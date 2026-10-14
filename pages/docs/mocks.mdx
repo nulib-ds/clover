@@ -20,15 +20,15 @@ Two pages of the _Berliner Tageblatt_ of 16 February 1925, with their OCR and a 
 Content Search 2.0 service. The OCR is the newspaper's own (Fraktur, errors included),
 with a position for every word, so search hits and text land where the print is.
 
-| Resource        | Published (static)                                                                                                                                |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Manifest        | [`/mocks/content-search/manifest.json`](https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json)                            |
-| OCR, by line    | [`/mocks/content-search/ocr/p1-lines.json`](https://samvera-labs.github.io/clover-iiif/mocks/content-search/ocr/p1-lines.json), `p2-lines.json`   |
-| OCR, by word    | [`/mocks/content-search/ocr/p1-words.json`](https://samvera-labs.github.io/clover-iiif/mocks/content-search/ocr/p1-words.json), `p2-words.json`   |
-| Example answers | [`/mocks/content-search/search/examples/`](https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/examples/nicht.json): see below |
-| Search service  | `/mocks/content-search/search`: answered live by `npm run dev` or `mockFetch`, not by the static site                                             |
+| Resource        | Published (static)                                                                                                                       |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Manifest        | [`/mocks/content-search/manifest.json`](https://nulib-ds.github.io/clover/mocks/content-search/manifest.json)                            |
+| OCR, by line    | [`/mocks/content-search/ocr/p1-lines.json`](https://nulib-ds.github.io/clover/mocks/content-search/ocr/p1-lines.json), `p2-lines.json`   |
+| OCR, by word    | [`/mocks/content-search/ocr/p1-words.json`](https://nulib-ds.github.io/clover/mocks/content-search/ocr/p1-words.json), `p2-words.json`   |
+| Example answers | [`/mocks/content-search/search/examples/`](https://nulib-ds.github.io/clover/mocks/content-search/search/examples/nicht.json): see below |
+| Search service  | `/mocks/content-search/search`: answered live by `npm run dev` or `mockFetch`, not by the static site                                    |
 
-All under `https://samvera-labs.github.io/clover-iiif`.
+All under `https://nulib-ds.github.io/clover`.
 
 ### What is in it
 
@@ -85,7 +85,7 @@ itself. Two ways to search any query:
   import { mockFetch } from "docs/mocks/content-search/index.mjs";
 
   <Clover.Viewer
-    iiifContent="https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json"
+    iiifContent="https://nulib-ds.github.io/clover/mocks/content-search/manifest.json"
     request={{ fetch: mockFetch() }}
   />;
   ```
@@ -115,9 +115,9 @@ County, Illinois_, as a Manifest of one Canvas, with:
 - a [navPlace](https://iiif.io/api/extension/navplace/) point naming Evanston, Illinois;
 - the image from Northwestern's IIIF Image API (level 2, 7337 × 9833, CORS open).
 
-| Resource | Published (static)                                                                                                 |
-| -------- | ------------------------------------------------------------------------------------------------------------------ |
-| Manifest | [`/mocks/georeference/manifest.json`](https://samvera-labs.github.io/clover-iiif/mocks/georeference/manifest.json) |
+| Resource | Published (static)                                                                                        |
+| -------- | --------------------------------------------------------------------------------------------------------- |
+| Manifest | [`/mocks/georeference/manifest.json`](https://nulib-ds.github.io/clover/mocks/georeference/manifest.json) |
 
 It answers no query, so it is static only. The [Map](/docs/map) page draws it, warped
 onto the map, and in a Viewer's Map tab. Its generator is
@@ -145,9 +145,9 @@ Navaho_ (1904), plate 1 of _The North American Indian_, as a Manifest of one Can
 | Photogravure John Andrew & Son                 | `3702,3144,424,44`         |
 | The Vanishing Race - Navaho                    | `219,3257,779,44`          |
 
-| Resource | Published (static)                                                                                       |
-| -------- | -------------------------------------------------------------------------------------------------------- |
-| Manifest | [`/mocks/tagging/manifest.json`](https://samvera-labs.github.io/clover-iiif/mocks/tagging/manifest.json) |
+| Resource | Published (static)                                                                              |
+| -------- | ----------------------------------------------------------------------------------------------- |
+| Manifest | [`/mocks/tagging/manifest.json`](https://nulib-ds.github.io/clover/mocks/tagging/manifest.json) |
 
 It answers no query, so it is static only. The homepage opens on it. Its generator is
 `docs/mocks/tagging/index.mjs`, and the record as fetched is
@@ -170,9 +170,9 @@ one Canvas, with:
   2026, apart from the ids of the Manifest and its Canvas, which are the mock's own;
 - the image from Northwestern's IIIF Image API (level 2, 3968 × 2685, CORS open).
 
-| Resource | Published (static)                                                                                         |
-| -------- | ---------------------------------------------------------------------------------------------------------- |
-| Manifest | [`/mocks/navplace/manifest.json`](https://samvera-labs.github.io/clover-iiif/mocks/navplace/manifest.json) |
+| Resource | Published (static)                                                                                |
+| -------- | ------------------------------------------------------------------------------------------------- |
+| Manifest | [`/mocks/navplace/manifest.json`](https://nulib-ds.github.io/clover/mocks/navplace/manifest.json) |
 
 It answers no query, so it is static only. The homepage's playground shows it as Photo,
 its place in a Viewer's Map tab. Its generator is `docs/mocks/navplace/index.mjs`, and
@@ -196,9 +196,9 @@ Manifest of 31 Canvases (its covers and 29 pages), with:
   2026, apart from the ids of the Manifest and its Canvases, which are the mock's own;
 - the images from Northwestern's IIIF Image API (level 2, CORS open).
 
-| Resource | Published (static)                                                                                   |
-| -------- | ---------------------------------------------------------------------------------------------------- |
-| Manifest | [`/mocks/paged/manifest.json`](https://samvera-labs.github.io/clover-iiif/mocks/paged/manifest.json) |
+| Resource | Published (static)                                                                          |
+| -------- | ------------------------------------------------------------------------------------------- |
+| Manifest | [`/mocks/paged/manifest.json`](https://nulib-ds.github.io/clover/mocks/paged/manifest.json) |
 
 It answers no query, so it is static only. The homepage's playground shows it as Catalog.
 Its generator is `docs/mocks/paged/index.mjs`, and the record as fetched is

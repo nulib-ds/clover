@@ -6,7 +6,7 @@
  * One could make this as complex as they like, for flexible implementations.
  */
 
-import { LabeledIIIFExternalWebResource } from "src/types/presentation-3";
+import type { LabeledIIIFExternalWebResource } from "@samvera/clover-iiif/image";
 
 const PDFViewer = ({
   id,

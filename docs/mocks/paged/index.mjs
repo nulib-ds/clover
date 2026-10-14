@@ -13,13 +13,12 @@
  *
  * Static only (it answers no query): `scripts/build-mocks.mjs` writes it to
  * `public/mocks/paged/`, published at
- * https://samvera-labs.github.io/clover-iiif/mocks/paged/. The images are served by
+ * https://nulib-ds.github.io/clover/mocks/paged/. The images are served by
  * Northwestern's IIIF Image API (level 2, CORS open). Documented at /docs/mocks.
  */
 import source from "./source.json";
 
-export const PUBLIC_BASE =
-  "https://samvera-labs.github.io/clover-iiif/mocks/paged";
+export const PUBLIC_BASE = "https://nulib-ds.github.io/clover/mocks/paged";
 
 /** The Canvas that is a whole opening, by its label, and the behavior that says so. */
 export const OPENING = { label: "Page 15", behavior: ["facing-pages"] };

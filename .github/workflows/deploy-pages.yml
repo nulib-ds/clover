@@ -1,0 +1,71 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Deploy only after the Tests workflow passes on main; allow manual dispatch.
+  workflow_run:
+    workflows: ["Tests"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # If triggered by workflow_run, require success on main; always allow manual dispatch.
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # When triggered by workflow_run, check out the tested commit.
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        with:
+          # Enable the Pages site if it has not been created yet.
+          enablement: true
+
+      - name: Build site
+        env:
+          # Where Pages serves the site, as Pages reports it: `/clover` on
+          # nulib-ds.github.io, nothing on a private Pages domain. `next.config.js` reads it.
+          DOCS_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          # Its address, for canonical links (`theme.config.tsx`).
+          NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
+        run: npm run build:docs
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

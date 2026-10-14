@@ -14,13 +14,12 @@
  *
  * Static only (it answers no query): `scripts/build-mocks.mjs` writes it to
  * `public/mocks/tagging/`, published at
- * https://samvera-labs.github.io/clover-iiif/mocks/tagging/. The image is served by
+ * https://nulib-ds.github.io/clover/mocks/tagging/. The image is served by
  * Northwestern's IIIF Image API (level 2, CORS open). Documented at /docs/mocks.
  */
 import source from "./source.json";
 
-export const PUBLIC_BASE =
-  "https://samvera-labs.github.io/clover-iiif/mocks/tagging";
+export const PUBLIC_BASE = "https://nulib-ds.github.io/clover/mocks/tagging";
 
 /**
  * The words printed on the plate, top to bottom and left to right, each with the box

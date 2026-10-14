@@ -1,4 +1,4 @@
-import cookbookRecipesJson from "src/fixtures/iiif-cookbook/recipes.json";
+import cookbookRecipesJson from "docs/fixtures/iiif-cookbook/recipes.json";
 
 export type CookbookRecipeCategory =
   | "Basic"

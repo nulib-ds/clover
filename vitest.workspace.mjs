@@ -1,8 +1,8 @@
 /**
- * Two test projects: the 3.x library (`@samvera/clover-iiif`, the root config) and the
- * 4.x package (`@nulib/clover`, its own config, relative imports only).
+ * Two test projects: the docs site's helpers (the root config) and the package
+ * (`@nulib/clover`, its own config, relative imports only).
  */
 export default [
-  { extends: "./vitest.config.mjs", test: { name: "clover-iiif" } },
+  { extends: "./vitest.config.mjs", test: { name: "docs" } },
   "./packages/clover/vitest.config.mjs",
 ];

@@ -12,22 +12,6 @@
   },
   "overrides": [
     {
-      "files": ["src/**"],
-      "rules": {
-        "no-restricted-imports": [
-          "error",
-          {
-            "patterns": [
-              {
-                "group": ["@nulib/clover", "@nulib/clover/*", "**/packages/**"],
-                "message": "3.x (@samvera/clover-iiif) must not import the 4.x package."
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
       "files": ["packages/clover/src/**"],
       "rules": {
         "no-restricted-imports": [
@@ -36,12 +20,11 @@
             "patterns": [
               {
                 "group": [
-                  "src/*",
                   "docs/*",
                   "@samvera/clover-iiif",
                   "@samvera/clover-iiif/*"
                 ],
-                "message": "@nulib/clover uses relative imports only and never reaches into 3.x."
+                "message": "@nulib/clover uses relative imports only, and never imports the docs or 3.x."
               }
             ]
           }

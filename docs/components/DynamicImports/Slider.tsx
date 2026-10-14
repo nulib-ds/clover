@@ -1,5 +1,4 @@
-import Slider from "src/components/Slider";
-import { type CloverSliderProps } from "src/components/Slider";
+import Slider, { type CloverSliderProps } from "@samvera/clover-iiif/slider";
 import { demoResources } from "docs/lib/demo-resources";
 import { useRouter } from "next/router";
 

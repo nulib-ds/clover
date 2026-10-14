@@ -54,7 +54,7 @@ export const VIEWER_RECIPES: Array<[string, string]> = [
   // A Cookbook-style animation (two frames, a stereo "wiggle"), as the 3.x docs publish it.
   [
     "0688 Animation",
-    "https://samvera-labs.github.io/clover-iiif/manifest/cookbook/0688-stereogram-timeline.json",
+    "https://nulib-ds.github.io/clover/manifest/cookbook/0688-stereogram-timeline.json",
   ],
   // Northwestern's Muybridge plates: 16 frames, each its own image, looping.
   [
@@ -138,7 +138,7 @@ export function ViewerDemo({ initial = 0 }: { initial?: number }) {
 }
 
 const MOCK_MANIFEST =
-  "https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json";
+  "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json";
 
 /**
  * `<Clover.Viewer>` over the Content Search 2.0 mock (see /docs/mocks). Its search service

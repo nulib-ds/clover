@@ -6,7 +6,7 @@ import { demoTitleFor } from "docs/components/CookbookRecipes/cookbookCatalog";
 import { iiifContentError } from "docs/lib/iiif-content";
 import { inertWhen } from "docs/lib/inert";
 import styles from "docs/components/CookbookRecipes/CookbookViewerPanel.module.css";
-import type { ViewerConfigOptions } from "src/context/viewer-context";
+import type { ViewerConfigOptions } from "@samvera/clover-iiif/viewer";
 
 /** Matches the slide transition in the stylesheet. */
 const slideDuration = 300;

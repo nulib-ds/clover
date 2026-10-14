@@ -1,17 +1,17 @@
 {
   "@context": "http://iiif.io/api/search/2/context.json",
-  "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/examples/zzzz.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/examples/zzzz.json",
   "type": "AnnotationPage",
   "partOf": {
-    "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search?q=zzzz",
+    "id": "https://nulib-ds.github.io/clover/mocks/content-search/search?q=zzzz",
     "type": "AnnotationCollection",
     "total": 0,
     "first": {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/examples/zzzz.json",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/examples/zzzz.json",
       "type": "AnnotationPage"
     },
     "last": {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/examples/zzzz.json",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/examples/zzzz.json",
       "type": "AnnotationPage"
     }
   },

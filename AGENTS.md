@@ -2,20 +2,31 @@
 
 ## Project Structure & Module Organization
 
-- Source lives in `src/` with key modules:
-  - `components/{Image,Primitives,Scroll,Slider,Viewer}`: published entry points.
-  - `lib/`, `hooks/`, `context/`, `i18n/`, `web-components/`.
+- This repository is `nulib-ds/clover`: the package `@nulib/clover` in `packages/clover`
+  (an npm workspace, with its own rules in `packages/clover/AGENTS.md`) and its
+  documentation site at the root. The root is the site, private, and publishes nothing.
 - Documentation site uses Next.js/Nextra in `pages/` and `docs/`.
   - The docs lead with Clover 4, `@nulib/clover` (`packages/clover`): its pages are
     `pages/docs/*` (URLs `/docs/…`), and the homepage shows it. Clover 3.x,
     `@samvera/clover-iiif`, is kept at `pages/docs/3.x/` (URLs `/docs/3.x/…`), one
     sidebar group titled "Clover 3.x", collapsed, under "Earlier versions" at the bottom.
     Its page titles end in "(3.x)" so search results tell the two apart.
+  - 3.x's source is not in this repository: it is `samvera-labs/clover-iiif`. The 3.x
+    pages' live examples import the published `@samvera/clover-iiif` (a devDependency,
+    pinned to `4.0.0-rc.2`, the release the pages were written against), through
+    `docs/components/DynamicImports/` and the entry points (`/viewer`, `/primitives`,
+    `/i18n`…). Its components inject their own styles. Data those pages need lives in
+    `docs/fixtures/`.
   - Keep 3.x as a nested group, not flattened with `"display": "children"`: Nextra 2
     keys sidebar items by file name, so a flattened `3.x/viewer` collides with 4.x's
     `viewer` and drops out of the sidebar.
   - Links inside 3.x pages point within `/docs/3.x/`. Keep 4.x features out of the 3.x
     pages, and 3.x's API out of the 4.x ones. `Canvas` is documented in 4.x only.
+  - The site deploys to GitHub Pages through GitHub Actions
+    (`.github/workflows/deploy-pages.yml`), after the Tests workflow passes on `main`, or
+    by hand. `actions/configure-pages` reports where Pages serves it, and the build reads
+    that as `DOCS_BASE_PATH` (`next.config.js`) and `NEXT_PUBLIC_SITE_URL` (canonical
+    links, `theme.config.tsx`). Without them, a build is for `nulib-ds.github.io/clover`.
   - The site is a static export, so there are no server redirects. URLs that moved
     (3.x pages from `/docs/…`, 4.x pages from `/docs/4.x/…`) are sent on by the 404
     page, `pages/404.mdx`, from the table in `docs/components/Moved.tsx`. Move a page
@@ -80,13 +91,15 @@
     `/test/dc-item` is a Digital Collections item page (`docs/components/DcItemMock/`),
     filled from the DC API, with the Viewer and `Items` where the site has 3.x's Viewer and
     Slider; `?id=<work id>` opens another work, and a row's works open in the mock.
-- Build output goes to `dist/`; static assets in `public/`.
-- Tests are colocated near code as `*.test.ts|tsx` (see `vitest.config.mjs`).
+- The package builds to `packages/clover/dist/`; the site's static assets are in `public/`.
+- Tests are colocated near code as `*.test.ts|tsx`: the package's, and the docs' own
+  helpers in `docs/lib/` (the root `vitest.config.mjs`), run together through
+  `vitest.workspace.mjs`.
 
 ## Build, Test, and Development Commands
 
 - `npm run dev`: start the docs site locally at `http://localhost:3000`.
-- `npm run build`: build the library (Vite-based, writes to `dist/`).
+- `npm run build`: build `@nulib/clover` (Vite-based, writes to `packages/clover/dist/`).
 - `npm run build:docs`: build the Next.js docs site. Not while `npm run dev` is running:
   both write to `.next/`, and the build leaves the dev server failing with "Cannot find
   module './NNNN.js'". Stop the dev server first, or after a build clear `.next/` and
@@ -106,7 +119,7 @@
 
 ## Testing Guidelines
 
-- Framework: Vitest with JSDOM and Testing Library (`src/setupTests.ts`).
+- Framework: Vitest with JSDOM and Testing Library (`packages/clover/src/setupTests.ts`).
 - Include tests alongside code: `ComponentName.test.tsx`, `util.test.ts`.
 - Coverage: v8 provider; reporters text/json/html. Run `npm run coverage`.
 - Prefer user-centric tests; avoid brittle DOM snapshots.
@@ -130,57 +143,41 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
 
 ## Changelog
 
-`CHANGELOG.md` follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+`packages/clover/CHANGELOG.md` follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-- Any change to `src/` that a consumer could notice — a prop, a default, a dependency, a
-  class name, rendered output — gets an entry under `## Unreleased`.
+- Any change to `packages/clover/src/` that a consumer could notice — a prop, a default,
+  a dependency, a class name, rendered output — gets an entry under `## Unreleased`.
 - Write entries for the person upgrading: what changed, and what they have to do about it.
   Include a migration snippet when behavior changed.
 - Add to `## Unreleased` only. Version headings and dates are added at release time by a
   human, so never convert `Unreleased` into a numbered release.
 - Docs-only changes are optional, and belong under a `Documentation` heading if included.
 
-## Map Component
+## MapLibre's worker (docs)
 
-- Map library: `maplibre-gl` + `@allmaps/maplibre` (replaced `leaflet` + `@allmaps/leaflet`).
-- The Map is rendered as a **"Map" tab inside the InformationPanel**, not in the Painting/Canvas area. The canvas always shows the image; the map is a companion tab.
-- Tab value: `"manifest-map"`. i18n key: `informationPanelTabsMap`. The tab appears only when `options.map.enabled: true` AND geographic data is present (`navPlace` or georeference annotations).
-- Map data computation (`mapGeorefAnnotations`, `mapNavPlace`) lives in `InformationPanel.tsx`, not `Painting.tsx`.
-- Default basemap: OpenFreeMap's Liberty vector style (`https://tiles.openfreemap.org/styles/liberty`), reshaped by `applyDefaultBasemap()` — road layers removed, hillshade added from Mapzen Terrain Tiles on AWS Open Data (`terrarium` encoding, keyless). The result is terrain + political borders + country/state names + major cities, no roads, sharp at every zoom. No free vector basemap ships terrain of its own, hence the separate DEM. CARTO Positron was the default until CARTO put their basemaps behind an API key and started serving "API KEY REQUIRED" placeholder tiles.
-- `applyDefaultBasemap()` only ever runs on Clover's own default. A `styleUrl` a consumer passes is used as authored — do not strip its roads or add relief to it. `tileLayer` takes precedence over `styleUrl` and builds a raster style instead; its `referenceUrl` draws a transparent labels/borders overlay above the base, and `maxZoom`/`referenceMaxZoom` cap each source (MapLibre otherwise requests to zoom 22 and goes blank). `expandTileUrls(url)` expands the `{s}` subdomain placeholder into the array of URLs MapLibre expects.
-- The hillshade is slotted before the first symbol or boundary layer so relief sits under the type rather than washing it out. Clover's own layers are added after the style loads, so navPlace geometry and markers stay above everything.
-- MapLibre 6 loads its worker from a real URL resolved against its own module, so a bundler that rewrites that module breaks it — the basemap still draws but every GeoJSON layer silently vanishes. Clover bundles the worker itself and hands MapLibre a blob URL, so consumers need nothing: `scripts/build-maplibre-worker.mjs` bundles `maplibre-gl-worker.mjs` (it imports `maplibre-gl-shared.mjs` by relative path, which a blob URL cannot resolve, so it must be bundled rather than copied) into `src/components/Map/maplibre-worker.generated.ts`, which is gitignored and regenerated by `prebuild`, `prebuild:docs`, `predev`, `pretest:ci` and `pretypecheck`. Run `npm run build:maplibre-worker` by hand after bumping maplibre-gl.
-- The generated worker adds ~500 KB to every bundle carrying the map, and needs `blob:` in a CSP `worker-src`. `workerUrl` / `options.map.workerUrl` is the escape hatch for a CSP that forbids blob workers, not a requirement — do not reintroduce a copy step as the default path.
-- Wheel/trackpad zoom is **off** by default (`scrollZoom: false`), matching the `scrollToZoom: false` Clover sets for OpenSeadragon, so an embedded map cannot swallow page scroll. Do not re-enable it as a default.
-- The accent color for markers is resolved with `resolveCloverColor()` rather than read from a token at build time: MapLibre paint properties go to WebGL, which cannot parse `var()`. It resolves once when the map becomes ready, so a token changed later will not repaint existing layers.
-- Stable layer ID constants are defined at the top of `src/components/Map/index.tsx` (`NAVPLACE_SOURCE`, `WARPED_LAYER_ID`, etc.).
-- MapLibre feature properties with nested objects (`iiifResource`, `label`, `summary`) are JSON-stringified in event handlers; use `parseMaplibreFeature()` to re-parse them.
-- Tests must mock `maplibre-gl` and `@allmaps/maplibre` in any test file that imports a component which (transitively) imports Map — including `InformationPanel.test.tsx`. The mock fires the `load` event synchronously.
-- `Map` is a composable standalone component, just as `Image` is. The Viewer wraps both — but consumers can use `Map` directly outside the Viewer. Keep this composability in mind when changing either component's props or internals.
+- MapLibre 6 loads its worker from a real URL resolved against its own module, so a
+  bundler that rewrites that module (Next does) breaks it: the basemap still draws but
+  every GeoJSON layer silently vanishes. The docs bundle the worker themselves and hand it
+  to the package with `setMapWorkerUrl` (`docs/lib/map-worker.ts`).
+- `scripts/build-maplibre-worker.mjs` bundles `maplibre-gl-worker.mjs` (it imports
+  `maplibre-gl-shared.mjs` by relative path, which a blob URL cannot resolve, so it must
+  be bundled rather than copied) into `docs/lib/maplibre-worker.generated.ts`, which is
+  gitignored and regenerated by `prebuild:docs`, `predev` and `pretypecheck`. Run
+  `npm run build:maplibre-worker` by hand after bumping maplibre-gl.
 
 ## Packages
 
 - `packages/clover` is `@nulib/clover`, the composable 4.x Clover, as an npm workspace.
   It is private and unpublished. Its own rules are in `packages/clover/AGENTS.md`.
-- `@samvera/clover-iiif` (the root) stays the 3.x line. The two never import each other:
-  ESLint forbids it both ways, the package's build rejects undeclared imports, and
-  `build/player-chunks.test.mjs` asserts that no 3.x build carries package code.
-- `Canvas` and its renderer live only in the package. 3.x draws with OpenSeadragon and
-  Vidstack, and keeps its Player and waveform.
-- 3.x's Slider and the Viewer's thumbnail strip scroll natively through
-  `src/components/Shared/Track/useTrack.ts` (CSS scroll snap, paging, mouse drag), a copy
-  of the package's `useScrollTrack`. Embla was removed; do not bring a carousel library
-  back.
-- The 3.x Viewer talks to OpenSeadragon through `ViewportAdapter`
-  (`src/lib/viewport-adapter.ts`): `zoomToAnnotation(id)`, `getVisibleRegion()`,
-  `onViewportChange()`, `markContentState()`. Read it with `useViewportAdapter()`, which
-  derives it from `openSeadragonViewer`. New Viewer code should use the adapter rather
-  than `openSeadragonViewer`, which stays in state for plugins. `viewport-adapter.ts` must
-  not import OpenSeadragon at runtime, since `viewer-context` imports it.
+- The package never imports the docs or 3.x (`@samvera/clover-iiif`): ESLint forbids it,
+  and the package's build rejects undeclared imports. Only the 3.x docs pages import 3.x.
+- 3.x is maintained in `samvera-labs/clover-iiif`, apart from this repository. Code the
+  package copied from it (fullscreen, label, hls, i18n, the control cluster) may drift.
 
 ## i18n
 
-- Clover translates with its own small translator in `src/i18n/config.ts`. No i18next:
+- Clover translates with its own small translator in `packages/clover/src/i18n/config.ts`
+  (a copy of 3.x's). No i18next:
   it was about 20 kB gzip, and Clover used only key lookup, `{{name}}` interpolation,
   fallback and detection.
 - Resources keep i18next's shape, `resources[lng][namespace][key]`, with the `clover`
@@ -191,8 +188,8 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   language (`pt-BR` → `pt`).
 - Components call `useCloverTranslation()` and use only `t`. It re-renders through
   `useSyncExternalStore` when `initCloverI18n` changes the language or the strings.
-- Add a locale by adding `src/i18n/locales/<tag>.json` and listing it in
-  `src/i18n/locales/index.ts`. All locales are bundled, which is about 2.5 kB gzip.
+- Add a locale by adding `packages/clover/src/i18n/locales/<tag>.json` and listing it in
+  `packages/clover/src/i18n/locales/index.ts`. All locales are bundled.
 
 ## Mocks
 
@@ -200,7 +197,7 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   generator in `docs/mocks/<name>/` and three outputs that must agree:
   - static files in `public/mocks/<name>/`, written by `npm run build:mocks`
     (`scripts/build-mocks.mjs`, run with vite-node) and committed, published with the
-    docs at `https://samvera-labs.github.io/clover-iiif/mocks/<name>/`;
+    docs at `https://nulib-ds.github.io/clover/mocks/<name>/`;
   - a live copy for `npm run dev` under `pages/api/mocks/<name>/`, ids under the dev
     server and CORS open;
   - where the static site cannot answer (a search's `?q=`), a `mockFetch` the docs demos
@@ -222,11 +219,8 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   catalog, a `paged` Manifest kept as fetched, with its double-page plate (Page 15)
   `facing-pages`, so it stands alone and Page 16 and Page 17 share a spread (static), the
   playground's Catalog.
-- The Map Component section below is 3.x's. The 4.x map is `@nulib/clover/map`; its
-  rules are in `packages/clover/AGENTS.md`.
 
 ## Environment & Tooling
 
-- Node: `20.5.0` (see `.tool-versions`).
-- Husky/lint-staged run formatting and lint checks on commit.
+- Node: 20.10 or later (`engines` in `package.json`).
 - When working with IIIF resources, verify CORS in local examples.

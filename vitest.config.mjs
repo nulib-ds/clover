@@ -12,13 +12,9 @@ export default defineConfig({
     },
     environment: "jsdom",
     globals: true,
-    include: [
-      "./src/**/*.{test,tests,spec}.{js,mjs,cjs,ts,tsx,mts,cts}",
-      // Pure helpers the docs site depends on.
-      "./docs/lib/**/*.{test,tests,spec}.{js,mjs,cjs,ts,tsx,mts,cts}",
-    ],
+    // Pure helpers the docs site depends on.
+    include: ["./docs/lib/**/*.{test,tests,spec}.{js,mjs,cjs,ts,tsx,mts,cts}"],
     reporters: ["default"],
-    setupFiles: "./src/setupTests.ts",
     // Avoid Node worker thread pool; use forked processes instead for stability in CI
     pool: "forks",
     maxConcurrency: 1,

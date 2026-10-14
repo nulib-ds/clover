@@ -2,9 +2,6 @@
   "compilerOptions": {
     "allowJs": true,
     "baseUrl": "./",
-    "declaration": true,
-    "declarationDir": "dist",
-    "declarationMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
@@ -13,9 +10,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "noEmit": false,
-    "noEmitHelpers": true,
-    "outDir": "dist",
+    "noEmit": true,
     "paths": {
       "@nulib/clover": ["packages/clover/src/index.ts"],
       "@nulib/clover/styles.css": ["packages/clover/src/styles/clover.css"],
@@ -24,8 +19,7 @@
       "@nulib/clover/templates.css": [
         "packages/clover/src/templates/templates.css"
       ],
-      "docs/*": ["docs/*"],
-      "src/*": ["src/*"]
+      "docs/*": ["docs/*"]
     },
     "plugins": [
       {
@@ -39,25 +33,6 @@
     "target": "esnext",
     "types": ["vitest/globals"]
   },
-  // "paths": {
-  //   "docs/*": ["docs/*"],
-  //   "src/*": ["src/*"]
-  // },
-  "exclude": [
-    "dist",
-    "node_modules",
-    "packages",
-    "theme.config.tsx",
-    "vite.*",
-    "playwright",
-    "playwright/**"
-  ],
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "../index.ts",
-    ".next/types/**/*.ts",
-    "src/test.ts"
-  ]
+  "exclude": ["dist", "node_modules", "packages", "theme.config.tsx", "vite.*"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"]
 }

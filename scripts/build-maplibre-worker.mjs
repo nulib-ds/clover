@@ -9,7 +9,7 @@ const ENTRY = join(
   ROOT,
   "node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs",
 );
-const OUT = join(ROOT, "src/components/Map/maplibre-worker.generated.ts");
+const OUT = join(ROOT, "docs/lib/maplibre-worker.generated.ts");
 
 const result = await build({
   logLevel: "error",

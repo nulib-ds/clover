@@ -1,6 +1,6 @@
 {
   "@context": "http://iiif.io/api/presentation/3/context.json",
-  "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/manifest.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
   "type": "Manifest",
   "behavior": [
     "paged"
@@ -278,7 +278,7 @@
   ],
   "items": [
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/1",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1",
       "type": "Canvas",
       "height": 4700,
       "width": 4756,
@@ -305,11 +305,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/1/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/1/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -331,23 +331,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/1"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/1/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 632,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/1/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/1/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -364,7 +364,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/1/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1/placeholder"
               }
             ]
           }
@@ -372,7 +372,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/2",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2",
       "type": "Canvas",
       "height": 4638,
       "width": 4686,
@@ -399,11 +399,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/2/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/2/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -425,23 +425,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/2"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/2/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 633,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/2/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/2/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -458,7 +458,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/2/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2/placeholder"
               }
             ]
           }
@@ -466,7 +466,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/3",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3",
       "type": "Canvas",
       "height": 4660,
       "width": 4728,
@@ -493,11 +493,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/3/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/3/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -519,23 +519,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/3"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/3/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 630,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/3/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/3/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -552,7 +552,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/3/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3/placeholder"
               }
             ]
           }
@@ -560,7 +560,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/4",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4",
       "type": "Canvas",
       "height": 4663,
       "width": 4721,
@@ -587,11 +587,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/4/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/4/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -613,23 +613,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/4"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/4/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 632,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/4/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/4/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -646,7 +646,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/4/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4/placeholder"
               }
             ]
           }
@@ -654,7 +654,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/5",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5",
       "type": "Canvas",
       "height": 4646,
       "width": 4729,
@@ -681,11 +681,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/5/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/5/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -707,23 +707,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/5"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/5/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 628,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/5/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/5/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -740,7 +740,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/5/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/placeholder"
               }
             ]
           }
@@ -748,7 +748,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/6",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6",
       "type": "Canvas",
       "height": 4639,
       "width": 4699,
@@ -775,11 +775,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/6/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/6/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -801,23 +801,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/6"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/6/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 631,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/6/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/6/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -834,7 +834,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/6/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6/placeholder"
               }
             ]
           }
@@ -842,7 +842,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/7",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7",
       "type": "Canvas",
       "height": 4651,
       "width": 4740,
@@ -869,11 +869,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/7/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/7/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -895,23 +895,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/7"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/7/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 627,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/7/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/7/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -928,7 +928,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/7/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/placeholder"
               }
             ]
           }
@@ -936,7 +936,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/8",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8",
       "type": "Canvas",
       "height": 4633,
       "width": 4712,
@@ -963,11 +963,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/8/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/8/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -989,23 +989,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/8"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/8/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 629,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/8/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/8/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -1022,7 +1022,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/8/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8/placeholder"
               }
             ]
           }
@@ -1030,7 +1030,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/9",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9",
       "type": "Canvas",
       "height": 4648,
       "width": 4725,
@@ -1057,11 +1057,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/9/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/9/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -1083,23 +1083,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/9"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/9/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 629,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/9/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/9/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -1116,7 +1116,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/9/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9/placeholder"
               }
             ]
           }
@@ -1124,7 +1124,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/10",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10",
       "type": "Canvas",
       "height": 4637,
       "width": 4715,
@@ -1151,11 +1151,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/10/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/10/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -1177,23 +1177,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/10"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/10/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 629,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/10/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/10/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -1210,7 +1210,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/10/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10/placeholder"
               }
             ]
           }
@@ -1218,7 +1218,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/11",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11",
       "type": "Canvas",
       "height": 4647,
       "width": 4728,
@@ -1245,11 +1245,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/11/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/11/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -1271,23 +1271,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/11"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/11/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 629,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/11/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/11/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -1304,7 +1304,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/11/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11/placeholder"
               }
             ]
           }
@@ -1312,7 +1312,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/12",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12",
       "type": "Canvas",
       "height": 4648,
       "width": 4721,
@@ -1339,11 +1339,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/12/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/12/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -1365,23 +1365,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/12"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/12/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 630,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/12/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/12/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -1398,7 +1398,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/12/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12/placeholder"
               }
             ]
           }
@@ -1406,7 +1406,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/13",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13",
       "type": "Canvas",
       "height": 4662,
       "width": 4742,
@@ -1433,11 +1433,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/13/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/13/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -1459,23 +1459,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/13"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/13/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 629,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/13/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/13/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -1492,7 +1492,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/13/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13/placeholder"
               }
             ]
           }
@@ -1500,7 +1500,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/14",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14",
       "type": "Canvas",
       "height": 4641,
       "width": 4732,
@@ -1527,11 +1527,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/14/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/14/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -1553,23 +1553,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/14"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/14/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 627,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/14/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/14/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -1586,7 +1586,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/14/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14/placeholder"
               }
             ]
           }
@@ -1594,7 +1594,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/15",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
       "type": "Canvas",
       "height": 4652,
       "width": 4738,
@@ -1621,11 +1621,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/15/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/15/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -1647,23 +1647,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/15"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/15/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 628,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/15/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/15/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -1680,7 +1680,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/15/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15/placeholder"
               }
             ]
           }
@@ -1688,7 +1688,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/16",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16",
       "type": "Canvas",
       "height": 4694,
       "width": 9423,
@@ -1715,11 +1715,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/16/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/16/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -1741,23 +1741,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/16"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/16/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 318,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/16/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/16/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -1774,7 +1774,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/16/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16/placeholder"
               }
             ]
           }
@@ -1785,7 +1785,7 @@
       ]
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/17",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17",
       "type": "Canvas",
       "height": 4650,
       "width": 4715,
@@ -1812,11 +1812,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/17/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/17/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -1838,23 +1838,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/17"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/17/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 631,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/17/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/17/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -1871,7 +1871,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/17/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17/placeholder"
               }
             ]
           }
@@ -1879,7 +1879,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/18",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18",
       "type": "Canvas",
       "height": 4658,
       "width": 4739,
@@ -1906,11 +1906,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/18/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/18/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -1932,23 +1932,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/18"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/18/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 629,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/18/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/18/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -1965,7 +1965,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/18/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18/placeholder"
               }
             ]
           }
@@ -1973,7 +1973,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/19",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19",
       "type": "Canvas",
       "height": 4660,
       "width": 4721,
@@ -2000,11 +2000,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/19/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/19/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -2026,23 +2026,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/19"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/19/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 631,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/19/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/19/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -2059,7 +2059,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/19/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/placeholder"
               }
             ]
           }
@@ -2067,7 +2067,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/20",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20",
       "type": "Canvas",
       "height": 4663,
       "width": 4724,
@@ -2094,11 +2094,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/20/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/20/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -2120,23 +2120,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/20"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/20/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 631,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/20/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/20/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -2153,7 +2153,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/20/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20/placeholder"
               }
             ]
           }
@@ -2161,7 +2161,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/21",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21",
       "type": "Canvas",
       "height": 4650,
       "width": 4728,
@@ -2188,11 +2188,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/21/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/21/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -2214,23 +2214,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/21"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/21/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 629,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/21/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/21/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -2247,7 +2247,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/21/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/placeholder"
               }
             ]
           }
@@ -2255,7 +2255,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/22",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22",
       "type": "Canvas",
       "height": 4649,
       "width": 4741,
@@ -2282,11 +2282,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/22/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/22/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -2308,23 +2308,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/22"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/22/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 627,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/22/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/22/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -2341,7 +2341,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/22/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22/placeholder"
               }
             ]
           }
@@ -2349,7 +2349,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/23",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23",
       "type": "Canvas",
       "height": 4641,
       "width": 4725,
@@ -2376,11 +2376,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/23/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/23/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -2402,23 +2402,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/23"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/23/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 628,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/23/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/23/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -2435,7 +2435,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/23/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/placeholder"
               }
             ]
           }
@@ -2443,7 +2443,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/24",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24",
       "type": "Canvas",
       "height": 4649,
       "width": 4740,
@@ -2470,11 +2470,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/24/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/24/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -2496,23 +2496,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/24"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/24/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 627,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/24/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/24/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -2529,7 +2529,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/24/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24/placeholder"
               }
             ]
           }
@@ -2537,7 +2537,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/25",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25",
       "type": "Canvas",
       "height": 4654,
       "width": 4734,
@@ -2564,11 +2564,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/25/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/25/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -2590,23 +2590,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/25"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/25/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 629,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/25/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/25/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -2623,7 +2623,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/25/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/placeholder"
               }
             ]
           }
@@ -2631,7 +2631,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/26",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26",
       "type": "Canvas",
       "height": 4657,
       "width": 4726,
@@ -2658,11 +2658,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/26/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/26/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -2684,23 +2684,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/26"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/26/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 630,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/26/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/26/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -2717,7 +2717,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/26/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26/placeholder"
               }
             ]
           }
@@ -2725,7 +2725,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/27",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27",
       "type": "Canvas",
       "height": 4652,
       "width": 4745,
@@ -2752,11 +2752,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/27/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/27/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -2778,23 +2778,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/27"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/27/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 627,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/27/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/27/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -2811,7 +2811,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/27/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/placeholder"
               }
             ]
           }
@@ -2819,7 +2819,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/28",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28",
       "type": "Canvas",
       "height": 4672,
       "width": 4736,
@@ -2846,11 +2846,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/28/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/28/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -2872,23 +2872,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/28"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/28/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 631,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/28/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/28/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -2905,7 +2905,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/28/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28/placeholder"
               }
             ]
           }
@@ -2913,7 +2913,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/29",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29",
       "type": "Canvas",
       "height": 4660,
       "width": 4759,
@@ -2940,11 +2940,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/29/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/29/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -2966,23 +2966,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/29"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/29/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 626,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/29/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/29/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -2999,7 +2999,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/29/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29/placeholder"
               }
             ]
           }
@@ -3007,7 +3007,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/30",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30",
       "type": "Canvas",
       "height": 4646,
       "width": 4724,
@@ -3034,11 +3034,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/30/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/30/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -3060,23 +3060,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/30"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/30/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 629,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/30/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/30/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -3093,7 +3093,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/30/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30/placeholder"
               }
             ]
           }
@@ -3101,7 +3101,7 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/31",
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31",
       "type": "Canvas",
       "height": 4662,
       "width": 4753,
@@ -3128,11 +3128,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/31/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/31/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -3154,23 +3154,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/31"
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/31/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 627,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/31/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/31/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -3187,7 +3187,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/paged/canvas/31/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/placeholder"
               }
             ]
           }

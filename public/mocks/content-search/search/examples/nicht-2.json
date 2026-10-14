@@ -1,38 +1,38 @@
 {
   "@context": "http://iiif.io/api/search/2/context.json",
-  "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/examples/nicht-2.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/examples/nicht-2.json",
   "type": "AnnotationPage",
   "partOf": {
-    "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search?q=nicht",
+    "id": "https://nulib-ds.github.io/clover/mocks/content-search/search?q=nicht",
     "type": "AnnotationCollection",
     "total": 36,
     "first": {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/examples/nicht.json",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/examples/nicht.json",
       "type": "AnnotationPage"
     },
     "last": {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/examples/nicht-2.json",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/examples/nicht-2.json",
       "type": "AnnotationPage"
     }
   },
   "startIndex": 25,
   "prev": {
-    "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/examples/nicht.json",
+    "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/examples/nicht.json",
     "type": "AnnotationPage"
   },
   "items": [
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w732",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w732",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/canvas/p2",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json",
+              "id": "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -45,17 +45,17 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w771",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w771",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/canvas/p2",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json",
+              "id": "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -68,17 +68,17 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w798",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w798",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/canvas/p2",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json",
+              "id": "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -91,17 +91,17 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w916",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w916",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/canvas/p2",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json",
+              "id": "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -114,17 +114,17 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w929",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w929",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/canvas/p2",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json",
+              "id": "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -137,17 +137,17 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w1215",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w1215",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/canvas/p2",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json",
+              "id": "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -160,17 +160,17 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w1234",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w1234",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/canvas/p2",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json",
+              "id": "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -183,17 +183,17 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w1603",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w1603",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/canvas/p2",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json",
+              "id": "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -206,17 +206,17 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w2195",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w2195",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/canvas/p2",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json",
+              "id": "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -229,17 +229,17 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w2286",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w2286",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/canvas/p2",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json",
+              "id": "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -252,17 +252,17 @@
       }
     },
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w2291",
+      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w2291",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/canvas/p2",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/manifest.json",
+              "id": "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -280,12 +280,12 @@
       "type": "AnnotationPage",
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w732/context",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w732/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w732",
+            "source": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w732",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -297,12 +297,12 @@
           }
         },
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w771/context",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w771/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w771",
+            "source": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w771",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -314,12 +314,12 @@
           }
         },
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w798/context",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w798/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w798",
+            "source": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w798",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -331,12 +331,12 @@
           }
         },
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w916/context",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w916/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w916",
+            "source": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w916",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -348,12 +348,12 @@
           }
         },
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w929/context",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w929/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w929",
+            "source": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w929",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -365,12 +365,12 @@
           }
         },
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w1215/context",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w1215/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w1215",
+            "source": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w1215",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -382,12 +382,12 @@
           }
         },
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w1234/context",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w1234/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w1234",
+            "source": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w1234",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -399,12 +399,12 @@
           }
         },
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w1603/context",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w1603/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w1603",
+            "source": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w1603",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -416,12 +416,12 @@
           }
         },
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w2195/context",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w2195/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w2195",
+            "source": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w2195",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -433,12 +433,12 @@
           }
         },
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w2286/context",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w2286/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w2286",
+            "source": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w2286",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -450,12 +450,12 @@
           }
         },
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w2291/context",
+          "id": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w2291/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://samvera-labs.github.io/clover-iiif/mocks/content-search/search/hit/p2-w2291",
+            "source": "https://nulib-ds.github.io/clover/mocks/content-search/search/hit/p2-w2291",
             "selector": [
               {
                 "type": "TextQuoteSelector",

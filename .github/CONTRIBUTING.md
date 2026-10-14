@@ -1,17 +1,17 @@
-# Contributing to Clover IIIF
+# Contributing to Clover
 
 ## Questions
 
-If you have questions about Clover IIIF, be sure to check out the docs where we have several examples and detailed API references that may help you solve your problem.
+If you have questions about Clover, be sure to check out the docs where we have several examples and detailed API references that may help you solve your problem.
 
 ## How to contribute
 
 There are many ways to contribute to the project. Code is just one possible means of contribution.
 
 - **Feedback.** Tell us what we're doing well or where we can improve.
-- **Support.** Please reach out to `@mat` or `@adam.arling` in the [IIIF Slack workspace](iiif.slack.com) or submit a new issue in [open issues](https://github.com/samvera-labs/clover-iiif/issues).
-- **Write.** If you come up with an interesting example, write about it. Post it to your blog and share it with us. We'd love to see what folks in the community build with Clover IIIF!
-- **Report.** Create issues with bug reports so we can make Clover IIIF even better.
+- **Support.** Please reach out to `@mat` or `@adam.arling` in the [IIIF Slack workspace](iiif.slack.com) or submit a new issue in [open issues](https://github.com/nulib-ds/clover/issues).
+- **Write.** If you come up with an interesting example, write about it. Post it to your blog and share it with us. We'd love to see what folks in the community build with Clover!
+- **Report.** Create issues with bug reports so we can make Clover even better.
 
 ## Working on your first Pull Request?
 
@@ -30,9 +30,9 @@ A good PR is small, focuses on a single feature or improvement, and clearly comm
 2. Clone the fork to your local machine and add upstream remote:
 
 ```sh
-git clone https://github.com/<your username>/clover-iiif.git
-cd clover-iiif
-git remote add upstream https://github.com/samvera-labs/clover-iiif.git
+git clone https://github.com/<your username>/clover.git
+cd clover
+git remote add upstream https://github.com/nulib-ds/clover.git
 ```
 
 1. Synchronize your local `main` branch with the upstream remote:
@@ -42,16 +42,16 @@ git checkout main
 git pull upstream main
 ```
 
-1. Make sure your Node version matches the [.nvmrc](../.nvmrc).
+1. Make sure your Node version is 20.10 or later (`engines` in [package.json](../package.json)).
 
 ```
 node -v
 ```
 
-1. Install dependencies with [yarn](https://yarnpkg.com):
+1. Install dependencies:
 
 ```sh
-npm run install
+npm install
 ```
 
 1. Create a new branch related to your PR:
@@ -66,19 +66,19 @@ git checkout -b my-bug-fix
 git push -u origin HEAD
 ```
 
-7. Go to [the repository](https://github.com/samvera/clover-iiif) and [make a Pull Request](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
+7. Go to [the repository](https://github.com/nulib-ds/clover) and [make a Pull Request](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
 
 8. We will review your Pull Request and either merge it, request changes to it, or close it with an explanation.
 
 ## Working locally
 
-The repo is managed with Yarn Workspaces.
+The repository is an npm workspace: the package, `@nulib/clover`, is in `packages/clover`, and its documentation site is at the root.
 
 ### Development
 
 ```bash
 # install dependencies
-npm run install
+npm install
 
 # start Nextra-based docs and see examples in the browser
 npm run dev

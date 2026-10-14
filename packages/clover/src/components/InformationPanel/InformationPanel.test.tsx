@@ -115,15 +115,14 @@ describe("InformationPanel", () => {
       </Clover.Root>,
     );
     const panel = await screen.findByRole("tabpanel", { name: "About" });
-    expect(within(panel).getByText("Date").tagName).toBe("DT");
+    expect((await within(panel).findByText("Date")).tagName).toBe("DT");
     expect(within(panel).getByText("Example Library").tagName).toBe("DD");
     expect(
       within(panel).getByRole("heading", { name: "Rights" }),
     ).toBeInTheDocument();
-    expect(within(panel).getByRole("link", { name: "PDF" })).toHaveAttribute(
-      "href",
-      "https://example.org/letter.pdf",
-    );
+    expect(
+      within(panel).getByRole("link", { name: "PDF (application/pdf)" }),
+    ).toHaveAttribute("href", "https://example.org/letter.pdf");
     expect(
       within(panel).getByRole("link", { name: "The letter's page" }),
     ).toBeInTheDocument();

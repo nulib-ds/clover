@@ -1,6 +1,6 @@
 {
   "@context": "http://iiif.io/api/presentation/3/context.json",
-  "id": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/manifest.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/tagging/manifest.json",
   "type": "Manifest",
   "label": {
     "none": [
@@ -321,7 +321,7 @@
   ],
   "items": [
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1",
+      "id": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1",
       "type": "Canvas",
       "label": {
         "none": [
@@ -352,17 +352,17 @@
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 526,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -379,7 +379,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1/placeholder"
               }
             ]
           }
@@ -387,11 +387,11 @@
       },
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -413,18 +413,18 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1"
+              "target": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1"
             }
           ]
         }
       ],
       "annotations": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1/tags",
+          "id": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1/tags",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1/tags/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1/tags/1",
               "type": "Annotation",
               "motivation": "tagging",
               "body": {
@@ -433,10 +433,10 @@
                 "language": "en",
                 "format": "text/plain"
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1#xywh=210,121,134,45"
+              "target": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1#xywh=210,121,134,45"
             },
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1/tags/2",
+              "id": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1/tags/2",
               "type": "Annotation",
               "motivation": "tagging",
               "body": {
@@ -445,10 +445,10 @@
                 "language": "en",
                 "format": "text/plain"
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1#xywh=1858,3148,578,47"
+              "target": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1#xywh=1858,3148,578,47"
             },
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1/tags/3",
+              "id": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1/tags/3",
               "type": "Annotation",
               "motivation": "tagging",
               "body": {
@@ -457,10 +457,10 @@
                 "language": "en",
                 "format": "text/plain"
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1#xywh=3702,3144,424,44"
+              "target": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1#xywh=3702,3144,424,44"
             },
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1/tags/4",
+              "id": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1/tags/4",
               "type": "Annotation",
               "motivation": "tagging",
               "body": {
@@ -469,7 +469,7 @@
                 "language": "en",
                 "format": "text/plain"
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/tagging/canvas/1#xywh=219,3257,779,44"
+              "target": "https://nulib-ds.github.io/clover/mocks/tagging/canvas/1#xywh=219,3257,779,44"
             }
           ]
         }

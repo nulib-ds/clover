@@ -3,7 +3,7 @@
     "http://iiif.io/api/extension/navplace/context.json",
     "http://iiif.io/api/presentation/3/context.json"
   ],
-  "id": "https://samvera-labs.github.io/clover-iiif/mocks/navplace/manifest.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/navplace/manifest.json",
   "type": "Manifest",
   "label": {
     "none": [
@@ -254,7 +254,7 @@
   ],
   "items": [
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/navplace/canvas/1",
+      "id": "https://nulib-ds.github.io/clover/mocks/navplace/canvas/1",
       "type": "Canvas",
       "height": 2685,
       "width": 3968,
@@ -281,11 +281,11 @@
       ],
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/navplace/canvas/1/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/navplace/canvas/1/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/navplace/canvas/1/page/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/navplace/canvas/1/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -307,23 +307,23 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/navplace/canvas/1"
+              "target": "https://nulib-ds.github.io/clover/mocks/navplace/canvas/1"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/navplace/canvas/1/placeholder",
+        "id": "https://nulib-ds.github.io/clover/mocks/navplace/canvas/1/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 433,
         "items": [
           {
-            "id": "https://samvera-labs.github.io/clover-iiif/mocks/navplace/canvas/1/placeholder/page",
+            "id": "https://nulib-ds.github.io/clover/mocks/navplace/canvas/1/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://samvera-labs.github.io/clover-iiif/mocks/navplace/canvas/1/placeholder/page/1",
+                "id": "https://nulib-ds.github.io/clover/mocks/navplace/canvas/1/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -340,7 +340,7 @@
                     }
                   ]
                 },
-                "target": "https://samvera-labs.github.io/clover-iiif/mocks/navplace/canvas/1/placeholder"
+                "target": "https://nulib-ds.github.io/clover/mocks/navplace/canvas/1/placeholder"
               }
             ]
           }
@@ -393,11 +393,11 @@
     }
   ],
   "navPlace": {
-    "id": "https://samvera-labs.github.io/clover-iiif/mocks/navplace/feature-collection/1",
+    "id": "https://nulib-ds.github.io/clover/mocks/navplace/feature-collection/1",
     "type": "FeatureCollection",
     "features": [
       {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/navplace/feature/1",
+        "id": "https://nulib-ds.github.io/clover/mocks/navplace/feature/1",
         "type": "Feature",
         "properties": {
           "label": {

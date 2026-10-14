@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 
-const Map = dynamic(() => import("src/components/Map"), {
+const Map = dynamic(() => import("@samvera/clover-iiif/map"), {
   ssr: false,
 });
 

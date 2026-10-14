@@ -1,211 +1,73 @@
 {
-  "name": "@samvera/clover-iiif",
-  "version": "4.0.0-rc.2",
-  "description": "Extensible IIIF front-end toolkit and Manifest viewer. Accessible. Composable. Open Source.",
-  "files": [
-    "dist"
-  ],
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "exports": {
-    "./package.json": "./package.json",
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    },
-    "./image": {
-      "types": "./dist/image/index.d.ts",
-      "import": "./dist/image/index.mjs",
-      "require": "./dist/image/index.cjs"
-    },
-    "./map": {
-      "types": "./dist/map/index.d.ts",
-      "import": "./dist/map/index.mjs",
-      "require": "./dist/map/index.cjs"
-    },
-    "./primitives": {
-      "types": "./dist/primitives/index.d.ts",
-      "import": "./dist/primitives/index.mjs",
-      "require": "./dist/primitives/index.cjs"
-    },
-    "./scroll": {
-      "types": "./dist/scroll/index.d.ts",
-      "import": "./dist/scroll/index.mjs",
-      "require": "./dist/scroll/index.cjs"
-    },
-    "./slider": {
-      "types": "./dist/slider/index.d.ts",
-      "import": "./dist/slider/index.mjs",
-      "require": "./dist/slider/index.cjs"
-    },
-    "./viewer": {
-      "types": "./dist/viewer/index.d.ts",
-      "import": "./dist/viewer/index.mjs",
-      "require": "./dist/viewer/index.cjs"
-    },
-    "./helpers": {
-      "types": "./dist/helpers/index.d.ts",
-      "import": "./dist/helpers/index.mjs",
-      "require": "./dist/helpers/index.cjs"
-    },
-    "./i18n": {
-      "types": "./dist/i18n/index.d.ts",
-      "import": "./dist/i18n/index.mjs",
-      "require": "./dist/i18n/index.cjs"
-    },
-    "./react-shim": {
-      "import": "./dist/react-shim.mjs",
-      "require": "./dist/react-shim.cjs"
-    }
-  },
-  "types": "./dist/index.d.ts",
+  "name": "clover",
+  "private": true,
+  "description": "Clover: @nulib/clover, composable IIIF components and viewer, and its documentation site.",
   "workspaces": [
     "packages/clover"
   ],
   "scripts": {
-    "build": "npm run build:iiif && npm run build:clover",
-    "build:iiif": "npm run clean && node --experimental-json-modules ./build/build.mjs",
-    "build:clover": "npm run build -w @nulib/clover",
+    "build": "npm run build -w @nulib/clover",
     "build:docs": "next build",
     "build:mocks": "vite-node scripts/build-mocks.mjs",
     "build:maplibre-worker": "node ./scripts/build-maplibre-worker.mjs",
-    "prebuild:iiif": "npm run build:maplibre-worker",
     "prebuild:docs": "npm run build:maplibre-worker",
     "predev": "npm run build:maplibre-worker",
-    "pretest:ci": "npm run build:maplibre-worker",
     "pretypecheck": "npm run build:maplibre-worker",
-    "clean": "rimraf dist",
     "coverage": "vitest --ui --coverage",
     "dev": "next dev",
-    "dev:vite": "vite",
+    "e2e": "npm run e2e -w @nulib/clover",
     "lint": "prettier . --check && next lint",
-    "prepublishOnly": "npm run build:iiif",
     "prettier": "prettier . --check",
     "prettier:fix": "prettier --write .",
     "start": "next start",
     "test": "vitest",
     "test:ci": "vitest run",
-    "pretest:build": "npm run build:maplibre-worker",
-    "test:build": "node --test build/*.test.mjs && npm run test:build -w @nulib/clover",
-    "e2e": "playwright test --config=playwright/playwright.config.ts",
-    "e2e:install": "playwright install --with-deps",
-    "e2e:html": "BASE_URL=http://localhost:3002 WEB_SERVER_CMD=\"python3 -m http.server 3002 --directory playwright/html\" playwright test e2e/wc.spec.ts e2e/reflow.spec.ts --config=playwright/playwright.config.ts",
-    "typecheck": "tsc --incremental --noEmit && npm run typecheck -w @nulib/clover",
-    "prepare": "husky install"
+    "test:build": "npm run test:build -w @nulib/clover",
+    "typecheck": "tsc --incremental --noEmit && npm run typecheck -w @nulib/clover"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/samvera-labs/clover-iiif.git"
+    "url": "git+https://github.com/nulib-ds/clover.git"
   },
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/samvera-labs/clover-iiif/issues"
+    "url": "https://github.com/nulib-ds/clover/issues"
   },
-  "homepage": "https://github.com/samvera-labs/clover-iiif#readme",
+  "homepage": "https://github.com/nulib-ds/clover#readme",
   "packageManager": "npm@10",
   "engines": {
     "node": ">=20.10.0"
   },
-  "dependencies": {
-    "@allmaps/maplibre": "^1.0.0-beta.44",
-    "@iiif/helpers": "^1.2.19",
-    "@iiif/parser": "^2.1.4",
-    "@radix-ui/react-aspect-ratio": "^1.1.0",
-    "@radix-ui/react-checkbox": "^1.1.2",
-    "@radix-ui/react-collapsible": "^1.1.1",
-    "@radix-ui/react-form": "^0.1.16",
-    "@radix-ui/react-popover": "^1.1.2",
-    "@radix-ui/react-radio-group": "^1.2.1",
-    "@radix-ui/react-select": "^2.1.2",
-    "@radix-ui/react-tabs": "^1.1.1",
-    "@vidstack/react": "^1.15.6",
-    "dompurify": "^3.0.2",
-    "flexsearch": "^0.7.43",
-    "hls.js": "^1.5.17",
-    "maplibre-gl": "^6.4.1",
-    "marked": "^18.0.2",
-    "marked-footnote": "^1.4.0",
-    "node-webvtt": "^1.9.4",
-    "openseadragon": "^6.1.0",
-    "react-error-boundary": "^4.1.2",
-    "react-lazy-load-image-component": "^1.6.2",
-    "uuid": "^9.0.1",
-    "wavesurfer.js": "^7.12.12"
-  },
   "devDependencies": {
+    "@iiif/helpers": "^1.2.19",
     "@iiif/presentation-3": "^1.1.3",
     "@playwright/test": "^1.54.2",
+    "@samvera/clover-iiif": "4.0.0-rc.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",
-    "@testing-library/user-event": "^14.5.2",
-    "@types/dompurify": "^3.2.0",
-    "@types/flexsearch": "^0.7.6",
     "@types/node": "20.11.16",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@vitejs/plugin-react": "^4.3.3",
     "@vitest/coverage-v8": "2.1.5",
     "@vitest/ui": "2.1.5",
-    "cross-fetch": "^4.0.0",
     "dts-bundle-generator": "8.0.1",
     "esbuild": "^0.21.5",
     "eslint-config-next": "14.1.0",
     "eslint-config-prettier": "^9.1.0",
-    "execa": "^8.0.1",
-    "husky": "^8.0.3",
     "jsdom": "^24.1.3",
-    "lint-staged": "^15.2.10",
+    "maplibre-gl": "^6.6.0",
     "next": "^14.2.18",
     "nextra": "^2.13.4",
     "nextra-theme-docs": "^2.13.4",
-    "preact": "^10.24.3",
     "prettier": "^3.3.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rimraf": "^6.0.1",
-    "terser": "^5.36.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.11",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "2.1.5"
-  },
-  "peerDependencies": {
-    "react": "^18.2.0 || ^19.0.0",
-    "react-dom": "^18.2.0 || ^19.0.0"
-  },
-  "typesVersions": {
-    "*": {
-      "viewer": [
-        "dist/viewer/index.d.ts"
-      ],
-      "image": [
-        "dist/image/index.d.ts"
-      ],
-      "map": [
-        "dist/map/index.d.ts"
-      ],
-      "primitives": [
-        "dist/primitives/index.d.ts"
-      ],
-      "scroll": [
-        "dist/scroll/index.d.ts"
-      ],
-      "slider": [
-        "dist/slider/index.d.ts"
-      ],
-      "helpers": [
-        "dist/helpers/index.d.ts"
-      ],
-      "i18n": [
-        "dist/i18n/index.d.ts"
-      ],
-      "*": [
-        "dist/index.d.ts"
-      ]
-    }
   }
 }

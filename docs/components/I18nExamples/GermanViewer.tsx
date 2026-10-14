@@ -1,5 +1,5 @@
 import Viewer from "docs/components/DynamicImports/Viewer";
-import { initCloverI18n } from "src/i18n/config";
+import { initCloverI18n } from "@samvera/clover-iiif/i18n";
 import { useEffect } from "react";
 
 const DEMO_MANIFEST =

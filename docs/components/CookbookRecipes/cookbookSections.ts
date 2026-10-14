@@ -1,5 +1,5 @@
 // Recipe list and grouping mirror https://iiif.io/api/cookbook/ (checked 2026-10-08).
-// Whether Clover covers a recipe comes from `supported` in src/fixtures/iiif-cookbook/recipes.json;
+// Whether Clover covers a recipe comes from `supported` in docs/fixtures/iiif-cookbook/recipes.json;
 // `partial` and `notes` below only qualify that.
 
 export interface CookbookSection {

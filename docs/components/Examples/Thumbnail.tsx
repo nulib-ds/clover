@@ -1,4 +1,4 @@
-import * as IIIF from "src/components/Primitives";
+import * as IIIF from "@samvera/clover-iiif/primitives";
 import ReactDOMServer from "react-dom/server";
 
 const ThumbnailImageExample = () => {

@@ -4,8 +4,8 @@ The composable 4.x Clover, used two ways: the ready-made `Viewer` (the default e
 `<Viewer iiifContent={url} template={Document} />`), or parts with dot notation around one
 `Clover.Root` (named exports). The Viewer only draws a template, and every template is
 built only from the parts. It is an npm workspace of the
-repository, private and unpublished. `@samvera/clover-iiif` (the repository root) is the
-3.x line and is maintained separately.
+repository, private and unpublished. The repository root is its documentation site. The
+3.x line, `@samvera/clover-iiif`, is maintained separately, in `samvera-labs/clover-iiif`.
 
 The root `AGENTS.md` applies here too, including the agents' scope of work: no commits,
 staging, `git mv`, versions or publishing.
@@ -20,8 +20,9 @@ staging, `git mv`, versions or publishing.
 - **Dependencies:** peers `react` and `react-dom` (18 or 19). Dependencies are
   `@iiif/parser@4` (the Presentation 4 upgrader, loaded on demand, and P4 types),
   `@iiif/helpers@4` (`i18n` only, 0.6 kB), `@iiif/presentation-3` (types), and
-  `dompurify`, `hls.js` and `maplibre-gl`, all loaded on demand. 3.x keeps parser 2 and helpers 1.5 at
-  the root; npm nests the package's own copies under `packages/clover/node_modules`. No
+  `dompurify`, `hls.js` and `maplibre-gl`, all loaded on demand. The docs keep helpers 1.x, and
+  the 3.x docs' `@samvera/clover-iiif` parser 2, at the root; npm nests the package's own
+  copies under `packages/clover/node_modules`. No
   Vault: it is 19.5 kB gzip. Add a dependency only when a milestone needs it.
 - **ES modules only**, one file per source module (`preserveModules`), named exports
   only. `import * as Clover from "@nulib/clover"` gives dot notation and still
@@ -175,8 +176,7 @@ staging, `git mv`, versions or publishing.
 
 - `npm run build -w @nulib/clover` builds `dist/` (Vite with three entries: the parts,
   `templates/index` and `map/index`; then `build/styles.mjs` for `styles.css` and
-  `templates.css`, then `dts-bundle-generator` for each entry's `.d.mts`). The root `npm run build` runs it after
-  the 3.x build.
+  `templates.css`, then `dts-bundle-generator` for each entry's `.d.mts`). The root `npm run build` runs it.
 - `npm run test -w @nulib/clover`, or the root `npm test`, which runs both Vitest
   projects (`vitest.workspace.mjs`).
 - `npm run test:build -w @nulib/clover` checks the built package, so build first.
@@ -345,7 +345,8 @@ staging, `git mv`, versions or publishing.
     re-framed under the reader on every render); standalone `iiifContent` wraps a Root
     with `annotationPages="all"`. Pressing a feature with a `canvasId` goes there.
   - No bundled worker (3.x's is ~500 kB): the host serves it if its bundler moves
-    MapLibre's files. The docs build a blob from 3.x's generated worker and call
+    MapLibre's files. The docs build a blob from the worker
+    `scripts/build-maplibre-worker.mjs` bundles into `docs/lib/` and call
     `setMapWorkerUrl`. MapLibre's CSS is the host's import too.
   - Wheel zoom off by default; default basemap as 3.x (Liberty, roads removed,
     hillshade); classes `clover-geomap*` (3.x has `clover-map*`); layer ids `geomap-*`.

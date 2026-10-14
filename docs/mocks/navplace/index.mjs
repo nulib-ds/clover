@@ -13,13 +13,12 @@
  *
  * Static only (it answers no query): `scripts/build-mocks.mjs` writes it to
  * `public/mocks/navplace/`, published at
- * https://samvera-labs.github.io/clover-iiif/mocks/navplace/. The image is served by
+ * https://nulib-ds.github.io/clover/mocks/navplace/. The image is served by
  * Northwestern's IIIF Image API (level 2, CORS open). Documented at /docs/mocks.
  */
 import source from "./source.json";
 
-export const PUBLIC_BASE =
-  "https://samvera-labs.github.io/clover-iiif/mocks/navplace";
+export const PUBLIC_BASE = "https://nulib-ds.github.io/clover/mocks/navplace";
 
 /** The corner of Michigan Avenue and Washington Street, Chicago: [longitude, latitude]. */
 export const PLACE = {

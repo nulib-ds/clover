@@ -1,17 +1,17 @@
-import {
-  type CustomDisplay,
-  ViewerConfigOptions,
+import type {
+  ContentSearchQuery,
+  CustomDisplay,
   PluginConfig,
-} from "src/context/viewer-context";
+  ViewerConfigOptions,
+} from "@samvera/clover-iiif/viewer";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
-import { ContentSearchQuery } from "src/types/annotations";
 
 // todo: set this as a constant somewhere?
 const defaultIiifContent =
   "https://api.dc.library.northwestern.edu/api/v2/works/71153379-4283-43be-8b0f-4e7e3bfda275?as=iiif";
 
-const Viewer = dynamic(() => import("src/components/Viewer"), {
+const Viewer = dynamic(() => import("@samvera/clover-iiif/viewer"), {
   ssr: false,
 });
 
@@ -21,7 +21,7 @@ const Viewer = dynamic(() => import("src/components/Viewer"), {
  * is first rendered. A failed preload is harmless: rendering the Viewer will try again.
  */
 export const preloadViewer = () => {
-  import("src/components/Viewer").catch(() => undefined);
+  import("@samvera/clover-iiif/viewer").catch(() => undefined);
 };
 
 const CloverViewer = ({

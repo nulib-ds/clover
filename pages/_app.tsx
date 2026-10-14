@@ -1,12 +1,8 @@
 /*
- * Clover's own stylesheet.
- *
- * The docs consume the library from source, outside the package's Vite build that discovers
- * colocated component CSS. Import the aggregate explicitly here because Next's Pages Router
- * only allows a global stylesheet in `_app`.
+ * Clover's stylesheets, imported here because Next's Pages Router only allows a global
+ * stylesheet in `_app`. @nulib/clover ships its own, and consumers import it the same way.
+ * The 3.x pages' components (`@samvera/clover-iiif`, from npm) inject their own styles.
  */
-import "src/styles/clover.css";
-// The 4.x package, @nulib/clover, ships its own stylesheet; consumers import it the same way.
 import "@nulib/clover/styles.css";
 import "@nulib/clover/templates.css";
 // The 4.x Map draws with MapLibre, whose stylesheet a consumer imports beside Clover's.

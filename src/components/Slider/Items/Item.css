@@ -1,9 +1,0 @@
-.clover-slider-item {
-  position: relative;
-  z-index: 0;
-  border-radius: var(--clover-radius, 3px);
-}
-
-.clover-slider-item-anchor {
-  text-decoration: none;
-}

@@ -14,6 +14,13 @@ const siteTitle = "Clover IIIF";
  */
 const siteDescription =
   "A suite of accessible UI components for IIIF Manifests and Collections.";
+/*
+ * The site's address, for canonical links. The deploy workflow passes it as Pages reports
+ * it (`NEXT_PUBLIC_SITE_URL`); a build without it is for nulib-ds.github.io.
+ */
+const siteUrl = (
+  process.env.NEXT_PUBLIC_SITE_URL || "https://nulib-ds.github.io/clover"
+).replace(/\/+$/, "");
 
 const config: DocsThemeConfig = {
   darkMode: true,
@@ -21,7 +28,7 @@ const config: DocsThemeConfig = {
     defaultTheme: "light",
     enableSystem: false,
   },
-  docsRepositoryBase: "https://github.com/samvera-labs/clover-iiif",
+  docsRepositoryBase: "https://github.com/nulib-ds/clover",
 
   /*
    * The docs lead with Clover 4, which is not released yet; the banner says so once, for
@@ -54,15 +61,12 @@ const config: DocsThemeConfig = {
       ? config.frontMatter.description
       : siteDescription;
 
+    /*
+     * Joined as text: `new URL(route, siteUrl)` would drop the site's path (`/clover`), the
+     * route being absolute.
+     */
     const { route } = useRouter();
-    const canonical = useMemo(
-      () =>
-        new URL(
-          route.endsWith("/") ? route : `${route}/`,
-          "https://samvera-labs.github.io/clover-iiif/",
-        ).href,
-      [route],
-    );
+    const canonical = useMemo(() => `${siteUrl}${route}`, [route]);
 
     return {
       defaultTitle: `${siteTitle} - ${siteDescription}`,
@@ -93,7 +97,7 @@ const config: DocsThemeConfig = {
     extraContent: <PageSettings />,
   },
   project: {
-    link: "https://github.com/samvera-labs/clover-iiif",
+    link: "https://github.com/nulib-ds/clover",
   },
   /*
    * #0F62FE (the site's blue, Carbon's Blue 60) = hsl(219 99% 53%). Nextra bakes its own lightness per utility and reads

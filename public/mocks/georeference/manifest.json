@@ -4,7 +4,7 @@
     "http://iiif.io/api/extension/georef/1/context.json",
     "http://iiif.io/api/presentation/3/context.json"
   ],
-  "id": "https://samvera-labs.github.io/clover-iiif/mocks/georeference/manifest.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/georeference/manifest.json",
   "type": "Manifest",
   "label": {
     "en": [
@@ -41,11 +41,11 @@
     }
   ],
   "navPlace": {
-    "id": "https://samvera-labs.github.io/clover-iiif/mocks/georeference/feature-collection/1",
+    "id": "https://nulib-ds.github.io/clover/mocks/georeference/feature-collection/1",
     "type": "FeatureCollection",
     "features": [
       {
-        "id": "https://samvera-labs.github.io/clover-iiif/mocks/georeference/feature/1",
+        "id": "https://nulib-ds.github.io/clover/mocks/georeference/feature/1",
         "type": "Feature",
         "properties": {
           "label": {
@@ -66,7 +66,7 @@
   },
   "items": [
     {
-      "id": "https://samvera-labs.github.io/clover-iiif/mocks/georeference/canvas/1",
+      "id": "https://nulib-ds.github.io/clover/mocks/georeference/canvas/1",
       "type": "Canvas",
       "label": {
         "en": [
@@ -77,11 +77,11 @@
       "height": 9833,
       "items": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/georeference/canvas/1/page",
+          "id": "https://nulib-ds.github.io/clover/mocks/georeference/canvas/1/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/georeference/canvas/1/page/image",
+              "id": "https://nulib-ds.github.io/clover/mocks/georeference/canvas/1/page/image",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -98,24 +98,24 @@
                   }
                 ]
               },
-              "target": "https://samvera-labs.github.io/clover-iiif/mocks/georeference/canvas/1"
+              "target": "https://nulib-ds.github.io/clover/mocks/georeference/canvas/1"
             }
           ]
         }
       ],
       "annotations": [
         {
-          "id": "https://samvera-labs.github.io/clover-iiif/mocks/georeference/canvas/1/georeference",
+          "id": "https://nulib-ds.github.io/clover/mocks/georeference/canvas/1/georeference",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://samvera-labs.github.io/clover-iiif/mocks/georeference/canvas/1/georeference/1",
+              "id": "https://nulib-ds.github.io/clover/mocks/georeference/canvas/1/georeference/1",
               "type": "Annotation",
               "motivation": "georeferencing",
               "target": {
                 "type": "SpecificResource",
                 "source": {
-                  "id": "https://samvera-labs.github.io/clover-iiif/mocks/georeference/canvas/1",
+                  "id": "https://nulib-ds.github.io/clover/mocks/georeference/canvas/1",
                   "type": "Canvas",
                   "width": 7337,
                   "height": 9833

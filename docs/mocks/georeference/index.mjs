@@ -5,12 +5,12 @@
  *
  * Static only (it answers no query): `scripts/build-mocks.mjs` writes it to
  * `public/mocks/georeference/`, published at
- * https://samvera-labs.github.io/clover-iiif/mocks/georeference/. The image is served by
+ * https://nulib-ds.github.io/clover/mocks/georeference/. The image is served by
  * Northwestern's IIIF Image API (level 2, CORS open). Documented at /docs/mocks.
  */
 
 export const PUBLIC_BASE =
-  "https://samvera-labs.github.io/clover-iiif/mocks/georeference";
+  "https://nulib-ds.github.io/clover/mocks/georeference";
 
 const IMAGE_SERVICE =
   "https://iiif.dc.library.northwestern.edu/iiif/3/2fb1e81a-9e24-420c-b224-0bfd6a279baf";

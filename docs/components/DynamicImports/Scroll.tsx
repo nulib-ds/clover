@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 const defaultIiifContent =
   "https://iiif-maktaba.dc.library.northwestern.edu/dc8ff749-adad-42a7-81e0-0eb473ef88a5.json";
 
-const Scroll = dynamic(() => import("src/components/Scroll"), {
+const Scroll = dynamic(() => import("@samvera/clover-iiif/scroll"), {
   ssr: false,
 });
 
