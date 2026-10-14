@@ -68,6 +68,57 @@ describe("CameraAnimator", () => {
     expect(animator.current).toEqual(target);
   });
 
+  it("with a spring, follows its curve and lands at its duration", () => {
+    const animator = new CameraAnimator(start, undefined, {
+      duration: 1.2,
+      stiffness: 6.5,
+    });
+    animator.animateTo({ state: { ...start, x: 100 } }, viewport);
+    animator.step(0.6, viewport);
+    const s = 6.5;
+    const expected = (100 * (1 - Math.exp(-s * 0.5))) / (1 - Math.exp(-s));
+    expect(animator.current.x).toBeCloseTo(expected, 9);
+    expect(animator.step(0.6, viewport)).toBe(false);
+    expect(animator.current.x).toBe(100);
+  });
+
+  it("moves further early with a stiffer spring", () => {
+    const at = (stiffness: number) => {
+      const animator = new CameraAnimator(start, undefined, {
+        duration: 1,
+        stiffness,
+      });
+      animator.animateTo({ state: { ...start, x: 100 } }, viewport);
+      animator.step(0.2, viewport);
+      return animator.current.x;
+    };
+    expect(at(12)).toBeGreaterThan(at(6.5));
+    expect(at(6.5)).toBeGreaterThan(at(2));
+  });
+
+  it("with a spring, restarts the curve from where the camera is on a new target", () => {
+    const animator = new CameraAnimator(start, undefined, {
+      duration: 1,
+      stiffness: 6.5,
+    });
+    animator.animateTo({ state: { ...start, x: 100 } }, viewport);
+    animator.step(0.5, viewport);
+    const midway = animator.current.x;
+    animator.animateTo({ state: { ...start, x: 200 } }, viewport);
+    animator.step(1, viewport);
+    expect(midway).toBeGreaterThan(0);
+    expect(animator.current.x).toBe(200);
+  });
+
+  it("with a zero-length spring, jumps", () => {
+    const animator = new CameraAnimator(start, undefined, {
+      duration: 0,
+      stiffness: 6.5,
+    });
+    animator.animateTo({ state: { ...start, x: 100 } }, viewport);
+    expect(animator.current.x).toBe(100);
+  });
+
   it("re-aims mid-flight without restarting", () => {
     const animator = new CameraAnimator(start);
     animator.animateTo({ state: { ...start, x: 100 } }, viewport);

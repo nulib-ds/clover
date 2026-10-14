@@ -72,16 +72,16 @@ unless `options.gestures.scrollToZoom` is on.
 
 ### View and rendering
 
-| Prop                   | Type                                                                       | Default           | Description                                                                                                                                                    |
-| ---------------------- | -------------------------------------------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `viewingDirection`     | `"left-to-right" \| "right-to-left" \| "top-to-bottom" \| "bottom-to-top"` | `"left-to-right"` | How several Canvases line up; in a `Root`, the Manifest's.                                                                                                     |
-| `navigator`            | `boolean`                                                                  | `false`           | An overview of the whole image, to press or drag in.                                                                                                           |
-| `options`              | `object`                                                                   | —                 | `backend`, `gestures`, `maxZoomPixelRatio`, `minZoomImageRatio`, `animationTime`, `hideDelay`, `animation`, `media`, `request`.                                |
-| `onReady`              | `(handle: CanvasHandle) => void`                                           | —                 | Once laid out, a handle to zoom, pan and turn it.                                                                                                              |
-| `onViewportChange`     | `(bounds: { x, y, width, height }) => void`                                | —                 | The region in view, at most once a frame.                                                                                                                      |
-| `onContentStateChange` | `(state: { json, encoded }) => void`                                       | —                 | Where it is, as a IIIF [content state](/docs/content-state), each time it settles: the Canvas within its Manifest, and the region in view or the media's time. |
-| `instanceId`           | `string`                                                                   | —                 | A stable id; a new one remounts the renderer.                                                                                                                  |
-| `className`            | `string`                                                                   | —                 | Added to `clover-canvas`, on its `figure`.                                                                                                                     |
+| Prop                   | Type                                                                       | Default           | Description                                                                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `viewingDirection`     | `"left-to-right" \| "right-to-left" \| "top-to-bottom" \| "bottom-to-top"` | `"left-to-right"` | How several Canvases line up; in a `Root`, the Manifest's.                                                                                                                                    |
+| `navigator`            | `boolean`                                                                  | `false`           | An overview of the whole image, to press or drag in.                                                                                                                                          |
+| `options`              | `object`                                                                   | —                 | `backend`, `gestures`, `maxZoomPixelRatio`, `minZoomImageRatio`, `animationTime`, `animationDuration`, `springStiffness`, `constrainDuringPan`, `hideDelay`, `animation`, `media`, `request`. |
+| `onReady`              | `(handle: CanvasHandle) => void`                                           | —                 | Once laid out, a handle to zoom, pan and turn it.                                                                                                                                             |
+| `onViewportChange`     | `(bounds: { x, y, width, height }) => void`                                | —                 | The region in view, at most once a frame.                                                                                                                                                     |
+| `onContentStateChange` | `(state: { json, encoded }) => void`                                       | —                 | Where it is, as a IIIF [content state](/docs/content-state), each time it settles: the Canvas within its Manifest, and the region in view or the media's time.                                |
+| `instanceId`           | `string`                                                                   | —                 | A stable id; a new one remounts the renderer.                                                                                                                                                 |
+| `className`            | `string`                                                                   | —                 | Added to `clover-canvas`, on its `figure`.                                                                                                                                                    |
 
 ### Controls
 
@@ -176,6 +176,50 @@ and pressed again, "Collapse viewer controls", it closes.
   isTiledImage
   label="The Vanishing Race - Navaho"
   collapseControls="always"
+/>
+```
+
+</Example>
+
+### Motion
+
+Zooms, glides and the home view ease toward their target, `animationTime` (`0.09`) the
+seconds to close most of the distance. Set `animationDuration` instead for a fixed-length
+ease, fast at first and slowing into place, `springStiffness` (`6.5`) setting how sharply.
+A mouse or pen drag tracks the pointer and glides on after a fast release. Three
+`gestures` options shape that:
+`flickEnabled` (`false` eases the drag instead, and it stops where the pointer stops),
+`flickMinSpeed`, the release speed in px/s below which there is no glide (`200`), and
+`flickMomentum`, the seconds of release velocity the glide travels (`0.25`). A finger always
+tracks 1:1. `constrainDuringPan={false}` lets a drag pull the image past its edge, to
+spring back on release.
+
+To move as Clover 3's `Image` did, on OpenSeadragon's defaults:
+
+<Example>
+<div style={{ height: 420 }}>
+  <CloverCanvas
+    src="https://iiif.dc.library.northwestern.edu/iiif/3/bcb98b9f-4c44-4fd0-bfa9-673fb904a2b1"
+    isTiledImage
+    label="The Vanishing Race - Navaho"
+    options={{
+      animationDuration: 1.2,
+      constrainDuringPan: false,
+      gestures: { flickEnabled: false, flickMinSpeed: 120 },
+    }}
+  />
+</div>
+
+```jsx
+<Clover.Canvas
+  src="https://iiif.dc.library.northwestern.edu/iiif/3/bcb98b9f-4c44-4fd0-bfa9-673fb904a2b1"
+  isTiledImage
+  label="The Vanishing Race - Navaho"
+  options={{
+    animationDuration: 1.2,
+    constrainDuringPan: false,
+    gestures: { flickEnabled: false, flickMinSpeed: 120 },
+  }}
 />
 ```
 
