@@ -61,7 +61,7 @@ describe("Viewer", () => {
         {/* @ts-expect-error Document's prop, without Document */}
         <Viewer iiifContent={bookJson} defaultSidebarOpen />
         {/* @ts-expect-error Default's prop, on Document */}
-        <Viewer iiifContent={bookJson} template={Document} filter />
+        <Viewer iiifContent={bookJson} template={Document} panel={false} />
       </>
     );
     expect(types).toBeTypeOf("function");

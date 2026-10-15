@@ -47,13 +47,13 @@ takes: no part uses another, not even a fluid size between two steps (video capt
 step through them with container queries instead). Larger display sizes, a page's own
 headings, belong to the page and are not packaged.
 
-| Token              | Value    | At 16px | Step    | Use                                                                                         |
-| ------------------ | -------- | ------- | ------- | ------------------------------------------------------------------------------------------- |
-| `--clover-text-xs` | 0.764rem | 12.2px  | 1 − 2xs | Badges: a duration on a thumbnail                                                           |
-| `--clover-text-s`  | 0.854rem | 13.7px  | 1 − 3xs | Secondary text: times, formats, captions under thumbnails, labels of metadata, menu legends |
-| (inherited)        | 1rem     | 16px    | 1       | Everything else: text, metadata, the strip's titles and position                            |
-| `--clover-text-m`  | 1.146rem | 18.3px  | 1 + 3xs | A section's heading: the information panel's accordion                                      |
-| `--clover-text-l`  | 1.236rem | 19.8px  | 1 + 2xs | Titles: a layout's title, Items' title, the lightbox's, an error headline                   |
+| Token              | Value    | At 16px | Step    | Use                                                                                  |
+| ------------------ | -------- | ------- | ------- | ------------------------------------------------------------------------------------ |
+| `--clover-text-xs` | 0.764rem | 12.2px  | 1 − 2xs | Badges: a duration on a thumbnail                                                    |
+| `--clover-text-s`  | 0.854rem | 13.7px  | 1 − 3xs | Secondary text: times, formats, captions under thumbnails, menu legends              |
+| (inherited)        | 1rem     | 16px    | 1       | Everything else: text, metadata (its labels medium), the strip's titles and position |
+| `--clover-text-m`  | 1.146rem | 18.3px  | 1 + 3xs | A section's heading: the information panel's accordion                               |
+| `--clover-text-l`  | 1.236rem | 19.8px  | 1 + 2xs | Titles: a layout's title, Items' title, the lightbox's, an error headline            |
 
 **One derived size.** `--clover-control` is a 1rem icon with `s` on every side,
 `calc(1rem + 2 * var(--clover-space-s))`, 2.236rem. Every round control is this size.
@@ -156,7 +156,7 @@ The stylesheet's size is part of the design.
   | Round controls       | `ui/Button.css`        | the Canvas's cluster, the media transport, Items' arrows, the Pager's Previous and Next, the InformationPanel's close |
   | Text buttons         | `ui/Button.css`        | Download's button, Search's button                                                                                    |
   | Rows and their lists | `InformationPanel.css` | annotations, Ranges, cues, search hits                                                                                |
-  | Fields               | `styles/scale.css`     | a search's query, a Collection's menu, a filter, a transcript's track menu                                            |
+  | Fields               | `styles/scale.css`     | a search's query, a Collection's menu, a transcript's track menu                                                      |
   | Popovers             | `ui/Tip.css`           | every control that shows an icon alone (§7)                                                                           |
   | Chrome               | `Canvas.css`           | the Canvas's controls, navigator, a placeholder's toggle, the media transport, its captions                           |
 

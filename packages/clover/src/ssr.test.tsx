@@ -47,11 +47,6 @@ describe("server rendering", () => {
         iiifContent={bookJson}
         template={Templates.Gallery}
       />,
-      <Clover.Viewer
-        key="t"
-        iiifContent={bookJson}
-        template={Templates.Text}
-      />,
       <Map key="m" iiifContent={bookJson} />,
     ]) {
       expect(() => renderToString(element)).not.toThrow();

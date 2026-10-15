@@ -49,14 +49,6 @@
   color: var(--clover-color-accent, #0065c3);
 }
 
-/* ---------- filter ---------- */
-
-.clover-items-filter input {
-  width: min(100%, 20rem);
-  margin-bottom: var(--clover-space-s);
-  border-radius: var(--clover-radius-pill, 2rem);
-}
-
 /* ---------- tracks ---------- */
 
 .clover-items-track {

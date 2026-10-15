@@ -83,11 +83,21 @@
 
 /* ── The assembled viewer ─────────────────────────────────────────────────── */
 
+/*
+ * Held in view beside the tiles, under the navbar, while it fits the window; taller than
+ * the window (its code open, say), held by its foot instead, so the code stays in view.
+ * `PartsLive` writes its height.
+ */
 .assembled {
   display: grid;
   gap: 1rem;
+  /* Its column, never wider: the title, kept to one line, would otherwise widen it. */
+  grid-template-columns: minmax(0, 1fr);
   position: sticky;
-  top: calc(var(--nextra-navbar-height, 4rem) + 1.618rem);
+  top: min(
+    calc(var(--nextra-navbar-height, 4rem) + 1.618rem),
+    calc(100vh - var(--assembled-height, 0px) - 1.618rem)
+  );
 }
 
 @media (max-width: 64rem) {
@@ -105,9 +115,336 @@
   margin: 0;
 }
 
-.caption code {
+.captionName {
+  color: var(--gray-12);
+  font-weight: 500;
+}
+
+/* Under the viewer, at its end, the control that opens its code below. */
+.codeBar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/*
+ * The code control: its icon alone, in the caption's grey, round. No fill: a hairline ring
+ * on hover, the accent's while its code is open.
+ */
+.codeToggle {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: 999px;
+  color: var(--gray-11);
+  cursor: pointer;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 1.618rem;
+  justify-content: center;
+  padding: 0;
+  transition:
+    color 160ms ease,
+    box-shadow 160ms ease;
+  width: 1.618rem;
+}
+
+.codeToggle:hover {
+  box-shadow: 0 0 0 1px var(--gray-6);
+  color: var(--gray-12);
+}
+
+.codeToggle[aria-expanded="true"] {
+  box-shadow: 0 0 0 1px var(--accent-9);
   color: var(--accent-11);
+}
+
+.codeToggle:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.codeToggle svg {
+  height: 1rem;
+  width: 1rem;
+}
+
+/*
+ * The viewer's code, opened under its control as an editor: Prism's Material colours on
+ * black (`--code-*`, `tokens.css`), in the tiles' monospace, line numbers in a gutter. It
+ * opens downward, its row growing from nothing, and while shut it is hidden from everyone.
+ * It shares a box with its control, so shut it leaves no gap: the space over it is its
+ * frame's own margin.
+ */
+.editor {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.editor[data-open] {
+  grid-template-rows: 1fr;
+}
+
+.editorInner {
+  min-height: 0;
+  overflow: hidden;
+  transition: visibility 240ms;
+  visibility: hidden;
+}
+
+.editor[data-open] > .editorInner {
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editor,
+  .editorInner {
+    transition: none;
+  }
+}
+
+.editorFrame {
+  background: var(--code-background);
+  border-radius: var(--radius-4);
+  color: var(--code-text);
+  margin-top: 0.618rem;
+}
+
+/* On a dark page, black on near-black: a hairline round it, drawn inside. */
+:global(.dark) .editorFrame {
+  box-shadow: inset 0 0 0 1px var(--gray-6);
+}
+
+/* Its head: the language, and Copy. */
+.editorHead {
+  align-items: center;
+  border-bottom: 1px solid var(--code-rule);
+  color: var(--code-faint);
+  display: flex;
   font-family: var(--font-mono);
+  font-size: 0.75rem;
+  justify-content: space-between;
+  padding: 0.382rem 0.618rem 0.382rem 1rem;
+}
+
+.copy {
+  background: none;
+  border: 0;
+  border-radius: var(--radius-2);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0.236rem 0.382rem;
+}
+
+.copy:hover {
+  color: var(--code-text);
+}
+
+.copy:focus-visible {
+  outline: 2px solid var(--accent-9);
+}
+
+/*
+ * The code, wrapped where it must (a resource's address), each line's wrap hung a step
+ * under its start, and its depth set as room rather than spaces.
+ */
+.codeText {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.618;
+  margin: 0;
+  overflow-wrap: anywhere;
+  padding: 0.618rem 1rem 1rem 0.236rem;
+  white-space: pre-wrap;
+}
+
+/* A line: its grip (a part's first line only), its number, its code. */
+.codeLine {
+  display: flex;
+  gap: 0.618rem;
+}
+
+/*
+ * A part's lines, which drag as one: by mouse anywhere on them, by touch from the grip,
+ * by keyboard from the grip with the arrow keys. While one is dragged the others step
+ * aside for it, and it rides over them, lit.
+ */
+.codeBlock {
+  border-radius: var(--radius-2);
+  cursor: grab;
+  display: block;
+  position: relative;
+  transition: background-color 160ms ease;
+}
+
+.codeText[data-dragging] .codeBlock:not([data-dragged]) {
+  transition:
+    background-color 160ms ease,
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* A part's lines while the part is pointed at, here or at its tile: the accent, faintly. */
+.codeBlock[data-on] {
+  background-color: color-mix(in srgb, var(--accent-9) 24%, transparent);
+}
+
+.codeBlock[data-dragged] {
+  background-color: color-mix(
+    in srgb,
+    var(--code-text) 10%,
+    var(--code-background)
+  );
+  box-shadow: 0 0 0 1px var(--code-rule);
+  cursor: grabbing;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .codeText[data-dragging] .codeBlock:not([data-dragged]) {
+    transition: none;
+  }
+}
+
+.gripCell {
+  align-items: center;
+  display: flex;
+  flex: none;
+  justify-content: center;
+  width: 1em;
+}
+
+/* Shown under the pointer, on focus, while dragged, and always where there is no hover. */
+.grip {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-2);
+  color: var(--code-faint);
+  cursor: grab;
+  display: inline-flex;
+  height: 1lh;
+  justify-content: center;
+  opacity: 0;
+  padding: 0;
+  touch-action: none;
+  transition: opacity 160ms ease;
+  width: 1em;
+}
+
+.codeBlock:hover .grip,
+.codeBlock[data-dragged] .grip,
+.grip:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .grip {
+    opacity: 1;
+  }
+}
+
+.grip:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 1px;
+}
+
+.lineNumber {
+  box-sizing: content-box;
+  color: var(--code-faint);
+  flex: none;
+  padding-inline-end: 0.382rem;
+  text-align: end;
+  user-select: none;
+  width: 2ch;
+}
+
+.lineText {
+  flex: 1;
+  min-width: 0;
+  padding-inline-start: calc(var(--depth, 0) * 2ch + 2ch);
+  text-indent: -2ch;
+}
+
+.tokenKeyword {
+  color: var(--code-keyword);
+}
+
+.tokenString {
+  color: var(--code-string);
+}
+
+.tokenTag {
+  color: var(--code-tag);
+}
+
+.tokenAttr {
+  color: var(--code-attr);
+}
+
+.tokenPunctuation {
+  color: var(--code-punctuation);
+}
+
+.tokenNumber {
+  color: var(--code-number);
+}
+
+.tokenProperty {
+  color: var(--code-property);
+}
+
+/*
+ * A value to change, in its token's colour, underlined with dashes; faintly lit under the
+ * pointer. A number drags sideways, a `true` switches, a string picks from a menu.
+ */
+.value {
+  background: none;
+  border: 0;
+  border-bottom: 1px dashed currentColor;
+  border-radius: 0;
+  cursor: pointer;
+  font: inherit;
+  line-height: inherit;
+  margin: 0;
+  padding: 0;
+  text-indent: 0;
+}
+
+.value:hover,
+.value[data-dragging] {
+  background-color: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.value:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.scrub {
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+.choice {
+  appearance: none;
+  field-sizing: content;
+}
+
+.choice option {
+  background: var(--gray-1);
+  color: var(--gray-12);
+}
+
+.visuallyHidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }
 
 /* The playground stage's edge and shadow, so the two read as the same viewer. */
@@ -118,8 +455,10 @@
     0 0 0 1px var(--gray-6),
     0 1px 2px rgb(0 0 0 / 0.04),
     0 6px 24px rgb(0 0 0 / 0.06);
-  display: grid;
-  gap: 1rem;
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 0.618rem;
   padding: 1.618rem;
 }
 
@@ -130,22 +469,34 @@
     0 6px 24px rgb(0 0 0 / 0.4);
 }
 
-.viewerHead {
-  align-items: center;
-  display: flex;
-  gap: 0.618rem;
-  min-width: 0;
+/*
+ * Its parts in the order its code gives them (which a reader can drag), each a row of its
+ * own; a thumbnail keeps its width, and a title beside it, before or after, takes the
+ * rest of the row, cut short if it must be. Summary and Metadata together are a step
+ * closer, as one part's text.
+ */
+.viewer > .region {
+  flex: 1 0 100%;
 }
 
-/* The thumbnail keeps its width; the title takes the rest, cut short if it must be. */
-.viewerHead > :first-child {
+.viewer > .regionThumb {
   flex: none;
+}
+
+.viewer > .regionThumb + .regionLabel,
+.viewer > .regionLabel:has(+ .regionThumb) {
+  flex: 1 1 0;
+}
+
+.viewer > .regionSummary + .regionMetadata,
+.viewer > .regionMetadata + .regionSummary {
+  margin-top: -0.382rem;
 }
 
 .viewerThumb {
   border-radius: var(--radius-2);
   display: block;
-  height: 2.618rem;
+  height: 2.236rem;
   max-width: 5rem;
   object-fit: cover;
   width: auto;
@@ -161,23 +512,18 @@
   white-space: nowrap;
 }
 
-.viewerStage {
-  --clover-content-height: 15rem;
-}
-
-/* Items, the width of the viewer. */
-.viewerRail {
-  display: grid;
-  gap: 0.618rem;
+/*
+ * Items' region holds the room Items keeps round each picture for its ring
+ * (`--clover-items-ring-room`, 4px), which Items lets out past its edges: so the strip
+ * meets the stage's edges, and the region's outline keeps clear of the rings, as every
+ * other part's keeps clear of its part.
+ */
+.viewer > .regionItems {
+  padding: 4px;
 }
 
 .viewerStrip {
   --clover-items-height: 4.236rem;
-}
-
-.viewerAbout {
-  display: grid;
-  gap: 0.618rem;
 }
 
 .viewerSummary {
@@ -190,16 +536,16 @@
   overflow: hidden;
 }
 
+/*
+ * The fields as far as the Date, whole, and no further: the cut falls in the gap before
+ * the next label, faded across it, so a field running past it elsewhere fades out too.
+ */
 .viewerFields {
   font-size: var(--text-sm);
   margin: 0;
-  mask-image: linear-gradient(#000 50%, transparent);
-  max-height: 4.236rem;
+  mask-image: linear-gradient(#000 calc(100% - 0.618rem), transparent);
+  max-height: 11.708rem;
   overflow: hidden;
-}
-
-.viewerFields dd {
-  margin: 0 0 0.382rem;
 }
 
 /*
@@ -372,8 +718,12 @@
   --clover-items-height: 6.854rem;
 }
 
-/* The fields in two columns across the row, cut short with a fade where they run on. */
+/*
+ * The fields in two columns across the row, cut short with a fade where they run on. A
+ * block, not the part's own stack, so the pairs can flow into columns.
+ */
 .fields {
+  display: block;
   column-gap: 2.618rem;
   columns: 2 16rem;
   margin: 0;
@@ -418,8 +768,22 @@
 }
 
 /* The viewer's strip is too small for names: its pictures alone, the tile has them named. */
-.viewerStrip :global(.clover-items-caption) {
+.viewerStrip[data-layout="carousel"] :global(.clover-items-caption) {
   display: none;
+}
+
+/*
+ * Laid out as a list or a grid (from its code), its pictures smaller, and scrolling in a
+ * box the stage's height at most, so the viewer stays in the window.
+ */
+.viewerStrip:not([data-layout="carousel"]) {
+  --clover-items-size: 6.854rem;
+}
+
+/* Items sets its viewport's overflow inline, which only `!important` outweighs. */
+.viewerStrip:not([data-layout="carousel"]) :global(.clover-items-viewport) {
+  max-height: 15rem;
+  overflow-y: auto !important;
 }
 
 .small,

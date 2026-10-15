@@ -15,7 +15,7 @@
    * The stage's one height, for every template and resource, so switching either never
    * moves the page. When the bar is held, the stage fills the screen under it: the
    * screen less the navbar, the bar (7.2rem), the space under the bar and room for the
-   * stage's shadow. Templates taller than it (a Gallery, a Text) scroll inside.
+   * stage's shadow. A template taller than it (a Gallery) scrolls inside.
    */
   --pg-stage-height: clamp(
     36rem,
@@ -421,8 +421,7 @@ button.tile:focus-visible {
 
 /*
  * A frame of one height, the edge of the box an implementer would give Clover. Each
- * template is fitted to it: Default and Document fill it, and Gallery and Text scroll
- * within it (Text's header sticks to its top).
+ * template is fitted to it: Default and Document fill it, and Gallery scrolls within it.
  */
 .stage {
   background: var(--color-background);
@@ -470,18 +469,12 @@ button.tile:focus-visible {
   border-radius: 0;
 }
 
-.stage :global(.clover-template-gallery),
-.stage :global(.clover-template-text) {
-  padding: 0 1.5rem 1.5rem;
-}
-
 .stage :global(.clover-template-gallery) {
-  padding-top: 1.25rem;
+  padding: 1.25rem 1.5rem 1.5rem;
 }
 
 @media (max-width: 640px) {
-  .stage :global(.clover-template-gallery),
-  .stage :global(.clover-template-text) {
+  .stage :global(.clover-template-gallery) {
     padding-inline: 1rem;
   }
 }

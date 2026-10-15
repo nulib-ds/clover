@@ -67,26 +67,13 @@
   font-weight: 600;
 }
 
-.clover-canvas-caption :is(p, dl, dd) {
+.clover-canvas-caption p {
   margin: 0;
 }
 
 /* The summary and its "Read more", `s` over the metadata. */
 .clover-canvas-caption .clover-read-more {
   margin-bottom: var(--clover-space-s);
-}
-
-.clover-canvas-caption dl {
-  display: flex;
-  flex-direction: column;
-  gap: var(--clover-space-s);
-}
-
-.clover-canvas-caption dt {
-  margin-bottom: var(--clover-space-2xs);
-  color: var(--clover-color-primary-muted, #26292b);
-  font-size: var(--clover-text-s);
-  font-weight: 600;
 }
 
 .clover-canvas-caption a {

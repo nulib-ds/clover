@@ -103,7 +103,6 @@ test("the templates entry imports in plain node", () => {
        console.log(JSON.stringify({
          Default: typeof Templates.Default,
          Gallery: typeof Templates.Gallery,
-         Text: typeof Templates.Text,
        }));`,
     ],
     { cwd: root, encoding: "utf8" },
@@ -112,7 +111,6 @@ test("the templates entry imports in plain node", () => {
   assert.deepEqual(JSON.parse(stdout.trim()), {
     Default: "function",
     Gallery: "function",
-    Text: "function",
   });
 });
 

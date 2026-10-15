@@ -18,7 +18,5 @@ export { Document } from "./document/Document";
 export type { DocumentProps } from "./document/Document";
 export { Gallery } from "./gallery/Gallery";
 export type { GalleryProps } from "./gallery/Gallery";
-export { Text } from "./text/Text";
-export type { TextProps } from "./text/Text";
 export { Lightbox } from "./shared/Lightbox";
 export type { LightboxProps } from "./shared/Lightbox";

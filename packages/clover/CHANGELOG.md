@@ -83,7 +83,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `Rights`, `Homepage`, `Rendering`, `SeeAlso`, `PartOf`, `Thumbnail` and `Id`, beside
   `Label`. Each reads the Root's Manifest, or the current Canvas with `of="canvas"`; a
   `value` prop wins, so they work outside a `Root` too. Text is in the reader's language
-  and marked with `lang`.
+  and marked with `lang`. `Metadata` and `RequiredStatement` style their own pairs, so
+  they look alike wherever they appear (the InformationPanel's About, a Canvas's
+  caption): each label over its value, medium and in the text's colour, the value in the
+  secondary colour (`--clover-color-primary-muted`) at the same size, the pairs stacked
+  `s` apart. About's own headings (Rights, Homepage…) read as the labels do.
 - **HTML in IIIF values is sanitised**, allowing only the markup the Presentation API
   permits and `http(s):` or `mailto:` links. Scripts, event handlers, `style`, SVG, and
   `javascript:` or `data:` URLs are removed. A value with markup shows as plain text until
@@ -94,7 +98,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   panel plugins. `value` / `defaultValue` / `onValueChange` control which section shows.
 
   `layout` lays the sections out as `"tabs"` (the default) or `"accordion"`: stacked
-  boxes, each opened and closed by its heading; opening one closes the others. In a
+  boxes, each opened by its heading; opening one closes the others, and one is always
+  open, as a tab is. In a
   panel that scrolls, every accordion heading stays in sight: those scrolled past stack
   at the top, those an open section pushes below stack at the bottom, both inside the
   panel's padding, so the first heading holds where it rests from the first pixel of
@@ -104,9 +109,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   heading is in the accent at the text's own weight, faintly underlined, and the open
   one's in the text's colour, bold;
   the heading after the open section is set `s` apart from its content. A section opened
-  by a press scrolls its start into sight, under the headings stacked above it. A lone section stays
-  open: there is nothing else to open in its place, so its button is `aria-disabled`
-  (as WAI-ARIA's accordion has it) and draws no chevron. The scroll drives it
+  by a press scrolls its start into sight, under the headings stacked above it. The open
+  section cannot be closed, so its button is `aria-disabled` (as WAI-ARIA's accordion
+  has it) and draws no chevron; a closed one's chevron offers it. The scroll drives it
   (scroll-driven animation, no script); browsers without it show no shadow. Both are built from the
   same buttons and panels and the same state, so switching layout keeps what is open, and
   a section's content mounts when it first opens and stays mounted. Each follows its
@@ -216,9 +221,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Annotations.** The comments, tags, transcriptions and descriptions on a Manifest's
   Canvases are listed in `Clover.Annotations` (and an Annotations tab when there are any)
   and drawn on the Canvas, each over the region it targets.
-  - Picking an entry frames it on the Canvas, moving to its Canvas first. Hovering an
-    entry or its region on the Canvas highlights both, through the Root, with no timers
-    or polling.
+  - Pressing an entry frames it on the Canvas, moving to its Canvas first. An entry has
+    no button of its own to see: for the keyboard, a button inside it ("Find on the
+    image: …", `annotationsShow`) does the same out of sight, and its focus is drawn
+    round the entry. Hovering an entry or its region on the Canvas highlights both,
+    through the Root, with no timers or polling.
   - Each set starts with a "Hide Annotations" checkbox (`annotationsHide`) that takes its
     regions off the Canvas, and under it a heading only when its AnnotationPage has a
     `label` of its own: the `InformationPanel`'s Annotations section names the rest. HTML bodies are
@@ -353,11 +360,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     Viewer, and its styles are in `styles.css`. Clover 3.x's Viewer layout: the
     Manifest's `Label` over the Canvas, after its `Thumbnail` (`xl` high, at its own
     shape up to 5rem wide, a wider one cropped to fill); `Items` under the Canvas, whose
-    arrows are Previous and Next, headed by the labels of the view's Canvases and
-    `Position` ("2 / 70"); the `InformationPanel` to the right of all three, the
-    layout's full height, scrolling within. The panel never stacks: it has its own space
-    beside the Canvas, and a `SplitHandle` between them shares the width (remembered
-    under `storageKey`).
+    arrows are Previous and Next, headed by the labels of the view's Canvases (a dot
+    between a spread's two) and `Position` ("2 / 70"); the `InformationPanel` to the
+    right of all three, the layout's full height, scrolling within. The panel never
+    stacks: it has its own space beside the Canvas, and a `SplitHandle` between them
+    shares the width (remembered under `storageKey`).
     Where there is no room for both (a phone), it slides over the Canvas instead, leaving
     a band of the page (`2xl`) that closes it on a press, as Escape and its close button
     do. It can be dragged back off too, as a side menu in a phone app can: it follows a
@@ -402,9 +409,6 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     inset clear round it on its grey background.
   - `Gallery`: `Items` as a grid of the views, opening one in a lightbox (a native
     `<dialog>`) with the Canvas and the `Pager`.
-  - `Text`: a Manifest read as text, as 3.x's Scroll reads it. One article per Canvas,
-    its image beside its annotations in a column per language, with a search and a
-    lightbox.
 
   ```jsx
   import Viewer from "@nulib/clover";
@@ -437,7 +441,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     to their `homepage`, with the Collection's label, summary and homepage link above.
     `onSelect(item, event)` hears each choice; `event.preventDefault()` keeps the reader
     on the page.
-  - `filter` adds a search field; `renderItem` replaces an item's figure.
+  - `renderItem` replaces an item's figure.
   - The carousel is the browser's own scrolling with CSS snap points, with no carousel
     library: wheel, trackpad, touch and keyboard all scroll it, and a mouse can drag it.
   - A carousel's arrows choosing between views (inside a `Root`) are Previous and Next:
@@ -898,7 +902,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   The budgets were raised for the controls' `Tip`s, their keys and Escape (0.7 kB on a
   standalone `Canvas`, 34.7 to 35.4; about 0.8 kB on each template; 0.3 kB of CSS, the
   stylesheet 6.9 to 7.2): `Canvas` 35.8 kB, the Viewer with `Default` 61.0,
-  `Document` 61.6, `Gallery` 53.6 and `Text` 49.8, the stylesheet 7.5.
+  `Document` 61.6 and `Gallery` 53.6, the stylesheet 7.5.
   `<clover-viewer>`'s was raised to 92.5 kB, for the Canvas's inset at home,
   `Position`'s two texts and the reader's open-or-closed choice, which brought it to its
   92.0.
@@ -929,8 +933,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Rollup and webpack split by what is used. Rollup numbers are smaller, so every budget
   was set again from them: a standalone `Canvas` 34.7 kB (budget 35.2), the Viewer
   shell 0.9 kB (1.2), and the Viewer with `Default` 59.6 kB (60.2), `Document` 60.2 kB
-  (60.8), `Gallery` 52.2 kB (52.8) and `Text` 48.5 kB (49.1). Before the shell, every
-  template paid for `Default`'s parts: Gallery about 10 kB, Text about 14 kB. MapLibre on
+  (60.8) and `Gallery` 52.2 kB (52.8). Before the shell, every template paid for
+  `Default`'s parts: Gallery about 10 kB. MapLibre on
   a map is 289.7 kB and `@nulib/clover/map` 18.0 kB before it. `<clover-viewer>` draws
   `Default` up front (budget 92 kB; measured from its own build, as before). `Default`'s
   styles moved from `templates.css` (budget 1.9 kB) to the stylesheet (budget 7.2 kB). A

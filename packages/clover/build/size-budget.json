@@ -4,7 +4,6 @@
   "defaultTemplateGzip": 61200,
   "documentTemplateGzip": 62400,
   "galleryTemplateGzip": 53600,
-  "textTemplateGzip": 49800,
   "stylesGzip": 8300,
   "templatesStylesGzip": 1900,
   "mapInitialGzip": 20000,

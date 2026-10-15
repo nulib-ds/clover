@@ -56,7 +56,7 @@ export interface InformationPanelProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "defaultValue"> {
   /**
    * `tabs` (the default): a row of tabs, one section shown at a time. `accordion`: the
-   * sections stacked as boxes, each opened and closed by its heading, one open at a time.
+   * sections stacked as boxes, each opened by its heading, one always open.
    */
   layout?: InformationPanelLayout;
   /** The tab shown, controlled (`tabs`). */

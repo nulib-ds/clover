@@ -205,10 +205,14 @@
   gap: var(--clover-space-s);
 }
 
-/* The view's titles at the start, one line, cut short rather than pushing the position. */
+/*
+ * The view's titles at the start, one line, cut short rather than pushing the position.
+ * A spread's two have a dot between them, `xs` either side, which keeps its place while
+ * they give way.
+ */
 .clover-template-default-titles {
   display: flex;
-  gap: var(--clover-space-s);
+  gap: var(--clover-space-xs);
   min-width: 0;
   margin: 0;
 }
@@ -217,6 +221,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.clover-template-default-titles > .clover-template-default-titles-dot {
+  flex-shrink: 0;
+  overflow: visible;
+  color: var(--clover-color-primary-muted, #26292b);
 }
 
 /* The position at the end. */

@@ -50,14 +50,12 @@
 }
 
 /*
- * Fields: a search's query, a Collection's member menu, a filter over thumbnails, a
- * transcript's track menu. `xs` by `s` inside, as a row of the panel is. No
+ * Fields: a search's query, a Collection's member menu, a transcript's track menu. `xs` by `s` inside, as a row of the panel is. No
  * specificity, so a part refines its own field.
  */
 :where(
   .clover-content-search-query,
   .clover-collection-select-control,
-  .clover-items-filter input,
   .clover-transcript-track select
 ) {
   box-sizing: border-box;
@@ -71,7 +69,6 @@
 :where(
   .clover-content-search-query,
   .clover-collection-select-control,
-  .clover-items-filter input,
   .clover-transcript-track select
 ):focus-visible {
   outline: 2px solid var(--clover-color-accent, #0065c3);

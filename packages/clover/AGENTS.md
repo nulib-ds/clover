@@ -151,9 +151,9 @@ staging, `git mv`, versions or publishing.
 - Classes are `clover-template-<name>-*`.
 - Current set: `Default` (3.x Viewer layout, the Viewer's own; `items` picks its
   thumbnails), `Document` (a PDF viewer: thumbnails left,
-  one whole page at a time, the panel sliding out right), `Gallery` (grid and lightbox),
-  `Text` (3.x Scroll: an article per Canvas, text by language; it sets
-  `annotationPages="all"`).
+  one whole page at a time, the panel sliding out right), `Gallery` (grid and lightbox).
+  A `Text` template (3.x's Scroll: an article per Canvas, its text by language) was
+  removed for now, to settle these three first; it is in the history.
 - `Document` turns pages from the wheel in `document/usePaging.ts`: one gesture is one
   page (a new gesture after a 160 ms pause, a swing harder than the momentum, or a strong
   event 600 ms after the last turn), and the wheel passes through at either end. It

@@ -261,8 +261,8 @@ button.clover-sections-button:focus-visible {
 
 /*
  * A closed box's heading is in the accent, at the text's own weight, its label underlined
- * faintly, as something to open; the open one is in the text's colour, and bold. Only the
- * label grows as it opens: the chevron keeps the row's end, so nothing beside it moves.
+ * faintly and a chevron at its end, as something to open; the open one is in the text's
+ * colour, and bold. Only the label grows as it opens, so nothing beside it moves.
  */
 .clover-sections[data-layout="accordion"]
   button.clover-sections-button[aria-expanded="false"] {
@@ -275,7 +275,7 @@ button.clover-sections-button:focus-visible {
   .clover-sections-label {
   text-decoration: underline 1px;
   text-decoration-color: color-mix(in srgb, currentColor 20%, transparent);
-  text-underline-offset: var(--clover-space-2xs);
+  text-underline-offset: var(--clover-space-3xs);
 }
 
 .clover-sections[data-layout="accordion"]
@@ -288,7 +288,7 @@ button.clover-sections-button:focus-visible {
   background-color: var(--clover-color-secondary-muted, #e6e8eb);
 }
 
-/* A lone box, which cannot close, is not offered as something to press. */
+/* The open box, which cannot close, is not offered as something to press. */
 .clover-sections[data-layout="accordion"]
   button.clover-sections-button[aria-disabled] {
   background: none;
@@ -297,11 +297,6 @@ button.clover-sections-button:focus-visible {
 
 .clover-sections-chevron {
   flex-shrink: 0;
-  transition: transform 150ms ease;
-}
-
-[aria-expanded="true"] > .clover-sections-chevron {
-  transform: rotate(180deg);
 }
 
 /*
@@ -312,10 +307,4 @@ button.clover-sections-button:focus-visible {
   isolation: isolate;
   margin-bottom: var(--clover-space-2xs);
   padding: 0 var(--clover-space-s) var(--clover-space-s);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .clover-sections-chevron {
-    transition: none;
-  }
 }

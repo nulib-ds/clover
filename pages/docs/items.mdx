@@ -58,7 +58,6 @@ lazily (`loading="lazy"`), at the size asked of each image service.
 | `items`         | `object[]`                          | On its own: IIIF resources to list as they are.                                             |
 | `navigation`    | `"id" \| "homepage"`                | Select (a listbox) or leave (links). Defaults to `id` for views and `homepage` for members. |
 | `onSelect`      | `(item, event) => void`             | An item was chosen. On a link, `event.preventDefault()` keeps the reader on the page.       |
-| `filter`        | `boolean`                           | A search field that narrows the items by label.                                             |
 | `header`        | `boolean`                           | On its own: the resource's label, summary and homepage link. Default `true`.                |
 | `thumbnailSize` | `number`                            | Pixels asked for each thumbnail's longer side. Default `200`.                               |
 | `renderItem`    | `(item, { selected }) => ReactNode` | Your own item in place of the figure.                                                       |
@@ -84,7 +83,7 @@ lazily (`loading="lazy"`), at the size asked of each image service.
 | `options.customViewAll`   | The Collection's `homepage`, or your own link beside it.            |
 | `options.credentials`     | `request={{ credentials }}`.                                        |
 | `onItemInteraction(item)` | `onSelect(item, event)`; call `event.preventDefault()` to stay put. |
-| `search`, `onSearch`      | `filter`.                                                           |
+| `search`, `onSearch`      | Not in Clover 4.                                                    |
 | `pager`                   | `Clover.Pager`, beside `Items` in a `Root`.                         |
 | `activeIndex`             | Follows the Root's current view.                                    |
 | `renderItem(item, index)` | `renderItem(item, { selected })`.                                   |

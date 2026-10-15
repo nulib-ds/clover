@@ -46,24 +46,33 @@
     when a recipe starts working, or stops, record it there with the date.
   - The site banner (`theme.config.tsx`) says Clover 4 is in development. Retire it, or
     change its `key`, when 4.0 ships.
-  - The homepage (`docs/components/Home/`) opens with its headline, "Create your own
-    viewer." (`Hero.tsx`, the page's `h1`), and one sentence on what Clover does for the
-    distinctive collections a library, archive or museum shares (an accessible, curated
-    viewer designed for its IIIF Manifests and Collections). It has two
-    halves: the templates live under it (`docs/components/Playground/`), and below them,
-    well apart, the same resource shown one IIIF property at a time by the components the
-    templates are made of (`Parts.tsx` and `PartsLive.tsx`), opened by one call to action,
-    with no heading of its own. It follows the playground: `Homepage` holds the resource the
-    playground reports (`onResourceChange`) and hands it down, and the section's chips
-    put another of the playground's resources on its stage (`pickResource`).
+  - The homepage (`docs/components/Home/`) opens with its headline, "Imagine a viewer built
+    by you." (`Hero.tsx`, the page's `h1`), and one sentence on what Clover does
+    for the distinctive collections a library, archive or museum shares (a lightweight,
+    accessible, and modular viewer designed for IIIF Manifests, Collections, and the
+    material they describe). It has two halves: the templates live under it
+    (`docs/components/Playground/`), and below them, well apart, the same resource shown
+    one IIIF property at a time by the components the templates are made of (`Parts.tsx`
+    and `PartsLive.tsx`), opened by one call to action, with no heading of its own. It
+    follows the playground: `Homepage` holds the resource the playground reports
+    (`onResourceChange`) and hands it down, and the section's chips put another of the
+    playground's resources on its stage (`pickResource`).
   - That section is one `Root` for that resource. On the left its parts make a small
-    viewer, held in view; on the right each part is a tile, live, named as it is written
-    (`<Clover.Label />`), with the property it reads and a fact from the resource (a
-    count, a size, a name). Pointing at a tile outlines the part in the viewer. A part
-    the resource gives nothing to is a chip at the end, naming what it would read and the
-    playground resource that has it (`SHOWN_IN`). Every value shown is the resource's
-    own: no illustrations, made-up figures or copy. Golden-ratio spaces, hairline edges,
-    no grey fills.
+    viewer, held in view (by its foot, once taller than the window), captioned "Example
+    Viewer" (never `<Clover.Root />`), its parts in the order its code gives them. The
+    code control under it opens that code below, as an editor (Prism's Material colours on
+    black, `--code-*` in `docs/styles/tokens.css`): its `Root` and parts as written. Its
+    values are live (drag Content's `height`, switch its `controls`, pick Items'
+    `layout`), each part's lines drag into another order (by mouse anywhere on them, by
+    touch from the grip, by keyboard with the grip's arrow keys), and the viewer follows,
+    so the code is always what it shows; a part's lines outline the part as its tile does.
+    On the right each part is a tile, live, named as it is written (`<Clover.Label />`),
+    with what it reads (a property; for `Content`, the Canvas) and a fact from the
+    resource (a count, a size, a name). Pointing at a tile outlines the part in the
+    viewer. A part the resource gives nothing to is a chip at the end, naming what it
+    would read and the playground resource that has it (`SHOWN_IN`). Every value shown is
+    the resource's own: no illustrations, made-up figures or copy. Golden-ratio spaces,
+    hairline edges, no grey fills.
   - The playground shows how far one Viewer stretches: any layout with any kind of
     resource. Two pickers sit over one stage, each changing without the other: the
     resources as thumbnails, centred and unlabelled (`resources` in
@@ -82,6 +91,9 @@
     navbar's edge moves to the bar's foot, and the bar's foot rides on the stage's as the
     two leave. `useStuck` writes `data-stuck` to the bar directly, not to state, so this
     never re-renders the stage.
+  - On the homepage the navbar's content lines up with the sections' 1300px (and the
+    shell's padding) at every width (`Home.module.css`); docs pages keep Nextra's 90rem,
+    which lines up with their sidebar.
   - The homepage renders on the server, so a component it imports statically must not
     import `@iiif/helpers` (through `docs/lib/iiif-content`, say). It is an ESM external
     there, which makes the importing module async, and the homepage's import of it is
@@ -216,9 +228,12 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   `navplace`, Northwestern's record of a Sullivan slide of a Chicago bus, kept as fetched,
   with a navPlace point at the corner its summary names (static), the playground's
   Photo; `paged`, Northwestern's record of the White Sewing Machine Company's 1896 bicycle
-  catalog, a `paged` Manifest kept as fetched, with its double-page plate (Page 15)
-  `facing-pages`, so it stands alone and Page 16 and Page 17 share a spread (static), the
-  playground's Catalog.
+  catalog, a `paged` Manifest kept as fetched, with a `summary` written from its own
+  fields and pages (it had none), its double-page plate (Page 15)
+  `facing-pages`, so it stands alone and Page 16 and Page 17 share a spread, and Ranges
+  for its sections (`structures`, titled only by its printed headings or the covers'
+  Canvas labels; some name a region), and each plate's "Then" and "Now" tagged (static),
+  the playground's Catalog.
 
 ## Environment & Tooling
 

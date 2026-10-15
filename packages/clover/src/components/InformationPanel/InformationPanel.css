@@ -202,8 +202,9 @@
 /* ---------- About ---------- */
 
 /*
- * Down from the panel's inset, a step a level: About's parts are `m` apart; metadata's
- * label-value pairs `s`; a heading `xs` over its value.
+ * Down from the panel's inset, a step a level: About's parts are `m` apart. Its own
+ * headings (Rights, Homepage…) read as Metadata's labels do (`Primitives.css`), over
+ * their values.
  */
 .clover-about {
   display: flex;
@@ -211,7 +212,7 @@
   gap: var(--clover-space-m);
 }
 
-.clover-about :is(p, dd, ul) {
+.clover-about :is(p, ul) {
   margin: 0;
 }
 
@@ -225,17 +226,10 @@
   overflow-wrap: anywhere;
 }
 
-.clover-about dl {
-  display: flex;
-  flex-direction: column;
-  gap: var(--clover-space-s);
+.clover-about .clover-about-heading {
   margin: 0;
-}
-
-.clover-about :is(dt, .clover-about-heading) {
-  margin: 0 0 var(--clover-space-xs);
   font-size: inherit;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .clover-link-format {

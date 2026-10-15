@@ -276,6 +276,11 @@
       "width": 1190
     }
   ],
+  "summary": {
+    "en": [
+      "The White Sewing Machine Company of Cleveland issued this bicycle catalog in 1896. Color plates by Thulstrup, Mente, Veenfliet, and Clarke pair “Then” with “Now”; specifications describe four models."
+    ]
+  },
   "items": [
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1",
@@ -745,7 +750,39 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5#xywh=2705,66,1419,1518"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5#xywh=236,236,4256,4162"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6",
@@ -933,7 +970,39 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7#xywh=57,57,1706,1673"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7#xywh=237,237,4266,4266"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8",
@@ -2064,7 +2133,39 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19#xywh=968,307,1723,1582"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19#xywh=1062,496,2715,3682"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20",
@@ -2252,7 +2353,39 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21#xywh=2080,416,1868,1229"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21#xywh=1017,473,2931,3759"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22",
@@ -2440,7 +2573,39 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23#xywh=2386,227,1347,1347"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23#xywh=1181,472,2575,3591"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24",
@@ -2628,7 +2793,39 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25#xywh=2452,473,1922,1212"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25#xywh=379,615,3977,3740"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26",
@@ -2816,7 +3013,39 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27#xywh=104,214,1542,1115"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27#xywh=285,285,4176,4128"
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28",
@@ -3192,7 +3421,349 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31#xywh=404,86,3351,2163"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31#xywh=1901,2139,2495,2424"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "structures": [
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/1",
+      "type": "Range",
+      "label": {
+        "none": [
+          "Front Cover"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/2",
+      "type": "Range",
+      "label": {
+        "en": [
+          "Introduction"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/3",
+      "type": "Range",
+      "label": {
+        "en": [
+          "Specifications “White” 1896 Model A"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8",
+          "type": "Canvas"
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/4",
+      "type": "Range",
+      "label": {
+        "en": [
+          "Specifications “White” 1896 Model B"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10",
+          "type": "Canvas"
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/5",
+      "type": "Range",
+      "label": {
+        "en": [
+          "Specifications “White” 1896 Model C"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12",
+          "type": "Canvas"
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/6",
+      "type": "Range",
+      "label": {
+        "en": [
+          "Specifications “White” 1896 Model D"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14",
+          "type": "Canvas"
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/7",
+      "type": "Range",
+      "label": {
+        "en": [
+          "“White” Bearings"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/7-1",
+          "type": "Range",
+          "label": {
+            "en": [
+              "Crank Bearing"
+            ]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17",
+              "type": "Canvas"
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/7-2",
+          "type": "Range",
+          "label": {
+            "en": [
+              "The Hubs"
+            ]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18",
+              "type": "Canvas"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8",
+      "type": "Range",
+      "label": {
+        "en": [
+          "Important Features of the “White”"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8-1",
+          "type": "Range",
+          "label": {
+            "en": [
+              "The Large Sprocket"
+            ]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20#xywh=449,756,3685,1890",
+              "type": "Canvas"
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8-2",
+          "type": "Range",
+          "label": {
+            "en": [
+              "Saddles"
+            ]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20#xywh=449,2645,3685,1583",
+              "type": "Canvas"
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8-3",
+          "type": "Range",
+          "label": {
+            "en": [
+              "Direct Seat Post"
+            ]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22#xywh=521,450,3651,1304",
+              "type": "Canvas"
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8-4",
+          "type": "Range",
+          "label": {
+            "en": [
+              "“Built-up” Wood Rim"
+            ]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22#xywh=521,853,3651,1209",
+              "type": "Canvas"
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8-5",
+          "type": "Range",
+          "label": {
+            "en": [
+              "Pedals"
+            ]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22#xywh=521,2086,3698,2181",
+              "type": "Canvas"
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8-6",
+          "type": "Range",
+          "label": {
+            "en": [
+              "“White” Handle Bars"
+            ]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24",
+              "type": "Canvas"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/9",
+      "type": "Range",
+      "label": {
+        "en": [
+          "Guaranty on “White” Bicycles"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/10",
+      "type": "Range",
+      "label": {
+        "en": [
+          "Tire Guarantees"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/11",
+      "type": "Range",
+      "label": {
+        "en": [
+          "Terms of Sale"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/12",
+      "type": "Range",
+      "label": {
+        "none": [
+          "Back Cover"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31",
+          "type": "Canvas"
+        }
+      ]
     }
   ]
 }

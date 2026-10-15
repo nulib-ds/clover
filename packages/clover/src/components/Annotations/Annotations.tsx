@@ -12,6 +12,7 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
 import { Markup } from "../../ui/Markup";
+import { visuallyHidden } from "../../ui/visuallyHidden";
 
 export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
   /** The view's annotations (default), or every annotation in the Manifest. */
@@ -28,8 +29,9 @@ export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
  * set, as a list to read and to point with.
  *
  * - Each entry shows its content (IIIF's limited HTML, sanitised; an image body as an
- *   image) and a button that frames it on the Canvas, going to its Canvas first if need
- *   be. A click anywhere on the entry does the same.
+ *   image). Pressing it frames the annotation on the Canvas, going to its Canvas first if
+ *   need be. For the keyboard, a button inside it does the same, out of sight, its focus
+ *   drawn round the entry.
  * - Hovering or focusing an entry highlights its hotspot, and hovering a hotspot
  *   highlights its entry: one highlight, shared through the Root, with no timers.
  * - Each set is headed by its AnnotationPage's own label, when it has one, and has a
@@ -175,7 +177,7 @@ function AnnotationGroup({
               onMouseLeave={() => onHighlight(null)}
               onFocus={() => onHighlight(entry.id)}
               onBlur={() => onHighlight(null)}
-              // A pointer convenience; the button below is the control.
+              // A press anywhere on it; the button below is the keyboard's way in.
               onClick={(event) => {
                 if ((event.target as Element).closest("a, button")) return;
                 onSelect(entry.id);
@@ -193,25 +195,9 @@ function AnnotationGroup({
                 className="clover-annotations-show"
                 aria-pressed={isSelected}
                 aria-label={text ? `${showLabel}: ${text}` : showLabel}
+                style={visuallyHidden}
                 onClick={() => onSelect(entry.id)}
-              >
-                <svg
-                  aria-hidden="true"
-                  focusable="false"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    d="M2 5V2h3M11 2h3v3M14 11v3h-3M5 14H2v-3"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.75"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+              />
             </li>
           );
         })}

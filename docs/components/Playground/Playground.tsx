@@ -57,7 +57,7 @@ const TemplateViewer = dynamic(
       function TemplateViewer({
         template,
         ...props
-      }: { template: "Default" | "Document" | "Gallery" | "Text" } & Record<
+      }: { template: "Default" | "Document" | "Gallery" } & Record<
         string,
         unknown
       >) {

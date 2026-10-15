@@ -1,8 +1,7 @@
 import React from "react";
 
 import type { IIIFCanvas } from "./layout";
-import { Summary } from "../Primitives/Primitives";
-import { MetadataList } from "../../ui/Markup";
+import { Metadata, Summary } from "../Primitives/Primitives";
 
 /**
  * A Canvas's `summary` and `metadata`: IIIF's limited HTML is kept, everything else is
@@ -15,9 +14,9 @@ const CaptionDetails: React.FC<Pick<IIIFCanvas, "summary" | "metadata">> = ({
   <>
     {/* The Summary part, cut short with "Read more" as every summary is. */}
     <Summary value={summary as any} className="clover-canvas-caption-summary" />
-    <MetadataList
+    <Metadata
+      value={metadata as any}
       className="clover-canvas-caption-metadata"
-      metadata={metadata as any}
     />
   </>
 );

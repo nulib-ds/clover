@@ -143,7 +143,7 @@ export interface Clover {
   getContentState(): ContentStateOutput | null;
   /**
    * Whose referenced annotation pages to fetch: the view's (default, as the reader moves)
-   * or every Canvas's (a page listing all of them, like the Text template).
+   * or every Canvas's (a page listing all of them).
    */
   setAnnotationPages(scope: "view" | "all"): void;
   /** Abandon any load in flight. The instance stays usable. */

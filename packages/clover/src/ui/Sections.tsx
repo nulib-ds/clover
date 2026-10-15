@@ -13,7 +13,7 @@ export type SectionsLayout = "tabs" | "accordion";
 export interface SectionsProps {
   items: SectionSpec[];
   layout?: SectionsLayout;
-  /** The section open, controlled. With `accordion`, `null` closes them all. */
+  /** The section open, controlled. One always is: a value naming none opens the first. */
   value?: string | null;
   /** The section open to start with. Default: the first. */
   defaultValue?: string;
@@ -34,10 +34,10 @@ export interface SectionsProps {
  * - `tabs`: the buttons gather in a `tablist` as `tab`s; one is always open, and the
  *   arrow keys (Home, End) move and select, with one tab stop (WAI-ARIA tabs).
  * - `accordion`: each button sits in a heading above its panel, `aria-expanded`; opening
- *   one closes the others, and pressing the open one closes it. The arrow keys move
+ *   one closes the others. One is always open, as a tab is, so the open one cannot be
+ *   closed: its button is `aria-disabled` and draws no chevron. The arrow keys move
  *   between headings without opening them, and each button is its own tab stop
- *   (WAI-ARIA accordion). A lone box stays open: its button is `aria-disabled` and
- *   draws no chevron. Every heading stays in sight in a scrolling container: those
+ *   (WAI-ARIA accordion). Every heading stays in sight in a scrolling container: those
  *   scrolled past stack at its top, those an open section pushes below stack at its
  *   bottom. The headings carry their place (`--clover-sections-index`) and the list its
  *   count (`--clover-sections-count`) for the stylesheet to stack them.
@@ -60,17 +60,12 @@ export function Sections({
     defaultValue ?? items[0]?.value ?? null,
   );
   const tabs = layout === "tabs";
-  // A lone box cannot close: there is nothing else to open in its place.
-  const fixed = !tabs && items.length === 1;
 
-  // Open: the controlled value, or the reader's. A tab is always open, as is a lone box;
-  // otherwise a box may not be.
+  // Open: the controlled value, or the reader's; the first when that names none.
   const chosen = value !== undefined ? value : own;
   const open = items.some((item) => item.value === chosen)
     ? chosen
-    : tabs || fixed
-      ? (items[0]?.value ?? null)
-      : null;
+    : (items[0]?.value ?? null);
   // Every section opened so far: its content stays mounted once it has been shown.
   const mounted = useRef(new Set<string>());
   if (open) mounted.current.add(open);
@@ -104,11 +99,11 @@ export function Sections({
   }, [open, tabs, items, id]);
 
   const choose = (item: string) => {
-    // Pressing the open box closes it; pressing the open tab, or a lone box, keeps it.
-    const next = !tabs && !fixed && item === open ? null : item;
-    pressed.current = next;
-    if (value === undefined) setOwn(next);
-    if (next) onValueChange?.(next);
+    // The open section stays open; another opens in its place.
+    if (item === open) return;
+    pressed.current = item;
+    if (value === undefined) setOwn(item);
+    onValueChange?.(item);
   };
 
   const onKeyDown = (event: React.KeyboardEvent, index: number) => {
@@ -156,14 +151,14 @@ export function Sections({
           : {
               "aria-expanded": isOpen,
               // WAI-ARIA's accordion: an open panel that cannot collapse is disabled.
-              "aria-disabled": fixed || undefined,
+              "aria-disabled": isOpen || undefined,
             })}
         onClick={() => choose(item.value)}
         onKeyDown={(event) => onKeyDown(event, index)}
       >
         <span className="clover-sections-label">{item.label}</span>
-        {/* A heading's open and closed state, drawn; a tab's is its underline. */}
-        {!tabs && !fixed && (
+        {/* A closed box's heading, drawn as something to open; a tab's state is its underline. */}
+        {!tabs && !isOpen && (
           <svg
             aria-hidden="true"
             focusable="false"

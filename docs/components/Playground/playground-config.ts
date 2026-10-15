@@ -3,7 +3,7 @@
  * and the share link read from one source.
  */
 
-export type TemplateKey = "default" | "document" | "gallery" | "text";
+export type TemplateKey = "default" | "document" | "gallery";
 
 export interface PlaygroundResource {
   key: string;
@@ -153,16 +153,9 @@ export const templateSpecs: Record<TemplateKey, TemplateSpec> = {
   default: { key: "default", name: "Default", defaultResource: "catalog" },
   document: { key: "document", name: "Document", defaultResource: "catalog" },
   gallery: { key: "gallery", name: "Gallery", defaultResource: "collection" },
-  // Text reads a Canvas's annotations beside it: the print's words, tagged.
-  text: { key: "text", name: "Text", defaultResource: "print" },
 };
 
-export const templateOrder: TemplateKey[] = [
-  "default",
-  "document",
-  "gallery",
-  "text",
-];
+export const templateOrder: TemplateKey[] = ["default", "document", "gallery"];
 
 /**
  * Accent presets for the page-theme knob.

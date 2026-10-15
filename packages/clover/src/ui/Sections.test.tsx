@@ -81,7 +81,7 @@ describe("Sections", () => {
       ).toEqual(["0", "1", "2"]);
     });
 
-    it("is a heading per section; opening one closes the others", () => {
+    it("is a heading per section; opening one closes the others, and one stays open", () => {
       render(<Layout layout="accordion" />);
       expect(screen.queryByRole("tablist")).toBeNull();
       const headings = screen.getAllByRole("heading", { level: 3 });
@@ -103,10 +103,14 @@ describe("Sections", () => {
         screen.getByRole("region", { name: "Contents" }),
       ).toHaveTextContent("Contents body");
 
-      // Pressing the open one closes it: none open.
+      // The open one cannot be closed: pressing it keeps it open, and it says so.
+      expect(contents).toHaveAttribute("aria-disabled", "true");
+      expect(about).not.toHaveAttribute("aria-disabled");
+      expect(contents.querySelector(".clover-sections-chevron")).toBeNull();
+      expect(about.querySelector(".clover-sections-chevron")).not.toBeNull();
       fireEvent.click(contents);
-      expect(contents).toHaveAttribute("aria-expanded", "false");
-      expect(screen.queryAllByRole("region")).toHaveLength(0);
+      expect(contents).toHaveAttribute("aria-expanded", "true");
+      expect(screen.getAllByRole("region")).toHaveLength(1);
     });
 
     it("moves between headings by arrow without opening them", () => {

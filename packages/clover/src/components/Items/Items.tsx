@@ -56,8 +56,6 @@ export interface ItemsProps
    * handle it yourself.
    */
   onSelect?: (item: ItemModel, event: React.SyntheticEvent) => void;
-  /** A search field that narrows the items by label. */
-  filter?: boolean;
   /** Standalone: show the resource's label, summary and homepage link. Default true. */
   header?: boolean;
   /** Pixels requested for each thumbnail's longer side. Default 200. */
@@ -276,7 +274,6 @@ function ItemsView({
   navigation,
   rtl = false,
   layout = "carousel",
-  filter = false,
   thumbnailSize = 200,
   request,
   language,
@@ -292,28 +289,16 @@ function ItemsView({
 }: ItemsViewProps) {
   const { t } = useCloverTranslation();
   const id = useId();
-  const [query, setQuery] = useState("");
-  const shown = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    return items
-      .map((item, index) => ({ item, index }))
-      .filter(
-        ({ item }) =>
-          !needle ||
-          localize(item.label, language).text.toLowerCase().includes(needle),
-      );
-  }, [items, query, language]);
-  const selectedShown = shown.findIndex(({ index }) => index === selected);
 
   const carousel = layout === "carousel";
   const listbox = navigation === "id";
   const track = useScrollTrack({
     align: listbox ? "center" : "start",
-    itemCount: shown.length,
+    itemCount: items.length,
   });
   const held = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(held.current), []);
-  const roving = useRovingFocus(shown.length, selectedShown, {
+  const roving = useRovingFocus(items.length, selected, {
     orientation:
       layout === "carousel"
         ? "horizontal"
@@ -322,13 +307,13 @@ function ItemsView({
           : "both",
     rtl,
     onActivate: (index) =>
-      onActivate(shown[index].item, {
+      onActivate(items[index], {
         type: "keydown",
       } as React.SyntheticEvent),
     onMove: followFocus
       ? (index, event) => {
           window.clearTimeout(held.current);
-          const select = () => followFocus(shown[index].item);
+          const select = () => followFocus(items[index]);
           // A held arrow sweeps the list: select where it stops, not each item passed.
           if (event.repeat) held.current = window.setTimeout(select, 150);
           else select();
@@ -340,19 +325,19 @@ function ItemsView({
   const arrived = useRef(false);
   const listRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (selectedShown < 0) return;
+    if (selected < 0) return;
     const instant = !arrived.current;
     arrived.current = true;
     if (carousel) {
-      track.scrollToIndex(selectedShown, { instant });
+      track.scrollToIndex(selected, { instant });
       return;
     }
     const option = listRef.current?.querySelector<HTMLElement>(
-      `[data-track-index="${selectedShown}"]`,
+      `[data-track-index="${selected}"]`,
     );
     if (option) keepInView(option, instant);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [carousel, selectedShown]);
+  }, [carousel, selected]);
 
   const name =
     ariaLabel ??
@@ -385,11 +370,11 @@ function ItemsView({
    * they step the selection, which the strip follows into view. A list of links has no
    * selection, so there they scroll the strip.
    */
-  const stepping = listbox && selectedShown >= 0;
+  const stepping = listbox && selected >= 0;
   const scrollButton = (step: "prev" | "next") => {
-    const to = selectedShown + (step === "prev" ? -1 : 1);
+    const to = selected + (step === "prev" ? -1 : 1);
     const can = stepping
-      ? to >= 0 && to < shown.length
+      ? to >= 0 && to < items.length
       : step === "prev"
         ? track.canScrollPrev
         : track.canScrollNext;
@@ -399,7 +384,7 @@ function ItemsView({
     const onClick = (event: React.MouseEvent) => {
       if (!stepping)
         return (step === "prev" ? track.scrollPrev : track.scrollNext)();
-      const item = shown[to].item;
+      const item = items[to];
       if (followFocus) followFocus(item);
       else onActivate(item, event);
     };
@@ -464,17 +449,6 @@ function ItemsView({
           )}
         </header>
       )}
-      {filter && (
-        <label className="clover-items-filter">
-          <span style={visuallyHidden}>{t("sliderSearch")}</span>
-          <input
-            type="search"
-            value={query}
-            placeholder={t("commonSearchPlaceholder")}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </label>
-      )}
       <div
         className="clover-items-frame"
         style={{ position: "relative" }}
@@ -496,7 +470,7 @@ function ItemsView({
               className="clover-items-track"
               style={trackStyle}
             >
-              {shown.map(({ item, index }, at) => {
+              {items.map((item, index) => {
                 const isSelected = index === selected;
                 return (
                   <div
@@ -505,9 +479,9 @@ function ItemsView({
                     role="option"
                     aria-selected={isSelected}
                     className="clover-items-item"
-                    data-track-index={at}
+                    data-track-index={index}
                     style={slideStyle}
-                    {...roving.itemProps(at)}
+                    {...roving.itemProps(index)}
                     onClick={(event) => onActivate(item, event)}
                   >
                     {figure(item, isSelected)}
@@ -521,11 +495,11 @@ function ItemsView({
               className="clover-items-track"
               style={trackStyle}
             >
-              {shown.map(({ item }, at) => (
+              {items.map((item, index) => (
                 <li
                   key={item.id}
                   className="clover-items-item"
-                  data-track-index={at}
+                  data-track-index={index}
                   style={slideStyle}
                 >
                   <a

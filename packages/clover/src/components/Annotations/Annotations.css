@@ -64,24 +64,11 @@
   border-radius: var(--clover-radius, 3px);
 }
 
-/* A small round button: one step under a control. */
-button.clover-annotations-show {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--clover-space-l);
-  height: var(--clover-space-l);
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: var(--clover-radius-pill, 2rem);
-  background: none;
-  color: var(--clover-color-primary-muted, #26292b);
-  cursor: pointer;
-}
-
-button.clover-annotations-show:is(:hover, :focus-visible),
-button.clover-annotations-show[aria-pressed="true"] {
-  border-color: var(--clover-color-accent, #0065c3);
-  color: var(--clover-color-accent, #0065c3);
+/*
+ * The entry is what is pressed. The button that does the same for the keyboard is out of
+ * sight (inline), so its focus is drawn round the entry.
+ */
+.clover-annotations-entry:has(> button.clover-annotations-show:focus-visible) {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 1px;
 }

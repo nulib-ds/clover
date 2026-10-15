@@ -335,7 +335,7 @@ const ItemsInRoot = dynamic(
           >
             {layout === "list" && (
               <div style={{ maxHeight: 420, overflowY: "auto" }}>
-                <Items layout="list" filter />
+                <Items layout="list" />
               </div>
             )}
             <Content style={{ height: 420 }} />
@@ -414,7 +414,7 @@ export function CollectionItemsDemo() {
   );
 }
 
-type TemplateName = "Default" | "Document" | "Gallery" | "Text";
+type TemplateName = "Default" | "Document" | "Gallery";
 
 /** The Viewer in one of `@nulib/clover/templates`, as a page would write it. */
 const TemplateViewer = dynamic(

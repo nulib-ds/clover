@@ -10,3 +10,25 @@
   -webkit-line-clamp: var(--clover-summary-lines, 5);
   overflow: hidden;
 }
+
+/*
+ * Metadata and the required statement (`Metadata`, `RequiredStatement`): each label over
+ * its value, the pairs stacked `s` apart. The label in the text's colour, medium; the value
+ * in the secondary colour, at the same size.
+ */
+:is(.clover-metadata, .clover-required-statement) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-s);
+  margin: 0;
+}
+
+:is(.clover-metadata, .clover-required-statement) dt {
+  margin: 0;
+  font-weight: 500;
+}
+
+:is(.clover-metadata, .clover-required-statement) dd {
+  margin: 0;
+  color: var(--clover-color-primary-muted, #26292b);
+}

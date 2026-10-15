@@ -121,6 +121,22 @@
 
   /* Focus ring, used consistently on every interactive surface. */
   --focus-ring: 0 0 0 2px var(--color-background), 0 0 0 4px var(--accent-6);
+
+  /*
+   * Code, as Prism's Material theme colours it, on black: the homepage's code editor,
+   * where it was asked for by name. Not themed: an editor stays dark on a light page.
+   */
+  --code-background: #000000;
+  --code-text: #eeffff;
+  --code-faint: color-mix(in srgb, var(--code-text) 36%, transparent);
+  --code-rule: color-mix(in srgb, var(--code-text) 14%, transparent);
+  --code-keyword: #c792ea;
+  --code-string: #c3e88d;
+  --code-tag: #f07178;
+  --code-attr: #ffcb6b;
+  --code-punctuation: #89ddff;
+  --code-number: #f78c6c;
+  --code-property: #82aaff;
 }
 
 /*

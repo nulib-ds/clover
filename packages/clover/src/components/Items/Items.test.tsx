@@ -147,15 +147,6 @@ describe("Items in a Root", () => {
     expect(options[1]).toHaveFocus();
   });
 
-  it("narrows by label with the filter", async () => {
-    renderInRoot({ filter: true });
-    await screen.findAllByRole("option");
-    fireEvent.change(screen.getByRole("searchbox", { name: "Search items" }), {
-      target: { value: "bookplate" },
-    });
-    expect(screen.getAllByRole("option")).toHaveLength(1);
-  });
-
   it("lays out as a list or a grid", async () => {
     const { container } = renderInRoot({ layout: "grid" });
     await screen.findAllByRole("option");

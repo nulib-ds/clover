@@ -20,6 +20,25 @@
 }
 
 /*
+ * On the homepage the navbar's content lines up with the sections' (`Parts.module.css`'s
+ * 1300px, inside the shell's padding) at every width, rather than with the docs' wider
+ * layout and its sidebar.
+ */
+:global(html):has(.page) :global(.nextra-nav-container > nav) {
+  max-width: calc(1300px + 4rem);
+  padding-left: max(env(safe-area-inset-left), 2rem);
+  padding-right: max(env(safe-area-inset-right), 2rem);
+}
+
+@media (max-width: 640px) {
+  :global(html):has(.page) :global(.nextra-nav-container > nav) {
+    max-width: calc(1300px + 2rem);
+    padding-left: max(env(safe-area-inset-left), 1rem);
+    padding-right: max(env(safe-area-inset-right), 1rem);
+  }
+}
+
+/*
  * The playground runs the full width of the page; the reading sections below it ("Why
  * Clover", "Install") are held to a readable measure and centred.
  */
@@ -49,11 +68,11 @@
 }
 
 /*
- * "your own", marked as by hand: a marker stroke under the words, drawn in once from the
- * left. The stroke is an SVG shape used as a mask over the accent, so it takes the site's
- * accent whatever it is set to. It sits behind the letters, at their baseline, so they
- * read over it: the words are a layer of their own (`z-index: 0`) with the stroke at its
- * bottom. The two words stay on one line together.
+ * "built by you", marked as by hand: a marker stroke under the words, drawn in once
+ * from the left. The stroke is an SVG shape used as a mask over the accent, so it takes
+ * the site's accent whatever it is set to. It sits behind the letters, at their baseline,
+ * so they read over it: the words are a layer of their own (`z-index: 0`) with the
+ * stroke at its bottom. The words stay on one line together.
  */
 .mark {
   isolation: isolate;
@@ -113,7 +132,8 @@
   /* No bottom margin: the hero's own bottom padding sets the gap to the playground
    * now that no buttons sit between them. */
   margin: 0 auto;
-  max-width: 40rem;
+  /* Two lines, balanced, with room to spare for a browser that sets the type wider. */
+  max-width: 44rem;
   text-wrap: balance;
 }
 

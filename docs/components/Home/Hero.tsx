@@ -13,11 +13,12 @@ const Hero: React.FC = () => (
   <header className={styles.hero}>
     <div className={styles.shell}>
       <h1 className={styles.headline}>
-        Create <span className={styles.mark}>your own</span> viewer.
+        Imagine a viewer <span className={styles.mark}>built by you</span>.
       </h1>
       <p className={styles.subtitle}>
-        Share your distinctive collections through an accessible and curated
-        viewer designed for your IIIF Manifests and Collections.
+        Share your distinctive collections through a lightweight, accessible,
+        and modular viewer designed for IIIF Manifests, Collections, and the
+        material they describe.
       </p>
     </div>
   </header>

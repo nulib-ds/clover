@@ -257,7 +257,6 @@ test("what a consumer ships stays within budget", async (t) => {
       ["Default", budget.defaultTemplateGzip],
       ["Document", budget.documentTemplateGzip],
       ["Gallery", budget.galleryTemplateGzip],
-      ["Text", budget.textTemplateGzip],
     ].map(([template, limit]) => [
       `Viewer, ${template}`,
       "default",

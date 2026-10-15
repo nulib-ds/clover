@@ -32,8 +32,6 @@ export type DefaultProps = Omit<RootProps, "children"> & {
   panelLayout?: InformationPanelLayout;
   /** The thumbnails under the stage: a layout, or `false` for none. Default `carousel`. */
   items?: ItemsLayout | false;
-  /** A filter field over the thumbnails. Default `false`. */
-  filter?: boolean;
   /**
    * Where the panel's width is remembered once the reader drags its bar
    * (`localStorage`). Default `"clover-template-default"`; `false` forgets it.
@@ -60,7 +58,6 @@ export function Default({
   defaultPanelOpen,
   panelLayout = "accordion",
   items = "carousel",
-  filter = false,
   storageKey = "clover-template-default",
   ...root
 }: DefaultProps) {
@@ -141,7 +138,7 @@ export function Default({
               <ViewTitles />
               <Clover.Position />
             </div>
-            {items && <Clover.Items layout={items} filter={filter} />}
+            {items && <Clover.Items layout={items} />}
           </div>
         </Clover.SplitPane>
         {panel && !over && open && (
@@ -184,15 +181,26 @@ export function Default({
 }
 
 /**
- * The titles of the view the reader is on: a page's label, or both of a spread's. The
- * strip's own arrows are Previous and Next, so the header names where the reader is.
+ * The titles of the view the reader is on: a page's label, or both of a spread's, a dot
+ * between them. The strip's own arrows are Previous and Next, so the header names where
+ * the reader is.
  */
 function ViewTitles() {
   const canvases = Clover.useVisibleCanvases();
   return (
     <p className="clover-template-default-titles">
-      {canvases.map((canvas) => (
-        <Clover.Label key={canvas.id} label={canvas.label} />
+      {canvases.map((canvas, index) => (
+        <React.Fragment key={canvas.id}>
+          {index > 0 && (
+            <span
+              className="clover-template-default-titles-dot"
+              aria-hidden="true"
+            >
+              ·
+            </span>
+          )}
+          <Clover.Label label={canvas.label} />
+        </React.Fragment>
       ))}
     </p>
   );

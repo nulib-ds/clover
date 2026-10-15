@@ -1,5 +1,13 @@
 import * as Clover from "@nulib/clover";
-import React, { Suspense, lazy, useMemo, useState } from "react";
+import React, {
+  Suspense,
+  lazy,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Link from "next/link";
 import { resourceByKey } from "docs/components/Playground/playground-config";
 import styles from "docs/components/Home/Parts.module.css";
@@ -7,10 +15,10 @@ import { useMapWorker } from "docs/lib/map-worker";
 
 /**
  * The playground's resource, taken apart (`Parts.tsx` is the section around it). One
- * `Root` holds it; on the left its parts make a small viewer, and on the right each part
- * stands on its own, live, named, with the property it reads and what the resource has
- * there. Choosing in one part moves the others, since they read the same Root. Pointing
- * at a part outlines it in the viewer.
+ * `Root` holds it; on the left its parts make a small viewer, its code a click away, and
+ * on the right each part stands on its own, live, named, with what it reads and what the
+ * resource has there. Choosing in one part moves the others, since they read the same
+ * Root. Pointing at a part, or at its line of code, outlines it in the viewer.
  *
  * Nothing here is made up: every value shown is the resource's own, read as Clover reads
  * it. A part the resource gives nothing to is a chip at the end, naming what it would
@@ -137,7 +145,7 @@ interface PartSpec {
   key: PartKey;
   /** The component, as it is written: `Clover.Label`. */
   name: string;
-  /** The property it reads. */
+  /** What it reads: a property, or for `Content` the Canvas it draws. */
   reads: string;
   href: string;
   /** What the resource has there, if anything: a count, a size, a name. */
@@ -159,12 +167,18 @@ export default function PartsLive({
 }) {
   return (
     <Clover.Root iiifContent={resource} key={resource} className={styles.root}>
-      <Exploded onTry={onTry} />
+      <Exploded resource={resource} onTry={onTry} />
     </Clover.Root>
   );
 }
 
-function Exploded({ onTry }: { onTry: (key: string) => void }) {
+function Exploded({
+  resource,
+  onTry,
+}: {
+  resource: string;
+  onTry: (key: string) => void;
+}) {
   const manifest = Clover.useManifest() as Json | null;
   const { canvases, views, direction } = Clover.useSequence();
   const active = Clover.useActiveCanvas() as Json | null;
@@ -173,6 +187,23 @@ function Exploded({ onTry }: { onTry: (key: string) => void }) {
     (state) => state.collection,
   ) as Json | null;
   const [pointed, setPointed] = useState<PartKey | null>(null);
+  const [code, setCode] = useState(false);
+  const codeId = useId();
+  // What the viewer's code says, and so what the viewer shows.
+  const [view, setView] = useState<ViewValues>(VIEW_DEFAULTS);
+
+  // Its height, for holding it in view by its foot once it is taller than the window.
+  const assembled = useRef<HTMLDivElement>(null);
+  const ready = Boolean(manifest);
+  useEffect(() => {
+    const node = assembled.current;
+    if (!node) return;
+    const observer = new ResizeObserver(() =>
+      node.style.setProperty("--assembled-height", `${node.offsetHeight}px`),
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [ready]);
 
   const parts = useMemo<PartSpec[]>(() => {
     if (!manifest) return [];
@@ -222,7 +253,7 @@ function Exploded({ onTry }: { onTry: (key: string) => void }) {
       {
         key: "content",
         name: "Content",
-        reads: "items",
+        reads: "Canvas",
         fact: [
           first(active?.label),
           size,
@@ -427,51 +458,119 @@ function Exploded({ onTry }: { onTry: (key: string) => void }) {
   });
   const shown = parts.filter((part) => part.present);
   const missing = parts.filter((part) => !part.present);
+  // The parts the example viewer shows, in the order its code gives them.
+  const order = view.order.filter(
+    (key) =>
+      key === "thumbnail" ||
+      key === "label" ||
+      key === "content" ||
+      shown.some((part) => part.key === key),
+  );
+  const regions: Record<ViewerPart, React.ReactNode> = {
+    thumbnail: (
+      <Region
+        key="thumbnail"
+        name="Thumbnail"
+        className={styles.regionThumb}
+        {...point("thumbnail")}
+      >
+        <Clover.Thumbnail alt="" size={128} className={styles.viewerThumb} />
+      </Region>
+    ),
+    label: (
+      <Region
+        key="label"
+        name="Label"
+        className={styles.regionLabel}
+        {...point("label")}
+      >
+        <Clover.Label as="h3" className={styles.viewerTitle} />
+      </Region>
+    ),
+    content: (
+      <Region key="content" name="Content" {...point("content")}>
+        <Clover.Content
+          controls={view.controls}
+          style={{ height: view.height }}
+        />
+      </Region>
+    ),
+    items: (
+      <Region
+        key="items"
+        name="Items"
+        className={styles.regionItems}
+        {...point("items")}
+      >
+        <Clover.Items className={styles.viewerStrip} layout={view.layout} />
+      </Region>
+    ),
+    summary: (
+      <Region
+        key="summary"
+        name="Summary"
+        className={styles.regionSummary}
+        {...point("summary")}
+      >
+        <Clover.Summary className={styles.viewerSummary} />
+      </Region>
+    ),
+    metadata: (
+      <Region
+        key="metadata"
+        name="Metadata"
+        className={styles.regionMetadata}
+        {...point("metadata")}
+      >
+        <Clover.Metadata className={styles.viewerFields} />
+      </Region>
+    ),
+  };
 
   return (
     <>
-      <div className={styles.assembled}>
+      <div ref={assembled} className={styles.assembled}>
         <p className={styles.caption}>
-          <code>{"<Clover.Root />"}</code>
+          <span className={styles.captionName}>Example Viewer</span>
           <span>
             {collection ? `${manifest.type}, in a Collection` : manifest.type}
           </span>
         </p>
-        <div className={styles.viewer}>
-          <div className={styles.viewerHead}>
-            <Region name="Thumbnail" {...point("thumbnail")}>
-              <Clover.Thumbnail
-                alt=""
-                size={128}
-                className={styles.viewerThumb}
-              />
-            </Region>
-            <Region name="Label" {...point("label")}>
-              <Clover.Label as="h3" className={styles.viewerTitle} />
-            </Region>
+        <div className={styles.viewer}>{order.map((key) => regions[key])}</div>
+        <div>
+          <div className={styles.codeBar}>
+            <button
+              type="button"
+              className={styles.codeToggle}
+              aria-label="Code"
+              title="Code"
+              aria-expanded={code}
+              aria-controls={codeId}
+              onClick={() => setCode((open) => !open)}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="m7 8-4 4 4 4M17 8l4 4-4 4M14 4l-4 16" />
+              </svg>
+            </button>
           </div>
-          <Region name="Content" {...point("content")}>
-            <Clover.Content className={styles.viewerStage} />
-          </Region>
-          {shown.some((part) => part.key === "items") && (
-            <div className={styles.viewerRail}>
-              <Region name="Items" {...point("items")}>
-                <Clover.Items className={styles.viewerStrip} />
-              </Region>
-            </div>
-          )}
-          {shown.some(
-            (part) => part.key === "summary" || part.key === "metadata",
-          ) && (
-            <div className={styles.viewerAbout}>
-              <Region name="Summary" {...point("summary")}>
-                <Clover.Summary className={styles.viewerSummary} />
-              </Region>
-              <Region name="Metadata" {...point("metadata")}>
-                <Clover.Metadata className={styles.viewerFields} />
-              </Region>
-            </div>
-          )}
+          <ViewerCode
+            id={codeId}
+            open={code}
+            resource={resource}
+            order={order}
+            view={view}
+            onView={setView}
+            point={point}
+          />
         </div>
       </div>
 
@@ -536,6 +635,7 @@ function Exploded({ onTry }: { onTry: (key: string) => void }) {
  */
 function Region({
   name,
+  className,
   children,
   ...rest
 }: {
@@ -543,12 +643,666 @@ function Region({
   children: React.ReactNode;
 } & React.HTMLAttributes<HTMLDivElement> & { "data-on"?: boolean }) {
   return (
-    <div className={styles.region} {...rest}>
+    <div
+      className={className ? `${styles.region} ${className}` : styles.region}
+      {...rest}
+    >
       <span className={styles.regionName} aria-hidden="true">
         {name}
       </span>
       {children}
     </div>
+  );
+}
+
+/** The parts of the example viewer, which its code lists and a reader can reorder. */
+type ViewerPart =
+  | "thumbnail"
+  | "label"
+  | "content"
+  | "items"
+  | "summary"
+  | "metadata";
+
+const PART_NAMES: Record<ViewerPart, string> = {
+  thumbnail: "Thumbnail",
+  label: "Label",
+  content: "Content",
+  items: "Items",
+  summary: "Summary",
+  metadata: "Metadata",
+};
+
+/** The values the example viewer's code lets a reader change, as they start. */
+interface ViewValues {
+  /** Content's height, in pixels. */
+  height: number;
+  /** Content's control cluster. */
+  controls: boolean;
+  layout: Clover.ItemsLayout;
+  /** The parts, in the order the code writes them and the viewer shows them. */
+  order: ViewerPart[];
+}
+
+const VIEW_DEFAULTS: ViewValues = {
+  height: 240,
+  controls: true,
+  layout: "carousel",
+  order: ["thumbnail", "label", "content", "items", "summary", "metadata"],
+};
+
+const LAYOUTS: Clover.ItemsLayout[] = ["carousel", "list", "grid"];
+
+type TokenKind =
+  | "keyword"
+  | "string"
+  | "tag"
+  | "attr"
+  | "punctuation"
+  | "number"
+  | "property";
+
+/** A run of code: its text, which Copy copies, and for a value to change, its control. */
+interface Token {
+  kind?: TokenKind;
+  text: string;
+  control?: React.ReactNode;
+}
+
+/** A line of code, its depth in the tree, and the part it writes, if any. */
+interface Line {
+  part?: PartKey;
+  depth: number;
+  tokens: Token[];
+}
+
+const run =
+  (kind?: TokenKind) =>
+  (text: string): Token => ({ kind, text });
+const plain = run();
+const keyword = run("keyword");
+const str = run("string");
+const tag = run("tag");
+const attr = run("attr");
+const punct = run("punctuation");
+const num = run("number");
+const property = run("property");
+
+const TOKEN_CLASS: Record<TokenKind, string> = {
+  keyword: styles.tokenKeyword,
+  string: styles.tokenString,
+  tag: styles.tokenTag,
+  attr: styles.tokenAttr,
+  punctuation: styles.tokenPunctuation,
+  number: styles.tokenNumber,
+  property: styles.tokenProperty,
+};
+
+/** `<Clover.Name a="b" />` on one line. */
+const element = (name: string, attrs: Token[][] = []): Token[] => [
+  punct("<"),
+  tag(`Clover.${name}`),
+  ...attrs.flatMap((tokens) => [plain(" "), ...tokens]),
+  punct(" />"),
+];
+
+/** A part moved from one place in the order to another. */
+const moved = <T,>(list: T[], from: number, to: number) => {
+  const next = [...list];
+  const [item] = next.splice(from, 1);
+  next.splice(to, 0, item);
+  return next;
+};
+
+/**
+ * The code behind the example viewer, as an editor under it: its Root and the parts in
+ * it, in order, as they are written, without the class names and outlines that dress it
+ * for this page. Its values are live (drag Content's height, switch its controls, pick
+ * Items' layout), and each part's lines can be dragged into another order (by mouse
+ * anywhere on them, by touch from the grip, by keyboard with the grip's arrow keys). The
+ * viewer follows, so the code is always what it shows. A part's lines outline the part in
+ * the viewer while pointed at, as its tile does.
+ */
+function ViewerCode({
+  id,
+  open,
+  resource,
+  order,
+  view,
+  onView,
+  point,
+}: {
+  id: string;
+  open: boolean;
+  resource: string;
+  order: ViewerPart[];
+  view: ViewValues;
+  onView: React.Dispatch<React.SetStateAction<ViewValues>>;
+  point: (key: PartKey) => React.HTMLAttributes<HTMLElement>;
+}) {
+  const set = (change: Partial<ViewValues>) =>
+    onView((values) => ({ ...values, ...change }));
+  const hint = useId();
+  const [copied, setCopied] = useState(false);
+  const [said, setSaid] = useState("");
+  useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 1600);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
+  // The parts in a new order; the parts this resource has none of keep their place after.
+  const reorder = (next: ViewerPart[]) =>
+    onView((values) => ({
+      ...values,
+      order: [...next, ...values.order.filter((key) => !next.includes(key))],
+    }));
+
+  // A drag: pressed (`press`), then moving once past a few pixels (`drag`).
+  const blocks = useRef(new Map<ViewerPart, HTMLElement>());
+  const grips = useRef(new Map<ViewerPart, HTMLButtonElement>());
+  const press = useRef<{
+    from: number;
+    y: number;
+    rects: { top: number; height: number }[];
+  } | null>(null);
+  type Drag = { from: number; to: number; dy: number };
+  const [drag, setDrag] = useState<Drag | null>(null);
+  // The latest, for the drop, which may come before the last move has rendered.
+  const dragged = useRef<Drag | null>(null);
+  const show = (next: Drag | null) => {
+    dragged.current = next;
+    setDrag(next);
+  };
+  const refocus = useRef<ViewerPart | null>(null);
+  useEffect(() => {
+    if (!refocus.current) return;
+    grips.current.get(refocus.current)?.focus();
+    refocus.current = null;
+  });
+
+  const startDrag = (index: number, event: React.PointerEvent) => {
+    const target = event.target as Element;
+    const fromGrip = Boolean(target.closest("[data-grip]"));
+    if (event.button !== 0) return;
+    // A value is changed, not dragged; by touch, only the grip drags, so the page scrolls.
+    if (!fromGrip && target.closest("button, select, [role='slider']")) return;
+    if (!fromGrip && event.pointerType !== "mouse") return;
+    event.preventDefault();
+    // Moves past the part's edges still drag it. (A pointer the browser has already let
+    // go of cannot be captured, and needs not be.)
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // The press goes on uncaptured.
+    }
+    press.current = {
+      from: index,
+      y: event.clientY,
+      rects: order.map((key) => {
+        const rect = blocks.current.get(key)!.getBoundingClientRect();
+        return { top: rect.top, height: rect.height };
+      }),
+    };
+  };
+
+  const moveDrag = (event: React.PointerEvent) => {
+    const pressed = press.current;
+    if (!pressed) return;
+    const dy = event.clientY - pressed.y;
+    if (!dragged.current && Math.abs(dy) < 4) return;
+    const { top, height } = pressed.rects[pressed.from];
+    const middle = top + height / 2 + dy;
+    const to = pressed.rects.filter(
+      (rect, index) =>
+        index !== pressed.from && rect.top + rect.height / 2 < middle,
+    ).length;
+    show({ from: pressed.from, to, dy });
+  };
+
+  const endDrag = () => {
+    const last = dragged.current;
+    press.current = null;
+    if (last && last.to !== last.from)
+      reorder(moved(order, last.from, last.to));
+    show(null);
+  };
+
+  // While a part is dragged, the others step aside for it.
+  const shift = (index: number) => {
+    if (!drag) return 0;
+    if (index === drag.from) return drag.dy;
+    const height = press.current?.rects[drag.from].height ?? 0;
+    if (drag.from < drag.to && index > drag.from && index <= drag.to)
+      return -height;
+    if (drag.to < drag.from && index >= drag.to && index < drag.from)
+      return height;
+    return 0;
+  };
+
+  const step = (index: number, by: number) => {
+    const to = index + by;
+    if (to < 0 || to >= order.length) return;
+    const key = order[index];
+    refocus.current = key;
+    reorder(moved(order, index, to));
+    setSaid(`${PART_NAMES[key]}, ${to + 1} of ${order.length}`);
+  };
+
+  const partLines = (key: ViewerPart): Line[] => {
+    switch (key) {
+      case "thumbnail":
+        return [
+          {
+            depth: 1,
+            tokens: element("Thumbnail", [
+              [attr("alt"), punct("="), str('""')],
+              [attr("size"), punct("={"), num("128"), punct("}")],
+            ]),
+          },
+        ];
+      case "label":
+        return [
+          {
+            depth: 1,
+            tokens: element("Label", [[attr("as"), punct("="), str('"h3"')]]),
+          },
+        ];
+      case "content":
+        return [
+          { depth: 1, tokens: [punct("<"), tag("Clover.Content")] },
+          {
+            depth: 2,
+            tokens: [
+              attr("controls"),
+              punct("={"),
+              {
+                text: String(view.controls),
+                control: (
+                  <Switch
+                    label="Content controls"
+                    value={view.controls}
+                    onChange={(controls) => set({ controls })}
+                  />
+                ),
+              },
+              punct("}"),
+            ],
+          },
+          {
+            depth: 2,
+            tokens: [
+              attr("style"),
+              punct("={{ "),
+              property("height"),
+              punct(": "),
+              {
+                text: String(view.height),
+                control: (
+                  <Scrub
+                    label="Content height"
+                    unit="pixels"
+                    min={120}
+                    max={480}
+                    value={view.height}
+                    onChange={(height) => set({ height })}
+                  />
+                ),
+              },
+              punct(" }}"),
+            ],
+          },
+          { depth: 1, tokens: [punct("/>")] },
+        ];
+      case "items":
+        return [
+          {
+            depth: 1,
+            tokens: element("Items", [
+              [
+                attr("layout"),
+                punct("="),
+                {
+                  text: `"${view.layout}"`,
+                  control: (
+                    <Choice
+                      label="Items layout"
+                      options={LAYOUTS}
+                      value={view.layout}
+                      onChange={(layout) => set({ layout })}
+                    />
+                  ),
+                },
+              ],
+            ]),
+          },
+        ];
+      default:
+        return [{ depth: 1, tokens: element(PART_NAMES[key]) }];
+    }
+  };
+
+  const head: Line[] = [
+    {
+      depth: 0,
+      tokens: [
+        keyword("import"),
+        plain(" * "),
+        keyword("as"),
+        plain(" Clover "),
+        keyword("from"),
+        plain(" "),
+        str('"@nulib/clover"'),
+        punct(";"),
+      ],
+    },
+    {
+      depth: 0,
+      tokens: [
+        keyword("import"),
+        plain(" "),
+        str('"@nulib/clover/styles.css"'),
+        punct(";"),
+      ],
+    },
+    { depth: 0, tokens: [] },
+    {
+      depth: 0,
+      tokens: [
+        punct("<"),
+        tag("Clover.Root"),
+        plain(" "),
+        attr("iiifContent"),
+        punct("="),
+        str(JSON.stringify(resource)),
+        punct(">"),
+      ],
+    },
+  ];
+  const tail: Line[] = [
+    { depth: 0, tokens: [punct("</"), tag("Clover.Root"), punct(">")] },
+  ];
+  const parts = order.map((key) => ({ key, lines: partLines(key) }));
+  const text = [...head, ...parts.flatMap((part) => part.lines), ...tail]
+    .map(
+      (line) =>
+        "  ".repeat(line.depth) +
+        line.tokens.map((token) => token.text).join(""),
+    )
+    .join("\n");
+
+  // Lines are numbered by where they are, not which part they belong to.
+  let number = 0;
+  const lineOf = (line: Line, key: React.Key, grip?: React.ReactNode) => (
+    <span key={key} className={styles.codeLine}>
+      <span className={styles.gripCell}>{grip}</span>
+      <span className={styles.lineNumber} aria-hidden="true">
+        {(number += 1)}
+      </span>
+      <span
+        className={styles.lineText}
+        style={{ "--depth": line.depth } as React.CSSProperties}
+      >
+        {line.tokens.length === 0
+          ? " "
+          : line.tokens.map((token, at) =>
+              token.control ? (
+                <React.Fragment key={at}>{token.control}</React.Fragment>
+              ) : (
+                <span
+                  key={at}
+                  className={token.kind ? TOKEN_CLASS[token.kind] : undefined}
+                >
+                  {token.text}
+                </span>
+              ),
+            )}
+      </span>
+    </span>
+  );
+
+  return (
+    <div
+      id={id}
+      role="group"
+      aria-label="Code"
+      className={styles.editor}
+      data-open={open || undefined}
+    >
+      <div className={styles.editorInner}>
+        <div className={styles.editorFrame}>
+          <div className={styles.editorHead}>
+            <span>JSX</span>
+            <button
+              type="button"
+              className={styles.copy}
+              onClick={() =>
+                navigator.clipboard?.writeText(text).then(
+                  () => setCopied(true),
+                  () => undefined,
+                )
+              }
+            >
+              {copied ? "Copied" : "Copy"}
+            </button>
+            <span role="status" className={styles.visuallyHidden}>
+              {copied ? "Copied the code" : said}
+            </span>
+            <span id={hint} className={styles.visuallyHidden}>
+              Arrow up or down moves the part.
+            </span>
+          </div>
+          <pre
+            className={styles.codeText}
+            data-dragging={drag ? true : undefined}
+          >
+            <code>
+              {head.map((line, index) => lineOf(line, `head-${index}`))}
+              {parts.map(({ key, lines }, index) => (
+                <span
+                  key={key}
+                  ref={(node) => {
+                    if (node) blocks.current.set(key, node);
+                    else blocks.current.delete(key);
+                  }}
+                  className={styles.codeBlock}
+                  data-dragged={drag?.from === index || undefined}
+                  style={{ transform: `translateY(${shift(index)}px)` }}
+                  {...point(key)}
+                  onPointerDown={(event) => startDrag(index, event)}
+                  onPointerMove={moveDrag}
+                  onPointerUp={endDrag}
+                  onPointerCancel={endDrag}
+                >
+                  {lines.map((line, at) =>
+                    lineOf(
+                      line,
+                      at,
+                      at === 0 && (
+                        <button
+                          ref={(node) => {
+                            if (node) grips.current.set(key, node);
+                            else grips.current.delete(key);
+                          }}
+                          type="button"
+                          data-grip
+                          className={styles.grip}
+                          aria-label={`Move ${PART_NAMES[key]}`}
+                          aria-describedby={hint}
+                          onKeyDown={(event) => {
+                            const by =
+                              event.key === "ArrowUp"
+                                ? -1
+                                : event.key === "ArrowDown"
+                                  ? 1
+                                  : 0;
+                            if (!by) return;
+                            event.preventDefault();
+                            step(index, by);
+                          }}
+                        >
+                          <svg
+                            width="8"
+                            height="12"
+                            viewBox="0 0 8 12"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
+                            {[2, 6, 10].flatMap((y) =>
+                              [2, 6].map((x) => (
+                                <circle
+                                  key={`${x}${y}`}
+                                  cx={x}
+                                  cy={y}
+                                  r="1.1"
+                                  fill="currentColor"
+                                />
+                              )),
+                            )}
+                          </svg>
+                        </button>
+                      ),
+                    ),
+                  )}
+                </span>
+              ))}
+              {tail.map((line, index) => lineOf(line, `tail-${index}`))}
+            </code>
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A number to drag sideways, a pixel a pixel, or step with the arrow keys (Shift for
+ * tens; Home and End for its limits). A slider to assistive technology.
+ */
+function Scrub({
+  label,
+  unit,
+  min,
+  max,
+  value,
+  onChange,
+}: {
+  label: string;
+  unit: string;
+  min: number;
+  max: number;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  const from = useRef<{ x: number; value: number } | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const clamp = (next: number) =>
+    Math.min(max, Math.max(min, Math.round(next)));
+  const steps: Record<string, number> = {
+    ArrowRight: 1,
+    ArrowUp: 1,
+    ArrowLeft: -1,
+    ArrowDown: -1,
+    PageUp: 10,
+    PageDown: -10,
+  };
+  const stop = () => {
+    from.current = null;
+    setDragging(false);
+  };
+  return (
+    <span
+      role="slider"
+      tabIndex={0}
+      aria-label={label}
+      aria-valuemin={min}
+      aria-valuemax={max}
+      aria-valuenow={value}
+      aria-valuetext={`${value} ${unit}`}
+      title="Drag to change"
+      className={`${styles.value} ${styles.scrub} ${styles.tokenNumber}`}
+      data-dragging={dragging || undefined}
+      onPointerDown={(event) => {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        event.currentTarget.focus();
+        event.currentTarget.setPointerCapture(event.pointerId);
+        from.current = { x: event.clientX, value };
+        setDragging(true);
+      }}
+      onPointerMove={(event) => {
+        if (from.current)
+          onChange(clamp(from.current.value + event.clientX - from.current.x));
+      }}
+      onPointerUp={stop}
+      onPointerCancel={stop}
+      onKeyDown={(event) => {
+        const step = steps[event.key];
+        const next =
+          event.key === "Home"
+            ? min
+            : event.key === "End"
+              ? max
+              : step === undefined
+                ? undefined
+                : value + step * (event.shiftKey ? 10 : 1);
+        if (next === undefined) return;
+        event.preventDefault();
+        onChange(clamp(next));
+      }}
+    >
+      {value}
+    </span>
+  );
+}
+
+/** `true` or `false`, pressed to switch. */
+function Switch({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={value}
+      aria-label={label}
+      className={`${styles.value} ${styles.tokenNumber}`}
+      onClick={() => onChange(!value)}
+    >
+      {String(value)}
+    </button>
+  );
+}
+
+/** One of a few strings, picked from a menu. */
+function Choice<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: T[];
+  value: T;
+  onChange: (value: T) => void;
+}) {
+  return (
+    <select
+      aria-label={label}
+      className={`${styles.value} ${styles.choice} ${styles.tokenString}`}
+      value={value}
+      onChange={(event) => onChange(event.target.value as T)}
+    >
+      {options.map((option) => (
+        <option key={option} value={option}>{`"${option}"`}</option>
+      ))}
+    </select>
   );
 }
 
