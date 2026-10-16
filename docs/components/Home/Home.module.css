@@ -20,18 +20,20 @@
 }
 
 /*
- * On the homepage the navbar's content lines up with the sections' (`Parts.module.css`'s
- * 1300px, inside the shell's padding) at every width, rather than with the docs' wider
- * layout and its sidebar.
+ * On the homepage the navbar's content, and the line under it, line up with the sections'
+ * (`Parts.module.css`'s 1300px, inside the shell's padding) at every width, rather than
+ * with the docs' wider layout and its sidebar.
  */
-:global(html):has(.page) :global(.nextra-nav-container > nav) {
+:global(html):has(.page)
+  :global(:is(.nextra-nav-container > nav, .site-subheader > p)) {
   max-width: calc(1300px + 4rem);
   padding-left: max(env(safe-area-inset-left), 2rem);
   padding-right: max(env(safe-area-inset-right), 2rem);
 }
 
 @media (max-width: 640px) {
-  :global(html):has(.page) :global(.nextra-nav-container > nav) {
+  :global(html):has(.page)
+    :global(:is(.nextra-nav-container > nav, .site-subheader > p)) {
     max-width: calc(1300px + 2rem);
     padding-left: max(env(safe-area-inset-left), 1rem);
     padding-right: max(env(safe-area-inset-right), 1rem);

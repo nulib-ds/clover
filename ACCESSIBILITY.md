@@ -109,7 +109,7 @@ Mat, 16 October 2026: the docs plan below waits until 4.x is being readied for r
 ### Decisions needed
 
 - **Film** (D64): describe a shortened Reel 1 published as a mock, or swap in a film that already has a description?
-- **Edge token** (D83, D74): a 3:1 edge is darker than the design's hairlines. The playground's field and Template button now use `--gray-11` at 75% over the page (`--pg-edge`, `Playground.module.css`). Make that the token, and only on controls?
+- **Edge token** (D83, D74): a 3:1 edge is darker than the design's hairlines. The playground's field and Template button now use `--gray-11` at 75% over the page (`--pg-edge`, `Playground.module.css`). Only on controls (Mat, 16 October 2026: the stage and the parts' tiles keep their hairlines; matching them to the field was tried and put back). Still open: make it the token for the site's other fields (D83's textareas)?
 - **Nextra**: patch 2.13.4, or upgrade?
 - **Nav headings** (D90): should four sidebar headings come before every page's h1?
 

@@ -1,7 +1,8 @@
-import { DocsThemeConfig } from "nextra-theme-docs";
+import { DocsThemeConfig, Navbar } from "nextra-theme-docs";
 import Link from "next/link";
 import Logo from "./docs/components/Logo";
 import PageSettings from "./docs/components/PageSettings/PageSettings";
+import Subheader from "./docs/components/Subheader";
 import React from "react";
 import { useConfig } from "nextra-theme-docs";
 import { useFSRoute } from "nextra/hooks";
@@ -117,9 +118,20 @@ const config: DocsThemeConfig = {
     };
   },
   logo: <Logo />,
-  /* Font, appearance and colour, behind a gear at the end of the header row. */
   navbar: {
+    /* Font, appearance and colour, behind a gear at the end of the header row. */
     extraContent: <PageSettings />,
+    /*
+     * Nextra's navbar, held at the top as ever, and under it the line saying whose
+     * project Clover is, which is not held: it follows the navbar's sticky box rather
+     * than sitting in it, so it scrolls away with the page.
+     */
+    component: (props: React.ComponentProps<typeof Navbar>) => (
+      <>
+        <Navbar {...props} />
+        <Subheader />
+      </>
+    ),
   },
   project: {
     link: "https://github.com/nulib-ds/clover",

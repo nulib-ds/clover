@@ -20,6 +20,41 @@ nav.nextra-toc:empty {
 }
 
 /*
+ * Under the navbar, the line saying whose project Clover is (`docs/components/
+ * Subheader.tsx`). Not held: it scrolls away with the page while the navbar stays. Solid,
+ * as the headers are, on the light grey surface (`--surface`); its text in the muted
+ * colour (5.2:1 light, 7.6:1 dark), its link the text accent (6.2:1 or more under every
+ * accent preset, either theme) and underlined, so it is told apart by more than colour
+ * (WCAG 1.4.1). It lines up with the end of the navbar's content (its last control):
+ * Nextra's 90rem and 1.5rem here, the homepage's own in `Home.module.css`.
+ */
+.site-subheader {
+  background-color: var(--surface);
+}
+
+.site-subheader > p {
+  max-width: 90rem;
+  margin: 0 auto;
+  padding-block: 0.618rem;
+  padding-left: max(env(safe-area-inset-left), 1.5rem);
+  padding-right: max(env(safe-area-inset-right), 1.5rem);
+  color: var(--gray-11);
+  /*
+   * The navbar's own size (Nextra's `nx-text-sm`), so the line reads with the links over
+   * it: under the docs' floor, as the navbar is (Mat, 2026-10-16).
+   */
+  font-size: 0.875rem;
+  line-height: 1.5;
+  text-align: end;
+}
+
+.site-subheader a {
+  color: var(--accent-link);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/*
  * Nextra's focus ring is pale (1.5:1 to 2.4:1), so it takes the text accent, which holds
  * 3:1 in both themes, behind a gap of the page's colour. `:root:root` outranks Nextra's
  * dark `[tabindex]` rule, (0,4,1). The banner is near-black, so its ring is its text's.

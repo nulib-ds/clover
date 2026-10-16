@@ -59,7 +59,9 @@
 
   /*
    * Type floor. Nothing in the UI goes below `--text-sm`; `--text-label` is reserved for
-   * uppercase mono eyebrows, where the letterforms carry more width per point.
+   * uppercase mono eyebrows, where the letterforms carry more width per point. The one
+   * exception is the header: Nextra's navbar links, and the line under them
+   * (`.site-subheader`), at Nextra's 0.875rem.
    */
   --text-label: 0.875rem;
   --text-sm: 0.9375rem;

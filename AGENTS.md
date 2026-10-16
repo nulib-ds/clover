@@ -113,7 +113,9 @@ deadline.
     which only the parts' chips use). It is a WAI-ARIA editable combobox: typing narrows the
     list, Down and Up open and move through it, Enter opens the one marked or what is
     typed, Escape closes the list and then puts the field back; focus stays in the field.
-    Its edge, and the Template button's, is 3:1 (`--pg-edge`). Under the stage, the
+    Its edge, and the Template button's, is 3:1 (`--pg-edge`): controls only, while the
+    stage and the parts' tiles keep their hairlines (Mat, 2026-10-16; the tiles at 3:1
+    was tried and put back). Under the stage, the
     "Template" dropdown listing the templates by name. No drawings of the layouts, no
     fills of light grey, spaces on Clover's golden-ratio scale. Each template shows with its own defaults: no props, no generated code (a
     Customize drawer with both was removed on purpose). The section is wider than the
@@ -131,9 +133,15 @@ deadline.
     `useStuck` sets the page's `scroll-padding-top` to the navbar and the bar, measured,
     so a control that takes focus in the stage comes into view below the bar (WCAG
     2.4.11).
-  - On the homepage the navbar's content lines up with the sections' 1300px (and the
-    shell's padding) at every width (`Home.module.css`); docs pages keep Nextra's 90rem,
-    which lines up with their sidebar.
+  - Under the navbar on every page, a line on the light grey surface (`--surface`) says
+    Clover is a project of Northwestern University Libraries, linking the Libraries'
+    site (`docs/components/Subheader.tsx`, styled in `docs/styles/layout.css`). It is
+    aligned to the end of the navbar's content. It is not held (Mat, 2026-10-16):
+    `navbar.component` in `theme.config.tsx` renders it after Nextra's `Navbar`, outside
+    the navbar's sticky box, so it scrolls away with the page.
+  - On the homepage the navbar's content, and that line, line up with the sections'
+    1300px (and the shell's padding) at every width (`Home.module.css`); docs pages keep
+    Nextra's 90rem, which lines up with their sidebar.
   - The homepage renders on the server, so a component it imports statically must not
     import `@iiif/helpers` (through `docs/lib/iiif-content`, say). It is an ESM external
     there, which makes the importing module async, and the homepage's import of it is
