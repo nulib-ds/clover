@@ -14,34 +14,14 @@ import {
   templateOrder,
   templateSpecs,
 } from "docs/components/Playground/playground-config";
+import ResourceField, { OWN } from "docs/components/Playground/ResourceField";
 import { loadMapWorker, useMapWorker } from "docs/lib/map-worker";
 import { normalizeHex, setPageTheme, usePageTheme } from "docs/lib/page-theme";
 
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import styles from "docs/components/Playground/Playground.module.css";
 import { useRouter } from "next/router";
-
-/** The reader's own resource, where a resource's key would be. */
-const OWN = "own";
-
-/*
- * The reader's own resource must be a web address. Not `validIiifContent` from
- * `docs/lib/iiif-content`: it brings `@iiif/helpers`, an ESM external on the server, and
- * that makes this module async, so the homepage's import of it is undefined while the
- * page is rendered there. A shared link may still carry an encoded content state.
- */
-const webAddress = (value: unknown) => {
-  if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  try {
-    const { protocol, hostname } = new URL(trimmed);
-    return (protocol === "http:" || protocol === "https:") && hostname
-      ? trimmed
-      : undefined;
-  } catch {
-    return undefined;
-  }
-};
 
 /**
  * The Viewer in a template, as a page would write it: `<Viewer template={Document} />`.
@@ -133,11 +113,12 @@ function useStuck(
 /**
  * The homepage's hero: any template beside any resource, live.
  *
- * Two pickers over one stage: the resources, as thumbnails, and at the end of the bar the
- * templates, by name, in a dropdown. Either changes the stage and leaves the other as it was,
- * so the same resource can be seen in each layout, and each layout with every kind of
- * resource. Both are native radios inside labels, so each group gets arrow keys and one
- * tab stop.
+ * Two pickers, one either side of the stage, each changing it and leaving the other as it
+ * was, so the same resource can be seen in each layout, and each layout with every kind
+ * of resource. Over the stage, the resource: one field for the address of the reader's
+ * own, with ours listed under it by thumbnail (`ResourceField`). Under it, the template, by
+ * name, in a dropdown of native radios (arrow keys and one tab stop), beside the way to a
+ * layout of one's own: the item above in another template, or built from the parts below.
  *
  * The stage keeps one height for every template, scrolling within when a template is
  * taller, so switching never moves the page. Each template is shown with its own
@@ -146,7 +127,7 @@ function useStuck(
 export interface PlaygroundProps {
   /**
    * The resource on the stage, whenever it changes: its address (or content state) and
-   * its tile's key (`"own"` for the reader's own). The parts below the playground follow it.
+   * its key (`"own"` for the reader's own). The parts below the playground follow it.
    */
   onResourceChange?: (resource: string, key: string) => void;
 }
@@ -206,7 +187,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
     /*
      * Read state out of the URL once the router and the origin are known, so a shared link
      * restores it. The resource travels as `iiif-content`, the parameter Clover has always
-     * read for a resource handed to the docs; one of ours is matched back to its tile.
+     * read for a resource handed to the docs; one of ours is matched back to its key.
      */
     useEffect(() => {
       if (!router.isReady || !origin) return;
@@ -287,50 +268,12 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
 
     useImperativeHandle(ref, () => ({ pickResource: selectResource }));
 
-    /*
-     * "Your own": a field in a popover from the last tile. Escape, the tile again, or a
-     * press outside closes it; opening a resource closes it too.
-     */
-    const [ownOpen, setOwnOpen] = useState(false);
-    const [draft, setDraft] = useState("");
-    const [draftError, setDraftError] = useState<string>();
-    const ownRef = useRef<HTMLDivElement>(null);
-    const ownTriggerRef = useRef<HTMLButtonElement>(null);
-    const ownInputRef = useRef<HTMLInputElement>(null);
-    const closeOwn = useCallback((focusTrigger = true) => {
-      setOwnOpen(false);
-      setDraftError(undefined);
-      if (focusTrigger) ownTriggerRef.current?.focus();
-    }, []);
-    const dismissOwn = useCallback(() => closeOwn(false), [closeOwn]);
-    usePressOutside(ownRef, ownOpen, dismissOwn);
-    useEffect(() => {
-      // Selected, so typing replaces the address that was open, and a paste does too.
-      if (ownOpen) ownInputRef.current?.select();
-    }, [ownOpen]);
-
-    /* Opens on the address already open, if it is the reader's, ready to edit. */
-    const toggleOwn = () => {
-      if (ownOpen) return closeOwn();
-      setDraft(own);
-      setOwnOpen(true);
-    };
-
-    const openOwn = (event: React.FormEvent) => {
-      event.preventDefault();
-      const content = webAddress(draft);
-      if (!content) {
-        setDraftError(
-          "Enter the web address of a IIIF Manifest or Collection, starting with https://",
-        );
-        return;
-      }
-      // Anything can have places, so the map's worker is set for a resource of the reader's.
+    /* The reader's own: an address or a content state, which may have places. */
+    const openOwn = (content: string) => {
       loadMapWorker();
       setOwn(content);
       setPicked(OWN);
       syncUrl(active, content);
-      closeOwn();
     };
 
     /*
@@ -367,117 +310,30 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
         id="playground"
       >
         <div className={styles.bar} ref={barRef}>
-          <div className={styles.resourceRow}>
-            <div
-              aria-label="Select a IIIF resource"
-              className={`${styles.tiles} ${styles.track}`}
-              role="radiogroup"
-            >
-              {resources.map((r) => (
-                <label
-                  className={styles.tile}
-                  data-selected={r.key === current}
-                  key={r.key}
-                  title={r.title}
-                >
-                  <input
-                    checked={r.key === current}
-                    className={styles.tileInput}
-                    name="pg-resource"
-                    onChange={() => selectResource(r.key)}
-                    type="radio"
-                    value={r.key}
-                  />
-                  <span className={styles.media}>
-                    {/* Static export with unoptimized images: next/image has nothing to add for a remote thumbnail. */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      alt=""
-                      className={styles.thumb}
-                      decoding="async"
-                      src={r.thumbnail}
-                    />
-                  </span>
-                  <span className={styles.tileName}>{r.name}</span>
-                </label>
-              ))}
-            </div>
+          <ResourceField
+            current={current}
+            onOwn={openOwn}
+            onPick={selectResource}
+            own={own}
+          />
+        </div>
 
-            <div className={styles.own} ref={ownRef}>
-              <button
-                aria-controls="pg-own"
-                aria-current={current === OWN ? "true" : undefined}
-                aria-expanded={ownOpen}
-                className={styles.tile}
-                data-selected={current === OWN}
-                onClick={toggleOwn}
-                ref={ownTriggerRef}
-                title={current === OWN ? own : undefined}
-                type="button"
-              >
-                <span className={styles.media}>
-                  <svg
-                    aria-hidden="true"
-                    fill="none"
-                    height="20"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    width="20"
-                  >
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
-                </span>
-                <span className={styles.tileName}>Your own</span>
-              </button>
+        {/* No font and no colour here: Clover takes both from the page. */}
+        <div className={styles.stage} data-template={active} ref={stageRef}>
+          {ready && (
+            <TemplateViewer
+              key={`${active}-${resource}`}
+              template={spec.name as "Default"}
+              iiifContent={resource}
+            />
+          )}
+        </div>
 
-              {ownOpen && (
-                <form
-                  className={styles.ownForm}
-                  id="pg-own"
-                  noValidate
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") {
-                      e.stopPropagation();
-                      closeOwn();
-                    }
-                  }}
-                  onSubmit={openOwn}
-                >
-                  <label className={styles.fieldLabel} htmlFor="pg-own-input">
-                    A IIIF Manifest or Collection
-                  </label>
-                  <div className={styles.ownRow}>
-                    <input
-                      aria-describedby={draftError ? "pg-own-error" : undefined}
-                      aria-invalid={Boolean(draftError)}
-                      className={styles.input}
-                      id="pg-own-input"
-                      onChange={(e) => {
-                        setDraft(e.target.value);
-                        setDraftError(undefined);
-                      }}
-                      placeholder="https://"
-                      ref={ownInputRef}
-                      spellCheck={false}
-                      type="url"
-                      value={draft}
-                    />
-                    <button className="cta-solid" type="submit">
-                      Open
-                    </button>
-                  </div>
-                  {draftError && (
-                    <p className={styles.error} id="pg-own-error" role="alert">
-                      {draftError}
-                    </p>
-                  )}
-                </form>
-              )}
-            </div>
-          </div>
-
+        {/*
+         * Between the playground and the parts: the item above in another template, or a
+         * layout of one's own from the parts below.
+         */}
+        <div className={styles.choices}>
           <div
             className={styles.layoutPicker}
             onBlur={(e) => {
@@ -540,7 +396,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
                   >
                     <input
                       checked={key === active}
-                      className={styles.tileInput}
+                      className={styles.choiceInput}
                       name="pg-layout"
                       onChange={() => selectTemplate(key)}
                       // A press chooses and closes; an arrow key only chooses.
@@ -554,17 +410,10 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
               </div>
             )}
           </div>
-        </div>
-
-        {/* No font and no colour here: Clover takes both from the page. */}
-        <div className={styles.stage} data-template={active} ref={stageRef}>
-          {ready && (
-            <TemplateViewer
-              key={`${active}-${resource}`}
-              template={spec.name as "Default"}
-              iiifContent={resource}
-            />
-          )}
+          <span className={styles.or}>or</span>
+          <Link href="/docs/composing" className={styles.cta}>
+            Build a layout <span aria-hidden="true">→</span>
+          </Link>
         </div>
       </section>
     );

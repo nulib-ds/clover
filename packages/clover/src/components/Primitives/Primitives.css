@@ -13,8 +13,8 @@
 
 /*
  * Metadata and the required statement (`Metadata`, `RequiredStatement`): each label over
- * its value, the pairs stacked `s` apart. The label in the text's colour, medium; the value
- * in the secondary colour, at the same size.
+ * its value, the pairs stacked `s` apart. Both in the text's colour, as the summary is, at
+ * the same size: the label medium, the value at the text's own weight.
  */
 :is(.clover-metadata, .clover-required-statement) {
   display: flex;
@@ -30,7 +30,6 @@
 
 :is(.clover-metadata, .clover-required-statement) dd {
   margin: 0;
-  color: var(--clover-color-primary-muted, #26292b);
 }
 
 /* Long identifiers, file names and bare URLs wrap rather than push the panel sideways. */

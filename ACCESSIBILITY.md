@@ -13,7 +13,7 @@ light and dark). A critic sent auditors back to criteria they had passed over. T
 independent reviewers, with a third to break ties, checked each of the 214 distinct
 findings against the code and the standard; 160 held. Of those, 77 were blatant and easy
 and were fixed first. Ten workstreams then fixed 44 more in the package; the rest are
-planned below. The package has 79 (73 fixed), the docs 81 (52 fixed).
+planned below. The package has 79 (73 fixed), the docs 81 (53 fixed).
 
 ## Package
 
@@ -66,7 +66,7 @@ All settled on 16 October 2026: the two-tone hotspot outlines and the Split grip
 
 ## Docs
 
-Of 81 verified docs findings, 52 are fixed (15 serious, 25 moderate, 12 minor) and 29 remain (8 serious, 12 moderate, 9 minor).
+Of 81 verified docs findings, 53 are fixed (15 serious, 26 moderate, 12 minor) and 28 remain (8 serious, 11 moderate, 9 minor).
 
 Mat, 16 October 2026: the docs plan below waits until 4.x is being readied for release, and is done then, before it ships. The Example Viewer's editor was fixed at once, before it first shipped.
 
@@ -77,6 +77,7 @@ Mat, 16 October 2026: the docs plan below waits until 4.x is being readied for r
 - Names added: the logo link, image demos, rights badge, homepage Items, textareas, demo field, the "Your own" state, Cookbook and Mocks links (1.1.1, 2.4.4, 2.5.3, 4.1.2; D8, D13, D17, D18, D19, D20, D24, D46, D52, D58, D62, D68, D82).
 - Every page has `<html lang="en">` (3.1.1; D3).
 - The Example Viewer's editor: a part picked by a press (or its grip focused) moves with Move up and Move down, Content's height is a number to type, its head's buttons are 24px, Escape puts away a part's name tag, and focus on a part of the held viewer above the window lets it go (2.5.7, 2.5.8, 1.4.13, 2.4.11; D4, D32, D70, D72).
+- The playground's resource field, which replaced "Your own" and its popover, has a 3:1 edge, as does the Template button (`--pg-edge`: 3.4:1 light, 5.5:1 dark), and its list closes when focus leaves it, so it never covers focus (1.4.11, 2.4.11; D33).
 - Focus stays in order and in view: parts chips, CanvasRecipe buttons, settings panel, phone banner (2.4.3, 2.4.11; D30, D34, D35, D66).
 - Errors are announced, and 3.x Content State validates its input (4.1.3, 3.3.1; D31, D45, D79).
 - Links and the current page are marked by more than colour (1.4.1; D28, D41).
@@ -94,7 +95,7 @@ Mat, 16 October 2026: the docs plan below waits until 4.x is being readied for r
 
 4. **Reflow** (1.4.10, 1.4.12). On phones the banner cuts off its 3.x link, recipe tables and Content State's columns crush, and tile names clip. Let the banner wrap and stop pinning it below 768px, then remove D34's scroll padding. Stack the table actions, and let the columns and `.tileName` wrap. `layout.css`, `CookbookCoverageTable.module.css`, `content-state.mdx`, `Parts.module.css`. S. (D9, D11, D71, D84)
 
-5. **Accent text and edges** (1.4.3, 1.4.11). Accent text is 3.77:1 in dark mode, and two fields have edges under 1.3:1. Add a text-accent token to the package, with a CHANGELOG entry, and map it to `--accent-11` in the docs' dark bridge. Add a 3:1 boundary step. `tokens.css`, package CSS. M. (D1, D33, D83)
+5. **Accent text and edges** (1.4.3, 1.4.11). Accent text is 3.77:1 in dark mode, and the Content State textareas have edges of 1.2:1. Add a text-accent token to the package, with a CHANGELOG entry, and map it to `--accent-11` in the docs' dark bridge. Add a 3:1 boundary step. `tokens.css`, package CSS. M. (D1, D83)
 
 6. **3.x pages** (2.1.1, 2.4.2, 2.4.5). The Map demo takes coordinates from a pointer only, six pages share the homepage's title, and nothing links to two pages. Add coordinate inputs and `title:` front matter ending in "(3.x)", with `config.title` as the fallback, and link both pages from viewer.mdx. `CoordinatePickingDemo.tsx`, `pages/docs/3.x/`. S. (D14, D43, D67)
 
@@ -106,9 +107,9 @@ Mat, 16 October 2026: the docs plan below waits until 4.x is being readied for r
 
 ### Decisions needed
 
-- **Playground bar** (D29): in Chromium and WebKit, scroll padding scrolls the page and releases the held bar. Should `useStuck` measure the bar, or should the stage's controls get scroll-margin (which also reaches the package's scroll containers)? The popover's close-on-blur half can ship now.
+- **Playground bar** (D29): in Chromium and WebKit, scroll padding scrolls the page and releases the held bar. Should `useStuck` measure the bar, or should the stage's controls get scroll-margin (which also reaches the package's scroll containers)?
 - **Film** (D64): describe a shortened Reel 1 published as a mock, or swap in a film that already has a description?
-- **Edge token** (D33, D83, D74): a 3:1 edge is darker than the design's hairlines. Which grey, and only on controls?
+- **Edge token** (D83, D74): a 3:1 edge is darker than the design's hairlines. The playground's field and Template button now use `--gray-11` at 75% over the page (`--pg-edge`, `Playground.module.css`). Make that the token, and only on controls?
 - **Nextra**: patch 2.13.4, or upgrade?
 - **Nav headings** (D90): should four sidebar headings come before every page's h1?
 
@@ -141,8 +142,7 @@ The audit's ids, cited by the plans, and N for those found since. Most severe fi
 | D16 | 2.1.1 Keyboard                         | serious  | Scrolling code blocks and tables cannot be reached by keyboard                                                 | `theme.config.tsx:25`, `pages/docs/canvas.mdx:501` …                                                                                          |
 | D23 | 4.1.2 Name                             | serious  | Out of scope: @samvera/clover-iiif's own components fail several A criteria on these pages                     | `node_modules/@samvera/clover-iiif/dist/primitives/index.mjs:691`, `node_modules/@samvera/clover-iiif/dist/primitives/index.mjs:651` …        |
 | D25 | 2.3.1 Three Flashes or Below Threshold | serious  | The Animation resource may pass the general flash threshold, and it starts and loops by itself                 | `docs/components/Playground/playground-config.ts:129`, `docs/components/Home/PartsLive.tsx:269` …                                             |
-| D29 | 2.4.11 Focus Not Obscured              | moderate | The playground's sticky bar, and the open 'Your own' popover, can hide focused controls in the stage           | `docs/components/Playground/Playground.module.css:13`, `docs/components/Playground/Playground.module.css:77` …                                |
-| D33 | 1.4.11 Non-text Contrast               | moderate | The 'Your own' address field has no visible boundary (1.14:1)                                                  | `docs/components/Playground/Playground.module.css:492`                                                                                        |
+| D29 | 2.4.11 Focus Not Obscured              | moderate | The playground's sticky bar can hide focused controls in the stage                                             | `docs/components/Playground/Playground.module.css:13`, `docs/components/Playground/Playground.module.css:77` …                                |
 | D36 | 2.4.11 Focus Not Obscured              | moderate | The open phone menu leaves the page behind it focusable                                                        | `node_modules/nextra-theme-docs/dist/index.js:1896`, `node_modules/nextra-theme-docs/dist/index.js:3001`                                      |
 | D37 | 4.1.2 Name                             | moderate | The menu and folder toggles don't expose their state                                                           | `node_modules/nextra-theme-docs/dist/index.js:1536`, `node_modules/nextra-theme-docs/dist/index.js:1700` …                                    |
 | D39 | 4.1.3 Status Messages                  | moderate | Search results, and their absence, are not announced                                                           | `node_modules/nextra-theme-docs/dist/index.js:780`, `node_modules/nextra-theme-docs/dist/index.js:813` …                                      |

@@ -113,9 +113,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `value` prop wins, so they work outside a `Root` too. Text is in the reader's language
   and marked with `lang`. `Metadata` and `RequiredStatement` style their own pairs, so
   they look alike wherever they appear (the InformationPanel's About, a Canvas's
-  caption): each label over its value, medium and in the text's colour, the value in the
-  secondary colour (`--clover-color-primary-muted`) at the same size, the pairs stacked
-  `s` apart. About's own headings (Rights, Homepage…) read as the labels do.
+  caption): each label over its value, both in the text's colour as the summary is, at
+  the same size, the label medium and the value at the text's own weight, the pairs
+  stacked `s` apart. About's own headings (Rights, Homepage…) read as the labels do.
 - **HTML in IIIF values is sanitised**, allowing only the markup the Presentation API
   permits and `http(s):` or `mailto:` links. Scripts, event handlers, `style`, SVG, and
   `javascript:` or `data:` URLs are removed. A value with markup shows as plain text until
@@ -136,11 +136,15 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   panel's padding, so the first heading holds where it rests from the first pixel of
   scrolling (a heading runs to as many lines as its label needs). What scrolls under them
   shows faintly: a soft shadow under the open section's heading once the panel has
-  scrolled, and over the next heading while there is more below. A closed section's
-  heading is in the accent at the text's own weight, faintly underlined, and the open
-  one's in the text's colour, bold;
-  the heading after the open section is set `s` apart from its content. A section opened
-  by a press scrolls its start into sight, under the headings stacked above it. The open
+  scrolled, and over the next heading while there is more below. The headings are
+  controls, not links: each label is bold, in the text's colour, over a 3px line as wide
+  as the panel's content. A closed one's line is the colour of a split's bar at rest
+  (`--clover-color-secondary-alt` at half strength), with a chevron; the open one's is
+  the accent, with none, and a closed one's under the pointer the accent at half
+  strength, as Items' hover is. The open
+  section's content is `m` under its line and over what follows; the heading after it
+  is set `s` further apart. A section opened by
+  a press scrolls its start into sight, under the headings stacked above it. The open
   section cannot be closed, so its button is `aria-disabled` (as WAI-ARIA's accordion
   has it) and draws no chevron; a closed one's chevron offers it. The scroll drives it
   (scroll-driven animation, no script); browsers without it show no shadow. Both are built from the

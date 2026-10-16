@@ -68,10 +68,12 @@ deadline.
     for the distinctive collections a library, archive or museum shares (a lightweight,
     accessible, and modular viewer designed for IIIF Manifests, Collections, and the
     material they describe). It has two halves: the templates live under it
-    (`docs/components/Playground/`), and below them, well apart, the same resource shown
-    one IIIF property at a time by the components the templates are made of (`Parts.tsx`
-    and `PartsLive.tsx`), opened by one call to action, with no heading of its own. It
-    follows the playground: `Homepage` holds the resource the playground reports
+    (`docs/components/Playground/`), and below them the same resource shown one IIIF
+    property at a time by the components the templates are made of (`Parts.tsx` and
+    `PartsLive.tsx`), with no heading of its own. Between the two, under the playground's
+    stage, is the choice: a template for the item above ("Template", a dropdown), or a
+    layout of one's own from the parts below ("Build a layout", the one call to action,
+    linking to Composing Layouts). The parts follow the playground: `Homepage` holds the resource the playground reports
     (`onResourceChange`) and hands it down, and the section's chips put another of the
     playground's resources on its stage (`pickResource`).
   - That section is one `Root` for that resource. On the left its parts make a small
@@ -96,17 +98,26 @@ deadline.
     that has it (`SHOWN_IN`). Every value shown is the resource's own: no illustrations,
     made-up figures or copy. Golden-ratio spaces, hairline edges, no grey fills.
   - The playground shows how far one Viewer stretches: any layout with any kind of
-    resource. Two pickers sit over one stage, each changing without the other: the
-    resources as thumbnails, centred and unlabelled (`resources` in
-    `playground-config.ts`: a catalog, a print, a Collection, a photo, a map, a film, a recording…,
-    plus "Your own"; their group is named "Select a IIIF resource" for assistive technology),
-    and at the end of the bar a "Template" dropdown listing the templates by name. No
-    drawings of the layouts, no fills of light grey, spaces on Clover's golden-ratio
-    scale. Each template shows with its own defaults: no props, no generated code (a
+    resource. Two pickers, each changing the stage without the other. Over it, centred,
+    the resource (`ResourceField.tsx`): one field, labelled "Select or provide a IIIF resource", for the
+    address or content state of the reader's own, with ours listed under it (`resources`
+    in `playground-config.ts`: a catalog, a print, a Collection, a photo, a map, a film, a
+    recording…), each by its thumbnail, its own label, and a few words on one thing it has
+    that the others do not (`description`: concise, only what the resource has). Each of
+    the reader's own joins the list as they open it, first, by its root `label` and
+    `thumbnail` (never a Canvas's or member's) over its address, so they can switch
+    between theirs and ours; held in memory only, never stored, gone with the page. The
+    field shows the label of the one on the stage, never our word for its kind (`name`,
+    which only the parts' chips use). It is a WAI-ARIA editable combobox: typing narrows the
+    list, Down and Up open and move through it, Enter opens the one marked or what is
+    typed, Escape closes the list and then puts the field back; focus stays in the field.
+    Its edge, and the Template button's, is 3:1 (`--pg-edge`). Under the stage, the
+    "Template" dropdown listing the templates by name. No drawings of the layouts, no
+    fills of light grey, spaces on Clover's golden-ratio scale. Each template shows with its own defaults: no props, no generated code (a
     Customize drawer with both was removed on purpose). The section is wider than the
     reading sections but held off the screen's edges; the stage keeps one height for
     every pairing, with a hairline edge and a small, soft grey shadow (never the accent).
-    Keep it about layout and UX: names, not descriptions or marketing lines.
+    Keep it about layout and UX: names and those few words, no marketing lines.
   - Headers are solid, never frosted or translucent: the navbar (`docs/styles/layout.css`
     overrides Nextra's blur) and the playground's bar. From 80rem, where the bar is one
     row, it holds under the navbar as its lower half: while the stage passes under, the

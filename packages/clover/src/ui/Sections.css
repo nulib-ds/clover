@@ -3,8 +3,9 @@
  * same parts in both, styled once; each layout adds only what it needs.
  *
  * On the scale: a tab is `xs` by `s`, the tabs `2xs` apart, the open one's content `m`
- * below the row. A box's heading is `s` inside, the boxes `2xs` apart, and its content
- * under its heading, `s` in.
+ * below the row. A box's heading is `s` over its label and `2xs` under it, then its 3px
+ * line; the boxes `2xs` apart; its content `m` under the line and over what follows,
+ * `s` in.
  */
 
 /* `button.x`: one class ties with a reset's `[type="button"]`. See `ui/Button.css`. */
@@ -65,13 +66,13 @@ button.clover-sections-button:focus-visible {
  * lines as its label needs. `Sections` measures them: on each box it writes the height of
  * the headings before it (`--clover-sections-before`) and after it (`-after`), each with
  * its padding, and on the list all of theirs (`--clover-sections-total`). Until it has,
- * each heading is taken as one line (`1lh`, at `text-m` with the page's leading) and the
- * button's `s` padding, counted from its place (`--clover-sections-index`) and the list's
+ * each heading is taken as one line (`1lh`, at `text-m` with the page's leading), the
+ * button's `s` over it and `2xs` under it, its 3px line and the `2xs` over it, counted from its place (`--clover-sections-index`) and the list's
  * count; where `lh` is not understood, the headings stick only once measured.
  */
 .clover-sections[data-layout="accordion"] {
   --clover-sections-step: calc(
-    1lh + 2 * var(--clover-space-s) + var(--clover-space-2xs)
+    1lh + var(--clover-space-s) + 2 * var(--clover-space-2xs) + 3px
   );
   --clover-sections-total: calc(
     var(--clover-sections-count) * var(--clover-sections-step)
@@ -81,7 +82,7 @@ button.clover-sections-button:focus-visible {
 }
 
 /*
- * Boxes by spacing and the heading's hover, without a border of their own. The box
+ * Boxes by spacing and their headings' lines, without a border of their own. The box
  * itself steps out of the layout, so its heading sticks within the whole list rather
  * than only within its own box, which is no taller than the heading when closed. What
  * it carries for the stacks still reaches its heading and its panel.
@@ -110,10 +111,10 @@ button.clover-sections-button:focus-visible {
  * sets to where its headings rest), so the first heading holds where it rests from the
  * first pixel of scrolling. Each is offset by the headings before it (top) or after it
  * (bottom), so a stuck heading sits exactly where it rests and never shifts as it comes
- * unstuck. They are on the panel's own colour, and each carries the boxes' `2xs` under
- * it as its own padding (so the boxes are spaced by their headings and panels, not a
- * gap): nothing can show between two stuck headings. Padding, not a border, since a
- * border's width snaps to device pixels.
+ * unstuck. They are on the panel's own colour, and each carries its 3px line under it as
+ * its own padding, as the next carries the space between them (below): nothing can show
+ * between two stuck headings. Padding, not a border, since a border's width snaps to
+ * device pixels.
  */
 .clover-sections[data-layout="accordion"] .clover-sections-heading {
   position: sticky;
@@ -125,7 +126,7 @@ button.clover-sections-button:focus-visible {
   bottom: calc(
     var(--clover-sections-inset-end, 0px) + var(--clover-sections-after)
   );
-  padding-bottom: var(--clover-space-2xs);
+  padding-bottom: 3px;
   background-color: var(--clover-color-secondary, #fff);
 }
 
@@ -170,6 +171,14 @@ button.clover-sections-button:focus-visible {
   .clover-sections[data-layout="accordion"] .clover-sections-panel * {
     scroll-margin-block: 0;
   }
+}
+
+/*
+ * The boxes `2xs` apart, as the rows of one list are: each heading after the first
+ * carries the space over it as padding, in its own colour.
+ */
+.clover-sections[data-layout="accordion"] > * + * > .clover-sections-heading {
+  padding-top: var(--clover-space-2xs);
 }
 
 /*
@@ -258,8 +267,8 @@ button.clover-sections-button:focus-visible {
     > .clover-sections-heading
     > button::after {
     --clover-sections-shade: to bottom;
-    /* Flush with the content: past the heading's own `2xs` under the button (above). */
-    top: calc(100% + var(--clover-space-2xs));
+    /* Flush with the content: past the heading's 3px line under the button (above). */
+    top: calc(100% + 3px);
     animation-range: 0 var(--clover-space-m);
   }
 
@@ -290,54 +299,77 @@ button.clover-sections-button:focus-visible {
   }
 }
 
+/* Open or closed, a heading's label is in the text's colour. */
 .clover-sections[data-layout="accordion"] button.clover-sections-button {
   position: relative;
   justify-content: space-between;
   width: 100%;
-  padding: var(--clover-space-s);
+  padding: var(--clover-space-s) var(--clover-space-s) var(--clover-space-2xs);
   border-radius: inherit;
+  color: var(--clover-color-primary, #1a1d1e);
 }
 
 /*
- * A label wraps, never cut short, however narrow the panel or wide its spaced text (WCAG
- * 1.4.12): onto more lines, breaking a long word where it must. The stacks measure it.
+ * The headings are the panel's controls, so they read as neither its links nor its
+ * labels: each label bold, in the text's colour, over a 3px line as wide as the panel's
+ * content (the button less its `s` either side), `2xs` under the label: the heading's
+ * foot, in its own padding, so what scrolls under the open heading meets its line. A closed one's
+ * is the colour of a split's bar at rest (`Split.css`), `secondary-alt` at half
+ * strength: it marks nothing, its chevron does. The open one's is the accent, 3:1 beside
+ * the panel (WCAG 1.4.11), and a closed one's under the pointer the accent at half
+ * strength, a preview, as Items' hover is; focus is the button's own ring. The open one
+ * has no chevron, so which is open is told by more than colour. A label wraps, never cut short, however narrow the panel or
+ * wide its spaced text (WCAG 1.4.12): onto more lines, breaking a long word where it
+ * must, the line under them all. The stacks measure it.
  */
 .clover-sections[data-layout="accordion"] .clover-sections-label {
   overflow-wrap: anywhere;
 }
 
+.clover-sections[data-layout="accordion"] .clover-sections-label::after {
+  content: "";
+  position: absolute;
+  inset-inline: var(--clover-space-s);
+  bottom: -3px;
+  height: 3px;
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-secondary-alt, #c1c8cd) 50%,
+    transparent
+  );
+}
+
+/* Under the pointer, the open one's line at half strength, as Items' hover previews. */
 .clover-sections[data-layout="accordion"]
-  button.clover-sections-button[aria-expanded="true"] {
-  color: var(--clover-color-primary, #1a1d1e);
+  [aria-expanded="false"]:hover
+  > .clover-sections-label::after {
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 50%,
+    transparent
+  );
+}
+
+.clover-sections[data-layout="accordion"]
+  [aria-expanded="true"]
+  > .clover-sections-label::after {
+  background-color: var(--clover-color-accent, #0065c3);
 }
 
 /*
- * A closed box's heading is in the accent, at the text's own weight, its label underlined
- * faintly and a chevron at its end, as something to open; the open one is in the text's
- * colour, and bold. Only the label grows as it opens, so nothing beside it moves.
+ * In forced colours a fill is the page's own colour: the line takes the text's colour,
+ * and the highlight on the open heading.
  */
-.clover-sections[data-layout="accordion"]
-  button.clover-sections-button[aria-expanded="false"] {
-  color: var(--clover-color-accent, #0065c3);
-  font-weight: 400;
-}
+@media (forced-colors: active) {
+  .clover-sections[data-layout="accordion"] .clover-sections-label::after {
+    background-color: CanvasText;
+  }
 
-.clover-sections[data-layout="accordion"]
-  button.clover-sections-button[aria-expanded="false"]
-  .clover-sections-label {
-  text-decoration: underline 1px;
-  text-decoration-color: color-mix(in srgb, currentColor 20%, transparent);
-  text-underline-offset: var(--clover-space-3xs);
-}
-
-.clover-sections[data-layout="accordion"]
-  button.clover-sections-button[aria-expanded="false"]:hover
-  .clover-sections-label {
-  text-decoration-color: currentColor;
-}
-
-.clover-sections[data-layout="accordion"] button.clover-sections-button:hover {
-  background-color: var(--clover-color-secondary-muted, #e6e8eb);
+  .clover-sections[data-layout="accordion"]
+    [aria-expanded="true"]
+    > .clover-sections-label::after {
+    background-color: Highlight;
+  }
 }
 
 /* The open box, which cannot close, is not offered as something to press. */
@@ -353,10 +385,11 @@ button.clover-sections-button:focus-visible {
 
 /*
  * Content scrolls under the stuck headings. Its own stacking context keeps anything
- * layered inside it (a map's controls) from rising over them.
+ * layered inside it (a map's controls) from rising over them. It is `m` under its
+ * heading's line and over what follows, as a tab's content is under its row.
  */
 .clover-sections[data-layout="accordion"] .clover-sections-panel {
   isolation: isolate;
   margin-bottom: var(--clover-space-2xs);
-  padding: 0 var(--clover-space-s) var(--clover-space-s);
+  padding: var(--clover-space-m) var(--clover-space-s);
 }

@@ -7,10 +7,18 @@ export type TemplateKey = "default" | "document" | "gallery";
 
 export interface PlaygroundResource {
   key: string;
-  /** What it is, in a word, under its thumbnail. */
+  /** What it is, in a word: the parts' chips name it (`PartsLive.tsx`). */
   name: string;
-  /** Its own label, copied from the resource so the picker needs no fetch. */
+  /**
+   * Its own label, copied from the resource so the picker needs no fetch: the picker
+   * names it by this, never by `name`.
+   */
   title: string;
+  /**
+   * A few words under its label in the picker: one thing it has that the others do not,
+   * so the list shows the range. Only what the resource has.
+   */
+  description: string;
   /** Its address, a content state, or a path under the docs' published `/mocks/`. */
   resource: string;
   mock?: boolean;
@@ -59,6 +67,7 @@ export const resources: PlaygroundResource[] = [
     name: "Catalog",
     title:
       "Portfolio of illustrations showing the White bicycles : then and now",
+    description: "Catalog with annotations and chapters",
     resource: "paged/manifest.json",
     mock: true,
     thumbnail: `${works}/386ff30f-1975-4d9c-9905-ec76381d6992/thumbnail`,
@@ -69,6 +78,7 @@ export const resources: PlaygroundResource[] = [
     key: "print",
     name: "Print",
     title: "The Vanishing Race - Navaho",
+    description: "Print with its words tagged",
     resource: "tagging/manifest.json",
     mock: true,
     thumbnail: `${works}/46dc28d1-9d59-4160-a511-72418f70cffc/thumbnail`,
@@ -77,6 +87,7 @@ export const resources: PlaygroundResource[] = [
     key: "collection",
     name: "Collection",
     title: "Commedia dell'Arte: The Masks of Antonio Fava",
+    description: "Collection of masks",
     // The Collection, opened on Zagna "lunga": a content state naming the Manifest, part
     // of the Collection, so the reader arrives on it among the other masks.
     resource: contentState({
@@ -93,6 +104,7 @@ export const resources: PlaygroundResource[] = [
     key: "photo",
     name: "Photo",
     title: "516; 151, Michigan & Washington, 1948, GM/TDH5502",
+    description: "Photo with its place on a map",
     resource: "navplace/manifest.json",
     mock: true,
     map: true,
@@ -103,6 +115,7 @@ export const resources: PlaygroundResource[] = [
     key: "map",
     name: "Map",
     title: "Map of the Township of Evanston, Cook County, Illinois",
+    description: "Georeferenced map",
     resource: "georeference/manifest.json",
     mock: true,
     map: true,
@@ -113,6 +126,7 @@ export const resources: PlaygroundResource[] = [
     key: "film",
     name: "Film",
     title: "Northwestern Football scrimmages, 1959",
+    description: "Film in seven reels",
     resource: nul("d8fb6329-f7fb-48bf-8bb7-70a64ded5a15"),
     thumbnail: `${works}/d8fb6329-f7fb-48bf-8bb7-70a64ded5a15/thumbnail`,
   },
@@ -120,6 +134,7 @@ export const resources: PlaygroundResource[] = [
     key: "recording",
     name: "Recording",
     title: "Partial audio recording of Gustav Mahler's Symphony No. 3",
+    description: "Audio with its score",
     resource:
       "https://iiif.io/api/cookbook/recipe/0014-accompanyingcanvas/manifest.json",
     // The score's first page, which the recording shows while it plays.
@@ -130,6 +145,7 @@ export const resources: PlaygroundResource[] = [
     key: "animation",
     name: "Animation",
     title: "Plate Number 700. Buffalo galloping",
+    description: "Animation from a plate's frames",
     resource:
       "https://nulib-ds.github.io/muybridge/iiif/plate-number-700-buffalo-galloping.json",
     // The first frame, not the plate's own animated GIF, which is over a megabyte.

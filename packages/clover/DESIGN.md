@@ -139,7 +139,7 @@ down: decide the outer level first, then step down for each level inside it.
 | Items that are each a group                                | `m`   | Thumbnails in any layout of Items (each a picture with its caption)                                                                                                                                         |
 | Siblings within one part                                   | `s`   | Cluster buttons; transport buttons; a strip's titles and Position; metadata's label-value pairs; a row's inline padding; the map over its list of places                                                    |
 | Parts of one control or one item; a heading over its value | `xs`  | A thumbnail and its caption; a label and its select; a search field and its button; the seek row over the bar; an icon beside a text button's label; a row's block padding; a metadata label over its value |
-| Rows of one list                                           | `2xs` | Rows of annotations, Ranges, cues and hits; the tabs in their row; boxes of the accordion                                                                                                                   |
+| Rows of one list                                           | `2xs` | Rows of annotations, Ranges, cues and hits; the tabs in their row; an accordion heading over its line                                                                                                       |
 | Lines of one caption                                       | `3xs` | A thumbnail's label and summary; a map overlay's name over "Georeferenced image"                                                                                                                            |
 
 A region's content sits `--clover-inset` (`l`, 1.618rem) in from its edges, whatever the
@@ -175,8 +175,9 @@ Worked examples, from the top of the Viewer down:
   chapter under the seek row, then the controls, those at the end kept together at the
   end of the last row.
 - **The information panel**: `l` inside. A tab is `xs` by `s`, the tabs `2xs` apart, and
-  the open tab's content `m` below the row. An accordion box's heading is `s` inside, the
-  boxes `2xs` apart, and the content under its heading `s` in; the boxes reach `s` out
+  the open tab's content `m` below the row. An accordion box's heading is `s` over its label and
+  `2xs` under it, then its 3px line, the boxes `2xs` apart; the content is `m` under
+  the line and over what follows, as a tab's is under its row, and `s` in; the boxes reach `s` out
   over the panel's `l`, so their text is `l` in, on the title's line. About's parts are
   `m` apart, metadata's pairs `s`, a label `xs` over its value.
   - The close control sits `xs` in from the corner. It reaches `xs + control = 2.618rem`

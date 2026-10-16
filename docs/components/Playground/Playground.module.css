@@ -14,57 +14,24 @@
   /*
    * The stage's one height, for every template and resource, so switching either never
    * moves the page. When the bar is held, the stage fills the screen under it: the
-   * screen less the navbar, the bar (7.2rem), the space under the bar and room for the
-   * stage's shadow. A template taller than it (a Gallery) scrolls inside.
+   * screen less the navbar, the bar (5.4rem: its label, the field and its padding), the
+   * space under the bar and room for the stage's shadow. A template taller than it (a
+   * Gallery) scrolls inside.
    */
   --pg-stage-height: clamp(
     36rem,
-    calc(
-      100vh - var(--nextra-navbar-height, 4rem) - 7.2rem - 0.632rem - 1.618rem
-    ),
+    calc(100vh - var(--nextra-navbar-height, 4rem) - 5.4rem - 2rem - 1.618rem),
     54rem
   );
 }
 
-/* ── The bar: the resources, then the layout ─────────────────────────────── */
+/* ── The bar: the resource ──────────────────────────────────────────────── */
 
-/*
- * The resources centred over the stage, unlabelled (the group's name is for assistive
- * technology). The layout sits at the end: beside the tiles where the page is wide enough
- * for both without pulling them off centre, otherwise on a line above them, and under
- * them on a narrow page, where the tiles scroll within their row.
- */
+/* The resource's field, centred over the stage, `xl` over it as the template is under it. */
 .bar {
-  align-items: center;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  margin-bottom: 1.25rem;
-  row-gap: 0.625rem;
-}
-
-.bar > .resourceRow {
-  grid-area: 2 / 1;
-  justify-self: center;
-  max-width: 100%;
-}
-
-.bar > .layoutPicker {
-  grid-area: 1 / 1;
-  justify-self: end;
-}
-
-/* From where the tiles leave room on each side for the template's button. */
-@media (min-width: 80rem) {
-  .bar > .resourceRow {
-    grid-row: 1;
-  }
-}
-
-@media (max-width: 900px) {
-  .bar > .layoutPicker {
-    grid-area: 3 / 1;
-    justify-self: center;
-  }
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--clover-space-xl, 2.618rem);
 }
 
 /*
@@ -84,7 +51,7 @@
   }
 
   .stage {
-    margin-top: calc(1.25rem - 0.618rem);
+    margin-top: calc(var(--clover-space-xl, 2.618rem) - 0.618rem);
   }
 
   /*
@@ -134,7 +101,7 @@
   }
 }
 
-/* The template's label, over its button, in the page's own type. */
+/* A control's label, over it, in the page's own type. */
 .inlineLabel {
   color: var(--gray-11);
   font-size: var(--clover-text-s, 0.854rem);
@@ -142,82 +109,161 @@
 }
 
 /*
- * Spaces on Clover's own golden-ratio scale (`--clover-space-*`, see the package's
- * DESIGN.md), so the pickers step as the Viewer under them does: tiles `s` apart, each
- * `xs` inside, its picture `s` over its name.
+ * The edge of a field or a button that has no fill: 3:1 against the page in both themes
+ * (1.4.11), so it shows where to type and press. The text's grey, lightened toward the
+ * page.
  */
-.tiles {
-  display: flex;
-  gap: var(--clover-space-s, 0.618rem);
-}
-
-/* ── The template: a dropdown of the four, by name ──────────────────────── */
-
-.layoutPicker {
-  align-items: flex-start;
-  display: flex;
-  flex-direction: column;
-  gap: var(--clover-space-2xs, 0.236rem);
-  position: relative;
+.section {
+  --pg-edge: color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
 }
 
 /*
- * The layout on the stage and a chevron that turns while open. No fill, as the tiles have
- * none: a hairline edge, tinted with the accent under the pointer and while open.
+ * The resource: a field for an address, ours in a list under it. Its label over it, the
+ * field and Open side by side, the list under both. Spaces on Clover's own
+ * golden-ratio scale (`--clover-space-*`, the package's DESIGN.md), so the pickers step as
+ * the Viewer under them does.
  */
-.layoutTrigger {
+/* Its label centred over the field and Open, `s` above them. */
+.resourcePicker > .inlineLabel {
+  text-align: center;
+}
+
+.resourcePicker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-s, 0.618rem);
+  min-width: 0;
+  width: min(100%, 36rem);
+}
+
+/* The list hangs from the row, so it is as wide as the field and Open together. */
+.resourceRow {
+  display: flex;
+  gap: var(--clover-space-xs, 0.382rem);
+  position: relative;
+}
+
+.combo {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* The thumbnail of the resource on the stage, its label or address, and the list's chevron. */
+.field {
   align-items: center;
-  background: transparent;
-  border: 1px solid var(--gray-6);
+  border: 1px solid var(--pg-edge);
   border-radius: var(--radius-3);
-  color: var(--gray-12);
-  cursor: pointer;
-  display: inline-flex;
-  font: inherit;
-  font-size: var(--text-sm);
+  display: flex;
   gap: var(--clover-space-xs, 0.382rem);
   height: 2.5rem;
-  justify-content: space-between;
-  /* Wide enough for the longest name, so it holds still as the layout changes. */
-  min-width: 8.5rem;
-  padding: 0 var(--clover-space-s, 0.618rem) 0 var(--clover-space-m, 1rem);
-  transition:
-    background-color 120ms ease,
-    border-color 120ms ease;
+  padding-inline: var(--clover-space-xs, 0.382rem)
+    var(--clover-space-2xs, 0.236rem);
 }
 
-.layoutTrigger:hover,
-.layoutTrigger[aria-expanded="true"] {
+.field:focus-within {
+  box-shadow: var(--focus-ring);
+}
+
+.fieldMedia {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-2);
+  flex: none;
+  height: 1.75rem;
+  overflow: hidden;
+}
+
+/* A resource of the reader's that names no thumbnail is drawn as an empty slot. */
+.fieldMedia[data-empty],
+.media[data-empty] {
+  border: 1px dashed color-mix(in srgb, var(--gray-11) 45%, transparent);
+  box-sizing: border-box;
+}
+
+.fieldInput {
+  background: transparent;
+  border: 0;
+  color: var(--gray-12);
+  flex: 1 1 auto;
+  font: inherit;
+  font-size: var(--text-sm);
+  height: 100%;
+  min-width: 0;
+  outline: none;
+  padding: 0;
+  text-overflow: ellipsis;
+}
+
+/* The field draws the ring round all of it (above), so the input draws none of its own. */
+.field .fieldInput:focus-visible {
+  box-shadow: none;
+}
+
+.fieldInput::placeholder {
+  color: var(--gray-11);
+}
+
+/* The list's own button: out of the tab order (the field's arrow keys open it), 32px. */
+.fieldToggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-2);
+  color: var(--gray-11);
+  cursor: pointer;
+  display: flex;
+  flex: none;
+  height: 2rem;
+  justify-content: center;
+  width: 2rem;
+}
+
+.fieldToggle:hover {
   background: color-mix(in srgb, var(--accent-9) 10%, transparent);
-  border-color: color-mix(in srgb, var(--accent-9) 40%, transparent);
 }
 
-.layoutTrigger:focus-visible {
+.fieldToggle[aria-expanded="true"] .chevron {
+  rotate: 180deg;
+}
+
+/* Open: the primary action, the accent's fill, as tall as the field. */
+.openButton {
+  background: var(--accent-9);
+  border: 0;
+  border-radius: var(--radius-3);
+  color: var(--accent-contrast);
+  cursor: pointer;
+  flex: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  padding: 0 var(--clover-space-m, 1rem);
+  transition: background-color 120ms ease;
+}
+
+.openButton:hover {
+  background: var(--accent-10);
+}
+
+.openButton:focus-visible {
   box-shadow: var(--focus-ring);
   outline: none;
 }
 
-.chevron {
-  color: var(--gray-11);
-  flex: none;
-  transition: rotate 160ms ease;
-}
-
-.layoutTrigger[aria-expanded="true"] .chevron {
-  rotate: 180deg;
-}
-
-/* The four, listed under the button and flush with its end. */
-.layoutMenu {
+/* Ours, under the field: a row each, scrolling within on a short screen. */
+.resourceList {
   background: var(--color-background);
   border-radius: var(--radius-4);
   box-shadow:
     0 0 0 1px var(--gray-6),
     0 12px 40px rgb(0 0 0 / 0.18);
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: var(--clover-space-2xs, 0.236rem);
-  min-width: 100%;
+  left: 0;
+  list-style: none;
+  margin: 0;
+  max-height: min(32rem, 55vh);
+  overflow-y: auto;
   padding: var(--clover-space-xs, 0.382rem);
   position: absolute;
   right: 0;
@@ -225,112 +271,80 @@
   z-index: 30;
 }
 
-/* A row per layout: the current one filled with the accent, as the chosen tile is. */
-.layoutOption {
+.resourceList[hidden] {
+  display: none;
+}
+
+/*
+ * A resource: its thumbnail, its own label, and what it holds under it. Marked as the thumbnails of
+ * Items are: a ring round the picture for the one on the stage, with its name in the text
+ * accent and a check, so more than colour tells it; the one the arrow keys reach, an
+ * inner ring in the text accent.
+ */
+.option {
+  align-items: center;
   border-radius: var(--radius-2);
   color: var(--gray-12);
   cursor: pointer;
-  font-size: var(--text-sm);
-  padding: var(--clover-space-xs, 0.382rem) var(--clover-space-m, 1rem);
-  position: relative;
-  white-space: nowrap;
+  display: flex;
+  gap: var(--clover-space-s, 0.618rem);
+  padding: var(--clover-space-xs, 0.382rem);
 }
 
-.layoutOption:hover {
+.option:hover {
   background: color-mix(in srgb, var(--accent-9) 10%, transparent);
 }
 
-.layoutOption[data-selected="true"] {
-  background: var(--accent-9);
-  color: var(--accent-contrast);
-  font-weight: var(--weight-bold);
+.option[data-active] {
+  box-shadow: inset 0 0 0 2px var(--accent-11);
 }
 
-.layoutOption:has(.tileInput:focus-visible) {
-  box-shadow: var(--focus-ring);
-}
-
-.resourceRow {
-  display: flex;
-  gap: var(--clover-space-s, 0.618rem);
-  min-width: 0;
-}
-
-/*
- * The resources scroll sideways when the page is narrow. The padding (taken back by the
- * margin) keeps a focused tile's ring inside the scroll box, which would clip it.
- */
-.track {
-  margin: -0.25rem;
-  min-width: 0;
-  overflow-x: auto;
-  padding: 0.25rem;
-  scroll-padding-inline: 0.25rem;
-  scroll-snap-type: x proximity;
-  scrollbar-width: thin;
-}
-
-/*
- * One tile for a resource and for "Your own": a picture over a name, every picture in
- * the same box.
- */
-/*
- * Marked as Items marks its thumbnails (`Items.css` in the package): no fill, a ring round
- * the picture instead (below).
- */
-.tile {
-  align-items: stretch;
-  background: transparent;
-  border: 0;
-  border-radius: var(--radius-3);
-  color: var(--gray-11);
-  cursor: pointer;
-  display: flex;
+.option .media {
   flex: none;
-  flex-direction: column;
-  font: inherit;
-  /* A thumbnail and its name `s` apart, so the name stands clear of the ring. */
-  gap: var(--clover-space-s, 0.618rem);
-  padding: var(--clover-space-xs, 0.382rem);
-  position: relative;
-  scroll-snap-align: start;
-  width: 5.5rem;
+  width: 4rem;
 }
 
-/*
- * The ring, as Items draws it: 3px, 1px clear of the picture. The accent for the chosen
- * resource, at half strength under the pointer, so it previews the choice; the text's
- * colour for keyboard focus. An outline takes no room, so the row never reflows.
- */
-.tile:hover {
-  --ring-color: color-mix(
-    in srgb,
-    var(--clover-color-accent, var(--accent-9)) 50%,
-    transparent
-  );
-}
-
-.tile[data-selected="true"] {
+.option[aria-selected="true"] {
   --ring-color: var(--clover-color-accent, var(--accent-9));
 }
 
-/* The input is the accessible control; the tile is its label. Kept focusable and
- * positioned so the focus ring lands on the tile. */
-.tileInput {
-  appearance: none;
-  cursor: pointer;
-  inset: 0;
-  margin: 0;
-  opacity: 0;
-  position: absolute;
+.optionText {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--clover-space-2xs, 0.236rem);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
-.tile:has(.tileInput:focus-visible),
-button.tile:focus-visible {
-  --ring-color: var(--gray-12);
-  outline: none;
+.optionName {
+  font-size: var(--text-sm);
+  line-height: 1.3;
 }
 
+.option[aria-selected="true"] .optionName {
+  color: var(--accent-11);
+  font-weight: var(--weight-bold);
+}
+
+/* What it holds, under its label, in the muted text. */
+.optionAbout {
+  color: var(--gray-11);
+  font-size: var(--clover-text-s, 0.854rem);
+  line-height: 1.3;
+}
+
+.check {
+  color: var(--accent-11);
+  flex: none;
+  visibility: hidden;
+}
+
+.option[aria-selected="true"] .check {
+  visibility: visible;
+}
+
+/* A picture in the same box for every resource, with room for its ring. */
 .media {
   align-items: center;
   aspect-ratio: 4 / 3;
@@ -340,13 +354,6 @@ button.tile:focus-visible {
   outline: 3px solid var(--ring-color, transparent);
   outline-offset: 1px;
   overflow: hidden;
-  transition: outline-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.media svg {
-  display: block;
-  height: auto;
-  max-width: 100%;
 }
 
 .thumb {
@@ -357,62 +364,10 @@ button.tile:focus-visible {
   width: 100%;
 }
 
-/* A name too wide for the tile, with text spacing widened, wraps rather than being cut off. */
-.tileName {
-  font-size: var(--clover-text-s, 0.854rem);
-  line-height: 1.2;
-  overflow-wrap: anywhere;
-  text-align: center;
-}
-
-/* The chosen resource's name in the text accent, 4.5:1 in both themes. */
-.tile[data-selected="true"] .tileName {
-  color: var(--accent-11);
-  font-weight: var(--weight-bold);
-}
-
-/* "Your own" holds its popover, so it sits outside the scrolling track. */
-.own {
-  flex: none;
-  position: relative;
-}
-
-/* With no picture of its own, "Your own" is drawn as an empty slot. */
-.own .media {
-  border: 1px dashed color-mix(in srgb, currentColor 45%, transparent);
-  box-sizing: border-box;
-}
-
-.ownForm {
-  background: var(--color-background);
-  border-radius: var(--radius-4);
-  box-shadow:
-    0 0 0 1px var(--gray-6),
-    0 12px 40px rgb(0 0 0 / 0.18);
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  padding: 0.875rem;
-  position: absolute;
-  right: 0;
-  top: calc(100% + 0.5rem);
-  width: min(26rem, calc(100vw - 2rem));
-  z-index: 30;
-}
-
-.ownRow {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.ownRow .input {
-  flex: 1;
-  min-width: 0;
-}
-
 .error {
   color: var(--red-11, #ce2c31);
-  font-size: var(--text-label);
+  font-size: var(--text-sm);
+  line-height: 1.4;
   margin: 0;
 }
 
@@ -478,29 +433,170 @@ button.tile:focus-visible {
   }
 }
 
-/* ── "Your own": its field ──────────────────────────────────────────────── */
+/* ── Under the stage: a template, or a layout of one's own ──────────────── */
 
-.fieldLabel {
-  color: var(--gray-12);
-  display: block;
+/*
+ * The item above in another template, or a layout of one's own from the parts below:
+ * centred under the stage, `xl` under it, wrapping on a narrow page.
+ */
+.choices {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clover-space-s, 0.618rem) var(--clover-space-m, 1rem);
+  justify-content: center;
+  margin-top: var(--clover-space-xl, 2.618rem);
+}
+
+.or {
+  color: var(--gray-11);
   font-size: var(--text-sm);
-  font-weight: var(--weight-regular);
-  margin-bottom: 0.3125rem;
 }
 
-.input {
-  background: var(--surface);
-  border: 0;
-  border-radius: var(--radius-3);
-  color: var(--gray-12);
-  font: inherit;
-  font-family: var(--font-mono);
-  font-size: var(--text-label);
-  padding: 0.5rem 0.625rem;
-  width: 100%;
+/* The call to action: the accent, filled, round-ended, the arrow nudging on hover. */
+.cta {
+  align-items: center;
+  background: var(--accent-9);
+  border-radius: 999px;
+  color: var(--accent-contrast);
+  display: inline-flex;
+  font-size: var(--text-sm);
+  gap: var(--clover-space-xs, 0.382rem);
+  height: 2.5rem;
+  padding: 0 var(--clover-space-l, 1.618rem);
+  text-decoration: none;
+  transition: background-color 120ms ease;
 }
 
-.input:focus {
+.cta:hover {
+  background: var(--accent-10);
+}
+
+.cta:focus-visible {
   box-shadow: var(--focus-ring);
   outline: none;
+}
+
+.cta span {
+  transition: translate 120ms ease;
+}
+
+.cta:hover span {
+  translate: 0.236rem 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta span {
+    transition: none;
+  }
+}
+
+/* ── The template: a dropdown of the four, by name ──────────────────────── */
+
+/* Its label beside it, in the row with the call to action. */
+.layoutPicker {
+  align-items: center;
+  display: flex;
+  gap: var(--clover-space-xs, 0.382rem);
+  position: relative;
+}
+
+.layoutPicker .inlineLabel {
+  font-size: var(--text-sm);
+}
+
+/*
+ * The layout on the stage and a chevron that turns while open. No fill: a hairline edge,
+ * at 3:1 as the field's, tinted with the accent under the pointer and while open.
+ */
+.layoutTrigger {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--pg-edge);
+  border-radius: var(--radius-3);
+  color: var(--gray-12);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: var(--text-sm);
+  gap: var(--clover-space-xs, 0.382rem);
+  height: 2.5rem;
+  justify-content: space-between;
+  /* Wide enough for the longest name, so it holds still as the layout changes. */
+  min-width: 8.5rem;
+  padding: 0 var(--clover-space-s, 0.618rem) 0 var(--clover-space-m, 1rem);
+  transition: background-color 120ms ease;
+}
+
+.layoutTrigger:hover,
+.layoutTrigger[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--accent-9) 10%, transparent);
+}
+
+.layoutTrigger:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+.chevron {
+  color: var(--gray-11);
+  flex: none;
+  transition: rotate 160ms ease;
+}
+
+.layoutTrigger[aria-expanded="true"] .chevron {
+  rotate: 180deg;
+}
+
+/* The four, listed under the button and flush with its end. */
+.layoutMenu {
+  background: var(--color-background);
+  border-radius: var(--radius-4);
+  box-shadow:
+    0 0 0 1px var(--gray-6),
+    0 12px 40px rgb(0 0 0 / 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-2xs, 0.236rem);
+  min-width: 100%;
+  padding: var(--clover-space-xs, 0.382rem);
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--clover-space-xs, 0.382rem));
+  z-index: 30;
+}
+
+/* A row per layout: the current one filled with the accent. */
+.layoutOption {
+  border-radius: var(--radius-2);
+  color: var(--gray-12);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  padding: var(--clover-space-xs, 0.382rem) var(--clover-space-m, 1rem);
+  position: relative;
+  white-space: nowrap;
+}
+
+.layoutOption:hover {
+  background: color-mix(in srgb, var(--accent-9) 10%, transparent);
+}
+
+.layoutOption[data-selected="true"] {
+  background: var(--accent-9);
+  color: var(--accent-contrast);
+  font-weight: var(--weight-bold);
+}
+
+/* The radio is the accessible control; the row is its label, and shows its focus. */
+.choiceInput {
+  appearance: none;
+  cursor: pointer;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  position: absolute;
+}
+
+.layoutOption:has(.choiceInput:focus-visible) {
+  box-shadow: var(--focus-ring);
 }

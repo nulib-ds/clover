@@ -2,64 +2,16 @@
  * The playground's resource, shown one IIIF property at a time by the
  * components Clover's templates are made of (`PartsLive.tsx`).
  *
- * Set well apart from the playground above (3xl on the golden scale). On the left, the
+ * Under the playground and the choice between its templates and a layout of one's own
+ * (`Playground.tsx`), 2xl apart on the golden scale. On the left, the
  * viewer its parts make, held in view while the parts scroll by; on the right, each part
  * on its own, the tiles `l` apart and `l` inside, so each reads as a thing of its own. No
  * grey fills: hairline edges, the resource's own pictures and words, the accent for what
  * is pointed at.
  */
 .section {
-  margin: 6.854rem auto 0;
+  margin: 4.236rem auto 0;
   max-width: 1300px;
-}
-
-/*
- * The section's opening: its one call to action, centred, 4.236rem over the components
- * (a golden-ratio step). Its headline and sentence are the page's own, in the hero.
- */
-.head {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  margin: 0 auto 4.236rem;
-  max-width: 42rem;
-  text-align: center;
-}
-
-/* The one call to action: the accent, filled, round-ended, the arrow nudging on hover. */
-.cta {
-  align-items: center;
-  background: var(--accent-9);
-  border-radius: 999px;
-  color: var(--accent-contrast);
-  display: inline-flex;
-  gap: 0.382rem;
-  padding: 0.618rem 1.618rem;
-  text-decoration: none;
-  transition: background-color 120ms ease;
-}
-
-.cta:hover {
-  background: var(--accent-10);
-}
-
-.cta:focus-visible {
-  box-shadow: var(--focus-ring);
-  outline: none;
-}
-
-.cta span {
-  transition: translate 120ms ease;
-}
-
-.cta:hover span {
-  translate: 0.236rem 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cta span {
-    transition: none;
-  }
 }
 
 /* Until the parts have loaded: the room they will take, so nothing below jumps. */

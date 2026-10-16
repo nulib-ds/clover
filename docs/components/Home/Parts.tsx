@@ -1,4 +1,3 @@
-import Link from "next/link";
 import React, { useRef } from "react";
 import dynamic from "next/dynamic";
 import styles from "docs/components/Home/Parts.module.css";
@@ -31,15 +30,18 @@ const Parts: React.FC<{
   };
   return (
     <section className={styles.section}>
-      {/* `#parts` for links to the section. */}
-      <div className={styles.head} id="parts">
-        <h2 ref={heading} tabIndex={-1} className={styles.visuallyHidden}>
-          Parts
-        </h2>
-        <Link href="/docs/composing" className={styles.cta}>
-          Build a layout <span aria-hidden="true">→</span>
-        </Link>
-      </div>
+      {/*
+       * `#parts` for links to the section. Its call to action, "Build a layout", is over
+       * it, under the playground's stage, beside the template picker.
+       */}
+      <h2
+        ref={heading}
+        tabIndex={-1}
+        className={styles.visuallyHidden}
+        id="parts"
+      >
+        Parts
+      </h2>
       {resource ? (
         <PartsLive resource={resource} onTry={tryResource} />
       ) : (
