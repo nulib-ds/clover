@@ -11,11 +11,32 @@ import { useRouter } from "next/router";
 
 const siteTitle = "Clover IIIF";
 /*
- * Drives the browser title and the OpenGraph description. Keeps "Manifests" and
- * "Collections" for search, where the homepage headline says "IIIF content".
+ * The homepage's title, and any page's without one of its own: the site's name and the
+ * hero's headline (`docs/components/Home/Hero.tsx`).
+ */
+const homeTitle = `${siteTitle} – Imagine a viewer built by you`;
+/*
+ * The site's description, for the homepage and any page without one of its own: the
+ * hero's sentence, less "designed", so it fits the 160 or so characters a search result
+ * shows. Keeps "Manifests" and "Collections" for search.
  */
 const siteDescription =
-  "A suite of accessible UI components for IIIF Manifests and Collections.";
+  "Share your distinctive collections through a lightweight, accessible, and modular viewer for IIIF Manifests, Collections, and the material they describe.";
+/*
+ * Every page's share card picture: the cover of the White Sewing Machine Company's 1896
+ * bicycle catalog (the playground's Catalog, `public/mocks/paged/`), a 1.91:1 band of it
+ * cut by Northwestern's IIIF Image server (the rider from her hat to the handlebars, "The
+ * White" beside her, the scan's border trimmed), so no platform crops it further. Served
+ * from there, never copied into the site: the record's attribution does not permit
+ * further distribution of its images (Mat, 2026-10-16).
+ */
+const shareImage = {
+  url: "https://iiif.dc.library.northwestern.edu/iiif/3/7ff31828-e562-4cbe-b517-74baace7745c/60,650,4636,2434/1200,/0/default.jpg",
+  type: "image/jpeg",
+  width: 1200,
+  height: 630,
+  alt: "The cover of the White Sewing Machine Company's 1896 bicycle catalog: a woman in a white dress and straw hat rides a bicycle down a country road, “The White” lettered beside her.",
+};
 /*
  * The site's address, for canonical links. The deploy workflow passes it as Pages reports
  * it (`NEXT_PUBLIC_SITE_URL`); a build without it is for nulib-ds.github.io.
@@ -82,7 +103,7 @@ const config: DocsThemeConfig = {
     const config = useConfig();
     const title = config.frontMatter.title
       ? `${config.frontMatter.title} – ${siteTitle}`
-      : `${siteTitle} – ${siteDescription}`;
+      : homeTitle;
     const description = config.frontMatter.description
       ? config.frontMatter.description
       : siteDescription;
@@ -95,28 +116,39 @@ const config: DocsThemeConfig = {
     const canonical = useMemo(() => `${siteUrl}${route}`, [route]);
 
     return {
-      defaultTitle: `${siteTitle} - ${siteDescription}`,
+      defaultTitle: homeTitle,
       title,
       description,
       canonical,
       openGraph: {
+        type: "website",
         url: canonical,
         title,
-        siteName: `${siteTitle} - ${siteDescription}`,
-        images: [
-          {
-            url: "",
-            type: "image/png",
-            width: 1200,
-            height: 675,
-          },
-        ],
+        description,
+        siteName: siteTitle,
+        images: [shareImage],
       },
+      // X reads the title, description and picture from Open Graph; its alt it does not.
       twitter: {
         cardType: "summary_large_image",
       },
+      additionalMetaTags: [
+        { name: "twitter:image:alt", content: shareImage.alt },
+      ],
     };
   },
+  /*
+   * In place of Nextra's default head, which carries its own description, Open Graph
+   * title and description ("Nextra: the next docs builder") and its author's X handle,
+   * contradicting the cards `useNextSeoProps` writes. Kept: the language, and the name a
+   * phone gives the site on its home screen.
+   */
+  head: (
+    <>
+      <meta httpEquiv="Content-Language" content="en" />
+      <meta name="apple-mobile-web-app-title" content={siteTitle} />
+    </>
+  ),
   logo: <Logo />,
   navbar: {
     /* Font, appearance and colour, behind a gear at the end of the header row. */

@@ -185,10 +185,23 @@
 
 /* ── Feature row ──────────────────────────────────────────────────────────── */
 
+/* The four in a row, two by two where they would crowd, one above another on a phone. */
 .features {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 64rem) {
+  .features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 40rem) {
+  .features {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .feature {

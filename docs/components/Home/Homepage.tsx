@@ -28,11 +28,6 @@ const features = [
     title: "Ships what you draw",
     body: "The Viewer is a 1 kB shell, so a page carries only the template and parts it uses. Its renderer replaces OpenSeadragon.",
   },
-  {
-    label: "Portable",
-    title: "React, or a script tag",
-    body: "ES modules for React 18 and 19, and a <clover-viewer> element for any page.",
-  },
 ];
 
 /**

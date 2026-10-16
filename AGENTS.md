@@ -133,6 +133,14 @@ deadline.
     `useStuck` sets the page's `scroll-padding-top` to the navbar and the bar, measured,
     so a control that takes focus in the stage comes into view below the bar (WCAG
     2.4.11).
+  - Titles and share cards are `useNextSeoProps` in `theme.config.tsx`: the homepage's
+    title is "Clover IIIF – Imagine a viewer built by you" and the site's description
+    the hero's sentence (less "designed", to fit a search result); a page with its own
+    `title` and `description` uses them. Every page's card picture is a 1200 × 630 band of
+    the White catalog's cover, cut by Northwestern's IIIF Image server and linked from
+    there, never copied into `public/` (Mat, 2026-10-16: the record's attribution does
+    not permit further distribution of its images). Its `head` replaces Nextra's
+    default, whose placeholder description and X handle had contradicted the cards.
   - Under the navbar on every page, a line on the light grey surface (`--surface`) says
     Clover is a project of Northwestern University Libraries, linking the Libraries'
     site (`docs/components/Subheader.tsx`, styled in `docs/styles/layout.css`). It is
