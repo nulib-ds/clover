@@ -904,6 +904,9 @@ function canvasHandle(
     get backendKind() {
       return renderer.backendKind;
     },
+    get atHome() {
+      return renderer.isAtHome;
+    },
     fitBounds: (bounds, immediate) => renderer.fitBounds(bounds, immediate),
     fitItemRect: (index, rect, immediate) =>
       renderer.fitItemRect(index, rect, immediate),

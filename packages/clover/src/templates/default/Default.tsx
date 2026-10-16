@@ -14,6 +14,8 @@ import type {
 } from "../../parts";
 import { useDragToClose } from "../shared/useDragToClose";
 import { useFocusOnOpen, useSlide, useWideEnough } from "../shared/useSlide";
+import { useFollowFocus } from "../shared/useFollowFocus";
+import { useSpine } from "../shared/useSpine";
 
 /** The narrowest the stage and the panel may be dragged, side by side. */
 const STAGE_MIN = "16rem";
@@ -89,12 +91,21 @@ export function Default({
   const setOpen = (value: boolean) => setChoice(value);
   const panelId = `${useId().replace(/:/g, "")}-panel`;
   const pane = useRef<HTMLElement>(null);
-  // Focus in the panel as it goes is handed to its toggle, never left on what is hidden.
+  /*
+   * The panel's toggle sits on the spine, the bar between stage and panel, while the
+   * panel is open beside the stage, and among the stage's controls otherwise. So a press
+   * moves it, and focus on it, or in the panel as the panel goes (never left on what is
+   * hidden), follows it to its new place once drawn.
+   */
+  const followFocus = useFollowFocus();
+  const follow = () =>
+    followFocus(() =>
+      document.querySelector<HTMLElement>(
+        `[data-button="panel"][aria-controls~="${panelId}"]`,
+      ),
+    );
   const handBack = () => {
-    if (pane.current?.contains(document.activeElement))
-      document
-        .querySelector<HTMLElement>(`[aria-controls~="${panelId}"]`)
-        ?.focus();
+    if (pane.current?.contains(document.activeElement)) follow();
   };
   /*
    * Narrowing under an open panel closes it, rather than suddenly covering the page. Before
@@ -109,6 +120,27 @@ export function Default({
     wasBeside.current = beside;
   }, [beside]);
   const over = !beside;
+  const docked = panel && !over && open;
+  const spine = useRef<HTMLDivElement>(null);
+  useSpine(
+    spine,
+    () =>
+      spine.current?.parentElement?.querySelector<HTMLElement>(
+        ".clover-template-default-stage",
+      ),
+    docked,
+  );
+  const toggle = (
+    <Clover.PanelToggle
+      open={open}
+      onOpenChange={(next) => {
+        // Beside the stage it moves; over it, the panel takes focus as it opens.
+        if (!over) follow();
+        setOpen(next);
+      }}
+      controls={panelId}
+    />
+  );
   // Only over the stage does it slide: beside it, it simply shows and hides.
   const slide = useSlide(over && open);
   useFocusOnOpen(panelRef, over && slide.mounted);
@@ -174,13 +206,7 @@ export function Default({
           {/* Its stage shows the loading; announced here, nothing moves. */}
           <Clover.Status loading={false} />
           <Clover.Content className="clover-template-default-stage">
-            {panel && (
-              <Clover.PanelToggle
-                open={open}
-                onOpenChange={setOpen}
-                controls={panelId}
-              />
-            )}
+            {panel && !docked && toggle}
           </Clover.Content>
           <div className="clover-template-default-rail">
             <div className="clover-template-default-rail-header">
@@ -190,8 +216,12 @@ export function Default({
             {items && <Clover.Items layout={items} />}
           </div>
         </Clover.SplitPane>
-        {panel && !over && open && (
-          <Clover.SplitHandle aria-controls={panelId} />
+        {docked && <Clover.SplitHandle aria-controls={panelId} />}
+        {/* Open beside the stage, its toggle on the spine, right after the bar. */}
+        {docked && (
+          <div ref={spine} className="clover-template-default-spine">
+            {toggle}
+          </div>
         )}
         {panel && (
           <Clover.SplitPane

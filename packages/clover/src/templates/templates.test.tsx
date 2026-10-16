@@ -77,10 +77,14 @@ describe("templates", () => {
         name: "Close information panel",
       }),
     ).toBeNull();
-    const toggle = screen.getByRole("button", { name: "More Information" });
-    fireEvent.click(toggle);
+    // Open, it sits on the bar between them; closed, among the Canvas's controls.
+    const toggle = () =>
+      screen.getByRole("button", { name: "More Information" });
+    expect(toggle().closest(".clover-template-default-spine")).not.toBeNull();
+    fireEvent.click(toggle());
     expect(panel).not.toBeVisible();
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(toggle()).toHaveAttribute("aria-expanded", "false");
+    expect(toggle().closest(".clover-canvas-controls")).not.toBeNull();
   });
 
   it("Default: the strip's arrows step the view; its header names the pages", async () => {
@@ -194,9 +198,12 @@ describe("templates", () => {
     expect(
       document.querySelector(".clover-template-default-panel"),
     ).toHaveAttribute("hidden");
-    expect(
-      screen.getByRole("button", { name: "More Information" }),
-    ).toHaveFocus();
+    // In the frame after: the toggle has moved, from the spine to the stage's controls.
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "More Information" }),
+      ).toHaveFocus(),
+    );
     width.mockRestore();
     vi.unstubAllGlobals();
   });
@@ -291,7 +298,7 @@ describe("templates", () => {
     await screen.findByRole("heading", {
       name: "Still image from an opera performance at Indiana University",
     });
-    expect(screen.queryByRole("button", { name: "Show Items" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Show Items/ })).toBeNull();
     expect(screen.queryByRole("complementary", { name: "Items" })).toBeNull();
     expect(screen.queryByRole("separator")).toBeNull();
     expect(
@@ -344,27 +351,40 @@ describe("templates", () => {
     ).toBeInTheDocument();
   });
 
-  it("Document: toolbar, thumbnails, a page the wheel turns, and a sliding panel", async () => {
+  it("Document: toolbar, thumbnails, a sheet for each view, PageDown, and a sliding panel", async () => {
     render(<Templates.Document iiifContent={bookJson} />);
     expect(
       await screen.findByRole("heading", { name: "Simple Manifest - Book" }),
     ).toBeInTheDocument();
     const sidebar = screen.getByRole("complementary", { name: "Items" });
-    const toggle = screen.getByRole("button", { name: "Show Items" });
-    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    // Their toggle: on the spine while they show, out of their pane, which is theirs whole.
+    const toggle = () => screen.getByRole("button", { name: /^Show Items/ });
+    expect(toggle()).toHaveAttribute("aria-expanded", "true");
+    expect(
+      toggle().closest(".clover-template-document-spine[data-for='sidebar']"),
+    ).not.toBeNull();
+    expect(sidebar).not.toContainElement(toggle());
     expect(within(sidebar).getAllByRole("option")).toHaveLength(3);
 
-    const stage = document.querySelector(".clover-template-document-stage")!;
+    // A still sheet for each view, the cover and two spreads, hidden from assistive
+    // technology: the live Canvas and the thumbnails are the way to each page.
+    const stage = document.querySelector<HTMLElement>(
+      ".clover-template-document-stage",
+    )!;
+    const sheets = stage.querySelectorAll(".clover-template-document-sheet");
+    expect(sheets).toHaveLength(3);
+    expect(sheets[1]).toHaveAttribute("aria-hidden", "true");
+    expect(sheets[1].querySelectorAll("img, span")).toHaveLength(2);
     const canvas = stage.querySelector('[data-testid="clover-canvas"]');
-    stage.dispatchEvent(
-      new WheelEvent("wheel", { deltaY: 100, bubbles: true, cancelable: true }),
-    );
+    fireEvent.keyDown(stage, { key: "PageDown" });
+    // The second view current, its thumbnail selected.
     await waitFor(() =>
-      expect(
-        document.querySelector(".clover-pager-position"),
-      ).toHaveTextContent("Item 2 of 3"),
+      expect(within(sidebar).getAllByRole("option")[1]).toHaveAttribute(
+        "aria-selected",
+        "true",
+      ),
     );
-    // The turn swapped the page into the same Canvas: nothing remounted.
+    // The one Canvas shows the next view: nothing remounted.
     expect(stage.querySelector('[data-testid="clover-canvas"]')).toBe(canvas);
 
     // With room for both, the panel sits beside the page, a bar between them.
@@ -391,8 +411,14 @@ describe("templates", () => {
     expect(panel).toHaveAttribute("hidden");
     expect(screen.getAllByRole("separator")).toHaveLength(1);
 
-    fireEvent.click(toggle);
+    // Put away, it waits over the page's top left, and focus goes with it.
+    toggle().focus();
+    fireEvent.click(toggle());
     expect(sidebar).toHaveAttribute("hidden");
+    expect(
+      toggle().closest(".clover-template-document-sidebar-closed"),
+    ).not.toBeNull();
+    await waitFor(() => expect(toggle()).toHaveFocus());
   });
 
   it("Document: the title at headingLevel, the panel's sections a level under it", async () => {
@@ -503,7 +529,11 @@ describe("templates", () => {
       option.focus();
       fireEvent.click(option);
       expect(sidebar).toHaveAttribute("hidden");
-      expect(screen.getByRole("button", { name: "Show Items" })).toHaveFocus();
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: /^Show Items/ }),
+        ).toHaveFocus(),
+      );
       matchMedia.mockRestore();
     });
   });

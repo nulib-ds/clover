@@ -4,7 +4,9 @@ import * as Clover from "../../parts";
 import type { InformationPanelLayout, RootProps } from "../../parts";
 import { useDragToClose } from "../shared/useDragToClose";
 import { useFocusOnOpen, useSlide, useWideEnough } from "../shared/useSlide";
-import { type PullListener, usePaging } from "./usePaging";
+import { useFollowFocus } from "../shared/useFollowFocus";
+import { useSpine } from "../shared/useSpine";
+import { Sheets } from "./Sheets";
 
 export type DocumentProps = Omit<RootProps, "children"> & {
   /** Whether the page thumbnails start shown. Default: shown on a wide screen. */
@@ -32,10 +34,11 @@ export type DocumentProps = Omit<RootProps, "children"> & {
 };
 
 /**
- * A layout that reads like a PDF viewer: a toolbar, page thumbnails down the left, and one
- * whole page at a time, never part of the next. Scrolling turns the page — one gesture,
- * one page — as do PageUp and PageDown. A bar between the thumbnails and the page widens
- * or narrows them. The information panel sits to the right of the page, with its own bar,
+ * A layout that reads like a PDF viewer: a toolbar, page thumbnails down the left, and
+ * the pages down one column, a spread to a sheet, the top of the next always showing:
+ * scrolling moves through them as a PDF reader's continuous view does, coming to rest on
+ * a sheet near its top, and PageUp and PageDown go a sheet at a time (`Sheets.tsx`). A
+ * bar between the thumbnails and the pages widens or narrows them. The information panel sits to the right of the page, with its own bar,
  * where there is room for both, and slides out over the page where there is not. Size
  * it with `--clover-template-document-height`.
  */
@@ -156,9 +159,22 @@ function DocumentLayout({
         ?.focus();
     setPanel(false);
   };
+  /*
+   * The page thumbnails' toggle is where they are: on the spine, the bar between them and
+   * the page (on a phone, where they float over it, their inner edge), while they show,
+   * so they keep their pane's whole height; and over the page's top left while they are
+   * put away. So every press moves it, and focus on it, or in the pane as the pane goes,
+   * follows it to its new place.
+   */
+  const sidebarSpine = useRef<HTMLDivElement>(null);
+  const followFocus = useFollowFocus();
+  const followToggle = () => followFocus(() => sidebarToggle.current);
+  const toggleSidebar = () => {
+    followToggle();
+    setSidebar((open) => !open);
+  };
   const closeSidebar = () => {
-    if (sidebarPane.current?.contains(document.activeElement))
-      sidebarToggle.current?.focus();
+    if (sidebarPane.current?.contains(document.activeElement)) followToggle();
     setSidebar(false);
   };
   const scrim = useRef<HTMLDivElement>(null);
@@ -172,95 +188,89 @@ function DocumentLayout({
     enabled: narrow && showSidebar,
     side: "start",
     onClose: closeSidebar,
+    alongside: sidebarSpine,
     exits: true,
   });
-
-  const stage = useRef<HTMLDivElement>(null);
-  /*
-   * A scroll on its way to a turn shows how near it is (`Document.css`): the pull goes
-   * straight to the stage's style, never through React, so the wheel never re-renders.
-   */
-  const pull: PullListener = (amount, phase) => {
-    const element = stage.current;
-    if (!element) return;
-    // The page leans while pulled; turned or let go, it is back in place.
-    element.style.setProperty(
-      "--clover-template-document-pull",
-      String(phase === "pull" ? amount : 0),
-    );
-    if (phase === "turn") {
-      // The chevron the turn came from holds a moment, then fades: started afresh even
-      // when two turns come with no pull between them.
-      element.dataset.turned = amount > 0 ? "next" : "previous";
-      delete element.dataset.pull;
-      void element.offsetWidth;
-    }
-    element.dataset.pull = phase;
-  };
-  // A turn only changes which Canvas the stage shows: the same Canvas, renderer and
-  // camera swap their content, with no motion of their own.
-  usePaging(stage, navigation, pull);
 
   // On a narrow screen the sidebar covers the page: choosing a page puts it away.
   const choose = () => {
     if (window.matchMedia?.(NARROW).matches) closeSidebar();
   };
 
+  /*
+   * The panel's toggle sits on the spine, the bar between the pages and the panel, while
+   * the panel is open beside them, and among the Canvas's controls otherwise; a press
+   * moves it, and focus follows it there.
+   */
+  const docked = !over && panel;
+  const spine = useRef<HTMLDivElement>(null);
+  const main = (element: React.RefObject<HTMLElement>) => () =>
+    element.current?.parentElement?.querySelector<HTMLElement>(
+      ".clover-template-document-main",
+    );
+  useSpine(spine, main(spine), docked);
+  // Over the thumbnails it belongs to, but for its far rounded end, over the page.
+  useSpine(sidebarSpine, main(sidebarSpine), showSidebar, { cap: true });
+  const panelToggle = (
+    <Clover.PanelToggle
+      open={panel}
+      onOpenChange={(next) => {
+        if (!over)
+          followFocus(() =>
+            document.querySelector<HTMLElement>(
+              `[data-button="panel"][aria-controls~="${id}-panel"]`,
+            ),
+          );
+        setPanel(next);
+      }}
+      controls={`${id}-panel`}
+    />
+  );
+
+  const toggle = pages && (
+    <button
+      ref={sidebarToggle}
+      type="button"
+      className="clover-template-document-sidebar-toggle"
+      aria-expanded={sidebar}
+      aria-controls={`${id}-sidebar`}
+      lang={langOf("templateSidebarToggle")}
+      onClick={toggleSidebar}
+    >
+      {/*
+       * A toggle, plainly: a list of thumbnails, each a small picture beside a line,
+       * the pictures filled while the list shows; and where the reader is. Its name
+       * is what it does, then the place in words ("Item 3 of 17").
+       */}
+      <svg
+        aria-hidden="true"
+        focusable="false"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill={sidebar ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="1.5" y="2" width="5.5" height="4.5" rx="1" />
+        <rect x="1.5" y="9.5" width="5.5" height="4.5" rx="1" />
+        <path d="M9.5 4.25h5M9.5 11.75h5" fill="none" />
+      </svg>
+      <span style={Clover.visuallyHidden}>{t("templateSidebarToggle")}</span>
+      <Clover.Position className="clover-template-document-position" />
+      <Clover.Tip label={t("templateSidebarToggle")} />
+    </button>
+  );
+
   return (
     <>
       <header className="clover-template-document-toolbar">
-        {pages && (
-          <button
-            ref={sidebarToggle}
-            type="button"
-            className="clover-template-document-sidebar-toggle"
-            aria-expanded={sidebar}
-            aria-controls={`${id}-sidebar`}
-            lang={langOf("templateSidebarToggle")}
-            onClick={() => setSidebar((open) => !open)}
-          >
-            {/*
-             * The panel toggle's glyph (`Clover.PanelToggle`), mirrored: a page with a
-             * side pane, here on the left, filled while the items show.
-             */}
-            <svg
-              aria-hidden="true"
-              focusable="false"
-              width="16"
-              height="16"
-              viewBox="0 0 512 512"
-              fill="currentColor"
-              stroke="currentColor"
-            >
-              <rect
-                x="64"
-                y="96"
-                width="384"
-                height="320"
-                rx="40"
-                fill="none"
-                strokeWidth="36"
-              />
-              <path d="M192 96v320" fill="none" strokeWidth="36" />
-              {sidebar && (
-                <path d="M192 96h-88a40 40 0 0 0-40 40v240a40 40 0 0 0 40 40h88z" />
-              )}
-            </svg>
-            <span style={Clover.visuallyHidden}>
-              {t("templateSidebarToggle")}
-            </span>
-            <Clover.Tip label={t("templateSidebarToggle")} />
-          </button>
-        )}
         <Clover.Label
           as={`h${headingLevel}`}
           className="clover-template-document-title"
         />
-        <Clover.Items
-          layout="pager"
-          className="clover-template-document-pager"
-        />
-        <Clover.CollectionSelect className="clover-template-document-collection" />
         {download && <Clover.Download headingLevel={below(headingLevel)} />}
       </header>
       {/* Its stage shows the loading; announced here, nothing moves. */}
@@ -314,6 +324,16 @@ function DocumentLayout({
         </Clover.SplitPane>
         {/* The bar between the thumbnails and the page; hidden where they cover it. */}
         {showSidebar && <Clover.SplitHandle aria-controls={`${id}-sidebar`} />}
+        {/* Open, their toggle on its spine, right after the bar (on a phone, the edge). */}
+        {showSidebar && (
+          <div
+            ref={sidebarSpine}
+            className="clover-template-document-spine"
+            data-for="sidebar"
+          >
+            {toggle}
+          </div>
+        )}
         <Clover.SplitPane
           className="clover-template-document-main"
           // A minimum only beside another pane: Items, or the InformationPanel docked.
@@ -321,24 +341,23 @@ function DocumentLayout({
             (showSidebar && !narrow) || (panel && !over) ? PAGE_MIN : undefined
           }
         >
-          <div ref={stage} className="clover-template-document-stage">
-            <Clover.Content className="clover-template-document-content">
-              <Clover.PanelToggle
-                open={panel}
-                onOpenChange={setPanel}
-                controls={`${id}-panel`}
-              />
-            </Clover.Content>
-            {pages && (
-              <>
-                <PullCue direction="previous" />
-                <PullCue direction="next" />
-              </>
-            )}
-          </div>
+          {/* Put away, their toggle waits over the page's top left. */}
+          {pages && !sidebar && (
+            <div className="clover-template-document-sidebar-closed">
+              {toggle}
+            </div>
+          )}
+          {/* The pages, and the one Canvas, which holds the panel's toggle. */}
+          <Sheets>{!docked && panelToggle}</Sheets>
         </Clover.SplitPane>
         {/* The bar between the page and the panel beside it; over the page, none. */}
-        {!over && panel && <Clover.SplitHandle aria-controls={`${id}-panel`} />}
+        {docked && <Clover.SplitHandle aria-controls={`${id}-panel`} />}
+        {/* Open beside the pages, its toggle on the spine, right after the bar. */}
+        {docked && (
+          <div ref={spine} className="clover-template-document-spine">
+            {panelToggle}
+          </div>
+        )}
         <Clover.SplitPane
           ref={panelPane}
           id={`${id}-panel`}
@@ -380,32 +399,6 @@ function DocumentLayout({
         )}
       </Clover.Split>
     </>
-  );
-}
-
-/**
- * The page a scroll is pulling toward, signalled at the edge it will come from: a
- * chevron that rises in as the pull builds. Decorative: PageUp and PageDown, the pager and
- * the thumbnails all turn the page without it.
- */
-function PullCue({ direction }: { direction: "previous" | "next" }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="clover-template-document-cue"
-      data-direction={direction}
-    >
-      <svg focusable="false" width="16" height="16" viewBox="0 0 16 16">
-        <path
-          d={direction === "next" ? "M3 6l5 5 5-5" : "M3 10l5-5 5 5"}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </span>
   );
 }
 

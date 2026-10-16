@@ -107,6 +107,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   <Viewer iiifContent={url} template={Default} />   // up front, and on the server
   ```
 
+- **`stillSource(canvas, size)`**, a picture to stand in for a Canvas as large as it is
+  drawn: the first image it paints, then its placeholder's or accompanying Canvas's, and
+  only then its own `thumbnail`, which is often small. `thumbnailSource` keeps the
+  `thumbnail` first, for small pictures. Resolve a level 0 service's with
+  `resolveThumbnail`. `Document` draws its sheets with it.
 - **The descriptive properties as parts:** `Summary`, `Metadata`, `RequiredStatement`,
   `Rights`, `Homepage`, `Rendering`, `SeeAlso`, `PartOf`, `Thumbnail` and `Id`, beside
   `Label`. Each reads the Root's Manifest, or the current Canvas with `of="canvas"`; a
@@ -409,7 +414,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     between a spread's two) and `Position` ("2 / 70"); the `InformationPanel` to the
     right of all three, the layout's full height, scrolling within. The panel never
     stacks: it has its own space beside the Canvas, and a `SplitHandle` between them
-    shares the width (remembered under `storageKey`).
+    shares the width (remembered under `storageKey`). While it is open there, its
+    `PanelToggle` sits on that bar, centred, level with the Canvas's controls; closed,
+    it is back among them, and focus moves with it.
     Where there is no room for both (a phone), it slides over the Canvas instead, leaving
     a band of the page (`2xl`) that closes it on a press, as Escape and its close button
     do. It can be dragged back off too, as a side menu in a phone app can: it follows a
@@ -429,23 +436,41 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     (`"carousel"`, `"list"` or `"grid"`), or `false` for none. `header={false}` leaves
     out the `Thumbnail` and `Label` over the Canvas (3.x's `showTitle: false`), and
     `panel={false}` the `InformationPanel` and its `PanelToggle`.
-  - `Document`: reads like a PDF viewer. A toolbar, `Items` down the left (the
-    Manifest's Canvases as page thumbnails), and one whole page at a time: a scroll
-    turns the page (one gesture, one page, past any trackpad momentum), as do PageUp and
-    PageDown, and at either end the wheel scrolls the web page on. A turn takes a
-    deliberate scroll (100px of wheel), and a long swipe's momentum never turns a second
-    page, however strong it stays; a wheel still spun after a second turns one more. A
-    scroll short of a turn shows how near it is: the page leans the way it is scrolled,
-    by up to `l`, and a chevron rises in from the edge the next (or previous) page comes
-    from. Let go and the page springs back, the chevron lingering a beat before it
-    fades; after a turn its chevron stays a moment in full, then fades. For less motion,
-    only the chevron shows. A `SplitHandle` between `Items` and the page resizes the
-    thumbnails; a one-page document has neither, nor their toggle. The toggle reads
-    "Show Items" and their pane "Items": what they list need not be pages. The
-    `InformationPanel` sits to the right of the page in its own `SplitPane`, with a
+  - `Document`: reads like a PDF viewer. A toolbar (the `Label`, and `Download`),
+    `Items` down the left (the Manifest's Canvases as page thumbnails), and the
+    pages down one column, as a PDF reader's continuous view: a sheet for each view (a
+    spread is one), fitted whole on the grey ground with `--clover-inset` round it, and
+    at most the stage less twice the inset tall, so the top of the next always shows
+    under the one at rest. The column scrolls as any page does (wheel, trackpad, a
+    finger, the scrollbar), and at either end the web page scrolls on. The top of the
+    stage is the one place a sheet is active: where the scroll rests, the next sheet is
+    brought there once the active one has been scrolled a quarter of its height on, the
+    previous once a quarter of it is in sight, and otherwise the active one settles back.
+    A press on a sheet, a thumbnail, and PageUp and PageDown bring theirs. Sheets not
+    active are muted (0.618 opacity, 0.809 under the pointer). Each sheet is a still of
+    its pictures; the one Canvas, with its zoom, annotations and media, lies over the
+    active sheet's still, and shows, its controls sliding in, only once that sheet is in
+    place and drawn; while the column scrolls the controls slide away. Zoomed in or out,
+    or moved, the active sheet fills the stage, pushing the others down, and they
+    dissolve, until the Canvas is home again or another sheet comes in. A finger scrolls
+    the column until then; after, it moves about the page. Pinch and Ctrl-wheel zoom.
+    The page thumbnails' toggle is a pill drawn as the round controls are (the control's
+    dark fill and light glyph, the accent under the pointer or focused): the glyph of a
+    list of thumbnails, its pictures filled while they show, and `Position` ("3 / 17",
+    `text-xs`). It reads "Show Items" and then the place ("Item 3 of 17"), and their
+    pane "Items": what they list need not be pages. While they show, it sits on the bar
+    between them and the page, over them but for its far rounded end, which hangs over
+    the page, so the thumbnails have their pane's whole height; put away, over the
+    page's top left, `--clover-inset` in, level with the Canvas's controls. On a phone,
+    where they float over the page, it sits on their inner edge, and is dragged off with
+    them. A `SplitHandle` between `Items` and the page resizes them; a one-page document
+    has neither, nor the toggle. To change Collection member, use the panel's Collection
+    section. The `InformationPanel` sits to the right of the page in its own `SplitPane`, with a
     `SplitHandle` between them that shares the width (remembered under `storageKey`),
-    where there is room for both, as `Default`'s does; where there is not, it slides out
-    over the page, taking focus and closing on Escape or its own button. Spaced as
+    where there is room for both, as `Default`'s does, its toggle on that bar while it
+    is open; where there is not, it slides out over the page, taking focus and closing
+    on Escape or its own button. Each toggle moves as it is pressed, and focus goes with
+    it. Spaced as
     `Default` is: the toolbar, `Items`, the page and the panel each keep
     `--clover-inset` at their sides, so the toolbar's first and last controls, the
     thumbnails, the page and the Canvas's controls share one edge; the Manifest's
@@ -779,8 +804,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - The navigator hides by `opacity` and `pointer-events`, as the controls do, no longer
     by `visibility`.
 - **The `InformationPanel`'s toggle, `PanelToggle`, never fades.** The Canvas's other
-  controls fade when the pointer leaves; the toggle stays, in the Canvas's top corner, on
-  wide screens and phones alike. That includes a lone video or sound, which shows no
+  controls fade when the pointer leaves; the toggle stays, in the Canvas's top corner (in
+  `Default` and `Document`, on the bar beside the Canvas while the panel is open there),
+  on wide screens and phones alike. That includes a lone video or sound, which shows no
   image controls, and a placeholder, whose own toggle steps aside for it. Beside the
   other controls it keeps their own gap. The controls now fade one by one rather than
   all together: a stylesheet that faded `.clover-canvas-controls` itself should fade its
@@ -826,7 +852,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - **For hosts.** The `onReady` handle gains `zoomToAnnotation(id)`, which zooms to an
     annotation's region on the Canvas and focuses it, `fitCanvasRect(canvasId, rect)`,
     which frames a region of a shown Canvas, and `getCanvasRegion()`, the visible part of
-    the Canvas filling most of the view in its own coordinates. `options.request` sets
+    the Canvas filling most of the view in its own coordinates, and `atHome`, whether the
+    view is still fitted whole (false once the reader zooms, pans or turns it, true again
+    on `home()`; a resize keeps it). `options.request` sets
     credentials, headers and `fetch` for every request the Canvas makes.
     `placeholder={false}` opens a Canvas past its placeholder, and children render with
     the Canvas's controls, after its own (a host's own controls).
@@ -1035,7 +1063,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Collection's members, and a count that keeps its widest room), then added about
   0.4 kB to each template: the budgets were set to the Viewer with `Default` 62.0 kB
   (61,882 B), `Document` 64.0 (63,884 B), `Gallery` 55.1 (54,931 B) and
-  `<clover-viewer>` 96.9 (96,709 B).
+  `<clover-viewer>` 96.9 (96,709 B). Document's continuous column of sheets, the toggles
+  on the spine (placed by `useSpine`, focus following them with `useFollowFocus`), the
+  thumbnails' toggle dragged with their pane, and the spine's Tips then raised the
+  Viewer with `Default` to 62.5 kB (62,418 B), `Document` to 65.2 (65,085 B), the
+  stylesheet to 10.7 (10,657 B) and `<clover-viewer>` to 97.6 (97,437 B);
+  `templates.css` is 2.0 kB (2,032 B), within its 2.1.
 
   The API is experimental and may change in any release.
 
@@ -1265,8 +1298,10 @@ are in the repository's `ACCESSIBILITY.md`.
     hides it until the pointer comes back or focus leaves. The label's markup changed:
     `.clover-items-label` now holds `.clover-items-label-text`, which carries `lang` and
     takes the clamp, and, when the title is cut, `data-clamped` and a hidden copy,
-    `.clover-items-label-full`, kept out of the item's name. Move a clamp or `lang`
-    selector to the inner span.
+    `.clover-items-label-full`, kept out of the item's name. Only a clamped title can be
+    cut: a list's titles (a Collection's members) never get the copy, in Firefox too,
+    which measured their inline text as cut. Move a clamp or `lang` selector to the
+    inner span.
 
     ```css
     /* Before */

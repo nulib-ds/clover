@@ -157,7 +157,11 @@ export type { Chapter, ContentsNode } from "./core/ranges";
 export { localize } from "./core/value";
 export { toPlainText } from "./core/text";
 export type { ItemModel, ItemPart } from "./core/items";
-export { thumbnailSource, resolveThumbnail } from "./core/thumbnail";
+export {
+  resolveThumbnail,
+  stillSource,
+  thumbnailSource,
+} from "./core/thumbnail";
 export type { LocalizedValue } from "./core/value";
 export { groupViews, resolveBehavior, resolveDirection } from "./core/sequence";
 export type { SequenceBehavior, View, ViewingDirection } from "./core/sequence";

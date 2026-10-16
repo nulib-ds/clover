@@ -65,8 +65,8 @@ test.describe("A Collection", () => {
       browserName === "webkit" || process.platform === "darwin",
       "an arrow key opens the menu's own list here, which the page does not see",
     );
-    await open(page, "&scene=document");
-    const title = page.locator(".clover-template-document-title");
+    await open(page, "&scene=collection");
+    const title = page.locator("h1.clover-label");
     await expect(title).toHaveText(MEMBERS[0][1]);
     const menu = page.getByRole("combobox", { name: "The family papers" });
     await menu.focus();
@@ -97,8 +97,8 @@ test.describe("A Collection", () => {
       browserName === "webkit" || process.platform === "darwin",
       "an arrow key opens the menu's own list here, which the page does not see",
     );
-    await open(page, "&scene=document");
-    const title = page.locator(".clover-template-document-title");
+    await open(page, "&scene=collection");
+    const title = page.locator("h1.clover-label");
     await expect(title).toHaveText(MEMBERS[0][1]);
     const menu = page.getByRole("combobox", { name: "The family papers" });
     await menu.focus();
@@ -123,8 +123,8 @@ test.describe("A Collection", () => {
    * arrive in a region already there, and are read as a change.
    */
   test("announces each load in the one status region", async ({ page }) => {
-    await open(page, "&scene=document");
-    const title = page.locator(".clover-template-document-title");
+    await open(page, "&scene=collection");
+    const title = page.locator("h1.clover-label");
     await expect(title).toHaveText(MEMBERS[0][1]);
     const status = page.locator(".clover-status[role='status']");
     await expect(status).toHaveCount(1);

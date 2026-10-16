@@ -97,7 +97,10 @@
   )
   .clover-tip,
 button.clover-canvas-placeholder-toggle > .clover-tip,
-button.clover-canvas-caption-close > .clover-tip {
+button.clover-canvas-caption-close > .clover-tip,
+button.clover-template-document-sidebar-toggle > .clover-tip,
+:is(.clover-template-default-spine, .clover-template-document-spine)
+  .clover-tip {
   top: calc(100% + var(--clover-space-xs));
   bottom: auto;
 }
@@ -110,7 +113,10 @@ button.clover-canvas-caption-close > .clover-tip {
   )
   .clover-tip::before,
 button.clover-canvas-placeholder-toggle > .clover-tip::before,
-button.clover-canvas-caption-close > .clover-tip::before {
+button.clover-canvas-caption-close > .clover-tip::before,
+button.clover-template-document-sidebar-toggle > .clover-tip::before,
+:is(.clover-template-default-spine, .clover-template-document-spine)
+  .clover-tip::before {
   top: auto;
   bottom: 100%;
 }
@@ -120,6 +126,9 @@ button.clover-canvas-caption-close > .clover-tip::before {
   > :first-child
   .clover-tip,
 button.clover-items-scroll-prev > .clover-tip,
+.clover-template-document-sidebar-closed
+  > button.clover-template-document-sidebar-toggle
+  > .clover-tip,
 .clover-information-panel[data-floating]
   > button.clover-information-panel-close
   > .clover-tip {
@@ -128,11 +137,7 @@ button.clover-items-scroll-prev > .clover-tip,
 }
 
 /* …and at its end (the media transport's end is its own group, the bar's last). */
-:is(
-    .clover-canvas-transport-end,
-    .clover-template-document-pager,
-    .clover-template-lightbox-header
-  )
+:is(.clover-canvas-transport-end, .clover-template-lightbox-header)
   > :last-child
   .clover-tip,
 .clover-canvas-controls > button:last-of-type > .clover-tip,

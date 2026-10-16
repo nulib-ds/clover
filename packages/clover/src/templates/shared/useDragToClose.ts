@@ -16,6 +16,8 @@ export interface DragToCloseOptions {
   onClose: () => void;
   /** The wash over the page behind it, to fade as the pane goes. */
   scrim?: React.RefObject<HTMLElement>;
+  /** What sits on the pane's edge and moves with it (its toggle, on its spine). */
+  alongside?: React.RefObject<HTMLElement>;
   /**
    * The pane has no slide of its own (it is simply hidden): the drag finishes the motion
    * off the edge itself, then closes it. By default its own slide out carries on.
@@ -36,17 +38,23 @@ export interface DragToCloseOptions {
  */
 export function useDragToClose(
   pane: React.RefObject<HTMLElement>,
-  { enabled, side, onClose, scrim, exits = false }: DragToCloseOptions,
+  {
+    enabled,
+    side,
+    onClose,
+    scrim,
+    alongside,
+    exits = false,
+  }: DragToCloseOptions,
 ) {
-  const latest = useRef({ enabled, side, onClose, scrim, exits });
-  latest.current = { enabled, side, onClose, scrim, exits };
+  const latest = useRef({ enabled, side, onClose, scrim, alongside, exits });
+  latest.current = { enabled, side, onClose, scrim, alongside, exits };
 
   useEffect(() => {
     const element = pane.current;
     if (!element) return;
     // Opened again: whatever a drag left is cleared, so the pane slides in whole.
-    element.style.translate = "";
-    element.style.transition = "";
+    move([element, latest.current.alongside?.current], "", "");
     const wash = latest.current.scrim?.current;
     if (wash) {
       wash.style.opacity = "";
@@ -65,6 +73,8 @@ export function useDragToClose(
     let width = 1;
     let toward = 1;
     let samples: Array<[number, number]> = [];
+    /** The pane, and what moves with it. */
+    const moving = () => [element, latest.current.alongside?.current];
 
     const onDown = (event: PointerEvent) => {
       if (
@@ -103,10 +113,10 @@ export function useDragToClose(
         } catch {
           // The drag goes on without it.
         }
-        element.style.transition = "none";
+        move(moving(), undefined, "none");
       }
       offset = Math.max(0, dx);
-      element.style.translate = `${offset * toward}px 0`;
+      move(moving(), `${offset * toward}px 0`);
       const wash = latest.current.scrim?.current;
       if (wash) {
         wash.style.transition = "none";
@@ -137,18 +147,16 @@ export function useDragToClose(
         }
         if (latest.current.exits) {
           // No slide of its own: it goes the rest of the way, then closes.
-          element.style.transition = "translate 200ms ease-out";
-          element.style.translate = `${width * toward}px 0`;
+          move(moving(), `${width * toward}px 0`, "translate 200ms ease-out");
           setTimeout(() => latest.current.onClose(), 200);
           return;
         }
         // Close from where it was let go: the slide out carries on from there.
-        element.style.transition = "";
+        move(moving(), undefined, "");
         latest.current.onClose();
         return;
       }
-      element.style.transition = SPRING;
-      element.style.translate = "";
+      move(moving(), "", SPRING);
       if (wash) {
         wash.style.transition = "opacity 240ms ease";
         wash.style.opacity = "";
@@ -171,4 +179,17 @@ export function useDragToClose(
       element.removeEventListener("pointercancel", onUp);
     };
   }, [pane]);
+}
+
+/** Sets the `translate`, and the `transition`, of each element given that is there. */
+function move(
+  elements: Array<HTMLElement | null | undefined>,
+  translate?: string,
+  transition?: string,
+) {
+  for (const element of elements) {
+    if (!element) continue;
+    if (transition !== undefined) element.style.transition = transition;
+    if (translate !== undefined) element.style.translate = translate;
+  }
 }

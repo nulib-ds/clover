@@ -15,8 +15,10 @@ the arrow keys (Home and End for the limits). The stage keeps at least
 for both (about 31rem, a phone), the panel slides over the stage instead, leaving a strip
 of the page uncovered: a click on the strip, Escape or its close button puts it away.
 The template measures its own width, so a narrow column of a wide page behaves the same.
-The panel's toggle is always in the stage's top corner and never fades with the other
-controls.
+The panel's toggle never fades with the other controls. While the panel is open beside the
+stage it sits on the bar between them, level with the stage's controls; closed, or over
+the stage, it is in the stage's top corner. It moves as it is pressed, and focus goes
+with it.
 
 ```jsx
 import Viewer from "@nulib/clover";
@@ -51,6 +53,7 @@ and every heading moves down a level, so the page's outline stays true. With
 
 To change the layout, copy `Default.tsx` and `Default.css` into your app, and import the
 parts from `@nulib/clover` where they import `../../parts`. They use only what
-`@nulib/clover` exports, and the slide hooks in `templates/shared/useSlide.ts`. The
+`@nulib/clover` exports, and the hooks in `templates/shared/` (`useSlide.ts`,
+`useDragToClose.ts`, `useSpine.ts`, `useFollowFocus.ts`); copy those too. The
 split is `Clover.Split`, `Clover.SplitPane` and `Clover.SplitHandle`, which you can use
 for any layout of your own.

@@ -5,8 +5,14 @@ import { useDragToClose } from "./useDragToClose";
 
 function Pane({ onClose }: { onClose: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
-  useDragToClose(ref, { enabled: true, side: "end", onClose });
-  return <div ref={ref} data-testid="pane" />;
+  const edge = useRef<HTMLDivElement>(null);
+  useDragToClose(ref, { enabled: true, side: "end", onClose, alongside: edge });
+  return (
+    <>
+      <div ref={ref} data-testid="pane" />
+      <div ref={edge} data-testid="edge" />
+    </>
+  );
 }
 
 // jsdom has no PointerEvent: one made by hand, with what the hook reads.
@@ -34,7 +40,7 @@ function setup() {
   const { getByTestId } = render(<Pane onClose={onClose} />);
   const pane = getByTestId("pane");
   pane.getBoundingClientRect = () => ({ width: 300 }) as DOMRect;
-  return { pane, onClose };
+  return { pane, edge: getByTestId("edge"), onClose };
 }
 
 describe("useDragToClose", () => {
@@ -55,6 +61,17 @@ describe("useDragToClose", () => {
     pointer(pane, "pointerup", 160, 0, { at: 800 });
     expect(onClose).not.toHaveBeenCalled();
     expect(pane.style.translate).toBe("");
+  });
+
+  it("moves what sits on the pane's edge with it, and back", () => {
+    const { pane, edge } = setup();
+    pointer(pane, "pointerdown", 100, 0, { at: 0 });
+    pointer(pane, "pointermove", 160, 0, { at: 400 });
+    expect(edge.style.translate).toBe("60px 0");
+    expect(edge.style.transition).toBe("none");
+    pointer(pane, "pointerup", 160, 0, { at: 800 });
+    expect(edge.style.translate).toBe("");
+    expect(edge.style.transition).toBe(pane.style.transition);
   });
 
   it("closes on a flick however short", () => {

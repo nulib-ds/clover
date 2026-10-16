@@ -224,18 +224,63 @@ every rule below.
 - Classes are `clover-template-<name>-*`.
 - Current set: `Default` (3.x Viewer layout, the Viewer's own; `items` picks its
   thumbnails), `Document` (a PDF viewer: thumbnails left,
-  one whole page at a time, the panel sliding out right), `Gallery` (grid and lightbox).
+  the pages down one scrolling column, the panel sliding out right), `Gallery` (grid and lightbox).
   A `Text` template (3.x's Scroll: an article per Canvas, its text by language) was
   removed for now, to settle these three first; it is in the history.
-- `Document` turns pages from the wheel in `document/usePaging.ts`: one gesture is one
-  page (a new gesture after a 160 ms pause, a swing harder than the momentum, or a strong
-  event 600 ms after the last turn), and the wheel passes through at either end. It
-  relies on the Canvas leaving a plain wheel alone (`scrollToZoom: false`); if that
-  default changes, the template must claim the wheel first. A turn only changes which
-  Canvas the one `Content` shows; the renderer swaps it in place and frames it at once.
-  Do not animate the stage, key it, or remount the Canvas on a turn (Mat: it should
-  simply swap the content). The panel slides with
-  `useSlide` (`hidden` once out of sight, so it reads plainly without CSS).
+- `Document`'s stage is `document/Sheets.tsx` (Mat, 2026-10-16: less friction, a flow
+  like Preview's continuous PDF view; it replaced `usePaging`, a page per wheel gesture).
+  Every view is a sheet down one natively scrolling column, a still of its pictures
+  (`stillSource`, the painted image at about 1600px, not the small `thumbnail`), each at
+  most the stage less `2 × --clover-inset` tall, so the next one's picture shows under
+  the one at rest. No CSS snap: the top of the stage is the one place a sheet is active
+  (Mat, 2026-10-16), and `Sheets` decides where the scroll rests (`SETTLE_MS`, 200, quiet;
+  never while a finger or the scrollbar holds it): past `THRESHOLD` (a quarter of the
+  way to the next place, from where it last rested) the next sheet, short of it the
+  active one, the previous going up, and brings it to the top. A press on a muted sheet,
+  a thumbnail, PageUp/PageDown or a link bring theirs; a reader's own wheel, touch or
+  scrollbar press lets a scroll of ours go. Sheets not active are muted (`opacity`; Mat
+  may try golden-ratio sizing). The one live `Content` (`Sheets` renders it, the
+  template's controls as its children) sits on the active sheet, exactly over its still
+  (the Canvas's home fit, the same inset), moved there by `top`, never remounted (Mat: a
+  turn simply swaps the content). It and its controls stay hidden (`data-moved`,
+  `data-scrolling`; controls through `--clover-chrome-shown`) until the sheet is in
+  place and the Canvas has drawn it (`data-status` not `loading`, or its placeholder,
+  or `REVEAL_MS`), unless focus is in it. Zoomed, moved or turned (the handle's
+  `atHome`, which a resize keeps, so growing never reads as zooming out), the active
+  sheet fills the stage (`data-zoomed`), the others dissolve, and the Canvas takes every
+  drag; another view or home puts it back. A resize keeps the active sheet at the top
+  (`pin`). It relies on the Canvas leaving a plain wheel alone (`scrollToZoom: false`),
+  so the wheel scrolls the column; at home a finger does too (`touch-action: pan-y`).
+  The toolbar is the `Label` and Download. No pager, no `CollectionSelect` (Mat: the
+  panel's Collection section does that). The page thumbnails' toggle is a pill drawn as
+  the round controls are, open or shut (control fill, control glyph, accent on hover and
+  focus; Mat, 2026-10-16: no light state while open), holding a glyph of a list of
+  thumbnails (its pictures filled while open) and `Position` (`text-xs`, keeping no room
+  for its widest: nothing sits after the toggle), no thumbnail. Its name starts with its
+  Tip's words ("Show Items"), then the place. Open, it sits on the thumbnails' spine
+  (below), over them but for its far rounded end, which hangs over the page (Mat: the
+  bar where that end's curve begins; its start's, the other way round, was tried
+  first), so the thumbnails keep their pane's whole height; shut, it sits
+  over the page's top left, `--clover-inset` in, level with the Canvas's controls.
+  `e2e/specs/document.spec.ts` checks every move with `settled()`, and where the toggle
+  sits. The panel slides with `useSlide` (`hidden` once out of sight, so it reads
+  plainly without CSS).
+- **Toggles on the spine** (Mat, 2026-10-16). While a pane is open beside the page, its
+  toggle sits on the bar between them (`shared/useSpine.ts`): `Default`'s and
+  `Document`'s `PanelToggle`, centred on the panel's bar, and `Document`'s thumbnails'
+  toggle, `cap` (over the thumbnails but for its far rounded end). It is rendered in the
+  `Split` right after the `SplitHandle` (not in the handle, whose `separator` role makes
+  its contents presentational; not in a pane, which clips or scrolls it), placed by
+  `left` and `--clover-template-spine-top`, level with the Canvas's controls. Where the
+  bar is hidden (`Document`'s thumbnails floating over a phone's page), it sits on the
+  pane's inner edge, and `useDragToClose`'s `alongside` drags it with the pane. Shut, or
+  over the page, the toggle is back among the Canvas's controls (the panel's) or over
+  the page's top left (the thumbnails'). Each press moves it, so focus follows with
+  `shared/useFollowFocus.ts`, frame by frame rather than after a render: React 19 can
+  run a stale effect before committing the move (an effect-based version lost focus
+  one time in five there), and a Canvas draws its controls a frame later. It focuses the
+  control only once focus has gone (on `body`, or in something `hidden`), never taking
+  it from somewhere the reader put it.
 - **Closing the information panel** is `InformationPanel`'s job, not a template's. Only
   a panel floating over the page gets `onClose` (a close button, and focus handed back to
   the `aria-controls` control) and `closeOnEscape`, which also puts the button at the

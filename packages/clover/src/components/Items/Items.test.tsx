@@ -489,6 +489,21 @@ describe("Items' long titles", () => {
     expect(short.querySelector(".clover-items-label-full")).toBeNull();
   });
 
+  it("never cuts a title that has no box of its own, as Firefox measures an inline one", () => {
+    // Inline, as a list's titles are: no client height, and the text's own scroll height.
+    vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(0);
+    vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
+      function (this: HTMLElement) {
+        return this.classList.contains("clover-items-label-text") ? 20 : 0;
+      },
+    );
+    const { container } = render2();
+    for (const label of container.querySelectorAll(".clover-items-label")) {
+      expect(label).not.toHaveAttribute("data-clamped");
+      expect(label.querySelector(".clover-items-label-full")).toBeNull();
+    }
+  });
+
   it("hides the full title on Escape until focus leaves, and takes the Escape", () => {
     render2();
     const link = screen.getByRole("link", { name: LONG });

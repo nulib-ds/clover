@@ -381,18 +381,23 @@ describe("InformationPanel closing", () => {
 });
 
 describe("Viewer panel", () => {
-  it("toggles the panel from the Canvas's controls", async () => {
+  it("toggles the panel from the spine while open, and from the Canvas's controls once closed", async () => {
     render(<Clover.Viewer iiifContent={manifest} items={false} />);
-    const toggle = await screen.findByRole("button", {
-      name: "More Information",
-    });
+    const toggle = () =>
+      screen.getByRole("button", { name: "More Information" });
+    await screen.findByRole("button", { name: "More Information" });
     const panel = document.getElementById(
-      toggle.getAttribute("aria-controls")!,
+      toggle().getAttribute("aria-controls")!,
     )!;
-    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(toggle()).toHaveAttribute("aria-expanded", "true");
+    expect(toggle().closest(".clover-template-default-spine")).not.toBeNull();
     expect(panel).toBeVisible();
-    fireEvent.click(toggle);
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    toggle().focus();
+    fireEvent.click(toggle());
+    expect(toggle()).toHaveAttribute("aria-expanded", "false");
+    expect(toggle().closest(".clover-canvas-controls")).not.toBeNull();
+    // It moved, and focus with it.
+    await waitFor(() => expect(toggle()).toHaveFocus());
     expect(panel).not.toBeVisible();
 
     // Docked beside the stage, it has no close button of its own: the toggle closes it.

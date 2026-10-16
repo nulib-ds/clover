@@ -1,7 +1,7 @@
 /*
- * Document: reads like a PDF viewer. A toolbar; page thumbnails down the left; one whole
- * page at a time on a grey ground; the information panel to the right, beside the page
- * where there is room, sliding out over it where there is not.
+ * Document: reads like a PDF viewer. A toolbar; page thumbnails down the left; the pages
+ * down one column on a grey ground, a spread to a sheet; the information panel to the
+ * right, beside the pages where there is room, sliding out over them where there is not.
  * Size it with `--clover-template-document-height`.
  *
  * On the scale, as Default's: the toolbar, the thumbnails, the page and the panel are
@@ -43,37 +43,55 @@
 }
 
 /*
- * Items' pager, in the toolbar's row: no padding of its own there. Its gap is its own,
- * the Canvas's controls' `s`, so its arrows line up with the controls under them.
+ * The page thumbnails' toggle, drawn as Clover's round controls are (`ui/Button.css`),
+ * open or put away: the control's dark fill and light glyph, which hold over any image,
+ * the accent under the pointer or focused. It holds the glyph of a list of thumbnails
+ * (its pictures filled while the thumbnails show, so open and closed differ by more than
+ * colour) and where the reader is ("3 / 17"), `xs` apart, `s` before the glyph and
+ * `xs` and `3xs` after the count (whose letters sit tighter to their box than the
+ * glyph's lines do).
+ * `button.x`: one class ties with a reset's `[type="button"]`.
  */
-.clover-template-document-toolbar > .clover-template-document-pager {
-  padding-block: 0;
-  font-size: var(--clover-text-s);
-}
-
-/* `button.x`: one class ties with a reset's `[type="button"]`. */
 button.clover-template-document-sidebar-toggle {
   display: inline-flex;
+  flex: none;
   align-items: center;
-  justify-content: center;
-  width: var(--clover-control);
-  height: var(--clover-control);
-  padding: 0;
+  gap: var(--clover-space-xs);
+  min-height: var(--clover-control);
+  padding-block: 0;
+  padding-inline: var(--clover-space-s)
+    calc(var(--clover-space-xs) + var(--clover-space-3xs));
   border: 0;
-  border-radius: var(--clover-radius, 3px);
-  background-color: transparent;
-  color: inherit;
+  border-radius: var(--clover-radius-pill, 2rem);
+  background-color: var(--clover-color-control, #1a1d1e);
+  color: var(--clover-color-control-glyph, #fff);
   cursor: pointer;
+  transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 button.clover-template-document-sidebar-toggle:is(:hover, :focus-visible) {
-  background-color: var(--clover-color-secondary-muted, #e6e8eb);
-  color: inherit;
+  background-color: var(--clover-color-accent, #0065c3);
 }
 
 button.clover-template-document-sidebar-toggle:focus-visible {
   outline: 2px solid var(--clover-color-accent, #0065c3);
-  outline-offset: 1px;
+  outline-offset: 2px;
+}
+
+/*
+ * The count in the control's light colour, small, right beside the glyph. It keeps no
+ * room for its widest ("17 / 17"): nothing sits after the toggle to be moved as it
+ * grows, so it is only as wide as the count it shows.
+ */
+.clover-template-document-sidebar-toggle .clover-template-document-position {
+  color: inherit;
+  font-size: var(--clover-text-xs);
+}
+
+.clover-template-document-sidebar-toggle
+  .clover-template-document-position
+  > .clover-pager-room[hidden] {
+  display: none;
 }
 
 /* ---------- body ---------- */
@@ -85,11 +103,28 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   min-height: 0;
 }
 
+/*
+ * The page thumbnails' pane, theirs from top to foot: their toggle sits on its spine
+ * (below), over the top of its inner edge. The scroll padding brings a focused thumbnail
+ * in below the toggle, never under it (WCAG 2.4.11).
+ */
 .clover-template-document-sidebar {
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--clover-inset);
+  scroll-padding-top: calc(2 * var(--clover-inset) + var(--clover-control));
   background-color: var(--clover-color-secondary, #fff);
+}
+
+/*
+ * Put away, the toggle sits over the page's top left as the Canvas's controls do its
+ * right: the same inset in from the corner (`--clover-canvas-chrome-inset` is the inset).
+ */
+.clover-template-document-sidebar-closed {
+  position: absolute;
+  top: var(--clover-inset);
+  inset-inline-start: var(--clover-inset);
+  z-index: 3;
 }
 
 .clover-template-document-sidebar[hidden] {
@@ -150,120 +185,135 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   background-color: var(--clover-color-secondary-muted, #e6e8eb);
 }
 
-/* The page fills the stage, fitted whole: no part of the next one shows. */
+/*
+ * The stage: the pages down one column, a spread to a sheet (`Sheets.tsx`). It scrolls
+ * as a PDF reader's continuous view does; where it rests, `Sheets` brings a sheet to its
+ * top, the one place a sheet is active. Its own size is what the sheets are sized from.
+ */
 .clover-template-document-stage {
-  --clover-content-height: 100%;
   position: absolute;
   inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  container-type: size;
 }
 
-/* The page on its grey ground, the inset clear round it at home, as a PDF reader's. */
+.clover-template-document-sheets {
+  position: relative;
+}
+
+/*
+ * A sheet: its pictures side by side at one height, fitted whole with the inset round
+ * them, as the Canvas fits them at home. At most as tall as the stage less twice the
+ * inset, so under a sheet at rest the next one's picture shows by the inset's depth.
+ * Between two sheets' pictures, the inset of each: `2l` of the grey ground. A document
+ * of one sheet has nothing to show under it, and takes the whole stage.
+ */
+.clover-template-document-sheet {
+  --clover-template-document-tease: calc(2 * var(--clover-inset));
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  height: min(
+    100cqh - var(--clover-template-document-tease),
+    (100cqw - 2 * var(--clover-inset)) / var(--ratio) + 2 * var(--clover-inset)
+  );
+  padding: var(--clover-inset);
+  transition:
+    opacity 200ms ease,
+    height 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/*
+ * Zoomed into, moved or turned, the active sheet takes the stage's whole height, pushing
+ * the others down (`Sheets`), and they dissolve away; the Canvas over it shows the
+ * picture, its still out of sight beneath. Home again, it is a sheet among the rest.
+ */
+.clover-template-document-stage[data-zoomed]
+  .clover-template-document-sheet[data-active] {
+  height: 100cqh;
+}
+
+.clover-template-document-stage[data-zoomed]
+  .clover-template-document-sheet[data-active]
+  > * {
+  visibility: hidden;
+}
+
+/* And the other sheets dissolve away, until the Canvas is home again. */
+.clover-template-document-stage[data-zoomed]
+  .clover-template-document-sheet:not([data-active]) {
+  --clover-template-document-muted: 0;
+  pointer-events: none;
+}
+
+/*
+ * A sheet not active is muted, and a press brings it to the top; under the pointer it
+ * comes part way back, to show it will.
+ */
+.clover-template-document-sheet:not([data-active]) {
+  --clover-template-document-muted: 0.618;
+  cursor: pointer;
+  opacity: var(--clover-template-document-muted);
+}
+
+.clover-template-document-sheet:not([data-active]):hover {
+  --clover-template-document-muted: 0.809;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-template-document-sheet {
+    transition: none;
+  }
+}
+
+.clover-template-document-sheets[data-single]
+  > .clover-template-document-sheet {
+  --clover-template-document-tease: 0px;
+}
+
+.clover-template-document-sheet > * {
+  display: block;
+  height: 100%;
+  min-width: 0;
+}
+
+/* The live Canvas, laid exactly over its sheet (`Sheets`): its picture on the still. */
+.clover-template-document-live {
+  --clover-content-height: 100%;
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 100%;
+  transition: opacity 160ms ease;
+}
+
 .clover-template-document-content .clover-canvas {
   --clover-canvas-inset: var(--clover-inset);
   background-color: transparent;
 }
 
-/*
- * A scroll that has not yet turned the page shows how near it is. The page leans the way
- * it is scrolled, by up to `l` (`--clover-template-document-pull`, -1 to 1, set as the
- * wheel goes), and a chevron rises in from the edge the page it pulls toward comes from.
- * Following the wheel, they move with it. Let go, and the page springs back while the
- * chevron lingers a beat and fades; a turn shows the new page in place at once, and the
- * chevron it came from stays a moment in full before it fades. Only the picture leans:
- * the controls stay where they are.
- */
-.clover-template-document-stage {
-  --clover-template-document-pull: 0;
-  --clover-template-document-ease: 240ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.clover-template-document-content
-  :is(.clover-canvas-viewport, .clover-canvas-placeholder) {
-  translate: 0
-    calc(var(--clover-template-document-pull) * -1 * var(--clover-space-l));
-  transition: translate var(--clover-template-document-ease);
-}
-
-.clover-template-document-cue {
-  position: absolute;
-  left: 50%;
-  z-index: 3;
-  display: grid;
-  place-items: center;
-  width: var(--clover-control);
-  height: var(--clover-control);
-  border-radius: 50%;
-  /* Drawn as a round control is (`ui/Button.css`). */
-  background-color: var(--clover-color-control, #1a1d1e);
-  color: var(--clover-color-control-glyph, #fff);
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.16);
-  opacity: var(--shown);
+/* Moved to a sheet the scroll has not yet rested on: its still shows until it does. */
+.clover-template-document-live[data-moved]:not(:focus-within) {
+  opacity: 0;
   pointer-events: none;
-  transition:
-    opacity var(--clover-template-document-ease),
-    translate var(--clover-template-document-ease);
 }
 
-.clover-template-document-cue[data-direction="next"] {
-  --shown: max(0, var(--clover-template-document-pull));
-  bottom: var(--clover-space-s);
-  translate: -50% calc((1 - var(--shown)) * var(--clover-space-m));
+/*
+ * While the scroll runs between sheets, the Canvas's controls slide away, as its chrome
+ * does when put away, and come back as it rests; not while focus is among them.
+ */
+.clover-template-document-stage[data-scrolling]
+  .clover-template-document-live:not(:focus-within)
+  .clover-canvas-controls
+  > * {
+  --clover-chrome-shown: 0;
+  --clover-chrome-events: none;
 }
 
-.clover-template-document-cue[data-direction="previous"] {
-  --shown: max(0, -1 * var(--clover-template-document-pull));
-  top: var(--clover-space-s);
-  translate: -50% calc((var(--shown) - 1) * var(--clover-space-m));
-}
-
-/* Let go: the chevron fades slowly, a beat after the page has sprung back. */
-.clover-template-document-stage[data-pull="release"]
-  .clover-template-document-cue {
-  transition:
-    opacity 640ms ease 160ms,
-    translate 640ms ease 160ms;
-}
-
-/* Turned: the chevron it came from holds, whole, then fades. */
-.clover-template-document-stage[data-pull="turn"][data-turned="next"]
-  .clover-template-document-cue[data-direction="next"],
-.clover-template-document-stage[data-pull="turn"][data-turned="previous"]
-  .clover-template-document-cue[data-direction="previous"] {
-  animation: clover-template-document-cue-out 960ms ease-out;
-}
-
-@keyframes clover-template-document-cue-out {
-  0%,
-  33% {
-    opacity: 1;
-    translate: -50% 0;
-  }
-  100% {
-    opacity: 0;
-    translate: -50% 0;
-  }
-}
-
-/* While the wheel goes, and as the page turns, nothing lags behind it. */
-.clover-template-document-stage:is([data-pull="pull"], [data-pull="turn"])
-  :is(
-    .clover-canvas-viewport,
-    .clover-canvas-placeholder,
-    .clover-template-document-cue
-  ) {
-  transition: none;
-}
-
-/* Less motion: the page holds still; the chevron only fades in, in place. */
-@media (prefers-reduced-motion: reduce) {
-  .clover-template-document-content
-    :is(.clover-canvas-viewport, .clover-canvas-placeholder) {
-    translate: none;
-  }
-
-  .clover-template-document-cue[data-direction] {
-    translate: -50% 0;
-  }
+/* A finger scrolls the column; zoomed into a sheet, the Canvas takes every drag. */
+.clover-template-document-stage:not([data-zoomed]) .clover-canvas-viewport {
+  touch-action: pan-y;
 }
 
 /* ---------- information panel ---------- */
@@ -387,9 +437,18 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   .clover-template-document-body > .clover-split-handle {
     display: none;
   }
+}
 
-  .clover-template-document-collection {
-    order: 1;
-    flex-basis: 100%;
-  }
+/*
+ * Open, the page thumbnails' toggle sits on the bar between them and the page, over them
+ * but for its far rounded end, and the panel's on the bar between the page and it,
+ * centred: each
+ * on its spine (`useSpine`), level with the Canvas's controls (their chrome inset,
+ * `--clover-inset`, down).
+ */
+.clover-template-document-spine {
+  position: absolute;
+  top: calc(var(--clover-template-spine-top, 0px) + var(--clover-inset));
+  /* Over the thumbnails floating over a phone's page, and the wash beside them. */
+  z-index: 4;
 }

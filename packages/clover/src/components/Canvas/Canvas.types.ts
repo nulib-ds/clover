@@ -92,6 +92,11 @@ export interface CloverCanvasOptions {
  */
 export interface CanvasHandle {
   readonly backendKind: BackendKind;
+  /**
+   * Whether the view is at home, fitted whole: false once the reader zooms, pans or turns
+   * it, true again on `home()`. A resize keeps it, refitting home. Read it on `viewport`.
+   */
+  readonly atHome: boolean;
   fitBounds(bounds: Rect, immediate?: boolean): void;
   /** Zoom to a rectangle in image `index`'s own coordinates, padded as `Image` pads. */
   fitItemRect(index: number, rect: Rect, immediate?: boolean): void;

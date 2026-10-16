@@ -99,6 +99,25 @@ export function thumbnailSource(
   );
 }
 
+/**
+ * A picture to stand in for a Canvas as large as it is drawn, at about `size` pixels: the
+ * first image it paints first, then its placeholder's or accompanying Canvas's, and only
+ * then its own `thumbnail`, which is often small. Null if it has nothing to show.
+ */
+export function stillSource(
+  resource: unknown,
+  size: number,
+): ThumbnailSource | null {
+  const value = resource as Json | undefined;
+  if (!value) return null;
+  return (
+    imageSource(firstPaintedImage(value), size) ??
+    imageSource(firstPaintedImage(value.placeholderContainer), size) ??
+    imageSource(firstPaintedImage(value.accompanyingContainer), size) ??
+    imageSource(asArray(value.thumbnail)[0] as Json | undefined, size)
+  );
+}
+
 /** A level 0 service's URL: the smallest listed size that fills `size`, else the largest. */
 export async function resolveThumbnail(
   source: ThumbnailSource,

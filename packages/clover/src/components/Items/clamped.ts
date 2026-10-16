@@ -25,7 +25,13 @@ let frame = 0;
 function measure(text: HTMLElement) {
   const entry = watched.get(text);
   if (!entry) return;
-  const cut = text.scrollHeight > text.clientHeight + 1;
+  /*
+   * Only a box of its own can cut its text: a clamped title is one, with a height. A list's
+   * titles are inline, where the client height is 0 and Firefox still gives the text's
+   * scroll height, which would read as a title cut to nothing.
+   */
+  const cut =
+    text.clientHeight > 0 && text.scrollHeight > text.clientHeight + 1;
   if (cut === entry.cut) return;
   entry.cut = cut;
   entry.change(cut);

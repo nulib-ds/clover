@@ -242,6 +242,11 @@ export class CanvasRenderer implements GestureTarget {
     return this.opened;
   }
 
+  /** Whether the camera is at home: false once the reader zooms, pans or turns it. */
+  get isAtHome(): boolean {
+    return this.atHome;
+  }
+
   on(event: CanvasRendererEvent, listener: Listener): () => void {
     let set = this.listeners.get(event);
     if (!set) {

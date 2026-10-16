@@ -265,8 +265,9 @@ for (const across of [1280, 1000])
     const thumbnailsBar = page.locator(
       ".clover-template-document-sidebar + .clover-split-handle",
     );
+    // The panel's bar, which its toggle's spine follows while the panel is open.
     const panelBar = page.locator(
-      ".clover-split-handle:has(+ .clover-template-document-panel)",
+      ".clover-template-document-body > .clover-split-handle[aria-controls$='-panel']",
     );
     await expect(panelBar).toBeVisible();
     await expect.poll(() => width(panel)).toBeCloseTo(384, 0);
@@ -313,9 +314,12 @@ test("a double click on Document's thumbnails' bar steps them once, and the seco
   const handle = page.locator(
     ".clover-template-document-sidebar + .clover-split-handle",
   );
-  const position = page.locator(".clover-pager-position");
+  // The current view, as its thumbnail is selected.
+  const position = page.locator(
+    ".clover-template-document-sidebar [role='option'][aria-selected='true']",
+  );
   await expect(handle).toBeVisible();
-  await expect(position).toHaveText(/1/);
+  await expect(position).toHaveCount(1);
   const before = await position.textContent();
   const box = (await handle.boundingBox())!;
   // Low on the bar, beside a thumbnail once the bar has moved off.
