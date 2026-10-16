@@ -6,6 +6,9 @@ import styles from "docs/components/Playground/Playground.module.css";
 /** The reader's own resource, where a resource's key would be. */
 export const OWN = "own";
 
+/** The list's first item: an empty field, for the reader's own. */
+const NEW = "new";
+
 /*
  * Not `validIiifContent` from `docs/lib/iiif-content`: it brings `@iiif/helpers`, an ESM
  * external on the server, and that makes this module async, so the homepage's import of
@@ -166,8 +169,8 @@ export interface ResourceFieldProps {
 /**
  * The playground's resource: one field for the address of the reader's own, with ours in
  * a list under it, each by its thumbnail and its own label, and a line on what it holds.
- * The reader's own join the list as they open them, first, so they can switch between
- * theirs and ours.
+ * First, always, "View your own", which empties the field for an address. The reader's
+ * own join the list as they open them, next, so they can switch between theirs and ours.
  *
  * An editable combobox (WAI-ARIA's pattern, with list autocomplete). The field shows the
  * label of the resource on the stage: for the reader's own, its root `label`, or its
@@ -202,6 +205,13 @@ export default function ResourceField({
   const details = useDetails(provided);
 
   const choices: Choice[] = [
+    // First, always: the way to one of the reader's own, an empty field to enter it in.
+    {
+      key: NEW,
+      label: { text: "View your own" },
+      about: "The address of a IIIF Manifest or Collection",
+      selected: false,
+    },
     ...provided.map((content, index) => {
       const address = rootAddress(content);
       return {
@@ -224,6 +234,7 @@ export default function ResourceField({
     })),
   ];
   const chosen = choices.find((choice) => choice.selected);
+  const resourcesOnly = choices.filter((choice) => choice.key !== NEW);
   const shown = chosen?.label ?? { text: own };
 
   /* A picture that would not load leaves the empty slot. */
@@ -242,8 +253,9 @@ export default function ResourceField({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const query = filter.trim().toLowerCase();
+  // Narrowed by what is typed, among the resources: one's own is already being entered.
   const options = query
-    ? choices.filter((choice) =>
+    ? resourcesOnly.filter((choice) =>
         `${choice.label.text} ${choice.about}`.toLowerCase().includes(query),
       )
     : choices;
@@ -285,9 +297,11 @@ export default function ResourceField({
 
   const choose = (choice: Choice) => {
     close();
-    setDraft(null);
     setFilter("");
     setError(undefined);
+    // "View your own" empties the field for an address; focus is already in it.
+    if (choice.key === NEW) return setDraft("");
+    setDraft(null);
     if (choice.content) onOwn(choice.content);
     else onPick(choice.key);
   };
@@ -309,7 +323,7 @@ export default function ResourceField({
     if (draft === null) return;
     const value = draft.trim();
     // One in the list, by its label, opens as if chosen.
-    const named = choices.find(
+    const named = resourcesOnly.find(
       (choice) => choice.label.text.toLowerCase() === value.toLowerCase(),
     );
     if (named) return choose(named);
@@ -366,7 +380,7 @@ export default function ResourceField({
       onSubmit={submit}
     >
       <label className={styles.inlineLabel} htmlFor={inputId}>
-        Select or provide a IIIF resource
+        IIIF resource
       </label>
       <div className={styles.resourceRow}>
         <div className={styles.combo}>
@@ -374,7 +388,8 @@ export default function ResourceField({
             <Picture
               className={styles.fieldMedia}
               onBroken={brake}
-              src={pictured(chosen?.thumbnail)}
+              // While the reader types, the field is theirs: an empty slot.
+              src={draft === null ? pictured(chosen?.thumbnail) : undefined}
             />
             <input
               aria-activedescendant={
@@ -469,6 +484,7 @@ export default function ResourceField({
                   className={styles.media}
                   lazy
                   onBroken={brake}
+                  plus={choice.key === NEW}
                   src={pictured(choice.thumbnail)}
                 />
                 <span className={styles.optionText}>
@@ -508,20 +524,39 @@ export default function ResourceField({
   );
 }
 
-/** A resource's thumbnail, or, where it has none or it will not load, an empty slot. */
+/**
+ * A resource's thumbnail, or, where it has none or it will not load, an empty slot; with
+ * `plus`, a slot to fill, as "View your own" is.
+ */
 function Picture({
   className,
   lazy,
   onBroken,
+  plus,
   src,
 }: {
   className: string;
   lazy?: boolean;
   onBroken: (src: string) => void;
+  plus?: boolean;
   src?: string;
 }) {
   return (
     <span className={className} data-empty={!src || undefined}>
+      {plus && (
+        <svg
+          aria-hidden="true"
+          fill="none"
+          height="16"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          width="16"
+        >
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      )}
       {src && (
         // Static export with unoptimized images: next/image has nothing to add for a remote thumbnail.
         // eslint-disable-next-line @next/next/no-img-element

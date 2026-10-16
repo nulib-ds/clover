@@ -14,13 +14,15 @@
   /*
    * The stage's one height, for every template and resource, so switching either never
    * moves the page. When the bar is held, the stage fills the screen under it: the
-   * screen less the navbar, the bar (5.4rem: its label, the field and its padding), the
+   * screen less the navbar, the bar (3.736rem: the field, and its padding), the
    * space under the bar and room for the stage's shadow. A template taller than it (a
    * Gallery) scrolls inside.
    */
   --pg-stage-height: clamp(
     36rem,
-    calc(100vh - var(--nextra-navbar-height, 4rem) - 5.4rem - 2rem - 1.618rem),
+    calc(
+      100vh - var(--nextra-navbar-height, 4rem) - 3.736rem - 2rem - 1.618rem
+    ),
     54rem
   );
 }
@@ -35,13 +37,17 @@
 }
 
 /*
- * On a wide screen, where the bar is one row, it holds under the navbar while the
- * playground scrolls past, so another resource or template is always a press away. Its
- * padding keeps the tiles off the navbar, and is taken back from the space above and
- * below it, so nothing moves at rest. The rest of the space below it is the stage's, so
- * the bar's foot meets the stage's as the stage leaves, and the two go up together.
+ * From a tablet's width, on a screen tall enough to spare it, the bar holds under the
+ * navbar while the stage scrolls past, so another resource is always a press away. Not
+ * on a phone, or a short screen, where with the navbar it would take too much of the
+ * height. Its padding keeps the field off the navbar, and is taken back from the space
+ * above and below it, so nothing moves at rest. The rest of the space below it is the
+ * stage's, and it is held only within the box it shares with the stage, so the bar's
+ * foot meets the stage's as the stage leaves, and the two go up together. While it can
+ * be held, the page's scroll padding reserves it (`useStuck`), so focus never lands
+ * under it.
  */
-@media (min-width: 80rem) {
+@media (min-width: 48rem) and (min-height: 36rem) {
   .bar {
     margin-block: -0.618rem 0;
     padding-block: 0.618rem;
@@ -91,7 +97,7 @@
 }
 
 /* Where more contrast is asked for, the edge is drawn as Nextra draws the navbar's then. */
-@media (min-width: 80rem) and (prefers-contrast: more) {
+@media (min-width: 48rem) and (min-height: 36rem) and (prefers-contrast: more) {
   .bar[data-stuck]::before {
     box-shadow: 0 1px 0 #000;
   }
@@ -115,31 +121,60 @@
  */
 .section {
   --pg-edge: color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
+  /* The stage's close, soft grey shadow, which the field shares. */
+  --pg-lift: 0 1px 2px rgb(0 0 0 / 0.04), 0 6px 24px rgb(0 0 0 / 0.06);
+}
+
+/* On a dark page an edge does the lifting; the shadow only deepens it. */
+:global(.dark) .section {
+  --pg-lift: 0 6px 24px rgb(0 0 0 / 0.4);
 }
 
 /*
- * The resource: a field for an address, ours in a list under it. Its label over it, the
- * field and Open side by side, the list under both. Spaces on Clover's own
- * golden-ratio scale (`--clover-space-*`, the package's DESIGN.md), so the pickers step as
- * the Viewer under them does.
+ * The resource: a field for an address, ours in a list under it. Its label beside it, as
+ * the template's is beside its button (`xs` from it), then the field and Open, the list
+ * under both; where the row has no room for the label, it wraps over them. A message
+ * takes a line of its own under them. Spaces on Clover's own golden-ratio scale
+ * (`--clover-space-*`, the package's DESIGN.md), so the pickers step as the Viewer under
+ * them does.
  */
-/* Its label centred over the field and Open, `s` above them. */
-.resourcePicker > .inlineLabel {
-  text-align: center;
+.resourcePicker {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clover-space-xs, 0.382rem);
+  max-width: 40rem;
+  min-width: 0;
+  transition: max-width 200ms ease;
+  width: 100%;
 }
 
-.resourcePicker {
-  display: flex;
-  flex-direction: column;
-  gap: var(--clover-space-s, 0.618rem);
-  min-width: 0;
-  width: min(100%, 36rem);
+.resourcePicker > .inlineLabel {
+  flex: none;
+  font-size: var(--text-sm);
+}
+
+.resourcePicker > .error {
+  flex-basis: 100%;
+}
+
+/* Held under the navbar, the field runs the playground's width, as the stage does. */
+.bar[data-stuck] .resourcePicker {
+  max-width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resourcePicker {
+    transition: none;
+  }
 }
 
 /* The list hangs from the row, so it is as wide as the field and Open together. */
 .resourceRow {
   display: flex;
+  flex: 1 1 18rem;
   gap: var(--clover-space-xs, 0.382rem);
+  min-width: 0;
   position: relative;
 }
 
@@ -153,6 +188,7 @@
   align-items: center;
   border: 1px solid var(--pg-edge);
   border-radius: var(--radius-3);
+  box-shadow: var(--pg-lift);
   display: flex;
   gap: var(--clover-space-xs, 0.382rem);
   height: 2.5rem;
@@ -161,11 +197,12 @@
 }
 
 .field:focus-within {
-  box-shadow: var(--focus-ring);
+  box-shadow: var(--focus-ring), var(--pg-lift);
 }
 
+/* Thumbnails square, in the field and the list. */
 .fieldMedia {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1;
   border-radius: var(--radius-2);
   flex: none;
   height: 1.75rem;
@@ -249,6 +286,7 @@
 }
 
 /* Ours, under the field: a row each, scrolling within on a short screen. */
+/* As wide as the field and Open at rest, and no wider while the field runs wide. */
 .resourceList {
   background: var(--color-background);
   border-radius: var(--radius-4);
@@ -262,6 +300,7 @@
   left: 0;
   list-style: none;
   margin: 0;
+  max-width: 36rem;
   max-height: min(32rem, 55vh);
   overflow-y: auto;
   padding: var(--clover-space-xs, 0.382rem);
@@ -301,7 +340,7 @@
 
 .option .media {
   flex: none;
-  width: 4rem;
+  width: var(--clover-space-xl, 2.618rem);
 }
 
 .option[aria-selected="true"] {
@@ -347,7 +386,7 @@
 /* A picture in the same box for every resource, with room for its ring. */
 .media {
   align-items: center;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1;
   border-radius: var(--radius-2);
   display: flex;
   justify-content: center;
@@ -383,18 +422,10 @@
   /* A hairline edge, then a close, soft grey shadow, just lifting the frame off the page. */
   box-shadow:
     0 0 0 1px var(--gray-6),
-    0 1px 2px rgb(0 0 0 / 0.04),
-    0 6px 24px rgb(0 0 0 / 0.06);
+    var(--pg-lift);
   height: var(--pg-stage-height);
   overflow: auto;
   position: relative;
-}
-
-/* On a dark page the edge does the lifting; the shadow only deepens it. */
-:global(.dark) .stage {
-  box-shadow:
-    0 0 0 1px var(--gray-6),
-    0 6px 24px rgb(0 0 0 / 0.4);
 }
 
 /*

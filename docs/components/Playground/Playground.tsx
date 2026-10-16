@@ -67,11 +67,16 @@ function usePressOutside(
 /**
  * Marks the bar `data-stuck` while it is held under the navbar with the stage passing
  * beneath it: from when the stage's top goes under the bar's foot until the bar, let go
- * where the playground ends, has gone up under the navbar. Its stylesheet holds the bar
- * on wide screens only; elsewhere the stage never reaches under it.
+ * where the stage ends, has gone up under the navbar. Its stylesheet holds the bar only
+ * where the screen has room for it; elsewhere the stage never reaches under it.
  *
  * Read from the two boxes once a frame while the page scrolls, and written to the bar
  * itself rather than to state, so holding and letting go never re-render the stage.
+ *
+ * While the bar can be held, the page's scroll padding reserves it as well as the navbar,
+ * measured, so a control in the stage that takes focus, by Tab or from a script, is
+ * brought into view below the bar rather than under it (WCAG 2.4.11). Its height is
+ * measured again whenever it changes (a message under the field).
  */
 function useStuck(
   bar: React.RefObject<HTMLElement>,
@@ -92,20 +97,25 @@ function useStuck(
         bottom > line + 1 && under.getBoundingClientRect().top < bottom,
       );
     };
+    const root = document.documentElement;
     const measure = () => {
       line = parseFloat(getComputedStyle(node).top) || 0;
+      root.style.scrollPaddingTop = line ? `${line + node.offsetHeight}px` : "";
       read();
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(read);
     };
-    measure();
+    const resized = new ResizeObserver(measure);
+    resized.observe(node);
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", measure);
     return () => {
       cancelAnimationFrame(frame);
+      resized.disconnect();
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", measure);
+      root.style.scrollPaddingTop = "";
     };
   }, [bar, stage]);
 }
@@ -309,24 +319,27 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
         className={styles.section}
         id="playground"
       >
-        <div className={styles.bar} ref={barRef}>
-          <ResourceField
-            current={current}
-            onOwn={openOwn}
-            onPick={selectResource}
-            own={own}
-          />
-        </div>
-
-        {/* No font and no colour here: Clover takes both from the page. */}
-        <div className={styles.stage} data-template={active} ref={stageRef}>
-          {ready && (
-            <TemplateViewer
-              key={`${active}-${resource}`}
-              template={spec.name as "Default"}
-              iiifContent={resource}
+        {/* The bar is held only as far as the stage reaches, and leaves with it. */}
+        <div>
+          <div className={styles.bar} ref={barRef}>
+            <ResourceField
+              current={current}
+              onOwn={openOwn}
+              onPick={selectResource}
+              own={own}
             />
-          )}
+          </div>
+
+          {/* No font and no colour here: Clover takes both from the page. */}
+          <div className={styles.stage} data-template={active} ref={stageRef}>
+            {ready && (
+              <TemplateViewer
+                key={`${active}-${resource}`}
+                template={spec.name as "Default"}
+                iiifContent={resource}
+              />
+            )}
+          </div>
         </div>
 
         {/*

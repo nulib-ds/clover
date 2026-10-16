@@ -99,12 +99,14 @@ deadline.
     made-up figures or copy. Golden-ratio spaces, hairline edges, no grey fills.
   - The playground shows how far one Viewer stretches: any layout with any kind of
     resource. Two pickers, each changing the stage without the other. Over it, centred,
-    the resource (`ResourceField.tsx`): one field, labelled "Select or provide a IIIF resource", for the
+    the resource (`ResourceField.tsx`): one field, labelled "IIIF resource" beside it, as "Template" is beside its dropdown, for the
     address or content state of the reader's own, with ours listed under it (`resources`
     in `playground-config.ts`: a catalog, a print, a Collection, a photo, a map, a film, a
     recording…), each by its thumbnail, its own label, and a few words on one thing it has
-    that the others do not (`description`: concise, only what the resource has). Each of
-    the reader's own joins the list as they open it, first, by its root `label` and
+    that the others do not (`description`: concise, only what the resource has). The
+    list's first item, always, is "View your own" (a dashed slot with a plus, as the old
+    "Your own" tile was), which empties the field for an address. Each of the reader's
+    own joins the list as they open it, after that, by its root `label` and
     `thumbnail` (never a Canvas's or member's) over its address, so they can switch
     between theirs and ours; held in memory only, never stored, gone with the page. The
     field shows the label of the one on the stage, never our word for its kind (`name`,
@@ -119,11 +121,16 @@ deadline.
     every pairing, with a hairline edge and a small, soft grey shadow (never the accent).
     Keep it about layout and UX: names and those few words, no marketing lines.
   - Headers are solid, never frosted or translucent: the navbar (`docs/styles/layout.css`
-    overrides Nextra's blur) and the playground's bar. From 80rem, where the bar is one
-    row, it holds under the navbar as its lower half: while the stage passes under, the
-    navbar's edge moves to the bar's foot, and the bar's foot rides on the stage's as the
-    two leave. `useStuck` writes `data-stuck` to the bar directly, not to state, so this
-    never re-renders the stage.
+    overrides Nextra's blur) and the playground's bar. From 48rem wide, on a screen at
+    least 36rem tall (not a phone, where with the navbar it would take too much height),
+    it holds under the navbar as its lower half: while the stage passes under, the
+    navbar's edge moves to the bar's foot, the field runs the playground's width, and the
+    bar's foot rides on the stage's as the two leave (they share a box, so the template
+    row under the stage is never under it). `useStuck` writes `data-stuck` to the bar
+    directly, not to state, so this never re-renders the stage. While the bar can hold,
+    `useStuck` sets the page's `scroll-padding-top` to the navbar and the bar, measured,
+    so a control that takes focus in the stage comes into view below the bar (WCAG
+    2.4.11).
   - On the homepage the navbar's content lines up with the sections' 1300px (and the
     shell's padding) at every width (`Home.module.css`); docs pages keep Nextra's 90rem,
     which lines up with their sidebar.
