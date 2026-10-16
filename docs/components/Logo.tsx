@@ -1,7 +1,10 @@
 const Logo = () => (
   <span>
+    {/* The navbar's link home holds only this, so it names the link. */}
     <svg
       id="clover-iiif-logo"
+      role="img"
+      aria-label="Clover IIIF"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 45.11 8.15"
       fill="none"

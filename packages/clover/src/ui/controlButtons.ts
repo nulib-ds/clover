@@ -10,6 +10,11 @@ export type ControlButtonProps = {
     id: string;
     type: "button";
     "aria-label": string;
+    /**
+     * The language of the name, when it is not the page's: a Choice's own label, or one
+     * of Clover's strings in another language. Spread it with the rest (WCAG 3.1.2).
+     */
+    lang?: string;
     /** The key the Canvas answers to for this control, when it has one. */
     "aria-keyshortcuts"?: string;
     onClick?: React.MouseEventHandler<HTMLButtonElement>;

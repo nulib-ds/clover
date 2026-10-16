@@ -56,6 +56,42 @@ test.describe("Viewer", () => {
     );
   });
 
+  test("a control under a resting pointer stays, Tip and all (WCAG 1.4.13)", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(isMobile, "needs a pointer that can rest");
+    await serveIIIF(page);
+    await page.goto("/?content=https://fixtures.test/0009-book-1.json");
+    await expect(
+      page.locator('.clover-canvas [data-button="panel"]'),
+    ).toHaveAttribute("aria-expanded", "true");
+    const zoom = page.locator(
+      '.clover-canvas-controls > [data-button="zoom-in"]',
+    );
+    const opacity = () => zoom.evaluate((el) => getComputedStyle(el).opacity);
+    const stage = await page.locator(".clover-canvas").boundingBox();
+    await page.mouse.move(
+      stage!.x + stage!.width / 2,
+      stage!.y + stage!.height / 2,
+    );
+    await expect.poll(opacity).toBe("1");
+
+    // Resting on the control, well past the hide delay: it and its Tip stay.
+    const box = await zoom.boundingBox();
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+    await page.waitForTimeout(3000);
+    expect(await opacity()).toBe("1");
+    await expect(zoom.locator(".clover-tip")).toBeVisible();
+
+    // Back on the picture, the chrome fades as before.
+    await page.mouse.move(
+      stage!.x + stage!.width / 2,
+      stage!.y + stage!.height / 2,
+    );
+    await expect.poll(opacity, { timeout: 5000 }).toBe("0");
+  });
+
   test("reads right to left: the strip runs leftward, Previous on the right", async ({
     page,
   }) => {

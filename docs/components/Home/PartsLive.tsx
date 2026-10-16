@@ -192,8 +192,39 @@ function Exploded({
   // What the viewer's code says, and so what the viewer shows.
   const [view, setView] = useState<ViewValues>(VIEW_DEFAULTS);
 
+  // A part's name tag, shown while it is pointed at, is put away by Escape (WCAG 1.4.13).
+  useEffect(() => {
+    if (!pointed) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !event.defaultPrevented) setPointed(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [pointed]);
+
   // Its height, for holding it in view by its foot once it is taller than the window.
   const assembled = useRef<HTMLDivElement>(null);
+  /*
+   * Held, a part of it can sit above the window, where no scrolling reaches while it is
+   * held. Focus landing there lets it go, and brings what is focused into view; focus
+   * leaving it holds it again (WCAG 2.4.11).
+   */
+  const reveal = (event: React.FocusEvent<HTMLDivElement>) => {
+    const node = event.currentTarget;
+    const target = event.target as HTMLElement;
+    const navbar =
+      document.querySelector(".nextra-nav-container")?.getBoundingClientRect()
+        .bottom ?? 0;
+    const { top, bottom } = target.getBoundingClientRect();
+    if (top >= navbar && bottom <= window.innerHeight) return;
+    node.dataset.hold = "free";
+    requestAnimationFrame(() => target.scrollIntoView({ block: "nearest" }));
+  };
+  const hold = (event: React.FocusEvent<HTMLDivElement>) => {
+    const node = event.currentTarget;
+    if (!node.contains(event.relatedTarget as Node | null))
+      delete node.dataset.hold;
+  };
   const ready = Boolean(manifest);
   useEffect(() => {
     const node = assembled.current;
@@ -529,14 +560,16 @@ function Exploded({
 
   return (
     <>
-      <div ref={assembled} className={styles.assembled}>
-        <p className={styles.caption}>
-          <span className={styles.captionName}>Example Viewer</span>
-          <span>
-            {collection ? `${manifest.type}, in a Collection` : manifest.type}
-          </span>
-        </p>
-        <div className={styles.viewer}>{order.map((key) => regions[key])}</div>
+      <div
+        ref={assembled}
+        className={styles.assembled}
+        onFocus={reveal}
+        onBlur={hold}
+      >
+        {/* Named for assistive technology; on screen the viewer speaks for itself. */}
+        <section className={styles.viewer} aria-label="Example Viewer">
+          {order.map((key) => regions[key])}
+        </section>
         <div>
           <div className={styles.codeBar}>
             <button
@@ -783,6 +816,21 @@ function ViewerCode({
   const set = (change: Partial<ViewValues>) =>
     onView((values) => ({ ...values, ...change }));
   const hint = useId();
+  const pickedName = useId();
+  /*
+   * The part picked to move without a drag: by a press on its lines, or focus on its
+   * grip. Move up and Move down in the head move it (WCAG 2.5.7); Escape lets it go.
+   */
+  const [picked, setPicked] = useState<ViewerPart | null>(null);
+  const pickedAt = picked ? order.indexOf(picked) : -1;
+  useEffect(() => {
+    if (!picked) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !event.defaultPrevented) setPicked(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [picked]);
   const [copied, setCopied] = useState(false);
   const [said, setSaid] = useState("");
   useEffect(() => {
@@ -822,11 +870,12 @@ function ViewerCode({
   });
 
   const startDrag = (index: number, event: React.PointerEvent) => {
+    dragEnded.current = false;
     const target = event.target as Element;
     const fromGrip = Boolean(target.closest("[data-grip]"));
     if (event.button !== 0) return;
     // A value is changed, not dragged; by touch, only the grip drags, so the page scrolls.
-    if (!fromGrip && target.closest("button, select, [role='slider']")) return;
+    if (!fromGrip && target.closest("button, select, input")) return;
     if (!fromGrip && event.pointerType !== "mouse") return;
     event.preventDefault();
     // Moves past the part's edges still drag it. (A pointer the browser has already let
@@ -865,7 +914,25 @@ function ViewerCode({
     press.current = null;
     if (last && last.to !== last.from)
       reorder(moved(order, last.from, last.to));
+    // The click that ends a drag is not a pick.
+    if (last) dragEnded.current = true;
     show(null);
+  };
+
+  // A press on a part's lines that moved nothing picks it, or lets it go; its grip's picks it.
+  const dragEnded = useRef(false);
+  const pick = (key: ViewerPart, event: React.MouseEvent) => {
+    if (dragEnded.current) {
+      dragEnded.current = false;
+      return;
+    }
+    const target = event.target as Element;
+    if (target.closest("[data-grip]")) return setPicked(key);
+    if (target.closest("button, select, input")) return;
+    if (picked === key) return setPicked(null);
+    setPicked(key);
+    // The keys then move the part picked, not one whose grip had focus.
+    grips.current.get(key)?.focus({ preventScroll: true });
   };
 
   // While a part is dragged, the others step aside for it.
@@ -880,11 +947,11 @@ function ViewerCode({
     return 0;
   };
 
-  const step = (index: number, by: number) => {
+  const step = (index: number, by: number, fromGrip = true) => {
     const to = index + by;
     if (to < 0 || to >= order.length) return;
     const key = order[index];
-    refocus.current = key;
+    if (fromGrip) refocus.current = key;
     reorder(moved(order, index, to));
     setSaid(`${PART_NAMES[key]}, ${to + 1} of ${order.length}`);
   };
@@ -940,8 +1007,7 @@ function ViewerCode({
                 text: String(view.height),
                 control: (
                   <Scrub
-                    label="Content height"
-                    unit="pixels"
+                    label="Content height, in pixels"
                     min={120}
                     max={480}
                     value={view.height}
@@ -1073,6 +1139,33 @@ function ViewerCode({
         <div className={styles.editorFrame}>
           <div className={styles.editorHead}>
             <span>JSX</span>
+            {picked && (
+              <div
+                role="group"
+                aria-labelledby={pickedName}
+                className={styles.moves}
+              >
+                <span id={pickedName} className={styles.picked}>
+                  {PART_NAMES[picked]}
+                </span>
+                <button
+                  type="button"
+                  className={styles.copy}
+                  aria-disabled={pickedAt <= 0 || undefined}
+                  onClick={() => step(pickedAt, -1, false)}
+                >
+                  Move up
+                </button>
+                <button
+                  type="button"
+                  className={styles.copy}
+                  aria-disabled={pickedAt >= order.length - 1 || undefined}
+                  onClick={() => step(pickedAt, 1, false)}
+                >
+                  Move down
+                </button>
+              </div>
+            )}
             <button
               type="button"
               className={styles.copy}
@@ -1089,7 +1182,7 @@ function ViewerCode({
               {copied ? "Copied the code" : said}
             </span>
             <span id={hint} className={styles.visuallyHidden}>
-              Arrow up or down moves the part.
+              Arrow up or down moves the part, as Move up and Move down do.
             </span>
           </div>
           <pre
@@ -1107,6 +1200,8 @@ function ViewerCode({
                   }}
                   className={styles.codeBlock}
                   data-dragged={drag?.from === index || undefined}
+                  data-picked={picked === key || undefined}
+                  onClick={(event) => pick(key, event)}
                   style={{ transform: `translateY(${shift(index)}px)` }}
                   {...point(key)}
                   onPointerDown={(event) => startDrag(index, event)}
@@ -1129,6 +1224,7 @@ function ViewerCode({
                           className={styles.grip}
                           aria-label={`Move ${PART_NAMES[key]}`}
                           aria-describedby={hint}
+                          onFocus={() => setPicked(key)}
                           onKeyDown={(event) => {
                             const by =
                               event.key === "ArrowUp"
@@ -1176,83 +1272,95 @@ function ViewerCode({
 }
 
 /**
- * A number to drag sideways, a pixel a pixel, or step with the arrow keys (Shift for
- * tens; Home and End for its limits). A slider to assistive technology.
+ * A number to type, step with the arrow keys (Shift for tens), or drag sideways a pixel a
+ * pixel: a press that does not drag puts the caret in it (WCAG 2.5.7). Out of its range,
+ * what is typed comes back within it when the field is left.
  */
 function Scrub({
   label,
-  unit,
   min,
   max,
   value,
   onChange,
 }: {
   label: string;
-  unit: string;
   min: number;
   max: number;
   value: number;
   onChange: (value: number) => void;
 }) {
-  const from = useRef<{ x: number; value: number } | null>(null);
+  const from = useRef<{ x: number; value: number; moved: boolean } | null>(
+    null,
+  );
   const [dragging, setDragging] = useState(false);
+  // What is typed, until it is a number in range or the field is left.
+  const [draft, setDraft] = useState<string | null>(null);
   const clamp = (next: number) =>
     Math.min(max, Math.max(min, Math.round(next)));
-  const steps: Record<string, number> = {
-    ArrowRight: 1,
-    ArrowUp: 1,
-    ArrowLeft: -1,
-    ArrowDown: -1,
-    PageUp: 10,
-    PageDown: -10,
-  };
-  const stop = () => {
+  const stop = (event: React.PointerEvent<HTMLInputElement>) => {
+    const pressed = from.current;
     from.current = null;
     setDragging(false);
+    if (pressed && !pressed.moved) {
+      event.currentTarget.focus();
+      event.currentTarget.select();
+    }
   };
   return (
-    <span
-      role="slider"
-      tabIndex={0}
+    <input
+      type="number"
+      inputMode="numeric"
       aria-label={label}
-      aria-valuemin={min}
-      aria-valuemax={max}
-      aria-valuenow={value}
-      aria-valuetext={`${value} ${unit}`}
-      title="Drag to change"
+      min={min}
+      max={max}
+      step={1}
+      value={draft ?? value}
       className={`${styles.value} ${styles.scrub} ${styles.tokenNumber}`}
       data-dragging={dragging || undefined}
+      onChange={(event) => {
+        const typed = event.target.value;
+        setDraft(typed);
+        const next = Number(typed);
+        if (typed !== "" && next >= min && next <= max) onChange(clamp(next));
+      }}
+      onBlur={() => {
+        if (draft !== null && draft !== "") onChange(clamp(Number(draft)));
+        setDraft(null);
+      }}
       onPointerDown={(event) => {
         if (event.button !== 0) return;
+        // Not focused yet: a press that drags scrubs, one that does not types.
+        if (document.activeElement === event.currentTarget) return;
         event.preventDefault();
-        event.currentTarget.focus();
         event.currentTarget.setPointerCapture(event.pointerId);
-        from.current = { x: event.clientX, value };
-        setDragging(true);
+        from.current = { x: event.clientX, value, moved: false };
       }}
       onPointerMove={(event) => {
-        if (from.current)
-          onChange(clamp(from.current.value + event.clientX - from.current.x));
+        const pressed = from.current;
+        if (!pressed) return;
+        const dx = event.clientX - pressed.x;
+        if (!pressed.moved && Math.abs(dx) < 3) return;
+        pressed.moved = true;
+        setDragging(true);
+        onChange(clamp(pressed.value + dx));
       }}
       onPointerUp={stop}
       onPointerCancel={stop}
       onKeyDown={(event) => {
-        const step = steps[event.key];
-        const next =
-          event.key === "Home"
-            ? min
-            : event.key === "End"
-              ? max
-              : step === undefined
-                ? undefined
-                : value + step * (event.shiftKey ? 10 : 1);
-        if (next === undefined) return;
+        if (event.key === "Enter") {
+          const next = Number(event.currentTarget.value);
+          if (event.currentTarget.value !== "") onChange(clamp(next));
+          setDraft(null);
+          return;
+        }
+        const by =
+          event.key === "ArrowUp" ? 1 : event.key === "ArrowDown" ? -1 : 0;
+        if (!by || !event.shiftKey) return;
         event.preventDefault();
-        onChange(clamp(next));
+        setDraft(null);
+        onChange(clamp(value + by * 10));
       }}
-    >
-      {value}
-    </span>
+    />
   );
 }
 

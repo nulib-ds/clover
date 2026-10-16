@@ -1,7 +1,7 @@
 import type { MetadataItem } from "@iiif/presentation-3";
 import React, { forwardRef, useEffect, useState } from "react";
 
-import { hasMarkup, toPlainText } from "../core/text";
+import { hasMarkup, markdownToPlainText, toPlainText } from "../core/text";
 import { type LanguageMapLike, localize } from "../core/value";
 
 /**
@@ -11,8 +11,13 @@ import { type LanguageMapLike, localize } from "../core/value";
  * becomes sanitised HTML once the sanitiser (DOMPurify, loaded on demand) arrives, so a
  * page whose values carry no markup never loads it.
  */
-function useSanitized(text: string, markdown = false): string | null {
+function useSanitized(
+  text: string,
+  markdown = false,
+  headingLevel = 3,
+): string | null {
   const markup = markdown || hasMarkup(text);
+  const key = markdown ? `${headingLevel}\n${text}` : text;
   const [html, setHtml] = useState<{ for: string; html: string } | null>(null);
   useEffect(() => {
     if (!markup) return;
@@ -21,32 +26,42 @@ function useSanitized(text: string, markdown = false): string | null {
       import("../core/sanitize"),
       markdown ? import("../core/markdown") : null,
     ]).then(([{ sanitizeHTML }, md]) => {
-      const source = md ? md.markdownToHtml(text) : text;
-      if (live) setHtml({ for: text, html: sanitizeHTML(source) });
+      const source = md ? md.markdownToHtml(text, { headingLevel }) : text;
+      if (live)
+        setHtml({ for: key, html: sanitizeHTML(source, { markdown: !!md }) });
     });
     return () => {
       live = false;
     };
-  }, [text, markup, markdown]);
-  return markup && html?.for === text ? html.html : null;
+  }, [text, key, markup, markdown, headingLevel]);
+  return markup && html?.for === key ? html.html : null;
 }
 
 type MarkupProps = {
   as?: React.ElementType;
   markup?: LanguageMapLike;
-  /** `text/markdown` is converted to HTML (then sanitised); anything else is HTML. */
+  /**
+   * `text/markdown` is converted to HTML (then sanitised), keeping its lists and
+   * headings; anything else is IIIF's HTML.
+   */
   format?: string;
+  /**
+   * The level of a Markdown value's first heading, a level under the part around it;
+   * the rest follow under it, none skipped. Default 3.
+   */
+  headingLevel?: number;
   /** The language to read the value in; the reader's by default. */
   language?: string;
 } & Omit<React.HTMLAttributes<HTMLElement>, "dangerouslySetInnerHTML" | "lang">;
 
 /** A IIIF language map, in the closest language, as sanitised HTML. Nothing when empty. */
 export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
-  { as: Tag = "span", markup, language, format, ...rest },
+  { as: Tag = "span", markup, language, format, headingLevel, ...rest },
   ref,
 ) {
   const { text, lang } = localize(markup, language);
-  const html = useSanitized(text, format === "text/markdown");
+  const markdown = format === "text/markdown";
+  const html = useSanitized(text, markdown, headingLevel);
   if (!text) return null;
   return html !== null ? (
     <Tag
@@ -56,8 +71,9 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
       dangerouslySetInnerHTML={{ __html: html }}
     />
   ) : (
+    // Until the sanitiser arrives, Markdown shows without its syntax.
     <Tag ref={ref} {...rest} lang={lang}>
-      {toPlainText(text)}
+      {markdown ? markdownToPlainText(text) : toPlainText(text)}
     </Tag>
   );
 });

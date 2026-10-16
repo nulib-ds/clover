@@ -1,4 +1,6 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import React from "react";
 
 import { Sections, type SectionsLayout } from "./Sections";
@@ -67,18 +69,276 @@ describe("Sections", () => {
       expect(screen.getByRole("region", { name: "About" })).toBeVisible();
     });
 
-    it("gives each heading its place, and the list its count, to stack them in sight", () => {
+    it("gives each box its place, and the list its count, to stack them until measured", () => {
       const { container } = render(<Layout layout="accordion" />);
       const list = container.querySelector<HTMLElement>(".clover-sections")!;
       expect(list.style.getPropertyValue("--clover-sections-count")).toBe("3");
-      const headings = [
-        ...container.querySelectorAll<HTMLElement>(".clover-sections-heading"),
+      // On the box, so its heading and its panel's content both read it.
+      const boxes = [
+        ...container.querySelectorAll<HTMLElement>(".clover-sections-item"),
       ];
       expect(
-        headings.map((heading) =>
-          heading.style.getPropertyValue("--clover-sections-index"),
+        boxes.map((box) =>
+          box.style.getPropertyValue("--clover-sections-index"),
         ),
       ).toEqual(["0", "1", "2"]);
+    });
+
+    describe("measuring the headings", () => {
+      /** A ResizeObserver whose sizes a test reports. */
+      class Observer {
+        static all: Observer[] = [];
+        targets: Element[] = [];
+        disconnected = false;
+        constructor(readonly callback: ResizeObserverCallback) {
+          Observer.all.push(this);
+        }
+        observe(target: Element) {
+          this.targets.push(target);
+        }
+        unobserve(target: Element) {
+          this.targets = this.targets.filter((each) => each !== target);
+        }
+        disconnect() {
+          this.disconnected = true;
+        }
+        /** Border-box heights, for the targets given (all of them by default). */
+        report(heights: number[], targets = this.targets) {
+          this.callback(
+            targets.map((target, index) => ({
+              target,
+              borderBoxSize: [{ blockSize: heights[index], inlineSize: 200 }],
+            })) as unknown as ResizeObserverEntry[],
+            this as unknown as ResizeObserver,
+          );
+        }
+      }
+
+      beforeEach(() => {
+        Observer.all = [];
+        vi.stubGlobal("ResizeObserver", Observer);
+      });
+      afterEach(() => {
+        vi.unstubAllGlobals();
+      });
+
+      const stacks = (container: HTMLElement) => ({
+        total: container
+          .querySelector<HTMLElement>(".clover-sections")!
+          .style.getPropertyValue("--clover-sections-total"),
+        boxes: [
+          ...container.querySelectorAll<HTMLElement>(".clover-sections-item"),
+        ].map((box) => [
+          box.style.getPropertyValue("--clover-sections-before"),
+          box.style.getPropertyValue("--clover-sections-after"),
+        ]),
+      });
+
+      // WCAG 1.4.12 (a label wraps) and 2.4.11 (focus clears the stacks).
+      it("writes the height of the headings before and after each box, as they wrap", () => {
+        const { container } = render(<Layout layout="accordion" />);
+        expect(Observer.all).toHaveLength(1);
+        const [observer] = Observer.all;
+        expect(observer.targets).toEqual([
+          ...container.querySelectorAll(".clover-sections-heading"),
+        ]);
+
+        observer.report([40, 50.5, 40]);
+        expect(stacks(container)).toEqual({
+          total: "130.5px",
+          boxes: [
+            ["0px", "90.5px"],
+            ["40px", "40px"],
+            ["90.5px", "0px"],
+          ],
+        });
+
+        // One label rewraps onto two lines: only it is reported, and every sum follows.
+        observer.report([70], [observer.targets[0]]);
+        expect(stacks(container)).toEqual({
+          total: "160.5px",
+          boxes: [
+            ["0px", "90.5px"],
+            ["70px", "40px"],
+            ["120.5px", "0px"],
+          ],
+        });
+      });
+
+      // WCAG 2.4.11, 1.4.10 and 1.4.12: in WebKit, stacks too tall overlap the open box.
+      it("lets the headings scroll where the stacks would leave the open box no room", () => {
+        const { container, rerender } = render(
+          <div data-testid="pane" style={{ overflowY: "auto" }}>
+            {/* JSDOM lays nothing out: the line, and the room the stacks keep, are set. */}
+            <style>{`
+              .clover-sections { line-height: 20px; }
+              .clover-sections-heading { position: sticky; top: 10px; bottom: 10px; }
+            `}</style>
+            <Sections items={items} layout="accordion" />
+          </div>,
+        );
+        const pane = screen.getByTestId("pane");
+        let room = 200;
+        Object.defineProperty(pane, "clientHeight", { get: () => room });
+        const list = container.querySelector<HTMLElement>(".clover-sections")!;
+        const [observer] = Observer.all;
+        // The pane is watched, with the headings.
+        expect(observer.targets[0]).toBe(pane);
+        const headings = observer.targets.slice(1);
+
+        // 200 less 20 at the edges and 130 of headings leaves 50: two lines and more.
+        observer.report([40, 50, 40], headings);
+        expect(list).not.toHaveAttribute("data-stacks");
+
+        // A label wraps: 20 left, less than two lines, so they stop sticking.
+        observer.report([70], [headings[0]]);
+        expect(list).toHaveAttribute("data-stacks", "off");
+
+        // The pane grows: room again.
+        room = 300;
+        observer.report([300], [pane]);
+        expect(list).not.toHaveAttribute("data-stacks");
+
+        // A pane not laid out decides nothing.
+        room = 0;
+        observer.report([0], [pane]);
+        expect(list).not.toHaveAttribute("data-stacks");
+
+        room = 200;
+        observer.report([200], [pane]);
+        expect(list).toHaveAttribute("data-stacks", "off");
+        rerender(
+          <div data-testid="pane" style={{ overflowY: "auto" }}>
+            <Sections items={items} layout="tabs" />
+          </div>,
+        );
+        expect(list).not.toHaveAttribute("data-stacks");
+      });
+
+      it("measures afresh when the sections change, and leaves nothing behind as tabs", () => {
+        const { container, rerender } = render(
+          <Sections items={items.slice(0, 2)} layout="accordion" />,
+        );
+        Observer.all[0].report([40, 40]);
+        rerender(<Sections items={items} layout="accordion" />);
+        expect(Observer.all[0].disconnected).toBe(true);
+        const [, again] = Observer.all;
+        expect(again.targets).toHaveLength(3);
+        again.report([40, 40, 40]);
+        expect(stacks(container).total).toBe("120px");
+
+        rerender(<Sections items={items} layout="tabs" />);
+        expect(again.disconnected).toBe(true);
+        expect(Observer.all).toHaveLength(2);
+        expect(stacks(container)).toEqual({
+          total: "",
+          boxes: [
+            ["", ""],
+            ["", ""],
+            ["", ""],
+          ],
+        });
+      });
+    });
+
+    // WCAG 2.4.11: Chromium scrolls focus into view only from outside the container.
+    it("moves its scrolling container to bring focus out from under a stuck heading", () => {
+      const links = ["About", "Contents"].map((name) => ({
+        value: name.toLowerCase(),
+        label: name,
+        content: <a href={`#${name}`}>{name} link</a>,
+      }));
+      render(
+        <div data-testid="pane" style={{ overflowY: "auto" }}>
+          <Sections items={links} layout="accordion" />
+        </div>,
+      );
+      const pane = screen.getByTestId("pane");
+      Object.defineProperties(pane, {
+        scrollHeight: { value: 1000 },
+        clientHeight: { value: 300 },
+        scrollTop: { value: 100, writable: true },
+      });
+      const at = (element: Element, top: number, bottom: number) => {
+        element.getBoundingClientRect = () =>
+          ({ top, bottom, height: bottom - top }) as DOMRect;
+      };
+      // The open heading stuck over 0-50, the next under 250-300.
+      const [open, next] = screen.getAllByRole("heading");
+      at(open, 0, 50);
+      at(next, 250, 300);
+      const link = screen.getByRole("link", { name: "About link" });
+
+      at(link, 100, 120);
+      link.focus();
+      expect(pane.scrollTop).toBe(100);
+
+      link.blur();
+      at(link, 240.5, 260.5);
+      link.focus();
+      expect(pane.scrollTop).toBe(111);
+
+      link.blur();
+      at(link, 30, 50);
+      link.focus();
+      expect(pane.scrollTop).toBe(91);
+
+      // Focus from a press does not show, and moves nothing under the pointer.
+      link.blur();
+      at(link, 240.5, 260.5);
+      const matches = link.matches.bind(link);
+      link.matches = (selector: string) =>
+        selector === ":focus-visible" ? false : matches(selector);
+      link.focus();
+      expect(pane.scrollTop).toBe(91);
+    });
+
+    // JSDOM lays nothing out, so the stylesheet is read; e2e/specs/sections.spec.ts looks.
+    it("lets a label wrap, and keeps focused content clear of the stuck headings", () => {
+      const css = readFileSync(resolve(__dirname, "Sections.css"), "utf8");
+      const rule = (selector: string) =>
+        css.match(
+          new RegExp(
+            `\\n${selector.replace(/[.[\]"*]/g, "\\$&")} \\{([^}]*)\\}`,
+          ),
+        )?.[1] ?? "";
+      const accordion = '.clover-sections[data-layout="accordion"]';
+      const label = rule(`${accordion} .clover-sections-label`);
+      expect(label).toMatch(/overflow-wrap: anywhere;/);
+      expect(label).not.toMatch(/nowrap|ellipsis|overflow: hidden/);
+      const heading = rule(`${accordion} .clover-sections-heading`);
+      expect(heading).not.toMatch(/(^|\s)height:/);
+      expect(heading).toMatch(/top: calc\([^;]*--clover-sections-before\)/);
+      expect(heading).toMatch(/bottom: calc\([^;]*--clover-sections-after\)/);
+      expect(rule(`${accordion} .clover-sections-panel *`)).toMatch(
+        /scroll-margin-block:[^;]*--clover-sections-total\) -\s*var\(--clover-sections-after\)[^;]*--clover-sections-after\)\);/,
+      );
+    });
+
+    // JSDOM applies no media queries, so the stylesheet is read (WCAG 1.4.10, C34).
+    it("stops sticking the headings on a short screen, so the open section has room", () => {
+      const css = readFileSync(resolve(__dirname, "Sections.css"), "utf8");
+      const query = css.match(/@media \(max-height: 32rem\) \{([\s\S]*?)\n\}/);
+      expect(query?.[1]).toMatch(
+        /\.clover-sections\[data-layout="accordion"\] \.clover-sections-heading \{\s*position: relative;\s*inset-block: auto;/,
+      );
+      // Nothing sticks, so focused content keeps no room clear of the headings.
+      expect(query?.[1]).toMatch(
+        /\.clover-sections\[data-layout="accordion"\] \.clover-sections-panel \* \{\s*scroll-margin-block: 0;/,
+      );
+      // The same where `Sections` finds the stacks too tall for their container.
+      const off =
+        '\\.clover-sections\\[data-layout="accordion"\\]\\[data-stacks="off"\\]\\s+';
+      expect(css).toMatch(
+        new RegExp(
+          `${off}\\.clover-sections-heading \\{\\s*position: relative;\\s*inset-block: auto;`,
+        ),
+      );
+      expect(css).toMatch(
+        new RegExp(
+          `${off}\\.clover-sections-panel\\s+\\* \\{\\s*scroll-margin-block: 0;`,
+        ),
+      );
     });
 
     it("is a heading per section; opening one closes the others, and one stays open", () => {

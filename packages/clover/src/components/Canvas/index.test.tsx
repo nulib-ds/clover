@@ -11,6 +11,7 @@ import choiceJson from "../../fixtures/iiif-cookbook/0033-choice.json";
 import audioJson from "../../fixtures/iiif-cookbook/0002-mvm-audio.json";
 import { initCloverI18n } from "../../i18n";
 import { CanvasRenderer } from "../../lib/renderer";
+import { Root } from "../Root/Root";
 import { stubViewport } from "./testing/viewport";
 
 // Published fixtures, upgraded to Presentation 4 as Clover holds them.
@@ -64,7 +65,20 @@ beforeEach(() => {
   document.body.appendChild(overlays);
 });
 
-const open = () => act(() => listeners.open());
+/** The image opens; the hotspots and the Canvas's menus, which load on demand, arrive. */
+const open = async () => {
+  act(() => listeners.open());
+  await loaded();
+};
+/** Let the modules a Canvas loads on demand (hotspots, its menus) arrive. */
+const loaded = () =>
+  act(async () => {
+    await Promise.all([
+      import("./Annotations"),
+      import("./AnnotationMenu"),
+      import("./ChoiceMenu"),
+    ]);
+  });
 
 describe("Canvas", () => {
   it("renders nothing without a source, as Image does", () => {
@@ -80,6 +94,85 @@ describe("Canvas", () => {
       "data-status",
       "loading",
     );
+  });
+
+  it("says the viewport can be operated, and with which keys (WCAG 4.1.2)", () => {
+    render(<Canvas src="https://example.org/a.jpg" label="A letter" />);
+    const viewport = screen.getByRole("img", { name: "A letter" });
+    expect(viewport).toHaveAttribute("aria-roledescription", "zoomable image");
+    expect(viewport).toHaveAttribute(
+      "aria-keyshortcuts",
+      "ArrowLeft ArrowRight ArrowUp ArrowDown Plus - 0 R Shift+R",
+    );
+    expect(viewport).toHaveAccessibleDescription(
+      "Use the arrow keys to pan, with Shift for larger steps, plus and minus to zoom, 0 to reset the view, and R or Shift+R to rotate.",
+    );
+  });
+
+  it("gives a lone recording's viewport media's keys, and no image's role description", () => {
+    render(<Canvas canvases={[p4(audioJson).items[0]]} />);
+    const viewport = screen.getByTestId("clover-canvas-viewport");
+    expect(viewport).not.toHaveAttribute("aria-roledescription");
+    expect(viewport).toHaveAttribute("aria-keyshortcuts", "K Space J L M");
+    expect(viewport).toHaveAccessibleDescription(/Space or K to play or pause/);
+  });
+
+  it("names no camera keys, nor the image as zoomable, when the host holds it still", () => {
+    render(
+      <Canvas
+        src="https://example.org/a.jpg"
+        label="A letter"
+        options={{ gestures: { navigable: false } }}
+      />,
+    );
+    const viewport = screen.getByRole("img", { name: "A letter" });
+    expect(viewport).not.toHaveAttribute("aria-roledescription");
+    expect(viewport).not.toHaveAttribute("aria-keyshortcuts");
+    expect(viewport).not.toHaveAttribute("aria-describedby");
+    // No grab hand, and nothing panned clear of the chrome.
+    expect(screen.getByTestId("clover-canvas")).toHaveAttribute(
+      "data-navigable",
+      "false",
+    );
+  });
+
+  it("names no keys behind a placeholder, where none does anything", () => {
+    render(<Canvas canvases={[placeholderVideo.items[0]]} />);
+    const viewport = screen.getByTestId("clover-canvas-viewport");
+    expect(viewport).not.toHaveAttribute("aria-keyshortcuts");
+    expect(viewport).not.toHaveAttribute("aria-describedby");
+  });
+
+  it("names the viewport from the body's label, or generically, when given none", () => {
+    const { unmount } = render(
+      <Canvas
+        body={{
+          id: "https://example.org/a.jpg",
+          type: "Image",
+          label: { en: ["A map"] },
+        }}
+      />,
+    );
+    expect(screen.getByRole("img", { name: "A map" })).toBeInTheDocument();
+    unmount();
+    render(<Canvas src="https://example.org/a.jpg" />);
+    expect(screen.getByRole("img", { name: "Image" })).toBeInTheDocument();
+  });
+
+  it("names the viewport in a Root from the Manifest's label when the Canvas has none", async () => {
+    const unlabelled = {
+      ...bookJson,
+      label: { en: ["A book"] },
+      items: [{ ...bookJson.items[0], label: undefined }],
+    };
+    render(
+      <Root iiifContent={unlabelled}>
+        <Canvas />
+      </Root>,
+    );
+    expect(
+      await screen.findByRole("img", { name: "A book" }),
+    ).toBeInTheDocument();
   });
 
   it("tiles a body from its image service, keeping body.id as the fallback", () => {
@@ -240,13 +333,18 @@ describe("Canvas", () => {
       expect(screen.queryByTestId("clover-canvas-controls")).toBeNull();
     });
 
-    it("labels them in Clover's language, as Image does", () => {
-      initCloverI18n({ lng: "fr" });
-      render(<Canvas src="a.jpg" />);
-      expect(
-        screen.getByRole("button", { name: "Zoom avant" }),
-      ).toBeInTheDocument();
-      initCloverI18n({ lng: "en" });
+    it("labels them in Clover's language, as Image does", async () => {
+      await initCloverI18n({ lng: "fr" }).ready();
+      try {
+        render(<Canvas src="a.jpg" />);
+        expect(
+          screen.getByRole("button", { name: "Zoom avant" }),
+        ).toBeInTheDocument();
+      } finally {
+        act(() => {
+          initCloverI18n({ lng: "en" });
+        });
+      }
     });
 
     it("honours controlButtons replacements", () => {
@@ -303,10 +401,10 @@ describe("Canvas", () => {
       },
     ];
 
-    it("pins a named button to each rectangular target, once laid out", () => {
+    it("pins a named button to each rectangular target, once laid out", async () => {
       render(<Canvas src="a.jpg" annotations={annotations} label="Photo" />);
       expect(screen.queryByRole("button", { name: /Fountain/ })).toBeNull();
-      open();
+      await open();
 
       // Hotspots must stay reachable: an `img` role would hide them.
       expect(screen.getByRole("group", { name: "Photo" })).toBeInTheDocument();
@@ -324,7 +422,7 @@ describe("Canvas", () => {
       expect(renderer.overlays.add).toHaveBeenCalledTimes(1);
     });
 
-    it("marks the hovered or focused hotspot active and reports it", () => {
+    it("marks the hovered or focused hotspot active and reports it", async () => {
       const onAnnotationActive = vi.fn();
       render(
         <Canvas
@@ -333,7 +431,7 @@ describe("Canvas", () => {
           onAnnotationActive={onAnnotationActive}
         />,
       );
-      open();
+      await open();
       const button = screen.getByRole("button", { name: "Fountain & square" });
       fireEvent.mouseOver(button);
       expect(button).toHaveAttribute("data-active", "true");
@@ -347,9 +445,9 @@ describe("Canvas", () => {
       expect(button).toHaveAttribute("data-active", "true");
     });
 
-    it("lists them in a menu from a comment control; picking one zooms to it", () => {
+    it("lists them in a menu from a comment control; picking one zooms to it", async () => {
       render(<Canvas src="a.jpg" annotations={annotations} />);
-      open();
+      await open();
       const control = screen.getByRole("button", { name: "Annotations" });
       expect(control).toHaveAttribute("data-button", "annotations");
       expect(control).toHaveAttribute("aria-expanded", "false");
@@ -380,9 +478,9 @@ describe("Canvas", () => {
       expect(control).toHaveFocus();
     });
 
-    it("offers no annotations control without drawable annotations, or when turned off", () => {
+    it("offers no annotations control without drawable annotations, or when turned off", async () => {
       const { unmount } = render(<Canvas src="a.jpg" />);
-      open();
+      await open();
       expect(screen.queryByRole("button", { name: "Annotations" })).toBeNull();
       unmount();
 
@@ -393,16 +491,16 @@ describe("Canvas", () => {
           controls={{ annotations: false }}
         />,
       );
-      open();
+      await open();
       expect(screen.queryByRole("button", { name: "Annotations" })).toBeNull();
     });
 
-    it("zooms to an annotation through the handle, focusing its hotspot", () => {
+    it("zooms to an annotation through the handle, focusing its hotspot", async () => {
       const onReady = vi.fn();
       render(
         <Canvas src="a.jpg" annotations={annotations} onReady={onReady} />,
       );
-      open();
+      await open();
       const handle = onReady.mock.calls[0][0];
       const hotspot = screen.getByRole("button", { name: "Fountain & square" });
       let zoomed = false;
@@ -420,9 +518,9 @@ describe("Canvas", () => {
       expect(handle.zoomToAnnotation("https://example.org/none")).toBe(false);
     });
 
-    it("zooms to its target on click", () => {
+    it("zooms to its target on click", async () => {
       render(<Canvas src="a.jpg" annotations={annotations} />);
-      open();
+      await open();
       fireEvent.click(
         screen.getByRole("button", { name: "Fountain & square" }),
       );
@@ -579,6 +677,26 @@ describe("Canvas", () => {
       expect(fit).toBe(false);
     });
 
+    it("shows an unlabelled item's number beside its radio button", () => {
+      const unlabelled = JSON.parse(JSON.stringify(xrayCanvas));
+      const strip = (node: any): void => {
+        if (!node || typeof node !== "object") return;
+        if (node.type === "Choice")
+          for (const item of node.items) delete item.label;
+        Object.values(node).forEach(strip);
+      };
+      strip(unlabelled);
+      render(<Canvas canvases={unlabelled} />);
+      fireEvent.click(screen.getByRole("button", { name: "Choice" }));
+      const menu = screen.getByTestId("clover-canvas-choice");
+      expect(within(menu).getByText("1")).toBeVisible();
+      expect(within(menu).getByText("2")).toBeVisible();
+      expect(screen.getByRole("radio", { name: "1" })).toBeChecked();
+      expect(screen.getByRole("radio", { name: "2" })).not.toHaveAttribute(
+        "aria-label",
+      );
+    });
+
     it("closes on Escape, returning focus to the control", () => {
       render(<Canvas canvases={xrayCanvas} />);
       const control = screen.getByRole("button", { name: "Choice" });
@@ -586,6 +704,55 @@ describe("Canvas", () => {
       fireEvent.keyDown(document, { key: "Escape" });
       expect(screen.queryByTestId("clover-canvas-choice")).toBeNull();
       expect(control).toHaveFocus();
+    });
+
+    it("closes on an Escape elsewhere, leaving focus where it is", () => {
+      render(
+        <>
+          <Canvas canvases={xrayCanvas} />
+          <input type="search" aria-label="Find" />
+        </>,
+      );
+      const control = screen.getByRole("button", { name: "Choice" });
+      fireEvent.click(control);
+      expect(
+        screen.getByRole("radio", { name: "Natural Light" }),
+      ).toHaveFocus();
+      // Tab on out of the menu, which stays open, and press Escape in a field.
+      const field = screen.getByRole("searchbox", { name: "Find" });
+      field.focus();
+      // Not handled here, so the field, or whatever holds it, still has its Escape.
+      expect(fireEvent.keyDown(field, { key: "Escape" })).toBe(true);
+      expect(screen.queryByTestId("clover-canvas-choice")).toBeNull();
+      expect(control).toHaveAttribute("aria-expanded", "false");
+      expect(field).toHaveFocus();
+    });
+
+    it("closes only itself on an Escape in it, not a dialog or panel around it", () => {
+      // What a modal `<dialog>` or a floating InformationPanel does with Escape: close,
+      // unless the key's default was prevented.
+      const around = vi.fn();
+      render(
+        <dialog
+          open
+          onKeyDown={(event) => {
+            if (event.key === "Escape" && !event.defaultPrevented) around();
+          }}
+        >
+          <Canvas canvases={xrayCanvas} />
+        </dialog>,
+      );
+      const control = screen.getByRole("button", { name: "Choice" });
+      fireEvent.click(control);
+      const radio = screen.getByRole("radio", { name: "Natural Light" });
+      expect(radio).toHaveFocus();
+      expect(fireEvent.keyDown(radio, { key: "Escape" })).toBe(false);
+      expect(screen.queryByTestId("clover-canvas-choice")).toBeNull();
+      expect(control).toHaveFocus();
+      expect(around).not.toHaveBeenCalled();
+      // With the menu closed, the next Escape is the dialog's.
+      expect(fireEvent.keyDown(control, { key: "Escape" })).toBe(true);
+      expect(around).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -624,7 +791,10 @@ describe("Canvas", () => {
 
     it("shows the still fitted in place of the Canvas, with only a toggle", () => {
       render(<Canvas canvases={[first]} />);
-      const still = screen.getByRole("img", { name: "Blank page" });
+      // The viewport shares the Canvas's name, so the still is found in its own frame.
+      const still = within(
+        screen.getByTestId("clover-canvas-placeholder"),
+      ).getByRole("img", { name: "Blank page" });
       expect(still).toHaveAttribute("src", `${first.id}/still.jpg`);
       expect(screen.getByTestId("clover-canvas")).toHaveAttribute(
         "data-placeholder",
@@ -636,7 +806,7 @@ describe("Canvas", () => {
       expect(screen.queryByRole("button", { name: "Zoom in" })).toBeNull();
     });
 
-    it("opens the Canvas from the toggle, and goes back to the still", () => {
+    it("opens the Canvas from the toggle, and goes back to the still", async () => {
       render(<Canvas canvases={[first]} />);
       fireEvent.click(openViewer());
       expect(renderer.setImages).toHaveBeenCalledTimes(1);
@@ -645,7 +815,7 @@ describe("Canvas", () => {
         "data-lingering",
         "true",
       );
-      open();
+      await open();
       expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
       expect(screen.getByTestId("clover-canvas-controls")).toHaveAttribute(
         "data-has-placeholder",
@@ -668,10 +838,15 @@ describe("Canvas", () => {
       expect(renderer.setImages).toHaveBeenCalledTimes(1);
     });
 
-    it("opens from a click on the still", () => {
+    it("opens from a click on the still", async () => {
       render(<Canvas canvases={[first]} />);
-      fireEvent.click(screen.getByRole("img", { name: "Blank page" }));
-      open();
+      fireEvent.click(
+        within(screen.getByTestId("clover-canvas-placeholder")).getByRole(
+          "img",
+          { name: "Blank page" },
+        ),
+      );
+      await open();
       expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
       expect(closeViewer()).toBeInTheDocument();
     });
@@ -684,10 +859,10 @@ describe("Canvas", () => {
       expect(stills.map((still) => still.style.width)).toEqual(["50%", "50%"]);
     });
 
-    it("keeps the reader's choice, open or closed, from view to view", () => {
+    it("keeps the reader's choice, open or closed, from view to view", async () => {
       const { rerender } = render(<Canvas canvases={[first]} />);
       fireEvent.click(openViewer());
-      open();
+      await open();
 
       // The next page opens too, its still in view (inert) until it draws.
       rerender(<Canvas canvases={[second]} />);
@@ -696,7 +871,7 @@ describe("Canvas", () => {
         "true",
       );
       expect(renderer.setImages.mock.lastCall[0][0].url).not.toMatch(/still/);
-      open();
+      await open();
       expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
 
       renderer.isOpen = true;
@@ -745,16 +920,16 @@ describe("Canvas", () => {
       ).toBeInTheDocument();
       // Playback starts in an effect once the element exists, which can trail the stage.
       await vi.waitFor(() => expect(play).toHaveBeenCalled());
-      // The toggle is the close control in the top right now.
-      expect(
-        screen
-          .getAllByRole("button", { name: "Close" })
-          .some((button) => button.dataset.button === "placeholder"),
-      ).toBe(true);
+      // The toggle is the close control in the top right now, named for the player.
+      const close = screen.getByRole("button", { name: "Close player" });
+      expect(close).toHaveAttribute("data-button", "placeholder");
+      expect(close.querySelector(".clover-tip")).toHaveTextContent(
+        "Close player",
+      );
       play.mockRestore();
     });
 
-    it("holds back annotations and Choice", () => {
+    it("holds back annotations and Choice", async () => {
       const [canvas] = choice.items as any[];
       render(
         <Canvas
@@ -773,13 +948,13 @@ describe("Canvas", () => {
           ]}
         />,
       );
-      open();
+      await open();
       expect(screen.queryByRole("button", { name: "Choice" })).toBeNull();
       expect(screen.queryByRole("button", { name: "Annotations" })).toBeNull();
       expect(screen.queryByRole("button", { name: "A note" })).toBeNull();
 
       fireEvent.click(openViewer());
-      open();
+      await open();
       expect(screen.getByRole("button", { name: "Choice" })).toBeVisible();
       expect(screen.getByRole("button", { name: "Annotations" })).toBeVisible();
     });
@@ -855,9 +1030,24 @@ describe("Canvas", () => {
       expect(about()).toHaveFocus();
 
       fireEvent.click(about());
-      fireEvent.keyDown(caption(), { key: "Escape" });
+      // Prevented: a modal `<dialog>` around it stays open.
+      expect(fireEvent.keyDown(caption(), { key: "Escape" })).toBe(false);
       expect(caption()).toHaveAttribute("data-open", "false");
       expect(about()).toHaveFocus();
+    });
+
+    // WCAG 2.4.11: what it covers, a hotspot say, comes back without moving focus.
+    it("closes on an Escape anywhere in the figure, leaving focus where it is", () => {
+      render(<Canvas canvases={[natural]} />);
+      fireEvent.click(about());
+      const viewport = screen.getByTestId("clover-canvas-viewport");
+      viewport.focus();
+      // Prevented: a modal `<dialog>` around it stays open.
+      expect(fireEvent.keyDown(viewport, { key: "Escape" })).toBe(false);
+      expect(caption()).toHaveAttribute("data-open", "false");
+      expect(viewport).toHaveFocus();
+      // Closed, the next Escape is left to what is around the figure.
+      expect(fireEvent.keyDown(viewport, { key: "Escape" })).toBe(true);
     });
   });
 
@@ -888,6 +1078,34 @@ describe("Canvas", () => {
       act(() => void vi.advanceTimersByTime(1000));
       expect(canvas).toHaveAttribute("data-chrome", "hidden");
       vi.useRealTimers();
+    });
+
+    it("shows under a finger on a tap on the picture, and hides on the next, never on a timer", () => {
+      vi.useFakeTimers();
+      render(<Canvas src="a.jpg" options={{ hideDelay: 500 }} />);
+      const canvas = screen.getByTestId("clover-canvas");
+      const picture = screen.getByTestId("clover-canvas-viewport");
+      const tap = () =>
+        ["pointerdown", "pointerup"].forEach((type) =>
+          act(
+            () =>
+              void picture.dispatchEvent(
+                Object.assign(
+                  new MouseEvent(type, { clientX: 5, bubbles: true }),
+                  { pointerId: 1, pointerType: "touch", isPrimary: true },
+                ),
+              ),
+          ),
+        );
+
+      tap();
+      act(() => void vi.advanceTimersByTime(300));
+      expect(canvas).toHaveAttribute("data-chrome", "visible");
+      act(() => void vi.advanceTimersByTime(60_000));
+      expect(canvas).toHaveAttribute("data-chrome", "visible");
+      tap();
+      act(() => void vi.advanceTimersByTime(300));
+      expect(canvas).toHaveAttribute("data-chrome", "hidden");
     });
   });
 });

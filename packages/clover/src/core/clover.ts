@@ -28,7 +28,6 @@ import {
   selectStart,
   selectVisibleCanvases,
 } from "./selectors";
-import { search } from "./search";
 import { type SearchHit, searchServiceOf } from "./search-service";
 import { type Channel, type Store, createChannel, createStore } from "./store";
 
@@ -449,6 +448,8 @@ export function createClover(options: CloverOptions = {}): Clover {
         search: { ...state.search, query: q, status: "loading" },
       }));
       try {
+        // Asking and reading a service loads with the first search, as few pages search.
+        const { search } = await import("./search");
         const results = await search(service, q, {
           request,
           signal: controller.signal,

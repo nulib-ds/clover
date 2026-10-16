@@ -59,6 +59,7 @@ The same image from the reference server's 2.1 and 2.0 endpoints, given as `src`
 
 <CanvasHandleDemo
   id="northwestern"
+  label="#54, Bath. 15 Dibre 1806, p. 1 recto"
   body={{
     id: "https://iiif.dc.library.northwestern.edu/iiif/2/6ca016c5-de7f-4373-ae8f-7047fecf6ace/full/600,/0/default.jpg",
     type: "Image",
@@ -79,9 +80,12 @@ The same image from the reference server's 2.1 and 2.0 endpoints, given as `src`
 ### Annotations
 
 Rectangular (`xywh`) annotation targets become hotspots, as in `Image`: hover or focus
-one to see its label, and click it (or press <kbd>Enter</kbd>) to zoom to it. The comment
-control in the cluster lists them by their text; picking one zooms to it and keeps its
-hotspot highlighted.
+one to see its label, in a popover that <kbd>Escape</kbd> hides, and click it (or press
+the <kbd>Enter</kbd> key) to zoom to it. Pressing <kbd>Tab</kbd> reaches them in the
+order the annotations are given, and moves the picture, no further than needed, to bring
+the one it reaches out from under the controls. The comment control in the cluster lists
+them by their text; picking one zooms to it and keeps its hotspot highlighted and marked
+as current.
 
 <CanvasHandleDemo
   id="annotations"
@@ -123,7 +127,7 @@ cluster. It slides out a box over the picture with each shown Canvas's label, su
 metadata, as the `<figcaption>` of the Canvas's `<figure>`. The box stays open while you
 pan and zoom, and as the host moves to another Canvas that has information to show. Close
 it from its own button, the `i` control, or <kbd>Escape</kbd>. Here each Canvas describes
-itself ([0029](https://iiif.io/api/cookbook/recipe/0029-metadata-anywhere/)).
+itself ([Cookbook 0029](https://iiif.io/api/cookbook/recipe/0029-metadata-anywhere/)).
 
 <CanvasRecipe
   id="metadata"
@@ -139,8 +143,8 @@ the image: nothing is fetched, and there is no pan or zoom, no annotations or `C
 and no video or sound until then. The information control stays available. The toggle
 then closes the Canvas again, back to its placeholder. Open or closed holds as the
 Canvases change, so a reader paging through a book opens it once; a video or sound
-starts at its poster each time, since opening it plays it. Here the
-[0029](https://iiif.io/api/cookbook/recipe/0029-metadata-anywhere/) Canvases are given
+starts at its poster each time, since opening it plays it. Here the Canvases of
+[Cookbook 0029](https://iiif.io/api/cookbook/recipe/0029-metadata-anywhere/) are given
 small stills of themselves as placeholders.
 
 <CanvasRecipe
@@ -200,7 +204,7 @@ below the `Canvas` rather than inside it. The grouping rules it uses are Clover'
 ### `individuals`
 
 One Canvas at a time — the spec's default.
-([0011](https://iiif.io/api/cookbook/recipe/0011-book-3-behavior/))
+([Cookbook 0011](https://iiif.io/api/cookbook/recipe/0011-book-3-behavior/))
 
 <CanvasRecipe
   id="individuals"
@@ -210,7 +214,7 @@ One Canvas at a time — the spec's default.
 ### `paged`
 
 Spreads, two Canvases at a time, after a cover that stands alone.
-([0009](https://iiif.io/api/cookbook/recipe/0009-book-1/))
+([Cookbook 0009](https://iiif.io/api/cookbook/recipe/0009-book-1/))
 
 <CanvasRecipe id="paged" iiifContent={`${RECIPES}/0009-book-1/manifest.json`} />
 
@@ -218,7 +222,7 @@ Spreads, two Canvases at a time, after a cover that stands alone.
 
 A Canvas marked `non-paged` is never paired — here, a foldout photographed unfolded —
 and pairing carries on after it.
-([0035](https://iiif.io/api/cookbook/recipe/0035-foldouts/))
+([Cookbook 0035](https://iiif.io/api/cookbook/recipe/0035-foldouts/))
 
 <CanvasRecipe
   id="non-paged"
@@ -244,7 +248,7 @@ one, so this marks the third Canvas of the book above `facing-pages`.
 ### `continuous`
 
 One object in several Canvases — a scroll photographed in sections — joined edge to edge
-in a single view. ([0011](https://iiif.io/api/cookbook/recipe/0011-book-3-behavior/))
+in a single view. ([Cookbook 0011](https://iiif.io/api/cookbook/recipe/0011-book-3-behavior/))
 
 <CanvasRecipe
   id="continuous"
@@ -256,7 +260,7 @@ in a single view. ([0011](https://iiif.io/api/cookbook/recipe/0011-book-3-behavi
 
 The recipe shows its Canvases individually, so "next" is the button on the left. As
 spreads (`behavior="paged"`), each spread's first page is on the right.
-([0010](https://iiif.io/api/cookbook/recipe/0010-book-2-viewing-direction/))
+([Cookbook 0010](https://iiif.io/api/cookbook/recipe/0010-book-2-viewing-direction/))
 
 <CanvasRecipe
   id="right-to-left"
@@ -272,7 +276,7 @@ spreads (`behavior="paged"`), each spread's first page is on the right.
 ### `top-to-bottom`
 
 Individually, the buttons point up and down. Joined (`behavior="continuous"`), the
-Canvases stack downward. ([0010](https://iiif.io/api/cookbook/recipe/0010-book-2-viewing-direction/))
+Canvases stack downward. ([Cookbook 0010](https://iiif.io/api/cookbook/recipe/0010-book-2-viewing-direction/))
 
 <CanvasRecipe
   id="top-to-bottom"
@@ -305,7 +309,7 @@ the first Canvas at the bottom, the stack growing up.
 
 Each painting annotation's target places its image on the Canvas: here a detail,
 photographed separately, is inset over the page it comes from.
-([0036](https://iiif.io/api/cookbook/recipe/0036-composition-from-multiple-images/))
+([Cookbook 0036](https://iiif.io/api/cookbook/recipe/0036-composition-from-multiple-images/))
 
 <CanvasRecipe
   id="composition"
@@ -316,7 +320,7 @@ photographed separately, is inset over the page it comes from.
 
 A `Choice` offers alternative images of the same thing. The first is shown; the bullet
 control in the cluster lists the others to switch to, keeping your place.
-([0033](https://iiif.io/api/cookbook/recipe/0033-choice/))
+([Cookbook 0033](https://iiif.io/api/cookbook/recipe/0033-choice/))
 
 <CanvasRecipe
   id="choice"
@@ -327,7 +331,7 @@ control in the cluster lists the others to switch to, keeping your place.
 
 World coordinates are the Canvas's: a 640 × 360 image painted on a 1920 × 1080 Canvas is
 stretched to fill it, and annotations on the Canvas land where they should.
-([0004](https://iiif.io/api/cookbook/recipe/0004-canvas-size/))
+([Cookbook 0004](https://iiif.io/api/cookbook/recipe/0004-canvas-size/))
 
 <CanvasRecipe
   id="canvas-size"
@@ -344,7 +348,7 @@ when a Canvas paints video or sound, so a page of images never downloads it.
 
 ### Video
 
-([0003](https://iiif.io/api/cookbook/recipe/0003-mvm-video/))
+([Cookbook 0003](https://iiif.io/api/cookbook/recipe/0003-mvm-video/))
 
 <CanvasRecipe
   id="video"
@@ -355,8 +359,11 @@ when a Canvas paints video or sound, so a page of images never downloads it.
 
 A `supplementing` annotation with a WebVTT body becomes a caption track. The first is
 shown by default; the captions control switches tracks or turns them off. Clover draws
-the cues itself, so they stay a readable size at any zoom.
-([0219](https://iiif.io/api/cookbook/recipe/0219-using-caption-file/))
+the cues itself, so they stay a readable size at any zoom. Captions carried in the media
+itself (an HLS stream's subtitles or CEA-608/708 captions, a file's own tracks) are offered
+after the Manifest's. In an iPhone's full screen and in picture in picture, the system's
+player shows the chosen track, and a track chosen in its own menu stays chosen.
+([Cookbook 0219](https://iiif.io/api/cookbook/recipe/0219-using-caption-file/))
 
 <CanvasRecipe
   id="captions"
@@ -364,19 +371,48 @@ the cues itself, so they stay a readable size at any zoom.
 />
 
 A `Choice` of caption files offers each language.
-([0074](https://iiif.io/api/cookbook/recipe/0074-multiple-language-captions/))
+([Cookbook 0074](https://iiif.io/api/cookbook/recipe/0074-multiple-language-captions/))
 
 <CanvasRecipe
   id="caption-languages"
   iiifContent={`${RECIPES}/0074-multiple-language-captions/manifest.json`}
 />
 
+#### Styling captions
+
+Clover's captions are sized on its scale, from the page's own text size, so a reader's
+larger default text or zoom makes them larger too. They grow a step at a time as the
+stage widens. A system's own caption settings (size, colour, background) reach the
+captions where the system's player shows them: an iPhone's full screen and picture in
+picture. On the page, set them yourself:
+
+| Custom property                   | Default            | What it sets                                            |
+| --------------------------------- | ------------------ | ------------------------------------------------------- |
+| `--clover-player-caption-surface` | `rgb(0 0 0 / 85%)` | The box behind each cue.                                |
+| `--clover-player-caption-text`    | `#fff`             | The cue's text.                                         |
+| `--clover-player-caption-edge`    | `none`             | A `text-shadow` round the text: an outline or a shadow. |
+
+Keep the text at 4.5:1 against the box, as the defaults are (WCAG 1.4.3). Size and font
+are your own CSS on the cue, which wins over Clover's layer:
+
+```css
+.my-player {
+  --clover-player-caption-surface: rgb(0 0 0 / 60%);
+  --clover-player-caption-edge: 0 0 2px #000, 0 0 2px #000;
+}
+
+.my-player .clover-canvas-captions-cue {
+  font-size: 1.25rem;
+  font-family: "Atkinson Hyperlegible", sans-serif;
+}
+```
+
 ### Placeholder Canvas for video
 
 A video's `placeholderContainer` is shown first, as for an image, with a large play button
 in the middle, as a video player has. The player loads only when it is pressed, and starts
 playing; the close control in the top right goes back to the placeholder.
-([0013](https://iiif.io/api/cookbook/recipe/0013-placeholderCanvas/))
+([Cookbook 0013](https://iiif.io/api/cookbook/recipe/0013-placeholderCanvas/))
 
 <CanvasRecipe
   id="placeholder"
@@ -402,7 +438,7 @@ decodes them. This needs CORS on the media: without it, that video falls back to
 
 Sound plays through the same transport. With no picture of its own,
 the Canvas is a 16:9 stage.
-([0002](https://iiif.io/api/cookbook/recipe/0002-mvm-audio/))
+([Cookbook 0002](https://iiif.io/api/cookbook/recipe/0002-mvm-audio/))
 
 <CanvasRecipe
   id="sound"
@@ -412,7 +448,7 @@ the Canvas is a 16:9 stage.
 ### Sound with an accompanying Canvas
 
 The `accompanyingContainer` (else the `placeholderContainer`) is shown while it plays.
-([0014](https://iiif.io/api/cookbook/recipe/0014-accompanyingcanvas/))
+([Cookbook 0014](https://iiif.io/api/cookbook/recipe/0014-accompanyingcanvas/))
 
 <CanvasRecipe
   id="sound-accompanying"
@@ -458,23 +494,42 @@ The `accompanyingContainer` (else the `placeholderContainer`) is shown while it 
 ## Interaction
 
 The controls, navigator, a video or sound's transport, and a soft scrim behind them appear
-while the pointer moves over the Canvas or focus is anywhere inside it. They fade after
-`hideDelay`, or a second after the pointer or keyboard focus leaves, as the Viewer's
-Player does. Chrome shown by keyboard focus stays while focus is inside.
+while the mouse moves over the Canvas or focus is anywhere inside it. They fade after
+`hideDelay`, or a second after the mouse or keyboard focus leaves, as the Viewer's
+Player does. Chrome shown by keyboard focus stays while focus is inside, and a control
+stays while the mouse rests on it. A finger, or a pen that does not hover, has no timer:
+a tap on the picture shows the chrome, and the next tap hides it, however long the reader
+takes. A pen that hovers (a desktop tablet's, say) points as a mouse does. A press where
+faded chrome sits only shows it: nothing beneath, a hotspot included, takes that press.
+Focus that no press brought (the keyboard's, or a screen reader's) holds the chrome until
+it leaves.
 
-| Input                       | Action                                  |
-| --------------------------- | --------------------------------------- |
-| Drag                        | Pan, with momentum on release           |
-| Click                       | Zoom in (<kbd>Shift</kbd>-click: out)   |
-| Pinch                       | Zoom about the pinch                    |
-| Trackpad pinch              | Zoom about the pointer                  |
-| Wheel                       | Scrolls the page, unless `scrollToZoom` |
-| Double tap (touch)          | Zoom in                                 |
-| Arrow keys                  | Pan (<kbd>Shift</kbd>: further)         |
-| <kbd>+</kbd> / <kbd>-</kbd> | Zoom in / out                           |
-| <kbd>0</kbd>                | Home, upright                           |
-| <kbd>r</kbd> / <kbd>R</kbd> | Rotate 90° clockwise / anticlockwise    |
-| Navigator                   | Press or drag to move there             |
+| Input                       | Action                                                    |
+| --------------------------- | --------------------------------------------------------- |
+| Drag                        | Pan, with momentum on release                             |
+| Click                       | Zoom in (<kbd>Shift</kbd>-click: out); at the limit, home |
+| Pinch                       | Zoom about the pinch                                      |
+| Trackpad pinch              | Zoom about the pointer                                    |
+| Wheel                       | Scrolls the page, unless `scrollToZoom`                   |
+| Tap (touch, pen)            | Show or hide the controls                                 |
+| Double tap (touch, pen)     | Zoom in; at the limit, home                               |
+| Arrow keys                  | Pan (<kbd>Shift</kbd>: further)                           |
+| <kbd>+</kbd> / <kbd>-</kbd> | Zoom in / out                                             |
+| <kbd>0</kbd>                | Home, upright                                             |
+| <kbd>r</kbd> / <kbd>R</kbd> | Rotate 90° clockwise / anticlockwise                      |
+| Navigator                   | Press or drag to move there                               |
+
+Zoomed in as far as it goes, a click or a double tap goes home, so one pointer can always
+zoom back out, even with the zoom and reset controls turned off (WCAG 2.5.1). Turn off the
+click zooms (`gestures`) as well, and pinch is the only zoom left on touch: give the reader
+one of your own through the handle (`home()`, `zoomBy(0.5)`).
+
+The viewport tells assistive technology that it can be operated. It keeps its `img` role
+(a `group` when it holds hotspots), described as a "zoomable image", and names its keys in
+`aria-keyshortcuts` and, in words, in its description. A lone video or sound names the
+player's keys instead, and a Canvas the host holds still (`navigable: false`) names no
+camera keys. Where Clover's strings are not in the page's language, the role
+keeps its own name, since an attribute cannot carry a language.
 
 A single video or sound Canvas is a player rather than a picture to explore. It is always
 fitted to the stage, at the video's own aspect, and does not pan, zoom or rotate. Its
@@ -542,32 +597,33 @@ Root's current view, and the Root does the loading and upgrading. See
 | `src`                | `string \| string[]`                                                       | Image URLs, or image service URIs with `isTiledImage`.                             |
 | `isTiledImage`       | `boolean`                                                                  | Treat each `src` as an image service (base URI or `info.json`).                    |
 | `label`              | `InternationalString \| string`                                            | Accessible name for the viewport.                                                  |
+| `language`           | `string`                                                                   | The language to read labels, Choices and annotations in. In a `Root`, the Root's.  |
 | `instanceId`         | `string`                                                                   | A new id remounts the renderer.                                                    |
 | `manifestId`         | `string`                                                                   | The id of the Manifest the Canvases are from. A new one clears the Canvas at once. |
 | `annotations`        | `{ annotation, targetIndex }[]`                                            | Hotspots, as `Image` takes them. Rectangular targets only.                         |
 | `onAnnotationActive` | `(id: string \| null) => void`                                             | The hovered or focused hotspot.                                                    |
 | `navigator`          | `boolean`                                                                  | Show the overview in the top left. Default `false`.                                |
-| `controls`           | `boolean \| { zoom, fullPage, rotation, reset, annotations, information }` | Which controls to show. Default all.                                               |
+| `controls`           | `boolean \| { zoom, fullPage, rotation, reset, annotations, information }` | Which controls to show. Default all. See Interaction for zooming out without them. |
 | `controlButtons`     | `ControlButtons`                                                           | Replace any control, as the Viewer's `controlButtons`.                             |
 | `options`            | `CloverCanvasOptions`                                                      | See below.                                                                         |
 | `onReady`            | `(handle: CanvasHandle) => void`                                           | Called once the first images are laid out and fitted.                              |
 | `onViewportChange`   | `(bounds: Rect) => void`                                                   | The visible region, in image coordinates, at most once per frame.                  |
 | `onMediaElement`     | `(element: HTMLVideoElement \| null) => void`                              | A time-based Canvas's media element, for a host's own transcript.                  |
 | `onEnded`            | `() => void`                                                               | Playback reached the end: a host's cue to advance.                                 |
-| `chapters`           | `{ label, start, end? }[]`                                                 | Chapters of the video or sound, on the seek bar and in a menu.                     |
+| `chapters`           | `{ label, lang?, start, end? }[]`                                          | Chapters of the video or sound, on the seek bar and in a menu, labels in `lang`.   |
 
 ### `options`
 
-| Option               | Default  | Description                                                                            |
-| -------------------- | -------- | -------------------------------------------------------------------------------------- |
-| `backend`            | `"auto"` | `"auto"`, `"webgl2"` or `"canvas2d"`.                                                  |
-| `gestures`           |          | `clickToZoom`, `dblClickToZoom`, `pinchToZoom`, `scrollToZoom` (`false`).              |
-| `maxZoomPixelRatio`  | `1.1`    | Largest zoom, in CSS pixels per image pixel.                                           |
-| `minZoomImageRatio`  | `0.9`    | Smallest zoom, as a fraction of the home zoom.                                         |
-| `animationTime`      | `0.09`   | Easing time constant in seconds. `0` under reduced motion.                             |
-| `hideDelay`          | `2000`   | Milliseconds the controls and navigator stay after the pointer stops, as the Player's. |
-| `request`            |          | `{ credentials, headers, fetch }` for `info.json`, tiles, captions and HLS.            |
-| `media.presentation` | `"dom"`  | `"dom"` places a real `<video>`; `"texture"` draws its frames into the canvas (CORS).  |
+| Option               | Default  | Description                                                                                                         |
+| -------------------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| `backend`            | `"auto"` | `"auto"`, `"webgl2"` or `"canvas2d"`.                                                                               |
+| `gestures`           |          | `clickToZoom`, `dblClickToZoom`, `pinchToZoom`, `scrollToZoom` (`false`), `navigable`.                              |
+| `maxZoomPixelRatio`  | `1.1`    | Largest zoom, in CSS pixels per image pixel.                                                                        |
+| `minZoomImageRatio`  | `0.9`    | Smallest zoom, as a fraction of the home zoom.                                                                      |
+| `animationTime`      | `0.09`   | Easing time constant in seconds. `0` under reduced motion.                                                          |
+| `hideDelay`          | `2000`   | Milliseconds the chrome stays after the mouse stops, as the Player's. None for touch, or a pen that does not hover. |
+| `request`            |          | `{ credentials, headers, fetch }` for `info.json`, tiles, captions and HLS.                                         |
+| `media.presentation` | `"dom"`  | `"dom"` places a real `<video>`; `"texture"` draws its frames into the canvas (CORS).                               |
 
 ### `CanvasHandle`
 

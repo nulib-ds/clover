@@ -35,7 +35,7 @@ export function About({
   className,
   ...rest
 }: AboutProps) {
-  const { t } = useCloverTranslation();
+  const { t, langOf } = useCloverTranslation();
   const downloads = useDownloads();
   const manifest = useCloverSelector(
     (state) => state.manifest as Record<string, any> | null,
@@ -44,10 +44,12 @@ export function About({
   );
   if (!manifest) return null;
   const Heading = `h${headingLevel}` as React.ElementType;
-  const section = (title: string, has: unknown, part: React.ReactNode) =>
+  const section = (titleKey: string, has: unknown, part: React.ReactNode) =>
     has ? (
       <section className="clover-about-section">
-        <Heading className="clover-about-heading">{title}</Heading>
+        <Heading className="clover-about-heading" lang={langOf(titleKey)}>
+          {t(titleKey)}
+        </Heading>
         {part}
       </section>
     ) : null;
@@ -64,11 +66,11 @@ export function About({
       <Summary className="clover-about-summary" />
       <Metadata className="clover-about-metadata" />
       <RequiredStatement className="clover-about-metadata" />
-      {section(t("aboutRights"), manifest.rights, <Rights />)}
-      {section(t("aboutHomepage"), hasAny("homepage"), <Homepage />)}
-      {section(t("aboutSeeAlso"), hasAny("seeAlso"), <SeeAlso />)}
+      {section("aboutRights", manifest.rights, <Rights />)}
+      {section("aboutHomepage", hasAny("homepage"), <Homepage />)}
+      {section("aboutSeeAlso", hasAny("seeAlso"), <SeeAlso />)}
       {section(
-        t("download"),
+        "download",
         downloads.page.length + downloads.all.length > 0,
         <DownloadGroups
           page={downloads.page}
@@ -76,7 +78,7 @@ export function About({
           headingLevel={Math.min(headingLevel + 1, 6) as 3}
         />,
       )}
-      {section(t("aboutManifest"), manifest.id, <Id />)}
+      {section("aboutManifest", manifest.id, <Id />)}
     </div>
   );
 }

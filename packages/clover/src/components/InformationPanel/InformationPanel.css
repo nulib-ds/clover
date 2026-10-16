@@ -117,9 +117,9 @@
 }
 
 /*
- * Centred on the first heading: it rests `inset - s` down, one line (`1lh`, at the
- * heading's `text-m`, which the button takes on; its tip keeps its own size) and `s`
- * above and below it tall.
+ * Centred on the first heading's first line: it rests `inset - s` down, one line (`1lh`,
+ * at the heading's `text-m`, which the button takes on; its tip keeps its own size) and
+ * `s` above and below it tall. A label that wraps runs on below it.
  */
 [data-spine]
   > .clover-information-panel
@@ -134,14 +134,15 @@
 
 /*
  * Rows: what a reader picks from a list in the panel (an annotation, a Range, a cue, a
- * search hit), written once. `xs` by `s` inside, an accent edge at the start when it is
- * the current one. Each part keeps only its own layout.
+ * search hit, a place on the map), written once. `xs` by `s` inside, an accent edge at
+ * the start when it is the current one. Each part keeps only its own layout.
  */
 :is(
   .clover-annotations-entry,
   button.clover-contents-button,
   .clover-transcript-cue > button,
-  button.clover-content-search-hit
+  button.clover-content-search-hit,
+  .clover-geomap-places button
 ) {
   box-sizing: border-box;
   width: 100%;
@@ -161,7 +162,8 @@
     .clover-annotations-entry,
     button.clover-contents-button,
     .clover-transcript-cue > button,
-    button.clover-content-search-hit
+    button.clover-content-search-hit,
+    .clover-geomap-places button
   ):is(:hover, [data-highlighted="true"]):not(:disabled) {
   background-color: var(--clover-color-secondary-muted, #f1f1f1);
 }
@@ -170,7 +172,8 @@
   .clover-annotations-entry[data-selected="true"],
   button.clover-contents-button[aria-current="true"],
   .clover-transcript-cue[aria-current="true"] > button,
-  button.clover-content-search-hit[aria-current="true"]
+  button.clover-content-search-hit[aria-current="true"],
+  .clover-geomap-places button[aria-current="true"]
 ) {
   border-inline-start-color: var(--clover-color-accent, #0065c3);
   /* The accent, faintly: whatever the accent is, never a colour of its own. */
@@ -182,6 +185,32 @@
 }
 
 /*
+ * Forced colours drop the tint and draw every row's edge in the text colour: the others'
+ * in the ground, so only the current one's shows, in the highlight.
+ */
+@media (forced-colors: active) {
+  :is(
+    .clover-annotations-entry,
+    button.clover-contents-button,
+    .clover-transcript-cue > button,
+    button.clover-content-search-hit,
+    .clover-geomap-places button
+  ) {
+    border-inline-start-color: Canvas;
+  }
+
+  :is(
+    .clover-annotations-entry[data-selected="true"],
+    button.clover-contents-button[aria-current="true"],
+    .clover-transcript-cue[aria-current="true"] > button,
+    button.clover-content-search-hit[aria-current="true"],
+    .clover-geomap-places button[aria-current="true"]
+  ) {
+    border-inline-start-color: Highlight;
+  }
+}
+
+/*
  * Lists of rows: no bullets, no indent, the rows `2xs` apart (they are one list); a
  * nested list of Ranges steps in by `m`.
  */
@@ -189,7 +218,8 @@
   .clover-annotations-list,
   .clover-contents-list,
   .clover-transcript-cues,
-  .clover-content-search-hits
+  .clover-content-search-hits,
+  .clover-geomap-places
 ) {
   display: flex;
   flex-direction: column;

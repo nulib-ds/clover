@@ -71,11 +71,26 @@ import { Default } from "@nulib/clover/templates";
 | ------------------ | --------------------------- | --------------------------------------------------------------- |
 | `template`         | `Default`, loaded on demand | The layout: one from `@nulib/clover/templates`, or your own.    |
 | `header`           | `true`                      | The thumbnail and title over the stage.                         |
+| `headingLevel`     | `2`                         | The title's level; the panel's sections are a level below.      |
 | `panel`            | `true`                      | The information panel and its toggle.                           |
 | `defaultPanelOpen` | —                           | Whether the panel starts open. Unset: open when it fits beside. |
 | `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.             |
 | `items`            | `"carousel"`                | The thumbnails: `"carousel"`, `"list"`, `"grid"`, or `false`.   |
 | `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.      |
+
+The Viewer's headings start at `h2`: its title, then the panel's sections under it. Where
+it sits under a heading of the page's own, give it the level below that heading, so a
+screen reader's list of headings matches the page as it looks. The Viewers on this page
+sit under its `h2`s and `h3`s, and pass `3` and `4`:
+
+```jsx
+<h3>Opening at a place</h3>
+<Viewer iiifContent={url} headingLevel={4} />
+```
+
+With `header={false}` the Viewer has no title, and the panel's sections take its place
+at `headingLevel` itself, so a Viewer under a page's `h1` keeps the default and its
+sections are `h2`s.
 
 ## Your own layout
 

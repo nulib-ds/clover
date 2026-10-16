@@ -1,4 +1,13 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import React from "react";
 
 import {
@@ -20,6 +29,7 @@ class FakeMap {
   sources: Record<string, any> = {};
   layers: Array<{ id: string; type: string; source?: string }> = [];
   handlers: Array<{ event: string; layer?: string; fn: (e: any) => void }> = [];
+  canvas = document.createElement("canvas");
   fitBounds = vi.fn();
   jumpTo = vi.fn();
   setPaintProperty = vi.fn();
@@ -30,6 +40,23 @@ class FakeMap {
     }
     this.options = options;
     maps.push(this);
+    // The canvas as MapLibre makes it: a focusable region, named from its locale.
+    this.canvas.className = "maplibregl-canvas";
+    this.canvas.tabIndex = 0;
+    this.canvas.setAttribute("role", "region");
+    this.canvas.setAttribute("aria-label", options.locale["Map.Title"]);
+    // The compact credits as MapLibre opens them: open, and shown, named from its locale.
+    const attrib = document.createElement("details");
+    attrib.className =
+      "maplibregl-ctrl maplibregl-ctrl-attrib maplibregl-compact maplibregl-compact-show";
+    attrib.open = true;
+    const credits = document.createElement("summary");
+    credits.className = "maplibregl-ctrl-attrib-button";
+    const label = options.locale["AttributionControl.ToggleAttribution"];
+    credits.title = label;
+    credits.setAttribute("aria-label", label);
+    attrib.append(credits);
+    options.container?.append?.(this.canvas, attrib);
     queueMicrotask(() => this.fire("load", {}));
   }
   on(event: string, layer: any, fn?: any) {
@@ -64,24 +91,36 @@ class FakeMap {
   }
   addControl() {}
   getCanvas() {
-    return { style: {} as Record<string, string> };
+    return this.canvas;
+  }
+  getZoom() {
+    return 1;
   }
   resize() {}
   remove() {}
 }
 
-const popups: Array<{ text?: string }> = [];
+const popups: FakePopup[] = [];
 class FakePopup {
-  text?: string;
-  setLngLat() {
+  text?: string | null;
+  node?: HTMLElement;
+  at?: unknown;
+  removed = false;
+  setLngLat(at: unknown) {
+    this.at = at;
     return this;
   }
-  setText(text: string) {
-    this.text = text;
+  setDOMContent(node: HTMLElement) {
+    this.node = node;
+    this.text = node.textContent;
     return this;
   }
   addTo() {
     popups.push(this);
+    return this;
+  }
+  remove() {
+    this.removed = true;
     return this;
   }
 }
@@ -123,6 +162,34 @@ const placeData = (map: FakeMap) =>
   map.sources["geomap-navplace"].setData.mock.calls.at(-1)?.[0];
 
 describe("Map", () => {
+  it("starts with its credits collapsed, and cases its lines in white", async () => {
+    const { container } = render(
+      <CloverMap
+        navPlace={{
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "LineString",
+            coordinates: [
+              [-87.69, 42.04],
+              [-87.68, 42.05],
+            ],
+          },
+        }}
+      />,
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
+    const attrib = container.querySelector("details")!;
+    await waitFor(() => expect(attrib.open).toBe(false));
+    expect(attrib).not.toHaveClass("maplibregl-compact-show");
+    const ids = maps[0].layers.map((layer) => layer.id);
+    expect(ids.indexOf("geomap-navplace-casing")).toBe(
+      ids.indexOf("geomap-navplace-line") - 1,
+    );
+    // A place with no name is listed by its number.
+    expect(screen.getByRole("button", { name: "Place 1" })).toBeInTheDocument();
+  });
+
   it("draws GeoJSON it is given, framed on its one point", async () => {
     render(
       <CloverMap
@@ -167,11 +234,169 @@ describe("Map", () => {
       ),
     );
     expect(popups.at(-1)?.text).toBe("Current Location of Painting");
+    expect(popups.at(-1)?.node?.lang).toBe("en");
     await waitFor(() =>
       expect(screen.getByTestId("canvas")).toHaveTextContent(
         canvasesJson.items[1].label.en[0],
       ),
     );
+  });
+
+  it("lists its places; pressing one frames and names it, and opens its Canvas", async () => {
+    const onSelect = vi.fn();
+    render(
+      <Clover.Root iiifContent={canvasesJson}>
+        <Clover.Label of="canvas" data-testid="canvas" />
+        <CloverMap onSelect={onSelect} />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
+    const [map] = maps;
+    await waitFor(() => expect(map.fitBounds).toHaveBeenCalledTimes(1));
+
+    const list = screen.getByRole("list");
+    const [bronze, painting] = within(list).getAllByRole("button");
+    expect(bronze).toHaveAccessibleName(
+      "Current Location of the Laocoön Bronze",
+    );
+    expect(bronze).toHaveAttribute("lang", "en");
+    // The first Canvas is in view, so its place is the current one.
+    expect(bronze).toHaveAttribute("aria-current", "true");
+    expect(painting).not.toHaveAttribute("aria-current");
+
+    fireEvent.click(painting);
+    expect(map.jumpTo).toHaveBeenLastCalledWith({
+      center: [-77.0199025, 38.8920717],
+      zoom: 8,
+    });
+    expect(popups.at(-1)?.text).toBe("Current Location of Painting");
+    expect(popups.at(-1)?.at).toEqual([-77.0199025, 38.8920717]);
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        properties: expect.objectContaining({
+          canvasId: canvasesJson.items[1].id,
+        }),
+      }),
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("canvas")).toHaveTextContent(
+        canvasesJson.items[1].label.en[0],
+      ),
+    );
+    expect(painting).toHaveAttribute("aria-current", "true");
+    expect(bronze).not.toHaveAttribute("aria-current");
+    // The view it opened draws nothing new, so the place stays framed.
+    expect(map.fitBounds).toHaveBeenCalledTimes(1);
+
+    // One popup at a time.
+    fireEvent.click(bronze);
+    expect(popups.at(-2)?.removed).toBe(true);
+  });
+
+  it("standalone, marks no place current: nothing shows a Canvas", async () => {
+    const onSelect = vi.fn();
+    render(<CloverMap iiifContent={canvasesJson} onSelect={onSelect} />);
+    const painting = await screen.findByRole("button", {
+      name: "Current Location of Painting",
+    });
+    await waitFor(() => expect(maps[0]?.fitBounds).toHaveBeenCalled());
+    const buttons = within(screen.getByRole("list")).getAllByRole("button");
+    for (const button of buttons)
+      expect(button).not.toHaveAttribute("aria-current");
+    // Nor once one is chosen: its popup names it, and nothing goes to a view.
+    fireEvent.click(painting);
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(popups.at(-1)?.text).toBe("Current Location of Painting");
+    for (const button of buttons)
+      expect(button).not.toHaveAttribute("aria-current");
+  });
+
+  it("names places in their own language, in the list and the popup", async () => {
+    render(
+      <Clover.Root iiifContent={canvasesJson} language="it">
+        <CloverMap />
+      </Clover.Root>,
+    );
+    const bronze = await screen.findByRole("button", {
+      name: "Ubicazione attuale del Bronzo Laocoonte e i suoi figli",
+    });
+    expect(bronze).toHaveAttribute("lang", "it");
+    await waitFor(() => expect(maps[0].fitBounds).toHaveBeenCalled());
+    fireEvent.click(bronze);
+    expect(popups.at(-1)?.node?.lang).toBe("it");
+    expect(popups.at(-1)?.node?.textContent).toBe(
+      "Ubicazione attuale del Bronzo Laocoonte e i suoi figli",
+    );
+  });
+
+  it("is one region, named in the reader's language and described by a count of its places", async () => {
+    const { container } = render(
+      <Clover.Root iiifContent={canvasesJson}>
+        <CloverMap />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
+    const [map] = maps;
+    expect(map.options.locale).toMatchObject({
+      "Map.Title": "Map",
+      "AttributionControl.ToggleAttribution": "Map credits",
+    });
+    const region = screen.getByRole("region");
+    expect(region).toBe(map.canvas);
+    expect(region).toHaveAccessibleName("Map");
+    // A count, short whatever the number: the list after it names them.
+    await waitFor(() =>
+      expect(region).toHaveAccessibleDescription(
+        "Places listed after the map: 2",
+      ),
+    );
+    const about = document.getElementById(
+      region.getAttribute("aria-describedby")!,
+    )!;
+    expect(about).not.toBeVisible();
+    expect(
+      within(screen.getByRole("list")).getAllByRole("button"),
+    ).toHaveLength(2);
+
+    // A new language renames MapLibre's own controls, title and all.
+    act(() => {
+      initCloverI18n({
+        lng: "fr",
+        resources: {
+          fr: { clover: { mapLabel: "Carte", mapAttribution: "Crédits" } },
+        },
+      });
+    });
+    await waitFor(() => expect(region).toHaveAccessibleName("Carte"));
+    const credits = container.querySelector(".maplibregl-ctrl-attrib-button")!;
+    expect(credits).toHaveAttribute("aria-label", "Crédits");
+    expect(credits).toHaveAttribute("title", "Crédits");
+  });
+
+  it("lists the georeferenced images it draws, by their Canvas's name", async () => {
+    const manifest = evanston();
+    (manifest.items[0] as any).label = { en: ["Township map"] };
+    render(
+      <Clover.Root iiifContent={manifest}>
+        <CloverMap />
+      </Clover.Root>,
+    );
+    const button = await screen.findByRole("button", {
+      name: "Township map Georeferenced image",
+    });
+    expect(within(button).getByText("Township map")).toHaveAttribute(
+      "lang",
+      "en",
+    );
+    const [map] = maps;
+    map.fitBounds.mockClear();
+    fireEvent.click(button);
+    expect(map.fitBounds).toHaveBeenCalledTimes(1);
+    const [[west, south], [east, north]] = map.fitBounds.mock.calls[0][0];
+    expect(west).toBeGreaterThan(-88);
+    expect(east).toBeLessThan(-87.5);
+    expect(south).toBeGreaterThan(41.9);
+    expect(north).toBeLessThan(42.2);
   });
 
   it("warps a georeferenced image onto the map by its control points", async () => {
@@ -213,12 +438,27 @@ describe("Map", () => {
     );
   });
 
-  it("says so when MapLibre cannot start (no WebGL)", async () => {
+  it("says so when MapLibre cannot start (no WebGL), and still lists its places", async () => {
     failNext = true;
     render(<CloverMap navPlace={{ type: "Point", coordinates: [0, 0] }} />);
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "The map could not be shown.",
     );
+    expect(screen.getByRole("button", { name: "Place 1" })).toBeInTheDocument();
+  });
+
+  it("holds a popup's ground and tip to the theme over MapLibre's unlayered white", () => {
+    // Layered (`dist`), only `!important` beats MapLibre's own `background: #fff`.
+    const css = readFileSync(resolve(__dirname, "Map.css"), "utf8");
+    expect(css).toMatch(
+      /\.clover-geomap-popup \.maplibregl-popup-content \{[^}]*background-color: var\(--clover-color-secondary, #fff\) !important;[^}]*color: var\(--clover-color-primary, #1a1d1e\);/,
+    );
+    for (const side of ["top", "bottom", "left", "right"])
+      expect(css).toMatch(
+        new RegExp(
+          `border-${side}-color: var\\(--clover-color-secondary, #fff\\) !important;`,
+        ),
+      );
   });
 });
 
@@ -247,7 +487,37 @@ describe("the Map tab", () => {
         <Clover.InformationPanel />
       </Clover.Root>,
     );
-    expect(await screen.findByRole("tab", { name: "Map" })).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("tab", { name: "Map" }));
+    // The places, under the map in its tab.
+    expect(
+      await screen.findByRole("button", {
+        name: "Current Location of Painting",
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("is no second region named Map inside the accordion's Map section", async () => {
+    render(
+      <Clover.Root iiifContent={canvasesJson}>
+        <Clover.InformationPanel layout="accordion" />
+      </Clover.Root>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "Map" }));
+    await waitFor(() => expect(maps).toHaveLength(1));
+    const [map] = maps;
+    // A group, so the section is the one landmark named Map.
+    expect(map.canvas).toHaveAttribute("role", "group");
+    await waitFor(() =>
+      expect(map.canvas).toHaveAccessibleDescription(
+        "Places listed after the map: 2",
+      ),
+    );
+    const section = screen.getByRole("region", { name: "Map" });
+    expect(section).toHaveClass("clover-sections-panel");
+    expect(within(section).queryByRole("region")).toBeNull();
+    expect(within(section).getByRole("group", { name: "Map" })).toBe(
+      map.canvas,
+    );
   });
 });
 

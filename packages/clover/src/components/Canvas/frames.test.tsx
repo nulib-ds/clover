@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react";
 import React from "react";
 
-import { FrameControls, useAnimation } from "./FrameAnimation";
+import FrameAnimation, { FrameControls, useAnimation } from "./FrameAnimation";
 import {
   type IIIFCanvas,
   animationFrames,
@@ -180,10 +180,17 @@ describe("FrameControls", () => {
     const animation = state(0);
     render(<FrameControls frames={frames} animation={animation} />);
     expect(screen.getByText("Frame 1 of 2")).toBeInTheDocument();
-    // At the first frame there is no previous one, as the pager has none.
+    // At the first frame there is no previous one, as the pager has none. The button
+    // says so but stays focusable, and a press does nothing.
+    const previous = screen.getByRole("button", { name: "Previous frame" });
+    expect(previous).toHaveAttribute("aria-disabled", "true");
+    expect(previous).toBeEnabled();
+    fireEvent.click(previous);
+    expect(animation.setFrame).not.toHaveBeenCalled();
+    expect(animation.setPlaying).not.toHaveBeenCalled();
     expect(
-      screen.getByRole("button", { name: "Previous frame" }),
-    ).toBeDisabled();
+      screen.getByRole("button", { name: "Next frame" }),
+    ).not.toHaveAttribute("aria-disabled");
     fireEvent.click(screen.getByRole("button", { name: "Next frame" }));
     expect(animation.setFrame).toHaveBeenCalledWith(1);
     expect(animation.setPlaying).toHaveBeenCalledWith(false);
@@ -228,10 +235,50 @@ describe("FrameControls", () => {
         animation={animation}
       />,
     );
-    expect(screen.getByRole("button", { name: "Next frame" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Next frame" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
     const repeat = screen.getByRole("button", { name: "Repeat" });
     expect(repeat).toHaveAttribute("aria-pressed", "false");
     fireEvent.click(repeat);
     expect(animation.setRepeat).toHaveBeenCalledWith(true);
+  });
+});
+
+describe("FrameAnimation", () => {
+  it("puts its bar in the media layer, as a video's, and gives the Canvas its height", () => {
+    // jsdom lays nothing out: the bar is as tall as two rows of a narrow stage.
+    const height = vi
+      .spyOn(HTMLElement.prototype, "offsetHeight", "get")
+      .mockReturnValue(59);
+    const canvas = stereo();
+    const scene = canvasScene([canvas], "left-to-right");
+    const renderer = { setHidden: vi.fn(), isReady: () => true };
+    const { unmount } = render(
+      <figure className="clover-canvas" data-testid="canvas">
+        <FrameAnimation
+          renderer={renderer as any}
+          frames={animationFrames(canvas)}
+          byFrame={scene.frames[frameKey(canvas)]}
+          animationKey={canvas.id}
+          sceneVersion={1}
+        />
+      </figure>,
+    );
+    const layer = screen.getByTestId("clover-canvas-frames").parentElement;
+    // It fades with the chrome and sizes its menu against the stage, as a video's does.
+    expect(layer).toHaveClass("clover-canvas-media");
+    expect(layer).toHaveAttribute("data-kind", "frames");
+    // What clears the bar (captions, the information box) clears both its rows.
+    const figure = screen.getByTestId("canvas");
+    expect(figure.style.getPropertyValue("--clover-transport-bar-height")).toBe(
+      "59px",
+    );
+    unmount();
+    expect(figure.style.getPropertyValue("--clover-transport-bar-height")).toBe(
+      "",
+    );
+    height.mockRestore();
   });
 });

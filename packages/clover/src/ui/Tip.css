@@ -2,8 +2,14 @@
  * The popover a control shows (`ui/Tip.tsx`): its name, and its key when it has one, in
  * `text-s` on the page's dark colour, `xs` from the control. Above it by default; below a
  * control along the top of what it sits on; beside the cluster when the cluster is a
- * column; and at either end of a row, lined up with the control's outer edge so it stays
- * inside the stage.
+ * column; at either end of a row, lined up with the control's outer edge so it stays
+ * inside the stage; and toward the middle of the stage from a hotspot.
+ *
+ * Then, each time it shows, `ui/Tip.tsx` measures it against what clips it (the stage, a
+ * scrolling panel, the window): where it would pass an edge, it wraps to the room there
+ * is (`--clover-tip-room`) and moves inward along the row (`--clover-tip-shift`), `xs`
+ * clear. So a name widened by a reader's text spacing, zoom or a longer language is never
+ * cut off (WCAG 1.4.10, 1.4.12). Without script, it keeps its family's place.
  *
  * WCAG 1.4.13, Content on Hover or Focus: shown on keyboard focus as well as hover;
  * hoverable (the gap to the control is bridged, so the pointer can cross onto it);
@@ -28,7 +34,14 @@
   color: var(--clover-color-secondary, #fff);
   font-size: var(--clover-text-s);
   font-weight: normal;
-  white-space: nowrap;
+  /* One line, as wide as its words, unless the room is short (above). */
+  box-sizing: border-box;
+  width: max-content;
+  max-width: var(--clover-tip-room, none);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  /* On top of its family's `translate`, whatever that is. */
+  transform: translateX(var(--clover-tip-shift, 0px));
   pointer-events: none;
   opacity: 0;
   visibility: hidden;
@@ -62,8 +75,14 @@
   transition-delay: 0s;
 }
 
+/*
+ * Dismissed: unseen, and taking no pointer, so what it covered is within reach. It comes
+ * back when the pointer next enters the control (`ui/Tip.tsx`).
+ */
 [data-tip-hidden] > .clover-tip {
-  display: none;
+  opacity: 0;
+  transition: none;
+  pointer-events: none;
 }
 
 /*
@@ -108,9 +127,9 @@ button.clover-items-scroll-prev > .clover-tip,
   translate: none;
 }
 
-/* …and at its end. */
+/* …and at its end (the media transport's end is its own group, the bar's last). */
 :is(
-    .clover-canvas-transport-bar,
+    .clover-canvas-transport-end,
     .clover-template-document-pager,
     .clover-template-lightbox-header
   )
@@ -125,6 +144,86 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
   > .clover-tip {
   inset-inline: auto 0;
   translate: none;
+}
+
+/*
+ * A hotspot's (`Canvas/Annotations.tsx`): its annotation's text, which may run long, so
+ * it wraps, no wider than the stage. It hangs on the side of the hotspot with more room,
+ * and is kept inside the stage, `xs` from its edges, across and down: where that side has
+ * too little room (a hotspot as tall as the stage, or zoomed into), it moves over the
+ * hotspot, to its edge in sight. The renderer's overlay layer, which pins each hotspot,
+ * writes where it is: `--clover-overlay-x`, its centre; `--clover-overlay-top` and
+ * `-bottom`, its edges; and `data-overlay-room`, the side. Without them, while the view
+ * is turned, it hangs below, centred.
+ *
+ * Taller than the stage, it is capped there and scrolls (WCAG 1.4.10): by wheel or touch
+ * over it, and by the arrows, the page keys, Home and End from its hotspot. A scroller
+ * cuts what passes its edge, so the gap to the hotspot is bridged inside its own box: an
+ * `xs` border on the hotspot's side, clear (`background-clip`), rather than `::before`.
+ */
+button.clover-canvas-annotation > .clover-tip {
+  --clover-tip-x: clamp(
+    var(--clover-space-xs) - var(--clover-overlay-x, 50cqw),
+    -50%,
+    100cqw - var(--clover-space-xs) - var(--clover-overlay-x, 50cqw) - 100%
+  );
+  top: 100%;
+  bottom: auto;
+  max-width: min(18rem, 100cqw - 2 * var(--clover-space-xs));
+  max-height: calc(100cqh - 2 * var(--clover-space-xs));
+  overflow-y: auto;
+  border: solid transparent;
+  border-width: var(--clover-space-xs) 0 0;
+  background-clip: padding-box;
+  translate: var(--clover-tip-x) 0;
+  /* Kept inside here, as the view moves under it, not where it was when it showed. */
+  transform: none;
+}
+
+button.clover-canvas-annotation > .clover-tip::before {
+  content: none;
+}
+
+button.clover-canvas-annotation[data-overlay-room="below"] > .clover-tip {
+  top: 100%;
+  translate: var(--clover-tip-x)
+    clamp(
+      0px - var(--clover-overlay-bottom),
+      0px,
+      100cqh - var(--clover-overlay-bottom) - var(--clover-space-xs) - 100%
+    );
+}
+
+button.clover-canvas-annotation[data-overlay-room="above"] > .clover-tip {
+  top: auto;
+  bottom: 100%;
+  border-width: 0 0 var(--clover-space-xs);
+  translate: var(--clover-tip-x)
+    clamp(
+      100% + var(--clover-space-xs) - var(--clover-overlay-top),
+      0px,
+      100cqh - var(--clover-overlay-top)
+    );
+}
+
+/*
+ * A split's handle (`Split.tsx`): beside its grip, at the bar's middle, over the pane
+ * after it. Above or below, it would land at the far ends of a bar as tall as the layout.
+ * A press on it neither steps nor drags the bar, so it keeps the plain pointer.
+ */
+.clover-split-handle > .clover-tip {
+  top: 50%;
+  bottom: auto;
+  inset-inline: calc(100% + var(--clover-space-xs)) auto;
+  translate: 0 -50%;
+  cursor: default;
+}
+
+.clover-split-handle > .clover-tip::before {
+  inset-block: 0;
+  inset-inline: auto 100%;
+  width: var(--clover-space-xs);
+  height: auto;
 }
 
 /* The cluster as a column on a phone: beside each control, toward the stage. */

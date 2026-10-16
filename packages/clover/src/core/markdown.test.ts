@@ -18,13 +18,122 @@ describe("markdownToHtml", () => {
     );
   });
 
+  it("writes bullet and numbered lists as lists, a numbered one from its first number", () => {
+    expect(markdownToHtml("- one\n* **two**\n+ three")).toBe(
+      "<ul><li>one</li><li><b>two</b></li><li>three</li></ul>",
+    );
+    expect(markdownToHtml("1. one\n2. two")).toBe(
+      "<ol><li>one</li><li>two</li></ol>",
+    );
+    expect(markdownToHtml("3) three\n4) four")).toBe(
+      '<ol start="3"><li>three</li><li>four</li></ol>',
+    );
+  });
+
+  it("starts a list after a line of text, a numbered one only from 1", () => {
+    expect(markdownToHtml("Intro:\n- a\n- b")).toBe(
+      "<p>Intro:</p><ul><li>a</li><li>b</li></ul>",
+    );
+    expect(markdownToHtml("Intro:\n1. one\n2. two")).toBe(
+      "<p>Intro:</p><ol><li>one</li><li>two</li></ol>",
+    );
+    // A line that opens with a number is still text, as in CommonMark.
+    expect(markdownToHtml("Printed in\n1849. Then sold.")).toBe(
+      "<p>Printed in 1849. Then sold.</p>",
+    );
+  });
+
+  it("nests an indented item under the one before, and carries an item on to the next line", () => {
+    expect(markdownToHtml("- a\n  - b\n  - c\n- d")).toBe(
+      "<ul><li>a<ul><li>b</li><li>c</li></ul></li><li>d</li></ul>",
+    );
+    expect(markdownToHtml("1. a\n   - b\n2. c")).toBe(
+      "<ol><li>a<ul><li>b</li></ul></li><li>c</li></ol>",
+    );
+    expect(markdownToHtml("- a\ncontinued\n- b")).toBe(
+      "<ul><li>a continued</li><li>b</li></ul>",
+    );
+    // A list of the other kind at the same depth is a list of its own.
+    expect(markdownToHtml("1. a\n- b")).toBe(
+      "<ol><li>a</li></ol><ul><li>b</li></ul>",
+    );
+  });
+
+  it("writes headings from the level it is given, each under the nearest shallower one, none skipped", () => {
+    // The source skips a level; the output does not.
+    expect(markdownToHtml("## Notes\n\n#### Sources\n\nText.")).toBe(
+      '<p role="heading" aria-level="3"><b>Notes</b></p>' +
+        '<p role="heading" aria-level="4"><b>Sources</b></p>' +
+        "<p>Text.</p>",
+    );
+    const levels = (markdown: string, headingLevel?: number) =>
+      [
+        ...markdownToHtml(markdown, { headingLevel }).matchAll(
+          /aria-level="(\d)"/g,
+        ),
+      ].map(([, level]) => Number(level));
+    expect(levels("# Title\n### Deep")).toEqual([3, 4]);
+    // The first heading takes the level, deeper or not; a shallower one later backs out.
+    expect(levels("### A\n# B\n## C\n#### D\n## E")).toEqual([3, 3, 4, 5, 4]);
+    expect(levels("# Notes", 5)).toEqual([5]);
+    // Never deeper than 6.
+    expect(levels("# One\n## Two\n### Three", 5)).toEqual([5, 6, 6]);
+  });
+
+  it("takes a heading from the lines round it, and its closing hashes off", () => {
+    expect(markdownToHtml("# Title #\nText under it.\n- a\n- b")).toBe(
+      '<p role="heading" aria-level="3"><b>Title</b></p>' +
+        "<p>Text under it.</p><ul><li>a</li><li>b</li></ul>",
+    );
+    expect(markdownToHtml("Text\n## Part\n- a\n- b")).toBe(
+      "<p>Text</p>" +
+        '<p role="heading" aria-level="3"><b>Part</b></p>' +
+        "<ul><li>a</li><li>b</li></ul>",
+    );
+  });
+
+  it("writes no heading without text, nor for a hash with no space", () => {
+    expect(markdownToHtml("#\n\n#tag")).toBe("<p>#</p><p>#tag</p>");
+  });
+
+  it("keeps its lists and headings through the Markdown sanitiser", () => {
+    const html = markdownToHtml("# Notes\n\n- one\n\n2. two", {
+      headingLevel: 4,
+    });
+    // The same markup, whatever order the sanitiser leaves its attributes in.
+    const parse = (markup: string) => {
+      const template = document.createElement("template");
+      template.innerHTML = markup;
+      return template.content;
+    };
+    expect(
+      parse(sanitizeHTML(html, { markdown: true })).isEqualNode(parse(html)),
+    ).toBe(true);
+  });
+
   it("escapes HTML in the source, and leaves unsafe links as text", () => {
     const html = sanitizeHTML(
       markdownToHtml(
         "<script>alert(1)</script> [x](javascript:alert(1)) <img src=x onerror=1>",
       ),
+      { markdown: true },
     );
     expect(html).not.toMatch(/<script|<img|href=/);
     expect(html).toContain("&lt;script&gt;");
+  });
+
+  it("never lets a quote in a link's address write attributes of its own", () => {
+    const html = sanitizeHTML(
+      markdownToHtml('[x](https://a"role="heading"aria-level="1)'),
+      { markdown: true },
+    );
+    const link = new DOMParser()
+      .parseFromString(html, "text/html")
+      .querySelector("a")!;
+    expect(link.getAttributeNames()).toEqual(["href"]);
+    expect(link.getAttribute("href")).toBe(
+      'https://a"role="heading"aria-level="1',
+    );
+    expect(markdownToHtml('Say "hi"')).toBe("<p>Say &quot;hi&quot;</p>");
   });
 });

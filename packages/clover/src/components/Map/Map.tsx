@@ -10,7 +10,8 @@ export type { MapProps } from "./MapView";
  * A map of where a IIIF resource is: its navPlace features (Collection, Manifest, Canvas
  * and annotation), and the georeferenced images of the Canvases in view, warped onto the
  * map by their control points. Pressing a place names it, and inside a `Root` goes to its
- * Canvas.
+ * Canvas. Under the map, a list names each place and overlay, as buttons that do the same:
+ * the map's text, and the keyboard's way to its places.
  *
  * MapLibre GL loads when a map is first shown, and nothing of it before. Its stylesheet is yours to import: `maplibre-gl/dist/maplibre-gl.css`.
  */

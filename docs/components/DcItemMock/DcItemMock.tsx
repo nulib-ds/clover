@@ -97,6 +97,7 @@ const DcItemMock: React.FC = () => {
   const [count, setCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [more, setMore] = useState(false);
+  const [whole, setWhole] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -106,6 +107,7 @@ const DcItemMock: React.FC = () => {
     setCount(null);
     setError(null);
     setMore(false);
+    setWhole(false);
     json<{ data: Work }>(`${API}/works/${id}`)
       .then(async ({ data }) => {
         if (!live) return;
@@ -177,7 +179,12 @@ const DcItemMock: React.FC = () => {
       </header>
 
       <main>
-        {error && <p className={styles.contained}>Could not load: {error}</p>}
+        {/* An alert, so a screen reader announces a failed load. */}
+        {error && (
+          <p className={styles.contained} role="alert">
+            Could not load: {error}
+          </p>
+        )}
 
         {work && (
           <div className={styles.viewer}>
@@ -267,10 +274,24 @@ const DcItemMock: React.FC = () => {
                       {count.toLocaleString()} Works
                     </p>
                   )}
+                  {/* Clamped to three lines until Show More, so none of it is out of reach. */}
                   {work.collection.description && (
-                    <p className={styles.clamp}>
-                      {work.collection.description}
-                    </p>
+                    <>
+                      <p
+                        className={styles.clamp}
+                        data-expanded={whole || undefined}
+                      >
+                        {work.collection.description}
+                      </p>
+                      <button
+                        type="button"
+                        className={styles.more}
+                        aria-expanded={whole}
+                        onClick={() => setWhole(!whole)}
+                      >
+                        {whole ? "Show Less" : "Show More"}
+                      </button>
+                    </>
                   )}
                 </div>
               </section>
@@ -283,6 +304,8 @@ const DcItemMock: React.FC = () => {
                   <Items
                     key={url}
                     iiifContent={url}
+                    // Each row's title under "Explore Further".
+                    headingLevel={3}
                     className={styles.row}
                     onSelect={stayHere}
                   />

@@ -61,8 +61,8 @@ setMapWorkerUrl("/static/maplibre-gl-worker.mjs");
 ## In a Viewer
 
 Inside a `Root`, `Map` maps the Root's resource: its places, and the georeferenced image of
-the view on the stage, following the reader from page to page. Pressing a place names it,
-and goes to its Canvas.
+the view on the stage, following the reader from page to page. Pressing a place, on the
+map or in the list under it, names it and goes to its Canvas.
 
 The Viewer, the templates and any default `InformationPanel` add a Map tab by themselves
 when the Manifest, its Collection, a Canvas or an annotation has navPlace or a
@@ -73,6 +73,8 @@ georeference. Nothing to pass:
 ```
 
 Below, the georeferenced Evanston map from Clover's [mocks](/docs/mocks): open the Map tab.
+It sits under this page's `h2`, so it is given `headingLevel={3}`, as any Viewer under a
+heading of the page's own is (see [the Viewer](/docs/viewer#the-viewer)).
 
 <MapViewerDemo />
 
@@ -106,6 +108,14 @@ Points, lines and areas are drawn in the accent color, or in a feature's own
 `marker-color`. Each is named by its `label`, in the reader's language, or by the resource
 it belongs to.
 
+Under the map, a list names every place, and each georeferenced image drawn by its
+Canvas's label, each name in its own language. Each is a button. A place's frames it and
+names it on the map, and inside a `Root` goes to its Canvas, as pressing it on the map
+does; there, the places of the Canvases in view are marked current. The list is the map's
+text alternative and the keyboard's way to its places. It shows even where the map cannot,
+without WebGL. The map is a region named "Map", described by how many places the list
+holds; in the information panel, whose section is already that region, it is a group.
+
 ## Properties
 
 | Prop             | Type                       | What it does                                                                     |
@@ -118,10 +128,13 @@ it belongs to.
 | `styleUrl`       | `string`                   | A MapLibre style, used as it is. Default: Clover's relief basemap.               |
 | `workerUrl`      | `string`                   | Where MapLibre's worker is served from, if your bundler moves it.                |
 | `scrollZoom`     | `boolean`                  | Zoom with the wheel or trackpad. Default `false`, so page scroll is not trapped. |
-| `onSelect`       | `(feature) => void`        | A place was pressed. Its `properties` hold `title` and `canvasId`.               |
+| `onSelect`       | `(feature) => void`        | A place was pressed. Its `properties` hold `title`, `titleLang` and `canvasId`.  |
 | `request`        | `{ credentials, headers }` | Standalone: how to fetch.                                                        |
 
-Size it with `--clover-map-height` (default `24rem`).
+Size the map with `--clover-map-height` (default `24rem`); its list follows it. `style`
+and `className` go to the element that holds both, so give the height as the property, not
+as `height`: `style={{ "--clover-map-height": "400px" } as React.CSSProperties}`, or set
+it in your CSS.
 
 The default basemap is OpenFreeMap's Liberty, keyless, with roads removed and relief from
 Mapzen's terrain tiles, as 3.x's Map draws it. Wheel zoom is off; the zoom buttons,

@@ -3,19 +3,10 @@ import React, { forwardRef, useEffect } from "react";
 import { Items } from "../Items/Items";
 import { Label } from "../Label/Label";
 import { Homepage, Id, Summary } from "../Primitives/Primitives";
+import { partOfCollection } from "../../core/selectors";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
-
-/** The first Collection a Manifest says it is `partOf`. */
-export const partOfCollection = (manifest: unknown) =>
-  (
-    ((manifest as { partOf?: unknown } | null)?.partOf ?? []) as Array<{
-      id?: string;
-      type?: string;
-      label?: unknown;
-    }>
-  ).find((part) => part?.id && part.type === "Collection");
 
 export interface CollectionProps extends React.HTMLAttributes<HTMLElement> {
   /** The level of its headings: the Collection's label, Homepage and its address. Default 3. */
@@ -35,7 +26,7 @@ export interface CollectionProps extends React.HTMLAttributes<HTMLElement> {
 export const Collection = forwardRef<HTMLDivElement, CollectionProps>(
   function Collection({ headingLevel = 3, className, ...rest }, ref) {
     const { clover } = useClover("Collection");
-    const { t } = useCloverTranslation();
+    const { t, langOf } = useCloverTranslation();
     const collection = useCloverSelector((state) => state.collection);
     const partOf = useCloverSelector((state) =>
       partOfCollection(state.manifest),
@@ -62,14 +53,20 @@ export const Collection = forwardRef<HTMLDivElement, CollectionProps>(
         <Items of="members" layout="list" />
         {Array.isArray(homepage) && homepage.length > 0 && (
           <section className="clover-about-section">
-            <Heading className="clover-about-heading">
+            <Heading
+              className="clover-about-heading"
+              lang={langOf("aboutHomepage")}
+            >
               {t("aboutHomepage")}
             </Heading>
             <Homepage value={homepage as never} />
           </section>
         )}
         <section className="clover-about-section">
-          <Heading className="clover-about-heading">
+          <Heading
+            className="clover-about-heading"
+            lang={langOf("aboutCollection")}
+          >
             {t("aboutCollection")}
           </Heading>
           <Id value={shown.id} />

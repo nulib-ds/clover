@@ -1,6 +1,7 @@
 import Viewer from "docs/components/DynamicImports/Viewer";
 import CustomManifest from "docs/components/CustomManifest/CustomManifest";
 import CallToAction from "docs/components/CallToAction";
+import { iiifContentError } from "docs/lib/iiif-content";
 
 import { encodeContentState, decodeContentState } from "@iiif/helpers";
 
@@ -72,7 +73,10 @@ A temporal `PointSelector` without annotation body text appears as a timestamp-o
 seek control in the Annotations tab. Points at `0` seconds are supported. If body
 text is supplied, it appears alongside the timestamp.
 
-<CustomManifest placeholder="IIIF Manifest or Collection" />
+<CustomManifest
+  placeholder="IIIF Manifest or Collection"
+  validate={iiifContentError}
+/>
 
 <Viewer
   contentStateCallback={handleContentStateCallback}
@@ -114,9 +118,12 @@ the viewer.
   }}
 >
   <div style={{ width: "33.33%" }}>
-    <strong>Preview</strong>
+    <label htmlFor="content-state-body">
+      <strong>Body text</strong>
+    </label>
     <textarea
       id="content-state-body"
+      aria-describedby="content-state-body-help"
       onChange={handleBodyChange}
       style={{
         background: "#0001",
@@ -127,11 +134,14 @@ the viewer.
         fontSize: "0.833rem",
         resize: "none",
       }}
-      placeholder='Enter any body text here to see how it is displayed in the viewer. Note that character lenghts longer than a few hundred characters may not display correctly in the viewer due to limitations in browser maxchar lengths.'
     ></textarea>
+    {/* The field's instructions, kept visible rather than in a faint placeholder. */}
+    <p id="content-state-body-help" style={{ fontSize: "0.833rem", margin: "0.5rem 0 0" }}>Enter any body text to see how it is displayed in the viewer. Text longer than a few hundred characters may not display correctly, because browsers limit URL length.</p>
   </div>
   <div style={{ width: "33.33%" }}>
-    <strong>base64 Encoded JSON</strong>
+    <label htmlFor="content-state-encoded">
+      <strong>base64 Encoded JSON</strong>
+    </label>
     <textarea
       id="content-state-encoded"
       style={{
@@ -148,7 +158,9 @@ the viewer.
 
   </div>
   <div style={{ width: "33.33%" }}>
-    <strong>Raw JSON</strong>
+    <label htmlFor="content-state-json">
+      <strong>Raw JSON</strong>
+    </label>
     <textarea
       id="content-state-json"
       style={{

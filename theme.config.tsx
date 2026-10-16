@@ -4,6 +4,7 @@ import Logo from "./docs/components/Logo";
 import PageSettings from "./docs/components/PageSettings/PageSettings";
 import React from "react";
 import { useConfig } from "nextra-theme-docs";
+import { useFSRoute } from "nextra/hooks";
 import { useMemo } from "react";
 import { useRouter } from "next/router";
 
@@ -21,6 +22,30 @@ const siteDescription =
 const siteUrl = (
   process.env.NEXT_PUBLIC_SITE_URL || "https://nulib-ds.github.io/clover"
 ).replace(/\/+$/, "");
+
+/*
+ * A sidebar entry's title. Nextra marks the current page by its look only, so the
+ * current page's link also says so to screen readers. Its test is Nextra's own.
+ */
+function SidebarTitle({
+  title,
+  type,
+  route,
+}: {
+  title: string;
+  type: string;
+  route: string;
+}) {
+  const [current] = useFSRoute().split("#");
+  const isCurrent =
+    type !== "separator" && [current, current + "/"].includes(route + "/");
+  return (
+    <>
+      {title}
+      {isCurrent && <span className="nx-sr-only"> (current page)</span>}
+    </>
+  );
+}
 
 const config: DocsThemeConfig = {
   darkMode: true,
@@ -108,8 +133,14 @@ const config: DocsThemeConfig = {
   primaryHue: 219,
   primarySaturation: 99,
   sidebar: {
-    autoCollapse: true,
+    /*
+     * Off, so an opened folder stays open while focus moves through it. On, Nextra closed
+     * it when focus passed from a page link to a nested folder's link, which then sat in
+     * a closed folder, hidden from focus (docs/styles/layout.css).
+     */
+    autoCollapse: false,
     defaultMenuCollapseLevel: 1,
+    titleComponent: SidebarTitle,
     toggleButton: true,
   },
 };

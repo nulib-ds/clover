@@ -30,6 +30,13 @@ describe("parseVtt", () => {
     ]);
   });
 
+  it("decodes numeric character references, once", () => {
+    const [cue] = parseVtt(
+      "WEBVTT\n\n00:01.000 --> 00:02.000\nit&#39;s &#x266A; &amp;#39; &#0; &bogus;\n",
+    );
+    expect(cue.text).toBe("it's ♪ &#39; &#0; &bogus;");
+  });
+
   it("finds the cue playing by binary search, none between cues", () => {
     const cues = parseVtt(VTT);
     expect(cueAt(cues, 0.5)).toBe(-1);

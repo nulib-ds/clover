@@ -100,21 +100,28 @@ export function Summary({
 
 /**
  * Any IIIF language map — an annotation's text, a label you hold — in the reader's
- * language, as sanitised HTML. `format="text/markdown"` reads Markdown.
+ * language, as sanitised HTML. `format="text/markdown"` reads Markdown, its lists as
+ * lists and its headings as headings, the first at `headingLevel` (default 3).
  */
 export function Value({
   value,
   format,
+  headingLevel,
   as = "span",
   className,
   ...rest
-}: Omit<PartProps<LanguageMapLike>, "of"> & { format?: string }) {
+}: Omit<PartProps<LanguageMapLike>, "of"> & {
+  format?: string;
+  /** With Markdown, the level of its first heading; the rest follow under it. Default 3. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
+}) {
   const language = useLanguage();
   return (
     <Markup
       as={as}
       markup={value}
       format={format}
+      headingLevel={headingLevel}
       language={language}
       className={join("clover-value", className)}
       {...rest}
@@ -322,10 +329,17 @@ export function Thumbnail({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, size]);
   if (!src) return null;
+  const label = localize(resource?.label, language);
   return (
     <img
       src={src}
-      alt={toPlainText(localize(resource?.label, language).text)}
+      alt={toPlainText(label.text)}
+      // The label's language, while the alt is the label.
+      lang={
+        (rest as { alt?: string }).alt === undefined && label.text
+          ? label.lang
+          : undefined
+      }
       width={size}
       loading="lazy"
       decoding="async"

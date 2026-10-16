@@ -106,18 +106,9 @@
   }
 }
 
-.caption {
-  align-items: baseline;
-  color: var(--gray-11);
-  display: flex;
-  font-size: var(--text-sm);
-  gap: 0.618rem;
-  margin: 0;
-}
-
-.captionName {
-  color: var(--gray-12);
-  font-weight: 500;
+/* Let go while focus is on a part of it the hold kept out of the window (`PartsLive`). */
+.assembled[data-hold="free"] {
+  position: static;
 }
 
 /* Under the viewer, at its end, the control that opens its code below. */
@@ -227,6 +218,7 @@
   padding: 0.382rem 0.618rem 0.382rem 1rem;
 }
 
+/* Its buttons: Copy, and Move up and Move down for a picked part. At least 24px each. */
 .copy {
   background: none;
   border: 0;
@@ -234,11 +226,36 @@
   color: inherit;
   cursor: pointer;
   font: inherit;
+  min-block-size: 24px;
+  min-inline-size: 24px;
   padding: 0.236rem 0.382rem;
 }
 
 .copy:hover {
   color: var(--code-text);
+}
+
+.copy[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.copy[aria-disabled="true"]:hover {
+  color: inherit;
+}
+
+/* The picked part's name, then its two moves, after the language. */
+.moves {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.236rem;
+  margin-inline: auto 0.618rem;
+}
+
+.picked {
+  color: var(--code-tag);
+  margin-inline-end: 0.236rem;
 }
 
 .copy:focus-visible {
@@ -287,6 +304,11 @@
 /* A part's lines while the part is pointed at, here or at its tile: the accent, faintly. */
 .codeBlock[data-on] {
   background-color: color-mix(in srgb, var(--accent-9) 24%, transparent);
+}
+
+/* The part picked to move, outlined in the accent as long as it is picked. */
+.codeBlock[data-picked] {
+  box-shadow: inset 0 0 0 1px var(--accent-9);
 }
 
 .codeBlock[data-dragged] {
@@ -421,10 +443,24 @@
   outline-offset: 2px;
 }
 
+/* Content's height: a number field, three digits wide, without the spin buttons. */
 .scrub {
+  -moz-appearance: textfield;
+  appearance: textfield;
+  color: inherit;
   cursor: ew-resize;
   touch-action: none;
-  user-select: none;
+  width: 3ch;
+}
+
+.scrub:focus {
+  cursor: text;
+}
+
+.scrub::-webkit-inner-spin-button,
+.scrub::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .choice {
@@ -767,9 +803,18 @@
   overflow: hidden;
 }
 
-/* The viewer's strip is too small for names: its pictures alone, the tile has them named. */
+/*
+ * The viewer's strip is too small for names: its pictures alone, the tile has them named.
+ * Hidden on screen only, so each option keeps its name for assistive technology.
+ */
 .viewerStrip[data-layout="carousel"] :global(.clover-items-caption) {
-  display: none;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }
 
 /*
@@ -803,6 +848,13 @@
   color: var(--accent-11);
 }
 
+/* A link in a part's text (Summary, Metadata, the statement), coloured and underlined. */
+.tileBody :is(p, dd) a,
+.viewer :is(p, dd) a {
+  color: var(--accent-11);
+  text-decoration: underline;
+}
+
 /*
  * Scrolls up and down, never across. Room at its sides for a ring drawn past an edge
  * (Items' selection), given back so what it holds lines up with the rest of the tile.
@@ -819,14 +871,14 @@
   max-height: 29rem;
 }
 
+/* The map at the tile's height, its places listed under it; its room held while it loads. */
 .map {
-  border-radius: var(--radius-3);
-  height: 22rem;
-  overflow: hidden;
+  --clover-map-height: 22rem;
+  min-height: var(--clover-map-height);
 }
 
-.map > * {
-  height: 100%;
+.map :global(.clover-geomap) > div {
+  border-radius: var(--radius-3);
 }
 
 .loading {

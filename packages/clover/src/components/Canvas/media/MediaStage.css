@@ -8,34 +8,49 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  /* Captions size against the stage, not the window. */
-  container-type: inline-size;
+  /*
+   * The bar, its menus and the captions size against the stage, not the window. It is
+   * the stage's size whatever it holds, so containing its height changes nothing.
+   */
+  container-type: size;
+}
+
+/* An open menu is over everything on the stage, the Canvas's controls too. */
+.clover-canvas-media:has([aria-expanded="true"]) {
+  z-index: 4;
 }
 
 /* ── captions ────────────────────────────────────────────────────────────── */
 
 /*
  * Drawn by Clover from the active track's cues, never by the browser, so they stay a
- * readable size at any zoom. Above the bar, whose scrim would otherwise wash them out, and
- * lifted clear of it while it shows.
+ * readable size at any zoom. Their sizes are the scale's, so they follow the page's own
+ * text size, and a reader's larger default text with it. A page styles them with
+ * `--clover-player-caption-surface` (the box), `-text` and `-edge` (a `text-shadow`: an
+ * outline or a drop shadow), and sets their size or font on `.clover-canvas-captions-cue`. Above the bar, whose scrim would otherwise wash them out, and
+ * lifted clear of it while it shows, moving with it.
+ *
+ * They sit at the foot of the stage above that line. Too many to fit there (a short
+ * stage, large text), they start from its top and run on over the bar, rather than off
+ * the top of the stage, where they could not be read (WCAG 1.4.10).
  */
 .clover-canvas-captions {
   position: absolute;
-  inset: auto 0 var(--clover-space-m);
+  inset: 0 0
+    calc(
+      var(--clover-space-m) + var(--clover-chrome-shown) *
+        (var(--clover-transport-room) - var(--clover-space-m))
+    );
   z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-end;
+  justify-content: safe flex-end;
   gap: var(--clover-space-2xs);
   padding: 0 var(--clover-space-m);
   pointer-events: none;
-  /* Lifted clear of the transport while the chrome shows, moving with it. */
-  translate: 0
-    calc(
-      var(--clover-chrome-shown) *
-        (var(--clover-space-m) - var(--clover-transport-room))
-    );
-  transition: translate var(--clover-chrome-timing);
+  transition: bottom var(--clover-chrome-timing);
 }
 
 .clover-canvas-captions-cue {
@@ -44,6 +59,7 @@
   border-radius: var(--clover-radius, 3px);
   background-color: var(--clover-player-caption-surface, rgb(0 0 0 / 85%));
   color: var(--clover-player-caption-text, #fff);
+  text-shadow: var(--clover-player-caption-edge, none);
   font-size: var(--clover-text-s);
   line-height: 1.35;
   text-align: center;

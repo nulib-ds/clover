@@ -27,12 +27,13 @@ export function PanelToggle({
   onOpenChange,
   controls,
 }: PanelToggleProps) {
-  const { t } = useCloverTranslation();
+  const { t, langOf } = useCloverTranslation();
   const id = useId().replace(/:/g, "");
   return (
     <Button
       id={`panel-${id}`}
       label={t("informationPanelToggle")}
+      lang={langOf("informationPanelToggle")}
       expanded={open}
       controls={controls}
       onClick={() => onOpenChange(!open)}

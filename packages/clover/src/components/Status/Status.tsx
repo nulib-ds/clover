@@ -19,49 +19,57 @@ export interface StatusProps {
 }
 
 /**
- * Loading and error states, announced: `role="status"` while loading and `role="alert"`
- * on failure. Renders nothing once the content is ready.
+ * Loading and error states, announced: a `role="status"` region while loading and
+ * `role="alert"` on failure. The region stays for the Status's whole life, empty and out
+ * of sight once the content is ready, and only its words change: many screen readers
+ * announce words put into a region already there, but not a region inserted with them
+ * (WCAG 4.1.3).
  */
 export function Status({
   className,
   loading,
   error: renderError,
 }: StatusProps) {
-  const { t } = useCloverTranslation();
+  const { t, langOf } = useCloverTranslation();
   const { status, error } = useStatus();
 
-  if (status === "loading") {
-    // Your own words are announced as they are; Clover's mark, or none, by the label.
-    const own = loading !== undefined && loading !== false;
-    return (
+  const busy = status === "loading";
+  // Your own words are announced as they are; Clover's mark, or none, by the label.
+  const own = loading !== undefined && loading !== false;
+  return (
+    <>
       <p
         className={join("clover-status", className)}
-        data-status={status}
+        data-status={busy ? status : undefined}
         role="status"
-        style={loading === false ? visuallyHidden : undefined}
+        style={busy && loading !== false ? undefined : visuallyHidden}
       >
-        {own ? loading : loading === undefined && <Loading />}
-        {!own && <span style={visuallyHidden}>{t("statusLoading")}</span>}
-      </p>
-    );
-  }
-  if (status === "error" && error) {
-    return (
-      <div
-        className={join("clover-status", className)}
-        data-status={status}
-        role="alert"
-      >
-        {renderError ? (
-          renderError(error)
-        ) : (
-          <>
-            <p>{t("statusError")}</p>
-            <p className="clover-status-detail">{error.message}</p>
-          </>
+        {busy && (own ? loading : loading === undefined && <Loading />)}
+        {busy && !own && (
+          <span style={visuallyHidden} lang={langOf("statusLoading")}>
+            {t("statusLoading")}
+          </span>
         )}
-      </div>
-    );
-  }
-  return null;
+      </p>
+      {status === "error" && error && (
+        <div
+          className={join("clover-status", className)}
+          data-status={status}
+          role="alert"
+        >
+          {renderError ? (
+            renderError(error)
+          ) : (
+            <>
+              <p lang={langOf("statusError")}>{t("statusError")}</p>
+              {/* The error's own words: English, as the browser and Clover write them. */}
+              <p className="clover-status-detail" lang="en">
+                {error.message}
+              </p>
+            </>
+          )}
+        </div>
+      )}
+    </>
+  );
 }

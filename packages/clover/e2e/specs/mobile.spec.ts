@@ -95,7 +95,7 @@ test("a pinch zooms the Canvas in, and back out", async ({ page }) => {
   await expect.poll(() => area(page)).toBeGreaterThan(before * 0.8);
 });
 
-test("the transport's bar stays one row; the chapter's title gives way", async ({
+test("the transport's bar wraps onto two rows, every control on the stage", async ({
   page,
 }) => {
   await serveIIIF(page);
@@ -103,24 +103,26 @@ test("the transport's bar stays one row; the chapter's title gives way", async (
   const bar = page.locator(".clover-canvas-transport-bar");
   await expect(bar).toHaveCount(1);
   const layout = await bar.evaluate((el) => {
-    const box = el.getBoundingClientRect();
+    const figure = el.closest(".clover-canvas")!.getBoundingClientRect();
     const shown = [...el.children].filter(
       (child) => getComputedStyle(child).display !== "none",
     );
-    return {
-      // One row: every part's middle is inside the bar's own height.
-      oneRow: shown.every((child) => {
+    // A row's parts are centred on one line.
+    const rows = new Set(
+      shown.map((child) => {
         const b = child.getBoundingClientRect();
-        const middle = b.top + b.height / 2;
-        return middle >= box.top && middle <= box.bottom;
+        return Math.round((b.top + b.bottom) / 2);
       }),
-      height: box.height,
-      inside: shown.every(
-        (child) => child.getBoundingClientRect().right <= box.right + 0.5,
-      ),
+    );
+    return {
+      rows: rows.size,
+      // The time and chapter over the buttons, and nothing off the stage.
+      inside: shown.every((child) => {
+        const b = child.getBoundingClientRect();
+        return b.left >= figure.left - 0.5 && b.right <= figure.right + 0.5;
+      }),
     };
   });
-  expect(layout.oneRow).toBe(true);
-  expect(layout.height).toBeLessThan(48);
+  expect(layout.rows).toBe(2);
   expect(layout.inside).toBe(true);
 });

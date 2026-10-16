@@ -2,8 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 /**
  * @nulib/clover end to end, on Chromium, WebKit and Firefox (React 18), on WebKit at
- * iPhone size with touch, and on Chromium
- * with React 19 (`e2e/react19`, its own install): `npm run e2e -w @nulib/clover`.
+ * iPhone size and Chromium at an Android phone's (Pixel 7), both with touch, and on
+ * Chromium with React 19 (`e2e/react19`, its own install): `npm run e2e -w @nulib/clover`.
  * The harness is served by Vite over the package's source; every IIIF resource and image
  * is served from disk by routing (`specs/fixtures.ts`), so nothing reaches the network.
  */
@@ -33,8 +33,10 @@ export default defineConfig({
       use: { ...devices["Desktop Firefox"] },
       testIgnore: TIMED,
     },
-    // A phone: WebKit at iPhone size, with touch. Phone-only specs skip elsewhere.
+    // Phones, with touch: WebKit at iPhone size, and Chromium as Chrome on Android.
+    // Phone-only specs skip elsewhere.
     { name: "iphone", use: { ...devices["iPhone 15"] }, testIgnore: TIMED },
+    { name: "android", use: { ...devices["Pixel 7"] }, testIgnore: TIMED },
     {
       name: "react19",
       use: { ...devices["Desktop Chrome"], baseURL: "http://localhost:4322" },
@@ -48,7 +50,14 @@ export default defineConfig({
       name: "timing",
       use: { ...devices["Desktop Chrome"] },
       testMatch: TIMED,
-      dependencies: ["chromium", "webkit", "firefox", "iphone", "react19"],
+      dependencies: [
+        "chromium",
+        "webkit",
+        "firefox",
+        "iphone",
+        "android",
+        "react19",
+      ],
     },
   ],
   webServer: [

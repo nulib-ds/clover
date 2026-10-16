@@ -14,6 +14,8 @@ interface ButtonProps {
   controls?: string;
   /** The key the Canvas answers to for this control, shown in its popover. */
   shortcut?: Shortcut;
+  /** The language of `label`, where it is not the page's: Clover's, or a Choice's. */
+  lang?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -25,6 +27,7 @@ const Button: React.FC<ButtonProps> = ({
   expanded,
   controls,
   shortcut,
+  lang,
 }) => {
   // Extract button type from id (e.g., "rotateLeft-abc123" → "rotate-left")
   // This ensures data-button is language-independent for CSS selectors
@@ -48,6 +51,8 @@ const Button: React.FC<ButtonProps> = ({
        */
       aria-label={label}
       aria-keyshortcuts={shortcut?.keys}
+      // On the button, so its name and its popover share it.
+      lang={lang}
       type="button"
     >
       <svg

@@ -46,11 +46,9 @@
   white-space: nowrap;
 }
 
+/* Wraps rather than truncating, so the whole name stays readable with wider text spacing. */
 .title {
   max-width: 20rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* Two classes, to beat the field's own page-level margin whatever order the sheets load in. */

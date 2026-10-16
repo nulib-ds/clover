@@ -4,7 +4,7 @@ import { Close } from "./glyphs";
 import type { IIIFCanvas } from "./layout";
 import Button from "../../ui/Button";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
-import { getLabelAsString } from "../../core/label";
+import { localize } from "../../core/value";
 import { useOneOpen } from "../../ui/useOneOpen";
 
 /**
@@ -29,6 +29,8 @@ interface CaptionProps {
   open: boolean;
   /** Close, returning focus to the control that opened it when `restoreFocus`. */
   onClose: (restoreFocus: boolean) => void;
+  /** The language to read the labels and details in. The reader's, by default. */
+  language?: string;
 }
 
 /**
@@ -41,8 +43,14 @@ interface CaptionProps {
  * such as the annotations menu, which hangs in the same place. Opening moves focus into
  * it.
  */
-const Caption: React.FC<CaptionProps> = ({ id, canvases, open, onClose }) => {
-  const { t } = useCloverTranslation();
+const Caption: React.FC<CaptionProps> = ({
+  id,
+  canvases,
+  open,
+  onClose,
+  language,
+}) => {
+  const { t, langOf } = useCloverTranslation();
   const ref = useRef<HTMLElement>(null);
   // Kept once loaded, so the box slides away with its content still in it.
   const [opened, setOpened] = useState(open);
@@ -61,6 +69,8 @@ const Caption: React.FC<CaptionProps> = ({ id, canvases, open, onClose }) => {
       id={id}
       onKeyDown={(event) => {
         if (event.key !== "Escape") return;
+        // It closes, and nothing around it: not a modal `<dialog>` (the Lightbox).
+        event.preventDefault();
         event.stopPropagation();
         onClose(true);
       }}
@@ -71,20 +81,22 @@ const Caption: React.FC<CaptionProps> = ({ id, canvases, open, onClose }) => {
         className="clover-canvas-caption-close"
         id={`close-${id}`}
         label={t("commonClose")}
+        lang={langOf("commonClose")}
         onClick={() => onClose(true)}
       >
         <Close />
       </Button>
       {canvases.map((canvas, index) => {
-        const label = getLabelAsString(canvas.label as any);
+        const label = localize(canvas.label as any, language);
         return (
           <section className="clover-canvas-caption-canvas" key={canvas.id}>
-            {label && (
+            {label.text && (
               <p
                 className="clover-canvas-caption-label"
                 id={captionLabelId(id, index)}
+                lang={label.lang}
               >
-                {label}
+                {label.text}
               </p>
             )}
             {opened && (
@@ -92,6 +104,7 @@ const Caption: React.FC<CaptionProps> = ({ id, canvases, open, onClose }) => {
                 <CaptionDetails
                   summary={canvas.summary}
                   metadata={canvas.metadata}
+                  language={language}
                 />
               </Suspense>
             )}

@@ -74,3 +74,16 @@
   outline: 2px solid var(--clover-color-accent, #0065c3);
   outline-offset: 1px;
 }
+
+/*
+ * A field's placeholder, mixed from the field's own text and ground at full opacity: some
+ * browsers draw it too pale to read (Safari's grey, Firefox's half opacity).
+ */
+:where(.clover-content-search-query)::placeholder {
+  color: color-mix(
+    in srgb,
+    var(--clover-color-primary, #1a1d1e) 65%,
+    var(--clover-color-secondary, #fff)
+  );
+  opacity: 1;
+}

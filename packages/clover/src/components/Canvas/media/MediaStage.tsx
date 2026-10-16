@@ -3,10 +3,13 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import type { MediaPlacement } from "../layout";
 import Transport, { type TransportChapter } from "./Transport";
+import { type CaptionOption, useCaptionTracks } from "./useCaptionTracks";
 import { useMediaController } from "./useMediaController";
 import { useMediaElement } from "./useMediaElement";
-import { getLabelAsString } from "../../../core/label";
+import { type LanguageMapLike, localize } from "../../../core/value";
+import { cueText } from "../../../core/vtt";
 import type { CanvasRenderer } from "../../../lib/renderer";
+import { useOptionalClover } from "../../../react/context";
 
 const SKIP_SECONDS = 10;
 
@@ -37,6 +40,8 @@ export interface MediaStageProps {
   autoPlay?: boolean;
   /** Chapters, for the transport. */
   chapters?: TransportChapter[];
+  /** The language to read IIIF text in. The Root's, or the reader's. */
+  language?: string;
 }
 
 /**
@@ -50,7 +55,10 @@ export interface MediaStageProps {
  *   zooms, except on a lone media Canvas, which never moves. On the focused Canvas, Space or K plays and pauses, M mutes, and J / L skip
  *   back and forward ten seconds.
  * - Captions are drawn here from the active track's cues, above the transport, so they
- *   read at any zoom whichever way the video is presented.
+ *   read at any zoom whichever way the video is presented. The tracks are the
+ *   Manifest's and any the media carries itself (`useCaptionTracks`).
+ * - It stays mounted from one recording to the next, as auto-advance moves on, so the
+ *   transport keeps keyboard focus (WCAG 2.4.3); the element and captions start afresh.
  * - Sound plays through the same element and transport, over the Canvas's accompanying
  *   or placeholder image when it has one.
  */
@@ -67,16 +75,32 @@ const MediaStage: React.FC<MediaStageProps> = ({
   isFullscreen = false,
   autoPlay = false,
   chapters,
+  language: givenLanguage,
 }) => {
+  // IIIF text in the Root's language, or the reader's when there is no Root.
+  const rootLanguage = useOptionalClover()?.language;
+  const language = givenLanguage ?? rootLanguage;
   const { element, presentation: presented } = useMediaElement(media, {
     presentation,
     request,
+    language,
   });
   const controller = useMediaController(element, media.duration);
-  // The first caption track shows by default, as the Player shows it.
-  const [activeCaption, setActiveCaption] = useState(
-    media.captions.length ? 0 : -1,
+  // The Manifest's tracks, named in the reader's language and tagged with it (WCAG 3.1.2).
+  const own = useMemo<CaptionOption[]>(
+    () =>
+      media.captions.map((caption, index) => {
+        const name = localize(caption.label as LanguageMapLike, language);
+        return {
+          label: name.text || caption.language || String(index + 1),
+          labelLang: name.text ? name.lang : undefined,
+          language: caption.language,
+        };
+      }),
+    [media.captions, language],
   );
+  // The first track shows by default, as the Player shows it.
+  const captions = useCaptionTracks(element, own, media.id);
   const [cues, setCues] = useState<string[]>([]);
 
   useEffect(() => {
@@ -132,36 +156,36 @@ const MediaStage: React.FC<MediaStageProps> = ({
     return () => host.removeEventListener("keydown", onKeyDown);
   }, [renderer, toggle, toggleMute, skip]);
 
-  // Show the chosen track's cues; every track stays `hidden` so none draws natively.
+  // Draw the chosen track's cues.
+  const { track } = captions;
   useEffect(() => {
-    if (!element) return;
-    const tracks = Array.from(element.textTracks ?? []);
-    tracks.forEach((track) => (track.mode = "hidden"));
-    const track = tracks[activeCaption];
     setCues([]);
     if (!track) return;
     const update = () =>
       setCues(
-        Array.from(track.activeCues ?? []).map((cue) =>
-          // Voice and styling tags (`<v Speaker>`, `<i>`) are dropped; the words stay.
-          ((cue as VTTCue).text ?? "").replace(/<[^>]*>/g, ""),
-        ),
+        Array.from(track.activeCues ?? []).map((cue) => {
+          // The words alone: tags dropped and character references decoded, by the
+          // browser where it can (`text` is the cue as written), else as `Transcript` does.
+          const vtt = cue as VTTCue;
+          return vtt.getCueAsHTML?.()?.textContent ?? cueText(vtt.text ?? "");
+        }),
       );
     track.addEventListener("cuechange", update);
     update();
     return () => track.removeEventListener("cuechange", update);
-  }, [element, activeCaption]);
+  }, [track]);
 
   const captionLabels = useMemo(
     () =>
-      media.captions.map((caption, index) => ({
-        label:
-          getLabelAsString(caption.label as any) ||
-          caption.language ||
-          String(index + 1),
+      captions.options.map(({ label, labelLang }) => ({
+        label,
+        lang: labelLang,
       })),
-    [media.captions],
+    [captions.options],
   );
+
+  // The cues are in their track's language (WCAG 3.1.2); IIIF's "none" is not a tag.
+  const captionLanguage = captions.options[captions.active]?.language;
 
   return (
     <div
@@ -174,8 +198,8 @@ const MediaStage: React.FC<MediaStageProps> = ({
         controller={controller}
         kind={media.kind}
         captions={captionLabels}
-        activeCaption={activeCaption}
-        onCaptionChange={setActiveCaption}
+        activeCaption={captions.active}
+        onCaptionChange={captions.select}
         fullscreen={fullscreen}
         isFullscreen={isFullscreen}
         video={media.kind === "video" ? element : null}
@@ -183,7 +207,15 @@ const MediaStage: React.FC<MediaStageProps> = ({
       />
       {/* After the transport: the stylesheet lifts the cues clear of it. */}
       {cues.length > 0 && (
-        <div className="clover-canvas-captions" aria-live="off">
+        <div
+          className="clover-canvas-captions"
+          aria-live="off"
+          lang={
+            captionLanguage && captionLanguage !== "none"
+              ? captionLanguage
+              : undefined
+          }
+        >
           {cues.map((text, index) => (
             <span className="clover-canvas-captions-cue" key={index}>
               {text}

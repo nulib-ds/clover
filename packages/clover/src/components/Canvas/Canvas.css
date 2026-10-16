@@ -68,12 +68,12 @@
   inset: 0;
   padding: var(--clover-canvas-inset);
   /*
-   * Its own stacking layer, below the chrome. Everything drawn in the viewport — the
-   * image, hotspots (an active one raises itself), the focus ring — stacks within it, so
-   * none of it can rise above the controls or the navigator, which sit at z-index 1 in
-   * the wrapper.
+   * Its own stacking layer, beneath everything else in the wrapper (which is isolated),
+   * as it is inline for the plain layout. Everything drawn in the viewport — the image,
+   * hotspots (an active one raises itself), the focus ring — stacks within it, so none
+   * of it can rise above the controls or the navigator.
    */
-  z-index: 0;
+  z-index: -1;
   isolation: isolate;
   overflow: hidden;
   /* The renderer owns drag and pinch; the page must not scroll or zoom underneath. */
@@ -89,7 +89,7 @@
   cursor: grabbing;
 }
 
-/* A lone video or sound does not move: a click plays, so no grab hand. */
+/* A Canvas the reader cannot move, a lone recording or one held still: no grab hand. */
 .clover-canvas[data-navigable="false"] > .clover-canvas-viewport {
   cursor: default;
 }
@@ -173,10 +173,13 @@
 /*
  * The controls are the top layer, over the popups they open (2, `ControlMenu.css`), so
  * a control's Tip is never covered by one: each control is a layer of its own (it fades
- * and tucks), so its Tip can rise no higher than the control does.
+ * and tucks), so its Tip can rise no higher than the control does. The cluster's own box
+ * takes no press, only its controls (below): between them, and where Chromium sizes a
+ * wrapped column wider than its controls, a press reaches what is under it.
  */
 .clover-canvas > .clover-canvas-controls {
   z-index: 3;
+  pointer-events: none;
 }
 
 /*
@@ -198,12 +201,20 @@
 }
 
 /*
- * Shown while the pointer is active over the Canvas, keyboard focus is inside it, or a
- * menu is open: decided here, once, for every piece of chrome.
+ * Shown while the pointer is active over the Canvas, rests on a piece of chrome,
+ * keyboard focus is inside it, or a menu is open: decided here, once, for every piece of
+ * chrome. A control under a resting pointer stays, Tip and all (WCAG 1.4.13), so a
+ * press never falls through to the picture. Faded chrome takes no pointer, so it cannot
+ * be hovered back; the panel's toggle never fades, so it holds nothing.
  */
 .clover-canvas:is(
   [data-chrome="visible"],
-  :has(:focus-visible, [aria-expanded="true"]:not([data-button="panel"]))
+  :has(:focus-visible, [aria-expanded="true"]:not([data-button="panel"])),
+  :has(
+    > .clover-canvas-controls > :not([data-button="panel"]):hover,
+    > .clover-canvas-navigator:hover,
+    .clover-canvas-transport > :hover
+  )
 ) {
   --clover-chrome-shown: 1;
   --clover-chrome-events: auto;
@@ -214,8 +225,8 @@
  * Every piece of chrome reads it: faded and tucked toward its edge (up from the top,
  * `--clover-chrome-edge: 1` for down from the bottom) until shown. Each control fades,
  * not the cluster, so one can stay, and a faded one keeps its room (nothing beside it
- * moves). A video or sound's transport (`Transport.css`) and its captions
- * (`MediaStage.css`) read the same state. A placeholder's toggle never fades: open, it
+ * moves). A video or sound's transport, or an animation's frames (`Transport.css`), and
+ * the captions (`MediaStage.css`) read the same state, in the media layer. A placeholder's toggle never fades: open, it
  * is the way back to the still, so it stays in sight.
  */
 .clover-canvas > .clover-canvas-controls > *,
@@ -227,7 +238,10 @@
       (1 - var(--clover-chrome-shown)) * var(--clover-chrome-edge, -1) *
         var(--clover-chrome-tuck)
     );
-  transition: all var(--clover-chrome-timing);
+  /* A layer raised (the transport over the captions) is raised at once, not by steps. */
+  transition:
+    all var(--clover-chrome-timing),
+    z-index 0s;
 }
 
 /* Not a click target while away. The transport's own box never is: only its controls. */
@@ -286,8 +300,11 @@
 }
 
 /*
- * Keyboard focus ring, matching Image's: two tones so it reads over any artwork, drawn
- * as a pseudo-element above the surface rather than an outline beneath it.
+ * Keyboard focus ring, inside the viewport's edge: a dark edge, the accent, then a light
+ * band, at full strength. The dark and the light are `primary` and `secondary`, 9:1
+ * apart or more, so one of them keeps 3:1 against whatever picture is behind (WCAG
+ * 1.4.11, technique C40), as the hotspots' outlines do. Drawn as a pseudo-element above
+ * the surface rather than an outline beneath it.
  */
 .clover-canvas-viewport:focus-visible::after {
   content: "";
@@ -296,9 +313,9 @@
   z-index: 1;
   pointer-events: none;
   box-shadow:
-    inset 0 0 0 3px var(--clover-color-accent, #0065c3),
-    inset 0 0 0 6px #fff;
-  opacity: 0.75;
+    inset 0 0 0 2px var(--clover-color-primary, #1a1d1e),
+    inset 0 0 0 5px var(--clover-color-accent, #0065c3),
+    inset 0 0 0 7px var(--clover-color-secondary, #fff);
 }
 
 @media (forced-colors: active) {

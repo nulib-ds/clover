@@ -14,6 +14,7 @@ import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
+import { useContainerName } from "../../ui/useContainerName";
 
 export interface ContentsProps extends React.HTMLAttributes<HTMLElement> {
   as?: React.ElementType;
@@ -26,8 +27,13 @@ export interface ContentsProps extends React.HTMLAttributes<HTMLElement> {
  */
 export const Contents = forwardRef<HTMLElement, ContentsProps>(
   function Contents({ as: Tag = "nav", className, ...rest }, ref) {
-    const { t } = useCloverTranslation();
+    const { t, langOf } = useCloverTranslation();
     const { clover, language } = useClover("Contents");
+    const name = useContainerName(
+      t("informationPanelTabsContents"),
+      langOf("informationPanelTabsContents"),
+      rest["aria-label"] !== undefined || rest["aria-labelledby"] !== undefined,
+    );
     const nodes = useCloverSelector((state) => tableOfContents(state.manifest));
     const canvasId = useCloverSelector((state) => state.canvasId);
     const element = useSyncExternalStore(
@@ -53,30 +59,35 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
 
     const render = (list: ContentsNode[]) => (
       <ol className="clover-contents-list">
-        {list.map((node) => (
-          <li key={node.id} className="clover-contents-item">
-            <button
-              type="button"
-              className="clover-contents-button"
-              aria-current={node.id === current ? "true" : undefined}
-              disabled={!node.canvasId}
-              onClick={() => choose(node)}
-            >
-              {localize(node.label, language).text || node.id}
-            </button>
-            {node.children.length > 0 && render(node.children)}
-          </li>
-        ))}
+        {list.map((node) => {
+          const label = localize(node.label, language);
+          return (
+            <li key={node.id} className="clover-contents-item">
+              <button
+                type="button"
+                className="clover-contents-button"
+                aria-current={node.id === current ? "true" : undefined}
+                disabled={!node.canvasId}
+                lang={label.text ? label.lang : undefined}
+                onClick={() => choose(node)}
+              >
+                {label.text || node.id}
+              </button>
+              {node.children.length > 0 && render(node.children)}
+            </li>
+          );
+        })}
       </ol>
     );
 
     return (
       <Tag
         ref={ref}
-        aria-label={t("informationPanelTabsContents")}
+        {...name.props}
         className={join("clover-contents", className)}
         {...rest}
       >
+        {name.node}
         {render(nodes)}
       </Tag>
     );

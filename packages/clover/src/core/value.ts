@@ -16,14 +16,13 @@ export interface LocalizedValue {
   lang?: string;
 }
 
-/** The reader's languages: the browser's, then the page's. */
+/** The languages to read IIIF text in: the page's, then the browser's. */
 function readerLanguages(): string[] {
-  if (typeof navigator !== "undefined" && navigator.languages?.length) {
-    return [...navigator.languages];
-  }
   const page =
     typeof document !== "undefined" ? document.documentElement.lang : "";
-  return page ? [page] : [];
+  const browser =
+    typeof navigator !== "undefined" ? [...(navigator.languages ?? [])] : [];
+  return [page, ...browser].filter(Boolean);
 }
 
 export function localize(

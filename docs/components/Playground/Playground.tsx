@@ -406,6 +406,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
             <div className={styles.own} ref={ownRef}>
               <button
                 aria-controls="pg-own"
+                aria-current={current === OWN ? "true" : undefined}
                 aria-expanded={ownOpen}
                 className={styles.tile}
                 data-selected={current === OWN}
@@ -468,7 +469,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
                     </button>
                   </div>
                   {draftError && (
-                    <p className={styles.error} id="pg-own-error">
+                    <p className={styles.error} id="pg-own-error" role="alert">
                       {draftError}
                     </p>
                   )}

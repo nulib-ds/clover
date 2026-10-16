@@ -18,9 +18,11 @@ import type { IIIFContent } from "../../core/load";
 import { type CloverRequest, requestKey } from "../../core/request";
 import { selectPosition, selectSequence } from "../../core/selectors";
 import { localize } from "../../core/value";
+import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { CloverContext } from "../../react/context";
+import { useRootLanguage } from "../../react/language";
 import { type ContentRenderer, sameRenderers } from "../Content/renderers";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 
@@ -82,7 +84,7 @@ export interface RootProps
 /**
  * The root of any Clover composition. It loads `iiifContent`, holds where the reader is,
  * and gives every part inside it the same state. Render parts — `Clover.Content`,
- * `Clover.Label`, `Clover.Pager` — anywhere within it, in any layout.
+ * `Clover.Label`, `Clover.Items` — anywhere within it, in any layout.
  */
 export const Root = forwardRef<HTMLElement, RootProps>(function Root(
   {
@@ -107,6 +109,11 @@ export const Root = forwardRef<HTMLElement, RootProps>(function Root(
   },
   ref,
 ) {
+  /*
+   * The page's language, for Clover's strings to be marked where they are in another.
+   * The Root carries none of its own: what the host puts in it is in the page's.
+   */
+  const root = useRootLanguage(ref, rest.lang);
   const controlled = canvasId !== undefined;
   const manifestControlled = manifestId !== undefined;
   const latest = useRef({
@@ -204,15 +211,17 @@ export const Root = forwardRef<HTMLElement, RootProps>(function Root(
 
   return (
     <CloverContext.Provider value={context}>
-      <Tag
-        ref={ref}
-        className={join("clover-root", className)}
-        data-status={status}
-        {...rest}
-      >
-        {children}
-        <Announcer clover={clover} language={language} />
-      </Tag>
+      <HostLanguageContext.Provider value={root.hostLanguage}>
+        <Tag
+          ref={root.ref}
+          className={join("clover-root", className)}
+          data-status={status}
+          {...rest}
+        >
+          {children}
+          <Announcer clover={clover} language={language} />
+        </Tag>
+      </HostLanguageContext.Provider>
     </CloverContext.Provider>
   );
 });
@@ -322,8 +331,13 @@ function Announcer({
   clover: Clover;
   language?: string;
 }) {
-  const { t } = useCloverTranslation();
-  const [message, setMessage] = useState("");
+  const { t, langOf } = useCloverTranslation();
+  // The label keeps its own language; the position is in Clover's.
+  const [message, setMessage] = useState<{
+    label: string;
+    lang?: string;
+    position: string;
+  } | null>(null);
   const tRef = useRef(t);
   tRef.current = t;
 
@@ -337,23 +351,36 @@ function Announcer({
       if (first) return;
       const { canvases, views } = selectSequence(manifest);
       const canvas = canvases.find((item) => item.id === canvasId);
-      const label = localize(canvas?.label as any, language).text;
+      const label = localize(canvas?.label as any, language);
       const position = tRef.current("canvasPosition", {
         index: selectPosition(manifest, canvasId) + 1,
         total: views.length,
       });
-      setMessage(label ? `${label}, ${position}` : position);
+      setMessage({
+        label: label.text,
+        lang: label.lang,
+        position,
+      });
     });
   }, [clover, language]);
 
+  // Atomic, so the whole message is read even when only one of its parts changed.
   return (
     <div
       className="clover-announcer"
       role="status"
       aria-live="polite"
+      aria-atomic="true"
       style={visuallyHidden}
     >
-      {message}
+      {message?.label ? (
+        <>
+          <span lang={message.lang}>{message.label}</span>,{" "}
+        </>
+      ) : null}
+      {message && (
+        <span lang={langOf("canvasPosition")}>{message.position}</span>
+      )}
     </div>
   );
 }

@@ -8,6 +8,54 @@ The aim is natural whitespace. Space between things should say how closely they 
 together, so a reader can see the structure before reading a word. Every value comes
 from one scale, and the scale comes from the page Clover sits in.
 
+## 0. Prime directive: WCAG 2.2 AA
+
+Every part, template and style conforms to WCAG 2.2 at Level AA. This outranks every
+other rule in this file, every request and every deadline. No look, size budget or
+schedule excuses a failure.
+
+- A change that fails a criterion does not ship. Fix it or take it back.
+- When a design or a request conflicts with a criterion, conformance wins. Say so, and
+  offer the way that conforms.
+- Check each change against the criteria it touches: keyboard and focus (2.1.1, 2.1.2,
+  2.4.3, 2.4.7, 2.4.11), names, roles and states (4.1.2, 2.5.3), contrast (1.4.3,
+  1.4.11), target size (2.5.8), gestures and dragging (2.5.1, 2.5.7), motion (2.2.2,
+  2.3.1, `prefers-reduced-motion`), reflow and text spacing (1.4.10, 1.4.12), content on
+  hover or focus (1.4.13), status messages (4.1.3), language of parts (3.1.2), media
+  (1.2, 1.4.2).
+- Every drag has a single-pointer alternative. A keyboard path alone does not meet 2.5.7.
+- A control that moves when clicked (a split's bar stepping a pane) moves out from under
+  the pointer, so the second click of a double click would land on what it uncovered.
+  Let that press go: for a double click's time (500ms), near where the control was,
+  until the pointer moves away. Two clicks never do two different things by accident.
+- One Escape closes one thing: the innermost popup where focus is. A popup that handles
+  an Escape from inside itself or from its control calls `preventDefault()`, so a modal
+  `<dialog>` or floating panel around it stays open. A popup that listens on the
+  document listens in the capture phase, so it sees the key before the page's React
+  handlers do. Every Escape handler first checks `event.defaultPrevented`. An Escape
+  from elsewhere may close a popup, but never moves focus (2.4.3).
+- A control with nothing left to do at the end of a sequence (Previous, Next, a
+  carousel's arrows, a frame step) is `aria-disabled`, never `disabled`, which would
+  drop focus to the page. Its press does nothing, so the press that reaches the end
+  keeps focus (2.4.3). One the stylesheet hides at an end also leaves the tab order
+  (`tabindex="-1"`), and stays in sight while focused.
+- Headings follow the page's outline (1.3.1). A part or template that renders a heading
+  takes `headingLevel` (2 to 6), and the headings inside it are exactly one level below.
+  A part with no title gives its own level to whatever takes the title's place.
+  Markdown headings get their level from the part around them and never skip one.
+- Mark each of Clover's strings, never a container (3.1.2). An element that shows a
+  Clover string, or is named by one, carries `lang={langOf(key)}`. A container's name in
+  another language is a hidden element's, reached through `aria-labelledby`
+  (`useContainerName`). No Clover root sets `lang`, because hosts put their own content
+  inside it.
+- Colour never carries meaning alone, and every default token pair meets its contrast
+  ratio: a page's own tokens are the page's responsibility, Clover's defaults are ours.
+  The pairs a page must check are in the docs' "Colours and contrast"
+  (`pages/docs/composing.mdx`); a part that draws a token on a new ground adds its row.
+- `e2e/specs/axe.spec.ts` catches some failures. Most need a keyboard, a screen reader
+  and a look. Known failures and the plan to clear them are in the repository's
+  `ACCESSIBILITY.md`.
+
 ## 1. Clover takes its size and type from the page
 
 - **No font family, ever.** Not on a part, not on a button, not anywhere. Type is the
@@ -68,8 +116,14 @@ down from it (§3).
   That is the cluster's inset, one control and the gap after it. The caption box, a
   placeholder's toggle and the navigator in full screen all sit there.
 - `--clover-transport-room` (`Transport.css`, on `.clover-canvas`) is what the media bar
-  takes up: one control, the seek row (`l`), `xs` between them and `m` above and below.
-  Captions and the caption box clear it.
+  takes up: the bar (one control, or its measured height once it wraps,
+  `--clover-transport-bar-height`), the seek row (`l`), `xs` between them and `m` above
+  and below. Captions and the caption box clear it.
+- `--clover-transport-menu-room` (on `.clover-canvas-transport`) caps a transport menu:
+  the stage's height (`100cqb`; `.clover-canvas-media` is a size container) less the
+  bar's inset `m`, a control, the `s` gap and `xs` clear of the top. A menu also
+  measures the room above its own button, whichever row the bar wrapped it onto, so its
+  first option never sits above the stage.
 
 ## 3. Adjacency: the step comes from how closely things belong together
 
@@ -83,10 +137,10 @@ down: decide the outer level first, then step down for each level inside it.
 | Separate groups in one list                                | `l`   | Annotation sets                                                                                                                                                                                             |
 | A region's parts; a part's inset in a region               | `m`   | The header's title and actions; the strip's header over its thumbnails; About's parts; a tab row over its content; the cluster's and the transport's inset from the stage                                   |
 | Items that are each a group                                | `m`   | Thumbnails in any layout of Items (each a picture with its caption)                                                                                                                                         |
-| Siblings within one part                                   | `s`   | Cluster buttons; transport buttons; a strip's titles and Position; metadata's label-value pairs; a row's inline padding                                                                                     |
+| Siblings within one part                                   | `s`   | Cluster buttons; transport buttons; a strip's titles and Position; metadata's label-value pairs; a row's inline padding; the map over its list of places                                                    |
 | Parts of one control or one item; a heading over its value | `xs`  | A thumbnail and its caption; a label and its select; a search field and its button; the seek row over the bar; an icon beside a text button's label; a row's block padding; a metadata label over its value |
 | Rows of one list                                           | `2xs` | Rows of annotations, Ranges, cues and hits; the tabs in their row; boxes of the accordion                                                                                                                   |
-| Lines of one caption                                       | `3xs` | A thumbnail's label and summary                                                                                                                                                                             |
+| Lines of one caption                                       | `3xs` | A thumbnail's label and summary; a map overlay's name over "Georeferenced image"                                                                                                                            |
 
 A region's content sits `--clover-inset` (`l`, 1.618rem) in from its edges, whatever the
 region: a layout's header, its thumbnail strip, the information panel, the picture on
@@ -116,7 +170,10 @@ Worked examples, from the top of the Viewer down:
   control's place beside it, `s` away.
 - **The media bar**: `m` in from the stage's sides and bottom, with `xl` of scrim above.
   The seek row is `xs` over the bar, since they are one control. The bar's controls are
-  `s` apart, as the cluster's are.
+  `s` apart, as the cluster's are. On a narrow stage (under 28rem, or 37.5rem with
+  chapters, whose title wants room of its own) it is two rows, `xs` apart: the time and
+  chapter under the seek row, then the controls, those at the end kept together at the
+  end of the last row.
 - **The information panel**: `l` inside. A tab is `xs` by `s`, the tabs `2xs` apart, and
   the open tab's content `m` below the row. An accordion box's heading is `s` inside, the
   boxes `2xs` apart, and the content under its heading `s` in; the boxes reach `s` out
@@ -126,15 +183,20 @@ Worked examples, from the top of the Viewer down:
     (`xl`) in, which is `m` past the panel's `l`. So the tab row keeps `m` clear for it
     (`--clover-panel-clear`), and the sums land back on the scale.
 - **Menus over the Canvas**: `xs` inside, options `xs` by `s`, groups `s` apart.
-- **Items**: each item is a group, so items are `m` apart, one step over their insides: a
-  picture `xs` over its label, a caption's lines `3xs` apart, in `text-s`. An item holds
-  a card per Canvas, and the Manifest's `behavior` decides what an item holds: the cards
-  of a spread (`paged`) or of a `continuous` Manifest are one item, stitched with no gap
-  (`0`), each with its own label under its own picture. Hover, selection and focus ring
-  the pictures, 1px clear of them (a hairline, 3px: the accent for the selection, at half
-  strength for hover, the text's colour for focus), in
-  room the item keeps round itself and gives back, so the ring never moves the items or
-  is cut by a strip's edge.
+- **Items**: each item is a group, so items are `m` apart, one step over their insides:
+  a picture `xs` over its label, a caption's lines `3xs` apart, in `text-s`. An item
+  holds a card per Canvas, and the Manifest's `behavior` decides what an item holds: the
+  cards of a spread (`paged`) or of a `continuous` Manifest are one item, stitched with
+  no gap (`0`), each with its own label under its own picture. Hover, selection and
+  focus ring the pictures, 1px clear of them (a hairline, 3px: the accent for the
+  selection, at half strength for hover, the text's colour for focus), in room the item
+  keeps round itself and gives back, so the ring never moves the items or is cut by a
+  strip's edge. Focus adds a second ring inside the pictures' edge, in two tones
+  (`secondary` at the edge, `primary` inside it, 2px each), so it shows on any picture
+  and by more than colour.
+- **The Map**: the map's box (`--clover-map-height`), and its places `s` under it as
+  rows of the panel. An overlay's row is its Canvas's name, with "Georeferenced image"
+  `3xs` under it in `text-s`.
 
 When a new part does not fit a row of the table, place it by asking what it belongs to,
 not by eye.
@@ -151,17 +213,21 @@ The stylesheet's size is part of the design.
 - **Families are written once**, as one `:is()` list over their members, and each member
   keeps only what is its own:
 
-  | Family               | Where                  | Members                                                                                                               |
-  | -------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
-  | Round controls       | `ui/Button.css`        | the Canvas's cluster, the media transport, Items' arrows, the Pager's Previous and Next, the InformationPanel's close |
-  | Text buttons         | `ui/Button.css`        | Download's button, Search's button                                                                                    |
-  | Rows and their lists | `InformationPanel.css` | annotations, Ranges, cues, search hits                                                                                |
-  | Fields               | `styles/scale.css`     | a search's query, a Collection's menu, a transcript's track menu                                                      |
-  | Popovers             | `ui/Tip.css`           | every control that shows an icon alone (§7)                                                                           |
-  | Chrome               | `Canvas.css`           | the Canvas's controls, navigator, a placeholder's toggle, the media transport, its captions                           |
+  | Family               | Where                  | Members                                                                                                                      |
+  | -------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+  | Round controls       | `ui/Button.css`        | the Canvas's cluster, the media transport, Items' arrows, `Previous` and `Next` (Items' pager), the InformationPanel's close |
+  | Text buttons         | `ui/Button.css`        | Download's button, Search's button                                                                                           |
+  | Rows and their lists | `InformationPanel.css` | annotations, Ranges, cues, search hits, places on the map                                                                    |
+  | Fields               | `styles/scale.css`     | a search's query, a Collection's menu, a transcript's track menu                                                             |
+  | Popovers             | `ui/Tip.css`           | every control that shows an icon alone (§7), the Canvas's hotspots, a split's handle                                         |
+  | Chrome               | `Canvas.css`           | the Canvas's controls, navigator, a placeholder's toggle, the media transport, its captions                                  |
 
   A family meant to be refined by its members is `:where()`, with no specificity. A
   family that sets a look its members keep is `:is()`.
+
+  In forced colours a row's tint is dropped, and every edge would be drawn in the text
+  colour, so the other rows' edges are set to `Canvas` and the current row's to
+  `Highlight`. The current row stays distinct with no colour of Clover's own.
 
 - **A state many parts share is decided once**, as custom properties on the part that
   owns it, and each reads them. The Canvas's chrome is shown by one selector, which sets
@@ -169,24 +235,47 @@ The stylesheet's size is part of the design.
   `--clover-chrome-timing` on `.clover-canvas`; one rule fades, tucks and spares every
   piece of it from them, and captions lift by the same number. Never repeat the state's
   selector per piece.
+- **Chrome never hides on a timer from a reader who cannot hover** (WCAG 2.2.1). A
+  mouse, or a pen that hovers, shows it by moving, and it fades after `hideDelay`.
+  Resting on a piece of chrome holds it (`:hover`, WCAG 1.4.13). A finger, or a pen that
+  does not hover, has no timer: a tap on the picture shows the chrome, and the next tap
+  hides it. A press where faded chrome sits only shows it, and goes no further: no zoom,
+  no play, no hotspot. Focus that no press brought, and keyboard focus
+  (`:has(:focus-visible)`), hold it. One pointer can always zoom back out: at the
+  largest zoom, a click, a double click or a double tap goes home (WCAG 2.5.1).
+- **The viewport lies beneath everything else in the figure**: `z-index: -1` in an
+  isolated figure, inline as well as in the stylesheet. Chrome, in the flow or
+  positioned, then takes its own presses with or without the stylesheet (WCAG 2.5.8).
+- **A toggle that is on** (Captions showing, Repeat pressed) shows a mark that hover and
+  focus never draw: a 2px bar under the glyph, inset `s` from the sides and `2xs` from
+  the bottom. It is a border, not a fill, because forced colours keep a border in the
+  text's colour but would paint a fill as the page. The accent fill alone is not
+  enough, since hover and focus use it too (WCAG 1.4.1). Any new toggle takes the same
+  mark.
 - **`button.x`, not `.x`.** One class ties with a reset's `[type="button"]`. The element
   type breaks the tie whichever stylesheet loads last.
-- **Everything is in `@layer clover`**, so a page's own unlayered rules win.
+- **Everything is in `@layer clover`**, so a page's own unlayered rules win, a reset's
+  included. Where a reset removes a look that carries meaning, as with the markers on a
+  Markdown body's lists (and with them VoiceOver's list semantics in Safari), the docs
+  give the override, in the Styles section of `composing.mdx`.
 
 ## 5. What is not on the scale
 
 Some values are not space between things, and stay as they are:
 
 - **Dimensions**: stage heights (`--clover-content-height`), panel widths and their
-  bounds, thumbnail heights, menu widths. Use the scale where a dimension is really a
-  space; the navigator, for example, is a golden rectangle, `2xl + xl` by `2xl`.
+  bounds, thumbnail heights, menu widths, and a target's minimum size (24px, in CSS px
+  as WCAG 2.5.8 measures it, such as the link lists' `min-block-size`). Use the scale
+  where a dimension is really a space; the navigator, for example, is a golden
+  rectangle, `2xl + xl` by `2xl`.
 - **Hairlines**: borders, outlines, focus rings, slider rails and thumbs, at most 4px.
 - **Motion**: chrome leaves on `--clover-chrome-leave` (180ms, accelerating away),
   tucked `--clover-chrome-tuck` (`s`) toward its edge, and comes back on
   `--clover-chrome-enter` (340ms, springing out a touch past and back). One pair for all
   of it, so it moves as one. Reduced motion sets all three to zero: chrome still comes and
   goes, without moving.
-- **Breakpoints**, percentages and viewport units.
+- **Breakpoints**, percentages and viewport units. Breakpoints for a part over the stage
+  are container queries on the stage (`.clover-canvas-media`), not the window.
 
 ## 6. Adding or changing a style
 
@@ -225,18 +314,30 @@ does it faster.
   its own controls has focus (`forwardShortcut`), so the key shown works where the reader
   is.
 - **Content on Hover or Focus (WCAG 2.1, 1.4.13).** It shows on keyboard focus, not on
-  hover alone. Escape hides it without moving the pointer or focus. It is hoverable: the
-  gap to the control is bridged, so the pointer can move onto it. It stays until the
-  pointer or focus leaves. Under the pointer it waits a moment, so passing over a row does
-  not flash every popover in it; on focus it shows at once.
+  hover alone. Escape hides it without moving the pointer or focus. Hidden, it takes no
+  pointer, so whatever it covered can be reached, and it shows again when the pointer
+  next enters the control. It is hoverable: the gap to the control is bridged, so the
+  pointer can move onto it. It stays until the pointer or focus leaves. Under the
+  pointer it waits a moment, so passing over a row does not flash every popover in it;
+  on focus it shows at once.
 - **Not `title`.** A native tooltip shows on hover only, never on focus or touch, cannot
   be dismissed, and is read inconsistently. Clover's controls set no `title`, and their
   icons no SVG `<title>`, which browsers also show as a tooltip.
 - **Read once.** The popover is `aria-hidden`; the name and key are the control's.
 - **Placed by family**, `xs` from the control: above by default; below a control along
   the top of what it sits on (the cluster, the panel's close, a toolbar); beside the
-  cluster when it is a column on a phone; and at either end of a row, lined up with the
-  control's outer edge, so it stays inside the stage.
+  cluster when it is a column on a phone; at either end of a row, lined up with the
+  control's outer edge, so it stays inside the stage; and beside a split's handle, at
+  its grip, over the pane after it (a handle is as tall as its layout, so a popover
+  above or below would put the name at its far ends). Then, each time it shows, it is
+  measured and kept inside what clips it (the stage, a scrolling panel, the window),
+  `xs` clear: it wraps to the room there is and moves in from the edge, so text spacing,
+  zoom or a longer language never cut a name off (WCAG 1.4.10, 1.4.12).
+- **A hotspot's popover** wraps, no wider than the stage, and sits on the side of the
+  hotspot with more room. It is kept inside the stage across and down, `xs` from its
+  edges. Where neither side has room, it moves over the hotspot.
+- **Part of its control, not something to press.** A control that acts on press or drag
+  ignores presses that start on its `.clover-tip`, and the Tip keeps `cursor: default`.
 - **Plain without the stylesheet.** It reads as text beside the icon: a visible label.
   `Previous` and `Next` shown as arrows alone take `iconOnly`, which hides their name for
   sight inline and adds the popover, so the name never shows twice.

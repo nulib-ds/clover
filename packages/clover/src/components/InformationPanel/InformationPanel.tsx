@@ -2,17 +2,12 @@ import React, { Suspense, forwardRef, lazy, useRef } from "react";
 
 import { About } from "./About";
 import { Tip } from "../../ui/Tip";
-import { Annotations } from "../Annotations/Annotations";
 import { Close } from "../Canvas/glyphs";
-import { Collection, partOfCollection } from "../Collection/Collection";
 import { canvasCaptions, type IIIFCanvas } from "../Canvas/layout";
-import { Transcript } from "../Transcript/Transcript";
-import { Contents } from "../Contents/Contents";
-import { Search } from "../Search/Search";
 import { searchServiceOf } from "../../core/search-service";
 import { hasMapData } from "../../core/geo-detect";
 import { tableOfContents } from "../../core/ranges";
-import { selectVisibleCanvases } from "../../core/selectors";
+import { partOfCollection, selectVisibleCanvases } from "../../core/selectors";
 import { selectAnnotationSets } from "../../core/annotation-sets";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
@@ -30,6 +25,34 @@ import {
  */
 const RootMap = lazy(() =>
   import("../Map/MapView").then((module) => ({ default: module.RootMap })),
+);
+
+/*
+ * The other default sections load when first opened, as the Map does: the panel opens on
+ * About, and a page whose reader opens no other section loads none of them. Each is a
+ * part of its own too (`Clover.Search`…), which a layout that places it imports directly.
+ */
+const Collection = lazy(() =>
+  import("../Collection/Collection").then((m) => ({ default: m.Collection })),
+);
+const Contents = lazy(() =>
+  import("../Contents/Contents").then((m) => ({ default: m.Contents })),
+);
+const Search = lazy(() =>
+  import("../Search/Search").then((m) => ({ default: m.Search })),
+);
+const Transcript = lazy(() =>
+  import("../Transcript/Transcript").then((m) => ({ default: m.Transcript })),
+);
+const Annotations = lazy(() =>
+  import("../Annotations/Annotations").then((m) => ({
+    default: m.Annotations,
+  })),
+);
+
+/** A section's content, shown once its module has loaded. */
+const later = (content: React.ReactNode) => (
+  <Suspense fallback={null}>{content}</Suspense>
 );
 
 export interface TabProps {
@@ -81,6 +104,12 @@ export interface InformationPanelProps
    * better without `onClose` at all: the toggle that opens it closes it.
    */
   closeOnEscape?: boolean;
+  /**
+   * The level of the sections' headings (`accordion`), one under the heading the panel
+   * belongs to. The default sections' own headings are a level below them; tabs are not
+   * headings, so there they start at this level. Default 3.
+   */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
   /** The element to render. Default `aside`. */
   as?: React.ElementType;
   /**
@@ -114,6 +143,7 @@ export const InformationPanel = forwardRef<HTMLElement, InformationPanelProps>(
       onValueChange,
       onClose,
       closeOnEscape = false,
+      headingLevel = 3,
       as: Tag = "aside",
       className,
       children,
@@ -124,7 +154,12 @@ export const InformationPanel = forwardRef<HTMLElement, InformationPanelProps>(
   ) {
     useClover("InformationPanel");
     const element = useRef<HTMLElement | null>(null);
-    const { t } = useCloverTranslation();
+    const { t, langOf } = useCloverTranslation();
+    // A tab's name, marked where it is not in the page's language (WCAG 3.1.2).
+    const tabLabel = (key: string) => {
+      const lang = langOf(key);
+      return lang ? <span lang={lang}>{t(key)}</span> : t(key);
+    };
     const hasAnnotations = useCloverSelector(
       (state) =>
         selectAnnotationSets(state.manifest, state.addedSets).length > 0,
@@ -156,6 +191,11 @@ export const InformationPanel = forwardRef<HTMLElement, InformationPanelProps>(
       (child): child is React.ReactElement<TabProps> =>
         React.isValidElement(child) && child.type === Tab,
     );
+    // In the accordion what a section holds is a level below its heading; tabs are not
+    // headings.
+    const inner = (
+      layout === "accordion" ? Math.min(headingLevel + 1, 6) : headingLevel
+    ) as 3;
     const tabs: SectionSpec[] = given.length
       ? given.map(({ props }) => ({
           value: props.value,
@@ -165,15 +205,15 @@ export const InformationPanel = forwardRef<HTMLElement, InformationPanelProps>(
       : [
           {
             value: "about",
-            label: t("informationPanelTabsAbout"),
-            content: <About />,
+            label: tabLabel("informationPanelTabsAbout"),
+            content: <About headingLevel={inner} />,
           },
           ...(hasCollection
             ? [
                 {
                   value: "collection",
-                  label: t("informationPanelTabsCollection"),
-                  content: <Collection />,
+                  label: tabLabel("informationPanelTabsCollection"),
+                  content: later(<Collection headingLevel={inner} />),
                 },
               ]
             : []),
@@ -181,8 +221,8 @@ export const InformationPanel = forwardRef<HTMLElement, InformationPanelProps>(
             ? [
                 {
                   value: "contents",
-                  label: t("informationPanelTabsContents"),
-                  content: <Contents />,
+                  label: tabLabel("informationPanelTabsContents"),
+                  content: later(<Contents />),
                 },
               ]
             : []),
@@ -190,8 +230,8 @@ export const InformationPanel = forwardRef<HTMLElement, InformationPanelProps>(
             ? [
                 {
                   value: "search",
-                  label: t("informationPanelTabsSearch"),
-                  content: <Search />,
+                  label: tabLabel("informationPanelTabsSearch"),
+                  content: later(<Search headingLevel={inner} />),
                 },
               ]
             : []),
@@ -199,12 +239,8 @@ export const InformationPanel = forwardRef<HTMLElement, InformationPanelProps>(
             ? [
                 {
                   value: "map",
-                  label: t("informationPanelTabsMap"),
-                  content: (
-                    <Suspense fallback={null}>
-                      <RootMap />
-                    </Suspense>
-                  ),
+                  label: tabLabel("informationPanelTabsMap"),
+                  content: later(<RootMap />),
                 },
               ]
             : []),
@@ -212,8 +248,8 @@ export const InformationPanel = forwardRef<HTMLElement, InformationPanelProps>(
             ? [
                 {
                   value: "transcript",
-                  label: t("transcriptLabel"),
-                  content: <Transcript />,
+                  label: tabLabel("transcriptLabel"),
+                  content: later(<Transcript />),
                 },
               ]
             : []),
@@ -221,8 +257,8 @@ export const InformationPanel = forwardRef<HTMLElement, InformationPanelProps>(
             ? [
                 {
                   value: "annotations",
-                  label: t("informationPanelTabsAnnotations"),
-                  content: <Annotations />,
+                  label: tabLabel("informationPanelTabsAnnotations"),
+                  content: later(<Annotations headingLevel={inner} />),
                 },
               ]
             : []),
@@ -266,6 +302,7 @@ export const InformationPanel = forwardRef<HTMLElement, InformationPanelProps>(
             type="button"
             className="clover-information-panel-close"
             aria-label={t("informationPanelClose")}
+            lang={langOf("informationPanelClose")}
             onClick={close}
           >
             {/* The Canvas controls' cross, at their size, so it reads as one of them. */}
@@ -288,6 +325,8 @@ export const InformationPanel = forwardRef<HTMLElement, InformationPanelProps>(
           defaultValue={defaultValue}
           onValueChange={onValueChange}
           label={t("informationPanelTabs")}
+          labelLang={langOf("informationPanelTabs")}
+          headingLevel={headingLevel}
         />
       </Tag>
     );

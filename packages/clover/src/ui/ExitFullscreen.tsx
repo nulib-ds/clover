@@ -7,12 +7,13 @@ import { useCloverTranslation } from "../i18n/useCloverTranslation";
  * the way without the stylesheet too; the stylesheet only dresses it.
  */
 const ExitFullscreen: React.FC<{ hidden?: boolean }> = ({ hidden }) => {
-  const { t } = useCloverTranslation();
+  const { t, langOf } = useCloverTranslation();
   const label = t("imageExitFullScreen");
 
   return (
     <button
       aria-label={label}
+      lang={langOf("imageExitFullScreen")}
       className="clover-canvas-exit-full-screen"
       hidden={hidden}
       onClick={(event) => void toggleFullscreen(event.currentTarget)}

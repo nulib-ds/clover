@@ -1,8 +1,16 @@
 /*
  * Map: MapLibre's own stylesheet (`maplibre-gl/dist/maplibre-gl.css`) styles the map, its
- * controls and popups; this only frames it. Size it with `--clover-map-height`.
+ * controls and popups; this frames it, over its places. Size it with
+ * `--clover-map-height`. The places are the panel's rows (`InformationPanel.css`,
+ * "Rows"), `s` under the map: two parts of one.
  */
 .clover-geomap {
+  display: grid;
+  gap: var(--clover-space-s);
+}
+
+/* The map's box: its first child. */
+.clover-geomap > div {
   overflow: hidden;
   border-radius: var(--clover-radius, 3px);
   background-color: var(--clover-color-secondary-muted, #e6e8eb);
@@ -19,9 +27,88 @@
   text-align: center;
 }
 
+/*
+ * Keyboard focus on the map itself: a ring inside its edge, as the Canvas viewport's: a
+ * dark edge, the accent, then a light band, `primary` and `secondary` 9:1 apart or more,
+ * so one keeps 3:1 over any basemap or scan (WCAG 1.4.11, C40). On Clover's own box, so
+ * the map's clipping cannot cut it.
+ */
+.clover-geomap > div:has(.maplibregl-canvas:focus-visible)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 2px var(--clover-color-primary, #1a1d1e),
+    inset 0 0 0 5px var(--clover-color-accent, #0065c3),
+    inset 0 0 0 7px var(--clover-color-secondary, #fff);
+  pointer-events: none;
+}
+
+/*
+ * The controls' focus, inside each on its white: MapLibre's own is a pale glow that falls
+ * under 3:1 over the map and is lost in forced colours. On the icon, and on the credits'
+ * box, which MapLibre's stylesheet leaves alone, so it holds whatever the layer order.
+ */
+.clover-geomap
+  .maplibregl-ctrl-group
+  button:focus-visible
+  > .maplibregl-ctrl-icon,
+.clover-geomap
+  .maplibregl-ctrl-attrib:has(> .maplibregl-ctrl-attrib-button:focus-visible) {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: -2px;
+}
+
+@media (forced-colors: active) {
+  .clover-geomap > div:has(.maplibregl-canvas:focus-visible)::after {
+    box-shadow: none;
+    outline: 3px solid CanvasText;
+    outline-offset: -3px;
+  }
+}
+
+/*
+ * A place's popup in the theme's colours, its tip with it. MapLibre's stylesheet is
+ * unlayered and Clover's layered (`dist`), so MapLibre's white ground would win under the
+ * theme's text, unreadable where that text is light: hence `!important`, on the ground
+ * and the tip only.
+ */
 .clover-geomap-popup .maplibregl-popup-content {
   padding: var(--clover-space-xs) var(--clover-space-s);
   border-radius: var(--clover-radius, 3px);
+  background-color: var(--clover-color-secondary, #fff) !important;
+  color: var(--clover-color-primary, #1a1d1e);
   font: inherit;
+  font-size: var(--clover-text-s);
+}
+
+.clover-geomap-popup[class*="maplibregl-popup-anchor-top"]
+  .maplibregl-popup-tip {
+  border-bottom-color: var(--clover-color-secondary, #fff) !important;
+}
+
+.clover-geomap-popup[class*="maplibregl-popup-anchor-bottom"]
+  .maplibregl-popup-tip {
+  border-top-color: var(--clover-color-secondary, #fff) !important;
+}
+
+.clover-geomap-popup.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: var(--clover-color-secondary, #fff) !important;
+}
+
+.clover-geomap-popup.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: var(--clover-color-secondary, #fff) !important;
+}
+
+/*
+ * An overlay's row: its Canvas's name, and under it, in secondary text, what it is; one
+ * caption's lines, `3xs` apart.
+ */
+.clover-geomap-places span + span {
+  display: block;
+  margin-block-start: var(--clover-space-3xs);
+  color: var(--clover-color-primary-muted, #26292b);
   font-size: var(--clover-text-s);
 }

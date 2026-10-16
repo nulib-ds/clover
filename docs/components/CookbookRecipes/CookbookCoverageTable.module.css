@@ -34,7 +34,8 @@
   display: block;
   font-family: monospace;
   font-size: 0.75rem;
-  opacity: 0.6;
+  /* A colour, not opacity, so the slug keeps 4.5:1 in both themes. */
+  color: var(--gray-11);
 }
 
 /* A solid rounded square in the state's colour with a white icon. */
@@ -57,8 +58,9 @@
   --status-color: #b07a00;
 }
 
+/* Light mode's --gray-11, fixed: the token lightens in dark mode, where the white cross would fall below 3:1. */
 .status[data-status="no"] {
-  --status-color: #b3b8c0;
+  --status-color: #60646c;
 }
 
 /* Matches the homepage playground's component tabs. */
@@ -153,53 +155,10 @@ a.view {
   gap: 0.375rem;
 }
 
-/* The tooltip is drawn from `data-tooltip` so it needs no script and shows on focus too. */
-.info {
-  background: none;
-  border: 0;
-  color: #b07a00;
-  cursor: help;
-  display: inline-flex;
-  height: 1.125rem;
-  padding: 0;
-  position: relative;
-  width: 1.125rem;
-}
-
-.info svg {
-  height: 100%;
-  width: 100%;
-}
-
-.info::after {
-  background: var(--gray-12, #1f2937);
-  border-radius: 0.375rem;
-  bottom: calc(100% + 0.5rem);
-  color: #fff;
-  content: attr(data-tooltip);
-  font-size: 0.8125rem;
-  left: 50%;
+/* Why a recipe is only partly covered, in the cell's own colour so it keeps its contrast. */
+.note {
+  display: block;
+  font-size: var(--text-sm);
   line-height: 1.4;
-  opacity: 0;
-  padding: 0.375rem 0.625rem;
-  pointer-events: none;
-  position: absolute;
-  text-align: left;
-  transform: translateX(-50%);
-  transition: opacity 120ms ease;
-  visibility: hidden;
-  white-space: nowrap;
-  z-index: 5;
-}
-
-.info:hover::after,
-.info:focus-visible::after {
-  opacity: 1;
-  visibility: visible;
-}
-
-.info:focus-visible {
-  border-radius: 50%;
-  box-shadow: var(--focus-ring);
-  outline: none;
+  margin-top: 0.125rem;
 }

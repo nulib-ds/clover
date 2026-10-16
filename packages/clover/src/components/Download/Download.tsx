@@ -11,6 +11,11 @@ export interface DownloadProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "children"> {
   /** What the button says. Default: a translated "Download". */
   children?: React.ReactNode;
+  /**
+   * The level of its groups' titles ("This page", "All pages"), a level under the
+   * heading it sits beneath. Default 3.
+   */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
 }
 
 export interface Rendering {
@@ -40,7 +45,8 @@ function renderingsOf(
       out.push({
         id,
         label: label.text || item.format || id,
-        lang: label.lang,
+        // A format or an address in place of a label is in no language.
+        lang: label.text ? label.lang : undefined,
         format: item.format,
       });
     }
@@ -80,17 +86,21 @@ export function DownloadGroups({
   all,
   headingLevel = 3,
 }: DownloadGroupsProps) {
-  const { t } = useCloverTranslation();
+  const { t, langOf } = useCloverTranslation();
   const id = useId();
   const Heading = `h${headingLevel}` as "h3";
-  const list = (title: string, items: Rendering[], key: string) =>
+  const list = (titleKey: string, items: Rendering[], key: string) =>
     items.length > 0 && (
       <section
         className="clover-download-group"
         aria-labelledby={`${id}-${key}`}
       >
-        <Heading className="clover-download-title" id={`${id}-${key}`}>
-          {title}
+        <Heading
+          className="clover-download-title"
+          id={`${id}-${key}`}
+          lang={langOf(titleKey)}
+        >
+          {t(titleKey)}
         </Heading>
         <ul className="clover-download-list">
           {items.map((item) => (
@@ -117,8 +127,8 @@ export function DownloadGroups({
     );
   return (
     <div className="clover-download-groups">
-      {list(t("downloadPage"), page, "page")}
-      {list(t("downloadAll"), all, "all")}
+      {list("downloadPage", page, "page")}
+      {list("downloadAll", all, "all")}
     </div>
   );
 }
@@ -129,11 +139,18 @@ const PANEL_WIDTH = 256;
 /**
  * Downloads, as 3.x's Viewer offers them: the `rendering` of the Canvases in view ("This
  * page") and of the Manifest ("All pages") — a PDF, a text, a high-resolution file —
- * behind one button, each a link. Escape, a press outside or another popup opening
- * (`useOneOpen`) closes it. Renders nothing when there is nothing to download.
+ * behind one button, each a link. Escape, a press outside, focus moving out of it or
+ * another popup opening (`useOneOpen`) closes it. Renders nothing when there is nothing to
+ * download.
  */
-export function Download({ className, children, ...rest }: DownloadProps) {
-  const { t } = useCloverTranslation();
+export function Download({
+  className,
+  children,
+  headingLevel = 3,
+  onBlur,
+  ...rest
+}: DownloadProps) {
+  const { t, langOf } = useCloverTranslation();
   const { page, all } = useDownloads();
   const [open, setOpen] = useState(false);
   useOneOpen(open, () => setOpen(false));
@@ -163,9 +180,18 @@ export function Download({ className, children, ...rest }: DownloadProps) {
       data-align={align}
       onKeyDown={(event) => {
         if (event.key !== "Escape" || !open) return;
+        // Taken, so a host's modal `<dialog>` or floating panel around it stays open.
+        event.preventDefault();
         event.stopPropagation();
         setOpen(false);
         button.current?.focus();
+      }}
+      onBlur={(event) => {
+        onBlur?.(event);
+        // Focus moving out (Tab on) closes it and stays where it went, so the panel never
+        // covers what is focused. No next target (the window lost focus) keeps it open.
+        const next = event.relatedTarget as Node | null;
+        if (open && next && !root.current?.contains(next)) setOpen(false);
       }}
       {...rest}
     >
@@ -175,6 +201,7 @@ export function Download({ className, children, ...rest }: DownloadProps) {
         className="clover-download-button"
         aria-expanded={open}
         aria-controls={`${id}-panel`}
+        lang={children == null ? langOf("download") : undefined}
         onClick={() => {
           const rect = button.current?.getBoundingClientRect();
           if (rect && typeof window !== "undefined") {
@@ -187,7 +214,7 @@ export function Download({ className, children, ...rest }: DownloadProps) {
         {children ?? t("download")}
       </button>
       <div id={`${id}-panel`} className="clover-download-panel" hidden={!open}>
-        <DownloadGroups page={page} all={all} />
+        <DownloadGroups page={page} all={all} headingLevel={headingLevel} />
       </div>
     </div>
   );

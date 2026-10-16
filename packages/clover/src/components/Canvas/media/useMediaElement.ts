@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { MediaPlacement } from "../layout";
-import { getLabelAsString } from "../../../core/label";
+import { type LanguageMapLike, localize } from "../../../core/value";
 import {
   type CloverRequest,
   requestKey,
@@ -15,6 +15,8 @@ export interface MediaElementOptions {
   presentation: "dom" | "texture";
   /** Captions and HLS get its credentials and headers; the element only its credentials. */
   request?: CloverRequest;
+  /** The language to name caption tracks in, for the system player's menu. */
+  language?: string;
 }
 
 /**
@@ -30,7 +32,8 @@ export interface MediaElementOptions {
  *   video drawn as a `texture` (never on the page) stays on the lowest rendition, and a
  *   `dom` one can stall at its first frame.
  * - Each WebVTT caption file becomes a `<track>`, `hidden`: Clover draws the cues itself,
- *   so they stay readable at any zoom and in either presentation.
+ *   so they stay readable at any zoom and in either presentation. Which track shows, and
+ *   how, is `useCaptionTracks`' to keep, with those the media carries itself.
  * - `texture` asks for CORS (`crossOrigin`), since WebGL may not read other frames;
  *   `dom` and sound do not need it. Media that will not load that way (no CORS headers,
  *   or a cached copy fetched without them) is made again without and presented as
@@ -38,17 +41,20 @@ export interface MediaElementOptions {
  */
 export function useMediaElement(
   media: MediaPlacement,
-  { presentation: requested, request }: MediaElementOptions,
+  { presentation: requested, request, language }: MediaElementOptions,
 ): { element: HTMLVideoElement | null; presentation: "dom" | "texture" } {
   const [element, setElement] = useState<HTMLVideoElement | null>(null);
-  const [corsFailed, setCorsFailed] = useState(false);
+  // The source whose CORS request failed: another recording asks again.
+  const [corsFailedSrc, setCorsFailedSrc] = useState<string | null>(null);
   const presentation =
-    requested === "texture" && !corsFailed ? "texture" : "dom";
+    requested === "texture" && corsFailedSrc !== media.src ? "texture" : "dom";
   const captionsKey = JSON.stringify(media.captions);
   const withCredentials = sendsCredentials(request);
   // Read through a ref, so a new object with the same settings does not remake the element.
   const requestRef = useRef(request);
   requestRef.current = request;
+  const languageRef = useRef(language);
+  languageRef.current = language;
 
   useEffect(() => {
     let cancelled = false;
@@ -59,7 +65,7 @@ export function useMediaElement(
     const onCorsError = () => {
       // Nothing loaded at all: the CORS request itself failed.
       if (video.readyState === HTMLMediaElement.HAVE_NOTHING)
-        setCorsFailed(true);
+        setCorsFailedSrc(media.src);
     };
     if (presentation === "texture") {
       video.crossOrigin = withCredentials ? "use-credentials" : "anonymous";
@@ -77,8 +83,9 @@ export function useMediaElement(
       const track = document.createElement("track");
       track.kind = "captions";
       if (caption.language) track.srclang = caption.language;
+      // Named as Clover's menu names it, for the system player's own menu.
       track.label =
-        getLabelAsString(caption.label as any) ||
+        localize(caption.label as LanguageMapLike, languageRef.current).text ||
         caption.language ||
         String(index + 1);
       video.appendChild(track);
@@ -126,27 +133,15 @@ export function useMediaElement(
       video.src = media.src;
     }
 
-    /*
-     * Captions are drawn by Clover, so none shows natively. Once is not enough: iOS Safari
-     * picks a track to show by the reader's caption settings whenever the tracks change
-     * (a caption file arriving, playback starting), and would draw its cues under
-     * Clover's. Any track it shows goes straight back to `hidden`, cues still live.
-     */
-    const keepHidden = () => {
-      for (const track of Array.from(video.textTracks ?? [])) {
-        if (track.mode === "showing") track.mode = "hidden";
-      }
-    };
+    // Hidden from the start: their cues are live, and Clover draws them.
     for (const track of Array.from(video.textTracks ?? [])) {
       track.mode = "hidden";
     }
-    video.textTracks?.addEventListener?.("change", keepHidden);
 
     setElement(video);
     return () => {
       cancelled = true;
       video.removeEventListener("error", onCorsError);
-      video.textTracks?.removeEventListener?.("change", keepHidden);
       video.pause();
       hls?.destroy();
       video.removeAttribute("src");

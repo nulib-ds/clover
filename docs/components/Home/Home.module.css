@@ -163,6 +163,12 @@
   margin: 0;
 }
 
+/* A link in the note, underlined: Nextra's reset leaves it looking like the text round it. */
+.sectionNote a {
+  color: var(--accent-11);
+  text-decoration: underline;
+}
+
 .sectionLink {
   color: var(--accent-11);
   font-size: var(--text-sm);

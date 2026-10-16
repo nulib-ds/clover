@@ -29,5 +29,24 @@ export default function CloverDocsApp({ Component, pageProps }: AppProps) {
     restorePageTheme();
   }, []);
 
+  /*
+   * Nextra's search takes a bare "/" page-wide, a single-key shortcut that cannot be
+   * turned off (WCAG 2.1.4). Its listener is on `window`, so stop the key at `document`,
+   * one hop before it. Cmd/Ctrl+K still opens search, and "/" still types and finds.
+   */
+  useEffect(() => {
+    const keepSlash = (event: KeyboardEvent) => {
+      if (
+        event.key === "/" &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey
+      )
+        event.stopPropagation();
+    };
+    document.addEventListener("keydown", keepSlash);
+    return () => document.removeEventListener("keydown", keepSlash);
+  }, []);
+
   return <Component {...pageProps} />;
 }

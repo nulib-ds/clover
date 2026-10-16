@@ -1,4 +1,11 @@
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { DEFAULT_STYLE_URL, applyDefaultBasemap } from "./basemap";
 import {
@@ -10,17 +17,21 @@ import {
   georeferencesOf,
   navPlaceOf,
   overlayImageUrl,
+  type Position,
   readGeoreference,
 } from "../../core/geo";
 import type { IIIFContent } from "../../core/load";
 import { type CloverRequest, sendsCredentials } from "../../core/request";
 import { selectVisibleCanvases } from "../../core/selectors";
+import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import {
   useOptionalClover,
   useOptionalCloverSelector,
 } from "../../react/context";
+import { HostLanguageContext } from "../../i18n/hostLanguage";
+import { useRootLanguage } from "../../react/language";
 import { getMapWorkerUrl } from "../../core/map-config";
 
 export interface MapProps
@@ -47,7 +58,10 @@ export interface MapProps
   workerUrl?: string;
   /** Zoom with the wheel or trackpad. Default false, so an embedded map never traps page scroll. */
   scrollZoom?: boolean;
-  /** A place was chosen. Inside a `Root`, choosing one on a Canvas also goes there. */
+  /**
+   * A place was chosen, on the map or in its list. Inside a `Root`, choosing one on a
+   * Canvas also goes there.
+   */
   onSelect?: (feature: MapFeature) => void;
   /** Standalone: credentials, headers and `fetch`. */
   request?: CloverRequest;
@@ -69,7 +83,10 @@ export const RootMap = forwardRef<
     "iiifContent" | "navPlace" | "georeferences" | "request" | "language"
   >
 >(function RootMap(props, ref) {
-  return <ConnectedMap {...props} scope="view" forwardedRef={ref} />;
+  // Its panel's section is the landmark, under the same name: the map is not another.
+  return (
+    <ConnectedMap {...props} scope="view" landmark={false} forwardedRef={ref} />
+  );
 });
 
 /** The Root's places, and the overlays of the view (or, standalone, every Canvas). */
@@ -78,7 +95,7 @@ export function ConnectedMap({
   onSelect,
   ...rest
 }: Omit<MapProps, "iiifContent" | "request" | "language"> &
-  Forwarded & { scope: "view" | "all" }) {
+  Forwarded & { scope: "view" | "all"; landmark?: boolean }) {
   const context = useOptionalClover()!;
   const features = useOptionalCloverSelector(
     (state) => navPlaceOf(state.manifest, state.collection, context.language),
@@ -102,11 +119,18 @@ export function ConnectedMap({
           ),
     [scope, all, shown],
   );
+  // Only a view's Canvases are current: standalone, nothing shows the Root's first one.
+  const current = useMemo(
+    () => (scope === "view" ? shown.map((canvas) => canvas.id) : undefined),
+    [scope, shown],
+  );
   return (
     <MapView
       {...rest}
       features={features}
       overlays={overlays}
+      current={current}
+      language={context.language}
       request={context.clover.request}
       onSelect={(feature) => {
         onSelect?.(feature);
@@ -119,6 +143,7 @@ export function ConnectedMap({
 
 const NONE: Georeference[] = [];
 const NO_CANVASES: ReturnType<typeof selectVisibleCanvases> = [];
+const NO_IDS: ReadonlySet<string> = new Set();
 
 /** GeoJSON and annotations handed in, with no Root to read. */
 export function GivenMap({
@@ -157,9 +182,13 @@ function useGiven<T>(value: unknown, read: (value: unknown) => T): T {
 /** Longer side, in pixels, of the image an overlay draws. */
 const OVERLAY_SIZE = 2048;
 
+/** The zoom a lone point is framed at. */
+const POINT_ZOOM = 8;
+
 const NAVPLACE = "geomap-navplace";
 const FILL = "geomap-navplace-fill";
 const LINE = "geomap-navplace-line";
+const CASING = "geomap-navplace-casing";
 const POINT = "geomap-navplace-point";
 const CLICKABLE = [FILL, LINE, POINT];
 
@@ -171,11 +200,20 @@ interface ViewProps
     Forwarded {
   features: MapFeatureCollection;
   overlays: Georeference[];
+  /** The Canvases in view: their places are the current ones. */
+  current?: string[];
+  /** The language to name overlays in. */
+  language?: string;
+  /** A region of its own. Default true; false in a panel, whose section is one. */
+  landmark?: boolean;
 }
 
 function MapView({
   features,
   overlays,
+  current,
+  language,
+  landmark = true,
   overlay = true,
   overlayOpacity = 0.75,
   styleUrl,
@@ -190,11 +228,23 @@ function MapView({
   ...rest
 }: ViewProps) {
   const { t } = useCloverTranslation();
+  const aboutId = useId();
+  // Outside a Root, the map reads the page's language itself, for its strings to mark.
+  const root = useRootLanguage(forwardedRef, rest.lang);
+  const { langOf } = root;
   const container = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<any>(null);
   const [failed, setFailed] = useState(false);
+  // The overlays on the map, by id, once their images are drawn.
+  const [drawnIds, setDrawnIds] = useState<ReadonlySet<string>>(NO_IDS);
   const latest = useRef({ onSelect, t });
   latest.current = { onSelect, t };
+  // Names a place in a popup at a point, once MapLibre is up.
+  const name = useRef<((feature: MapFeature, at: unknown) => void) | null>(
+    null,
+  );
+  // The extent last framed.
+  const framed = useRef("");
 
   // MapLibre, loaded and started once.
   useEffect(() => {
@@ -219,11 +269,15 @@ function MapView({
           dragRotate: false,
           scrollZoom,
           attributionControl: { compact: true },
+          // MapLibre's own names, in Clover's words; kept current below.
           locale: {
+            "Map.Title": t("mapLabel"),
             "NavigationControl.ZoomIn": t("imageZoomIn"),
             "NavigationControl.ZoomOut": t("imageZoomOut"),
+            "AttributionControl.ToggleAttribution": t("mapAttribution"),
           },
         });
+        if (!landmark) instance.getCanvas().setAttribute("role", "group");
         instance.addControl(
           new maplibre.NavigationControl({ showCompass: false }),
           "top-right",
@@ -232,25 +286,38 @@ function MapView({
           if (!live) return;
           if (!styleUrl) applyDefaultBasemap(instance);
           // Credits behind their ⓘ, so they do not cover a small map; one press away.
-          container.current
-            ?.querySelector(".maplibregl-ctrl-attrib")
-            ?.classList.remove("maplibregl-compact-show");
+          // Closed as well as hidden, so the toggle says it is collapsed.
+          const attrib = container.current?.querySelector(
+            ".maplibregl-ctrl-attrib",
+          );
+          attrib?.classList.remove("maplibregl-compact-show");
+          attrib?.removeAttribute("open");
           addPlaceLayers(instance, accentOf(container.current));
+          let popup: any = null;
+          name.current = (feature, at) => {
+            popup?.remove();
+            popup = null;
+            const title = feature.properties?.title;
+            if (!title) return;
+            // Text in a span, never markup, so the title can carry its language.
+            const text = document.createElement("span");
+            text.textContent = String(title);
+            const lang = feature.properties?.titleLang;
+            if (lang !== undefined) text.lang = String(lang);
+            popup = new maplibre.Popup({
+              closeButton: false,
+              offset: 8,
+              className: "clover-geomap-popup",
+            })
+              .setLngLat(at)
+              .setDOMContent(text)
+              .addTo(instance);
+          };
           for (const layer of CLICKABLE) {
             instance.on("click", layer, (event: any) => {
               const feature = event.features?.[0] as MapFeature | undefined;
               if (!feature) return;
-              const title = feature.properties?.title;
-              if (title) {
-                new maplibre.Popup({
-                  closeButton: false,
-                  offset: 8,
-                  className: "clover-geomap-popup",
-                })
-                  .setLngLat(event.lngLat)
-                  .setText(String(title))
-                  .addTo(instance);
-              }
+              name.current?.(feature, event.lngLat);
               latest.current.onSelect?.(feature);
             });
             instance.on("mouseenter", layer, () => {
@@ -275,6 +342,8 @@ function MapView({
       live = false;
       observer?.disconnect();
       instance?.remove();
+      name.current = null;
+      framed.current = "";
       setMap(null);
     };
     // Style, worker and wheel are read once: a new map would be a new viewer.
@@ -285,6 +354,45 @@ function MapView({
   useEffect(() => {
     map?.getSource(NAVPLACE)?.setData(features);
   }, [map, features]);
+
+  // What the list names: every place, and each overlay drawn.
+  const listed = overlay
+    ? overlays.filter((item) => drawnIds.has(item.id))
+    : NONE;
+  const count = features.features.length + listed.length;
+  const described = count > 0;
+
+  // MapLibre's canvas is the map's one region (in a panel, a group in its section's):
+  // named in the reader's language, and described by how many places follow it.
+  useEffect(() => {
+    if (!map) return;
+    const canvas = map.getCanvas();
+    canvas.setAttribute("role", landmark ? "region" : "group");
+    // Each name carries its language where it is not the page's (WCAG 3.1.2).
+    const mark = (element: Element, lang: string | undefined) => {
+      if (lang === undefined) element.removeAttribute("lang");
+      else element.setAttribute("lang", lang);
+    };
+    canvas.setAttribute("aria-label", t("mapLabel"));
+    mark(canvas, langOf("mapLabel"));
+    if (described) canvas.setAttribute("aria-describedby", aboutId);
+    else canvas.removeAttribute("aria-describedby");
+    const rename = (selector: string, key: string) => {
+      const control = container.current?.querySelector(selector);
+      if (!control) return;
+      control.setAttribute("aria-label", t(key));
+      if (control.hasAttribute("title")) control.setAttribute("title", t(key));
+      mark(control, langOf(key));
+    };
+    rename(".maplibregl-ctrl-zoom-in", "imageZoomIn");
+    rename(".maplibregl-ctrl-zoom-out", "imageZoomOut");
+    rename(".maplibregl-ctrl-attrib-button", "mapAttribution");
+    // The credits are the basemap's: English for Clover's own, unknown for yours.
+    const credits = container.current?.querySelector(
+      ".maplibregl-ctrl-attrib-inner",
+    );
+    if (credits) mark(credits, styleUrl ? undefined : "en");
+  }, [map, t, langOf, described, aboutId, landmark, styleUrl]);
 
   // The overlays: one canvas source each, under the places.
   const drawn = useRef<Record<string, string>>({});
@@ -299,6 +407,11 @@ function MapView({
       if (map.getSource(layer)) map.removeSource(layer);
       delete drawn.current[id];
     }
+    setDrawnIds((before) =>
+      [...before].every((id) => ids.has(id))
+        ? before
+        : new Set([...before].filter((id) => ids.has(id))),
+    );
     wanted.forEach((item, index) => {
       if (drawn.current[item.id]) return;
       const layer = `geomap-overlay-${index}-${hash(item.id)}`;
@@ -325,6 +438,7 @@ function MapView({
           },
           map.getLayer(FILL) ? FILL : undefined,
         );
+        setDrawnIds((before) => new Set(before).add(item.id));
       });
     });
     return () => {
@@ -343,46 +457,126 @@ function MapView({
     }
   }, [map, overlayOpacity]);
 
-  // Frame what there is: a lone point closer in, anything else to its bounds.
+  // Frame what there is, once for each extent: a place chosen stays framed when the
+  // view it opens draws nothing new.
   useEffect(() => {
     if (!map) return;
     const bounds = boundsOf(features.features, overlay ? overlays : []);
     if (!bounds) return;
-    const [[west, south], [east, north]] = bounds;
-    if (west === east && south === north) {
-      map.jumpTo({ center: [west, south], zoom: 8 });
-    } else {
-      map.fitBounds(bounds, { padding: 32, maxZoom: 12, duration: 0 });
-    }
+    const extent = bounds.flat().join();
+    if (extent === framed.current) return;
+    framed.current = extent;
+    frame(map, bounds, POINT_ZOOM);
   }, [map, features, overlays, overlay]);
 
+  // A place from the list: framed and named as on the map, then chosen.
+  const choose = (feature: MapFeature) => {
+    const bounds = boundsOf([feature]);
+    if (map && bounds) {
+      frame(map, bounds, Math.max(map.getZoom(), POINT_ZOOM));
+      name.current?.(feature, centre(bounds));
+    }
+    onSelect?.(feature);
+  };
+  const show = (item: Georeference) => {
+    const bounds = boundsOf([], [item]);
+    if (map && bounds) frame(map, bounds, POINT_ZOOM);
+  };
+
   return (
-    <Tag
-      ref={forwardedRef}
-      className={join("clover-geomap", className)}
-      data-status={failed ? "error" : map ? "ready" : "loading"}
-      // Functional: the map needs a box to draw in, with or without the stylesheet.
-      style={{
-        position: "relative",
-        height: "var(--clover-map-height, 24rem)",
-        ...style,
-      }}
-      {...rest}
-    >
-      <div
-        ref={container}
-        className="clover-geomap-canvas"
-        role="region"
-        aria-label={t("mapLabel")}
-        style={{ position: "absolute", inset: 0 }}
-      />
-      {failed && (
-        <p className="clover-geomap-error" role="alert">
-          {t("mapUnavailable")}
-        </p>
-      )}
-    </Tag>
+    <HostLanguageContext.Provider value={root.hostLanguage}>
+      <Tag
+        ref={root.ref}
+        className={join("clover-geomap", className)}
+        data-status={failed ? "error" : map ? "ready" : "loading"}
+        style={style}
+        {...rest}
+      >
+        {/* Functional: the map needs a box to draw in, with or without the stylesheet. */}
+        <div
+          style={{
+            position: "relative",
+            height: "var(--clover-map-height, 24rem)",
+          }}
+        >
+          <div
+            ref={container}
+            className="clover-geomap-canvas"
+            style={{ position: "absolute", inset: 0 }}
+          />
+          {failed && (
+            <p
+              className="clover-geomap-error"
+              role="alert"
+              lang={langOf("mapUnavailable")}
+            >
+              {t("mapUnavailable")}
+            </p>
+          )}
+        </div>
+        {described && (
+          <>
+            {/* The map's description: a count, not the names, which the list reads next. */}
+            <span id={aboutId} hidden lang={langOf("mapPlacesListed")}>
+              {t("mapPlacesListed", { count })}
+            </span>
+            {/* What the map shows, as text, and the keyboard's way to each place. */}
+            <ul className="clover-geomap-places">
+              {features.features.map((feature, index) => {
+                const { title, titleLang, canvasId } = feature.properties;
+                return (
+                  <li key={`place-${index}`}>
+                    <button
+                      type="button"
+                      lang={title ? titleLang : langOf("mapPlaceUntitled")}
+                      aria-current={
+                        canvasId && current?.includes(canvasId)
+                          ? "true"
+                          : undefined
+                      }
+                      onClick={() => choose(feature)}
+                    >
+                      {title || t("mapPlaceUntitled", { number: index + 1 })}
+                    </button>
+                  </li>
+                );
+              })}
+              {listed.map((item) => {
+                const label = localize(item.label, language);
+                return (
+                  <li key={item.id}>
+                    <button type="button" onClick={() => show(item)}>
+                      {label.text && (
+                        <>
+                          <span lang={label.lang}>{label.text}</span>{" "}
+                        </>
+                      )}
+                      <span lang={langOf("mapOverlay")}>{t("mapOverlay")}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+      </Tag>
+    </HostLanguageContext.Provider>
   );
+}
+
+/** Frame a box: a lone point centred at `zoom`, anything else to its bounds. */
+function frame(map: any, bounds: [Position, Position], zoom: number) {
+  const [[west, south], [east, north]] = bounds;
+  if (west === east && south === north) {
+    map.jumpTo({ center: [west, south], zoom });
+  } else {
+    map.fitBounds(bounds, { padding: 32, maxZoom: 12, duration: 0 });
+  }
+}
+
+/** The middle of a box. */
+function centre([[west, south], [east, north]]: [Position, Position]) {
+  return [(west + east) / 2, (south + north) / 2];
 }
 
 /** The accent token, resolved: MapLibre paints with WebGL, which cannot read `var()`. */
@@ -415,17 +609,32 @@ function addPlaceLayers(map: any, color: string) {
       "fill-opacity": ["coalesce", ["get", "fill-opacity"], 0.18],
     },
   });
+  const lines = [
+    "match",
+    ["geometry-type"],
+    ["LineString", "MultiLineString", "Polygon", "MultiPolygon"],
+    true,
+    false,
+  ];
+  // A white casing under each line and outline, as points have a white ring, so the
+  // accent holds its contrast over water, relief or a scan.
+  map.addLayer({
+    id: CASING,
+    type: "line",
+    source: NAVPLACE,
+    filter: lines,
+    layout: { "line-join": "round", "line-cap": "round" },
+    paint: {
+      "line-color": "#ffffff",
+      "line-width": ["+", ["coalesce", ["get", "stroke-width"], 2], 2],
+      "line-opacity": ["coalesce", ["get", "stroke-opacity"], 1],
+    },
+  });
   map.addLayer({
     id: LINE,
     type: "line",
     source: NAVPLACE,
-    filter: [
-      "match",
-      ["geometry-type"],
-      ["LineString", "MultiLineString", "Polygon", "MultiPolygon"],
-      true,
-      false,
-    ],
+    filter: lines,
     paint: {
       "line-color": ["coalesce", ["get", "stroke"], color],
       "line-width": ["coalesce", ["get", "stroke-width"], 2],

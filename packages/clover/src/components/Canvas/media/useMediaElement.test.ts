@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 
 import type { MediaPlacement } from "../layout";
 import { useMediaElement } from "./useMediaElement";
@@ -92,7 +92,7 @@ describe("useMediaElement", () => {
     expect(hls.loadSource).not.toHaveBeenCalled();
   });
 
-  it("keeps every caption track hidden when the browser shows one (iOS Safari)", async () => {
+  it("makes every caption track hidden, its cues live for Clover to draw", async () => {
     // jsdom has no text tracks: a list that fires `change` as a browser's does.
     const tracks = Object.assign(new EventTarget(), {
       items: [{ mode: "disabled" }, { mode: "disabled" }] as Array<{
@@ -120,9 +120,51 @@ describe("useMediaElement", () => {
     await waitFor(() =>
       expect(tracks.items.map((t) => t.mode)).toEqual(["hidden", "hidden"]),
     );
-    // The browser picks one to show by the reader's caption settings.
-    tracks.items[1].mode = "showing";
-    tracks.dispatchEvent(new Event("change"));
-    expect(tracks.items.map((t) => t.mode)).toEqual(["hidden", "hidden"]);
+    // What shows from then on is `useCaptionTracks`' to keep.
+  });
+
+  it("presents media without CORS as dom, for that recording only", async () => {
+    const { result, rerender } = renderHook(
+      ({ src }: { src: string }) =>
+        useMediaElement(media(src, "video/mp4"), { presentation: "texture" }),
+      { initialProps: { src: "https://example.org/no-cors.mp4" } },
+    );
+    expect(result.current.presentation).toBe("texture");
+    expect(result.current.element?.crossOrigin).toBe("anonymous");
+
+    // Nothing loaded: the CORS request itself failed.
+    act(() => {
+      result.current.element?.dispatchEvent(new Event("error"));
+    });
+    expect(result.current.presentation).toBe("dom");
+    expect(result.current.element?.crossOrigin).toBeNull();
+
+    // The next recording may send CORS headers: it asks again.
+    rerender({ src: "https://example.org/cors.mp4" });
+    expect(result.current.presentation).toBe("texture");
+    expect(result.current.element?.crossOrigin).toBe("anonymous");
+  });
+
+  it("names each caption track in the reader's language, for the system player's menu", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("WEBVTT\n"));
+    const { result } = renderHook(() =>
+      useMediaElement(
+        {
+          ...media("https://example.org/film.mp4", "video/mp4"),
+          captions: [
+            {
+              id: "https://example.org/film.vtt",
+              label: { en: ["Captions"], it: ["Sottotitoli"] },
+              language: "it",
+            },
+          ],
+        },
+        { presentation: "dom", language: "it" },
+      ),
+    );
+    await waitFor(() => expect(result.current.element).not.toBeNull());
+    expect(result.current.element?.querySelector("track")?.label).toBe(
+      "Sottotitoli",
+    );
   });
 });

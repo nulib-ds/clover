@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import React from "react";
 
+import languagesJson from "../../fixtures/iiif-cookbook/0074-multiple-language-captions.json";
 import captionsJson from "../../fixtures/iiif-cookbook/0219-using-caption-file.json";
 import { clearVttCache } from "../../core/vtt";
 import { initCloverI18n } from "../../i18n";
@@ -95,6 +96,20 @@ describe("Transcript", () => {
       canvasId: captionsJson.items[0].id,
       time: 4,
     });
+  });
+
+  it("marks each caption file in the menu with the language of its label", async () => {
+    render(
+      <Clover.Root iiifContent={languagesJson} request={{ fetch }}>
+        <Clover.Transcript />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByRole("option", { name: "Captions in WebVTT format" }),
+    ).toHaveAttribute("lang", "en");
+    expect(
+      screen.getByRole("option", { name: "Sottotitoli in formato WebVTT" }),
+    ).toHaveAttribute("lang", "it");
   });
 
   it("joins the information panel when the view has captions", async () => {

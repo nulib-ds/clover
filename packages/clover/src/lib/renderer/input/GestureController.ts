@@ -9,6 +9,8 @@ export interface GestureTarget {
   /** Continue a released drag at `vx, vy` px/s. */
   flick(vx: number, vy: number): void;
   home(): void;
+  /** The view is zoomed in as far as it goes. */
+  atMaxZoom?(): boolean;
   rotateBy(degrees: number): void;
   /** A pointer is down. The camera tracks it 1:1, so any animation is cancelled. */
   setInteracting(interacting: boolean): void;
@@ -17,7 +19,10 @@ export interface GestureTarget {
 }
 
 export interface GestureOptions {
-  /** A click (or tap) zooms in; with Shift, out. */
+  /**
+   * A mouse click zooms in; with Shift, out. With this or `dblClickToZoom`, a double tap
+   * (a finger, or a pen that does not hover) zooms in.
+   */
   clickToZoom: boolean;
   /** A double click zooms in. Only consulted when `clickToZoom` is off. */
   dblClickToZoom: boolean;
@@ -44,8 +49,12 @@ export const DEFAULT_GESTURES: GestureOptions = {
   navigable: true,
 };
 
-const TAP_SLOP = 5;
-const TAP_MS = 300;
+/** How far a press may move, in CSS pixels, and still be a tap. */
+export const TAP_SLOP = 5;
+/** How long a tap may take, and the most time between the two of a double tap. */
+export const TAP_MS = 300;
+/** How far apart the two taps of a double tap may land. */
+export const DOUBLE_TAP_SLOP = TAP_SLOP * 4;
 const CLICK_ZOOM = 2;
 const KEY_ZOOM = 1.5;
 const KEY_PAN_FRACTION = 0.1;
@@ -75,6 +84,8 @@ export class GestureController {
   private pinch: { distance: number; mid: Point } | null = null;
   private lastTap: Sample | null = null;
   private lastPointerType = "";
+  /** A pen has hovered over the stage, so pens here are pointed as a mouse is. */
+  private penHovers = false;
 
   constructor(
     private readonly element: HTMLElement,
@@ -131,6 +142,7 @@ export class GestureController {
   };
 
   private onPointerMove = (event: PointerEvent) => {
+    if (isHovering(event)) this.penHovers = true;
     const previous = this.pointers.get(event.pointerId);
     if (!previous) return;
     const p = this.local(event);
@@ -202,31 +214,31 @@ export class GestureController {
       event.timeStamp - down.t < TAP_MS;
 
     if (isTap) {
-      if (event.pointerType === "touch") {
+      if (isDirect(event.pointerType, this.penHovers)) {
         /*
-         * Touch follows OpenSeadragon's touch defaults: a single tap does nothing (a
-         * reader taps to focus, or to bring up chrome) and a double tap zooms in.
+         * A finger, or a pen that does not hover, follows OpenSeadragon's touch defaults:
+         * a single tap does nothing here (it shows or hides the chrome,
+         * `useChromeVisibility`) and a double tap zooms in, unless the host has turned
+         * both click zooms off. A pen that hovers clicks as a mouse does.
          */
         const last = this.lastTap;
         if (
           this.options.navigable &&
+          (this.options.clickToZoom || this.options.dblClickToZoom) &&
           last &&
           event.timeStamp - last.t < TAP_MS &&
-          Math.hypot(p.x - last.x, p.y - last.y) < TAP_SLOP * 4
+          Math.hypot(p.x - last.x, p.y - last.y) < DOUBLE_TAP_SLOP
         ) {
           this.lastTap = null;
-          this.target.zoomBy(CLICK_ZOOM, p, true);
+          this.zoomIn(p);
         } else {
           this.lastTap = { x: p.x, y: p.y, t: event.timeStamp };
         }
         return;
       }
       if (this.options.clickToZoom && this.options.navigable) {
-        this.target.zoomBy(
-          event.shiftKey ? 1 / CLICK_ZOOM : CLICK_ZOOM,
-          p,
-          true,
-        );
+        if (event.shiftKey) this.target.zoomBy(1 / CLICK_ZOOM, p, true);
+        else this.zoomIn(p);
       } else {
         this.target.tap?.(p);
       }
@@ -247,20 +259,31 @@ export class GestureController {
   private onDoubleClick = (event: MouseEvent) => {
     if (!this.options.navigable) return;
     if (this.options.clickToZoom || !this.options.dblClickToZoom) return;
-    // Touch double taps are handled on pointerup; this is the synthesized echo.
-    if (this.lastPointerType === "touch") return;
+    // Double taps are handled on pointerup; this is the synthesized echo.
+    if (isDirect(this.lastPointerType, this.penHovers)) return;
     if (isInteractive(event.target, this.element)) return;
-    this.target.zoomBy(
-      event.shiftKey ? 1 / CLICK_ZOOM : CLICK_ZOOM,
-      this.local(event),
-      true,
-    );
+    if (event.shiftKey)
+      this.target.zoomBy(1 / CLICK_ZOOM, this.local(event), true);
+    else this.zoomIn(this.local(event));
   };
+
+  /**
+   * A pointer's zoom in: a click, a double click or a double tap. Zoomed in as far as it
+   * goes, it goes home instead, so one pointer can always zoom back out, whichever
+   * controls the host shows (WCAG 2.5.1).
+   */
+  private zoomIn(at: Point) {
+    if (this.target.atMaxZoom?.()) this.target.home();
+    else this.target.zoomBy(CLICK_ZOOM, at, true);
+  }
 
   private onWheel = (event: WheelEvent) => {
     const pinch = event.ctrlKey;
     if (!this.options.navigable) return;
     if (!pinch && !this.options.scrollToZoom) return;
+    // A box in the stage that scrolls that way (a long hotspot note) scrolls, not zooms.
+    if (!pinch && scrollsWithin(event.target, this.element, event.deltaY))
+      return;
     event.preventDefault();
     const delta = normalizeWheel(event);
     const rate = pinch ? PINCH_WHEEL_ZOOM_RATE : WHEEL_ZOOM_RATE;
@@ -326,7 +349,46 @@ function normalizeWheel(event: WheelEvent): number {
   return event.deltaY;
 }
 
-function isInteractive(
+/**
+ * A finger, or a pen: pointers pressed on the screen itself, with no hover to rely on. A
+ * pen that has been seen to hover (`hovers`, from `isHovering`) is pointed as a mouse is.
+ */
+export function isDirect(
+  pointerType: string | undefined,
+  hovers = false,
+): boolean {
+  return pointerType === "touch" || (pointerType === "pen" && !hovers);
+}
+
+/** A pen moving over the screen without touching it, as a desktop tablet's does. */
+export function isHovering(event: PointerEvent): boolean {
+  return event.pointerType === "pen" && event.buttons === 0;
+}
+
+/** Whether a box between `target` and `stage` can scroll further down (or up). */
+export function scrollsWithin(
+  target: EventTarget | null,
+  stage: HTMLElement,
+  deltaY: number,
+): boolean {
+  for (
+    let node = target as HTMLElement | null;
+    node && node !== stage;
+    node = node.parentElement
+  ) {
+    // Room that way: below for a wheel down, above for one up.
+    const room =
+      deltaY > 0
+        ? node.scrollHeight - node.clientHeight - node.scrollTop
+        : node.scrollTop;
+    if (room >= 1 && /auto|scroll/.test(getComputedStyle(node).overflowY))
+      return true;
+  }
+  return false;
+}
+
+/** A control, link or overlay within `stage` that handles its own presses. */
+export function isInteractive(
   target: EventTarget | null,
   stage: HTMLElement,
 ): boolean {

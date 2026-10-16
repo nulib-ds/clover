@@ -29,7 +29,9 @@
 
 /*
  * Their titles at the panel's own size; the line under each stays the caption's `s`. Each
- * is one line, cut short if it must be, so every member is as tall as its thumbnail.
+ * wraps, never cut short: the words that tell members apart (a date, a volume) often come
+ * last, and must still show at 320 CSS px and under a reader's own text spacing (WCAG
+ * 1.4.10, 1.4.12). A long one makes its member taller than its thumbnail.
  */
 .clover-collection .clover-items-caption {
   min-width: 0;
@@ -42,7 +44,5 @@
 
 .clover-collection :is(.clover-items-label, .clover-items-summary) {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }

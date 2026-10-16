@@ -72,8 +72,9 @@ const CustomManifest = ({
       className={`${styles.customManifest} nextra-search nx-relative ${className ?? ""}`}
     >
       <form onSubmit={handleSubmit} noValidate>
+        {/* The placeholder is the only text naming the field on screen, so the name repeats it. */}
         <label htmlFor={id} className={styles.label}>
-          IIIF Manifest or Collection
+          {placeholder}
         </label>
         <div className={styles.row}>
           <input

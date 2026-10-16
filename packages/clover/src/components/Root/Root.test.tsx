@@ -69,23 +69,73 @@ describe("Clover.Root and its parts", () => {
       <Clover.Root iiifContent={bookJson}>
         <Clover.Label as="h1" />
         <Clover.Content />
-        <Clover.Pager />
+        <Clover.Items layout="pager" />
       </Clover.Root>,
     );
     expect(
       await screen.findByRole("heading", { name: "Simple Manifest - Book" }),
     ).toHaveAttribute("lang", "en");
     expect(screen.getByText(/Item 1 of/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Previous" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
     await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
     expect(shownCanvases()).toEqual([canvasIds[0]]);
+  });
+
+  it("keeps focus on Next at the last view, where a press does nothing", async () => {
+    const onClick = vi.fn();
+    render(
+      <Clover.Root iiifContent={bookJson}>
+        <Clover.Position />
+        <Clover.Previous />
+        <Clover.Next onClick={onClick} />
+      </Clover.Root>,
+    );
+    const previous = await screen.findByRole("button", { name: "Previous" });
+    const next = screen.getByRole("button", { name: "Next" });
+    // Nowhere to go back to: said so, and out of the tab order, as a disabled button is.
+    expect(previous).toHaveAttribute("aria-disabled", "true");
+    expect(previous).toHaveAttribute("tabindex", "-1");
+    expect(next).not.toHaveAttribute("aria-disabled");
+    expect(next).not.toHaveAttribute("tabindex");
+
+    next.focus();
+    const position = document.querySelector(".clover-pager-position");
+    fireEvent.click(next);
+    fireEvent.click(next);
+    expect(position).toHaveTextContent("Item 3 of 3");
+    // Not `disabled`, which would drop focus to the page (WCAG 2.4.3).
+    expect(next).toBeEnabled();
+    expect(next).toHaveAttribute("aria-disabled", "true");
+    expect(next).toHaveFocus();
+    expect(onClick).toHaveBeenCalledTimes(2);
+
+    fireEvent.click(next);
+    expect(onClick).toHaveBeenCalledTimes(2);
+    expect(position).toHaveTextContent("Item 3 of 3");
+    expect(next).toHaveFocus();
+    expect(previous).not.toHaveAttribute("aria-disabled");
+    expect(previous).not.toHaveAttribute("tabindex");
+  });
+
+  it("lets a host disable Previous or Next itself", async () => {
+    render(
+      <Clover.Root iiifContent={bookJson}>
+        <Clover.Next disabled />
+      </Clover.Root>,
+    );
+    const next = await screen.findByRole("button", { name: "Next" });
+    expect(next).toBeDisabled();
+    expect(next).not.toHaveAttribute("aria-disabled");
   });
 
   it("steps by view, a spread at a time, and announces where it went", async () => {
     render(
       <Clover.Root iiifContent={bookJson}>
         <Clover.Content />
-        <Clover.Pager />
+        <Clover.Items layout="pager" />
       </Clover.Root>,
     );
     fireEvent.click(await screen.findByRole("button", { name: "Next" }));
@@ -102,13 +152,20 @@ describe("Clover.Root and its parts", () => {
     await waitFor(() =>
       expect(shownCanvases()).toEqual([canvasIds[1], canvasIds[2]]),
     );
-    expect(screen.getByRole("status")).toHaveTextContent(/Item 2 of/);
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent(/^Frontispiece, Item 2 of \d+$/);
+    // The label in its own language, the position in the reader's.
+    expect(within(status).getByText("Frontispiece")).toHaveAttribute(
+      "lang",
+      "en",
+    );
+    expect(status).toHaveAttribute("aria-atomic", "true");
   });
 
   it("points the arrows the way a right-to-left book reads", async () => {
     render(
       <Clover.Root iiifContent={rtlJson}>
-        <Clover.Pager />
+        <Clover.Items layout="pager" />
       </Clover.Root>,
     );
     const next = await screen.findByRole("button", { name: "Next" });
@@ -135,7 +192,7 @@ describe("Clover.Root and its parts", () => {
           }}
         >
           <Clover.Label of="canvas" data-testid="canvas-label" />
-          <Clover.Pager />
+          <Clover.Items layout="pager" />
         </Clover.Root>
       );
     }
@@ -233,6 +290,75 @@ describe("Clover.Root and its parts", () => {
     );
   });
 
+  it("keeps one status region, so each load is announced as a change to it (WCAG 4.1.3)", async () => {
+    const BOOK = bookJson.id;
+    const LETTER = "https://example.org/letter";
+    const letter = {
+      ...bookJson,
+      id: LETTER,
+      label: { en: ["A letter"] },
+      items: [bookJson.items[0]],
+    };
+    const shelf = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/shelf",
+      type: "Collection",
+      label: { en: ["Shelf"] },
+      items: [
+        { id: BOOK, type: "Manifest", label: { en: ["The book"] } },
+        { id: LETTER, type: "Manifest", label: { en: ["A letter"] } },
+      ],
+    };
+    const fetch = vi.fn(
+      async (url: string) =>
+        new Response(JSON.stringify(url === LETTER ? letter : bookJson), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+    );
+    let clover: ReturnType<typeof useClover>["clover"] | undefined;
+    function Probe() {
+      clover = useClover().clover;
+      return null;
+    }
+    render(
+      <Clover.Root iiifContent={shelf} request={{ fetch }}>
+        <Probe />
+        <Clover.Label as="h1" />
+        <Clover.Status />
+      </Clover.Root>,
+    );
+    const region = document.querySelector('.clover-status[role="status"]');
+    expect(region).not.toBeNull();
+    await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+    // Ready: the same region, empty and out of sight, waiting for the next message.
+    expect(region).toBeInTheDocument();
+    expect(region).toBeEmptyDOMElement();
+    expect(region).toHaveStyle({ position: "absolute" });
+    expect(region).not.toHaveAttribute("data-status");
+
+    act(() => void clover!.goToManifest(LETTER));
+    expect(region).toHaveTextContent("Loading…");
+    expect(region).toHaveAttribute("data-status", "loading");
+    expect(region).not.toHaveStyle({ position: "absolute" });
+    await screen.findByRole("heading", { name: "A letter" });
+    expect(region).toBeInTheDocument();
+    expect(region).toBeEmptyDOMElement();
+  });
+
+  it("keeps its status region, empty, beside the alert on failure", async () => {
+    const fetch = vi.fn(async () => new Response("nope", { status: 500 }));
+    render(
+      <Clover.Root iiifContent="https://example.org/broken" request={{ fetch }}>
+        <Clover.Status />
+      </Clover.Root>,
+    );
+    const region = document.querySelector('.clover-status[role="status"]');
+    await screen.findByRole("alert");
+    expect(region).toBeInTheDocument();
+    expect(region).toBeEmptyDOMElement();
+  });
+
   it("only announces loading, with loading={false}, where the stage shows it", async () => {
     render(
       <Clover.Root iiifContent={bookJson}>
@@ -262,6 +388,6 @@ describe("Clover.Root and its parts", () => {
 
   it("names the part used outside a Root", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
-    expect(() => render(<Clover.Pager />)).toThrow(/<Clover.Root>/);
+    expect(() => render(<Clover.Previous />)).toThrow(/<Clover.Root>/);
   });
 });

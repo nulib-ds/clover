@@ -19,6 +19,12 @@ export type DocumentProps = Omit<RootProps, "children"> & {
   /** A Download button in the toolbar, listing the Manifest's and the page's `rendering`. Default `true`. */
   download?: boolean;
   /**
+   * The title's heading level, to fit the outline of the page around the layout (under
+   * an `h2`, 3). The panel's sections, and the Download menu's groups, are a level below
+   * it. Default 2.
+   */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  /**
    * Where the thumbnails' width is remembered once the reader drags the bar beside them
    * (`localStorage`). Default `"clover-template-document"`; `false` forgets it.
    */
@@ -39,6 +45,7 @@ export function Document({
   defaultPanelOpen = false,
   panelLayout = "accordion",
   download = true,
+  headingLevel = 2,
   storageKey = "clover-template-document",
   ...root
 }: DocumentProps) {
@@ -54,6 +61,7 @@ export function Document({
         defaultPanelOpen={defaultPanelOpen}
         panelLayout={panelLayout}
         download={download}
+        headingLevel={headingLevel}
         storageKey={storageKey}
       />
     </Clover.Root>
@@ -61,6 +69,9 @@ export function Document({
 }
 
 const NARROW = "(max-width: 40rem)";
+
+/** The heading level under another, no deeper than 6. */
+const below = (level: number) => Math.min(level + 1, 6) as 2 | 3 | 4 | 5 | 6;
 
 /** The narrowest the page and the panel may be dragged, side by side. */
 const PAGE_MIN = "16rem";
@@ -77,6 +88,7 @@ function DocumentLayout({
   defaultSidebarOpen,
   defaultPanelOpen,
   download,
+  headingLevel = 2,
   storageKey,
   panelLayout,
 }: Pick<
@@ -84,10 +96,18 @@ function DocumentLayout({
   | "defaultSidebarOpen"
   | "defaultPanelOpen"
   | "download"
+  | "headingLevel"
   | "storageKey"
   | "panelLayout"
 >) {
   const t = Clover.useT();
+  const langOf = Clover.useLangOf();
+  /*
+   * The sidebar's name. In a language other than the page's (the reader's, or a string
+   * that fell back), it is a hidden element's, which carries its `lang`; Items then
+   * names its own list.
+   */
+  const sidebarLang = langOf("templateSidebar");
   const id = useId().replace(/:/g, "");
   const navigation = Clover.useNavigation();
   const [sidebar, setSidebar] = useState(
@@ -126,18 +146,32 @@ function DocumentLayout({
    */
   const narrow = useMatches(NARROW);
   const panelPane = useRef<HTMLElement>(null);
+  const sidebarPane = useRef<HTMLElement>(null);
+  const sidebarToggle = useRef<HTMLButtonElement>(null);
+  // Focus in a pane as it goes is handed to its toggle, never left on what is hidden.
+  const closePanel = () => {
+    if (panelPane.current?.contains(document.activeElement))
+      document
+        .querySelector<HTMLElement>(`[aria-controls~="${id}-panel"]`)
+        ?.focus();
+    setPanel(false);
+  };
+  const closeSidebar = () => {
+    if (sidebarPane.current?.contains(document.activeElement))
+      sidebarToggle.current?.focus();
+    setSidebar(false);
+  };
   const scrim = useRef<HTMLDivElement>(null);
   useDragToClose(panelPane, {
     enabled: over && slide.open,
     side: "end",
-    onClose: () => setPanel(false),
+    onClose: closePanel,
     scrim,
   });
-  const sidebarPane = useRef<HTMLElement>(null);
   useDragToClose(sidebarPane, {
     enabled: narrow && showSidebar,
     side: "start",
-    onClose: () => setSidebar(false),
+    onClose: closeSidebar,
     exits: true,
   });
 
@@ -169,7 +203,7 @@ function DocumentLayout({
 
   // On a narrow screen the sidebar covers the page: choosing a page puts it away.
   const choose = () => {
-    if (window.matchMedia?.(NARROW).matches) setSidebar(false);
+    if (window.matchMedia?.(NARROW).matches) closeSidebar();
   };
 
   return (
@@ -177,10 +211,12 @@ function DocumentLayout({
       <header className="clover-template-document-toolbar">
         {pages && (
           <button
+            ref={sidebarToggle}
             type="button"
             className="clover-template-document-sidebar-toggle"
             aria-expanded={sidebar}
             aria-controls={`${id}-sidebar`}
+            lang={langOf("templateSidebarToggle")}
             onClick={() => setSidebar((open) => !open)}
           >
             {/*
@@ -216,14 +252,16 @@ function DocumentLayout({
             <Clover.Tip label={t("templateSidebarToggle")} />
           </button>
         )}
-        <Clover.Label as="h2" className="clover-template-document-title" />
-        <div className="clover-template-document-pager">
-          <Clover.Previous />
-          <Clover.Position />
-          <Clover.Next />
-        </div>
+        <Clover.Label
+          as={`h${headingLevel}`}
+          className="clover-template-document-title"
+        />
+        <Clover.Items
+          layout="pager"
+          className="clover-template-document-pager"
+        />
         <Clover.CollectionSelect className="clover-template-document-collection" />
-        {download && <Clover.Download />}
+        {download && <Clover.Download headingLevel={below(headingLevel)} />}
       </header>
       {/* Its stage shows the loading; announced here, nothing moves. */}
       <Clover.Status loading={false} />
@@ -233,6 +271,20 @@ function DocumentLayout({
         data-sidebar={showSidebar ? "open" : "closed"}
         data-panel={over ? "over" : "beside"}
         storageKey={storageKey || undefined}
+        onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
+          // Escape anywhere puts the floating panel away, uncovering a control focus
+          // reached under it, and leaves focus there (the panel's own Escape, handled
+          // first, hands focus to its toggle).
+          if (
+            over &&
+            panel &&
+            event.key === "Escape" &&
+            !event.defaultPrevented
+          ) {
+            event.preventDefault();
+            setPanel(false);
+          }
+        }}
       >
         <Clover.SplitPane
           ref={sidebarPane}
@@ -240,16 +292,22 @@ function DocumentLayout({
           id={`${id}-sidebar`}
           name="sidebar"
           className="clover-template-document-sidebar"
-          aria-label={t("templateSidebar")}
+          aria-label={sidebarLang ? undefined : t("templateSidebar")}
+          aria-labelledby={sidebarLang ? `${id}-sidebar-name` : undefined}
           size="13rem"
           // On a phone Items slides over the Canvas, so it takes no room from it.
           min={narrow ? undefined : "8rem"}
           max="24rem"
           hidden={!showSidebar}
         >
+          {sidebarLang && (
+            <span hidden id={`${id}-sidebar-name`} lang={sidebarLang}>
+              {t("templateSidebar")}
+            </span>
+          )}
           <Clover.Items
             layout="list"
-            aria-label={t("templateSidebar")}
+            aria-label={sidebarLang ? undefined : t("templateSidebar")}
             thumbnailSize={320}
             onSelect={choose}
           />
@@ -296,6 +354,7 @@ function DocumentLayout({
           <Clover.InformationPanel
             ref={panelRef}
             layout={panelLayout}
+            headingLevel={below(headingLevel)}
             onClose={over ? () => setPanel(false) : undefined}
             closeOnEscape={over}
           />
@@ -316,7 +375,7 @@ function DocumentLayout({
             data-for="sidebar"
             data-open="true"
             aria-hidden="true"
-            onClick={() => setSidebar(false)}
+            onClick={closeSidebar}
           />
         )}
       </Clover.Split>

@@ -48,6 +48,17 @@ const LAZY_MODULES = [
   "/core/sanitize.ts",
   "/core/svg-shape.ts",
   "/components/Canvas/FrameAnimation.tsx",
+  "/components/Canvas/panClearOfChrome.ts",
+  // Hotspots and the Canvas's menus, for a Canvas with annotations or a Choice.
+  "/components/Canvas/Annotations.tsx",
+  "/components/Canvas/AnnotationMenu.tsx",
+  "/components/Canvas/ChoiceMenu.tsx",
+  // Off by default.
+  "/lib/renderer/overlays/Navigator.ts",
+  // Every language but English, the first time Clover is to speak it.
+  ...["es", "fi", "fr", "nb", "nn", "no", "pt"].map(
+    (lng) => `/i18n/locales/${lng}.json`,
+  ),
 ];
 /** Packages imported only on demand: media streaming, sanitising, upgrading old IIIF. */
 const LAZY_PACKAGES = ["hls.js", "dompurify", "@iiif/parser", "maplibre-gl"];
@@ -116,7 +127,7 @@ test("three entries, only package source, externals within dependencies and peer
   }
 });
 
-test("media, caption details, the sanitiser, hls.js and the upgrader load only on demand", async () => {
+test("media, caption details, hotspots, the Canvas's menus, the navigator, languages, the sanitiser, hls.js and the upgrader load only on demand", async () => {
   const chunks = await emitted();
   const initial = closure(chunks, "index.mjs");
   const reachable = closure(chunks, "index.mjs", true);
@@ -228,7 +239,9 @@ function split({ chunks, initial }, size) {
         : id.includes("/dist/templates/")
           ? "template"
           : "parts";
-      minified[group] += transformSync(module.code, { minify: true }).code.length;
+      minified[group] += transformSync(module.code, {
+        minify: true,
+      }).code.length;
     }
   }
   const all = minified.shell + minified.parts + minified.template;
@@ -318,9 +331,7 @@ test("what a consumer ships stays within budget", async (t) => {
   t.diagnostic(
     "  each group's share of the minified code. <Viewer /> with no template ships the",
   );
-  t.diagnostic(
-    "  shell alone up front and loads Default when it first draws.",
-  );
+  t.diagnostic("  shell alone up front and loads Default when it first draws.");
   for (const [name, size, limit] of rows) {
     assert.ok(size <= limit, `${name} is ${size} B gzip, over ${limit} B`);
   }

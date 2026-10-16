@@ -18,8 +18,9 @@ interface ControlMenuProps {
  *
  * Its items are native radios in fieldsets, so a reader moves between them with the
  * arrow keys and hears the group's name and the current item. Opening focuses the checked
- * item (else the first), scrolled into the menu's view. It closes on Escape, returning
- * focus to the control, on a press outside, and when another popup opens (`useOneOpen`).
+ * item (else the first), scrolled into the menu's view. It closes on Escape (returning
+ * focus to the control when focus was in the menu or on the control, and then closing
+ * nothing else), on a press outside, and when another popup opens (`useOneOpen`).
  */
 const ControlMenu: React.FC<ControlMenuProps> = ({
   id,
@@ -56,13 +57,25 @@ const ControlMenu: React.FC<ControlMenuProps> = ({
       onClose(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose(true);
+      if (event.key !== "Escape") return;
+      // Escape in the menu, or on its control, hands focus back to the control. From
+      // anywhere else it only closes the menu, leaving focus where the reader is.
+      const active = document.activeElement;
+      const inside = Boolean(
+        ref.current?.contains(active) ||
+          document.getElementById(triggerId)?.contains(active),
+      );
+      // Handled here, so nothing around it closes as well: a modal `<dialog>` (the
+      // Gallery's Lightbox), a floating InformationPanel. Heard in the capture phase,
+      // before the page's own handlers, the panel's among them.
+      if (inside) event.preventDefault();
+      onClose(inside);
     };
     document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keydown", onKeyDown, true);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keydown", onKeyDown, true);
     };
   }, [triggerId, onClose]);
 

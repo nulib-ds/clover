@@ -26,7 +26,7 @@ import { FrameLoop } from "./loop/FrameLoop";
 import { uploadBudget } from "./scene/uploadBudget";
 import { type Point, apply, compose, rotate, scale } from "./math/affine";
 import { type Rect, clamp, union } from "./math/rect";
-import { Navigator } from "./overlays/Navigator";
+import type { Navigator } from "./overlays/Navigator";
 import { OverlayLayer } from "./overlays/OverlayLayer";
 import { planFrame } from "./scene/planFrame";
 import {
@@ -100,6 +100,8 @@ const MAX_PIXEL_RATIO = 2;
 const MAX_CONTEXT_LOSSES = 3;
 /** Padding around an annotation zoomed to, as a fraction of the first item's width. */
 const ANNOTATION_PADDING = 0.1;
+/** Zooms this close to the limit count as at it: clamping leaves floating-point dust. */
+const ZOOM_EPSILON = 1e-6;
 
 interface Inset {
   top: number;
@@ -159,6 +161,8 @@ export class CanvasRenderer implements GestureTarget {
   private gestureOptions: Partial<GestureOptions> = {};
   private cache: TileCache;
   private navigator: Navigator | null = null;
+  /** Counts `attachNavigator` calls, so only the latest one's navigator is made. */
+  private navigatorAsked = 0;
 
   private viewport: ViewportSize = { width: 1, height: 1 };
   /** The host's padding: the space the home view keeps clear round the picture. */
@@ -461,6 +465,14 @@ export class CanvasRenderer implements GestureTarget {
     this.animateTo(home, immediate);
   }
 
+  /** Zoomed in as far as it goes, or on the way there. */
+  atMaxZoom(): boolean {
+    return (
+      this.camera.destination.zoom >=
+      this.getZoomLimits().max * (1 - ZOOM_EPSILON)
+    );
+  }
+
   zoomBy(factor: number, at?: Point, animate = true): void {
     const base = animate ? this.camera.destination : this.camera.current;
     const screen = at ?? {
@@ -590,17 +602,29 @@ export class CanvasRenderer implements GestureTarget {
     };
   }
 
-  /** Show an overview of the scene in `element`. Returns a function that removes it. */
+  /**
+   * Show an overview of the scene in `element`. Returns a function that removes it. It is
+   * off by default, so its code loads the first time one is asked for, and draws then.
+   */
   attachNavigator(element: HTMLElement): () => void {
     this.navigator?.dispose();
-    const navigator = new Navigator(element, (point, immediate) =>
-      this.panTo(point, immediate),
-    );
-    this.navigator = navigator;
-    this.invalidate();
+    this.navigator = null;
+    const asked = ++this.navigatorAsked;
+    let navigator: Navigator | null = null;
+    let removed = false;
+    void import("./overlays/Navigator").then((module) => {
+      // Removed, or another asked for since: this one is not wanted.
+      if (removed || this.disposed || asked !== this.navigatorAsked) return;
+      navigator = new module.Navigator(element, (point, immediate) =>
+        this.panTo(point, immediate),
+      );
+      this.navigator = navigator;
+      this.invalidate();
+    });
     return () => {
-      navigator.dispose();
-      if (this.navigator === navigator) this.navigator = null;
+      removed = true;
+      navigator?.dispose();
+      if (navigator && this.navigator === navigator) this.navigator = null;
     };
   }
 

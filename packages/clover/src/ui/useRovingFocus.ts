@@ -13,8 +13,8 @@ export interface RovingFocusOptions {
   orientation?: "horizontal" | "vertical" | "both";
   /** Right-to-left: the left arrow steps forward. */
   rtl?: boolean;
-  /** Enter or Space on an option. */
-  onActivate?: (index: number) => void;
+  /** Enter or Space on an option, with the key's own event. */
+  onActivate?: (index: number, event: React.KeyboardEvent) => void;
   /** Focus moved to an option by an arrow, Home or End: to select as focus moves. */
   onMove?: (index: number, event: React.KeyboardEvent) => void;
 }
@@ -70,8 +70,10 @@ export function useRovingFocus(
       } else if (event.key === "End") {
         next = count - 1;
       } else if (event.key === "Enter" || event.key === " ") {
+        // The host sees the event as it came, as a click's arrives; only then is Space
+        // kept from scrolling the page.
+        activate.current?.(index, event);
         event.preventDefault();
-        activate.current?.(index);
         return;
       }
       if (next === null) return;

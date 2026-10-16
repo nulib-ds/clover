@@ -54,8 +54,10 @@ export interface CloverCanvasOptions {
   /** Seconds for an animation to close most of its distance. 0 disables easing. */
   animationTime?: number;
   /**
-   * Milliseconds the controls and navigator stay after the pointer stops moving, as the
-   * Player's `hideDelay`. Default 2000; `Infinity` keeps them once shown.
+   * Milliseconds the controls and navigator stay after a mouse (or a pen that hovers)
+   * stops moving, as the Player's `hideDelay`. Default 2000; `Infinity` keeps them once
+   * shown. A finger, or a pen that does not hover, has no timer: a tap on the picture
+   * shows them, and another hides them. Focus that no press brought holds them too.
    */
   hideDelay?: number;
   /** A time-based Canvas's video or sound. */
@@ -146,17 +148,27 @@ export interface CloverCanvasProps {
   isTiledImage?: boolean;
   /** Accessible name for the viewport. */
   label?: InternationalString | string;
+  /**
+   * The language to read IIIF text in: labels, Choices, annotations. The reader's, by
+   * default; inside a `Root`, the Root's.
+   */
+  language?: string;
   /** Stable id for this instance. A new id remounts the renderer. */
   instanceId?: string;
   className?: string;
   options?: CloverCanvasOptions;
   /**
    * Show an overview of the whole image with the visible region outlined; press or drag
-   * in it to move there. On by default, as `Image`'s navigator is; never shown for a
-   * Canvas of video or sound.
+   * in it to move there. Off by default; never shown for a Canvas of video or sound.
    */
   navigator?: boolean;
-  /** Show the control cluster (`true`, the default), none (`false`), or some. */
+  /**
+   * Show the control cluster (`true`, the default), none (`false`), or some. Without the
+   * zoom and reset controls, one pointer can still zoom back out: at the largest zoom, a
+   * click or a double tap goes home. With the click zooms off as well (`gestures`), a
+   * pinch is the only zoom left on touch, so give the reader one of your own, through
+   * the handle `onReady` passes (`home()`, `zoomBy(0.5)`) (WCAG 2.5.1).
+   */
   controls?: boolean | CanvasControlsConfig;
   /** Replace any control with your own component — the `Viewer`'s `controlButtons`. */
   controlButtons?: ControlButtons;
@@ -197,9 +209,15 @@ export interface CloverCanvasProps {
   onEnded?: () => void;
   /**
    * Chapters of the Canvas's video or sound: marked on the seek bar, listed in a menu, and
-   * named beside the time. Inside a `Root`, they come from the Manifest's Ranges.
+   * named beside the time. Inside a `Root`, they come from the Manifest's Ranges. `lang`
+   * is the language a label is written in, set on it where it shows.
    */
-  chapters?: Array<{ label: string; start: number; end?: number }>;
+  chapters?: Array<{
+    label: string;
+    lang?: string;
+    start: number;
+    end?: number;
+  }>;
   /**
    * Show a Canvas's `placeholderContainer` first (the default). `false` opens the Canvas
    * straight away, as a host does when a link or content state points into it.

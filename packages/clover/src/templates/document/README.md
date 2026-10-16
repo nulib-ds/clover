@@ -2,7 +2,8 @@
 
 Reads like a PDF viewer: a toolbar across the top, page thumbnails down the left, and one
 whole page at a time on a grey ground. The bar between the thumbnails and the page widens
-or narrows them (8rem to 24rem; drag it, or use the arrow keys on it), and the width is
+or narrows them (8rem to 24rem; drag it, click or tap it to step from 8rem to 13rem to
+24rem and round again, or use the arrow keys on it), and the width is
 remembered. A document of one page has no thumbnails, bar or toggle for them: the page
 takes the whole width. You never see part of the next page. Scrolling
 turns the page, one gesture to one page however long a trackpad's momentum runs, and
@@ -30,11 +31,16 @@ import "@nulib/clover/templates.css";
 | `defaultPanelOpen`   | `false`                      | Whether the information panel starts open.                      |
 | `panelLayout`        | `"accordion"`                | The panel's sections as stacked boxes, or `"tabs"`.             |
 | `download`           | `true`                       | A Download button, when the Manifest or page has a `rendering`. |
+| `headingLevel`       | `2`                          | The title's level; the panel's sections are a level below.      |
 | `storageKey`         | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.  |
 | …                    |                              | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`… |
 
 Size it with `--clover-template-document-height` (default `min(85vh, 56rem)`). Below
 40rem the thumbnails cover the page while open, and choosing one puts them away.
+
+The title in the toolbar is an `h2`, and the panel's section headings and the Download
+menu's groups `h3`s. Under a heading of the page's own, pass the level below it as
+`headingLevel`.
 
 A page is a view: a paged Manifest turns a spread at a time, as the pager does. Pinch
 and Ctrl-wheel still zoom into a page; the plain wheel always turns it.

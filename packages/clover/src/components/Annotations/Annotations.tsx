@@ -1,13 +1,15 @@
 import React, { forwardRef, useId } from "react";
 
 import {
+  type AnnotationBodyEntry,
   type AnnotationEntry,
   type AnnotationSet,
   selectAnnotationSets,
 } from "../../core/annotation-sets";
 import { selectVisibleCanvases } from "../../core/selectors";
-import { toPlainText } from "../../core/text";
-import { localize } from "../../core/value";
+import { markdownToPlainText, toPlainText } from "../../core/text";
+import { type LocalizedValue, localize } from "../../core/value";
+import { langWithin } from "../../i18n/config";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
@@ -19,7 +21,10 @@ export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
   scope?: "view" | "all";
   /** Your own rendering of an annotation's content. */
   renderEntry?: (entry: AnnotationEntry) => React.ReactNode;
-  /** The heading level for each set's title. Default 3. */
+  /**
+   * The heading level for each set's title. Headings in an annotation's Markdown sit a
+   * level below it, or at it in a set with no title. Default 3.
+   */
   headingLevel?: 2 | 3 | 4 | 5 | 6;
   as?: React.ElementType;
 }
@@ -49,7 +54,7 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
     },
     ref,
   ) {
-    const { t } = useCloverTranslation();
+    const { t, langOf } = useCloverTranslation();
     const { clover, language } = useClover("Annotations");
     const sets = useCloverSelector((state) =>
       selectAnnotationSets(state.manifest, state.addedSets),
@@ -89,11 +94,18 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
             set={set}
             entries={entries}
             Heading={Heading}
+            headingLevel={headingLevel}
             language={language}
             // The AnnotationPage's own label, or none: the panel's section names them.
-            title={localize(set.label, language).text}
-            hideLabel={t("annotationsHide")}
-            showLabel={t("annotationsShow")}
+            title={localize(set.label, language)}
+            hideLabel={{
+              text: t("annotationsHide"),
+              lang: langOf("annotationsHide"),
+            }}
+            showLabel={{
+              text: t("annotationsShow"),
+              lang: langOf("annotationsShow"),
+            }}
             hidden={hiddenSets.includes(set.id)}
             selected={selected}
             highlighted={highlighted}
@@ -112,6 +124,7 @@ function AnnotationGroup({
   set,
   entries,
   Heading,
+  headingLevel: setLevel,
   title,
   language,
   hideLabel,
@@ -127,11 +140,14 @@ function AnnotationGroup({
   set: AnnotationSet;
   entries: AnnotationEntry[];
   Heading: React.ElementType;
-  /** The AnnotationPage's label; empty when it has none, and then no heading. */
-  title: string;
+  /** The level of the set's heading. */
+  headingLevel: number;
+  /** The AnnotationPage's label, and its language; empty when none, and then no heading. */
+  title: LocalizedValue;
   language?: string;
-  hideLabel: string;
-  showLabel: string;
+  /** Clover's strings, each with its language where it is not the page's. */
+  hideLabel: LocalizedValue;
+  showLabel: LocalizedValue;
   hidden: boolean;
   selected: string | null;
   highlighted: string | null;
@@ -141,32 +157,49 @@ function AnnotationGroup({
   onVisible: (visible: boolean) => void;
 }) {
   const id = useId();
+  const { hostLanguage } = useCloverTranslation();
+  // Headings in an entry's Markdown sit under the set's own, or at its level without one.
+  const headingLevel = title.text ? Math.min(setLevel + 1, 6) : setLevel;
   return (
     <section
       className="clover-annotations-set"
-      aria-labelledby={title ? `${id}-title` : undefined}
+      aria-labelledby={title.text ? `${id}-title` : undefined}
       data-set={set.id}
     >
       {/* The checkbox first, over the AnnotationPage's label when it has one. */}
       <div className="clover-annotations-set-header">
-        <label className="clover-annotations-markers">
+        <label className="clover-annotations-markers" lang={hideLabel.lang}>
           <input
             type="checkbox"
             checked={hidden}
             onChange={(event) => onVisible(!event.target.checked)}
           />
-          {hideLabel}
+          {hideLabel.text}
         </label>
-        {title && (
-          <Heading className="clover-annotations-title" id={`${id}-title`}>
-            {title}
+        {title.text && (
+          <Heading
+            className="clover-annotations-title"
+            id={`${id}-title`}
+            lang={title.lang}
+          >
+            {title.text}
           </Heading>
         )}
       </div>
       <ol className="clover-annotations-list">
-        {entries.map((entry) => {
+        {entries.map((entry, index) => {
           const isSelected = entry.id === selected;
-          const text = entryText(entry, language);
+          // With no text, named by its number, as its hotspot and the Canvas's menu
+          // name it, so no two read alike.
+          const own = entryText(entry, language);
+          const text = own.text ? own : { text: String(index + 1) };
+          // Clover's words and the annotation's: both in the page's language, or each
+          // in its own.
+          const oneLanguage =
+            !showLabel.lang && !langWithin(text.lang, hostLanguage);
+          const name = text.text
+            ? `${showLabel.text}: ${text.text}`
+            : showLabel.text;
           return (
             <li
               key={entry.id}
@@ -187,17 +220,40 @@ function AnnotationGroup({
                 {renderEntry ? (
                   renderEntry(entry)
                 ) : (
-                  <EntryBodies entry={entry} language={language} />
+                  <EntryBodies
+                    entry={entry}
+                    language={language}
+                    headingLevel={headingLevel}
+                  />
                 )}
               </div>
+              {/*
+                In two languages, named by its content rather than `aria-label`, so
+                each part carries its own (WCAG 3.1.2).
+              */}
               <button
                 type="button"
                 className="clover-annotations-show"
                 aria-pressed={isSelected}
-                aria-label={text ? `${showLabel}: ${text}` : showLabel}
+                aria-label={oneLanguage ? name : undefined}
                 style={visuallyHidden}
                 onClick={() => onSelect(entry.id)}
-              />
+              >
+                {!oneLanguage && (
+                  <>
+                    <span lang={showLabel.lang}>
+                      {showLabel.text}
+                      {text.text && ":"}
+                    </span>
+                    {text.text && (
+                      <>
+                        {" "}
+                        <span lang={text.lang}>{text.text}</span>
+                      </>
+                    )}
+                  </>
+                )}
+              </button>
             </li>
           );
         })}
@@ -206,47 +262,83 @@ function AnnotationGroup({
   );
 }
 
-/** An entry's text, plain, for its button's name. */
-function entryText(entry: AnnotationEntry, language?: string) {
+/**
+ * An entry's text, plain, for its button's name, and the language it is in: HTML's tags
+ * and Markdown's syntax taken off, so neither is read out. With no text of its own, an
+ * image's label names it.
+ */
+function entryText(entry: AnnotationEntry, language?: string): LocalizedValue {
   const values = entry.bodies
     .filter((body) => body.value)
-    .map((body) => ({ [body.language ?? "none"]: [body.value!] }));
-  const text = values.length
-    ? localize(Object.assign({}, ...values), language).text
-    : "";
-  return toPlainText(text).trim().slice(0, 120);
+    .map((body) => ({
+      [body.language ?? "none"]: [
+        body.format === "text/markdown"
+          ? markdownToPlainText(body.value!)
+          : toPlainText(body.value!),
+      ],
+    }));
+  const image = entry.bodies.find((body) => body.image && body.label);
+  const found: LocalizedValue = values.length
+    ? localize(Object.assign({}, ...values), language)
+    : localize(image?.label, language);
+  const text = values.length ? found.text : toPlainText(found.text);
+  return { ...found, text: text.trim().slice(0, 120) };
 }
+
+/** Whether an entry has text, which describes any image beside it (Cookbook 0377). */
+const hasText = (entry: AnnotationEntry) =>
+  entry.bodies.some((body) => body.value?.trim());
 
 function EntryBodies({
   entry,
   language,
+  headingLevel,
 }: {
   entry: AnnotationEntry;
   language?: string;
+  /** The level of a Markdown body's first heading. */
+  headingLevel: number;
 }) {
+  const { t, langOf } = useCloverTranslation();
+  /*
+   * An image's text alternative (WCAG 1.1.1): none beside text that describes it, which
+   * would say it twice; else its label, or its annotation's; else that it is an image.
+   */
+  const altOf = (body: AnnotationBodyEntry): LocalizedValue => {
+    if (hasText(entry)) return { text: "" };
+    const label = localize(body.label, language);
+    return label.text
+      ? label
+      : { text: t("annotationsImage"), lang: langOf("annotationsImage") };
+  };
   return (
     <>
-      {entry.bodies.map((body, index) =>
-        body.image ? (
+      {entry.bodies.map((body, index) => {
+        if (!body.image)
+          return (
+            <Markup
+              key={index}
+              as="div"
+              markup={{ [body.language ?? "none"]: [body.value ?? ""] }}
+              format={body.format}
+              headingLevel={headingLevel}
+              language={language}
+              className="clover-annotations-text"
+            />
+          );
+        const alt = altOf(body);
+        return (
           <img
             key={index}
             src={body.image}
-            alt=""
+            alt={alt.text}
+            lang={alt.text ? alt.lang : undefined}
             width={200}
             loading="lazy"
             className="clover-annotations-image"
           />
-        ) : (
-          <Markup
-            key={index}
-            as="div"
-            markup={{ [body.language ?? "none"]: [body.value ?? ""] }}
-            format={body.format}
-            language={language}
-            className="clover-annotations-text"
-          />
-        ),
-      )}
+        );
+      })}
     </>
   );
 }

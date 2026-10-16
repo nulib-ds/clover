@@ -6,6 +6,11 @@
   padding: 0.75rem 1.25rem;
 }
 
+/* The placeholder is the field's only visible label: Nextra's gray-500 is 4.3:1 on the field. */
+.customManifest input::placeholder {
+  color: var(--gray-11);
+}
+
 /*
  * Hidden from sight but not from assistive technology. This was `display: none`, which
  * removes the label from the accessibility tree too and left the field named by its

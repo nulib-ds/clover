@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 import { ReadMore } from "./ReadMore";
@@ -41,6 +41,15 @@ describe("ReadMore", () => {
     expect(screen.getByRole("button", { name: "Read more" })).toBeVisible();
   });
 
+  it("marks its words, on their own, where the page's language is not Clover's", async () => {
+    heights(200, 100);
+    document.documentElement.lang = "fr";
+    render(<Summary value={{ fr: ["Une longue note"] }} />);
+    const more = screen.getByRole("button", { name: "Read more" });
+    await waitFor(() => expect(more).toHaveAttribute("lang", "en"));
+    expect(screen.getByText("Une longue note")).toHaveAttribute("lang", "fr");
+  });
+
   it("offers nothing for text that fits", () => {
     heights(100, 100);
     render(
@@ -49,6 +58,25 @@ describe("ReadMore", () => {
       </ReadMore>,
     );
     expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  it("measures again when the page's styles change, as text spacing does", async () => {
+    heights(100, 100);
+    render(
+      <ReadMore>
+        <p>A note that fits, until spaced out</p>
+      </ReadMore>,
+    );
+    expect(screen.queryByRole("button")).toBeNull();
+    // The box keeps its height; only the text inside it grows.
+    heights(150, 100);
+    const style = document.createElement("style");
+    style.textContent = "* { line-height: 1.5 !important; }";
+    document.head.append(style);
+    expect(
+      await screen.findByRole("button", { name: "Read more" }),
+    ).toBeVisible();
+    style.remove();
   });
 });
 

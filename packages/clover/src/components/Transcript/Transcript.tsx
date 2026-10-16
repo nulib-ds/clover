@@ -37,7 +37,7 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
     { as: Tag = "div", follow = true, className, ...rest },
     ref,
   ) {
-    const { t } = useCloverTranslation();
+    const { t, langOf } = useCloverTranslation();
     const { clover, language } = useClover("Transcript");
     const canvases = useCloverSelector((state) =>
       selectVisibleCanvases(state.manifest, state.canvasId),
@@ -96,18 +96,23 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
       <Tag ref={ref} className={join("clover-transcript", className)} {...rest}>
         {tracks.length > 1 && (
           <label className="clover-transcript-track">
-            <span>{t("playerCaptions")}</span>{" "}
+            <span lang={langOf("playerCaptions")}>{t("playerCaptions")}</span>{" "}
             <select
               value={choice}
               onChange={(event) => setChoice(Number(event.target.value))}
             >
-              {tracks.map((option, index) => (
-                <option key={option.id} value={index}>
-                  {localize(option.label as any, language).text ||
-                    option.language ||
-                    index + 1}
-                </option>
-              ))}
+              {tracks.map((option, index) => {
+                const label = localize(option.label as any, language);
+                return (
+                  <option
+                    key={option.id}
+                    value={index}
+                    lang={label.text ? label.lang : undefined}
+                  >
+                    {label.text || option.language || index + 1}
+                  </option>
+                );
+              })}
             </select>
           </label>
         )}
@@ -115,7 +120,11 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
           ref={list}
           className="clover-transcript-cues"
           id={`${id}-cues`}
-          lang={track.language}
+          lang={
+            track.language && track.language !== "none"
+              ? track.language
+              : undefined
+          }
         >
           {cues.map((cue, index) => (
             <li

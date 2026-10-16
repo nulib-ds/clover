@@ -25,48 +25,98 @@
 }
 
 /*
- * The bar, as 3.x's Viewer draws its drag handle: a solid bar in the muted secondary
- * colour at half strength, turning the accent while hovered, held or focused. 3px wide,
- * with 3px more either side to grab that is not drawn.
+ * The bar: a faint line between the panes, the muted secondary colour at half strength,
+ * as 3.x's Viewer draws it, with a grip at its middle in the muted primary. The grip
+ * shows the bar can be taken hold of, so it keeps 3:1 beside either pane (WCAG 1.4.11):
+ * the muted primary is quieter text, 4.5:1 on both grounds. Hovered, held or focused,
+ * the bar and its grip turn the accent. 3px wide, centred in an area `l` wide (about
+ * 26px, past the 24px a target needs) to grab that is not drawn.
  */
 .clover-split-handle {
   position: relative;
   z-index: 1;
   flex: 0 0 3px;
   align-self: stretch;
-  background-color: var(--clover-color-secondary-alt, #c1c8cd);
-  opacity: 0.5;
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-secondary-alt, #c1c8cd) 50%,
+    transparent
+  );
   cursor: col-resize;
   touch-action: none;
   user-select: none;
   outline: none;
-  transition:
-    background-color 150ms,
-    opacity 150ms;
+  transition: background-color 150ms;
 }
 
 .clover-split-handle::before {
   content: "";
   position: absolute;
   inset-block: 0;
-  inset-inline: -3px;
+  inset-inline: calc((3px - var(--clover-space-l)) / 2);
 }
 
-.clover-split-handle:hover,
-.clover-split-handle:focus-visible,
-.clover-split-handle[data-dragging] {
+/*
+ * The grip: `xl` long, at its middle, standing 1px proud of the bar on either side, so it
+ * reads as something to take hold of rather than a darker stretch of the line.
+ */
+.clover-split-handle::after {
+  content: "";
+  position: absolute;
+  inset-inline: -1px;
+  top: 50%;
+  height: var(--clover-space-xl);
+  translate: 0 -50%;
+  border-radius: var(--clover-radius, 3px);
+  background-color: var(--clover-color-primary-muted, #26292b);
+  transition: background-color 150ms;
+}
+
+.clover-split-handle:is(:hover, :focus-visible, [data-dragging]) {
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 80%,
+    transparent
+  );
+}
+
+.clover-split-handle:is(:hover, :focus-visible, [data-dragging])::after {
   background-color: var(--clover-color-accent, #0065c3);
-  opacity: 0.8;
 }
 
 /* The keyboard's focus is shown outright, not only by the colour. */
 .clover-split-handle:focus-visible {
-  opacity: 1;
+  background-color: var(--clover-color-accent, #0065c3);
   box-shadow: 0 0 0 2px var(--clover-color-secondary, #fff);
 }
 
+/*
+ * In forced colours a fill is the page's own colour, and a shadow is dropped: the bar
+ * and its grip take the text's colour, the highlight while hovered, held or focused, and
+ * focus an outline. No fade between them: on its way, a colour is no system colour, and
+ * would be forced to the page's.
+ */
+@media (forced-colors: active) {
+  .clover-split-handle,
+  .clover-split-handle::after {
+    background-color: CanvasText;
+    transition: none;
+  }
+
+  .clover-split-handle:is(:hover, :focus-visible, [data-dragging]),
+  .clover-split-handle:is(:hover, :focus-visible, [data-dragging])::after {
+    background-color: Highlight;
+  }
+
+  .clover-split-handle:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: 2px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .clover-split-handle {
+  .clover-split-handle,
+  .clover-split-handle::after {
     transition: none;
   }
 }

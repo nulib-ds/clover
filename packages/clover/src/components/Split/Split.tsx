@@ -10,12 +10,34 @@ import React, {
 } from "react";
 
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
+import { Tip } from "../../ui/Tip";
 
 /** A length: pixels as a number, or a CSS length in `px`, `rem` or `%` of the split. */
 export type SplitLength = number | string;
 
 /** How far an arrow key moves the handle; four times that with Shift. */
 const KEY_STEP_REM = 1;
+
+/** How far a press may wander, in pixels, and still be a click: a finger wanders more. */
+const CLICK_SLOP_PX = 4;
+const TAP_SLOP_PX = 8;
+
+/**
+ * How long after a click, and how near it (in slops), a second press is taken for the
+ * other half of a double click.
+ */
+const DOUBLE_CLICK_MS = 500;
+const DOUBLE_CLICK_SLOPS = 4;
+
+/** What a double click's second half sends, from the press to the click. */
+const PRESS_EVENTS = [
+  "pointerdown",
+  "mousedown",
+  "pointerup",
+  "mouseup",
+  "click",
+  "dblclick",
+];
 
 interface PaneSpec {
   min?: SplitLength;
@@ -256,17 +278,20 @@ function neighbours(handle: HTMLElement) {
 export type SplitHandleProps = React.HTMLAttributes<HTMLDivElement>;
 
 /**
- * The bar between two panes. Drag it, or focus it and use the arrow keys (Shift for
- * bigger steps, Home and End for the limits); a double click puts the pane back to its
- * own size. It is a focusable `separator` carrying the sized pane's share of the width.
+ * The bar between two panes, with a grip at its middle. Drag it. Or click or tap it: each
+ * click steps the pane on to its next width, from its narrowest to its own size to its
+ * widest and round again, so one pointer resizes it without a drag (WCAG 2.5.7). A double
+ * click steps it once. Or focus it and use the arrow keys (Shift for bigger steps, Home
+ * and End for the limits). It is a focusable `separator` carrying the sized pane's share
+ * of the width, and names itself in a popover on hover and focus.
  */
 export const SplitHandle = forwardRef<HTMLDivElement, SplitHandleProps>(
   function SplitHandle(
-    { className, onPointerDown, onKeyDown, onDoubleClick, ...rest },
+    { className, children, onPointerDown, onClick, onKeyDown, ...rest },
     ref,
   ) {
     const split = useContext(SplitContext);
-    const { t } = useCloverTranslation();
+    const { t, langOf } = useCloverTranslation();
     const self = useRef<HTMLDivElement | null>(null);
     const [value, setValue] = useState<{
       now: number;
@@ -287,8 +312,15 @@ export const SplitHandle = forwardRef<HTMLDivElement, SplitHandleProps>(
       const otherSpec =
         split.specs.current[other?.dataset.splitKey ?? ""] ?? {};
       const min = toPixels(spec.min, across) ?? 0;
-      const room =
-        across - handle.offsetWidth - (toPixels(otherSpec.min, across) ?? 0);
+      /*
+       * The room is what the two panes either side share, less the other's minimum. The
+       * split's other panes and bars keep theirs: past that, the layout would squeeze
+       * them, and the pane would never reach the width it was given.
+       */
+      const shared =
+        sized.getBoundingClientRect().width +
+        (other?.getBoundingClientRect().width ?? 0);
+      const room = shared - (toPixels(otherSpec.min, across) ?? 0);
       const max = Math.max(
         min,
         Math.min(toPixels(spec.max, across) ?? room, room),
@@ -332,7 +364,110 @@ export const SplitHandle = forwardRef<HTMLDivElement, SplitHandleProps>(
 
     const percent = (px: number) =>
       Math.round((px / (split?.element.current?.clientWidth || 1)) * 100);
-    const dragging = useRef<ReturnType<typeof limits>>(null);
+
+    /** A click's step: on to the next of the pane's narrowest, own and widest sizes. */
+    const step = () => {
+      const found = limits();
+      if (!found || !split) return;
+      const across = split.element.current?.clientWidth ?? 0;
+      const own = toPixels(split.specs.current[found.key]?.size, across);
+      const stops =
+        own !== undefined && own > found.min + 1 && own < found.max - 1
+          ? [found.min, own, found.max]
+          : [found.min, found.max];
+      /*
+       * From the width it was given (the reader's, or its own), not the one it has: a
+       * narrow layout may squeeze it below either, and measured, it would be given the
+       * same width again and never move on.
+       */
+      const now =
+        split.sizes[found.key] ??
+        own ??
+        found.sized.getBoundingClientRect().width;
+      const next = stops.find((stop) => stop > now + 1) ?? stops[0];
+      if (own === undefined || Math.abs(next - own) > 1) return resize(next);
+      // Its own size: the reader's is forgotten, so the pane takes its `size` again.
+      split.setSize(found.key, undefined);
+      setValue({ now: own, min: found.min, max: found.max });
+    };
+
+    /*
+     * A click's step moves the bar out from under the pointer, so the second click of a
+     * double click (a habit with split views, and a slip of an unsteady hand) would land
+     * on what the step uncovered: a thumbnail, a link, the Canvas. Until a double click's
+     * time has passed, or the pointer has moved away, a press near where the bar was
+     * goes nowhere. On the bar itself, it is a click of its own.
+     */
+    const guard = useRef<(() => void) | null>(null);
+    useEffect(() => () => guard.current?.(), []);
+    const holdOff = (at: { x: number; y: number; reach: number }) => {
+      guard.current?.();
+      const bar = self.current;
+      const win = bar?.ownerDocument.defaultView;
+      if (!bar || !win) return;
+      const far = (event: Event) =>
+        Math.hypot(
+          (event as MouseEvent).clientX - at.x,
+          (event as MouseEvent).clientY - at.y,
+        ) > at.reach;
+      const stop = () => {
+        PRESS_EVENTS.forEach((type) =>
+          win.removeEventListener(type, swallow, true),
+        );
+        win.removeEventListener("pointermove", away, true);
+        clearTimeout(timer);
+        guard.current = null;
+      };
+      const swallow = (event: Event) => {
+        if (bar.contains(event.target as Node)) return;
+        if (event.type === "pointerdown" && far(event)) return stop();
+        event.preventDefault();
+        event.stopPropagation();
+      };
+      const away = (event: Event) => far(event) && stop();
+      PRESS_EVENTS.forEach((type) => win.addEventListener(type, swallow, true));
+      win.addEventListener("pointermove", away, true);
+      const timer = setTimeout(stop, DOUBLE_CLICK_MS);
+      guard.current = stop;
+    };
+
+    /** The press under way: where it began, the pane's width then, if it is a drag. */
+    const press = useRef<{
+      found: NonNullable<ReturnType<typeof limits>>;
+      x: number;
+      from: number;
+      slop: number;
+      moved: boolean;
+    } | null>(null);
+    /** Whether the last press was a drag, so the click that ends it does not step too. */
+    const dragged = useRef(false);
+    /** Where the last press that stayed put was let go: a click by a pointer. */
+    const clicked = useRef<{ x: number; y: number; reach: number } | null>(
+      null,
+    );
+    const release = (event: React.PointerEvent<HTMLDivElement>) => {
+      const held = press.current;
+      dragged.current = held?.moved ?? false;
+      clicked.current =
+        held && !held.moved && event.type === "pointerup"
+          ? {
+              x: event.clientX,
+              y: event.clientY,
+              reach: held.slop * DOUBLE_CLICK_SLOPS,
+            }
+          : null;
+      press.current = null;
+      delete event.currentTarget.dataset.dragging;
+    };
+    /*
+     * The popover hangs over the next pane and takes the pointer (WCAG 1.4.13): a press
+     * on it, reaching for what it covers, neither steps nor drags the bar.
+     */
+    const onTip = (event: React.SyntheticEvent<HTMLDivElement>) => {
+      const tip = (event.target as Element).closest?.(".clover-tip");
+      return Boolean(tip && event.currentTarget.contains(tip));
+    };
+    const label = rest["aria-label"] ?? t("splitHandle");
 
     return (
       <div
@@ -342,7 +477,10 @@ export const SplitHandle = forwardRef<HTMLDivElement, SplitHandleProps>(
         }}
         role="separator"
         aria-orientation="vertical"
-        aria-label={rest["aria-label"] ?? t("splitHandle")}
+        aria-label={label}
+        lang={
+          rest["aria-label"] === undefined ? langOf("splitHandle") : undefined
+        }
         aria-valuenow={value ? percent(value.now) : undefined}
         aria-valuemin={value ? percent(value.min) : undefined}
         aria-valuemax={value ? percent(value.max) : undefined}
@@ -350,29 +488,44 @@ export const SplitHandle = forwardRef<HTMLDivElement, SplitHandleProps>(
         className={["clover-split-handle", className].filter(Boolean).join(" ")}
         onPointerDown={(event) => {
           onPointerDown?.(event);
-          if (event.defaultPrevented || event.button !== 0) return;
-          dragging.current = limits();
-          if (!dragging.current) return;
+          dragged.current = false;
+          clicked.current = null;
+          if (event.defaultPrevented || event.button !== 0 || onTip(event))
+            return;
+          const found = limits();
+          if (!found) return;
           event.preventDefault();
-          event.currentTarget.setPointerCapture?.(event.pointerId);
+          press.current = {
+            found,
+            x: event.clientX,
+            from: found.sized.getBoundingClientRect().width,
+            slop: event.pointerType === "touch" ? TAP_SLOP_PX : CLICK_SLOP_PX,
+            moved: false,
+          };
           event.currentTarget.dataset.dragging = "";
+          event.currentTarget.setPointerCapture?.(event.pointerId);
         }}
         onPointerMove={(event) => {
-          const found = dragging.current;
-          if (!found) return;
-          // The sized pane's far edge stays put; the bar is its near edge.
-          const box = found.sized.getBoundingClientRect();
-          resize(
-            found.after ? box.right - event.clientX : event.clientX - box.left,
-          );
+          const held = press.current;
+          if (!held) return;
+          const moved = event.clientX - held.x;
+          // Within the slop it is still a click. Past it, a drag to the end: the bar
+          // follows the pointer from where it was taken, toward the pane to narrow it.
+          if (!held.moved && Math.abs(moved) < held.slop) return;
+          held.moved = true;
+          resize(held.from + (held.found.after ? -moved : moved));
         }}
-        onPointerUp={(event) => {
-          dragging.current = null;
-          delete event.currentTarget.dataset.dragging;
-        }}
-        onPointerCancel={(event) => {
-          dragging.current = null;
-          delete event.currentTarget.dataset.dragging;
+        onPointerUp={release}
+        onPointerCancel={release}
+        onClick={(event) => {
+          onClick?.(event);
+          const drag = dragged.current;
+          const at = clicked.current;
+          dragged.current = false;
+          clicked.current = null;
+          if (event.defaultPrevented || drag || onTip(event)) return;
+          step();
+          if (at) holdOff(at);
         }}
         onKeyDown={(event) => {
           onKeyDown?.(event);
@@ -380,27 +533,22 @@ export const SplitHandle = forwardRef<HTMLDivElement, SplitHandleProps>(
           const found = limits();
           if (!found) return;
           const now = found.sized.getBoundingClientRect().width;
-          const step = KEY_STEP_REM * rootFontSize() * (event.shiftKey ? 4 : 1);
+          const by = KEY_STEP_REM * rootFontSize() * (event.shiftKey ? 4 : 1);
           // Toward the sized pane shrinks it: which arrow that is depends on its side.
           const grow = found.after ? "ArrowLeft" : "ArrowRight";
           const shrink = found.after ? "ArrowRight" : "ArrowLeft";
-          if (event.key === grow) resize(now + step);
-          else if (event.key === shrink) resize(now - step);
+          if (event.key === grow) resize(now + by);
+          else if (event.key === shrink) resize(now - by);
           else if (event.key === "Home") resize(found.min);
           else if (event.key === "End") resize(found.max);
           else return;
           event.preventDefault();
         }}
-        onDoubleClick={(event) => {
-          onDoubleClick?.(event);
-          const found = limits();
-          if (!found) return;
-          split?.setSize(found.key, undefined);
-          // Its own size again: read once the pane has it.
-          requestAnimationFrame(update);
-        }}
         {...rest}
-      />
+      >
+        {children}
+        <Tip label={label} />
+      </div>
     );
   },
 );

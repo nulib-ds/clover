@@ -32,21 +32,22 @@
   border-bottom: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
 }
 
+/* The whole title, wrapped: zoomed, on a phone or spaced out it is never cut short. */
 .clover-template-document-title {
   flex: 1 1 6rem;
   min-width: 0;
   margin: 0;
-  overflow: hidden;
   font-size: var(--clover-text-l);
   font-weight: 400;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
-.clover-template-document-pager {
-  display: flex;
-  align-items: center;
-  gap: var(--clover-space-xs);
+/*
+ * Items' pager, in the toolbar's row: no padding of its own there. Its gap is its own,
+ * the Canvas's controls' `s`, so its arrows line up with the controls under them.
+ */
+.clover-template-document-toolbar > .clover-template-document-pager {
+  padding-block: 0;
   font-size: var(--clover-text-s);
 }
 
@@ -93,6 +94,12 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 
 .clover-template-document-sidebar[hidden] {
   display: none;
+}
+
+/* The bar's grab area lies on the page's side, off the thumbnails' scrollbar. */
+.clover-template-document-sidebar + .clover-split-handle::before {
+  inset-inline-start: 0;
+  inset-inline-end: calc(3px - var(--clover-space-l));
 }
 
 /*

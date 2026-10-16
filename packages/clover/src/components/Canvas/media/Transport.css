@@ -10,12 +10,14 @@
  * On the scale: `m` in from the stage's sides and bottom, `xl` of scrim above; the seek
  * row `xs` over the bar (they are one control); the bar's controls `s` apart, as the
  * cluster's are. `--clover-transport-room` is what that takes up, for anything that has
- * to clear it (captions, the caption box).
+ * to clear it (captions, the caption box). The bar is one control high, or as high as
+ * the transport measures it (`--clover-transport-bar-height`, `useBarHeight`) once it
+ * wraps.
  */
 .clover-canvas {
   --clover-transport-room: calc(
-    var(--clover-control) + var(--clover-space-l) + var(--clover-space-xs) + 2 *
-      var(--clover-space-m)
+    var(--clover-transport-bar-height, var(--clover-control)) +
+      var(--clover-space-l) + var(--clover-space-xs) + 2 * var(--clover-space-m)
   );
 }
 
@@ -35,22 +37,38 @@
     rgb(0 0 0 / 0%)
   );
   user-select: none;
+  /*
+   * The room a menu has above its button, on the bar's last row: the stage
+   * (`.clover-canvas-media` is its size container), less the bar's inset, the button,
+   * the gap to the menu, and `xs` clear of the top. A menu taller than the stage leaves
+   * would run off its top, where nothing scrolls to it (WCAG 1.4.10). The Captions and
+   * Chapters menus measure it where their button is (`TransportMenu`).
+   */
+  --clover-transport-menu-room: calc(
+    100cqb - var(--clover-space-m) - var(--clover-control) -
+      var(--clover-space-s) - var(--clover-space-xs)
+  );
 }
 
-/* An open menu has to clear the captions. */
-.clover-canvas-transport:has([aria-expanded="true"]) {
+/*
+ * Over the captions, which may run down over the bar on a short stage, while a menu is
+ * open or keyboard focus is in the bar: a cue must never hide the focused control, its
+ * ring or its Tip (WCAG 2.4.7, 2.4.11).
+ */
+.clover-canvas-transport:has([aria-expanded="true"], :focus-visible) {
   z-index: 4;
 }
 
 /*
- * One row, never wrapped: the controls and the time hold their size, and the chapter's
- * title gives way to them, down to nothing, with an ellipsis.
+ * One row while it fits: the controls and the time hold their size, and the chapter's
+ * title gives way to them, with an ellipsis. Where they would not fit, they wrap rather
+ * than run off the stage (WCAG 1.4.10); a narrow stage has its own two rows (below).
  */
 .clover-canvas-transport-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--clover-space-s);
-  flex-wrap: nowrap;
+  gap: var(--clover-space-xs) var(--clover-space-s);
   min-width: 0;
 }
 
@@ -58,9 +76,55 @@
   flex-shrink: 0;
 }
 
-.clover-canvas-transport-bar > .clover-canvas-transport-spacer {
-  flex: 1 1 auto;
-  min-width: 0;
+/*
+ * The time and the chapter take the room between the start and end controls, pushing
+ * those at the end to it. Only the time's width counts toward a row: the title takes
+ * what is left.
+ */
+.clover-canvas-transport-bar > .clover-canvas-transport-status {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  gap: var(--clover-space-s);
+  min-width: min-content;
+}
+
+/*
+ * The controls at the end (chapters, captions, full screen) keep together at the end of
+ * their row: beside the others while they fit, else on a row of their own, the bar's
+ * last. On a row the status shares, it takes the free space first, and the margin has
+ * none.
+ */
+.clover-canvas-transport-end {
+  display: flex;
+  gap: var(--clover-space-s);
+  margin-inline-start: auto;
+}
+
+/*
+ * On a narrow stage, where it is (the time and chapter) has a row of its own under the
+ * seek bar, and the controls go below it, those at the end at its end, or a row lower
+ * where they do not fit beside the others. Narrow is the width every control needs on
+ * one row, with text spacing (WCAG 1.4.12): more with chapters, whose title wants room
+ * of its own. Nothing is hidden.
+ */
+@container (max-width: 37.5rem) {
+  .clover-canvas-transport-bar:has([data-button="chapters"])
+    > .clover-canvas-transport-status {
+    order: -1;
+    flex-basis: 100%;
+  }
+
+  .clover-canvas-transport-status > .clover-canvas-transport-chapter {
+    max-width: none;
+  }
+}
+
+@container (max-width: 28rem) {
+  .clover-canvas-transport-bar > .clover-canvas-transport-status {
+    order: -1;
+    flex-basis: 100%;
+  }
 }
 
 /* ── buttons ─────────────────────────────────────────────────────────────── */
@@ -81,8 +145,27 @@
 .clover-canvas-transport-button:hover,
 .clover-canvas-transport-button:focus-visible,
 .clover-canvas-transport-button[data-active],
+.clover-canvas-transport-button[aria-pressed="true"],
 .clover-canvas-transport-button[aria-expanded="true"] {
   background-color: var(--clover-color-accent, #0065c3);
+}
+
+/*
+ * On (captions showing, Repeat pressed): a bar under the glyph, in the glyph's colour,
+ * which hover and focus never draw, so the state is not told by the fill alone
+ * (WCAG 1.4.1). Its Tip positions the button. A border, not a fill: forced colours keep
+ * a border in the text's colour, where they would paint a fill as the page.
+ */
+button.clover-canvas-transport-button:is(
+    [data-active],
+    [aria-pressed="true"]
+  )::after {
+  content: "";
+  position: absolute;
+  inset-inline: var(--clover-space-s);
+  bottom: var(--clover-space-2xs);
+  border-bottom: 2px solid;
+  border-radius: 1px;
 }
 
 .clover-canvas-transport-button:focus-visible {
@@ -101,6 +184,9 @@
  *
  * WebKit and Gecko pseudo-elements live in separate rules: a selector list naming one an
  * engine does not know is dropped whole.
+ *
+ * Thumbs and rails have a dark edge, focused or not, so they keep 3:1 over a light
+ * picture and on sound, where the scrim is thin (WCAG 1.4.11).
  */
 .clover-canvas-transport-seek-area {
   position: relative;
@@ -123,6 +209,13 @@
   width: var(--clover-space-2xl);
 }
 
+/* Shorter on a narrow stage, so the controls keep to one row under the time if they can. */
+@container (max-width: 28rem) {
+  .clover-canvas-transport input.clover-canvas-transport-volume {
+    width: var(--clover-space-xl);
+  }
+}
+
 .clover-canvas-transport input[type="range"]::-webkit-slider-runnable-track {
   height: 4px;
   border-radius: var(--clover-radius, 3px);
@@ -134,7 +227,7 @@
     var(--clover-player-track, rgb(255 255 255 / 45%))
       var(--clover-transport-loaded, 0%)
   );
-  box-shadow: var(--clover-player-track-shadow, 0 0 0 1px rgb(0 0 0 / 35%));
+  box-shadow: var(--clover-player-track-shadow, 0 0 0 1px rgb(0 0 0 / 75%));
 }
 
 .clover-canvas-transport input[type="range"]::-moz-range-track {
@@ -148,7 +241,7 @@
     var(--clover-player-track, rgb(255 255 255 / 45%))
       var(--clover-transport-loaded, 0%)
   );
-  box-shadow: var(--clover-player-track-shadow, 0 0 0 1px rgb(0 0 0 / 35%));
+  box-shadow: var(--clover-player-track-shadow, 0 0 0 1px rgb(0 0 0 / 75%));
 }
 
 .clover-canvas-transport input[type="range"]::-webkit-slider-thumb {
@@ -159,6 +252,7 @@
   border: none;
   border-radius: var(--clover-radius-pill, 2rem);
   background-color: var(--clover-player-text, #fff);
+  box-shadow: 0 0 0 2px rgb(0 0 0 / 60%);
 }
 
 .clover-canvas-transport input[type="range"]::-moz-range-thumb {
@@ -167,6 +261,7 @@
   border: none;
   border-radius: var(--clover-radius-pill, 2rem);
   background-color: var(--clover-player-text, #fff);
+  box-shadow: 0 0 0 2px rgb(0 0 0 / 60%);
 }
 
 .clover-canvas-transport input[type="range"]:focus-visible {
@@ -177,19 +272,15 @@
   input[type="range"]:focus-visible::-webkit-slider-thumb {
   box-shadow:
     0 0 0 2px var(--clover-color-accent, #0065c3),
-    0 0 0 4px var(--clover-player-text, #fff);
+    0 0 0 4px var(--clover-player-text, #fff),
+    0 0 0 6px rgb(0 0 0 / 60%);
 }
 
 .clover-canvas-transport input[type="range"]:focus-visible::-moz-range-thumb {
   box-shadow:
     0 0 0 2px var(--clover-color-accent, #0065c3),
-    0 0 0 4px var(--clover-player-text, #fff);
-}
-
-@media (max-width: 575px) {
-  .clover-canvas-transport input.clover-canvas-transport-volume {
-    display: none;
-  }
+    0 0 0 4px var(--clover-player-text, #fff),
+    0 0 0 6px rgb(0 0 0 / 60%);
 }
 
 /* ── time ────────────────────────────────────────────────────────────────── */
@@ -203,10 +294,6 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   text-shadow: 0 1px 2px rgb(0 0 0 / 90%);
-}
-
-.clover-canvas-transport-time > [aria-hidden] {
-  opacity: 0.6;
 }
 
 /*
@@ -243,7 +330,7 @@ button.clover-canvas-transport-time:focus-visible {
   bottom: calc(100% + var(--clover-space-s));
   left: 0;
   max-width: min(20rem, 80vw);
-  max-height: min(24rem, 70vh);
+  max-height: min(24rem, 70vh, var(--clover-transport-menu-room));
 }
 
 /* ── captions menu ───────────────────────────────────────────────────────── */
@@ -253,14 +340,28 @@ button.clover-canvas-transport-time:focus-visible {
   display: flex;
 }
 
+/*
+ * Up from its button, at its end. Placed on opening (`TransportMenu`): no taller than the
+ * room above the button (`--clover-transport-menu-above`, from the stage's top), and moved
+ * along (`--clover-transport-menu-shift`) to lie within the bar's inset, wherever the bar
+ * has wrapped the button (WCAG 1.4.10).
+ */
 .clover-canvas-transport-options {
   position: absolute;
   right: 0;
   bottom: calc(100% + var(--clover-space-s));
   display: flex;
   flex-direction: column;
-  min-width: 11rem;
-  max-height: 16rem;
+  box-sizing: border-box;
+  min-width: min(11rem, 100cqi - 2 * var(--clover-space-m));
+  max-width: calc(100cqi - 2 * var(--clover-space-m));
+  max-height: min(
+    16rem,
+    var(--clover-transport-menu-room),
+    var(--clover-transport-menu-above, 100cqb) - var(--clover-space-s) -
+      var(--clover-space-xs)
+  );
+  translate: var(--clover-transport-menu-shift, 0px) 0;
   margin: 0;
   padding: var(--clover-space-xs);
   border: none;
@@ -315,8 +416,57 @@ button.clover-canvas-transport-time:focus-visible {
 /* ── accessibility ───────────────────────────────────────────────────────── */
 
 @media (forced-colors: active) {
-  button.clover-canvas-transport-button {
+  /* Over `ui/Button.css`, which comes later with the same specificity. */
+  .clover-canvas-transport button.clover-canvas-transport-button {
     border: 1px solid ButtonText;
+  }
+
+  /*
+   * The sliders are a gradient and a shadow, both of which forced colours drop, leaving
+   * nothing: drawn again here in system colours, a rail with its edge, the part played
+   * in Highlight, and the thumb in the text's colour (WCAG 1.4.11).
+   */
+  .clover-canvas-transport input[type="range"] {
+    forced-color-adjust: none;
+  }
+
+  .clover-canvas-transport input[type="range"]::-webkit-slider-runnable-track {
+    border: 1px solid CanvasText;
+    background: linear-gradient(
+      to right,
+      Highlight var(--clover-transport-progress, 0%),
+      Canvas var(--clover-transport-progress, 0%)
+    );
+    box-shadow: none;
+  }
+
+  .clover-canvas-transport input[type="range"]::-moz-range-track {
+    border: 1px solid CanvasText;
+    background: linear-gradient(
+      to right,
+      Highlight var(--clover-transport-progress, 0%),
+      Canvas var(--clover-transport-progress, 0%)
+    );
+    box-shadow: none;
+  }
+
+  /* Focused too: the input's outline marks focus here, not the thumb's ring. */
+  .clover-canvas-transport input[type="range"]::-webkit-slider-thumb,
+  .clover-canvas-transport
+    input[type="range"]:focus-visible::-webkit-slider-thumb {
+    background-color: CanvasText;
+    box-shadow: 0 0 0 2px Canvas;
+  }
+
+  .clover-canvas-transport input[type="range"]::-moz-range-thumb,
+  .clover-canvas-transport input[type="range"]:focus-visible::-moz-range-thumb {
+    background-color: CanvasText;
+    box-shadow: 0 0 0 2px Canvas;
+  }
+
+  .clover-canvas-transport input[type="range"]:focus-visible {
+    outline: 2px solid CanvasText;
+    outline-offset: 2px;
   }
 
   .clover-canvas-transport-button:focus-visible {
@@ -325,6 +475,8 @@ button.clover-canvas-transport-time:focus-visible {
     box-shadow: none;
   }
 
+  /* On: the accent fill is dropped here, so the button takes the menu's mark. */
+  .clover-canvas-transport-button:is([data-active], [aria-pressed="true"]),
   .clover-canvas-transport-option:has(input:checked) {
     background-color: Highlight;
     color: HighlightText;
@@ -354,14 +506,20 @@ button.clover-canvas-transport-time:focus-visible {
   pointer-events: none;
 }
 
-.clover-canvas-transport-bar > .clover-canvas-transport-chapter {
-  flex: 0 1 auto;
+/*
+ * Full white, with the time's shadow: dimmed, it fell below 4.5:1 over a light picture.
+ * It takes what the time leaves, up to its own width, and adds nothing to the room a row
+ * needs (`width: 0`), so a long title is cut short rather than wrapping the bar.
+ */
+.clover-canvas-transport-status > .clover-canvas-transport-chapter {
+  flex: 1 1 auto;
   overflow: hidden;
+  width: 0;
   min-width: 0;
   max-width: 16rem;
   color: var(--clover-player-text, #fff);
   font-size: var(--clover-text-s);
   text-overflow: ellipsis;
   white-space: nowrap;
-  opacity: 0.85;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 90%);
 }

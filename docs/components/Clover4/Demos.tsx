@@ -83,6 +83,13 @@ const pill: React.CSSProperties = {
   cursor: "pointer",
 };
 
+/* Pressed is a solid fill: white on the accent keeps 4.5:1, and shows by more than hue. */
+const pillPressed: React.CSSProperties = {
+  background: "var(--accent-9)",
+  border: "1px solid var(--accent-9)",
+  color: "var(--accent-contrast)",
+};
+
 /** `<Clover.Viewer>`, with a picker of Cookbook recipes. */
 export function ViewerDemo({ initial = 0 }: { initial?: number }) {
   const [index, setIndex] = useState(initial);
@@ -117,12 +124,7 @@ export function ViewerDemo({ initial = 0 }: { initial?: number }) {
             }}
             style={{
               ...pill,
-              ...(!shared && n === index
-                ? {
-                    color: "var(--clover-color-accent, #0065c3)",
-                    background: "rgb(0 101 195 / 0.1)",
-                  }
-                : undefined),
+              ...(!shared && n === index ? pillPressed : undefined),
             }}
           >
             {label}
@@ -131,6 +133,8 @@ export function ViewerDemo({ initial = 0 }: { initial?: number }) {
       </div>
       <Viewer
         iiifContent={shared ?? VIEWER_RECIPES[index][1]}
+        // Under the page's "The Viewer" h2.
+        headingLevel={3}
         style={{ ["--clover-content-height" as string]: "480px" }}
       />
     </div>
@@ -163,6 +167,8 @@ export function ContentSearchDemo({ query = "Moskau" }: { query?: string }) {
           iiifContent={MOCK_MANIFEST}
           request={request}
           searchQuery={query}
+          // Under the page's "Content Search" h3.
+          headingLevel={4}
           style={{ ["--clover-content-height" as string]: "520px" }}
         />
       )}
@@ -218,6 +224,8 @@ export function MapViewerDemo() {
         <Viewer
           iiifContent={url}
           items={false}
+          // Under the page's "In a Viewer" h2.
+          headingLevel={3}
           style={{ ["--clover-content-height" as string]: "480px" }}
         />
       )}
@@ -235,7 +243,8 @@ const Composed = dynamic(
               iiifContent={iiifContent}
               style={{
                 display: "grid",
-                gridTemplateColumns: "minmax(0, 1fr) 12rem",
+                /* The side column is capped, so the Canvas keeps room at 320px. */
+                gridTemplateColumns: "minmax(0, 1fr) min(12rem, 40%)",
                 gap: "1rem",
                 alignItems: "start",
               }}
@@ -243,7 +252,7 @@ const Composed = dynamic(
               <Content style={{ height: 420 }} />
               <aside style={{ display: "grid", gap: "0.75rem" }}>
                 <Label as="h3" style={{ margin: 0 }} />
-                <Label of="canvas" style={{ opacity: 0.7 }} />
+                <Label of="canvas" style={{ color: "var(--gray-11)" }} />
                 <Position />
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <Previous />
@@ -300,6 +309,8 @@ export function ContentStateDemo() {
     <div style={{ margin: "1.5rem 0 2rem" }}>
       <Viewer
         iiifContent={TITLE_PAGE_STATE}
+        // Under the page's "Opening at a place" h3.
+        headingLevel={4}
         style={{ ["--clover-content-height" as string]: "420px" }}
       />
     </div>
@@ -314,20 +325,21 @@ const ItemsInRoot = dynamic(
         layout,
       }: {
         iiifContent: string;
-        layout: "carousel" | "list" | "grid";
+        layout: "carousel" | "list" | "grid" | "pager";
       }) {
         return (
           <Root
             iiifContent={iiifContent}
             style={
-              layout === "carousel"
+              layout === "carousel" || layout === "pager"
                 ? undefined
                 : {
                     display: "grid",
+                    /* Items' column is capped, so the Canvas keeps room at 320px. */
                     gridTemplateColumns:
                       layout === "list"
-                        ? "16rem minmax(0, 1fr)"
-                        : "minmax(0, 1fr) 18rem",
+                        ? "min(16rem, 40%) minmax(0, 1fr)"
+                        : "minmax(0, 1fr) min(18rem, 40%)",
                     gap: "1rem",
                     alignItems: "start",
                   }
@@ -340,6 +352,7 @@ const ItemsInRoot = dynamic(
             )}
             <Content style={{ height: 420 }} />
             {layout === "carousel" && <Items />}
+            {layout === "pager" && <Items layout="pager" />}
             {layout === "grid" && (
               <div style={{ maxHeight: 420, overflowY: "auto" }}>
                 <Items
@@ -358,7 +371,7 @@ const ItemsInRoot = dynamic(
 
 /** `Items` beside a Canvas in each layout, over one Manifest. */
 export function ItemsLayoutsDemo() {
-  const [layout, setLayout] = useState<"carousel" | "list" | "grid">(
+  const [layout, setLayout] = useState<"carousel" | "list" | "grid" | "pager">(
     "carousel",
   );
   return (
@@ -368,7 +381,7 @@ export function ItemsLayoutsDemo() {
         aria-label="Layout"
         style={{ display: "flex", gap: "0.375rem", marginBottom: "1rem" }}
       >
-        {(["carousel", "list", "grid"] as const).map((name) => (
+        {(["carousel", "list", "grid", "pager"] as const).map((name) => (
           <button
             key={name}
             type="button"
@@ -376,12 +389,7 @@ export function ItemsLayoutsDemo() {
             onClick={() => setLayout(name)}
             style={{
               ...pill,
-              ...(name === layout
-                ? {
-                    color: "var(--clover-color-accent, #0065c3)",
-                    background: "rgb(0 101 195 / 0.1)",
-                  }
-                : undefined),
+              ...(name === layout ? pillPressed : undefined),
             }}
           >
             {name}
@@ -408,6 +416,8 @@ export function CollectionItemsDemo() {
     <div style={{ margin: "1.5rem 0 2rem" }}>
       <StandaloneItems
         iiifContent="https://api.dc.library.northwestern.edu/api/v2/collections/c373ecd2-2c45-45f2-9f9e-52dc244870bd?as=iiif"
+        // Under the page's "A Collection" h2.
+        headingLevel={3}
         style={{ ["--clover-items-height" as string]: "10rem" }}
       />
     </div>

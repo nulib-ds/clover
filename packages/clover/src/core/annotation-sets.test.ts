@@ -4,7 +4,11 @@ import captionsJson from "../fixtures/iiif-cookbook/0219-using-caption-file.json
 import simpleJson from "../fixtures/iiif-cookbook/simple-annotation.json";
 import { p4 } from "../fixtures/presentation4";
 import { loadAnnotationSets } from "./annotation-collection";
-import { selectAnnotationSets, selectManifestSets } from "./annotation-sets";
+import {
+  readPage,
+  selectAnnotationSets,
+  selectManifestSets,
+} from "./annotation-sets";
 import { createClover } from "./clover";
 import {
   buildContentState,
@@ -33,6 +37,36 @@ describe("annotation sets", () => {
     const [entry] = selectManifestSets(p4(imageJson))[0].entries;
     expect(entry.bodies[0].image).toMatch(/fountain/);
     expect(entry.target.rect).toEqual({ x: 138, y: 550, w: 1477, h: 1710 });
+  });
+
+  it("keeps an image body's label, else its annotation's, for its text alternative", () => {
+    const page = (annotation: Record<string, unknown>) => ({
+      items: [
+        {
+          id: "https://example.org/anno",
+          type: "Annotation",
+          motivation: ["commenting"],
+          target: "https://example.org/canvas",
+          ...annotation,
+        },
+      ],
+    });
+    const image = { id: "https://example.org/a.jpg", type: "Image" };
+    const [own] = readPage(
+      page({
+        label: { en: ["The annotation"] },
+        body: { ...image, label: { en: ["The image"] } },
+      }),
+      "set",
+    );
+    expect(own.bodies[0].label).toEqual({ en: ["The image"] });
+    const [annotation] = readPage(
+      page({ label: { en: ["The annotation"] }, body: image }),
+      "set",
+    );
+    expect(annotation.bodies[0].label).toEqual({ en: ["The annotation"] });
+    const [none] = readPage(page({ body: image }), "set");
+    expect(none.bodies[0]).not.toHaveProperty("label");
   });
 
   it("leaves caption files to the media transcript", () => {

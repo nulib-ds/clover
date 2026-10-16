@@ -32,3 +32,37 @@
   margin: 0;
   color: var(--clover-color-primary-muted, #26292b);
 }
+
+/* Long identifiers, file names and bare URLs wrap rather than push the panel sideways. */
+.clover-summary,
+:is(.clover-metadata, .clover-required-statement) :is(dt, dd) {
+  overflow-wrap: anywhere;
+}
+
+/*
+ * Links in IIIF's text are underlined, not only coloured, since a page's reset may take
+ * the browser's underline away. Not links with a class of their own (Items' cards, Rights,
+ * the id): IIIF's HTML never carries one.
+ */
+:is(
+    .clover-about,
+    .clover-canvas-caption,
+    .clover-annotations-body,
+    .clover-metadata,
+    .clover-required-statement,
+    .clover-summary
+  )
+  a:not([class]) {
+  text-decoration-line: underline;
+  text-underline-offset: var(--clover-space-3xs);
+}
+
+/*
+ * Lists of links (`Homepage`, `Rendering`, `SeeAlso`, `PartOf`): each item at least 24px
+ * tall, in CSS px as the criterion is, so the links' centres are 24px apart whatever the
+ * page's type size and leading (WCAG 2.5.8).
+ */
+:is(.clover-homepage, .clover-rendering, .clover-see-also, .clover-part-of)
+  > li {
+  min-block-size: 24px;
+}

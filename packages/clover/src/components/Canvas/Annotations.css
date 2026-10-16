@@ -1,13 +1,26 @@
 /*
- * Annotation hotspots, styled as `Image` styles its OpenSeadragon overlays: a quiet
- * outline at rest; on hover or focus an accent ring, a dimmed surround, and the label.
+ * Annotation hotspots, styled as `Image` styles its OpenSeadragon overlays, in tones that
+ * read over any picture (WCAG 1.4.11): at rest a dark line round a light one; on hover,
+ * focus, or once picked, an accent band between a dark edge and a light one, and a
+ * dimmed surround. The dark and the light are `primary` and `secondary`, 9:1 apart or
+ * more, so one of them keeps 3:1 against whatever is behind (C40). A hotspot's name is
+ * its popover (`Tip`, placed in `ui/Tip.css`).
  */
 .clover-canvas-overlays {
   position: absolute;
   inset: 0;
+  /* Clipped, so focusing a hotspot out of view never scrolls the layer; hidden where
+     clip is unknown. */
   overflow: hidden;
+  overflow: clip;
   /* The layer passes input through; only the hotspots themselves take it. */
   pointer-events: none;
+  /*
+   * Its own stacking layer, so the hotspots' depths never rise over the viewport's
+   * focus ring or the chrome; and the box their popovers keep within.
+   */
+  isolation: isolate;
+  container-type: size;
 }
 
 .clover-canvas-overlay {
@@ -24,73 +37,83 @@
   padding: 0;
   cursor: zoom-in;
   background-color: transparent;
-  border: 2px solid #0001;
+  border: 1px solid var(--clover-color-primary, #1a1d1e);
   border-radius: var(--clover-radius, 3px);
-  box-shadow: 0 0 38vw 38vw transparent;
-  z-index: 0;
+  box-shadow:
+    inset 0 0 0 1px var(--clover-color-secondary, #fff),
+    0 0 38vw 38vw transparent;
+  /* Smaller over larger, and the active one over all (`Annotations.tsx`). */
+  z-index: var(--clover-annotation-depth, 0);
 }
 
-.clover-canvas-annotation label {
-  opacity: 0;
-  position: absolute;
-  pointer-events: none;
-  text-align: center;
-  min-width: 18rem;
-  max-width: 20vw;
-  padding: var(--clover-space-xs) var(--clover-space-s);
-  border-radius: var(--clover-radius, 3px);
-  top: calc(100% + var(--clover-space-xs));
-  left: 50%;
-  transform: translate(-50%, 0);
-  background-color: var(--clover-color-primary, #1a1d1e);
-  color: var(--clover-color-secondary, #fff);
-  transition: opacity 100ms ease-in-out;
-}
-
-.clover-canvas-annotation[data-active="true"] {
-  border: 1px solid #fff2;
+/*
+ * From the outside in: the dark edge, the accent band, the light line; and inside, a tint
+ * of the accent, as a shape has, which shows it while its edges are out of sight.
+ */
+.clover-canvas-annotation:is([data-active="true"], :focus-visible) {
+  border-color: var(--clover-color-secondary, #fff);
   outline: 2px solid var(--clover-color-accent, #0065c3);
   outline-offset: 0;
-  box-shadow: 0 0 38vw 38vw #0001;
-  z-index: 1;
-}
-
-.clover-canvas-annotation[data-active="true"] label {
-  opacity: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .clover-canvas-annotation label {
-    transition: none;
-  }
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 18%,
+    transparent
+  );
+  box-shadow:
+    0 0 0 3px var(--clover-color-primary, #1a1d1e),
+    0 0 38vw 38vw #0001;
 }
 
 /*
  * A point: a marker of fixed size at its centre. The button is the box framed on click;
- * only the marker shows, and only it takes the pointer.
+ * only the marker shows, and only it takes the pointer. A shape likewise.
  */
-.clover-canvas-annotation[data-shape="point"],
-.clover-canvas-annotation[data-shape="svg"] {
-  border-color: transparent;
-  background-color: transparent;
+.clover-canvas-annotation:is([data-shape="point"], [data-shape="svg"]) {
   pointer-events: none;
 }
 
+.clover-canvas-annotation:is([data-shape="point"], [data-shape="svg"]),
+.clover-canvas-annotation:is([data-shape="point"], [data-shape="svg"]):is(
+    [data-active="true"],
+    :focus-visible
+  ) {
+  border-color: transparent;
+  outline: none;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* An accent dot in a light ring, with a dark edge. */
 .clover-canvas-annotation-point {
   position: absolute;
   top: 50%;
   left: 50%;
   width: var(--clover-space-m);
   height: var(--clover-space-m);
-  border: 2px solid #fff;
+  border: 2px solid var(--clover-color-secondary, #fff);
   border-radius: 50%;
   background-color: var(--clover-color-accent, #0065c3);
-  box-shadow: 0 0 0 1px #0004;
+  box-shadow: 0 0 0 1px var(--clover-color-primary, #1a1d1e);
   transform: translate(-50%, -50%);
   pointer-events: auto;
 }
 
-/* A shape: drawn as itself, which is all that takes the pointer. */
+/* Active, an accent band round the light ring, and the dark edge round that. */
+.clover-canvas-annotation[data-shape="point"]:is(
+    [data-active="true"],
+    :focus-visible
+  )
+  .clover-canvas-annotation-point {
+  box-shadow:
+    0 0 0 2px var(--clover-color-accent, #0065c3),
+    0 0 0 3px var(--clover-color-primary, #1a1d1e);
+}
+
+/*
+ * A shape, drawn three times (`ShapeOutline`): a dark edge, a light line on it, and an
+ * accent mark on that, shown while active. Only the edge takes the pointer, inside and
+ * out.
+ */
 .clover-canvas-annotation-shape {
   position: absolute;
   inset: 0;
@@ -99,45 +122,105 @@
   overflow: visible;
 }
 
-.clover-canvas-annotation-shape > * {
+.clover-canvas-annotation-shape > g > * {
+  fill: none;
+  stroke: none;
+  pointer-events: none;
+}
+
+.clover-canvas-annotation-shape > g:nth-child(1) > * {
   fill: transparent;
-  stroke: #fff9;
-  stroke-width: 2;
+  stroke: var(--clover-color-primary, #1a1d1e);
+  stroke-width: 3;
   pointer-events: visiblePainted;
   cursor: zoom-in;
 }
 
-.clover-canvas-annotation[data-shape="svg"][data-active="true"] {
-  outline: none;
-  box-shadow: none;
+.clover-canvas-annotation-shape > g:nth-child(2) > * {
+  stroke: var(--clover-color-secondary, #fff);
+  stroke-width: 1;
 }
 
-.clover-canvas-annotation[data-shape="svg"][data-active="true"]
+.clover-canvas-annotation[data-shape="svg"]:is(
+    [data-active="true"],
+    :focus-visible
+  )
   .clover-canvas-annotation-shape
+  > g:nth-child(1)
   > * {
   fill: color-mix(
     in srgb,
     var(--clover-color-accent, #0065c3) 18%,
     transparent
   );
+  stroke-width: 6;
+}
+
+.clover-canvas-annotation[data-shape="svg"]:is(
+    [data-active="true"],
+    :focus-visible
+  )
+  .clover-canvas-annotation-shape
+  > g:nth-child(2)
+  > * {
+  stroke-width: 4;
+}
+
+.clover-canvas-annotation[data-shape="svg"]:is(
+    [data-active="true"],
+    :focus-visible
+  )
+  .clover-canvas-annotation-shape
+  > g:nth-child(3)
+  > * {
   stroke: var(--clover-color-accent, #0065c3);
-  stroke-width: 3;
+  stroke-width: 2;
 }
 
-.clover-canvas-annotation[data-shape="point"][data-active="true"] {
-  outline: none;
-  box-shadow: none;
-}
+/*
+ * In forced colours shadows are dropped, and the picture is not repainted: a rectangle's
+ * edge in the text's colour with the light line drawn by an outline instead, in the
+ * background's; active, the highlight round it.
+ */
+@media (forced-colors: active) {
+  .clover-canvas-annotation {
+    border-color: CanvasText;
+  }
 
-.clover-canvas-annotation[data-shape="point"][data-active="true"]
-  .clover-canvas-annotation-point {
-  outline: 2px solid var(--clover-color-accent, #0065c3);
-  outline-offset: 2px;
-}
+  .clover-canvas-annotation[data-shape="rect"] {
+    outline: 1px solid Canvas;
+    outline-offset: -2px;
+  }
 
-/* Keyboard focus shows on the shape or marker, the button itself being invisible. */
-.clover-canvas-annotation[data-shape="point"]:focus-visible,
-.clover-canvas-annotation[data-shape="svg"]:focus-visible {
-  outline: 2px solid var(--clover-color-accent, #0065c3);
-  outline-offset: 2px;
+  .clover-canvas-annotation:is([data-active="true"], :focus-visible) {
+    outline: 2px solid Highlight;
+    outline-offset: 0;
+  }
+
+  .clover-canvas-annotation-shape > g:nth-child(1) > * {
+    stroke: CanvasText;
+  }
+
+  .clover-canvas-annotation-shape > g:nth-child(2) > * {
+    stroke: Canvas;
+  }
+
+  .clover-canvas-annotation[data-shape="svg"]:is(
+      [data-active="true"],
+      :focus-visible
+    )
+    .clover-canvas-annotation-shape
+    > g:nth-child(3)
+    > * {
+    stroke: Highlight;
+  }
+
+  .clover-canvas-annotation[data-shape="point"]:is(
+      [data-active="true"],
+      :focus-visible
+    )
+    .clover-canvas-annotation-point {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+  }
 }

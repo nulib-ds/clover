@@ -26,11 +26,13 @@ export interface MapFeature {
   id?: string | number;
   geometry: GeoGeometry;
   /**
-   * Flat, for MapLibre (which turns nested objects into strings): the text to show, the
-   * Canvas it belongs to, and any simplestyle keys it carried (`fill`, `stroke`, …).
+   * Flat, for MapLibre (which turns nested objects into strings): the text to show and
+   * its language, the Canvas it belongs to, and any simplestyle keys it carried (`fill`,
+   * `stroke`, …).
    */
   properties: Record<string, string | number | boolean> & {
     title?: string;
+    titleLang?: string;
     canvasId?: string;
   };
 }
@@ -52,6 +54,8 @@ export interface Georeference {
   height: number;
   /** The part of the image that is map (an SvgSelector polygon), in the same units. */
   mask?: Position[];
+  /** Its name: the annotation's label, or the Canvas's. */
+  label?: LanguageMapLike;
   /** What to draw: an image body (or a bare image service) for `thumbnailSource`. */
   image: Record<string, unknown>;
 }
@@ -108,12 +112,15 @@ function flatten(
       properties[key] = value;
     }
   }
-  const title =
-    (typeof own.label === "string"
-      ? own.label
-      : localize(own.label as LanguageMapLike, language).text) ||
-    localize(owner.label as LanguageMapLike, language).text;
-  if (title) properties.title = title.replace(/<[^>]*>/g, "");
+  // The feature's own label, or else its owner's, with the language it is in.
+  const ownTitle = localize(own.label as LanguageMapLike, language);
+  const title = ownTitle.text
+    ? ownTitle
+    : localize(owner.label as LanguageMapLike, language);
+  if (title.text) {
+    properties.title = title.text.replace(/<[^>]*>/g, "");
+    if (title.lang) properties.titleLang = title.lang;
+  }
   if (owner.canvasId) properties.canvasId = owner.canvasId;
   return {
     type: "Feature",
@@ -285,6 +292,7 @@ export function readGeoreference(
     mask.every(
       ([x, y]) => (x === 0 || x === width) && (y === 0 || y === height),
     );
+  const label = (annotation.label ?? canvas?.label) as LanguageMapLike;
   return {
     id: String(annotation.id ?? sourceId),
     ...(isService || !sourceId ? {} : { canvasId: canvas?.id ?? sourceId }),
@@ -292,6 +300,7 @@ export function readGeoreference(
     width,
     height,
     ...(mask && !whole ? { mask } : {}),
+    ...(label ? { label } : {}),
     image,
   };
 }

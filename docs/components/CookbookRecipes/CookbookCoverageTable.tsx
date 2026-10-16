@@ -41,34 +41,6 @@ const StatusIcon: React.FC<{ status: Status }> = ({ status }) => (
   </svg>
 );
 
-/** An "i" after the title that shows why a recipe is only partly covered, on hover or focus. */
-const InfoTip: React.FC<{ note: string }> = ({ note }) => (
-  <button
-    type="button"
-    className={styles.info}
-    aria-label={`Note: ${note}`}
-    data-tooltip={note}
-  >
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <circle
-        cx="12"
-        cy="12"
-        r="9.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M12 11v5.5M12 7.5v.01"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  </button>
-);
-
 interface CookbookCoverageTableProps {
   /** Opens a recipe's resource in the viewer. Keep it stable: the table renders once. */
   onView: (resource: string) => void;
@@ -143,9 +115,11 @@ const CookbookCoverageTable: React.FC<CookbookCoverageTableProps> = ({
                       ) : (
                         recipe.title
                       )}
-                      {note && <InfoTip note={note} />}
                     </div>
                     <span className={styles.slug}>{recipe.slug}</span>
+                    {/* Why a recipe is only partly covered, as text: a hover tooltip
+                        could not be reached, dismissed or tapped (WCAG 1.4.13). */}
+                    {note && <span className={styles.note}>{note}</span>}
                   </td>
                   <td>
                     <div className={styles.actions}>

@@ -1,16 +1,19 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { p4 } from "../../../fixtures/presentation4";
 import React from "react";
 
 import Canvas, { containAspect } from "..";
+import { type FakeTrack, FakeTrackList } from "../testing/textTracks";
 import { stubViewport } from "../testing/viewport";
 import { formatTime } from "./useMediaController";
 import audioJson from "../../../fixtures/iiif-cookbook/0002-mvm-audio.json";
 import videoJson from "../../../fixtures/iiif-cookbook/0003-mvm-video.json";
 import accompanyingJson from "../../../fixtures/iiif-cookbook/0014-accompanyingcanvas.json";
 import languagesJson from "../../../fixtures/iiif-cookbook/0074-multiple-language-captions.json";
+import operaJson from "../../../fixtures/iiif-cookbook/0026-toc-opera.json";
 import captionsJson from "../../../fixtures/iiif-cookbook/0219-using-caption-file.json";
 import { clearVttCache } from "../../../core/vtt";
+import * as Clover from "../../../index";
 
 // Published fixtures, upgraded to Presentation 4 as Clover holds them.
 const audio = p4(audioJson);
@@ -98,6 +101,12 @@ const transport = async () => {
 };
 
 beforeEach(() => clearVttCache());
+
+// A pointer's pick of a menu's option: pressed on its row, which clicks its radio.
+const pick = (radio: HTMLElement) => {
+  fireEvent.pointerDown(radio);
+  fireEvent.click(radio);
+};
 
 describe("Canvas media", () => {
   it("places a video in the scene once its element exists", async () => {
@@ -192,6 +201,28 @@ describe("Canvas media", () => {
     expect(pause).toHaveBeenCalledTimes(2);
   });
 
+  it("keeps the camera still beside other Canvases when the host holds it so", async () => {
+    const [first] = video.items as any[];
+    render(
+      <Canvas
+        canvases={[first, { ...first, id: `${first.id}/2` }]}
+        options={{ gestures: { navigable: false } }}
+      />,
+    );
+    await transport();
+    expect(renderer.setGestures).toHaveBeenCalledWith(
+      expect.objectContaining({ navigable: false }),
+    );
+    expect(renderer.setGestures).not.toHaveBeenCalledWith(
+      expect.objectContaining({ navigable: true }),
+    );
+    // Media's keys alone: none of the camera's.
+    expect(screen.getByTestId("clover-canvas-viewport")).toHaveAttribute(
+      "aria-keyshortcuts",
+      "K Space J L M",
+    );
+  });
+
   it("seeks, skips and mutes", async () => {
     const onMediaElement = vi.fn();
     render(
@@ -265,9 +296,89 @@ describe("Canvas media", () => {
     expect(screen.getByText("Opening")).toHaveClass(
       "clover-canvas-transport-chapter",
     );
-    fireEvent.click(screen.getByRole("button", { name: "Chapters" }));
-    fireEvent.click(screen.getByRole("radio", { name: /Lunch/ }));
+    const button = screen.getByRole("button", { name: "Chapters" });
+    fireEvent.click(button);
+    pick(screen.getByRole("radio", { name: /Lunch/ }));
     expect(element.currentTime).toBe(10);
+    // Closed, with focus back on its button rather than on the page.
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveFocus();
+  });
+
+  it("keeps a menu open while the arrow keys move through it", async () => {
+    const onMediaElement = vi.fn();
+    render(
+      <Canvas
+        canvases={video.items as any}
+        onMediaElement={onMediaElement}
+        chapters={[
+          { label: "Opening", start: 0, end: 10 },
+          { label: "Lunch", start: 10, end: 20 },
+        ]}
+      />,
+    );
+    await transport();
+    const element = onMediaElement.mock.calls.at(-1)?.[0] as HTMLVideoElement;
+    const button = screen.getByRole("button", { name: "Chapters" });
+    fireEvent.click(button);
+
+    // An arrow key checks the next radio and clicks it, with no pointer.
+    const lunch = screen.getByRole("radio", { name: /Lunch/ });
+    act(() => lunch.focus());
+    fireEvent.keyDown(lunch, { key: "ArrowDown" });
+    fireEvent.click(lunch);
+    expect(element.currentTime).toBe(10);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(lunch).toHaveFocus();
+
+    // Escape closes it and hands focus back to its button. Prevented, it closes nothing
+    // else: not a modal `<dialog>` around the Canvas.
+    expect(fireEvent.keyDown(lunch, { key: "Escape" })).toBe(false);
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveFocus();
+    // With the menu closed, Escape passes on.
+    expect(fireEvent.keyDown(button, { key: "Escape" })).toBe(true);
+
+    // Enter picks the focused option and closes it the same way.
+    fireEvent.click(button);
+    const opening = screen.getByRole("radio", { name: /Opening/ });
+    act(() => opening.focus());
+    fireEvent.keyDown(opening, { key: "Enter" });
+    expect(element.currentTime).toBe(0);
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveFocus();
+  });
+
+  it("closes a menu when keyboard focus moves on past it, and leaves focus there", async () => {
+    render(
+      <Canvas
+        canvases={video.items as any}
+        chapters={[
+          { label: "Opening", start: 0, end: 10 },
+          { label: "Lunch", start: 10, end: 20 },
+        ]}
+      />,
+    );
+    await transport();
+    const button = screen.getByRole("button", { name: "Chapters" });
+    act(() => button.focus());
+    fireEvent.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+
+    // Into the menu, and out of focus altogether (a press on an option's text, another
+    // window): it stays open.
+    const lunch = screen.getByRole("radio", { name: /Lunch/ });
+    act(() => lunch.focus());
+    act(() => lunch.blur());
+    expect(button).toHaveAttribute("aria-expanded", "true");
+
+    // On to another control, which the open menu might cover: it closes, and focus
+    // stays where the reader took it.
+    act(() => lunch.focus());
+    const mute = screen.getByRole("button", { name: "Mute" });
+    act(() => mute.focus());
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(mute).toHaveFocus();
   });
 
   it("offers caption tracks from the Canvas, with Off", async () => {
@@ -300,15 +411,213 @@ describe("Canvas media", () => {
 
     const button = screen.getByRole("button", { name: "Captions" });
     expect(button).toHaveAttribute("data-active");
+    // The track showing is told, not only shown by the button's fill.
+    expect(button).toHaveAccessibleDescription("Captions in WebVTT format");
     fireEvent.click(button);
     expect(button).toHaveAttribute("aria-expanded", "true");
     expect(
       screen.getByRole("radio", { name: "Captions in WebVTT format" }),
     ).toBeChecked();
 
-    fireEvent.click(screen.getByRole("radio", { name: "Off" }));
+    pick(screen.getByRole("radio", { name: "Off" }));
     expect(button).not.toHaveAttribute("data-active");
     expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveAccessibleDescription("Off");
+  });
+
+  it("draws the chosen track's cues in its language, as words alone", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+      Promise.resolve(new Response("WEBVTT\n")),
+    );
+    URL.createObjectURL = vi.fn(() => "blob:http://localhost/captions");
+    URL.revokeObjectURL = vi.fn();
+    const onMediaElement = vi.fn();
+    render(
+      <Canvas
+        canvases={languages.items as any}
+        onMediaElement={onMediaElement}
+      />,
+    );
+    await transport();
+    const element = onMediaElement.mock.calls.at(-1)?.[0] as HTMLVideoElement;
+    // jsdom has no text tracks: stand in for Cookbook 0074's two, a cue showing in each.
+    const track = (text: string) => ({
+      mode: "showing",
+      activeCues: [{ text }],
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    });
+    Object.defineProperty(element, "textTracks", {
+      configurable: true,
+      value: [
+        track("<v Ann>Tom &amp; Jerry</v>"),
+        track("Tom &amp; Jerry, &#39;l&#x2019;altro&#39;"),
+      ],
+    });
+    const button = screen.getByRole("button", { name: "Captions" });
+
+    fireEvent.click(button);
+    pick(screen.getByRole("radio", { name: "Sottotitoli in formato WebVTT" }));
+    const captions = () => document.querySelector(".clover-canvas-captions");
+    expect(captions()).toHaveAttribute("lang", "it");
+    expect(captions()).toHaveTextContent("Tom & Jerry, 'l’altro'");
+
+    fireEvent.click(button);
+    pick(screen.getByRole("radio", { name: "Captions in WebVTT format" }));
+    expect(captions()).toHaveAttribute("lang", "en");
+    expect(captions()).toHaveTextContent(/^Tom & Jerry$/);
+  });
+
+  it("offers captions the stream carries, and draws them in their language", async () => {
+    // jsdom has no text tracks: stand in for those hls.js or the file add.
+    const list = new FakeTrackList();
+    const tracks = vi
+      .spyOn(HTMLMediaElement.prototype, "textTracks", "get")
+      .mockReturnValue(list as unknown as TextTrackList);
+    render(<Canvas canvases={video.items as any} />);
+    await transport();
+    // The Manifest has none.
+    expect(screen.queryByRole("button", { name: "Captions" })).toBeNull();
+
+    let french!: FakeTrack;
+    act(() => {
+      french = list.add({
+        label: "Français",
+        language: "fr",
+        cues: ["Bonjour"],
+      });
+    });
+    // Off until the reader turns it on, though `addTextTrack` made it `hidden`.
+    expect(french.mode).toBe("disabled");
+    const button = screen.getByRole("button", { name: "Captions" });
+    fireEvent.click(button);
+    expect(screen.getByText("Français")).toHaveAttribute("lang", "fr");
+    pick(screen.getByRole("radio", { name: "Français" }));
+    // Clover draws it, so the browser does not.
+    expect(french.mode).toBe("hidden");
+    const drawn = document.querySelector(".clover-canvas-captions");
+    expect(drawn).toHaveAttribute("lang", "fr");
+    expect(drawn).toHaveTextContent("Bonjour");
+    tracks.mockRestore();
+  });
+
+  it("tags chapter titles and track names with the language they are written in", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+      Promise.resolve(new Response("WEBVTT\n")),
+    );
+    URL.createObjectURL = vi.fn(() => "blob:http://localhost/captions");
+    URL.revokeObjectURL = vi.fn();
+    render(
+      <Canvas
+        canvases={languages.items as any}
+        chapters={[
+          { label: "Atto Primo", lang: "it", start: 0, end: 10 },
+          { label: "Atto Secondo", lang: "it", start: 10 },
+        ]}
+      />,
+    );
+    await transport();
+    expect(screen.getByText("Atto Primo")).toHaveAttribute("lang", "it");
+
+    fireEvent.click(screen.getByRole("button", { name: "Chapters" }));
+    const second = screen
+      .getByRole("radio", { name: /Atto Secondo/ })
+      .closest("label")!;
+    expect(within(second).getByText("Atto Secondo")).toHaveAttribute(
+      "lang",
+      "it",
+    );
+    // The time is the interface's, not the title's.
+    expect(within(second).getByText("0:10")).not.toHaveAttribute("lang");
+
+    fireEvent.click(screen.getByRole("button", { name: "Captions" }));
+    expect(screen.getByText("Sottotitoli in formato WebVTT")).toHaveAttribute(
+      "lang",
+      "it",
+    );
+    expect(screen.getByText("Off")).not.toHaveAttribute("lang");
+  });
+
+  it("takes chapters from the Manifest's Ranges, each in its language", async () => {
+    render(
+      <Clover.Root iiifContent={operaJson}>
+        <Clover.Content />
+      </Clover.Root>,
+    );
+    const title = await screen.findByText(
+      "Preludio e Coro d'introduzione – Bel conforto al mietitore",
+      { selector: ".clover-canvas-transport-chapter" },
+      { timeout: 5000 },
+    );
+    expect(title).toHaveAttribute("lang", "it");
+    fireEvent.click(screen.getByRole("button", { name: "Chapters" }));
+    expect(screen.getByText("Remainder of Atto Primo")).toHaveAttribute(
+      "lang",
+      "en",
+    );
+  });
+
+  it("keeps the transport, and the focus on it, from one recording to the next", async () => {
+    const onMediaElement = vi.fn();
+    const [first] = video.items as any[];
+    // Another recording, as auto-advance moves on to it.
+    const next = JSON.parse(
+      JSON.stringify(first)
+        .replaceAll(first.id, `${first.id}/next`)
+        .replace("1024kb", "512kb"),
+    );
+    const { rerender } = render(
+      <Canvas canvases={[first]} onMediaElement={onMediaElement} />,
+    );
+    await transport();
+    const toggle = screen.getByRole("button", { name: "Play" });
+    act(() => toggle.focus());
+
+    rerender(<Canvas canvases={[next]} onMediaElement={onMediaElement} />);
+    await act(async () => {});
+    const element = onMediaElement.mock.calls.at(-1)?.[0] as HTMLVideoElement;
+    expect(element.src).toContain("512kb");
+    expect(screen.getByRole("button", { name: "Play" })).toBe(toggle);
+    expect(toggle).toHaveFocus();
+  });
+
+  it("hands focus to Play when the next recording lacks the control it was on", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+      Promise.resolve(new Response("WEBVTT\n")),
+    );
+    URL.createObjectURL = vi.fn(() => "blob:http://localhost/captions");
+    URL.revokeObjectURL = vi.fn();
+    // Cookbook 0074's recording, with captions, then 0003's, with none, as auto-advance
+    // moves on; chapters for the first only.
+    const [captioned] = languages.items as any[];
+    const [plain] = video.items as any[];
+    const chapters = [{ label: "Opening", start: 0, end: 10 }];
+    const { rerender } = render(
+      <Canvas canvases={[captioned]} chapters={chapters} />,
+    );
+    await transport();
+    act(() => screen.getByRole("button", { name: "Captions" }).focus());
+
+    rerender(<Canvas canvases={[plain]} chapters={chapters} />);
+    await act(async () => {});
+    expect(screen.queryByRole("button", { name: "Captions" })).toBeNull();
+    const play = screen.getByRole("button", { name: "Play" });
+    // Not dropped to the page (WCAG 2.4.3).
+    expect(play).toHaveFocus();
+
+    // The same for Chapters.
+    act(() => screen.getByRole("button", { name: "Chapters" }).focus());
+    rerender(<Canvas canvases={[captioned]} />);
+    await act(async () => {});
+    expect(screen.queryByRole("button", { name: "Chapters" })).toBeNull();
+    expect(play).toHaveFocus();
+
+    // Focus the reader took elsewhere is left there.
+    act(() => screen.getByRole("button", { name: "Captions" }).focus());
+    act(() => renderer.host.focus());
+    rerender(<Canvas canvases={[plain]} />);
+    await act(async () => {});
+    expect(renderer.host).toHaveFocus();
   });
 
   it("plays sound through the same transport, never placed", async () => {

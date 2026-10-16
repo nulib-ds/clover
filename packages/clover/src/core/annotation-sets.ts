@@ -26,6 +26,8 @@ export interface AnnotationBodyEntry {
   language?: string;
   /** An image body (Cookbook 0377): its URL. */
   image?: string;
+  /** An image body's label, else its annotation's: the image's text alternative. */
+  label?: LanguageMapLike;
 }
 
 export interface AnnotationEntry {
@@ -71,7 +73,12 @@ export function readBodies(annotation: Json): AnnotationBodyEntry[] {
         language: asArray(body.language)[0] as string | undefined,
       });
     } else if (body.type === "Image" && body.id) {
-      bodies.push({ image: body.id, format: body.format });
+      const label = body.label ?? annotation.label;
+      bodies.push({
+        image: body.id,
+        format: body.format,
+        ...(label ? { label } : {}),
+      });
     }
   }
   return bodies;

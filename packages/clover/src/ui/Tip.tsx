@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
 
@@ -58,24 +58,136 @@ export const SHORTCUT_KEYS = new Set([
 export function Tip({
   label,
   shortcut,
+  scrolls = false,
 }: {
   label: string;
   shortcut?: Shortcut;
+  /**
+   * It may run longer than the room it is kept in (a hotspot's note, kept inside the
+   * stage): capped there, it scrolls (`scrollNote` in `Canvas/Annotations.tsx`). It never takes focus, which a scroller
+   * might, hidden as it is from assistive technology: a press on it focuses its control.
+   */
+  scrolls?: boolean;
 }) {
   const { t } = useCloverTranslation();
-  useEscapeHidesTips();
+  const ref = useRef<HTMLSpanElement>(null);
+  const text = shortcut
+    ? t("controlShortcut", { label, shortcut: shortcut.glyph })
+    : label;
+  useTips();
+  // Its words change while it shows (Play, then Pause): measured again.
+  useEffect(() => {
+    const tip = ref.current;
+    if (tip && isShown(tip)) keepInside(tip);
+  }, [text]);
   return (
-    <span className="clover-tip" aria-hidden="true">
-      {shortcut
-        ? t("controlShortcut", { label, shortcut: shortcut.glyph })
-        : label}
+    <span
+      ref={ref}
+      className="clover-tip"
+      aria-hidden="true"
+      {...(scrolls && {
+        tabIndex: -1,
+        onMouseDown: (event: React.MouseEvent<HTMLSpanElement>) => {
+          event.preventDefault();
+          event.currentTarget.parentElement?.focus({ preventScroll: true });
+        },
+      })}
+    >
+      {text}
     </span>
   );
 }
 
 /*
- * Escape hides the popover of whatever is hovered or focused, until the pointer leaves it
- * or it loses focus. One listener per document, however many popovers there are.
+ * A popover is placed by its family (`ui/Tip.css`), and then kept inside what clips it:
+ * the stage, a scrolling panel, the window. Each time it shows (the pointer comes to its
+ * control, or focus does), it is measured as it is then, after any zoom, text spacing or
+ * longer language, and wraps to the room there is and moves in from the edge, `xs` clear
+ * (WCAG 1.4.10, 1.4.12).
+ */
+function placeTip(event: Event) {
+  const tip = event.target instanceof Element && tipOf(event.target);
+  if (tip) keepInside(tip);
+}
+
+/** A control's popover, if it has one. */
+function tipOf(control: Element) {
+  return Array.from(control.children).find((child) =>
+    child.classList.contains("clover-tip"),
+  ) as HTMLElement | undefined;
+}
+
+function isShown(tip: HTMLElement) {
+  try {
+    return Boolean(tip.parentElement?.matches(":hover, :focus-visible"));
+  } catch {
+    return false;
+  }
+}
+
+/** Wraps the popover to the room there is, then moves it inward from the edge it passes. */
+function keepInside(tip: HTMLElement) {
+  const control = tip.parentElement;
+  if (!control) return;
+  tip.style.removeProperty("--clover-tip-room");
+  tip.style.removeProperty("--clover-tip-shift");
+  const bounds = clipOf(control);
+  // Kept clear of the edge by its own inline padding, `xs`.
+  const clear = parseFloat(getComputedStyle(tip).paddingLeft) || 0;
+  const start = bounds.left + clear;
+  const end = bounds.right - clear;
+  const own = control.getBoundingClientRect();
+  let box = tip.getBoundingClientRect();
+  // Beside its control (the cluster as a column), it has only the room on its own side.
+  const room =
+    box.right <= own.left
+      ? box.right - start
+      : box.left >= own.right
+        ? end - box.left
+        : end - start;
+  if (box.width > room) {
+    tip.style.setProperty("--clover-tip-room", `${Math.max(room, 0)}px`);
+    box = tip.getBoundingClientRect();
+  }
+  const shift =
+    box.left < start ? start - box.left : box.right > end ? end - box.right : 0;
+  if (shift) tip.style.setProperty("--clover-tip-shift", `${shift}px`);
+}
+
+/**
+ * Across, the box that clips an element: every ancestor's that cuts its overflow across,
+ * and the window's.
+ */
+function clipOf(element: HTMLElement) {
+  let left = 0;
+  let right = document.documentElement.clientWidth || window.innerWidth;
+  for (
+    let node = element.parentElement;
+    node && node !== document.documentElement;
+    node = node.parentElement
+  ) {
+    const { display, overflow, overflowX } = getComputedStyle(node);
+    // Overflow cuts only a box's content: not an inline element's, nor one with no box.
+    if (display === "inline" || display === "contents") continue;
+    // (JSDOM gives only the shorthand.)
+    const across = overflowX || overflow;
+    if (!across || across === "visible") continue;
+    // Its padding box, where overflow is cut.
+    const rect = node.getBoundingClientRect();
+    left = Math.max(left, rect.left + node.clientLeft);
+    right = Math.min(right, rect.left + node.clientLeft + node.clientWidth);
+  }
+  return { left, right };
+}
+
+/*
+ * Escape hides the popover of whatever is hovered or focused, until the pointer comes to
+ * it again or it loses focus. One listener per document, however many popovers there are.
+ *
+ * Hidden, the popover takes no pointer, so what it covered is within reach. Taken from
+ * under a pointer resting on it, it is the pointer leaving the control: shown again on
+ * that, it would come straight back. So it comes back when the pointer next enters, which
+ * it can do only through the control's own box.
  */
 let listening = 0;
 
@@ -86,29 +198,36 @@ function hideTips(event: KeyboardEvent) {
     .querySelectorAll<HTMLElement>(":hover > .clover-tip")
     .forEach((tip) => tip.parentElement && shown.add(tip.parentElement));
   const focused = document.activeElement as HTMLElement | null;
-  const hasTip = (element: Element) =>
-    Array.from(element.children).some((child) =>
-      child.classList.contains("clover-tip"),
-    );
-  if (focused && hasTip(focused)) shown.add(focused);
+  if (focused && tipOf(focused)) shown.add(focused);
   shown.forEach((control) => {
     control.dataset.tipHidden = "";
     const show = () => {
       delete control.dataset.tipHidden;
-      control.removeEventListener("pointerleave", show);
+      control.removeEventListener("pointerenter", show);
       control.removeEventListener("blur", show);
     };
-    control.addEventListener("pointerleave", show);
+    control.addEventListener("pointerenter", show);
     control.addEventListener("blur", show);
   });
 }
 
-function useEscapeHidesTips() {
+/**
+ * What every popover listens for, once per document: Escape, and the pointer or focus
+ * coming to a control. Neither `pointerenter` nor `focus` bubbles, but both pass the
+ * document as they capture.
+ */
+function useTips() {
   useEffect(() => {
-    if (listening++ === 0) document.addEventListener("keydown", hideTips, true);
+    if (listening++ === 0) {
+      document.addEventListener("keydown", hideTips, true);
+      document.addEventListener("pointerenter", placeTip, true);
+      document.addEventListener("focus", placeTip, true);
+    }
     return () => {
-      if (--listening === 0)
-        document.removeEventListener("keydown", hideTips, true);
+      if (--listening) return;
+      document.removeEventListener("keydown", hideTips, true);
+      document.removeEventListener("pointerenter", placeTip, true);
+      document.removeEventListener("focus", placeTip, true);
     };
   }, []);
 }

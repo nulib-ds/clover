@@ -1,5 +1,5 @@
 import Link from "next/link";
-import React from "react";
+import React, { useRef } from "react";
 import dynamic from "next/dynamic";
 import styles from "docs/components/Home/Parts.module.css";
 
@@ -22,20 +22,31 @@ const Parts: React.FC<{
   resource: string | null;
   /** Put one of the playground's resources on its stage, by key. */
   onTry: (key: string) => void;
-}> = ({ resource, onTry }) => (
-  <section className={styles.section}>
-    {/* `#parts` for links to the section. */}
-    <div className={styles.head} id="parts">
-      <Link href="/docs/composing" className={styles.cta}>
-        Build a layout <span aria-hidden="true">→</span>
-      </Link>
-    </div>
-    {resource ? (
-      <PartsLive resource={resource} onTry={onTry} />
-    ) : (
-      <div className={styles.placeholder} aria-hidden="true" />
-    )}
-  </section>
-);
+}> = ({ resource, onTry }) => {
+  // A chip's resource remounts the parts, chip and all, so focus moves here first.
+  const heading = useRef<HTMLHeadingElement>(null);
+  const tryResource = (key: string) => {
+    onTry(key);
+    heading.current?.focus({ preventScroll: true });
+  };
+  return (
+    <section className={styles.section}>
+      {/* `#parts` for links to the section. */}
+      <div className={styles.head} id="parts">
+        <h2 ref={heading} tabIndex={-1} className={styles.visuallyHidden}>
+          Parts
+        </h2>
+        <Link href="/docs/composing" className={styles.cta}>
+          Build a layout <span aria-hidden="true">→</span>
+        </Link>
+      </div>
+      {resource ? (
+        <PartsLive resource={resource} onTry={tryResource} />
+      ) : (
+        <div className={styles.placeholder} aria-hidden="true" />
+      )}
+    </section>
+  );
+};
 
 export default Parts;

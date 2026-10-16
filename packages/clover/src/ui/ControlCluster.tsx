@@ -4,6 +4,7 @@ import Button from "./Button";
 import { type Shortcut, Tip } from "./Tip";
 import { ControlIcon } from "./controlGlyphs";
 import type { ControlButtons } from "./controlButtons";
+import { useClusterReach } from "./useClusterReach";
 import useWithinFullscreen from "../hooks/useWithinFullscreen";
 
 export interface ControlSpec {
@@ -18,6 +19,8 @@ export interface ControlSpec {
   controls?: string;
   /** The key the Canvas answers to for it, shown in its popover. */
   shortcut?: Shortcut;
+  /** The language of `label`, where it is not the page's: Clover's, or a Choice's. */
+  lang?: string;
 }
 
 export interface ControlClusterProps {
@@ -52,6 +55,8 @@ const ControlCluster: React.FC<ControlClusterProps> = ({
    */
   const [element, setElement] = useState<HTMLDivElement | null>(null);
   const isFullscreen = useWithinFullscreen(element);
+  // How far it reaches, wrapped on a small stage, for the popups it opens to clear.
+  useClusterReach(element);
 
   /**
    * Renders a consumer's control in place of the default when one is configured.
@@ -67,6 +72,7 @@ const ControlCluster: React.FC<ControlClusterProps> = ({
     expanded,
     controls,
     shortcut,
+    lang,
   }: ControlSpec) {
     const Custom = controlButtons?.[key];
     if (Custom)
@@ -77,6 +83,7 @@ const ControlCluster: React.FC<ControlClusterProps> = ({
             id,
             type: "button",
             "aria-label": label,
+            ...(lang && { lang }),
             ...(shortcut && { "aria-keyshortcuts": shortcut.keys }),
             onClick,
             ...(expanded !== undefined && {
@@ -98,6 +105,7 @@ const ControlCluster: React.FC<ControlClusterProps> = ({
         expanded={expanded}
         controls={controls}
         shortcut={shortcut}
+        lang={lang}
       >
         {glyph}
       </Button>

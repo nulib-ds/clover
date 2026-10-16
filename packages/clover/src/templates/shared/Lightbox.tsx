@@ -5,6 +5,8 @@ import * as Clover from "../../parts";
 export interface LightboxProps {
   open: boolean;
   onClose: () => void;
+  /** The level of its title, a level under the layout's. Default 3. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
   className?: string;
 }
 
@@ -13,10 +15,21 @@ export interface LightboxProps {
  * position). A native dialog keeps focus inside, closes on Escape, and returns focus to
  * whatever opened it. The stage mounts only while open, so it is sized when drawn.
  */
-export function Lightbox({ open, onClose, className }: LightboxProps) {
+export function Lightbox({
+  open,
+  onClose,
+  headingLevel = 3,
+  className,
+}: LightboxProps) {
   const t = Clover.useT();
+  const langOf = Clover.useLangOf();
   const dialog = useRef<HTMLDialogElement>(null);
-  const titleId = `${useId().replace(/:/g, "")}-title`;
+  const baseId = useId().replace(/:/g, "");
+  const titleId = `${baseId}-title`;
+  const manifestTitleId = `${baseId}-manifest`;
+  // Named by the Canvas's label, else by the Manifest's, so it always has a name.
+  const canvasLabel = Clover.useLocalized(Clover.useActiveCanvas()?.label);
+  const named = canvasLabel.text ? titleId : manifestTitleId;
 
   useEffect(() => {
     const element = dialog.current;
@@ -31,7 +44,7 @@ export function Lightbox({ open, onClose, className }: LightboxProps) {
       className={["clover-template-lightbox", className]
         .filter(Boolean)
         .join(" ")}
-      aria-labelledby={titleId}
+      aria-labelledby={named}
       onClose={onClose}
       // A press on the backdrop (the dialog itself, outside its content) closes it.
       onClick={(event) => {
@@ -41,11 +54,16 @@ export function Lightbox({ open, onClose, className }: LightboxProps) {
       {open && (
         <div className="clover-template-lightbox-body">
           <header className="clover-template-lightbox-header">
-            <Clover.Label of="canvas" as="h3" id={titleId} />
+            <Clover.Label of="canvas" as={`h${headingLevel}`} id={titleId} />
+            {/* Hidden: a name still reads it, and the content does not repeat it. */}
+            {named === manifestTitleId && (
+              <Clover.Label id={manifestTitleId} hidden />
+            )}
             <button
               type="button"
               className="clover-template-lightbox-close"
               aria-label={t("commonClose")}
+              lang={langOf("commonClose")}
               onClick={onClose}
             >
               <svg
@@ -66,7 +84,7 @@ export function Lightbox({ open, onClose, className }: LightboxProps) {
             </button>
           </header>
           <Clover.Content className="clover-template-lightbox-stage" />
-          <Clover.Pager />
+          <Clover.Items layout="pager" />
         </div>
       )}
     </dialog>

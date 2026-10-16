@@ -15,10 +15,14 @@ export type {
 } from "./components/Content/renderers";
 export { Label } from "./components/Label/Label";
 export type { LabelProps } from "./components/Label/Label";
-export { Next, Pager, Position, Previous } from "./components/Pager/Pager";
-export type { PagerProps, PositionProps } from "./components/Pager/Pager";
 export { Items } from "./components/Items/Items";
 export type { ItemsLayout, ItemsProps } from "./components/Items/Items";
+export { Next, Position, Previous } from "./components/Items/Pager";
+export type {
+  PositionProps,
+  StepProps,
+  StepsOf,
+} from "./components/Items/Pager";
 export { Status } from "./components/Status/Status";
 export {
   Homepage,
@@ -100,6 +104,7 @@ export {
   useSequence,
   useStatus,
   useT,
+  useLangOf,
   useVisibleCanvases,
 } from "./react/hooks";
 /** Inline styles that hide text from sight but not from assistive technology. */

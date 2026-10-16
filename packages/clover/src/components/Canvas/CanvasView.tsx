@@ -9,12 +9,8 @@ import React, {
   useState,
 } from "react";
 
-import Annotations, {
-  type AnnotationPlacer,
-  type PlacedAnnotation,
-  placeAnnotations,
-  useSvgReader,
-} from "./Annotations";
+import type { AnnotationPlacer, PlacedAnnotation } from "./Annotations";
+import { useSvgReader } from "./useSvgReader";
 import Caption, { captionLabelId, hasInformation } from "./Caption";
 import type {
   CanvasControlsConfig,
@@ -40,11 +36,17 @@ import ExitFullscreen from "../../ui/ExitFullscreen";
 import { useChromeVisibility } from "./useChromeVisibility";
 import { useNearViewport } from "./useNearViewport";
 import useFullscreen from "../../hooks/useFullscreen";
+import { useLoaded } from "../../hooks/useLoaded";
 import { ErrorBoundary } from "../../ui/ErrorBoundary";
 import { Loading } from "../../ui/Loading";
-import { forwardShortcut } from "../../ui/Tip";
+import { SHORTCUTS, forwardShortcut } from "../../ui/Tip";
+import { visuallyHidden } from "../../ui/visuallyHidden";
 import { join } from "../../lib/classnames";
-import { getLabelAsString } from "../../core/label";
+import { localize } from "../../core/value";
+import { useCloverTranslation } from "../../i18n/useCloverTranslation";
+import { HostLanguageContext } from "../../i18n/hostLanguage";
+import { useRootLanguage } from "../../react/language";
+import { useContainerName } from "../../ui/useContainerName";
 import {
   CanvasRenderer,
   findImageServiceId,
@@ -56,6 +58,8 @@ type CanvasStatus = "loading" | "ready" | "error";
 
 /** Video and sound: only fetched when a Canvas paints them. */
 const MediaStage = lazy(() => import("./media/MediaStage"));
+/** The hotspots, and the placing of them, loaded for a Canvas with annotations. */
+const loadHotspots = () => import("./Annotations");
 // Few Canvases are animations: their clock and bar load when one is shown.
 const FrameAnimation = lazy(() => import("./FrameAnimation"));
 
@@ -69,6 +73,27 @@ const ALL_CONTROLS: Required<CanvasControlsConfig> = {
 };
 
 let instances = 0;
+
+/**
+ * The keys the viewport answers to while focused, as `aria-keyshortcuts` spells them,
+ * and the string that says them in words: the camera's (`GestureController`) and
+ * media's (`MediaStage`).
+ */
+const CAMERA_KEYS = {
+  description: "canvasKeysImage",
+  keys: [
+    "ArrowLeft ArrowRight ArrowUp ArrowDown",
+    SHORTCUTS.zoomIn.keys,
+    SHORTCUTS.zoomOut.keys,
+    SHORTCUTS.reset.keys,
+    SHORTCUTS.rotateRight.keys,
+    SHORTCUTS.rotateLeft.keys,
+  ].join(" "),
+};
+const MEDIA_KEYS = {
+  description: "canvasKeysMedia",
+  keys: [SHORTCUTS.play.keys, "J L", SHORTCUTS.mute.keys].join(" "),
+};
 
 /**
  * `Canvas` drawing exactly what it is handed — IIIF Canvases, or plain images — knowing
@@ -96,6 +121,7 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
   src,
   isTiledImage = false,
   label,
+  language,
   instanceId,
   className,
   options,
@@ -115,6 +141,7 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
   placeholder = true,
   children,
 }) => {
+  const { t } = useCloverTranslation();
   const hostRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<CanvasRenderer | null>(null);
   const [renderer, setRenderer] = useState<CanvasRenderer | null>(null);
@@ -124,9 +151,18 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
     null,
   );
   const isFullscreen = useFullscreen(wrapperElement);
-  // Controls and navigator show on pointer activity and fade after a pause, as the
-  // Player's bar does.
-  const chromeVisible = useChromeVisibility(wrapperElement, options?.hideDelay);
+  // Standalone, the Canvas reads the page's language itself, for its strings to mark.
+  const root = useRootLanguage(
+    setWrapperElement as React.RefCallback<HTMLElement>,
+  );
+  // Controls and navigator show on a mouse's activity and fade after a pause, as the
+  // Player's bar does; under a finger, or a pen that does not hover, a tap on the
+  // picture shows and hides them. Focus that no press brought holds them.
+  const chromeVisible = useChromeVisibility(
+    wrapperElement,
+    options?.hideDelay,
+    hostRef,
+  );
   /*
    * Nothing is fetched until the Canvas comes within half a screen of view: no
    * `info.json` or tiles, and no video, sound or captions (nor the media code itself).
@@ -239,6 +275,8 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
    * control cluster.
    */
   const mediaOnly = Boolean(media) && canvases?.length === 1;
+  /** The reader can move the camera: not a lone recording, nor held still by the host. */
+  const navigable = !mediaOnly && options?.gestures?.navigable !== false;
   /** The Canvases last drawn: when the host hands over others, frame them afresh. */
   const canvasKey = canvases?.map((canvas) => canvas.id).join("|") ?? null;
   /*
@@ -252,14 +290,13 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
     if (!canvases || !placeholder) return [];
     const found = canvases.flatMap((canvas) => {
       const still = placeholderStill(canvas);
-      return still
-        ? [{ ...still, alt: getLabelAsString(canvas.label as any) || "" }]
-        : [];
+      const alt = localize(canvas.label as any, language);
+      return still ? [{ ...still, alt: alt.text, lang: alt.lang }] : [];
     });
     return direction === "right-to-left" || direction === "bottom-to-top"
       ? found.reverse()
       : found;
-  }, [canvases, direction, placeholder]);
+  }, [canvases, direction, placeholder, language]);
   /*
    * Open or closed is the reader's choice, and it holds as they move from view to view:
    * open one page, and the next opens too, with its still in view until it draws. Video
@@ -363,15 +400,44 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
     else setImagesOpen(showPlaceholder);
   };
 
-  const ariaLabel =
-    typeof label === "string" ? label : getLabelAsString(label) || undefined;
+  /*
+   * The viewport always has a name: the given label, else the first Canvas's or body's,
+   * else a generic one, each with its language. Not as a `lang` on the viewport, which
+   * holds the hotspots: a name in another language is a hidden element's.
+   */
+  const firstBody = Array.isArray(body) ? body[0] : body;
+  const ownName = [label, canvases?.[0]?.label, firstBody?.label]
+    .map((value) => localize(value as any, language))
+    .find((value) => value.text);
+  const viewportName = useContainerName(
+    ownName?.text || t("canvasImage"),
+    ownName ? ownName.lang : root.langOf("canvasImage"),
+    false,
+    root.hostLanguage,
+  );
   const hasAnnotations = Boolean(annotations?.length);
+  /*
+   * The viewport says that it can be operated, and how (WCAG 4.1.2): a role description
+   * over its `img` or `group` role, and its keys, in `aria-keyshortcuts` and in words in
+   * its description. The camera's keys where the reader can move it, and media's where
+   * there is media; none behind a placeholder, where no key does anything. An attribute
+   * cannot carry a language, so the role keeps its own name where Clover's strings are
+   * not in the page's language (WCAG 3.1.2).
+   */
+  const viewportKeys = showPlaceholder
+    ? []
+    : [...(navigable ? [CAMERA_KEYS] : []), ...(media ? [MEDIA_KEYS] : [])];
+  const keysId = `keys-${instance}`;
+  const roleDescription =
+    navigable && !showPlaceholder && !root.langOf("canvasRoleDescription")
+      ? t("canvasRoleDescription")
+      : undefined;
   const hasCaption = Boolean(shownControls) && captioned.length > 0;
   // The captioned Canvases' labels name the figure, whether or not the caption is open.
   const figureLabel = hasCaption
     ? captioned
         .map((canvas, index) =>
-          getLabelAsString(canvas.label as any)
+          localize(canvas.label as any, language).text
             ? captionLabelId(captionId, index)
             : null,
         )
@@ -400,19 +466,29 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
    * with one highlight between them: the hovered or focused one, else the one last
    * picked (from the menu or by clicking its hotspot).
    */
+  const hotspots = useLoaded(loadHotspots, hasAnnotations);
   const readSvg = useSvgReader(annotations);
   const placedAnnotations = useMemo<PlacedAnnotation[]>(
     () =>
-      renderer && annotations?.length && sceneVersion > 0
-        ? placeAnnotations(
+      hotspots && renderer && annotations?.length && sceneVersion > 0
+        ? hotspots.placeAnnotations(
             annotations,
             placeAnnotation ??
               ((rect, _, targetIndex) =>
                 renderer.itemRectToWorld(targetIndex, rect)),
             readSvg,
+            language,
           )
         : [],
-    [renderer, annotations, sceneVersion, placeAnnotation, readSvg],
+    [
+      hotspots,
+      renderer,
+      annotations,
+      sceneVersion,
+      placeAnnotation,
+      readSvg,
+      language,
+    ],
   );
   const [hoveredAnnotation, setHoveredAnnotation] = useState<string | null>(
     null,
@@ -582,152 +658,213 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
     !showPlaceholder;
 
   return (
-    <figure
-      aria-labelledby={figureLabel}
-      className={join("clover-canvas", className)}
-      data-testid="clover-canvas"
-      data-status={status}
-      data-has-navigator={showNavigator}
-      data-fullscreen={isFullscreen}
-      data-chrome={chromeVisible ? "visible" : "hidden"}
-      data-media={media?.kind}
-      data-navigable={!mediaOnly}
-      data-placeholder={stills.length ? showPlaceholder : undefined}
-      ref={setWrapperElement}
-      // The Canvas's keys work from its own controls too, as their popovers say.
-      onKeyDown={(event) => forwardShortcut(event, hostRef.current)}
-      // Geometry inline: the stage fills its box with or without the stylesheet.
-      style={{
-        position: "relative",
-        width: "100%",
-        height: "100%",
-        margin: 0,
-        overflow: "hidden",
-      }}
-    >
-      {/* A dark wash behind the controls, so they read over a bright picture. */}
-      {(shownControls || showNavigator) && (
-        <div className="clover-canvas-scrim" aria-hidden="true" />
-      )}
-      {/* Revealed by CSS only while this wrapper is the full-screen element. */}
-      <ExitFullscreen hidden={!isFullscreen} />
-      {renderer && shownControls && (
-        <Controls
-          renderer={renderer}
-          instance={instance}
-          config={shownControls}
-          controlButtons={controlButtons}
-          hasPlaceholder={stills.length > 0}
-          choices={showPlaceholder ? [] : choices}
-          selections={selections}
-          onSelect={selectChoice}
-          annotations={placedAnnotations}
-          selectedAnnotation={selectedAnnotation}
-          onAnnotationSelect={selectAnnotation}
-          onAnnotationActivate={activateAnnotation}
-          captionId={hasCaption ? captionId : undefined}
-          captionOpen={isCaptionOpen}
-          onCaptionToggle={() => setCaptionOpen((open) => !open)}
-        >
-          {children}
-        </Controls>
-      )}
-      {showNavigator && (
-        <div
-          ref={setNavigatorElement}
-          className="clover-canvas-navigator"
-          data-testid="clover-canvas-navigator"
-          aria-hidden="true"
-        />
-      )}
-      <div
-        ref={hostRef}
-        className="clover-canvas-viewport"
-        // Geometry inline, so the stage holds its size without the stylesheet.
-        style={{ position: "absolute", inset: 0, overflow: "hidden" }}
-        data-testid="clover-canvas-viewport"
-        /*
-         * An `img` role makes its children presentational, which would hide annotation
-         * buttons from assistive technology. With hotspots it is a named group instead.
-         */
-        role={hasAnnotations ? "group" : "img"}
-        aria-label={ariaLabel}
-        aria-busy={loading}
-        tabIndex={0}
-      />
-      {stills.length > 0 && (
-        <Placeholder
-          instance={instance}
-          stills={stills}
-          vertical={
-            direction === "top-to-bottom" || direction === "bottom-to-top"
+    <HostLanguageContext.Provider value={root.hostLanguage}>
+      <figure
+        aria-labelledby={figureLabel}
+        className={join("clover-canvas", className)}
+        data-testid="clover-canvas"
+        data-status={status}
+        data-has-navigator={showNavigator}
+        data-fullscreen={isFullscreen}
+        data-chrome={chromeVisible ? "visible" : "hidden"}
+        data-media={media?.kind}
+        data-animated={animated ? "" : undefined}
+        data-navigable={navigable}
+        data-placeholder={stills.length ? showPlaceholder : undefined}
+        ref={root.ref}
+        onKeyDown={(event) => {
+          /*
+           * Escape closes the open caption from anywhere in the figure, leaving focus
+           * where it is, so a hotspot or control it covers comes back into sight without
+           * moving focus (WCAG 2.4.11). Inside the caption, its own handler takes it.
+           */
+          if (
+            event.key === "Escape" &&
+            isCaptionOpen &&
+            !event.defaultPrevented
+          ) {
+            // It closes, and nothing around it: not a modal `<dialog>` (the Lightbox).
+            event.preventDefault();
+            closeCaption(false);
+            return;
           }
-          media={Boolean(media)}
-          active={showPlaceholder}
-          lingering={status === "loading" && !cleared}
-          onToggle={togglePlaceholder}
-        />
-      )}
-      {renderer && media && nearViewport && !showPlaceholder && (
-        <Suspense fallback={null}>
-          <MediaStage
-            key={media.id}
-            media={media}
-            presentation={presentation}
-            request={options?.request}
+          // The Canvas's keys work from its own controls too, as their popovers say.
+          forwardShortcut(event, hostRef.current);
+        }}
+        /*
+         * Geometry inline: the stage fills its box with or without the stylesheet. Its
+         * own stacking context, so the viewport can lie beneath everything else in it.
+         */
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "100%",
+          margin: 0,
+          overflow: "hidden",
+          isolation: "isolate",
+        }}
+      >
+        {/* A dark wash behind the controls, so they read over a bright picture. */}
+        {(shownControls || showNavigator) && (
+          <div className="clover-canvas-scrim" aria-hidden="true" />
+        )}
+        {/* Revealed by CSS only while this wrapper is the full-screen element. */}
+        <ExitFullscreen hidden={!isFullscreen} />
+        {renderer && shownControls && (
+          <Controls
             renderer={renderer}
             instance={instance}
-            onElement={handleMediaElement}
-            navigable={!mediaOnly}
-            fullscreen={mediaOnly && Boolean(controlsConfig?.fullPage)}
-            isFullscreen={isFullscreen}
-            onEnded={onEnded}
-            chapters={chapters}
-            autoPlay={stills.length > 0}
+            config={shownControls}
+            controlButtons={controlButtons}
+            hasPlaceholder={stills.length > 0}
+            choices={showPlaceholder ? [] : choices}
+            selections={selections}
+            onSelect={selectChoice}
+            annotations={placedAnnotations}
+            selectedAnnotation={selectedAnnotation}
+            onAnnotationSelect={selectAnnotation}
+            onAnnotationActivate={activateAnnotation}
+            captionId={hasCaption ? captionId : undefined}
+            captionOpen={isCaptionOpen}
+            onCaptionToggle={() => setCaptionOpen((open) => !open)}
+            language={language}
+          >
+            {children}
+          </Controls>
+        )}
+        {showNavigator && (
+          <div
+            ref={setNavigatorElement}
+            className="clover-canvas-navigator"
+            data-testid="clover-canvas-navigator"
+            aria-hidden="true"
           />
-        </Suspense>
-      )}
-      {renderer &&
-        animated &&
-        scene?.frames[frameKey(animated)] &&
-        !showPlaceholder && (
+        )}
+        <div
+          ref={hostRef}
+          className="clover-canvas-viewport"
+          /*
+           * Geometry inline, so the stage holds its size without the stylesheet. Beneath
+           * the rest of the figure, so without it the controls, laid out in the flow
+           * over the picture, still take their presses (WCAG 2.5.8).
+           */
+          style={{
+            position: "absolute",
+            inset: 0,
+            overflow: "hidden",
+            zIndex: -1,
+          }}
+          data-testid="clover-canvas-viewport"
+          /*
+           * An `img` role makes its children presentational, which would hide annotation
+           * buttons from assistive technology. With hotspots it is a named group instead.
+           */
+          role={hasAnnotations ? "group" : "img"}
+          aria-roledescription={roleDescription}
+          {...viewportName.props}
+          aria-describedby={viewportKeys.length ? keysId : undefined}
+          aria-keyshortcuts={
+            viewportKeys.map(({ keys }) => keys).join(" ") || undefined
+          }
+          aria-busy={loading}
+          tabIndex={0}
+        />
+        {viewportName.node}
+        {viewportKeys.length > 0 && (
+          <span id={keysId} style={visuallyHidden}>
+            {viewportKeys.map(({ description }, index) => (
+              <React.Fragment key={description}>
+                {index > 0 && " "}
+                <span lang={root.langOf(description)}>{t(description)}</span>
+              </React.Fragment>
+            ))}
+          </span>
+        )}
+        {stills.length > 0 && (
+          <Placeholder
+            instance={instance}
+            stills={stills}
+            vertical={
+              direction === "top-to-bottom" || direction === "bottom-to-top"
+            }
+            media={Boolean(media)}
+            active={showPlaceholder}
+            lingering={status === "loading" && !cleared}
+            onToggle={togglePlaceholder}
+          />
+        )}
+        {renderer && media && nearViewport && !showPlaceholder && (
           <Suspense fallback={null}>
-            <FrameAnimation
-              key={animated.id}
+            {/*
+             * Not keyed by the media: from one recording to the next (auto-advance), the
+             * transport stays, and so does the keyboard focus on it (WCAG 2.4.3).
+             */}
+            <MediaStage
+              media={media}
+              presentation={presentation}
+              request={options?.request}
               renderer={renderer}
-              frames={frames}
-              byFrame={scene.frames[frameKey(animated)]}
-              animationKey={animated.id}
-              sceneVersion={sceneVersion}
-              autoplay={options?.animation?.autoplay}
-              loop={options?.animation?.loop}
+              instance={instance}
+              onElement={handleMediaElement}
+              navigable={navigable}
+              fullscreen={mediaOnly && Boolean(controlsConfig?.fullPage)}
+              isFullscreen={isFullscreen}
               onEnded={onEnded}
+              chapters={chapters}
+              autoPlay={stills.length > 0}
+              language={language}
             />
           </Suspense>
         )}
-      {renderer && hasAnnotations && sceneVersion > 0 && !showPlaceholder && (
-        <Annotations
-          renderer={renderer}
-          placed={placedAnnotations}
-          sceneVersion={sceneVersion}
-          active={
-            hoveredAnnotation ?? highlightedAnnotation ?? selectedAnnotation
-          }
-          onActivate={activateAnnotation}
-          onSelect={selectAnnotation}
-        />
-      )}
-      {/* Last, as a `<figcaption>` must be first or last in its `<figure>`. */}
-      {hasCaption && (
-        <Caption
-          id={captionId}
-          canvases={captioned}
-          open={isCaptionOpen}
-          onClose={closeCaption}
-        />
-      )}
-      {loading && <Loading overlay />}
-    </figure>
+        {renderer &&
+          animated &&
+          scene?.frames[frameKey(animated)] &&
+          !showPlaceholder && (
+            <Suspense fallback={null}>
+              <FrameAnimation
+                key={animated.id}
+                renderer={renderer}
+                frames={frames}
+                byFrame={scene.frames[frameKey(animated)]}
+                animationKey={animated.id}
+                sceneVersion={sceneVersion}
+                autoplay={options?.animation?.autoplay}
+                loop={options?.animation?.loop}
+                onEnded={onEnded}
+                language={language}
+              />
+            </Suspense>
+          )}
+        {hotspots &&
+          renderer &&
+          hasAnnotations &&
+          sceneVersion > 0 &&
+          !showPlaceholder && (
+            <hotspots.default
+              renderer={renderer}
+              placed={placedAnnotations}
+              sceneVersion={sceneVersion}
+              active={
+                hoveredAnnotation ?? highlightedAnnotation ?? selectedAnnotation
+              }
+              selected={selectedAnnotation}
+              onActivate={activateAnnotation}
+              onSelect={selectAnnotation}
+            />
+          )}
+        {/* Last, as a `<figcaption>` must be first or last in its `<figure>`. */}
+        {hasCaption && (
+          <Caption
+            id={captionId}
+            canvases={captioned}
+            open={isCaptionOpen}
+            onClose={closeCaption}
+            language={language}
+          />
+        )}
+        {loading && <Loading overlay />}
+      </figure>
+    </HostLanguageContext.Provider>
   );
 };
 

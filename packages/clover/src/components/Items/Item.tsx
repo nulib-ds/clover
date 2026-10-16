@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import type { ItemModel, ItemPart } from "../../core/items";
 import type { CloverRequest } from "../../core/request";
 import { resolveThumbnail, thumbnailSource } from "../../core/thumbnail";
 import { localize } from "../../core/value";
+import { watchClamp } from "./clamped";
 
 /** `h:mm:ss`, or `m:ss` under an hour. */
 export function formatDuration(seconds: number): string {
@@ -64,11 +65,14 @@ function Picture({
   size,
   request,
   alt,
+  altLang,
 }: {
   part: ItemPart;
   size: number;
   request?: CloverRequest;
   alt: string;
+  /** The language of the `alt`, a label's. */
+  altLang?: string;
 }) {
   const { src, none } = useThumbnail(part, size, request);
   const [loaded, setLoaded] = useState(false);
@@ -103,6 +107,7 @@ function Picture({
         <img
           src={src}
           alt={alt}
+          lang={alt ? altLang : undefined}
           // Sized here so a picture never fills its container without the stylesheet.
           width={size}
           height={Math.round(size / ratio)}
@@ -118,6 +123,56 @@ function Picture({
           {formatDuration(part.duration)}
         </span>
       ) : null}
+    </span>
+  );
+}
+
+/**
+ * One card's label. Under a carousel's or grid's pictures it runs to three lines and is
+ * cut short after (`Items.css`). Cut short, a full copy shows over the card's picture,
+ * from where its lines end upward, while the item is hovered or focused (WCAG 1.4.12),
+ * so nothing beside or below it moves and a carousel's scrolling box cannot clip it. The
+ * copy exists only while the label is cut (`clamped.ts`). It is `hidden` until the
+ * stylesheet shows it, and hidden from assistive technology, which has the item's whole
+ * name.
+ */
+function ItemLabel({
+  text,
+  lang,
+  first,
+}: {
+  text: string;
+  lang?: string;
+  first: boolean;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [cut, setCut] = useState(false);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node || !text) return;
+    return watchClamp(node, setCut);
+  }, [text]);
+  return (
+    <span className="clover-items-label" data-clamped={cut || undefined}>
+      {/* Inline without the stylesheet; a grid cell trims it with it. */}
+      {!first && " "}
+      <span
+        ref={ref}
+        className="clover-items-label-text"
+        lang={text ? lang : undefined}
+      >
+        {text}
+      </span>
+      {cut && (
+        <span
+          className="clover-items-label-full"
+          lang={lang}
+          aria-hidden="true"
+          hidden
+        >
+          {text}
+        </span>
+      )}
     </span>
   );
 }
@@ -141,6 +196,9 @@ export interface ItemFigureProps {
  * the labels in its `figcaption`. Without the stylesheet the labels read inline, a space
  * between them. A picture's `alt` is empty when its label already names it, so a screen
  * reader does not read it twice.
+ *
+ * The figure has no role of its own: Chromium and Firefox leave a figure's text out of the
+ * name they give the option or link around it, which the label must reach.
  */
 export function ItemFigure({
   item,
@@ -156,34 +214,38 @@ export function ItemFigure({
   const labelled = labels.some((label) => label.text);
   return (
     <figure
+      role="none"
       className="clover-items-figure"
       data-parts={item.parts.length}
       data-media={item.parts[0]?.media?.toLowerCase()}
       style={{ "--parts": item.parts.length } as React.CSSProperties}
     >
       <span className="clover-items-pictures">
-        {item.parts.map((part, index) => (
-          <Picture
-            key={part.id}
-            part={part}
-            size={size}
-            request={request}
-            alt={labels[index].text ? "" : localize(part.label, language).text}
-          />
-        ))}
+        {item.parts.map((part, index) => {
+          const alt = labels[index].text
+            ? { text: "" }
+            : localize(part.label, language);
+          return (
+            <Picture
+              key={part.id}
+              part={part}
+              size={size}
+              request={request}
+              alt={alt.text}
+              altLang={alt.lang}
+            />
+          );
+        })}
       </span>
       {(labelled || summary?.text) && (
         <figcaption className="clover-items-caption">
           {labels.map((label, index) => (
-            <span
+            <ItemLabel
               key={item.parts[index].id}
-              className="clover-items-label"
+              text={label.text}
               lang={label.lang}
-            >
-              {/* Inline without the stylesheet; a grid cell trims it with it. */}
-              {index > 0 && " "}
-              {label.text}
-            </span>
+              first={index === 0}
+            />
           ))}
           {summary?.text && (
             <span className="clover-items-summary" lang={summary.lang}>

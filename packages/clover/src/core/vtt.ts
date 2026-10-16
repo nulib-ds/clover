@@ -30,7 +30,24 @@ const ENTITIES: Record<string, string> = {
   "&nbsp;": " ",
   "&lrm;": "‎",
   "&rlm;": "‏",
+  "&quot;": '"',
+  "&apos;": "'",
 };
+
+/**
+ * A cue's words: voice and styling tags (`<v Speaker>`, `<i>`) dropped, and character
+ * references decoded, named (`&amp;`) and numeric (`&#39;`, `&#x2019;`), in one pass
+ * so `&amp;#39;` stays `&#39;`. One left unknown stays as written.
+ */
+export function cueText(raw: string): string {
+  return raw
+    .replace(/<[^>]*>/g, "")
+    .replace(/&(?:#(\d+)|#x([0-9a-f]+)|[a-z]+);/gi, (entity, dec, hex) => {
+      if (!dec && !hex) return ENTITIES[entity.toLowerCase()] ?? entity;
+      const code = dec ? parseInt(dec, 10) : parseInt(hex, 16);
+      return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : entity;
+    });
+}
 
 export function parseVtt(text: string): Cue[] {
   const cues: Cue[] = [];
@@ -46,9 +63,7 @@ export function parseVtt(text: string): Cue[] {
     if (!Number.isFinite(start) || !Number.isFinite(end)) continue;
     const raw = lines.slice(timing + 1).join("\n");
     const voice = /<v(?:\.[^\s>]+)*\s+([^>]+)>/.exec(raw)?.[1]?.trim();
-    const body = raw
-      .replace(/<[^>]*>/g, "")
-      .replace(/&(amp|lt|gt|nbsp|lrm|rlm);/g, (entity) => ENTITIES[entity]);
+    const body = cueText(raw);
     cues.push({ start, end, text: body, ...(voice ? { voice } : {}) });
   }
   return cues.sort((a, b) => a.start - b.start);

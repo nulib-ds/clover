@@ -43,11 +43,15 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
   onEnded,
   placeholder = true,
   label,
+  language: givenLanguage,
   annotations: givenAnnotations,
   chapters: givenChapters,
   ...rest
 }) => {
-  const { clover, language } = useClover("Canvas");
+  const context = useClover("Canvas");
+  const { clover } = context;
+  // The Root's language, unless the Canvas is given its own.
+  const language = givenLanguage ?? context.language;
   const canvases = useVisibleCanvases() as unknown as IIIFCanvas[];
   const { direction } = useSequence();
   const manifest = useManifest();
@@ -116,11 +120,16 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
   const rangeChapters = useMemo(
     () =>
       chaptersOf(manifest, mediaCanvas?.id ?? null, mediaCanvas?.duration).map(
-        (chapter) => ({
-          label: localize(chapter.label, language).text,
-          start: chapter.start,
-          end: chapter.end,
-        }),
+        (chapter) => {
+          // The label's language goes with it, for the transport to tag (WCAG 3.1.2).
+          const value = localize(chapter.label, language);
+          return {
+            label: value.text,
+            lang: value.lang,
+            start: chapter.start,
+            end: chapter.end,
+          };
+        },
       ),
     [manifest, mediaCanvas, language],
   );
@@ -240,7 +249,12 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
       manifestId={manifestId}
       canvases={canvases}
       viewingDirection={direction}
-      label={label ?? (active?.label as CloverCanvasProps["label"])}
+      language={language}
+      label={
+        label ??
+        (active?.label as CloverCanvasProps["label"]) ??
+        (manifest?.label as CloverCanvasProps["label"])
+      }
       options={connectedOptions}
       placeholder={showPlaceholder}
       onReady={handleReady}

@@ -1,9 +1,7 @@
 import React, { useCallback, useState } from "react";
 
 import type { CanvasControlsConfig } from "./Canvas.types";
-import AnnotationMenu from "./AnnotationMenu";
 import type { PlacedAnnotation } from "./Annotations";
-import ChoiceMenu from "./ChoiceMenu";
 import { Comment, Information } from "./glyphs";
 import Button from "../../ui/Button";
 import type { ChoiceGroup, ChoiceSelections } from "./layout";
@@ -19,11 +17,19 @@ import {
 } from "../../ui/controlGlyphs";
 import type { ControlButtons } from "../../ui/controlButtons";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
-import { getLabelAsString } from "../../core/label";
+import { localize } from "../../core/value";
 import { toggleFullscreen } from "../../lib/fullscreen";
 import useFullscreenSupported from "../../hooks/useFullscreenSupported";
+import { useLoaded } from "../../hooks/useLoaded";
 import { SHORTCUTS } from "../../ui/Tip";
 import type { CanvasRenderer } from "../../lib/renderer";
+
+/*
+ * The annotations and Choice menus, each fetched once its control shows, so it is there
+ * by the time it is pressed, and never for a Canvas that offers neither.
+ */
+const loadAnnotationMenu = () => import("./AnnotationMenu");
+const loadChoiceMenu = () => import("./ChoiceMenu");
 
 /** OpenSeadragon's `zoomPerClick`. */
 const ZOOM_PER_CLICK = 2;
@@ -50,6 +56,8 @@ interface CanvasControlsProps {
   captionId?: string;
   captionOpen?: boolean;
   onCaptionToggle?: () => void;
+  /** The language to read the Choices' labels in. The reader's, by default. */
+  language?: string;
   children?: React.ReactNode;
 }
 
@@ -74,15 +82,17 @@ const Controls: React.FC<CanvasControlsProps> = ({
   captionId,
   captionOpen = false,
   onCaptionToggle,
+  language,
   children,
 }) => {
-  const { t } = useCloverTranslation();
+  const { t, langOf } = useCloverTranslation();
   const [choiceOpen, setChoiceOpen] = useState(false);
   const [annotationsOpen, setAnnotationsOpen] = useState(false);
   const annotationsId = `annotations-${instance}`;
   const annotationsMenuId = `${annotationsId}-menu`;
   // The Information panel's word for them, so no new string is needed.
   const annotationsLabel = t("informationPanelTabsAnnotations");
+  const annotationsLang = langOf("informationPanelTabsAnnotations");
   const closeAnnotations = useCallback(
     (restoreFocus: boolean) => {
       setAnnotationsOpen(false);
@@ -100,10 +110,21 @@ const Controls: React.FC<CanvasControlsProps> = ({
    * there is one Choice that has one. Otherwise the IIIF term, so an icon-only button
    * still has a name for assistive technology.
    */
-  const choiceLabel =
-    (choices.length === 1 && getLabelAsString(choices[0].label as any)) ||
-    t("canvasChoice");
+  const ownChoiceLabel =
+    choices.length === 1 ? localize(choices[0].label as any, language) : null;
+  const choiceLabel = ownChoiceLabel?.text || t("canvasChoice");
+  const choiceLang = ownChoiceLabel?.text
+    ? ownChoiceLabel.lang
+    : langOf("canvasChoice");
   const menuId = `${choiceId}-menu`;
+  const AnnotationMenu = useLoaded(
+    loadAnnotationMenu,
+    Boolean(showAnnotations),
+  )?.default;
+  const ChoiceMenu = useLoaded(
+    loadChoiceMenu,
+    choices.length > 0 && Boolean(onSelect),
+  )?.default;
   const closeChoice = useCallback(
     (restoreFocus: boolean) => {
       setChoiceOpen(false);
@@ -123,6 +144,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
           id: `zoomIn-${instance}`,
           shortcut: SHORTCUTS.zoomIn,
           label: t("imageZoomIn"),
+          lang: langOf("imageZoomIn"),
           glyph: <ZoomIn />,
           onClick: () => renderer.zoomBy(ZOOM_PER_CLICK),
         },
@@ -131,6 +153,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
           id: `zoomOut-${instance}`,
           shortcut: SHORTCUTS.zoomOut,
           label: t("imageZoomOut"),
+          lang: langOf("imageZoomOut"),
           glyph: <ZoomOut />,
           onClick: () => renderer.zoomBy(1 / ZOOM_PER_CLICK),
         },
@@ -141,6 +164,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
         key: "fullPage",
         id: `fullPage-${instance}`,
         label: isFullscreen ? t("imageExitFullScreen") : t("imageFullScreen"),
+        lang: langOf(isFullscreen ? "imageExitFullScreen" : "imageFullScreen"),
         glyph: isFullscreen ? <ZoomExitFullScreen /> : <ZoomFullScreen />,
         // Straight from the click: the Fullscreen API only honours a user gesture.
         onClick: (event) => void toggleFullscreen(event.currentTarget),
@@ -153,6 +177,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
           id: `rotateRight-${instance}`,
           shortcut: SHORTCUTS.rotateRight,
           label: t("imageRotateRight"),
+          lang: langOf("imageRotateRight"),
           glyph: <Rotate />,
           onClick: () => renderer.rotateBy(90),
         },
@@ -161,6 +186,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
           id: `rotateLeft-${instance}`,
           shortcut: SHORTCUTS.rotateLeft,
           label: t("imageRotateLeft"),
+          lang: langOf("imageRotateLeft"),
           glyph: <Rotate />,
           onClick: () => renderer.rotateBy(-90),
         },
@@ -172,6 +198,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
         id: `reset-${instance}`,
         shortcut: SHORTCUTS.reset,
         label: t("imageResetZoom"),
+        lang: langOf("imageResetZoom"),
         glyph: <Reset />,
         // Home also turns the image upright, as `Image`'s reset does.
         onClick: () => renderer.home(),
@@ -182,6 +209,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
         key: "choice",
         id: choiceId,
         label: choiceLabel,
+        lang: choiceLang,
         glyph: <Choice />,
         onClick: () => setChoiceOpen((open) => !open),
         expanded: choiceOpen,
@@ -206,6 +234,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
           <Button
             id={annotationsId}
             label={annotationsLabel}
+            lang={annotationsLang}
             onClick={() => setAnnotationsOpen((open) => !open)}
             expanded={annotationsOpen}
             controls={annotationsMenuId}
@@ -217,6 +246,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
           <Button
             id={`information-${instance}`}
             label={t("informationPanelTabsAbout")}
+            lang={langOf("informationPanelTabsAbout")}
             onClick={onCaptionToggle}
             expanded={captionOpen}
             controls={captionId}
@@ -231,11 +261,12 @@ const Controls: React.FC<CanvasControlsProps> = ({
         is: all three hang in one place, below the controls, and stay under them, so a
         control's Tip is never covered (`ControlMenu.css`).
       */}
-      {annotationsOpen && showAnnotations && (
+      {AnnotationMenu && annotationsOpen && showAnnotations && (
         <AnnotationMenu
           id={annotationsMenuId}
           triggerId={annotationsId}
           label={annotationsLabel}
+          labelLang={annotationsLang}
           annotations={annotations}
           selected={selectedAnnotation}
           onSelect={onAnnotationSelect}
@@ -243,11 +274,13 @@ const Controls: React.FC<CanvasControlsProps> = ({
           onClose={closeAnnotations}
         />
       )}
-      {choiceOpen && choices.length > 0 && onSelect && (
+      {ChoiceMenu && choiceOpen && choices.length > 0 && onSelect && (
         <ChoiceMenu
           id={menuId}
           triggerId={choiceId}
           label={choiceLabel}
+          labelLang={choiceLang}
+          language={language}
           choices={choices}
           selections={selections}
           onSelect={onSelect}

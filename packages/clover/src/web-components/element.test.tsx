@@ -29,7 +29,17 @@ vi.mock("../lib/renderer", async (importOriginal) => ({
 }));
 
 let viewport: ReturnType<typeof stubViewport>;
-beforeAll(() => defineCloverViewer({ styles: ".clover-root{}" }));
+/** The stylesheet in runs, as the build hands it: the middle one only for a map. */
+const loadMapRun = vi.fn(async () => ".clover-geomap{}");
+beforeAll(() =>
+  defineCloverViewer({
+    styles: [
+      { key: "clover-1", css: ".clover-root{}" },
+      { key: "map", when: ".clover-geomap", load: loadMapRun },
+      { key: "clover-2", css: ".clover-status{}" },
+    ],
+  }),
+);
 beforeEach(() => {
   initCloverI18n({ lng: "en" });
   viewport = stubViewport();
@@ -65,8 +75,32 @@ describe("<clover-viewer>", () => {
     // The stylesheet is in the document once, however many elements there are.
     mount();
     expect(
-      document.querySelectorAll('style[data-clover="clover"]'),
+      document.querySelectorAll('style[data-clover="clover-1"]'),
     ).toHaveLength(1);
+  });
+
+  it("loads a run only some pages need when what needs it draws, in its place", async () => {
+    const element = mount();
+    await within(element).findByRole("heading", {
+      name: "Simple Manifest - Book",
+    });
+    const order = () =>
+      [...document.head.querySelectorAll("style[data-clover]")].map(
+        (style) => (style as HTMLElement).dataset.clover,
+      );
+    expect(order()).toEqual(["clover-1", "clover-2"]);
+    expect(loadMapRun).not.toHaveBeenCalled();
+
+    const map = document.createElement("div");
+    map.className = "clover-geomap";
+    await act(async () => {
+      element.querySelector(".clover-root")!.append(map);
+      await Promise.resolve();
+    });
+    await waitFor(() =>
+      expect(order()).toEqual(["clover-1", "map", "clover-2"]),
+    );
+    expect(loadMapRun).toHaveBeenCalledTimes(1);
   });
 
   it("maps attributes to the Viewer's props, `false` turning a part off", async () => {
@@ -96,6 +130,26 @@ describe("<clover-viewer>", () => {
     ).toBeNull();
   });
 
+  it("heading-level sets the title's level, and the panel's a level below", async () => {
+    const element = mount({ "heading-level": "4" });
+    expect(
+      await within(element).findByRole("heading", {
+        level: 4,
+        name: "Simple Manifest - Book",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(element).getByRole("heading", { level: 5, name: "About" }),
+    ).toBeInTheDocument();
+  });
+
+  it("with header=false, the panel's sections take heading-level themselves", async () => {
+    const element = mount({ header: "false", "heading-level": "3" });
+    expect(
+      await within(element).findByRole("heading", { level: 3, name: "About" }),
+    ).toBeInTheDocument();
+  });
+
   it("tells the page where the reader moves, as events", async () => {
     const element = mount();
     const moved = vi.fn();
@@ -108,6 +162,25 @@ describe("<clover-viewer>", () => {
     await waitFor(() =>
       expect(moved).toHaveBeenCalledWith({ canvasId: bookJson.items[1].id }),
     );
+  });
+
+  it("lets a page without React set Clover's language, and marks it where the page's differs", async () => {
+    document.documentElement.lang = "fr";
+    const Element = customElements.get("clover-viewer") as unknown as {
+      initCloverI18n: typeof initCloverI18n;
+    };
+    const element = mount();
+    const next = await within(element).findByRole("button", { name: "Next" });
+    await waitFor(() => expect(next).toHaveAttribute("lang", "en"));
+    expect(element.querySelector(".clover-root")).not.toHaveAttribute("lang");
+
+    act(() => {
+      Element.initCloverI18n({ lng: "fr" });
+    });
+    expect(
+      await within(element).findByRole("button", { name: "Suivant" }),
+    ).not.toHaveAttribute("lang");
+    document.documentElement.lang = "";
   });
 
   it("tears down when removed, and not when moved", async () => {

@@ -25,8 +25,9 @@ export class ErrorBoundary extends React.Component<
   render() {
     const { error } = this.state;
     if (!error) return this.props.children;
+    // Its words are English, untranslated, so they are marked as English.
     return (
-      <div className="clover-canvas-error" role="alert">
+      <div className="clover-canvas-error" role="alert" lang="en">
         <p className="clover-canvas-error-headline" data-testid="headline">
           Something went wrong
         </p>

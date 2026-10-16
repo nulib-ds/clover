@@ -119,6 +119,15 @@ export async function serveIIIF(page: Page): Promise<Request[]> {
   return requests;
 }
 
+/**
+ * On a phone (the `iphone` and `android` projects) the Viewer's information panel floats,
+ * closed until it is asked for: open it there, as a reader would, before its sections.
+ */
+export async function openPanel(page: Page, isMobile: boolean) {
+  if (!isMobile) return;
+  await page.getByRole("button", { name: "More Information" }).click();
+}
+
 /** A content state as a link carries it: base64url of the URI-encoded JSON. */
 export function encodeContentState(json: unknown): string {
   return Buffer.from(encodeURIComponent(JSON.stringify(json)))

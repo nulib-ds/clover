@@ -117,3 +117,19 @@ export function useT(): (
 ) => string {
   return useCloverTranslation().t;
 }
+
+/**
+ * The language of one of Clover's strings where it is not the page's (a French reader on
+ * an English page, or a key that fell back to English), for the element that shows it, or
+ * is named by it, to carry as `lang` (WCAG 3.1.2). Undefined otherwise: the string takes
+ * the page's language. The page's is the nearest `lang` around the Root.
+ *
+ * ```jsx
+ * const t = Clover.useT();
+ * const langOf = Clover.useLangOf();
+ * <button aria-label={t("commonClose")} lang={langOf("commonClose")} />
+ * ```
+ */
+export function useLangOf(): (key: string) => string | undefined {
+  return useCloverTranslation().langOf;
+}

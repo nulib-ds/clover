@@ -77,23 +77,31 @@ const CanvasRecipe = ({
     direction === "right-to-left" || direction === "bottom-to-top";
   const vertical =
     direction === "top-to-bottom" || direction === "bottom-to-top";
-  const step = (label: string, delta: number, glyph: string) => (
-    <button
-      type="button"
-      onClick={() => setViewIndex((index) => index + delta)}
-      disabled={viewIndex + delta < 0 || viewIndex + delta >= views.length}
-      style={{
-        padding: "0.25rem 0.875rem",
-        borderRadius: "999px",
-        border: "1px solid currentColor",
-        background: "transparent",
-        cursor: "pointer",
-        font: "inherit",
-      }}
-    >
-      <span aria-hidden="true">{glyph}</span> {label}
-    </button>
-  );
+  const step = (label: string, delta: number, glyph: string) => {
+    // At an end the button stays focusable, so focus never drops to the page: a press
+    // there does nothing.
+    const blocked = viewIndex + delta < 0 || viewIndex + delta >= views.length;
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          if (!blocked) setViewIndex((index) => index + delta);
+        }}
+        aria-disabled={blocked || undefined}
+        style={{
+          padding: "0.25rem 0.875rem",
+          borderRadius: "999px",
+          border: "1px solid currentColor",
+          background: "transparent",
+          cursor: blocked ? "default" : "pointer",
+          opacity: blocked ? 0.5 : undefined,
+          font: "inherit",
+        }}
+      >
+        <span aria-hidden="true">{glyph}</span> {label}
+      </button>
+    );
+  };
   const previous = step(
     "Previous",
     -1,
@@ -118,6 +126,7 @@ const CanvasRecipe = ({
           <CloverCanvas
             canvases={shown}
             viewingDirection={direction}
+            label={manifest?.label}
             options={options}
           />
         )}

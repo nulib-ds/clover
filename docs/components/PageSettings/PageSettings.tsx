@@ -22,7 +22,7 @@ const DEFAULT_ACCENT = "#0f62fe";
  *
  * A disclosure rather than a modal: no backdrop, nothing inert, because the point is to
  * change a value and watch the page respond. It closes on Escape (returning focus to
- * the gear) and on a press outside.
+ * the gear), on a press outside, and when focus leaves it.
  */
 const PageSettings: React.FC = () => {
   const { accent, font } = usePageTheme();
@@ -57,11 +57,17 @@ const PageSettings: React.FC = () => {
       setOpen(false);
       triggerRef.current?.focus();
     };
+    // Tabbing out closes it, so it never covers the control that takes focus.
+    const onFocusIn = (event: FocusEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("focusin", onFocusIn);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("focusin", onFocusIn);
     };
   }, [open]);
 

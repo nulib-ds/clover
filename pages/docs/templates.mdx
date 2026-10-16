@@ -30,6 +30,13 @@ of them can leave out. The Viewer passes every prop but `template`
 to its template, and every template takes the `Clover.Root` props: `request`,
 `canvasId`, `annotations`, `onContentStateChange` and the rest.
 
+Every template also takes `headingLevel`, the level of its title (default `2`), so it fits
+the outline of the page around it. The headings inside it follow a level below: the
+panel's sections in `Default` and `Document`, the Download menu's groups in `Document`,
+the lightbox's title in `Gallery`. `Default` without its header has no title, and its
+panel's sections take the title's level. Under a heading of your own, pass the level
+below it.
+
 <div className="clover-docs-template">
   <DefaultReadme />
 </div>

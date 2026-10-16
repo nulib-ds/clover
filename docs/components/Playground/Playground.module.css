@@ -357,18 +357,17 @@ button.tile:focus-visible {
   width: 100%;
 }
 
+/* A name too wide for the tile, with text spacing widened, wraps rather than being cut off. */
 .tileName {
   font-size: var(--clover-text-s, 0.854rem);
   line-height: 1.2;
-  overflow: hidden;
+  overflow-wrap: anywhere;
   text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-/* The chosen resource's name in the accent, as Items' chosen label is. */
+/* The chosen resource's name in the text accent, 4.5:1 in both themes. */
 .tile[data-selected="true"] .tileName {
-  color: var(--clover-color-accent, var(--accent-9));
+  color: var(--accent-11);
   font-weight: var(--weight-bold);
 }
 

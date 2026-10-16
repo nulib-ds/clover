@@ -20,13 +20,18 @@
   transition: all 200ms ease-in-out;
 }
 
-.cta:hover,
-.cta:focus {
+.cta:hover {
   box-shadow:
     -15px 0 30px -15px hsla(var(--nextra-primary-hue), 100%, 45%, 100%),
     0 0 30px -15px hsla(235, 100%, 38.2%, 38.2%),
     15px 0 30px -15px
       hsla(calc(var(--nextra-primary-hue) + 10deg), 100%, 85%, 25%);
+}
+
+/* A solid ring, 3:1 or more in both themes; the glow alone hid focus. */
+.cta:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
 }
 
 .cta span {

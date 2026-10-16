@@ -101,7 +101,6 @@
   background: var(--surface-sunken);
   border-radius: var(--radius-3);
   display: flex;
-  overflow: hidden;
 }
 
 .segment {
@@ -113,6 +112,20 @@
   font-size: var(--text-sm);
   padding: 0.5rem 0.875rem;
   white-space: nowrap;
+}
+
+/*
+ * The ends take the group's corners. Clipping the group to round them would cut off the
+ * focus ring, which is drawn outside the segment.
+ */
+.segment:first-child {
+  border-end-start-radius: inherit;
+  border-start-start-radius: inherit;
+}
+
+.segment:last-child {
+  border-end-end-radius: inherit;
+  border-start-end-radius: inherit;
 }
 
 .segment:hover {

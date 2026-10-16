@@ -57,8 +57,9 @@ const enterNativeFullscreen = (video: PrefixedVideo, from: Element) => {
   const placed = !video.isConnected && Boolean(canvas);
   if (placed && canvas) {
     const style = video.getAttribute("style");
+    // In the viewport's layer, and first in it, so beneath the viewport.
     video.style.cssText =
-      "position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none";
+      "position:absolute;inset:0;z-index:-1;width:100%;height:100%;object-fit:contain;pointer-events:none";
     canvas.prepend(video);
     video.addEventListener(
       "webkitendfullscreen",

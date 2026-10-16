@@ -1,4 +1,10 @@
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 import * as Clover from "../../parts";
 import type {
@@ -18,9 +24,18 @@ const PANEL_MIN = "14rem";
  */
 const BESIDE_REM = 16 + 14 + 1;
 
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
+
 export type DefaultProps = Omit<RootProps, "children"> & {
   /** The header over the stage: the resource's thumbnail and title. Default `true`. */
   header?: boolean;
+  /**
+   * The title's heading level, to fit the outline of the page around the layout (under
+   * an `h2`, 3). The panel's sections are a level below it, or at it with no header,
+   * taking the title's place. Default 2.
+   */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
   /** The information panel beside the stage, with its toggle. Default `true`. */
   panel?: boolean;
   /** Whether the panel starts open. Default: open when it has room beside the stage. */
@@ -31,7 +46,7 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    */
   panelLayout?: InformationPanelLayout;
   /** The thumbnails under the stage: a layout, or `false` for none. Default `carousel`. */
-  items?: ItemsLayout | false;
+  items?: Exclude<ItemsLayout, "pager"> | false;
   /**
    * Where the panel's width is remembered once the reader drags its bar
    * (`localStorage`). Default `"clover-template-default"`; `false` forgets it.
@@ -54,6 +69,7 @@ export type DefaultProps = Omit<RootProps, "children"> & {
 export function Default({
   className,
   header = true,
+  headingLevel = 2,
   panel = true,
   defaultPanelOpen,
   panelLayout = "accordion",
@@ -71,10 +87,25 @@ export function Default({
   const [choice, setChoice] = useState<boolean | undefined>(defaultPanelOpen);
   const open = choice ?? beside;
   const setOpen = (value: boolean) => setChoice(value);
-  // Narrowing under an open panel closes it, rather than suddenly covering the page.
+  const panelId = `${useId().replace(/:/g, "")}-panel`;
+  const pane = useRef<HTMLElement>(null);
+  // Focus in the panel as it goes is handed to its toggle, never left on what is hidden.
+  const handBack = () => {
+    if (pane.current?.contains(document.activeElement))
+      document
+        .querySelector<HTMLElement>(`[aria-controls~="${panelId}"]`)
+        ?.focus();
+  };
+  /*
+   * Narrowing under an open panel closes it, rather than suddenly covering the page. Before
+   * paint, while focus is still in the pane just hidden.
+   */
   const wasBeside = useRef(beside);
-  useEffect(() => {
-    if (wasBeside.current && !beside) setChoice(undefined);
+  useIsomorphicLayoutEffect(() => {
+    if (wasBeside.current && !beside) {
+      handBack();
+      setChoice(undefined);
+    }
     wasBeside.current = beside;
   }, [beside]);
   const over = !beside;
@@ -82,15 +113,16 @@ export function Default({
   const slide = useSlide(over && open);
   useFocusOnOpen(panelRef, over && slide.mounted);
   // Over the stage, it can be dragged back off the way it came, as an app's drawer can.
-  const pane = useRef<HTMLElement>(null);
   const scrim = useRef<HTMLDivElement>(null);
   useDragToClose(pane, {
     enabled: over && slide.open,
     side: "end",
-    onClose: () => setOpen(false),
+    onClose: () => {
+      handBack();
+      setOpen(false);
+    },
     scrim,
   });
-  const panelId = `${useId().replace(/:/g, "")}-panel`;
   const shown = over ? slide.mounted : open;
   return (
     <Clover.Root
@@ -105,6 +137,20 @@ export function Default({
         data-panel={over ? "over" : "beside"}
         data-panel-open={panel && open}
         storageKey={storageKey || undefined}
+        onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
+          // Escape anywhere puts the floating panel away, uncovering a control focus
+          // reached under it, and leaves focus there (the panel's own Escape, handled
+          // first, hands focus to its toggle).
+          if (
+            over &&
+            open &&
+            event.key === "Escape" &&
+            !event.defaultPrevented
+          ) {
+            event.preventDefault();
+            setOpen(false);
+          }
+        }}
       >
         <Clover.SplitPane
           className="clover-template-default-main"
@@ -119,7 +165,10 @@ export function Default({
                 className="clover-template-default-thumbnail"
                 size={128}
               />
-              <Clover.Label as="h2" className="clover-template-default-title" />
+              <Clover.Label
+                as={`h${headingLevel}`}
+                className="clover-template-default-title"
+              />
             </header>
           )}
           {/* Its stage shows the loading; announced here, nothing moves. */}
@@ -159,6 +208,8 @@ export function Default({
             <Clover.InformationPanel
               ref={panelRef}
               layout={panelLayout}
+              // With no title over them, the sections take its place in the outline.
+              headingLevel={header ? below(headingLevel) : headingLevel}
               // Docked, the toggle closes it; over the stage, it carries its own close.
               onClose={over ? () => setOpen(false) : undefined}
               closeOnEscape={over}
@@ -179,6 +230,9 @@ export function Default({
     </Clover.Root>
   );
 }
+
+/** The heading level under another, no deeper than 6. */
+const below = (level: number) => Math.min(level + 1, 6) as 2 | 3 | 4 | 5 | 6;
 
 /**
  * The titles of the view the reader is on: a page's label, or both of a spread's, a dot

@@ -9,6 +9,18 @@
   --dc-muted: #716c6b;
   --dc-rule: #e4e0ee;
   --clover-color-accent: var(--dc-purple);
+  /*
+   * The page is always light, so Clover's neutrals are pinned to it. The docs set them at
+   * the root, already resolved, so in their dark theme Clover's text would be light on
+   * this white page.
+   */
+  --clover-color-primary: var(--dc-text);
+  --clover-color-primary-muted: var(--dc-muted);
+  --clover-color-primary-alt: var(--dc-text);
+  --clover-color-secondary: #fff;
+  --clover-color-secondary-muted: #f0f0f3;
+  --clover-color-secondary-alt: #dddde3;
+  color-scheme: light;
   min-height: 100vh;
   background: #fff;
   color: var(--dc-text);
@@ -52,11 +64,15 @@
   color: #fff;
 }
 
+/* Wraps on a narrow screen, so the links drop below the wordmark rather than run off. */
 .bar .wide {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 0.382rem 1.618rem;
   min-height: 2.618rem;
+  padding-block: 0.382rem;
 }
 
 .wordmark {
@@ -66,7 +82,8 @@
 
 .barLinks {
   display: flex;
-  gap: 1.618rem;
+  flex-wrap: wrap;
+  gap: 0.382rem 1.618rem;
   font-size: 0.854rem;
 }
 
@@ -233,6 +250,11 @@
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}
+
+.clamp[data-expanded] {
+  display: block;
+  -webkit-line-clamp: none;
 }
 
 .explore {

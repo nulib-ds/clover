@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import React from "react";
 
 import { initCloverI18n } from "../../i18n";
@@ -95,6 +101,20 @@ describe("primitives", () => {
     expect(container.innerHTML).not.toMatch(/javascript/);
   });
 
+  it("read a Markdown value's lists and headings, the first at headingLevel", async () => {
+    render(
+      <Clover.Value
+        value={{ none: ["# Provenance\n\n- Bought 1902\n- Given 1950"] }}
+        format="text/markdown"
+        headingLevel={4}
+      />,
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Provenance", level: 4 }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+  });
+
   it("render nothing without a value", () => {
     const { container } = render(
       <>
@@ -128,6 +148,45 @@ describe("InformationPanel", () => {
     ).toBeInTheDocument();
     expect(
       within(panel).getByRole("link", { name: manifest.id }),
+    ).toBeInTheDocument();
+  });
+
+  it("puts About's headings a level under its own in the accordion", async () => {
+    render(
+      <Clover.Root iiifContent={manifest}>
+        <Clover.InformationPanel layout="accordion" />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByRole("heading", { name: "About", level: 3 }),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Rights", level: 4 }),
+    ).toBeInTheDocument();
+  });
+
+  it("sets its headings from headingLevel, in either layout", async () => {
+    const { unmount } = render(
+      <Clover.Root iiifContent={manifest}>
+        <Clover.InformationPanel layout="accordion" headingLevel={5} />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByRole("heading", { name: "About", level: 5 }),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Rights", level: 6 }),
+    ).toBeInTheDocument();
+    unmount();
+
+    // Tabs are not headings: their content starts at the level.
+    render(
+      <Clover.Root iiifContent={manifest}>
+        <Clover.InformationPanel headingLevel={4} />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByRole("heading", { name: "Rights", level: 4 }),
     ).toBeInTheDocument();
   });
 
@@ -196,7 +255,8 @@ describe("InformationPanel", () => {
     expect(fetch).not.toHaveBeenCalled();
     fireEvent.click(tab);
     const panel = screen.getByRole("tabpanel", { name: "Collection" });
-    expect(panel).toHaveTextContent("Letters");
+    // The section loads with the tab, its first opening.
+    await waitFor(() => expect(panel).toHaveTextContent("Letters"));
     const members = await within(panel).findAllByRole("option");
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(fetch.mock.calls[0][0]).toBe(SHELF);

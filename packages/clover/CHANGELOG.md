@@ -18,18 +18,46 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   unlayered CSS wins. Import it once; components never inject CSS. Peers: React 18 or 19.
 - **`groupViews`, `resolveBehavior` and `resolveDirection`**, the rules that group a
   Manifest's Canvases into views by `behavior` and lay them out by `viewingDirection`.
-- **`initCloverI18n`**, as in 3.x. Translations are bundled for en, es, fi, fr, nb, nn,
-  no and pt.
+- **`initCloverI18n`**, as in 3.x. Clover ships en, es, fi, fr, nb, nn, no and pt.
+  English is bundled; each other language is its own chunk, loaded the first time Clover
+  is to speak it, so a page in English never fetches one. Until it arrives, Clover's
+  words show in English, marked `lang="en"`, and change when it does. Unlike 3.x, Clover
+  speaks the language of the page around it: without an `lng`, it reads the page's
+  `<html lang>` first and the browser's languages after, so a French browser on an
+  English page gets English, as the rest of that page is. IIIF text without a Root
+  `language` follows the same order. To speak the reader's browser language whatever the
+  page's, pass it yourself:
+
+  ```js
+  initCloverI18n({ lng: navigator.language });
+  ```
+
+  `initCloverI18n` returns the translator, whose `ready()` settles once the language it
+  speaks has loaded. Await it where the strings must be in place before anything draws:
+  a server render, or a test that reads them at once.
+
+  ```js
+  await initCloverI18n({ lng: "fr" }).ready();
+  ```
+
+  Twenty-seven of 3.x's strings that no part shows are gone (`sliderNext`,
+  `canvasAnimationPlay`, `playerAnnounce…`, `share…` and others); a `resources` entry
+  for one does nothing.
+
 - **`Clover.Root` and its parts.** `Root` loads `iiifContent` and holds where the reader
   is; parts read from the nearest `Root`, wherever they sit in your markup.
   - `Content` draws the current view (a page, a spread, a video or sound) with `Canvas`.
   - `Label` shows the Manifest's label, or the current Canvas's with `of="canvas"`, in the
     reader's language and marked with `lang`.
-  - `Previous`, `Next`, `Position` and `Pager` move a view at a time, a spread at a time
-    in a paged book. Their arrows and order follow `viewingDirection`. `Previous` and
-    `Next` are round arrow controls, as Items' arrows are: each names itself on hover and
-    focus, and is hidden on the first or last view, keeping its room so `Position` stays
-    put. `Position` shows "2 / 5", the same in every language; assistive technology reads
+  - `Previous`, `Next` and `Position` move a view at a time, a spread at a time in a
+    paged book; with `of="members"`, a Manifest at a time through the Collection. All
+    three together are Items' `pager` layout (below). Their arrows follow
+    `viewingDirection`. `Previous` and `Next` are round arrow controls, as Items' arrows
+    are: each names itself on hover and focus, and at the first or last item is
+    `aria-disabled` and shows disabled: faded, taking no pointer (whole again, its arrow
+    faded, while it has focus).
+    `Position` shows "2 / 5", the same in every language, in the room of its widest
+    count ("17 / 17"), so nothing beside it moves as it grows; assistive technology reads
     "Item 2 of 5", in the reader's language.
   - `Status` shows loading and errors: loading as Clover's loading mark, a 3px line
     in the accent drawn from start to end, fading in as it goes, announced as "Loading…" (your own `loading` is shown
@@ -53,7 +81,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   <Clover.Root iiifContent={url}>
     <Clover.Label as="h1" />
     <Clover.Content />
-    <Clover.Pager />
+    <Clover.Items layout="pager" />
   </Clover.Root>
   ```
 
@@ -96,6 +124,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   About by default. Give it `Clover.Tab` children (`value`, `label`, and anything as
   content) to choose the sections, including your own; this replaces 3.x's information
   panel plugins. `value` / `defaultValue` / `onValueChange` control which section shows.
+  The default sections past About (Collection, Contents, Search, Map, Transcript,
+  Annotations) load when first opened, so their content arrives a moment after the
+  section opens; in a test, find it with `findBy…`, not `getBy…`.
 
   `layout` lays the sections out as `"tabs"` (the default) or `"accordion"`: stacked
   boxes, each opened by its heading; opening one closes the others, and one is always
@@ -103,7 +134,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   panel that scrolls, every accordion heading stays in sight: those scrolled past stack
   at the top, those an open section pushes below stack at the bottom, both inside the
   panel's padding, so the first heading holds where it rests from the first pixel of
-  scrolling (a heading is one line, cut short if it must be). What scrolls under them
+  scrolling (a heading runs to as many lines as its label needs). What scrolls under them
   shows faintly: a soft shadow under the open section's heading once the panel has
   scrolled, and over the next heading while there is more below. A closed section's
   heading is in the accent at the text's own weight, faintly underlined, and the open
@@ -159,8 +190,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Attributes `iiif-content`, `canvas-id`, `manifest-id`, `language`, `search-query`,
   `items`, `header`, `panel`, `download`; an `iiifContent` property for objects; events
   `canvaschange`, `manifestchange`, `contentstatechange`. Light DOM, as 3.x's. About
-  86 kB gzip up front (3.x's element: about 530 kB); MapLibre, its worker and its
-  stylesheet load only with a map.
+  96 kB gzip up front (3.x's element: about 530 kB); MapLibre, its worker and its
+  stylesheet load only with a map. Its stylesheet is injected in runs, in the order
+  `styles.css` gives them, as `<style data-clover="clover-1">` to `"clover-3"`; the
+  rules only video, sound, an animation or a map need (`data-clover="media"`, `"map"`)
+  load as one draws, each put in its place among the runs, so the cascade is the
+  stylesheet's. Where a page looked for `style[data-clover="clover"]`, look for
+  `style[data-clover]`, which finds them all (MapLibre's, `"maplibre"`, too).
+  `defineCloverViewer`'s `styles` takes the whole stylesheet or its runs.
 
   ```html
   <script src=".../web-components/index.umd.js"></script>
@@ -196,7 +233,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     Canvas's `duration` ends.
   - Playback controls for the frames, styled as the Canvas's playback controls for video
     and sound, and fading as they do: a seek bar, previous and next (stopping at the
-    ends), play or pause, Repeat, and "Frame 3 of 16".
+    ends, where they show disabled), play or pause, Repeat, and "Frame 3 of 16".
   - "Frame 3 of 16" opens the frames, as 3.x's row of their thumbnails under the Canvas
     did: the menu a Canvas's Choice opens (one radio button per frame, its picture and
     the Manifest's label for it, the frame showing checked), up from the playback
@@ -322,9 +359,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     Manifest was reached through a Collection or says it is `partOf` one: the
     Collection's name and summary over its members as
     `<Clover.Items of="members" layout="list">` (square thumbnails, `xl` on a side, and
-    their names at the panel's size, a name and its summary a line each, cut short if they
-    must be), set 1.618rem (`l`) from what is above and below it, then its homepage and
-    its id.
+    their names and summaries at the panel's size, in full: a long one makes its member
+    taller than its thumbnail), set 1.618rem (`l`) from what is above and below it, then
+    its homepage and its id.
     Choosing one shows it. A `partOf` Collection is fetched only when the section first
     opens, never before. This is where the Viewer's `Default` template lists them.
   - `Clover.Collection` is that section as a part of its own, for a layout that shows
@@ -334,7 +371,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     part takes the name `Collection`.
   - `Clover.CollectionSelect`, a native `<select>` of the members labelled by the
     Collection, is the same choice as a menu (in `Document`'s toolbar). Choosing a
-    Manifest shows it; choosing a nested Collection enters it.
+    Manifest shows it; choosing a nested Collection enters it. A pointer, a phone's
+    picker or the menu's own list chooses at once. From the keyboard, the arrows only
+    move through the members, Enter opens the one shown, and Escape or leaving the menu
+    takes the step back. `onChange` is called when a member is chosen, not on each
+    step.
   - `<Clover.Items of="members">` is the same choice as a listbox of thumbnails.
   - `Root` takes `manifestId` (controlled, with `onManifestChange`) to open and follow a
     member, and `clover.goToManifest(id)` moves there from a part of your own.
@@ -408,7 +449,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     before), and the panel is as wide as `Default`'s floating one. The page keeps the
     inset clear round it on its grey background.
   - `Gallery`: `Items` as a grid of the views, opening one in a lightbox (a native
-    `<dialog>`) with the Canvas and the `Pager`.
+    `<dialog>`) with the Canvas and Items' pager.
 
   ```jsx
   import Viewer from "@nulib/clover";
@@ -422,13 +463,23 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`visuallyHidden`**, the inline styles Clover hides labels with, for parts of your own
   that must read plainly without the stylesheet.
 - **Markdown annotation bodies** (`format: "text/markdown"`) are read as Markdown —
-  paragraphs, emphasis, links, lists, footnotes — and sanitised like HTML. `Clover.Value`
+  paragraphs, emphasis, links, lists (nested), headings, footnotes — and sanitised like
+  HTML. `Clover.Value`
   shows any language map (with `format`); `useAnnotationSets`, `useT` and `toPlainText`
   are exported; `Root` takes `annotationPages="all"` to fetch every Canvas's referenced
   annotation pages, not only the view's. `Thumbnail` takes any resource as `value`, and
   image attributes such as `alt`.
 - **`Clover.Items`**, thumbnails of a sequence as a `carousel` (the default), `list` or
-  `grid`. It succeeds 3.x's `Slider` and the row of thumbnails under 3.x's Viewer.
+  `grid`, or one item at a time as a `pager`. It succeeds 3.x's `Slider` and the row of
+  thumbnails under 3.x's Viewer.
+  - `layout="pager"` is the count, then Previous and Next (mirrored in a right-to-left
+    book), in a `nav` named "Items" (`itemsLabel`), stepping through what the strip
+    lists: the Root's views, its Collection's members (`of="members"`, telling
+    `onSelect` of each), or a standalone list's selection. A strip and a pager follow
+    each other. It is a flex row, `.clover-items.clover-pager[data-layout="pager"]`:
+    move a piece with `order`, or compose `Previous`, `Next` and `Position`, which take
+    `of` too. It replaces a `Pager` part, and its `pagerLabel` string ("Pages"), which
+    are gone.
   - Inside a `Root` it is a listbox of the Root's views, a spread as one item (and
     nothing at all for a single view): one tab
     stop, and as in a radio group the arrows, Home and End select as they move (where a
@@ -545,17 +596,18 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Video and sound still start at their placeholder each time, since opening one plays it.
 - **The selected thumbnail is clearer.** Hover, selection and focus ring an item's
   pictures from outside, 1px clear of them, rather than inside their edge. It is always
-  3px, transparent at rest, so only its colour changes: the accent for the selection, the
-  text colour for keyboard focus (so the two tell apart where they part, as a
-  Collection's members do), and the accent at half strength for hover. It is an outline
+  3px and transparent at rest, so it never grows: the accent for the selection, the text
+  colour for keyboard focus, and the accent at half strength for hover. Focus adds a
+  second ring inside the pictures' edge, `secondary` beside `primary`, so it shows on
+  any picture. It is an outline
   on `.clover-items-pictures`, in 4px of room the item keeps round itself
   (`--clover-items-ring-room`) and gives back with a negative margin, so items are still
   `--clover-items-gap` apart and the edge of `Items` never cuts a ring. Only a carousel,
   which scrolls across, keeps that room at its sides: a list or a grid keeps it above and
   below alone, so it never reaches past its own sides, which had put a scrollbar across a
-  scrolling box with no padding round it. A stylesheet that
-  styled `.clover-items-pictures::after` should style `.clover-items-pictures`'s outline
-  instead. The thumbnails' corners are rounded to match, `--clover-radius` (3px), a
+  scrolling box with no padding round it. Clover now draws focus's inner ring on
+  `.clover-items-pictures::after`. A stylesheet that styled that pseudo-element should
+  style `.clover-items-pictures`'s outline instead, and leave `::after` to Clover. The thumbnails' corners are rounded to match, `--clover-radius` (3px), a
   spread's outer corners only: each picture now clips its image, where only a grid's did.
 - **Every region keeps what it holds 1.618rem in, the Canvas's controls too, and steps
   down from there.** A region's inset is a new token, `--clover-inset`
@@ -606,12 +658,15 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the system player. That includes a video drawn into the `<canvas>` element
   (`presentation: "texture"`). The same applies inside an `<iframe>` that is not allowed
   full screen, where the button used to do nothing. Other browsers are unchanged.
-- **The playback controls for video and sound stay on one row.** The play, volume, time,
-  chapters, captions and full-screen controls keep their size, and the current chapter's
-  title gives way to them, shortening with an ellipsis, rather than the row wrapping.
+- **The playback controls for video and sound keep their size.** The play, volume, time,
+  chapters, captions and full-screen controls hold their size, and the current chapter's
+  title gives way to them, shortening with an ellipsis. Where they still do not fit, the
+  bar wraps (see Fixed).
 - **Captions show once on iPhone.** iOS Safari turns a caption track on by the reader's
-  caption settings, and drew its own copy of each cue in the picture, under Clover's. Every
-  track now stays `hidden`. Clover draws the cues and fills the transcript.
+  caption settings, and drew its own copy of each cue in the picture, under Clover's. The
+  tracks Clover draws stay `hidden`, and the media's own stay `disabled` until chosen, so
+  the page shows one copy: Clover draws the cues and fills the transcript. In the system
+  player the chosen track is `showing` (see Fixed).
 - **Without the stylesheet**, the Canvas keeps its size, because its geometry is set inline.
   The exit full-screen button stays hidden until the page goes full screen, and icons keep
   their own size.
@@ -683,7 +738,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the bar the reader drags between them. One pane beside each bar has a `size` (with
   `min` and `max`, in px, rem or %); the other takes what is left. The bar is a focusable
   `separator`: the arrow keys move it (Shift for bigger steps), Home and End go to the
-  limits, and a double click puts the pane back to its size. A pane's `min` holds in the
+  limits, and a click or tap steps the pane through its narrowest, its own `size` and its
+  widest. A pane's `min` holds in the
   layout too, not only under the bar: where the Split is narrow, a sized pane gives way
   down to its own `min` before the others go below theirs. Docked beside the Canvas at
   about 580px, `Default`'s `InformationPanel` had kept its full 24rem and left the Canvas
@@ -756,7 +812,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - **Full screen, rotation and keyboard control**, and a **navigator** (an overview in
     the top left). Reset turns the image upright the short way: after four turns right
     it does not spin back a whole turn, and after three it turns one more quarter. The
-    navigator is off by default; turn it on with `navigator`:
+    navigator is off by default, and its code loads only once it is on; turn it on with
+    `navigator`:
 
     ```jsx
     <Clover.Canvas src={src} isTiledImage navigator />
@@ -815,7 +872,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     It is added to `ControlButtons` as `choice`, so it can be replaced like the others.
   - **Controls on demand.** The Canvas's controls, the navigator (when on) and a dark
     shade behind them appear on pointer activity or keyboard focus inside the Canvas,
-    and fade after `options.hideDelay` (2000 ms), as the bar of 3.x's Player does.
+    and fade after `options.hideDelay` (2000 ms), as the bar of 3.x's Player does. Under
+    a finger, a tap on the picture shows and hides them instead.
   - **No Manifest awareness.** `Canvas` does not step through a Manifest. Grouping
     Canvases by `behavior` (`individuals`, `paged` spreads with `facing-pages` and
     `non-paged`, `continuous`) and moving between them is the host's job.
@@ -844,7 +902,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     - **`navigable` gesture option.** `options.gestures.navigable: false` holds the
       camera still for any Canvas.
     - **Captions.** WebVTT files from `supplementing` annotations, one per language for
-      a `Choice`, become caption tracks.
+      a `Choice`, become caption tracks. Clover draws them on the scale, from the page's
+      own text size, so a reader's larger default text makes them larger. Style them
+      with `--clover-player-caption-surface` (the box), `--clover-player-caption-text`
+      and `--clover-player-caption-edge` (a `text-shadow`, `none` by default), and set
+      their size or font on `.clover-canvas-captions-cue`. A system's own caption
+      settings apply where its player shows them (an iPhone's full screen, picture in
+      picture).
     - **Poster.** A `placeholderContainer` image is the video's poster.
     - **HLS** plays through `hls.js` wherever the browser supports it, Chromium's native
       HLS included, and natively only where it does not (older iOS).
@@ -946,5 +1010,553 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   stylesheet 6.3 kB and `templates.css` 1.8 kB. Bundled through the package entry with esbuild, a
   standalone Canvas measures 34.7 kB; imported directly it is 32.9 kB, as Rollup bundles
   it.
+  The accessibility work of October 2026 brought a standalone `Canvas` to 44.5 kB, the
+  Viewer with `Default` to 74.1, `Document` to 76.0, `Gallery` to 63.6, the map before
+  MapLibre to 24.1 and `<clover-viewer>` to 111.3. Most of it was won back by loading on
+  demand what not every page uses: the seven languages after English (5.6 kB); the panel
+  sections past About (Collection, Contents, Search, Transcript, Annotations); the
+  hotspots and the Canvas's annotations and Choice menus, fetched as soon as a Canvas has
+  annotations or a Choice, so they are there before they are pressed (`.clover-canvas`
+  now carries `data-animated` on an animation, as it does `data-media`); the navigator;
+  the Content Search client, with the first search; and, in `<clover-viewer>`, the
+  styles for media and maps. Twenty-seven unused strings went too. What remains is the
+  accessibility work itself, and the budgets were set from the new sizes: a standalone
+  `Canvas` 35.6 kB (budget 35.8, unchanged), the Viewer with `Default` 61.3 (61.5),
+  `Document` 63.3 (63.5), `Gallery` 54.4 (54.6), `@nulib/clover/map` 17.2 before
+  MapLibre (lowered from 20.0 to 17.3), the stylesheet 10.4 (10.6), `templates.css` 1.9
+  (2.1; at 1,916 B it had passed its 1.9 unnoticed, the test stopping at the first page
+  over) and `<clover-viewer>` 95.7 (95.9). Scrolling a hotspot's note longer than the
+  stage then brought `<clover-viewer>` to 95.9 kB (95,934 B), 34 B over that, and its
+  budget was set to 96.1. Items' pager, which replaced the `Pager` part (stepping a
+  Collection's members, and a count that keeps its widest room), then added about
+  0.4 kB to each template: the budgets were set to the Viewer with `Default` 62.0 kB
+  (61,882 B), `Document` 64.0 (63,884 B), `Gallery` 55.1 (54,931 B) and
+  `<clover-viewer>` 96.9 (96,709 B).
 
   The API is experimental and may change in any release.
+
+### Fixed
+
+WCAG 2.2 AA, from an audit of the whole package. What it found and the plan for the rest
+are in the repository's `ACCESSIBILITY.md`.
+
+- **Canvas.**
+  - The viewport's focus ring is a dark edge, the accent and a light band, at full
+    strength: `--clover-color-primary` and `--clover-color-secondary` either side of
+    `--clover-color-accent`, 9:1 apart by default, so one of them keeps 3:1 over any
+    picture. It was the accent beside white at 75% opacity, which fell to about 2.4:1 on
+    a mid-tone picture. The map's ring is the same. If you set `primary` and `secondary`,
+    keep them 9:1 apart.
+  - The viewport always has a name: the `label` given, else the Canvas's, the
+    Manifest's, a painting body's, then "Image" (a new string, `canvasImage`).
+  - The viewport says it can be operated: `aria-roledescription` ("zoomable image"),
+    `aria-keyshortcuts`, and `aria-describedby` pointing to a hidden list of its keys,
+    the player's for a lone video or sound. The role description is left out where its
+    string is not in the page's language, and with `options.gestures.navigable: false`,
+    which also drops the camera keys.
+  - A control under a resting pointer, its Tip with it, no longer fades after
+    `hideDelay`, so a press there no longer falls through to zoom the picture or play
+    the media.
+  - Under a finger, or a pen that does not hover, the controls, navigator and transport
+    no longer hide on a timer. A tap on the picture shows them and the next tap hides
+    them; a double tap zooms and leaves them as they were. `hideDelay` now applies only
+    to a mouse and a pen that hovers. If you relied on touch chrome fading by itself, it
+    no longer does.
+  - A press where faded chrome sits only shows the chrome: neither the press nor its
+    click reaches the picture or a hotspot beneath.
+  - Focus that no press brought (the keyboard's, a screen reader's) shows the chrome and
+    holds it until focus leaves.
+  - A pen that does not hover works as a finger: a single tap no longer zooms or plays
+    and pauses, and a double tap zooms. A touch double tap no longer zooms when
+    `clickToZoom` and `dblClickToZoom` are both off.
+  - At the largest zoom, a click, a double click or a double tap goes home, so one
+    pointer can always zoom back out. If you turn off both the click zooms and the zoom
+    controls, give readers a way out through the handle (`home()`, `zoomBy(0.5)`).
+  - `options.gestures.navigable: false` now holds the camera still beside video or sound
+    too, drops the grab cursor, and sets the figure's `data-navigable`.
+  - Without the stylesheet, the controls take their presses again: the viewport is
+    `z-index: -1` (was `0`), inline and in `Canvas.css`, in a figure that is
+    `isolation: isolate` inline. Restack anything you placed against the old `0`. A rule
+    that sets the viewport's own `z-index` now needs `!important`:
+
+    ```css
+    .my-page .clover-canvas-viewport {
+      z-index: 0 !important;
+    }
+    ```
+
+  - The information box and the Canvas's menus sit below every row of the controls, or
+    beside every column on a phone, however the controls wrap on a short stage. The
+    Canvas writes `--clover-canvas-controls-width` and `--clover-canvas-controls-height`
+    inline on `.clover-canvas` for them. On a phone they have no minimum width. The
+    controls' own box takes no presses; only the controls do.
+  - Escape returns focus to a menu's control (Choice, annotations, frames) only when it
+    is pressed in the menu or on the control. From elsewhere it closes the menu and
+    leaves focus where it is. Escape now closes the information box from anywhere in
+    the figure, also leaving focus where it is.
+  - A menu or the information box that handles an Escape calls `preventDefault()`, so a
+    `<dialog>` around the Canvas (the Gallery's lightbox) or a floating panel stays open
+    until the next Escape. A host's own Escape handler should return early on
+    `event.defaultPrevented`.
+  - A hotspot with no text of its own is named by its number, as the annotations menu
+    lists it. A hotspot reached by Tab pans into view just far enough to clear the
+    controls, navigator, transport, information box and menus; one already clear does
+    not move. The overlay layer is `overflow: clip`, so focus no longer scrolls the
+    hotspots off their regions.
+  - A hotspot's name is now a `Tip`, not a `<label>`. It shows on hover after a moment
+    and at once on keyboard focus, takes the pointer, hides on Escape, wraps, and stays
+    inside the stage, over the hotspot where neither side has room. Move your rules:
+
+    ```css
+    /* before */ .clover-canvas-annotation label { … }
+    /* after  */ .clover-canvas-annotation > .clover-tip { … }
+    ```
+
+  - A hotspot's note taller than the stage is capped inside it and scrolls: by wheel or
+    touch over it, and by the arrows, the page keys, Home and End from its hotspot. Where
+    `scrollToZoom` is on, the wheel over a note that can scroll scrolls it rather than
+    zooming. The gap between hotspot and note is now a clear `--clover-space-xs` border
+    of the note's own (`background-clip: padding-box`), so the pointer still crosses
+    onto it; the hotspot's `.clover-tip::before` bridge is gone. The note has
+    `tabindex="-1"`, and a press on it focuses its hotspot: hidden
+    from assistive technology, it never takes focus. `Clover.Tip` takes the same as
+    `scrolls` for a popover of your own that may outgrow its room; give it a
+    `max-height` and `overflow-y: auto`.
+
+  - Hotspots are outlined in two tones, `--clover-color-primary` round
+    `--clover-color-secondary`. Hovered, focused or picked, an accent band runs between
+    them and the inside takes a light accent tint. In forced colours a rectangle has a
+    `CanvasText` edge round a `Canvas` line, and an active one a `Highlight` ring.
+  - Hotspots are in the DOM in the annotations' order, so Tab and screen readers follow
+    the menu's order, not size. Stacking is a `z-index` from `--clover-annotation-depth`,
+    set inline: smaller over larger, the active one over the rest, the later of two on
+    one region on top. `.clover-canvas-overlays` is now `isolation: isolate` and
+    `container-type: size`. Update selectors and tests that relied on the old order.
+  - The picked hotspot has `aria-current="true"`.
+  - While the view is upright, the overlay layer writes `--clover-overlay-x`,
+    `--clover-overlay-top`, `--clover-overlay-bottom` and `data-overlay-room` (`above`
+    or `below`) on each element it pins, and removes them while the view is turned.
+  - Previous and Next frame stay focusable at the first and last frame: they are
+    `aria-disabled` there, not `disabled`. A selector or test for `:disabled` on them
+    should use `[aria-disabled="true"]`.
+  - An animation's frames bar sits in a `.clover-canvas-media[data-kind="frames"]` layer,
+    as a video's transport does: it fades with the chrome, and its menu fits the stage.
+    Rules on `.clover-canvas > .clover-canvas-transport[data-kind="frames"]` should
+    target `.clover-canvas-media > .clover-canvas-transport`.
+  - The Gallery's lightbox is named by the Canvas's label, else the Manifest's.
+
+- **Media.**
+  - Captions carry their track's `lang` and decode numeric character references
+    (`&#39;`, `&#x2019;`), as `parseVtt`, and so `Transcript`, now do.
+  - Caption tracks the media carries itself (an HLS stream's subtitles, CEA-608/708, a
+    file's own tracks) are offered in the Captions menu after the Manifest's, and drawn
+    as the Manifest's are. They stay `disabled` until chosen.
+  - In the iPhone's system player and in picture in picture, the chosen track is
+    `showing`, and a choice made in the system's own menu is kept when the video comes
+    back.
+  - The Captions button describes the track in use, and in forced colours shows
+    Highlight while captions are on.
+  - Captions on, or Repeat pressed, draws a bar under the button's glyph (an `::after`
+    border) beside the accent fill, in forced colours too. A pressed Repeat now takes
+    the accent fill as well.
+  - The transport bar wraps rather than running off a narrow stage. Under 28rem of stage
+    width (37.5rem with chapters), the time and chapter take a row above the buttons.
+    They sit in a new `.clover-canvas-transport-status`, and
+    `.clover-canvas-transport-spacer` is gone. Retarget rules on the spacer, or on
+    `.clover-canvas-transport-bar > .clover-canvas-transport-chapter`, to
+    `.clover-canvas-transport-status` and its `.clover-canvas-transport-chapter`.
+  - Chapters, Captions and Full screen sit together in a new
+    `<div class="clover-canvas-transport-end">`, at the end of the bar's last row. Rules
+    that selected them as children of `.clover-canvas-transport-bar` should select them
+    in `.clover-canvas-transport-end`.
+  - The transport writes its bar's height inline on `.clover-canvas` as
+    `--clover-transport-bar-height`, and `--clover-transport-room` includes it. If you
+    override `--clover-transport-room`, use
+    `var(--clover-transport-bar-height, var(--clover-control))` for the bar.
+  - `.clover-canvas-media` is now `container-type: size`, so the menus and captions are
+    sized to the stage. The Captions and Chapters menus place themselves when they open
+    and on resize: no taller than the room above their button, no wider than the stage,
+    and moved along to stay inside the bar's inset. They write
+    `--clover-transport-menu-above` and `--clover-transport-menu-shift` inline. On a
+    stage too short to clear the transport, the information box and the Canvas's menus
+    may cover it.
+  - The volume slider no longer hides below a 575px window. It narrows on a narrow
+    stage, and is left out only where a page cannot set the volume (iOS).
+  - The media stage stays mounted from one recording to the next (auto-advance), so
+    focus stays on the transport. If the focused control goes with the recording
+    (Captions, Chapters, Full screen), Play/Pause takes focus. A `texture` recording
+    whose CORS request fails falls back to `dom` for that recording only.
+  - While one of its controls has keyboard focus, the transport sits above the captions,
+    so a cue never covers the focused control.
+  - The Captions and Chapters menus stay open while the arrow keys move through them.
+    They close on a choice, Escape or a press outside, with focus back on their button,
+    and when focus moves out of them, leaving it where it went. An Escape in one closes
+    only the menu, never a dialog around the Canvas.
+  - `chapters` entries take `lang`, the language of their label, which Clover sets on the
+    chapter's title and its menu option. Inside a `Root` it comes from the Range's label.
+
+    ```tsx
+    <Canvas
+      chapters={[{ label: "Atto Primo", lang: "it", start: 0, end: 302 }]}
+    />
+    ```
+
+  - An open video or sound's toggle reads "Close player" (`playerClose`, a new string),
+    not "Close", in its name and its Tip. Tests that found it as "Close" should look for
+    "Close player".
+  - The full-screen button reads `imageFullScreen` and `imageExitFullScreen`, as the
+    Canvas's own does. Move any `playerFullScreen` or `playerExitFullScreen` translation
+    to those keys.
+  - In forced colours the seek and volume sliders draw in system colours: a `CanvasText`
+    rail and thumb, the played part in `Highlight`, and an outline on focus. The
+    transport's buttons keep a 1px `ButtonText` border.
+
+- **Previous and Next.** `Previous`, `Next` and Items' carousel arrows keep keyboard focus
+  at the first and last view. There they are `aria-disabled`, not `disabled`: they leave
+  the tab order, a press does nothing, and while focused they stay in sight with the
+  arrow faded. Once focus leaves they show disabled, faded (`opacity: 0.38`) and taking
+  no pointer, where they used to vanish: the pager keeps its shape, and a press on the
+  strip's faded arrow reaches the picture under it. An animation's previous and next
+  frame show disabled the same way at its first and last frame. The rule is one, in
+  `ui/Button.css`. A `disabled` you pass is still the native attribute. Selectors and tests
+  for `:disabled` on `.clover-pager-previous`, `.clover-pager-next`,
+  `.clover-items-scroll-prev` or `.clover-items-scroll-next` should use
+  `[aria-disabled="true"]`:
+
+  ```css
+  /* Before */
+  .clover-pager-next:disabled {
+    visibility: hidden;
+  }
+  /* After */
+  .clover-pager-next[aria-disabled="true"]:not(:focus-visible) {
+    visibility: hidden;
+  }
+  ```
+
+  ```ts
+  // Before
+  expect(next).toBeDisabled();
+  // After
+  expect(next).toHaveAttribute("aria-disabled", "true");
+  ```
+
+- **Items.**
+  - An item with no label is named by its place ("Item 2 of 5"). Options and links take
+    their name from the item's label in every browser: the figure is `role="none"`, so
+    give a `renderItem` figure the same. A `renderItem` item now shows a focus outline.
+  - Keyboard focus adds a second ring inside the pictures' edge, in two tones
+    (`--clover-color-secondary` at the edge, `--clover-color-primary` inside it, 2px
+    each), so a focused item differs from a selected one by more than colour. It is a
+    `CanvasText` outline in forced colours. Clover draws it on
+    `.clover-items-pictures::after`; leave that pseudo-element to Clover.
+  - On Enter and Space, `onSelect` gets the key's own event, as a click passes its own.
+    `preventDefault()`, `stopPropagation()` and a `defaultPrevented` guard now work for
+    keys as for clicks; before, a stand-in object threw on `preventDefault()`. Clover
+    still keeps Space from scrolling the page.
+  - Entering a nested Collection keeps focus in the list, on the new list's selected
+    member or else its first.
+  - A carousel's or grid's title cut short at three lines shows in full while its item is
+    hovered or focused, over the picture above it, so nothing around it moves. Escape
+    hides it until the pointer comes back or focus leaves. The label's markup changed:
+    `.clover-items-label` now holds `.clover-items-label-text`, which carries `lang` and
+    takes the clamp, and, when the title is cut, `data-clamped` and a hidden copy,
+    `.clover-items-label-full`, kept out of the item's name. Move a clamp or `lang`
+    selector to the inner span.
+
+    ```css
+    /* Before */
+    .clover-items-label {
+      -webkit-line-clamp: 2;
+    }
+    /* After */
+    .clover-items {
+      --clover-items-lines: 2;
+    }
+    ```
+
+- **Collections.**
+  - In `Clover.Collection` and the panel's Collection section, member titles and
+    summaries wrap in full. A long one makes its member taller than its thumbnail.
+  - `CollectionSelect` no longer loads a Manifest on every arrow key or typed letter.
+    From the keyboard, the arrows move through the members and Enter loads the one
+    shown; Escape or leaving the menu takes the step back. A choice from the menu's own
+    list (a pointer, a phone's picker, Alt+↓, the list macOS opens) loads at once.
+    `onChange` fires on a choice, not on each step. Its Escape is `preventDefault`ed, so
+    a dialog or floating panel around it stays open. After a failed load, Enter tries
+    again.
+- **Information panel.**
+  - In the accordion, the default sections' own headings sit a level under the section
+    headings: h4 under h3 by default (About's download groups h5). Style them by class,
+    not by tag.
+  - Accordion labels wrap onto as many lines as they need, never cut short. `Sections`
+    measures the headings, and the stuck stacks follow.
+  - What is focused or scrolled to in the open section stays clear of the stuck
+    headings: its content keeps a `scroll-margin-block` as tall as the stacks, and
+    keyboard focus moves the pane to show it. A press never scrolls the pane.
+  - Headings stop sticking when the window is 32rem tall or less, or where their stacks
+    would leave the open section less than two lines of text, which sets
+    `data-stacks="off"` on the list.
+  - `--clover-sections-heading-height` is gone, and the heading has no fixed `height`:
+    size headings with padding. `--clover-sections-step` is now on `.clover-sections` and
+    `--clover-sections-index` on `.clover-sections-item`, both only a fallback until the
+    headings are measured. `Sections` writes `--clover-sections-before` and
+    `--clover-sections-after` inline on each item, and `--clover-sections-total` on the
+    list. For one line anyway, set `white-space: nowrap`, `overflow: hidden` and
+    `text-overflow: ellipsis` on
+    `.clover-sections[data-layout="accordion"] .clover-sections-label`; it cuts any label
+    that text spacing widens.
+  - In forced colours the current row (an annotation, a Range, a cue, a search hit, a
+    place on the map) keeps its edge, in `Highlight`, and the other rows' edges are drawn
+    in `Canvas`.
+  - Escape puts away a floating panel even with focus on a control under it, and
+    `Default` and `Document` never leave focus on a pane they hide.
+  - Download's menu closes when focus leaves it. Its Escape is `preventDefault`ed, so a
+    modal `<dialog>` around it stays open.
+- **Annotations.**
+  - An image annotation with no text beside it takes its alt from the image's `label`,
+    else the annotation's, else "Image" (`annotationsImage`, a new string). An image
+    with text beside it keeps `alt=""`. `AnnotationBodyEntry` has a new optional
+    `label`.
+  - Each entry's "Find on the image" button carries that label, or the entry's number
+    ("Find on the image: 2"), so no two read alike.
+  - A Markdown annotation is named by its words, without the syntax, in its button, its
+    hotspot, the hotspot's Tip and the annotations menu.
+- **Search.**
+  - The status region stays in the accessibility tree while empty (visually hidden, not
+    `display: none`), so its first message is announced.
+  - Matched words are bold as well as tinted, and take `Mark` and `MarkText` in forced
+    colours. If you restyle `.clover-content-search-hit mark`, keep a sign besides
+    colour.
+- **Status.** `Status` keeps one `role="status"` element, `p.clover-status`, for its whole
+  life: empty and visually hidden once ready, only its words changing, so "Loading…" is
+  announced on every load. An error renders the `role="alert"` box beside it. A test or
+  style that expected no `.clover-status` once ready should select `[data-status]` (set
+  only while loading, and on the alert) or `[role="alert"]`:
+
+  ```js
+  // Before
+  expect(container.querySelector(".clover-status")).toBeNull();
+  // After
+  expect(container.querySelector(".clover-status[data-status]")).toBeNull();
+  ```
+
+- **Split.**
+  - A click or tap on a `SplitHandle` steps its sized pane from its narrowest to its own
+    `size` to its widest, and round again. A press is a click until it moves 4px (8px
+    for a finger); past that it is a drag. `event.preventDefault()` in your `onClick`
+    skips the step.
+  - A double click no longer resets the pane: it steps once, and its second click, which
+    lands on what the step uncovered, is ignored for half a second or until the pointer
+    moves away. Your `onDoubleClick` still runs. Reaching its own `size` forgets the
+    stored size. Where you told readers to double-click the bar, tell them to click it.
+  - A pane's widest is what it shares with the pane across the bar, less that pane's
+    `min`, so in `Document` neither bar squeezes the third pane.
+  - At rest the bar has a grip at its middle, in `--clover-color-primary-muted`, 3:1
+    against either pane, 1px wider than the bar on each side. The bar's faintness is now a `background-color`, not `opacity`,
+    which would fade the grip too. `::after` draws the grip and `::before` is the grab
+    area, now `l` wide; use a child element for anything else. If you restyled the
+    handle:
+
+    ```css
+    /* Before */
+    .clover-split-handle {
+      background-color: …;
+      opacity: …;
+    }
+    /* After: the bar, and its grip (keep the grip 3:1 against both panes) */
+    .clover-split-handle {
+      background-color: …;
+    }
+    .clover-split-handle::after {
+      background-color: …;
+    }
+    ```
+
+  - The handle names itself in a Tip beside its grip, on hover and focus: "Resize
+    panels", or its own `aria-label`. A press on the Tip neither steps nor drags. The
+    handle now renders its `children` and the `.clover-tip` span, so a test that read
+    its `textContent` should read its accessible name. Without the stylesheet the name
+    shows, so the focus stop has a box.
+  - In forced colours the bar and grip are `CanvasText`, and `Highlight` while hovered,
+    held or focused. Focus adds a 2px outline.
+
+- **Popovers.**
+  - A `Tip` dismissed with Escape fades (`opacity: 0`) and takes no pointer, so a click
+    where it was reaches what it covered. It shows again when the pointer next enters
+    its control, or when focus leaves and comes back.
+  - Each time a Tip shows, it is measured against what clips it (the stage, a scrolling
+    panel, the window). One that would pass an edge wraps to the room there is and
+    moves in, `xs` clear. `.clover-tip` is now `width: max-content` and wraps, and sets
+    `transform: translateX(var(--clover-tip-shift, 0px))`; Clover writes
+    `--clover-tip-room` and `--clover-tip-shift` inline. Give your own offset with
+    `translate`, not `transform`, and drop any reliance on `white-space: nowrap`.
+- **Text.**
+  - Links in IIIF text are underlined, not only coloured. To opt out, set your own
+    unlayered `text-decoration: none`.
+  - Long unbroken values in Summary, Metadata and RequiredStatement wrap.
+  - "Read more" appears when text spacing or a late font pushes a summary past its clamp.
+  - Document's title wraps. For one line, set `white-space: nowrap`, `overflow: hidden`
+    and `text-overflow: ellipsis` on `.clover-template-document-title`.
+  - `Default`'s titles over `Items` (a spread's, joined by a dot) wrap, as Document's
+    title does, never cut short with an ellipsis.
+  - The search field's placeholder meets 4.5:1.
+  - Each link in the `Homepage`, `Rendering`, `SeeAlso` and `PartOf` lists is at least
+    24px tall (`min-block-size`).
+- **Markdown and HTML.**
+  - Markdown lists (`format: "text/markdown"`, in an annotation body or `Clover.Value`)
+    are `ul` and `ol` with `li` items. A numbered list keeps its first number as
+    `start`, an indented item nests under the one before, and a list may follow a line
+    of text with no blank line (a numbered one only when it starts at 1). Clover gives
+    them markers and an `l` indent.
+  - Markdown headings are `<p role="heading" aria-level="N"><b>…</b></p>`, never
+    `h1`–`h6`. The first takes the part's level, and each later one sits a level under
+    the nearest shallower heading before it, never skipping one. In `Annotations` they
+    sit a level under the set's heading.
+  - Before, bullets were `<p>• a<br>• b</p>`, numbered lines one `p`, and headings
+    `<p><b>…</b></p>`; restyle with `ul`, `ol` and `[role="heading"]`. A page's list
+    reset (Tailwind's preflight) removes the markers, and with them VoiceOver's lists in
+    Safari. Put them back:
+
+    ```css
+    :is(.clover-annotations-body, .clover-value) ul {
+      list-style: disc;
+      padding-inline-start: var(--clover-space-l);
+    }
+    :is(.clover-annotations-body, .clover-value) ol {
+      list-style: decimal;
+      padding-inline-start: var(--clover-space-l);
+    }
+    ```
+
+  - IIIF HTML loses `aria-*` and `data-*` attributes, which the Presentation API does not
+    allow.
+  - Clover sanitises with a private DOMPurify instance, so your page's own
+    `DOMPurify.sanitize` no longer drops relative `href` and `src` once Clover has run.
+
+- **Headings.**
+  - `headingLevel` (2 to 6) fits Clover's headings into your page's outline. `Default`,
+    `Document` and `Gallery`, and so the Viewer, take it for the title (default 2), and
+    the headings inside sit a level below: the panel's sections, Document's Download
+    groups, Gallery's lightbox title. `<clover-viewer>` takes `heading-level`.
+    Standalone `Clover.Items` takes it for its title (default 2),
+    `Clover.InformationPanel` for its accordion headings (default 3), `Clover.Download`
+    for its groups (default 3) and `Clover.Value` for a Markdown value's first heading
+    (default 3). Under a heading of your own, pass the level below it:
+
+    ```jsx
+    <h3>Opening at a place</h3>
+    <Viewer iiifContent={url} headingLevel={4} />
+    ```
+
+  - `Default` with `header={false}` has no title, so its panel's sections take the
+    title's level: `h2` by default, where they were `h3`. Pass `headingLevel={3}` to keep
+    `h3`.
+  - Select these headings by class, not tag (`h2.clover-template-default-title`,
+    `h2.clover-items-title`, `.clover-template-lightbox-header h3`), so a rule holds at
+    any level.
+
+- **Language.**
+  - IIIF HTML keeps `lang` and `dir`, and an image its `width` and `height`. Contents,
+    the caption-track menu, annotation set headings, a Thumbnail's default alt and the
+    Root's announcement carry their label's `lang`. The error box carries `lang="en"`
+    until it is translated.
+  - Where Clover's interface language differs from the page's (a host's `lng`, or a
+    page in a language Clover has no strings for), each of Clover's strings carries `lang` on the element that shows it
+    or is named by it. The page's language is a `lang` you give the root, else the
+    nearest `lang` around the `Root`, or around a standalone `Canvas`, `Items` or `Map`,
+    read after mount. No Clover root carries a `lang` of its own, so your content inside
+    a `Root`, and IIIF text in `none`, keep the page's language.
+  - A container named in another language than the page's (Items' pager's `nav`, the
+    panel's tabs and Sections, Contents, the Items list, the Canvas viewport, the
+    Canvas's and the transport's menus) is named by `aria-labelledby` and a hidden
+    element carrying `lang`, not by `aria-label`. Standalone `Items` with a heading is
+    named by that heading. Query the accessible name instead:
+
+    ```js
+    // Before
+    container.querySelector('nav[aria-label="Pages"]');
+    // After
+    screen.getByRole("navigation", { name: "Pages" });
+    ```
+
+  - A custom control in `controlButtons` receives `lang` in its props. Spread it with
+    the rest, or its name loses its language:
+
+    ```jsx
+    controlButtons={{ zoomIn: ({ props, icon }) => <button {...props}>{icon}</button> }}
+    ```
+
+  - `Clover.useLangOf()` gives `langOf(key)`: the language of one of Clover's strings
+    where it differs from the page's, else `undefined`, for parts of your own. The value
+    `initCloverI18n` returns also has `resolve(key, values)` (`{ text, lang }`),
+    `langOf(key, hostLanguage)` and `resolvedLanguage`.
+
+    ```jsx
+    const t = Clover.useT();
+    const langOf = Clover.useLangOf();
+
+    <button aria-label={t("commonClose")} lang={langOf("commonClose")}>
+      <CloseIcon aria-hidden="true" />
+      <Clover.Tip label={t("commonClose")} />
+    </button>;
+    ```
+
+  - `<clover-viewer>` can set its interface language: `initCloverI18n` is exported from
+    `@nulib/clover/web-components`, and is a static on the element's class
+    (`customElements.get("clover-viewer").initCloverI18n({ lng: "fr" })`).
+  - `Canvas` takes `language`, the language to read its IIIF text in: labels, Choices,
+    hotspots, chapters and the information box. Inside a `Root` it defaults to the
+    Root's.
+  - es, fi, fr, nb, nn, no and pt have every string, so none falls back to English
+    partway through. In nb, nn and no, `informationPanelTabsClose` is "Visning" (was
+    "Viewer"); in nn, `informationPanelTabsAnnotations` is "Annoteringar" and
+    `contentSearchLoading` "Lastar inn...". Tests that find controls by the old words
+    need the new ones. `pt` is European Portuguese, which Brazilian readers get too. The
+    new translations await review by native speakers.
+  - New strings: `canvasRoleDescription`, `canvasKeysImage`, `canvasKeysMedia`,
+    `playerClose`, `annotationsImage`, `mapAttribution`, `mapPlaceUntitled`, `mapOverlay`
+    and `mapPlacesListed`. If you pass your own `resources` to `initCloverI18n`,
+    translate them.
+
+- **Map.**
+  - Focus shows on the map and its controls. Popups take `--clover-color-secondary` and
+    `--clover-color-primary`. Lines and outlines have a white casing, a new
+    `geomap-navplace-casing` layer under `geomap-navplace-line`. The credits button
+    reports collapsed while the credits are closed.
+  - A list of places, `ul.clover-geomap-places`, renders under every map, the Map tab's
+    included. It has a button for each navPlace feature, named by its title in its own
+    `lang` ("Place 2" when it has none), and one for each georeferenced image drawn,
+    named by its Canvas's label. A button frames its place, opens its popup and calls
+    `onSelect`; inside a `Root` it also goes to the place's Canvas, and the places of the
+    Canvases in view are `aria-current="true"`. The list shows even when MapLibre cannot
+    start.
+  - MapLibre's canvas is the map's only region, named by `mapLabel` and described by a
+    count ("Places listed after the map: 2"). `.clover-geomap-canvas` no longer has
+    `role="region"` or `aria-label`; a test that found it should find
+    `getByRole("region", { name: "Map" })`. In the information panel the canvas is a
+    `group`, since the section is the region. MapLibre's own labels (the map, zoom, the
+    credits) come from Clover's strings and follow `initCloverI18n`.
+  - Popups carry their title's `lang`. `MapFeature.properties.titleLang` and
+    `Georeference.label` are new, and `onSelect` also fires from the list.
+  - `.clover-geomap` is now a grid of the map's box (its first `div`, sized by
+    `--clover-map-height`, default `24rem`) and the list under it. `style` and
+    `className` go on that wrapper, so a `height` there no longer sizes the map. Move
+    rules for the box (`border-radius`, `overflow`, a background) to
+    `.clover-geomap > div`, and size it with the property:
+
+    ```tsx
+    // Before
+    <Map style={{ height: 400 }} />
+    // After
+    <Map style={{ "--clover-map-height": "400px" } as React.CSSProperties} />
+    ```
+
+- **Size.** Measured as a Vite app builds them, with every fix here but the last
+  transport changes: a standalone Canvas is 44.3 kB gzip, the Viewer with `Default`
+  73.3, `Document` 75.2 and `Gallery` 62.8, the Map before MapLibre 24.1, `styles.css`
+  10.2 and `<clover-viewer>` 110.1 kB up front. The last transport changes add about
+  0.4 kB to a Canvas and 0.2 kB to `styles.css`. The largest costs: the completed
+  locales, about 3.2 kB on each entry (3.0 kB on `<clover-viewer>`); Tips kept inside
+  what clips them, 0.5 kB; hotspots, 0.7 kB, with 1 kB more loaded on the first hotspot
+  focus.

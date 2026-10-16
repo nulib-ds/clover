@@ -42,6 +42,9 @@
   --accent-11: color-mix(in oklab, var(--accent-9) 82%, #000);
   --accent-contrast: #ffffff;
 
+  /* Error text. */
+  --red-11: #ce2c31;
+
   /*
    * Surfaces.
    *
@@ -119,8 +122,11 @@
   --shadow-2: 0 1px 2px #1c202408, 0 1px 3px #1c202410;
   --shadow-4: 0 8px 24px -8px #1c202420, 0 2px 6px -2px #1c202414;
 
-  /* Focus ring, used consistently on every interactive surface. */
-  --focus-ring: 0 0 0 2px var(--color-background), 0 0 0 4px var(--accent-6);
+  /*
+   * Focus ring, used consistently on every interactive surface: the text accent, so it
+   * holds 3:1 against the page in both themes and under every accent preset.
+   */
+  --focus-ring: 0 0 0 2px var(--color-background), 0 0 0 4px var(--accent-11);
 
   /*
    * Code, as Prism's Material theme colours it, on black: the homepage's code editor,
@@ -128,7 +134,8 @@
    */
   --code-background: #000000;
   --code-text: #eeffff;
-  --code-faint: color-mix(in srgb, var(--code-text) 36%, transparent);
+  /* Faint, yet 4.5:1 on black for the editor's labels and line numbers. */
+  --code-faint: color-mix(in srgb, var(--code-text) 55%, transparent);
   --code-rule: color-mix(in srgb, var(--code-text) 14%, transparent);
   --code-keyword: #c792ea;
   --code-string: #c3e88d;
@@ -157,8 +164,8 @@
   --gray-11: #b0b4ba;
   --gray-12: #edeef0;
 
-  /* Same derivation, mixed toward white rather than black so the hover and text
-   * steps stay legible on a dark ground. */
+  /* Same derivation, with the text step mixed toward white rather than black so it
+   * stays legible on a dark ground. */
   /*
    * The accent is not lifted for dark mode: the blue is the same colour in both
    * themes. `--accent-9` is inherited from `:root` and the steps below remix it.
@@ -166,9 +173,11 @@
   --accent-2: color-mix(in oklab, var(--accent-9) 10%, var(--gray-1));
   --accent-3: color-mix(in oklab, var(--accent-9) 22%, var(--gray-1));
   --accent-6: color-mix(in oklab, var(--accent-9) 45%, var(--gray-1));
-  --accent-10: color-mix(in oklab, var(--accent-9) 85%, #fff);
+  /* Hover darkens, as in light mode, so white text on it keeps 4.5:1. */
+  --accent-10: color-mix(in oklab, var(--accent-9) 85%, #000);
   --accent-11: color-mix(in oklab, var(--accent-9) 62%, #fff);
   --accent-contrast: #ffffff;
+  --red-11: #ff9592;
 
   --color-background: var(--gray-1);
   --surface: var(--gray-3);
@@ -194,8 +203,9 @@
     --accent-2: color-mix(in oklab, var(--accent-9) 10%, var(--gray-1));
     --accent-3: color-mix(in oklab, var(--accent-9) 22%, var(--gray-1));
     --accent-6: color-mix(in oklab, var(--accent-9) 45%, var(--gray-1));
-    --accent-10: color-mix(in oklab, var(--accent-9) 85%, #fff);
+    --accent-10: color-mix(in oklab, var(--accent-9) 85%, #000);
     --accent-11: color-mix(in oklab, var(--accent-9) 62%, #fff);
+    --red-11: #ff9592;
 
     --surface: var(--gray-3);
     --surface-raised: var(--gray-4);
@@ -314,6 +324,35 @@ html .nx-font-bold {
  */
 html .nextra-sidebar-container li.nx-font-semibold {
   font-weight: var(--weight-bold);
+}
+
+/*
+ * The current page's sidebar entry is bold again, so it is marked by more than its
+ * colour; and the TOC's current entry is underlined.
+ */
+html .nextra-sidebar-container :is(a, button).nx-font-semibold {
+  font-weight: var(--weight-bold);
+}
+
+html nav.nextra-toc a.nx-text-primary-600 {
+  text-decoration: underline;
+}
+
+/*
+ * Code blocks' syntax colours at 4.5:1 on Nextra's tinted ground, highlighted lines
+ * included. One element more than Nextra's `:root` and `.dark`, so they win whatever
+ * the load order; the light ones only out of dark mode.
+ */
+html:root:not(.dark) {
+  --shiki-token-string: #116329;
+  --shiki-token-constant: #0b62c4;
+  --shiki-token-comment: #5f6670;
+  --shiki-token-keyword: #b31d28;
+  --shiki-token-parameter: #953800;
+}
+
+html.dark {
+  --shiki-token-comment: #8b949e;
 }
 
 code,

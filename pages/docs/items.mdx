@@ -15,7 +15,8 @@ import {
   thumbnail strip.
 </Callout>
 
-Thumbnails of a sequence, as a carousel, a list or a grid.
+A sequence and where the reader is in it: thumbnails as a carousel, a list or a grid, or
+one item at a time as a pager.
 
 - **Inside a `Clover.Root`**, `Items` lists the Root's views (a spread is one item) and
   selecting one goes there. It is a listbox, and like a radio group the selection
@@ -37,11 +38,43 @@ import * as Clover from "@nulib/clover";
 
 <ItemsLayoutsDemo />
 
+## One at a time
+
+`layout="pager"` shows no thumbnails: the count, then Previous and Next, in a `nav` named
+"Items". It steps through what the strip would list, a spread at a time in a paged book,
+and the two follow each other. With `of="members"` it steps through the Collection's
+Manifests instead, telling `onSelect` of each. A right-to-left book mirrors it.
+
+```jsx
+<Clover.Root iiifContent={manifestUrl}>
+  <Clover.Content />
+  <Clover.Items layout="pager" />
+</Clover.Root>
+```
+
+The count keeps the room of its widest ("17 / 17"), so the arrows never move as it grows.
+The pager is a flex row (`.clover-pager`): move a piece with `order`, or place the three
+parts yourself, which take `of` too. A layout with a pager and no thumbnails is lighter
+that way: `Items` brings every layout with it, about 7.4 kB gzip, where the three parts
+alone are 1.2 kB.
+
+```jsx
+<header className="my-toolbar">
+  <Clover.Label as="h2" />
+  <Clover.Previous />
+  <Clover.Next />
+  <Clover.Position />
+</header>
+```
+
 ## A Collection
 
 ```jsx
 <Clover.Items iiifContent={collectionUrl} />
 ```
+
+Its header's title is an `h2`. Under a heading of the page's own, pass the level below
+it: this one sits under the page's `h2`, so it takes `headingLevel={3}`.
 
 <CollectionItemsDemo />
 
@@ -51,17 +84,19 @@ lazily (`loading="lazy"`), at the size asked of each image service.
 
 ## Props
 
-| Prop            | Type                                | Description                                                                                 |
-| --------------- | ----------------------------------- | ------------------------------------------------------------------------------------------- |
-| `layout`        | `"carousel" \| "list" \| "grid"`    | Default `carousel`.                                                                         |
-| `iiifContent`   | `string \| object`                  | On its own: a Collection (its members) or a Manifest (its views).                           |
-| `items`         | `object[]`                          | On its own: IIIF resources to list as they are.                                             |
-| `navigation`    | `"id" \| "homepage"`                | Select (a listbox) or leave (links). Defaults to `id` for views and `homepage` for members. |
-| `onSelect`      | `(item, event) => void`             | An item was chosen. On a link, `event.preventDefault()` keeps the reader on the page.       |
-| `header`        | `boolean`                           | On its own: the resource's label, summary and homepage link. Default `true`.                |
-| `thumbnailSize` | `number`                            | Pixels asked for each thumbnail's longer side. Default `200`.                               |
-| `renderItem`    | `(item, { selected }) => ReactNode` | Your own item in place of the figure.                                                       |
-| `request`       | `{ credentials, headers, fetch }`   | On its own. Inside a Root, the Root's.                                                      |
+| Prop            | Type                                        | Description                                                                                 |
+| --------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `layout`        | `"carousel" \| "list" \| "grid" \| "pager"` | Default `carousel`. `pager`: one item at a time.                                            |
+| `of`            | `"views" \| "members"`                      | In a Root: its views (default), or its Collection's members.                                |
+| `iiifContent`   | `string \| object`                          | On its own: a Collection (its members) or a Manifest (its views).                           |
+| `items`         | `object[]`                                  | On its own: IIIF resources to list as they are.                                             |
+| `navigation`    | `"id" \| "homepage"`                        | Select (a listbox) or leave (links). Defaults to `id` for views and `homepage` for members. |
+| `onSelect`      | `(item, event) => void`                     | An item was chosen. On a link, `event.preventDefault()` keeps the reader on the page.       |
+| `header`        | `boolean`                                   | On its own: the resource's label, summary and homepage link. Default `true`.                |
+| `headingLevel`  | `2 \| 3 \| 4 \| 5 \| 6`                     | On its own: the level of the header's title, to fit the page's outline. Default `2`.        |
+| `thumbnailSize` | `number`                                    | Pixels asked for each thumbnail's longer side. Default `200`.                               |
+| `renderItem`    | `(item, { selected }) => ReactNode`         | Your own item in place of the figure.                                                       |
+| `request`       | `{ credentials, headers, fetch }`           | On its own. Inside a Root, the Root's.                                                      |
 
 ### Styles
 
@@ -84,7 +119,7 @@ lazily (`loading="lazy"`), at the size asked of each image service.
 | `options.credentials`     | `request={{ credentials }}`.                                        |
 | `onItemInteraction(item)` | `onSelect(item, event)`; call `event.preventDefault()` to stay put. |
 | `search`, `onSearch`      | Not in Clover 4.                                                    |
-| `pager`                   | `Clover.Pager`, beside `Items` in a `Root`.                         |
+| `pager`                   | `<Clover.Items layout="pager" />`, beside the strip in a `Root`.    |
 | `activeIndex`             | Follows the Root's current view.                                    |
 | `renderItem(item, index)` | `renderItem(item, { selected })`.                                   |
 | `behavior="paged"`        | Inside a Root, spreads are one item each.                           |

@@ -206,26 +206,18 @@
 }
 
 /*
- * The view's titles at the start, one line, cut short rather than pushing the position.
- * A spread's two have a dot between them, `xs` either side, which keeps its place while
- * they give way.
+ * The view's titles at the start, as a line of text that wraps: a long title, or a
+ * reader's text spacing, gives the header another line rather than cutting a title short
+ * (WCAG 1.4.12). A spread's two have a dot between them, `xs` either side.
  */
 .clover-template-default-titles {
-  display: flex;
-  gap: var(--clover-space-xs);
   min-width: 0;
   margin: 0;
-}
-
-.clover-template-default-titles > * {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .clover-template-default-titles > .clover-template-default-titles-dot {
-  flex-shrink: 0;
-  overflow: visible;
+  margin-inline: var(--clover-space-xs);
   color: var(--clover-color-primary-muted, #26292b);
 }
 

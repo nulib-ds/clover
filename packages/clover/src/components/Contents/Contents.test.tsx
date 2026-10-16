@@ -2,6 +2,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 
 import tocJson from "../../fixtures/iiif-cookbook/0024-book-4-toc.json";
+import operaJson from "../../fixtures/iiif-cookbook/0026-toc-opera.json";
 import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
 
@@ -27,6 +28,21 @@ describe("Contents", () => {
       "true",
     );
     expect(first).not.toHaveAttribute("aria-current");
+  });
+
+  it("marks each entry with the language of its label", async () => {
+    render(
+      <Clover.Root iiifContent={operaJson}>
+        <Clover.Contents />
+      </Clover.Root>,
+    );
+    const nav = await screen.findByRole("navigation", { name: "Contents" });
+    expect(
+      within(nav).getByRole("button", { name: "Atto Primo" }),
+    ).toHaveAttribute("lang", "it");
+    expect(
+      within(nav).getByRole("button", { name: "Remainder of Atto Primo" }),
+    ).toHaveAttribute("lang", "en");
   });
 
   it("renders nothing without structures", async () => {

@@ -20,11 +20,13 @@ export class OverlayLayer {
   constructor(parent: HTMLElement) {
     const container = document.createElement("div");
     container.className = "clover-canvas-overlays";
-    // Geometry inline: hotspots are placed without the stylesheet too.
+    // Geometry inline: hotspots are placed without the stylesheet too. Clipped, not
+    // hidden: a hidden overflow still scrolls to a focused hotspot out of view, which
+    // would move every hotspot off its region.
     Object.assign(container.style, {
       position: "absolute",
       inset: "0",
-      overflow: "hidden",
+      overflow: "clip",
       pointerEvents: "none",
     });
     parent.appendChild(container);
@@ -55,6 +57,7 @@ export class OverlayLayer {
 
   position(camera: CameraState, viewport: ViewportSize): void {
     const degrees = (camera.rotation * 180) / Math.PI;
+    const upright = Math.cos(camera.rotation) > 0.9999;
     for (const [element, rect] of this.overlays) {
       const center = worldPointToScreen(camera, viewport, {
         x: rect.x + rect.width / 2,
@@ -67,6 +70,28 @@ export class OverlayLayer {
       element.style.transform =
         `translate(${center.x - width / 2}px, ${center.y - height / 2}px)` +
         (degrees ? ` rotate(${degrees}deg)` : "");
+      /*
+       * Where it sits in the layer, so what it shows beside itself (a hotspot's popover)
+       * can stay inside: its centre across, its top and bottom edges, and the side with
+       * more room, above it in the lower half and below it in the upper. Not while the
+       * view is turned, since what it shows turns with it.
+       */
+      const { style, dataset } = element;
+      if (upright) {
+        style.setProperty("--clover-overlay-x", `${center.x}px`);
+        style.setProperty("--clover-overlay-top", `${center.y - height / 2}px`);
+        style.setProperty(
+          "--clover-overlay-bottom",
+          `${center.y + height / 2}px`,
+        );
+        const room = center.y > viewport.height / 2 ? "above" : "below";
+        if (dataset.overlayRoom !== room) dataset.overlayRoom = room;
+      } else {
+        style.removeProperty("--clover-overlay-x");
+        style.removeProperty("--clover-overlay-top");
+        style.removeProperty("--clover-overlay-bottom");
+        delete dataset.overlayRoom;
+      }
     }
   }
 

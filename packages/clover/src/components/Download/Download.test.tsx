@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 
 import bookJson from "../../fixtures/iiif-cookbook/0009-book-1.json";
@@ -54,6 +54,32 @@ describe("Download", () => {
     expect(pdf).toHaveAttribute("target", "_blank");
   });
 
+  it("titles its groups at headingLevel, h3 by default", async () => {
+    const { unmount } = render(
+      <Clover.Root iiifContent={withPage}>
+        <Clover.Download />
+      </Clover.Root>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "Download" }));
+    expect(
+      screen.getByRole("heading", { level: 3, name: "This page" }),
+    ).toBeInTheDocument();
+    unmount();
+
+    render(
+      <Clover.Root iiifContent={withPage}>
+        <Clover.Download headingLevel={5} />
+      </Clover.Root>,
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "Download" }));
+    expect(
+      screen.getByRole("heading", { level: 5, name: "This page" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 5, name: "All pages" }),
+    ).toBeInTheDocument();
+  });
+
   it("closes on Escape, handing focus back, and on a press outside", async () => {
     render(
       <Clover.Root iiifContent={renderingJson}>
@@ -63,15 +89,36 @@ describe("Download", () => {
     );
     const button = await screen.findByRole("button", { name: "Download" });
     fireEvent.click(button);
-    fireEvent.keyDown(screen.getByRole("link", { name: /PDF version/ }), {
-      key: "Escape",
-    });
+    const kept = fireEvent.keyDown(
+      screen.getByRole("link", { name: /PDF version/ }),
+      { key: "Escape" },
+    );
+    expect(kept).toBe(false);
     expect(button).toHaveAttribute("aria-expanded", "false");
     expect(button).toHaveFocus();
 
     fireEvent.click(button);
     fireEvent.pointerDown(screen.getByText("Elsewhere"));
     expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("closes as focus moves out of it, leaving focus where it went", async () => {
+    render(
+      <Clover.Root iiifContent={renderingJson}>
+        <Clover.Download />
+        <button type="button">After</button>
+      </Clover.Root>,
+    );
+    const button = await screen.findByRole("button", { name: "Download" });
+    fireEvent.click(button);
+    const link = screen.getByRole("link", { name: /PDF version/ });
+    act(() => link.focus());
+    // Within it, it stays open.
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    const after = screen.getByRole("button", { name: "After" });
+    act(() => after.focus());
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(after).toHaveFocus();
   });
 
   it("renders nothing with nothing to download", async () => {

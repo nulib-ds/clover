@@ -18,10 +18,11 @@ import "@nulib/clover/templates.css";
 />;
 ```
 
-| Prop   | Default | What it does                                      |
-| ------ | ------- | ------------------------------------------------- |
-| `size` | `10rem` | A grid cell's width (sets `--clover-items-size`). |
-| …      |         | Every `Clover.Root` prop.                         |
+| Prop           | Default | What it does                                          |
+| -------------- | ------- | ----------------------------------------------------- |
+| `size`         | `10rem` | A grid cell's width (sets `--clover-items-size`).     |
+| `headingLevel` | `2`     | The title's level; the lightbox's title is one below. |
+| …              |         | Every `Clover.Root` prop.                             |
 
 To change the layout, copy `Gallery.tsx`, `Gallery.css` and `../shared/Lightbox.tsx` into
 your app. They use only what `@nulib/clover` exports.

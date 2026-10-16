@@ -31,7 +31,7 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
   { headingLevel = 3, as: Tag = "div", className, ...rest },
   ref,
 ) {
-  const { t } = useCloverTranslation();
+  const { t, langOf } = useCloverTranslation();
   const { clover, language } = useClover("Search");
   const service = useCloverSelector(
     (state) => searchServiceOf(state.manifest)?.id ?? null,
@@ -60,18 +60,19 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
   }
   const Heading = `h${headingLevel}` as React.ElementType;
   const count = search.hits.length;
-  const status =
+  const statusKey =
     search.status === "loading"
-      ? t("contentSearchLoading")
+      ? "contentSearchLoading"
       : search.status === "error"
-        ? t("contentSearchError")
+        ? "contentSearchError"
         : search.status === "ready"
           ? count === 0
-            ? t("contentSearchResultsNone")
+            ? "contentSearchResultsNone"
             : count === 1
-              ? t("contentSearchResult")
-              : t("contentSearchResults", { count })
-          : "";
+              ? "contentSearchResult"
+              : "contentSearchResults"
+          : null;
+  const status = statusKey ? t(statusKey, { count }) : "";
 
   return (
     <Tag
@@ -88,7 +89,11 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
           void clover.search(draft);
         }}
       >
-        <label htmlFor={`${id}-query`} style={visuallyHidden}>
+        <label
+          htmlFor={`${id}-query`}
+          style={visuallyHidden}
+          lang={langOf("informationPanelTabsSearch")}
+        >
           {t("informationPanelTabsSearch")}
         </label>
         <input
@@ -97,17 +102,26 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
           className="clover-content-search-query"
           value={draft}
           placeholder={t("contentSearchPlaceholder")}
+          lang={langOf("contentSearchPlaceholder")}
           onChange={(event) => {
             setDraft(event.target.value);
             // Emptying the field (its × included) clears the hits.
             if (!event.target.value && search.query) void clover.search("");
           }}
         />
-        <button type="submit" className="clover-content-search-submit">
+        <button
+          type="submit"
+          className="clover-content-search-submit"
+          lang={langOf("commonSearch")}
+        >
           {t("commonSearch")}
         </button>
       </form>
-      <p className="clover-content-search-status" role="status">
+      <p
+        className="clover-content-search-status"
+        role="status"
+        lang={statusKey ? langOf(statusKey) : undefined}
+      >
         {status}
       </p>
       {groups.map(({ canvasId, hits }, index) => {
@@ -122,7 +136,7 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
             <Heading
               id={`${id}-${index}`}
               className="clover-content-search-canvas"
-              lang={label.lang}
+              lang={label.text ? label.lang : undefined}
             >
               {label.text || canvasId}
             </Heading>

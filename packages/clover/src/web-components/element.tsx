@@ -6,6 +6,7 @@ import type { ViewerProps } from "../components/Viewer/Viewer";
 import { Default } from "../templates/default/Default";
 import { setMapWorkerUrl } from "../core/map-config";
 import type { IIIFContent } from "../core/load";
+import { initCloverI18n } from "../i18n/config";
 
 /**
  * `<clover-viewer>`: Clover's Viewer as a custom element, for a page with no React of its
@@ -15,16 +16,39 @@ import type { IIIFContent } from "../core/load";
  *   <clover-viewer iiif-content="https://example.org/manifest.json"></clover-viewer>
  *
  * Attributes: `iiif-content`, `canvas-id` (the Canvas to open on), `manifest-id`,
- * `language`, `search-query`, and `items`, `panel`, `download` (`"false"` turns one
- * off; `items` also takes `carousel`, `list` or `grid`). The `iiifContent` property takes
- * an object too. Events: `canvaschange`, `manifestchange`, `contentstatechange`, each
- * with its value in `detail`.
+ * `language` (the language to read IIIF text in), `search-query`, `heading-level` (the
+ * title's, 2 to 6, to fit the page's outline), and `items`, `header`, `panel`,
+ * `download` (`"false"` turns one off; `items` also takes `carousel`, `list` or `grid`).
+ * The `iiifContent` property takes an object too. Events: `canvaschange`,
+ * `manifestchange`, `contentstatechange`, each with its value in `detail`.
+ *
+ * Clover's own strings follow the page's `<html lang>`, then the reader's browser, as in
+ * React. The element is built
+ * with its own copy of the translator, so a page sets their language, or adds strings,
+ * through it: `initCloverI18n` from the module, or the element's class from a classic
+ * script.
+ *
+ *   customElements.get("clover-viewer").initCloverI18n({ lng: "fr" });
  */
 
+/** A run of Clover's stylesheet: its CSS, or, for one only some pages need, its loader. */
+export interface StyleRun {
+  key: string;
+  css?: string;
+  /** Fetched the first time an element holds a match for `when`. */
+  load?: () => Promise<string>;
+  /** A selector for what needs the run, in an attribute selector if drawn before it. */
+  when?: string;
+}
+
 export interface ElementAssets {
-  /** Clover's stylesheet, injected once per document. */
-  styles: string;
-  /** MapLibre's stylesheet, injected the first time a map is shown. */
+  /**
+   * Clover's stylesheet, injected once per document: whole, or in its runs, in order. A
+   * run with `load` is put in its place among them once it arrives, so its rules keep
+   * their place in the cascade.
+   */
+  styles: string | StyleRun[];
+  /** MapLibre's stylesheet, injected the first time a map shows. */
   mapStyles?: () => Promise<string>;
   /** Where MapLibre's worker is served from (the build emits it beside the element). */
   mapWorkerUrl?: string;
@@ -41,8 +65,12 @@ const SWITCHES = ["header", "panel", "download"] as const;
 
 const injected = new WeakMap<Document, Set<string>>();
 
-/** Put a stylesheet in the document once, first in `<head>` so the page's own CSS wins. */
-function inject(doc: Document, key: string, css: string) {
+/**
+ * Put a stylesheet in the document once: first in `<head>`, so the page's own CSS comes
+ * after it, or right after the first of `after` (Clover's earlier runs, nearest first)
+ * that is there.
+ */
+function inject(doc: Document, key: string, css: string, after: string[] = []) {
   let done = injected.get(doc);
   if (!done) injected.set(doc, (done = new Set()));
   if (done.has(key)) return;
@@ -50,7 +78,11 @@ function inject(doc: Document, key: string, css: string) {
   const style = doc.createElement("style");
   style.dataset.clover = key;
   style.textContent = css;
-  doc.head.prepend(style);
+  const before = after
+    .map((earlier) => doc.head.querySelector(`style[data-clover="${earlier}"]`))
+    .find(Boolean);
+  if (before) before.after(style);
+  else doc.head.prepend(style);
 }
 
 /** Define `<clover-viewer>` (once), with the assets the build hands it. */
@@ -58,11 +90,57 @@ export function defineCloverViewer(assets: ElementAssets): void {
   if (typeof customElements === "undefined") return;
   if (customElements.get("clover-viewer")) return;
   if (assets.mapWorkerUrl) setMapWorkerUrl(assets.mapWorkerUrl);
+  const runs: StyleRun[] =
+    typeof assets.styles === "string"
+      ? [{ key: "clover", css: assets.styles }]
+      : assets.styles;
+  /** The runs before one, nearest first: where it goes once it arrives. */
+  const earlier = (run: StyleRun) =>
+    runs
+      .slice(0, runs.indexOf(run))
+      .reverse()
+      .map(({ key }) => key);
+  /** What loads with what needs it: the runs only some pages need, and MapLibre's. */
+  const deferred = [
+    ...runs.flatMap((run) =>
+      run.load && run.when
+        ? [
+            {
+              key: run.key,
+              load: run.load,
+              when: run.when,
+              after: earlier(run),
+            },
+          ]
+        : [],
+    ),
+    ...(assets.mapStyles
+      ? [
+          {
+            key: "maplibre",
+            load: assets.mapStyles,
+            when: ".clover-geomap",
+            after: [],
+          },
+        ]
+      : []),
+  ];
+  // What is drawn before a run's own code: the attributes its `when` names.
+  const marks = [
+    ...new Set(
+      deferred.flatMap(({ when }) =>
+        [...when.matchAll(/\[([\w-]+)/g)].map((match) => match[1]),
+      ),
+    ),
+  ];
 
   class CloverViewerElement extends HTMLElement {
     static get observedAttributes() {
-      return [...Object.keys(STRINGS), "items", ...SWITCHES];
+      return [...Object.keys(STRINGS), "items", "heading-level", ...SWITCHES];
     }
+
+    /** Set Clover's interface language, or add strings, for every element on the page. */
+    static initCloverI18n = initCloverI18n;
 
     private root: ReactRoot | null = null;
     private content: IIIFContent | null = null;
@@ -78,8 +156,11 @@ export function defineCloverViewer(assets: ElementAssets): void {
     }
 
     connectedCallback() {
-      inject(this.ownerDocument, "clover", assets.styles);
-      this.watchForMap();
+      const doc = this.ownerDocument;
+      runs.forEach((run) => {
+        if (run.css !== undefined) inject(doc, run.key, run.css, earlier(run));
+      });
+      this.watchForDeferred();
       this.root ??= createRoot(this);
       this.update();
     }
@@ -99,17 +180,30 @@ export function defineCloverViewer(assets: ElementAssets): void {
       this.update();
     }
 
-    /** MapLibre's stylesheet, the first time a map appears in any element. */
-    private watchForMap() {
-      const { mapStyles } = assets;
-      if (!mapStyles || this.observer) return;
+    /** Each deferred stylesheet, the first time what needs it appears in any element. */
+    private watchForDeferred() {
+      if (this.observer) return;
       const doc = this.ownerDocument;
-      this.observer = new MutationObserver(() => {
-        if (!this.querySelector(".clover-geomap")) return;
-        this.observer?.disconnect();
-        void mapStyles().then((css) => inject(doc, "maplibre", css));
+      const waiting = deferred.filter(
+        ({ key }) => !injected.get(doc)?.has(key),
+      );
+      if (!waiting.length) return;
+      const look = () => {
+        for (const sheet of [...waiting]) {
+          if (!this.querySelector(sheet.when)) continue;
+          waiting.splice(waiting.indexOf(sheet), 1);
+          void sheet
+            .load()
+            .then((css) => inject(doc, sheet.key, css, sheet.after));
+        }
+        if (!waiting.length) this.observer?.disconnect();
+      };
+      this.observer = new MutationObserver(look);
+      this.observer.observe(this, {
+        childList: true,
+        subtree: true,
+        ...(marks.length ? { attributes: true, attributeFilter: marks } : {}),
       });
-      this.observer.observe(this, { childList: true, subtree: true });
     }
 
     private emit(type: string, detail: unknown) {
@@ -126,6 +220,8 @@ export function defineCloverViewer(assets: ElementAssets): void {
       }
       const items = this.getAttribute("items");
       if (items) props.items = items === "false" ? false : items;
+      const level = Number(this.getAttribute("heading-level"));
+      if ([2, 3, 4, 5, 6].includes(level)) props.headingLevel = level;
       for (const name of SWITCHES) {
         if (this.getAttribute(name) === "false") props[name] = false;
       }

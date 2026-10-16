@@ -9,6 +9,7 @@ import React, {
 
 import ChoiceMenu from "./ChoiceMenu";
 import { type AnimationFrame, resolveBody } from "./layout";
+import { useBarHeight } from "./media/useBarHeight";
 import { imageSource } from "../../core/thumbnail";
 import { Tip } from "../../ui/Tip";
 import type { CanvasRenderer } from "../../lib/renderer";
@@ -125,16 +126,21 @@ export function useAnimation(
 export function FrameControls({
   frames,
   animation,
+  language,
 }: {
   frames: AnimationFrame[];
   animation: AnimationState;
+  /** The language to read the frames' labels in. The reader's, by default. */
+  language?: string;
 }) {
-  const { t } = useCloverTranslation();
+  const { t, langOf } = useCloverTranslation();
   const { frame, playing, repeat, setFrame, setPlaying, setRepeat } = animation;
   const last = frames.length - 1;
   const triggerId = `${useId().replace(/:/g, "")}-frames`;
   const menuId = `${triggerId}-menu`;
   const [open, setOpen] = useState(false);
+  const bar = useRef<HTMLDivElement>(null);
+  useBarHeight(bar);
   const close = useCallback(
     (restoreFocus: boolean) => {
       setOpen(false);
@@ -158,10 +164,14 @@ export function FrameControls({
     index: frame + 1,
     total: frames.length,
   });
-  // Stepping by hand pauses, and stops at the ends, as the pager does.
+  // Stepping by hand pauses, and stops at the ends, as the pager does. At an end the
+  // button is only `aria-disabled`, so it keeps focus (WCAG 2.4.3), and a press there
+  // does nothing.
   const step = (by: number) => {
+    const next = Math.min(last, Math.max(0, frame + by));
+    if (next === frame) return;
     setPlaying(false);
-    setFrame(Math.min(last, Math.max(0, frame + by)));
+    setFrame(next);
   };
   return (
     <div
@@ -173,6 +183,7 @@ export function FrameControls({
         <input
           aria-label={t("frameSeek")}
           aria-valuetext={position}
+          lang={langOf("frameSeek")}
           className="clover-canvas-transport-seek"
           max={last}
           min={0}
@@ -190,12 +201,14 @@ export function FrameControls({
           }
         />
       </div>
-      <div className="clover-canvas-transport-bar">
+      {/* On a narrow stage, which frame shows wraps below the buttons. */}
+      <div className="clover-canvas-transport-bar" ref={bar}>
         <button
           type="button"
           className="clover-canvas-transport-button"
           aria-label={t("framePrevious")}
-          disabled={frame === 0}
+          lang={langOf("framePrevious")}
+          aria-disabled={frame === 0 || undefined}
           onClick={() => step(-1)}
         >
           <svg
@@ -221,6 +234,7 @@ export function FrameControls({
           className="clover-canvas-transport-button"
           data-button={playing ? "pause" : "play"}
           aria-label={playing ? t("playerPause") : t("playerPlay")}
+          lang={langOf(playing ? "playerPause" : "playerPlay")}
           onClick={() => {
             // Playing from the last frame starts again.
             if (!playing && frame === last) setFrame(0);
@@ -234,7 +248,8 @@ export function FrameControls({
           type="button"
           className="clover-canvas-transport-button"
           aria-label={t("frameNext")}
-          disabled={frame === last}
+          lang={langOf("frameNext")}
+          aria-disabled={frame === last || undefined}
           onClick={() => step(1)}
         >
           <svg
@@ -260,6 +275,7 @@ export function FrameControls({
           className="clover-canvas-transport-button"
           data-button="repeat"
           aria-label={t("frameRepeat")}
+          lang={langOf("frameRepeat")}
           aria-pressed={repeat}
           onClick={() => setRepeat(!repeat)}
         >
@@ -294,7 +310,9 @@ export function FrameControls({
               setOpen(!open);
             }}
           >
-            <span aria-live="off">{position}</span>
+            <span aria-live="off" lang={langOf("framePosition")}>
+              {position}
+            </span>
             <svg
               aria-hidden="true"
               focusable="false"
@@ -317,6 +335,8 @@ export function FrameControls({
               id={menuId}
               triggerId={triggerId}
               label={t("frameSeek")}
+              labelLang={langOf("frameSeek")}
+              language={language}
               choices={[group]}
               selections={{ frame }}
               onSelect={(_key, index) => {
@@ -345,6 +365,7 @@ export default function FrameAnimation({
   autoplay,
   loop,
   onEnded,
+  language,
 }: {
   renderer: CanvasRenderer;
   frames: AnimationFrame[];
@@ -356,6 +377,7 @@ export default function FrameAnimation({
   autoplay?: boolean;
   loop?: boolean;
   onEnded?: () => void;
+  language?: string;
 }) {
   const animation = useAnimation(frames, animationKey, {
     autoplay,
@@ -368,5 +390,17 @@ export default function FrameAnimation({
     const shown = new Set(byFrame[animation.frame] ?? []);
     renderer.setHidden(byFrame.flat().filter((id) => !shown.has(id)));
   }, [renderer, byFrame, animation.frame, sceneVersion]);
-  return <FrameControls frames={frames} animation={animation} />;
+  /*
+   * In the media layer, as a video's transport is: it fades with the chrome, and sizes
+   * its menu against the stage (`MediaStage.css`).
+   */
+  return (
+    <div className="clover-canvas-media" data-kind="frames">
+      <FrameControls
+        frames={frames}
+        animation={animation}
+        language={language}
+      />
+    </div>
+  );
 }

@@ -9,6 +9,8 @@ export interface PlaceholderStill {
   width: number;
   height: number;
   alt: string;
+  /** The language of `alt`, the Canvas's label. */
+  lang?: string;
 }
 
 interface PlaceholderProps {
@@ -50,7 +52,14 @@ const Placeholder: React.FC<PlaceholderProps> = ({
   lingering,
   onToggle,
 }) => {
-  const { t } = useCloverTranslation();
+  const { t, langOf } = useCloverTranslation();
+  const toggleKey = media
+    ? active
+      ? "playerPlay"
+      : "playerClose"
+    : active
+      ? "imageViewerOpen"
+      : "imageViewerClose";
   // Each image's share of the run, at a common height (a row) or width (a column).
   const shares = stills.map(({ width, height }) =>
     vertical ? height / width : width / height,
@@ -60,19 +69,15 @@ const Placeholder: React.FC<PlaceholderProps> = ({
 
   return (
     <>
-      {/* Named for the viewer it opens and closes, as the Viewer's toggle is. */}
+      {/*
+       * Named for what it opens and closes, as the Viewer's toggle is: "Close player",
+       * not a bare "Close" beside the caption's own (WCAG 2.4.6).
+       */}
       <Button
         className="clover-canvas-placeholder-toggle"
         id={`placeholder-${instance}`}
-        label={
-          media
-            ? active
-              ? t("playerPlay")
-              : t("commonClose")
-            : active
-              ? t("imageViewerOpen")
-              : t("imageViewerClose")
-        }
+        label={t(toggleKey)}
+        lang={langOf(toggleKey)}
         onClick={onToggle}
       >
         {/* A video's opens as play; an image's opens and closes with a magnifier. */}
@@ -106,6 +111,7 @@ const Placeholder: React.FC<PlaceholderProps> = ({
               // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
               <img
                 alt={still.alt}
+                lang={still.alt ? still.lang : undefined}
                 key={index}
                 src={still.src}
                 style={{

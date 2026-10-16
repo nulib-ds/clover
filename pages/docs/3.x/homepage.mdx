@@ -172,7 +172,7 @@ In the following example, an `onClick()` function will display an with the `data
 
 ### Wrapping Children
 
-The `Homepage` component can also be used to wrap React children. An `aria-label` element with the value of the homepage `label`.
+The `Homepage` component can also be used to wrap React children. The link then gets an `aria-label` with the value of the homepage `label`, which replaces the children as its accessible name. Keep the visible text a part of that label (here, "Homepage"), so speech-input users can say what they see.
 
 <Tabs items={["Code", "Example", "HTML"]}>
   <Tab>
@@ -191,7 +191,7 @@ The `Homepage` component can also be used to wrap React children. An `aria-label
         },
       ]}
     >
-      <span>View Homepage</span>
+      <span>Homepage</span>
     </Homepage>
     ```
   </Tab>
@@ -210,7 +210,7 @@ The `Homepage` component can also be used to wrap React children. An `aria-label
         },
       ]}
     >
-      <span>View Homepage</span>
+      <span>Homepage</span>
     </Homepage>
   </Tab>
   <Tab>
@@ -220,7 +220,7 @@ The `Homepage` component can also be used to wrap React children. An `aria-label
       href="https://dc.library.northwestern.edu/items/71153379-4283-43be-8b0f-4e7e3bfda275"
       class="c-PJLV"
     >
-      <span>View Homepage</span>
+      <span>Homepage</span>
     </a>
     ```
   </Tab>

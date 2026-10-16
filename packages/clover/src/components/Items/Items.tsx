@@ -8,6 +8,7 @@ import React, {
 } from "react";
 
 import { ItemFigure } from "./Item";
+import { ItemsPager, type Steps } from "./Pager";
 import { Tip } from "../../ui/Tip";
 import {
   type ItemModel,
@@ -19,19 +20,30 @@ import { type IIIFContent, fetchResource } from "../../core/load";
 import type { Collection, Manifest } from "../../core/presentation";
 import type { CloverRequest } from "../../core/request";
 import { selectPosition, selectSequence } from "../../core/selectors";
+import type { ViewingDirection } from "../../core/sequence";
 import { type LanguageMapLike, localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useCloverSelector, useOptionalClover } from "../../react/context";
+import { HostLanguageContext } from "../../i18n/hostLanguage";
+import { useRootLanguage } from "../../react/language";
+import { useContainerName } from "../../ui/useContainerName";
 import { useRovingFocus } from "../../ui/useRovingFocus";
 import { useScrollTrack } from "../../ui/useScrollTrack";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 
-export type ItemsLayout = "carousel" | "list" | "grid";
+/**
+ * A scrolling row of thumbnails (`carousel`), a column, a wrapping grid, or one item at a
+ * time (`pager`: Previous, Position and Next).
+ */
+export type ItemsLayout = "carousel" | "list" | "grid" | "pager";
 
 export interface ItemsProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children"> {
-  /** A scrolling row (the default), a column, or a wrapping grid. */
+  /**
+   * A scrolling row (the default), a column, a wrapping grid, or `pager`: Previous,
+   * Position and Next, stepping one item at a time, with no thumbnails.
+   */
   layout?: ItemsLayout;
   /**
    * Inside a `Root`: the Manifest's views (default), or the members of the Collection it
@@ -52,12 +64,17 @@ export interface ItemsProps
    */
   navigation?: "id" | "homepage";
   /**
-   * An item was chosen. For a link, call `event.preventDefault()` to stay on the page and
-   * handle it yourself.
+   * An item was chosen, with the click's or the key's own event. For a link, call
+   * `event.preventDefault()` to stay on the page and handle it yourself.
    */
   onSelect?: (item: ItemModel, event: React.SyntheticEvent) => void;
   /** Standalone: show the resource's label, summary and homepage link. Default true. */
   header?: boolean;
+  /**
+   * Standalone: the level of the header's title, to fit the outline of the page around
+   * it (a carousel under an `h2` takes 3). Default 2.
+   */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
   /** Pixels requested for each thumbnail's longer side. Default 200. */
   thumbnailSize?: number;
   /** Standalone: credentials, headers and `fetch`. In a `Root`, the Root's are used. */
@@ -119,6 +136,20 @@ function MemberItems({
   const manifestId = useCloverSelector((state) => state.manifest?.id ?? null);
   const items = itemsOfCollection(collection);
   if (!items.length) return null;
+  const choose = (item: ItemModel, event: React.SyntheticEvent) => {
+    onSelect?.(item, event);
+    void clover.goToManifest(item.id);
+  };
+  if (rest.layout === "pager") {
+    const position = items.findIndex((item) => item.id === manifestId);
+    return (
+      <Pager
+        {...rest}
+        forwardedRef={forwardedRef}
+        steps={stepsOf(items, position, "left-to-right", choose)}
+      />
+    );
+  }
   return (
     <ItemsView
       {...rest}
@@ -129,10 +160,7 @@ function MemberItems({
       language={language}
       request={clover.request}
       showSummary
-      onActivate={(item, event) => {
-        onSelect?.(item, event);
-        void clover.goToManifest(item.id);
-      }}
+      onActivate={choose}
     />
   );
 }
@@ -152,8 +180,19 @@ function ViewItems({
     (state) => selectSequence(state.manifest).direction,
   );
   const items = itemsOfManifest(manifest);
-  // One view has nothing to choose between, as the pager agrees.
+  // One view has nothing to choose between.
   if (items.length < 2) return null;
+  // A step is a selection, as the carousel's arrows' are: the Root goes there.
+  const select = (item: ItemModel) => clover.goTo(item.id);
+  if (rest.layout === "pager") {
+    return (
+      <Pager
+        {...rest}
+        forwardedRef={forwardedRef}
+        steps={stepsOf(items, position, direction, select)}
+      />
+    );
+  }
   return (
     <ItemsView
       {...rest}
@@ -169,7 +208,7 @@ function ViewItems({
         clover.goTo(item.id);
       }}
       // As in a radio group: the page in focus is the page shown.
-      followFocus={(item) => clover.goTo(item.id)}
+      followFocus={select}
     />
   );
 }
@@ -216,6 +255,19 @@ function StandaloneItems({
 
   const isViews = !provided && resource?.type === "Manifest";
   const mode = navigation ?? (isViews ? "id" : "homepage");
+  // A pager steps a selection over the list, and tells `onSelect` of each step.
+  if (rest.layout === "pager") {
+    return (
+      <Pager
+        {...rest}
+        forwardedRef={forwardedRef}
+        steps={stepsOf(items, selected, "left-to-right", (item, event) => {
+          onSelect?.(item, event);
+          setSelected(items.indexOf(item));
+        })}
+      />
+    );
+  }
   const homepage = (resource as { homepage?: Array<{ id?: string }> } | null)
     ?.homepage?.[0]?.id;
 
@@ -243,6 +295,58 @@ function StandaloneItems({
       }}
       followFocus={(item) => setSelected(items.indexOf(item))}
     />
+  );
+}
+
+/** A list's items, and the one selected, as the pager's steps. */
+function stepsOf(
+  items: ItemModel[],
+  selected: number,
+  direction: ViewingDirection,
+  go: (item: ItemModel, event: React.SyntheticEvent) => void,
+): Steps {
+  return {
+    position: selected,
+    total: items.length,
+    direction,
+    step: (by, event) => {
+      const item = items[selected + by];
+      if (item) go(item, event);
+    },
+  };
+}
+
+/**
+ * Items' `pager` layout, standalone or in a Root: Items' own props that are not the
+ * `nav`'s are left behind, and the page's language is read as the strip reads it.
+ */
+function Pager({
+  steps,
+  forwardedRef,
+  /* eslint-disable @typescript-eslint/no-unused-vars -- Items' own, not the nav's */
+  layout,
+  thumbnailSize,
+  renderItem,
+  header,
+  headingLevel,
+  request,
+  language,
+  navigation,
+  of,
+  /* eslint-enable @typescript-eslint/no-unused-vars */
+  ...rest
+}: Omit<ItemsProps, "onSelect" | "iiifContent" | "items"> &
+  Forwarded & { steps: Steps }) {
+  const root = useRootLanguage(forwardedRef, rest.lang);
+  return (
+    <HostLanguageContext.Provider value={root.hostLanguage}>
+      <ItemsPager
+        {...rest}
+        steps={steps}
+        forwardedRef={root.ref}
+        hostLanguage={root.hostLanguage}
+      />
+    </HostLanguageContext.Provider>
   );
 }
 
@@ -279,6 +383,7 @@ function ItemsView({
   language,
   showSummary = false,
   heading,
+  headingLevel = 2,
   renderItem,
   onActivate,
   followFocus,
@@ -289,6 +394,9 @@ function ItemsView({
 }: ItemsViewProps) {
   const { t } = useCloverTranslation();
   const id = useId();
+  // Outside a Root, Items reads the page's language itself, for its strings to mark.
+  const root = useRootLanguage(forwardedRef, rest.lang);
+  const { langOf } = root;
 
   const carousel = layout === "carousel";
   const listbox = navigation === "id";
@@ -306,10 +414,7 @@ function ItemsView({
           ? "vertical"
           : "both",
     rtl,
-    onActivate: (index) =>
-      onActivate(items[index], {
-        type: "keydown",
-      } as React.SyntheticEvent),
+    onActivate: (index, event) => onActivate(items[index], event),
     onMove: followFocus
       ? (index, event) => {
           window.clearTimeout(held.current);
@@ -321,9 +426,35 @@ function ItemsView({
       : undefined,
   });
 
+  const listRef = useRef<HTMLDivElement>(null);
+
+  /*
+   * New items replace the options, and the one in focus goes with them: entering a nested
+   * Collection lists its members. Whether focus is among the options is read as each
+   * render begins, while the old ones are still there. If it was, and focus has fallen to
+   * the page, it goes to the new tab stop: the selected option, else the first
+   * (WCAG 2.4.3).
+   */
+  const hadFocus = useRef(false);
+  hadFocus.current = Boolean(
+    listRef.current?.contains(listRef.current.ownerDocument.activeElement),
+  );
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list || !hadFocus.current) return;
+    const { activeElement, body } = list.ownerDocument;
+    if (activeElement && activeElement !== body) return;
+    list
+      .querySelector<HTMLElement>(
+        `[data-track-index="${Math.max(0, selected)}"]`,
+      )
+      ?.focus();
+    // Only new items: a new selection among the same ones keeps focus where it is.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
+
   // Keep the selection in view: at once on arrival, smoothly after.
   const arrived = useRef(false);
-  const listRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (selected < 0) return;
     const instant = !arrived.current;
@@ -339,11 +470,25 @@ function ItemsView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [carousel, selected]);
 
-  const name =
-    ariaLabel ??
-    (heading?.label ? localize(heading.label, language).text : t("itemsLabel"));
+  const Title = `h${headingLevel}` as "h2";
   const headingLabel = heading ? localize(heading.label, language) : null;
   const headingSummary = heading ? localize(heading.summary, language) : null;
+  /*
+   * The list is named by your `aria-label`, else by the heading over it, which carries the
+   * label's language (an `aria-label` could not), else by "Items".
+   */
+  const titled = ariaLabel === undefined && Boolean(headingLabel?.text);
+  const fallbackName = useContainerName(
+    t("itemsLabel"),
+    langOf("itemsLabel"),
+    ariaLabel !== undefined || titled,
+    root.hostLanguage,
+  );
+  const listName = titled
+    ? { "aria-labelledby": `${id}-title` }
+    : ariaLabel !== undefined
+      ? { "aria-label": ariaLabel }
+      : fallbackName.props;
 
   const figure = (item: ItemModel, isSelected: boolean) =>
     renderItem ? (
@@ -358,6 +503,21 @@ function ItemsView({
       />
     );
 
+  // An item with no text of its own is named by its place, as Position names it. Your own
+  // figure (`renderItem`) names itself.
+  const positioned = (item: ItemModel) =>
+    !(
+      renderItem ||
+      localize(item.label, language).text ||
+      (showSummary && localize(item.summary, language).text)
+    );
+  const positionName = (item: ItemModel, index: number) =>
+    positioned(item)
+      ? t("canvasPosition", { index: index + 1, total: items.length })
+      : undefined;
+  const positionLang = (item: ItemModel) =>
+    positioned(item) ? langOf("canvasPosition") : undefined;
+
   const trackStyle: React.CSSProperties | undefined = carousel
     ? { display: "flex", margin: 0, padding: 0, listStyle: "none" }
     : undefined;
@@ -369,6 +529,10 @@ function ItemsView({
    * The carousel's arrows. Choosing between views (a listbox), they are Previous and Next:
    * they step the selection, which the strip follows into view. A list of links has no
    * selection, so there they scroll the strip.
+   *
+   * At an end an arrow is `aria-disabled`, not `disabled`: the press that reaches the end
+   * leaves focus on it (WCAG 2.4.3), and another does nothing. It leaves the tab order
+   * there, as a disabled button would.
    */
   const stepping = listbox && selected >= 0;
   const scrollButton = (step: "prev" | "next") => {
@@ -378,10 +542,16 @@ function ItemsView({
       : step === "prev"
         ? track.canScrollPrev
         : track.canScrollNext;
-    const label = stepping
-      ? t(step === "prev" ? "commonPrevious" : "commonNext")
-      : t(step === "prev" ? "itemsScrollBack" : "itemsScrollForward");
+    const labelKey = stepping
+      ? step === "prev"
+        ? "commonPrevious"
+        : "commonNext"
+      : step === "prev"
+        ? "itemsScrollBack"
+        : "itemsScrollForward";
+    const label = t(labelKey);
     const onClick = (event: React.MouseEvent) => {
+      if (!can) return;
       if (!stepping)
         return (step === "prev" ? track.scrollPrev : track.scrollNext)();
       const item = items[to];
@@ -393,7 +563,9 @@ function ItemsView({
         type="button"
         className={`clover-items-scroll-${step}`}
         aria-controls={stepping ? undefined : `${id}-viewport`}
-        disabled={!can}
+        lang={langOf(labelKey)}
+        aria-disabled={!can || undefined}
+        tabIndex={can ? undefined : -1}
         onClick={onClick}
       >
         <svg
@@ -419,105 +591,119 @@ function ItemsView({
   };
 
   return (
-    <Tag
-      ref={forwardedRef}
-      className={join("clover-items", className)}
-      data-layout={layout}
-      data-navigation={navigation}
-      {...rest}
-    >
-      {heading && (headingLabel?.text || headingSummary?.text) && (
-        <header className="clover-items-header">
-          {headingLabel?.text && (
-            <h2
-              className="clover-items-title"
-              id={`${id}-title`}
-              lang={headingLabel.lang}
-            >
-              {headingLabel.text}
-            </h2>
-          )}
-          {headingSummary?.text && (
-            <p className="clover-items-description" lang={headingSummary.lang}>
-              {headingSummary.text.replace(/<[^>]*>/g, "")}
-            </p>
-          )}
-          {heading.homepage && (
-            <a className="clover-items-homepage" href={heading.homepage}>
-              {t("commonViewAll")}
-            </a>
-          )}
-        </header>
-      )}
-      <div
-        className="clover-items-frame"
-        style={{ position: "relative" }}
-        // A right-to-left book runs leftward: its first item, and "back", on the right.
-        dir={rtl ? "rtl" : undefined}
+    <HostLanguageContext.Provider value={root.hostLanguage}>
+      <Tag
+        ref={root.ref}
+        className={join("clover-items", className)}
+        data-layout={layout}
+        data-navigation={navigation}
+        {...rest}
       >
-        {carousel && scrollButton("prev")}
+        {heading && (headingLabel?.text || headingSummary?.text) && (
+          <header className="clover-items-header">
+            {headingLabel?.text && (
+              <Title
+                className="clover-items-title"
+                id={`${id}-title`}
+                lang={headingLabel.lang}
+              >
+                {headingLabel.text}
+              </Title>
+            )}
+            {headingSummary?.text && (
+              <p
+                className="clover-items-description"
+                lang={headingSummary.lang}
+              >
+                {headingSummary.text.replace(/<[^>]*>/g, "")}
+              </p>
+            )}
+            {heading.homepage && (
+              <a
+                className="clover-items-homepage"
+                href={heading.homepage}
+                lang={langOf("commonViewAll")}
+              >
+                {t("commonViewAll")}
+              </a>
+            )}
+          </header>
+        )}
         <div
-          id={`${id}-viewport`}
-          className="clover-items-viewport"
-          ref={carousel ? track.ref : undefined}
+          className="clover-items-frame"
+          style={{ position: "relative" }}
+          // A right-to-left book runs leftward: its first item, and "back", on the right.
+          dir={rtl ? "rtl" : undefined}
         >
-          {listbox ? (
-            <div
-              ref={listRef}
-              role="listbox"
-              aria-label={name}
-              aria-orientation={carousel ? "horizontal" : "vertical"}
-              className="clover-items-track"
-              style={trackStyle}
-            >
-              {items.map((item, index) => {
-                const isSelected = index === selected;
-                return (
-                  <div
+          {carousel && scrollButton("prev")}
+          <div
+            id={`${id}-viewport`}
+            className="clover-items-viewport"
+            ref={carousel ? track.ref : undefined}
+          >
+            {listbox ? (
+              <div
+                ref={listRef}
+                role="listbox"
+                {...listName}
+                aria-orientation={carousel ? "horizontal" : "vertical"}
+                className="clover-items-track"
+                style={trackStyle}
+              >
+                {items.map((item, index) => {
+                  const isSelected = index === selected;
+                  return (
+                    <div
+                      key={item.id}
+                      id={`${id}-${index}`}
+                      role="option"
+                      aria-selected={isSelected}
+                      aria-label={positionName(item, index)}
+                      lang={positionLang(item)}
+                      className="clover-items-item"
+                      data-track-index={index}
+                      style={slideStyle}
+                      {...roving.itemProps(index)}
+                      onClick={(event) => onActivate(item, event)}
+                    >
+                      {figure(item, isSelected)}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <ul
+                {...listName}
+                className="clover-items-track"
+                style={trackStyle}
+              >
+                {items.map((item, index) => (
+                  <li
                     key={item.id}
-                    id={`${id}-${index}`}
-                    role="option"
-                    aria-selected={isSelected}
                     className="clover-items-item"
                     data-track-index={index}
                     style={slideStyle}
-                    {...roving.itemProps(index)}
-                    onClick={(event) => onActivate(item, event)}
                   >
-                    {figure(item, isSelected)}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <ul
-              aria-label={name}
-              className="clover-items-track"
-              style={trackStyle}
-            >
-              {items.map((item, index) => (
-                <li
-                  key={item.id}
-                  className="clover-items-item"
-                  data-track-index={index}
-                  style={slideStyle}
-                >
-                  <a
-                    className="clover-items-link"
-                    href={item.href}
-                    draggable={false}
-                    onClick={(event) => onActivate(item, event)}
-                  >
-                    {figure(item, false)}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
+                    <a
+                      className="clover-items-link"
+                      href={item.href}
+                      aria-label={positionName(item, index)}
+                      lang={positionLang(item)}
+                      draggable={false}
+                      onClick={(event) => onActivate(item, event)}
+                    >
+                      {figure(item, false)}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          {carousel && scrollButton("next")}
         </div>
-        {carousel && scrollButton("next")}
-      </div>
-    </Tag>
+        {fallbackName.node}
+      </Tag>
+    </HostLanguageContext.Provider>
   );
 }
 

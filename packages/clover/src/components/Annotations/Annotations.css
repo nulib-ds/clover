@@ -53,6 +53,27 @@
   margin: 0;
 }
 
+/*
+ * A Markdown body's lists: flush with its paragraphs, their markers in `l`. Each entry is
+ * itself a list item, so a body's bullets are set as a list's own, not a nested one's.
+ */
+.clover-annotations-body :is(ul, ol) {
+  margin: 0;
+  padding-inline-start: var(--clover-space-l);
+}
+
+.clover-annotations-body ul {
+  list-style-type: disc;
+}
+
+.clover-annotations-body :is(ul, ol) ul {
+  list-style-type: circle;
+}
+
+.clover-annotations-body ol {
+  list-style-type: decimal;
+}
+
 .clover-annotations-body a {
   color: var(--clover-color-accent, #0065c3);
 }

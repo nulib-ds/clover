@@ -187,6 +187,22 @@ describe("CanvasRenderer", () => {
     renderer.dispose();
   });
 
+  it("knows when it is zoomed in as far as it goes, or on its way there", async () => {
+    mockedLoad.mockResolvedValue(bitmap(1000, 1000));
+    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    expect(renderer.atMaxZoom()).toBe(false);
+
+    // At home 0.6 (the stage's 600px over the image's 1000), at most 1.1.
+    renderer.zoomBy(1.5, undefined, false);
+    expect(renderer.atMaxZoom()).toBe(false);
+    renderer.zoomBy(1000);
+    expect(renderer.atMaxZoom()).toBe(true);
+    renderer.home(true);
+    expect(renderer.atMaxZoom()).toBe(false);
+    renderer.dispose();
+  });
+
   it("comes home by the shortest way upright, never spinning a whole turn back", async () => {
     mockedLoad.mockResolvedValue(bitmap(1000, 1000));
     const renderer = new CanvasRenderer(host(), { animationTime: 0 });

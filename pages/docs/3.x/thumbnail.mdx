@@ -28,6 +28,7 @@ The Thumbnail component is used to display a thumbnail for a IIIF resource. This
           width: 200,
         },
       ]}
+      altAsLabel={{ none: ['Zagna "lunga"'] }}
     />
     ```
   </Tab>
@@ -42,11 +43,13 @@ The Thumbnail component is used to display a thumbnail for a IIIF resource. This
           width: 200,
         },
       ]}
+      altAsLabel={{ none: ['Zagna "lunga"'] }}
     />
   </Tab>
   <Tab>
     ```html
     <img
+      alt='Zagna "lunga"'
       src="https://api.dc.library.northwestern.edu/api/v2/works/71153379-4283-43be-8b0f-4e7e3bfda275/thumbnail"
       class="c-eCSSFU c-eCSSFU-ieexNaM-css"
     />
@@ -72,17 +75,18 @@ export default CustomThumbnail;
 
 Thumbnails are rendered to a relative HTML `<img>` or `<video>` element depenpdent on the type of the resource in the `thumbnail` entry. Currently, only type **Image** and **Video** are supported.
 
-| Prop        | Type                                                         | Default | Required |
-| ----------- | ------------------------------------------------------------ | ------- | -------- |
-| `as`        | `img`, `video`                                               | `img`   | --       |
-| `thumbnail` | [thumbnail](https://iiif.io/api/presentation/3.0/#thumbnail) | --      | **Yes**  |
-| `objectFit` | `contain`, `cover`                                           | `cover` | --       |
-| `className` | `string`, `undefined`                                        | --      | --       |
-| `style`     | `CSSProperties`, `undefined`                                 | --      | --       |
-| `lang`      | `string`, `undefined`                                        | --      | --       |
-| `title`     | `string`, `undefined`                                        | --      | --       |
-| `data-*`    | `string`, `undefined`                                        | --      | --       |
-| `aria-*`    | `AriaAttributes`, `undefined`                                | --      | --       |
+| Prop         | Type                                                                                                     | Default | Required |
+| ------------ | -------------------------------------------------------------------------------------------------------- | ------- | -------- |
+| `as`         | `img`, `video`                                                                                           | `img`   | --       |
+| `thumbnail`  | [thumbnail](https://iiif.io/api/presentation/3.0/#thumbnail)                                             | --      | **Yes**  |
+| `altAsLabel` | [InternationalString](https://iiif.io/api/presentation/3.0/#44-language-of-property-values), `undefined` | --      | --       |
+| `objectFit`  | `contain`, `cover`                                                                                       | `cover` | --       |
+| `className`  | `string`, `undefined`                                                                                    | --      | --       |
+| `style`      | `CSSProperties`, `undefined`                                                                             | --      | --       |
+| `lang`       | `string`, `undefined`                                                                                    | --      | --       |
+| `title`      | `string`, `undefined`                                                                                    | --      | --       |
+| `data-*`     | `string`, `undefined`                                                                                    | --      | --       |
+| `aria-*`     | `AriaAttributes`, `undefined`                                                                            | --      | --       |
 
 ### Video Thumbnail
 

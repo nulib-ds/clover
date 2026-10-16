@@ -12,12 +12,15 @@ const CanvasHandleDemo = ({
   src,
   isTiledImage,
   annotations,
+  label = "Göttingen market square, IIIF Image API reference image",
 }: {
   id?: string;
   body?: any;
   src?: any;
   isTiledImage?: boolean;
   annotations?: any[];
+  /** The viewport's accessible name: what the image shows. */
+  label?: string;
 }) => {
   const handle = useRef<CanvasHandle | null>(null);
   const [backend, setBackend] = useState("");
@@ -57,7 +60,7 @@ const CanvasHandleDemo = ({
           src={src}
           isTiledImage={isTiledImage}
           annotations={annotations}
-          label="Canvas demo"
+          label={label}
           onReady={(h: CanvasHandle) => {
             handle.current = h;
             setBackend(h.backendKind);

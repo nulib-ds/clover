@@ -2,12 +2,18 @@
  * The end-to-end harness: one scene of @nulib/clover, chosen by the query string, over
  * the package's source.
  *
- *   ?scene=viewer|items|document|gallery|composed   what to render (default viewer, in
- *                                          its Default template; document and gallery
- *                                          are the Viewer in those templates);
- *                                          `composed` publishes the viewport channel
- *                                          as `window.__viewport` for gesture tests
+ *   ?scene=viewer|items|document|gallery|composed|map|panel   what to render (default
+ *                                          viewer, in its Default template; document
+ *                                          and gallery are the Viewer in those
+ *                                          templates); `composed` publishes the viewport
+ *                                          channel as `window.__viewport` for gesture
+ *                                          tests; `map` is a Root's Map, on the style
+ *                                          `https://fixtures.test/map-style.json`, which
+ *                                          its spec serves; `panel` is an accordion of a
+ *                                          site's own sections, long named and full of
+ *                                          links, in a narrow scrolling pane
  *   &presentation=texture                  (composed) draw video into the canvas
+ *   &navigator=1                           (composed) show the Canvas's navigator
  *   &content=<url or content state>        its iiifContent
  *   &css=0                                 leave the stylesheet out (the plain layout)
  *   &headers=1                             send `X-Clover: e2e` and credentials
@@ -19,9 +25,13 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 
 import Viewer, * as Clover from "../../src/index";
+import { Map, setMapWorkerUrl } from "../../src/map/index";
 import * as Templates from "../../src/templates/index";
+import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 
 const params = new URLSearchParams(location.search);
+// A host's own choice of Clover's language (`&lng=fr`), set before anything renders.
+if (params.get("lng")) Clover.initCloverI18n({ lng: params.get("lng")! });
 const scene = params.get("scene") ?? "viewer";
 const content =
   params.get("content") ?? "https://fixtures.test/0009-book-1.json";
@@ -32,6 +42,14 @@ const request =
   params.get("headers") === "1"
     ? { headers: { "X-Clover": "e2e" }, credentials: "include" as const }
     : undefined;
+
+/** The `panel` scene's sections: a site's own, named at length, each a list of links. */
+const PANEL_SECTIONS = [
+  ["notes", "Notes on this work", 24],
+  ["provenance", "Provenance notes", 24],
+  ["map", "Map", 4],
+  ["contents", "Inhaltsverzeichnis", 4],
+] as const;
 
 /** The viewport channel, on `window`, so a spec can tell that a gesture moved the camera. */
 function ViewportProbe() {
@@ -63,14 +81,50 @@ function Scene() {
           <Clover.Label as="h1" />
           <Clover.Content
             style={{ height: "60vh" }}
+            navigator={params.get("navigator") === "1"}
             options={
               params.get("presentation") === "texture"
                 ? { media: { presentation: "texture" } }
                 : undefined
             }
           />
-          <Clover.Pager />
+          <Clover.Items layout="pager" />
           <ViewportProbe />
+        </Clover.Root>
+      );
+    case "map":
+      return (
+        <Clover.Root iiifContent={content} request={request}>
+          <Clover.Label of="canvas" as="p" data-testid="canvas-label" />
+          <Map styleUrl="https://fixtures.test/map-style.json" />
+          <button type="button">After the map</button>
+        </Clover.Root>
+      );
+    case "panel":
+      // A template's pane, as narrow as a phone's: it scrolls, so the headings stick.
+      return (
+        <Clover.Root iiifContent={content} request={request}>
+          <div
+            data-testid="pane"
+            style={{ width: "15rem", height: "24rem", overflowY: "auto" }}
+          >
+            <Clover.InformationPanel layout="accordion">
+              {PANEL_SECTIONS.map(([value, label, count]) => (
+                <Clover.Tab key={value} value={value} label={label}>
+                  <ul>
+                    {Array.from({ length: count }, (_, index) => (
+                      <li key={index}>
+                        <a href={`#${value}-${index + 1}`}>
+                          {label}, {index + 1}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </Clover.Tab>
+              ))}
+            </Clover.InformationPanel>
+          </div>
+          <button type="button">After the panel</button>
         </Clover.Root>
       );
     case "gallery":
@@ -205,7 +259,9 @@ async function start() {
   if (params.get("css") !== "0") {
     await import("../../src/styles/clover.css");
     await import("../../src/templates/templates.css");
+    await import("maplibre-gl/dist/maplibre-gl.css");
   }
+  setMapWorkerUrl(mapWorkerUrl);
   createRoot(document.getElementById("app")!).render(
     <>
       <Scene />

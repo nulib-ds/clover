@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 
-import { afterEach } from "vitest";
+import { afterEach, beforeEach } from "vitest";
 import { cleanup } from "@testing-library/react";
 
 /*
@@ -68,6 +68,14 @@ if (typeof window !== "undefined") {
 
   globalThis.IntersectionObserver = MockIntersectionObserver as any;
 }
+
+/*
+ * A page in English, as a page declares its language (WCAG 3.1.1), so a Root speaking
+ * Clover's English marks nothing. Tests of another page language set their own.
+ */
+beforeEach(() => {
+  if (typeof document !== "undefined") document.documentElement.lang = "en";
+});
 
 // runs a cleanup after each test case (e.g. clearing jsdom)
 afterEach(() => {

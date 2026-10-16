@@ -31,13 +31,36 @@ it works from any CDN path. On a page with modules, load
 | `search-query`      | A Content Search to run as the Manifest opens.                      |
 | `items`             | `carousel` (default), `list`, `grid`, or `false` for no thumbnails. |
 | `header`            | `false` removes the thumbnail and title over the stage.             |
+| `heading-level`     | The title's level, `2` (default) to `6`, to fit the page's outline. |
 | `panel`, `download` | `false` removes the information panel or the Download button.       |
+
+With `header="false"` there is no title, and the panel's sections take `heading-level`
+themselves.
 
 The `iiifContent` property takes a IIIF object as well, which an attribute cannot carry:
 
 ```js
 document.querySelector("clover-viewer").iiifContent = manifestJson;
 ```
+
+## Languages
+
+Clover's own words follow the page's `<html lang>`, then the reader's browser, as in React. The element carries its own
+copy of Clover's translator, so a page sets their language, or adds strings, through the
+element: `initCloverI18n` from the module, or from the element's class in a classic
+script. It applies to every `<clover-viewer>` on the page.
+
+```js
+// With modules.
+import { initCloverI18n } from ".../web-components/index.mjs";
+initCloverI18n({ lng: document.documentElement.lang });
+
+// From a classic script, once the element is defined.
+customElements.get("clover-viewer").initCloverI18n({ lng: "fr" });
+```
+
+Where that language is not the page's, the viewer marks each of its own words with
+`lang`, as a `Root` does; see [Languages](/docs/composing#languages).
 
 ## Events
 

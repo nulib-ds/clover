@@ -40,6 +40,57 @@ describe("navPlaceOf", () => {
     expect(features[1].properties.title).toBe("Current Location of Painting");
   });
 
+  it("keeps the language a title is in, the feature's own or its owner's", () => {
+    const { features } = navPlaceOf(p4(canvasesJson), null, "it");
+    expect(features[0].properties).toMatchObject({
+      title: "Ubicazione attuale del Bronzo Laocoonte e i suoi figli",
+      titleLang: "it",
+    });
+    // Only English is given, so English it is, and says so.
+    expect(features[1].properties.titleLang).toBe("en");
+    // Named by its Canvas, in the Canvas's language.
+    const unnamed = p4({
+      ...canvasesJson,
+      items: [
+        {
+          ...canvasesJson.items[1],
+          label: { de: ["Gemälde"] },
+          navPlace: { type: "Point", coordinates: [0, 0] },
+        },
+      ],
+    });
+    expect(navPlaceOf(unnamed).features[0].properties).toMatchObject({
+      title: "Gemälde",
+      titleLang: "de",
+    });
+    // A plain string, or `none`, has no language.
+    const plain = navPlaceOf(
+      p4({
+        ...canvasesJson,
+        items: [],
+        navPlace: {
+          type: "FeatureCollection",
+          features: [
+            {
+              type: "Feature",
+              properties: { label: "Rome" },
+              geometry: { type: "Point", coordinates: [12.5, 41.9] },
+            },
+            {
+              type: "Feature",
+              properties: { label: { none: ["Roma"] } },
+              geometry: { type: "Point", coordinates: [12.5, 41.9] },
+            },
+          ],
+        },
+      }),
+    ).features;
+    expect(plain.map((f) => f.properties.titleLang)).toEqual([
+      undefined,
+      undefined,
+    ]);
+  });
+
   it("reads a GeoJSON annotation body, on the Canvas it targets", () => {
     const { features } = navPlaceOf(p4(annotationJson));
     expect(features.length).toBeGreaterThan(0);
@@ -69,6 +120,23 @@ describe("georeferences", () => {
       DC_IMAGE_SERVICE_V3_ID,
     );
     expect(hasMapData(evanston())).toBe(true);
+  });
+
+  it("is named by the annotation's label, or else its Canvas's", () => {
+    const canvas = {
+      ...(evanston().items[0] as object),
+      label: { en: ["Township map"] },
+    };
+    expect(
+      readGeoreference(DC_GEOREF_ANNOTATION_CANVAS, canvas)?.label,
+    ).toEqual({ en: ["Township map"] });
+    expect(
+      readGeoreference(
+        { ...DC_GEOREF_ANNOTATION_CANVAS, label: { de: ["Karte"] } },
+        canvas,
+      )?.label,
+    ).toEqual({ de: ["Karte"] });
+    expect(georeferencesOf(evanston())[0].label).toBeUndefined();
   });
 
   it("takes an annotation on an image service directly, with its mask", () => {

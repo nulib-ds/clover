@@ -1,0 +1,41 @@
+/*
+ * Items' pager: Position, then Previous and Next (mirrored in a right-to-left book).
+ * Previous and Next are round controls (`ui/Button.css`), as Items' arrows are. The
+ * buttons carry sized icons and their names, so the pager reads without this file; this
+ * only spaces it. A flex row: move a piece with `order`.
+ */
+.clover-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* The Canvas's controls' gap, so a pager over a stage lines up with them. */
+  gap: var(--clover-space-s);
+  padding-block: var(--clover-space-s);
+}
+
+/* Nowhere to go (the first item, or the last): shown disabled, in `ui/Button.css`. */
+
+/*
+ * The count keeps the room of its widest ("17 / 17"), drawn unseen in the same cell, so
+ * nothing beside it moves as it grows: its digits are all one width (`tabular-nums`). It
+ * sits at the end of its room, by the arrows; in a mirrored pager, at the start.
+ */
+.clover-pager-position {
+  display: inline-grid;
+  justify-items: end;
+  font-variant-numeric: tabular-nums;
+  color: var(--clover-color-primary-muted, #26292b);
+}
+
+.clover-pager[data-direction="right-to-left"] .clover-pager-position {
+  justify-items: start;
+}
+
+.clover-pager-position > [aria-hidden] {
+  grid-area: 1 / 1;
+}
+
+.clover-pager-position > .clover-pager-room[hidden] {
+  display: block;
+  visibility: hidden;
+}

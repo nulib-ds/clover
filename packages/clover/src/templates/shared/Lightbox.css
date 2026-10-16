@@ -28,7 +28,8 @@
   gap: var(--clover-space-m);
 }
 
-.clover-template-lightbox-header h3 {
+/* Its title, at whatever level the layout gives it. */
+.clover-template-lightbox-header :is(h2, h3, h4, h5, h6) {
   flex: 1 1 auto;
   min-width: 0;
   margin: 0;

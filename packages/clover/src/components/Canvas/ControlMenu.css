@@ -21,11 +21,14 @@
  * One place for those the Canvas's controls open: `s` below the controls, lined up with
  * their end, no wider or taller than the Canvas leaves room for. Each is the Canvas's own
  * child, under the controls in the stacking order (`Canvas.css`), so a control's Tip
- * always shows over it, and the controls stay usable while it is open.
+ * always shows over it, and the controls stay usable while it is open. Below all of
+ * them: a narrow stage wraps the cluster onto more rows, which it measures
+ * (`--clover-canvas-controls-height`, `ui/useClusterReach.ts`).
  */
 .clover-canvas > :is(.clover-canvas-caption, .clover-canvas-menu) {
   --top: calc(
-    var(--clover-canvas-chrome-inset) + var(--clover-control) +
+    var(--clover-canvas-chrome-inset) +
+      var(--clover-canvas-controls-height, var(--clover-control)) +
       var(--clover-space-s)
   );
   top: var(--top);
@@ -34,23 +37,38 @@
   max-height: calc(100% - var(--top) - var(--clover-canvas-chrome-inset));
 }
 
-/* Clear of a video or sound's playback controls, which stay reachable below. */
+/*
+ * Clear of a video or sound's playback controls, which stay reachable below. On a stage
+ * too short for that to leave a box worth reading, it may cover them, as far as the
+ * stage's inset, and closes to give them back (WCAG 1.4.10).
+ */
 .clover-canvas[data-media] > :is(.clover-canvas-caption, .clover-canvas-menu) {
-  max-height: calc(100% - var(--top) - var(--clover-transport-room));
+  max-height: max(
+    calc(100% - var(--top) - var(--clover-transport-room)),
+    min(
+      2 * var(--clover-space-2xl),
+      calc(100% - var(--top) - var(--clover-canvas-chrome-inset))
+    )
+  );
 }
 
 /*
  * On a phone the controls are a column down the end, so these sit beside it instead, from
- * the top: below the way out of full screen when full screen.
+ * the top: below the way out of full screen when full screen. Beside every column of it:
+ * a short stage wraps the column onto more (`--clover-canvas-controls-width`), and what
+ * is left between them and the stage's start is the box's, however narrow, rather than
+ * over a control (WCAG 2.5.8).
  */
 @media (max-width: 575px) {
   .clover-canvas > :is(.clover-canvas-caption, .clover-canvas-menu) {
     --top: var(--clover-canvas-chrome-inset);
     right: calc(
-      var(--clover-canvas-chrome-inset) + var(--clover-control) +
+      var(--clover-canvas-chrome-inset) +
+        var(--clover-canvas-controls-width, var(--clover-control)) +
         var(--clover-space-s)
     );
     left: var(--clover-canvas-chrome-inset);
+    min-width: 0;
     max-width: none;
   }
 

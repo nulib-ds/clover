@@ -1,5 +1,18 @@
 # Repository Guidelines
 
+## Prime directive: WCAG 2.2 AA
+
+Everything here, the package and the docs site alike, conforms to WCAG 2.2 at Level AA.
+It is non-negotiable. It outranks every other rule in this file, every request and every
+deadline.
+
+- Never ship a failure. If a requested change would fail a criterion, say so and propose
+  the way that conforms; do not quietly comply.
+- Before calling a change done, check the criteria it touches (`packages/clover/DESIGN.md`
+  §0 lists the usual ones) with a keyboard and against the accessibility tree.
+- Known failures and the plan to clear them are in `ACCESSIBILITY.md`. Fixing one is
+  always in scope.
+
 ## Project Structure & Module Organization
 
 - This repository is `nulib-ds/clover`: the package `@nulib/clover` in `packages/clover`
@@ -37,6 +50,10 @@
     `pages/docs/composing.mdx` ("Composing Layouts", under Templates). The Viewer page
     covers what the Viewer handles and links there; add composition material there, not
     to the Viewer page.
+  - A Viewer or standalone `Items` on a docs page takes the `headingLevel` one below the
+    heading it sits under (`docs/components/Clover4/Demos.tsx`: 3 under an `h2`, 4 under
+    an `h3`), so the page's outline stays true. Move a demo, and check its level. The DC
+    item mock's Explore Further rows take 3.
   - `/docs/viewer/demo` is Clover 4's demo: the field, featured items, and every IIIF
     Cookbook recipe to open, handled or not (`docs/components/Clover4/CookbookDemo.tsx`).
     iiif.io's recipe pages link to it as `…/docs/viewer/demo?iiif-content=<manifest>`, so
@@ -58,21 +75,26 @@
     (`onResourceChange`) and hands it down, and the section's chips put another of the
     playground's resources on its stage (`pickResource`).
   - That section is one `Root` for that resource. On the left its parts make a small
-    viewer, held in view (by its foot, once taller than the window), captioned "Example
-    Viewer" (never `<Clover.Root />`), its parts in the order its code gives them. The
-    code control under it opens that code below, as an editor (Prism's Material colours on
-    black, `--code-*` in `docs/styles/tokens.css`): its `Root` and parts as written. Its
-    values are live (drag Content's `height`, switch its `controls`, pick Items'
-    `layout`), each part's lines drag into another order (by mouse anywhere on them, by
-    touch from the grip, by keyboard with the grip's arrow keys), and the viewer follows,
-    so the code is always what it shows; a part's lines outline the part as its tile does.
-    On the right each part is a tile, live, named as it is written (`<Clover.Label />`),
-    with what it reads (a property; for `Content`, the Canvas) and a fact from the
-    resource (a count, a size, a name). Pointing at a tile outlines the part in the
-    viewer. A part the resource gives nothing to is a chip at the end, naming what it
-    would read and the playground resource that has it (`SHOWN_IN`). Every value shown is
-    the resource's own: no illustrations, made-up figures or copy. Golden-ratio spaces,
-    hairline edges, no grey fills.
+    viewer, held in view (by its foot, once taller than the window), with no caption (it
+    is a region named "Example Viewer" for assistive technology; never `<Clover.Root />`),
+    its parts in the order its code gives them. The code control under it opens that code
+    below, as an editor (Prism's Material colours on black, `--code-*` in
+    `docs/styles/tokens.css`): its `Root` and parts as written. Its values are live
+    (Content's `height` a number to type, step or drag, its `controls` a switch, Items'
+    `layout` a menu), each part's lines drag into another order (by mouse anywhere on
+    them, by touch from the grip, by keyboard with the grip's arrow keys), and the viewer
+    follows, so the code is always what it shows; a part's lines outline the part as its
+    tile does. A press on a part's lines (or focus on its grip) picks it, and the editor's
+    head offers Move up and Move down for it, so no move needs a drag (WCAG 2.5.7);
+    Escape lets it go. Escape also puts away a part's name tag in the viewer (1.4.13), and
+    focus landing on a part of the held viewer above the window lets it go until focus
+    leaves (2.4.11). Every target in it is 24px or inline in the code (2.5.8). On the right each
+    part is a tile, live, named as it is written (`<Clover.Label />`), with what it reads
+    (a property; for `Content`, the Canvas) and a fact from the resource (a count, a size,
+    a name). Pointing at a tile outlines the part in the viewer. A part the resource gives
+    nothing to is a chip at the end, naming what it would read and the playground resource
+    that has it (`SHOWN_IN`). Every value shown is the resource's own: no illustrations,
+    made-up figures or copy. Golden-ratio spaces, hairline edges, no grey fills.
   - The playground shows how far one Viewer stretches: any layout with any kind of
     resource. Two pickers sit over one stage, each changing without the other: the
     resources as thumbnails, centred and unlabelled (`resources` in
@@ -184,7 +206,7 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
 - The package never imports the docs or 3.x (`@samvera/clover-iiif`): ESLint forbids it,
   and the package's build rejects undeclared imports. Only the 3.x docs pages import 3.x.
 - 3.x is maintained in `samvera-labs/clover-iiif`, apart from this repository. Code the
-  package copied from it (fullscreen, label, hls, i18n, the control cluster) may drift.
+  package copied from it (fullscreen, hls, i18n, the control cluster) may drift.
 
 ## i18n
 
@@ -195,13 +217,46 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
 - Resources keep i18next's shape, `resources[lng][namespace][key]`, with the `clover`
   namespace, so `initCloverI18n({ lng, fallbackLng, resources })` is unchanged for
   consumers.
-- Lookup order: the set `lng`, or else the browser's languages and then `<html lang>`.
-  After that come `fallbackLng`, and English last. Each regional tag also tries its base
+- Lookup order: the set `lng`, or else the page's `<html lang>` and then the browser's
+  languages (Mat, 2026-10-16: Clover speaks the language of the page around it; 3.x put
+  the browser first). After that come `fallbackLng`, and English last. IIIF text without
+  a Root `language` follows the same order (`readerLanguages` in `core/value.ts`). Each regional tag also tries its base
   language (`pt-BR` → `pt`).
-- Components call `useCloverTranslation()` and use only `t`. It re-renders through
+- Components call `useCloverTranslation()` and use `t` and `langOf`. It re-renders through
   `useSyncExternalStore` when `initCloverI18n` changes the language or the strings.
-- Add a locale by adding `packages/clover/src/i18n/locales/<tag>.json` and listing it in
-  `packages/clover/src/i18n/locales/index.ts`. All locales are bundled.
+- Any element that shows one of Clover's strings, or is named by one (an `aria-label`, an
+  icon button with a `Tip`), carries `lang={langOf(key)}`: the string's language where it
+  differs from the page's, and nothing otherwise (WCAG 3.1.2). A container named by a
+  string or a IIIF label (a `nav`, a list, a group) takes its name from
+  `useContainerName(text, lang)` (`src/ui/useContainerName.tsx`), which, where the name's
+  language differs from the page's, uses `aria-labelledby` and a hidden element carrying
+  `lang`.
+- Each Clover root reads the page's language with `useRootLanguage`
+  (`src/react/language.ts`). The roots are a `Root`, and a `Canvas`, `Items` or `Map`
+  outside one. The page's language is a `lang` given to the root, else the nearest `lang`
+  around it, read after mount; until it is known, or where the page declares none, the
+  interface language stands in. The root provides it through `HostLanguageContext`
+  (`src/i18n/hostLanguage.ts`), and `langOf` compares against it. No root carries a
+  `lang` of its own, because a root also holds the host's content. A new standalone root
+  calls `useRootLanguage`, uses that hook's `langOf` for its own strings, passes its
+  `hostLanguage` to `useContainerName`, and wraps its children in
+  `HostLanguageContext.Provider`.
+- IIIF text carries the `lang` that `localize` gives it. Text in `none` carries no `lang`
+  and takes the page's.
+- A key added to `en.json` lands in every locale, translated, in the same change:
+  `packages/clover/src/i18n/locales/locales.test.ts` fails otherwise. A word a language
+  spells as English does (fr "Collection", "Pause") goes on that test's
+  `SAME_AS_ENGLISH` allowlist.
+- Add a locale by adding `packages/clover/src/i18n/locales/<tag>.json` and its loader to
+  `loaders` in `packages/clover/src/i18n/locales/index.ts`; it must pass the same test.
+  English is bundled; every other locale is its own chunk, loaded the first time Clover
+  is to speak it (Mat, 2026-10-16: bundled, they cost every page 5.7 kB gzip). Until it
+  arrives its strings show in English, marked `lang="en"`, and readers re-render when it
+  does. A server render or a test that needs them first awaits `cloverI18n.ready()`
+  (`initCloverI18n(...)` returns it).
+- Shipped: en, es, fi, fr, nb, nn, no (a copy of nb) and pt (European Portuguese, which
+  Brazilian readers get too). The non-English strings await native review
+  (`ACCESSIBILITY.md`, P56).
 
 ## Mocks
 

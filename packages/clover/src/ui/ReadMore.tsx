@@ -7,6 +7,7 @@ import React, {
 } from "react";
 
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
+import { useRootLanguage } from "../react/language";
 
 /** A layout effect in the browser, an effect on the server (where there is no layout). */
 const useIsomorphicLayoutEffect =
@@ -30,6 +31,8 @@ const useIsomorphicLayoutEffect =
  */
 export function ReadMore({ children }: { children: React.ReactElement }) {
   const { t } = useCloverTranslation();
+  // Outside a Root (a Summary on its own), the button reads the page's language itself.
+  const own = useRootLanguage();
   const ref = useRef<HTMLElement>(null);
   const fallbackId = useId();
   const [open, setOpen] = useState(false);
@@ -42,14 +45,47 @@ export function ReadMore({ children }: { children: React.ReactElement }) {
     const node = ref.current;
     if (node && !open) setCut(node.scrollHeight > node.clientHeight + 1);
   };
-  // After every render (its text may have changed), and whenever it is resized.
+  /*
+   * After every render (its text may have changed), whenever it is resized, and when the
+   * page's styles or fonts change: a reader's text spacing, or a web font arriving, can
+   * lengthen text whose clamped box stays the same size.
+   */
   useIsomorphicLayoutEffect(measure);
   useEffect(() => {
     const node = ref.current;
-    if (!node || typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(node);
-    return () => observer.disconnect();
+    if (!node) return;
+    let frame = 0;
+    const again = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    };
+    const resized =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(measure);
+    resized?.observe(node);
+    const styled =
+      typeof MutationObserver === "undefined"
+        ? null
+        : new MutationObserver(again);
+    styled?.observe(document.head, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+    styled?.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["style", "class"],
+    });
+    // Its own style only: React's `data-read-more` must not set it off.
+    styled?.observe(node, { attributes: true, attributeFilter: ["style"] });
+    document.fonts?.addEventListener?.("loadingdone", again);
+    return () => {
+      cancelAnimationFrame(frame);
+      resized?.disconnect();
+      styled?.disconnect();
+      document.fonts?.removeEventListener?.("loadingdone", again);
+    };
     // `measure` reads the latest `open` through its closure, renewed with each render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -71,6 +107,8 @@ export function ReadMore({ children }: { children: React.ReactElement }) {
           aria-expanded={open}
           aria-controls={id}
           onClick={() => setOpen((value) => !value)}
+          ref={own.ref}
+          lang={own.langOf(open ? "readLess" : "readMore")}
         >
           {open ? t("readLess") : t("readMore")}
         </button>

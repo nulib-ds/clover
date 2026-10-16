@@ -28,8 +28,20 @@
   font-size: var(--clover-text-s);
 }
 
+/*
+ * Empty, it stays for assistive technology, out of sight and out of the column's gap, so
+ * its first message is announced as a change to a region already there (WCAG 4.1.3).
+ * Hidden by `display: none`, it would arrive with its message, which is often not read.
+ */
 .clover-content-search-status:empty {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .clover-content-search-canvas {
@@ -59,4 +71,14 @@ button.clover-content-search-hit:focus-visible {
     transparent
   );
   color: inherit;
+  /* Bold as well, so they are not told by colour alone (WCAG 1.4.1). */
+  font-weight: 700;
+}
+
+/* Forced colours drop the tint: the system's own colours for marked text instead. */
+@media (forced-colors: active) {
+  .clover-content-search-hit mark {
+    background-color: Mark;
+    color: MarkText;
+  }
 }

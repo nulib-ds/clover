@@ -120,3 +120,13 @@ export const hasBehavior = (resource: unknown, value: string) => {
     ? behavior.includes(value)
     : behavior === value;
 };
+
+/** The first Collection a Manifest says it is `partOf`. */
+export const partOfCollection = (manifest: unknown) =>
+  (
+    ((manifest as { partOf?: unknown } | null)?.partOf ?? []) as Array<{
+      id?: string;
+      type?: string;
+      label?: unknown;
+    }>
+  ).find((part) => part?.id && part.type === "Collection");

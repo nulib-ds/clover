@@ -78,6 +78,52 @@ button.clover-canvas-button svg {
 }
 
 /*
+ * A step with nowhere to go: Previous or Next at an end (the pager's, the strip's arrows),
+ * an animation's frame at its first or last. Shown disabled, faded, taking no pointer, so
+ * it never lights up under one and nothing beside it moves. The press that reaches the end
+ * leaves keyboard focus on it (`aria-disabled`, not `disabled`, WCAG 2.4.3): while focused
+ * it is whole again, its glyph faded, its focus drawn as ever. An inactive control needs
+ * no contrast (WCAG 1.4.3, 1.4.11); it tells assistive technology it is disabled.
+ */
+:is(
+  button.clover-pager-previous,
+  button.clover-pager-next,
+  button.clover-items-scroll-prev,
+  button.clover-items-scroll-next,
+  button.clover-canvas-transport-button
+)[aria-disabled="true"] {
+  cursor: default;
+}
+
+:is(
+    button.clover-pager-previous,
+    button.clover-pager-next,
+    button.clover-items-scroll-prev,
+    button.clover-items-scroll-next,
+    button.clover-canvas-transport-button
+  )[aria-disabled="true"]
+  svg {
+  opacity: 0.5;
+}
+
+:is(
+    button.clover-pager-previous,
+    button.clover-pager-next,
+    button.clover-items-scroll-prev,
+    button.clover-items-scroll-next,
+    button.clover-canvas-transport-button
+  )[aria-disabled="true"]:not(:focus-visible),
+:is(
+  button.clover-pager-previous,
+  button.clover-pager-next,
+  button.clover-items-scroll-prev,
+  button.clover-items-scroll-next
+):disabled {
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+/*
  * `data-button` rather than the id, so the nudge is language-independent: the ids carry a
  * localized label, the attribute does not.
  */

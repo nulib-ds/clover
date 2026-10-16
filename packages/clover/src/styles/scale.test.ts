@@ -93,3 +93,37 @@ describe("the scale", () => {
     expect(set).toEqual([]);
   });
 });
+
+/*
+ * The search field's placeholder is the theme's text mixed into its ground, at full
+ * opacity: browsers' own (Safari's grey, Firefox's half opacity) fall under 4.5:1.
+ */
+describe("a field's placeholder", () => {
+  const rule = readFileSync(SCALE, "utf8").match(
+    /:where\(\.clover-content-search-query\)::placeholder\s*\{([^}]*)\}/,
+  )?.[1];
+
+  it("is drawn at full opacity", () => {
+    expect(rule).toMatch(/opacity:\s*1;/);
+  });
+
+  it("keeps 4.5:1 on the field with the default theme", () => {
+    const [, text, share, ground] =
+      rule?.match(
+        /color-mix\(\s*in srgb,\s*var\([^,]+,\s*(#[0-9a-f]{3,6})\)\s*(\d+)%,\s*var\([^,]+,\s*(#[0-9a-f]{3,6})\)/,
+      ) ?? [];
+    const rgb = (hex: string) =>
+      hex.length === 4
+        ? [1, 2, 3].map((i) => parseInt(hex[i] + hex[i], 16))
+        : [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+    const luminance = (channels: number[]) =>
+      channels
+        .map((c) => c / 255)
+        .map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+        .reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+    const p = Number(share) / 100;
+    const mixed = rgb(text).map((c, i) => c * p + rgb(ground)[i] * (1 - p));
+    const ratio = (luminance(rgb(ground)) + 0.05) / (luminance(mixed) + 0.05);
+    expect(ratio).toBeGreaterThanOrEqual(4.5);
+  });
+});

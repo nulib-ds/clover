@@ -32,8 +32,8 @@
 @import "../ui/ReadMore.css";
 @import "../components/Primitives/Primitives.css";
 @import "../components/Status/Status.css";
-@import "../components/Pager/Pager.css";
 @import "../components/Items/Items.css";
+@import "../components/Items/Pager.css";
 @import "../components/InformationPanel/InformationPanel.css";
 @import "../components/Collection/Collection.css";
 @import "../components/Split/Split.css";

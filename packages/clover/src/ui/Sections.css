@@ -61,12 +61,21 @@ button.clover-sections-button:focus-visible {
 /* ---------- accordion: stacked boxes, each with its heading ---------- */
 
 /*
- * A heading is one line, so its height is known: its own line (`1lh`, at `text-m` with
- * the page's leading) and the button's `s` padding. The stacking below counts in it; where `lh` is not
- * understood, the headings simply do not stick.
+ * The stacks below are as tall as the headings in them, and a heading runs to as many
+ * lines as its label needs. `Sections` measures them: on each box it writes the height of
+ * the headings before it (`--clover-sections-before`) and after it (`-after`), each with
+ * its padding, and on the list all of theirs (`--clover-sections-total`). Until it has,
+ * each heading is taken as one line (`1lh`, at `text-m` with the page's leading) and the
+ * button's `s` padding, counted from its place (`--clover-sections-index`) and the list's
+ * count; where `lh` is not understood, the headings stick only once measured.
  */
 .clover-sections[data-layout="accordion"] {
-  --clover-sections-heading-height: calc(1lh + 2 * var(--clover-space-s));
+  --clover-sections-step: calc(
+    1lh + 2 * var(--clover-space-s) + var(--clover-space-2xs)
+  );
+  --clover-sections-total: calc(
+    var(--clover-sections-count) * var(--clover-sections-step)
+  );
   display: flex;
   flex-direction: column;
 }
@@ -74,10 +83,18 @@ button.clover-sections-button:focus-visible {
 /*
  * Boxes by spacing and the heading's hover, without a border of their own. The box
  * itself steps out of the layout, so its heading sticks within the whole list rather
- * than only within its own box, which is no taller than the heading when closed.
+ * than only within its own box, which is no taller than the heading when closed. What
+ * it carries for the stacks still reaches its heading and its panel.
  */
 .clover-sections[data-layout="accordion"] .clover-sections-item {
   display: contents;
+  --clover-sections-before: calc(
+    var(--clover-sections-index) * var(--clover-sections-step)
+  );
+  --clover-sections-after: calc(
+    var(--clover-sections-total) - var(--clover-sections-before) -
+      var(--clover-sections-step)
+  );
 }
 
 .clover-sections-heading {
@@ -91,33 +108,68 @@ button.clover-sections-button:focus-visible {
  * at the bottom over the ones after it. The stacks keep the container's own padding
  * (`--clover-sections-inset-start` above, `-end` below, which the information panel
  * sets to where its headings rest), so the first heading holds where it rests from the
- * first pixel of scrolling. Each is offset by a heading and the boxes' `2xs` gap for
- * every heading before it (top) or after it (bottom), so a stuck heading sits exactly
- * where it rests and never shifts as it comes unstuck. They are on the panel's own
- * colour, and each carries the `2xs` under it as its own padding (so the boxes are
- * spaced by their headings and panels, not a gap): nothing can show between two stuck
- * headings. Padding, not a border, since a border's width snaps to device pixels.
+ * first pixel of scrolling. Each is offset by the headings before it (top) or after it
+ * (bottom), so a stuck heading sits exactly where it rests and never shifts as it comes
+ * unstuck. They are on the panel's own colour, and each carries the boxes' `2xs` under
+ * it as its own padding (so the boxes are spaced by their headings and panels, not a
+ * gap): nothing can show between two stuck headings. Padding, not a border, since a
+ * border's width snaps to device pixels.
  */
 .clover-sections[data-layout="accordion"] .clover-sections-heading {
   position: sticky;
   font-size: var(--clover-text-m);
   z-index: 1;
-  --clover-sections-step: calc(
-    var(--clover-sections-heading-height) + var(--clover-space-2xs)
-  );
   top: calc(
-    var(--clover-sections-inset-start, 0px) + var(--clover-sections-index) *
-      var(--clover-sections-step)
+    var(--clover-sections-inset-start, 0px) + var(--clover-sections-before)
   );
   bottom: calc(
-    var(--clover-sections-inset-end, 0px) +
-      (var(--clover-sections-count) - var(--clover-sections-index) - 1) *
-      var(--clover-sections-step)
+    var(--clover-sections-inset-end, 0px) + var(--clover-sections-after)
   );
-  box-sizing: content-box;
-  height: var(--clover-sections-heading-height);
   padding-bottom: var(--clover-space-2xs);
   background-color: var(--clover-color-secondary, #fff);
+}
+
+/*
+ * What is focused or scrolled to in an open box lands clear of the stuck headings (WCAG
+ * 2.4.11): every heading up to its own above it, and those after it below.
+ */
+.clover-sections[data-layout="accordion"] .clover-sections-panel * {
+  scroll-margin-block: calc(
+      var(--clover-sections-inset-start, 0px) + var(--clover-sections-total) -
+        var(--clover-sections-after)
+    )
+    calc(var(--clover-sections-inset-end, 0px) + var(--clover-sections-after));
+}
+
+/*
+ * Where the stuck headings would fill the panel and leave the open section no room, they
+ * scroll with it, and what is focused needs no room kept clear of them: wherever
+ * `Sections` finds the stacks too tall for their container (`data-stacks="off"`), and on
+ * a short screen (a phone held sideways, or a page zoomed to 400%), even before it has
+ * measured. Relative, not static: the bands above the first heading and below the last
+ * stay anchored to their own heading.
+ */
+.clover-sections[data-layout="accordion"][data-stacks="off"]
+  .clover-sections-heading {
+  position: relative;
+  inset-block: auto;
+}
+
+.clover-sections[data-layout="accordion"][data-stacks="off"]
+  .clover-sections-panel
+  * {
+  scroll-margin-block: 0;
+}
+
+@media (max-height: 32rem) {
+  .clover-sections[data-layout="accordion"] .clover-sections-heading {
+    position: relative;
+    inset-block: auto;
+  }
+
+  .clover-sections[data-layout="accordion"] .clover-sections-panel * {
+    scroll-margin-block: 0;
+  }
 }
 
 /*
@@ -242,16 +294,16 @@ button.clover-sections-button:focus-visible {
   position: relative;
   justify-content: space-between;
   width: 100%;
-  height: 100%;
   padding: var(--clover-space-s);
   border-radius: inherit;
 }
 
-/* One line, cut short if it must be, so the heading keeps the height counted on. */
+/*
+ * A label wraps, never cut short, however narrow the panel or wide its spaced text (WCAG
+ * 1.4.12): onto more lines, breaking a long word where it must. The stacks measure it.
+ */
 .clover-sections[data-layout="accordion"] .clover-sections-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .clover-sections[data-layout="accordion"]

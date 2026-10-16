@@ -8,8 +8,9 @@ full height, scrolling within when its sections run longer. Downloads (the page'
 Manifest's `rendering`) are listed in the panel's About.
 
 The panel never stacks. As in 3.x it has its own space beside the stage, 24rem to start,
-and the bar between them shares the width: drag it, or focus it and use the arrow keys
-(Home and End for the limits; a double click puts it back). The stage keeps at least
+and the bar between them shares the width: drag it by its grip; click or tap it to step
+the panel from its narrowest to 24rem to its widest and round again; or focus it and use
+the arrow keys (Home and End for the limits). The stage keeps at least
 16rem and the panel 14rem, and the width the reader chooses is remembered. With no room
 for both (about 31rem, a phone), the panel slides over the stage instead, leaving a strip
 of the page uncovered: a click on the strip, Escape or its close button puts it away.
@@ -32,6 +33,7 @@ pass it: `template={Default}`, from `@nulib/clover/templates`.
 | Prop               | Default                     | What it does                                                    |
 | ------------------ | --------------------------- | --------------------------------------------------------------- |
 | `header`           | `true`                      | The thumbnail and title over the stage.                         |
+| `headingLevel`     | `2`                         | The title's level; the panel's sections are a level below.      |
 | `panel`            | `true`                      | The information panel and its toggle.                           |
 | `defaultPanelOpen` | —                           | Whether the panel starts open. Unset: open when it fits beside. |
 | `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.             |
@@ -40,6 +42,12 @@ pass it: `template={Default}`, from `@nulib/clover/templates`.
 | …                  |                             | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`… |
 
 Size the stage with `--clover-content-height` (default `min(65vh, 40rem)`).
+
+The title is an `h2`, the panel's section headings `h3`s, and the headings inside them
+`h4`s. On a page where the Viewer sits under an `h2` of its own, pass `headingLevel={3}`
+and every heading moves down a level, so the page's outline stays true. With
+`header={false}` there is no title, and the panel's sections take its place, at
+`headingLevel` itself: under a page's `h1`, they are `h2`s.
 
 To change the layout, copy `Default.tsx` and `Default.css` into your app, and import the
 parts from `@nulib/clover` where they import `../../parts`. They use only what
