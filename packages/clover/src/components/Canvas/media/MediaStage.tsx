@@ -28,6 +28,10 @@ export interface MediaStageProps {
     presentation: "dom" | "texture",
   ) => void;
   onEnded?: () => void;
+  /** The reader chose a caption track: the Manifest's file, or `null` (Off, or the media's own). */
+  onCaptionChange?: (caption: { id: string; language?: string } | null) => void;
+  /** The Manifest's caption file to show while captions are on, by its `id`. */
+  caption?: string | null;
   /** Whether the reader may pan and zoom; off for a lone video or sound. */
   navigable?: boolean;
   /** Put full screen in the transport, as a lone media Canvas does. */
@@ -70,6 +74,8 @@ const MediaStage: React.FC<MediaStageProps> = ({
   instance,
   onElement,
   onEnded,
+  onCaptionChange,
+  caption,
   navigable = true,
   fullscreen = false,
   isFullscreen = false,
@@ -101,6 +107,18 @@ const MediaStage: React.FC<MediaStageProps> = ({
   );
   // The first track shows by default, as the Player shows it.
   const captions = useCaptionTracks(element, own, media.id);
+  /*
+   * A caption file chosen elsewhere (a transcript's language) is the one shown, while one
+   * shows: Off stays off, and the reader's own choice in the menu is told back as theirs.
+   */
+  const { active: shown, select } = captions;
+  useEffect(() => {
+    if (!caption || shown < 0) return;
+    const index = media.captions.findIndex((each) => each.id === caption);
+    if (index >= 0 && index !== shown) select(index);
+    // Only as the file asked for changes: the reader's menu stays theirs in between.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [caption, media.captions]);
   const [cues, setCues] = useState<string[]>([]);
 
   useEffect(() => {
@@ -177,9 +195,10 @@ const MediaStage: React.FC<MediaStageProps> = ({
 
   const captionLabels = useMemo(
     () =>
-      captions.options.map(({ label, labelLang }) => ({
+      captions.options.map(({ label, labelLang, language }) => ({
         label,
         lang: labelLang,
+        language,
       })),
     [captions.options],
   );
@@ -199,7 +218,14 @@ const MediaStage: React.FC<MediaStageProps> = ({
         kind={media.kind}
         captions={captionLabels}
         activeCaption={captions.active}
-        onCaptionChange={captions.select}
+        onCaptionChange={(index) => {
+          captions.select(index);
+          // The Manifest's files come first in the menu; past them, the media's own.
+          const chosen = media.captions[index];
+          onCaptionChange?.(
+            chosen ? { id: chosen.id, language: chosen.language } : null,
+          );
+        }}
         fullscreen={fullscreen}
         isFullscreen={isFullscreen}
         video={media.kind === "video" ? element : null}

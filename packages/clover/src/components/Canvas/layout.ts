@@ -31,6 +31,8 @@ export interface IIIFCanvas {
   items?: Array<{ items?: Array<IIIFAnnotation> }>;
   /** Non-painting annotations, embedded: captions are `supplementing` WebVTT here. */
   annotations?: Array<{ items?: Array<IIIFAnnotation> }>;
+  /** Other forms of it: a transcript as plain text, among them. */
+  rendering?: unknown;
   /** Shown before the Canvas is opened, and before playback begins. */
   placeholderContainer?: IIIFCanvas;
   /** Shown while sound plays, which has no picture of its own. */
@@ -412,6 +414,48 @@ export function canvasCaptions(canvas: IIIFCanvas): CaptionTrack[] {
     }
   }
   return tracks;
+}
+
+/** A transcript of a Canvas as plain text, untimed: a file of the words, in a language. */
+export interface TextTranscript {
+  id: string;
+  label?: unknown;
+  language?: string;
+}
+
+/**
+ * A time-based Canvas's transcripts as plain text (`text/plain`), in order: from its
+ * `supplementing` annotations (Presentation 4's `provides: transcript`, Cookbook 0253),
+ * then its `rendering` (Cookbook 0017). Each file once. Only a Canvas with a `duration`:
+ * the plain text of a page's image is its text, not a transcript of something heard.
+ */
+export function canvasTextTranscripts(canvas: IIIFCanvas): TextTranscript[] {
+  if (!(Number(canvas.duration) > 0)) return [];
+  const found: TextTranscript[] = [];
+  const add = (raw: unknown) => {
+    const candidate = raw as Record<string, any> | undefined;
+    const id = candidate?.id;
+    if (typeof id !== "string" || found.some((each) => each.id === id)) return;
+    const format = candidate?.format;
+    if (format ? format !== "text/plain" : !/\.txt(\?|$)/i.test(id)) return;
+    found.push({
+      id,
+      label: candidate?.label,
+      language: asArray(candidate?.language)[0] as string | undefined,
+    });
+  };
+  const pages = [...(canvas.annotations ?? []), ...(canvas.items ?? [])];
+  for (const page of pages) {
+    for (const annotation of page.items ?? []) {
+      if (!asArray(annotation.motivation).includes("supplementing")) continue;
+      for (const raw of asArray(annotation.body)) {
+        const body = raw as Record<string, any>;
+        (body?.type === "Choice" ? asArray(body.items) : [body]).forEach(add);
+      }
+    }
+  }
+  asArray(canvas.rendering).forEach(add);
+  return found;
 }
 
 export function resolveBody(

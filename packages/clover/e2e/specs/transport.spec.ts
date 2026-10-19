@@ -460,6 +460,18 @@ test.describe("transport", () => {
     );
     const captions = page.getByRole("button", { name: "Captions" });
     await expect(captions).toHaveAttribute("data-active", "");
+    // On, it keeps the control's own fill: the accent is for the pointer and focus.
+    const fill = () =>
+      captions.evaluate((element) => getComputedStyle(element).backgroundColor);
+    const control = await captions.evaluate((element) => {
+      const probe = document.createElement("span");
+      probe.style.backgroundColor = "var(--clover-color-control, #1a1d1e)";
+      element.parentElement!.append(probe);
+      const colour = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+      return colour;
+    });
+    expect(await fill()).toBe(control);
     const mark = () =>
       captions.evaluate((element) => {
         const after = getComputedStyle(element, "::after");

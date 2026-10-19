@@ -463,8 +463,28 @@ every rule below.
   polling anywhere.
 - **Media text.** `core/vtt.ts` parses WebVTT and caches each file's text (`loadVtt`),
   shared by the Canvas's caption tracks and `Transcript`; tests call `clearVttCache()`.
+  A transcript as plain text (`canvasTextTranscripts` in `Canvas/layout.ts`: a
+  time-based Canvas's `text/plain` `rendering` or supplementing body, as in Cookbook
+  recipes 0017 and 0253) is the Transcript's too, after the captions, untimed, in
+  paragraphs (`loadText`, `paragraphsOf`). In the row it shows "TXT" after the caption files'
+  language codes (Mat, 2026-10-19), "TXT EN" where there are several, and any code that
+  would show twice shows its label instead. The docs' `transcripts` mock has both kinds. `decodeText` reads UTF-8, else Windows-1252 with its
+  0x80–0x9F mapped by hand: Node's decoder reads that label as Latin-1. Only caption
+  files take part in the captions' one choice (`clover.captions`).
   `Transcript` follows the media element from the `media` channel (`timeupdate`, `seeked`)
   in component state, never the store. Chapters come from `core/ranges.ts`.
+- **Caption languages** (Mat, 2026-10-19). Several caption files are offered by their
+  language codes first ("EN", "IT", `ui/languageCode.ts`), each named by its code and its
+  file's label: in the Captions menu the label follows the code; in the Transcript the
+  code alone shows, the label its `Tip` (a `<label>` around a radio can hold one), and
+  the row sits beside the Transcript's heading in an accordion (`useSectionActions` in
+  `ui/Sections.tsx`: a slot after the heading, held with it, its width kept clear in the
+  heading's button), never a `<select>`, which got lost in the cues. Captions and the
+  Transcript are one choice, both ways, through `clover.captions`: the Canvas's menu
+  (`onCaptionChange`) sets it and the Transcript follows; the Transcript sets it and the
+  Canvas shows that file (`caption`) while captions show. Off stays off: the Transcript
+  never turns captions on. The transport's buttons take the accent only under the pointer
+  or on focus, not when on or open: on is the bar under the glyph.
 - **Upstream bug:** `@iiif/parser` 4.0.3's upgrader rewrites a Range item's Canvas id
   `…#t=0,30` as `…/t=0,30` (and `#xywh=` likewise). Read Range items through
   `rangeItemTarget()`, which restores the fragment. Drop it once the parser is fixed.

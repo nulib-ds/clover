@@ -115,5 +115,72 @@ export function loadVtt(url: string, request?: CloverRequest): Promise<string> {
   return file;
 }
 
+const texts = new Map<string, Promise<string>>();
+
+/**
+ * A plain-text file's text (a transcript), fetched once per URL (with CORS and the request
+ * settings). Read as UTF-8, or, where it is not UTF-8, as Windows-1252: the encoding of
+ * a file saved on Windows and served without a charset, as Cookbook 0017's is, whose
+ * apostrophes would otherwise be lost.
+ */
+export function loadText(
+  url: string,
+  request?: CloverRequest,
+): Promise<string> {
+  let file = texts.get(url);
+  if (!file) {
+    file = cloverFetch(request, url)
+      .then((response) =>
+        response.ok
+          ? response.arrayBuffer()
+          : Promise.reject(new Error(String(response.status))),
+      )
+      .then(decodeText)
+      .catch((error) => {
+        texts.delete(url); // A failure is not kept: a later caller may try again.
+        throw error;
+      });
+    texts.set(url, file);
+  }
+  return file;
+}
+
+/**
+ * Windows-1252's 0x80–0x9F, its quotes, dashes and the euro, where Latin-1 has control
+ * characters. Some decoders (Node's) read "windows-1252" as Latin-1, so they are mapped
+ * here; the five it leaves undefined stay as they were.
+ */
+const WINDOWS_1252 =
+  "€\u0081‚ƒ„…†‡ˆ‰Š‹Œ\u008dŽ\u008f\u0090‘’“”•–—˜™š›œ\u009džŸ";
+
+/** Bytes as text: UTF-8 where they are, else Windows-1252. */
+export function decodeText(bytes: ArrayBuffer): string {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return new TextDecoder("windows-1252")
+      .decode(bytes)
+      .replace(
+        /[\u0080-\u009f]/g,
+        (control) => WINDOWS_1252[control.charCodeAt(0) - 0x80],
+      );
+  }
+}
+
+/**
+ * Plain text in paragraphs: split at blank lines, any line ending, each trimmed, the
+ * line breaks within one kept (as a speaker's turns may be).
+ */
+export function paragraphsOf(text: string): string[] {
+  return text
+    .replace(/\r\n?/g, "\n")
+    .split(/\n[ \t]*(?:\n[ \t]*)+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+}
+
 /** Forget fetched files (tests). */
-export const clearVttCache = () => files.clear();
+export const clearVttCache = () => {
+  files.clear();
+  texts.clear();
+};

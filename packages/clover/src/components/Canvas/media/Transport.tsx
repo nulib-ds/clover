@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { useBarHeight } from "./useBarHeight";
 import { type MediaController, formatTime } from "./useMediaController";
+import { languageCode } from "../../../ui/languageCode";
 import { SHORTCUTS, Tip } from "../../../ui/Tip";
 import { useOneOpen } from "../../../ui/useOneOpen";
 import {
@@ -23,8 +24,11 @@ interface TransportProps {
   instance: string;
   controller: MediaController;
   kind: "video" | "audio";
-  /** The caption tracks: each one's name, and the language it is written in. */
-  captions: Array<{ label: string; lang?: string }>;
+  /**
+   * The caption tracks: each one's name, the language it is written in, and the language
+   * of its cues.
+   */
+  captions: Array<{ label: string; lang?: string; language?: string }>;
   /** The caption track showing, or -1 for none. */
   activeCaption: number;
   onCaptionChange: (index: number) => void;
@@ -50,6 +54,8 @@ interface TransportOption {
   label: string;
   lang?: string;
   time?: string;
+  /** The language of what it chooses (a caption track's cues), shown as its code. */
+  language?: string;
 }
 
 /**
@@ -140,6 +146,7 @@ function TransportMenu({
   // as they send an arrow key's.
   const pointer = useRef(false);
   const name = useContainerName(label, labelLang);
+  const coded = options.some((option) => languageCode(option.language));
   useOneOpen(open, () => setOpen(false));
   const dismiss = () => {
     setOpen(false);
@@ -230,40 +237,61 @@ function TransportMenu({
           id={id}
           ref={list}
         >
-          {options.map((option, index) => (
-            <label
-              className="clover-canvas-transport-option"
-              key={index}
-              onPointerDown={() => {
-                pointer.current = true;
-              }}
-            >
-              <input
-                checked={selected === index}
-                name={id}
-                onChange={() => onSelect(index)}
-                onClick={() => {
-                  if (pointer.current) dismiss();
+          {options.map((option, index) => {
+            const code = languageCode(option.language);
+            return (
+              <label
+                className="clover-canvas-transport-option"
+                key={index}
+                onPointerDown={() => {
+                  pointer.current = true;
                 }}
-                onKeyDown={(event) => {
-                  pointer.current = false;
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    onSelect(index);
-                    dismiss();
-                  }
-                }}
-                type="radio"
-              />
-              {option.time && (
-                <>
-                  <span>{option.time}</span>{" "}
-                </>
-              )}
-              {/* Only the name carries its language: the time is in digits. */}
-              <span lang={option.lang}>{option.label}</span>
-            </label>
-          ))}
+              >
+                <input
+                  checked={selected === index}
+                  name={id}
+                  onChange={() => onSelect(index)}
+                  onClick={() => {
+                    if (pointer.current) dismiss();
+                  }}
+                  onKeyDown={(event) => {
+                    pointer.current = false;
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      onSelect(index);
+                      dismiss();
+                    }
+                  }}
+                  type="radio"
+                />
+                {option.time && (
+                  <>
+                    <span>{option.time}</span>{" "}
+                  </>
+                )}
+                {/*
+                 * The code of its cues' language ("EN", "IT"), where any option has one: so a
+                 * reader who cannot read a name can still tell its language. An option
+                 * without one (Off) keeps the column, its cell empty and unread.
+                 */}
+                {coded &&
+                  (code ? (
+                    <>
+                      <span className="clover-canvas-transport-code">
+                        {code}
+                      </span>{" "}
+                    </>
+                  ) : (
+                    <span
+                      className="clover-canvas-transport-code"
+                      aria-hidden="true"
+                    />
+                  ))}
+                {/* Only the name carries its language: the time is in digits. */}
+                <span lang={option.lang}>{option.label}</span>
+              </label>
+            );
+          })}
         </fieldset>
       )}
     </div>

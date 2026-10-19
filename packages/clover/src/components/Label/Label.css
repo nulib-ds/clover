@@ -1,0 +1,8 @@
+/*
+ * The resource's label (`Label.tsx`), a title wherever it is drawn: its lines balanced,
+ * so a long one breaks into lines of about one length rather than leaving a word alone on
+ * the last. Its size and weight are the layout's, as is any limit to its lines.
+ */
+.clover-label {
+  text-wrap: balance;
+}

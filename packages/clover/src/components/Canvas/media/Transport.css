@@ -142,19 +142,21 @@
   fill: none;
 }
 
+/*
+ * The accent under the pointer or on focus only, as on Clover's other round controls:
+ * not for a toggle that is on, nor a button whose menu is open (Mat, 2026-10-19). Its
+ * menu, open, shows that it is.
+ */
 .clover-canvas-transport-button:hover,
-.clover-canvas-transport-button:focus-visible,
-.clover-canvas-transport-button[data-active],
-.clover-canvas-transport-button[aria-pressed="true"],
-.clover-canvas-transport-button[aria-expanded="true"] {
+.clover-canvas-transport-button:focus-visible {
   background-color: var(--clover-color-accent, #0065c3);
 }
 
 /*
  * On (captions showing, Repeat pressed): a bar under the glyph, in the glyph's colour,
- * which hover and focus never draw, so the state is not told by the fill alone
- * (WCAG 1.4.1). Its Tip positions the button. A border, not a fill: forced colours keep
- * a border in the text's colour, where they would paint a fill as the page.
+ * the state's one mark, never a fill of its own, so it is not told by colour (WCAG
+ * 1.4.1). Its Tip positions the button. A border, not a fill: forced colours keep a
+ * border in the text's colour, where they would paint a fill as the page.
  */
 button.clover-canvas-transport-button:is(
     [data-active],
@@ -392,6 +394,32 @@ button.clover-canvas-transport-time:focus-visible {
 
 .clover-canvas-transport-option:has(input:focus-visible) {
   box-shadow: inset 0 0 0 2px var(--clover-player-text, #fff);
+}
+
+/*
+ * A caption track's language, as its code ("EN", "IT") before its name, in a column of
+ * its own so the names line up; Off's cell is empty. At the transcript's size for its
+ * codes (`Transcript.css`), and a little softer than the name: about 9:1 still on the
+ * menu's ground. On the chosen row's accent it is the name's own white, since softened it
+ * would fall under 4.5:1 (WCAG 1.4.3).
+ */
+.clover-canvas-transport-code {
+  flex: none;
+  min-width: var(--clover-space-l);
+  color: color-mix(in srgb, currentColor 72%, transparent);
+  font-size: var(--clover-text-xs);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.clover-canvas-transport-option:has(input:checked)
+  .clover-canvas-transport-code {
+  color: inherit;
+}
+
+/* With the codes' column, room for a name of a few words on a line or two. */
+.clover-canvas-transport-options:has(.clover-canvas-transport-code) {
+  min-width: min(16rem, 100cqi - 2 * var(--clover-space-m));
 }
 
 /* The row is the control; the radio stays for keyboard and screen reader only. */

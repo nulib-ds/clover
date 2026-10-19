@@ -31,6 +31,10 @@ import {
   PUBLIC_BASE as PAGED_BASE,
   manifest as pagedManifest,
 } from "../docs/mocks/paged/index.mjs";
+import {
+  PUBLIC_BASE as TRANSCRIPTS_BASE,
+  manifest as transcriptsManifest,
+} from "../docs/mocks/transcripts/index.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "public/mocks/content-search");
@@ -110,3 +114,13 @@ writeFileSync(
   `${JSON.stringify(pagedManifest(PAGED_BASE), null, 2)}\n`,
 );
 console.log("paged: manifest.json");
+
+// The film with its captions and its transcript: one static Manifest.
+const transcripts = join(root, "public/mocks/transcripts");
+rmSync(transcripts, { recursive: true, force: true });
+mkdirSync(transcripts, { recursive: true });
+writeFileSync(
+  join(transcripts, "manifest.json"),
+  `${JSON.stringify(transcriptsManifest(TRANSCRIPTS_BASE), null, 2)}\n`,
+);
+console.log("transcripts: manifest.json");

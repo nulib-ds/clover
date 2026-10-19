@@ -12,10 +12,13 @@ import choiceJson from "../../fixtures/iiif-cookbook/0033-choice.json";
 import compositionJson from "../../fixtures/iiif-cookbook/0036-composition-from-multiple-images.json";
 import languagesJson from "../../fixtures/iiif-cookbook/0074-multiple-language-captions.json";
 import captionsJson from "../../fixtures/iiif-cookbook/0219-using-caption-file.json";
+import renderingJson from "../../fixtures/iiif-cookbook/0017-transcription-av.json";
+import transcriptJson from "../../fixtures/iiif-cookbook/0253-using-transcript-file.json";
 import {
   type IIIFCanvas,
   arrangeCanvases,
   canvasScene,
+  canvasTextTranscripts,
   findChoices,
   paintedImages,
   resolveDirection,
@@ -263,5 +266,47 @@ describe("canvasScene media", () => {
         (track) => track.language,
       ),
     ).toEqual(["en", "it"]);
+  });
+});
+
+describe("canvasTextTranscripts", () => {
+  it("finds a time-based Canvas's plain-text transcript in its rendering (Cookbook 0017)", () => {
+    const [canvas] = p4(renderingJson).items;
+    expect(canvasTextTranscripts(canvas)).toEqual([
+      {
+        id: "https://fixtures.iiif.io/video/indiana/volleyball/volleyball.txt",
+        label: { en: ["Transcript"] },
+        language: undefined,
+      },
+    ]);
+  });
+
+  it("finds one a supplementing annotation provides, with its language (Cookbook 0253, Presentation 4)", () => {
+    const [canvas] = p4(transcriptJson).items;
+    expect(canvasTextTranscripts(canvas)).toEqual([
+      {
+        id: "https://fixtures.iiif.io/video/indiana/lunchroom_manners/lunchroom_manners.txt",
+        label: { en: ["Transcript in plain text format"] },
+        language: "en",
+      },
+    ]);
+  });
+
+  it("takes no captions, and no plain text of a Canvas that is not time-based", () => {
+    const [captioned] = p4(captionsJson).items;
+    expect(canvasTextTranscripts(captioned)).toEqual([]);
+    const page = {
+      id: "https://example.org/canvas/1",
+      width: 100,
+      height: 100,
+      rendering: [
+        {
+          id: "https://example.org/page-1.txt",
+          type: "Text",
+          format: "text/plain",
+        },
+      ],
+    };
+    expect(canvasTextTranscripts(page)).toEqual([]);
   });
 });

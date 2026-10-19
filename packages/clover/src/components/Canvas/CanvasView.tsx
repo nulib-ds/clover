@@ -136,6 +136,8 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
   onReady,
   onViewportChange,
   onMediaElement,
+  onCaptionChange,
+  caption,
   onEnded,
   chapters,
   placeholder = true,
@@ -806,6 +808,8 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
               renderer={renderer}
               instance={instance}
               onElement={handleMediaElement}
+              onCaptionChange={onCaptionChange}
+              caption={caption}
               navigable={navigable}
               fullscreen={mediaOnly && Boolean(controlsConfig?.fullPage)}
               isFullscreen={isFullscreen}

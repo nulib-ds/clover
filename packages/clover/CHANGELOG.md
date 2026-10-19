@@ -48,7 +48,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   is; parts read from the nearest `Root`, wherever they sit in your markup.
   - `Content` draws the current view (a page, a spread, a video or sound) with `Canvas`.
   - `Label` shows the Manifest's label, or the current Canvas's with `of="canvas"`, in the
-    reader's language and marked with `lang`.
+    reader's language and marked with `lang`. Its lines are balanced, so a long title
+    breaks into lines of about one length (`.clover-label` sets `text-wrap: balance`; set
+    `text-wrap: wrap` on it to undo that).
   - `Previous`, `Next` and `Position` move a view at a time, a spread at a time in a
     paged book; with `of="members"`, a Manifest at a time through the Collection. All
     three together are Items' `pager` layout (below). Their arrows follow
@@ -139,7 +141,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   panel that scrolls, every accordion heading stays in sight: those scrolled past stack
   at the top, those an open section pushes below stack at the bottom, both inside the
   panel's padding, so the first heading holds where it rests from the first pixel of
-  scrolling (a heading runs to as many lines as its label needs). What scrolls under them
+  scrolling (a heading runs to as many lines as its label needs). An open box's content
+  can put controls of its own beside its heading: a `.clover-sections-actions` box after
+  each heading, held where the heading is held, over the end of its row, and the
+  heading's button keeps that room clear (`--clover-sections-actions`), so its label
+  never runs under them. The Transcript's languages sit there. What scrolls under them
   shows faintly: a soft shadow under the open section's heading once the panel has
   scrolled, and over the next heading while there is more below. The headings are
   controls, not links: each label is bold, in the text's colour, over a 3px line as wide
@@ -306,10 +312,30 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **Transcripts and chapters.**
   - `Clover.Transcript` lists the WebVTT captions of the video or sound in view, marks
-    the cue playing (found by binary search) and seeks to a cue when it is pressed. With
-    several caption files it offers a choice of language. It appears as a Transcript tab
+    the cue playing (found by binary search) and seeks to a cue when it is pressed. It
+    reads a transcript as plain text (`text/plain`) too, untimed, as its paragraphs in
+    the file's language (`.clover-transcript-body`): one a time-based Canvas has as its
+    `rendering` (Cookbook 0017) or a `supplementing` annotation provides (0253), after
+    any caption files: in the row of choices it shows "TXT" after their language codes
+    ("TXT EN" and so on where there are several), and the row is then named
+    "Transcript". A file that is not UTF-8 is read as Windows-1252, as 0017's is
+    encoded, so its apostrophes are not lost. The information panel offers the
+    Transcript for either kind. With
+    several caption files it offers them as a row of their language codes ("EN", "IT"),
+    native radios each named by its code and its file's label (in that label's
+    language), the label shown as its popover (a `Tip`). In an information panel's
+    accordion the row sits beside the Transcript's heading, held there as the heading is
+    (`useSectionActions`, below); elsewhere it is over the cues. It replaces a `<select>`
+    and its `.clover-transcript-track` label: style `.clover-transcript-languages`,
+    `.clover-transcript-language` and `.clover-transcript-code` instead. Its language and
+    the Canvas's captions are one choice: a file chosen in either is the one the other
+    shows, through the Root (`clover.captions`), except that the Transcript changes the
+    captions' language, never whether they show (Off stays off). It appears as a Transcript tab
     when the view's media has captions. Playback re-renders it only when the cue changes
-    and writes nothing to the Root's state.
+    and writes nothing to the Root's state. Its cues share one grid
+    (`.clover-transcript-cues`, with each row and button a `subgrid`): the times' column
+    is as wide as the list's widest time, and every cue's text starts `s` past it. The
+    time no longer has a `2xl` minimum width.
   - Captions and the transcript share one fetch of each file, read by Clover's own
     WebVTT parser (`parseVtt`, `cueAt`), with voice and styling tags handled.
   - Chapters come from the Manifest's Ranges (`chaptersOf`): marked on the seek bar of
@@ -744,7 +770,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   its keys while any of its own controls has focus, not only the image: `+`, `−`, `0`,
   `R`, `⇧R`, and `K`, `M`, `J`, `L` for video and sound.
   - `Clover.Tip` shows the name for controls of your own:
-    `<Clover.Tip label={label} shortcut={shortcut} />`, last inside the control.
+    `<Clover.Tip label={label} shortcut={shortcut} />`, last inside the control. It takes
+    `lang` for a name in another language than its control's, and a `<label>` around a
+    radio or checkbox can hold one: it shows while the input has keyboard focus, and
+    Escape hides it there too.
   - A `Tip` is always on top. The popups the Canvas's controls open (its information, its
     menus) hang below the controls and under them, so no popup covers a control's name;
     a `Tip` had shown behind an open menu, all but hidden. The information box's close
@@ -947,7 +976,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     - **Sound** plays with the same playback controls, over the
       accompanying (or placeholder) Canvas's image. It has no waveform.
     - **New props and options.** `onMediaElement` hands a host the element, and
-      `onEnded` fires at the end. `options.media.presentation: "texture"` draws video
+      `onEnded` fires at the end. `onCaptionChange` tells a host the caption file the
+      reader picks in the Captions menu (`{ id, language }`, or `null` for Off), and
+      `caption` (a file's `id`) chooses the one shown while captions are on, for a
+      transcript of a host's own to lead and follow; inside a `Root` the Canvas reads it
+      from the Root's new `clover.captions` channel, which `Transcript` sets. `options.media.presentation: "texture"` draws video
       frames into the WebGL canvas instead of positioning a `<video>`. This needs CORS,
       and a video without it falls back.
 
@@ -1068,7 +1101,15 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   thumbnails' toggle dragged with their pane, and the spine's Tips then raised the
   Viewer with `Default` to 62.5 kB (62,418 B), `Document` to 65.2 (65,085 B), the
   stylesheet to 10.7 (10,657 B) and `<clover-viewer>` to 97.6 (97,437 B);
-  `templates.css` is 2.0 kB (2,032 B), within its 2.1.
+  `templates.css` is 2.0 kB (2,032 B), within its 2.1. The Transcript's language row
+  beside its heading (the accordion's slot for it, the codes, their popovers), the
+  captions menu's codes, one caption choice for the Canvas and the Transcript, and
+  balanced labels then raised a standalone `Canvas` to 35.9 kB (35,878 B), the Viewer
+  with `Default` to 62.9 (62,775 B), `Document` to 65.6 (65,460 B), `Gallery` to 55.2
+  (55,154 B), the stylesheet to 11.1 (11,036 B) and `<clover-viewer>` to 98.3
+  (98,200 B). Plain-text transcripts (the panel reading whether a Canvas has one) then
+  raised the Viewer with `Default` to 63.0 kB (62,945 B), `Document` to 65.7 (65,626 B),
+  `Gallery` to 55.4 (55,319 B) and `<clover-viewer>` to 98.5 (98,439 B).
 
   The API is experimental and may change in any release.
 
@@ -1194,8 +1235,15 @@ are in the repository's `ACCESSIBILITY.md`.
   - The Captions button describes the track in use, and in forced colours shows
     Highlight while captions are on.
   - Captions on, or Repeat pressed, draws a bar under the button's glyph (an `::after`
-    border) beside the accent fill, in forced colours too. A pressed Repeat now takes
-    the accent fill as well.
+    border), in forced colours too. The transport's buttons take the accent fill under
+    the pointer or on focus only, as Clover's other round controls do: no longer while
+    captions are on, Repeat is pressed or their menu is open. A stylesheet that relied
+    on that fill should mark `[data-active]`, `[aria-pressed="true"]` or
+    `[aria-expanded="true"]` itself.
+  - The Captions menu leads each track with the code of its cues' language ("EN",
+    "IT"), in a column of its own (`.clover-canvas-transport-code`), so a reader who
+    cannot read a track's name can still tell its language; the menu is a little wider
+    with them (16rem).
   - The transport bar wraps rather than running off a narrow stage. Under 28rem of stage
     width (37.5rem with chapters), the time and chapter take a row above the buttons.
     They sit in a new `.clover-canvas-transport-status`, and

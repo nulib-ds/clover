@@ -67,8 +67,9 @@
   transition-delay: 400ms;
 }
 
-/* At once, for keyboard focus. */
-:focus-visible > .clover-tip {
+/* At once, for keyboard focus: on the control, or on the radio in a label that holds it. */
+:focus-visible > .clover-tip,
+label:has(> input:focus-visible):not([data-tip-hidden]) > .clover-tip {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
@@ -126,6 +127,7 @@ button.clover-template-document-sidebar-toggle > .clover-tip::before,
   > :first-child
   .clover-tip,
 button.clover-items-scroll-prev > .clover-tip,
+.clover-transcript-languages > .clover-transcript-language > .clover-tip,
 .clover-template-document-sidebar-closed
   > button.clover-template-document-sidebar-toggle
   > .clover-tip,
@@ -146,10 +148,21 @@ button.clover-items-scroll-next > .clover-tip,
 button.clover-canvas-placeholder-toggle > .clover-tip,
 .clover-information-panel:not([data-floating])
   > button.clover-information-panel-close
+  > .clover-tip,
+.clover-sections-actions
+  .clover-transcript-languages
+  > .clover-transcript-language
   > .clover-tip {
   inset-inline: auto 0;
   translate: none;
 }
+
+/*
+ * A transcript's languages (`Transcript.css`): over the cues, at the start of their row,
+ * so the labels hang from the start (above); beside the Transcript's heading, at the end
+ * of the panel's row, so they hang from the end, and none passes the panel's edge, shown
+ * or not, where a hidden one would still have made the panel scroll across.
+ */
 
 /*
  * A hotspot's (`Canvas/Annotations.tsx`): its annotation's text, which may run long, so

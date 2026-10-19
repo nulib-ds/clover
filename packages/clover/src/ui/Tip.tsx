@@ -57,10 +57,13 @@ export const SHORTCUT_KEYS = new Set([
  */
 export function Tip({
   label,
+  lang,
   shortcut,
   scrolls = false,
 }: {
   label: string;
+  /** The language of `label`, where it is not its control's. */
+  lang?: string;
   shortcut?: Shortcut;
   /**
    * It may run longer than the room it is kept in (a hotspot's note, kept inside the
@@ -85,6 +88,7 @@ export function Tip({
       ref={ref}
       className="clover-tip"
       aria-hidden="true"
+      lang={lang}
       {...(scrolls && {
         tabIndex: -1,
         onMouseDown: (event: React.MouseEvent<HTMLSpanElement>) => {
@@ -106,7 +110,8 @@ export function Tip({
  * (WCAG 1.4.10, 1.4.12).
  */
 function placeTip(event: Event) {
-  const tip = event.target instanceof Element && tipOf(event.target);
+  const control = event.target instanceof Element && controlOf(event.target);
+  const tip = control && tipOf(control);
   if (tip) keepInside(tip);
 }
 
@@ -117,9 +122,22 @@ function tipOf(control: Element) {
   ) as HTMLElement | undefined;
 }
 
+/**
+ * The control whose popover an element shows: the element itself, or, for a radio or a
+ * checkbox, the label around it, which holds the popover while focus is on the input.
+ */
+function controlOf(element: Element): Element {
+  const label = element.matches("input") ? element.parentElement : null;
+  return label?.matches("label") && tipOf(label) ? label : element;
+}
+
 function isShown(tip: HTMLElement) {
   try {
-    return Boolean(tip.parentElement?.matches(":hover, :focus-visible"));
+    return Boolean(
+      tip.parentElement?.matches(
+        ":hover, :focus-visible, :has(> input:focus-visible)",
+      ),
+    );
   } catch {
     return false;
   }
@@ -197,17 +215,19 @@ function hideTips(event: KeyboardEvent) {
   document
     .querySelectorAll<HTMLElement>(":hover > .clover-tip")
     .forEach((tip) => tip.parentElement && shown.add(tip.parentElement));
-  const focused = document.activeElement as HTMLElement | null;
-  if (focused && tipOf(focused)) shown.add(focused);
+  const focused = document.activeElement;
+  const control = focused && (controlOf(focused) as HTMLElement);
+  if (control && tipOf(control)) shown.add(control);
   shown.forEach((control) => {
     control.dataset.tipHidden = "";
+    // Back once the pointer comes again, or focus leaves it (or the input in it).
     const show = () => {
       delete control.dataset.tipHidden;
       control.removeEventListener("pointerenter", show);
-      control.removeEventListener("blur", show);
+      control.removeEventListener("focusout", show);
     };
     control.addEventListener("pointerenter", show);
-    control.addEventListener("blur", show);
+    control.addEventListener("focusout", show);
   });
 }
 

@@ -322,7 +322,10 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   `facing-pages`, so it stands alone and Page 16 and Page 17 share a spread, and Ranges
   for its sections (`structures`, titled only by its printed headings or the covers'
   Canvas labels; some name a region), and each plate's "Then" and "Now" tagged (static),
-  the playground's Catalog.
+  the playground's Catalog; `transcripts`, Cookbook 0219's _Lunchroom Manners_ with its
+  English captions and, as the Canvas's `rendering` (0017's way), the film's plain-text
+  transcript that 0253 provides (static). The package's tests use a copy,
+  `packages/clover/src/fixtures/transcripts.json`.
 
 ## Environment & Tooling
 

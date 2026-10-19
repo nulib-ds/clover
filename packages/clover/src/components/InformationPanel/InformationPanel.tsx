@@ -3,7 +3,11 @@ import React, { Suspense, forwardRef, lazy, useRef } from "react";
 import { About } from "./About";
 import { Tip } from "../../ui/Tip";
 import { Close } from "../Canvas/glyphs";
-import { canvasCaptions, type IIIFCanvas } from "../Canvas/layout";
+import {
+  canvasCaptions,
+  canvasTextTranscripts,
+  type IIIFCanvas,
+} from "../Canvas/layout";
 import { searchServiceOf } from "../../core/search-service";
 import { hasMapData } from "../../core/geo-detect";
 import { tableOfContents } from "../../core/ranges";
@@ -116,7 +120,8 @@ export interface InformationPanelProps
    * `Clover.Tab`s. Without any, the panel has the tabs Clover has data for: About,
    * Contents when the Manifest has Ranges, Search when it has a Content Search service, a
    * Map when it (or a Canvas or annotation) has navPlace or a georeference,
-   * a Transcript when the view's media has captions, and Annotations when there are any.
+   * a Transcript when the view's media has captions or a plain-text transcript, and
+   * Annotations when there are any.
    */
   children?: React.ReactNode;
 }
@@ -170,7 +175,11 @@ export const InformationPanel = forwardRef<HTMLElement, InformationPanelProps>(
           state.manifest,
           state.canvasId,
         ) as unknown as IIIFCanvas[]
-      ).some((canvas) => canvasCaptions(canvas).length > 0),
+      ).some(
+        (canvas) =>
+          canvasCaptions(canvas).length > 0 ||
+          canvasTextTranscripts(canvas).length > 0,
+      ),
     );
     const hasContents = useCloverSelector(
       (state) => tableOfContents(state.manifest).length > 0,

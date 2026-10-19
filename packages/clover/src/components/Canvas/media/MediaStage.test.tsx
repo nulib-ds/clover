@@ -415,9 +415,11 @@ describe("Canvas media", () => {
     expect(button).toHaveAccessibleDescription("Captions in WebVTT format");
     fireEvent.click(button);
     expect(button).toHaveAttribute("aria-expanded", "true");
+    // Each track by the code of its cues' language, then its name; Off by its name.
     expect(
-      screen.getByRole("radio", { name: "Captions in WebVTT format" }),
+      screen.getByRole("radio", { name: "EN Captions in WebVTT format" }),
     ).toBeChecked();
+    expect(screen.getByText("EN")).toHaveClass("clover-canvas-transport-code");
 
     pick(screen.getByRole("radio", { name: "Off" }));
     expect(button).not.toHaveAttribute("data-active");
@@ -457,15 +459,58 @@ describe("Canvas media", () => {
     const button = screen.getByRole("button", { name: "Captions" });
 
     fireEvent.click(button);
-    pick(screen.getByRole("radio", { name: "Sottotitoli in formato WebVTT" }));
+    pick(
+      screen.getByRole("radio", { name: "IT Sottotitoli in formato WebVTT" }),
+    );
     const captions = () => document.querySelector(".clover-canvas-captions");
     expect(captions()).toHaveAttribute("lang", "it");
     expect(captions()).toHaveTextContent("Tom & Jerry, 'l’altro'");
 
     fireEvent.click(button);
-    pick(screen.getByRole("radio", { name: "Captions in WebVTT format" }));
+    pick(screen.getByRole("radio", { name: "EN Captions in WebVTT format" }));
     expect(captions()).toHaveAttribute("lang", "en");
     expect(captions()).toHaveTextContent(/^Tom & Jerry$/);
+  });
+
+  it("tells the reader's pick, and shows the file it is given while captions are on; Off stays off", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+      Promise.resolve(new Response("WEBVTT\n")),
+    );
+    URL.createObjectURL = vi.fn(() => "blob:http://localhost/captions");
+    URL.revokeObjectURL = vi.fn();
+    const [english, italian] = (languages.items[0] as any).annotations[0]
+      .items[0].body.items;
+    const onCaptionChange = vi.fn();
+    const canvas = (caption?: string) => (
+      <Canvas
+        canvases={languages.items as any}
+        onCaptionChange={onCaptionChange}
+        caption={caption}
+      />
+    );
+    const { rerender } = render(canvas());
+    await transport();
+    const button = screen.getByRole("button", { name: "Captions" });
+    fireEvent.click(button);
+    pick(
+      screen.getByRole("radio", { name: "IT Sottotitoli in formato WebVTT" }),
+    );
+    expect(onCaptionChange).toHaveBeenLastCalledWith({
+      id: italian.id,
+      language: "it",
+    });
+
+    // Given the English file (a transcript's language), it shows that one.
+    rerender(canvas(english.id));
+    expect(button).toHaveAccessibleDescription("Captions in WebVTT format");
+
+    // Off stays off, whatever it is given; and what it is given is not told back.
+    fireEvent.click(button);
+    pick(screen.getByRole("radio", { name: "Off" }));
+    expect(onCaptionChange).toHaveBeenLastCalledWith(null);
+    rerender(canvas(italian.id));
+    expect(button).toHaveAccessibleDescription("Off");
+    expect(onCaptionChange).toHaveBeenCalledTimes(2);
   });
 
   it("offers captions the stream carries, and draws them in their language", async () => {
@@ -492,7 +537,7 @@ describe("Canvas media", () => {
     const button = screen.getByRole("button", { name: "Captions" });
     fireEvent.click(button);
     expect(screen.getByText("Français")).toHaveAttribute("lang", "fr");
-    pick(screen.getByRole("radio", { name: "Français" }));
+    pick(screen.getByRole("radio", { name: "FR Français" }));
     // Clover draws it, so the browser does not.
     expect(french.mode).toBe("hidden");
     const drawn = document.querySelector(".clover-canvas-captions");

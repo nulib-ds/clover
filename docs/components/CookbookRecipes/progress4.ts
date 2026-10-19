@@ -54,9 +54,8 @@ export const progress4: Record<string, Progress> = {
   "0234-provider": no("provider is not shown in About"),
   "0032-collection": yes,
   "0464-reuse-manifest": yes,
-  "0017-transcription-av": partial(
-    "The transcript is offered under Download, not shown beside the video",
-  ),
+  // 2026-10-19: its plain-text transcript shows in the panel's Transcript.
+  "0017-transcription-av": yes,
   "0103-poetry-reading-annotations": partial(
     "Annotations are listed beside the recording; choosing one does not seek to its time",
   ),
@@ -65,7 +64,8 @@ export const progress4: Record<string, Progress> = {
     "General considerations, with no resource to open",
   ),
   "0219-using-caption-file": yes,
-  "0253-using-transcript-file": no("The transcript file is not shown"),
+  // 2026-10-19: its plain-text transcript shows in the panel's Transcript.
+  "0253-using-transcript-file": yes,
   "0266-full-canvas-annotation": yes,
   "0019-html-in-annotations": yes,
   "0045-css": no("The annotation styled by CSS is neither shown nor styled"),

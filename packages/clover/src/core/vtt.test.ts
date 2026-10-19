@@ -1,5 +1,5 @@
 import { chaptersOf, parseTime } from "./ranges";
-import { cueAt, parseVtt } from "./vtt";
+import { cueAt, decodeText, paragraphsOf, parseVtt } from "./vtt";
 
 const VTT = `WEBVTT
 Kind: captions
@@ -132,5 +132,31 @@ describe("chaptersOf", () => {
     expect(parseTime("30")).toEqual({ start: 30 });
     expect(parseTime("0,")).toEqual({ start: 0 });
     expect(parseTime("x,1")).toBeUndefined();
+  });
+});
+
+describe("plain-text transcripts", () => {
+  it("reads UTF-8, and a file that is not (Windows-1252, as Cookbook 0017's) as Windows-1252", () => {
+    const utf8 = new TextEncoder().encode("the opponent’s court");
+    expect(decodeText(utf8.buffer as ArrayBuffer)).toBe("the opponent’s court");
+    // 0x92, Windows-1252's right single quote, is not UTF-8 on its own.
+    const windows = new Uint8Array([
+      ...new TextEncoder().encode("the opponent"),
+      0x92,
+      ...new TextEncoder().encode("s court"),
+    ]);
+    expect(decodeText(windows.buffer)).toBe("the opponent’s court");
+  });
+
+  it("splits at blank lines, whatever the line endings, keeping a paragraph's own breaks", () => {
+    expect(
+      paragraphsOf(
+        "[DISCLAIMER]\r\n\r\nVolleyball is fun\r\nand any boy can play.\n \n\nThe end.\n",
+      ),
+    ).toEqual([
+      "[DISCLAIMER]",
+      "Volleyball is fun\nand any boy can play.",
+      "The end.",
+    ]);
   });
 });

@@ -305,8 +305,75 @@ button.clover-sections-button:focus-visible {
   justify-content: space-between;
   width: 100%;
   padding: var(--clover-space-s) var(--clover-space-s) var(--clover-space-2xs);
+  /* Clear of the controls beside it, where its section has some (below). */
+  padding-inline-end: calc(
+    var(--clover-space-s) + var(--clover-sections-actions, 0px)
+  );
   border-radius: inherit;
   color: var(--clover-color-primary, #1a1d1e);
+}
+
+/*
+ * A section's own controls beside its heading (`useSectionActions`; a transcript's
+ * languages): over the end of the heading's row, `s` in from the panel's edge and on its
+ * label's line, held where the heading is held, at the top or the bottom of the stacks,
+ * and in its place where the headings scroll. A box as tall as the heading (the headings'
+ * total less those before and after it), drawn back over it by its own height, so it
+ * takes no room of its own. The heading's button keeps its width clear
+ * (`--clover-sections-actions`, measured), so the label never runs under it. Only while
+ * its section is open (`hidden` otherwise), and nothing at all while empty.
+ */
+.clover-sections[data-layout="accordion"] .clover-sections-actions {
+  --clover-sections-own: calc(
+    var(--clover-sections-total) - var(--clover-sections-before) -
+      var(--clover-sections-after)
+  );
+  position: sticky;
+  z-index: 2;
+  top: calc(
+    var(--clover-sections-inset-start, 0px) + var(--clover-sections-before)
+  );
+  bottom: calc(
+    var(--clover-sections-inset-end, 0px) + var(--clover-sections-after)
+  );
+  display: flex;
+  align-items: center;
+  align-self: flex-end;
+  box-sizing: border-box;
+  height: var(--clover-sections-own);
+  margin-top: calc(-1 * var(--clover-sections-own));
+  padding: var(--clover-space-s) var(--clover-space-s)
+    calc(var(--clover-space-2xs) + 3px);
+  font-size: var(--clover-text-m);
+  /* Only its controls take the pointer: the heading under the rest of it is pressed. */
+  pointer-events: none;
+}
+
+.clover-sections[data-layout="accordion"] > * + * > .clover-sections-actions {
+  padding-top: calc(var(--clover-space-2xs) + var(--clover-space-s));
+}
+
+.clover-sections-actions > * {
+  pointer-events: auto;
+}
+
+/* After the box itself: a `display` of its own would otherwise outweigh `hidden`. */
+.clover-sections[data-layout="accordion"]
+  .clover-sections-actions:is(:empty, [hidden]) {
+  display: none;
+}
+
+.clover-sections[data-layout="accordion"][data-stacks="off"]
+  .clover-sections-actions {
+  position: relative;
+  inset-block: auto;
+}
+
+@media (max-height: 32rem) {
+  .clover-sections[data-layout="accordion"] .clover-sections-actions {
+    position: relative;
+    inset-block: auto;
+  }
 }
 
 /*

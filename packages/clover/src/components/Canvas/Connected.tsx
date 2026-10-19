@@ -30,8 +30,8 @@ import {
  *   to its time once the media can. Then it is consumed, and the placeholder stays away
  *   for that view: a link into a Canvas never lands on its cover.
  * - **Reporting.** The visible region goes to the viewport channel on every camera move,
- *   and the media element to the media channel — never to the store, so panning and
- *   playback re-render nothing.
+ *   the media element to the media channel, and the caption file the reader chooses to
+ *   the captions channel — never to the store, so panning and playback re-render nothing.
  * - **Auto-advance.** When playback ends on a Manifest or Canvas with `auto-advance`, the
  *   next view plays; with `repeat`, the last wraps to the first.
  */
@@ -40,6 +40,8 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
   onReady,
   onViewportChange,
   onMediaElement,
+  onCaptionChange,
+  caption: givenCaption,
   onEnded,
   placeholder = true,
   label,
@@ -50,6 +52,13 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
 }) => {
   const context = useClover("Canvas");
   const { clover } = context;
+  // The caption file to show: the host's, or the one chosen in the Root (a Transcript's).
+  const rootCaption = useSyncExternalStore(
+    clover.captions.subscribe,
+    clover.captions.get,
+    clover.captions.get,
+  );
+  const caption = givenCaption ?? rootCaption;
   // The Root's language, unless the Canvas is given its own.
   const language = givenLanguage ?? context.language;
   const canvases = useVisibleCanvases() as unknown as IIIFCanvas[];
@@ -260,6 +269,12 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
       onReady={handleReady}
       onViewportChange={handleViewport}
       onMediaElement={handleMediaElement}
+      caption={caption}
+      onCaptionChange={(caption) => {
+        // To the Root, for its Transcript to follow; then to the host.
+        clover.captions.emit(caption?.id ?? null);
+        onCaptionChange?.(caption);
+      }}
       onEnded={handleEnded}
       annotations={annotations}
       chapters={givenChapters ?? rangeChapters}

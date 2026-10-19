@@ -98,6 +98,11 @@ export interface Clover {
   store: Store<CloverState>;
   viewport: Channel<ViewportState | null>;
   media: Channel<HTMLVideoElement | null>;
+  /**
+   * The caption file the reader chose in a Canvas's own Captions menu, by its `id` (the
+   * WebVTT's address): `null` until they choose, or for Off. A transcript follows it.
+   */
+  captions: Channel<string | null>;
   /** The annotation hovered or focused, in a list or on the Canvas. */
   highlight: Channel<string | null>;
   readonly request: CloverRequest | undefined;
@@ -180,6 +185,7 @@ export function createClover(options: CloverOptions = {}): Clover {
   const store = createStore<CloverState>(INITIAL);
   const viewport = createChannel<ViewportState | null>(null);
   const media = createChannel<HTMLVideoElement | null>(null);
+  const captions = createChannel<string | null>(null);
   const highlight = createChannel<string | null>(null);
   let annotating: AbortController | null = null;
   let searching: AbortController | null = null;
@@ -352,6 +358,7 @@ export function createClover(options: CloverOptions = {}): Clover {
     store,
     viewport,
     media,
+    captions,
     highlight,
     get request() {
       return request;

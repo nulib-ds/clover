@@ -1,7 +1,7 @@
 /*
  * A transcript: cues as rows of time and text, the current one marked. The rows and the
  * list are the panel's (`InformationPanel.css`, "Rows"). The track menu sits `s` above the
- * cues; a cue's time is `s` from its text.
+ * cues.
  */
 .clover-transcript {
   display: flex;
@@ -9,18 +9,110 @@
   gap: var(--clover-space-s);
 }
 
+/*
+ * The cues as one grid of two columns, the times' and the texts': the times' is as wide
+ * as the widest time in the list ("0:22", or "1:02:03" where there is one), so every
+ * cue's text starts on one line, `s` past it. Each row, and its button, shares the list's
+ * columns (`subgrid`); the rows stay the list's `2xs` apart.
+ */
+.clover-transcript-cues {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--clover-space-s);
+}
+
+.clover-transcript-cue,
 .clover-transcript-cue > button {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+}
+
+/*
+ * A transcript as plain text: its paragraphs, `s` apart, each keeping its own line breaks
+ * (a speaker's turns), a long word breaking where it must (WCAG 1.4.10).
+ */
+.clover-transcript-body {
   display: flex;
+  flex-direction: column;
   gap: var(--clover-space-s);
 }
 
+.clover-transcript-body > p {
+  margin: 0;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
 .clover-transcript-time {
-  flex: 0 0 auto;
-  min-width: var(--clover-space-2xl);
   color: var(--clover-color-primary-muted, #26292b);
   font-variant-numeric: tabular-nums;
 }
 
 .clover-transcript-voice {
   font-weight: 600;
+}
+
+/*
+ * Its languages, where it has several caption files: a row of their codes ("EN", "IT"),
+ * one chosen, beside the Transcript's heading in an accordion (`useSectionActions`), else
+ * over the cues. A row of native radios, `2xs` apart, as tall as a heading's label line,
+ * with no edge or fill of its own: the codes in the muted text on the panel, the chosen
+ * one a pill filled with the accent (5:1 under its white code, and against the panel),
+ * as is any under the pointer or focused (focus with its ring), at the smaller text size. Each is `l` square at the least, past 24px (WCAG
+ * 2.5.8); the radio stays for the keyboard and assistive technology, the code is what
+ * shows, and its file's label its popover.
+ */
+.clover-transcript-languages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clover-space-2xs);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: var(--clover-text-xs);
+  line-height: 1;
+}
+
+.clover-transcript-languages > .clover-transcript-language {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: var(--clover-space-l);
+  min-height: var(--clover-space-l);
+  padding: 0 var(--clover-space-xs);
+  border-radius: var(--clover-radius-pill, 2rem);
+  color: var(--clover-color-primary-muted, #26292b);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Chosen, and any under the pointer or focused, as Clover's controls take it: the accent. */
+.clover-transcript-language:is(
+  :has(input:checked),
+  :hover,
+  :has(input:focus-visible)
+) {
+  background-color: var(--clover-color-accent, #0065c3);
+  color: var(--clover-color-secondary, #fff);
+}
+
+.clover-transcript-language:has(input:focus-visible) {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+}
+
+.clover-transcript-language input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  .clover-transcript-language:has(input:checked) {
+    background-color: Highlight;
+    color: HighlightText;
+  }
 }

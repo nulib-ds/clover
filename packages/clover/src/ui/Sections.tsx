@@ -1,4 +1,6 @@
 import React, {
+  createContext,
+  useContext,
   useEffect,
   useId,
   useLayoutEffect,
@@ -11,6 +13,18 @@ import { useContainerName } from "./useContainerName";
 /** A layout effect in the browser, an effect on the server (where there is no layout). */
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+/**
+ * Where a section's content may put controls of its own beside its heading: the element
+ * to portal them into (`createPortal`), while its section is laid out as an accordion's
+ * box; elsewhere (tabs, or no `Sections` around it) `null`, and the content shows them
+ * itself. A transcript puts its languages there.
+ */
+const SectionActionsContext = createContext<HTMLElement | null>(null);
+
+export function useSectionActions() {
+  return useContext(SectionActionsContext);
+}
 
 /** One section: what its button says, and what its panel shows. */
 export interface SectionSpec {
@@ -384,21 +398,85 @@ export function Sections({
                 {button(item, index)}
               </Heading>
             )}
-            <div
+            <Panel
               id={`${id}-panel-${index}`}
-              role={tabs ? "tabpanel" : "region"}
-              aria-labelledby={`${id}-button-${index}`}
-              // A tab panel is a tab stop of its own; a region is reached by its content.
-              tabIndex={tabs ? 0 : undefined}
-              className="clover-sections-panel"
+              tabs={tabs}
+              labelledBy={`${id}-button-${index}`}
               hidden={!isOpen}
             >
               {mounted.current.has(item.value) ? item.content : null}
-            </div>
+            </Panel>
           </section>
         );
       })}
     </div>
+  );
+}
+
+/**
+ * A section's panel. In an accordion it comes after a place for its content's own
+ * controls, beside the heading (`useSectionActions`): held where the heading is held, over
+ * the end of its row, while the section is open. Its width is written to the section
+ * (`--clover-sections-actions`), so the heading's button keeps that room clear and its
+ * label never runs under them, however long or spaced its text (WCAG 1.4.12). Empty, it
+ * takes no room.
+ */
+function Panel({
+  id,
+  tabs,
+  labelledBy,
+  hidden,
+  children,
+}: {
+  id: string;
+  tabs: boolean;
+  labelledBy: string;
+  hidden: boolean;
+  children: React.ReactNode;
+}) {
+  const [actions, setActions] = useState<HTMLDivElement | null>(null);
+  // Measured while its section is open: closed, it is hidden, and holds nothing.
+  useIsomorphicLayoutEffect(() => {
+    const section = actions?.parentElement;
+    if (hidden || !actions || !section || typeof ResizeObserver === "undefined")
+      return;
+    const observer = new ResizeObserver(() => {
+      const width = actions.offsetWidth;
+      if (width) {
+        section.style.setProperty("--clover-sections-actions", `${width}px`);
+      } else {
+        section.style.removeProperty("--clover-sections-actions");
+      }
+    });
+    observer.observe(actions);
+    return () => {
+      observer.disconnect();
+      section.style.removeProperty("--clover-sections-actions");
+    };
+  }, [actions, hidden]);
+  return (
+    <>
+      {!tabs && (
+        <div
+          ref={setActions}
+          className="clover-sections-actions"
+          hidden={hidden}
+        />
+      )}
+      <div
+        id={id}
+        role={tabs ? "tabpanel" : "region"}
+        aria-labelledby={labelledBy}
+        // A tab panel is a tab stop of its own; a region is reached by its content.
+        tabIndex={tabs ? 0 : undefined}
+        className="clover-sections-panel"
+        hidden={hidden}
+      >
+        <SectionActionsContext.Provider value={tabs ? null : actions}>
+          {children}
+        </SectionActionsContext.Provider>
+      </div>
+    </>
   );
 }
 

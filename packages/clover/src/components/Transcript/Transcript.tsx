@@ -7,15 +7,33 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react";
+import { createPortal } from "react-dom";
 
-import { canvasCaptions } from "../Canvas/layout";
-import type { IIIFCanvas } from "../Canvas/layout";
+import {
+  type CaptionTrack,
+  type IIIFCanvas,
+  type TextTranscript,
+  canvasCaptions,
+  canvasTextTranscripts,
+} from "../Canvas/layout";
 import { selectVisibleCanvases } from "../../core/selectors";
 import { localize } from "../../core/value";
-import { type Cue, cueAt, loadVtt, parseVtt } from "../../core/vtt";
+import {
+  type Cue,
+  cueAt,
+  loadText,
+  loadVtt,
+  paragraphsOf,
+  parseVtt,
+} from "../../core/vtt";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
+import { languageCode } from "../../ui/languageCode";
+import { useSectionActions } from "../../ui/Sections";
+import { Tip } from "../../ui/Tip";
+import { useContainerName } from "../../ui/useContainerName";
+import { visuallyHidden } from "../../ui/visuallyHidden";
 import { formatDuration } from "../Items/Item";
 
 export interface TranscriptProps extends React.HTMLAttributes<HTMLElement> {
@@ -24,13 +42,26 @@ export interface TranscriptProps extends React.HTMLAttributes<HTMLElement> {
   follow?: boolean;
 }
 
+/** A file the transcript reads: a caption track's timed cues, or a plain-text transcript. */
+type TranscriptFile =
+  | (CaptionTrack & { kind: "captions" })
+  | (TextTranscript & { kind: "text" });
+
 /**
- * The words of the video or sound in view, from its WebVTT captions: one entry per cue,
- * the current one marked as it plays, and a press on any entry seeking there.
+ * The words of the video or sound in view. From its WebVTT captions: one entry per cue,
+ * the current one marked as it plays, and a press on any entry seeking there. From a
+ * transcript as plain text (Cookbook 0017's `rendering`, 0253's `provides: transcript`):
+ * its paragraphs, untimed, in the file's language. The captions come first.
  *
  * Playback re-renders the transcript only when the current cue changes, and writes nothing
- * to the Root's store. With several caption files (one per language), a menu picks one.
- * The file is the one the Canvas loads for its captions, fetched once.
+ * to the Root's store. A caption file is the one the Canvas loads for its captions,
+ * fetched once.
+ *
+ * With several caption files (one per language), a row of their language codes ("EN",
+ * "IT") picks one: native radios, each named by its code and its file's label, in that
+ * label's language. In an information panel's accordion the row sits beside the
+ * Transcript's heading (`useSectionActions`), where it is not lost in the cues; elsewhere
+ * it is over them.
  */
 export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
   function Transcript(
@@ -43,23 +74,60 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
       selectVisibleCanvases(state.manifest, state.canvasId),
     ) as unknown as IIIFCanvas[];
     const canvas = canvases.find(
-      (candidate) => canvasCaptions(candidate).length > 0,
+      (candidate) =>
+        canvasCaptions(candidate).length > 0 ||
+        canvasTextTranscripts(candidate).length > 0,
     );
-    const tracks = useMemo(
-      () => (canvas ? canvasCaptions(canvas) : []),
+    const tracks = useMemo<TranscriptFile[]>(
+      () =>
+        canvas
+          ? [
+              ...canvasCaptions(canvas).map((each) => ({
+                ...each,
+                kind: "captions" as const,
+              })),
+              ...canvasTextTranscripts(canvas).map((each) => ({
+                ...each,
+                kind: "text" as const,
+              })),
+            ]
+          : [],
       [canvas],
     );
     const [choice, setChoice] = useState(0);
     const track = tracks[choice] ?? tracks[0];
+    /*
+     * One choice of language for the captions and the transcript, through the Root
+     * (`clover.captions`): a caption file chosen in the Canvas's own Captions menu is the
+     * one read here, chosen before this mounted or after, and one chosen here is the one
+     * the Canvas shows while its captions are on. Off leaves the language as it was.
+     */
+    useEffect(() => {
+      const follow = (id: string | null) => {
+        const index = tracks.findIndex(
+          (option) => option.kind === "captions" && option.id === id,
+        );
+        if (index >= 0) setChoice(index);
+      };
+      follow(clover.captions.get());
+      return clover.captions.subscribe(follow);
+    }, [clover, tracks]);
 
     const [cues, setCues] = useState<Cue[]>([]);
+    const [paragraphs, setParagraphs] = useState<string[]>([]);
     useEffect(() => {
       setCues([]);
+      setParagraphs([]);
       if (!track) return;
       let live = true;
-      loadVtt(track.id, clover.request)
-        .then((text) => live && setCues(parseVtt(text)))
-        .catch(() => undefined);
+      (track.kind === "captions"
+        ? loadVtt(track.id, clover.request).then(
+            (text) => live && setCues(parseVtt(text)),
+          )
+        : loadText(track.id, clover.request).then(
+            (text) => live && setParagraphs(paragraphsOf(text)),
+          )
+      ).catch(() => undefined);
       return () => {
         live = false;
       };
@@ -81,7 +149,79 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
     }, [active, follow, element]);
 
     const id = useId();
+    const actions = useSectionActions();
+    // The row is named for what it picks among: caption files, or transcripts of any kind.
+    const nameKey = tracks.every((each) => each.kind === "captions")
+      ? "playerCaptions"
+      : "transcriptLabel";
+    const name = useContainerName(t(nameKey), langOf(nameKey));
     if (!canvas || !track) return null;
+    /*
+     * What each file shows: a caption file its language's code ("EN"), a plain-text file
+     * "TXT" after them (with its language's, "TXT EN", where there are several). A code
+     * shows only where it tells its file apart: two that would show the same show labels.
+     */
+    const texts = tracks.filter((each) => each.kind === "text").length;
+    const shown = tracks.map((each) => {
+      const code = languageCode(each.language);
+      if (each.kind === "captions") return code;
+      return texts > 1 && code ? `TXT ${code}` : "TXT";
+    });
+    const codes = shown.map((code) =>
+      code && shown.filter((each) => each === code).length === 1
+        ? code
+        : undefined,
+    );
+    const lang =
+      track.language && track.language !== "none" ? track.language : undefined;
+
+    const languages = tracks.length > 1 && (
+      <>
+        {name.node}
+        <fieldset {...name.props} className="clover-transcript-languages">
+          {tracks.map((option, index) => {
+            const label = localize(option.label as any, language);
+            const code = codes[index];
+            const text = label.text || option.language || String(index + 1);
+            return (
+              <label key={option.id} className="clover-transcript-language">
+                <input
+                  type="radio"
+                  name={`${id}-language`}
+                  checked={index === choice}
+                  onChange={() => {
+                    setChoice(index);
+                    // A caption file is the captions' choice too; plain text is not one.
+                    if (option.kind === "captions")
+                      clover.captions.emit(option.id);
+                  }}
+                />
+                {/*
+                 * Named by the code it shows, then its file's own label in that label's
+                 * language, which the code stands in for on screen and its popover shows
+                 * (WCAG 2.5.3, 3.1.2).
+                 */}
+                {code && (
+                  <>
+                    <span className="clover-transcript-code">{code}</span>{" "}
+                  </>
+                )}
+                <span
+                  style={code ? visuallyHidden : undefined}
+                  lang={label.text ? label.lang : undefined}
+                >
+                  {text}
+                </span>
+                {/* Its label on hover and focus, as the controls' names show. */}
+                {code && label.text && (
+                  <Tip label={label.text} lang={label.lang} />
+                )}
+              </label>
+            );
+          })}
+        </fieldset>
+      </>
+    );
 
     const seek = (cue: Cue) => {
       if (element) {
@@ -94,60 +234,44 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
 
     return (
       <Tag ref={ref} className={join("clover-transcript", className)} {...rest}>
-        {tracks.length > 1 && (
-          <label className="clover-transcript-track">
-            <span lang={langOf("playerCaptions")}>{t("playerCaptions")}</span>{" "}
-            <select
-              value={choice}
-              onChange={(event) => setChoice(Number(event.target.value))}
-            >
-              {tracks.map((option, index) => {
-                const label = localize(option.label as any, language);
-                return (
-                  <option
-                    key={option.id}
-                    value={index}
-                    lang={label.text ? label.lang : undefined}
-                  >
-                    {label.text || option.language || index + 1}
-                  </option>
-                );
-              })}
-            </select>
-          </label>
+        {languages && (actions ? createPortal(languages, actions) : languages)}
+        {track.kind === "text" ? (
+          // Untimed: the words alone, a paragraph each, nothing to press.
+          <div className="clover-transcript-body" lang={lang}>
+            {paragraphs.map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))}
+          </div>
+        ) : (
+          <ol
+            ref={list}
+            className="clover-transcript-cues"
+            id={`${id}-cues`}
+            lang={lang}
+          >
+            {cues.map((cue, index) => (
+              <li
+                key={`${cue.start}-${index}`}
+                className="clover-transcript-cue"
+                aria-current={index === active ? "true" : undefined}
+              >
+                <button type="button" onClick={() => seek(cue)}>
+                  <span className="clover-transcript-time">
+                    {formatDuration(cue.start)}
+                  </span>
+                  <span className="clover-transcript-text">
+                    {cue.voice && (
+                      <span className="clover-transcript-voice">
+                        {cue.voice}:{" "}
+                      </span>
+                    )}
+                    {cue.text}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ol>
         )}
-        <ol
-          ref={list}
-          className="clover-transcript-cues"
-          id={`${id}-cues`}
-          lang={
-            track.language && track.language !== "none"
-              ? track.language
-              : undefined
-          }
-        >
-          {cues.map((cue, index) => (
-            <li
-              key={`${cue.start}-${index}`}
-              className="clover-transcript-cue"
-              aria-current={index === active ? "true" : undefined}
-            >
-              <button type="button" onClick={() => seek(cue)}>
-                <span className="clover-transcript-time">
-                  {formatDuration(cue.start)}
-                </span>
-                <span className="clover-transcript-text">
-                  {cue.voice && (
-                    <span className="clover-transcript-voice">
-                      {cue.voice}:{" "}
-                    </span>
-                  )}
-                  {cue.text}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ol>
       </Tag>
     );
   },

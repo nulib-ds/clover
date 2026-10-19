@@ -3,7 +3,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import React from "react";
 
-import { Sections, type SectionsLayout } from "./Sections";
+import { createPortal } from "react-dom";
+
+import { Sections, type SectionsLayout, useSectionActions } from "./Sections";
 
 const mounts: string[] = [];
 function Body({ name }: { name: string }) {
@@ -27,7 +29,47 @@ beforeEach(() => {
   mounts.length = 0;
 });
 
+/** Content with a control of its own, put beside its heading where there is room. */
+function WithAction() {
+  const actions = useSectionActions();
+  const control = <button type="button">Choose</button>;
+  return (
+    <>
+      {actions ? createPortal(control, actions) : control}
+      <p>Body</p>
+    </>
+  );
+}
+
 describe("Sections", () => {
+  it("gives a section's content a place beside its heading as an accordion's box, none as a tab", () => {
+    const sections = [
+      { value: "one", label: "One", content: <WithAction /> },
+      { value: "two", label: "Two", content: <p>Two</p> },
+    ];
+    const { rerender } = render(
+      <Sections items={sections} layout="accordion" />,
+    );
+    const choose = screen.getByRole("button", { name: "Choose" });
+    const heading = screen
+      .getByRole("button", { name: "One" })
+      .closest(".clover-sections-heading")!;
+    // After the heading, before the region: in reading and tab order between them.
+    expect(heading.nextElementSibling).toContainElement(choose);
+    expect(screen.getByRole("region", { name: "One" })).not.toContainElement(
+      choose,
+    );
+    // Shown only while its section is open.
+    fireEvent.click(screen.getByRole("button", { name: "Two" }));
+    expect(heading.nextElementSibling).toHaveAttribute("hidden");
+
+    rerender(<Sections items={sections} layout="tabs" />);
+    fireEvent.click(screen.getByRole("tab", { name: "One" }));
+    expect(screen.getByRole("tabpanel", { name: "One" })).toContainElement(
+      screen.getByRole("button", { name: "Choose" }),
+    );
+  });
+
   describe("as tabs", () => {
     it("is a tablist of tabs, one panel open, one tab stop", () => {
       render(<Layout layout="tabs" />);
@@ -122,6 +164,14 @@ describe("Sections", () => {
         vi.unstubAllGlobals();
       });
 
+      /** The observers measuring headings (an open box's own controls have another). */
+      const headingObservers = () =>
+        Observer.all.filter((each) =>
+          each.targets.some((target) =>
+            target.classList.contains("clover-sections-heading"),
+          ),
+        );
+
       const stacks = (container: HTMLElement) => ({
         total: container
           .querySelector<HTMLElement>(".clover-sections")!
@@ -137,8 +187,8 @@ describe("Sections", () => {
       // WCAG 1.4.12 (a label wraps) and 2.4.11 (focus clears the stacks).
       it("writes the height of the headings before and after each box, as they wrap", () => {
         const { container } = render(<Layout layout="accordion" />);
-        expect(Observer.all).toHaveLength(1);
-        const [observer] = Observer.all;
+        expect(headingObservers()).toHaveLength(1);
+        const [observer] = headingObservers();
         expect(observer.targets).toEqual([
           ...container.querySelectorAll(".clover-sections-heading"),
         ]);
@@ -181,7 +231,7 @@ describe("Sections", () => {
         let room = 200;
         Object.defineProperty(pane, "clientHeight", { get: () => room });
         const list = container.querySelector<HTMLElement>(".clover-sections")!;
-        const [observer] = Observer.all;
+        const [observer] = headingObservers();
         // The pane is watched, with the headings.
         expect(observer.targets[0]).toBe(pane);
         const headings = observer.targets.slice(1);
@@ -219,17 +269,17 @@ describe("Sections", () => {
         const { container, rerender } = render(
           <Sections items={items.slice(0, 2)} layout="accordion" />,
         );
-        Observer.all[0].report([40, 40]);
+        headingObservers()[0].report([40, 40]);
         rerender(<Sections items={items} layout="accordion" />);
-        expect(Observer.all[0].disconnected).toBe(true);
-        const [, again] = Observer.all;
+        expect(headingObservers()[0].disconnected).toBe(true);
+        const [, again] = headingObservers();
         expect(again.targets).toHaveLength(3);
         again.report([40, 40, 40]);
         expect(stacks(container).total).toBe("120px");
 
         rerender(<Sections items={items} layout="tabs" />);
         expect(again.disconnected).toBe(true);
-        expect(Observer.all).toHaveLength(2);
+        expect(headingObservers()).toHaveLength(2);
         expect(stacks(container)).toEqual({
           total: "",
           boxes: [

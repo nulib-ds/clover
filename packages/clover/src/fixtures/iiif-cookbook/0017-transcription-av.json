@@ -1,0 +1,49 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://iiif.io/api/cookbook/recipe/0017-transcription-av/manifest.json",
+  "type": "Manifest",
+  "label": {
+    "en": ["Volleyball for Boys"]
+  },
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0017-transcription-av/canvas",
+      "type": "Canvas",
+      "height": 1080,
+      "width": 1920,
+      "duration": 662.037,
+      "items": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0017-transcription-av/canvas/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0017-transcription-av/canvas/page/annotation",
+              "type": "Annotation",
+              "motivation": "painting",
+              "target": "https://iiif.io/api/cookbook/recipe/0017-transcription-av/canvas",
+              "body": {
+                "id": "https://fixtures.iiif.io/video/indiana/volleyball/high/volleyball-for-boys.mp4",
+                "type": "Video",
+                "format": "video/mp4",
+                "height": 1080,
+                "width": 1920,
+                "duration": 662.037
+              }
+            }
+          ]
+        }
+      ],
+      "rendering": [
+        {
+          "id": "https://fixtures.iiif.io/video/indiana/volleyball/volleyball.txt",
+          "type": "Text",
+          "label": {
+            "en": ["Transcript"]
+          },
+          "format": "text/plain"
+        }
+      ]
+    }
+  ]
+}

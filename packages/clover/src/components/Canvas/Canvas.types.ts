@@ -210,6 +210,21 @@ export interface CloverCanvasProps {
    * host's own transcript, chapters or `#t=` seeks. Sound plays through a `<video>` too.
    */
   onMediaElement?: (element: HTMLVideoElement | null) => void;
+  /**
+   * The reader chose a caption track in the Canvas's own Captions menu: the Manifest's
+   * caption file (its `id`, the WebVTT's address, and the `language` of its cues), or
+   * `null` for Off or a track the media carries itself. For a host's own transcript to
+   * follow, as Clover's `Transcript` does.
+   */
+  onCaptionChange?: (caption: { id: string; language?: string } | null) => void;
+  /**
+   * Which of the Manifest's caption files to show while captions are on, by its `id`:
+   * for a host's own transcript to lead the captions' language as well as follow it
+   * (`onCaptionChange`). It changes the track shown, never whether one shows: Off stays
+   * off. Inside a `Root` the Canvas takes it from the Root, which Clover's `Transcript`
+   * sets.
+   */
+  caption?: string | null;
   /** Playback reached the end — a host's cue to move to the next Canvas. */
   onEnded?: () => void;
   /**

@@ -224,6 +224,39 @@ Its generator is `docs/mocks/paged/index.mjs`, and the record as fetched is
 `https://api.dc.library.northwestern.edu/api/v2/works/386ff30f-1975-4d9c-9905-ec76381d6992?as=iiif`
 into `source.json` again and run `npm run build:mocks`.
 
+## Transcripts: a film's captions and its transcript
+
+The IIIF Cookbook's [recipe 0219](https://iiif.io/api/cookbook/recipe/0219-using-caption-file/),
+_Lunchroom Manners_, a Manifest of one video Canvas (9 min 32 s), with:
+
+- its English captions as the recipe publishes them, a `supplementing` WebVTT file
+  labelled "Captions in WebVTT format";
+- the film's transcript as plain text beside them, as the Canvas's `rendering`, which is
+  how [recipe 0017](https://iiif.io/api/cookbook/recipe/0017-transcription-av/) gives a
+  transcript. The file is the one
+  [recipe 0253](https://iiif.io/api/cookbook/recipe/0253-using-transcript-file/)
+  (Presentation 4) provides for the same film, with that recipe's label, "Transcript in
+  plain text format", and its language, `en`;
+- everything else as recipe 0219 publishes it, apart from the ids of the Manifest, its
+  Canvas and their annotations, which are the mock's own;
+- the video, the captions and the transcript from the Cookbook's own fixtures, at
+  fixtures.iiif.io (CORS open).
+
+So a viewer has both kinds of transcript to offer, the timed captions and the untimed
+text: Clover's Transcript lists them as "EN" and "TXT".
+
+| Resource | Published (static)                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------------------- |
+| Manifest | [`/mocks/transcripts/manifest.json`](https://nulib-ds.github.io/clover/mocks/transcripts/manifest.json) |
+
+It answers no query, so it is static only. Its generator is
+`docs/mocks/transcripts/index.mjs`, and recipe 0219's Manifest as fetched is
+`docs/mocks/transcripts/source.json`: to bring it up to date, fetch
+`https://iiif.io/api/cookbook/recipe/0219-using-caption-file/manifest.json` into
+`source.json` again and run `npm run build:mocks`. The package's tests use a copy,
+`packages/clover/src/fixtures/transcripts.json`; copy the published file there again
+after a change.
+
 ### Rights
 
 The newspaper's scans and text are the _Berliner Tageblatt_, Staatsbibliothek zu Berlin –
@@ -237,4 +270,6 @@ unlocatable or unidentifiable; its record and image are from Northwestern Univer
 Libraries' Transportation Library, with the attribution the record gives. The White
 catalog is in the public domain in the United States (No Copyright – United States); its
 record and images are Northwestern University Libraries', from the Transportation
-Library, and keep their attribution. The mocks' structure is Clover's, under its licence.
+Library, and keep their attribution. _Lunchroom Manners_, its captions and its transcript
+are the IIIF Cookbook's fixtures, as recipes 0219 and 0253 publish them. The mocks'
+structure is Clover's, under its licence.

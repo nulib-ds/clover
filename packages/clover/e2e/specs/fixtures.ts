@@ -1,10 +1,16 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import type { Page, Request } from "@playwright/test";
 
 /** The package's Cookbook fixtures, as `https://fixtures.test/<name>.json`. */
 const FIXTURES = resolve(__dirname, "../../src/fixtures/iiif-cookbook");
+
+/** A fixture by name: a Cookbook recipe's, else one of the package's own (a mock's copy). */
+const fixture = (name: string) => {
+  const recipe = resolve(FIXTURES, name);
+  return existsSync(recipe) ? recipe : resolve(FIXTURES, "..", name);
+};
 
 /** A 64 × 64 grey PNG, for every image any part asks for. */
 const PNG = Buffer.from(
@@ -82,7 +88,7 @@ export async function serveIIIF(page: Page): Promise<Request[]> {
       },
       body: generated
         ? JSON.stringify(manifestOf(Number(generated[1])))
-        : readFileSync(resolve(FIXTURES, name), "utf8"),
+        : readFileSync(fixture(name), "utf8"),
     });
   });
   await page.route(/^https?:\/\/(?!localhost)[^/]+\/.*/, async (route) => {
@@ -90,6 +96,16 @@ export async function serveIIIF(page: Page): Promise<Request[]> {
     if (url.startsWith("https://fixtures.test/")) return route.fallback();
     requests.push(route.request());
     const cors = { "Access-Control-Allow-Origin": "*" };
+    // A plain-text file by its name among the fixtures, as served: no charset.
+    const text = /\/([^/]+\.txt)$/.exec(new URL(url).pathname)?.[1];
+    if (text && existsSync(resolve(FIXTURES, text))) {
+      return route.fulfill({
+        status: 200,
+        contentType: "text/plain",
+        headers: cors,
+        body: readFileSync(resolve(FIXTURES, text)),
+      });
+    }
     if (url.endsWith("/info.json")) {
       const id = url.slice(0, -"/info.json".length);
       return route.fulfill({

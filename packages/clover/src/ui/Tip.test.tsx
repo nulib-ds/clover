@@ -52,8 +52,27 @@ describe("Tip", () => {
     button.focus();
     fireEvent.keyDown(document, { key: "Escape" });
     expect(button).toHaveAttribute("data-tip-hidden");
-    fireEvent.blur(button);
+    fireEvent.focusOut(button);
     expect(button).not.toHaveAttribute("data-tip-hidden");
+  });
+
+  it("is held by a radio's label, and Escape hides it while the radio has focus", () => {
+    render(
+      <label>
+        <input type="radio" name="language" />
+        <span>IT</span>
+        <Tip label="Sottotitoli in formato WebVTT" lang="it" />
+      </label>,
+    );
+    const radio = screen.getByRole("radio");
+    const label = radio.parentElement!;
+    expect(label.querySelector(".clover-tip")).toHaveAttribute("lang", "it");
+    radio.focus();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(label).toHaveAttribute("data-tip-hidden");
+    // Back once focus leaves the radio, and so the label.
+    fireEvent.focusOut(radio);
+    expect(label).not.toHaveAttribute("data-tip-hidden");
   });
 
   it("stays hidden as the pointer leaves, and shows when it comes back", () => {
