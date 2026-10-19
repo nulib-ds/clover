@@ -642,8 +642,116 @@ test.describe("Hotspots", () => {
     expect(ratio(active.colours[0], active.colours[1])).toBeGreaterThanOrEqual(
       9,
     );
-    // And a tint inside, which shows it while its edges are out of sight.
-    expect(alpha(active.fill)).toBeGreaterThan(0);
+    // Nothing over what it marks; the picture round it dims a little instead.
+    expect(alpha(active.fill)).toBe(0);
+    expect(alpha(active.colours[2])).toBeGreaterThan(0);
+  });
+
+  /*
+   * The picked one names itself without the pointer on it, until the reader lets it go:
+   * by Escape (WCAG 2.1.1), or a click off every hotspot, which does nothing more. The
+   * next click, with nothing picked, zooms as ever.
+   */
+  test("the picked one shows its name until Escape or a click off it lets it go", async ({
+    page,
+  }) => {
+    await open(page, [["Fountain", "xywh=200,200,400,300"]]);
+    const spot = hotspot(page, "Fountain");
+    const viewport = page.getByTestId("clover-canvas-viewport");
+    const pick = async () => {
+      await spot.focus();
+      await page.keyboard.press("Enter");
+      await expect(spot).toHaveAttribute("aria-current", "true");
+      // Focus moves on, and no pointer is over it: it is still the active one, named.
+      await viewport.focus();
+      await expect(spot).toHaveAttribute("data-active", "true");
+      await expect.poll(seen(tipOf(spot))).toBe(true);
+    };
+    await pick();
+    await page.keyboard.press("Escape");
+    await expect(spot).not.toHaveAttribute("aria-current");
+    await expect.poll(seen(tipOf(spot))).toBe(false);
+    // Escape was the Canvas's: focus stays where it was.
+    await expect(viewport).toBeFocused();
+
+    await pick();
+    await settled(spot);
+    const width = () => spot.evaluate((element) => element.style.width);
+    const before = await width();
+    // A click on the stage's bare corner, off the hotspot.
+    const box = (await viewport.boundingBox())!;
+    const corner = { x: box.x + 8, y: box.y + box.height - 8 };
+    await page.mouse.click(corner.x, corner.y);
+    await expect(spot).not.toHaveAttribute("aria-current");
+    await expect.poll(seen(tipOf(spot))).toBe(false);
+    expect(await width()).toBe(before);
+    // Nothing picked now: the next click zooms.
+    await page.mouse.click(corner.x, corner.y);
+    await expect.poll(width).not.toBe(before);
+  });
+
+  // A shared link's note (Digital Collections writes them): shown, picked and named.
+  test("a content state's note shows on its Canvas, picked and named", async ({
+    page,
+  }) => {
+    await serveIIIF(page);
+    await page.route(MANIFEST, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        headers: { "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify(
+          manifestOf([["Fountain", "xywh=200,200,400,300"]]),
+        ),
+      }),
+    );
+    const state = {
+      id: "https://fixtures.test/state/1",
+      type: "Annotation",
+      motivation: ["contentState"],
+      target: {
+        type: "SpecificResource",
+        source: {
+          id: CANVAS,
+          type: "Canvas",
+          partOf: [{ id: MANIFEST, type: "Manifest" }],
+        },
+        selector: { type: "FragmentSelector", value: "xywh=1000,400,500,300" },
+      },
+      body: [{ type: "TextualBody", value: "Hospital", format: "text/plain" }],
+    };
+    const encoded = Buffer.from(
+      encodeURIComponent(JSON.stringify(state)),
+    ).toString("base64url");
+    await page.goto(`/?scene=composed&content=${encoded}`);
+    await expect(page.locator("button.clover-canvas-annotation")).toHaveCount(
+      2,
+    );
+    const note = hotspot(page, "Hospital");
+    await expect(note).toHaveAttribute("aria-current", "true");
+    await expect.poll(seen(tipOf(note))).toBe(true);
+  });
+
+  // As a vector editor hides what a shape covers: the active one, crossed by no line.
+  test("beneath the active one, another's lines stop where it lies", async ({
+    page,
+  }) => {
+    await open(page, [
+      ["Wide", "xywh=0,400,2000,200"],
+      ["Tall", "xywh=900,0,200,1000"],
+    ]);
+    const masks = () =>
+      page
+        .locator("button.clover-canvas-annotation")
+        .evaluateAll((spots) =>
+          spots.map((spot) => getComputedStyle(spot).maskImage.slice(0, 4)),
+        );
+    expect(await masks()).toEqual(["none", "none"]);
+    // The wide one active: the tall one, beneath it now, is masked where they cross.
+    await hotspot(page, "Wide").focus();
+    await expect.poll(masks).toEqual(["none", "url("]);
+    await hotspot(page, "Tall").focus();
+    await expect.poll(masks).toEqual(["url(", "none"]);
   });
 
   // Shadows are dropped in forced colours: two tones still at rest, and a ring active.

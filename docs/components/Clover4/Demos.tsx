@@ -2,6 +2,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { useMapWorker } from "docs/lib/map-worker";
+import { useMock } from "docs/lib/useMock";
 
 /**
  * Live demos of @nulib/clover for the 4.x docs. The package is loaded on the client only:
@@ -180,16 +181,6 @@ const StandaloneMap = dynamic(
   () => import("@nulib/clover/map").then(({ Map }) => Map),
   { ssr: false },
 );
-
-/** A mock under `public/mocks/`, from this site (so it works before the docs deploy). */
-function useMock(path: string) {
-  const { basePath } = useRouter();
-  const [url, setUrl] = useState<string | null>(null);
-  useEffect(() => {
-    setUrl(new URL(`${basePath}/mocks/${path}`, location.origin).href);
-  }, [basePath, path]);
-  return url;
-}
 
 /** `Map` on its own: a IIIF resource's places, and its georeferenced images. */
 export function MapDemo({

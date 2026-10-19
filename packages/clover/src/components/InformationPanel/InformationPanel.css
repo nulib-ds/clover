@@ -256,6 +256,47 @@
   overflow-wrap: anywhere;
 }
 
+/*
+ * What a Canvas shown on its own is part of: each Manifest's label, and under it the
+ * button that opens it in place, as the read-more button reads, its target 24px or more
+ * (WCAG 2.5.8).
+ */
+.clover-about ul.clover-about-part-of {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clover-about-part-of > li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+button.clover-about-open {
+  min-height: var(--clover-space-l);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--clover-color-accent, #0065c3);
+  font-size: var(--clover-text-s);
+  text-decoration: underline 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 20%, transparent);
+  text-underline-offset: var(--clover-space-3xs);
+  cursor: pointer;
+}
+
+button.clover-about-open:hover {
+  text-decoration-color: currentColor;
+}
+
+button.clover-about-open:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+  border-radius: var(--clover-radius, 3px);
+}
+
 .clover-about .clover-about-heading {
   margin: 0;
   font-size: inherit;

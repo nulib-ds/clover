@@ -208,6 +208,51 @@ describe("GestureController", () => {
         );
     };
 
+    /*
+     * Off a picked annotation, the first click or tap lets it go and does nothing more;
+     * with nothing to let go, a click zooms as ever. A drag pans, letting go of nothing.
+     */
+    it.each(["mouse", "touch"])(
+      "lets go of a pick on a %s tap off it, and does nothing more",
+      (pointerType) => {
+        const { element, target } = setup();
+        let picked = true;
+        target.dismiss = vi.fn(() => {
+          const was = picked;
+          picked = false;
+          return was;
+        });
+        target.tap = vi.fn();
+        tap(element, pointerType);
+        expect(target.dismiss).toHaveBeenCalledTimes(1);
+        expect(target.zoomBy).not.toHaveBeenCalled();
+        expect(target.tap).not.toHaveBeenCalled();
+        // Nothing picked now: a click zooms; for a finger, this tap is a first one.
+        tap(element, pointerType, { x: 24 });
+        if (pointerType === "mouse")
+          expect(target.zoomBy).toHaveBeenCalledTimes(1);
+        else expect(target.zoomBy).not.toHaveBeenCalled();
+      },
+    );
+
+    it("lets go of nothing on a drag", () => {
+      const { element, target } = setup();
+      target.dismiss = vi.fn(() => true);
+      for (const [type, x] of [
+        ["pointerdown", 10],
+        ["pointermove", 60],
+        ["pointerup", 60],
+      ] as const)
+        element.dispatchEvent(
+          Object.assign(
+            new MouseEvent(type, { clientX: x, clientY: 10, button: 0 }),
+            { pointerId: 1, pointerType: "mouse" },
+          ),
+        );
+      expect(target.panBy).toHaveBeenCalled();
+      expect(target.dismiss).not.toHaveBeenCalled();
+    });
+
     it.each(["touch", "pen"])(
       "zooms in on a double %s tap, never on a single one",
       (pointerType) => {

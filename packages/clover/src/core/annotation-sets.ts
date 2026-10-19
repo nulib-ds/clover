@@ -3,8 +3,10 @@ import {
   bodiesOf,
   parseAnnotationTarget,
 } from "./annotations";
+import { type AnnotationBodyEntry, readBodies } from "./annotation-bodies";
 
-export { bodiesOf };
+export { bodiesOf, readBodies };
+export type { AnnotationBodyEntry };
 import type { Manifest } from "./presentation";
 import { selectSequence } from "./selectors";
 import type { LanguageMapLike } from "./value";
@@ -18,17 +20,6 @@ import type { LanguageMapLike } from "./value";
  * A set is one AnnotationPage. Sets are memoised on the Manifest and the added pages, so
  * the same arrays come back while nothing changes.
  */
-
-export interface AnnotationBodyEntry {
-  /** `TextualBody` text, as published: plain, or IIIF's limited HTML. */
-  value?: string;
-  format?: string;
-  language?: string;
-  /** An image body (Cookbook 0377): its URL. */
-  image?: string;
-  /** An image body's label, else its annotation's: the image's text alternative. */
-  label?: LanguageMapLike;
-}
 
 export interface AnnotationEntry {
   id: string;
@@ -56,33 +47,8 @@ type Json = Record<string, any>;
 const asArray = (value: unknown): unknown[] =>
   Array.isArray(value) ? value : value == null ? [] : [value];
 
-const isCaptionFile = (body: Json) =>
-  body?.format === "text/vtt" ||
-  (typeof body?.id === "string" && /\.vtt(\?|$)/i.test(body.id));
-
-export function readBodies(annotation: Json): AnnotationBodyEntry[] {
-  const bodies: AnnotationBodyEntry[] = [];
-  for (let body of bodiesOf(annotation)) {
-    // A `Choice` of languages offers its first, as a viewer shows one at a time.
-    if (body?.type === "Choice") body = asArray(body.items)[0] as Json;
-    if (!body || isCaptionFile(body)) continue;
-    if (body.type === "TextualBody" || typeof body.value === "string") {
-      bodies.push({
-        value: String(body.value ?? ""),
-        format: body.format,
-        language: asArray(body.language)[0] as string | undefined,
-      });
-    } else if (body.type === "Image" && body.id) {
-      const label = body.label ?? annotation.label;
-      bodies.push({
-        image: body.id,
-        format: body.format,
-        ...(label ? { label } : {}),
-      });
-    }
-  }
-  return bodies;
-}
+const isLinking = (annotation: Json) =>
+  asArray(annotation?.motivation).includes("linking");
 
 /** The entries of one page, for the Canvas it hangs on (or its targets name). */
 export function readPage(
@@ -95,7 +61,8 @@ export function readPage(
     const motivation = asArray(annotation?.motivation) as string[];
     if (motivation.includes("painting")) continue;
     const bodies = readBodies(annotation);
-    if (!bodies.length) continue;
+    // A link alone (Cookbook 0022) is still something to list and follow.
+    if (!bodies.length && !isLinking(annotation)) continue;
     const target = parseAnnotationTarget(asArray(annotation.target)[0] as any);
     const canvasId = target.id || fallbackCanvasId;
     if (!canvasId || !annotation.id) continue;

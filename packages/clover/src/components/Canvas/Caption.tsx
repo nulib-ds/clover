@@ -13,7 +13,10 @@ import { useOneOpen } from "../../ui/useOneOpen";
  */
 const CaptionDetails = lazy(() => import("./CaptionDetails"));
 
-/** Whether a Canvas has anything for the caption to show: a `summary` or `metadata`. */
+/**
+ * Whether a Canvas has anything of its own for the caption to show: a `summary` or
+ * `metadata`. Comments on the whole of it count too (`CanvasView`).
+ */
 export function hasInformation(canvas: IIIFCanvas): boolean {
   return Boolean(canvas.summary) || Boolean(canvas.metadata?.length);
 }
@@ -26,6 +29,8 @@ interface CaptionProps {
   id: string;
   /** The shown Canvases that have information, in reading order. */
   canvases: IIIFCanvas[];
+  /** Comments on a whole Canvas, by its id (Cookbook 0266), shown under its words. */
+  comments?: Map<string, Record<string, any>[]>;
   open: boolean;
   /** Close, returning focus to the control that opened it when `restoreFocus`. */
   onClose: (restoreFocus: boolean) => void;
@@ -35,7 +40,8 @@ interface CaptionProps {
 
 /**
  * The `<figcaption>` of the Canvas's `<figure>`: each shown Canvas's label, `summary` and
- * `metadata` (Cookbook 0029, "metadata anywhere"), in a box that slides out over the
+ * `metadata` (Cookbook 0029, "metadata anywhere"), and the comments on the whole of it
+ * (0266, with HTML as 0019 has it), in a box that slides out over the
  * picture from the information control.
  *
  * Not a menu: it stays open while the reader pans and zooms, and closes from its own
@@ -46,6 +52,7 @@ interface CaptionProps {
 const Caption: React.FC<CaptionProps> = ({
   id,
   canvases,
+  comments,
   open,
   onClose,
   language,
@@ -104,6 +111,7 @@ const Caption: React.FC<CaptionProps> = ({
                 <CaptionDetails
                   summary={canvas.summary}
                   metadata={canvas.metadata}
+                  comments={comments?.get(canvas.id)}
                   language={language}
                 />
               </Suspense>

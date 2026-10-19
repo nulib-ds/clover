@@ -31,7 +31,7 @@ const asArray = (value: unknown): unknown[] =>
   Array.isArray(value) ? value : value == null ? [] : [value];
 
 /** The compliance level a service declares: 0, 1 or 2, or undefined. */
-function serviceLevel(service: unknown): number | undefined {
+export function serviceLevel(service: unknown): number | undefined {
   for (const candidate of asArray(service) as Json[]) {
     const profile = JSON.stringify(candidate?.profile ?? "");
     const match = /level([012])/.exec(profile);

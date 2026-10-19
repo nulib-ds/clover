@@ -1,0 +1,103 @@
+{
+  "context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://samvera-labs.github.io/clover-iiif/canvas/standalone-canvas.json",
+  "type": "Canvas",
+  "height": 8582,
+  "width": 6262,
+  "label": {
+    "none": ["L'Isole Britanniche (1811)"]
+  },
+  "summary": {
+    "en": ["Map of British Isles showing political boundaries."]
+  },
+  "partOf": [
+    {
+      "id": "https://api.dc.library.northwestern.edu/api/v2/works/20f1cd93-7851-4646-af07-0b544661569f?as=iiif",
+      "type": "Manifest",
+      "label": {
+        "en": ["L'Isole Britanniche (1811)"]
+      }
+    }
+  ],
+  "thumbnail": [
+    {
+      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b9e19ed9-70f2-45eb-8c1f-ef0e5e86890f/full/!300,300/0/default.jpg",
+      "type": "Image",
+      "format": "image/jpeg",
+      "height": 300,
+      "width": 300,
+      "service": [
+        {
+          "@id": "https://iiif.dc.library.northwestern.edu/iiif/3/b9e19ed9-70f2-45eb-8c1f-ef0e5e86890f",
+          "@type": "ImageService2",
+          "profile": "http://iiif.io/api/image/2/level2.json"
+        }
+      ]
+    }
+  ],
+  "items": [
+    {
+      "id": "https://api.dc.library.northwestern.edu/api/v2/works/20f1cd93-7851-4646-af07-0b544661569f?as=iiif/canvas/0/annotation-page",
+      "type": "AnnotationPage",
+      "items": [
+        {
+          "id": "https://api.dc.library.northwestern.edu/api/v2/works/20f1cd93-7851-4646-af07-0b544661569f?as=iiif/canvas/0/annotation/0",
+          "type": "Annotation",
+          "motivation": "painting",
+          "target": "https://api.dc.library.northwestern.edu/api/v2/works/20f1cd93-7851-4646-af07-0b544661569f?as=iiif/canvas/0",
+          "body": {
+            "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b9e19ed9-70f2-45eb-8c1f-ef0e5e86890f/full/600,/0/default.jpg",
+            "type": "Image",
+            "format": "image/tiff",
+            "height": 8582,
+            "width": 6262,
+            "label": {
+              "en": ["recto"]
+            },
+            "service": [
+              {
+                "@id": "https://iiif.dc.library.northwestern.edu/iiif/3/b9e19ed9-70f2-45eb-8c1f-ef0e5e86890f",
+                "@type": "ImageService2",
+                "profile": "http://iiif.io/api/image/2/level2.json"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "placeholderCanvas": {
+    "id": "https://api.dc.library.northwestern.edu/api/v2/works/20f1cd93-7851-4646-af07-0b544661569f?as=iiif/canvas/0/placeholder",
+    "type": "Canvas",
+    "width": 640,
+    "height": 877,
+    "items": [
+      {
+        "id": "https://api.dc.library.northwestern.edu/api/v2/works/20f1cd93-7851-4646-af07-0b544661569f?as=iiif/canvas/0/placeholder/annotation-page/0",
+        "type": "AnnotationPage",
+        "items": [
+          {
+            "id": "https://api.dc.library.northwestern.edu/api/v2/works/20f1cd93-7851-4646-af07-0b544661569f?as=iiif/canvas/0/placeholder/annotation/0",
+            "type": "Annotation",
+            "motivation": "painting",
+            "body": {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b9e19ed9-70f2-45eb-8c1f-ef0e5e86890f/full/!640,877/0/default.jpg",
+              "type": "Image",
+              "format": "image/tiff",
+              "width": 640,
+              "height": 877,
+              "service": [
+                {
+                  "@id": "https://iiif.dc.library.northwestern.edu/iiif/3/b9e19ed9-70f2-45eb-8c1f-ef0e5e86890f",
+                  "@type": "ImageService2",
+                  "profile": "http://iiif.io/api/image/2/level2.json"
+                }
+              ]
+            },
+            "target": "https://api.dc.library.northwestern.edu/api/v2/works/20f1cd93-7851-4646-af07-0b544661569f?as=iiif/canvas/0/placeholder"
+          }
+        ]
+      }
+    ]
+  }
+}

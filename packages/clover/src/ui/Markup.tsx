@@ -1,7 +1,12 @@
 import type { MetadataItem } from "@iiif/presentation-3";
 import React, { forwardRef, useEffect, useState } from "react";
 
-import { hasMarkup, markdownToPlainText, toPlainText } from "../core/text";
+import {
+  hasMarkup,
+  markdownToPlainText,
+  readAs,
+  toPlainText,
+} from "../core/text";
 import { type LanguageMapLike, localize } from "../core/value";
 
 /**
@@ -41,8 +46,10 @@ type MarkupProps = {
   as?: React.ElementType;
   markup?: LanguageMapLike;
   /**
-   * `text/markdown` is converted to HTML (then sanitised), keeping its lists and
-   * headings; anything else is IIIF's HTML.
+   * Read strictly by it (`readAs`): `text/markdown` is converted to HTML (then
+   * sanitised), keeping its lists and headings; `text/html` is IIIF's HTML; `text/plain`
+   * (or any other type) is shown as written, its line breaks kept. With none, IIIF's
+   * rule: HTML only from a first `<` to a last `>`.
    */
   format?: string;
   /**
@@ -60,9 +67,26 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
   ref,
 ) {
   const { text, lang } = localize(markup, language);
-  const markdown = format === "text/markdown";
-  const html = useSanitized(text, markdown, headingLevel);
+  const kind = readAs(format, text);
+  const markdown = kind === "markdown";
+  // Plain text is never markup: nothing is sanitised, so nothing loads for it.
+  const html = useSanitized(
+    kind === "plain" ? "" : text,
+    markdown,
+    headingLevel,
+  );
   if (!text) return null;
+  if (kind === "plain")
+    return (
+      <Tag ref={ref} {...rest} lang={lang}>
+        {text.split(/\r?\n/).map((line, index) => (
+          <React.Fragment key={index}>
+            {index > 0 && <br />}
+            {line}
+          </React.Fragment>
+        ))}
+      </Tag>
+    );
   return html !== null ? (
     <Tag
       ref={ref}

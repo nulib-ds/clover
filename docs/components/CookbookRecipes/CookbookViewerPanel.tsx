@@ -75,8 +75,16 @@ const CookbookViewerPanel: React.FC<CookbookViewerPanelProps> = ({
     document.body.style.overflow = "hidden";
 
     const onKeyDown = (event: KeyboardEvent) => {
-      // Escape belongs to a text field it is pressed in, and should not also close the panel.
-      if (event.key === "Escape" && !(event.target instanceof HTMLInputElement))
+      /*
+       * Escape belongs to a text field it is pressed in, and to the Viewer where it
+       * handled it (`preventDefault`: a menu or caption closed, an annotation let go), and
+       * should not also close the panel.
+       */
+      if (
+        event.key === "Escape" &&
+        !event.defaultPrevented &&
+        !(event.target instanceof HTMLInputElement)
+      )
         onBack();
     };
     window.addEventListener("keydown", onKeyDown);

@@ -15,6 +15,27 @@
   color: var(--clover-color-primary, #1a1d1e);
 }
 
+/*
+ * `fill`: as tall as the box it sits in, and the stage takes what the header and the strip
+ * leave (flex, rather than `--clover-content-height`), so the layout never runs below it.
+ * Never a stage under 16rem, the width it keeps beside the panel: in a box too short for
+ * that, the layout grows past the box, for the box to scroll.
+ */
+.clover-template-default[data-fill] {
+  --clover-content-height: auto;
+  height: 100%;
+  min-height: min-content;
+}
+
+.clover-template-default[data-fill] > .clover-template-default-body {
+  flex: 1 1 auto;
+}
+
+.clover-template-default[data-fill] .clover-template-default-stage {
+  flex: 1 1 0;
+  min-height: 16rem;
+}
+
 .clover-template-default-header {
   display: flex;
   align-items: center;

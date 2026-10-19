@@ -1,5 +1,6 @@
 import CloverCanvas from "docs/components/DynamicImports/Canvas";
 import { useRef, useState } from "react";
+import { useMock } from "docs/lib/useMock";
 import type { CanvasHandle } from "@nulib/clover";
 
 /**
@@ -10,18 +11,29 @@ const CanvasHandleDemo = ({
   id,
   body,
   src,
+  iiifContent,
+  mock,
   isTiledImage,
   annotations,
-  label = "Göttingen market square, IIIF Image API reference image",
+  label,
 }: {
   id?: string;
   body?: any;
   src?: any;
+  /** A Canvas (or Manifest) for the Canvas to load itself. */
+  iiifContent?: string;
+  /** Or one of this site's mocks, by its path under `/mocks/`. */
+  mock?: string;
   isTiledImage?: boolean;
   annotations?: any[];
-  /** The viewport's accessible name: what the image shows. */
+  /**
+   * The viewport's accessible name: what the image shows. Loading its own, the Canvas
+   * takes its label, as it does each Canvas a link leads it to.
+   */
   label?: string;
 }) => {
+  const mockUrl = useMock(mock ?? "");
+  const content = mock ? (mockUrl ?? undefined) : iiifContent;
   const handle = useRef<CanvasHandle | null>(null);
   const [backend, setBackend] = useState("");
   const [region, setRegion] = useState("");
@@ -58,12 +70,20 @@ const CanvasHandleDemo = ({
         <CloverCanvas
           body={body}
           src={src}
+          iiifContent={content}
           isTiledImage={isTiledImage}
           annotations={annotations}
-          label={label}
+          label={
+            label ??
+            (iiifContent || mock
+              ? undefined
+              : "Göttingen market square, IIIF Image API reference image")
+          }
           onReady={(h: CanvasHandle) => {
             handle.current = h;
             setBackend(h.backendKind);
+            // Another when a context is lost, or taken anew back in view.
+            h.on("backend", () => setBackend(h.backendKind));
           }}
           onViewportChange={(bounds) =>
             setRegion(

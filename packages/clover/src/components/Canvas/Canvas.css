@@ -201,19 +201,42 @@
 }
 
 /*
+ * Nor does the information control (the `i`), as a placeholder's toggle never does: what
+ * the Canvas says of itself (its label, summary, metadata) is always a press away. Nor
+ * the annotations control, over a picture or a recording: what is said of it, likewise.
+ * Nor, paused, a recording's (or an animation's) Play, at the start of its bar: playing is
+ * always a press away, in one place. Playing, its Pause goes with the rest (Mat,
+ * 2026-10-19).
+ */
+.clover-canvas
+  > .clover-canvas-controls
+  > :is([data-button="information"], [data-button="annotations"]),
+.clover-canvas-transport-bar > [data-button="play"] {
+  --clover-chrome-shown: 1;
+  --clover-chrome-events: auto;
+}
+
+/*
  * Shown while the pointer is active over the Canvas, rests on a piece of chrome,
  * keyboard focus is inside it, or a menu is open: decided here, once, for every piece of
  * chrome. A control under a resting pointer stays, Tip and all (WCAG 1.4.13), so a
  * press never falls through to the picture. Faded chrome takes no pointer, so it cannot
- * be hovered back; the panel's toggle never fades, so it holds nothing.
+ * be hovered back; the panel's toggle, the `i`, the annotations control and a paused
+ * recording's Play never fade, so they hold nothing.
  */
 .clover-canvas:is(
   [data-chrome="visible"],
   :has(:focus-visible, [aria-expanded="true"]:not([data-button="panel"])),
   :has(
-    > .clover-canvas-controls > :not([data-button="panel"]):hover,
+    > .clover-canvas-controls
+      > :not(
+        [data-button="panel"],
+        [data-button="information"],
+        [data-button="annotations"]
+      ):hover,
     > .clover-canvas-navigator:hover,
-    .clover-canvas-transport > :hover
+    .clover-canvas-transport-seek-area:hover,
+    .clover-canvas-transport-bar > :not([data-button="play"]):hover
   )
 ) {
   --clover-chrome-shown: 1;
@@ -226,12 +249,22 @@
  * `--clover-chrome-edge: 1` for down from the bottom) until shown. Each control fades,
  * not the cluster, so one can stay, and a faded one keeps its room (nothing beside it
  * moves). A video or sound's transport, or an animation's frames (`Transport.css`), and
- * the captions (`MediaStage.css`) read the same state, in the media layer. A placeholder's toggle never fades: open, it
+ * the captions (`MediaStage.css`) read the same state, in the media layer: its scrim, its
+ * seek bar and each piece of its bar, so its Play can stay. A placeholder's toggle never fades: open, it
  * is the way back to the still, so it stays in sight.
  */
 .clover-canvas > .clover-canvas-controls > *,
 .clover-canvas > .clover-canvas-navigator,
-.clover-canvas > .clover-canvas-media > .clover-canvas-transport {
+.clover-canvas > .clover-canvas-media > .clover-canvas-transport::before,
+.clover-canvas
+  > .clover-canvas-media
+  > .clover-canvas-transport
+  > .clover-canvas-transport-seek-area,
+.clover-canvas
+  > .clover-canvas-media
+  > .clover-canvas-transport
+  > .clover-canvas-transport-bar
+  > * {
   opacity: var(--clover-chrome-shown);
   translate: 0
     calc(
@@ -247,7 +280,8 @@
 /* Not a click target while away. The transport's own box never is: only its controls. */
 .clover-canvas > .clover-canvas-controls > *,
 .clover-canvas > .clover-canvas-navigator,
-.clover-canvas-transport > * {
+.clover-canvas-transport > .clover-canvas-transport-seek-area,
+.clover-canvas-transport-bar > * {
   pointer-events: var(--clover-chrome-events);
 }
 

@@ -12,6 +12,7 @@ import accompanyingJson from "../../../fixtures/iiif-cookbook/0014-accompanyingc
 import languagesJson from "../../../fixtures/iiif-cookbook/0074-multiple-language-captions.json";
 import operaJson from "../../../fixtures/iiif-cookbook/0026-toc-opera.json";
 import captionsJson from "../../../fixtures/iiif-cookbook/0219-using-caption-file.json";
+import poetryJson from "../../../fixtures/iiif-cookbook/0103-poetry-reading-annotations.json";
 import { clearVttCache } from "../../../core/vtt";
 import * as Clover from "../../../index";
 
@@ -21,6 +22,7 @@ const video = p4(videoJson);
 const accompanying = p4(accompanyingJson);
 const languages = p4(languagesJson);
 const captions = p4(captionsJson);
+const poetry = p4(poetryJson);
 
 const listeners: Record<string, (detail?: unknown) => void> = {};
 let renderer: Record<string, any>;
@@ -77,6 +79,7 @@ beforeEach(() => {
     host,
     setImages: vi.fn().mockResolvedValue(undefined),
     setGestures: vi.fn(),
+    setDismiss: vi.fn(),
     dispose: vi.fn(),
     isOpen: false,
     backendKind: "webgl2",
@@ -463,12 +466,17 @@ describe("Canvas media", () => {
       screen.getByRole("radio", { name: "IT Sottotitoli in formato WebVTT" }),
     );
     const captions = () => document.querySelector(".clover-canvas-captions");
-    expect(captions()).toHaveAttribute("lang", "it");
+    // Each cue in its track's language, as an annotation's cue is in its own.
+    expect(
+      captions()?.querySelector(".clover-canvas-captions-cue"),
+    ).toHaveAttribute("lang", "it");
     expect(captions()).toHaveTextContent("Tom & Jerry, 'l’altro'");
 
     fireEvent.click(button);
     pick(screen.getByRole("radio", { name: "EN Captions in WebVTT format" }));
-    expect(captions()).toHaveAttribute("lang", "en");
+    expect(
+      captions()?.querySelector(".clover-canvas-captions-cue"),
+    ).toHaveAttribute("lang", "en");
     expect(captions()).toHaveTextContent(/^Tom & Jerry$/);
   });
 
@@ -541,7 +549,10 @@ describe("Canvas media", () => {
     // Clover draws it, so the browser does not.
     expect(french.mode).toBe("hidden");
     const drawn = document.querySelector(".clover-canvas-captions");
-    expect(drawn).toHaveAttribute("lang", "fr");
+    expect(drawn?.querySelector(".clover-canvas-captions-cue")).toHaveAttribute(
+      "lang",
+      "fr",
+    );
     expect(drawn).toHaveTextContent("Bonjour");
     tracks.mockRestore();
   });
@@ -663,6 +674,107 @@ describe("Canvas media", () => {
     rerender(<Canvas canvases={[plain]} />);
     await act(async () => {});
     expect(renderer.host).toHaveFocus();
+  });
+
+  /*
+   * Cookbook 0103: a comment on 702 to 705 seconds of a reading, in an AnnotationPage
+   * labelled "Environmental Noise".
+   */
+  describe("annotations on the recording's time", () => {
+    const [canvas] = poetry.items as any[];
+    const page = canvas.annotations[0];
+    const annotations = page.items.map((annotation: any) => ({
+      annotation,
+      targetIndex: 0,
+      pageLabel: page.label,
+    }));
+    const renderPoetry = async () => {
+      const onMediaElement = vi.fn();
+      render(
+        <Canvas
+          canvases={[canvas]}
+          annotations={annotations}
+          onMediaElement={onMediaElement}
+        />,
+      );
+      await transport();
+      await act(async () => {
+        await import("../Annotations");
+        await import("../AnnotationMenu");
+      });
+      return onMediaElement.mock.calls.at(-1)?.[0] as HTMLMediaElement;
+    };
+    const cues = () =>
+      Array.from(
+        document.querySelectorAll(
+          '.clover-canvas-captions-cue[data-kind="annotation"]',
+        ),
+      );
+
+    it("shows one as a cue while its stretch plays, under its page's label", async () => {
+      const element = await renderPoetry();
+      const at = (seconds: number) =>
+        act(() => {
+          element.currentTime = seconds;
+          element.dispatchEvent(new Event("timeupdate"));
+        });
+      at(700);
+      expect(cues()).toHaveLength(0);
+      at(703);
+      const [cue] = cues();
+      expect(cue).toHaveTextContent(
+        "Environmental NoiseSoft laughter, rustling",
+      );
+      expect(
+        cue.querySelector(".clover-canvas-captions-cue-label"),
+      ).toHaveAttribute("lang", "en");
+      at(705);
+      expect(cues()).toHaveLength(0);
+    });
+
+    it("goes there when picked from the Annotations list beside it", async () => {
+      let media: HTMLMediaElement | null = null;
+      const Spy = () => {
+        const { clover } = Clover.useClover("Spy");
+        React.useEffect(
+          () => clover.media.subscribe(() => (media = clover.media.get())),
+          [clover],
+        );
+        return null;
+      };
+      render(
+        <Clover.Root iiifContent={poetryJson}>
+          <Clover.Content />
+          <Clover.Annotations />
+          <Spy />
+        </Clover.Root>,
+      );
+      await transport();
+      const entry = await screen.findByRole("button", {
+        name: "Find in the recording: Soft laughter, rustling",
+      });
+      fireEvent.click(entry);
+      await act(async () => {});
+      expect(media!.currentTime).toBe(702);
+    });
+
+    it("lists them in the Canvas's annotations menu by time, under the page, and a pick goes there", async () => {
+      const element = await renderPoetry();
+      fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
+      const menu = screen.getByTestId("clover-canvas-annotation-menu");
+      expect(
+        within(menu).getByRole("group", { name: "Environmental Noise" }),
+      ).toBeInTheDocument();
+      const item = within(menu).getByRole("radio", {
+        name: "11:42 Soft laughter, rustling",
+      });
+      pick(item);
+      expect(element.currentTime).toBe(702);
+      // Paused it was, and paused it stays.
+      expect(play).not.toHaveBeenCalled();
+      act(() => element.dispatchEvent(new Event("seeked")));
+      expect(cues()).toHaveLength(1);
+    });
   });
 
   it("plays sound through the same transport, never placed", async () => {

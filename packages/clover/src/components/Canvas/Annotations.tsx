@@ -2,11 +2,14 @@ import type { Annotation } from "@iiif/presentation-3";
 import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
+import type { IIIFCanvas } from "./layout";
 import type { SvgReader } from "./useSvgReader";
 import { bodiesOf, parseAnnotationTarget } from "../../core/annotations";
+import { type AnnotationLink, readLink } from "../../core/link";
 import type { SvgShape } from "../../core/svg-shape";
-import { markdownToPlainText } from "../../core/text";
-import { localize } from "../../core/value";
+import { markdownToPlainText, readAs } from "../../core/text";
+import { parseTime } from "../../core/ranges";
+import { type LanguageMapLike, localize } from "../../core/value";
 import { Tip } from "../../ui/Tip";
 import type { CanvasRenderer, Rect } from "../../lib/renderer";
 
@@ -14,6 +17,8 @@ export interface CanvasAnnotation {
   annotation: Annotation;
   /** Which image in the scene the annotation targets (its index in `body`/`src`). */
   targetIndex: number;
+  /** Its AnnotationPage's `label`, which the menu and a recording's cues show it under. */
+  pageLabel?: LanguageMapLike;
 }
 
 /**
@@ -40,6 +45,64 @@ export interface PlacedAnnotation {
   world: Rect;
   /** A point's marker, or an SVG shape drawn in `world`; a rectangle needs neither. */
   shape?: { kind: "point" } | { kind: "svg"; svg: SvgShape };
+  /** Where a `linking` annotation leads (Cookbook 0022): pressing it follows. */
+  link?: AnnotationLink;
+  /** An image it carries (Cookbook 0377), shown in its popover above its text. */
+  image?: string;
+  /** Its AnnotationPage's label, read: the menu lists it under it. */
+  page?: { text: string; lang?: string };
+}
+
+/**
+ * An annotation on a stretch of a recording's time (`#t=`, Cookbook 0103): its cue shows
+ * while that stretch plays, as a caption's does, and picking it goes there.
+ */
+export interface TimedAnnotation {
+  id: string;
+  label?: string;
+  lang?: string;
+  /** In seconds. */
+  start: number;
+  end?: number;
+  page?: { text: string; lang?: string };
+}
+
+/** What the Canvas's annotations menu lists: those on its picture, and on its time. */
+export type ListedAnnotation = PlacedAnnotation | TimedAnnotation;
+
+export const isTimed = (
+  annotation: ListedAnnotation,
+): annotation is TimedAnnotation => "start" in annotation;
+
+/** An AnnotationPage's label, in the reader's language; none for one without. */
+function pageOf(
+  label: LanguageMapLike | undefined,
+  language?: string,
+): { page?: { text: string; lang?: string } } {
+  const { text, lang } = localize(label as any, language);
+  return text ? { page: { text, ...(lang ? { lang } : {}) } } : {};
+}
+
+/** The annotations on a stretch of time (`#t=start,end`), in the order given. */
+export function timeAnnotations(
+  annotations: CanvasAnnotation[],
+  language?: string,
+): TimedAnnotation[] {
+  const timed: TimedAnnotation[] = [];
+  for (const { annotation, pageLabel } of annotations) {
+    const target = parseAnnotationTarget([annotation?.target].flat()[0] as any);
+    const time = parseTime(target?.t?.replace(/^npt:/, ""));
+    if (!time || target.rect || target.point || target.svg) continue;
+    const { text, lang } = annotationLabel(annotation, language);
+    timed.push({
+      id: annotation.id,
+      ...(text ? { label: text } : {}),
+      ...(lang ? { lang } : {}),
+      ...time,
+      ...pageOf(pageLabel, language),
+    });
+  }
+  return timed;
 }
 
 /** The box framed around a point, in its target's own units, as 3.x frames one. */
@@ -58,7 +121,7 @@ export function placeAnnotations(
   language?: string,
 ): PlacedAnnotation[] {
   const placed: PlacedAnnotation[] = [];
-  for (const { annotation, targetIndex } of annotations) {
+  for (const { annotation, targetIndex, pageLabel } of annotations) {
     const target = parseAnnotationTarget(annotation?.target as any);
     if (!target) continue;
     let rect: Rect | null = null;
@@ -86,12 +149,19 @@ export function placeAnnotations(
     const world = place(rect, target.id, targetIndex);
     if (!world) continue;
     const { text, lang } = annotationLabel(annotation, language);
+    const link = readLink(annotation);
+    const image = bodiesOf(annotation as any).find(
+      (body) => body?.type === "Image" && /^https?:\/\//i.test(body.id ?? ""),
+    )?.id as string | undefined;
     placed.push({
       id: annotation.id,
       label: text,
       ...(lang ? { lang } : {}),
       world,
       ...(shape ? { shape } : {}),
+      ...(link ? { link } : {}),
+      ...(image ? { image } : {}),
+      ...pageOf(pageLabel, language),
     });
   }
   return placed;
@@ -109,6 +179,11 @@ interface AnnotationsProps {
   onActivate: (id: string | null) => void;
   /** A hotspot clicked: zoom to it, and it becomes the menu's current annotation. */
   onSelect: (annotation: PlacedAnnotation) => void;
+  /**
+   * A linking hotspot pressed, to a Canvas or a Manifest: show it. Without it, such a
+   * hotspot is picked as any other. A link to a web page is a link, and needs none.
+   */
+  onFollow?: (annotation: PlacedAnnotation) => void;
 }
 
 const area = ({ world }: PlacedAnnotation) => world.width * world.height;
@@ -120,11 +195,67 @@ const within = (inner: Rect, outer: Rect) =>
   inner.x + inner.width <= outer.x + outer.width &&
   inner.y + inner.height <= outer.y + outer.height;
 
+/** A number for a mask's SVG, to a thousandth (so never in exponent form). */
+const unit = (value: number) => String(Math.round(value * 1000) / 1000 || 0);
+
+/**
+ * What of `entry` shows while `over`, the active hotspot, stacks above it: all of it but
+ * where `over` lies (its rectangle, or its shape), as a vector editor hides what a shape
+ * covers, so no other hotspot's lines cross the one picked. Nothing is laid over the
+ * picture to do it. An SVG image for `mask-image`, drawn in `entry`'s own world units and
+ * stretched to its box, so it holds at any zoom with no work from frame to frame; its
+ * box with a tenth to spare on each side, for a shape's edge drawn past it. Null where
+ * the two do not meet, and under a point, whose marker covers what it crosses.
+ */
+export function maskUnder(
+  entry: PlacedAnnotation,
+  over: PlacedAnnotation,
+): string | null {
+  const a = entry.world;
+  const b = over.world;
+  if (
+    over.shape?.kind === "point" ||
+    b.x >= a.x + a.width ||
+    b.x + b.width <= a.x ||
+    b.y >= a.y + a.height ||
+    b.y + b.height <= a.y
+  )
+    return null;
+  const [w, h] = [a.width, a.height];
+  const [x, y] = [b.x - a.x, b.y - a.y];
+  const view = `${unit(-w / 10)} ${unit(-h / 10)} ${unit(w * 1.2)} ${unit(h * 1.2)}`;
+  const all = `M${unit(-w / 10)} ${unit(-h / 10)}h${unit(w * 1.2)}v${unit(h * 1.2)}h${unit(-w * 1.2)}Z`;
+  let body: string;
+  if (over.shape?.kind === "svg") {
+    // The shape, in black, cut from white: geometry already validated, numbers only.
+    const { box, shapes } = over.shape.svg;
+    const drawn = shapes
+      .map(
+        ({ tag, attributes }) =>
+          `<${tag} ${Object.entries(attributes)
+            .map(([name, value]) => `${name}="${value}"`)
+            .join(" ")}/>`,
+      )
+      .join("");
+    body =
+      `<mask id="m"><path fill="#fff" d="${all}"/>` +
+      `<svg x="${unit(x)}" y="${unit(y)}" width="${unit(b.width)}" height="${unit(b.height)}" ` +
+      `viewBox="${box.x} ${box.y} ${Math.max(box.width, 1)} ${Math.max(box.height, 1)}" ` +
+      `preserveAspectRatio="none" overflow="visible"><g fill="#000">${drawn}</g></svg>` +
+      `</mask><path d="${all}" mask="url(#m)"/>`;
+  } else {
+    body = `<path fill-rule="evenodd" d="${all}M${unit(x)} ${unit(y)}h${unit(b.width)}v${unit(b.height)}h${unit(-b.width)}Z"/>`;
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${view}" preserveAspectRatio="none">${body}</svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
 /**
  * Annotation hotspots: a focusable button over each rectangular target, as `Image` draws
  * them — named by the annotation's text, which its popover (`Tip`) shows on hover and
- * focus, marked active on hover or focus, and zoomed to (with OpenSeadragon's padding)
- * on click, Enter or Space.
+ * focus (with an image it carries above it), marked active on hover or focus, and zoomed
+ * to (with OpenSeadragon's padding) on click, Enter or Space. A linking annotation's
+ * follows its link instead (`onFollow`), and one to a web page is a link.
  *
  * Rendered by React into the renderer's overlay layer, which pins each button to its
  * world rectangle every frame.
@@ -137,6 +268,7 @@ const Annotations: React.FC<AnnotationsProps> = ({
   selected,
   onActivate,
   onSelect,
+  onFollow,
 }) => {
   // Each hotspot's rank by size, largest first, and of two alike the later over the
   // earlier (the sort is stable): the order they stack in.
@@ -176,11 +308,18 @@ const Annotations: React.FC<AnnotationsProps> = ({
           name={entry.label ?? String(index + 1)}
           lang={entry.label ? entry.lang : undefined}
           depth={depthOf(entry)}
+          // Beneath the active one, its lines stop where that one lies.
+          mask={
+            current && entry !== current && depthOf(entry) < placed.length
+              ? maskUnder(entry, current)
+              : null
+          }
           renderer={renderer}
           active={active === entry.id}
           selected={selected === entry.id}
           onActivate={onActivate}
           onSelect={onSelect}
+          onFollow={onFollow}
         />
       ))}
     </>,
@@ -200,23 +339,28 @@ const AnnotationButton: React.FC<{
   lang?: string;
   /** Where it stacks among the hotspots, higher over lower. */
   depth: number;
+  /** What of it shows beneath the active hotspot (`maskUnder`), or null for all of it. */
+  mask: string | null;
   renderer: CanvasRenderer;
   active: boolean;
   selected: boolean;
   onActivate: (id: string | null) => void;
   onSelect: (annotation: PlacedAnnotation) => void;
+  onFollow?: (annotation: PlacedAnnotation) => void;
 }> = ({
   entry,
   name,
   lang,
   depth,
+  mask,
   renderer,
   active,
   selected,
   onActivate,
   onSelect,
+  onFollow,
 }) => {
-  const [element, setElement] = useState<HTMLButtonElement | null>(null);
+  const [element, setElement] = useState<HTMLElement | null>(null);
   // Re-pinned when the numbers change, not whenever a new object carries the same ones.
   const { x, y, width, height } = entry.world;
 
@@ -227,20 +371,36 @@ const AnnotationButton: React.FC<{
     return unpin;
   }, [element, renderer, x, y, width, height]);
 
+  /*
+   * A link to a web page is a link (`<a>`), opening it beside the viewer; one to a Canvas
+   * or a Manifest, a button that shows it here. Anything else zooms to it.
+   */
+  const { link } = entry;
+  const web = link && !link.canvasId && !link.manifestId ? link.id : undefined;
+  const follow = link && !web && onFollow ? () => onFollow(entry) : undefined;
+  const Hotspot = (web ? "a" : "button") as "button";
   return (
-    <button
-      ref={setElement}
-      type="button"
+    <Hotspot
+      ref={setElement as React.Ref<HTMLButtonElement>}
+      {...(web
+        ? { href: web, target: "_blank", rel: "noopener noreferrer" }
+        : { type: "button" })}
       id={entry.id}
       className="clover-canvas-annotation"
       data-active={active ? "true" : "false"}
       data-shape={entry.shape?.kind ?? "rect"}
+      data-link={web || follow ? "true" : undefined}
       aria-label={name}
       // A command (zoom to it), not a toggle: pressing the picked one again frames it
       // again, so it is current rather than pressed.
       aria-current={selected ? "true" : undefined}
       lang={lang}
-      style={{ "--clover-annotation-depth": depth } as React.CSSProperties}
+      style={
+        {
+          "--clover-annotation-depth": depth,
+          "--clover-annotation-mask": mask ?? undefined,
+        } as React.CSSProperties
+      }
       // Enter and leave, not over and out: the pointer crossing onto its own marker or
       // popover keeps it active.
       onMouseEnter={() => onActivate(entry.id)}
@@ -265,15 +425,17 @@ const AnnotationButton: React.FC<{
       onKeyDown={scrollNote}
       onClick={(event) => {
         event.stopPropagation();
-        onSelect(entry);
+        if (web) return;
+        if (follow) follow();
+        else onSelect(entry);
       }}
     >
       {entry.shape?.kind === "point" && (
         <span className="clover-canvas-annotation-point" aria-hidden="true" />
       )}
       {entry.shape?.kind === "svg" && <ShapeOutline svg={entry.shape.svg} />}
-      <Tip label={name} scrolls />
-    </button>
+      <Tip label={name} scrolls image={entry.image} />
+    </Hotspot>
   );
 };
 
@@ -354,16 +516,15 @@ export function annotationLabel(
   if (!value.trim()) return {};
   const tag = tagOf(body);
   const lang = tag === "none" ? undefined : tag;
-  // Markdown's syntax is taken off, so neither the name nor the tip reads it out.
-  if (body.format === "text/markdown") {
+  // Read by its format (`readAs`). Markdown's syntax is taken off, so neither the name
+  // nor the tip reads it out; HTML is read for its text.
+  const kind = readAs(body.format, value);
+  if (kind === "markdown") {
     const text = markdownToPlainText(value);
     return text ? { text, lang } : {};
   }
-  const html =
-    typeof body.format === "string"
-      ? /html/i.test(body.format)
-      : /[<&]/.test(value);
-  if (!html || typeof DOMParser === "undefined") return { text: value, lang };
+  if (kind === "plain" || typeof DOMParser === "undefined")
+    return { text: value, lang };
   const text = new DOMParser()
     .parseFromString(value, "text/html")
     .body.textContent?.trim();
@@ -403,4 +564,36 @@ export function scrollNote(event: React.KeyboardEvent<HTMLElement>): boolean {
   event.preventDefault();
   tip.scrollBy({ top: delta });
   return true;
+}
+
+/**
+ * The annotations on a whole Canvas, by Canvas (Cookbook 0266): a target with no region,
+ * point, shape or time, and a body with something to read or see. The Canvas's caption
+ * shows them.
+ */
+export function wholeCanvasComments(
+  annotations: CanvasAnnotation[] | undefined,
+  canvases: IIIFCanvas[] | undefined,
+): Map<string, CanvasAnnotation["annotation"][]> {
+  const byCanvas = new Map<string, CanvasAnnotation["annotation"][]>();
+  for (const { annotation, targetIndex } of annotations ?? []) {
+    const target = parseAnnotationTarget(
+      [annotation?.target].flat()[0] as Parameters<
+        typeof parseAnnotationTarget
+      >[0],
+    );
+    if (target.rect || target.point || target.svg || target.t) continue;
+    if (
+      !bodiesOf(annotation as Record<string, any>).some(
+        (body) => typeof body?.value === "string" || body?.type === "Image",
+      )
+    )
+      continue;
+    const canvas =
+      canvases?.find((each) => each.id === target.id) ??
+      (target.id ? undefined : canvases?.[targetIndex]);
+    if (!canvas) continue;
+    byCanvas.set(canvas.id, [...(byCanvas.get(canvas.id) ?? []), annotation]);
+  }
+  return byCanvas;
 }

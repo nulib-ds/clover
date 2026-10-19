@@ -10,6 +10,8 @@ import type { CanvasHandle, CloverCanvasProps } from "./Canvas.types";
 import CanvasView from "./CanvasView";
 import { type IIIFCanvas, paintedMedia } from "./layout";
 import { selectDrawnSets } from "../../core/annotation-sets";
+import type { AnnotationLink } from "../../core/link";
+import { showLink } from "../../core/show-link";
 import { chaptersOf } from "../../core/ranges";
 import { localize } from "../../core/value";
 import { hasBehavior } from "../../core/selectors";
@@ -94,12 +96,15 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
     const shown = canvases.map((canvas) => canvas.id);
     return sets
       .filter((set) => !hiddenSets.includes(set.id))
-      .flatMap((set) => set.entries)
-      .filter((entry) => shown.includes(entry.canvasId))
-      .map((entry) => ({
-        annotation: entry.annotation as CanvasAnnotation["annotation"],
-        targetIndex: shown.indexOf(entry.canvasId),
-      }));
+      .flatMap((set) =>
+        set.entries
+          .filter((entry) => shown.includes(entry.canvasId))
+          .map((entry) => ({
+            annotation: entry.annotation as CanvasAnnotation["annotation"],
+            targetIndex: shown.indexOf(entry.canvasId),
+            ...(set.label ? { pageLabel: set.label } : {}),
+          })),
+      );
   }, [givenAnnotations, sets, hiddenSets, canvases]);
   const shows = (canvasId?: string) =>
     Boolean(canvasId) && canvases.some((canvas) => canvas.id === canvasId);
@@ -235,6 +240,12 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
     }
   }, [clover, manifest, active, onEnded]);
 
+  // A linking hotspot's Canvas (Cookbook 0022), shown as the Root shows any.
+  const followLink = useCallback(
+    (link: AnnotationLink) => void showLink(clover, link),
+    [clover],
+  );
+
   // The Root's request settings, unless the Canvas is given its own.
   const request = options?.request ?? clover.request;
   // An animation Canvas plays and loops as the Manifest's or Canvas's behavior says.
@@ -281,6 +292,7 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
       selectedAnnotation={selectedAnnotation}
       highlightedAnnotation={highlighted}
       onAnnotationSelect={(id) => clover.selectAnnotation(id)}
+      onAnnotationLink={rest.onAnnotationLink ?? followLink}
       onAnnotationActive={(id) => {
         clover.highlight.emit(id);
         rest.onAnnotationActive?.(id);

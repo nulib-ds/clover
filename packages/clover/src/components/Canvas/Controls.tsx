@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 
 import type { CanvasControlsConfig } from "./Canvas.types";
-import type { PlacedAnnotation } from "./Annotations";
+import type { ListedAnnotation } from "./Annotations";
 import { Comment, Information } from "./glyphs";
 import Button from "../../ui/Button";
 import type { ChoiceGroup, ChoiceSelections } from "./layout";
@@ -44,10 +44,10 @@ interface CanvasControlsProps {
   choices?: ChoiceGroup[];
   selections?: ChoiceSelections;
   onSelect?: (key: string, index: number) => void;
-  /** The Canvas's drawable annotations. With any, a control to list them appears. */
-  annotations?: PlacedAnnotation[];
+  /** The Canvas's annotations, on its picture and its time. With any, a control lists them. */
+  annotations?: ListedAnnotation[];
   selectedAnnotation?: string | null;
-  onAnnotationSelect?: (annotation: PlacedAnnotation) => void;
+  onAnnotationSelect?: (annotation: ListedAnnotation) => void;
   onAnnotationActivate?: (id: string | null) => void;
   /**
    * The id of the Canvas's caption when it has information to show (`Caption`, which the

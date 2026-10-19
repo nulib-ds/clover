@@ -85,7 +85,34 @@ the <kbd>Enter</kbd> key) to zoom to it. Pressing <kbd>Tab</kbd> reaches them in
 order the annotations are given, and moves the picture, no further than needed, to bring
 the one it reaches out from under the controls. The comment control in the cluster lists
 them by their text; picking one zooms to it and keeps its hotspot highlighted and marked
-as current.
+as current, its label showing without the pointer on it. A click off every hotspot, or
+
+<kbd>Escape</kbd>, lets it go.
+
+A pick is framed at once, in one cut: on the Canvas, from a list beside it, or from a
+content state's note. To have the camera glide there instead, as it eases to anywhere
+else, pass `animateAnnotations` (inside a `Root`, on `Content`). A reader who asks their
+system for reduced motion gets the cut either way.
+
+```jsx
+<Clover.Canvas src={src} annotations={annotations} animateAnnotations />
+```
+
+An annotation can carry an image as well as words
+([Cookbook 0377](https://iiif.io/api/cookbook/recipe/0377-image-in-annotation/)): its
+popover shows it, above them. One that links (`motivation: "linking"`,
+[Cookbook 0022](https://iiif.io/api/cookbook/recipe/0022-linking-with-a-hotspot/)) goes
+where it links when pressed, rather than zooming: another of the Manifest's Canvases, or
+the Manifest its target is `partOf`, shown in place, with focus kept on the Canvas. A link
+to a page on the web is a link, and opens the page in a new tab. Inside a `Root`, or
+loading its own (`iiifContent`), the Canvas follows them itself; otherwise, take
+`onAnnotationLink` and show the Canvas or Manifest it is given. Here, the fountain's
+hotspot leads to its close-up.
+
+<CanvasHandleDemo
+  id="linking"
+  iiifContent={`${RECIPES}/0022-linking-with-a-hotspot/manifest.json`}
+/>
 
 <CanvasHandleDemo
   id="annotations"
@@ -112,6 +139,7 @@ as current.
           {
             type: "TextualBody",
             value: "<b>Old Town Hall</b> (Altes Rathaus)",
+            format: "text/html",
           },
         ],
         target: "https://example.org/canvas#xywh=0,0,2000,1400",
@@ -134,13 +162,27 @@ itself ([Cookbook 0029](https://iiif.io/api/cookbook/recipe/0029-metadata-anywhe
   iiifContent={`${RECIPES}/0029-metadata-anywhere/manifest.json`}
 />
 
+Annotations on the whole Canvas, with no region to mark
+([Cookbook 0266](https://iiif.io/api/cookbook/recipe/0266-full-canvas-annotation/)), are
+in that box too, under its metadata, as the Annotations list shows them: HTML with its
+links and images kept and the rest sanitised away, as here
+([Cookbook 0019](https://iiif.io/api/cookbook/recipe/0019-html-in-annotations/)), and
+Markdown and plain text as their `format` says.
+
+<CanvasHandleDemo
+  id="whole-canvas"
+  iiifContent={`${RECIPES}/0019-html-in-annotations/manifest.json`}
+/>
+
 ### Placeholder Canvas
 
 A Canvas with a `placeholderContainer` (Presentation 3's `placeholderCanvas`) shows that
 Canvas's image first, fitted to the frame and centred, as the Viewer does. The Canvas
 itself is held back until you open it from the toggle in the top right, or by clicking
-the image: nothing is fetched, and there is no pan or zoom, no annotations or `Choice`,
-and no video or sound until then. The information control stays available. The toggle
+the image: nothing is fetched, and there is no pan or zoom, no hotspots or `Choice`,
+and no video or sound until then. The information control stays available, and so does
+the annotations menu: picking an annotation from it opens the Canvas there, as picking
+one from a list beside it, or arriving by a content state's note, does. The toggle
 then closes the Canvas again, back to its placeholder. Open or closed holds as the
 Canvases change, so a reader paging through a book opens it once; a video or sound
 starts at its poster each time, since opening it plays it. Here the Canvases of
@@ -193,6 +235,30 @@ small stills of themselves as placeholders.
 `Canvas` draws IIIF Canvases: pass one, or the few you want shown together, as
 `canvases`. Each Canvas's painting annotations are composed at their targets, and
 several Canvases are laid out in reading order by `viewingDirection`.
+
+### Loading one
+
+Given `iiifContent` instead, a Canvas loads what it draws, with no `Root` or Viewer
+around it: a Canvas, or a Manifest's first, by URL or as an object, in any Presentation
+version. It is fetched with `options.request` and upgraded as it loads, with its own
+annotations (its `annotations` pages), and its information control shows its label,
+summary and metadata. Nothing is drawn until it arrives. This one is a Canvas on its
+own, a Digital Collections map with Ireland tagged
+([`standalone-canvas`](/docs/mocks#standalone-canvas-a-map-on-its-own) mock):
+
+<CanvasHandleDemo
+  id="iiif-content"
+  mock="standalone-canvas/canvas.json"
+  label="L'Isole Britanniche (1811)"
+/>
+
+```jsx
+<Clover.Canvas iiifContent="https://example.org/canvas.json" />
+```
+
+Given to the Viewer, a Canvas is shown on its own too, its About saying what the Canvas
+says of itself; where it is `partOf` a Manifest, About offers to open the full Manifest
+in its place.
 
 `Canvas` knows nothing of the Manifest around those Canvases. Deciding what to show —
 reading `behavior` to group a Manifest into single pages, spreads or one joined object —
@@ -407,6 +473,22 @@ are your own CSS on the cue, which wins over Clover's layer:
 }
 ```
 
+### Annotations on a recording's time
+
+An annotation that targets a stretch of the recording (`#t=start,end`) shows as a cue
+while that stretch plays, among the captions, above them, under its AnnotationPage's
+`label` when it has one: a comment on a reading, a note on a scene. One on a moment
+(`#t=start` alone) shows for three seconds. The annotations control lists them by the
+time they start, grouped under their pages' labels; picking one goes there, playing or
+paused as it was, and so does pressing one in a list beside the Canvas.
+([Cookbook 0103](https://iiif.io/api/cookbook/recipe/0103-poetry-reading-annotations/):
+a comment on the laughter near the end of a poetry reading, at 11:42.)
+
+<CanvasHandleDemo
+  id="timed-annotations"
+  iiifContent={`${RECIPES}/0103-poetry-reading-annotations/manifest.json`}
+/>
+
 ### Placeholder Canvas for video
 
 A video's `placeholderContainer` is shown first, as for an image, with a large play button
@@ -589,28 +671,29 @@ Inside a `Clover.Root`, leave out `canvases`, `body` and `src`: the Canvas shows
 Root's current view, and the Root does the loading and upgrading. See
 [Viewer](/docs/viewer).
 
-| Prop                 | Type                                                                       | Description                                                                        |
-| -------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `canvases`           | Presentation 4 Canvases or Timelines                                       | One, or several shown together (a spread). See below.                              |
-| `viewingDirection`   | `"left-to-right"` and so on                                                | How to lay out several `canvases`.                                                 |
-| `body`               | IIIF painting body, or an array                                            | Image resources to draw. Takes precedence over `src`.                              |
-| `src`                | `string \| string[]`                                                       | Image URLs, or image service URIs with `isTiledImage`.                             |
-| `isTiledImage`       | `boolean`                                                                  | Treat each `src` as an image service (base URI or `info.json`).                    |
-| `label`              | `InternationalString \| string`                                            | Accessible name for the viewport.                                                  |
-| `language`           | `string`                                                                   | The language to read labels, Choices and annotations in. In a `Root`, the Root's.  |
-| `instanceId`         | `string`                                                                   | A new id remounts the renderer.                                                    |
-| `manifestId`         | `string`                                                                   | The id of the Manifest the Canvases are from. A new one clears the Canvas at once. |
-| `annotations`        | `{ annotation, targetIndex }[]`                                            | Hotspots, as `Image` takes them. Rectangular targets only.                         |
-| `onAnnotationActive` | `(id: string \| null) => void`                                             | The hovered or focused hotspot.                                                    |
-| `navigator`          | `boolean`                                                                  | Show the overview in the top left. Default `false`.                                |
-| `controls`           | `boolean \| { zoom, fullPage, rotation, reset, annotations, information }` | Which controls to show. Default all. See Interaction for zooming out without them. |
-| `controlButtons`     | `ControlButtons`                                                           | Replace any control, as the Viewer's `controlButtons`.                             |
-| `options`            | `CloverCanvasOptions`                                                      | See below.                                                                         |
-| `onReady`            | `(handle: CanvasHandle) => void`                                           | Called once the first images are laid out and fitted.                              |
-| `onViewportChange`   | `(bounds: Rect) => void`                                                   | The visible region, in image coordinates, at most once per frame.                  |
-| `onMediaElement`     | `(element: HTMLVideoElement \| null) => void`                              | A time-based Canvas's media element, for a host's own transcript.                  |
-| `onEnded`            | `() => void`                                                               | Playback reached the end: a host's cue to advance.                                 |
-| `chapters`           | `{ label, lang?, start, end? }[]`                                          | Chapters of the video or sound, on the seek bar and in a menu, labels in `lang`.   |
+| Prop                 | Type                                                                       | Description                                                                                             |
+| -------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `canvases`           | Presentation 4 Canvases or Timelines                                       | One, or several shown together (a spread). See below.                                                   |
+| `viewingDirection`   | `"left-to-right"` and so on                                                | How to lay out several `canvases`.                                                                      |
+| `body`               | IIIF painting body, or an array                                            | Image resources to draw. Takes precedence over `src`.                                                   |
+| `src`                | `string \| string[]`                                                       | Image URLs, or image service URIs with `isTiledImage`.                                                  |
+| `isTiledImage`       | `boolean`                                                                  | Treat each `src` as an image service (base URI or `info.json`).                                         |
+| `label`              | `InternationalString \| string`                                            | Accessible name for the viewport.                                                                       |
+| `language`           | `string`                                                                   | The language to read labels, Choices and annotations in. In a `Root`, the Root's.                       |
+| `instanceId`         | `string`                                                                   | A new id remounts the renderer.                                                                         |
+| `manifestId`         | `string`                                                                   | The id of the Manifest the Canvases are from. A new one clears the Canvas at once.                      |
+| `annotations`        | `{ annotation, targetIndex }[]`                                            | As `Image` takes them: hotspots on regions, points and shapes; a whole Canvas's in its information box. |
+| `onAnnotationActive` | `(id: string \| null) => void`                                             | The hovered or focused hotspot.                                                                         |
+| `onAnnotationLink`   | `(link: { id, canvasId?, manifestId? }) => void`                           | A linking hotspot pressed: show its Canvas or Manifest. In a `Root`, done for you.                      |
+| `navigator`          | `boolean`                                                                  | Show the overview in the top left. Default `false`.                                                     |
+| `controls`           | `boolean \| { zoom, fullPage, rotation, reset, annotations, information }` | Which controls to show. Default all. See Interaction for zooming out without them.                      |
+| `controlButtons`     | `ControlButtons`                                                           | Replace any control, as the Viewer's `controlButtons`.                                                  |
+| `options`            | `CloverCanvasOptions`                                                      | See below.                                                                                              |
+| `onReady`            | `(handle: CanvasHandle) => void`                                           | Called once the first images are laid out and fitted.                                                   |
+| `onViewportChange`   | `(bounds: Rect) => void`                                                   | The visible region, in image coordinates, at most once per frame.                                       |
+| `onMediaElement`     | `(element: HTMLVideoElement \| null) => void`                              | A time-based Canvas's media element, for a host's own transcript.                                       |
+| `onEnded`            | `() => void`                                                               | Playback reached the end: a host's cue to advance.                                                      |
+| `chapters`           | `{ label, lang?, start, end? }[]`                                          | Chapters of the video or sound, on the seek bar and in a menu, labels in `lang`.                        |
 
 ### `options`
 

@@ -100,8 +100,10 @@ export function Summary({
 
 /**
  * Any IIIF language map — an annotation's text, a label you hold — in the reader's
- * language, as sanitised HTML. `format="text/markdown"` reads Markdown, its lists as
- * lists and its headings as headings, the first at `headingLevel` (default 3).
+ * language, read strictly by `format` (`readAs`): `text/html` as sanitised HTML,
+ * `text/plain` as written, and none by IIIF's rule (HTML only from `<` to `>`).
+ * `format="text/markdown"` reads Markdown, its lists as lists and its headings as
+ * headings, the first at `headingLevel` (default 3).
  */
 export function Value({
   value,

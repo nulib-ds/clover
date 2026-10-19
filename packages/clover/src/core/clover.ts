@@ -2,10 +2,12 @@ import {
   type AnnotationSet,
   findEntry,
   selectDrawnSets,
+  readPage,
 } from "./annotation-sets";
 import {
   type AnnotationsInput,
   loadAnnotationSets,
+  manifestOfAnnotation,
 } from "./annotation-collection";
 import {
   type ContentStateOutput,
@@ -114,7 +116,7 @@ export interface Clover {
    * Show another member of the Collection: a Manifest (fetched if only referenced), or a
    * nested Collection, which is entered as `load` would.
    */
-  goToManifest(id: string): Promise<void>;
+  goToManifest(id: string, canvasId?: string): Promise<void>;
   /** A controlled host's Manifest, shown without asking it again. */
   syncManifest(id: string | null): Promise<void>;
   /**
@@ -150,6 +152,12 @@ export interface Clover {
    * or every Canvas's (a page listing all of them).
    */
   setAnnotationPages(scope: "view" | "all"): void;
+  /**
+   * Fetch every Canvas's referenced annotation pages while held, whatever
+   * `setAnnotationPages` says: for a listing of all of them (`Annotations`'
+   * `scope="all"`). Returns the release.
+   */
+  holdAllAnnotationPages(): () => void;
   /** Abandon any load in flight. The instance stays usable. */
   dispose(): void;
 }
@@ -189,11 +197,25 @@ export function createClover(options: CloverOptions = {}): Clover {
   const highlight = createChannel<string | null>(null);
   let annotating: AbortController | null = null;
   let searching: AbortController | null = null;
+  /*
+   * The added sets: the host's (`annotations`), and a content state's note. Each changes
+   * without the other, so the store holds the two together.
+   */
+  let hostSets: AnnotationSet[] = [];
+  let stateSets: AnnotationSet[] = [];
+  /** One of those to pick once a host that holds the Manifest moves to it. */
+  let pending: string | null = null;
+  const added = () =>
+    hostSets.length || stateSets.length
+      ? [...hostSets, ...stateSets]
+      : INITIAL.addedSets;
   let request = options.request;
   let loading: AbortController | null = null;
   /** Referenced pages already asked for, so each is fetched once. */
   const requested = new Set<string>();
   let pageScope: "view" | "all" = "view";
+  /** Listings of every annotation shown now, each holding every page wanted. */
+  let allHeld = 0;
 
   /** Fetch the referenced annotation pages of the Canvases now shown. */
   const embedVisiblePages = () => {
@@ -201,7 +223,7 @@ export function createClover(options: CloverOptions = {}): Clover {
     if (!manifest) return;
     const signal = loading?.signal;
     for (const [canvas, list, pageId] of referencedPages(
-      pageScope === "all"
+      pageScope === "all" || allHeld > 0
         ? selectSequence(manifest).canvases
         : selectVisibleCanvases(manifest, canvasId),
     )) {
@@ -233,6 +255,8 @@ export function createClover(options: CloverOptions = {}): Clover {
     collection: Collection | null,
     deepLink: Target | undefined,
     initial: Initial,
+    /** An annotation of the content's own (`stateSets`) to pick, on the Canvas opened. */
+    pick?: string | null,
   ) => {
     const { canvases } = selectSequence(manifest);
     const has = (id?: string | null) =>
@@ -251,13 +275,26 @@ export function createClover(options: CloverOptions = {}): Clover {
         null);
     // A search belongs to the Manifest it searched.
     searching?.abort();
+    /*
+     * The content's own annotation to pick (a content state's note, the first of the
+     * annotations given as the content), on the Canvas it opens on, so it names itself
+     * there and in the list. The link then opens its Canvas (past any placeholder) and
+     * the pick frames it once the spread is drawn, as a pick from the list does: one move
+     * into it, not a cut to its region and a second move to the note.
+     */
+    const picked =
+      pick && findEntry(stateSets, pick)?.canvasId === canvasId ? pick : null;
+    const arrival =
+      target && picked ? { ...target, region: undefined } : target;
     store.set({
       status: "ready",
       search: NO_SEARCH,
       manifest,
       collection,
       canvasId,
-      target: target && target.canvasId === canvasId ? target : null,
+      target: arrival && arrival.canvasId === canvasId ? arrival : null,
+      addedSets: added(),
+      annotationId: picked,
     });
     if (canvasId && canvasId !== initial.canvasId) {
       options.onCanvasChange?.(canvasId);
@@ -314,11 +351,26 @@ export function createClover(options: CloverOptions = {}): Clover {
         manifestId: initial.manifestId ?? undefined,
       });
       if (signal.aborted) return;
+      /*
+       * The content's own annotations: a content state's note, as a set of its own, or the
+       * annotations given as the content. They stay through moves to the other Manifests
+       * they name, until the next content.
+       */
+      const note = loaded.annotation;
+      const noted = note
+        ? readPage({ items: [note] }, `${note.id}#content-state`)
+        : [];
+      stateSets = noted.length
+        ? [{ id: `${note!.id}#content-state`, source: "added", entries: noted }]
+        : (loaded.annotationSets ?? []);
+      const pick = pending ?? noted[0]?.id ?? loaded.pick;
+      pending = null;
       arrive(
         loaded.manifest,
         loaded.collection ?? null,
         loaded.target,
         initial,
+        pick,
       );
     } catch (error) {
       if (!signal.aborted) fail(error);
@@ -335,18 +387,50 @@ export function createClover(options: CloverOptions = {}): Clover {
       (item) => item.id === id,
     ) ?? { id, type: "Manifest" };
 
-  /** Show a Collection member; true once it is shown. */
-  const show = async (member: Record<string, any>): Promise<boolean> => {
+  /**
+   * Open another Manifest, to pick one of the content's own annotations there (`show`
+   * picks it, at its Canvas), or ask a host that holds the Manifest to.
+   */
+  const openAnnotation = (manifestId: string, id: string) => {
+    pending = id;
+    if (options.isManifestControlled?.()) {
+      options.onManifestChange?.(manifestId);
+      return;
+    }
+    void show({ id: manifestId, type: "Manifest" }).then(
+      (shown) => shown && options.onManifestChange?.(manifestId),
+    );
+  };
+
+  /** Show a Collection member (at `canvasId`, where it has it); true once it is shown. */
+  const show = async (
+    member: Record<string, any>,
+    canvasId?: string,
+  ): Promise<boolean> => {
     if (member.type === "Collection") {
       await load(member.id);
       return store.get().status === "ready";
     }
     const { collection } = store.get();
     const signal = begin();
+    // A pick waiting on this move (a host that holds the Manifest made it): its Canvas.
+    const pick = pending;
+    pending = null;
+    const waiting = pick ? findEntry(stateSets, pick) : null;
     try {
       const next = await loadManifest(member, { request, signal });
       if (signal.aborted) return false;
-      arrive(next, collection, undefined, {});
+      arrive(
+        next,
+        collection,
+        waiting
+          ? { canvasId: waiting.canvasId }
+          : canvasId
+            ? { canvasId }
+            : undefined,
+        {},
+        pick,
+      );
       return true;
     } catch (error) {
       if (!signal.aborted) fail(error);
@@ -380,7 +464,7 @@ export function createClover(options: CloverOptions = {}): Clover {
         // A Collection that will not load leaves the Manifest as it was.
       }
     },
-    async goToManifest(id) {
+    async goToManifest(id, canvasId) {
       if (isShown(id)) return;
       const member = memberOf(id);
       // Entering a nested Collection is not a choice of Manifest to ask the host about.
@@ -388,7 +472,7 @@ export function createClover(options: CloverOptions = {}): Clover {
         options.onManifestChange?.(id);
         return;
       }
-      if (await show(member)) {
+      if (await show(member, canvasId)) {
         options.onManifestChange?.(store.get().manifest!.id);
       }
     },
@@ -437,6 +521,11 @@ export function createClover(options: CloverOptions = {}): Clover {
         (canvas) => canvas.id === entry.canvasId,
       );
       if (!shown && exists) navigate(entry.canvasId, null);
+      // On a Canvas of another Manifest it names (`partOf`): open that one there.
+      const elsewhere = exists
+        ? undefined
+        : manifestOfAnnotation(entry.annotation);
+      if (elsewhere) openAnnotation(elsewhere, entry.id);
     },
     async search(query) {
       searching?.abort();
@@ -491,7 +580,8 @@ export function createClover(options: CloverOptions = {}): Clover {
     async loadAnnotations(input) {
       annotating?.abort();
       if (!input) {
-        store.set({ addedSets: INITIAL.addedSets });
+        hostSets = [];
+        store.set({ addedSets: added() });
         return;
       }
       const controller = new AbortController();
@@ -501,7 +591,9 @@ export function createClover(options: CloverOptions = {}): Clover {
           request,
           signal: controller.signal,
         });
-        if (!controller.signal.aborted) store.set({ addedSets: sets });
+        if (controller.signal.aborted) return;
+        hostSets = sets;
+        store.set({ addedSets: added() });
       } catch {
         // Annotations that will not load leave the Manifest's own in place.
       }
@@ -532,6 +624,15 @@ export function createClover(options: CloverOptions = {}): Clover {
       if (scope === pageScope) return;
       pageScope = scope;
       embedVisiblePages();
+    },
+    holdAllAnnotationPages() {
+      allHeld++;
+      embedVisiblePages();
+      let held = true;
+      return () => {
+        if (held) allHeld--;
+        held = false;
+      };
     },
     dispose() {
       loading?.abort();

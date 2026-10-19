@@ -327,7 +327,10 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   transcript that 0253 provides (static); `page-transcript`, `content-search`'s newspaper
   with each page's own OCR as a plain-text `rendering` in German, a line of the page a
   line of the file (static, and live in `npm run dev` under
-  `pages/api/mocks/page-transcript/`, since its text files are its own). The package's tests use copies of these two, in
+  `pages/api/mocks/page-transcript/`, since its text files are its own);
+  `standalone-canvas`, the one Canvas of Northwestern's record of Borghi's map of the
+  British Isles, as 3.x's site publishes it on its own (`source.json`), its `partOf`
+  kept, with a Contributor metadata line from the record and Ireland tagged (static). The package's tests use copies of these two and of `paged`, in
   `packages/clover/src/fixtures/mocks/<name>/`.
 
 ## Environment & Tooling

@@ -56,9 +56,9 @@ export const progress4: Record<string, Progress> = {
   "0464-reuse-manifest": yes,
   // 2026-10-19: its plain-text transcript shows in the panel's Transcript.
   "0017-transcription-av": yes,
-  "0103-poetry-reading-annotations": partial(
-    "Annotations are listed beside the recording; choosing one does not seek to its time",
-  ),
+  // 2026-10-19: a cue while its stretch plays, under its page's label; the list and the
+  // Canvas's own menu go to its time.
+  "0103-poetry-reading-annotations": yes,
   "0046-rendering": yes,
   "0231-transcript-meta-recipe": no(
     "General considerations, with no resource to open",
@@ -66,15 +66,16 @@ export const progress4: Record<string, Progress> = {
   "0219-using-caption-file": yes,
   // 2026-10-19: its plain-text transcript shows in the panel's Transcript.
   "0253-using-transcript-file": yes,
+  // 2026-10-19: also in the Canvas's caption, on its own as in the Viewer.
   "0266-full-canvas-annotation": yes,
+  // 2026-10-19: its HTML (link and image) in the caption too, sanitised.
   "0019-html-in-annotations": yes,
   "0045-css": no("The annotation styled by CSS is neither shown nor styled"),
   "0021-tagging": yes,
   "0261-non-rectangular-commenting": yes,
   "0258-tagging-external-resource": yes,
-  "0022-linking-with-a-hotspot": partial(
-    "The hotspot is drawn and listed; pressing it does not follow its link",
-  ),
+  // 2026-10-19: the hotspot, and the list's "Open the link", show the close-up.
+  "0022-linking-with-a-hotspot": yes,
   "0326-annotating-image-layer": partial(
     "The choice of layers works; the annotation on one layer is not shown",
   ),
@@ -83,6 +84,7 @@ export const progress4: Record<string, Progress> = {
   "0269-embedded-or-referenced-annotations": yes,
   "0306-linking-annotations-to-manifests": yes,
   "0309-annotation-collection": yes,
+  // 2026-10-19: the image shows in the hotspot's popover too.
   "0377-image-in-annotation": yes,
   "0346-multilingual-annotation-body": yes,
   "0561-text-on-image": no("Text painted on the Canvas is not drawn"),

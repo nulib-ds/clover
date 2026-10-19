@@ -37,6 +37,7 @@ beforeEach(() => {
     host: document.createElement("div"),
     setImages: vi.fn().mockResolvedValue(undefined),
     setGestures: vi.fn(),
+    setDismiss: vi.fn(),
     dispose: vi.fn(),
     isOpen: false,
     backendKind: "webgl2",

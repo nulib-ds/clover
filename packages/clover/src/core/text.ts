@@ -33,6 +33,29 @@ export const hasMarkup = (value: string) =>
   /<[a-z!/]|&(#x?[0-9a-f]+|[a-z]+);/i.test(value);
 
 /**
+ * How a text is read, strictly by its `format`'s media type: `text/html` as IIIF's HTML,
+ * sanitised to what the Presentation API allows; `text/markdown` as Markdown; `text/plain`
+ * (and any other type) as written, a `<` included. With no format, as IIIF's property
+ * values come, by IIIF's rule: HTML only from a first `<` to a last `>`, whitespace
+ * aside; anything else is plain text.
+ */
+export function readAs(
+  format: string | undefined,
+  value = "",
+): "markdown" | "html" | "plain" {
+  const type = format?.split(";")[0].trim().toLowerCase();
+  if (type) {
+    return type === "text/html"
+      ? "html"
+      : type === "text/markdown"
+        ? "markdown"
+        : "plain";
+  }
+  const text = value.trim();
+  return text.startsWith("<") && text.endsWith(">") ? "html" : "plain";
+}
+
+/**
  * Markdown (`text/markdown`) as plain text, its syntax taken off: headings' `#`s, list
  * markers, emphasis, footnote marks, and links down to their text. What names an
  * annotation written in it (an `aria-label`, a hotspot's tip), where markup cannot go.

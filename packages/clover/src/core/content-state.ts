@@ -27,6 +27,12 @@ export interface ResolvedContentState {
   /** With a Collection to load, the member to open in it rather than its first. */
   manifestId?: string;
   target?: Target;
+  /**
+   * The content state annotation itself, where it carries a body (a note its sharer
+   * wrote, as Digital Collections' shared links do) and targets a Canvas: shown on the
+   * Canvas as an annotation, and picked.
+   */
+  annotation?: Json;
 }
 
 type Json = Record<string, any>;
@@ -132,16 +138,34 @@ export function resolveContentState(json: Json): ResolvedContentState | null {
     (part: any) => part?.id && (!part.type || part.type === "Manifest"),
   ) as Json | undefined;
   const collection = collectionOf(partOf);
+  // Its note, as an annotation on the Canvas: the body as given, on its own target.
+  const annotation =
+    json.type === "Annotation" && asArray(json.body).length
+      ? {
+          id: json.id ?? `${parsed.id}#content-state`,
+          type: "Annotation",
+          motivation: asArray(json.motivation),
+          body: json.body,
+          target,
+        }
+      : undefined;
+  const shared = annotation ? { annotation } : {};
   return collection && partOf
     ? {
         id: collection.id,
         type: "Collection",
         manifestId: partOf.id,
         target: canvasTarget,
+        ...shared,
       }
     : partOf
-      ? { id: partOf.id, type: "Manifest", target: canvasTarget }
-      : { id: parsed.id, type: type ?? "Canvas", target: canvasTarget };
+      ? { id: partOf.id, type: "Manifest", target: canvasTarget, ...shared }
+      : {
+          id: parsed.id,
+          type: type ?? "Canvas",
+          target: canvasTarget,
+          ...shared,
+        };
 }
 
 /** A content state as a link carries it: base64url of the URI-encoded JSON, unpadded. */

@@ -15,6 +15,7 @@ import type {
 import type { CanvasAnnotation } from "./Annotations";
 import type { IIIFCanvas, ViewingDirection } from "./layout";
 import type { ControlButtons } from "../../ui/controlButtons";
+import type { AnnotationLink } from "../../core/link";
 import type { CloverRequest } from "../../core/request";
 
 /** A painting body as `body` takes it: a web resource that may carry a `label`. */
@@ -143,6 +144,13 @@ export interface CloverCanvasProps {
    * `body` and `src`) out and the Canvas shows the Root's current view.
    */
   canvases?: IIIFCanvas[];
+  /**
+   * A Canvas to load and draw, on its own, outside any `Root`: a URL or an object, in any
+   * Presentation version (upgraded as it loads), fetched with `options.request`. A
+   * Manifest gives its first Canvas. Nothing is drawn until it arrives, or if it will
+   * not load. Takes precedence over the Root's view, as `canvases` does.
+   */
+  iiifContent?: string | Record<string, unknown>;
   /** How to lay out several Canvases: in reading order along this direction. */
   viewingDirection?: ViewingDirection;
   /** IIIF painting bodies (Image resources). Takes precedence over `src`. */
@@ -189,10 +197,27 @@ export interface CloverCanvasProps {
    * `null` clears the pick. Leave it out for the Canvas to keep its own.
    */
   selectedAnnotation?: string | null;
+  /**
+   * Glide to a picked annotation, as the camera eases to anywhere else, rather than
+   * framing it at once. Default `false`: an annotation picked on the Canvas, in a list
+   * beside it or by a link is framed in one cut, once its view is drawn. A reader who
+   * asks for reduced motion gets the cut either way.
+   */
+  animateAnnotations?: boolean;
   /** An annotation to highlight, as hovering it in a list beside the Canvas does. */
   highlightedAnnotation?: string | null;
-  /** A hotspot (or the annotations menu) picked an annotation. */
-  onAnnotationSelect?: (id: string) => void;
+  /**
+   * A hotspot (or the annotations menu) picked an annotation; `null` when the reader let
+   * it go, by a click or tap off it on the Canvas, or Escape.
+   */
+  onAnnotationSelect?: (id: string | null) => void;
+  /**
+   * A linking annotation's hotspot pressed (Cookbook 0022), leading to a Canvas or a
+   * Manifest: show it. Inside a `Root`, or loading its own (`iiifContent`), the Canvas
+   * shows it itself unless you take this; otherwise, without it, the hotspot is picked as
+   * any other. A link to a web page is a link, and opens the page in a new tab.
+   */
+  onAnnotationLink?: (link: AnnotationLink) => void;
   /** Called once, when the first images are laid out and fitted. */
   onReady?: (handle: CanvasHandle) => void;
   /**

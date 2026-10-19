@@ -27,19 +27,21 @@
  * readable size at any zoom. Their sizes are the scale's, so they follow the page's own
  * text size, and a reader's larger default text with it. A page styles them with
  * `--clover-player-caption-surface` (the box), `-text` and `-edge` (a `text-shadow`: an
- * outline or a drop shadow), and sets their size or font on `.clover-canvas-captions-cue`. Above the bar, whose scrim would otherwise wash them out, and
- * lifted clear of it while it shows, moving with it.
+ * outline or a drop shadow), and sets their size or font on `.clover-canvas-captions-cue`.
+ * Above the bar, whose scrim would otherwise wash them out, and lifted clear of it while
+ * it shows, moving with it.
  *
- * They sit at the foot of the stage above that line. Too many to fit there (a short
- * stage, large text), they start from its top and run on over the bar, rather than off
- * the top of the stage, where they could not be read (WCAG 1.4.10).
+ * They sit at the foot of the stage above that line, in from its sides and foot by the
+ * chrome's inset (`--clover-canvas-chrome-inset`), as the controls are. Too many to fit
+ * there (a short stage, large text), they start from its top and run on over the bar,
+ * rather than off the top of the stage, where they could not be read (WCAG 1.4.10).
  */
 .clover-canvas-captions {
   position: absolute;
   inset: 0 0
     calc(
-      var(--clover-space-m) + var(--clover-chrome-shown) *
-        (var(--clover-transport-room) - var(--clover-space-m))
+      var(--clover-canvas-chrome-inset) + var(--clover-chrome-shown) *
+        (var(--clover-transport-room) - var(--clover-canvas-chrome-inset))
     );
   z-index: 3;
   display: flex;
@@ -48,7 +50,7 @@
   justify-content: flex-end;
   justify-content: safe flex-end;
   gap: var(--clover-space-2xs);
-  padding: 0 var(--clover-space-m);
+  padding: 0 var(--clover-canvas-chrome-inset);
   pointer-events: none;
   transition: bottom var(--clover-chrome-timing);
 }
@@ -65,6 +67,17 @@
   text-align: center;
   text-wrap: balance;
   white-space: pre-line;
+}
+
+/*
+ * An annotation on the recording's time (Cookbook 0103), shown as a cue: its
+ * AnnotationPage's label on a line of its own over its words, as a speaker's name over a
+ * caption: `s`, as the smallest cue is, and set apart by its weight there.
+ */
+.clover-canvas-captions-cue-label {
+  display: block;
+  font-size: var(--clover-text-s);
+  font-weight: 500;
 }
 
 /*

@@ -222,7 +222,9 @@ It answers no query, so it is static only. The homepage's playground shows it as
 Its generator is `docs/mocks/paged/index.mjs`, and the record as fetched is
 `docs/mocks/paged/source.json`: to bring the record up to date, fetch
 `https://api.dc.library.northwestern.edu/api/v2/works/386ff30f-1975-4d9c-9905-ec76381d6992?as=iiif`
-into `source.json` again and run `npm run build:mocks`.
+into `source.json` again and run `npm run build:mocks`. The package's tests use a copy, in
+`packages/clover/src/fixtures/mocks/paged/`; copy the published file there again after a
+change.
 
 ## Transcripts: a film's captions and its transcript
 
@@ -286,6 +288,35 @@ answers (the published ones exist only once the site is deployed). Its generator
 The package's tests use a copy, in `packages/clover/src/fixtures/mocks/page-transcript/`;
 copy the published files there again after a change.
 
+## Standalone canvas: a map on its own
+
+A Canvas published on its own, not in a Manifest: the one Canvas of Northwestern
+University Libraries' record of Bartolomeo Borghi's map of the British Isles,
+_L'Isole Britanniche_, as Clover 3.x's site publishes it
+([`standalone-canvas.json`](https://samvera-labs.github.io/clover-iiif/canvas/standalone-canvas.json),
+fetched on 19 October 2026), with:
+
+- ids under the mock's own address for the Canvas, its painting page and annotation; its
+  `partOf` still names the record's Manifest, from which a viewer can open it;
+- `@context` for its `context` key, a slip in the published file;
+- a `metadata` line it does not carry, its Contributor, as the record's Manifest publishes
+  it: "Borghi, Bartolomeo, 1750-1821 (Cartographer)", "Costa, Agostino (Engraver)",
+  "Borghi, Bartolomeo, 1750-1821 (Contributor)";
+- an annotation page of its own, tagging Ireland where the map draws it
+  (`xywh=600,4160,2180,2800`, read from the image), by the name the map prints there,
+  "Irlanda", in Italian, as the map is;
+- everything else as published, its label, summary, thumbnail and placeholder included;
+- the image from Northwestern's IIIF Image API (level 2, CORS open).
+
+| Resource | Published (static)                                                                                              |
+| -------- | --------------------------------------------------------------------------------------------------------------- |
+| Canvas   | [`/mocks/standalone-canvas/canvas.json`](https://nulib-ds.github.io/clover/mocks/standalone-canvas/canvas.json) |
+
+It answers no query, so it is static only. The Canvas page shows it, loaded by a `Canvas`
+on its own. Its generator is `docs/mocks/standalone-canvas/index.mjs`, and the Canvas as
+fetched is `docs/mocks/standalone-canvas/source.json`: to bring it up to date, fetch the
+published file into `source.json` again and run `npm run build:mocks`.
+
 ### Rights
 
 The newspaper's scans and text, in the Content Search and Page transcript mocks, are the
@@ -301,5 +332,8 @@ Libraries' Transportation Library, with the attribution the record gives. The Wh
 catalog is in the public domain in the United States (No Copyright – United States); its
 record and images are Northwestern University Libraries', from the Transportation
 Library, and keep their attribution. _Lunchroom Manners_, its captions and its transcript
-are the IIIF Cookbook's fixtures, as recipes 0219 and 0253 publish them. The mocks'
+are the IIIF Cookbook's fixtures, as recipes 0219 and 0253 publish them. Borghi's map is
+in the public domain in the United States (No Copyright – United States); its record and
+image are Northwestern University Libraries', from the Charles Deering McCormick Library
+of Special Collections, and keep their attribution. The mocks'
 structure is Clover's, under its licence.

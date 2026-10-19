@@ -60,6 +60,7 @@ export function Tip({
   lang,
   shortcut,
   scrolls = false,
+  image,
 }: {
   label: string;
   /** The language of `label`, where it is not its control's. */
@@ -71,6 +72,11 @@ export function Tip({
    * might, hidden as it is from assistive technology: a press on it focuses its control.
    */
   scrolls?: boolean;
+  /**
+   * A picture above the words (a hotspot's image, Cookbook 0377): fetched only once it
+   * shows, and named by them, as the control is.
+   */
+  image?: string;
 }) {
   const { t } = useCloverTranslation();
   const ref = useRef<HTMLSpanElement>(null);
@@ -97,6 +103,19 @@ export function Tip({
         },
       })}
     >
+      {image && (
+        <img
+          className="clover-tip-image"
+          src={image}
+          alt=""
+          loading="lazy"
+          // Its size known only now: kept inside again, as a change of words is.
+          onLoad={() => {
+            const tip = ref.current;
+            if (tip && isShown(tip)) keepInside(tip);
+          }}
+        />
+      )}
       {text}
     </span>
   );

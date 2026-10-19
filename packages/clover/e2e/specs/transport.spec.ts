@@ -88,6 +88,16 @@ async function layout(page: Page) {
   await expect(bar).toHaveCount(1);
   return bar.evaluate((element) => {
     const figure = element.closest(".clover-canvas")!.getBoundingClientRect();
+    /*
+     * Where the layout puts each piece. Faded, each piece of the bar is tucked toward its
+     * edge on its own, and a paused Play is not (`Canvas.css`): that moves them, not the
+     * layout, so it is left out while measuring.
+     */
+    const pieces = [...element.children] as HTMLElement[];
+    pieces.forEach((piece) => {
+      piece.style.transition = "none";
+      piece.style.translate = "none";
+    });
     const box = (node: Element) => node.getBoundingClientRect();
     const controls = [
       ...element.querySelectorAll(
@@ -107,7 +117,7 @@ async function layout(page: Page) {
         '[data-button="chapters"], [data-button="captions"], [data-button="fullscreen"]',
       ),
     ];
-    return {
+    const measured = {
       // Every control and the time, wholly on the Canvas.
       inside: controls.every(
         (node) =>
@@ -131,6 +141,11 @@ async function layout(page: Page) {
       ).getPropertyValue("--clover-transport-bar-height"),
       height: box(element).height,
     };
+    pieces.forEach((piece) => {
+      piece.style.translate = "";
+      piece.style.transition = "";
+    });
+    return measured;
   });
 }
 
@@ -472,32 +487,36 @@ test.describe("transport", () => {
       return colour;
     });
     expect(await fill()).toBe(control);
+    // The mark is the glyph's shape: a filled card while on, an outlined one while off.
     const mark = () =>
       captions.evaluate((element) => {
-        const after = getComputedStyle(element, "::after");
-        return (
-          after.content !== "none" && parseFloat(after.borderBottomWidth) > 0
-        );
+        const card = element.querySelector(".clover-captions-icon rect")!;
+        return getComputedStyle(card).fill !== "none";
       });
     expect(await mark()).toBe(true);
+    // No bar under it: the glyph says it alone.
+    expect(
+      await captions.evaluate(
+        (element) => getComputedStyle(element, "::after").content,
+      ),
+    ).toBe("none");
 
-    // In forced colours the fill is the system's Highlight, and the mark is drawn in
-    // the button's own text colour over it.
+    // In forced colours the fill is the system's Highlight; the card is in the button's
+    // own text colour, and its letters, cut out of it, in the Highlight it sits on.
     await page.emulateMedia({ forcedColors: "active" });
     const forced = await captions.evaluate((element) => {
-      const button = getComputedStyle(element);
-      const after = getComputedStyle(element, "::after");
-      return {
-        mark: after.borderBottomColor,
-        text: button.color,
-        fill: button.backgroundColor,
-      };
+      const card = getComputedStyle(
+        element.querySelector(".clover-captions-icon rect")!,
+      );
+      const letters = getComputedStyle(
+        element.querySelector(".clover-captions-icon-letters")!,
+      );
+      return { card: card.fill, letters: letters.stroke };
     });
-    expect(forced.mark).toBe(forced.text);
-    expect(forced.mark).not.toBe(forced.fill);
+    expect(forced.letters).not.toBe(forced.card);
     await page.emulateMedia({ forcedColors: "none" });
 
-    // Off: the fill may still show under the pointer or focus, the mark does not.
+    // Off: the fill may still show under the pointer or focus; the card is outlined.
     await captions.focus();
     await page.keyboard.press("Enter");
     await page.getByRole("radio", { name: "Off" }).focus();

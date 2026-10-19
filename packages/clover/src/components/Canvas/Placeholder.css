@@ -89,8 +89,24 @@ button.clover-canvas-placeholder-toggle {
   box-shadow: 0 4px 16px #0003;
 }
 
+/* Its icon in proportion, as a control's: 1rem of its 1rem and `s` round it. */
+.clover-canvas[data-placeholder="true"][data-media]
+  > button.clover-canvas-placeholder-toggle
+  svg {
+  width: calc(var(--clover-space-2xl) / (1 + 2 * 0.618));
+  height: calc(var(--clover-space-2xl) / (1 + 2 * 0.618));
+}
+
 .clover-canvas-placeholder[data-media="true"] {
   cursor: pointer;
+}
+
+/* The whole still plays it: pointing anywhere on it lights the play button, as on it. */
+.clover-canvas[data-placeholder="true"][data-media]:has(
+    > .clover-canvas-placeholder[data-media="true"]:hover
+  )
+  > button.clover-canvas-placeholder-toggle {
+  background-color: var(--clover-color-accent, #0065c3);
 }
 
 /*

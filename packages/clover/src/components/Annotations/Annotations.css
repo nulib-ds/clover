@@ -43,6 +43,20 @@
   gap: var(--clover-space-s);
 }
 
+/*
+ * What an entry marks, beside what it says: its region, an `l` square (about its first
+ * line's height) at the line's start, cropped to fill, with the radius the header's
+ * thumbnail has. Muted behind it while it loads.
+ */
+.clover-annotations-thumbnail {
+  flex: none;
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+  object-fit: cover;
+  border-radius: var(--clover-radius, 3px);
+  background-color: var(--clover-color-secondary-muted, #e6e8eb);
+}
+
 .clover-annotations-body {
   flex: 1 1 auto;
   min-width: 0;
@@ -78,6 +92,33 @@
   color: var(--clover-color-accent, #0065c3);
 }
 
+/* Where a linking annotation leads (Cookbook 0022), under what it says. */
+:is(a, button).clover-annotations-link {
+  display: inline-block;
+  min-height: var(--clover-space-l);
+  margin: var(--clover-space-2xs) 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--clover-color-accent, #0065c3);
+  font: inherit;
+  font-size: var(--clover-text-s);
+  text-decoration: underline 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 20%, transparent);
+  text-underline-offset: var(--clover-space-3xs);
+  cursor: pointer;
+}
+
+:is(a, button).clover-annotations-link:hover {
+  text-decoration-color: currentColor;
+}
+
+:is(a, button).clover-annotations-link:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+  border-radius: var(--clover-radius, 3px);
+}
+
 .clover-annotations-image {
   display: block;
   max-width: 100%;
@@ -92,4 +133,52 @@
 .clover-annotations-entry:has(> button.clover-annotations-show:focus-visible) {
   outline: 2px solid var(--clover-color-accent, #0065c3);
   outline-offset: 1px;
+}
+
+/*
+ * Every annotation (`scope="all"`): within a layer, each Canvas's annotations under its
+ * label, `xs` over them, the Canvases `m` apart. A label is in the muted text at the
+ * smaller size; the Canvases in view (`aria-current`) are marked by the accent's 3px
+ * edge at their label's start, as a row is, and the text's colour, so by more than
+ * colour (WCAG 1.4.1).
+ */
+.clover-annotations-canvas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-xs);
+}
+
+.clover-annotations-canvas + .clover-annotations-canvas {
+  margin-top: var(--clover-space-m);
+}
+
+.clover-annotations-canvas-label {
+  margin: 0;
+  padding-inline-start: calc(var(--clover-space-s) + 3px);
+  color: var(--clover-color-primary-muted, #26292b);
+  font-size: var(--clover-text-s);
+  font-weight: 600;
+}
+
+.clover-annotations-canvas[aria-current="true"]
+  > .clover-annotations-canvas-label {
+  padding-inline-start: var(--clover-space-s);
+  border-inline-start: 3px solid var(--clover-color-accent, #0065c3);
+  color: var(--clover-color-primary, #1a1d1e);
+}
+
+@media (forced-colors: active) {
+  .clover-annotations-canvas[aria-current="true"]
+    > .clover-annotations-canvas-label {
+    border-inline-start-color: Highlight;
+  }
+}
+
+/* Where an entry on a recording's time starts (Cookbook 0103), where an image's has its region. */
+.clover-annotations-time {
+  flex: none;
+  min-width: var(--clover-space-l);
+  color: var(--clover-color-primary-muted, #26292b);
+  font-size: var(--clover-text-s);
+  font-variant-numeric: tabular-nums;
 }

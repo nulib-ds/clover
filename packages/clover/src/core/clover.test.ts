@@ -84,6 +84,72 @@ describe("createClover: loading", () => {
     expect(canvasId).toBe("https://example.org/p2/c1");
   });
 
+  /*
+   * A content state may carry a note its sharer wrote, as Digital Collections' shared
+   * links do: shown on its Canvas as an annotation of its own, and picked on arrival.
+   */
+  it("shows a content state's note on its Canvas, picked, beside the host's annotations", async () => {
+    const fetch = mockFetch({ [BOOK]: bookJson });
+    const clover = createClover({ request: { fetch } });
+    const state = "https://example.org/state/1";
+    await clover.load(
+      encode({
+        id: state,
+        type: "Annotation",
+        motivation: ["contentState"],
+        target: {
+          type: "SpecificResource",
+          source: {
+            id: canvasIds[1],
+            type: "Canvas",
+            partOf: [{ id: BOOK, type: "Manifest" }],
+          },
+          selector: { type: "FragmentSelector", value: "xywh=10,20,30,40" },
+        },
+        body: [
+          { type: "TextualBody", value: "hospital", format: "text/plain" },
+        ],
+      }),
+    );
+    const { canvasId, annotationId, addedSets, target } = clover.store.get();
+    expect(canvasId).toBe(canvasIds[1]);
+    expect(annotationId).toBe(state);
+    // Its Canvas opens; the pick frames the note, in one move, once the spread is drawn.
+    expect(target?.canvasId).toBe(canvasIds[1]);
+    expect(target?.region).toBeUndefined();
+    expect(addedSets).toHaveLength(1);
+    expect(addedSets[0].entries).toMatchObject([
+      {
+        id: state,
+        canvasId: canvasIds[1],
+        target: { rect: { x: 10, y: 20, w: 30, h: 40 } },
+        bodies: [expect.objectContaining({ value: "hospital" })],
+      },
+    ]);
+    // The host's own annotations join it, rather than take its place.
+    await clover.loadAnnotations({
+      id: "https://example.org/host/page",
+      type: "AnnotationPage",
+      items: [
+        {
+          id: "https://example.org/host/1",
+          type: "Annotation",
+          motivation: "commenting",
+          body: { type: "TextualBody", value: "Host" },
+          target: canvasIds[0],
+        },
+      ],
+    });
+    expect(clover.store.get().addedSets.map((set) => set.id)).toEqual([
+      "https://example.org/host/page",
+      `${state}#content-state`,
+    ]);
+    await clover.loadAnnotations(null);
+    expect(clover.store.get().addedSets.map((set) => set.id)).toEqual([
+      `${state}#content-state`,
+    ]);
+  });
+
   it("follows an encoded content state to its Manifest, Canvas and region", async () => {
     const fetch = mockFetch({ [BOOK]: bookJson });
     const clover = createClover({ request: { fetch } });
@@ -134,6 +200,33 @@ describe("createClover: loading", () => {
     });
     const { manifest, canvasId } = clover.store.get();
     expect(manifest?.items).toHaveLength(1);
+    expect(canvasId).toBe(canvasIds[1]);
+  });
+
+  /*
+   * A Canvas given itself is what is shown, not its Manifest: what it says of itself is
+   * kept, with its `partOf`, from which the full Manifest opens in its place.
+   */
+  it("shows a Canvas given itself on its own, and opens its Manifest at it", async () => {
+    const fetch = mockFetch({ [BOOK]: bookJson });
+    const clover = createClover({ request: { fetch } });
+    await clover.load({
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      ...bookJson.items[1],
+      summary: { en: ["The second page."] },
+      metadata: [{ label: { en: ["Side"] }, value: { en: ["Verso"] } }],
+      partOf: [{ id: BOOK, type: "Manifest" }],
+    });
+    const lone = clover.store.get().manifest as Record<string, any>;
+    expect(lone.id).toBe(canvasIds[1]);
+    expect(lone.summary).toEqual({ en: ["The second page."] });
+    expect(lone.metadata).toHaveLength(1);
+    expect(lone.partOf).toEqual([{ id: BOOK, type: "Manifest" }]);
+    // Nothing of the Manifest until it is asked for.
+    expect(fetch).not.toHaveBeenCalled();
+    await clover.goToManifest(BOOK, canvasIds[1]);
+    const { manifest, canvasId } = clover.store.get();
+    expect(manifest?.id).toBe(BOOK);
     expect(canvasId).toBe(canvasIds[1]);
   });
 
@@ -451,5 +544,117 @@ describe("createClover: Collections", () => {
     await clover.syncManifest(LETTER);
     expect(clover.store.get().manifest?.id).toBe(LETTER);
     expect(onManifestChange).toHaveBeenCalledTimes(1);
+  });
+});
+
+/*
+ * Annotations as the content (an AnnotationPage, or an AnnotationCollection of pages),
+ * made apart from any Manifest, as 3.x took them: each names its Canvas's Manifest
+ * (`partOf`), and Clover opens the first's, there, that annotation picked.
+ */
+describe("createClover: annotations as the content", () => {
+  const OTHER = "https://example.org/other";
+  const other = {
+    "@context": "http://iiif.io/api/presentation/3/context.json",
+    id: OTHER,
+    type: "Manifest",
+    label: { none: ["Other"] },
+    items: [
+      {
+        id: `${OTHER}/canvas/1`,
+        type: "Canvas",
+        width: 100,
+        height: 100,
+        items: [],
+      },
+    ],
+  };
+  const tag = (id: string, canvas: string, manifest: string) => ({
+    id,
+    type: "Annotation",
+    motivation: "tagging",
+    body: { type: "TextualBody", value: id, format: "text/plain" },
+    target: {
+      type: "SpecificResource",
+      source: {
+        id: canvas,
+        type: "Canvas",
+        partOf: [{ id: manifest, type: "Manifest" }],
+      },
+      selector: { type: "FragmentSelector", value: "xywh=1,2,3,4" },
+    },
+  });
+  const PAGE = "https://example.org/annotations/page";
+  const page = {
+    "@context": "http://iiif.io/api/presentation/3/context.json",
+    id: PAGE,
+    type: "AnnotationPage",
+    label: { en: ["Tags"] },
+    items: [
+      tag("https://example.org/tag/1", canvasIds[1], BOOK),
+      tag("https://example.org/tag/2", `${OTHER}/canvas/1`, OTHER),
+    ],
+  };
+
+  it("opens the Manifest the first annotation names, at its Canvas, picked", async () => {
+    const fetch = mockFetch({ [PAGE]: page, [BOOK]: bookJson, [OTHER]: other });
+    const clover = createClover({ request: { fetch } });
+    await clover.load(PAGE);
+    const { manifest, canvasId, annotationId, addedSets } = clover.store.get();
+    expect(manifest?.id).toBe(BOOK);
+    expect(canvasId).toBe(canvasIds[1]);
+    expect(annotationId).toBe("https://example.org/tag/1");
+    expect(addedSets.flatMap((set) => set.entries).map((e) => e.id)).toEqual([
+      "https://example.org/tag/1",
+      "https://example.org/tag/2",
+    ]);
+    // Only what it needs: the page and the one Manifest, not the other.
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual([PAGE, BOOK]);
+  });
+
+  it("reads an AnnotationCollection's pages, from first through next", async () => {
+    const COLLECTION = "https://example.org/annotations/collection";
+    const second = `${PAGE}/2`;
+    const fetch = mockFetch({
+      [COLLECTION]: {
+        "@context": "http://iiif.io/api/presentation/3/context.json",
+        id: COLLECTION,
+        type: "AnnotationCollection",
+        first: PAGE,
+      },
+      [PAGE]: { ...page, items: [page.items[0]], next: second },
+      [second]: { ...page, id: second, items: [page.items[1]] },
+      [BOOK]: bookJson,
+    });
+    const clover = createClover({ request: { fetch } });
+    await clover.load(COLLECTION);
+    const { manifest, addedSets } = clover.store.get();
+    expect(manifest?.id).toBe(BOOK);
+    expect(addedSets.map((set) => set.id)).toEqual([PAGE, second]);
+  });
+
+  it("opens another Manifest they name, there, when one on it is picked, keeping them", async () => {
+    const fetch = mockFetch({ [PAGE]: page, [BOOK]: bookJson, [OTHER]: other });
+    const onManifestChange = vi.fn();
+    const clover = createClover({ request: { fetch }, onManifestChange });
+    // As an object, not only by URL.
+    await clover.load(page);
+    clover.selectAnnotation("https://example.org/tag/2");
+    await vi.waitFor(() => expect(clover.store.get().manifest?.id).toBe(OTHER));
+    const { canvasId, annotationId, addedSets } = clover.store.get();
+    expect(canvasId).toBe(`${OTHER}/canvas/1`);
+    expect(annotationId).toBe("https://example.org/tag/2");
+    expect(addedSets.flatMap((set) => set.entries)).toHaveLength(2);
+    expect(onManifestChange).toHaveBeenLastCalledWith(OTHER);
+  });
+
+  it("says so when they name no Manifest", async () => {
+    const lone = {
+      ...page,
+      items: [{ ...page.items[0], target: canvasIds[0] }],
+    };
+    const clover = createClover({ request: { fetch: mockFetch({}) } });
+    await clover.load(lone);
+    expect(clover.store.get().status).toBe("error");
   });
 });

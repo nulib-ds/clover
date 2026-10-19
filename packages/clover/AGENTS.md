@@ -443,6 +443,131 @@ every rule below.
   the `highlight` channel. Selection is controlled on the Canvas (`selectedAnnotation`),
   which frames a new id once its hotspot is placed. Presentation 4 groups several bodies
   in `Independents`/`Composite`/`List`; read bodies through `bodiesOf()`.
+  - The `InformationPanel` lists every annotation (`Annotations scope="all"`, Mat
+    2026-10-19): `AnnotationLayers`, by layer (`layersOf`: sets sharing a localized label
+    are one layer, the unlabelled ones another) and then by Canvas, in sequence order;
+    a Manifest of one Canvas gets no Canvas labels or `aria-current` (`grouped`), which
+    would only repeat the item and push a note's headings a level deeper.
+    The Canvases in view are `aria-current`; on a move the list scrolls their group to
+    its start, and a picked entry to nearest, within its own scroller (`scrollerOf`,
+    never the page), skipped while the pointer is over it or focus in it.
+  - Each entry shows its region (`regionSource` in `core/region.ts`, Mat 2026-10-19, as
+    3.x drew one). It is its own module, apart from `core/thumbnail.ts`, which every page
+    loads for its strip: in there, its import of `parseAnnotationTarget` put about
+    0.23 kB on every template's first load. The painted image's level 1/2 service cuts it and sizes it to
+    `!52,52` (twice the `l` square it is shown at). Never a level 0 or service-less
+    image, which would mean fetching a large one: those get none. Intersect the region
+    with the painted image's bounds; never clamp its corner.
+  - It needs every Canvas's pages, so it calls `clover.holdAllAnnotationPages()`, which
+    returns its release. Do not call `setAnnotationPages("all")` from a part: the Root's
+    own effect resets the scope after a child's effect runs.
+  - The Canvas's annotations menu, its hotspots and the panel share `annotationId` and
+    `hiddenSets` through the store, as the captions' language goes through
+    `clover.captions`: nothing of the choice is local to any of them.
+- **Hotspot look.** Active (picked, hovered, focused), a rectangle keeps its edges and
+  covers nothing it marks; the picture round it dims (`0 0 38vw 38vw #0002`, lighter than
+  3.x's `#0003`). The 18% accent tint inside it, and inside a shape, was dropped at
+  Mat's request, 2026-10-19: it washed out what the annotation points to. Hotspots beneath the
+  active one (`depthOf` below its own) that meet it carry `--clover-annotation-mask`
+  (`maskUnder`, Mat 2026-10-19): an SVG drawn in their own world box (a tenth spare each
+  side, for a shape's stroke past it) less the active one's rectangle or shape, so it is
+  set once per change of active, never per frame, and holds through zoom and rotation
+  (the overlay layer sizes each box to its world rect and rotates it about its centre).
+  Those over the active one are never masked: a masked hotspot on top would be an unseen
+  target. A point masks nothing; its marker is opaque.
+- **Letting go of a pick** (Mat, 2026-10-19). A tap or click on the stage off every
+  hotspot first asks the renderer's `dismiss()` (`setDismiss`, set by `CanvasView` to
+  `releaseAnnotation`); if there was a pick it is let go and the tap does nothing more
+  (no zoom, no `tap` event). Escape in the figure does the same (WCAG 2.1.1), after the
+  caption and any open menu, and is `preventDefault`ed, so hosts' Escape handlers must
+  check `defaultPrevented` (the docs' demo panel does). `onAnnotationSelect(null)` reports
+  it. The picked hotspot's Tip shows while it is `data-active` and `aria-current`
+  (`ui/Tip.css`), so hovering or focusing another takes the name over and it never
+  covers a hotspot in focus (2.4.11). Renderer stubs in tests list `setDismiss`.
+- **Picks from outside open the Canvas** (Mat, 2026-10-19). `CanvasView` holds a new
+  `selectedAnnotation` as pending until it is among its `annotations` (so after a move to
+  its Canvas), then opens the placeholder: images through `imagesOpen`, a recording
+  through `mediaOpenedFor` with `quietlyOpened` keeping it from autoplaying. A pick that
+  persists across moves does not reopen a placeholder; only a new pick does.
+- **Framing a pick** (Mat, 2026-10-19). `CanvasView` places hotspots, and frames a pick,
+  only once the Canvases it is handed are the drawn ones (`drawn`: `drawnScene.key ===
+canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned scene's
+  layout, so before this a move's new hotspots lay over the last view and the camera
+  glided in the wrong scene, then jumped at the swap. Framing is a cut
+  (`fitAnnotation(world, true)`) unless `animateAnnotations`. A content state with a
+  note drops its region from the target, so the pick does the one framing.
+- **The upgrader and fragments.** `@iiif/parser`'s upgrader turns an object target with a
+  fragment in its id into a path (`…/canvas/1/xywh=…`); `toPresentation4` runs
+  `keepFragments` (lazy, with the upgrader) first, rewriting it as a SpecificResource.
+  Never upgrade a page that came out of an upgraded resource again: nested pages carry
+  no `@context`, so `upgradePage` would take them for Presentation 3 (`LoadedCanvas`
+  reads embedded pages with `readPage` for that reason).
+- **The `i`, the annotations control and a paused Play never fade** (Mat, 2026-10-19),
+  as the panel toggle and a placeholder's toggle do (`[data-button="information"]`,
+  `[data-button="annotations"]`, and a transport bar's `[data-button="play"]`, in
+  `Canvas.css`), over a picture or a recording; playing, its Pause fades with the rest
+  (Mat: only while paused). For Play, the transport fades by its parts (its
+  `::before` scrim, which carries every scrim, sound's too; its seek area; each of its
+  bar's children), never its box, so the one child can stay. A large paused play button
+  in the middle, shown while the chrome was away, was tried and removed (Mat: it came
+  and went). Captions tell their state
+  by the glyph, outlined or filled (`CaptionsIcon` `on`), not the transport's bar.
+- **What an annotation leads to, carries and covers** (Mat, 2026-10-19; Cookbook 0022,
+  0377, 0266, 0019, 0103). Each in the lazy chunks, not a Canvas's first:
+  - A `linking` annotation's target is read by `readLink` (`core/link.ts`, apart from
+    `core/annotations.ts`, which every Canvas loads): a Canvas (with its `partOf`
+    Manifest), a Manifest, or an `http(s)` page, nothing else. Its hotspot follows it
+    (`onFollow`, given only when `onAnnotationLink` is): a web page is an `<a>`, a Canvas
+    or Manifest a button that first moves focus to the viewport, since the hotspot goes
+    (WCAG 2.4.3). `Connected` and the list's "Open the link" use `showLink(clover, link)`;
+    `LoadedCanvas` follows within what it loaded, keeping its `CanvasView` (with
+    `manifestId="loading"`) while another Manifest loads, so focus stays.
+  - An image body shows in the hotspot's `Tip` (`image`), lazy, re-placed on load.
+  - A whole-Canvas annotation (no region, point, shape or time) goes to the caption
+    (`wholeCanvasComments`, in the hotspot chunk, so the `i` it brings shows once that
+    loads), rendered in `CaptionDetails` by `EntryBodies` (shared with the list, in
+    `components/Annotations/EntryBodies.tsx`) over `readBodies` (`core/annotation-bodies.ts`,
+    light, so the caption's chunk does not pull in the selectors). `readLink` is read
+    where a link is used (the hotspots, the list's `FollowLink`), never in `readPage`,
+    and `showLink` is apart in `core/show-link.ts`: either eager put 0.25 kB on the
+    Viewer's first load.
+  - A `#t=` annotation is a `TimedAnnotation` (`timeAnnotations`, in the hotspot chunk):
+    `MediaStage` shows it among the caption cues while its stretch plays (a moment, three
+    seconds), the menu lists it by its start, and a pick seeks (`sought`), never plays.
+    Each cue carries its own `lang`, not the captions box. `CanvasAnnotation.pageLabel`
+    (its AnnotationPage's) labels its cue and groups the menu.
+- **A Canvas as the content** (Mat, 2026-10-19). Shown on its own, never its `partOf`
+  Manifest up front: `loneCanvas` (in `core/load.ts`) wraps it as a Manifest of one with
+  the Canvas's id (`isLoneCanvas` tells it apart: its id is its one Canvas's) and the
+  Canvas's descriptive properties (`DESCRIPTIVE`), `partOf` among them. About's "Part of"
+  opens a `partOf` Manifest with `goToManifest(id, canvasId)`, then moves focus to its
+  section's heading button (or About, `tabIndex={-1}`), since the button is gone
+  (WCAG 2.4.3). A standalone `Canvas` takes `iiifContent` too: `LoadedCanvas.tsx`, lazy
+  from `Canvas/index.tsx`, reads it with `loadContent`, as a `Root` does (a Manifest
+  gives its first Canvas, a Collection its first Manifest's, a content state the Canvas
+  it names), showing the loading bar until then and an alert (`clover-status`) with the
+  reason if it fails or has no Canvas; never an empty box.
+- **Annotations as the content** (Mat, 2026-10-19; 3.x did it). `loadContent` hands an
+  AnnotationPage/AnnotationCollection (`ANNOTATIONS`) to `core/annotations-content.ts`,
+  imported on demand (in `bundle.test.mjs` `LAZY_MODULES`), which reads it with
+  `loadAnnotationSets` (a page's `next` followed too) and opens the Manifest of the first
+  annotation whose target names one (`manifestOfAnnotation`: the Canvas's `partOf`), or
+  the host's `manifestId` among them. `load` sets `stateSets` from the content (these, or
+  a content state's note) once per content; `arrive` never resets them, so moves between
+  the Manifests they name keep them. `selectAnnotation` on a Canvas not in the Manifest
+  leaves the pick `pending` and opens its `partOf` Manifest through `show` (which picks
+  it, at its Canvas), or, when the host holds the Manifest, calls `onManifestChange` and
+  `show` picks it when the host's change arrives.
+  The list's `useElsewhere` fetches the other Manifests (one promise per Root and id)
+  only when the list shows, for names and thumbnails; `inOrder` keeps the annotations'
+  order whenever any group is elsewhere.
+- **A content state's note.** `resolveContentState` keeps an Annotation's `body` as
+  `annotation` (its own id and target); `loadContent` returns it, and `arrive` makes it a
+  set of its own (`${id}#content-state`, `source: "added"`) and picks it, when its
+  Canvas is the one opened. The store's `addedSets` is `hostSets` then `stateSets`
+  (closures in `createClover`), so `loadAnnotations` never drops the note. Its body is
+  read by its declared `format`: Digital Collections' links write `<em>` in a
+  `text/plain` body, which shows as written.
 - **Sanitiser.** `core/sanitize.ts` runs on its own DOMPurify instance
   (`DOMPurify(window)`, made on first use). `dompurify` is external, so a host that
   imports it gets the same default instance. Never call `addHook` or `setConfig` on the
@@ -450,6 +575,15 @@ every rule below.
   adds only what `markdownToHtml` writes: `ul`, `ol` and `li`; `role="heading"` and
   `aria-level` 1–6 on `p`; and a numeric `start` on `ol`. The hook removes these
   anywhere else. IIIF HTML never gets them.
+- **Text formats, strictly** (Mat, 2026-10-19). `readAs(format, value)` in
+  `core/text.ts` decides: the media type before any `;`, case aside — `text/html` is
+  HTML, `text/markdown` Markdown, anything else plain, shown as written. No format: IIIF's
+  property-value rule, HTML only from a first `<` to a last `>` (whitespace trimmed).
+  `Markup`, the Annotations list's names and the hotspots' names all use it; never test
+  a format with a loose regex (`/html/` matched `application/xhtml+xml`). Plain text in
+  `Markup` keeps its line breaks as `<br>` and never loads the sanitiser. The Markdown
+  converter (`core/markdown.ts`, footnotes included, 1.7 kB gzip, loaded with the
+  sanitiser) is Clover's own; no GFM library (Mat: package size).
 - **Markdown.** `core/markdown.ts` escapes `& < > "` before it writes any markup, so no
   source text can close an attribute. Headings are `p[role=heading][aria-level]`, never
   `h1`–`h6`. Levels come from a stack (each heading goes one level under the nearest
@@ -618,6 +752,15 @@ every rule below.
 - Painters sit behind one `Backend` interface. WebGL2 is primary and Canvas2D is a
   full-fidelity fallback. `DomLayers` positions real `<img>`/`<video>` elements with the same
   camera transform.
+- **WebGL contexts are rationed** (Mat, 2026-10-19: Chrome's face-in-a-box showed on the
+  Canvas page). Browsers cap a page's contexts (about 16, 8 on Android) and kill the
+  oldest past it, and Chrome paints a killed one with that picture. So a renderer takes a
+  context only while its host is in the window (`inWindow` at construction, then its
+  `IntersectionObserver`), never on creation alone; `backends/contexts.ts` holds Clover's
+  to `MAX_CONTEXTS` (6) page-wide, freeing the one out of view longest, else handing
+  the newcomer Canvas2D; and on `webglcontextlost` the renderer drops the canvas at once
+  and draws on with Canvas2D (`acquireBackend(false)`), trying WebGL again on its next
+  return to view. Never leave a lost context's canvas in the page.
 - Cross-origin pixels without CORS cannot be uploaded to WebGL. They are shown as a DOM
   layer, decided **per item, never per instance**.
 - World units are the first image's own pixels (its declared IIIF `width`/`height` when
@@ -725,6 +868,11 @@ every rule below.
   - With media, `clickToZoom` is off, and a mouse click or a hovering pen's (renderer
     `"tap"`) plays and pauses. A finger's tap, or a pen's that has not hovered, only
     toggles the chrome.
+  - The transport and the caption cues sit `--clover-canvas-chrome-inset` in from the
+    stage's sides and foot, as the cluster does (Mat, 2026-10-19), never a step of their
+    own; below 28rem of stage width the bar's controls go `xs` apart so 320px keeps two
+    rows. The sliders have no edge: the scrim, at least 60% black up to the seek bar,
+    keeps them at 3:1 (WCAG 1.4.11), so never thin it there.
   - The bar wraps instead of clipping (WCAG 1.4.10). `.clover-canvas-media` is a size
     container (`container-type: size`; it is `inset: 0`, so containing its height
     changes nothing), and size rules for the transport read the stage, never the window:
@@ -751,8 +899,9 @@ every rule below.
     on the gestures, `fit: true` on every `setImages`, and the world is the video's rect
     at its intrinsic aspect (`containAspect`). It has no top cluster, scrim or
     navigator; full screen is the last button in the transport. The cluster returns
-    only to offer a `Choice` or the `i`, or to hold a host's own controls (the panel
-    toggle), which must never disappear with the image controls.
+    only to offer a `Choice`, the `i` or its annotations (those on its time), or to hold
+    a host's own controls (the panel toggle), which must never disappear with the image
+    controls.
   - Navigability is one value in `CanvasView`:
     `navigable = !mediaOnly && options.gestures.navigable !== false`. It gates
     `CAMERA_KEYS` and the role description on the viewport, `data-navigable` on the
@@ -767,13 +916,14 @@ every rule below.
     2.5.8). Anything placed in the figure to lie beneath the viewport (the iPhone
     `texture` video) goes first, at `z-index: -1`.
   - The transport fades with the rest of the chrome, through the single reveal rule
-    in `Canvas.css`. Do not add "stay visible while paused" or similar overrides. The
+    in `Canvas.css`, all but its Play while paused, which never fades (above). Do not add
+    "stay visible while paused" or other overrides beyond that one. The
     reveal is `data-chrome` (from `useChromeVisibility`: a mouse's activity, lingering
     `LEAVE_DELAY` after leave or blur; a finger's tap on the picture; focus no press
     brought), `:has(:focus-visible)`, an open menu, or a control, the navigator or the
-    transport under a resting pointer (`:hover`), so a control never fades, Tip and all,
-    while the pointer is on it (WCAG 1.4.13). It is not `:focus-within`: a click focuses
-    the viewport and would pin a video's bar.
+    transport under a resting pointer (`:hover`, Play's aside), so a control never fades,
+    Tip and all, while the pointer is on it (WCAG 1.4.13). It is not `:focus-within`: a
+    click focuses the viewport and would pin a video's bar.
 - The wrapper is a `<figure>`. A shown Canvas with a `summary` or `metadata` (as in
   Cookbook recipe 0029) gets an `i` control (`controls.information`, label "About"). It
   opens `Caption.tsx`, the figure's `<figcaption>`, which must stay its last child.
@@ -796,8 +946,11 @@ every rule below.
   (`placeholderStill()` in `layout.ts`) fitted and centred with container units, and a
   toggle in the top right (the Viewer's magnifier, then a ×).
   - Until it is opened, it holds back everything else: `setImages`, pan and zoom,
-    annotations, `Choice` and the media stage. The `i` control is the one exception and
-    stays visible beside the toggle.
+    hotspots, `Choice` and the media stage. Two controls stay beside the toggle: the `i`
+    control, and the annotations menu (Mat, 2026-10-19), which lists the annotations as
+    the planned layout places them (`listedAnnotations`, nothing drawn). A pick from it
+    is `held` (not framed), opens the placeholder through the pending pick, and is framed
+    by the same effect as a host's pick once the view is drawn.
   - Each new set of `canvases` starts from its placeholder again (`openedFor` keyed by
     `canvasKey`). Reopening re-frames the Canvas (`fit`), as the Viewer remounts OSD.
   - The still lingers, inert, until the renderer's `open` event. `open` fires once the

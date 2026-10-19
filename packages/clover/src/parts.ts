@@ -155,13 +155,14 @@ export type { Cue } from "./core/vtt";
 export { chaptersOf, currentContents, tableOfContents } from "./core/ranges";
 export type { Chapter, ContentsNode } from "./core/ranges";
 export { localize } from "./core/value";
-export { toPlainText } from "./core/text";
+export { readAs, toPlainText } from "./core/text";
 export type { ItemModel, ItemPart } from "./core/items";
 export {
   resolveThumbnail,
   stillSource,
   thumbnailSource,
 } from "./core/thumbnail";
+export { regionSource } from "./core/region";
 export type { LocalizedValue } from "./core/value";
 export { groupViews, resolveBehavior, resolveDirection } from "./core/sequence";
 export type { SequenceBehavior, View, ViewingDirection } from "./core/sequence";

@@ -41,6 +41,11 @@ import {
   pageText,
 } from "../docs/mocks/page-transcript/index.mjs";
 
+import {
+  PUBLIC_BASE as STANDALONE_CANVAS_BASE,
+  canvas as standaloneCanvas,
+} from "../docs/mocks/standalone-canvas/index.mjs";
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "public/mocks/content-search");
 
@@ -142,3 +147,13 @@ for (const n of [1, 2]) {
   writeFileSync(join(pageTranscript, `text/p${n}.txt`), pageText(n));
 }
 console.log("page-transcript: manifest.json, text/p1.txt, text/p2.txt");
+
+// A Canvas on its own, the map of the British Isles: one static Canvas.
+const standalone = join(root, "public/mocks/standalone-canvas");
+rmSync(standalone, { recursive: true, force: true });
+mkdirSync(standalone, { recursive: true });
+writeFileSync(
+  join(standalone, "canvas.json"),
+  `${JSON.stringify(standaloneCanvas(STANDALONE_CANVAS_BASE), null, 2)}\n`,
+);
+console.log("standalone-canvas: canvas.json");

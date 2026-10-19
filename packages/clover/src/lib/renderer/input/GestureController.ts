@@ -16,6 +16,11 @@ export interface GestureTarget {
   setInteracting(interacting: boolean): void;
   /** A mouse click that is not a zoom (click-to-zoom is off): video toggles playback. */
   tap?(at: Point): void;
+  /**
+   * A tap or click off every control and hotspot: whether it put something away (a
+   * picked annotation). If it did, the tap does nothing more: no zoom, no `tap`.
+   */
+  dismiss?(): boolean;
 }
 
 export interface GestureOptions {
@@ -214,6 +219,11 @@ export class GestureController {
       event.timeStamp - down.t < TAP_MS;
 
     if (isTap) {
+      // Off a picked annotation, the first tap lets it go and does nothing else.
+      if (this.target.dismiss?.()) {
+        this.lastTap = null;
+        return;
+      }
       if (isDirect(event.pointerType, this.penHovers)) {
         /*
          * A finger, or a pen that does not hover, follows OpenSeadragon's touch defaults:

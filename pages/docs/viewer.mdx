@@ -77,6 +77,7 @@ import { Default } from "@nulib/clover/templates";
 | `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.             |
 | `items`            | `"carousel"`                | The thumbnails: `"carousel"`, `"list"`, `"grid"`, or `false`.   |
 | `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.      |
+| `fill`             | `false`                     | Fill the box it sits in; the stage takes what the rest leave.   |
 
 The Viewer's headings start at `h2`: its title, then the panel's sections under it. Where
 it sits under a heading of the page's own, give it the level below that heading, so a
@@ -110,10 +111,20 @@ The Viewer takes the [`Root` props](/docs/composing#root) and hands them to its 
   shows it, and a nested Collection is
   entered. Paged Collections are followed through `next`. `manifestId` with
   `onManifestChange` makes the Manifest controlled, as `canvasId` does the Canvas.
-- **A Canvas.** Its `partOf` Manifest is loaded and opened at the Canvas. A Canvas with no
-  `partOf` is shown on its own.
+- **A Canvas.** Shown on its own, About saying what the Canvas says of itself: its
+  label, summary and metadata. Where it is `partOf` a Manifest, About names it under
+  "Part of", with a button that opens the full Manifest in its place, at this Canvas.
 - **A content state**, as JSON or base64url. It opens at the Canvas it points to,
-  framing its region (`xywh=`) or seeking to its time (`t=`), past any placeholder.
+  framing its region (`xywh=`) or seeking to its time (`t=`), past any placeholder. One
+  that carries a `body` (a note its sharer wrote, as Northwestern's Digital Collections
+  shared links do) shows that note on the Canvas as an annotation, picked, so it names
+  itself there and in the Annotations list.
+- **Annotations**: an AnnotationPage, or an AnnotationCollection (its pages followed from
+  `first` through `next`), made apart from any Manifest, as a page of tags across a
+  collection is. Each annotation names its Canvas's Manifest (`partOf`), and the Viewer
+  opens the first one's Manifest at that Canvas, the annotation picked. Every annotation
+  is listed in the panel, those on other Manifests named by their Manifest's label (each
+  fetched once, when the list first shows), and pressing one opens its Manifest there.
 - **An object** rather than a URL, from any of these. An object is identified by its
   `id`, so a new object with the same `id` does not reload.
 
@@ -242,4 +253,15 @@ credentials. So does an image served without CORS, which Clover shows as an `<im
 ## Styles
 
 Import `@nulib/clover/styles.css` once, and size the stage with
-`--clover-content-height`. The rest is in [Composing Layouts](/docs/composing#styles).
+`--clover-content-height`. Or give the Viewer a box of a set height and `fill`: it is as
+tall as the box, and the stage takes what the title and the thumbnails leave, never less
+than 16rem (a shorter box scrolls). This page's demo fills the window under its header
+so:
+
+```jsx
+<div style={{ height: "calc(100dvh - 4rem)" }}>
+  <Viewer iiifContent={url} fill />
+</div>
+```
+
+The rest is in [Composing Layouts](/docs/composing#styles).

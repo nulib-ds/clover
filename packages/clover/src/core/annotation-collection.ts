@@ -34,23 +34,37 @@ async function resolve(
   return json;
 }
 
+/** The pages: a collection's from `first`, or a page and those its `next` leads to. */
 async function pagesOf(
   json: Json,
   request: CloverRequest | undefined,
   signal?: AbortSignal,
 ): Promise<Json[]> {
   const type = String(json?.type ?? json?.["@type"] ?? "");
-  if (/AnnotationCollection/.test(type)) {
-    const pages: Json[] = [];
-    let next: unknown = json.first;
-    while (next && pages.length < MAX_PAGES) {
-      const page = await resolve(next, request, signal);
-      pages.push(page);
-      next = page.next;
-    }
-    return pages;
+  const collection = /AnnotationCollection/.test(type);
+  const pages: Json[] = collection ? [] : [json];
+  let next: unknown = collection ? json.first : json.next;
+  while (next && pages.length < MAX_PAGES) {
+    const page = await resolve(next, request, signal);
+    pages.push(page);
+    next = page.next;
   }
-  return [json];
+  return pages;
+}
+
+/**
+ * The Manifest an annotation's target says its Canvas is `partOf`, as annotations made
+ * apart from any Manifest name it (a shared link, a page of tags across a collection).
+ */
+export function manifestOfAnnotation(annotation: Json): string | undefined {
+  for (const target of asArray(annotation?.target) as Json[]) {
+    const source = target?.type === "SpecificResource" ? target.source : target;
+    const part = asArray(source?.partOf).find(
+      (each: any) => each?.id && (!each.type || each.type === "Manifest"),
+    ) as Json | undefined;
+    if (part) return part.id;
+  }
+  return undefined;
 }
 
 export async function loadAnnotationSets(

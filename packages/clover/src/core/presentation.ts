@@ -51,6 +51,10 @@ export async function toPresentation4<T = Manifest | Collection | Container>(
   resource: unknown,
 ): Promise<T> {
   if (isPresentation4(resource)) return resource as T;
-  const { upgradeToPresentation4 } = await preloadUpgrader();
-  return upgradeToPresentation4(resource) as T;
+  // With the upgrader, a fix for its reading of fragmented targets (`keep-fragments.ts`).
+  const [{ upgradeToPresentation4 }, { keepFragments }] = await Promise.all([
+    preloadUpgrader(),
+    import("./keep-fragments"),
+  ]);
+  return upgradeToPresentation4(keepFragments(resource)) as T;
 }

@@ -106,7 +106,12 @@ test("the transport's bar wraps onto two rows, every control on the stage", asyn
     const figure = el.closest(".clover-canvas")!.getBoundingClientRect();
     const shown = [...el.children].filter(
       (child) => getComputedStyle(child).display !== "none",
-    );
+    ) as HTMLElement[];
+    // Where the layout puts each piece, not its tuck while faded (`Canvas.css`).
+    shown.forEach((child) => {
+      child.style.transition = "none";
+      child.style.translate = "none";
+    });
     // A row's parts are centred on one line.
     const rows = new Set(
       shown.map((child) => {

@@ -31,18 +31,13 @@ const preload = () => {
   import("@nulib/clover/templates").catch(() => undefined);
 };
 
-/** A resource in the panel: the Viewer, filling it, scrolling within it if taller. */
+/**
+ * A resource in the panel: the Viewer filling what the panel's header leaves (`fill`),
+ * so its thumbnail strip is never below the fold.
+ */
 const renderViewer = (resource: string) => (
   <div className={styles.viewer}>
-    <Viewer
-      key={resource}
-      iiifContent={resource}
-      style={
-        {
-          "--clover-content-height": "max(20rem, calc(100dvh - 20rem))",
-        } as React.CSSProperties
-      }
-    />
+    <Viewer key={resource} iiifContent={resource} fill />
   </div>
 );
 

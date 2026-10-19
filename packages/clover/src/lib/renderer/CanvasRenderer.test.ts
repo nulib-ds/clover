@@ -1,5 +1,6 @@
 import { GOTTINGEN_V2_1, GOTTINGEN_V3 } from "../../fixtures/iiif-image/info";
 import { CanvasRenderer } from "./CanvasRenderer";
+import { MAX_CONTEXTS } from "./backends/contexts";
 import { clearInfoCache } from "./sources/imageService";
 import { loadImage } from "./io/decode";
 import { createFakeGl, type FakeGl } from "./testing/fakeGl";
@@ -396,6 +397,86 @@ describe("CanvasRenderer", () => {
     expect(
       renderer.itemRectToWorld(0, { x: 2016, y: 1512, width: 10, height: 10 }),
     ).toEqual({ x: 0, y: 0, width: 10, height: 10 });
+    renderer.dispose();
+  });
+});
+
+describe("the page's WebGL contexts", () => {
+  /** Each host's observer callback, to say when it comes into view or leaves it. */
+  let observed: Map<Element, IntersectionObserverCallback>;
+  const inView = (el: Element, isIntersecting: boolean) =>
+    observed.get(el)!(
+      [{ target: el, isIntersecting } as IntersectionObserverEntry],
+      {} as IntersectionObserver,
+    );
+
+  beforeEach(() => {
+    observed = new Map();
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        constructor(private callback: IntersectionObserverCallback) {}
+        observe(el: Element) {
+          observed.set(el, this.callback);
+        }
+        unobserve() {}
+        disconnect() {}
+      },
+    );
+  });
+
+  /** A host far down the page, out of the window. */
+  function below() {
+    const el = document.createElement("div");
+    el.getBoundingClientRect = () =>
+      ({ left: 0, top: 5000, width: 800, height: 600 }) as DOMRect;
+    document.body.appendChild(el);
+    return el;
+  }
+
+  it("takes none for a host out of view, until it comes into view", () => {
+    const el = below();
+    const renderer = new CanvasRenderer(el);
+    expect(renderer.backendKind).toBe("none");
+    expect(el.querySelector("canvas")).toBeNull();
+    inView(el, true);
+    expect(renderer.backendKind).toBe("webgl2");
+    renderer.dispose();
+  });
+
+  it("holds a few: one out of view gives its back to one in view, and past them all in view, Canvas2D", () => {
+    const shown = Array.from(
+      { length: MAX_CONTEXTS },
+      () => new CanvasRenderer(host()),
+    );
+    expect(shown.map((each) => each.backendKind)).toEqual(
+      Array(MAX_CONTEXTS).fill("webgl2"),
+    );
+    // The first leaves the view: the next one in view takes its context at once.
+    inView(shown[0].host, false);
+    const next = new CanvasRenderer(host());
+    expect(next.backendKind).toBe("webgl2");
+    expect(shown[0].backendKind).toBe("none");
+    expect(shown[0].host.dataset.backend).toBe("released");
+    // Every one in view: one more draws with Canvas2D.
+    const more = new CanvasRenderer(host());
+    expect(more.backendKind).toBe("canvas2d");
+    [...shown, next, more].forEach((each) => each.dispose());
+  });
+
+  it("drops a lost context's canvas at once, draws on with Canvas2D, and tries WebGL again back in view", async () => {
+    const el = host();
+    const renderer = new CanvasRenderer(el, { releaseAfterMs: 0 });
+    const lost = el.querySelector("canvas")!;
+    lost.dispatchEvent(new Event("webglcontextlost", { cancelable: true }));
+    // Never the browser's picture of a lost context: that canvas is gone.
+    expect(lost.isConnected).toBe(false);
+    expect(renderer.backendKind).toBe("canvas2d");
+    inView(el, false);
+    await frames(1);
+    expect(el.dataset.backend).toBe("released");
+    inView(el, true);
+    expect(renderer.backendKind).toBe("webgl2");
     renderer.dispose();
   });
 });

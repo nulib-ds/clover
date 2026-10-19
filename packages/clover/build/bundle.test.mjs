@@ -55,6 +55,14 @@ const LAZY_MODULES = [
   "/components/Canvas/ChoiceMenu.tsx",
   // Off by default.
   "/lib/renderer/overlays/Navigator.ts",
+  // Annotations as the content, an AnnotationPage or AnnotationCollection.
+  "/core/annotations-content.ts",
+  // A standalone Canvas loading its own (`iiifContent`).
+  "/components/Canvas/LoadedCanvas.tsx",
+  // The upgrader's fix for fragmented targets, loaded with the upgrader.
+  "/core/keep-fragments.ts",
+  // About's "Part of", for a Canvas shown on its own.
+  "/components/InformationPanel/PartOfManifest.tsx",
   // Every language but English, the first time Clover is to speak it.
   ...["es", "fi", "fr", "nb", "nn", "no", "pt"].map(
     (lng) => `/i18n/locales/${lng}.json`,

@@ -1,6 +1,11 @@
 import type { CloverRequest } from "../../core/request";
 import type { Backend, BackendKind, DrawSource } from "./backends/backend";
 import { Canvas2DBackend } from "./backends/canvas2d/Canvas2DBackend";
+import {
+  type ContextHolder,
+  claimContext,
+  returnContext,
+} from "./backends/contexts";
 import { DomLayers, type DomLayerItem } from "./backends/dom/DomLayers";
 import { WebGL2Backend } from "./backends/webgl2/WebGL2Backend";
 import {
@@ -64,7 +69,7 @@ export interface CanvasRendererOptions {
   byteBudget?: number;
   /** Image requests in flight at once. */
   maxInFlight?: number;
-  /** Milliseconds offscreen before a WebGL context is released. */
+  /** Milliseconds offscreen before its context is released. */
   releaseAfterMs?: number;
 }
 
@@ -153,6 +158,13 @@ export class CanvasRenderer implements GestureTarget {
   private backend: Backend | null = null;
   private backendPreference: BackendPreference;
   private contextLosses = 0;
+  /** Its place among the page's WebGL contexts (`backends/contexts`). */
+  private holder: ContextHolder = {
+    hiddenSince: null,
+    release: () => this.giveBack(),
+  };
+  /** In the window, as last seen: only then does it hold a context. */
+  private visible = true;
   private dom: DomLayers;
   private camera: CameraAnimator;
   private loop: FrameLoop;
@@ -227,7 +239,10 @@ export class CanvasRenderer implements GestureTarget {
       maxInFlight: this.options.maxInFlight,
     });
 
-    this.acquireBackend();
+    // A context only for a host in view: a page of them must not ask for one each.
+    this.visible = inWindow(host);
+    if (this.visible) this.acquireBackend();
+    else this.holder.hiddenSince = now();
     this.measure();
     this.observe();
   }
@@ -555,6 +570,20 @@ export class CanvasRenderer implements GestureTarget {
 
   tap(at: Point): void {
     this.emit("tap", at);
+  }
+
+  private dismisser: (() => boolean) | null = null;
+
+  /**
+   * What a tap off every control and hotspot puts away first: the handler returns whether
+   * it put anything away, and if it did, the tap neither zooms nor is reported.
+   */
+  setDismiss(handler: (() => boolean) | null): void {
+    this.dismisser = handler;
+  }
+
+  dismiss(): boolean {
+    return this.dismisser?.() ?? false;
   }
 
   /** Change how pointer, wheel and keyboard drive the camera. */
@@ -897,7 +926,8 @@ export class CanvasRenderer implements GestureTarget {
 
   // ─── Backend lifecycle ────────────────────────────────────────────────────
 
-  private acquireBackend(): void {
+  /** @param webgl false to draw with Canvas2D whatever the preference, as after a loss. */
+  private acquireBackend(webgl = true): void {
     if (this.backend || this.disposed) return;
 
     const canvas = document.createElement("canvas");
@@ -919,16 +949,19 @@ export class CanvasRenderer implements GestureTarget {
     this.host.insertBefore(canvas, this.dom.container);
 
     const tryWebGL =
-      this.backendPreference === "webgl2" ||
-      (this.backendPreference === "auto" &&
-        this.contextLosses < MAX_CONTEXT_LOSSES);
+      webgl &&
+      (this.backendPreference === "webgl2" ||
+        (this.backendPreference === "auto" &&
+          this.contextLosses < MAX_CONTEXT_LOSSES));
 
     let backend: Backend | null = null;
-    if (tryWebGL) {
-      backend = WebGL2Backend.create(canvas, {
-        onLost: this.onContextLost,
-        onRestored: this.onContextRestored,
-      });
+    // Asked for WebGL2 alone, it is tried past the page's share too.
+    if (
+      tryWebGL &&
+      (claimContext(this.holder) || this.backendPreference === "webgl2")
+    ) {
+      backend = WebGL2Backend.create(canvas, { onLost: this.onContextLost });
+      if (!backend) returnContext(this.holder);
     }
     if (!backend && this.backendPreference !== "webgl2") {
       backend = Canvas2DBackend.create(canvas);
@@ -953,6 +986,7 @@ export class CanvasRenderer implements GestureTarget {
   }
 
   private releaseBackend(): void {
+    returnContext(this.holder);
     if (!this.backend) return;
     const canvas = this.backend.canvas;
     this.backend.dispose();
@@ -960,21 +994,25 @@ export class CanvasRenderer implements GestureTarget {
     this.backend = null;
   }
 
+  /** Its context given back, out of view or to make room for one in view. */
+  private giveBack(): void {
+    if (this.releaseTimer) clearTimeout(this.releaseTimer);
+    this.releaseTimer = null;
+    this.releaseBackend();
+    this.host.dataset.backend = "released";
+  }
+
+  /*
+   * The browser took the context (too many on the page, a GPU reset). Its canvas goes at
+   * once, so the browser's picture of a lost context never shows, only the host's
+   * background; Canvas2D draws on from the decoded tiles, nothing refetched, and WebGL is
+   * tried again when it next comes into view (a GPU that keeps dropping it, never).
+   */
   private onContextLost = () => {
     this.contextLosses += 1;
-    if (
-      this.contextLosses >= MAX_CONTEXT_LOSSES &&
-      this.backendPreference === "auto"
-    ) {
-      // A GPU that keeps dropping us: settle on Canvas2D for this instance.
-      this.releaseBackend();
-      this.acquireBackend();
-    }
-  };
-
-  private onContextRestored = () => {
-    // Textures went with the context; the next frame re-uploads from decoded pixels.
-    this.invalidate();
+    this.releaseBackend();
+    if (this.visible) this.acquireBackend(false);
+    else this.host.dataset.backend = "released";
   };
 
   // ─── Observation ──────────────────────────────────────────────────────────
@@ -998,22 +1036,25 @@ export class CanvasRenderer implements GestureTarget {
 
   /**
    * Browsers cap live WebGL contexts per page and silently kill the oldest beyond it.
-   * An instance scrolled out of view gives its context back after a grace period and
-   * takes a fresh one on return; decoded tiles stay in memory, so nothing is refetched.
+   * An instance scrolled out of view gives its context back after a grace period, or at
+   * once when one in view needs it (`backends/contexts`), and takes a fresh one on
+   * return; decoded tiles stay in memory, so nothing is refetched.
    */
   private setVisible(visible: boolean): void {
+    this.visible = visible;
     if (visible) {
+      this.holder.hiddenSince = null;
       if (this.releaseTimer) clearTimeout(this.releaseTimer);
       this.releaseTimer = null;
       if (!this.backend) this.acquireBackend();
       return;
     }
-    if (this.backend?.kind !== "webgl2" || this.releaseTimer) return;
-    this.releaseTimer = setTimeout(() => {
-      this.releaseTimer = null;
-      this.releaseBackend();
-      this.host.dataset.backend = "released";
-    }, this.options.releaseAfterMs);
+    this.holder.hiddenSince ??= now();
+    if (!this.backend || this.releaseTimer) return;
+    this.releaseTimer = setTimeout(
+      () => this.giveBack(),
+      this.options.releaseAfterMs,
+    );
   }
 
   /**
@@ -1083,6 +1124,29 @@ export class CanvasRenderer implements GestureTarget {
   private emit(event: CanvasRendererEvent, detail?: unknown): void {
     this.listeners.get(event)?.forEach((listener) => listener(detail));
   }
+}
+
+const now = () =>
+  typeof performance !== "undefined" ? performance.now() : Date.now();
+
+/**
+ * Whether the host is in the window, its edges included (as a host not yet laid out is,
+ * at the origin): where `IntersectionObserver` cannot say, always.
+ */
+function inWindow(host: HTMLElement): boolean {
+  if (
+    typeof IntersectionObserver === "undefined" ||
+    typeof window === "undefined"
+  ) {
+    return true;
+  }
+  const { top, left, width, height } = host.getBoundingClientRect();
+  return (
+    top + height >= 0 &&
+    left + width >= 0 &&
+    top <= window.innerHeight &&
+    left <= window.innerWidth
+  );
 }
 
 function prefersReducedMotion(): boolean {

@@ -117,6 +117,12 @@
   font-size: var(--clover-text-s);
 }
 
+/* A timed annotation's start, before its text (Cookbook 0103), in even figures. */
+.clover-canvas-menu-time {
+  color: var(--clover-color-primary-muted, #26292b);
+  font-variant-numeric: tabular-nums;
+}
+
 .clover-canvas-menu label {
   display: flex;
   align-items: center;

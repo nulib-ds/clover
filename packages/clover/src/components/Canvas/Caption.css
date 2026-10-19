@@ -79,3 +79,25 @@
 .clover-canvas-caption a {
   color: var(--clover-color-accent, #0065c3);
 }
+
+/*
+ * Comments on the whole Canvas (Cookbook 0266), `s` under its metadata: their label as a
+ * metadata label is, `xs` over them, and each `s` apart.
+ */
+.clover-canvas-caption-annotations {
+  margin-top: var(--clover-space-s);
+}
+
+.clover-canvas-caption .clover-canvas-caption-annotations-label {
+  margin-bottom: var(--clover-space-xs);
+  font-weight: 500;
+}
+
+.clover-canvas-caption-annotations > ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-s);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

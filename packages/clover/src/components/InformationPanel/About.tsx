@@ -1,5 +1,6 @@
-import React from "react";
+import React, { Suspense, lazy, useRef } from "react";
 
+import { isLoneCanvas } from "../../core/load";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useCloverSelector } from "../../react/context";
@@ -21,9 +22,15 @@ export interface AboutProps extends React.HTMLAttributes<HTMLElement> {
   headingLevel?: 2 | 3 | 4 | 5 | 6;
 }
 
+/*
+ * What a Canvas shown on its own is part of, and the button that opens it: only for such
+ * a Canvas, so loaded only for one.
+ */
+const PartOfManifest = lazy(() => import("./PartOfManifest"));
+
 /**
  * Everything the Manifest says about itself, in the order 3.x's About tab shows it:
- * summary, metadata, required statement, rights, homepage, see also, downloads, and the
+ * what a Canvas shown on its own is part of, then summary, metadata, required statement, rights, homepage, see also, downloads, and the
  * Manifest's own address. Its thumbnail is the layout's to place (`Default` puts it in
  * its header, beside the title). Each part renders only if the Manifest has
  * it. The downloads are Download's: the `rendering` of the page in view ("This page")
@@ -42,6 +49,19 @@ export function About({
     Object.is,
     "About",
   );
+  /*
+   * The full Manifest opened from "Part of": the button goes with the Canvas, so focus
+   * goes to the section it was in (its heading's button, in an InformationPanel), or to
+   * About itself, never lost to the page (WCAG 2.4.3).
+   */
+  const root = useRef<HTMLDivElement>(null);
+  const onOpened = () => {
+    const about = root.current;
+    const heading = about
+      ?.closest(".clover-sections-item")
+      ?.querySelector<HTMLElement>(".clover-sections-button");
+    (heading ?? about)?.focus({ preventScroll: true });
+  };
   if (!manifest) return null;
   const Heading = `h${headingLevel}` as React.ElementType;
   const section = (titleKey: string, has: unknown, part: React.ReactNode) =>
@@ -59,9 +79,23 @@ export function About({
       : Boolean(manifest[key]);
 
   return (
-    <div className={join("clover-about", className)} {...rest}>
+    <div
+      ref={root}
+      className={join("clover-about", className)}
+      tabIndex={-1}
+      {...rest}
+    >
       {canvasSummary && (
         <Summary of="canvas" className="clover-about-summary" />
+      )}
+      {isLoneCanvas(manifest) && manifest.partOf && (
+        <Suspense fallback={null}>
+          <PartOfManifest
+            manifest={manifest}
+            Heading={Heading}
+            onOpened={onOpened}
+          />
+        </Suspense>
       )}
       <Summary className="clover-about-summary" />
       <Metadata className="clover-about-metadata" />
@@ -78,7 +112,11 @@ export function About({
           headingLevel={Math.min(headingLevel + 1, 6) as 3}
         />,
       )}
-      {section("aboutManifest", manifest.id, <Id />)}
+      {section(
+        isLoneCanvas(manifest) ? "aboutCanvas" : "aboutManifest",
+        manifest.id,
+        <Id />,
+      )}
     </div>
   );
 }

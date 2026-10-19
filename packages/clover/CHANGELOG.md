@@ -287,6 +287,96 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     `first` through `next`), as URLs or objects.
   - The Canvas takes `selectedAnnotation`, `highlightedAnnotation` and
     `onAnnotationSelect`, so a host can drive its annotations' regions too.
+  - The picked annotation names itself on the Canvas: its popover shows while it is the
+    active one, without the pointer on it, until another is hovered or focused.
+  - A pick made outside the Canvas (an entry pressed in the list, a content state's
+    note) opens it past its placeholder, once the annotation is in its view, to show it.
+    A recording opened so is not played, as a press of its play button would.
+  - A pick is framed in one cut, once its view is drawn: on another Canvas, the move
+    comes first (the spread fitted, none of its hotspots laid over the last view while
+    it loads), then the annotation. `animateAnnotations` on the Canvas (or `Content`)
+    glides there instead, as the camera eases elsewhere; reduced motion cuts either way.
+    The handle's `zoomToAnnotation` and a hotspot's click follow the same choice. Before,
+    every pick glided, and one on another Canvas glided over the last view, then jumped.
+  - **Linking annotations** (`motivation: "linking"`, Cookbook 0022) go where they link.
+    Pressing the hotspot shows the Canvas it leads to, in this Manifest or the one its
+    target is `partOf` (opened in its place), with focus moved to the Canvas, since the
+    hotspot goes; its entry in the list gains "Open the link" (`annotationsOpenLink`, in
+    every locale), which does the same. A link to a page on the web is a link (`<a>`),
+    opening the page in a new tab; only `http(s)` addresses are followed. A standalone
+    `Canvas` given `onAnnotationLink` hands you the link instead of zooming to it:
+
+    ```jsx
+    <Clover.Canvas
+      canvases={[canvas]}
+      annotations={annotations}
+      onAnnotationLink={({ canvasId, manifestId }) =>
+        show(manifestId, canvasId)
+      }
+    />
+    ```
+
+    Inside a `Root`, or loading its own (`iiifContent`), the Canvas follows them itself
+    unless you pass it. Before, the hotspot only zoomed to its region.
+
+  - **Annotations on a recording's time** (`#t=start,end`, Cookbook 0103) show as cues
+    while their stretch plays, among the captions and above them, under their
+    AnnotationPage's `label` when it has one (`.clover-canvas-captions-cue` with
+    `data-kind="annotation"`, its label a `.clover-canvas-captions-cue-label`). One on a
+    moment (`#t=start`) shows for three seconds. The Canvas's annotations control lists
+    them by the time they start, now over a lone video or sound too, and picking one goes
+    there, playing or paused as it was; so does pressing one in `Clover.Annotations`,
+    whose entry shows its start where an image's has its region, and whose button is
+    "Find in the recording" (`annotationsShowTime`, in every locale) rather than "Find on
+    the image". Before, the Canvas showed nothing of them, and a press in the list did not
+    seek.
+  - **The annotations menu groups by AnnotationPage**, under each page's `label`, as the
+    list does; a page with none is named by the control. `CanvasAnnotation` takes
+    `pageLabel` for a host's own annotations; inside a `Root`, and loading its own, the
+    Canvas gives each its page's.
+  - **Each caption cue carries its language**, rather than the box around the cues
+    (`.clover-canvas-captions`), so an annotation's cue beside it can carry its own. A
+    page reading `lang` from `.clover-canvas-captions` reads it from
+    `.clover-canvas-captions-cue` instead.
+  - **An image an annotation carries** (Cookbook 0377) shows in its hotspot's popover,
+    above its words, fetched only once the popover shows. `Tip` takes `image`.
+  - **Annotations on a whole Canvas** (Cookbook 0266), with no region to mark, are in the
+    Canvas's information box (the `i`), under its metadata, under "Annotations", as the
+    list shows them: HTML (0019) sanitised with its links and images kept, Markdown and
+    plain text by their `format`. A Canvas with only such annotations now has the `i`.
+    Before, the Canvas showed nothing of them. The bodies' renderer is shared with the
+    list (`components/Annotations/EntryBodies.tsx`).
+    To keep the glide:
+
+    ```jsx
+    <Clover.Content animateAnnotations />
+    ```
+
+  - The reader lets go of a pick with a click or tap on the Canvas off every hotspot,
+    which then does nothing more (it does not zoom; the next one does), or with Escape
+    anywhere in the Canvas, unless a menu or the caption is open, which Escape closes
+    first. With annotations, the viewport's `aria-keyshortcuts` ends in `Escape`, and its
+    description says so, in a new string, `canvasKeysAnnotations` ("Press Escape to
+    clear the selected annotation."). Escape that lets go is `preventDefault`ed, so a
+    dialog or panel around the Canvas stays open; a host's own Escape handler should
+    leave such an event alone:
+
+    ```js
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !event.defaultPrevented) closeMyPanel();
+    });
+    ```
+
+    `onAnnotationSelect` is now `(id: string | null) => void`, and is called with
+    `null` when the reader lets go; a controlled `selectedAnnotation` should follow it:
+
+    ```jsx
+    <Clover.Canvas
+      selectedAnnotation={picked}
+      onAnnotationSelect={(id) => setPicked(id)}
+    />
+    ```
+
   - An annotation's region on the Canvas takes its target's shape: a rectangle
     (`xywh`), a point (PointSelector, a marker that frames a 40-unit box when pressed,
     Cookbook 0135), or a shape (SvgSelector, drawn as itself and pressed only within it,
@@ -294,6 +384,32 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     `polyline`, `rect`, `circle`, `ellipse`, `line`, numeric attributes only — never
     from the selector's markup. The SVG reader (1.3 kB) loads only when a shape is in
     view.
+  - The `InformationPanel`'s Annotations section lists every annotation in the
+    Manifest, not only the view's, as `<Clover.Annotations scope="all" />` does wherever
+    it sits. They are grouped by layer (AnnotationPages that share a label, or have
+    none), each layer with one "Hide Annotations" checkbox for all its pages, and under
+    that by Canvas, under the Canvas's label: `section.clover-annotations-canvas`, named
+    by its `.clover-annotations-canvas-label` heading, one level under the layer's. A
+    Manifest of one Canvas has no Canvas labels, so its notes' headings keep their level. The
+    listing is `data-scope="all"`. Before, `scope="all"` gave one flat list per page.
+    - The Canvases in view are `aria-current="true"`, and as the reader moves, the list
+      scrolls to bring them up under its headings, and a picked entry into sight. It
+      never moves under the pointer or while focus is in it, so a press in the list
+      moves the Canvas, not the list.
+    - Each entry with a rectangle (`xywh`) shows what it marks beside its text: its
+      region, cut by the image server and fetched at no more than 52px a side
+      (`{service}/{region}/!52,52/0/default.jpg`), shown as an `l` square
+      (`img.clover-annotations-thumbnail`, decorative, `alt=""`, lazily loaded). The
+      region is read in the image's pixels from where it is painted. A level 0 service,
+      which cannot cut, gives none, so no image larger than that is ever fetched for
+      it; nor does an entry that shows an image of its own. `regionSource` builds the
+      URL, from a Canvas, the rectangle and a size.
+    - The listing fetches every Canvas's referenced pages while it shows, as
+      `annotationPages="all"` does, and lets them go when it unmounts.
+    - Picking an annotation in the Canvas's menu, on its region or in the list picks it
+      in all three, and hiding a layer takes it off the Canvas and out of the menu: one
+      choice, through the Root, as the captions' language is.
+
 - **Content state out.** `onContentStateChange` on `Root` reports where the reader is,
   as a IIIF content state (`{ json, encoded }`), whenever it settles after a move, a pan
   or zoom, or a pause or seek: the Canvas holding most of the view, and its region or
@@ -440,8 +556,19 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     shape up to 5rem wide, a wider one cropped to fill); `Items` under the Canvas, whose
     arrows are Previous and Next, headed by the labels of the view's Canvases (a dot
     between a spread's two) and `Position` ("2 / 70"); the `InformationPanel` to the
-    right of all three, the layout's full height, scrolling within. The panel never
-    stacks: it has its own space beside the Canvas, and a `SplitHandle` between them
+    right of all three, the layout's full height, scrolling within. `fill` lays it out
+    in the box it sits in, as tall as that box, the Canvas taking what the title and
+    `Items` leave (never under 16rem; a shorter box scrolls), for a box of a set height,
+    the window under a page's own header say; without it, the Canvas is
+    `--clover-content-height` tall:
+
+    ```jsx
+    <div style={{ height: "calc(100dvh - 4rem)" }}>
+      <Viewer iiifContent={url} fill />
+    </div>
+    ```
+
+    The panel never stacks: it has its own space beside the Canvas, and a `SplitHandle` between them
     shares the width (remembered under `storageKey`). While it is open there, its
     `PanelToggle` sits on that bar, centred, level with the Canvas's controls; closed,
     it is back among them, and focus moves with it.
@@ -464,6 +591,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     (`"carousel"`, `"list"` or `"grid"`), or `false` for none. `header={false}` leaves
     out the `Thumbnail` and `Label` over the Canvas (3.x's `showTitle: false`), and
     `panel={false}` the `InformationPanel` and its `PanelToggle`.
+
   - `Document`: reads like a PDF viewer. A toolbar (the `Label`, and `Download`),
     `Items` down the left (the Manifest's Canvases as page thumbnails), and the
     pages down one column, as a PDF reader's continuous view: a sheet for each view (a
@@ -519,6 +647,28 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **`visuallyHidden`**, the inline styles Clover hides labels with, for parts of your own
   that must read plainly without the stylesheet.
+- **Text is read strictly by its `format`.** `text/html` is IIIF's HTML, sanitised to
+  the tags and attributes the Presentation API allows; `text/markdown` is Markdown;
+  `text/plain`, and any other media type, is shown as written, a `<` included, with its
+  line breaks kept. A value with no `format` (IIIF's `summary`, `metadata` and
+  `requiredStatement` values, and annotation bodies that declare none) follows IIIF's
+  rule: it is HTML only when it runs from a first `<` to a last `>`, whitespace aside, and
+  plain text otherwise. 3.x, and Clover until now, read any value holding a tag or an
+  entity as HTML, and a `text/plain` annotation body as HTML in the Annotations list
+  (though not in its hotspot's name). If your HTML values do not begin and end with a
+  tag, wrap them in one, or declare the body's `format`:
+
+  ```json
+  {
+    "type": "TextualBody",
+    "value": "Written in <b>1849</b>.",
+    "format": "text/html"
+  }
+  ```
+
+  `readAs(format, value)`, exported beside `toPlainText`, says how Clover reads one, for
+  a `renderEntry` of your own.
+
 - **Markdown annotation bodies** (`format: "text/markdown"`) are read as Markdown —
   paragraphs, emphasis, links, lists (nested), headings, footnotes — and sanitised like
   HTML. `Clover.Value`
@@ -576,12 +726,36 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   ```
 
 - **What `iiifContent` takes.** A URL, or a IIIF object in Presentation 2, 3 or 4: a
-  Manifest, a Collection (its first Manifest is shown, or `manifestId`), a Canvas (its `partOf` Manifest,
-  or a Manifest of one), or a content state as JSON or base64url. A content state opens
-  at its Canvas, framing its region or seeking to its time, past any placeholder. A
+  Manifest, a Collection (its first Manifest is shown, or `manifestId`), a Canvas, or a
+  content state as JSON or base64url. A Canvas is shown on its own, as a Manifest of
+  one that says what the Canvas says of itself (its label, summary, metadata, required
+  statement, rights, homepage, see also, rendering, thumbnail), so the InformationPanel's
+  About is the Canvas's, its address under "IIIF Canvas" (`aboutCanvas`). Where it is
+  `partOf` a Manifest, About opens with "Part of" (`aboutPartOf`): the Manifest's label
+  and a button, "Open the full Manifest" (`aboutOpenManifest`), that shows it in place,
+  at that Canvas where it holds it, focus moving to About's heading. Before, a Canvas
+  `partOf` a Manifest loaded that Manifest at once, and its own metadata was not shown.
+  `goToManifest(id, canvasId?)` takes the Canvas to open at. A content state opens
+  at its Canvas, framing its region or seeking to its time, past any placeholder. One
+  with a `body` (a note its sharer wrote, as Digital Collections' shared links carry)
+  shows that note there as an annotation, in a set of its own after the host's
+  `annotations`, and picked, so it names itself on the Canvas and in the list; its body
+  is read by its declared `format`, as any annotation's is. A
   Manifest it names that is `partOf` a Collection (directly, or as its Canvas's Manifest)
   opens that Collection on that Manifest, so its members are there to choose from. Then
-  comes `defaultCanvasId`, then the Manifest's `start`, then its first Canvas. `canvasId`
+  comes `defaultCanvasId`, then the Manifest's `start`, then its first Canvas.
+  `iiifContent` also takes annotations made apart from any Manifest: an AnnotationPage
+  (and any pages its `next` leads to) or an AnnotationCollection (its pages from `first`
+  through `next`), as a URL or an object, as 3.x did. Each annotation names its Canvas's
+  Manifest (`partOf`); the Root opens the first one's Manifest at its Canvas, that
+  annotation picked, and keeps all of them, as added sets, while the reader moves
+  between the Manifests they name, until the next `iiifContent`. Picking one on another
+  Manifest opens it there (through `onManifestChange` where the host holds the
+  Manifest, picking it on arrival). The Annotations list names a group on another
+  Manifest by its label (and its Canvas's, where it has several), fetching each such
+  Manifest once, when the list first shows, never on load; and keeps the annotations'
+  own order, whichever is open. Annotations that name no Manifest are an error
+  ("The annotations name no Manifest"). `canvasId`
   with `onCanvasChange` makes the Canvas controlled.
 - **One data shape: IIIF Presentation 4.** Everything is upgraded to Presentation 4 as it
   loads, with `@iiif/parser`'s upgrader, which is fetched only when something needs
@@ -880,6 +1054,21 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     <Clover.Canvas src={src} isTiledImage navigator />
     ```
 
+  - **Loading its own.** `iiifContent` on a `Canvas` outside any `Root` loads what it
+    draws, as a `Root` would: a Canvas, a Manifest's first Canvas, a Collection's first
+    Manifest's, or the Canvas a content state names, by URL or as an object, in any
+    Presentation version, fetched with `options.request` and upgraded as it loads. Until
+    it arrives the Canvas shows its background and the loading bar; if it cannot be
+    loaded, or has no Canvas, it says so (`role="alert"`) with the reason. It draws the
+    Canvas's own annotations (its `annotations` pages, embedded or referenced) and a
+    content state's, unless you pass `annotations`, and its information control shows the
+    Canvas's label, summary and metadata. The loading is its own chunk, fetched only by a
+    Canvas given it.
+
+    ```jsx
+    <Clover.Canvas iiifContent="https://example.org/canvas.json" />
+    ```
+
   - **For hosts.** The `onReady` handle gains `zoomToAnnotation(id)`, which zooms to an
     annotation's region on the Canvas and focuses it, `fitCanvasRect(canvasId, rect)`,
     which frames a region of a shown Canvas, and `getCanvasRegion()`, the visible part of
@@ -915,12 +1104,24 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     fitted and centred, with a toggle in the top right (the Viewer's magnifier) to open
     the Canvas; clicking the image opens it too. Once open, the toggle is a magnifier with
     a minus, which goes back to the image. Until then the Canvas is held back: no
-    tiles, pan or zoom, annotations, `Choice`, or video and sound. The information control
-    is not held back. The toggle goes back to the placeholder, and each new set of
+    tiles, pan or zoom, hotspots, `Choice`, or video and sound. The information control
+    and the annotations menu are not held back: a pick from the menu opens the Canvas and
+    frames the annotation once it is drawn, as a pick from a list beside it does. Closing
+    the Canvas back to its placeholder lets go of the pick (`onAnnotationSelect(null)`),
+    so picking it again opens it again. The toggle goes back to the placeholder, and each new set of
     `canvases` starts from its placeholder. For video and sound the toggle is a large play
-    button in the middle of the image, and opening starts playback; once open it is the
+    button in the middle of the image, its icon in the proportion a control's has (1rem
+    of 2.236), and opening starts playback; since the whole still plays it, pointing
+    anywhere on the still lights the button, as pointing at it does. Once open it is the
     close control in the top right, like the image's. The close control stays in sight
-    while the other controls fade.
+    while the other controls fade, and so do the information control (the `i`), the
+    annotations control, over a picture or a recording, and, while paused, a recording's
+    (or an animation's) Play, at the start of its bar, so what a Canvas says of itself,
+    what is said of it, and playing are always a press away; hovering any of them never
+    brings the others back. Playing, its Pause fades with the rest. The transport's scrim, seek bar and other controls still fade:
+    each fades on its own now, rather than the transport's box, and the scrim is the
+    transport's `::before`. A rule of yours setting `opacity` on `.clover-canvas-transport`
+    no longer fades it; one setting its `background` styles the box, not the scrim.
 
   It also draws IIIF Canvases, in Presentation 4: pass one, or the few shown together (a
   spread), as `canvases`. Upgrade older IIIF with `toPresentation4()` first. Inside a
@@ -962,6 +1163,18 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
       linger for a second after the pointer or focus leaves the Canvas, rather than
       vanishing at once. Mouse focus (a click on the picture) no longer keeps them
       showing; keyboard focus still does.
+    - **Sliders.** The seek bar and the volume are solid and edgeless: the rail 65% white
+      where nothing is loaded, 90% where it is, the played span in the accent, the thumb
+      white, with no dark ring round rail or thumb (`--clover-player-track-shadow` is
+      `none` by default). The scrim keeps them at 3:1 over the lightest picture (WCAG
+      1.4.11): it is at least 60% black up to the seek bar and fades out above it, for
+      video and sound alike (sound's own softer scrim is gone). A focused thumb keeps its
+      ring.
+    - **Inset as the image controls are.** The playback controls and the caption cues
+      sit in from the stage's sides and foot by `--clover-canvas-chrome-inset` (`l` by
+      default), as the Canvas's other controls do, rather than `m`; set that property to
+      move them all together. On a stage narrower than 28rem the bar's controls are `xs`
+      apart rather than `s`, so they keep to two rows at 320px.
     - **`navigable` gesture option.** `options.gestures.navigable: false` holds the
       camera still for any Canvas.
     - **Captions.** WebVTT files from `supplementing` annotations, one per language for
@@ -971,7 +1184,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
       and `--clover-player-caption-edge` (a `text-shadow`, `none` by default), and set
       their size or font on `.clover-canvas-captions-cue`. A system's own caption
       settings apply where its player shows them (an iPhone's full screen, picture in
-      picture).
+      picture). The Captions control's glyph tells whether they show: an outlined "CC"
+      card while they are off, a filled one while they are on. The bar that marked it
+      under the glyph is gone (Repeat keeps its own); a rule of yours for
+      `.clover-canvas-transport-button[data-active]::after` no longer applies.
     - **Poster.** A `placeholderContainer` image is the video's poster.
     - **HLS** plays through `hls.js` wherever the browser supports it, Chromium's native
       HLS included, and natively only where it does not (older iOS).
@@ -1111,11 +1327,68 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (55,154 B), the stylesheet to 11.1 (11,036 B) and `<clover-viewer>` to 98.3
   (98,200 B). Plain-text transcripts (the panel reading whether a Canvas has one) then
   raised the Viewer with `Default` to 63.0 kB (62,945 B), `Document` to 65.7 (65,626 B),
-  `Gallery` to 55.4 (55,319 B) and `<clover-viewer>` to 98.5 (98,439 B).
+  `Gallery` to 55.4 (55,319 B) and `<clover-viewer>` to 98.5 (98,439 B). Every
+  annotation in the panel, by layer and Canvas and kept in step with the view, then
+  raised the stylesheet to 11.2 kB (11,104 B) and `<clover-viewer>` to 98.6
+  (98,584 B); the Viewer with `Default` is 63.0 kB (62,966 B), within its 63.0. Masking
+  the hotspots beneath the active one then raised `<clover-viewer>` to 98.7 kB
+  (98,642 B); the stylesheet is 11.2 kB (11,168 B), within its 11.2. Letting go of a pick (a
+  click off it, Escape, and their description) and the picked hotspot's name then raised
+  a standalone `Canvas` to 36.1 kB (36,070 B), the Viewer with `Default` to 63.2
+  (63,139 B), `Document` to 65.9 (65,840 B), `Gallery` to 55.6 (55,511 B) and
+  `<clover-viewer>` to 99.0 (98,954 B); the stylesheet is 11.2 kB (11,179 B). A content state's note, and the
+  Canvas opening for a pick made outside it, then raised a standalone `Canvas` to
+  36.2 kB (36,177 B), the Viewer with `Default` to 63.5 (63,462 B), `Document` to 66.2
+  (66,158 B), `Gallery` to 55.9 (55,830 B), `@nulib/clover/map` before MapLibre to 17.5
+  (17,425 B) and `<clover-viewer>` to 99.4 (99,296 B). Reading text strictly by its `format`
+  then raised the Viewer with `Default` to 63.7 kB (63,624 B), `Document` to 66.4
+  (66,319 B), `Gallery` to 56.0 (55,977 B) and `<clover-viewer>` to 99.6 (99,482 B). Default's `fill`,
+  framing a pick once its view is drawn, and `animateAnnotations` then raised a standalone
+  `Canvas` to 36.3 kB (36,229 B), the Viewer with `Default` to 63.8 (63,715 B),
+  `Document` to 66.5 (66,397 B), `Gallery` to 56.1 (56,062 B), the stylesheet to 11.3
+  (11,224 B) and `<clover-viewer>` to 99.7 (99,645 B). The annotations menu over a
+  placeholder then raised the Viewer with `Default` to 63.9 kB (63,788 B), `Gallery` to
+  56.2 (56,120 B) and `<clover-viewer>` to 99.8 (99,732 B); a standalone `Canvas` is
+  36.3 kB (36,283 B), within its 36.3. Annotations as the content
+  (pages followed through `next`, the Manifest each names, the move between them, kept
+  across moves) then raised the Viewer with `Default` to 64.2 kB (64,107 B), `Document`
+  to 66.9 (66,781 B), `Gallery` to 56.5 (56,445 B), `@nulib/clover/map` before MapLibre
+  to 17.8 (17,738 B) and `<clover-viewer>` to 100.2 (100,139 B). The rest of it, the
+  annotations' own loading and the list's other Manifests, loads only when used. A
+  Canvas shown on its own, a `Canvas` loading its own (`iiifContent`), the CC glyph, the
+  `i` in sight and the upgrader's fragment fix then raised a standalone `Canvas` to
+  36.6 kB (36,508 B), the Viewer with `Default` to 64.5 (64,383 B), `Document` to 67.2
+  (67,092 B), `Gallery` to 56.7 (56,605 B), `@nulib/clover/map` before MapLibre to 17.9
+  (17,876 B), the stylesheet to 11.4 (11,348 B) and `<clover-viewer>` to 100.6
+  (100,537 B). About's "Part of", the Canvas's loading and the fix load only when used.
+  Rationing WebGL contexts, following links (0022), images in popovers (0377), comments
+  on a whole Canvas (0266), annotations on a recording's time (0103) and the transport
+  fading by its parts then raised a standalone `Canvas` to 37.3 kB (37,298 B), the Viewer
+  with `Default` to 65.3 (65,340 B), `Document` to 68.0 (68,014 B), `Gallery` to 57.5
+  (57,519 B), `@nulib/clover/map` before MapLibre to 17.9 (17,929 B), the stylesheet to
+  11.6 (11,586 B) and `<clover-viewer>` to 102.1 (102,132 B). Reading the links, the
+  comments and the timed annotations loads only for a Canvas with annotations.
 
   The API is experimental and may change in any release.
 
 ### Fixed
+
+- **A Canvas never shows the browser's picture of a lost WebGL context** (Chrome's face in
+  a box). Browsers cap a page's WebGL contexts (about 16 on desktop, 8 on Android) and
+  kill the oldest past the cap, and every `Canvas` used to take one as it was made, in
+  view or not, so a page of them (the docs' Canvas page has 28) lost the ones at the top.
+  Now a `Canvas` takes a context only while in view, Clover holds at most six on a page
+  (one out of view gives its back at once to one coming into view; with six in view, the
+  next draws with Canvas2D), and a context the browser takes anyway, for a map or the
+  host's own, is dropped at once: the Canvas shows its background and draws on with
+  Canvas2D from what it has loaded, and tries WebGL again when it next comes into view.
+  Nothing for you to do. An offscreen Canvas drawn with Canvas2D now also gives its
+  canvas back after `releaseAfterMs`.
+- **Annotations whose target is a Canvas object with a fragment in its `id`** (valid
+  Presentation 3) are drawn again. `@iiif/parser`'s upgrader
+  read the fragment as part of the path (`…/canvas/1/xywh=…`), so they named no Canvas
+  and never showed. Clover rewrites such a target as the SpecificResource it means
+  before upgrading (`core/keep-fragments.ts`, loaded with the upgrader).
 
 WCAG 2.2 AA, from an audit of the whole package. What it found and the plan for the rest
 are in the repository's `ACCESSIBILITY.md`.
@@ -1205,7 +1478,12 @@ are in the repository's `ACCESSIBILITY.md`.
 
   - Hotspots are outlined in two tones, `--clover-color-primary` round
     `--clover-color-secondary`. Hovered, focused or picked, an accent band runs between
-    them and the inside takes a light accent tint. In forced colours a rectangle has a
+    them; nothing covers what it marks, and the picture round a rectangle dims a little
+    (as 3.x's did, more lightly). Another hotspot beneath it shows none of its lines where the active one
+    lies (its rectangle, or its shape's own outline), as a vector editor hides what a
+    shape covers; those inside it and over it stay whole. It is a `mask-image` from
+    `--clover-annotation-mask`, set inline on the hotspots beneath; a rule of yours that
+    sets `mask` on `.clover-canvas-annotation` replaces it. In forced colours a rectangle has a
     `CanvasText` edge round a `Canvas` line, and an active one a `Highlight` ring.
   - Hotspots are in the DOM in the annotations' order, so Tab and screen readers follow
     the menu's order, not size. Stacking is a `z-index` from `--clover-annotation-depth`,
@@ -1604,8 +1882,9 @@ are in the repository's `ACCESSIBILITY.md`.
     need the new ones. `pt` is European Portuguese, which Brazilian readers get too. The
     new translations await review by native speakers.
   - New strings: `canvasRoleDescription`, `canvasKeysImage`, `canvasKeysMedia`,
-    `playerClose`, `annotationsImage`, `mapAttribution`, `mapPlaceUntitled`, `mapOverlay`
-    and `mapPlacesListed`. If you pass your own `resources` to `initCloverI18n`,
+    `playerClose`, `annotationsImage`, `mapAttribution`, `mapPlaceUntitled`, `mapOverlay`,
+    `mapPlacesListed`, `canvasKeysAnnotations`, `aboutCanvas`, `aboutPartOf` and
+    `aboutOpenManifest`. If you pass your own `resources` to `initCloverI18n`,
     translate them.
 
 - **Map.**

@@ -44,24 +44,34 @@
     0 0 38vw 38vw transparent;
   /* Smaller over larger, and the active one over all (`Annotations.tsx`). */
   z-index: var(--clover-annotation-depth, 0);
+  /*
+   * Beneath the active one, none of its lines cross that one (`maskUnder`): the mask is
+   * its box and a tenth more each side, for a shape's edge drawn past it.
+   */
+  mask-image: var(--clover-annotation-mask, none);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: 120% 120%;
+  mask-clip: no-clip;
+}
+
+/* One that follows its link (Cookbook 0022) goes there, rather than zooming. */
+.clover-canvas-annotation[data-link] {
+  cursor: pointer;
 }
 
 /*
- * From the outside in: the dark edge, the accent band, the light line; and inside, a tint
- * of the accent, as a shape has, which shows it while its edges are out of sight.
+ * From the outside in: the dark edge, the accent band, the light line. Nothing is laid
+ * over what it marks; the picture round it is dimmed a little instead, as 3.x's was, and
+ * more lightly.
  */
 .clover-canvas-annotation:is([data-active="true"], :focus-visible) {
   border-color: var(--clover-color-secondary, #fff);
   outline: 2px solid var(--clover-color-accent, #0065c3);
   outline-offset: 0;
-  background-color: color-mix(
-    in srgb,
-    var(--clover-color-accent, #0065c3) 18%,
-    transparent
-  );
   box-shadow:
     0 0 0 3px var(--clover-color-primary, #1a1d1e),
-    0 0 38vw 38vw #0001;
+    0 0 38vw 38vw #0002;
 }
 
 /*
@@ -111,8 +121,8 @@
 
 /*
  * A shape, drawn three times (`ShapeOutline`): a dark edge, a light line on it, and an
- * accent mark on that, shown while active. Only the edge takes the pointer, inside and
- * out.
+ * accent mark on that, shown while active, over nothing inside. Only the edge takes the
+ * pointer, inside and out.
  */
 .clover-canvas-annotation-shape {
   position: absolute;
@@ -148,11 +158,6 @@
   .clover-canvas-annotation-shape
   > g:nth-child(1)
   > * {
-  fill: color-mix(
-    in srgb,
-    var(--clover-color-accent, #0065c3) 18%,
-    transparent
-  );
   stroke-width: 6;
 }
 

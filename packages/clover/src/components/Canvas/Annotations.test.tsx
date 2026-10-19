@@ -1,12 +1,18 @@
 import { fireEvent, render, waitFor } from "@testing-library/react";
 import React from "react";
 
-import { type CanvasAnnotation, placeAnnotations } from "./Annotations";
+import {
+  type CanvasAnnotation,
+  maskUnder,
+  placeAnnotations,
+} from "./Annotations";
 import { panClearOfChrome } from "./panClearOfChrome";
 import { readSvgShape } from "../../core/svg-shape";
 import { selectAnnotationSets } from "../../core/annotation-sets";
 import pointJson from "../../fixtures/iiif-cookbook/0135-annotating-point-in-canvas.json";
 import shapeJson from "../../fixtures/iiif-cookbook/0261-non-rectangular-commenting.json";
+import hotspotJson from "../../fixtures/iiif-cookbook/0022-linking-with-a-hotspot.json";
+import imageJson from "../../fixtures/iiif-cookbook/0377-image-in-annotation.json";
 import { p4 } from "../../fixtures/presentation4";
 
 const canvas = "https://example.org/canvas/1";
@@ -178,6 +184,7 @@ async function renderHotspots(
     selected: string | null;
     onActivate: (id: string | null) => void;
     onSelect: (annotation: unknown) => void;
+    onFollow: (annotation: unknown) => void;
   }> = {},
   renderer: Record<string, unknown> = {},
 ) {
@@ -198,6 +205,7 @@ async function renderHotspots(
       selected={props.selected ?? null}
       onActivate={props.onActivate ?? (() => undefined)}
       onSelect={props.onSelect ?? (() => undefined)}
+      onFollow={props.onFollow}
     />,
   );
   const buttons = () =>
@@ -349,6 +357,72 @@ describe("the hotspots' order", () => {
       expect(comment, String(active)).toBeGreaterThan(tag);
       layer.remove();
     }
+  });
+});
+
+/*
+ * Beneath the active hotspot, another's lines stop where the active one lies, as a shape
+ * in a vector editor hides what it covers; nothing is laid over the picture to do it.
+ */
+describe("beneath the active hotspot", () => {
+  const placed = () =>
+    placeAnnotations(
+      [
+        annotation("line", `${canvas}#xywh=0,0,400,40`),
+        annotation("word", `${canvas}#xywh=10,5,50,30`),
+        annotation("page", `${canvas}#xywh=0,0,1000,1000`),
+        annotation("other", `${canvas}#xywh=500,500,40,40`),
+        annotation("point", {
+          type: "SpecificResource",
+          source: canvas,
+          selector: { type: "PointSelector", x: 200, y: 20 },
+        }),
+        annotation("shape", {
+          type: "SpecificResource",
+          source: { id: canvas, type: "Canvas" },
+          selector: {
+            type: "SvgSelector",
+            value: '<svg><polygon points="100,100 200,100 150,250" /></svg>',
+          },
+        }),
+      ],
+      place,
+      readSvgShape,
+    );
+  const mask = (button: HTMLElement) =>
+    button.style.getPropertyValue("--clover-annotation-mask");
+  /** The SVG a mask draws. */
+  const drawn = (value: string | null) =>
+    decodeURIComponent(value!.slice('url("data:image/svg+xml,'.length, -2));
+
+  it("masks only those it lies over, never those over it", async () => {
+    const { buttons } = await renderHotspots(placed(), { active: "line" });
+    const [line, word, page, other, point, shape] = buttons();
+    // The page crosses under the line; the word and the point lie within it, over it.
+    expect(mask(page)).toMatch(/^url\("data:image\/svg\+xml,/);
+    for (const whole of [line, word, other, point, shape])
+      expect(mask(whole), whole.id).toBe("");
+  });
+
+  it("takes its rectangle out of the box beneath, in that box's own units", () => {
+    const [line, , page] = placed();
+    // The page's box, a tenth to spare each side, less the line's rectangle.
+    expect(drawn(maskUnder(page, line))).toContain(
+      'viewBox="-100 -100 1200 1200"',
+    );
+    expect(drawn(maskUnder(page, line))).toContain(
+      'd="M-100 -100h1200v1200h-1200ZM0 0h400v40h-400Z"',
+    );
+  });
+
+  it("takes a shape's own outline, not its box, and nothing for a point", () => {
+    const [, , page, other, point, shape] = placed();
+    const svg = drawn(maskUnder(page, shape));
+    expect(svg).toContain('<polygon points="100,100 200,100 150,250"/>');
+    expect(svg).toContain('x="100" y="100" width="100" height="150"');
+    // A point's marker covers what it crosses; boxes that do not meet are left alone.
+    expect(maskUnder(page, point)).toBeNull();
+    expect(maskUnder(other, shape)).toBeNull();
   });
 });
 
@@ -633,5 +707,102 @@ describe("a hotspot reached by Tab", () => {
     await import("./panClearOfChrome");
     await new Promise((resolve) => setTimeout(resolve));
     expect(panTo).not.toHaveBeenCalled();
+  });
+});
+
+/*
+ * Cookbook 0022: a linking hotspot follows its link. To a Canvas or a Manifest, it is a
+ * button that asks for it (`onFollow`); to a page on the web, a link.
+ */
+describe("a linking hotspot", () => {
+  const linked = () =>
+    placeAnnotations(
+      [
+        {
+          annotation: hotspotJson.items[0].annotations![0].items[0] as never,
+          targetIndex: 0,
+        },
+      ],
+      place,
+    );
+
+  it("follows its link to a Canvas when pressed, rather than zooming to it", async () => {
+    const onFollow = vi.fn();
+    const onSelect = vi.fn();
+    const { buttons } = await renderHotspots(linked(), { onFollow, onSelect });
+    const [button] = buttons();
+    expect(button).toHaveAttribute("data-link", "true");
+    expect(button).toHaveAccessibleName(
+      "A link to a close up of Gänseliesel-Brunnen fountain.",
+    );
+    fireEvent.click(button);
+    expect(onFollow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        link: expect.objectContaining({
+          canvasId: `${hotspotJson.items[1].id}`,
+        }),
+      }),
+    );
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it("is picked as any other with nothing to follow it", async () => {
+    const onSelect = vi.fn();
+    const { buttons } = await renderHotspots(linked(), { onSelect });
+    expect(buttons()[0]).not.toHaveAttribute("data-link");
+    fireEvent.click(buttons()[0]);
+    expect(onSelect).toHaveBeenCalled();
+  });
+
+  it("is a link to a page on the web", async () => {
+    const placed = placeAnnotations(
+      [
+        {
+          annotation: {
+            id: "web",
+            type: "Annotation",
+            motivation: "linking",
+            body: [
+              { type: "TextualBody", value: "The fountain's page" },
+              { id: "https://example.org/fountain", type: "Text" },
+            ],
+            target: `${canvas}#xywh=0,0,10,10`,
+          } as never,
+          targetIndex: 0,
+        },
+      ],
+      place,
+    );
+    await renderHotspots(placed);
+    const link = document.querySelector<HTMLAnchorElement>(
+      "a.clover-canvas-annotation",
+    )!;
+    expect(link).toHaveAttribute("href", "https://example.org/fountain");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAccessibleName("The fountain's page");
+  });
+});
+
+// Cookbook 0377: an image the annotation carries shows in its popover, over its text.
+describe("an image in a hotspot's popover", () => {
+  it("is above the words that name it, which say it for assistive technology", async () => {
+    const placed = placeAnnotations(
+      [
+        {
+          annotation: imageJson.items[0].annotations[0].items[0] as never,
+          targetIndex: 0,
+        },
+      ],
+      place,
+    );
+    const { buttons } = await renderHotspots(placed);
+    const image = buttons()[0].querySelector(".clover-tip > img")!;
+    expect(image).toHaveAttribute(
+      "src",
+      expect.stringContaining("fountain/full/300,/0/default.jpg"),
+    );
+    expect(image).toHaveAttribute("alt", "");
+    expect(image).toHaveAttribute("loading", "lazy");
+    expect(buttons()[0]).toHaveAccessibleName(/Night picture/);
   });
 });

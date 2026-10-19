@@ -15,7 +15,7 @@ const manifest = {
   id: "https://example.org/manifest",
   type: "Manifest",
   label: { en: ["A letter"], fr: ["Une lettre"] },
-  summary: { en: ["Written in <b>1849</b> &amp; posted."] },
+  summary: { en: ["<p>Written in <b>1849</b> &amp; posted.</p>"] },
   metadata: [
     { label: { en: ["Date"] }, value: { en: ["1849"] } },
     {
@@ -92,6 +92,27 @@ describe("primitives", () => {
     expect(screen.getByText("Written in 1849 & posted.")).toBeInTheDocument();
     // Then the sanitiser arrives and the markup is kept.
     expect(await screen.findByText("1849")).toContainHTML("<b>1849</b>");
+  });
+
+  // Strictly by format: plain text is shown as written, its line breaks kept.
+  it("show a value declared plain as written, markup and all, its lines kept", () => {
+    const { container } = render(
+      <Clover.Value
+        value={{ none: ["hospital\n <em>Note</em>"] }}
+        format="text/plain"
+      />,
+    );
+    expect(container.querySelector("em")).toBeNull();
+    expect(container).toHaveTextContent("hospital <em>Note</em>");
+    expect(container.querySelectorAll("br")).toHaveLength(1);
+  });
+
+  it("show a value with no format as HTML only when it is IIIF's HTML", async () => {
+    const { container } = render(
+      <Clover.Value value={{ none: ["Written in <b>1849</b>."] }} />,
+    );
+    expect(container).toHaveTextContent("Written in <b>1849</b>.");
+    expect(container.querySelector("b")).toBeNull();
   });
 
   it("strip a javascript: link from a metadata value", async () => {
@@ -404,5 +425,53 @@ describe("Viewer panel", () => {
     expect(
       within(panel).queryByRole("button", { name: "Close information panel" }),
     ).toBeNull();
+  });
+});
+
+/*
+ * A Canvas given as the content is shown on its own: About says what it says of itself,
+ * what it is part of, and opens that Manifest in its place, focus kept where it was.
+ */
+describe("About, for a Canvas shown on its own", () => {
+  const MANIFEST = "https://example.org/letter-manifest";
+  const canvas = {
+    "@context": "http://iiif.io/api/presentation/3/context.json",
+    ...manifest.items[0],
+    partOf: [
+      { id: MANIFEST, type: "Manifest", label: { en: ["The whole letter"] } },
+    ],
+  };
+  it("says what it is part of, and opens it in place, focus kept", async () => {
+    const fetch = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ ...manifest, id: MANIFEST }), {
+          headers: { "Content-Type": "application/json" },
+        }),
+    );
+    render(
+      <Clover.Root iiifContent={canvas} request={{ fetch }}>
+        <Clover.InformationPanel />
+      </Clover.Root>,
+    );
+    const open = await screen.findByRole("button", {
+      name: "Open the full Manifest",
+    });
+    expect(open).toHaveAccessibleDescription("The whole letter");
+    expect(screen.getByText("The first page.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "IIIF Canvas" }),
+    ).toBeInTheDocument();
+    open.focus();
+    fireEvent.click(open);
+    await screen.findByRole("heading", { name: "IIIF Manifest" });
+    expect(
+      screen.queryByRole("button", { name: "Open the full Manifest" }),
+    ).toBeNull();
+    // Focus stays in the section it was in: About's own heading, or About itself.
+    const about = document.querySelector(".clover-about")!;
+    const heading = about
+      .closest(".clover-sections-item")
+      ?.querySelector(".clover-sections-button");
+    expect(document.activeElement).toBe(heading ?? about);
   });
 });

@@ -2,6 +2,7 @@ import bookJson from "../fixtures/iiif-cookbook/0009-book-1.json";
 import placeholderJson from "../fixtures/iiif-cookbook/0013-placeholderCanvas.json";
 import { p4 } from "../fixtures/presentation4";
 import { clearInfoCache } from "../lib/renderer/sources/imageService";
+import { regionSource } from "./region";
 import { resolveThumbnail, thumbnailSource } from "./thumbnail";
 
 const book = p4(bookJson);
@@ -95,5 +96,70 @@ describe("resolveThumbnail", () => {
         { fetch },
       ),
     ).toBe("x.jpg");
+  });
+});
+
+/*
+ * A region of a Canvas, cut small by the image server: read in the image's pixels, from
+ * where it is painted, and never asked of a server that cannot cut it.
+ */
+describe("regionSource", () => {
+  const SERVICE = "https://example.org/iiif/page";
+  const canvas = (
+    profile: string,
+    target = "https://example.org/canvas/1",
+    image = { width: 2000, height: 1000 },
+  ) => ({
+    id: "https://example.org/canvas/1",
+    type: "Canvas",
+    width: 1000,
+    height: 500,
+    items: [
+      {
+        type: "AnnotationPage",
+        items: [
+          {
+            type: "Annotation",
+            motivation: ["painting"],
+            target,
+            body: [
+              {
+                id: `${SERVICE}/full/max/0/default.jpg`,
+                type: "Image",
+                ...image,
+                service: [{ id: SERVICE, type: "ImageService3", profile }],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
+  it("asks for the region in the image's pixels, at no more than the size", () => {
+    // The image is twice the Canvas's size: the region is doubled.
+    expect(
+      regionSource(canvas("level2"), { x: 10, y: 20, w: 100, h: 50 }, 52),
+    ).toBe(`${SERVICE}/20,40,200,100/!52,52/0/default.jpg`);
+  });
+
+  it("reads the region from where the image is painted on the Canvas", () => {
+    // Painted at x 500, half the Canvas wide, at its own size.
+    const placed = canvas(
+      "level1",
+      "https://example.org/canvas/1#xywh=500,0,500,500",
+      { width: 500, height: 500 },
+    );
+    expect(regionSource(placed, { x: 600, y: 100, w: 50, h: 50 }, 52)).toBe(
+      `${SERVICE}/100,100,50,50/!52,52/0/default.jpg`,
+    );
+    // Off that image, nothing.
+    expect(regionSource(placed, { x: 0, y: 0, w: 50, h: 50 }, 52)).toBeNull();
+  });
+
+  it("asks nothing of a level 0 service, which cannot cut", () => {
+    expect(
+      regionSource(canvas("level0"), { x: 0, y: 0, w: 10, h: 10 }, 52),
+    ).toBeNull();
   });
 });

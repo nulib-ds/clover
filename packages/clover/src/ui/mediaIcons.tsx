@@ -53,24 +53,43 @@ export const VolumeMutedIcon = () => (
   </svg>
 );
 
-export const CaptionsIcon = () => (
-  <svg {...svgProps}>
-    <rect
-      x="32"
-      y="96"
-      width="448"
-      height="320"
-      rx="32"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="32"
-    />
+/**
+ * Closed captions: a card with "CC" on it, outlined while they are off, filled while they
+ * show (the letters then in the control's own fill, as if cut out). The state is told by
+ * the shape, not by colour (WCAG 1.4.1).
+ */
+export const CaptionsIcon = ({ on = false }: { on?: boolean }) => (
+  <svg {...svgProps} data-on={on || undefined} className="clover-captions-icon">
+    {on ? (
+      // Filled: the outlined card's outer edge, so the two are one size. No `stroke`,
+      // which the transport's glyph rules read as an outline (`Transport.css`).
+      <rect
+        x="22"
+        y="86"
+        width="468"
+        height="340"
+        rx="74"
+        fill="currentColor"
+      />
+    ) : (
+      <rect
+        x="40"
+        y="104"
+        width="432"
+        height="304"
+        rx="56"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="36"
+      />
+    )}
     <path
-      d="M216 210a44 44 0 100 92M360 210a44 44 0 100 92"
+      className="clover-captions-icon-letters"
+      d="M228 216a48 48 0 1 0 0 80M356 216a48 48 0 1 0 0 80"
       fill="none"
-      stroke="currentColor"
+      stroke={on ? "var(--clover-color-control, #1a1d1e)" : "currentColor"}
       strokeLinecap="round"
-      strokeWidth="32"
+      strokeWidth="36"
     />
   </svg>
 );

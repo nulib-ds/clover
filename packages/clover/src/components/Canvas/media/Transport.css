@@ -7,17 +7,20 @@
  * declared nowhere, since the scrim is dark in every theme.
  */
 /*
- * On the scale: `m` in from the stage's sides and bottom, `xl` of scrim above; the seek
- * row `xs` over the bar (they are one control); the bar's controls `s` apart, as the
- * cluster's are. `--clover-transport-room` is what that takes up, for anything that has
- * to clear it (captions, the caption box). The bar is one control high, or as high as
+ * On the scale: in from the stage's sides and bottom by the chrome's inset
+ * (`--clover-canvas-chrome-inset`, `l` by default), as the image controls are, with `xl`
+ * of scrim above; the seek row `xs` over the bar (they are one control); the bar's
+ * controls `s` apart, as the cluster's are (`xs` on a narrow stage, below).
+ * `--clover-transport-room` is what that takes up, and `m` clear of it, for anything that
+ * has to clear it (captions, the caption box). The bar is one control high, or as high as
  * the transport measures it (`--clover-transport-bar-height`, `useBarHeight`) once it
  * wraps.
  */
 .clover-canvas {
   --clover-transport-room: calc(
     var(--clover-transport-bar-height, var(--clover-control)) +
-      var(--clover-space-l) + var(--clover-space-xs) + 2 * var(--clover-space-m)
+      var(--clover-space-l) + var(--clover-space-xs) +
+      var(--clover-canvas-chrome-inset) + var(--clover-space-m)
   );
 }
 
@@ -27,15 +30,10 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  padding: var(--clover-space-xl) var(--clover-space-m) var(--clover-space-m);
+  padding: var(--clover-space-xl) var(--clover-canvas-chrome-inset)
+    var(--clover-canvas-chrome-inset);
   /* Chrome, shown with the rest (`Canvas.css`): it tucks down, toward its edge. */
   --clover-chrome-edge: 1;
-  background: linear-gradient(
-    to top,
-    rgb(0 0 0 / 78%),
-    rgb(0 0 0 / 45%) 45%,
-    rgb(0 0 0 / 0%)
-  );
   user-select: none;
   /*
    * The room a menu has above its button, on the bar's last row: the stage
@@ -45,9 +43,30 @@
    * Chapters menus measure it where their button is (`TransportMenu`).
    */
   --clover-transport-menu-room: calc(
-    100cqb - var(--clover-space-m) - var(--clover-control) -
+    100cqb - var(--clover-canvas-chrome-inset) - var(--clover-control) -
       var(--clover-space-s) - var(--clover-space-xs)
   );
+}
+
+/*
+ * The scrim behind the bar, on a layer of its own under the controls, so it fades with
+ * the chrome while Play stays (`Canvas.css`). At least 60% black up to the seek bar's
+ * top (the transport's `xl` of padding above it is where it fades out), over a picture
+ * or sound's light stage alike: the sliders have no edge of their own, and over the
+ * lightest picture this keeps their rails and thumbs at 3:1 (WCAG 1.4.11; below).
+ */
+.clover-canvas-transport::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 78%),
+    rgb(0 0 0 / 60%) calc(100% - var(--clover-space-xl)),
+    rgb(0 0 0 / 0%)
+  );
+  pointer-events: none;
+  content: "";
 }
 
 /*
@@ -153,15 +172,13 @@
 }
 
 /*
- * On (captions showing, Repeat pressed): a bar under the glyph, in the glyph's colour,
- * the state's one mark, never a fill of its own, so it is not told by colour (WCAG
- * 1.4.1). Its Tip positions the button. A border, not a fill: forced colours keep a
- * border in the text's colour, where they would paint a fill as the page.
+ * Pressed (Repeat): a bar under the glyph, in the glyph's colour, the state's one mark,
+ * never a fill of its own, so it is not told by colour (WCAG 1.4.1). Its Tip positions
+ * the button. A border, not a fill: forced colours keep a border in the text's colour,
+ * where they would paint a fill as the page. Captions tell theirs by their glyph instead:
+ * outlined while off, filled while they show (`CaptionsIcon`).
  */
-button.clover-canvas-transport-button:is(
-    [data-active],
-    [aria-pressed="true"]
-  )::after {
+button.clover-canvas-transport-button[aria-pressed="true"]::after {
   content: "";
   position: absolute;
   inset-inline: var(--clover-space-s);
@@ -187,8 +204,10 @@ button.clover-canvas-transport-button:is(
  * WebKit and Gecko pseudo-elements live in separate rules: a selector list naming one an
  * engine does not know is dropped whole.
  *
- * Thumbs and rails have a dark edge, focused or not, so they keep 3:1 over a light
- * picture and on sound, where the scrim is thin (WCAG 1.4.11).
+ * Solid, with no edge (Mat, 2026-10-19): the rail is 65% white where nothing is loaded and
+ * 90% where it is, the thumb white. Over the scrim (60% black or more at the seek bar,
+ * above), on the lightest picture, that is 3.5:1, 5:1 and 5.7:1 (WCAG 1.4.11). The
+ * played span, in the accent, meets the rail at 3.5:1, and the thumb marks it.
  */
 .clover-canvas-transport-seek-area {
   position: relative;
@@ -211,10 +230,18 @@ button.clover-canvas-transport-button:is(
   width: var(--clover-space-2xl);
 }
 
-/* Shorter on a narrow stage, so the controls keep to one row under the time if they can. */
+/*
+ * Shorter on a narrow stage, and the controls a step closer (`xs`), so they keep to one
+ * row under the time if they can, inside the chrome's inset.
+ */
 @container (max-width: 28rem) {
   .clover-canvas-transport input.clover-canvas-transport-volume {
     width: var(--clover-space-xl);
+  }
+
+  .clover-canvas-transport-bar,
+  .clover-canvas-transport-end {
+    column-gap: var(--clover-space-xs);
   }
 }
 
@@ -224,12 +251,12 @@ button.clover-canvas-transport-button:is(
   background: linear-gradient(
     to right,
     var(--clover-color-accent, #0065c3) var(--clover-transport-progress, 0%),
-    rgb(255 255 255 / 70%) var(--clover-transport-progress, 0%),
-    rgb(255 255 255 / 70%) var(--clover-transport-loaded, 0%),
-    var(--clover-player-track, rgb(255 255 255 / 45%))
+    rgb(255 255 255 / 90%) var(--clover-transport-progress, 0%),
+    rgb(255 255 255 / 90%) var(--clover-transport-loaded, 0%),
+    var(--clover-player-track, rgb(255 255 255 / 65%))
       var(--clover-transport-loaded, 0%)
   );
-  box-shadow: var(--clover-player-track-shadow, 0 0 0 1px rgb(0 0 0 / 75%));
+  box-shadow: var(--clover-player-track-shadow, none);
 }
 
 .clover-canvas-transport input[type="range"]::-moz-range-track {
@@ -238,12 +265,12 @@ button.clover-canvas-transport-button:is(
   background: linear-gradient(
     to right,
     var(--clover-color-accent, #0065c3) var(--clover-transport-progress, 0%),
-    rgb(255 255 255 / 70%) var(--clover-transport-progress, 0%),
-    rgb(255 255 255 / 70%) var(--clover-transport-loaded, 0%),
-    var(--clover-player-track, rgb(255 255 255 / 45%))
+    rgb(255 255 255 / 90%) var(--clover-transport-progress, 0%),
+    rgb(255 255 255 / 90%) var(--clover-transport-loaded, 0%),
+    var(--clover-player-track, rgb(255 255 255 / 65%))
       var(--clover-transport-loaded, 0%)
   );
-  box-shadow: var(--clover-player-track-shadow, 0 0 0 1px rgb(0 0 0 / 75%));
+  box-shadow: var(--clover-player-track-shadow, none);
 }
 
 .clover-canvas-transport input[type="range"]::-webkit-slider-thumb {
@@ -254,7 +281,6 @@ button.clover-canvas-transport-button:is(
   border: none;
   border-radius: var(--clover-radius-pill, 2rem);
   background-color: var(--clover-player-text, #fff);
-  box-shadow: 0 0 0 2px rgb(0 0 0 / 60%);
 }
 
 .clover-canvas-transport input[type="range"]::-moz-range-thumb {
@@ -263,7 +289,6 @@ button.clover-canvas-transport-button:is(
   border: none;
   border-radius: var(--clover-radius-pill, 2rem);
   background-color: var(--clover-player-text, #fff);
-  box-shadow: 0 0 0 2px rgb(0 0 0 / 60%);
 }
 
 .clover-canvas-transport input[type="range"]:focus-visible {
@@ -355,8 +380,8 @@ button.clover-canvas-transport-time:focus-visible {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  min-width: min(11rem, 100cqi - 2 * var(--clover-space-m));
-  max-width: calc(100cqi - 2 * var(--clover-space-m));
+  min-width: min(11rem, 100cqi - 2 * var(--clover-canvas-chrome-inset));
+  max-width: calc(100cqi - 2 * var(--clover-canvas-chrome-inset));
   max-height: min(
     16rem,
     var(--clover-transport-menu-room),
@@ -419,7 +444,7 @@ button.clover-canvas-transport-time:focus-visible {
 
 /* With the codes' column, room for a name of a few words on a line or two. */
 .clover-canvas-transport-options:has(.clover-canvas-transport-code) {
-  min-width: min(16rem, 100cqi - 2 * var(--clover-space-m));
+  min-width: min(16rem, 100cqi - 2 * var(--clover-canvas-chrome-inset));
 }
 
 /* The row is the control; the radio stays for keyboard and screen reader only. */
@@ -427,18 +452,6 @@ button.clover-canvas-transport-time:focus-visible {
   position: absolute;
   opacity: 0;
   pointer-events: none;
-}
-
-/* ── Sound ───────────────────────────────────────────────────────────────── */
-
-/* Sound has no moving picture to lift the bar off, so its scrim is shorter and softer. */
-.clover-canvas-media[data-kind="audio"] .clover-canvas-transport {
-  background: linear-gradient(
-    to top,
-    rgb(0 0 0 / 70%) 0,
-    rgb(0 0 0 / 35%) var(--clover-space-2xl),
-    rgb(0 0 0 / 0%) calc(var(--clover-space-2xl) + var(--clover-space-l))
-  );
 }
 
 /* ── accessibility ───────────────────────────────────────────────────────── */
@@ -508,6 +521,17 @@ button.clover-canvas-transport-time:focus-visible {
   .clover-canvas-transport-option:has(input:checked) {
     background-color: Highlight;
     color: HighlightText;
+  }
+
+  /* The filled card's letters, cut out of it: the button's own colour, never lost. */
+  .clover-captions-icon[data-on] .clover-captions-icon-letters {
+    stroke: ButtonFace;
+  }
+
+  .clover-canvas-transport-button[data-active]
+    .clover-captions-icon[data-on]
+    .clover-captions-icon-letters {
+    stroke: Highlight;
   }
 }
 

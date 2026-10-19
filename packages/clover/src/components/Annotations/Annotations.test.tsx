@@ -9,6 +9,7 @@ import {
 import React from "react";
 
 import imageJson from "../../fixtures/iiif-cookbook/0377-image-in-annotation.json";
+import hotspotJson from "../../fixtures/iiif-cookbook/0022-linking-with-a-hotspot.json";
 import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
 import { stubViewport } from "../Canvas/testing/viewport";
@@ -39,6 +40,7 @@ beforeEach(() => {
     host: document.createElement("div"),
     setImages: vi.fn().mockResolvedValue(undefined),
     setGestures: vi.fn(),
+    setDismiss: vi.fn(),
     dispose: vi.fn(),
     isOpen: false,
     backendKind: "webgl2",
@@ -91,15 +93,42 @@ describe("Annotations", () => {
     ).toHaveAttribute("aria-pressed", "false");
   });
 
+  // Cookbook 0022: where a linking annotation leads, followed from the list too.
+  it("follows a linking annotation to its Canvas, focus going to the Canvas", async () => {
+    let clover: Clover.Clover | undefined;
+    const Spy = () => {
+      clover = Clover.useClover("Spy").clover;
+      return null;
+    };
+    render(
+      <Clover.Root iiifContent={hotspotJson}>
+        <Clover.Content />
+        <Clover.Annotations />
+        <Spy />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
+    emit("open");
+    const follow = await screen.findByRole("button", {
+      name: "Open the link",
+    });
+    fireEvent.click(follow);
+    expect(clover!.store.get().canvasId).toBe(hotspotJson.items[1].id);
+    expect(screen.getByTestId("clover-canvas-viewport")).toHaveFocus();
+  });
+
   it("frames a picked annotation on the Canvas, and marks it picked", async () => {
     await renderWithStage();
     fireEvent.click(screen.getByRole("button", { name: /Find on the image/ }));
-    expect(renderer.fitAnnotation).toHaveBeenCalledWith({
-      x: 138,
-      y: 550,
-      width: 1477,
-      height: 1710,
-    });
+    expect(renderer.fitAnnotation).toHaveBeenCalledWith(
+      {
+        x: 138,
+        y: 550,
+        width: 1477,
+        height: 1710,
+      },
+      true,
+    );
     expect(
       screen.getByRole("button", { name: /Find on the image/ }),
     ).toHaveAttribute("aria-pressed", "true");
@@ -414,5 +443,236 @@ describe("content state", () => {
     const [{ json }] = onContentStateChange.mock.lastCall!;
     expect(resolveContentState(json)?.target).toMatchObject({ canvasId });
     vi.useRealTimers();
+  });
+});
+
+describe("Annotations, every Canvas's (scope all)", () => {
+  const base = "https://example.org/all";
+  const note = (canvas: number, id: string, value: string) => ({
+    id: `${base}/annotation/${id}`,
+    type: "Annotation",
+    motivation: "commenting",
+    body: { type: "TextualBody", value, format: "text/plain" },
+    target: `${base}/canvas/${canvas}`,
+  });
+  const page = (
+    canvas: number,
+    id: string,
+    items: unknown[],
+    label?: string,
+  ) => ({
+    id: `${base}/page/${id}`,
+    type: "AnnotationPage",
+    ...(label ? { label: { en: [label] } } : {}),
+    items,
+  });
+  // Three pages: tags on pages 1 and 3, one page each and unlabelled, as most Manifests
+  // publish them; Comments on pages 2 and 3, page 3's only referenced.
+  const manifest = {
+    "@context": "http://iiif.io/api/presentation/3/context.json",
+    id: `${base}/manifest.json`,
+    type: "Manifest",
+    label: { en: ["Three pages"] },
+    items: [1, 2, 3].map((n) => ({
+      id: `${base}/canvas/${n}`,
+      type: "Canvas",
+      label: { en: [`Page ${n}`] },
+      width: 100,
+      height: 100,
+      items: [],
+      annotations: [
+        ...(n !== 2
+          ? [page(n, `tags-${n}`, [note(n, `tag-${n}`, `Tag ${n}`)])]
+          : []),
+        ...(n === 2
+          ? [
+              page(
+                n,
+                "comments-2",
+                [note(n, "comment-2", "Comment 2")],
+                "Comments",
+              ),
+            ]
+          : []),
+        ...(n === 3
+          ? [{ id: `${base}/page/comments-3`, type: "AnnotationPage" }]
+          : []),
+      ],
+    })),
+  };
+  const referenced = page(
+    3,
+    "comments-3",
+    [note(3, "comment-3", "Comment 3")],
+    "Comments",
+  );
+
+  let clover: any;
+  function Spy() {
+    clover = Clover.useClover().clover;
+    return null;
+  }
+
+  it("lists them by layer, one checkbox each, then by Canvas under its label, those in view current", async () => {
+    const fetch = vi.fn(async () => new Response(JSON.stringify(referenced)));
+    render(
+      <Clover.Root iiifContent={manifest} request={{ fetch }}>
+        <Spy />
+        <Clover.Annotations scope="all" />
+      </Clover.Root>,
+    );
+    // Every Canvas's pages are fetched for it: page 3's Comments, only referenced.
+    await screen.findByText("Comment 3");
+    expect(fetch).toHaveBeenCalledWith(
+      `${base}/page/comments-3`,
+      expect.anything(),
+    );
+    // Two layers: the unlabelled tags (two pages, one checkbox), and the Comments.
+    const boxes = screen.getAllByRole("checkbox", { name: "Hide Annotations" });
+    expect(boxes).toHaveLength(2);
+    const comments = screen.getByRole("region", { name: "Comments" });
+    expect(
+      within(comments)
+        .getAllByRole("heading")
+        .map((heading) => heading.textContent),
+    ).toEqual(["Comments", "Page 2", "Page 3"]);
+    // Page 1 is in view, so its group is current.
+    const groups = () =>
+      [...document.querySelectorAll(".clover-annotations-canvas")].map(
+        (group) => [
+          group.querySelector(".clover-annotations-canvas-label")?.textContent,
+          group.getAttribute("aria-current"),
+        ],
+      );
+    expect(groups()).toEqual([
+      ["Page 1", "true"],
+      ["Page 3", null],
+      ["Page 2", null],
+      ["Page 3", null],
+    ]);
+    act(() => clover.goTo(`${base}/canvas/3`));
+    expect(groups()).toEqual([
+      ["Page 1", null],
+      ["Page 3", "true"],
+      ["Page 2", null],
+      ["Page 3", "true"],
+    ]);
+
+    // One checkbox hides the whole layer, both of its pages.
+    fireEvent.click(boxes[0]);
+    expect(clover.store.get().hiddenSets).toEqual([
+      `${base}/page/tags-1`,
+      `${base}/page/tags-3`,
+    ]);
+    expect(boxes[0]).toBeChecked();
+  });
+
+  // What each marks, beside what it says: its region, cut small by the image server.
+  it("shows each entry's region, cut small by its image's server", async () => {
+    const service = "https://example.org/iiif/one";
+    const pictured = {
+      ...manifest,
+      items: [
+        {
+          ...manifest.items[0],
+          width: 100,
+          height: 100,
+          items: [
+            {
+              id: `${base}/canvas/1/page`,
+              type: "AnnotationPage",
+              items: [
+                {
+                  id: `${base}/canvas/1/paint`,
+                  type: "Annotation",
+                  motivation: "painting",
+                  target: `${base}/canvas/1`,
+                  body: {
+                    id: `${service}/full/max/0/default.jpg`,
+                    type: "Image",
+                    width: 1000,
+                    height: 1000,
+                    service: [
+                      { id: service, type: "ImageService3", profile: "level1" },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+          annotations: [
+            page(1, "notes-1", [
+              {
+                ...note(1, "boxed", "Boxed"),
+                target: `${base}/canvas/1#xywh=10,20,30,40`,
+              },
+            ]),
+          ],
+        },
+      ],
+    };
+    const { container } = render(
+      <Clover.Root iiifContent={pictured}>
+        <Clover.Annotations scope="all" />
+      </Clover.Root>,
+    );
+    await screen.findByText("Boxed");
+    const picture = container.querySelector("img.clover-annotations-thumbnail");
+    expect(picture).toHaveAttribute(
+      "src",
+      `${service}/100,200,300,400/!52,52/0/default.jpg`,
+    );
+    // Decorative: the entry's text names it.
+    expect(picture).toHaveAttribute("alt", "");
+  });
+
+  it("lists a Manifest of one Canvas by layer alone, with no Canvas to name", async () => {
+    const one = {
+      ...manifest,
+      items: [
+        {
+          ...manifest.items[0],
+          annotations: [
+            page(
+              1,
+              "comments-1",
+              [note(1, "comment-1", "Comment 1")],
+              "Comments",
+            ),
+          ],
+        },
+      ],
+    };
+    render(
+      <Clover.Root iiifContent={one}>
+        <Clover.Annotations scope="all" />
+      </Clover.Root>,
+    );
+    const comments = await screen.findByRole("region", { name: "Comments" });
+    expect(
+      within(comments)
+        .getAllByRole("heading")
+        .map((heading) => heading.textContent),
+    ).toEqual(["Comments"]);
+    expect(comments).toHaveTextContent("Comment 1");
+    expect(comments.querySelector("[aria-current]")).toBeNull();
+  });
+
+  it("joins the information panel listing every Canvas's, not only the view's", async () => {
+    render(
+      <Clover.Root
+        iiifContent={manifest}
+        request={{
+          fetch: vi.fn(async () => new Response(JSON.stringify(referenced))),
+        }}
+      >
+        <Clover.InformationPanel />
+      </Clover.Root>,
+    );
+    fireEvent.click(await screen.findByRole("tab", { name: "Annotations" }));
+    const panel = screen.getByRole("tabpanel", { name: "Annotations" });
+    await waitFor(() => expect(panel).toHaveTextContent("Comment 3"));
+    expect(panel).toHaveTextContent("Tag 1");
+    expect(panel).toHaveTextContent("Comment 2");
   });
 });

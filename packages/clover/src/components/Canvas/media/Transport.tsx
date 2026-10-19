@@ -521,7 +521,7 @@ const Transport: React.FC<TransportProps> = ({
                 label={t("playerCaptions")}
                 labelLang={langOf("playerCaptions")}
                 button="captions"
-                icon={<CaptionsIcon />}
+                icon={<CaptionsIcon on={activeCaption >= 0} />}
                 active={activeCaption >= 0}
                 current={captions[activeCaption] ?? captionsOff}
                 options={[captionsOff, ...captions]}

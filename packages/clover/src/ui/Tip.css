@@ -50,6 +50,15 @@
     visibility 0s linear 120ms;
 }
 
+/* A picture above the words (a hotspot's image), as wide as the popover lets it be. */
+.clover-tip-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-block-end: var(--clover-space-2xs);
+  border-radius: calc(var(--clover-radius, 3px) / 2);
+}
+
 /* The gap between the control and its popover, bridged for the pointer. */
 .clover-tip::before {
   position: absolute;
@@ -179,7 +188,7 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
  * cuts what passes its edge, so the gap to the hotspot is bridged inside its own box: an
  * `xs` border on the hotspot's side, clear (`background-clip`), rather than `::before`.
  */
-button.clover-canvas-annotation > .clover-tip {
+:is(button, a).clover-canvas-annotation > .clover-tip {
   --clover-tip-x: clamp(
     var(--clover-space-xs) - var(--clover-overlay-x, 50cqw),
     -50%,
@@ -198,11 +207,31 @@ button.clover-canvas-annotation > .clover-tip {
   transform: none;
 }
 
-button.clover-canvas-annotation > .clover-tip::before {
+:is(button, a).clover-canvas-annotation > .clover-tip::before {
   content: none;
 }
 
-button.clover-canvas-annotation[data-overlay-room="below"] > .clover-tip {
+/*
+ * The picked hotspot names itself while it is the active one, without the pointer on it:
+ * picked from the list, the menu or the hotspot. Another hovered or focused takes over
+ * (then it is the active one), so it never covers a hotspot in focus (WCAG 2.4.11), and a
+ * click off it or Escape lets go of the pick, and the popover with it.
+ */
+:is(
+    button,
+    a
+  ).clover-canvas-annotation[data-active="true"][aria-current="true"]:not(
+    [data-tip-hidden]
+  )
+  > .clover-tip {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+:is(button, a).clover-canvas-annotation[data-overlay-room="below"]
+  > .clover-tip {
   top: 100%;
   translate: var(--clover-tip-x)
     clamp(
@@ -212,7 +241,8 @@ button.clover-canvas-annotation[data-overlay-room="below"] > .clover-tip {
     );
 }
 
-button.clover-canvas-annotation[data-overlay-room="above"] > .clover-tip {
+:is(button, a).clover-canvas-annotation[data-overlay-room="above"]
+  > .clover-tip {
   top: auto;
   bottom: 100%;
   border-width: 0 0 var(--clover-space-xs);

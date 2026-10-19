@@ -139,7 +139,11 @@ carries markup.
 | `Id`                                         | The resource's `id`, as a link                                |
 
 `Value` shows any other IIIF language map you hold, an annotation's text say, marked
-and sanitised the same way. With `format="text/markdown"` it reads Markdown, as
+and sanitised the same way. It reads a value strictly by its `format`: `text/html` as
+IIIF's HTML, sanitised to the tags the Presentation API allows; `text/plain` as written,
+markup and all, its line breaks kept; and with no `format`, by IIIF's rule for property
+values, as HTML only when it runs from a first `<` to a last `>`. With
+`format="text/markdown"` it reads Markdown, as
 `Annotations` does for a `text/markdown` body: its lists are lists, and its headings are
 headings to assistive technology (`role="heading"`, drawn bold, so your page's heading
 styles stay out of them). The first heading takes `headingLevel` (default 3), and each

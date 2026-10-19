@@ -1,0 +1,3542 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+  "type": "Manifest",
+  "behavior": ["paged"],
+  "label": {
+    "none": [
+      "Portfolio of illustrations showing the White bicycles : then and now"
+    ]
+  },
+  "metadata": [
+    {
+      "label": {
+        "none": ["Alternate Title"]
+      },
+      "value": {
+        "none": [
+          "Portfolio of illustrations showing the White bicycles : then and now illustrated by Thulstrup, Mente, Veenfliet, Clarke."
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": ["Contributor"]
+      },
+      "value": {
+        "none": ["White Sewing Machine Company (Author)"]
+      }
+    },
+    {
+      "label": {
+        "none": ["Date"]
+      },
+      "value": {
+        "none": ["1896"]
+      }
+    },
+    {
+      "label": {
+        "none": ["Department"]
+      },
+      "value": {
+        "none": ["Transportation Library"]
+      }
+    },
+    {
+      "label": {
+        "none": ["Dimensions"]
+      },
+      "value": {
+        "none": ["20 cm"]
+      }
+    },
+    {
+      "label": {
+        "none": ["Genre"]
+      },
+      "value": {
+        "none": ["catalogs (documents)"]
+      }
+    },
+    {
+      "label": {
+        "none": ["Last Modified"]
+      },
+      "value": {
+        "none": ["2026-10-14T16:08:19.099277Z"]
+      }
+    },
+    {
+      "label": {
+        "none": ["Language"]
+      },
+      "value": {
+        "none": ["English"]
+      }
+    },
+    {
+      "label": {
+        "none": ["Location"]
+      },
+      "value": {
+        "none": ["Ohio--Cleveland"]
+      }
+    },
+    {
+      "label": {
+        "none": ["Materials"]
+      },
+      "value": {
+        "none": ["28 unnumbered pages with illustrations (some color)"]
+      }
+    },
+    {
+      "label": {
+        "none": ["Publisher"]
+      },
+      "value": {
+        "none": ["The White Sewing Machine Co."]
+      }
+    },
+    {
+      "label": {
+        "none": ["Rights Statement"]
+      },
+      "value": {
+        "none": ["No Copyright - United States"]
+      }
+    },
+    {
+      "label": {
+        "none": ["Subject"]
+      },
+      "value": {
+        "none": ["White Sewing Machine Company", "Bicycles"]
+      }
+    }
+  ],
+  "requiredStatement": {
+    "label": {
+      "none": ["Attribution"]
+    },
+    "value": {
+      "none": [
+        "Courtesy of Northwestern University Libraries",
+        "The images on this web site are from material in the collections of the Transportation Library of Northwestern University Libraries, are provided for use by its students, faculty and staff, and by other researchers visiting this site, for research consultation and scholarly purposes only. Further distribution and/or any commercial use of the images from this site is not permitted."
+      ]
+    }
+  },
+  "rights": "http://rightsstatements.org/vocab/NoC-US/1.0/",
+  "thumbnail": [
+    {
+      "id": "https://api.dc.library.northwestern.edu/api/v2/works/386ff30f-1975-4d9c-9905-ec76381d6992/thumbnail",
+      "type": "Image",
+      "format": "image/jpeg",
+      "height": 300,
+      "width": 300
+    }
+  ],
+  "seeAlso": [
+    {
+      "id": "https://api.dc.library.northwestern.edu/api/v2/works/386ff30f-1975-4d9c-9905-ec76381d6992",
+      "type": "Dataset",
+      "format": "application/json",
+      "label": {
+        "none": ["Northwestern University Libraries Digital Collections API"]
+      }
+    }
+  ],
+  "homepage": [
+    {
+      "id": "https://dc.library.northwestern.edu/items/386ff30f-1975-4d9c-9905-ec76381d6992",
+      "type": "Text",
+      "format": "text/html",
+      "label": {
+        "none": [
+          "Homepage at Northwestern University Libraries Digital Collections"
+        ]
+      }
+    }
+  ],
+  "partOf": [
+    {
+      "id": "https://api.dc.library.northwestern.edu/api/v2/collections/cd92fb8d-76a7-4e72-be0f-78a5839caa89?as=iiif",
+      "type": "Collection",
+      "label": {
+        "none": [
+          "Late 19th - Early 20th Century Bicycle and Bicycle Parts Catalogs"
+        ]
+      },
+      "summary": {
+        "none": [
+          "This collection contains lavishly illustrated early U.S. bicycle and bicycle parts manufacturers’ catalogs covering the period from 1890 through 1932, with the great majority published between 1890 and 1902. The 71 items in this collection represent over 40 manufacturers, roughly geographically distributed in equal parts between the Chicago area, the East Coast, and the Midwest."
+        ]
+      }
+    }
+  ],
+  "provider": [
+    {
+      "id": "https://www.library.northwestern.edu/",
+      "type": "Agent",
+      "label": {
+        "none": ["Northwestern University Libraries"]
+      },
+      "homepage": [
+        {
+          "id": "https://dc.library.northwestern.edu/",
+          "type": "Text",
+          "label": {
+            "none": [
+              "Northwestern University Libraries Digital Collections Homepage"
+            ]
+          },
+          "format": "text/html",
+          "language": ["en"]
+        }
+      ],
+      "logo": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/2/00000000-0000-0000-0000-000000000003/full/pct:50/0/default.webp",
+          "type": "Image",
+          "format": "image/webp",
+          "height": 139,
+          "width": 1190
+        }
+      ]
+    }
+  ],
+  "logo": [
+    {
+      "id": "https://iiif.dc.library.northwestern.edu/iiif/2/00000000-0000-0000-0000-000000000003/full/pct:50/0/default.webp",
+      "type": "Image",
+      "format": "image/webp",
+      "height": 139,
+      "width": 1190
+    }
+  ],
+  "summary": {
+    "en": [
+      "The White Sewing Machine Company of Cleveland issued this bicycle catalog in 1896. Color plates by Thulstrup, Mente, Veenfliet, and Clarke pair “Then” with “Now”; specifications describe four models."
+    ]
+  },
+  "items": [
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1",
+      "type": "Canvas",
+      "height": 4700,
+      "width": 4756,
+      "label": {
+        "none": ["Front Cover"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/7ff31828-e562-4cbe-b517-74baace7745c/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/7ff31828-e562-4cbe-b517-74baace7745c",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/7ff31828-e562-4cbe-b517-74baace7745c/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4700,
+                "width": 4756,
+                "label": {
+                  "en": ["Front Cover"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/7ff31828-e562-4cbe-b517-74baace7745c",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 632,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/7ff31828-e562-4cbe-b517-74baace7745c/full/!640,632/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 632,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/7ff31828-e562-4cbe-b517-74baace7745c",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2",
+      "type": "Canvas",
+      "height": 4638,
+      "width": 4686,
+      "label": {
+        "none": ["Page 1"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/249e8375-d2c1-4509-997f-5afca28ce364/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/249e8375-d2c1-4509-997f-5afca28ce364",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/249e8375-d2c1-4509-997f-5afca28ce364/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4638,
+                "width": 4686,
+                "label": {
+                  "en": ["Page 1"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/249e8375-d2c1-4509-997f-5afca28ce364",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 633,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/249e8375-d2c1-4509-997f-5afca28ce364/full/!640,633/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 633,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/249e8375-d2c1-4509-997f-5afca28ce364",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3",
+      "type": "Canvas",
+      "height": 4660,
+      "width": 4728,
+      "label": {
+        "none": ["Page 2"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/d5a9d7b2-9410-4fc7-87bd-3cdeea66e86f/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/d5a9d7b2-9410-4fc7-87bd-3cdeea66e86f",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/d5a9d7b2-9410-4fc7-87bd-3cdeea66e86f/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4660,
+                "width": 4728,
+                "label": {
+                  "en": ["Page 2"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/d5a9d7b2-9410-4fc7-87bd-3cdeea66e86f",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 630,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/d5a9d7b2-9410-4fc7-87bd-3cdeea66e86f/full/!640,630/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 630,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/d5a9d7b2-9410-4fc7-87bd-3cdeea66e86f",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/3/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4",
+      "type": "Canvas",
+      "height": 4663,
+      "width": 4721,
+      "label": {
+        "none": ["Page 3"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/c9eae5ed-1021-4e71-a81f-3ae39341927c/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/c9eae5ed-1021-4e71-a81f-3ae39341927c",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/c9eae5ed-1021-4e71-a81f-3ae39341927c/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4663,
+                "width": 4721,
+                "label": {
+                  "en": ["Page 3"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/c9eae5ed-1021-4e71-a81f-3ae39341927c",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 632,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/c9eae5ed-1021-4e71-a81f-3ae39341927c/full/!640,632/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 632,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/c9eae5ed-1021-4e71-a81f-3ae39341927c",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5",
+      "type": "Canvas",
+      "height": 4646,
+      "width": 4729,
+      "label": {
+        "none": ["Page 4"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/17d364fe-21ae-444c-bfff-7e0e9106df86/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/17d364fe-21ae-444c-bfff-7e0e9106df86",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/17d364fe-21ae-444c-bfff-7e0e9106df86/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4646,
+                "width": 4729,
+                "label": {
+                  "en": ["Page 4"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/17d364fe-21ae-444c-bfff-7e0e9106df86",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 628,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/17d364fe-21ae-444c-bfff-7e0e9106df86/full/!640,628/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 628,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/17d364fe-21ae-444c-bfff-7e0e9106df86",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/placeholder"
+              }
+            ]
+          }
+        ]
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5#xywh=2705,66,1419,1518"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5#xywh=236,236,4256,4162"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6",
+      "type": "Canvas",
+      "height": 4639,
+      "width": 4699,
+      "label": {
+        "none": ["Page 5"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/09418ffd-559d-4c98-8089-8b248e2f4913/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/09418ffd-559d-4c98-8089-8b248e2f4913",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/09418ffd-559d-4c98-8089-8b248e2f4913/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4639,
+                "width": 4699,
+                "label": {
+                  "en": ["Page 5"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/09418ffd-559d-4c98-8089-8b248e2f4913",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 631,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/09418ffd-559d-4c98-8089-8b248e2f4913/full/!640,631/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 631,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/09418ffd-559d-4c98-8089-8b248e2f4913",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7",
+      "type": "Canvas",
+      "height": 4651,
+      "width": 4740,
+      "label": {
+        "none": ["Page 6"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/c28bf8f5-1442-4cc9-9777-8301f9cc4418/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/c28bf8f5-1442-4cc9-9777-8301f9cc4418",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/c28bf8f5-1442-4cc9-9777-8301f9cc4418/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4651,
+                "width": 4740,
+                "label": {
+                  "en": ["Page 6"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/c28bf8f5-1442-4cc9-9777-8301f9cc4418",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 627,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/c28bf8f5-1442-4cc9-9777-8301f9cc4418/full/!640,627/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 627,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/c28bf8f5-1442-4cc9-9777-8301f9cc4418",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/placeholder"
+              }
+            ]
+          }
+        ]
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7#xywh=57,57,1706,1673"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7#xywh=237,237,4266,4266"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8",
+      "type": "Canvas",
+      "height": 4633,
+      "width": 4712,
+      "label": {
+        "none": ["Page 7"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/7142667d-bcaa-40fe-aae1-80ffea37c79f/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/7142667d-bcaa-40fe-aae1-80ffea37c79f",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/7142667d-bcaa-40fe-aae1-80ffea37c79f/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4633,
+                "width": 4712,
+                "label": {
+                  "en": ["Page 7"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/7142667d-bcaa-40fe-aae1-80ffea37c79f",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 629,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/7142667d-bcaa-40fe-aae1-80ffea37c79f/full/!640,629/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 629,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/7142667d-bcaa-40fe-aae1-80ffea37c79f",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9",
+      "type": "Canvas",
+      "height": 4648,
+      "width": 4725,
+      "label": {
+        "none": ["Page 8"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/bcccd012-5b26-4ad4-bb4d-adb1497b14ba/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/bcccd012-5b26-4ad4-bb4d-adb1497b14ba",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/bcccd012-5b26-4ad4-bb4d-adb1497b14ba/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4648,
+                "width": 4725,
+                "label": {
+                  "en": ["Page 8"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/bcccd012-5b26-4ad4-bb4d-adb1497b14ba",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 629,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/bcccd012-5b26-4ad4-bb4d-adb1497b14ba/full/!640,629/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 629,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/bcccd012-5b26-4ad4-bb4d-adb1497b14ba",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10",
+      "type": "Canvas",
+      "height": 4637,
+      "width": 4715,
+      "label": {
+        "none": ["Page 9"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/21aeb4a0-520c-4295-a58b-dff82a08ad86/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/21aeb4a0-520c-4295-a58b-dff82a08ad86",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/21aeb4a0-520c-4295-a58b-dff82a08ad86/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4637,
+                "width": 4715,
+                "label": {
+                  "en": ["Page 9"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/21aeb4a0-520c-4295-a58b-dff82a08ad86",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 629,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/21aeb4a0-520c-4295-a58b-dff82a08ad86/full/!640,629/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 629,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/21aeb4a0-520c-4295-a58b-dff82a08ad86",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11",
+      "type": "Canvas",
+      "height": 4647,
+      "width": 4728,
+      "label": {
+        "none": ["Page 10"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b72da0f2-89ea-4505-9df8-c5ce1ecc6a87/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b72da0f2-89ea-4505-9df8-c5ce1ecc6a87",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b72da0f2-89ea-4505-9df8-c5ce1ecc6a87/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4647,
+                "width": 4728,
+                "label": {
+                  "en": ["Page 10"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b72da0f2-89ea-4505-9df8-c5ce1ecc6a87",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 629,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b72da0f2-89ea-4505-9df8-c5ce1ecc6a87/full/!640,629/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 629,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b72da0f2-89ea-4505-9df8-c5ce1ecc6a87",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12",
+      "type": "Canvas",
+      "height": 4648,
+      "width": 4721,
+      "label": {
+        "none": ["Page 11"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/28b99ba3-81ae-4db7-8983-5a6e247f7f12/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/28b99ba3-81ae-4db7-8983-5a6e247f7f12",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/28b99ba3-81ae-4db7-8983-5a6e247f7f12/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4648,
+                "width": 4721,
+                "label": {
+                  "en": ["Page 11"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/28b99ba3-81ae-4db7-8983-5a6e247f7f12",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 630,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/28b99ba3-81ae-4db7-8983-5a6e247f7f12/full/!640,630/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 630,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/28b99ba3-81ae-4db7-8983-5a6e247f7f12",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13",
+      "type": "Canvas",
+      "height": 4662,
+      "width": 4742,
+      "label": {
+        "none": ["Page 12"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/a1330559-c0c5-450d-b1e1-1eed08e5ea8a/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/a1330559-c0c5-450d-b1e1-1eed08e5ea8a",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/a1330559-c0c5-450d-b1e1-1eed08e5ea8a/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4662,
+                "width": 4742,
+                "label": {
+                  "en": ["Page 12"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/a1330559-c0c5-450d-b1e1-1eed08e5ea8a",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 629,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/a1330559-c0c5-450d-b1e1-1eed08e5ea8a/full/!640,629/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 629,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/a1330559-c0c5-450d-b1e1-1eed08e5ea8a",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14",
+      "type": "Canvas",
+      "height": 4641,
+      "width": 4732,
+      "label": {
+        "none": ["Page 13"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/58c8f489-74cf-42d7-8c42-8098b41a532d/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/58c8f489-74cf-42d7-8c42-8098b41a532d",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/58c8f489-74cf-42d7-8c42-8098b41a532d/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4641,
+                "width": 4732,
+                "label": {
+                  "en": ["Page 13"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/58c8f489-74cf-42d7-8c42-8098b41a532d",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 627,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/58c8f489-74cf-42d7-8c42-8098b41a532d/full/!640,627/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 627,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/58c8f489-74cf-42d7-8c42-8098b41a532d",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+      "type": "Canvas",
+      "height": 4652,
+      "width": 4738,
+      "label": {
+        "none": ["Page 14"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/85bc16cf-5800-4d4c-a9d3-0750054d7e0a/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/85bc16cf-5800-4d4c-a9d3-0750054d7e0a",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/85bc16cf-5800-4d4c-a9d3-0750054d7e0a/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4652,
+                "width": 4738,
+                "label": {
+                  "en": ["Page 14"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/85bc16cf-5800-4d4c-a9d3-0750054d7e0a",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 628,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/85bc16cf-5800-4d4c-a9d3-0750054d7e0a/full/!640,628/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 628,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/85bc16cf-5800-4d4c-a9d3-0750054d7e0a",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16",
+      "type": "Canvas",
+      "height": 4694,
+      "width": 9423,
+      "label": {
+        "none": ["Page 15"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/39ce6368-2e52-4df2-a914-6c43d77a736d/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/39ce6368-2e52-4df2-a914-6c43d77a736d",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/39ce6368-2e52-4df2-a914-6c43d77a736d/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4694,
+                "width": 9423,
+                "label": {
+                  "en": ["Page 15"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/39ce6368-2e52-4df2-a914-6c43d77a736d",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 318,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/39ce6368-2e52-4df2-a914-6c43d77a736d/full/!640,318/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 318,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/39ce6368-2e52-4df2-a914-6c43d77a736d",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16/placeholder"
+              }
+            ]
+          }
+        ]
+      },
+      "behavior": ["facing-pages"]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17",
+      "type": "Canvas",
+      "height": 4650,
+      "width": 4715,
+      "label": {
+        "none": ["Page 16"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/050c37d6-fcd8-47ee-8f03-e965853c1eb3/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/050c37d6-fcd8-47ee-8f03-e965853c1eb3",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/050c37d6-fcd8-47ee-8f03-e965853c1eb3/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4650,
+                "width": 4715,
+                "label": {
+                  "en": ["Page 16"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/050c37d6-fcd8-47ee-8f03-e965853c1eb3",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 631,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/050c37d6-fcd8-47ee-8f03-e965853c1eb3/full/!640,631/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 631,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/050c37d6-fcd8-47ee-8f03-e965853c1eb3",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18",
+      "type": "Canvas",
+      "height": 4658,
+      "width": 4739,
+      "label": {
+        "none": ["Page 17"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6d881c83-3a50-419e-9ab4-26fb1cc3f0f4/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6d881c83-3a50-419e-9ab4-26fb1cc3f0f4",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6d881c83-3a50-419e-9ab4-26fb1cc3f0f4/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4658,
+                "width": 4739,
+                "label": {
+                  "en": ["Page 17"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6d881c83-3a50-419e-9ab4-26fb1cc3f0f4",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 629,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6d881c83-3a50-419e-9ab4-26fb1cc3f0f4/full/!640,629/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 629,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6d881c83-3a50-419e-9ab4-26fb1cc3f0f4",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19",
+      "type": "Canvas",
+      "height": 4660,
+      "width": 4721,
+      "label": {
+        "none": ["Page 18"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/cd064860-0df0-4810-b3df-818fc862d8bc/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/cd064860-0df0-4810-b3df-818fc862d8bc",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/cd064860-0df0-4810-b3df-818fc862d8bc/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4660,
+                "width": 4721,
+                "label": {
+                  "en": ["Page 18"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/cd064860-0df0-4810-b3df-818fc862d8bc",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 631,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/cd064860-0df0-4810-b3df-818fc862d8bc/full/!640,631/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 631,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/cd064860-0df0-4810-b3df-818fc862d8bc",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/placeholder"
+              }
+            ]
+          }
+        ]
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19#xywh=968,307,1723,1582"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19#xywh=1062,496,2715,3682"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20",
+      "type": "Canvas",
+      "height": 4663,
+      "width": 4724,
+      "label": {
+        "none": ["Page 19"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/ed3a0c4e-3dd9-4045-8cc9-d6b7bca080a1/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/ed3a0c4e-3dd9-4045-8cc9-d6b7bca080a1",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/ed3a0c4e-3dd9-4045-8cc9-d6b7bca080a1/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4663,
+                "width": 4724,
+                "label": {
+                  "en": ["Page 19"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/ed3a0c4e-3dd9-4045-8cc9-d6b7bca080a1",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 631,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/ed3a0c4e-3dd9-4045-8cc9-d6b7bca080a1/full/!640,631/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 631,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/ed3a0c4e-3dd9-4045-8cc9-d6b7bca080a1",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21",
+      "type": "Canvas",
+      "height": 4650,
+      "width": 4728,
+      "label": {
+        "none": ["Page 20"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/f779253e-faf8-42e3-ab48-b66d7835925c/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/f779253e-faf8-42e3-ab48-b66d7835925c",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/f779253e-faf8-42e3-ab48-b66d7835925c/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4650,
+                "width": 4728,
+                "label": {
+                  "en": ["Page 20"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/f779253e-faf8-42e3-ab48-b66d7835925c",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 629,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/f779253e-faf8-42e3-ab48-b66d7835925c/full/!640,629/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 629,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/f779253e-faf8-42e3-ab48-b66d7835925c",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/placeholder"
+              }
+            ]
+          }
+        ]
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21#xywh=2080,416,1868,1229"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21#xywh=1017,473,2931,3759"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22",
+      "type": "Canvas",
+      "height": 4649,
+      "width": 4741,
+      "label": {
+        "none": ["Page 21"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/505e9f59-01dc-4a29-8ce1-95481156ccd7/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/505e9f59-01dc-4a29-8ce1-95481156ccd7",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/505e9f59-01dc-4a29-8ce1-95481156ccd7/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4649,
+                "width": 4741,
+                "label": {
+                  "en": ["Page 21"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/505e9f59-01dc-4a29-8ce1-95481156ccd7",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 627,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/505e9f59-01dc-4a29-8ce1-95481156ccd7/full/!640,627/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 627,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/505e9f59-01dc-4a29-8ce1-95481156ccd7",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23",
+      "type": "Canvas",
+      "height": 4641,
+      "width": 4725,
+      "label": {
+        "none": ["Page 22"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/88d6b93c-bf13-40ac-83d7-2d3a647c8da5/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/88d6b93c-bf13-40ac-83d7-2d3a647c8da5",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/88d6b93c-bf13-40ac-83d7-2d3a647c8da5/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4641,
+                "width": 4725,
+                "label": {
+                  "en": ["Page 22"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/88d6b93c-bf13-40ac-83d7-2d3a647c8da5",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 628,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/88d6b93c-bf13-40ac-83d7-2d3a647c8da5/full/!640,628/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 628,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/88d6b93c-bf13-40ac-83d7-2d3a647c8da5",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/placeholder"
+              }
+            ]
+          }
+        ]
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23#xywh=2386,227,1347,1347"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23#xywh=1181,472,2575,3591"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24",
+      "type": "Canvas",
+      "height": 4649,
+      "width": 4740,
+      "label": {
+        "none": ["Page 23"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6f880eb4-4a36-46cd-91a2-04b6ea10bf6e/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6f880eb4-4a36-46cd-91a2-04b6ea10bf6e",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6f880eb4-4a36-46cd-91a2-04b6ea10bf6e/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4649,
+                "width": 4740,
+                "label": {
+                  "en": ["Page 23"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6f880eb4-4a36-46cd-91a2-04b6ea10bf6e",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 627,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6f880eb4-4a36-46cd-91a2-04b6ea10bf6e/full/!640,627/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 627,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6f880eb4-4a36-46cd-91a2-04b6ea10bf6e",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25",
+      "type": "Canvas",
+      "height": 4654,
+      "width": 4734,
+      "label": {
+        "none": ["Page 24"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/afc3271d-008d-4eb5-9751-df5ec20c8204/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/afc3271d-008d-4eb5-9751-df5ec20c8204",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/afc3271d-008d-4eb5-9751-df5ec20c8204/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4654,
+                "width": 4734,
+                "label": {
+                  "en": ["Page 24"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/afc3271d-008d-4eb5-9751-df5ec20c8204",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 629,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/afc3271d-008d-4eb5-9751-df5ec20c8204/full/!640,629/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 629,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/afc3271d-008d-4eb5-9751-df5ec20c8204",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/placeholder"
+              }
+            ]
+          }
+        ]
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25#xywh=2452,473,1922,1212"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25#xywh=379,615,3977,3740"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26",
+      "type": "Canvas",
+      "height": 4657,
+      "width": 4726,
+      "label": {
+        "none": ["Page 25"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6372c738-8e4d-4a02-abb1-f28efb3ec5dd/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6372c738-8e4d-4a02-abb1-f28efb3ec5dd",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6372c738-8e4d-4a02-abb1-f28efb3ec5dd/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4657,
+                "width": 4726,
+                "label": {
+                  "en": ["Page 25"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6372c738-8e4d-4a02-abb1-f28efb3ec5dd",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 630,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6372c738-8e4d-4a02-abb1-f28efb3ec5dd/full/!640,630/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 630,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/6372c738-8e4d-4a02-abb1-f28efb3ec5dd",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27",
+      "type": "Canvas",
+      "height": 4652,
+      "width": 4745,
+      "label": {
+        "none": ["Page 26"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/426eb296-f63a-4d1a-b470-4b2d87e329b1/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/426eb296-f63a-4d1a-b470-4b2d87e329b1",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/426eb296-f63a-4d1a-b470-4b2d87e329b1/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4652,
+                "width": 4745,
+                "label": {
+                  "en": ["Page 26"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/426eb296-f63a-4d1a-b470-4b2d87e329b1",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 627,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/426eb296-f63a-4d1a-b470-4b2d87e329b1/full/!640,627/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 627,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/426eb296-f63a-4d1a-b470-4b2d87e329b1",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/placeholder"
+              }
+            ]
+          }
+        ]
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27#xywh=104,214,1542,1115"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27#xywh=285,285,4176,4128"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28",
+      "type": "Canvas",
+      "height": 4672,
+      "width": 4736,
+      "label": {
+        "none": ["Page 27"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/4c361bcc-d098-4575-a658-85336819324d/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/4c361bcc-d098-4575-a658-85336819324d",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/4c361bcc-d098-4575-a658-85336819324d/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4672,
+                "width": 4736,
+                "label": {
+                  "en": ["Page 27"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/4c361bcc-d098-4575-a658-85336819324d",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 631,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/4c361bcc-d098-4575-a658-85336819324d/full/!640,631/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 631,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/4c361bcc-d098-4575-a658-85336819324d",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29",
+      "type": "Canvas",
+      "height": 4660,
+      "width": 4759,
+      "label": {
+        "none": ["Page 28"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/30313063-da4b-4465-be26-fb3cd0eba860/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/30313063-da4b-4465-be26-fb3cd0eba860",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/30313063-da4b-4465-be26-fb3cd0eba860/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4660,
+                "width": 4759,
+                "label": {
+                  "en": ["Page 28"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/30313063-da4b-4465-be26-fb3cd0eba860",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 626,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/30313063-da4b-4465-be26-fb3cd0eba860/full/!640,626/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 626,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/30313063-da4b-4465-be26-fb3cd0eba860",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30",
+      "type": "Canvas",
+      "height": 4646,
+      "width": 4724,
+      "label": {
+        "none": ["Page 29"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/abcb5867-ef43-4d2d-9331-ef9030952249/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/abcb5867-ef43-4d2d-9331-ef9030952249",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/abcb5867-ef43-4d2d-9331-ef9030952249/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4646,
+                "width": 4724,
+                "label": {
+                  "en": ["Page 29"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/abcb5867-ef43-4d2d-9331-ef9030952249",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 629,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/abcb5867-ef43-4d2d-9331-ef9030952249/full/!640,629/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 629,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/abcb5867-ef43-4d2d-9331-ef9030952249",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31",
+      "type": "Canvas",
+      "height": 4662,
+      "width": 4753,
+      "label": {
+        "none": ["Back Cover"]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/fd3ec320-850d-40b0-ab52-54fbda6cf355/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/fd3ec320-850d-40b0-ab52-54fbda6cf355",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/fd3ec320-850d-40b0-ab52-54fbda6cf355/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 4662,
+                "width": 4753,
+                "label": {
+                  "en": ["Back Cover"]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/fd3ec320-850d-40b0-ab52-54fbda6cf355",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 627,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/fd3ec320-850d-40b0-ab52-54fbda6cf355/full/!640,627/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 627,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/fd3ec320-850d-40b0-ab52-54fbda6cf355",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/placeholder"
+              }
+            ]
+          }
+        ]
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/tags",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/tags/1",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Then",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31#xywh=404,86,3351,2163"
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31/tags/2",
+              "type": "Annotation",
+              "motivation": "tagging",
+              "body": {
+                "type": "TextualBody",
+                "value": "Now",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31#xywh=1901,2139,2495,2424"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "structures": [
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/1",
+      "type": "Range",
+      "label": {
+        "none": ["Front Cover"]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/2",
+      "type": "Range",
+      "label": {
+        "en": ["Introduction"]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/6",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/3",
+      "type": "Range",
+      "label": {
+        "en": ["Specifications “White” 1896 Model A"]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/8",
+          "type": "Canvas"
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/4",
+      "type": "Range",
+      "label": {
+        "en": ["Specifications “White” 1896 Model B"]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10",
+          "type": "Canvas"
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/5",
+      "type": "Range",
+      "label": {
+        "en": ["Specifications “White” 1896 Model C"]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12",
+          "type": "Canvas"
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/6",
+      "type": "Range",
+      "label": {
+        "en": ["Specifications “White” 1896 Model D"]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14",
+          "type": "Canvas"
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/7",
+      "type": "Range",
+      "label": {
+        "en": ["“White” Bearings"]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/7-1",
+          "type": "Range",
+          "label": {
+            "en": ["Crank Bearing"]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17",
+              "type": "Canvas"
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/7-2",
+          "type": "Range",
+          "label": {
+            "en": ["The Hubs"]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18",
+              "type": "Canvas"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8",
+      "type": "Range",
+      "label": {
+        "en": ["Important Features of the “White”"]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8-1",
+          "type": "Range",
+          "label": {
+            "en": ["The Large Sprocket"]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20#xywh=449,756,3685,1890",
+              "type": "Canvas"
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8-2",
+          "type": "Range",
+          "label": {
+            "en": ["Saddles"]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/20#xywh=449,2645,3685,1583",
+              "type": "Canvas"
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8-3",
+          "type": "Range",
+          "label": {
+            "en": ["Direct Seat Post"]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22#xywh=521,450,3651,1304",
+              "type": "Canvas"
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8-4",
+          "type": "Range",
+          "label": {
+            "en": ["“Built-up” Wood Rim"]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22#xywh=521,853,3651,1209",
+              "type": "Canvas"
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8-5",
+          "type": "Range",
+          "label": {
+            "en": ["Pedals"]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/22#xywh=521,2086,3698,2181",
+              "type": "Canvas"
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/range/8-6",
+          "type": "Range",
+          "label": {
+            "en": ["“White” Handle Bars"]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/24",
+              "type": "Canvas"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/9",
+      "type": "Range",
+      "label": {
+        "en": ["Guaranty on “White” Bicycles"]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/26",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/10",
+      "type": "Range",
+      "label": {
+        "en": ["Tire Guarantees"]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/28",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/11",
+      "type": "Range",
+      "label": {
+        "en": ["Terms of Sale"]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29",
+          "type": "Canvas"
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/range/12",
+      "type": "Range",
+      "label": {
+        "none": ["Back Cover"]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31",
+          "type": "Canvas"
+        }
+      ]
+    }
+  ]
+}

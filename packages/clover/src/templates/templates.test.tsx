@@ -87,6 +87,18 @@ describe("templates", () => {
     expect(toggle().closest(".clover-canvas-controls")).not.toBeNull();
   });
 
+  // `fill` lays it out in the box it is given; without it, the stage keeps its height.
+  it("Default: fill marks the layout to fill its box, and is off by default", async () => {
+    const { rerender, container } = render(
+      <Templates.Default iiifContent={bookJson} />,
+    );
+    await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+    const layout = () => container.querySelector(".clover-template-default");
+    expect(layout()).not.toHaveAttribute("data-fill");
+    rerender(<Templates.Default iiifContent={bookJson} fill />);
+    expect(layout()).toHaveAttribute("data-fill", "true");
+  });
+
   it("Default: the strip's arrows step the view; its header names the pages", async () => {
     render(<Templates.Default iiifContent={bookJson} />);
     const next = await screen.findByRole("button", { name: "Next" });

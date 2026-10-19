@@ -16,5 +16,14 @@
       "navbar": false,
       "footer": false
     }
+  },
+  "recipes": {
+    "title": "Recipes (test)",
+    "display": "hidden",
+    "theme": {
+      "layout": "raw",
+      "navbar": false,
+      "footer": false
+    }
   }
 }

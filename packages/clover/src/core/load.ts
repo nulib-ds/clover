@@ -11,15 +11,17 @@ import {
   toPresentation4,
 } from "./presentation";
 import { type CloverRequest, fetchJson } from "./request";
+import type { AnnotationSet } from "./annotation-sets";
 
 /**
  * Turning whatever a `Root` is handed into a Manifest to show.
  *
  * `iiifContent` may be a URL, a IIIF resource object (Presentation 2, 3 or 4), or a content
  * state (JSON or base64url). The resource may be a Manifest, a Collection (its first
- * Manifest is shown), or a lone Canvas (its `partOf` Manifest, or a Manifest made around
- * it). Everything is fetched once, with the request settings, and upgraded to
- * Presentation 4.
+ * Manifest is shown), a lone Canvas (its `partOf` Manifest, or a Manifest made around
+ * it), or annotations, an AnnotationPage or AnnotationCollection (the Manifest their first
+ * annotation's Canvas is `partOf`, at that Canvas). Everything is fetched once, with the
+ * request settings, and upgraded to Presentation 4.
  */
 
 export type IIIFContent = string | Record<string, unknown>;
@@ -30,7 +32,57 @@ export interface Loaded {
   collection?: Collection;
   /** Where a content state, or a Canvas given directly, points. */
   target?: Target;
+  /** A content state's note, as an annotation to show and pick (`resolveContentState`). */
+  annotation?: Record<string, any>;
+  /**
+   * Annotations given as the content (an AnnotationPage or AnnotationCollection), as sets:
+   * shown wherever their Canvases are, across the Manifests they name.
+   */
+  annotationSets?: AnnotationSet[];
+  /** The annotation to pick on arrival: the first of those, on the Canvas opened. */
+  pick?: string;
 }
+
+/** What a Canvas says of itself that a Manifest can say too, for one shown on its own. */
+const DESCRIPTIVE = [
+  "summary",
+  "metadata",
+  "requiredStatement",
+  "rights",
+  "provider",
+  "homepage",
+  "seeAlso",
+  "rendering",
+  "thumbnail",
+  "navDate",
+  "partOf",
+];
+
+/**
+ * A Canvas on its own, as a Manifest of one: its id (so it is told from a Manifest that
+ * holds it, `isLoneCanvas`), what it says of itself, and the Canvas.
+ */
+export function loneCanvas(canvas: Json): Manifest {
+  const manifest: Json = {
+    "@context": P4_CONTEXT,
+    id: canvas.id,
+    type: "Manifest",
+    label: canvas.label ?? { none: [""] },
+    items: [canvas],
+  };
+  for (const key of DESCRIPTIVE) {
+    if (canvas[key] !== undefined && key !== "label")
+      manifest[key] = canvas[key];
+  }
+  return manifest as unknown as Manifest;
+}
+
+/** Whether a Manifest is a Canvas shown on its own (`loneCanvas`). */
+export const isLoneCanvas = (manifest: Json | null | undefined) =>
+  Boolean(manifest) && manifest!.items?.[0]?.id === manifest!.id;
+
+/** An AnnotationPage or AnnotationCollection, as the content. */
+const ANNOTATIONS = /^(oa:)?Annotation(Page|Collection)$/;
 
 export class CloverContentError extends Error {
   name = "CloverContentError";
@@ -45,7 +97,7 @@ interface LoadOptions {
   signal?: AbortSignal;
 }
 
-interface LoadContentOptions extends LoadOptions {
+export interface LoadContentOptions extends LoadOptions {
   /** In a Collection, the member Manifest to open instead of the first. */
   manifestId?: string;
 }
@@ -156,6 +208,8 @@ export async function loadContent(
   let target: Target | undefined;
   /** The Collection member a content state names, to open in place of the first. */
   let member: string | undefined;
+  /** A content state's note. */
+  let annotation: Record<string, any> | undefined;
   let json: unknown;
 
   /** A content state names what to load and where to go in it. */
@@ -164,6 +218,7 @@ export async function loadContent(
     if (!resolved) throw new CloverContentError("Unreadable content state");
     target = resolved.target ?? target;
     member = resolved.manifestId ?? member;
+    annotation = resolved.annotation ?? annotation;
     return fetchJson(request, resolved.id, signal);
   };
 
@@ -183,12 +238,21 @@ export async function loadContent(
     json = await followContentState(json as Record<string, any>);
   }
 
+  /*
+   * Annotations, made apart from any Manifest: shown in the Manifest their first
+   * annotation's Canvas is `partOf`. Loaded only for them, so no other page carries it.
+   */
+  if (ANNOTATIONS.test(String((json as Json)?.type ?? ""))) {
+    const { annotationsContent } = await import("./annotations-content");
+    return annotationsContent(json as Json, options);
+  }
+
   const resource = await toPresentation4<Record<string, any>>(json);
   signal?.throwIfAborted?.();
 
   switch (resource.type) {
     case "Manifest":
-      return { manifest: resource as Manifest, target };
+      return { manifest: resource as Manifest, target, annotation };
     case "Collection": {
       const collection = await withMembers(resource as Collection, options);
       // The host's choice, or the content state's, or else the first member.
@@ -204,30 +268,19 @@ export async function loadContent(
       if (!manifest) {
         throw new CloverContentError("The Collection holds no Manifest");
       }
-      return { manifest, collection, target };
+      return { manifest, collection, target, annotation };
     }
     case "Canvas":
     case "Timeline": {
+      /*
+       * A Canvas, given itself, is what is shown, not the Manifest it is `partOf`: a
+       * Manifest of one, saying what the Canvas says of itself (its label, summary,
+       * metadata, rights…), and keeping its `partOf`, from which the full Manifest can
+       * be opened in its place (`About`).
+       */
       const container = resource;
       target ??= { canvasId: container.id };
-      const partOf = (container.partOf ?? []).find(
-        (part: any) => part?.type === "Manifest" && part.id,
-      );
-      if (partOf) {
-        const manifest = await toPresentation4<Manifest>(
-          await fetchJson(request, partOf.id, signal),
-        );
-        return { manifest, target };
-      }
-      // A Canvas on its own: shown as a Manifest of one.
-      const manifest = {
-        "@context": P4_CONTEXT,
-        id: container.id,
-        type: "Manifest",
-        label: container.label ?? { none: [""] },
-        items: [container],
-      } as unknown as Manifest;
-      return { manifest, target };
+      return { manifest: loneCanvas(container), target, annotation };
     }
     default:
       throw new CloverContentError(

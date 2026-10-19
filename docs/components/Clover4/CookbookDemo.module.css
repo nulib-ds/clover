@@ -1,4 +1,7 @@
-/* The Viewer in the slide-in panel: filling it, and scrolling within it when taller. */
+/*
+ * The Viewer in the slide-in panel, filling it (`fill`): its box is the panel's body,
+ * which scrolls only in a window too short for the stage's least height.
+ */
 .viewer {
   height: 100%;
   overflow-y: auto;

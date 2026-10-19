@@ -1,4 +1,11 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { p4 } from "../../fixtures/presentation4";
 import React from "react";
 
@@ -9,6 +16,8 @@ import placeholderVideoJson from "../../fixtures/iiif-cookbook/0013-placeholderC
 import metadataAnywhereJson from "../../fixtures/iiif-cookbook/0029-metadata-anywhere.json";
 import choiceJson from "../../fixtures/iiif-cookbook/0033-choice.json";
 import audioJson from "../../fixtures/iiif-cookbook/0002-mvm-audio.json";
+import hotspotJson from "../../fixtures/iiif-cookbook/0022-linking-with-a-hotspot.json";
+import fullCanvasJson from "../../fixtures/iiif-cookbook/0266-full-canvas-annotation.json";
 import { initCloverI18n } from "../../i18n";
 import { CanvasRenderer } from "../../lib/renderer";
 import { Root } from "../Root/Root";
@@ -44,6 +53,7 @@ beforeEach(() => {
     setImages: vi.fn().mockResolvedValue(undefined),
     clear: vi.fn(),
     setGestures: vi.fn(),
+    setDismiss: vi.fn(),
     dispose: vi.fn(),
     isOpen: false,
     backendKind: "webgl2",
@@ -84,6 +94,213 @@ describe("Canvas", () => {
   it("renders nothing without a source, as Image does", () => {
     const { container } = render(<Canvas src={[]} />);
     expect(container).toBeEmptyDOMElement();
+  });
+
+  // Outside any Root, it loads what it draws: a Canvas, or a Manifest's first.
+  it("loads a Canvas given as iiifContent, or a Manifest's first, and draws it", async () => {
+    const fetch = vi.fn(
+      async () =>
+        new Response(JSON.stringify(bookJson), {
+          headers: { "Content-Type": "application/json" },
+        }),
+    );
+    const { unmount } = render(
+      <Canvas
+        iiifContent="https://example.org/book.json"
+        options={{ request: { fetch } }}
+      />,
+    );
+    // The Manifest's first Canvas, named by its label.
+    // The loading chunk, the content and the upgrader arrive first: slow under load.
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("clover-canvas-viewport"),
+        ).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    expect(fetch).toHaveBeenCalledWith(
+      "https://example.org/book.json",
+      expect.anything(),
+    );
+    expect(renderer.setImages).toHaveBeenCalled();
+    unmount();
+    render(<Canvas iiifContent={bookJson.items[1] as any} />);
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("clover-canvas-viewport"),
+        ).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+  });
+
+  // Its own annotations, as a Canvas on its own carries them: drawn where they target.
+  it("draws the annotations a Canvas loaded as iiifContent carries", async () => {
+    const canvas = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      ...bookJson.items[1],
+      annotations: [
+        {
+          id: "https://example.org/tags",
+          type: "AnnotationPage",
+          items: [
+            {
+              id: "https://example.org/tags/1",
+              type: "Annotation",
+              motivation: "tagging",
+              body: {
+                type: "TextualBody",
+                value: "A tag",
+                format: "text/plain",
+              },
+              target: `${bookJson.items[1].id}#xywh=10,20,30,40`,
+            },
+          ],
+        },
+      ],
+    };
+    render(<Canvas iiifContent={canvas as any} />);
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("clover-canvas-viewport"),
+        ).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    await open();
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "A tag" })).toBeInTheDocument(),
+    );
+  });
+
+  it("shows its box, busy, with the loading mark until what it loads arrives, and says why it failed", async () => {
+    let answer!: (response: Response) => void;
+    const fetch = vi.fn(
+      () => new Promise<Response>((resolve) => (answer = resolve)),
+    );
+    const { container } = render(
+      <Canvas
+        iiifContent="https://example.org/missing.json"
+        options={{ request: { fetch } }}
+      />,
+    );
+    // Never an empty box: the Canvas's own, busy, its loading mark along the top.
+    const box = container.querySelector(".clover-canvas")!;
+    expect(box).toHaveAttribute("aria-busy", "true");
+    expect(box.querySelector(".clover-loading")).not.toBeNull();
+    await waitFor(() => expect(fetch).toHaveBeenCalled());
+    answer(new Response("Not found", { status: 404 }));
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("This could not be loaded.");
+    expect(alert.querySelector(".clover-status-detail")?.textContent).not.toBe(
+      "",
+    );
+    expect(container.querySelector(".clover-canvas")).toHaveAttribute(
+      "data-status",
+      "error",
+    );
+  });
+
+  it("loads the Canvas a content state names, its note drawn there", async () => {
+    const BOOK = "https://example.org/book.json";
+    const fetch = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ ...bookJson, id: BOOK }), {
+          headers: { "Content-Type": "application/json" },
+        }),
+    );
+    render(
+      <Canvas
+        iiifContent={{
+          "@context": "http://iiif.io/api/presentation/3/context.json",
+          id: "https://example.org/state/1",
+          type: "Annotation",
+          motivation: ["contentState"],
+          target: {
+            type: "SpecificResource",
+            source: {
+              id: bookJson.items[2].id,
+              type: "Canvas",
+              partOf: [{ id: BOOK, type: "Manifest" }],
+            },
+            selector: { type: "FragmentSelector", value: "xywh=10,20,30,40" },
+          },
+          body: [
+            { type: "TextualBody", value: "A note", format: "text/plain" },
+          ],
+        }}
+        options={{ request: { fetch } }}
+      />,
+    );
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("clover-canvas-viewport"),
+        ).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    expect(fetch).toHaveBeenCalledWith(BOOK, expect.anything());
+    await open();
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "A note" }),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  // Cookbook 0022: its hotspot leads to the Manifest's other Canvas, which it then shows.
+  it("follows a linking hotspot to another Canvas of what it loaded, focus kept on its viewport", async () => {
+    render(<Canvas iiifContent={hotspotJson as any} />);
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("clover-canvas-viewport"),
+        ).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    await open();
+    const hotspot = await screen.findByRole("button", {
+      name: "A link to a close up of Gänseliesel-Brunnen fountain.",
+    });
+    renderer.setImages.mockClear();
+    fireEvent.click(hotspot);
+    await waitFor(() =>
+      expect(renderer.setImages).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            service: expect.stringContaining("fountain"),
+          }),
+        ],
+        expect.anything(),
+      ),
+    );
+    expect(screen.getByTestId("clover-canvas-viewport")).toHaveFocus();
+  });
+
+  // Cookbook 0266: a comment on the whole Canvas has no region; the caption shows it.
+  it("shows comments on the whole Canvas in its caption", async () => {
+    render(<Canvas iiifContent={fullCanvasJson as any} />);
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("clover-canvas-viewport"),
+        ).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    await open();
+    fireEvent.click(await screen.findByRole("button", { name: "About" }));
+    const caption = screen.getByTestId("clover-canvas-caption");
+    await waitFor(() =>
+      expect(caption).toHaveTextContent(
+        "Göttinger Marktplatz mit Gänseliesel Brunnen",
+      ),
+    );
+    expect(caption).toHaveTextContent("Annotations");
+    expect(caption.querySelector(".clover-annotations-text")).toHaveAttribute(
+      "lang",
+      "de",
+    );
   });
 
   it("renders an accessible, focusable viewport", () => {
@@ -383,7 +600,11 @@ describe("Canvas", () => {
           id: "https://example.org/anno/1",
           type: "Annotation",
           body: [
-            { type: "TextualBody", value: "<b>Fountain</b> &amp; square" },
+            {
+              type: "TextualBody",
+              value: "<b>Fountain</b> &amp; square",
+              format: "text/html",
+            },
           ],
           target: "https://example.org/canvas#xywh=10,20,30,40",
         } as any,
@@ -445,6 +666,48 @@ describe("Canvas", () => {
       expect(button).toHaveAttribute("data-active", "true");
     });
 
+    /*
+     * The pick is let go by Escape in the Canvas (WCAG 2.1.1), as by a click or tap off
+     * every hotspot (the renderer's `dismiss`, which the gestures ask before a zoom).
+     */
+    it("lets go of the picked hotspot on Escape or a click off it, and says Escape does", async () => {
+      const onAnnotationSelect = vi.fn();
+      render(
+        <Canvas
+          src="a.jpg"
+          annotations={annotations}
+          onAnnotationSelect={onAnnotationSelect}
+        />,
+      );
+      await open();
+      const viewport = screen.getByTestId("clover-canvas-viewport");
+      expect(viewport.getAttribute("aria-keyshortcuts")).toMatch(/ Escape$/);
+      expect(viewport).toHaveAccessibleDescription(
+        /Press Escape to clear the selected annotation\.$/,
+      );
+      const button = screen.getByRole("button", { name: "Fountain & square" });
+      fireEvent.click(button);
+      expect(button).toHaveAttribute("aria-current", "true");
+      fireEvent.keyDown(viewport, { key: "Escape" });
+      expect(button).not.toHaveAttribute("aria-current");
+      expect(button).toHaveAttribute("data-active", "false");
+      expect(onAnnotationSelect).toHaveBeenLastCalledWith(null);
+
+      fireEvent.click(button);
+      const [dismiss] = renderer.setDismiss.mock.calls.at(-1);
+      let dismissed: boolean | undefined;
+      act(() => {
+        dismissed = dismiss();
+      });
+      expect(dismissed).toBe(true);
+      expect(button).not.toHaveAttribute("aria-current");
+      // Nothing left to let go: that tap zooms, as ever.
+      act(() => {
+        dismissed = dismiss();
+      });
+      expect(dismissed).toBe(false);
+    });
+
     it("lists them in a menu from a comment control; picking one zooms to it", async () => {
       render(<Canvas src="a.jpg" annotations={annotations} />);
       await open();
@@ -462,12 +725,15 @@ describe("Canvas", () => {
 
       fireEvent.click(item);
       expect(item).toBeChecked();
-      expect(renderer.fitAnnotation).toHaveBeenCalledWith({
-        x: 10,
-        y: 20,
-        width: 30,
-        height: 40,
-      });
+      expect(renderer.fitAnnotation).toHaveBeenCalledWith(
+        {
+          x: 10,
+          y: 20,
+          width: 30,
+          height: 40,
+        },
+        true,
+      );
       // Its hotspot stays highlighted as the current one.
       expect(
         screen.getByRole("button", { name: "Fountain & square" }),
@@ -476,6 +742,33 @@ describe("Canvas", () => {
       fireEvent.keyDown(document, { key: "Escape" });
       expect(control).toHaveAttribute("aria-expanded", "false");
       expect(control).toHaveFocus();
+    });
+
+    // A cut by default; the glide only when the host asks for it.
+    it("frames a picked annotation at once, or glides to it with animateAnnotations", async () => {
+      const { unmount } = render(
+        <Canvas src="a.jpg" annotations={annotations} />,
+      );
+      await open();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Fountain & square" }),
+      );
+      expect(renderer.fitAnnotation).toHaveBeenLastCalledWith(
+        expect.any(Object),
+        true,
+      );
+      unmount();
+      render(
+        <Canvas src="a.jpg" annotations={annotations} animateAnnotations />,
+      );
+      await open();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Fountain & square" }),
+      );
+      expect(renderer.fitAnnotation).toHaveBeenLastCalledWith(
+        expect.any(Object),
+        false,
+      );
     });
 
     it("offers no annotations control without drawable annotations, or when turned off", async () => {
@@ -508,12 +801,15 @@ describe("Canvas", () => {
         zoomed = handle.zoomToAnnotation(hotspot.id);
       });
       expect(zoomed).toBe(true);
-      expect(renderer.fitAnnotation).toHaveBeenCalledWith({
-        x: 10,
-        y: 20,
-        width: 30,
-        height: 40,
-      });
+      expect(renderer.fitAnnotation).toHaveBeenCalledWith(
+        {
+          x: 10,
+          y: 20,
+          width: 30,
+          height: 40,
+        },
+        true,
+      );
       expect(hotspot).toHaveFocus();
       expect(handle.zoomToAnnotation("https://example.org/none")).toBe(false);
     });
@@ -524,12 +820,15 @@ describe("Canvas", () => {
       fireEvent.click(
         screen.getByRole("button", { name: "Fountain & square" }),
       );
-      expect(renderer.fitAnnotation).toHaveBeenCalledWith({
-        x: 10,
-        y: 20,
-        width: 30,
-        height: 40,
-      });
+      expect(renderer.fitAnnotation).toHaveBeenCalledWith(
+        {
+          x: 10,
+          y: 20,
+          width: 30,
+          height: 40,
+        },
+        true,
+      );
     });
   });
 
@@ -585,6 +884,49 @@ describe("Canvas", () => {
       expect(mark()).not.toBeNull();
       act(() => listeners.change());
       expect(mark()).toBeNull();
+    });
+
+    /*
+     * On a move the last view stays up until the next one draws: its hotspots, and the
+     * framing of a pick on it, wait for that, so the camera moves in the scene it ends
+     * in: the spread fitted first, then the annotation.
+     */
+    it("waits for the next view to draw before its hotspots and a pick's framing", async () => {
+      const note = (canvas: any) => ({
+        targetIndex: 0,
+        annotation: {
+          id: `${canvas.id}/note`,
+          type: "Annotation",
+          body: { type: "TextualBody", value: "A note" },
+          target: `${canvas.id}#xywh=10,20,30,40`,
+        } as any,
+      });
+      const { rerender } = render(
+        <Canvas
+          canvases={[pages[0]]}
+          annotations={[note(pages[0])]}
+          selectedAnnotation={null}
+        />,
+      );
+      await open();
+      expect(screen.getAllByRole("button", { name: "A note" })).toHaveLength(1);
+      renderer.isOpen = true;
+      rerender(
+        <Canvas
+          canvases={[pages[1]]}
+          annotations={[note(pages[1])]}
+          selectedAnnotation={`${pages[1].id}/note`}
+        />,
+      );
+      // Still the last view: no hotspot laid over it, and the camera left alone.
+      expect(screen.queryByRole("button", { name: "A note" })).toBeNull();
+      expect(renderer.fitAnnotation).not.toHaveBeenCalled();
+      act(() => listeners.change());
+      await loaded();
+      expect(
+        screen.getByRole("button", { name: "A note" }),
+      ).toBeInTheDocument();
+      expect(renderer.fitAnnotation).toHaveBeenCalledTimes(1);
     });
 
     it("clears at once for another Manifest, not for another of its Canvases", () => {
@@ -806,6 +1148,108 @@ describe("Canvas", () => {
       expect(screen.queryByRole("button", { name: "Zoom in" })).toBeNull();
     });
 
+    // The reader asked to see it: a list beside the Canvas, or a link, picked it.
+    it("opens past the still for a pick made outside it, once its annotation is in view", () => {
+      const note = {
+        targetIndex: 0,
+        annotation: {
+          id: "https://example.org/anno/1",
+          type: "Annotation",
+          body: { type: "TextualBody", value: "A note" },
+          target: `${first.id}#xywh=10,20,30,40`,
+        } as any,
+      };
+      const { rerender } = render(
+        <Canvas
+          canvases={[first]}
+          annotations={[note]}
+          selectedAnnotation={null}
+        />,
+      );
+      // One on no Canvas in view opens nothing.
+      rerender(
+        <Canvas
+          canvases={[first]}
+          annotations={[note]}
+          selectedAnnotation="https://example.org/anno/elsewhere"
+        />,
+      );
+      expect(openViewer()).toBeInTheDocument();
+      expect(renderer.setImages).not.toHaveBeenCalled();
+      rerender(
+        <Canvas
+          canvases={[first]}
+          annotations={[note]}
+          selectedAnnotation="https://example.org/anno/1"
+        />,
+      );
+      expect(renderer.setImages).toHaveBeenCalledTimes(1);
+      expect(closeViewer()).toBeInTheDocument();
+    });
+
+    // Its annotations are to hand over the still: picking one opens it there.
+    it("keeps the annotations menu over the still; a pick from it opens the Canvas and frames it once drawn", async () => {
+      const note = {
+        targetIndex: 0,
+        annotation: {
+          id: "https://example.org/anno/1",
+          type: "Annotation",
+          body: { type: "TextualBody", value: "A note" },
+          target: `${first.id}#xywh=10,20,30,40`,
+        } as any,
+      };
+      render(<Canvas canvases={[first]} annotations={[note]} />);
+      await loaded();
+      const control = screen.getByRole("button", { name: "Annotations" });
+      expect(screen.queryByRole("button", { name: "Zoom in" })).toBeNull();
+      fireEvent.click(control);
+      fireEvent.click(screen.getByRole("radio", { name: "A note" }));
+      // Opened, but nothing to frame until the Canvas draws.
+      expect(renderer.setImages).toHaveBeenCalledTimes(1);
+      expect(renderer.fitAnnotation).not.toHaveBeenCalled();
+      await open();
+      expect(renderer.fitAnnotation).toHaveBeenCalledTimes(1);
+      expect(renderer.fitAnnotation).toHaveBeenLastCalledWith(
+        expect.any(Object),
+        true,
+      );
+      expect(screen.getByRole("button", { name: "A note" })).toHaveAttribute(
+        "aria-current",
+        "true",
+      );
+    });
+
+    // Closed, nothing of the pick shows: it is let go, so picking it again reopens.
+    it("lets go of the pick when the Canvas is closed back to its still", async () => {
+      const onAnnotationSelect = vi.fn();
+      const note = {
+        targetIndex: 0,
+        annotation: {
+          id: "https://example.org/anno/1",
+          type: "Annotation",
+          body: { type: "TextualBody", value: "A note" },
+          target: `${first.id}#xywh=10,20,30,40`,
+        } as any,
+      };
+      render(
+        <Canvas
+          canvases={[first]}
+          annotations={[note]}
+          onAnnotationSelect={onAnnotationSelect}
+        />,
+      );
+      await loaded();
+      fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
+      fireEvent.click(screen.getByRole("radio", { name: "A note" }));
+      await open();
+      expect(onAnnotationSelect).toHaveBeenLastCalledWith(
+        "https://example.org/anno/1",
+      );
+      fireEvent.click(closeViewer());
+      expect(onAnnotationSelect).toHaveBeenLastCalledWith(null);
+      expect(openViewer()).toBeInTheDocument();
+    });
+
     it("opens the Canvas from the toggle, and goes back to the still", async () => {
       render(<Canvas canvases={[first]} />);
       fireEvent.click(openViewer());
@@ -929,7 +1373,7 @@ describe("Canvas", () => {
       play.mockRestore();
     });
 
-    it("holds back annotations and Choice", async () => {
+    it("holds back Choice and the hotspots, not the annotations menu", async () => {
       const [canvas] = choice.items as any[];
       render(
         <Canvas
@@ -950,7 +1394,8 @@ describe("Canvas", () => {
       );
       await open();
       expect(screen.queryByRole("button", { name: "Choice" })).toBeNull();
-      expect(screen.queryByRole("button", { name: "Annotations" })).toBeNull();
+      // The menu is to hand; a pick from it opens the Canvas (tested above).
+      expect(screen.getByRole("button", { name: "Annotations" })).toBeVisible();
       expect(screen.queryByRole("button", { name: "A note" })).toBeNull();
 
       fireEvent.click(openViewer());

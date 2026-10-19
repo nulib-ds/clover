@@ -1,6 +1,7 @@
 import type { CloverRequest } from "../../../core/request";
 import React, { useEffect, useMemo, useState } from "react";
 
+import type { TimedAnnotation } from "../Annotations";
 import type { MediaPlacement } from "../layout";
 import Transport, { type TransportChapter } from "./Transport";
 import { type CaptionOption, useCaptionTracks } from "./useCaptionTracks";
@@ -12,6 +13,8 @@ import type { CanvasRenderer } from "../../../lib/renderer";
 import { useOptionalClover } from "../../../react/context";
 
 const SKIP_SECONDS = 10;
+/** A moment's annotation (`#t=` with no end) shows this long, to read a few words. */
+const MOMENT_SECONDS = 3;
 
 export interface MediaStageProps {
   media: MediaPlacement;
@@ -46,6 +49,11 @@ export interface MediaStageProps {
   chapters?: TransportChapter[];
   /** The language to read IIIF text in. The Root's, or the reader's. */
   language?: string;
+  /**
+   * Annotations on the recording's time (Cookbook 0103): each shows as a cue while its
+   * stretch plays, as a caption does, under its AnnotationPage's label.
+   */
+  notes?: TimedAnnotation[];
 }
 
 /**
@@ -60,7 +68,8 @@ export interface MediaStageProps {
  *   back and forward ten seconds.
  * - Captions are drawn here from the active track's cues, above the transport, so they
  *   read at any zoom whichever way the video is presented. The tracks are the
- *   Manifest's and any the media carries itself (`useCaptionTracks`).
+ *   Manifest's and any the media carries itself (`useCaptionTracks`). Annotations on
+ *   the recording's time show among them, each while its stretch plays.
  * - It stays mounted from one recording to the next, as auto-advance moves on, so the
  *   transport keeps keyboard focus (WCAG 2.4.3); the element and captions start afresh.
  * - Sound plays through the same element and transport, over the Canvas's accompanying
@@ -82,6 +91,7 @@ const MediaStage: React.FC<MediaStageProps> = ({
   autoPlay = false,
   chapters,
   language: givenLanguage,
+  notes,
 }) => {
   // IIIF text in the Root's language, or the reader's when there is no Root.
   const rootLanguage = useOptionalClover()?.language;
@@ -206,6 +216,19 @@ const MediaStage: React.FC<MediaStageProps> = ({
   // The cues are in their track's language (WCAG 3.1.2); IIIF's "none" is not a tag.
   const captionLanguage = captions.options[captions.active]?.language;
 
+  // The annotations whose stretch is playing, in the order given.
+  const { currentTime } = controller;
+  const playing = useMemo(
+    () =>
+      (notes ?? []).filter(
+        (note) =>
+          note.label &&
+          currentTime >= note.start &&
+          currentTime < (note.end ?? note.start + MOMENT_SECONDS),
+      ),
+    [notes, currentTime],
+  );
+
   return (
     <div
       className="clover-canvas-media"
@@ -231,19 +254,39 @@ const MediaStage: React.FC<MediaStageProps> = ({
         video={media.kind === "video" ? element : null}
         chapters={chapters}
       />
-      {/* After the transport: the stylesheet lifts the cues clear of it. */}
-      {cues.length > 0 && (
-        <div
-          className="clover-canvas-captions"
-          aria-live="off"
-          lang={
-            captionLanguage && captionLanguage !== "none"
-              ? captionLanguage
-              : undefined
-          }
-        >
+      {/*
+        After the transport: the stylesheet lifts the cues clear of it. The annotations
+        over the captions, which keep the line nearest the bar.
+      */}
+      {cues.length + playing.length > 0 && (
+        <div className="clover-canvas-captions" aria-live="off">
+          {playing.map((note) => (
+            <span
+              className="clover-canvas-captions-cue"
+              data-kind="annotation"
+              key={note.id}
+            >
+              {note.page && (
+                <span
+                  className="clover-canvas-captions-cue-label"
+                  lang={note.page.lang}
+                >
+                  {note.page.text}
+                </span>
+              )}
+              <span lang={note.lang}>{note.label}</span>
+            </span>
+          ))}
           {cues.map((text, index) => (
-            <span className="clover-canvas-captions-cue" key={index}>
+            <span
+              className="clover-canvas-captions-cue"
+              key={index}
+              lang={
+                captionLanguage && captionLanguage !== "none"
+                  ? captionLanguage
+                  : undefined
+              }
+            >
               {text}
             </span>
           ))}

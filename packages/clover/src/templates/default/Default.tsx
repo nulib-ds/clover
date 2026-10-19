@@ -54,6 +54,13 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    * (`localStorage`). Default `"clover-template-default"`; `false` forgets it.
    */
   storageKey?: string | false;
+  /**
+   * Fill the box it sits in: as tall as that box, the stage taking what the header and
+   * the strip leave, so nothing runs below it. For a box of a set height, the window
+   * under a page's own header say. Default `false`: the stage is
+   * `--clover-content-height` tall, and the layout as tall as it needs.
+   */
+  fill?: boolean;
 };
 
 /**
@@ -77,6 +84,7 @@ export function Default({
   panelLayout = "accordion",
   items = "carousel",
   storageKey = "clover-template-default",
+  fill = false,
   ...root
 }: DefaultProps) {
   const body = useRef<HTMLElement>(null);
@@ -161,6 +169,7 @@ export function Default({
       className={["clover-template-default", className]
         .filter(Boolean)
         .join(" ")}
+      data-fill={fill || undefined}
       {...root}
     >
       <Clover.Split
