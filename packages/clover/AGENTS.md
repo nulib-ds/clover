@@ -463,9 +463,9 @@ every rule below.
   polling anywhere.
 - **Media text.** `core/vtt.ts` parses WebVTT and caches each file's text (`loadVtt`),
   shared by the Canvas's caption tracks and `Transcript`; tests call `clearVttCache()`.
-  A transcript as plain text (`canvasTextTranscripts` in `Canvas/layout.ts`: a
-  time-based Canvas's `text/plain` `rendering` or supplementing body, as in Cookbook
-  recipes 0017 and 0253) is the Transcript's too, after the captions, untimed, in
+  A transcript as plain text (`canvasTextTranscripts` in `Canvas/layout.ts`: a Canvas's
+  `text/plain` `rendering` or supplementing body, as in Cookbook recipes 0017 and 0253,
+  a recording's or an image's, Mat 2026-10-19) is the Transcript's too, after the captions, untimed, in
   paragraphs (`loadText`, `paragraphsOf`). In the row it shows "TXT" after the caption files'
   language codes (Mat, 2026-10-19), "TXT EN" where there are several, and any code that
   would show twice shows its label instead. The docs' `transcripts` mock has both kinds. `decodeText` reads UTF-8, else Windows-1252 with its

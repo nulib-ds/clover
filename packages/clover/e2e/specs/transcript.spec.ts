@@ -169,6 +169,7 @@ test("a film's captions and its transcript share the row, the transcript as TXT 
 
 test("an image's transcript shows for the page in view, in its language, and follows the page", async ({
   page,
+  isMobile,
 }) => {
   await serveIIIF(page);
   // The docs' `page-transcript` mock: a newspaper's two pages, each with its OCR as text.
@@ -182,7 +183,11 @@ test("an image's transcript shows for the page in view, in its language, and fol
   const body = page.locator(".clover-transcript-body");
   await expect(body).toHaveAttribute("lang", "de");
   await expect(body.locator("p").first()).toHaveText("I. 54. Jahrgang");
+  // On a phone the panel floats over the strip: put away, then opened again on page 2.
+  if (isMobile)
+    await page.getByRole("button", { name: "Close information panel" }).click();
   await page.getByRole("button", { name: "Next" }).click();
+  if (isMobile) await panel.click();
   await expect(body.locator("p").first()).toContainText(
     "Die beiden Weltreiſenden",
   );

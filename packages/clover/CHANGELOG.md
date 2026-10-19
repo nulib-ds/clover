@@ -314,11 +314,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - `Clover.Transcript` lists the WebVTT captions of the video or sound in view, marks
     the cue playing (found by binary search) and seeks to a cue when it is pressed. It
     reads a transcript as plain text (`text/plain`) too, untimed, as its paragraphs in
-    the file's language (`.clover-transcript-body`): one a time-based Canvas has as its
-    `rendering` (Cookbook 0017) or a `supplementing` annotation provides (0253), after
+    the file's language (`.clover-transcript-body`): one a Canvas has as its `rendering`
+    (Cookbook 0017) or a `supplementing` annotation provides (0253), after
     any caption files: in the row of choices it shows "TXT" after their language codes
     ("TXT EN" and so on where there are several), and the row is then named
-    "Transcript". A file that is not UTF-8 is read as Windows-1252, as 0017's is
+    "Transcript". Of a recording, that is what is said; of an image, what is written on
+    it (a page's OCR, a letter's transcription), the page in view's. A file that is not
+    UTF-8 is read as Windows-1252, as 0017's is
     encoded, so its apostrophes are not lost. The information panel offers the
     Transcript for either kind. With
     several caption files it offers them as a row of their language codes ("EN", "IT"),

@@ -277,7 +277,10 @@ misreadings included.
 | Page 1, as text | [`/mocks/page-transcript/text/p1.txt`](https://nulib-ds.github.io/clover/mocks/page-transcript/text/p1.txt)     |
 | Page 2, as text | [`/mocks/page-transcript/text/p2.txt`](https://nulib-ds.github.io/clover/mocks/page-transcript/text/p2.txt)     |
 
-It answers no query, so it is static only. Its generator is
+In `npm run dev` it is live too, at
+[`/api/mocks/page-transcript/manifest.json`](http://localhost:3000/api/mocks/page-transcript/manifest.json),
+with ids under the dev server, so the text files it names are ones the dev server
+answers (the published ones exist only once the site is deployed). Its generator is
 `docs/mocks/page-transcript/index.mjs`, which reads the Content Search mock's OCR
 (`docs/mocks/content-search/ocr.json`): run `npm run build:mocks` after changing either.
 The package's tests use a copy, in `packages/clover/src/fixtures/mocks/page-transcript/`;
