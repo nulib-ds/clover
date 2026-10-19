@@ -424,13 +424,12 @@ export interface TextTranscript {
 }
 
 /**
- * A time-based Canvas's transcripts as plain text (`text/plain`), in order: from its
- * `supplementing` annotations (Presentation 4's `provides: transcript`, Cookbook 0253),
- * then its `rendering` (Cookbook 0017). Each file once. Only a Canvas with a `duration`:
- * the plain text of a page's image is its text, not a transcript of something heard.
+ * A Canvas's transcripts as plain text (`text/plain`), in order: from its `supplementing`
+ * annotations (Presentation 4's `provides: transcript`, Cookbook 0253), then its
+ * `rendering` (Cookbook 0017). Each file once. Of a recording, what is said; of an
+ * image, what is written on it (a page's OCR, a letter's transcription).
  */
 export function canvasTextTranscripts(canvas: IIIFCanvas): TextTranscript[] {
-  if (!(Number(canvas.duration) > 0)) return [];
   const found: TextTranscript[] = [];
   const add = (raw: unknown) => {
     const candidate = raw as Record<string, any> | undefined;

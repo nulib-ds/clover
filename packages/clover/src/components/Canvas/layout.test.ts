@@ -14,6 +14,7 @@ import languagesJson from "../../fixtures/iiif-cookbook/0074-multiple-language-c
 import captionsJson from "../../fixtures/iiif-cookbook/0219-using-caption-file.json";
 import renderingJson from "../../fixtures/iiif-cookbook/0017-transcription-av.json";
 import transcriptJson from "../../fixtures/iiif-cookbook/0253-using-transcript-file.json";
+import pagesJson from "../../fixtures/mocks/page-transcript/manifest.json";
 import {
   type IIIFCanvas,
   arrangeCanvases,
@@ -292,21 +293,17 @@ describe("canvasTextTranscripts", () => {
     ]);
   });
 
-  it("takes no captions, and no plain text of a Canvas that is not time-based", () => {
+  it("takes no captions, and finds an image's too: what is written on it", () => {
     const [captioned] = p4(captionsJson).items;
     expect(canvasTextTranscripts(captioned)).toEqual([]);
-    const page = {
-      id: "https://example.org/canvas/1",
-      width: 100,
-      height: 100,
-      rendering: [
-        {
-          id: "https://example.org/page-1.txt",
-          type: "Text",
-          format: "text/plain",
-        },
-      ],
-    };
-    expect(canvasTextTranscripts(page)).toEqual([]);
+    // The docs' `page-transcript` mock: a newspaper page with its OCR as text.
+    const [page] = p4(pagesJson).items;
+    expect(canvasTextTranscripts(page)).toEqual([
+      {
+        id: "https://nulib-ds.github.io/clover/mocks/page-transcript/text/p1.txt",
+        label: { en: ["Text (OCR)"] },
+        language: "de",
+      },
+    ]);
   });
 });

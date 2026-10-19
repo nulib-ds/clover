@@ -35,6 +35,11 @@ import {
   PUBLIC_BASE as TRANSCRIPTS_BASE,
   manifest as transcriptsManifest,
 } from "../docs/mocks/transcripts/index.mjs";
+import {
+  PUBLIC_BASE as PAGE_TRANSCRIPT_BASE,
+  manifest as pageTranscriptManifest,
+  pageText,
+} from "../docs/mocks/page-transcript/index.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "public/mocks/content-search");
@@ -124,3 +129,16 @@ writeFileSync(
   `${JSON.stringify(transcriptsManifest(TRANSCRIPTS_BASE), null, 2)}\n`,
 );
 console.log("transcripts: manifest.json");
+
+// The newspaper issue with each page's OCR as a text file: a Manifest and two texts.
+const pageTranscript = join(root, "public/mocks/page-transcript");
+rmSync(pageTranscript, { recursive: true, force: true });
+mkdirSync(join(pageTranscript, "text"), { recursive: true });
+writeFileSync(
+  join(pageTranscript, "manifest.json"),
+  `${JSON.stringify(pageTranscriptManifest(PAGE_TRANSCRIPT_BASE), null, 2)}\n`,
+);
+for (const n of [1, 2]) {
+  writeFileSync(join(pageTranscript, `text/p${n}.txt`), pageText(n));
+}
+console.log("page-transcript: manifest.json, text/p1.txt, text/p2.txt");

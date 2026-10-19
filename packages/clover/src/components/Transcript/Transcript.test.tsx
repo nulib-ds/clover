@@ -10,7 +10,8 @@ import React from "react";
 import languagesJson from "../../fixtures/iiif-cookbook/0074-multiple-language-captions.json";
 import captionsJson from "../../fixtures/iiif-cookbook/0219-using-caption-file.json";
 import renderingJson from "../../fixtures/iiif-cookbook/0017-transcription-av.json";
-import bothJson from "../../fixtures/transcripts.json";
+import bothJson from "../../fixtures/mocks/transcripts/manifest.json";
+import pagesJson from "../../fixtures/mocks/page-transcript/manifest.json";
 import { clearVttCache } from "../../core/vtt";
 import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
@@ -252,6 +253,35 @@ describe("Transcript", () => {
     );
     // Plain text is not a caption file: the captions' choice is untouched.
     expect(clover.captions.get()).toBeNull();
+  });
+
+  it("shows an image's transcript, the page in view's, in its language", async () => {
+    // The docs' `page-transcript` mock: a newspaper's two pages, each with its OCR as text.
+    const pages = vi.fn(
+      async (url: string) =>
+        new Response(
+          String(url).endsWith("p1.txt")
+            ? "I. 54. Jahrgang\n\nNr. 29"
+            : "Zweite Seite",
+        ),
+    );
+    render(
+      <Clover.Root iiifContent={pagesJson} request={{ fetch: pages }}>
+        <Spy />
+        <Clover.Transcript />
+      </Clover.Root>,
+    );
+    await waitFor(() =>
+      expect(
+        document.querySelectorAll(".clover-transcript-body > p"),
+      ).toHaveLength(2),
+    );
+    const body = () => document.querySelector(".clover-transcript-body");
+    expect(body()).toHaveAttribute("lang", "de");
+    expect(body()).toHaveTextContent("I. 54. Jahrgang");
+    // The next page in view: its own text.
+    act(() => clover.next());
+    await waitFor(() => expect(body()).toHaveTextContent("Zweite Seite"));
   });
 
   it("joins the information panel when the view has a plain-text transcript", async () => {

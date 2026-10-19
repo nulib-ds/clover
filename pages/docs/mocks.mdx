@@ -253,13 +253,40 @@ It answers no query, so it is static only. Its generator is
 `docs/mocks/transcripts/index.mjs`, and recipe 0219's Manifest as fetched is
 `docs/mocks/transcripts/source.json`: to bring it up to date, fetch
 `https://iiif.io/api/cookbook/recipe/0219-using-caption-file/manifest.json` into
-`source.json` again and run `npm run build:mocks`. The package's tests use a copy,
-`packages/clover/src/fixtures/transcripts.json`; copy the published file there again
+`source.json` again and run `npm run build:mocks`. The package's tests use a copy, in
+`packages/clover/src/fixtures/mocks/transcripts/`; copy the published file there again
 after a change.
+
+## Page transcript: a newspaper's pages as text
+
+The newspaper issue of the [Content Search mock](#content-search-20-a-newspaper-issue)
+(the _Berliner Tageblatt_ of 16 February 1925, two pages), with each page's transcript as
+plain text: a `text/plain` file in the Canvas's `rendering`, labelled "Text (OCR)" and in
+German (`de`), as libraries publish a page's OCR text beside its image. It has no search
+service and no OCR annotations, so the text files are the one way to the words.
+
+Each file is the page's own OCR, as the Content Search mock reads it: its lines in
+reading order, a line of the page a line of the file, with a blank line where the next
+line jumps up a column or steps down more than 1.6 times the page's usual line pitch (a
+new block). Nothing in it is typed by hand, so it reads as the OCR does, long s (ſ) and
+misreadings included.
+
+| Resource        | Published (static)                                                                                              |
+| --------------- | --------------------------------------------------------------------------------------------------------------- |
+| Manifest        | [`/mocks/page-transcript/manifest.json`](https://nulib-ds.github.io/clover/mocks/page-transcript/manifest.json) |
+| Page 1, as text | [`/mocks/page-transcript/text/p1.txt`](https://nulib-ds.github.io/clover/mocks/page-transcript/text/p1.txt)     |
+| Page 2, as text | [`/mocks/page-transcript/text/p2.txt`](https://nulib-ds.github.io/clover/mocks/page-transcript/text/p2.txt)     |
+
+It answers no query, so it is static only. Its generator is
+`docs/mocks/page-transcript/index.mjs`, which reads the Content Search mock's OCR
+(`docs/mocks/content-search/ocr.json`): run `npm run build:mocks` after changing either.
+The package's tests use a copy, in `packages/clover/src/fixtures/mocks/page-transcript/`;
+copy the published files there again after a change.
 
 ### Rights
 
-The newspaper's scans and text are the _Berliner Tageblatt_, Staatsbibliothek zu Berlin –
+The newspaper's scans and text, in the Content Search and Page transcript mocks, are the
+_Berliner Tageblatt_, Staatsbibliothek zu Berlin –
 Preußischer Kulturbesitz, via Europeana, under the
 [Public Domain Mark](http://creativecommons.org/publicdomain/mark/1.0/). The Evanston map
 is Northwestern University Libraries'. The Curtis plate is in the public domain in the

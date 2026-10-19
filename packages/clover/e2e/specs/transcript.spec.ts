@@ -146,7 +146,9 @@ test("a film's captions and its transcript share the row, the transcript as TXT 
 }) => {
   await serveIIIF(page);
   // The docs' `transcripts` mock: English captions, and the film's plain-text transcript.
-  await page.goto("/?content=https://fixtures.test/transcripts.json");
+  await page.goto(
+    "/?content=https://nulib-ds.github.io/clover/mocks/transcripts/manifest.json",
+  );
   const panel = page.getByRole("button", { name: "More Information" });
   if ((await panel.getAttribute("aria-expanded")) !== "true")
     await panel.click();
@@ -163,4 +165,25 @@ test("a film's captions and its transcript share the row, the transcript as TXT 
   await expect(
     page.getByRole("button", { name: "Captions" }),
   ).toHaveAccessibleDescription("Captions in WebVTT format");
+});
+
+test("an image's transcript shows for the page in view, in its language, and follows the page", async ({
+  page,
+}) => {
+  await serveIIIF(page);
+  // The docs' `page-transcript` mock: a newspaper's two pages, each with its OCR as text.
+  await page.goto(
+    "/?content=https://nulib-ds.github.io/clover/mocks/page-transcript/manifest.json",
+  );
+  const panel = page.getByRole("button", { name: "More Information" });
+  if ((await panel.getAttribute("aria-expanded")) !== "true")
+    await panel.click();
+  await page.getByRole("button", { name: "Transcript" }).click();
+  const body = page.locator(".clover-transcript-body");
+  await expect(body).toHaveAttribute("lang", "de");
+  await expect(body.locator("p").first()).toHaveText("I. 54. Jahrgang");
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(body.locator("p").first()).toContainText(
+    "Die beiden Weltreiſenden",
+  );
 });

@@ -324,8 +324,10 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   Canvas labels; some name a region), and each plate's "Then" and "Now" tagged (static),
   the playground's Catalog; `transcripts`, Cookbook 0219's _Lunchroom Manners_ with its
   English captions and, as the Canvas's `rendering` (0017's way), the film's plain-text
-  transcript that 0253 provides (static). The package's tests use a copy,
-  `packages/clover/src/fixtures/transcripts.json`.
+  transcript that 0253 provides (static); `page-transcript`, `content-search`'s newspaper
+  with each page's own OCR as a plain-text `rendering` in German, a line of the page a
+  line of the file (static). The package's tests use copies of these two, in
+  `packages/clover/src/fixtures/mocks/<name>/`.
 
 ## Environment & Tooling
 

@@ -6,11 +6,9 @@ import type { Page, Request } from "@playwright/test";
 /** The package's Cookbook fixtures, as `https://fixtures.test/<name>.json`. */
 const FIXTURES = resolve(__dirname, "../../src/fixtures/iiif-cookbook");
 
-/** A fixture by name: a Cookbook recipe's, else one of the package's own (a mock's copy). */
-const fixture = (name: string) => {
-  const recipe = resolve(FIXTURES, name);
-  return existsSync(recipe) ? recipe : resolve(FIXTURES, "..", name);
-};
+/** Copies of the docs' published mocks, served at their own addresses. */
+const MOCKS = resolve(__dirname, "../../src/fixtures/mocks");
+const MOCKS_URL = "https://nulib-ds.github.io/clover/mocks/";
 
 /** A 64 × 64 grey PNG, for every image any part asks for. */
 const PNG = Buffer.from(
@@ -88,7 +86,7 @@ export async function serveIIIF(page: Page): Promise<Request[]> {
       },
       body: generated
         ? JSON.stringify(manifestOf(Number(generated[1])))
-        : readFileSync(fixture(name), "utf8"),
+        : readFileSync(resolve(FIXTURES, name), "utf8"),
     });
   });
   await page.route(/^https?:\/\/(?!localhost)[^/]+\/.*/, async (route) => {
@@ -96,6 +94,18 @@ export async function serveIIIF(page: Page): Promise<Request[]> {
     if (url.startsWith("https://fixtures.test/")) return route.fallback();
     requests.push(route.request());
     const cors = { "Access-Control-Allow-Origin": "*" };
+    // A mock, from its copy: its Manifest, and any text it publishes.
+    const mock = url.startsWith(MOCKS_URL)
+      ? resolve(MOCKS, url.slice(MOCKS_URL.length).split(/[?#]/)[0])
+      : null;
+    if (mock && existsSync(mock)) {
+      return route.fulfill({
+        status: 200,
+        contentType: mock.endsWith(".json") ? "application/json" : "text/plain",
+        headers: cors,
+        body: readFileSync(mock),
+      });
+    }
     // A plain-text file by its name among the fixtures, as served: no charset.
     const text = /\/([^/]+\.txt)$/.exec(new URL(url).pathname)?.[1];
     if (text && existsSync(resolve(FIXTURES, text))) {
