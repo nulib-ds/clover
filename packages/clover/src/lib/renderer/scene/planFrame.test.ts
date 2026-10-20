@@ -159,7 +159,7 @@ describe("planFrame", () => {
     expect(complete.draws.every((d) => !/\/full\//.test(d.url))).toBe(true);
   });
 
-  it("places tiles edge to edge on screen, with a bleed only between neighbours", () => {
+  it("places tiles edge to edge on screen, with a bleed only between neighbors", () => {
     const item = gottingen();
     const camera = fitCamera(item.rect, viewport);
     const plan = planFrame({

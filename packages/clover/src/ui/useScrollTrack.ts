@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
  *
  * - **Paging**, for previous / next buttons: by what fits (`slidesToScroll: "auto"`) or by
  *   a number of slides, and whether there is anywhere to go.
- * - **Bringing a slide to rest** at the start, centre or end, which is how a host keeps
+ * - **Bringing a slide to rest** at the start, center or end, which is how a host keeps
  *   its selection in view.
  * - **Dragging with a mouse**, which native scrolling only offers to touch. A drag that
  *   moves swallows the click that ends it, so dragging never activates a slide.

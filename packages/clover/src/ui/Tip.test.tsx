@@ -203,7 +203,7 @@ describe("Tip, kept inside what clips it", () => {
 
   it("moves in from the stage's edge when the pointer comes to its control", () => {
     const { button, tip } = stage(270);
-    // Centred on the control, 133px wide: 20px past the stage's end.
+    // Centered on the control, 133px wide: 20px past the stage's end.
     box(
       tip,
       () => 288 - 133 / 2 + (parseFloat(shift(tip)) || 0),

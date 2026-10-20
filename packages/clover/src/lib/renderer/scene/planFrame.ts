@@ -70,7 +70,7 @@ const IN_FLIGHT_LEVELS = 2;
 interface ItemView {
   /** The visible part of the item, in full-size image pixels. */
   area: RegionRect;
-  /** The camera's centre, in full-size image pixels. */
+  /** The camera's center, in full-size image pixels. */
   center: { x: number; y: number };
   target: number;
 }

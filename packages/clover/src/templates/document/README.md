@@ -1,7 +1,7 @@
 # Document
 
 Reads like a PDF viewer: a toolbar across the top (the title, and Download), page
-thumbnails down the left, and the pages down one column on a grey ground, as a PDF
+thumbnails down the left, and the pages down one column on a gray ground, as a PDF
 reader's continuous view. The page thumbnails' toggle is drawn as Clover's round controls
 are: the glyph of a list of thumbnails, its pictures filled while they show, and where the
 reader is ("3 / 17"). While they show, it sits on the bar between them and the page, over

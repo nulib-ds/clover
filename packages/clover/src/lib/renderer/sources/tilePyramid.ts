@@ -140,7 +140,7 @@ export function servicePyramid(info: ImageServiceInfo): TilePyramid {
   }
 
   // A tiled service whose coarsest level is still several tiles, and which lists no sizes,
-  // gets one whole-image thumbnail of its own — if it honours arbitrary sizes.
+  // gets one whole-image thumbnail of its own — if it honors arbitrary sizes.
   const coarsest = levels.reduce<PyramidLevel | null>(
     (best, l) => (!best || l.scaleFactor > best.scaleFactor ? l : best),
     null,

@@ -33,8 +33,8 @@ export type ContentProps = Omit<
  * size it, `100%` to fill a sized parent.
  *
  * While the Root loads (the first Manifest, or the next one chosen) the stage is busy and
- * shows Clover's loading mark in its middle, over what it still shows; it keeps its size
- * and its background, so nothing moves.
+ * shows Clover's loading mark, a line along its top edge, over what it still shows; it
+ * keeps its size and its background, so nothing moves.
  */
 export function Content({
   className,

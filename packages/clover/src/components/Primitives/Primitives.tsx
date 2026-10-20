@@ -18,7 +18,7 @@ import { ReadMore } from "../../ui/ReadMore";
  * The IIIF descriptive properties, one part each. Inside a `Root` each reads the
  * Manifest, or the current Canvas with `of="canvas"`; anywhere, a value passed as a prop
  * wins. Text is in the Root's language and marked with the language it is in; HTML is
- * sanitised. A part with nothing to show renders nothing.
+ * sanitized. A part with nothing to show renders nothing.
  */
 
 export type Of = "manifest" | "canvas";
@@ -61,7 +61,7 @@ interface PartProps<Value>
 }
 
 /**
- * `summary`, as sanitised HTML, cut to five lines, with "Read more" under it when it runs
+ * `summary`, as sanitized HTML, cut to five lines, with "Read more" under it when it runs
  * longer (`ReadMore`). Every summary Clover shows is this part: About's, a Collection's, a
  * Canvas's in its information box.
  *
@@ -100,7 +100,7 @@ export function Summary({
 
 /**
  * Any IIIF language map — an annotation's text, a label you hold — in the reader's
- * language, read strictly by `format` (`readAs`): `text/html` as sanitised HTML,
+ * language, read strictly by `format` (`readAs`): `text/html` as sanitized HTML,
  * `text/plain` as written, and none by IIIF's rule (HTML only from `<` to `>`).
  * `format="text/markdown"` reads Markdown, its lists as lists and its headings as
  * headings, the first at `headingLevel` (default 3).
@@ -174,7 +174,7 @@ export function RequiredStatement({
   );
 }
 
-/** `rights`: a link to the licence or rights statement. */
+/** `rights`: a link to the license or rights statement. */
 export function Rights({
   of = "manifest",
   value,

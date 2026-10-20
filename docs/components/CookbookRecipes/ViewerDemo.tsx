@@ -1,5 +1,7 @@
-import React, { useCallback } from "react";
-import Router, { useRouter } from "next/router";
+"use client";
+
+import React, { useCallback, useRef } from "react";
+import { useRouter } from "docs/lib/router";
 
 import CookbookCoverageTable from "docs/components/CookbookRecipes/CookbookCoverageTable";
 import FeaturedGrid from "docs/components/CookbookRecipes/FeaturedGrid";
@@ -34,6 +36,8 @@ interface ViewerDemoProps {
   renderViewer?: (resource: string) => React.ReactNode;
   /** Loads that Viewer ahead of a click. Default: the 3.x Viewer's. */
   preload?: () => void;
+  /** The field for any IIIF resource, under `intro`. Default `true`. */
+  field?: boolean;
   /** The featured items between the field and `children`. Default `true`. */
   featured?: boolean;
   /**
@@ -51,6 +55,7 @@ const ViewerDemo: React.FC<ViewerDemoProps> = ({
   children,
   renderViewer,
   preload = preloadViewer,
+  field = true,
   featured = true,
   renderRecipes,
 }) => {
@@ -59,12 +64,16 @@ const ViewerDemo: React.FC<ViewerDemoProps> = ({
   const open = resource !== undefined;
 
   /*
-   * Through the singleton router rather than `router` from the hook, which is a new object
-   * on every route change. These go to a memoized table and would otherwise re-render all
-   * of its rows each time the URL changes.
+   * Through a ref to the router, which is a new object whenever the address changes.
+   * These go to a memoized table and would otherwise re-render all of its rows each time.
    */
-  const view = useCallback((next: string) => pushIiifContent(Router, next), []);
-  const back = useCallback(() => pushIiifContent(Router), []);
+  const current = useRef(router);
+  current.current = router;
+  const view = useCallback(
+    (next: string) => pushIiifContent(current.current, next),
+    [],
+  );
+  const back = useCallback(() => pushIiifContent(current.current), []);
 
   return (
     <>
@@ -74,11 +83,13 @@ const ViewerDemo: React.FC<ViewerDemoProps> = ({
         onFocus={preload}
       >
         {intro && <p className={styles.intro}>{intro}</p>}
-        <CustomManifest
-          placeholder="View a IIIF Manifest or valid IIIF resource"
-          submitLabel="Enter"
-          validate={iiifContentError}
-        />
+        {field && (
+          <CustomManifest
+            placeholder="View a IIIF Manifest or valid IIIF resource"
+            submitLabel="Enter"
+            validate={iiifContentError}
+          />
+        )}
         {featured && <FeaturedGrid onView={view} onPreload={preload} />}
         {children}
         {renderRecipes ? (

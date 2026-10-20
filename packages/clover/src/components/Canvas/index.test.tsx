@@ -377,13 +377,13 @@ describe("Canvas", () => {
   });
 
   it("names the viewport in a Root from the Manifest's label when the Canvas has none", async () => {
-    const unlabelled = {
+    const unlabeled = {
       ...bookJson,
       label: { en: ["A book"] },
       items: [{ ...bookJson.items[0], label: undefined }],
     };
     render(
-      <Root iiifContent={unlabelled}>
+      <Root iiifContent={unlabeled}>
         <Canvas />
       </Root>,
     );
@@ -564,7 +564,7 @@ describe("Canvas", () => {
       }
     });
 
-    it("honours controlButtons replacements", () => {
+    it("honors controlButtons replacements", () => {
       const ZoomIn = ({ buttonProps, label }: any) => (
         <button {...buttonProps} data-custom>
           {label}!
@@ -1019,16 +1019,16 @@ describe("Canvas", () => {
       expect(fit).toBe(false);
     });
 
-    it("shows an unlabelled item's number beside its radio button", () => {
-      const unlabelled = JSON.parse(JSON.stringify(xrayCanvas));
+    it("shows an unlabeled item's number beside its radio button", () => {
+      const unlabeled = JSON.parse(JSON.stringify(xrayCanvas));
       const strip = (node: any): void => {
         if (!node || typeof node !== "object") return;
         if (node.type === "Choice")
           for (const item of node.items) delete item.label;
         Object.values(node).forEach(strip);
       };
-      strip(unlabelled);
-      render(<Canvas canvases={unlabelled} />);
+      strip(unlabeled);
+      render(<Canvas canvases={unlabeled} />);
       fireEvent.click(screen.getByRole("button", { name: "Choice" }));
       const menu = screen.getByTestId("clover-canvas-choice");
       expect(within(menu).getByText("1")).toBeVisible();
@@ -1071,7 +1071,7 @@ describe("Canvas", () => {
     });
 
     it("closes only itself on an Escape in it, not a dialog or panel around it", () => {
-      // What a modal `<dialog>` or a floating InformationPanel does with Escape: close,
+      // What a modal `<dialog>` or a floating Panel does with Escape: close,
       // unless the key's default was prevented.
       const around = vi.fn();
       render(

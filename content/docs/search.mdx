@@ -1,0 +1,180 @@
+---
+title: Search
+description: "IIIF Content Search of the Root's Manifest, version 1 or 2: a field, then the hits by Canvas with the words around them, drawn on the Canvas."
+---
+
+import { Callout } from "nextra/components";
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+
+# Search
+
+<Callout type="info">
+  `Search` replaces the Content Search tab of Clover 3.x's
+  [Viewer](/docs/3.x/viewer#iiif-content-search), with its
+  `iiifContentSearchQuery` and `options.contentSearch`: see [From Clover
+  3.x](#from-clover-3x).
+</Callout>
+
+[IIIF Content Search](https://iiif.io/api/search/2.0/) of the Root's Manifest, version 1
+or 2: a search field, then the hits grouped by Canvas, each with the words around it. The
+hits are drawn on the Canvas, and choosing one goes to it and frames it. The `Default`
+and `Document` templates show it by themselves, in the [Panel](/docs/panel)'s Search
+section, when the Manifest has a search service; in a layout of your own, place it
+anywhere inside a `Clover.Root`.
+
+```jsx
+import * as Clover from "@nulib/clover";
+import "@nulib/clover/styles.css";
+
+<Clover.Root iiifContent={manifestUrl}>
+  <Clover.Content />
+  <Clover.Search />
+</Clover.Root>;
+```
+
+It renders nothing when the Manifest has no search service.
+
+## Searching
+
+Below, the two-page newspaper from Clover's [mocks](/docs/mocks), whose Content Search
+2.0 service is answered in the browser. Search for `moskau`, or for the phrase
+`drei jungen`. The part sits under this page's `h2`, so it takes `headingLevel={3}`.
+
+<PartDemo part="Search" resource="search" content props={{ headingLevel: 3 }} />
+
+The field is a search box named "Search", in a `form` with `role="search"`, and a Search
+button submits it. A new search stops one still in progress. Emptying the field, its
+clear button included, clears the hits and lets go of the one chosen.
+
+The hits are listed in the order the service gives them, grouped by Canvas: each group a
+`section` named by its heading, the Canvas's label in its own language (or the Canvas's
+id, where it has no label), over an ordered list. Each hit is a button: the words before
+the match, the match in a `mark`, and the words after. Pressing one goes to the Canvas
+the hit is on and frames it there; the hit chosen is `aria-current="true"`. Hovering or
+focusing a hit marks its hotspot on the Canvas, and hovering or focusing a hotspot marks
+its hit in the list.
+
+A status line under the form says how the search went: "Loading...", then "1 result",
+"11 results" or "No Results", or "The search could not be completed." It is a
+`role="status"` region, there from the start, so each message is announced as it
+changes, while focus stays in the field. While empty it is hidden from sight, never
+removed (WCAG 4.1.3). The words that matched are bold as well as tinted, so they are not
+told by color alone (WCAG 1.4.1); in forced colors they take the system's own colors
+for marked text. Clover's words (the field's name, the button, the status) carry `lang`
+where they are in a language other than the page's.
+
+### A query to start with
+
+`searchQuery` on the Root, or on the Viewer, searches once the Manifest is shown, and
+again whenever it changes. The field shows it, and the reader can search on from there.
+
+```jsx
+<Clover.Root iiifContent={manifestUrl} searchQuery="moskau">
+  <Clover.Content />
+  <Clover.Search />
+</Clover.Root>
+```
+
+The results are the Root's, not the part's: a `Search` shown again, as the Panel's
+section is when it is opened again, shows them still. They belong to the Manifest
+searched, so another Manifest starts with none.
+
+## The service
+
+The Manifest's `service` is a search service when its `type` is `SearchService2` or
+`SearchService1`, or when its `profile` or `@context` names `/search/2/` or `/search/1/`,
+as Presentation 2 Manifests do. Where it has both versions, Clover asks version 2.
+
+- **Version 2** answers with `highlighting` annotations on the Canvases. Its
+  `contextualizing` annotations, where it sends them, give the words around each match
+  in a `TextQuoteSelector` (`prefix`, `exact`, `suffix`). Further pages hang from `next`.
+- **Version 1** answers with `resources`, annotations `on` a Canvas region with their
+  text in `resource.chars`, and `hits` that group them with `before`, `match` and
+  `after`. A hit over several annotations draws them all and goes to the first. Further
+  pages hang from `next` or `within.next`.
+
+Clover follows up to 10 pages of results. An annotation no hit names is listed as a hit
+of its own, its text the match. Requests go through the Root's `request`, with its
+credentials and headers. The code that asks the service loads with the first search,
+and in the Panel the Search section loads the first time it is opened.
+
+## Searching from your own part
+
+`clover.search(query)`, from `useClover()`, searches as the field does; an empty query
+clears the hits. The Root's state holds the results as `search`: its `query`, its
+`status` (`"idle"`, `"loading"`, `"ready"` or `"error"`), its `hits`, and the `set` of
+annotations the Canvas draws.
+
+```jsx
+function SearchFor({ query }) {
+  const { clover } = Clover.useClover();
+  return (
+    <button type="button" onClick={() => clover.search(query)}>
+      Find {query}
+    </button>
+  );
+}
+
+const searchOf = (state) => state.search;
+
+function HitCount() {
+  const { status, hits } = Clover.useCloverSelector(searchOf);
+  const text = status === "ready" ? `Hits: ${hits.length}` : "";
+  return <p role="status">{text}</p>;
+}
+```
+
+Each hit has an `id`, the `canvasId` it is on, the `entryIds` of the annotations it
+highlights, and its `before`, `match` and `after`. `clover.selectAnnotation(entryIds[0])`
+goes to it, as pressing it in `Search` does.
+
+The hits are drawn as hotspots, as annotations are, but `Annotations` does not list them.
+Their set's id is `SEARCH_SET_ID`, so `clover.setSetVisible(SEARCH_SET_ID, false)` hides
+the highlights and leaves the hits listed.
+
+| Export                             | What it does                                                                                                                           |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `searchServiceOf(manifest)`        | The Manifest's search service, `{ id, version }`, version 2 preferred; `null` without one.                                             |
+| `search(service, query, options?)` | Asks the service, following further pages, and resolves to `{ query, hits, set }`. `options`: `request` and `signal` (an AbortSignal). |
+| `SEARCH_SET_ID`                    | `"content-search"`, the id of the hits' annotation set.                                                                                |
+
+`searchServiceOf` reads the Manifest as the Root holds it (`useManifest()`). `search`
+leaves the Root's state alone: it is for a search of your own, such as one of a Manifest
+that is not shown.
+
+## Props
+
+| Prop           | Type                    | Description                                                    |
+| -------------- | ----------------------- | -------------------------------------------------------------- |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | The level of each Canvas's heading over its hits. Default `3`. |
+| `as`           | element type            | Default `div`.                                                 |
+
+Its other props (`id`, `className`, `style`, `aria-*`) go to its element, and so does its
+`ref`. Set `headingLevel` one below the heading the part sits under. In a `Tab` of the
+Panel, see [Sections of your own](/docs/panel#sections-of-your-own).
+
+### Styles
+
+| Class                           | What it is                                                                                    |
+| ------------------------------- | --------------------------------------------------------------------------------------------- |
+| `.clover-content-search`        | The part, with `data-status`: `idle`, `loading`, `ready` or `error`.                          |
+| `.clover-content-search-form`   | The field and its button, in a row.                                                           |
+| `.clover-content-search-query`  | The field.                                                                                    |
+| `.clover-content-search-submit` | The Search button.                                                                            |
+| `.clover-content-search-status` | The status line.                                                                              |
+| `.clover-content-search-group`  | A Canvas's hits, under its heading (`.clover-content-search-canvas`).                         |
+| `.clover-content-search-hits`   | The list of a Canvas's hits.                                                                  |
+| `.clover-content-search-hit`    | A hit's button, `aria-current` when chosen, `data-highlighted` when marked; `mark` inside it. |
+
+Clover 3.x's are `clover-search*`, so the styles of the two never reach each other on one
+page.
+
+## From Clover 3.x
+
+| 3.x                                                      | Clover 4                                     |
+| -------------------------------------------------------- | -------------------------------------------- |
+| `iiifContentSearchQuery={{ q }}`                         | `searchQuery="…"`, on the Viewer or the Root |
+| `informationPanel.renderContentSearch: false`            | A `Panel` with `Tab`s, Search left out       |
+| `informationPanel.defaultTab: "manifest-content-search"` | `<Clover.Panel defaultValue="search" />`     |
+| `contentSearch.overlays.renderOverlays: false`           | `clover.setSetVisible(SEARCH_SET_ID, false)` |
+| `contentSearch.searchResultsLimit`                       | Not in Clover 4: every hit is listed         |

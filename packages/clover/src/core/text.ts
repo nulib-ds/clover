@@ -1,6 +1,6 @@
 /**
  * IIIF HTML as plain text: tags dropped and the common entities decoded. What a value
- * shows before the sanitiser has loaded, and wherever markup cannot go (an `alt`, an
+ * shows before the sanitizer has loaded, and wherever markup cannot go (an `alt`, an
  * `aria-label`). Never used as HTML.
  */
 const ENTITIES: Record<string, string> = {
@@ -28,13 +28,13 @@ export function toPlainText(html: string): string {
     });
 }
 
-/** Whether a value carries markup or entities, and so needs the sanitiser to show. */
+/** Whether a value carries markup or entities, and so needs the sanitizer to show. */
 export const hasMarkup = (value: string) =>
   /<[a-z!/]|&(#x?[0-9a-f]+|[a-z]+);/i.test(value);
 
 /**
  * How a text is read, strictly by its `format`'s media type: `text/html` as IIIF's HTML,
- * sanitised to what the Presentation API allows; `text/markdown` as Markdown; `text/plain`
+ * sanitized to what the Presentation API allows; `text/markdown` as Markdown; `text/plain`
  * (and any other type) as written, a `<` included. With no format, as IIIF's property
  * values come, by IIIF's rule: HTML only from a first `<` to a last `>`, whitespace
  * aside; anything else is plain text.

@@ -1,0 +1,125 @@
+---
+title: Viewer content state (3.x)
+---
+
+import CallToAction from "docs/components/CallToAction";
+import {
+  ContentStateBody,
+  ContentStateViewer,
+} from "docs/components/ContentState/ContentStateDemo";
+
+## Viewer (Content State)
+
+This is a helper page to demonstrate the retrieving the current IIIF Content State of a Viewer component.
+
+A temporal `PointSelector` without annotation body text appears as a timestamp-only
+seek control in the Annotations tab. Points at `0` seconds are supported. If body
+text is supplied, it appears alongside the timestamp.
+
+<ContentStateViewer />
+
+### Current Content State
+
+This section displays the raw JSON and base64 encoded JSON of the IIIF Content State for this Viewer instance. Preview the current content state of the Viewer component, which
+includes information about the currently displayed canvas, zoom level, and other
+relevant details. This can be useful for debugging or for saving the state of
+the viewer.
+
+<div style={{ marginTop: "1rem" }}>
+  <CallToAction
+    href="/docs/3.x/viewer"
+    text="Preview Content State"
+    size="small"
+    id="content-state-preview"
+    target="_blank"
+  />
+</div>
+
+<div
+  style={{
+    display: "flex",
+    flexDirection: "row",
+    gap: "1rem",
+    marginTop: "2rem",
+  }}
+>
+  <div style={{ width: "33.33%" }}>
+    <label htmlFor="content-state-body">
+      <strong>Body text</strong>
+    </label>
+    <ContentStateBody
+      style={{
+          background: "#0001",
+          borderRadius: "0.5rem",
+          width: "100%",
+          height: "500px",
+          padding: "1rem",
+          fontSize: "0.833rem",
+          resize: "none",
+        }}
+    />
+    {/* The field's instructions, kept visible rather than in a faint placeholder. */}
+    <p id="content-state-body-help" style={{ fontSize: "0.833rem", margin: "0.5rem 0 0" }}>Enter any body text to see how it is displayed in the viewer. Text longer than a few hundred characters may not display correctly, because browsers limit URL length.</p>
+  </div>
+  <div style={{ width: "33.33%" }}>
+    <label htmlFor="content-state-encoded">
+      <strong>base64 Encoded JSON</strong>
+    </label>
+    <textarea
+      id="content-state-encoded"
+      style={{
+        background: "#0001",
+        borderRadius: "0.5rem",
+        width: "100%",
+        height: "500px",
+        padding: "1rem",
+        fontSize: "0.833rem",
+        resize: "none",
+      }}
+      readOnly
+    ></textarea>
+
+  </div>
+  <div style={{ width: "33.33%" }}>
+    <label htmlFor="content-state-json">
+      <strong>Raw JSON</strong>
+    </label>
+    <textarea
+      id="content-state-json"
+      style={{
+        background: "#0001",
+        borderRadius: "0.5rem",
+        width: "100%",
+        height: "500px",
+        padding: "1rem",
+        fontSize: "0.833rem",
+        resize: "none",
+      }}
+      readOnly
+    ></textarea>
+  </div>
+</div>
+
+### Demo Usage
+
+```jsx
+export const handleContentStateCallback = ({ encoded, json }) => {
+  console.log({
+    encoded, // base64 encoded JSON
+    json, // raw JSON
+  });
+};
+
+<Viewer
+  contentStateCallback={handleContentStateCallback}
+  options={{
+    canvasHeight: "640px",
+    openSeadragon: {
+      gestureSettingsMouse: {
+        scrollToZoom: false,
+      },
+    },
+    showIIIFBadge: false,
+  }}
+/>;
+```

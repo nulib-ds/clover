@@ -220,7 +220,7 @@
 
 /*
  * Hover, selection and focus ring the pictures, 1px clear of them. Always 3px, and
- * transparent until wanted, so only its colour changes: a ring never grows in (focus adds
+ * transparent until wanted, so only its color changes: a ring never grows in (focus adds
  * a second, two-toned, inside the pictures' edge, below). An
  * outline, which the pictures' own `overflow` (a grid's square cells) does not clip; on
  * the pictures, not a focusable element, so a page's reset of focus outlines does not
@@ -327,7 +327,7 @@
 /*
  * A title cut short shows in full while its item is hovered or focused (WCAG 1.4.12):
  * over the card's own picture, its last line where the cut title's last line is, on the
- * secondary colour with a soft shadow above. Nothing beside or below it moves,
+ * secondary color with a soft shadow above. Nothing beside or below it moves,
  * and a carousel's scrolling box cannot clip it. It is part of the item, so the pointer
  * can rest on it, and Escape hides it until the pointer comes back or focus leaves
  * (WCAG 1.4.13, `clamped.ts`).
@@ -360,10 +360,9 @@
   }
 }
 
-/* A member's summary runs under all of it. */
+/* A member's summary runs under all of it, in the text's own color, not muted. */
 .clover-items-summary {
   grid-column: 1 / -1;
-  color: var(--clover-color-primary-muted, #26292b);
 }
 
 /* Carousel: a common picture height, each picture at its own aspect. */
@@ -444,7 +443,7 @@
 }
 
 /*
- * Focus as thick as the selection, in the text's colour, so the two tell apart where
+ * Focus as thick as the selection, in the text's color, so the two tell apart where
  * they part: a Collection's members, chosen with Enter, not as focus moves.
  */
 :is(.clover-items-item[role="option"], .clover-items-link):focus-visible {
@@ -454,7 +453,7 @@
 /*
  * And a second ring inside it, over the pictures' edge: where focus and the selection
  * are one item (selection follows focus), focus still shows by its shape, not by its
- * colour alone (WCAG 1.4.1). Two tones, the ground's colour at the edge and the text's
+ * color alone (WCAG 1.4.1). Two tones, the ground's color at the edge and the text's
  * inside it, so one of them stands out from any picture, light or dark (C40). Drawn
  * inside the pictures, it takes no more room than the ring keeps.
  */
@@ -483,8 +482,8 @@
 }
 
 /*
- * In forced colours, the system's own: Highlight for the selection, CanvasText for focus.
- * The resting ring is the page's own colour there, since a transparent one is forced to
+ * In forced colors, the system's own: Highlight for the selection, CanvasText for focus.
+ * The resting ring is the page's own color there, since a transparent one is forced to
  * show.
  */
 @media (forced-colors: active) {
@@ -500,7 +499,7 @@
     --ring-color: CanvasText;
   }
 
-  /* Forced colours drop the shadow: the inner ring is the outline alone. */
+  /* Forced colors drop the shadow: the inner ring is the outline alone. */
   :is(.clover-items-item[role="option"], .clover-items-link):focus-visible
     .clover-items-pictures::after {
     outline-color: CanvasText;

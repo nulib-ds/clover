@@ -1,7 +1,7 @@
 /**
  * A photograph placed on the map: Northwestern University Libraries' record of a Ronald
  * J. Sullivan slide, Chicago bus 516 on route 151 at Michigan Avenue and Washington Street
- * (taken July 3, 1955), as its Digital Collections API published it on 14 October 2026
+ * (taken July 3, 1955), as its Digital Collections API published it on October 14, 2026
  * (`source.json`, kept as fetched), with two changes:
  *
  * - the Manifest and its Canvas take ids under the mock's own address;

@@ -755,7 +755,7 @@ describe("Canvas media", () => {
 
   /*
    * Cookbook 0103: a comment on 702 to 705 seconds of a reading, in an AnnotationPage
-   * labelled "Environmental Noise".
+   * labeled "Environmental Noise".
    */
   describe("annotations on the recording's time", () => {
     const [canvas] = poetry.items as any[];
@@ -1221,7 +1221,7 @@ describe("a lone media Canvas", () => {
 });
 
 describe("containAspect", () => {
-  it("centres the largest rectangle of an aspect inside a box", () => {
+  it("centers the largest rectangle of an aspect inside a box", () => {
     const box = { x: 10, y: 0, width: 200, height: 200 };
     expect(containAspect(box, { width: 16, height: 9 })).toEqual({
       x: 10,

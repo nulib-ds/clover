@@ -171,7 +171,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
         label: isFullscreen ? t("imageExitFullScreen") : t("imageFullScreen"),
         lang: langOf(isFullscreen ? "imageExitFullScreen" : "imageFullScreen"),
         glyph: isFullscreen ? <ZoomExitFullScreen /> : <ZoomFullScreen />,
-        // Straight from the click: the Fullscreen API only honours a user gesture.
+        // Straight from the click: the Fullscreen API only honors a user gesture.
         onClick: (event) => void toggleFullscreen(event.currentTarget),
       });
     }

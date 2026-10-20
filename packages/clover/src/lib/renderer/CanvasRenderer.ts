@@ -540,7 +540,7 @@ export class CanvasRenderer implements GestureTarget {
     this.invalidate();
   }
 
-  /** Centre the view on a world point. */
+  /** Center the view on a world point. */
   panTo(point: Point, immediate = false): void {
     const base = immediate ? this.camera.current : this.camera.destination;
     this.atHome = false;
@@ -557,7 +557,7 @@ export class CanvasRenderer implements GestureTarget {
     this.setRotation((base.rotation * 180) / Math.PI + degrees);
   }
 
-  /** Rotate about the viewport centre. Degrees, clockwise, like OpenSeadragon. */
+  /** Rotate about the viewport center. Degrees, clockwise, like OpenSeadragon. */
   setRotation(degrees: number, immediate = false): void {
     const base = this.camera.destination;
     const rotation = (degrees * Math.PI) / 180;
@@ -896,14 +896,14 @@ export class CanvasRenderer implements GestureTarget {
       upright,
       this.options.homePadding,
     );
-    // Centred in the padded area, off the viewport's centre when its sides differ.
+    // Centered in the padded area, off the viewport's center when its sides differ.
     camera.x -= (left - right) / 2 / camera.zoom;
     camera.y -= (top - bottom) / 2 / camera.zoom;
     return camera;
   }
 
   /**
-   * Keep the camera usable: zoom within limits, and the centre over the world so the
+   * Keep the camera usable: zoom within limits, and the center over the world so the
    * picture cannot be flung out of sight.
    */
   private constrain(

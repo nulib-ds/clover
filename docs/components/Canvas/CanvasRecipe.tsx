@@ -1,4 +1,7 @@
+"use client";
+
 import CloverCanvas from "docs/components/DynamicImports/Canvas";
+import { ADAPTERS, type AdapterName } from "./adapters";
 import { useEffect, useMemo, useState } from "react";
 import {
   type CloverCanvasOptions,
@@ -17,8 +20,9 @@ import {
  * through the views with its own controls.
  *
  * Two cases have no recipe of their own, a `facing-pages` Canvas and a `bottom-to-top`
- * sequence, so those adapt a real recipe: `adapt` edits the Manifest after fetching it,
- * and `behavior` / `viewingDirection` stand in for the Manifest's own.
+ * sequence, so those adapt a real recipe: `adapt` names an edit of the Manifest after
+ * fetching it (`adapters.ts`), and `behavior` / `viewingDirection` stand in for the
+ * Manifest's own.
  *
  * `Canvas` reads Presentation 4, so the fetched recipe (Presentation 3) is upgraded with
  * `toPresentation4()` first, as any host holding older IIIF does.
@@ -34,7 +38,7 @@ const CanvasRecipe = ({
 }: {
   id: string;
   iiifContent: string;
-  adapt?: (manifest: any) => any;
+  adapt?: AdapterName;
   behavior?: string;
   viewingDirection?: string;
   /** Passed straight to `Canvas`, e.g. `{ media: { presentation: "texture" } }`. */
@@ -45,17 +49,17 @@ const CanvasRecipe = ({
   const [viewIndex, setViewIndex] = useState(0);
 
   useEffect(() => {
-    let cancelled = false;
+    let canceled = false;
     fetch(iiifContent)
       .then((response) => response.json())
-      .then((json) => toPresentation4(adapt ? adapt(json) : json))
+      .then((json) => toPresentation4(adapt ? ADAPTERS[adapt](json) : json))
       .then((upgraded) => {
-        if (cancelled) return;
+        if (canceled) return;
         setManifest(upgraded);
         setViewIndex(0);
       });
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, [iiifContent, adapt]);
 

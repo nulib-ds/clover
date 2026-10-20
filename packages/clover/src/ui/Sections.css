@@ -36,17 +36,118 @@ button.clover-sections-button:focus-visible {
   outline: 2px solid var(--clover-color-accent, #0065c3);
 }
 
-/* ---------- tabs: a row of buttons over the open panel ---------- */
+/* ---------- tabs: one row of buttons over the open panel ---------- */
 
-.clover-sections[data-layout="tabs"] .clover-sections-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--clover-space-2xs);
+/*
+ * The tabs keep to one row, never wrapping. Where they do not fit it scrolls sideways
+ * (`useScrollTrack` sets its overflow inline, so it holds without this sheet), with no
+ * scrollbar: it fades out at an end while tabs lie past it (`data-more`), and an arrow
+ * there pages it. The fade is a round control's width and an `s` gap, and the row's
+ * scroll padding is the same, so a tab brought into view by focus or by opening comes
+ * to rest clear of the fade and the arrow (WCAG 2.4.11). A tab's label stays whole on
+ * one line: the row scrolls rather than cut it short (WCAG 1.4.12).
+ */
+.clover-sections[data-layout="tabs"] .clover-sections-tabs {
+  --clover-sections-fade: calc(var(--clover-control) + var(--clover-space-s));
   border-bottom: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
 }
 
+.clover-sections[data-layout="tabs"] .clover-sections-row {
+  position: relative;
+}
+
+.clover-sections[data-layout="tabs"] .clover-sections-list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--clover-space-2xs);
+  scroll-padding-inline: var(--clover-sections-fade);
+  scrollbar-width: none;
+}
+
+.clover-sections[data-layout="tabs"] .clover-sections-list::-webkit-scrollbar {
+  display: none;
+}
+
 .clover-sections[data-layout="tabs"] button.clover-sections-button {
+  flex: none;
   border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+
+.clover-sections-tabs[data-more="end"] .clover-sections-list {
+  mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - var(--clover-sections-fade)),
+    transparent
+  );
+}
+
+.clover-sections-tabs[data-more="start"] .clover-sections-list {
+  mask-image: linear-gradient(
+    to left,
+    #000 calc(100% - var(--clover-sections-fade)),
+    transparent
+  );
+}
+
+.clover-sections-tabs[data-more="start end"] .clover-sections-list {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--clover-sections-fade),
+    #000 calc(100% - var(--clover-sections-fade)),
+    transparent
+  );
+}
+
+/* A right-to-left row starts on the right: its fades swap ends. */
+.clover-sections-tabs[data-more="end"]:dir(rtl) .clover-sections-list {
+  mask-image: linear-gradient(
+    to left,
+    #000 calc(100% - var(--clover-sections-fade)),
+    transparent
+  );
+}
+
+.clover-sections-tabs[data-more="start"]:dir(rtl) .clover-sections-list {
+  mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - var(--clover-sections-fade)),
+    transparent
+  );
+}
+
+/*
+ * The arrows, Clover's round controls (`ui/Button.css`), centered on the row at its
+ * ends, over the fade. Hidden while nothing lies past their end.
+ */
+:is(button.clover-sections-scroll-prev, button.clover-sections-scroll-next) {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  translate: 0 -50%;
+}
+
+:is(
+  button.clover-sections-scroll-prev,
+  button.clover-sections-scroll-next
+)[hidden] {
+  display: none;
+}
+
+button.clover-sections-scroll-prev {
+  inset-inline-start: 0;
+}
+
+button.clover-sections-scroll-next {
+  inset-inline-end: 0;
+}
+
+:is(button.clover-sections-scroll-prev, button.clover-sections-scroll-next):dir(
+    rtl
+  )
+  svg {
+  scale: -1 1;
 }
 
 .clover-sections[data-layout="tabs"]
@@ -111,7 +212,7 @@ button.clover-sections-button:focus-visible {
  * sets to where its headings rest), so the first heading holds where it rests from the
  * first pixel of scrolling. Each is offset by the headings before it (top) or after it
  * (bottom), so a stuck heading sits exactly where it rests and never shifts as it comes
- * unstuck. They are on the panel's own colour, and each carries its 3px line under it as
+ * unstuck. They are on the panel's own color, and each carries its 3px line under it as
  * its own padding, as the next carries the space between them (below): nothing can show
  * between two stuck headings. Padding, not a border, since a border's width snaps to
  * device pixels.
@@ -175,7 +276,7 @@ button.clover-sections-button:focus-visible {
 
 /*
  * The boxes `2xs` apart, as the rows of one list are: each heading after the first
- * carries the space over it as padding, in its own colour.
+ * carries the space over it as padding, in its own color.
  */
 .clover-sections[data-layout="accordion"] > * + * > .clover-sections-heading {
   padding-top: var(--clover-space-2xs);
@@ -183,7 +284,7 @@ button.clover-sections-button:focus-visible {
 
 /*
  * The first closed box after the open one is set `s` apart from its content, resting or
- * stuck below it: its heading carries the space as padding, in its own colour.
+ * stuck below it: its heading carries the space as padding, in its own color.
  */
 .clover-sections[data-layout="accordion"]
   > [data-open="true"]
@@ -194,7 +295,7 @@ button.clover-sections-button:focus-visible {
 
 /*
  * The padding above the first heading and below the last is painted in the heading's
- * colour, so nothing scrolls into view between a stuck heading and the container's edge.
+ * color, so nothing scrolls into view between a stuck heading and the container's edge.
  * Below the last only while its box is closed: open, its content is what follows it.
  */
 .clover-sections[data-layout="accordion"]
@@ -299,7 +400,7 @@ button.clover-sections-button:focus-visible {
   }
 }
 
-/* Open or closed, a heading's label is in the text's colour. */
+/* Open or closed, a heading's label is in the text's color. */
 .clover-sections[data-layout="accordion"] button.clover-sections-button {
   position: relative;
   justify-content: space-between;
@@ -378,14 +479,14 @@ button.clover-sections-button:focus-visible {
 
 /*
  * The headings are the panel's controls, so they read as neither its links nor its
- * labels: each label bold, in the text's colour, over a 3px line as wide as the panel's
+ * labels: each label bold, in the text's color, over a 3px line as wide as the panel's
  * content (the button less its `s` either side), `2xs` under the label: the heading's
  * foot, in its own padding, so what scrolls under the open heading meets its line. A closed one's
- * is the colour of a split's bar at rest (`Split.css`), `secondary-alt` at half
+ * is the color of a split's bar at rest (`Split.css`), `secondary-alt` at half
  * strength: it marks nothing, its chevron does. The open one's is the accent, 3:1 beside
  * the panel (WCAG 1.4.11), and a closed one's under the pointer the accent at half
  * strength, a preview, as Items' hover is; focus is the button's own ring. The open one
- * has no chevron, so which is open is told by more than colour. A label wraps, never cut short, however narrow the panel or
+ * has no chevron, so which is open is told by more than color. A label wraps, never cut short, however narrow the panel or
  * wide its spaced text (WCAG 1.4.12): onto more lines, breaking a long word where it
  * must, the line under them all. The stacks measure it.
  */
@@ -424,7 +525,7 @@ button.clover-sections-button:focus-visible {
 }
 
 /*
- * In forced colours a fill is the page's own colour: the line takes the text's colour,
+ * In forced colors a fill is the page's own color: the line takes the text's color,
  * and the highlight on the open heading.
  */
 @media (forced-colors: active) {

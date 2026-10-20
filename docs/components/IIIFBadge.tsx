@@ -4,10 +4,8 @@ import styles from "docs/components/IIIFBadge.module.css";
 
 const Badge = ({ children, href, text = ["Presentation API"] }) => {
   return (
-    <Link href={href} target="_blank" className={`${styles.badge} nx-flex-col`}>
-      <span
-        className={`${styles.content} nx-gap-2 nx-h-7 nx-rounded-md nx-px-2 nx-text-left nx-text-sm nx-font-medium nx-text-gray-600 nx-transition-colors dark:nx-text-gray-400 hover:nx-bg-gray-100 hover:nx-text-gray-900 dark:hover:nx-bg-primary-100/5 dark:hover:nx-text-gray-50`}
-      >
+    <Link href={href} target="_blank" className={styles.badge}>
+      <span className={styles.content}>
         <IIIFLogo /> {text.join(` or `)} ↗
       </span>
     </Link>

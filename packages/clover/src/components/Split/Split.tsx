@@ -113,7 +113,7 @@ export type SplitProps = React.HTMLAttributes<HTMLElement> & {
  * <Clover.Split>
  *   <Clover.SplitPane min="16rem"><Clover.Content /></Clover.SplitPane>
  *   <Clover.SplitHandle />
- *   <Clover.SplitPane size="24rem" min="14rem"><Clover.InformationPanel /></Clover.SplitPane>
+ *   <Clover.SplitPane size="24rem" min="14rem"><Clover.Panel /></Clover.SplitPane>
  * </Clover.Split>
  * ```
  *
@@ -256,7 +256,7 @@ const paneElements = (split: HTMLElement | null | undefined) =>
     : [];
 
 /** The panes either side of a handle, and which of them it sizes. */
-function neighbours(handle: HTMLElement) {
+function neighbors(handle: HTMLElement) {
   const sibling = (step: "previousElementSibling" | "nextElementSibling") => {
     let node = handle[step];
     while (node && !node.classList.contains("clover-split-pane")) {
@@ -304,7 +304,7 @@ export const SplitHandle = forwardRef<HTMLDivElement, SplitHandleProps>(
       const handle = self.current;
       const container = split?.element.current;
       if (!handle || !container || !split) return null;
-      const { sized, other } = neighbours(handle);
+      const { sized, other } = neighbors(handle);
       if (!sized) return null;
       const across = container.clientWidth;
       const key = sized.dataset.splitKey ?? "";

@@ -23,7 +23,7 @@ describe("server rendering", () => {
         <Clover.Label as="h1" />
         <Clover.Content />
         <Clover.Items />
-        <Clover.InformationPanel />
+        <Clover.Panel />
       </Clover.Root>,
     );
     expect(html).toContain("clover-root");

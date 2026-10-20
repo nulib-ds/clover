@@ -64,7 +64,7 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
       last.items.push(index);
     else groups.push({ page: annotation.page, items: [index] });
   });
-  const unlabelled = groups.some((group) => !group.page);
+  const unlabeled = groups.some((group) => !group.page);
   return (
     <ControlMenu
       // Drawn as the Annotations list draws its entries, the same parts and rules.
@@ -74,7 +74,7 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
       onClose={onClose}
       triggerId={triggerId}
     >
-      {unlabelled && name.node}
+      {unlabeled && name.node}
       {groups.map((group, g) => {
         // The pages its annotations are from, hidden and shown together.
         const pageIds = [

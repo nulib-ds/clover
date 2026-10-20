@@ -1,0 +1,137 @@
+---
+title: SeeAlso (3.x)
+---
+
+import IIIFBadge from "docs/components/IIIFBadge";
+import { SeeAlso } from "@samvera/clover-iiif/primitives";
+import { Tabs } from "nextra/components";
+
+# SeeAlso
+
+The SeeAlso component is used to display a list of related resources. A machine-readable resource such as an XML or RDF description that is related to the current resource that has the seeAlso property. The resource may be of any media type, and contain any type of data.
+
+<IIIFBadge
+  href="https://iiif.io/api/presentation/3.0/#seealso"
+  text={["seeAlso"]}
+/>
+
+<Tabs items={["Code", "Example", "HTML"]}>
+  <Tabs.Tab>
+    ```jsx
+    <SeeAlso
+      seeAlso={[
+        {
+          id: "https://api.dc.library.northwestern.edu/api/v2/works/71153379-4283-43be-8b0f-4e7e3bfda275",
+          type: "Dataset",
+          format: "application/json",
+          label: {
+            none: ["Northwestern University Libraries Digital Collections API"],
+          },
+        },
+      ]}
+    />
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <SeeAlso
+      seeAlso={[
+        {
+          id: "https://api.dc.library.northwestern.edu/api/v2/works/71153379-4283-43be-8b0f-4e7e3bfda275",
+          type: "Dataset",
+          format: "application/json",
+          label: {
+            none: ["Northwestern University Libraries Digital Collections API"],
+          },
+        },
+      ]}
+    />
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```html
+    <ul class="c-PJLV">
+      <li class="c-PJLV">
+        <a href="https://api.dc.library.northwestern.edu/api/v2/works/71153379-4283-43be-8b0f-4e7e3bfda275">
+          Northwestern University Libraries Digital Collections API
+        </a>
+      </li>
+    </ul>
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Usage
+
+### React
+
+```jsx
+import { SeeAlso } from "@samvera/clover-iiif/primitives";
+
+const CustomSeeAlso = ({ seeAlso }) => {
+  return <SeeAlso seeAlso={seeAlso} />;
+};
+
+export default CustomSeeAlso;
+```
+
+## API Reference
+
+| Prop        | Type                                                     | Default | Required |
+| ----------- | -------------------------------------------------------- | ------- | -------- |
+| `as`        | `ol`, `ul`                                               | `ul`    | --       |
+| `seeAlso`   | [seeAlso](https://iiif.io/api/presentation/3.0/#seeAlso) | --      | **Yes**  |
+| `className` | `string`, `undefined`                                    | --      | --       |
+| `style`     | `CSSProperties`, `undefined`                             | --      | --       |
+| `lang`      | `string`, `undefined`                                    | --      | --       |
+| `title`     | `string`, `undefined`                                    | --      | --       |
+| `data-*`    | `string`, `undefined`                                    | --      | --       |
+| `aria-*`    | `AriaAttributes`, `undefined`                            | --      | --       |
+
+### Custom Element
+
+The `SeeAlso` component can be rendered as either `ol` or `ul` elements. The default is `ul`.
+
+<Tabs items={["Code", "Example", "HTML"]}>
+  <Tabs.Tab>
+    ```jsx
+    <SeeAlso
+      seeAlso={[
+        {
+          id: "https://api.dc.library.northwestern.edu/api/v2/works/71153379-4283-43be-8b0f-4e7e3bfda275",
+          type: "Dataset",
+          format: "application/json",
+          label: {
+            none: ["Northwestern University Libraries Digital Collections API"],
+          },
+        },
+      ]}
+      as="ol"
+    />
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <SeeAlso
+      seeAlso={[
+        {
+          id: "https://api.dc.library.northwestern.edu/api/v2/works/71153379-4283-43be-8b0f-4e7e3bfda275",
+          type: "Dataset",
+          format: "application/json",
+          label: {
+            none: ["Northwestern University Libraries Digital Collections API"],
+          },
+        },
+      ]}
+      as="ol"
+    />
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```html
+    <ol class="c-PJLV">
+      <li class="c-PJLV">
+        <a href="https://api.dc.library.northwestern.edu/api/v2/works/71153379-4283-43be-8b0f-4e7e3bfda275">
+          Northwestern University Libraries Digital Collections API
+        </a>
+      </li>
+    </ol>
+    ```
+  </Tabs.Tab>
+</Tabs>

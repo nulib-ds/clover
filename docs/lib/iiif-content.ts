@@ -1,4 +1,4 @@
-import type { NextRouter } from "next/router";
+import type { DocsRouter } from "docs/lib/router";
 import { decodeContentState } from "@iiif/helpers";
 
 /**
@@ -59,7 +59,7 @@ export const iiifContentError = (value: string) =>
  * page stays where it is. A deep link into a long page would otherwise jump to the top.
  */
 export const pushIiifContent = (
-  router: Pick<NextRouter, "pathname" | "push" | "query">,
+  router: Pick<DocsRouter, "pathname" | "push" | "query">,
   value?: string,
 ) => {
   const query = { ...router.query };

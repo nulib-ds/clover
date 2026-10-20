@@ -1,6 +1,6 @@
 /**
  * A page's transcript as plain text: the newspaper issue of the `content-search` mock
- * (two pages of the _Berliner Tageblatt_, 16 February 1925), each Canvas with its own
+ * (two pages of the _Berliner Tageblatt_, February 16, 1925), each Canvas with its own
  * OCR as a `text/plain` file in its `rendering`, in German (`de`), as libraries publish a
  * page's OCR text beside its image. No search service and no OCR annotations: the text
  * files are the one way to the words.

@@ -4,7 +4,7 @@ import { hexToHueSaturation } from "docs/components/Playground/playground-config
 import { fontPresets } from "docs/lib/preview-fonts";
 
 /**
- * Site-level theme overrides: accent colour and font family.
+ * Site-level theme overrides: accent color and font family.
  *
  * These are not preview controls. They exist to demonstrate the thing that makes Clover
  * themeable — components read CSS custom properties from whatever contains them — so the
@@ -20,7 +20,7 @@ import { fontPresets } from "docs/lib/preview-fonts";
  *    other step is mixed from it in `tokens.css`, and `--clover-color-accent` maps to it,
  *    so this one property retints both the docs chrome and any rendered component. It
  *    also sets `--nextra-primary-hue` / `--nextra-primary-saturation`, which Nextra
- *    composes its own primary colours from in `hsl()` — it takes hue and saturation as
+ *    composes its own primary colors from in `hsl()` — it takes hue and saturation as
  *    variables and bakes lightness into each utility, so handing it H and S shifts the
  *    whole family while leaving Nextra's light/dark contrast choices intact.
  *  - **Font** sets `--font-sans`, the site's own family, so the whole website changes —
@@ -160,11 +160,36 @@ const subscribePageTheme = (listener: () => void) => {
   };
 };
 
+/*
+ * A theme shown without being kept: the homepage's Yours story shows one as it passes
+ * (`PartsLive.tsx`). It is applied and announced as a choice is, so the settings show
+ * it, but never stored. Ending it puts back what is stored, unless a choice was made
+ * meanwhile, which keeps what is shown and ends it.
+ */
+let previewing = false;
+
+export const previewPageTheme = (next: Partial<PageTheme>) => {
+  previewing = true;
+  current = { ...getPageTheme(), ...next };
+  applyPageTheme(next);
+  listeners.forEach((listener) => listener());
+};
+
+export const endPageThemePreview = () => {
+  if (!previewing) return;
+  previewing = false;
+  current = readStoredPageTheme();
+  applyPageTheme(current);
+  listeners.forEach((listener) => listener());
+};
+
 /** Change the accent and/or font: applied to the page, remembered, and announced. */
 export const setPageTheme = (next: Partial<PageTheme>) => {
   current = { ...getPageTheme(), ...next };
   applyPageTheme(next);
-  storePageTheme(next);
+  // A choice made over a preview keeps all that is shown, the preview's part too.
+  storePageTheme(previewing ? current : next);
+  previewing = false;
   listeners.forEach((listener) => listener());
 };
 

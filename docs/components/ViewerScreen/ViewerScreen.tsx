@@ -1,9 +1,11 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { resourceByKey } from "docs/components/Playground/playground-config";
 import styles from "docs/components/ViewerScreen/ViewerScreen.module.css";
 import { loadMapWorker } from "docs/lib/map-worker";
-import { useRouter } from "next/router";
+import { useRouter } from "docs/lib/router";
 
 /**
  * The Viewer's Default template alone on the screen, for trying it on a phone: nothing of

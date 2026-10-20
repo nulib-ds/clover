@@ -1,0 +1,475 @@
+---
+title: Composing Layouts
+---
+
+import { Callout } from "nextra/components";
+import { ComposedDemo } from "docs/components/Clover4/Demos";
+
+# Composing Layouts
+
+Every template is a composition of Clover's parts, and so is a layout of your own. A
+`Root` loads the content and holds where the reader is. Every part inside it reads from
+the nearest `Root`, wherever it sits in your markup, so a layout is your own HTML with
+parts placed in it.
+
+<Callout type="info">
+  Composing with Clover 3.x, `@samvera/clover-iiif`? See [Clover 3.x ›
+  Composing](/docs/3.x/composing).
+</Callout>
+
+## A layout of your own
+
+The parts are named exports. `import * as Clover` gives them dot notation, and they
+tree-shake: a page ships only the parts it renders. Here the title, position and buttons
+sit beside the stage.
+
+```jsx
+import * as Clover from "@nulib/clover";
+import "@nulib/clover/styles.css";
+
+<Clover.Root iiifContent={url} className="my-layout">
+  <Clover.Content />
+  <aside>
+    <Clover.Label as="h3" />
+    <Clover.Label of="canvas" />
+    <Clover.Position />
+    <Clover.Previous />
+    <Clover.Next />
+  </aside>
+</Clover.Root>;
+```
+
+<ComposedDemo />
+
+## Start from a template
+
+The [templates](/docs/viewer/templates) are built only from these parts, so a template's source
+is a good place to start. Copy `Default.tsx` and `Default.css` from
+`packages/clover/src/templates/default/` (or another template's folder) into your app,
+and read `../../parts` in its imports as `@nulib/clover`. Rename its
+`clover-template-default-*` classes to your own, and change what you like: nothing in a
+template is private.
+
+To keep the Viewer's shell, pass your layout as its `template`; it takes the `Root` props
+like any template:
+
+```jsx
+import Viewer, * as Clover from "@nulib/clover";
+
+function MyLayout(props) {
+  return (
+    <Clover.Root {...props}>
+      <Clover.Content />
+      <Clover.Items layout="pager" />
+    </Clover.Root>
+  );
+}
+
+<Viewer iiifContent={url} template={MyLayout} />;
+```
+
+## `Root`
+
+| Prop                   | Type                              | Description                                                                        |
+| ---------------------- | --------------------------------- | ---------------------------------------------------------------------------------- |
+| `iiifContent`          | `string \| object`                | A URL, a IIIF resource (Presentation 2, 3 or 4), or a content state.               |
+| `canvasId`             | `string`                          | The Canvas to show, controlled. Moving calls `onCanvasChange` instead.             |
+| `defaultCanvasId`      | `string`                          | The Canvas to start on. A content state, then the Manifest's `start`, win over it. |
+| `onCanvasChange`       | `(canvasId: string) => void`      | The reader moved to a Canvas.                                                      |
+| `onStatusChange`       | `(status, error) => void`         | `"loading"`, `"ready"` or `"error"`.                                               |
+| `request`              | `{ credentials, headers, fetch }` | Used for every request any part makes.                                             |
+| `language`             | `string`                          | The language to read IIIF text in. The page's, then the reader's, by default.      |
+| `annotations`          | URL, object or list               | AnnotationPages or AnnotationCollections to show beside the Manifest's own.        |
+| `manifestId`           | `string`                          | In a Collection, the member to show, controlled.                                   |
+| `onManifestChange`     | `(manifestId) => void`            | In a Collection, the reader moved, or asks to move, to another member.             |
+| `searchQuery`          | `string`                          | A Content Search to run once the Manifest is shown, and whenever it changes.       |
+| `onContentStateChange` | `({ json, encoded }) => void`     | Where the reader is, as a content state, each time it settles.                     |
+| `renderers`            | list                              | Components that draw views Clover does not; see [below](#renderers-of-your-own).   |
+| `as`                   | element type                      | Default `div`.                                                                     |
+
+`iiifContent` can be a Manifest, a Collection, a Canvas or a content state, as a URL or
+an object; see [what the Viewer opens](/docs/viewer#what-iiifcontent-can-be). Every
+template, and the Viewer, takes these props and hands them to its `Root`.
+
+## Parts
+
+| Part                                               | What it renders                                                                                                                                                                                                                     |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Root`                                             | Loads the content and holds where the reader is. Renders a `div` (or `as`), and announces moves.                                                                                                                                    |
+| [`Content`](/docs/content)                         | The current view, drawn by `Canvas`: a page, a spread, a video or sound. Children join its controls. While it loads, Clover's loading mark runs along its top edge; nothing moves.                                                  |
+| [`Label`](/docs/primitives/label)                  | The Manifest's label, or the current Canvas's with `of="canvas"`, in the reader's language.                                                                                                                                         |
+| [`Previous`, `Next`](/docs/items#one-at-a-time)    | Round arrow controls that move a view at a time (a spread, in a paged book), as Items' arrows do, or with `of="members"` a Collection's Manifest. Each names itself on hover and focus, and shows disabled at an end.               |
+| [`Position`](/docs/items#one-at-a-time)            | "2 / 5", counted in views (or members); "Item 2 of 5" to assistive technology, in the reader's language. Its room is its widest count's.                                                                                            |
+| `Status`                                           | Loading, as Clover's loading mark (announced "Loading…"), or what went wrong. Once loaded, its status region stays, empty and hidden, so the next load is announced. `loading={false}` only announces it, where `Content` shows it. |
+| [`Items`](/docs/items)                             | Thumbnails of the views, as a carousel, list or grid, or `layout="pager"`: `Position`, `Previous` and `Next` in a `nav`. See [Items](/docs/items).                                                                                  |
+| [`Panel`](/docs/panel)                             | The resource's information in sections, as tabs or an accordion: the ones it has data for, or `Tab`s of your own. See [Panel](/docs/panel).                                                                                         |
+| [`Tab`](/docs/panel#sections-of-your-own)          | One tab of the panel: `value`, `label`, and what it shows. Your own components go here.                                                                                                                                             |
+| [`About`](/docs/panel#sections)                    | Everything the Manifest says about itself, as 3.x's About tab shows it.                                                                                                                                                             |
+| [`PanelToggle`](/docs/panel#showing-and-hiding-it) | Shows and hides the panel. As a child of `Content`, it sits with the Canvas's controls.                                                                                                                                             |
+| [`Annotations`](/docs/annotations)                 | The view's annotations by set: content to read, a button to find each on the Canvas, and an eye before each set's label that hides its annotations on the Canvas (shared with the Canvas's annotations menu).                       |
+| [`Download`](/docs/download)                       | The `rendering` of the page in view and of the Manifest (a PDF, say), as links behind one button.                                                                                                                                   |
+| [`Transcript`](/docs/transcript)                   | The view's captions as text: the current cue marked as it plays, a press seeking there.                                                                                                                                             |
+| [`Contents`](/docs/contents)                       | The table of contents from the Manifest's Ranges, the entry the reader is in marked. Hovering an entry draws its chapter out on the Canvas's seek bar, and the chapter under the pointer there marks its entry.                     |
+| [`Search`](/docs/search)                           | IIIF Content Search (1 or 2): a field, then the hits by page with the words around them.                                                                                                                                            |
+| [`Collection`](/docs/collection)                   | The Collection the Manifest is in: its label, summary, members, homepage and address, as the `Panel`'s Collection section shows it. Fetched when it first shows. `headingLevel` sets its headings (default 3).                      |
+| [`CollectionSelect`](/docs/collection)             | In a Collection, a menu of its members; choosing one shows it. By keyboard, the arrows move through the members and Enter opens one; Escape, or leaving the menu, takes the step back.                                              |
+| [`Canvas`](/docs/canvas)                           | The renderer itself. Inside a `Root` it shows the current view; see [Canvas](/docs/canvas).                                                                                                                                         |
+| `Tip`                                              | A control's popover: its name and its key, on hover and focus. See [below](#controls-of-your-own).                                                                                                                                  |
+
+Parts that have nothing to show render nothing: `Items` and its pager for a single view,
+`Label` with no label.
+
+## Properties
+
+[Primitives](/docs/primitives) has a page for each. Each IIIF descriptive property is a part of its own, reading the Manifest, or the
+current Canvas with `of="canvas"`. A value passed as `value` wins, so they also work
+outside a `Root`. Text is in the reader's language and marked with `lang`; HTML is
+limited to what IIIF allows and sanitized, by a sanitizer that loads only when a value
+carries markup.
+
+| Part                                                                                                                                                             | Property                                                      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| [`Label`](/docs/primitives/label)                                                                                                                                | `label` (takes `label` rather than `value`)                   |
+| [`Summary`](/docs/primitives/summary)                                                                                                                            | `summary`, cut to five lines with "Read more" (below)         |
+| [`Metadata`](/docs/primitives/metadata)                                                                                                                          | `metadata`, as a description list; `renderValue` to customize |
+| [`RequiredStatement`](/docs/primitives/required-statement)                                                                                                       | `requiredStatement`                                           |
+| [`Rights`](/docs/primitives/rights)                                                                                                                              | `rights`, as a link                                           |
+| [`Homepage`](/docs/primitives/homepage), [`Rendering`](/docs/primitives/rendering), [`SeeAlso`](/docs/primitives/see-also), [`PartOf`](/docs/primitives/part-of) | Linked resources, by label, with their format                 |
+| [`Thumbnail`](/docs/primitives/thumbnail)                                                                                                                        | `thumbnail` (or a Canvas's first image), at `size`            |
+| [`Id`](/docs/primitives/id)                                                                                                                                      | The resource's `id`, as a link                                |
+
+`Value` shows any other IIIF language map you hold, an annotation's text say, marked
+and sanitized the same way. It reads a value strictly by its `format`: `text/html` as
+IIIF's HTML, sanitized to the tags the Presentation API allows; `text/plain` as written,
+markup and all, its line breaks kept; and with no `format`, by IIIF's rule for property
+values, as HTML only when it runs from a first `<` to a last `>`. With
+`format="text/markdown"` it reads Markdown, as
+`Annotations` does for a `text/markdown` body: its lists are lists, and its headings are
+headings to assistive technology (`role="heading"`, drawn bold, so your page's heading
+styles stay out of them). The first heading takes `headingLevel` (default 3), and each
+later one sits a level under the nearest shallower heading before it, so none is skipped
+even where the source skips one. In `Annotations` they sit a level under the set's
+heading.
+
+Every summary Clover shows is `Summary`, cut to five lines with a "Read more" button
+under it when it runs longer, and "Read less" to cut it again. The number of lines is a
+CSS custom property, `--clover-summary-lines`, set on `.clover-summary` or anything
+around it; `none` shows it whole:
+
+```css
+.my-layout .clover-summary {
+  --clover-summary-lines: 3;
+}
+```
+
+`ReadMore` gives text of your own the same button: wrap one element (or a component that
+forwards its ref) and clamp it in your CSS; it carries `data-read-more="open"` while
+open.
+
+```jsx
+<Clover.ReadMore>
+  <p className="my-note">{note}</p>
+</Clover.ReadMore>
+```
+
+## The information panel
+
+`Panel` shows About, and each other section the content has something for:
+Collection, Contents, Search, Map, Transcript and Annotations. Give it `Tab`s to choose
+the sections yourself, in your order. Each part a default section uses works on its own
+too, in a `Tab` or anywhere in the layout, and so does a part of your own.
+
+```jsx
+<Clover.Panel>
+  <Clover.Tab value="about" label="About">
+    <Clover.About />
+  </Clover.Tab>
+  <Clover.Tab value="page" label="This page">
+    <Clover.Label of="canvas" as="h3" />
+    <Clover.Summary of="canvas" />
+    <Clover.Metadata of="canvas" />
+  </Clover.Tab>
+</Clover.Panel>
+```
+
+`PanelToggle` shows and hides it; as a child of `Content`, it sits with the Canvas's
+controls. [Panel](/docs/panel) has its layouts, the sections and
+when each shows, headings, closing a panel that floats over the page, and its props.
+
+## Panes side by side
+
+`Split`, `SplitPane` and `SplitHandle` put panes side by side, with a bar between them
+that shares the width. One pane beside each bar has a `size` (with `min` and `max`, in px,
+rem or %); the other takes what is left. The reader drags the bar by its grip, or clicks
+or taps it: each click steps the pane on to its next width, from its narrowest to its own
+`size` to its widest and round again, so one pointer can resize it without dragging. The
+bar is a focusable `separator` that names itself on hover and focus: the arrow keys move
+it (Shift for bigger steps), and Home and End go to the limits. With `storageKey` the
+reader's sizes are remembered. The `Default` and `Document` templates use it, and nothing
+ties it to any part.
+
+```jsx
+<Clover.Root iiifContent={url}>
+  <Clover.Split storageKey="my-layout">
+    <Clover.SplitPane min="16rem">
+      <Clover.Content />
+    </Clover.SplitPane>
+    <Clover.SplitHandle />
+    <Clover.SplitPane size="24rem" min="14rem">
+      <Clover.Panel />
+    </Clover.SplitPane>
+  </Clover.Split>
+</Clover.Root>
+```
+
+## Parts of your own
+
+Hooks read from the nearest `Root`. Each re-renders only when what it reads changes.
+
+| Hook                   | Returns                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------ |
+| `useStatus()`          | `{ status, error }`                                                            |
+| `useManifest()`        | The Manifest, in Presentation 4.                                               |
+| `useSequence()`        | `{ canvases, views, direction }`                                               |
+| `useVisibleCanvases()` | The Canvases of the current view.                                              |
+| `useActiveCanvas()`    | The Canvas the reader is on.                                                   |
+| `useNavigation()`      | `{ position, total, hasPrevious, hasNext, previous, next, first, last, goTo }` |
+| `useLocalized(value)`  | `{ text, lang }` for a IIIF language map, in the Root's language.              |
+| `useT()`               | `t(key, values)`: Clover's strings, in its interface language.                 |
+| `useLangOf()`          | `langOf(key)`: a string's `lang` where it is not the page's language.          |
+
+```jsx
+function PageCount() {
+  const { position, total } = Clover.useNavigation();
+  return (
+    <span>
+      {position + 1} / {total}
+    </span>
+  );
+}
+```
+
+`useClover()` gives `{ clover }`, the Root's state and actions (`clover.goTo(canvasId)`,
+`clover.next()`, `clover.search(query)` and the rest), for parts that act rather than
+read.
+
+### Controls of your own
+
+Every control Clover draws as an icon alone names itself in a popover on hover and on
+keyboard focus, with its keyboard shortcut when it has one. Give a control of your own
+the same: its name as `aria-label`, its key (if it has one) as `aria-keyshortcuts`, and
+`Tip` inside it, last, with the same words. Tip is hidden from assistive technology,
+which reads the control's own name, and hides on Escape. Each time it shows, it is kept
+inside whatever clips it (the stage, a scrolling panel, the window): it wraps to the room
+there is and moves in from the edge.
+
+```jsx
+<button type="button" aria-label="Bookmark" onClick={save}>
+  <BookmarkIcon aria-hidden="true" />
+  <Clover.Tip label="Bookmark" />
+</button>
+```
+
+Clover's popups open one at a time: the Canvas's information and its menus
+(annotations, Choice, an animation's frames), the playback controls' menus and
+Download's list. Opening one closes whichever other is open, however it was opened. A
+popup of your own joins them with `useOneOpen`, given its open state and the way to
+close it:
+
+```jsx
+const [open, setOpen] = useState(false);
+Clover.useOneOpen(open, () => setOpen(false));
+```
+
+## Languages
+
+Clover's own words (its controls' names, its messages, what it announces) are in its
+interface language: the one set with `initCloverI18n`, else the page's `<html lang>`, else
+the first of the browser's languages it has, else English, so it speaks the language of
+the page around it. It ships English, Finnish,
+French, Norwegian (Bokmål and Nynorsk), Portuguese (European) and Spanish, each complete.
+IIIF text is read in the Root's `language`, else the page's, else the browser's.
+
+```jsx
+import { initCloverI18n } from "@nulib/clover";
+
+// The page's language, and strings of your own for one Clover does not ship.
+initCloverI18n({
+  lng: "de",
+  resources: { de: { clover: { informationPanelTabsAbout: "Über" } } },
+});
+```
+
+English comes with Clover; each other language loads the first time Clover is to speak
+it, so a page in English never fetches one. Until it arrives, Clover's words show in
+English, marked `lang="en"`, and they change when it does. A page rendered on the server,
+or a test, that needs them in place first waits for them:
+
+```js
+await initCloverI18n({ lng: "fr" }).ready();
+```
+
+Where the interface language is not the page's (a French reader on an English page), each
+of Clover's strings carries it as `lang`, on the element that shows it or is named by it.
+The page's language is the nearest `lang` around the `Root`, or one you give the `Root`.
+The `Root` carries none of its own, so what you put in it, and IIIF text in no language
+(`none`), keep the page's. A language you bootstrap with some strings falls back to
+English for the rest, each such string marked `lang="en"` too. In a part of your own,
+mark Clover's strings the same way:
+
+```jsx
+const t = Clover.useT();
+const langOf = Clover.useLangOf();
+
+<button
+  type="button"
+  aria-label={t("commonClose")}
+  lang={langOf("commonClose")}
+>
+  <CloseIcon aria-hidden="true" />
+  <Clover.Tip label={t("commonClose")} />
+</button>;
+```
+
+## Renderers of your own
+
+Give `Root` (or one `Content`) `renderers`, and a view they claim is drawn by your
+component instead of the Canvas: a 3D model, a PDF, anything Clover does not draw. Claim a
+view by its Canvas id, by a painted body's `format`, or with a `match` test. The first
+renderer that claims a view draws it. This is 3.x's `customDisplays`.
+
+```jsx
+function ModelViewer({ bodies }) {
+  // Inside the Root: Clover's hooks work here (useNavigation, useActiveCanvas, useClover…).
+  return <model-viewer src={bodies[0].id} camera-controls />;
+}
+
+<Clover.Root
+  iiifContent={url}
+  renderers={[{ format: ["model/gltf-binary"], component: ModelViewer }]}
+>
+  <Clover.Content />
+</Clover.Root>;
+```
+
+A renderer gets the view's `canvases`, their painting `bodies` (a `Choice` as its first
+item, a `SpecificResource` as its source) and `Content`'s `children`. The Viewer and every
+template pass `renderers` through to their `Root`.
+
+| 3.x `customDisplays`         | 4.x `renderers`                                     |
+| ---------------------------- | --------------------------------------------------- |
+| `target.canvasId`            | `canvasId`                                          |
+| `target.paintingFormat`      | `format`                                            |
+| (none)                       | `match: ({ canvases, bodies }) => boolean`          |
+| `display.component`          | `component`                                         |
+| `display.componentProps`     | close over them: `component: (p) => <X {...p} a />` |
+| `id`, `annotationBody` props | `canvases`, `bodies` props                          |
+| `hooks` prop                 | Clover's hooks, called in the component             |
+
+## Styles
+
+Import `@nulib/clover/styles.css` once. Its rules sit in `@layer clover`, so your own
+CSS wins without a fight over specificity. Without it, every part still renders a plain,
+usable layout.
+
+The stage takes its height from `--clover-content-height` (default `60vh`):
+
+```css
+.my-layout {
+  --clover-content-height: 70vh;
+}
+```
+
+Every region keeps `--clover-inset` (default `1.618rem`, the scale's `l`) between its
+edge and its content: the header and thumbnail strip, the information panel, the picture
+on the stage at home. Inside a region, each level is a step less: its parts `1rem` apart,
+what is within a part `0.618rem`. Set it once for a tighter or roomier layout:
+
+```css
+.my-layout {
+  --clover-inset: var(--clover-space-m);
+}
+```
+
+The picture fills its stage edge to edge at home; `--clover-canvas-inset` keeps a margin
+round it instead. The Canvas's controls sit `--clover-canvas-chrome-inset` in from its
+edges, the region's inset by default, so they line up with what is round the stage.
+
+Clover sets no font and steps every space from your `1rem`, so a layout reads at your
+page's type and size. Its colors are custom properties (`--clover-color-accent` and
+the rest): set one on any ancestor and it cascades. The round controls have two of their
+own, a dark fill (`--clover-color-control`) and white glyphs
+(`--clover-color-control-glyph`), and keep them in a dark mode: they sit over a Canvas's
+images, so they do not swap with the page's text and background colors. Each part names itself with one
+`clover-*` class on its root and states what it is doing in `data-*` attributes
+(`data-media` on a Canvas playing video or sound, `data-layout` on the panel's sections),
+for your own CSS to select.
+
+Since your CSS wins, a reset that takes the markers off every list
+(`ul, ol { list-style: none; padding: 0 }`, as Tailwind's and many themes' do) takes
+them off a Markdown body's lists too: its bullets, its indent, and the numbers its author
+gave. Safari's VoiceOver then stops reading them as lists. Put them back for Clover's
+text:
+
+```css
+:is(.clover-annotations-body, .clover-value) ul {
+  list-style: disc;
+  padding-inline-start: var(--clover-space-l);
+}
+
+:is(.clover-annotations-body, .clover-value) ol {
+  list-style: decimal;
+  padding-inline-start: var(--clover-space-l);
+}
+```
+
+### Colors and contrast
+
+Clover's default colors meet WCAG 2.2 AA (open gaps are listed in
+[ACCESSIBILITY.md](https://github.com/nulib-ds/clover/blob/main/ACCESSIBILITY.md)); the
+colors a page sets are the page's to keep accessible. These are the pairs Clover draws,
+the ratio each needs, and what the defaults measure. Names drop `--clover-color-`.
+
+| Pair                                                 | Where Clover draws it                                                                                                                                                                                                                                                                                   | Needs                              | WCAG          | Default |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ------------- | ------- |
+| `primary` on `secondary`                             | Text in the panel, menus, popups and fields, and the reverse in tips; Items' focus ring                                                                                                                                                                                                                 | 4.5:1                              | 1.4.3         | 16.96:1 |
+| `primary-muted` on `secondary`                       | Quieter text: descriptions, formats, legends, status; the edges of fields and text buttons; a split's grip                                                                                                                                                                                              | 4.5:1                              | 1.4.3, 1.4.11 | 14.64:1 |
+| `primary` or `primary-muted` on `secondary-muted`    | Text on a row or menu option under the pointer; the map's message on its empty ground; a split's grip beside Document's page                                                                                                                                                                            | 4.5:1                              | 1.4.3, 1.4.11 | 11.93:1 |
+| `primary` 65% into `secondary`                       | The search field's placeholder                                                                                                                                                                                                                                                                          | 4.5:1                              | 1.4.3         | 5.28:1  |
+| `accent` on `secondary`                              | Links, Read more, the selected item's label; reversed, a text button's label and the lightbox's close, under the pointer, focused or open                                                                                                                                                               | 4.5:1                              | 1.4.3         | 5.75:1  |
+| `accent` against `secondary`                         | Focus rings, the selected item's ring, the edge of the current tab and row; the line under the open accordion heading                                                                                                                                                                                   | 3:1                                | 1.4.11        | 5.75:1  |
+| `accent` at half strength against `secondary`        | Under the pointer: an item's ring, and the line under a closed accordion heading                                                                                                                                                                                                                        | None: a preview; the press decides | 1.4.11        | 2.24:1  |
+| `control-glyph` on `control`                         | The round controls' glyphs; Exit full screen's label                                                                                                                                                                                                                                                    | 4.5:1                              | 1.4.3, 1.4.11 | 16.96:1 |
+| `control-glyph` on `accent`                          | A round control under the pointer or focused                                                                                                                                                                                                                                                            | 4.5:1                              | 1.4.3, 1.4.11 | 5.75:1  |
+| `secondary-muted` against `secondary`                | Hairlines between regions; fills under the pointer                                                                                                                                                                                                                                                      | None: they mark nothing            | 1.4.11        | 1.23:1  |
+| `secondary-alt` at half strength against `secondary` | The bar between split panes, beside its grip; the line under a closed accordion heading, beside its chevron                                                                                                                                                                                             | None: the grip or chevron marks it | 1.4.11        | 1.28:1  |
+| `primary` beside `secondary`, over a picture         | The Canvas's hotspots: their two-tone outline at rest, and the edges either side of the accent when active or focused; the Canvas's and the map's focus rings, either side of the accent; Items' focus: inside its ring, a `secondary` ring and a `primary` one, side by side over the thumbnail's edge | 9:1 between them                   | 1.4.11        | 16.96:1 |
+
+Text needs 4.5:1 (1.4.3); large text, 24px or 18.66px bold, needs 3:1, but Clover's
+labels and links run at the page's body size or smaller. Rings, edges and glyphs that
+show a control or its state need 3:1 (1.4.11). Color is never the only sign (1.4.1). A
+ratio is not rounded up: 4.49:1 fails.
+
+- **Measure against what is behind.** Most parts paint no ground of their own: the panel
+  beside the stage and Items sit on the page. Set `--clover-color-secondary` to the
+  page's background, or measure against the page's.
+- **Check the accent as text.** It draws links and labels as well as rings, so it needs
+  4.5:1 against `secondary`, not 3:1, and against `secondary-muted` too.
+- **Keep `control` and `control-glyph` 4.5:1 apart.** The round controls sit over any
+  picture, so their fill is the only ground a glyph can count on, and Exit full screen
+  writes its name there. Under the pointer or focused, the fill turns the accent: check
+  the glyph on that too.
+- **Check a dark mode on its own.** Ratios do not carry over, so measure every pair again
+  with the dark values. An accent light enough to read on a dark `secondary` can be too
+  light under a white `control-glyph`.
+- **Over a picture, two tones 9:1 apart.** A picture has no one color to measure
+  against. At 9:1 between two tones, one of them keeps 3:1 against any picture (WCAG
+  technique C40). So over a picture Clover draws with `primary` and `secondary` side by
+  side: the Canvas's and the map's focus rings, a dark edge and a light band either side
+  of the accent; the hotspots' outlines; and Items' focus inside the thumbnail. Keep
+  those two 9:1 apart.
+- **Never let the accent alone mark a state.** Keep a second sign beside it, as Clover
+  does: the selected item's label and the current Range turn bold, the words a search
+  matched are bold on their tint, the item in focus has a second ring, `secondary` and
+  `primary` side by side, inside the thumbnail's edge, and a closed accordion heading is
+  underlined, with a chevron. Restyle a state, and keep its second sign.

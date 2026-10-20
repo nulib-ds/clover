@@ -1,7 +1,7 @@
 /*
  * Map: MapLibre's own stylesheet (`maplibre-gl/dist/maplibre-gl.css`) styles the map, its
  * controls and popups; this frames it, over its places. Size it with
- * `--clover-map-height`. The places are the panel's rows (`InformationPanel.css`,
+ * `--clover-map-height`. The places are the panel's rows (`Panel.css`,
  * "Rows"), `s` under the map: two parts of one.
  */
 .clover-geomap {
@@ -48,7 +48,7 @@
 
 /*
  * The controls' focus, inside each on its white: MapLibre's own is a pale glow that falls
- * under 3:1 over the map and is lost in forced colours. On the icon, and on the credits'
+ * under 3:1 over the map and is lost in forced colors. On the icon, and on the credits'
  * box, which MapLibre's stylesheet leaves alone, so it holds whatever the layer order.
  */
 .clover-geomap
@@ -70,7 +70,7 @@
 }
 
 /*
- * A place's popup in the theme's colours, its tip with it. MapLibre's stylesheet is
+ * A place's popup in the theme's colors, its tip with it. MapLibre's stylesheet is
  * unlayered and Clover's layered (`dist`), so MapLibre's white ground would win under the
  * theme's text, unreadable where that text is light: hence `!important`, on the ground
  * and the tip only.

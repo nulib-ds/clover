@@ -465,7 +465,7 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
         ? union(scene.placements)
         : null;
   // Every field matters (a new region is a new picture), so compare them all. An element
-  // does not serialise, so the media item's presence stands in for it.
+  // does not serialize, so the media item's presence stands in for it.
   const imagesKey = JSON.stringify([
     baseImages,
     world,
@@ -1245,7 +1245,7 @@ function useVideoSize(element: HTMLVideoElement | null) {
   return size;
 }
 
-/** The largest rectangle of `size`'s aspect centred inside `box`; `box` until it is known. */
+/** The largest rectangle of `size`'s aspect centered inside `box`; `box` until it is known. */
 
 const NO_FRAMES: AnimationFrame[] = [];
 

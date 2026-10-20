@@ -129,9 +129,7 @@ describe("templates", () => {
     expect(
       screen.queryByRole("button", { name: "More Information" }),
     ).not.toBeInTheDocument();
-    expect(
-      document.querySelector(".clover-information-panel"),
-    ).not.toBeInTheDocument();
+    expect(document.querySelector(".clover-panel")).not.toBeInTheDocument();
   });
 
   it("Default: the title at headingLevel, the panel's sections a level under it", async () => {
@@ -352,11 +350,11 @@ describe("templates", () => {
   });
 
   it("Gallery: the lightbox is named by the Manifest when its Canvas has no label", async () => {
-    const unlabelled = {
+    const unlabeled = {
       ...bookJson,
       items: bookJson.items.map((canvas) => ({ ...canvas, label: undefined })),
     };
-    render(<Templates.Gallery iiifContent={unlabelled} />);
+    render(<Templates.Gallery iiifContent={unlabeled} />);
     fireEvent.click((await screen.findAllByRole("option"))[1]);
     expect(
       screen.getByRole("dialog", { name: "Simple Manifest - Book" }),

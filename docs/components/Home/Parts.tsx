@@ -15,13 +15,20 @@ const PartsLive = dynamic(() => import("docs/components/Home/PartsLive"), {
  * The homepage's second half: the resource in the playground above, taken apart into the
  * parts every template is made of (`PartsLive.tsx`). It follows the playground: pick
  * another resource there and other parts light up here.
+ *
+ * What follows the parts ("Why Clover", `children`) shares their grid, in the parts'
+ * column, so the example viewer stays held beside it, and a story there with a
+ * `data-point` (a part's key, or `viewer`) outlines that part, or every part, in the
+ * viewer, with a line drawn to it, while it is in the middle of the window. Drawn here, on the server, so
+ * it is the page's own text before the parts load.
  */
 const Parts: React.FC<{
   /** The playground's resource: an address or a content state. */
   resource: string | null;
   /** Put one of the playground's resources on its stage, by key. */
   onTry: (key: string) => void;
-}> = ({ resource, onTry }) => {
+  children?: React.ReactNode;
+}> = ({ resource, onTry, children }) => {
   // A chip's resource remounts the parts, chip and all, so focus moves here first.
   const heading = useRef<HTMLHeadingElement>(null);
   const tryResource = (key: string) => {
@@ -42,11 +49,14 @@ const Parts: React.FC<{
       >
         Parts
       </h2>
-      {resource ? (
-        <PartsLive resource={resource} onTry={tryResource} />
-      ) : (
-        <div className={styles.placeholder} aria-hidden="true" />
-      )}
+      <div className={styles.grid}>
+        {resource ? (
+          <PartsLive resource={resource} onTry={tryResource} />
+        ) : (
+          <div className={styles.placeholder} aria-hidden="true" />
+        )}
+        {children && <div className={styles.after}>{children}</div>}
+      </div>
     </section>
   );
 };

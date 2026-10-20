@@ -41,7 +41,7 @@ const ChoiceMenu: React.FC<ChoiceMenuProps> = ({
 }) => {
   // A group with no label of its own is named by the control, for assistive technology.
   const fallbackName = useContainerName(label, labelLang);
-  const unlabelled = choices.some(
+  const unlabeled = choices.some(
     (group) => !localize(group.label as any, language).text,
   );
   return (
@@ -51,7 +51,7 @@ const ChoiceMenu: React.FC<ChoiceMenuProps> = ({
       onClose={onClose}
       triggerId={triggerId}
     >
-      {unlabelled && fallbackName.node}
+      {unlabeled && fallbackName.node}
       {choices.map((group, g) => {
         // Only text the Manifest provides is shown.
         const heading = localize(group.label as any, language);

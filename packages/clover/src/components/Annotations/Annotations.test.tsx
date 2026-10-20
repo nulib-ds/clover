@@ -182,7 +182,7 @@ describe("Annotations", () => {
   it("joins the information panel as a tab when there are annotations", async () => {
     render(
       <Clover.Root iiifContent={imageJson}>
-        <Clover.InformationPanel />
+        <Clover.Panel />
       </Clover.Root>,
     );
     expect(
@@ -471,7 +471,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
     ...(label ? { label: { en: [label] } } : {}),
     items,
   });
-  // Three pages: tags on pages 1 and 3, one page each and unlabelled, as most Manifests
+  // Three pages: tags on pages 1 and 3, one page each and unlabeled, as most Manifests
   // publish them; Comments on pages 2 and 3, page 3's only referenced.
   const manifest = {
     "@context": "http://iiif.io/api/presentation/3/context.json",
@@ -533,7 +533,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
       expect.anything(),
     );
     /*
-     * Two layers: the unlabelled tags (two pages, one toggle), and the Comments, each
+     * Two layers: the unlabeled tags (two pages, one toggle), and the Comments, each
      * toggle named "Hide" and its layer's label, which follows it in the header.
      */
     const boxes = [
@@ -679,7 +679,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
           fetch: vi.fn(async () => new Response(JSON.stringify(referenced))),
         }}
       >
-        <Clover.InformationPanel />
+        <Clover.Panel />
       </Clover.Root>,
     );
     fireEvent.click(await screen.findByRole("tab", { name: "Annotations" }));

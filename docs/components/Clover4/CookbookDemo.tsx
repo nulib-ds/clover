@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import dynamic from "next/dynamic";
 
@@ -41,18 +43,17 @@ const renderViewer = (resource: string) => (
   </div>
 );
 
-const intro =
-  "Clover's Viewer, in its Default template: images in deep zoom, video and sound, annotations, contents, search and maps, all from the Manifest. Paste the address of your own IIIF Manifest, Collection or content state below, or start with one of ours.";
-
 /**
- * Clover 4's demo page: the field, the featured items, and every IIIF Cookbook recipe to
- * open in the Viewer. Each recipe is listed whether Clover 4 handles it yet or not; how
- * far it does is on the unlisted progress page.
+ * The Cookbook Recipes page: every IIIF Cookbook recipe to open in the Viewer, which
+ * slides in over the page. Each recipe is listed whether Clover 4 handles it yet or not;
+ * how far it does is on the unlisted progress page. The homepage is the demo, with its
+ * own field for any resource, so this page has none.
  */
 export function Cookbook4Demo({ children }: { children?: React.ReactNode }) {
   return (
     <ViewerDemo
-      intro={intro}
+      field={false}
+      featured={false}
       renderViewer={renderViewer}
       preload={preload}
       renderRecipes={(onView, onPreload) => (
@@ -60,6 +61,8 @@ export function Cookbook4Demo({ children }: { children?: React.ReactNode }) {
           onView={onView}
           onPreload={onPreload}
           showStatus={false}
+          // Under the page's own title, an h1.
+          headingLevel={2}
         />
       )}
     >

@@ -38,7 +38,7 @@ every rule below.
   into `dist/styles.css` (esbuild), which `build/styles.mjs` wraps in `@layer clover`.
   Keep the aggregate's imports plain: the docs import it from source, and Next 14 reads
   `@import … layer()` as a media query that never matches. Package JS never imports CSS.
-  Colour tokens are `--clover-color-*` with literal fallbacks, since a page sets them. The
+  Color tokens are `--clover-color-*` with literal fallbacks, since a page sets them. The
   scale's tokens (`--clover-space-*`, `--clover-text-*`, `--clover-control`) are defined
   in `src/styles/scale.css`, first in the list, and need none. Add every new stylesheet to
   the list.
@@ -62,7 +62,7 @@ every rule below.
   system player: pass it to `toggleFullscreen(from, video)`. A `texture` video is not on
   the page, so it is placed first in its Canvas at full size, under the viewport, until
   `webkitendfullscreen`. The player is handed it a frame later. Handed over at once, a
-  video that has never been laid out shows as black. Safari still honours the press.
+  video that has never been laid out shows as black. Safari still honors the press.
   Checked in the iOS 26 Simulator.
 - **Class names** are `clover-*`, and never one 3.x uses: both stylesheets load on the
   docs pages, and an app moving to 4.x may load both too. The Viewer's are its template's
@@ -78,7 +78,19 @@ every rule below.
   select-on-arrow; or headings, `aria-expanded`, `region`, arrow keys that only move focus)
   and the layout CSS under `[data-layout]`. A panel keeps its place in the tree across a
   layout switch, so its content does not remount.
-- The `InformationPanel`'s default sections past About are `React.lazy`, each in its own
+- Tabs keep to one row, never wrapping (Mat, 2026-10-20). The tab list is
+  `useScrollTrack`'s viewport (`dragFree`, its tabs the slides), in
+  `.clover-sections-tabs` (the rule under the row, the Panel's room for its close
+  button) > `.clover-sections-row` (where the arrows sit). While tabs lie past an end
+  the box carries `data-more` (`start`, `end`, both), the list is masked to fade there,
+  and that end's arrow shows, a round control that pages the row. The arrows are for a
+  pointer only: a tab list holds only tabs, and the keyboard reaches every tab already,
+  so they are `aria-hidden`, `tabIndex={-1}`, keep focus where it was on a press, and
+  name themselves with a `Tip`. The fade and the row's `scroll-padding-inline` are both
+  `--clover-sections-fade` (a control and `s`), so a tab brought into view by focus or
+  by opening rests clear of them (WCAG 2.4.11). The open tab is brought into view when
+  it opens out of sight.
+- The `Panel`'s default sections past About are `React.lazy`, each in its own
   `Suspense` (`later`), as the Map's is: `Sections` mounts a section's content only when
   it first opens, so a section never opened is never fetched. Its helpers (whether to
   offer a section) must not import the section's module: `partOfCollection` lives in
@@ -177,7 +189,7 @@ every rule below.
   flush with the bar, it read as part of the line). The grip, not the bar, identifies the
   control, so it must keep 3:1 beside both panes (WCAG 1.4.11): don't remove it, fade it
   or lighten it. The grab area is `::before`, `l` wide; Document puts it on the page's
-  side, off the thumbnails' scrollbar. Forced colours: `CanvasText`, `Highlight` while
+  side, off the thumbnails' scrollbar. Forced colors: `CanvasText`, `Highlight` while
   active, and a 2px outline on focus.
 - A click or tap steps the sized pane min → own `size` → max and round (WCAG 2.5.7). A
   press turns into a drag only past 4px (8px for touch). A step starts from the size the
@@ -267,7 +279,7 @@ every rule below.
   plainly without CSS).
 - **Toggles on the spine** (Mat, 2026-10-16). While a pane is open beside the page, its
   toggle sits on the bar between them (`shared/useSpine.ts`): `Default`'s and
-  `Document`'s `PanelToggle`, centred on the panel's bar, and `Document`'s thumbnails'
+  `Document`'s `PanelToggle`, centered on the panel's bar, and `Document`'s thumbnails'
   toggle, `cap` (over the thumbnails but for its far rounded end). It is rendered in the
   `Split` right after the `SplitHandle` (not in the handle, whose `separator` role makes
   its contents presentational; not in a pane, which clips or scrolls it), placed by
@@ -281,7 +293,7 @@ every rule below.
   one time in five there), and a Canvas draws its controls a frame later. It focuses the
   control only once focus has gone (on `body`, or in something `hidden`), never taking
   it from somewhere the reader put it.
-- **Closing the information panel** is `InformationPanel`'s job, not a template's. Only
+- **Closing the information panel** is `Panel`'s job, not a template's. Only
   a panel floating over the page gets `onClose` (a close button, and focus handed back to
   the `aria-controls` control) and `closeOnEscape`, which also puts the button at the
   panel's inner edge (`data-floating`: the start, for a panel over the end of the page).
@@ -314,9 +326,9 @@ every rule below.
   modules it shares up front. Measured that way, every import from `@nulib/clover`,
   even a lone `Canvas`, is the whole Default template (62 kB). Rollup and webpack (Next)
   split by what is used. It is a real cost for apps bundled with esbuild, not only a
-  measuring artefact.
+  measuring artifact.
 - The docs import `@nulib/clover`, `@nulib/clover/templates`, `@nulib/clover/map` and the
-  stylesheets, which the root `tsconfig.json` maps to this package's source. Its pages are `pages/docs/*` (3.x's moved to `pages/docs/3.x/`), its demos in
+  stylesheets, which the root `tsconfig.json` maps to this package's source. Its pages are `content/docs/*` (3.x's in `content/docs/3.x/`), its demos in
   `docs/components/Clover4/`, and the homepage shows it (`docs/components/Home/`).
 
 ### End to end (`e2e/`)
@@ -330,10 +342,13 @@ every rule below.
   has finished, alone: run alongside four other browsers they measured the machine.
   `react19` runs Chromium against a second server on port 4322. That server aliases React
   to `e2e/react19/node_modules`, which is its own install, so run `npm ci` there once.
+  Since the docs moved to Next 16 the root's React is 19 too, so the unit tests and the
+  main e2e projects run on 19 and nothing runs on React 18, which the package still
+  supports; pointing the second harness at React 18 would test it again.
 - The harness picks a scene by query:
   `?scene=viewer|items|document|gallery|composed|map|panel` (`document` and `gallery` are
   the Viewer with that template; `map` is a Root's Map on the style its spec routes;
-  `panel` is an accordion `InformationPanel` of a site's own long-named Tabs, full of
+  `panel` is an accordion `Panel` of a site's own long-named Tabs, full of
   links, in a 15rem × 24rem scrolling pane), `&content=`, `&css=0` (no stylesheet, the
   plain layout), `&headers=1` (request settings), `&panel=tabs|accordion` and `&lng=`
   (a host's `initCloverI18n({ lng })`, set before anything renders). `composed`
@@ -357,7 +372,7 @@ every rule below.
 - `specs/transport.spec.ts` (Chromium only) checks the transport's reflow at 320px and on
   640 × 360, 320 × 256 and 320 × 180 stages: the end controls stay together, and the
   menus, the frames menu, the information box and the captions stay on the stage. It
-  also checks the on-state mark and the sliders in forced colours, and the tracks a real
+  also checks the on-state mark and the sliders in forced colors, and the tracks a real
   video adds.
 - `specs/hotspots.spec.ts` serves its own Manifest of hotspots: nested, under the
   cluster's second control, near the edges. A dismissed popover only fades, so check it
@@ -402,7 +417,7 @@ every rule below.
   holding only `status`, `error`, `manifest`, `collection`, `canvasId` and `target`.
   Per-frame and per-tick values (viewport, media element) go through channels, never the
   store; a test asserts that 60 viewport events write nothing.
-- Selectors (`core/selectors.ts`) are memoised on the Manifest object. Never mutate the
+- Selectors (`core/selectors.ts`) are memoized on the Manifest object. Never mutate the
   Manifest: `core/pages.ts` embeds a referenced annotation page by copying only the path
   to it. A selector must return the same object for the same input (an empty result is a
   shared constant), or `useSyncExternalStore` loops.
@@ -412,12 +427,12 @@ every rule below.
 - Content state is decoded by Clover (`core/content-state.ts`), not `@iiif/helpers`
   (14 kB). `groupViews` must match `@iiif/helpers`' `getManifestSequence`;
   `core/sequence.parity.test.ts` checks that with a Vault used only in the test (the
-  Vault normalises in place, so it gets its own copy).
+  Vault normalizes in place, so it gets its own copy).
 - Parts take `as`, `className` and rest props, render nothing when they have nothing to
   show, and throw a message naming themselves outside a `Root`.
 - **Heading levels.** Every part or template that renders a heading takes
   `headingLevel?: 2|3|4|5|6` and never hard-codes `h2` or `h3` (WCAG 1.3.1). It hands
-  `Math.min(level + 1, 6)` to the parts inside it: the InformationPanel, Download, the
+  `Math.min(level + 1, 6)` to the parts inside it: the Panel, Download, the
   Lightbox, About, and the Annotations' Markdown. When a layout drops its title, as
   `Default` does with `header={false}`, it hands its own level to whatever takes the
   title's place, not the level below.
@@ -438,14 +453,14 @@ every rule below.
   (Vite) splits it correctly; its library-mode numbers look larger only because Vite
   does not strip whitespace from ES library output.
 - **Annotations.** `core/annotation-sets.ts` reads the Manifest's non-painting pages
-  (and `addedSets`, from `core/annotation-collection.ts`) into sets of entries, memoised
+  (and `addedSets`, from `core/annotation-collection.ts`) into sets of entries, memoized
   on the Manifest. The store holds `annotationId`, `hiddenSets` and `addedSets`; hover is
   the `highlight` channel. Selection is controlled on the Canvas (`selectedAnnotation`),
   which frames a new id once its hotspot is placed. Presentation 4 groups several bodies
   in `Independents`/`Composite`/`List`; read bodies through `bodiesOf()`.
-  - The `InformationPanel` lists every annotation (`Annotations scope="all"`, Mat
+  - The `Panel` lists every annotation (`Annotations scope="all"`, Mat
     2026-10-19): `AnnotationLayers`, by layer (`layersOf`: sets sharing a localized label
-    are one layer, the unlabelled ones another) and then by Canvas, in sequence order;
+    are one layer, the unlabeled ones another) and then by Canvas, in sequence order;
     a Manifest of one Canvas gets no Canvas labels or `aria-current` (`grouped`), which
     would only repeat the item and push a note's headings a level deeper.
     The Canvases in view are `aria-current`; on a move the list scrolls their group to
@@ -481,7 +496,7 @@ every rule below.
   (`maskUnder`, Mat 2026-10-19): an SVG drawn in their own world box (a tenth spare each
   side, for a shape's stroke past it) less the active one's rectangle or shape, so it
   holds through zoom and rotation (the overlay layer sizes each box to its world rect and
-  rotates it about its centre). The layer sets it on each element (`remask`), never in
+  rotates it about its center). The layer sets it on each element (`remask`), never in
   the rendered `style`: where both stand still, once per change of active; where either
   follows a recording, again on each frame either moves (`moved`, from `useFollow`), from
   where each is then, and not at all under an active one off the recording. A mask is
@@ -594,7 +609,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   (closures in `createClover`), so `loadAnnotations` never drops the note. Its body is
   read by its declared `format`: Digital Collections' links write `<em>` in a
   `text/plain` body, which shows as written.
-- **Sanitiser.** `core/sanitize.ts` runs on its own DOMPurify instance
+- **Sanitizer.** `core/sanitize.ts` runs on its own DOMPurify instance
   (`DOMPurify(window)`, made on first use). `dompurify` is external, so a host that
   imports it gets the same default instance. Never call `addHook` or `setConfig` on the
   default export: those leak into the host's own `sanitize` calls. `{ markdown: true }`
@@ -607,9 +622,9 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   property-value rule, HTML only from a first `<` to a last `>` (whitespace trimmed).
   `Markup`, the Annotations list's names and the hotspots' names all use it; never test
   a format with a loose regex (`/html/` matched `application/xhtml+xml`). Plain text in
-  `Markup` keeps its line breaks as `<br>` and never loads the sanitiser. The Markdown
+  `Markup` keeps its line breaks as `<br>` and never loads the sanitizer. The Markdown
   converter (`core/markdown.ts`, footnotes included, 1.7 kB gzip, loaded with the
-  sanitiser) is Clover's own; no GFM library (Mat: package size).
+  sanitizer) is Clover's own; no GFM library (Mat: package size).
 - **Markdown.** `core/markdown.ts` escapes `& < > "` before it writes any markup, so no
   source text can close an attribute. Headings are `p[role=heading][aria-level]`, never
   `h1`–`h6`. Levels come from a stack (each heading goes one level under the nearest
@@ -709,13 +724,13 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   - `core/geo.ts` reads navPlace (Collection, Manifest, Canvas, annotation `navPlace`,
     GeoJSON annotation bodies) into flat features (`title`, `canvasId`, simplestyle keys;
     MapLibre stringifies nested properties), and georeferencing annotations into
-    `Georeference`s, memoised on the Manifest.
+    `Georeference`s, memoized on the Manifest.
   - Georeferences are drawn the basic way, with no Allmaps: the least-squares affine fit
     of the control points in Web Mercator (exact for three) maps the image's corners, and
     the image (about 2048 px via `core/thumbnail` `imageSource`, clipped to the
     SvgSelector mask on a 2D canvas) is a MapLibre `canvas` source under the places.
     Needs CORS on the image. No TPS, no tiled overlay: document, don't add.
-  - Inside a Root the Map overlays the view's Canvases only (memoised, or the map is
+  - Inside a Root the Map overlays the view's Canvases only (memoized, or the map is
     re-framed under the reader on every render); standalone `iiifContent` wraps a Root
     with `annotationPages="all"`. Pressing a feature with a `canvasId` goes there.
   - Under the map, `ul.clover-geomap-places` lists each feature and each overlay drawn,
@@ -989,11 +1004,11 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     view (WCAG 2.4.11). Both prevent the keydown, so a dialog around it stays open.
   - The captioned Canvases' labels name the figure through `aria-labelledby`.
   - `CaptionDetails.tsx` is `React.lazy` and renders `Markup` and `MetadataList`
-    (`src/ui/Markup.tsx`), whose sanitiser (`src/core/sanitize.ts`, DOMPurify, ~9 kB
+    (`src/ui/Markup.tsx`), whose sanitizer (`src/core/sanitize.ts`, DOMPurify, ~9 kB
     gzip) loads on first open. Keep it out of the entry chunk; `bundle.test.mjs`
     asserts it.
 - A shown Canvas with a `placeholderCanvas` opens on `Placeholder.tsx`. This is a still
-  (`placeholderStill()` in `layout.ts`) fitted and centred with container units, and a
+  (`placeholderStill()` in `layout.ts`) fitted and centered with container units, and a
   toggle in the top right (the Viewer's magnifier, then a ×).
   - Until it is opened, it holds back everything else: `setImages`, pan and zoom,
     hotspots, `Choice` and the media stage. Two controls stay beside the toggle: the `i`
@@ -1005,7 +1020,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     `canvasKey`). Reopening re-frames the Canvas (`fit`), as the Viewer remounts OSD.
   - The still lingers, inert, until the renderer's `open` event. `open` fires once the
     coarsest tiles are decoded, so opening never flashes an empty stage.
-  - For video and sound, the toggle is a 4rem play button in the centre ("think
+  - For video and sound, the toggle is a 4rem play button in the center ("think
     YouTube"). Opening passes `autoPlay` to the media stage, because that press was a
     press of play. Once open, the toggle is the × in the top right. Safari may refuse
     the deferred `play()`; it is swallowed, leaving the transport ready.
@@ -1103,7 +1118,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `--clover-color-control-glyph`, defaults `#1a1d1e` and `#fff`), in light and dark mode
   alike, and the accent under the pointer or focused. They read no `primary` or
   `secondary`: a page swaps those for its dark mode, which turned the controls light.
-  Light controls (the surface's colour) and an accent at rest were both tried and
+  Light controls (the surface's color) and an accent at rest were both tried and
   reverted at Mat's request, as was a translucent 85% rest state. Do not reintroduce
   them.
 - Fixtures: `src/fixtures/iiif-image/info.ts` holds the reference server's Göttingen

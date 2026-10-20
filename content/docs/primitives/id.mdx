@@ -1,0 +1,63 @@
+---
+title: Id
+description: A IIIF resource's id, its own address, as a link.
+---
+
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+
+# Id
+
+The resource's own address, its [`id`](https://iiif.io/api/presentation/3.0/#id), as a
+link whose text is the address. For a Manifest, that is where its IIIF JSON is. Inside a
+`Root` it reads the Root's Manifest, or the current Canvas with `of="canvas"`. A `value`
+you pass wins, so it works outside a `Root` too.
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+<Clover.Root iiifContent={manifestUrl}>
+  <Clover.Id />
+</Clover.Root>;
+```
+
+Below, the White Sewing Machine Company's 1896 bicycle catalog from Clover's
+[mocks](/docs/mocks).
+
+<PartDemo part="Id" />
+
+Outside a `Root`, pass the address:
+
+```jsx
+<Clover.Id value={manifestUrl} />
+```
+
+## The link
+
+`Id` is an `a`, its `href` and its text the address, so its name is the address. It
+carries no `lang`. With no `id`, it renders nothing.
+
+[About](/docs/panel#sections) ends with it, under a IIIF Manifest heading (IIIF Canvas,
+for a Canvas shown on its own), and the Panel's Collection section with the Collection's,
+under IIIF Collection. The heading says what the address is; in a layout of your own,
+give it one too.
+
+## Props
+
+| Prop    | Type                     | Description                                                   |
+| ------- | ------------------------ | ------------------------------------------------------------- |
+| `of`    | `"manifest" \| "canvas"` | Whose `id`: the Manifest's (default) or the current Canvas's. |
+| `value` | `string`                 | An address to show in place of the Root's.                    |
+
+Its other props (`className`, `style`, `title`, `aria-*`) go to the `a`. It takes no `as`.
+
+### Styles
+
+`.clover-id` is the link. An address has no spaces to break at: About lets a long one
+wrap anywhere, so it never pushes the panel wider. In a narrow layout of your own, do the
+same:
+
+```css
+.my-layout .clover-id {
+  overflow-wrap: anywhere;
+}
+```

@@ -128,7 +128,7 @@ describe("service discovery", () => {
     ).toBe("https://example.org/iiif/img");
   });
 
-  it("normalises an info.json URI to the service base", () => {
+  it("normalizes an info.json URI to the service base", () => {
     expect(serviceBase("https://example.org/iiif/abc/info.json")).toBe(
       "https://example.org/iiif/abc",
     );

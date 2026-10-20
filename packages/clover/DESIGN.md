@@ -48,9 +48,9 @@ schedule excuses a failure.
   another language is a hidden element's, reached through `aria-labelledby`
   (`useContainerName`). No Clover root sets `lang`, because hosts put their own content
   inside it.
-- Colour never carries meaning alone, and every default token pair meets its contrast
+- Color never carries meaning alone, and every default token pair meets its contrast
   ratio: a page's own tokens are the page's responsibility, Clover's defaults are ours.
-  The pairs a page must check are in the docs' "Colours and contrast"
+  The pairs a page must check are in the docs' "Colors and contrast"
   (`pages/docs/composing.mdx`); a part that draws a token on a new ground adds its row.
 - `e2e/specs/axe.spec.ts` catches some failures. Most need a keyboard, a screen reader
   and a look. Known failures and the plan to clear them are in the repository's
@@ -190,11 +190,11 @@ Worked examples, from the top of the Viewer down:
   cards of a spread (`paged`) or of a `continuous` Manifest are one item, stitched with
   no gap (`0`), each with its own label under its own picture. Hover, selection and
   focus ring the pictures, 1px clear of them (a hairline, 3px: the accent for the
-  selection, at half strength for hover, the text's colour for focus), in room the item
+  selection, at half strength for hover, the text's color for focus), in room the item
   keeps round itself and gives back, so the ring never moves the items or is cut by a
   strip's edge. Focus adds a second ring inside the pictures' edge, in two tones
   (`secondary` at the edge, `primary` inside it, 2px each), so it shows on any picture
-  and by more than colour.
+  and by more than color.
 - **The Map**: the map's box (`--clover-map-height`), and its places `s` under it as
   rows of the panel. An overlay's row is its Canvas's name, with "Georeferenced image"
   `3xs` under it in `text-s`.
@@ -214,21 +214,21 @@ The stylesheet's size is part of the design.
 - **Families are written once**, as one `:is()` list over their members, and each member
   keeps only what is its own:
 
-  | Family               | Where                  | Members                                                                                                                      |
-  | -------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-  | Round controls       | `ui/Button.css`        | the Canvas's cluster, the media transport, Items' arrows, `Previous` and `Next` (Items' pager), the InformationPanel's close |
-  | Text buttons         | `ui/Button.css`        | Download's button, Search's button                                                                                           |
-  | Rows and their lists | `InformationPanel.css` | annotations, Ranges, cues, search hits, places on the map                                                                    |
-  | Fields               | `styles/scale.css`     | a search's query, a Collection's menu, a transcript's track menu                                                             |
-  | Popovers             | `ui/Tip.css`           | every control that shows an icon alone (§7), the Canvas's hotspots, a split's handle                                         |
-  | Chrome               | `Canvas.css`           | the Canvas's controls, navigator, a placeholder's toggle, the media transport, its captions                                  |
+  | Family               | Where              | Members                                                                                                           |
+  | -------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+  | Round controls       | `ui/Button.css`    | the Canvas's cluster, the media transport, Items' arrows, `Previous` and `Next` (Items' pager), the Panel's close |
+  | Text buttons         | `ui/Button.css`    | Download's button, Search's button                                                                                |
+  | Rows and their lists | `Panel.css`        | annotations, Ranges, cues, search hits, places on the map                                                         |
+  | Fields               | `styles/scale.css` | a search's query, a Collection's menu, a transcript's track menu                                                  |
+  | Popovers             | `ui/Tip.css`       | every control that shows an icon alone (§7), the Canvas's hotspots, a split's handle                              |
+  | Chrome               | `Canvas.css`       | the Canvas's controls, navigator, a placeholder's toggle, the media transport, its captions                       |
 
   A family meant to be refined by its members is `:where()`, with no specificity. A
   family that sets a look its members keep is `:is()`.
 
-  In forced colours a row's tint is dropped, and every edge would be drawn in the text
-  colour, so the other rows' edges are set to `Canvas` and the current row's to
-  `Highlight`. The current row stays distinct with no colour of Clover's own.
+  In forced colors a row's tint is dropped, and every edge would be drawn in the text
+  color, so the other rows' edges are set to `Canvas` and the current row's to
+  `Highlight`. The current row stays distinct with no color of Clover's own.
 
 - **A state many parts share is decided once**, as custom properties on the part that
   owns it, and each reads them. The Canvas's chrome is shown by one selector, which sets
@@ -249,8 +249,8 @@ The stylesheet's size is part of the design.
   positioned, then takes its own presses with or without the stylesheet (WCAG 2.5.8).
 - **A toggle that is on** (Captions showing, Repeat pressed) shows a mark that hover and
   focus never draw: a 2px bar under the glyph, inset `s` from the sides and `2xs` from
-  the bottom. It is a border, not a fill, because forced colours keep a border in the
-  text's colour but would paint a fill as the page. The accent fill alone is not
+  the bottom. It is a border, not a fill, because forced colors keep a border in the
+  text's color but would paint a fill as the page. The accent fill alone is not
   enough, since hover and focus use it too (WCAG 1.4.1). Any new toggle takes the same
   mark.
 - **`button.x`, not `.x`.** One class ties with a reset's `[type="button"]`. The element

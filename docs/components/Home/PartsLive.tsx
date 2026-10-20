@@ -1,4 +1,5 @@
 import * as Clover from "@nulib/clover";
+import { createPortal } from "react-dom";
 import React, {
   Suspense,
   lazy,
@@ -9,16 +10,25 @@ import React, {
   useState,
 } from "react";
 import Link from "next/link";
-import { resourceByKey } from "docs/components/Playground/playground-config";
+import {
+  accentPresets,
+  resourceByKey,
+} from "docs/components/Playground/playground-config";
 import styles from "docs/components/Home/Parts.module.css";
 import { useMapWorker } from "docs/lib/map-worker";
+import { StoryLines } from "docs/components/Home/StoryLines";
+import { AccessibilityTree } from "docs/components/Home/AccessibilityTree";
+import { componentCount, primitiveCount } from "docs/components/Home/counts";
+import { endPageThemePreview, previewPageTheme } from "docs/lib/page-theme";
 
 /**
  * The playground's resource, taken apart (`Parts.tsx` is the section around it). One
  * `Root` holds it; on the left its parts make a small viewer, its code a click away, and
  * on the right each part stands on its own, live, named, with what it reads and what the
  * resource has there. Choosing in one part moves the others, since they read the same
- * Root. Pointing at a part, or at its line of code, outlines it in the viewer.
+ * Root. Pointing at a part, or at its line of code, outlines it in the viewer, and so does
+ * a story of "Why Clover", beside the viewer below the parts, that names it
+ * (`StoryLines.tsx`).
  *
  * Nothing here is made up: every value shown is the resource's own, read as Clover reads
  * it. A part the resource gives nothing to is a chip at the end, naming what it would
@@ -64,7 +74,7 @@ function first(map: unknown): string | undefined {
   return undefined;
 }
 
-/** A rights statement's or licence's short name: `…/vocab/InC/1.0/` is "InC 1.0". */
+/** A rights statement's or license's short name: `…/vocab/InC/1.0/` is "InC 1.0". */
 function rightsName(uri: unknown): string | undefined {
   if (typeof uri !== "string") return undefined;
   try {
@@ -134,13 +144,26 @@ const SHOWN_IN: Partial<Record<PartKey, string>> = {
   transcript: "footage",
 };
 
-/** Where each part is documented. */
-const DOCS = {
-  composing: "/docs/composing#parts",
-  properties: "/docs/composing#properties",
-  panel: "/docs/composing#the-information-panel",
-  items: "/docs/items",
-  map: "/docs/map",
+/** Where each part is documented: its own page, under Components. */
+const DOCS: Record<string, string> = {
+  Label: "/docs/primitives/label",
+  Thumbnail: "/docs/primitives/thumbnail",
+  Content: "/docs/content",
+  Items: "/docs/items",
+  Summary: "/docs/primitives/summary",
+  Metadata: "/docs/primitives/metadata",
+  Collection: "/docs/collection",
+  Homepage: "/docs/primitives/homepage",
+  SeeAlso: "/docs/primitives/see-also",
+  Id: "/docs/primitives/id",
+  Rights: "/docs/primitives/rights",
+  RequiredStatement: "/docs/primitives/required-statement",
+  Annotations: "/docs/annotations",
+  Map: "/docs/map",
+  Contents: "/docs/contents",
+  Search: "/docs/search",
+  Transcript: "/docs/transcript",
+  Download: "/docs/download",
 };
 
 interface PartSpec {
@@ -189,6 +212,34 @@ function Exploded({
     (state) => state.collection,
   ) as Json | null;
   const [pointed, setPointed] = useState<PartKey | null>(null);
+  // The parts the story in the middle of the window names (`StoryLines`).
+  const [lit, setLit] = useState<string[]>([]);
+  const viewer = useRef<HTMLElement>(null);
+  /*
+   * Turned over to its accessibility tree while a story asks (`data-turn`), unless focus
+   * is in it: then its face stays up, so what is focused is seen (WCAG 2.4.7).
+   */
+  const [turned, setTurned] = useState(false);
+  const [focused, setFocused] = useState(false);
+  // The Coverage story's Cookbook recipe, loaded as the stories are reached, and read then.
+  const [recipe, setRecipe] = useState<{ url: string; name: string } | null>(
+    null,
+  );
+  const [reading, setReading] = useState(false);
+  // The tiles at the middle of the window, lit as pointing at them lights them.
+  const [passing, setPassing] = useState<string[]>([]);
+  const face = focused
+    ? "front"
+    : turned
+      ? "back"
+      : reading && recipe
+        ? "recipe"
+        : "front";
+  // Once it has turned, coming back to its face is a turn too (not on the first draw).
+  const [turnedOnce, setTurnedOnce] = useState(false);
+  useEffect(() => {
+    if (face !== "front") setTurnedOnce(true);
+  }, [face]);
   const [code, setCode] = useState(false);
   const codeId = useId();
   // What the viewer's code says, and so what the viewer shows.
@@ -215,7 +266,7 @@ function Exploded({
     const node = event.currentTarget;
     const target = event.target as HTMLElement;
     const navbar =
-      document.querySelector(".nextra-nav-container")?.getBoundingClientRect()
+      document.querySelector(".nextra-navbar")?.getBoundingClientRect()
         .bottom ?? 0;
     const { top, bottom } = target.getBoundingClientRect();
     if (top >= navbar && bottom <= window.innerHeight) return;
@@ -271,7 +322,7 @@ function Exploded({
         reads: "label",
         present: Boolean(first(manifest.label)),
         span: 4,
-        href: DOCS.composing,
+        href: DOCS.Label,
         body: <Clover.Label as="p" className={styles.display} />,
       },
       {
@@ -280,7 +331,7 @@ function Exploded({
         reads: manifest.thumbnail ? "thumbnail" : "items[0]",
         present: true,
         span: 2,
-        href: DOCS.properties,
+        href: DOCS.Thumbnail,
         body: <Clover.Thumbnail alt="" size={400} className={styles.thumb} />,
       },
       {
@@ -298,7 +349,7 @@ function Exploded({
         present: true,
         span: 6,
         tall: true,
-        href: DOCS.composing,
+        href: DOCS.Content,
         body: <Clover.Content className={styles.stage} />,
       },
       {
@@ -315,7 +366,7 @@ function Exploded({
           .join(" · "),
         present: several,
         span: 6,
-        href: DOCS.items,
+        href: DOCS.Items,
         body: <Clover.Items className={styles.strip} />,
       },
       {
@@ -324,7 +375,7 @@ function Exploded({
         reads: "summary",
         present: Boolean(first(manifest.summary)),
         span: 6,
-        href: DOCS.properties,
+        href: DOCS.Summary,
         body: <Clover.Summary />,
       },
       {
@@ -334,7 +385,7 @@ function Exploded({
         fact: count(asArray(manifest.metadata).length, "field"),
         present: asArray(manifest.metadata).length > 0,
         span: 6,
-        href: DOCS.properties,
+        href: DOCS.Metadata,
         body: <Clover.Metadata className={styles.fields} />,
       },
       {
@@ -344,8 +395,8 @@ function Exploded({
         fact: collection ? count(members, "member") : undefined,
         present: Boolean(partOf || collection),
         span: 6,
-        href: DOCS.composing,
-        // What the InformationPanel's Collection section shows, as the part it is.
+        href: DOCS.Collection,
+        // What the Panel's Collection section shows, as the part it is.
         body: (
           <Clover.Collection
             headingLevel={4}
@@ -359,7 +410,7 @@ function Exploded({
         reads: "homepage",
         present: asArray(manifest.homepage).length > 0,
         span: 3,
-        href: DOCS.properties,
+        href: DOCS.Homepage,
         body: <Clover.Homepage className={styles.links} />,
       },
       {
@@ -369,7 +420,7 @@ function Exploded({
         fact: count(asArray(manifest.seeAlso).length, "link"),
         present: asArray(manifest.seeAlso).length > 0,
         span: 3,
-        href: DOCS.properties,
+        href: DOCS.SeeAlso,
         body: <Clover.SeeAlso className={styles.links} />,
       },
       {
@@ -379,7 +430,7 @@ function Exploded({
         fact: manifest.type,
         present: true,
         span: 3,
-        href: DOCS.properties,
+        href: DOCS.Id,
         body: <Clover.Id className={styles.links} />,
       },
       {
@@ -389,7 +440,7 @@ function Exploded({
         fact: rightsName(manifest.rights),
         present: Boolean(manifest.rights),
         span: 3,
-        href: DOCS.properties,
+        href: DOCS.Rights,
         body: <Clover.Rights className={styles.small} />,
       },
       {
@@ -399,7 +450,7 @@ function Exploded({
         fact: first(manifest.requiredStatement?.label),
         present: Boolean(first(manifest.requiredStatement?.value)),
         span: 6,
-        href: DOCS.properties,
+        href: DOCS.RequiredStatement,
         body: <Clover.RequiredStatement className={styles.statement} />,
       },
       {
@@ -411,7 +462,7 @@ function Exploded({
           .join(" · "),
         present: notes.length > 0,
         span: 6,
-        href: DOCS.panel,
+        href: DOCS.Annotations,
         body: <Clover.Annotations className={styles.scroll} />,
       },
       {
@@ -427,7 +478,7 @@ function Exploded({
         present: places > 0 || georeferences > 0,
         span: 6,
         tall: true,
-        href: DOCS.map,
+        href: DOCS.Map,
         body: <MapTile />,
       },
       {
@@ -437,7 +488,7 @@ function Exploded({
         fact: count(asArray(manifest.structures).length, "range"),
         present: asArray(manifest.structures).length > 0,
         span: 3,
-        href: DOCS.panel,
+        href: DOCS.Contents,
         body: <Clover.Contents className={styles.scroll} />,
       },
       {
@@ -446,7 +497,7 @@ function Exploded({
         reads: "service",
         present: Boolean(Clover.searchServiceOf(manifest as never)),
         span: 3,
-        href: DOCS.panel,
+        href: DOCS.Search,
         body: <Clover.Search />,
       },
       {
@@ -455,7 +506,7 @@ function Exploded({
         reads: "WebVTT captions",
         present: hasCaptions(all),
         span: 3,
-        href: DOCS.panel,
+        href: DOCS.Transcript,
         body: <Clover.Transcript className={styles.scroll} />,
       },
       {
@@ -466,11 +517,94 @@ function Exploded({
           asArray(manifest.rendering).length > 0 ||
           all.some((canvas) => asArray(canvas.rendering).length > 0),
         span: 3,
-        href: DOCS.panel,
+        href: DOCS.Download,
         body: <Clover.Download />,
       },
     ];
   }, [manifest, canvases, views, direction, active, sets, collection]);
+
+  /*
+   * Where the viewer is held beside the stories, its code moves to the Composable story
+   * (`data-composer`, drawn by `Homepage.tsx`), and is drawn there through a portal, so it
+   * keeps this Root and the view it edits. Elsewhere it stays under the viewer.
+   */
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const held = window.matchMedia("(min-width: 64.0625rem)");
+    const place = () => {
+      setSlot(
+        held.matches
+          ? document.querySelector<HTMLElement>("[data-composer]")
+          : null,
+      );
+    };
+    place();
+    held.addEventListener("change", place);
+    return () => held.removeEventListener("change", place);
+  }, []);
+
+  /*
+   * As the Composable story passes (`onCompose`), its code makes a change of its own, to
+   * the layout Mat set in it (2026-10-20): Content first and taller, then the Label and
+   * Summary, then Items with larger pictures; the Thumbnail and Metadata out. Nothing is
+   * lit for it: the code crossfades to the new (`change`), its new lines lit a moment, and
+   * the viewer follows; a part lights as its code is pointed at. When the story goes, it
+   * is put back, unless the reader has changed the code meanwhile.
+   */
+  /*
+   * As the Yours story passes (`onBrandStory`), the whole site shows another color a
+   * while: Northwestern purple, a preset of the site's, shown but not kept
+   * (`previewPageTheme`), and put back as the story goes, unless the reader chose
+   * meanwhile. Never the font, which would reflow the page under the reader (Mat,
+   * 2026-10-20: a layout shift). Not on a dark page, where a dark accent on the dark
+   * ground would fall below the contrast its text needs (WCAG 1.4.3).
+   */
+  const [branding, setBranding] = useState(false);
+  useEffect(() => {
+    if (!branding) return endPageThemePreview();
+    if (document.documentElement.classList.contains("dark")) return;
+    previewPageTheme({
+      accent:
+        accentPresets.find((preset) => preset.name === "Northwestern purple")
+          ?.value ?? "",
+    });
+  }, [branding]);
+  useEffect(() => () => endPageThemePreview(), []);
+
+  const [composing, setComposing] = useState(false);
+  const [change, setChange] = useState(0);
+  const scripted = useRef<{ before: ViewValues; after: ViewValues } | null>(
+    null,
+  );
+  useEffect(() => {
+    if (composing && !scripted.current && manifest) {
+      const before = view;
+      const lead: ViewerPart[] = ["content", "label", "summary", "items"];
+      const after: ViewValues = {
+        ...view,
+        height: 400,
+        itemsSize: "9rem",
+        order: [
+          ...lead.filter((key) => view.order.includes(key)),
+          ...view.order.filter(
+            (key) =>
+              !lead.includes(key) && key !== "thumbnail" && key !== "metadata",
+          ),
+        ],
+      };
+      scripted.current = { before, after };
+      setView(after);
+      setChange((n) => n + 1);
+    } else if (!composing && scripted.current) {
+      const { before, after } = scripted.current;
+      scripted.current = null;
+      setView((current) =>
+        JSON.stringify(current) === JSON.stringify(after) ? before : current,
+      );
+      setChange((n) => n + 1);
+    }
+  }, [composing]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!manifest) {
     return (
@@ -489,7 +623,32 @@ function Exploded({
     onFocus: () => setPointed(key),
     onBlur: () => setPointed(null),
   });
+  // A part in the viewer: as a tile's, and lit while a story names it.
+  const region = (key: PartKey) => ({
+    ...point(key),
+    "data-on":
+      pointed === key ||
+      lit.includes(key) ||
+      passing.includes(key) ||
+      undefined,
+    "data-part": key,
+  });
   const shown = parts.filter((part) => part.present);
+  // The first tile past the viewer's own parts and the Collection: "And more." goes over it.
+  const firstMore = shown.find(
+    (part) =>
+      !(
+        [
+          "label",
+          "thumbnail",
+          "content",
+          "items",
+          "summary",
+          "metadata",
+          "partOf",
+        ] as PartKey[]
+      ).includes(part.key),
+  )?.key;
   const missing = parts.filter((part) => !part.present);
   // The parts the example viewer shows, in the order its code gives them.
   const order = view.order.filter(
@@ -505,7 +664,7 @@ function Exploded({
         key="thumbnail"
         name="Thumbnail"
         className={styles.regionThumb}
-        {...point("thumbnail")}
+        {...region("thumbnail")}
       >
         <Clover.Thumbnail alt="" size={128} className={styles.viewerThumb} />
       </Region>
@@ -515,13 +674,13 @@ function Exploded({
         key="label"
         name="Label"
         className={styles.regionLabel}
-        {...point("label")}
+        {...region("label")}
       >
         <Clover.Label as="h3" className={styles.viewerTitle} />
       </Region>
     ),
     content: (
-      <Region key="content" name="Content" {...point("content")}>
+      <Region key="content" name="Content" {...region("content")}>
         <Clover.Content
           controls={view.controls}
           style={{ height: view.height }}
@@ -533,9 +692,19 @@ function Exploded({
         key="items"
         name="Items"
         className={styles.regionItems}
-        {...point("items")}
+        {...region("items")}
       >
-        <Clover.Items className={styles.viewerStrip} layout={view.layout} />
+        <Clover.Items
+          className={styles.viewerStrip}
+          layout={view.layout}
+          style={
+            view.itemsSize
+              ? ({
+                  [itemsSizeProperty(view.layout)]: view.itemsSize,
+                } as React.CSSProperties)
+              : undefined
+          }
+        />
       </Region>
     ),
     summary: (
@@ -543,7 +712,7 @@ function Exploded({
         key="summary"
         name="Summary"
         className={styles.regionSummary}
-        {...point("summary")}
+        {...region("summary")}
       >
         <Clover.Summary className={styles.viewerSummary} />
       </Region>
@@ -553,7 +722,7 @@ function Exploded({
         key="metadata"
         name="Metadata"
         className={styles.regionMetadata}
-        {...point("metadata")}
+        {...region("metadata")}
       >
         <Clover.Metadata className={styles.viewerFields} />
       </Region>
@@ -568,66 +737,125 @@ function Exploded({
         onFocus={reveal}
         onBlur={hold}
       >
-        {/* Named for assistive technology; on screen the viewer speaks for itself. */}
-        <section className={styles.viewer} aria-label="Example Viewer">
-          {order.map((key) => regions[key])}
-        </section>
-        <div>
-          <div className={styles.codeBar}>
-            <button
-              type="button"
-              className={styles.codeToggle}
-              aria-label="Code"
-              title="Code"
-              aria-expanded={code}
-              aria-controls={codeId}
-              onClick={() => setCode((open) => !open)}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <path d="m7 8-4 4 4 4M17 8l4 4-4 4M14 4l-4 16" />
-              </svg>
-            </button>
-          </div>
-          <ViewerCode
-            id={codeId}
-            open={code}
-            resource={resource}
-            order={order}
-            view={view}
-            onView={setView}
-            point={point}
-          />
+        <div
+          className={styles.flip}
+          data-face={face}
+          data-moved={turnedOnce || undefined}
+          onFocus={() => setFocused(true)}
+          onBlur={(event) => {
+            if (
+              !event.currentTarget.contains(event.relatedTarget as Node | null)
+            )
+              setFocused(false);
+          }}
+        >
+          {/* Named for assistive technology; on screen the viewer speaks for itself. */}
+          <section
+            ref={viewer}
+            className={styles.viewer}
+            aria-label="Example Viewer"
+            data-face-of="front"
+          >
+            {order.map((key) => regions[key])}
+          </section>
+          <AccessibilityTree of={viewer} shown={face === "back"} />
+          {recipe && <RecipeFace recipe={recipe} height={view.height} />}
         </div>
+        {slot ? (
+          createPortal(
+            <ViewerCode
+              id={codeId}
+              open
+              resource={resource}
+              order={order}
+              view={view}
+              onView={setView}
+              point={point}
+              change={change}
+              // The most the Composable story's change needs (`composing`).
+              rows={15}
+            />,
+            slot,
+          )
+        ) : (
+          <div>
+            <div className={styles.codeBar}>
+              <button
+                type="button"
+                className={styles.codeToggle}
+                aria-label="Code"
+                title="Code"
+                aria-expanded={code}
+                aria-controls={codeId}
+                onClick={() => setCode((open) => !open)}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="m7 8-4 4 4 4M17 8l4 4-4 4M14 4l-4 16" />
+                </svg>
+              </button>
+            </div>
+            <ViewerCode
+              id={codeId}
+              open={code}
+              resource={resource}
+              order={order}
+              view={view}
+              onView={setView}
+              point={point}
+            />
+          </div>
+        )}
       </div>
 
+      <StoryLines
+        viewer={viewer}
+        onLight={setLit}
+        onTurn={setTurned}
+        onRecipe={setReading}
+        onArrive={setRecipe}
+        onPassing={setPassing}
+        onCompose={setComposing}
+        onBrandStory={setBranding}
+      />
+
       <div className={styles.tiles}>
-        {shown.map((part) => (
-          <section
-            key={part.key}
-            aria-labelledby={`part-${part.key}`}
-            className={styles.tile}
-            data-span={part.span}
-            data-tall={part.tall || undefined}
-            {...point(part.key)}
-          >
-            <header className={styles.tileHead}>
-              <h3 id={`part-${part.key}`} className={styles.tileName}>
-                <Link href={part.href}>{`<Clover.${part.name} />`}</Link>
-              </h3>
-              <span className={styles.reads}>{part.reads}</span>
-              {part.fact && <span className={styles.fact}>{part.fact}</span>}
-            </header>
-            <div className={styles.tileBody}>{part.body}</div>
-          </section>
+        {shown.map((part, index) => (
+          <React.Fragment key={part.key}>
+            {/*
+             * After the parts the viewer is made of (and the Collection it belongs to), a
+             * line: the rest are more of the same kit, and how many there are to use.
+             */}
+            {part.key === firstMore && index > 0 && <More />}
+            <section
+              aria-labelledby={`part-${part.key}`}
+              className={styles.tile}
+              data-span={part.span}
+              data-tall={part.tall || undefined}
+              data-tile={part.key}
+              {...point(part.key)}
+              data-on={
+                pointed === part.key || passing.includes(part.key) || undefined
+              }
+            >
+              <header className={styles.tileHead}>
+                <h3 id={`part-${part.key}`} className={styles.tileName}>
+                  <Link href={part.href}>{`<Clover.${part.name} />`}</Link>
+                </h3>
+                <span className={styles.reads}>{part.reads}</span>
+                {part.fact && <span className={styles.fact}>{part.fact}</span>}
+              </header>
+              <div className={styles.tileBody}>{part.body}</div>
+            </section>
+          </React.Fragment>
         ))}
       </div>
 
@@ -666,6 +894,57 @@ function Exploded({
 }
 
 /**
+ * A line across the tiles, between the parts the example viewer is made of and the rest:
+ * how many there are to build with, each documented. Its figures are counted from the
+ * docs' Components menu (`counts.ts`). Words to be worked on (Mat, 2026-10-20).
+ */
+function More() {
+  return (
+    <div className={styles.more}>
+      <p className={styles.moreTitle}>And more.</p>
+      <p className={styles.moreBody}>
+        {componentCount} components and {primitiveCount} primitives, every one
+        yours to compose. <Link href="/docs/content">See them all</Link>
+      </p>
+    </div>
+  );
+}
+
+/**
+ * "Why Clover"'s Coverage story, read on the viewer's other side: a Cookbook recipe in a
+ * Root of its own, read by the same Content and Annotations, outlined with their names,
+ * and the recipe named at the head, so it is plain what is being read. An illustration as
+ * the page scrolls, so it is inert: focus and assistive technology stay with the viewer
+ * itself, which turns back the moment focus comes to it.
+ */
+function RecipeFace({
+  recipe,
+  height,
+}: {
+  recipe: { url: string; name: string };
+  height: number;
+}) {
+  return (
+    <section
+      className={`${styles.viewer} ${styles.recipeFace}`}
+      data-face-of="recipe"
+      inert
+    >
+      <p className={styles.recipeName}>{recipe.name}</p>
+      <Clover.Root iiifContent={recipe.url} className={styles.recipeRoot}>
+        <Clover.Label as="p" className={styles.recipeLabel} />
+        <Region name="Content" data-on data-part="content">
+          <Clover.Content controls={false} style={{ height }} />
+        </Region>
+        <Region name="Annotations" data-on data-part="annotations">
+          <Clover.Annotations className={styles.recipeNotes} />
+        </Region>
+      </Clover.Root>
+    </section>
+  );
+}
+
+/**
  * A part in the assembled viewer: outlined, its name shown, while its tile is pointed at.
  */
 function Region({
@@ -676,7 +955,10 @@ function Region({
 }: {
   name: string;
   children: React.ReactNode;
-} & React.HTMLAttributes<HTMLDivElement> & { "data-on"?: boolean }) {
+} & React.HTMLAttributes<HTMLDivElement> & {
+    "data-on"?: boolean;
+    "data-part"?: string;
+  }) {
   return (
     <div
       className={className ? `${styles.region} ${className}` : styles.region}
@@ -715,6 +997,11 @@ interface ViewValues {
   /** Content's control cluster. */
   controls: boolean;
   layout: Clover.ItemsLayout;
+  /**
+   * Items' size where the code sets one: a carousel's picture height
+   * (`--clover-items-height`), or a grid's or list's column (`--clover-items-size`).
+   */
+  itemsSize?: string;
   /** The parts, in the order the code writes them and the viewer shows them. */
   order: ViewerPart[];
 }
@@ -727,6 +1014,10 @@ const VIEW_DEFAULTS: ViewValues = {
 };
 
 const LAYOUTS: Clover.ItemsLayout[] = ["carousel", "list", "grid"];
+
+/** The custom property that sizes Items' pictures in a layout (`Items.css`). */
+const itemsSizeProperty = (layout: Clover.ItemsLayout) =>
+  layout === "carousel" ? "--clover-items-height" : "--clover-items-size";
 
 type TokenKind =
   | "keyword"
@@ -806,6 +1097,8 @@ function ViewerCode({
   view,
   onView,
   point,
+  change = 0,
+  rows = 0,
 }: {
   id: string;
   open: boolean;
@@ -814,6 +1107,16 @@ function ViewerCode({
   view: ViewValues;
   onView: React.Dispatch<React.SetStateAction<ViewValues>>;
   point: (key: PartKey) => React.HTMLAttributes<HTMLElement>;
+  /**
+   * Counts the changes made for the reader (the Composable story's), each crossfaded
+   * from the code before it, its new lines lit, rather than simply redrawn.
+   */
+  change?: number;
+  /**
+   * Lines it always shows, blank ones after the code where it has fewer, and none of
+   * them wrapping: where a change is made for the reader, so its height stays put.
+   */
+  rows?: number;
 }) {
   const set = (change: Partial<ViewValues>) =>
     onView((values) => ({ ...values, ...change }));
@@ -1022,29 +1325,42 @@ function ViewerCode({
           },
           { depth: 1, tokens: [punct("/>")] },
         ];
-      case "items":
-        return [
+      case "items": {
+        const layout: Token[] = [
+          attr("layout"),
+          punct("="),
           {
-            depth: 1,
-            tokens: element("Items", [
-              [
-                attr("layout"),
-                punct("="),
-                {
-                  text: `"${view.layout}"`,
-                  control: (
-                    <Choice
-                      label="Items layout"
-                      options={LAYOUTS}
-                      value={view.layout}
-                      onChange={(layout) => set({ layout })}
-                    />
-                  ),
-                },
-              ],
-            ]),
+            text: `"${view.layout}"`,
+            control: (
+              <Choice
+                label="Items layout"
+                options={LAYOUTS}
+                value={view.layout}
+                onChange={(next) => set({ layout: next })}
+              />
+            ),
           },
         ];
+        if (!view.itemsSize)
+          return [{ depth: 1, tokens: element("Items", [layout]) }];
+        // With a size of its own, its props a line each, as a page would write them.
+        return [
+          { depth: 1, tokens: [punct("<"), tag("Clover.Items")] },
+          { depth: 2, tokens: layout },
+          {
+            depth: 2,
+            tokens: [
+              attr("style"),
+              punct("={{ "),
+              str(`"${itemsSizeProperty(view.layout)}"`),
+              punct(": "),
+              str(`"${view.itemsSize}"`),
+              punct(" }}"),
+            ],
+          },
+          { depth: 1, tokens: [punct("/>")] },
+        ];
+      }
       default:
         return [{ depth: 1, tokens: element(PART_NAMES[key]) }];
     }
@@ -1099,10 +1415,45 @@ function ViewerCode({
     )
     .join("\n");
 
+  // Blank lines after the code, up to the rows it keeps (`rows`).
+  const code = [...head, ...parts.flatMap((part) => part.lines), ...tail];
+  const padding: Line[] = Array.from(
+    { length: Math.max(0, rows - code.length) },
+    () => ({ depth: 0, tokens: [] }),
+  );
+  const all = [...code, ...padding];
+  const textOf = (line: Line) =>
+    "  ".repeat(line.depth) + line.tokens.map((token) => token.text).join("");
+  /*
+   * A change made for the reader crossfades: the code as it was is laid over the code as
+   * it is and fades out, and each line that is new is lit a moment. Where the reader does
+   * not want motion, it simply changes, the new lines still lit.
+   */
+  const shown = useRef<Line[]>(all);
+  const [ghost, setGhost] = useState<{ lines: Line[]; fresh: Set<string> }>();
+  useEffect(() => {
+    if (!change) return;
+    const before = shown.current;
+    const had = new Set(before.map(textOf));
+    setGhost({
+      lines: before,
+      fresh: new Set(all.map(textOf).filter((line) => !had.has(line))),
+    });
+    const timer = setTimeout(() => setGhost(undefined), 1600);
+    return () => clearTimeout(timer);
+  }, [change]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    shown.current = all;
+  });
+
   // Lines are numbered by where they are, not which part they belong to.
   let number = 0;
   const lineOf = (line: Line, key: React.Key, grip?: React.ReactNode) => (
-    <span key={key} className={styles.codeLine}>
+    <span
+      key={key}
+      className={styles.codeLine}
+      data-fresh={ghost?.fresh.has(textOf(line)) || undefined}
+    >
       <span className={styles.gripCell}>{grip}</span>
       <span className={styles.lineNumber} aria-hidden="true">
         {(number += 1)}
@@ -1136,6 +1487,7 @@ function ViewerCode({
       aria-label="Code"
       className={styles.editor}
       data-open={open || undefined}
+      data-rows={rows || undefined}
     >
       <div className={styles.editorInner}>
         <div className={styles.editorFrame}>
@@ -1187,86 +1539,124 @@ function ViewerCode({
               Arrow up or down moves the part, as Move up and Move down do.
             </span>
           </div>
-          <pre
-            className={styles.codeText}
-            data-dragging={drag ? true : undefined}
-          >
-            <code>
-              {head.map((line, index) => lineOf(line, `head-${index}`))}
-              {parts.map(({ key, lines }, index) => (
-                <span
-                  key={key}
-                  ref={(node) => {
-                    if (node) blocks.current.set(key, node);
-                    else blocks.current.delete(key);
-                  }}
-                  className={styles.codeBlock}
-                  data-dragged={drag?.from === index || undefined}
-                  data-picked={picked === key || undefined}
-                  onClick={(event) => pick(key, event)}
-                  style={{ transform: `translateY(${shift(index)}px)` }}
-                  {...point(key)}
-                  onPointerDown={(event) => startDrag(index, event)}
-                  onPointerMove={moveDrag}
-                  onPointerUp={endDrag}
-                  onPointerCancel={endDrag}
-                >
-                  {lines.map((line, at) =>
-                    lineOf(
-                      line,
-                      at,
-                      at === 0 && (
-                        <button
-                          ref={(node) => {
-                            if (node) grips.current.set(key, node);
-                            else grips.current.delete(key);
-                          }}
-                          type="button"
-                          data-grip
-                          className={styles.grip}
-                          aria-label={`Move ${PART_NAMES[key]}`}
-                          aria-describedby={hint}
-                          onFocus={() => setPicked(key)}
-                          onKeyDown={(event) => {
-                            const by =
-                              event.key === "ArrowUp"
-                                ? -1
-                                : event.key === "ArrowDown"
-                                  ? 1
-                                  : 0;
-                            if (!by) return;
-                            event.preventDefault();
-                            step(index, by);
-                          }}
-                        >
-                          <svg
-                            width="8"
-                            height="12"
-                            viewBox="0 0 8 12"
-                            aria-hidden="true"
-                            focusable="false"
+          <div className={styles.codeStack}>
+            {ghost && (
+              <pre
+                className={`${styles.codeText} ${styles.codeGhost}`}
+                aria-hidden="true"
+              >
+                <code>
+                  {ghost.lines.map((line, index) => (
+                    <span key={index} className={styles.codeLine}>
+                      <span className={styles.gripCell} />
+                      <span className={styles.lineNumber}>{index + 1}</span>
+                      <span
+                        className={styles.lineText}
+                        style={{ "--depth": line.depth } as React.CSSProperties}
+                      >
+                        {line.tokens.length === 0
+                          ? " "
+                          : line.tokens.map((token, at) => (
+                              <span
+                                key={at}
+                                className={
+                                  token.kind
+                                    ? TOKEN_CLASS[token.kind]
+                                    : undefined
+                                }
+                              >
+                                {token.text}
+                              </span>
+                            ))}
+                      </span>
+                    </span>
+                  ))}
+                </code>
+              </pre>
+            )}
+            <pre
+              className={styles.codeText}
+              data-dragging={drag ? true : undefined}
+              data-crossfade={ghost ? true : undefined}
+            >
+              <code>
+                {head.map((line, index) => lineOf(line, `head-${index}`))}
+                {parts.map(({ key, lines }, index) => (
+                  <span
+                    key={key}
+                    ref={(node) => {
+                      if (node) blocks.current.set(key, node);
+                      else blocks.current.delete(key);
+                    }}
+                    className={styles.codeBlock}
+                    data-dragged={drag?.from === index || undefined}
+                    data-picked={picked === key || undefined}
+                    onClick={(event) => pick(key, event)}
+                    style={{ transform: `translateY(${shift(index)}px)` }}
+                    {...point(key)}
+                    onPointerDown={(event) => startDrag(index, event)}
+                    onPointerMove={moveDrag}
+                    onPointerUp={endDrag}
+                    onPointerCancel={endDrag}
+                  >
+                    {lines.map((line, at) =>
+                      lineOf(
+                        line,
+                        at,
+                        at === 0 && (
+                          <button
+                            ref={(node) => {
+                              if (node) grips.current.set(key, node);
+                              else grips.current.delete(key);
+                            }}
+                            type="button"
+                            data-grip
+                            className={styles.grip}
+                            aria-label={`Move ${PART_NAMES[key]}`}
+                            aria-describedby={hint}
+                            onFocus={() => setPicked(key)}
+                            onKeyDown={(event) => {
+                              const by =
+                                event.key === "ArrowUp"
+                                  ? -1
+                                  : event.key === "ArrowDown"
+                                    ? 1
+                                    : 0;
+                              if (!by) return;
+                              event.preventDefault();
+                              step(index, by);
+                            }}
                           >
-                            {[2, 6, 10].flatMap((y) =>
-                              [2, 6].map((x) => (
-                                <circle
-                                  key={`${x}${y}`}
-                                  cx={x}
-                                  cy={y}
-                                  r="1.1"
-                                  fill="currentColor"
-                                />
-                              )),
-                            )}
-                          </svg>
-                        </button>
+                            <svg
+                              width="8"
+                              height="12"
+                              viewBox="0 0 8 12"
+                              aria-hidden="true"
+                              focusable="false"
+                            >
+                              {[2, 6, 10].flatMap((y) =>
+                                [2, 6].map((x) => (
+                                  <circle
+                                    key={`${x}${y}`}
+                                    cx={x}
+                                    cy={y}
+                                    r="1.1"
+                                    fill="currentColor"
+                                  />
+                                )),
+                              )}
+                            </svg>
+                          </button>
+                        ),
                       ),
-                    ),
-                  )}
-                </span>
-              ))}
-              {tail.map((line, index) => lineOf(line, `tail-${index}`))}
-            </code>
-          </pre>
+                    )}
+                  </span>
+                ))}
+                {tail.map((line, index) => lineOf(line, `tail-${index}`))}
+                {padding.map((line, index) => lineOf(line, `pad-${index}`))}
+              </code>
+            </pre>
+          </div>
         </div>
       </div>
     </div>

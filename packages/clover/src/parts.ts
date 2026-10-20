@@ -37,16 +37,13 @@ export {
   Thumbnail,
   Value,
 } from "./components/Primitives/Primitives";
-export {
-  InformationPanel,
-  Tab,
-} from "./components/InformationPanel/InformationPanel";
+export { Panel, Tab } from "./components/Panel/Panel";
 export type {
-  InformationPanelLayout,
-  InformationPanelProps,
+  PanelLayout,
+  PanelProps,
   TabProps,
-} from "./components/InformationPanel/InformationPanel";
-export { About } from "./components/InformationPanel/About";
+} from "./components/Panel/Panel";
+export { About } from "./components/Panel/About";
 export { Annotations } from "./components/Annotations/Annotations";
 export type { AnnotationsProps } from "./components/Annotations/Annotations";
 export { Transcript } from "./components/Transcript/Transcript";
@@ -77,9 +74,9 @@ export type { CollectionProps } from "./components/Collection/Collection";
 export { CollectionSelect } from "./components/CollectionSelect/CollectionSelect";
 export type { CollectionSelectProps } from "./components/CollectionSelect/CollectionSelect";
 export type { TranscriptProps } from "./components/Transcript/Transcript";
-export type { AboutProps } from "./components/InformationPanel/About";
-export { PanelToggle } from "./components/InformationPanel/PanelToggle";
-export type { PanelToggleProps } from "./components/InformationPanel/PanelToggle";
+export type { AboutProps } from "./components/Panel/About";
+export { PanelToggle } from "./components/Panel/PanelToggle";
+export type { PanelToggleProps } from "./components/Panel/PanelToggle";
 export type { StatusProps } from "./components/Status/Status";
 export { default as Canvas } from "./components/Canvas";
 export type {

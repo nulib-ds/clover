@@ -1,3 +1,5 @@
+"use client";
+
 import Viewer from "docs/components/DynamicImports/Viewer";
 import { initCloverI18n } from "@samvera/clover-iiif/i18n";
 import { useEffect } from "react";

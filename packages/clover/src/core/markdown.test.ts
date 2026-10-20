@@ -96,11 +96,11 @@ describe("markdownToHtml", () => {
     expect(markdownToHtml("#\n\n#tag")).toBe("<p>#</p><p>#tag</p>");
   });
 
-  it("keeps its lists and headings through the Markdown sanitiser", () => {
+  it("keeps its lists and headings through the Markdown sanitizer", () => {
     const html = markdownToHtml("# Notes\n\n- one\n\n2. two", {
       headingLevel: 4,
     });
-    // The same markup, whatever order the sanitiser leaves its attributes in.
+    // The same markup, whatever order the sanitizer leaves its attributes in.
     const parse = (markup: string) => {
       const template = document.createElement("template");
       template.innerHTML = markup;

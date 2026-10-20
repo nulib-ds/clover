@@ -12,7 +12,7 @@ import { parseAnnotationTarget } from "./annotations";
 
 /**
  * Derived data, read from the Presentation 4 Manifest the store holds. Each result is
- * memoised on the Manifest object, which is replaced (never mutated) when something in it
+ * memoized on the Manifest object, which is replaced (never mutated) when something in it
  * changes — a referenced annotation page arriving, say — so an unchanged Manifest returns
  * the very same arrays, and React parts that selected them do not re-render.
  */

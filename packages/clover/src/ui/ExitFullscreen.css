@@ -33,7 +33,7 @@ button.clover-canvas-exit-full-screen {
   padding: 0 var(--clover-space-m) 0 var(--clover-space-s);
   border: none;
   border-radius: var(--clover-radius-pill, 2rem);
-  /* A control over the stage: the round controls' colours (`ui/Button.css`). */
+  /* A control over the stage: the round controls' colors (`ui/Button.css`). */
   background-color: var(--clover-color-control, #1a1d1e);
   color: var(--clover-color-control-glyph, #fff);
   font-size: var(--clover-text-s);

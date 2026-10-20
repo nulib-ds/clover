@@ -1,0 +1,144 @@
+---
+title: Rendering (3.x)
+---
+
+import IIIFBadge from "docs/components/IIIFBadge";
+import { Rendering } from "@samvera/clover-iiif/primitives";
+import { Tabs } from "nextra/components";
+
+# Rendering
+
+The Rendering component is used to display a list of alternate formats related to a resource. Whereas SeeAlso is used
+to link to a machine-readable resource such as metadata, the Rendering component alerts users that the resource is
+available in another format such as PDF or ePub or has a related format. Because of the wide variety of formats that
+resources can be available in, the Rendering component is flexible and be of any media type and contain any type of
+data.
+
+<IIIFBadge
+  href="https://iiif.io/api/presentation/3.0/#rendering"
+  text={["rendering"]}
+/>
+
+<Tabs items={["Code", "Example", "HTML"]}>
+  <Tabs.Tab>
+    ```jsx
+    <Rendering
+      rendering={[
+        {
+          id: "https://fixtures.iiif.io/other/UCLA/kabuki_ezukushi_rtl.pdf",
+          type: "Text",
+          label: {
+            en: ["PDF version"],
+          },
+          format: "application/pdf",
+        },
+      ]}
+    />
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <Rendering
+      rendering={[
+        {
+          id: "https://fixtures.iiif.io/other/UCLA/kabuki_ezukushi_rtl.pdf",
+          type: "Text",
+          label: {
+            en: ["PDF version"],
+          },
+          format: "application/pdf",
+        },
+      ]}
+    />
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```html
+    <ul class="c-PJLV">
+      <li class="c-PJLV">
+        <a
+          href="https://fixtures.iiif.io/other/UCLA/kabuki_ezukushi_rtl.pdf"
+          target="_blank"
+        >
+          PDF version
+        </a>
+      </li>
+    </ul>
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Usage
+
+### React
+
+```jsx
+import { Rendering } from "@samvera/clover-iiif/primitives";
+
+const CustomRendering = ({ rendering }) => {
+  return <Rendering rendering={rendering} />;
+};
+
+export default CustomRendering;
+```
+
+## API Reference
+
+| Prop        | Type                                                         | Default | Required |
+| ----------- | ------------------------------------------------------------ | ------- | -------- |
+| `as`        | `ol`, `ul`                                                   | `ul`    | --       |
+| `rendering` | [rendering](https://iiif.io/api/presentation/3.0/#rendering) | --      | **Yes**  |
+| `className` | `string`, `undefined`                                        | --      | --       |
+| `style`     | `CSSProperties`, `undefined`                                 | --      | --       |
+| `lang`      | `string`, `undefined`                                        | --      | --       |
+| `title`     | `string`, `undefined`                                        | --      | --       |
+| `data-*`    | `string`, `undefined`                                        | --      | --       |
+| `aria-*`    | `AriaAttributes`, `undefined`                                | --      | --       |
+
+### Custom Element
+
+The `Rendering` component can be rendered as either `ol` or `ul` elements. The default is `ul`.
+
+<Tabs items={["Code", "Example", "HTML"]}>
+  <Tabs.Tab>
+    ```jsx
+    <Rendering
+      rendering={[
+        {
+          id: "https://fixtures.iiif.io/other/UCLA/kabuki_ezukushi_rtl.pdf",
+          type: "Text",
+          label: {
+            en: ["PDF version"],
+          },
+          format: "application/pdf",
+        },
+      ]}
+      as="ol"
+    />
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <Rendering
+      rendering={[
+        {
+          id: "https://fixtures.iiif.io/other/UCLA/kabuki_ezukushi_rtl.pdf",
+          type: "Text",
+          label: {
+            en: ["PDF version"],
+          },
+          format: "application/pdf",
+        },
+      ]}
+      as="ol"
+    />
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```html
+    <ol class="c-PJLV">
+      <li class="c-PJLV">
+        <a href="https://fixtures.iiif.io/other/UCLA/kabuki_ezukushi_rtl.pdf">
+          PDF version
+        </a>
+      </li>
+    </ol>
+    ```
+  </Tabs.Tab>
+</Tabs>

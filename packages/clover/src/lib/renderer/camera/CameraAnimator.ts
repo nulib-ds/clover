@@ -9,7 +9,7 @@ import type { Point } from "../math/affine";
  * discontinuity in velocity. Zoom interpolates in log space so each frame is the same
  * *ratio* of change, which is how a zoom reads to the eye.
  *
- * An anchored target ("zoom about this point") recomputes the centre every frame so the
+ * An anchored target ("zoom about this point") recomputes the center every frame so the
  * anchor holds still on screen throughout, not just once the animation lands.
  */
 export interface CameraTarget {
@@ -47,7 +47,7 @@ export class CameraAnimator {
     this.timeConstant = Math.max(0, seconds);
   }
 
-  /** Jump, cancelling any animation. Used by drags, which must track the pointer 1:1. */
+  /** Jump, canceling any animation. Used by drags, which must track the pointer 1:1. */
   set(state: CameraState): void {
     this.current = { ...state };
     this.target = null;
@@ -64,10 +64,10 @@ export class CameraAnimator {
     }
 
     /*
-     * An anchor is only honoured if it agrees with the target. When the caller clamped
-     * the target centre (zooming out past the edge of the world), the anchored path
+     * An anchor is only honored if it agrees with the target. When the caller clamped
+     * the target center (zooming out past the edge of the world), the anchored path
      * would land somewhere other than the target and never settle — so fall back to a
-     * plain centre interpolation instead.
+     * plain center interpolation instead.
      */
     let anchor = target.anchor;
     if (anchor) {

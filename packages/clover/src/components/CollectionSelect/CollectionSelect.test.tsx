@@ -77,7 +77,7 @@ function mockFetch() {
 beforeEach(() => initCloverI18n({ lng: "en" }));
 
 describe("CollectionSelect", () => {
-  it("lists the members, labelled by the Collection, and shows the one chosen", async () => {
+  it("lists the members, labeled by the Collection, and shows the one chosen", async () => {
     const onManifestChange = vi.fn();
     render(
       <Clover.Root
@@ -270,9 +270,9 @@ describe("CollectionSelect", () => {
   });
 
   it("shows a visible label for a Collection with none", async () => {
-    const unlabelled = { ...shelf, label: undefined };
+    const unlabeled = { ...shelf, label: undefined };
     render(
-      <Clover.Root iiifContent={unlabelled} request={{ fetch: mockFetch() }}>
+      <Clover.Root iiifContent={unlabeled} request={{ fetch: mockFetch() }}>
         <Clover.CollectionSelect />
       </Clover.Root>,
     );

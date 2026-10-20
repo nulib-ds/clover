@@ -1,0 +1,91 @@
+---
+title: SeeAlso
+description: A IIIF resource's seeAlso, the machine-readable descriptions of it elsewhere, as a list of links.
+---
+
+import { Callout } from "nextra/components";
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+
+# SeeAlso
+
+<Callout type="info">
+  Looking for the SeeAlso of Clover 3.x, `@samvera/clover-iiif`? It is at
+  [Clover 3.x › SeeAlso](/docs/3.x/seeAlso).
+</Callout>
+
+Descriptions of the object elsewhere, meant for machines, such as an XML or JSON record
+of it, from its [`seeAlso`](https://iiif.io/api/presentation/3.0/#seealso), as a list of
+links. Inside a `Root` it reads the Root's Manifest, or the current Canvas with
+`of="canvas"`. A `value` you pass wins, so it works outside a `Root` too.
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+<Clover.Root iiifContent={manifestUrl}>
+  <Clover.SeeAlso />
+</Clover.Root>;
+```
+
+Below, the White Sewing Machine Company's 1896 bicycle catalog from Clover's
+[mocks](/docs/mocks), whose `seeAlso` is its record in Northwestern University Libraries'
+Digital Collections API, as JSON.
+
+<PartDemo part="SeeAlso" />
+
+Outside a `Root`, pass the property as IIIF gives it, one resource or a list:
+
+```jsx
+<Clover.SeeAlso
+  value={[
+    {
+      id: "https://example.org/catalog.json",
+      type: "Dataset",
+      label: { en: ["The catalog's record"] },
+      format: "application/json",
+    },
+  ]}
+/>
+```
+
+## Links
+
+Each resource is a link to its `id`, named by its `label` as plain text, in the reader's
+language: the Root's `language`, else the page's, else the browser's. The link carries
+the label's `lang`; a label in `none` carries none, and takes the page's. A resource with
+no label is named by its address. Its `format` follows the link, in parentheses and
+outside it, so the link's name is the label alone. Of each resource, only its `id`,
+`label` and `format` are read. One with no `id` is left out, and with none to show,
+`SeeAlso` renders nothing.
+
+The list is a `ul`, a link to each `li`. With Clover's stylesheet, each `li` is at least
+24px tall, so the links' centers are 24px apart at any type size (WCAG 2.5.8).
+
+[About](/docs/panel#sections) shows the Manifest's under a See also heading.
+
+## Props
+
+| Prop    | Type                     | Description                                                        |
+| ------- | ------------------------ | ------------------------------------------------------------------ |
+| `of`    | `"manifest" \| "canvas"` | Whose `seeAlso`: the Manifest's (default) or the current Canvas's. |
+| `value` | resource or list         | `{ id, label, format }`, shown in place of the Root's.             |
+
+Its other props (`id`, `className`, `style`, `aria-*`) go to the `ul`. It takes no `as`
+and no `lang`: it is always a list, and each link carries its label's language.
+
+### Styles
+
+`.clover-see-also` is the list, and `.clover-link-format` each format, in
+`--clover-color-primary-muted` at `--clover-text-s`. Clover leaves the list's markers to
+your page; About takes them off its own lists.
+
+## From Clover 3.x
+
+Import it from `@nulib/clover`, as `Clover.SeeAlso` or by name.
+
+| 3.x `SeeAlso`                                     | Clover 4                                         |
+| ------------------------------------------------- | ------------------------------------------------ |
+| `seeAlso`                                         | `value`; inside a `Root`, read from the Manifest |
+| `as` (`ul` or `ol`)                               | Not taken: always a `ul`                         |
+| `className`, `style`, `title`, `data-*`, `aria-*` | The same, on the `ul`                            |
+| `lang`                                            | Not taken: each link carries its label's         |
+| No format shown                                   | Each resource's `format` follows its link        |

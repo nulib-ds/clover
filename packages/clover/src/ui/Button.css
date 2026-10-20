@@ -9,10 +9,10 @@
 
 /*
  * Round controls: the Canvas's cluster, the media transport, Items' arrows, the Pager's
- * Previous and Next, and the InformationPanel's close. One size, `--clover-control`: a
+ * Previous and Next, the Panel's close and its tab row's arrows. One size, `--clover-control`: a
  * 1rem icon with `s` around it.
  *
- * Their colours are their own, not the page's: a dark fill (`--clover-color-control`)
+ * Their colors are their own, not the page's: a dark fill (`--clover-color-control`)
  * and white glyphs (`--clover-color-control-glyph`), on a light page and a dark one
  * alike. They sit over a Canvas's images as much as on the page, and a page's `primary`
  * and `secondary` trade places in its dark mode, which would turn them light. Under the
@@ -25,7 +25,9 @@
   button.clover-items-scroll-next,
   button.clover-pager-previous,
   button.clover-pager-next,
-  button.clover-information-panel-close
+  button.clover-panel-close,
+  button.clover-sections-scroll-prev,
+  button.clover-sections-scroll-next
 ) {
   display: flex;
   flex-shrink: 0;
@@ -51,7 +53,9 @@
     button.clover-items-scroll-next,
     button.clover-pager-previous,
     button.clover-pager-next,
-    button.clover-information-panel-close
+    button.clover-panel-close,
+    button.clover-sections-scroll-prev,
+    button.clover-sections-scroll-next
   )
   svg {
   flex-shrink: 0;
@@ -60,7 +64,7 @@
   transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
 }
 
-/* The Canvas's own glyphs are filled and stroked in the text colour. */
+/* The Canvas's own glyphs are filled and stroked in the text color. */
 button.clover-canvas-button svg {
   fill: currentColor;
   stroke: currentColor;
@@ -72,7 +76,9 @@ button.clover-canvas-button svg {
   button.clover-items-scroll-next,
   button.clover-pager-previous,
   button.clover-pager-next,
-  button.clover-information-panel-close
+  button.clover-panel-close,
+  button.clover-sections-scroll-prev,
+  button.clover-sections-scroll-next
 ):is(:hover, :focus-visible) {
   background-color: var(--clover-color-accent, #0065c3);
 }

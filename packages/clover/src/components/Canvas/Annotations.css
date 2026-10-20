@@ -83,7 +83,7 @@
 }
 
 /*
- * A point: a marker of fixed size at its centre. The button is the box framed on click;
+ * A point: a marker of fixed size at its center. The button is the box framed on click;
  * only the marker shows, and only it takes the pointer. A shape likewise.
  */
 .clover-canvas-annotation:is([data-shape="point"], [data-shape="svg"]) {
@@ -191,8 +191,8 @@
 }
 
 /*
- * In forced colours shadows are dropped, and the picture is not repainted: a rectangle's
- * edge in the text's colour with the light line drawn by an outline instead, in the
+ * In forced colors shadows are dropped, and the picture is not repainted: a rectangle's
+ * edge in the text's color with the light line drawn by an outline instead, in the
  * background's; active, the highlight round it.
  */
 @media (forced-colors: active) {

@@ -151,7 +151,7 @@ export async function loadImage(
 
 async function decodeBitmap(blob: Blob): Promise<ImageBitmap> {
   const options: ImageBitmapOptions = {
-    // Honour EXIF orientation, as an <img> would.
+    // Honor EXIF orientation, as an <img> would.
     imageOrientation: "from-image",
     premultiplyAlpha: "premultiply",
     colorSpaceConversion: "default",
@@ -159,7 +159,7 @@ async function decodeBitmap(blob: Blob): Promise<ImageBitmap> {
   try {
     return await createImageBitmap(blob, options);
   } catch (error) {
-    // Older engines reject "from-image"; their default already honours EXIF.
+    // Older engines reject "from-image"; their default already honors EXIF.
     if (error instanceof TypeError) return createImageBitmap(blob);
     throw error;
   }

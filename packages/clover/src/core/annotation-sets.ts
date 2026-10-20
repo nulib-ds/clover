@@ -17,7 +17,7 @@ import type { LanguageMapLike } from "./value";
  * Painting annotations are the picture, not commentary, and caption files belong to the
  * media transcript, so neither is listed here.
  *
- * A set is one AnnotationPage. Sets are memoised on the Manifest and the added pages, so
+ * A set is one AnnotationPage. Sets are memoized on the Manifest and the added pages, so
  * the same arrays come back while nothing changes.
  */
 

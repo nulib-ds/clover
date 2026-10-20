@@ -17,7 +17,7 @@
   font-size: var(--clover-text-l);
 }
 
+/* In the text's own color, not muted: a summary is the resource's own words. */
 .clover-template-gallery-summary {
   margin: 0;
-  color: var(--clover-color-primary-muted, #26292b);
 }

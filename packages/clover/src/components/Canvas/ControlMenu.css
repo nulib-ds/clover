@@ -1,7 +1,7 @@
 /*
  * The popups a Canvas shows, written once: its information (`Caption.css`) and its menus
  * (Choice, annotations, an animation's frames). One look: Clover's background and text
- * colours, so they theme with everything else, the page's own text size, one radius and
+ * colors, so they theme with everything else, the page's own text size, one radius and
  * one shadow, scrolling within when long.
  */
 :is(.clover-canvas-caption, .clover-canvas-menu) {

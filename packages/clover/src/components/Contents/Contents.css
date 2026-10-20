@@ -1,6 +1,6 @@
 /*
  * The table of contents: nested lists of Ranges, the current one marked. The rows and
- * their lists are the panel's (`InformationPanel.css`, "Rows"); a nested list steps in by
+ * their lists are the panel's (`Panel.css`, "Rows"); a nested list steps in by
  * `m`, behind a hairline, `s` from the edge of the list it is in.
  */
 .clover-contents-list .clover-contents-list {

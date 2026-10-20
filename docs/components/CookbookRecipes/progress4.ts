@@ -68,7 +68,7 @@ export const progress4: Record<string, Progress> = {
   "0253-using-transcript-file": yes,
   // 2026-10-19: also in the Canvas's caption, on its own as in the Viewer.
   "0266-full-canvas-annotation": yes,
-  // 2026-10-19: its HTML (link and image) in the caption too, sanitised.
+  // 2026-10-19: its HTML (link and image) in the caption too, sanitized.
   "0019-html-in-annotations": yes,
   "0045-css": no("The annotation styled by CSS is neither shown nor styled"),
   "0021-tagging": yes,
@@ -92,7 +92,7 @@ export const progress4: Record<string, Progress> = {
   "0025-newspaper-article-index": yes,
   "0026-toc-opera": yes,
   "0229-behavior-ranges": partial(
-    "no-nav is honoured; thumbnail-nav ranges are listed as chapters, not as thumbnails",
+    "no-nav is honored; thumbnail-nav ranges are listed as chapters, not as thumbnails",
   ),
   "0027-alternative-page-order": partial(
     "The other orders are listed in Contents; Previous and Next keep the Manifest's",

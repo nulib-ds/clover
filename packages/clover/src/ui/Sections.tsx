@@ -8,7 +8,10 @@ import React, {
   useState,
 } from "react";
 
+import { Tip } from "./Tip";
 import { useContainerName } from "./useContainerName";
+import { useScrollTrack } from "./useScrollTrack";
+import { useCloverTranslation } from "../i18n/useCloverTranslation";
 
 /** A layout effect in the browser, an effect on the server (where there is no layout). */
 const useIsomorphicLayoutEffect =
@@ -60,7 +63,9 @@ export interface SectionsProps {
  * mounts when it first opens, and stays). The layouts differ only where the patterns do:
  *
  * - `tabs`: the buttons gather in a `tablist` as `tab`s; one is always open, and the
- *   arrow keys (Home, End) move and select, with one tab stop (WAI-ARIA tabs).
+ *   arrow keys (Home, End) move and select, with one tab stop (WAI-ARIA tabs). They keep
+ *   to one row, which scrolls sideways where they do not fit, fades at an end while tabs
+ *   lie past it, and shows an arrow there to page it.
  * - `accordion`: each button sits in a heading above its panel, `aria-expanded`; opening
  *   one closes the others. One is always open, as a tab is, so the open one cannot be
  *   closed: its button is `aria-disabled` and draws no chevron. The arrow keys move
@@ -95,6 +100,12 @@ export function Sections({
     defaultValue ?? items[0]?.value ?? null,
   );
   const tabs = layout === "tabs";
+  const { t, langOf } = useCloverTranslation();
+  /*
+   * The tabs keep to one row, which scrolls sideways when they do not fit: by touch,
+   * wheel or a mouse's drag, and to whichever tab takes focus. Its arrows page it.
+   */
+  const track = useScrollTrack({ dragFree: true, itemCount: items.length });
 
   // Open: the controlled value, or the reader's; the first when that names none.
   const chosen = value !== undefined ? value : own;
@@ -128,7 +139,7 @@ export function Sections({
 
   /*
    * Focus in the open box lands clear of the stuck headings (WCAG 2.4.11). The panel's
-   * content keeps a scroll margin as tall as the stacks, which a browser honours when it
+   * content keeps a scroll margin as tall as the stacks, which a browser honors when it
    * scrolls; but Chromium scrolls a focused element only when it is outside the scrolling
    * container, however much a sticky heading covers it. So the container is moved just
    * enough to bring it out between the stacks: below the open heading, above the next.
@@ -301,6 +312,73 @@ export function Sections({
     if (tabs) choose(items[next].value);
   };
 
+  /*
+   * The open tab, brought into the row's view when it opens out of sight (chosen from
+   * outside, or the first open one past the end), clear of the arrows at its ends: the
+   * row's scroll padding. In place at once the first time, smoothly after.
+   */
+  const placed = useRef(false);
+  useEffect(() => {
+    if (!tabs) return;
+    const index = items.findIndex((item) => item.value === open);
+    const tab = buttons.current[index];
+    const row = tab?.parentElement;
+    if (!tab || !row) return;
+    const style = getComputedStyle(row);
+    const room = row.getBoundingClientRect();
+    const box = tab.getBoundingClientRect();
+    const start = room.left + (parseFloat(style.scrollPaddingLeft) || 0);
+    const end = room.right - (parseFloat(style.scrollPaddingRight) || 0);
+    if (box.left < start - 1 || box.right > end + 1)
+      track.scrollToIndex(index, { instant: !placed.current });
+    placed.current = true;
+    // `track` is a new object each render; its `scrollToIndex` follows the row.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, tabs, items.length, track.scrollToIndex]);
+
+  /*
+   * The arrows at the row's ends, shown while tabs lie past that end. They page the row
+   * for a pointer. The keyboard reaches every tab already (the arrow keys move through
+   * them, and the row follows focus), and a tab list holds only tabs, so they sit beside
+   * it, out of the tab order and the accessibility tree; a press leaves focus where it
+   * was. Each names itself on hover, as Clover's round controls do.
+   */
+  const scroller = (step: "prev" | "next") => {
+    const more = step === "prev" ? track.canScrollPrev : track.canScrollNext;
+    const key =
+      step === "prev" ? "sectionsScrollBack" : "sectionsScrollForward";
+    return (
+      <button
+        type="button"
+        className={`clover-sections-scroll-${step}`}
+        aria-hidden="true"
+        tabIndex={-1}
+        hidden={!more}
+        lang={langOf(key)}
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={step === "prev" ? track.scrollPrev : track.scrollNext}
+      >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d={step === "next" ? "M6 3l5 5-5 5" : "M10 3L5 8l5 5"}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <Tip label={t(key)} />
+      </button>
+    );
+  };
+
   const Heading = `h${headingLevel}` as "h3";
   const button = (item: SectionSpec, index: number) => {
     const isOpen = item.value === open;
@@ -314,6 +392,7 @@ export function Sections({
         id={`${id}-button-${index}`}
         className="clover-sections-button"
         data-value={item.value}
+        data-track-index={tabs ? index : undefined}
         aria-controls={`${id}-panel-${index}`}
         {...(tabs
           ? {
@@ -370,8 +449,26 @@ export function Sections({
       }
     >
       {tabs && (
-        <div role="tablist" {...name.props} className="clover-sections-list">
-          {items.map(button)}
+        <div
+          className="clover-sections-tabs"
+          data-more={
+            [track.canScrollPrev && "start", track.canScrollNext && "end"]
+              .filter(Boolean)
+              .join(" ") || undefined
+          }
+        >
+          <div className="clover-sections-row">
+            <div
+              role="tablist"
+              ref={track.ref}
+              {...name.props}
+              className="clover-sections-list"
+            >
+              {items.map(button)}
+            </div>
+            {scroller("prev")}
+            {scroller("next")}
+          </div>
         </div>
       )}
       {tabs && name.node}

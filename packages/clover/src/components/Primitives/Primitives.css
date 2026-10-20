@@ -13,7 +13,7 @@
 
 /*
  * Metadata and the required statement (`Metadata`, `RequiredStatement`): each label over
- * its value, the pairs stacked `s` apart. Both in the text's colour, as the summary is, at
+ * its value, the pairs stacked `s` apart. Both in the text's color, as the summary is, at
  * the same size: the label medium, the value at the text's own weight.
  */
 :is(.clover-metadata, .clover-required-statement) {
@@ -39,7 +39,7 @@
 }
 
 /*
- * Links in IIIF's text are underlined, not only coloured, since a page's reset may take
+ * Links in IIIF's text are underlined, not only colored, since a page's reset may take
  * the browser's underline away. Not links with a class of their own (Items' cards, Rights,
  * the id): IIIF's HTML never carries one.
  */
@@ -58,7 +58,7 @@
 
 /*
  * Lists of links (`Homepage`, `Rendering`, `SeeAlso`, `PartOf`): each item at least 24px
- * tall, in CSS px as the criterion is, so the links' centres are 24px apart whatever the
+ * tall, in CSS px as the criterion is, so the links' centers are 24px apart whatever the
  * page's type size and leading (WCAG 2.5.8).
  */
 :is(.clover-homepage, .clover-rendering, .clover-see-also, .clover-part-of)

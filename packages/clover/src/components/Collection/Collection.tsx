@@ -17,7 +17,7 @@ export interface CollectionProps extends React.HTMLAttributes<HTMLElement> {
  * The Collection the Manifest was reached through, or else the first it is `partOf`, as
  * About describes a Manifest: its label and summary, its members as a list (each opening
  * its Manifest in the Root, `Items of="members"`), then its homepage and its own address.
- * The `InformationPanel`'s Collection section is this part.
+ * The `Panel`'s Collection section is this part.
  *
  * A `partOf` Collection is fetched only when the part first shows (the panel mounts a
  * section's content then), never ahead of the reader; until it arrives, what the

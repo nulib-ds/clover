@@ -1,0 +1,80 @@
+---
+title: RequiredStatement
+description: The required statement of the Manifest, or of the current Canvas, such as an attribution, as a label and value in the reader's language.
+---
+
+import { Callout } from "nextra/components";
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+
+# RequiredStatement
+
+<Callout type="info">
+  Looking for the RequiredStatement of Clover 3.x, `@samvera/clover-iiif`? It is
+  at [Clover 3.x › RequiredStatement](/docs/3.x/requiredStatement).
+</Callout>
+
+The Manifest's `requiredStatement`, or the current Canvas's with `of="canvas"`: the text
+IIIF says must be shown with the resource, such as an attribution. It is one label and
+value pair, in the reader's language, in a description list, drawn as
+[`Metadata`](/docs/primitives/metadata) draws its pairs. Outside a `Root`, give it the
+statement to show as `value`.
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+<Clover.Root iiifContent={manifestUrl}>
+  <Clover.Content />
+  <Clover.RequiredStatement />
+</Clover.Root>;
+```
+
+Below, the attribution of the White Sewing Machine Company's 1896 bicycle catalog, from
+Clover's [mocks](/docs/mocks). Its value has two entries, joined with a comma.
+
+<PartDemo part="RequiredStatement" />
+
+## What it renders
+
+```html
+<dl class="clover-required-statement">
+  <div data-label="attribution">
+    <dt>Attribution</dt>
+    <dd>Courtesy of Northwestern University Libraries, …</dd>
+  </div>
+</dl>
+```
+
+- The `div` keeps the `dt` and `dd` associated for assistive technology. Its `data-label`
+  is the label in lower case, hyphens for spaces, read in `none`, else the label's first
+  language.
+- The label and value carry the language they are in as `lang`; those in `none` carry
+  none. A language's several values are joined with commas.
+- The value is shown as IIIF's limited HTML, sanitized, when it runs from a first `<` to a
+  last `>` (see [HTML](/docs/primitives#html)); otherwise as written. Links in it are
+  underlined, not only colored, and long unbroken values wrap.
+- Without a required statement it renders nothing.
+
+## Props
+
+| Prop        | Type                     | Description                                |
+| ----------- | ------------------------ | ------------------------------------------ |
+| `of`        | `"manifest" \| "canvas"` | Whose statement. Default `manifest`.       |
+| `value`     | `{ label, value }`       | A statement to show instead of the Root's. |
+| `className` | `string`                 | Added to `clover-required-statement`.      |
+
+It takes no `as`: it is a `dl`. Its other props (`id`, `style`, `aria-*`) go to the `dl`.
+
+### Styles
+
+`.clover-required-statement` is styled as `.clover-metadata` is: the label over its value,
+in the text's color and size, the label medium weight (500).
+
+## From Clover 3.x
+
+| 3.x `RequiredStatement`                           | Clover 4                                                                              |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `requiredStatement`                               | `value`; inside a `Root`, leave it out                                                |
+| `customValueDelimiter`                            | Not in Clover 4: a language's values are joined with commas                           |
+| `as` (`dl`)                                       | Always a `dl`                                                                         |
+| `lang`                                            | The Root's `language`; outside a `Root`, the page's `<html lang>`, then the browser's |
+| `className`, `style`, `title`, `data-*`, `aria-*` | The same, on the `dl`                                                                 |

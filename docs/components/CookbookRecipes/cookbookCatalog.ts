@@ -48,11 +48,17 @@ const resourcePaths: Record<string, string | null> = {
   "0231-transcript-meta-recipe": null,
 };
 
+/*
+ * A recipe's resource: where it publishes it under another name, that name first, since
+ * recipes.json (3.x's list) gives `manifest.json` for 0010, 0011, 0030, 0040 and 0230,
+ * which are not there; then recipes.json; then the Cookbook's convention.
+ */
 export const resourceFor = (slug: string): string | undefined => {
-  const known = resourceBySlug.get(slug);
-  if (known) return known;
-  const path = slug in resourcePaths ? resourcePaths[slug] : "manifest.json";
-  return path ? `${recipeBase}${slug}/${path}` : undefined;
+  if (slug in resourcePaths) {
+    const path = resourcePaths[slug];
+    return path ? `${recipeBase}${slug}/${path}` : undefined;
+  }
+  return resourceBySlug.get(slug) ?? `${recipeBase}${slug}/manifest.json`;
 };
 
 export const statusFor = (slug: string): Status =>

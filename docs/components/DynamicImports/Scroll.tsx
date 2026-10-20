@@ -1,5 +1,7 @@
+"use client";
+
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
+import { useRouter } from "docs/lib/router";
 
 // todo: set this as a constant somewhere?
 const defaultIiifContent =

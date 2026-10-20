@@ -1,30 +1,29 @@
 /*
- * Nextra keeps the table-of-contents column as an empty 256px placeholder when a page turns
- * it off (`theme.toc: false`) or has no headings, squeezing the article. Collapse it.
+ * Nextra 4's stylesheet is all in cascade layers (Tailwind's `theme`, `base`,
+ * `components`, `utilities`), so these unlayered rules outrank it whatever the
+ * specificity, with no `!important`; only a layered `!important` still wins, and is met
+ * through the custom property it reads. Its utilities are `x:`-prefixed classes, matched
+ * here as whole class names (`[class~="x:…"]`).
  */
-nav.nextra-toc:empty {
-  display: none !important;
-}
 
 /*
- * The navbar is solid: Nextra frosts it (the page at 85%, blurred), and the page then
- * shows through it, smeared, as it scrolls under. `!important` because Nextra's own dark
- * colour carries it; the selector's three classes outrank its (0,2,1). Its edge fades
- * as it moves to the homepage playground's bar and back (`Playground.module.css`).
+ * The navbar is solid: Nextra frosts it (the page at 70%, blurred), and the page then
+ * shows through it, smeared, as it scrolls under. Its edge fades as it moves to the
+ * homepage playground's bar and back (`Playground.module.css`).
  */
-:root .nextra-nav-container > .nextra-nav-container-blur {
+.nextra-navbar > .nextra-navbar-blur {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  background-color: var(--color-background) !important;
+  background-color: var(--color-background);
   transition: box-shadow 150ms ease;
 }
 
 /*
  * Under the navbar, the line saying whose project Clover is (`docs/components/
  * Subheader.tsx`). Not held: it scrolls away with the page while the navbar stays. Solid,
- * as the headers are, on the light grey surface (`--surface`); its text in the muted
- * colour (5.2:1 light, 7.6:1 dark), its link the text accent (6.2:1 or more under every
- * accent preset, either theme) and underlined, so it is told apart by more than colour
+ * as the headers are, on the light gray surface (`--surface`); its text in the muted
+ * color (5.2:1 light, 7.6:1 dark), its link the text accent (6.2:1 or more under every
+ * accent preset, either theme) and underlined, so it is told apart by more than color
  * (WCAG 1.4.1). It lines up with the end of the navbar's content (its last control):
  * Nextra's 90rem and 1.5rem here, the homepage's own in `Home.module.css`.
  */
@@ -40,7 +39,7 @@ nav.nextra-toc:empty {
   padding-right: max(env(safe-area-inset-right), 1.5rem);
   color: var(--gray-11);
   /*
-   * The navbar's own size (Nextra's `nx-text-sm`), so the line reads with the links over
+   * The navbar's own size (Nextra's `x:text-sm`), so the line reads with the links over
    * it: under the docs' floor, as the navbar is (Mat, 2026-10-16).
    */
   font-size: 0.875rem;
@@ -55,9 +54,9 @@ nav.nextra-toc:empty {
 }
 
 /*
- * Nextra's focus ring is pale (1.5:1 to 2.4:1), so it takes the text accent, which holds
- * 3:1 in both themes, behind a gap of the page's colour. `:root:root` outranks Nextra's
- * dark `[tabindex]` rule, (0,4,1). The banner is near-black, so its ring is its text's.
+ * Nextra's focus ring is pale (its primary-200, 1.5:1 to 2.4:1), so it takes the text
+ * accent, which holds 3:1 in both themes, behind a gap of the page's color. The banner
+ * is near-black, so its ring is its text's.
  */
 :root:root
   :is(
@@ -72,7 +71,7 @@ nav.nextra-toc:empty {
 }
 
 :root:root
-  .nextra-banner-container
+  .nextra-banner
   :is(a, button, [tabindex]:not([tabindex="-1"])):focus-visible {
   --tw-ring-color: currentColor;
 }
@@ -82,8 +81,9 @@ nav.nextra-toc:empty {
  * search results, tabs) is the accent at 45% lightness in both themes: under 3:1 on its
  * dark ground, and under 4.5:1 on white for some accents. It takes the text accent
  * instead, lifted further in dark mode so it holds 4.5:1 on Nextra's lighter dark
- * grounds too (code, callouts) under every preset. `:root:root` outranks Nextra's dark
- * rule, (0,2,1); the high-contrast rule repeats it because Nextra's carries `!important`.
+ * grounds too (code, callouts) under every preset. Nextra's high-contrast class carries
+ * a layered `!important`, which no unlayered rule outranks, so it is given the color
+ * through the variable it reads.
  */
 :root:root {
   --accent-link: var(--accent-11);
@@ -93,46 +93,69 @@ nav.nextra-toc:empty {
   --accent-link: color-mix(in oklab, var(--accent-9) 45%, #fff);
 }
 
-:root:root
-  :is(
-    .nx-text-primary-600,
-    .nx-text-primary-800,
-    .hover\:nx-text-primary-600:hover
-  ) {
+:is(
+  [class~="x:text-primary-600"],
+  [class~="x:text-primary-800"],
+  [class~="x:dark:text-primary-500"],
+  [class~="x:dark:text-primary-600"]
+) {
   color: var(--accent-link);
 }
 
-@media (prefers-contrast: more) {
-  :root:root .contrast-more\:\!nx-text-primary-600 {
-    color: var(--accent-link) !important;
-  }
+[class~="x:contrast-more:text-primary-600!"] {
+  --x-color-primary-600: var(--accent-link);
+}
+
+/*
+ * The sidebar's entries (pages, folders, section titles) are in `--nav-text`, black on
+ * the light page and white on the dark one (Mat, 2026-10-20), where Nextra grays them.
+ * The current page keeps the accent on its tint, bold (Nextra's `x:text-primary-800`),
+ * so it is told apart by more than color.
+ */
+:is(.nextra-sidebar, .nextra-mobile-nav)
+  :is(a, button, li):not([class~="x:text-primary-800"]) {
+  color: var(--nav-text);
+}
+
+/*
+ * The sidebar at the page's 1rem, its section titles and entries alike (Mat, 2026-10-20),
+ * where Nextra sets both at 14px. A section title is the one `li` that carries Nextra's
+ * weight class itself.
+ */
+:is(.nextra-sidebar, .nextra-mobile-nav) li[class~="x:font-semibold"] {
+  font-size: 1rem;
+}
+
+:is(.nextra-sidebar, .nextra-mobile-nav) :is(a, button) {
+  font-size: 1rem;
 }
 
 /*
  * Nextra hides a closed sidebar folder, and the sidebar after "Hide sidebar", by height or
- * width and opacity alone, and only moves the closed phone menu above the screen. Their
- * links stayed in the tab order, taking focus unseen, so they are hidden as well.
+ * width and opacity alone. Their links stayed in the tab order, taking focus unseen, so
+ * they are hidden as well. Visibility turns once the fade ends, so closing still animates.
  */
-.nextra-sidebar-container .nx-overflow-hidden > .nx-opacity-0 {
+:is(.nextra-sidebar, .nextra-mobile-nav)
+  [class~="x:overflow-hidden"][class~="x:opacity-0"] {
   visibility: hidden;
 }
 
-@media not all and (min-width: 768px) {
-  .nextra-sidebar-container[class*="translate3d(0,-100%,0)"] {
-    visibility: hidden;
-  }
+/*
+ * The closed phone menu is only moved above the screen, its search field and links still
+ * in the tab order, so it is hidden as well once it has slid away.
+ */
+.nextra-mobile-nav[class*="translate3d(0,-100%,0)"] {
+  visibility: hidden;
 }
 
-/* Visibility turns once the fade or the slide ends, so closing still animates. */
 @media (prefers-reduced-motion: no-preference) {
-  .nextra-sidebar-container .nx-overflow-hidden > .nx-opacity-0 {
+  :is(.nextra-sidebar, .nextra-mobile-nav)
+    [class~="x:overflow-hidden"][class~="x:opacity-0"] {
     transition-property: opacity, visibility;
   }
 
-  @media not all and (min-width: 768px) {
-    .nextra-sidebar-container[class*="translate3d(0,-100%,0)"] {
-      transition-property: transform, visibility;
-    }
+  .nextra-mobile-nav[class*="translate3d(0,-100%,0)"] {
+    transition-property: transform, visibility;
   }
 }
 
@@ -142,7 +165,7 @@ nav.nextra-toc:empty {
  * the banner shows, the padding covers both.
  */
 @media not all and (min-width: 768px) {
-  html:has(.nextra-banner-container):not(:has(body.nextra-banner-hidden)) {
+  html:has(.nextra-banner:not([class$="hidden"])) {
     scroll-padding-top: calc(
       var(--nextra-navbar-height) + var(--nextra-banner-height)
     );
@@ -150,15 +173,19 @@ nav.nextra-toc:empty {
 }
 
 /*
- * Nextra's search hint (gray-500 on the field, 4.3:1) and its loading, empty and error
- * states (gray-400 at 2.5:1, red-500 at 3.8:1) fall under 4.5:1 in light mode. They take
- * the muted text colour. Nextra's dark placeholder rule, (0,2,2), still wins in dark.
+ * The search field's placeholder takes the muted text color in either theme, and its
+ * loading, empty and error states (gray-400 at 2.5:1, red-500 at 3.8:1 on light) take
+ * it in light mode, where they fall under 4.5:1.
  */
 .nextra-search input::placeholder {
   color: var(--gray-11);
 }
 
-html:not(.dark) .nextra-search ul :is(.nx-text-gray-400, .nx-text-red-500) {
+html:not(.dark)
+  .nextra-search-results:is(
+    [class~="x:text-gray-400"],
+    [class~="x:text-red-500"]
+  ) {
   color: var(--gray-11);
 }
 
@@ -173,18 +200,52 @@ article table {
 }
 
 /*
- * Once a query is typed, the search field's key hint becomes its Clear button. Nextra
- * makes it 20px tall, inside the field, so it is raised to 24px; the field still fits it.
+ * Code inside a callout sits on a darker tint of the callout's own ground, in the
+ * callout's text color, which falls under 4.5:1 there in light mode (green 4.2:1,
+ * yellow 4.4:1). It takes that color a step darker.
  */
-.nextra-search kbd {
-  height: 1.5rem;
-  margin-block: 0.25rem;
+html:not(.dark) .nextra-callout :not(pre) > code {
+  color: color-mix(in oklab, currentColor 72%, var(--gray-12));
 }
 
 /*
- * Nextra's reset takes the markers and indent off every list, unlayered, so it beats
- * Clover's `@layer clover`: a Markdown annotation's lists, and their numbers, are put
- * back, as the Styles section of Composing Layouts tells consumers to.
+ * Below 768px a code block's word-wrap button showed only once the block was hovered,
+ * over the code, and could not be put away (WCAG 1.4.13). There it is always shown, in
+ * the flow under the code, covering nothing.
+ */
+@media not all and (min-width: 768px) {
+  .nextra-code > [class~="x:opacity-0"] {
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+    opacity: 1;
+    position: static;
+  }
+}
+
+/*
+ * A Markdown table scrolls sideways in its own box (`docs/components/ScrollTable.tsx`),
+ * spaced as Nextra spaces its tables. While it scrolls the box is a focusable region, so
+ * it shows focus as the site's controls do.
+ */
+.docs-table {
+  margin-top: 1.25em;
+  overflow-x: auto;
+  position: relative;
+}
+
+.docs-table:first-child {
+  margin-top: 0;
+}
+
+.docs-table:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+/*
+ * Nextra's reset (Tailwind's preflight) takes the markers and indent off every list: a
+ * Markdown annotation's lists, and their numbers, are put back, as the Styles section of
+ * Composing Layouts tells consumers to.
  */
 :is(.clover-annotations-body, .clover-value) ul {
   list-style: disc;

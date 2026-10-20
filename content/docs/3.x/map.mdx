@@ -1,0 +1,781 @@
+---
+title: Map (3.x)
+---
+
+import CloverMap from "docs/components/DynamicImports/Map";
+import CoordinatePickingDemo from "docs/components/Map/CoordinatePickingDemo";
+import IIIFBadge from "docs/components/IIIFBadge";
+import { Callout } from "nextra/components";
+import { Tabs } from "nextra/components";
+import {
+  DC_GEOREF_ANNOTATION_CANVAS as georefAnnotation,
+  DC_GEOREF_ANNOTATION_OVERLAY as georefAnnotationOverlay,
+} from "docs/fixtures/georef";
+
+export const navPlace = {
+  type: "FeatureCollection",
+  features: [
+    {
+      id: "https://iiif.io/api/cookbook/recipe/0240-navPlace-on-canvases/feature/1",
+      type: "Feature",
+      properties: {
+        label: {
+          en: ["Current Location of the Laocoön Bronze"],
+          it: ["Ubicazione attuale del Bronzo Laocoonte e i suoi figli"],
+        },
+      },
+      geometry: { type: "Point", coordinates: [-118.4745559, 34.0776376] },
+    },
+    {
+      id: "https://iiif.io/api/cookbook/recipe/0240-navPlace-on-canvases/feature/2",
+      type: "Feature",
+      properties: {
+        label: { en: ["Current Location of Painting"] },
+      },
+      geometry: { type: "Point", coordinates: [-77.0199025, 38.8920717] },
+    },
+  ],
+};
+
+export const navPlacePolygon = {
+  type: "Feature",
+  properties: { label: { en: ["Lake Michigan"] } },
+  geometry: {
+    type: "Polygon",
+    coordinates: [
+      [
+        [-87.91178, 41.61793],
+        [-84.72398, 41.61793],
+        [-84.72398, 46.1023],
+        [-87.91178, 46.1023],
+        [-87.91178, 41.61793],
+      ],
+    ],
+  },
+};
+
+export const navPlaceRoute66 = {
+  type: "Feature",
+  properties: { label: { en: ["Historic Route 66"] } },
+  geometry: {
+    type: "LineString",
+    coordinates: [
+      [-87.65005, 41.85003],
+      [-89.64371, 39.80172],
+      [-90.19789, 38.62727],
+      [-94.51328, 37.08423],
+      [-97.51643, 35.46756],
+      [-101.8313, 35.222],
+      [-106.65114, 35.08449],
+      [-111.65127, 35.19807],
+      [-118.49138, 34.01949],
+    ],
+  },
+};
+
+export const navPlaceLakeMichigan = {
+  type: "Feature",
+  properties: { label: { en: ["Lake Michigan Shoreline"] } },
+  geometry: {
+    type: "GeometryCollection",
+    geometries: [
+      {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-87.91178, 41.61793],
+            [-84.72398, 41.61793],
+            [-84.72398, 46.1023],
+            [-87.91178, 46.1023],
+            [-87.91178, 41.61793],
+          ],
+        ],
+      },
+      {
+        type: "LineString",
+        coordinates: [
+          [-87.34643, 41.59337],
+          [-87.65005, 41.85003],
+          [-87.90647, 43.0389],
+          [-88.01983, 44.51916],
+        ],
+      },
+      {
+        type: "MultiPoint",
+        coordinates: [
+          [-87.34643, 41.59337],
+          [-87.65005, 41.85003],
+          [-87.90647, 43.0389],
+          [-88.01983, 44.51916],
+          [-85.62063, 44.76306],
+        ],
+      },
+    ],
+  },
+};
+
+# Map
+
+A UI component that renders a geographic map using [MapLibre GL](https://maplibre.org/maplibre-gl-js/), with native support for IIIF [navPlace](https://iiif.io/api/extension/navplace/) geographic annotations and [Georeference Extension](https://iiif.io/api/extension/georef/) control points. Optionally renders warped IIIF image overlays via [@allmaps/maplibre](https://allmaps.org/).
+
+<IIIFBadge
+  href="https://iiif.io/api/extension/navplace/"
+  text={["navPlace Extension"]}
+/>
+
+<IIIFBadge
+  href="https://iiif.io/api/extension/georef/"
+  text={["Georeference Extension"]}
+/>
+
+---
+
+<div style={{ position: "relative", height: "400px" }}>
+  <CloverMap navPlace={navPlace} fitToData />
+</div>
+
+## Features
+
+Provide a IIIF `navPlace` GeoJSON value, a Georeference Extension annotation, or both, and the component:
+
+- Renders GeoJSON features from IIIF `navPlace` values (FeatureCollection, Feature, or bare geometry)
+- Resolves `label` properties as IIIF [InternationalString](https://iiif.io/api/presentation/3.0/#44-language-of-property-values) or plain strings for tooltips
+- Displays Ground Control Points (GCPs) from a Georeference Extension annotation as numbered markers
+- Optionally renders a warped IIIF image overlay via [@allmaps/maplibre](https://allmaps.org/) when `showImageOverlay` is enabled
+- Auto-fits the viewport to all displayed data with `fitToData`
+- Accepts a click callback for coordinate picking (`onMapClick`)
+- Draws a terrain basemap by default, or any MapLibre style or raster tiles you supply
+
+### Scroll to zoom
+
+Zooming with the mouse wheel or trackpad is **off by default**. A map placed partway down
+a scrolling page would otherwise swallow the wheel and trap the reader — the same reason
+Clover disables OpenSeadragon's `scrollToZoom` in `Image` and `Viewer`. The zoom controls,
+double-click and pinch gestures all still work.
+
+Turn it on with `scrollZoom` for a full-page or full-bleed map, where wheel zoom is what a
+reader expects:
+
+```jsx
+<Map iiifContent={iiifContent} fitToData scrollZoom />
+```
+
+<Callout type="info">
+  Prior to this release the map zoomed on scroll, following MapLibre's own
+  default. If you are relying on that behavior, add `scrollZoom` to keep it.
+</Callout>
+
+## Installation
+
+{/* prettier-ignore */}
+<Tabs items={["npm", "yarn", "pnpm"]}>
+  <Tabs.Tab>
+    ```shell
+      npm install @samvera/clover-iiif
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```shell
+      yarn add @samvera/clover-iiif
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```shell
+      pnpm install @samvera/clover-iiif
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Usage
+
+### React
+
+Add the `Map` component to your `jsx` or `tsx` code.
+
+```jsx
+import Map from "@samvera/clover-iiif/map";
+```
+
+### Next.js
+
+Implementation with Next.js requires a [dynamic import](https://nextjs.org/docs/advanced-features/dynamic-import) because MapLibre GL assumes a browser `document` object.
+
+```jsx
+import dynamic from "next/dynamic";
+
+const Map = dynamic(
+  () => import("@samvera/clover-iiif").then((Clover) => Clover.Map),
+  { ssr: false },
+);
+```
+
+---
+
+## navPlace
+
+Render geographic features from a IIIF [navPlace](https://iiif.io/api/extension/navplace/) value. The `navPlace` prop accepts a GeoJSON `FeatureCollection`, `Feature`, or bare geometry object. Feature `properties.label` may be a plain string or a IIIF `InternationalString`, and will be shown as a tooltip and popup.
+
+You can also pass a IIIF resource through `iiifContent`. Clover will extract navPlace values from Collections, Manifests, Canvases, and Annotations, and the popup will include the resource context that supplied the feature, including its label, summary, and thumbnail when present.
+
+```jsx
+<Map
+  iiifContent="https://iiif.io/api/cookbook/recipe/0240-navPlace-on-canvases/manifest.json"
+  navPlaceLevel="Canvas"
+  fitToData
+/>
+```
+
+The example below uses features from [IIIF Cookbook recipe 0240: navPlace on Canvases](https://iiif.io/api/cookbook/recipe/0240-navPlace-on-canvases/), where `navPlace` is declared directly on each Canvas. To consume it, fetch the manifest and read `canvas.navPlace` from each item:
+
+<Tabs items={["Code", "Preview"]}>
+  <Tabs.Tab>
+    ```jsx
+    // Fetch the manifest and collect navPlace features from all canvases
+    const manifest = await fetch(
+      "https://iiif.io/api/cookbook/recipe/0240-navPlace-on-canvases/manifest.json"
+    ).then((r) => r.json());
+
+    const navPlace = {
+      type: "FeatureCollection",
+      features: manifest.items.flatMap(
+        (canvas) => canvas.navPlace?.features ?? []
+      ),
+    };
+
+    // navPlace now contains two features:
+    // - Current Location of the Laocoön Bronze  [-118.47, 34.07]  (Getty, Los Angeles)
+    // - Current Location of Painting            [-77.02,  38.89]  (National Gallery, DC)
+
+    <div style={{ height: "400px" }}>
+      <Map navPlace={navPlace} fitToData />
+    </div>
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <div style={{ position: "relative", height: "400px" }}>
+      <CloverMap navPlace={navPlace} fitToData />
+    </div>
+  </Tabs.Tab>
+</Tabs>
+
+### Polygon
+
+A `Polygon` geometry draws a filled region. This example uses a bounding box from [GeoNames](https://www.geonames.org/) to outline the extent of Lake Michigan.
+
+<Tabs items={["Code", "Preview"]}>
+  <Tabs.Tab>
+    ```jsx
+    const navPlace = {
+      type: "Feature",
+      properties: { label: { en: ["Lake Michigan"] } },
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-87.91178, 41.61793], // SW
+            [-84.72398, 41.61793], // SE
+            [-84.72398, 46.10230], // NE
+            [-87.91178, 46.10230], // NW
+            [-87.91178, 41.61793], // close ring
+          ],
+        ],
+      },
+    };
+
+    <div style={{ height: "400px" }}>
+      <Map navPlace={navPlace} fitToData />
+    </div>
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <div style={{ position: "relative", height: "400px" }}>
+      <CloverMap navPlace={navPlacePolygon} fitToData />
+    </div>
+  </Tabs.Tab>
+</Tabs>
+
+### LineString
+
+A `LineString` draws a connected path between an ordered sequence of coordinates. This example traces [Historic Route 66](https://en.wikipedia.org/wiki/U.S._Route_66) from Chicago to Santa Monica using city coordinates from GeoNames.
+
+<Tabs items={["Code", "Preview"]}>
+  <Tabs.Tab>
+    ```jsx
+    const navPlace = {
+      type: "Feature",
+      properties: { label: { en: ["Historic Route 66"] } },
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          [-87.65005, 41.85003], // Chicago, IL
+          [-89.64371, 39.80172], // Springfield, IL
+          [-90.19789, 38.62727], // St. Louis, MO
+          [-94.51328, 37.08423], // Joplin, MO
+          [-97.51643, 35.46756], // Oklahoma City, OK
+          [-101.83130, 35.22200], // Amarillo, TX
+          [-106.65114, 35.08449], // Albuquerque, NM
+          [-111.65127, 35.19807], // Flagstaff, AZ
+          [-118.49138, 34.01949], // Santa Monica, CA
+        ],
+      },
+    };
+
+    <div style={{ height: "400px" }}>
+      <Map navPlace={navPlace} fitToData />
+    </div>
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <div style={{ position: "relative", height: "400px" }}>
+      <CloverMap navPlace={navPlaceRoute66} fitToData />
+    </div>
+  </Tabs.Tab>
+</Tabs>
+
+### GeometryCollection
+
+A `GeometryCollection` bundles multiple geometry types into a single `navPlace` feature. This example maps the western Lake Michigan shoreline as a composite: a bounding `Polygon` for the lake, a `LineString` tracing the shore from Gary to Green Bay, and a `MultiPoint` marking five lakeshore cities, all sharing one label.
+
+<Tabs items={["Code", "Preview"]}>
+  <Tabs.Tab>
+    ```jsx
+    const navPlace = {
+      type: "Feature",
+      properties: { label: { en: ["Lake Michigan Shoreline"] } },
+      geometry: {
+        type: "GeometryCollection",
+        geometries: [
+          {
+            type: "Polygon",
+            coordinates: [[
+              [-87.91178, 41.61793],
+              [-84.72398, 41.61793],
+              [-84.72398, 46.10230],
+              [-87.91178, 46.10230],
+              [-87.91178, 41.61793],
+            ]],
+          },
+          {
+            type: "LineString",
+            coordinates: [
+              [-87.34643, 41.59337], // Gary, IN
+              [-87.65005, 41.85003], // Chicago, IL
+              [-87.90647, 43.03890], // Milwaukee, WI
+              [-88.01983, 44.51916], // Green Bay, WI
+            ],
+          },
+          {
+            type: "MultiPoint",
+            coordinates: [
+              [-87.34643, 41.59337], // Gary, IN
+              [-87.65005, 41.85003], // Chicago, IL
+              [-87.90647, 43.03890], // Milwaukee, WI
+              [-88.01983, 44.51916], // Green Bay, WI
+              [-85.62063, 44.76306], // Traverse City, MI
+            ],
+          },
+        ],
+      },
+    };
+
+    <div style={{ height: "400px" }}>
+      <Map navPlace={navPlace} fitToData />
+    </div>
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <div style={{ position: "relative", height: "400px" }}>
+      <CloverMap navPlace={navPlaceLakeMichigan} fitToData />
+    </div>
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Georeference Extension
+
+Render Ground Control Points (GCPs) from a IIIF [Georeference Extension](https://iiif.io/api/extension/georef/) annotation. Pass a parsed annotation object to `georefAnnotation` and the component will extract the GCPs and display them as numbered markers on the map. GCPs are included in `fitToData` bounds.
+
+The example below uses a real annotation from Northwestern University Libraries' [Map of the Township of Evanston, Cook County, Illinois](https://dc.library.northwestern.edu/items/c9869cb2-e735-4010-a493-84a66fcd065d). The annotation's `target.source` is a Canvas.
+
+<Tabs items={["Code", "Preview"]}>
+  <Tabs.Tab>
+    ```jsx
+    // Annotation as returned by dc-api; target.source.type is "Canvas"
+    const georefAnnotation = {
+      "@context": [
+        "http://iiif.io/api/extension/georef/1/context.json",
+        "http://iiif.io/api/presentation/3/context.json",
+      ],
+      id: "urn:meadow:georeference:2fb1e81a-...",
+      type: "Annotation",
+      motivation: "georeferencing",
+      target: {
+        type: "SpecificResource",
+        source: {
+          id: "https://api.dc.library.northwestern.edu/api/v2/file-sets/2fb1e81a-9e24-420c-b224-0bfd6a279baf?as=iiif",
+          type: "Canvas",
+          width: 7337,
+          height: 9833,
+        },
+        selector: { type: "SvgSelector", value: "<svg ...>" },
+      },
+      body: {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: { confidence: "medium", resourceCoords: [577.7, 1074.97] },
+            geometry: { type: "Point", coordinates: [-87.71064, 42.06793] },
+          },
+          // ... 2 more GCPs
+        ],
+      },
+    };
+
+    <div style={{ height: "400px" }}>
+      <Map georefAnnotation={georefAnnotation} fitToData />
+    </div>
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <div style={{ position: "relative", height: "400px" }}>
+      <CloverMap georefAnnotation={georefAnnotation} fitToData />
+    </div>
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Warped Image Overlay
+
+When `showImageOverlay` is enabled and a `georefAnnotation` with at least 3 GCPs is provided, the component renders a warped IIIF image overlay using [@allmaps/maplibre](https://allmaps.org/).
+
+**Important:** `@allmaps/maplibre` requires the annotation's `target.source` to reference an IIIF Image API endpoint (`type: "ImageService2"` or `"ImageService3"`), not a Canvas. Annotations saved by authoring tools typically use a Canvas source. Use the `adaptGeoreferenceAnnotationForOverlay` helper to swap the source before passing it to `<Map>`.
+
+The example below uses the same Evanston map annotation adapted with the FileSet's IIIF Image API v3 endpoint as the ImageService3 source.
+
+<Tabs items={["Code", "Preview"]}>
+  <Tabs.Tab>
+    ```jsx
+    import Map, { adaptGeoreferenceAnnotationForOverlay } from "@samvera/clover-iiif/map";
+
+    // Annotation target.source.type is "Canvas"
+    const storedAnnotation = { /* ... */ };
+
+    // IIIF Image API v3 base URL for the FileSet
+    const imageServiceId =
+      "https://iiif.dc.library.northwestern.edu/iiif/3/2fb1e81a-9e24-420c-b224-0bfd6a279baf";
+
+    // Adapt the annotation so @allmaps/maplibre can use it
+    const overlayAnnotation = adaptGeoreferenceAnnotationForOverlay(
+      storedAnnotation,
+      imageServiceId,
+    );
+
+    <div style={{ height: "500px" }}>
+      <Map
+        georefAnnotation={overlayAnnotation}
+        showImageOverlay
+        imageOverlayOpacity={0.65}
+        fitToData
+      />
+    </div>
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <div style={{ position: "relative", height: "500px" }}>
+      <CloverMap
+        georefAnnotation={georefAnnotationOverlay}
+        showImageOverlay
+        imageOverlayOpacity={0.65}
+        fitToData
+      />
+    </div>
+  </Tabs.Tab>
+</Tabs>
+
+`@allmaps/maplibre` is an optional dependency. It is only loaded when `showImageOverlay` is `true`, so consumers who don't use this feature pay no bundle cost.
+
+---
+
+## Combining navPlace and Georeference
+
+`navPlace` and `georefAnnotation` can be used together. When `fitToData` is enabled the viewport will expand to cover all features, GCPs, and any additional `markers`.
+
+<Tabs items={["Code", "Preview"]}>
+  <Tabs.Tab>
+    ```jsx
+    <div style={{ height: "400px" }}>
+      <Map navPlace={navPlace} georefAnnotation={georefAnnotation} fitToData />
+    </div>
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <div style={{ position: "relative", height: "400px" }}>
+      <CloverMap
+        navPlace={navPlace}
+        georefAnnotation={georefAnnotation}
+        fitToData
+      />
+    </div>
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Coordinate Picking
+
+Use `onMapClick` and `useCrosshairCursor` to turn the map into a coordinate picker. The callback receives `[longitude, latitude]` rounded to five decimal places.
+
+<Tabs items={["Code", "Preview"]}>
+  <Tabs.Tab>
+    ```jsx
+    const [coordinates, setCoordinates] = React.useState(null);
+
+    <div>
+      <div style={{ height: "400px" }}>
+        <Map
+          center={{ latitude: 42.045, longitude: -87.688, zoom: 11 }}
+          markers={
+            coordinates
+              ? [
+                  {
+                    latitude: coordinates.lat,
+                    longitude: coordinates.lng,
+                    label: "Selected coordinate",
+                  },
+                ]
+              : []
+          }
+          onMapClick={([lng, lat]) => setCoordinates({ lng, lat })}
+          useCrosshairCursor
+        />
+      </div>
+
+      <output>
+        {coordinates
+          ? `longitude: ${coordinates.lng}, latitude: ${coordinates.lat}`
+          : "Click the map to pick coordinates."}
+      </output>
+    </div>
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <CoordinatePickingDemo />
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## API Reference
+
+### Map props
+
+| Prop                  | Type                                                     | Required | Default    |
+| --------------------- | -------------------------------------------------------- | -------- | ---------- |
+| `navPlace`            | `GeoJSON.FeatureCollection \| Feature \| Geometry`       | No       |            |
+| `iiifContent`         | `string \| object`                                       | No       |            |
+| `navPlaceLevel`       | `Collection \| Manifest \| Canvas \| Annotation \| all`  | No       | `all`      |
+| `georefAnnotation`    | [`GeoreferenceAnnotation`](#georeferenceannotation-type) | No       |            |
+| `showControlPoints`   | `boolean`                                                | No       | `true`     |
+| `showImageOverlay`    | `boolean`                                                | No       | `false`    |
+| `imageOverlayOpacity` | `number` (0-1)                                           | No       | `0.65`     |
+| `geoJson`             | `GeoJSON.FeatureCollection \| Feature`                   | No       |            |
+| `markers`             | [`MapMarker[]`](#mapmarker-type)                         | No       | `[]`       |
+| `center`              | [`MapCenter`](#mapcenter-type)                           | No       | World view |
+| `fitToData`           | `boolean`                                                | No       | `false`    |
+| `onMapClick`          | `(coordinates: [number, number]) => void`                | No       |            |
+| `useCrosshairCursor`  | `boolean`                                                | No       | `false`    |
+| `scrollZoom`          | `boolean`                                                | No       | `false`    |
+| `tileLayer`           | [`MapTileLayer`](#maptilelayer-type)                     | No       |            |
+| `styleUrl`            | `string`                                                 | No       |            |
+| `workerUrl`           | `string`                                                 | No       |            |
+
+### `GeoreferenceAnnotation` type
+
+A IIIF [Georeference Extension](https://iiif.io/api/extension/georef/) annotation. The `body` is a GeoJSON `FeatureCollection` whose features carry `properties.resourceCoords` (image pixel `[x, y]`) paired with a `Point` geometry (geographic `[longitude, latitude]`).
+
+```ts
+interface GeoreferenceAnnotation {
+  "@context"?: string | string[];
+  id?: string;
+  type: "Annotation";
+  motivation: "georeferencing";
+  target: {
+    type: "SpecificResource";
+    source: {
+      id: string;
+      type: string; // "Canvas" | "ImageService2" | "ImageService3"
+      width?: number;
+      height?: number;
+    };
+    selector?: { type: "SvgSelector"; value: string };
+  };
+  body: GeoJSON.FeatureCollection;
+}
+```
+
+### `MapMarker` type
+
+```ts
+interface MapMarker {
+  latitude: number;
+  longitude: number;
+  label?: string;
+}
+```
+
+### `MapCenter` type
+
+```ts
+interface MapCenter {
+  latitude: number;
+  longitude: number;
+  zoom: number;
+}
+```
+
+### `MapTileLayer` type
+
+```ts
+interface MapTileLayer {
+  url: string; // e.g. "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+  attribution: string;
+  maxZoom?: number; // deepest zoom the provider serves
+  referenceUrl?: string; // labels and borders drawn above `url`
+  referenceMaxZoom?: number; // deepest zoom the overlay serves
+}
+```
+
+### Basemap
+
+The default basemap is [OpenFreeMap Liberty](https://openfreemap.org/), a free vector style
+that needs no API key. Clover removes its roads and adds shaded relief from
+[Mapzen Terrain Tiles](https://registry.opendata.aws/terrain-tiles/). The map shows terrain,
+political borders, country and state names, and major cities. It stays sharp at every zoom.
+
+To use another MapLibre style, pass its URL as `styleUrl`. Clover draws the style as written.
+
+```jsx
+<Map styleUrl="https://tiles.openfreemap.org/styles/positron" />
+```
+
+To use raster tiles, pass `tileLayer`; it takes precedence over `styleUrl`. Set `maxZoom` to
+the deepest zoom your provider serves. Beyond it, MapLibre enlarges the last tiles rather
+than drawing blank ones.
+
+```jsx
+<Map
+  tileLayer={{
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution:
+      "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+    maxZoom: 19,
+  }}
+/>
+```
+
+To add labels and borders to a base that has none, such as terrain or imagery, pass the
+overlay as `referenceUrl` and its deepest zoom as `referenceMaxZoom`.
+
+Clover draws navPlace geometry and markers above any basemap.
+
+### MapLibre's web worker
+
+MapLibre 6 loads its web worker from a separate file. By default and for convenience, Clover
+bundles the worker for you. The map works as installed, whether you bundle Clover or load it
+from a `<script>` tag.
+
+If your implementation has trouble loading the worker, you can set `workerUrl` to a copy of
+the worker that your app serves. For example, the bundled worker runs from a `blob:` URL,
+which a strict Content-Security-Policy may block. Check `worker-src`; if it is not set,
+browsers apply `script-src` to workers instead. The map then shows no navPlace geometry,
+control points, or `geoJson`, and the default basemap loads without its labels and borders.
+
+To serve the worker yourself, copy these two files into one directory:
+
+```
+node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs
+node_modules/maplibre-gl/dist/maplibre-gl-shared.mjs
+```
+
+Keep them together; the worker loads the shared file by relative path. Then point `workerUrl`
+at the worker:
+
+```jsx
+<Map workerUrl="/maplibre/maplibre-gl-worker.mjs" />
+
+<Viewer
+  options={{ map: { enabled: true, workerUrl: "/maplibre/maplibre-gl-worker.mjs" } }}
+/>
+```
+
+---
+
+## Helpers
+
+The following functions are exported from `@samvera/clover-iiif/helpers` and `@samvera/clover-iiif` to assist with processing IIIF georeference and navPlace data.
+
+### `parseGeoreferenceAnnotation`
+
+Extracts Ground Control Points from a `GeoreferenceAnnotation`. Features with missing or non-numeric coordinates are silently skipped.
+
+```ts
+import { helpers } from "@samvera/clover-iiif";
+
+const gcps = helpers.parseGeoreferenceAnnotation(annotation);
+// → [{ id, resourceCoords: [x, y], geoCoords: [lng, lat] }, ...]
+```
+
+### `adaptGeoreferenceAnnotationForOverlay`
+
+Swaps a Canvas source for an ImageService source so the annotation can be used with `@allmaps/maplibre`. Does not mutate the input.
+
+```ts
+import { adaptGeoreferenceAnnotationForOverlay } from "@samvera/clover-iiif";
+
+const overlayAnnotation = adaptGeoreferenceAnnotationForOverlay(
+  storedAnnotation, // GeoreferenceAnnotation with Canvas source
+  imageServiceId, // IIIF Image API base URL
+  "ImageService3", // default; pass "ImageService2" for Image API 2 services
+);
+```
+
+### `normalizeNavPlace`
+
+Normalises any GeoJSON value (FeatureCollection, Feature, or bare geometry) to a `FeatureCollection`. Returns `null` for unrecognised input.
+
+```ts
+import { helpers } from "@samvera/clover-iiif";
+
+const featureCollection = helpers.normalizeNavPlace(canvas.navPlace);
+```
+
+### `extractNavPlaceFeatures`
+
+Extracts navPlace features from IIIF resources and annotates each feature with the Collection, Manifest, Canvas, or Annotation that supplied it.
+
+```ts
+import { extractNavPlaceFeatures } from "@samvera/clover-iiif";
+
+const features = extractNavPlaceFeatures(manifest, { levels: ["Canvas"] });
+```
+
+### `getNavPlaceLabel`
+
+Resolves a navPlace Feature `label` property to a display string, handling both plain strings and IIIF [InternationalString](https://iiif.io/api/presentation/3.0/#44-language-of-property-values).
+
+```ts
+import { helpers } from "@samvera/clover-iiif";
+
+const label = helpers.getNavPlaceLabel(feature.properties.label);
+// → "Current Location of the Laocoön Bronze"
+```

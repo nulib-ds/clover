@@ -211,7 +211,7 @@ export function ItemFigure({
     localize(item.parts.length === 1 ? item.label : part.label, language),
   );
   const summary = showSummary ? localize(item.summary, language) : null;
-  const labelled = labels.some((label) => label.text);
+  const labeled = labels.some((label) => label.text);
   return (
     <figure
       role="none"
@@ -237,7 +237,7 @@ export function ItemFigure({
           );
         })}
       </span>
-      {(labelled || summary?.text) && (
+      {(labeled || summary?.text) && (
         <figcaption className="clover-items-caption">
           {labels.map((label, index) => (
             <ItemLabel

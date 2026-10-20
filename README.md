@@ -26,7 +26,7 @@ npm run dev
 | `npm run build:docs` | Build the site as a static export (not while `npm run dev` is running) |
 | `npm test`           | Run the unit tests (Vitest): the package's and the docs'               |
 | `npm run e2e`        | Run the package's end-to-end tests (Playwright)                        |
-| `npm run lint`       | Check formatting (Prettier) and lint (`next lint`)                     |
+| `npm run lint`       | Check formatting (Prettier) and lint (ESLint)                          |
 | `npm run typecheck`  | Check types (TypeScript)                                               |
 
 ## Contributing

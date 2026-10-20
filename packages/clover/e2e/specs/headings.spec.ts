@@ -8,7 +8,7 @@ import { manifestOf, openPanel, serveIIIF } from "./fixtures";
  * A Markdown annotation in the Viewer's panel (WCAG 1.3.1): its lists are lists and its
  * headings headings, nested under the panel's own, as the browser itself reads them once
  * DOMPurify has run in it, and its names carry none of its syntax (2.4.6). JSDOM has
- * neither the browser's sanitising nor its layout.
+ * neither the browser's sanitizing nor its layout.
  */
 
 const axePath = createRequire(__filename).resolve("axe-core/axe.min.js");
@@ -69,7 +69,7 @@ async function open(page: Page, isMobile = false) {
   ).toBeVisible();
   await openPanel(page, isMobile);
   await page
-    .locator(".clover-information-panel")
+    .locator(".clover-panel")
     .getByRole("button", { name: "Annotations" })
     .click();
 }

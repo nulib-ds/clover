@@ -1,0 +1,153 @@
+---
+title: i18n
+description: How Clover 4 speaks its reader's language, the languages it ships, and how to add one.
+---
+
+import { LanguagesDemo } from "docs/components/Clover4/LanguagesDemo";
+
+# i18n
+
+Clover translates its own words: the names of its controls, its messages, and what it
+announces. IIIF text (a label, a summary, metadata) is the resource's own, in the
+languages it has, and Clover chooses among them as
+[Composing Layouts](/docs/composing#languages) describes.
+
+Clover has its own translator, well under 1 kB gzipped, with no translation library to
+install. Its strings are kept the way i18next keeps them, so `initCloverI18n` calls from
+Clover 3.x keep working.
+
+## Languages Clover ships
+
+Each is complete: it has every string English has, which a test checks.
+
+| Language          | Tag  | Notes                                                       |
+| :---------------- | :--- | :---------------------------------------------------------- |
+| English           | `en` | Comes with Clover. Every other language falls back to it.   |
+| Spanish           | `es` |                                                             |
+| Finnish           | `fi` |                                                             |
+| French            | `fr` |                                                             |
+| Norwegian Bokmål  | `nb` |                                                             |
+| Norwegian Nynorsk | `nn` |                                                             |
+| Norwegian         | `no` | The same strings as `nb`.                                   |
+| Portuguese        | `pt` | European Portuguese, which Brazilian (`pt-BR`) readers get. |
+
+Pick one to hear the Viewer in it. This page is in English, so each of Clover's words in
+another language carries that language's `lang`.
+
+<LanguagesDemo />
+
+## How Clover chooses
+
+Clover speaks the language of the page around it:
+
+1. the language set with `initCloverI18n({ lng })`;
+2. else the page's `<html lang>`;
+3. else the first of the browser's languages that Clover ships;
+4. then, string by string, the `fallbackLng` you give, and English last.
+
+A regional tag tries its base language too: `pt-BR`, then `pt`.
+
+## Setting a language
+
+Call `initCloverI18n` near your app's entry point, before Clover draws:
+
+```jsx
+import { initCloverI18n } from "@nulib/clover";
+
+initCloverI18n({ lng: "fr" });
+```
+
+| Option        | Type                                       | Default                                      |
+| :------------ | :----------------------------------------- | :------------------------------------------- |
+| `lng`         | `string`                                   | The page's `<html lang>`, then the browser's |
+| `fallbackLng` | `string`, `string[]` or `false`            | None; English is always last                 |
+| `resources`   | `{ [lng]: { clover: { [key]: string } } }` | None                                         |
+
+It can be called again: each call merges its `resources` and applies any `lng` or
+`fallbackLng` it is given, and every Clover part on the page changes language at once.
+The web component takes the same call; see
+[Languages](/docs#languages) under Web component.
+
+## A language Clover does not ship
+
+Give its strings as `resources`, under the `clover` namespace:
+
+```jsx
+import { initCloverI18n } from "@nulib/clover";
+
+initCloverI18n({
+  lng: "de",
+  resources: {
+    de: {
+      clover: {
+        commonClose: "Schließen",
+        informationPanelTabs: "Informationsbereich",
+      },
+    },
+  },
+});
+```
+
+Any string you leave out falls back to English, marked `lang="en"`. The full list of
+keys, with their English, is
+[`en.json`](https://github.com/nulib-ds/clover/blob/main/packages/clover/src/i18n/locales/en.json).
+A string with `{{name}}` in it is filled in by Clover: keep each placeholder as it is.
+
+## Loading
+
+English comes with Clover. Each other language is its own file, loaded the first time
+Clover is to speak it, so a page in English never fetches one. Until it arrives, Clover's
+words are shown in English, marked `lang="en"`, and they change when it does. A page
+rendered on the server, or a test, that needs them in place first waits for them:
+
+```js
+await initCloverI18n({ lng: "fr" }).ready();
+```
+
+## Marking languages
+
+Where one of Clover's strings is not in the page's language (a French reader on an
+English page, or a string that fell back to English), the element that shows it, or is
+named by it, carries its language as `lang`, so a screen reader pronounces it correctly
+(WCAG 3.1.2). The page's language is the nearest `lang` around the `Root`, or one you give
+the `Root`. A part of your own does the same with `useT` and `useLangOf`, as
+[Languages](/docs/composing#languages) in Composing Layouts shows.
+
+## Adding a language to Clover
+
+A language added to Clover itself ships to everyone. In
+[nulib-ds/clover](https://github.com/nulib-ds/clover):
+
+1. Add `packages/clover/src/i18n/locales/<tag>.json`, with every key `en.json` has,
+   translated. Keep each `{{name}}` placeholder as it is.
+2. Add its loader to `loaders` in `packages/clover/src/i18n/locales/index.ts`, so it
+   loads only when it is needed.
+3. Run `npm test`. `locales.test.ts` checks that the file has every key English has and
+   no other, and that each placeholder is kept. A word your language spells as English
+   does (French "Collection") goes on that test's `SAME_AS_ENGLISH` list for your
+   language.
+4. Add a line under `## Unreleased` in `packages/clover/CHANGELOG.md`, and open a pull
+   request.
+
+```json filename="packages/clover/src/i18n/locales/de.json"
+{
+  "commonClose": "Schließen",
+  "commonNext": "Weiter",
+  "commonPrevious": "Zurück"
+}
+```
+
+```ts filename="packages/clover/src/i18n/locales/index.ts"
+export const loaders: Record<string, LocaleLoader> = {
+  de: () => import("./de.json"),
+  es: () => import("./es.json"),
+  // …
+};
+```
+
+For a regional variant, name the file by its full tag (`fr-CA.json`) and give its loader
+the same key (`"fr-CA"`); readers of that region get it, and others the base language.
+
+A new key in `en.json` is added to every locale, translated, in the same change, and the
+test fails until it is. If you speak one of the languages Clover ships, a review of its
+strings is welcome, as an issue or a pull request.

@@ -1,6 +1,6 @@
 /*
  * The popover a control shows (`ui/Tip.tsx`): its name, and its key when it has one, in
- * `text-s` on the page's dark colour, `xs` from the control. Above it by default; below a
+ * `text-s` on the page's dark color, `xs` from the control. Above it by default; below a
  * control along the top of what it sits on; beside the cluster when the cluster is a
  * column; at either end of a row, lined up with the control's outer edge so it stays
  * inside the stage; and toward the middle of the stage from a hotspot.
@@ -101,7 +101,7 @@ label:has(> input:focus-visible):not([data-tip-hidden]) > .clover-tip {
  */
 :is(
     .clover-canvas-controls,
-    .clover-information-panel,
+    .clover-panel,
     .clover-template-document-toolbar,
     .clover-template-lightbox-header
   )
@@ -117,7 +117,7 @@ button.clover-template-document-sidebar-toggle > .clover-tip,
 
 :is(
     .clover-canvas-controls,
-    .clover-information-panel,
+    .clover-panel,
     .clover-template-document-toolbar,
     .clover-template-lightbox-header
   )
@@ -136,13 +136,12 @@ button.clover-template-document-sidebar-toggle > .clover-tip::before,
   > :first-child
   .clover-tip,
 button.clover-items-scroll-prev > .clover-tip,
+button.clover-sections-scroll-prev > .clover-tip,
 .clover-transcript-languages > .clover-transcript-language > .clover-tip,
 .clover-template-document-sidebar-closed
   > button.clover-template-document-sidebar-toggle
   > .clover-tip,
-.clover-information-panel[data-floating]
-  > button.clover-information-panel-close
-  > .clover-tip {
+.clover-panel[data-floating] > button.clover-panel-close > .clover-tip {
   inset-inline: 0 auto;
   translate: none;
 }
@@ -154,10 +153,9 @@ button.clover-items-scroll-prev > .clover-tip,
 .clover-canvas-controls > button:last-of-type > .clover-tip,
 button.clover-canvas-caption-close > .clover-tip,
 button.clover-items-scroll-next > .clover-tip,
+button.clover-sections-scroll-next > .clover-tip,
 button.clover-canvas-placeholder-toggle > .clover-tip,
-.clover-information-panel:not([data-floating])
-  > button.clover-information-panel-close
-  > .clover-tip,
+.clover-panel:not([data-floating]) > button.clover-panel-close > .clover-tip,
 .clover-sections-actions
   .clover-transcript-languages
   > .clover-transcript-language
@@ -179,9 +177,9 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
  * and is kept inside the stage, `xs` from its edges, across and down: where that side has
  * too little room (a hotspot as tall as the stage, or zoomed into), it moves over the
  * hotspot, to its edge in sight. The renderer's overlay layer, which pins each hotspot,
- * writes where it is: `--clover-overlay-x`, its centre; `--clover-overlay-top` and
+ * writes where it is: `--clover-overlay-x`, its center; `--clover-overlay-top` and
  * `-bottom`, its edges; and `data-overlay-room`, the side. Without them, while the view
- * is turned, it hangs below, centred.
+ * is turned, it hangs below, centered.
  *
  * Taller than the stage, it is capped there and scrolls (WCAG 1.4.10): by wheel or touch
  * over it, and by the arrows, the page keys, Home and End from its hotspot. A scroller
@@ -280,7 +278,7 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
   }
 }
 
-/* In forced colours a filled box loses its fill; an outline keeps its shape. */
+/* In forced colors a filled box loses its fill; an outline keeps its shape. */
 @media (forced-colors: active) {
   .clover-tip {
     outline: 1px solid CanvasText;

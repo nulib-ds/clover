@@ -6,7 +6,7 @@ import { type LanguageMapLike, localize } from "./value";
  * What `Items` shows: light models of a Manifest's views or a Collection's members, never
  * the resources themselves, so a long sequence costs a few fields per item.
  *
- * Memoised on the resource object, as the selectors are.
+ * Memoized on the resource object, as the selectors are.
  */
 
 export interface ItemPart {

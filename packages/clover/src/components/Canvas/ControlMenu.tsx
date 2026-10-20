@@ -74,7 +74,7 @@ const ControlMenu: React.FC<ControlMenuProps> = ({
           document.getElementById(triggerId)?.contains(active),
       );
       // Handled here, so nothing around it closes as well: a modal `<dialog>` (the
-      // Gallery's Lightbox), a floating InformationPanel. Heard in the capture phase,
+      // Gallery's Lightbox), a floating Panel. Heard in the capture phase,
       // before the page's own handlers, the panel's among them.
       if (inside) event.preventDefault();
       onClose(inside);

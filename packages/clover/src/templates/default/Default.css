@@ -251,7 +251,7 @@
 
 /*
  * Open beside the stage, the panel's toggle sits on the bar between them, its spine
- * (`useSpine`), centred on it and level with the stage's controls (their chrome inset,
+ * (`useSpine`), centered on it and level with the stage's controls (their chrome inset,
  * `--clover-inset`, down).
  */
 .clover-template-default-spine {

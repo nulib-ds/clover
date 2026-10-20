@@ -475,7 +475,7 @@ describe("the Map tab", () => {
           })),
         }}
       >
-        <Clover.InformationPanel />
+        <Clover.Panel />
       </Clover.Root>,
     );
     await screen.findByRole("tab", { name: "About" });
@@ -484,7 +484,7 @@ describe("the Map tab", () => {
 
     render(
       <Clover.Root iiifContent={canvasesJson}>
-        <Clover.InformationPanel />
+        <Clover.Panel />
       </Clover.Root>,
     );
     fireEvent.click(await screen.findByRole("tab", { name: "Map" }));
@@ -499,7 +499,7 @@ describe("the Map tab", () => {
   it("is no second region named Map inside the accordion's Map section", async () => {
     render(
       <Clover.Root iiifContent={canvasesJson}>
-        <Clover.InformationPanel layout="accordion" />
+        <Clover.Panel layout="accordion" />
       </Clover.Root>,
     );
     fireEvent.click(await screen.findByRole("button", { name: "Map" }));

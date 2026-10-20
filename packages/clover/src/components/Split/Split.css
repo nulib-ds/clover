@@ -25,11 +25,11 @@
 }
 
 /*
- * The bar: a faint line between the panes, the muted secondary colour at half strength,
+ * The bar: a faint line between the panes, the muted secondary color at half strength,
  * as 3.x's Viewer draws it, with a grip at its middle in the muted primary. The grip
  * shows the bar can be taken hold of, so it keeps 3:1 beside either pane (WCAG 1.4.11):
  * the muted primary is quieter text, 4.5:1 on both grounds. Hovered, held or focused,
- * the bar and its grip turn the accent. 3px wide, centred in an area `l` wide (about
+ * the bar and its grip turn the accent. 3px wide, centered in an area `l` wide (about
  * 26px, past the 24px a target needs) to grab that is not drawn.
  */
 .clover-split-handle {
@@ -84,16 +84,16 @@
   background-color: var(--clover-color-accent, #0065c3);
 }
 
-/* The keyboard's focus is shown outright, not only by the colour. */
+/* The keyboard's focus is shown outright, not only by the color. */
 .clover-split-handle:focus-visible {
   background-color: var(--clover-color-accent, #0065c3);
   box-shadow: 0 0 0 2px var(--clover-color-secondary, #fff);
 }
 
 /*
- * In forced colours a fill is the page's own colour, and a shadow is dropped: the bar
- * and its grip take the text's colour, the highlight while hovered, held or focused, and
- * focus an outline. No fade between them: on its way, a colour is no system colour, and
+ * In forced colors a fill is the page's own color, and a shadow is dropped: the bar
+ * and its grip take the text's color, the highlight while hovered, held or focused, and
+ * focus an outline. No fade between them: on its way, a color is no system color, and
  * would be forced to the page's.
  */
 @media (forced-colors: active) {

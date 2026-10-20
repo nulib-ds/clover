@@ -44,7 +44,7 @@
 
 /*
  * Full screen, for a `Canvas` used on its own — as `Image` does it: the page's background
- * and type colour set together, the exit control revealed (direct child only, so a nested
+ * and type color set together, the exit control revealed (direct child only, so a nested
  * one stays quiet), and the navigator dropped below it.
  */
 .clover-canvas[data-fullscreen="true"] {
@@ -113,7 +113,7 @@
 
 /*
  * A DOM item is a crop box carrying the camera transform, with its element offset inside
- * it. Both transform about their own top-left corner, matching the renderer's maths.
+ * it. Both transform about their own top-left corner, matching the renderer's math.
  */
 .clover-canvas-dom-item {
   position: absolute;

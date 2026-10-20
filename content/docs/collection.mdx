@@ -1,0 +1,139 @@
+---
+title: Collection
+description: The Collection a Manifest is in, described and its members listed, and a menu of its members to move between them.
+---
+
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+
+# Collection
+
+Two parts for the Collection the Root's Manifest is in. `Collection` describes it and
+lists its members, as the `Panel`'s Collection section does. `CollectionSelect` is a menu
+of its members, to move between them. Choosing a member in either shows its Manifest in
+the Root. Both read the Root, so place them inside a `Clover.Root`.
+
+```jsx
+import * as Clover from "@nulib/clover";
+import "@nulib/clover/styles.css";
+
+<Clover.Root iiifContent={collectionUrl}>
+  <Clover.CollectionSelect />
+  <Clover.Content />
+  <Clover.Collection />
+</Clover.Root>;
+```
+
+## Which Collection
+
+Given a Collection as its `iiifContent`, the Root shows its first Manifest, or the one
+`manifestId` names, and that Collection is the Root's. Choosing a member that is itself a
+Collection enters it: it becomes the Root's Collection, and its first Manifest is shown.
+A paged Collection's members are followed through `next`.
+
+Given a Manifest, the Root has no Collection until a `Collection` part asks for the
+first Collection the Manifest is `partOf`. That Collection is fetched the first time the
+part shows, never before. Once it arrives it is the Root's, so a `CollectionSelect`
+inside the same Root lists its members too. A Collection that will not load leaves the
+Manifest as it was.
+
+## `Collection`
+
+The Collection's label, as a heading; its summary; its members, as a list; then its
+`homepage` and its own address, each under a heading. Until a `partOf` Collection
+arrives, it shows what the Manifest's `partOf` says of it. It renders nothing when there
+is no Collection. Laid out as About is, it is the `Panel`'s Collection section, shown
+whenever the Manifest was reached through a Collection or is `partOf` one.
+
+The members are [`Items`](/docs/items) with `of="members"` and `layout="list"`: each by
+its thumbnail, label and summary, the Manifest shown selected. It is a listbox with one
+tab stop. The arrows, Home and End move through the members, and Enter, Space or a click
+shows the one in focus, since each loads a Manifest.
+
+Below, the White catalog from Clover's [mocks](/docs/mocks), which is `partOf`
+Northwestern's Collection of bicycle catalogs. The part fetches it as it shows. It sits
+under this page's `h2`, so it is given `headingLevel: 3`. Its members are Northwestern's
+records, live: choosing one shows it above, in place of the mock. Here the part scrolls in
+a box of its own.
+
+<PartDemo
+  part="Collection"
+  content
+  props={{
+    headingLevel: 3,
+    style: { maxHeight: "32rem", overflowY: "auto" },
+  }}
+/>
+
+`headingLevel` (default 3) is the level of its headings: the Collection's label, and the
+headings over its homepage and its address. Set it one below the heading the part sits
+under. In the `Panel`'s own Collection section, the panel sets it.
+
+### Props
+
+| Prop           | Type                    | Description                             |
+| -------------- | ----------------------- | --------------------------------------- |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | The level of its headings. Default `3`. |
+
+Its other props (`id`, `className`, `style`, `aria-*`) go to its element, a `div`, and so
+does its `ref`. It carries `clover-about` and `clover-collection`; its label is
+`.clover-collection-title`.
+
+## `CollectionSelect`
+
+A menu of the Root's Collection's members: a native `<select>`, each member an option
+named by its label (or its address, with none). It is labeled, visibly, by the
+Collection's label, or by "Collection", in the reader's language, for a Collection with
+none. Choosing a Manifest shows it; choosing a nested Collection enters it. It renders
+nothing outside a Collection, and for a Collection of one member.
+
+```jsx
+<Clover.Root iiifContent={collectionUrl}>
+  <header>
+    <Clover.CollectionSelect />
+    <Clover.Label as="h2" />
+  </header>
+  <Clover.Content />
+</Clover.Root>
+```
+
+Below, Northwestern University Libraries' Collection "Commedia dell'Arte: The Masks of
+Antonio Fava", nine Manifests to choose from.
+
+<PartDemo part="CollectionSelect" resource="collection" content />
+
+Each choice loads a whole Manifest, so the keyboard only moves through the members until
+the reader makes one (WCAG 3.2.2):
+
+| Key                                                 | Action                                   |
+| --------------------------------------------------- | ---------------------------------------- |
+| The arrows, Home, End, Page Up, Page Down, a letter | Move through the members; nothing loads  |
+| Enter                                               | Shows the member moved to                |
+| Escape                                              | Takes the step back, to the member shown |
+
+Leaving the menu takes the step back too, so a Manifest loaded once focus has moved on
+never takes away the control focus moved to (WCAG 2.4.3). Escape is handled only when
+there is a step to take back; otherwise it is left to what is round the menu, a dialog or
+a panel that floats over the page, say. A choice from the menu's own list (with a
+pointer, a phone's picker, or a list opened by Alt+Down or on macOS) is made at once.
+
+The choice holds while its Manifest loads. One that fails to load stays in the menu, and
+Enter asks for it again. With the Root's `manifestId` controlled, the Root only asks
+(`onManifestChange`) and moves when you hand the choice back.
+
+### Props
+
+| Prop       | Type                   | Description                                           |
+| ---------- | ---------------------- | ----------------------------------------------------- |
+| `onChange` | `(id: string) => void` | A member was chosen: its `id`, before the Root moves. |
+
+Its other props (`id`, `className`, `style`, `aria-*`) go to its element, a `div` round
+the label and the menu, and so does its `ref`. The label is
+`.clover-collection-select-label` and the menu `.clover-collection-select-control`.
+
+## From Clover 3.x
+
+Clover 3.x's [Composing](/docs/3.x/composing) read the Manifest's `partOf[0].id` and gave
+it to a `Slider`. Inside a Root, `Collection` reads `partOf` itself, fetches the
+Collection when it first shows, and shows a chosen member in the Root. For the Slider's
+links to each member's `homepage`, use [`Items`](/docs/items#a-collection) on its own,
+with the Collection's address.

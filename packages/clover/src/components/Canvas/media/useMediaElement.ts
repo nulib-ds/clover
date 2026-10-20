@@ -57,7 +57,7 @@ export function useMediaElement(
   languageRef.current = language;
 
   useEffect(() => {
-    let cancelled = false;
+    let canceled = false;
     const video = document.createElement("video");
     video.playsInline = true;
     video.preload = "metadata";
@@ -92,7 +92,7 @@ export function useMediaElement(
       // Shared with `Transcript`: one fetch per file.
       loadVtt(caption.id, requestRef.current)
         .then((text) => {
-          if (cancelled) return;
+          if (canceled) return;
           const url = URL.createObjectURL(
             new Blob([text], { type: "text/vtt" }),
           );
@@ -106,7 +106,7 @@ export function useMediaElement(
     if (isHls(media.src, media.format)) {
       import("hls.js")
         .then(({ default: Hls }) => {
-          if (cancelled) return;
+          if (canceled) return;
           if (!Hls.isSupported()) {
             video.src = media.src;
             return;
@@ -127,7 +127,7 @@ export function useMediaElement(
         })
         // hls.js itself failed to load: the browser's own player, if it has one.
         .catch(() => {
-          if (!cancelled) video.src = media.src;
+          if (!canceled) video.src = media.src;
         });
     } else {
       video.src = media.src;
@@ -140,7 +140,7 @@ export function useMediaElement(
 
     setElement(video);
     return () => {
-      cancelled = true;
+      canceled = true;
       video.removeEventListener("error", onCorsError);
       video.pause();
       hls?.destroy();

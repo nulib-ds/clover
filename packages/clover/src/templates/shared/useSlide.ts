@@ -32,7 +32,7 @@ export function useSlide(want: boolean) {
  * focused at once.
  */
 export function useFocusOnOpen(
-  panel: React.RefObject<HTMLElement>,
+  panel: React.RefObject<HTMLElement | null>,
   shown: boolean,
 ) {
   const was = useRef(shown);
@@ -60,7 +60,7 @@ const useIsomorphicLayoutEffect =
  * still knows it is narrow. True until measured (on the server, or with no layout yet).
  */
 export function useWideEnough(
-  element: React.RefObject<HTMLElement>,
+  element: React.RefObject<HTMLElement | null>,
   rem: number,
 ): boolean {
   const [wide, setWide] = useState(true);

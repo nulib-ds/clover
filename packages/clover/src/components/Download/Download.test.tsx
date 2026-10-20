@@ -102,6 +102,22 @@ describe("Download", () => {
     expect(button).toHaveAttribute("aria-expanded", "false");
   });
 
+  it("runs a host's own key handler and still closes on Escape", async () => {
+    const onKeyDown = vi.fn();
+    render(
+      <Clover.Root iiifContent={renderingJson}>
+        <Clover.Download onKeyDown={onKeyDown} />
+      </Clover.Root>,
+    );
+    const button = await screen.findByRole("button", { name: "Download" });
+    fireEvent.click(button);
+    fireEvent.keyDown(screen.getByRole("link", { name: /PDF version/ }), {
+      key: "Escape",
+    });
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
+    expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
   it("closes as focus moves out of it, leaving focus where it went", async () => {
     render(
       <Clover.Root iiifContent={renderingJson}>

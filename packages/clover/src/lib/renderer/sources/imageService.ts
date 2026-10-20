@@ -45,9 +45,9 @@ export interface ImageServiceInfo {
   maxWidth?: number;
   maxHeight?: number;
   maxArea?: number;
-  /** Whether arbitrary `x,y,w,h` regions are honoured (level 1+, or advertised). */
+  /** Whether arbitrary `x,y,w,h` regions are honored (level 1+, or advertised). */
   regionByPx: boolean;
-  /** Whether arbitrary `w,` / `w,h` sizes are honoured. */
+  /** Whether arbitrary `w,` / `w,h` sizes are honored. */
   sizeByW: boolean;
   format: string;
   quality: string;

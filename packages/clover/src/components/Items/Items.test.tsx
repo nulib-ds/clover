@@ -201,22 +201,22 @@ describe("Items in a Root", () => {
 
   it("names a view with no label by its place", async () => {
     const [first, ...rest] = bookJson.items;
-    const unlabelled = {
+    const unlabeled = {
       ...bookJson,
-      id: `${bookJson.id}/unlabelled`,
+      id: `${bookJson.id}/unlabeled`,
       items: [
-        { ...first, id: `${first.id}/unlabelled`, label: undefined },
+        { ...first, id: `${first.id}/unlabeled`, label: undefined },
         ...rest,
       ],
     };
     render(
-      <Clover.Root iiifContent={unlabelled}>
+      <Clover.Root iiifContent={unlabeled}>
         <Clover.Items />
       </Clover.Root>,
     );
     const options = await screen.findAllByRole("option");
     expect(options[0]).toHaveAccessibleName("Item 1 of 3");
-    // A labelled view keeps its own name.
+    // A labeled view keeps its own name.
     expect(options[1]).not.toHaveAttribute("aria-label");
   });
 

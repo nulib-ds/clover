@@ -58,7 +58,7 @@ const cases: Array<[string, Record<string, any>]> = [
 describe("groupViews parity with getManifestSequence", () => {
   it.each(cases)("%s", (_, manifestJson) => {
     const ours = selectSequence(p4(structuredClone(manifestJson))).views;
-    // The Vault normalises in place, so it gets a copy of its own.
+    // The Vault normalizes in place, so it gets a copy of its own.
     const vault = new Vault();
     const manifest = vault.loadSync<any>(
       manifestJson.id,

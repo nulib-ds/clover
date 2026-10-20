@@ -70,7 +70,7 @@ test.describe("Search", () => {
   });
 
   /* WCAG 1.4.1: the words a hit matched are bold, not only tinted. */
-  test("marks the words matched in bold, and in the system's colours when forced", async ({
+  test("marks the words matched in bold, and in the system's colors when forced", async ({
     page,
     isMobile,
   }) => {
@@ -91,7 +91,7 @@ test.describe("Search", () => {
     const ground = await mark.evaluate(
       (element) => getComputedStyle(element).backgroundColor,
     );
-    // An opaque system colour, not the tint that forced colours drop.
+    // An opaque system color, not the tint that forced colors drop.
     expect(ground).toMatch(/^rgb\(/);
   });
 });

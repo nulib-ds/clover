@@ -27,7 +27,7 @@ export function useCloverTranslation(
   const t = useCallback(
     (key: string, values?: Record<string, unknown>) =>
       cloverI18n.t(key, values, namespace),
-    // `version` stands for "the strings changed": a new `t` re-renders memoised readers.
+    // `version` stands for "the strings changed": a new `t` re-renders memoized readers.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [namespace, version],
   );

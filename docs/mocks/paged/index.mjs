@@ -2,13 +2,13 @@
  * A catalog that turns as a book does: Northwestern University Libraries' record of the
  * White Sewing Machine Company's _Portfolio of illustrations showing the White bicycles :
  * then and now_ (1896), from its Transportation Library, as its Digital Collections API
- * published it on 14 October 2026 (`source.json`, kept as fetched), with five changes:
+ * published it on October 14, 2026 (`source.json`, kept as fetched), with five changes:
  *
  * - the Manifest and its Canvases take ids under the mock's own address;
  * - a `summary` (`SUMMARY`), which the record has none of, written from its own fields
  *   (Publisher, Location, Date, the illustrators its Alternate Title names, Materials)
  *   and its pages;
- * - Page 15 is `facing-pages`. It is one image of a whole opening, a colour plate across
+ * - Page 15 is `facing-pages`. It is one image of a whole opening, a color plate across
  *   both pages (9423 × 4694, twice a page's width), so it is shown alone, and the pages
  *   after it pair as the book's openings do: Page 16 with Page 17, and the Back Cover
  *   alone. The record is `paged` but says nothing of the plate, so a viewer pairs it with
@@ -79,7 +79,7 @@ const tags = (canvas, words) => ({
 
 /**
  * The catalog's sections, each titled exactly as the catalog has it: by the heading
- * printed on its page (its words, without the closing full stop), or, for a cover, by the
+ * printed on its page (its words, without the closing period), or, for a cover, by the
  * Canvas's own label. Nothing printed groups the four models, so each stands alone; where
  * the headings nest in print, the Ranges nest.
  *
@@ -145,7 +145,7 @@ const range = (base, pages, section, place) => {
   const page = (name) => {
     const [label, fragment] = name.split("#");
     const found = pages.get(label);
-    if (!found) throw new Error(`No Canvas labelled "${label}"`);
+    if (!found) throw new Error(`No Canvas labeled "${label}"`);
     return { ...found, ref: fragment ? `${found.id}#${fragment}` : found.id };
   };
   // A cover: its page alone, titled by the Canvas's own label.

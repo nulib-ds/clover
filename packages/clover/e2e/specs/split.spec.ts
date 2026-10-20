@@ -6,7 +6,7 @@ import { serveIIIF } from "./fixtures";
  * The bar between two panes (`Clover.SplitHandle`), in the templates that use it: its
  * grip seen at rest (WCAG 1.4.11), a click or a tap for a drag (2.5.7), with three panes
  * as well as two, and right to left; a double click that clicks nothing beside it; a
- * popover that is no part of the bar to press; and its focus in forced colours and
+ * popover that is no part of the bar to press; and its focus in forced colors and
  * without the stylesheet (2.4.7).
  */
 const BOOK = "https://fixtures.test/0009-book-1.json";
@@ -154,7 +154,7 @@ test("at rest, the bar's grip keeps 3:1 beside each pane (WCAG 1.4.11)", async (
   for (const ratio of await gripContrast(handle))
     expect(ratio).toBeGreaterThanOrEqual(3);
 
-  // Document's page sits on a grey ground, beside the white thumbnails.
+  // Document's page sits on a gray ground, beside the white thumbnails.
   await open(page, "scene=document&");
   const thumbnails = page.locator(
     ".clover-template-document-sidebar + .clover-split-handle",
@@ -183,14 +183,14 @@ test("names itself beside its grip on keyboard focus, clear of the bar", async (
   ).toBeLessThan(2);
 });
 
-test("in forced colours the bar shows in the text's colour, and its focus in the highlight with an outline (WCAG 2.4.7)", async ({
+test("in forced colors the bar shows in the text's color, and its focus in the highlight with an outline (WCAG 2.4.7)", async ({
   page,
   browserName,
   isMobile,
 }) => {
   test.skip(
     browserName !== "chromium",
-    "forced colours are emulated in Chromium",
+    "forced colors are emulated in Chromium",
   );
   test.skip(isMobile, "on a phone there is no bar");
   // Emulated before the page loads: switched on after, Chromium keeps the rules it had.

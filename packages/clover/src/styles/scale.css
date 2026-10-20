@@ -77,7 +77,7 @@
 
 /*
  * A field's placeholder, mixed from the field's own text and ground at full opacity: some
- * browsers draw it too pale to read (Safari's grey, Firefox's half opacity).
+ * browsers draw it too pale to read (Safari's gray, Firefox's half opacity).
  */
 :where(.clover-content-search-query)::placeholder {
   color: color-mix(

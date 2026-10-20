@@ -1,4 +1,4 @@
-import { useRouter } from "next/router";
+import { useRouter } from "docs/lib/router";
 import { useEffect, useState } from "react";
 
 /**

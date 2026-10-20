@@ -25,8 +25,8 @@ export interface DrawCommand {
   opacity: number;
   /**
    * Stretch the right and/or bottom edge by one device pixel. Set on a tile that has a
-   * neighbour on that side: two quads that meet exactly can still leave a hairline of
-   * background between them once antialiased or rounded, and the neighbour paints over
+   * neighbor on that side: two quads that meet exactly can still leave a hairline of
+   * background between them once antialiased or rounded, and the neighbor paints over
    * the overlap anyway.
    */
   bleed?: { right: boolean; bottom: boolean };
@@ -93,7 +93,7 @@ export function hasPixels(source: DrawSource): boolean {
 
 /**
  * One device pixel, in the source pixels of `command`: the bleed a backend adds to an
- * edge that has a neighbour.
+ * edge that has a neighbor.
  */
 export function bleedInSourcePixels(
   command: DrawCommand,

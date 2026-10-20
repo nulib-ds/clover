@@ -1,0 +1,157 @@
+---
+title: Viewer prefetched content (3.x)
+---
+
+import Viewer from "docs/components/DynamicImports/Viewer";
+import CustomManifest from "docs/components/CustomManifest/CustomManifest";
+import CallToAction from "docs/components/CallToAction";
+
+export const prefetchedManifestPres2 = {
+  "@context": "http://iiif.io/api/presentation/2/context.json",
+  "@id": "https://api.artic.edu/api/v1/artworks/89503/manifest.json",
+  "@type": "sc:Manifest",
+  label:
+    'Under the Wave off Kanagawa (Kanagawa oki nami ura), also known as The Great Wave, from the series "Thirty-Six Views of Mount Fuji (Fugaku sanjurokkei)"',
+  description: [
+    {
+      value:
+        "Katsushika Hokusai’s much celebrated series, Thirty-Six Views of Mount Fuji (Fugaku sanjûrokkei), was begun in 1830, when the artist was 70 years old. This tour-de-force series established the popularity of landscape prints, which continues to this day. Perhaps most striking about the series is Hokusai’s copious use of the newly affordable Berlin blue pigment, featured in many of the compositions in the color for the sky and water. Mount Fuji is the protagonist in each scene, viewed from afar or up close, during various weather conditions and seasons, and from all directions.\nThe most famous image from the set is the &quot;Great Wave&quot; (Kanagawa oki nami ura), in which a diminutive Mount Fuji can be seen in the distance under the crest of a giant wave. The three impressions of Hokusai’s Great Wave in the Art Institute are all later impressions than the first state of the design.\n",
+      language: "en",
+    },
+  ],
+  metadata: [
+    {
+      label: "Artist / Maker",
+      value: "Katsushika Hokusai 葛飾 北斎\nJapanese, 1760-1849",
+    },
+    {
+      label: "Medium",
+      value: "Color woodblock print; oban",
+    },
+  ],
+  sequences: [
+    {
+      "@type": "sc:Sequence",
+      canvases: [
+        {
+          "@type": "sc:Canvas",
+          "@id":
+            "https://www.artic.edu/iiif/2/2fa24f36-cc26-41b6-4b49-12bba2a6c1c8",
+          label:
+            'Under the Wave off Kanagawa (Kanagawa oki nami ura), also known as The Great Wave, from the series "Thirty-Six Views of Mount Fuji (Fugaku sanjurokkei)", 1830/33. Katsushika Hokusai 葛飾 北斎, Japanese, 1760-1849',
+          width: 843,
+          height: 583,
+          images: [
+            {
+              "@type": "oa:Annotation",
+              motivation: "sc:painting",
+              on: "https://www.artic.edu/iiif/2/2fa24f36-cc26-41b6-4b49-12bba2a6c1c8",
+              resource: {
+                "@type": "dctypes:Image",
+                "@id":
+                  "https://www.artic.edu/iiif/2/2fa24f36-cc26-41b6-4b49-12bba2a6c1c8/full/843,/0/default.jpg",
+                width: 843,
+                height: 583,
+                service: {
+                  "@context": "http://iiif.io/api/image/2/context.json",
+                  "@id":
+                    "https://www.artic.edu/iiif/2/2fa24f36-cc26-41b6-4b49-12bba2a6c1c8",
+                  profile: "http://iiif.io/api/image/2/level2.json",
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+export const prefetchedManifest = {
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  id: "https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json",
+  type: "Manifest",
+  label: {
+    en: ["Single Image Example"],
+  },
+  items: [
+    {
+      id: "https://iiif.io/api/cookbook/recipe/0001-mvm-image/canvas/p1",
+      type: "Canvas",
+      height: 1800,
+      width: 1200,
+      items: [
+        {
+          id: "https://iiif.io/api/cookbook/recipe/0001-mvm-image/page/p1/1",
+          type: "AnnotationPage",
+          items: [
+            {
+              id: "https://iiif.io/api/cookbook/recipe/0001-mvm-image/annotation/p0001-image",
+              type: "Annotation",
+              motivation: "painting",
+              body: {
+                id: "http://iiif.io/api/presentation/2.1/example/fixtures/resources/page1-full.png",
+                type: "Image",
+                format: "image/png",
+                height: 1800,
+                width: 1200,
+              },
+              target:
+                "https://iiif.io/api/cookbook/recipe/0001-mvm-image/canvas/p1",
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+export const prefetchedCollection = {
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  id: "https://iiif.io/api/cookbook/recipe/0032-collection/collection.json",
+  type: "Collection",
+  label: {
+    en: ["Simple Collection Example"],
+  },
+  items: [
+    {
+      id: "https://iiif.io/api/cookbook/recipe/0032-collection/manifest-01.json",
+      type: "Manifest",
+      label: {
+        en: ["The Gulf Stream"],
+      },
+    },
+    {
+      id: "https://iiif.io/api/cookbook/recipe/0032-collection/manifest-02.json",
+      type: "Manifest",
+      label: {
+        en: ["Northeaster"],
+      },
+    },
+  ],
+};
+
+## Viewer (Prefetched Content)
+
+<br />
+
+<CallToAction href="/docs/3.x/viewer" text="Docs" size="small" />
+
+<CustomManifest placeholder="IIIF Manifest or Collection" />
+
+A UI component that renders a multicanvas IIIF item viewer with pan-zoom support for `Image` via [OpenSeadragon](https://openseadragon.github.io/) and `Video` and `Sound` content resources using the [HTML video element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video).
+
+---
+
+<Viewer
+  iiifContent={prefetchedManifest}
+  options={{
+    canvasHeight: "640px",
+    openSeadragon: {
+      gestureSettingsMouse: {
+        scrollToZoom: false,
+      },
+    },
+    showIIIFBadge: false,
+  }}
+/>

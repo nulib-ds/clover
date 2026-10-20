@@ -1,7 +1,7 @@
 /*
  * Content Search: a field, its status, and the hits grouped by Canvas. The submit is a
  * pill (`ui/Button.css`), the field a field (`styles/scale.css`), the hits rows
- * (`InformationPanel.css`, "Rows").
+ * (`Panel.css`, "Rows").
  *
  * On the scale: field, status and results `s` apart; the field `xs` from its button; a
  * Canvas's heading `xs` over its hits.
@@ -71,11 +71,11 @@ button.clover-content-search-hit:focus-visible {
     transparent
   );
   color: inherit;
-  /* Bold as well, so they are not told by colour alone (WCAG 1.4.1). */
+  /* Bold as well, so they are not told by color alone (WCAG 1.4.1). */
   font-weight: 700;
 }
 
-/* Forced colours drop the tint: the system's own colours for marked text instead. */
+/* Forced colors drop the tint: the system's own colors for marked text instead. */
 @media (forced-colors: active) {
   .clover-content-search-hit mark {
     background-color: Mark;

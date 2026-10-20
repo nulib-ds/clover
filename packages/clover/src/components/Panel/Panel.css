@@ -1,0 +1,303 @@
+/*
+ * The information panel: its sections (`ui/Sections.css`), as tabs or stacked boxes, the
+ * region's inset (`--clover-inset`) inside its edges. The page's own text size and line height. Its height follows the
+ * stage's (`--clover-content-height`) beside it in the Viewer; elsewhere it is as tall
+ * as its content.
+ */
+.clover-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--clover-inset);
+  /*
+   * Its accordion's headings stick where they rest: the boxes reach `s` out over the
+   * inset (below), so a heading's text stays on the inset.
+   */
+  --clover-sections-inset-start: calc(
+    var(--clover-inset) - var(--clover-space-s)
+  );
+  --clover-sections-inset-end: var(--clover-sections-inset-start);
+  color: var(--clover-color-primary, #1a1d1e);
+}
+
+/*
+ * A closable panel (one floating over the page): the round close control `xs` in from
+ * its top corner. It reaches `xs + control` (`xl`) in, `--clover-panel-clear` past the
+ * panel's inset (`m`, past an inset of `l`), so the tab row keeps that clear for it;
+ * stacked boxes start that far down instead. A floating panel has it at its inner edge,
+ * the side it slides in from the page: the start of the row.
+ */
+.clover-panel[data-closable] {
+  --clover-panel-clear: calc(
+    var(--clover-space-xs) + var(--clover-control) - var(--clover-inset)
+  );
+  /* The boxes start below the close control, so their first heading rests there. */
+  --clover-sections-inset-start: calc(
+    var(--clover-inset) + var(--clover-panel-clear)
+  );
+  position: relative;
+}
+
+.clover-panel[data-closable] .clover-sections-tabs {
+  padding-inline-end: var(--clover-panel-clear);
+}
+
+.clover-panel[data-closable][data-floating] .clover-sections-tabs {
+  padding-inline: var(--clover-panel-clear) 0;
+}
+
+/*
+ * Stacked boxes: their text on the panel's `m`, as every region's content is. The boxes,
+ * `s` inside, reach out over the panel's padding to put it there.
+ */
+.clover-panel > .clover-sections[data-layout="accordion"] {
+  margin: calc(-1 * var(--clover-space-s));
+}
+
+/* Under a close control, the boxes start below it. */
+.clover-panel[data-closable] > .clover-sections[data-layout="accordion"] {
+  padding-block-start: calc(var(--clover-panel-clear) + var(--clover-space-s));
+}
+
+/*
+ * The shape, size, colors and glyph are the round control's (`ui/Button.css`), as the
+ * Canvas's are, so it reads as the way out at a glance. It sits above the accordion's
+ * stuck headings, which would otherwise cover it.
+ */
+.clover-panel > button.clover-panel-close {
+  position: absolute;
+  inset-block-start: var(--clover-space-xs);
+  inset-inline-end: var(--clover-space-xs);
+  z-index: 2;
+}
+
+.clover-panel[data-floating] > button.clover-panel-close {
+  inset-inline: var(--clover-space-xs) auto;
+}
+
+/*
+ * In a pane that slides over the page and has a spine (`data-spine` on the pane, which
+ * the templates set while it floats): the close button sits on the spine, the pane's
+ * inner edge, half over the page, and stays there however far the panel scrolls. The pane
+ * itself does not scroll; the panel does, within it, and is left unpositioned so the
+ * button is placed against the pane, outside what scrolls and is clipped. The room the
+ * button would take in the panel's first row is given back.
+ */
+/* Outweighs a template's own scrolling pane, whichever stylesheet comes later. */
+.clover-split-pane[data-spine] {
+  overflow: visible;
+}
+
+[data-spine] > .clover-panel {
+  --clover-panel-clear: calc(-1 * var(--clover-space-s));
+  position: static;
+  box-sizing: border-box;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  /*
+   * A heading sticks inside what scrolls, inside its padding: so the panel keeps none
+   * above or below, and its sections take that room as margin instead, which puts each
+   * heading where it rests and where it sticks at one place, as in a scrolling pane.
+   */
+  padding-block: 0;
+}
+
+[data-spine] > .clover-panel > .clover-sections {
+  margin-block: var(--clover-inset);
+}
+
+[data-spine] > .clover-panel > .clover-sections[data-layout="accordion"] {
+  margin-block: calc(var(--clover-inset) - var(--clover-space-s));
+}
+
+/*
+ * Centered on the first heading's first line: it rests `inset - s` down, one line (`1lh`,
+ * at the heading's `text-m`, which the button takes on; its tip keeps its own size) and
+ * `s` above and below it tall. A label that wraps runs on below it.
+ */
+[data-spine] > .clover-panel > button.clover-panel-close {
+  font-size: var(--clover-text-m);
+  inset-block-start: calc(
+    var(--clover-inset) - var(--clover-space-s) +
+      (1lh + 2 * var(--clover-space-s) - var(--clover-control)) / 2
+  );
+  inset-inline: calc(-0.5 * var(--clover-control)) auto;
+}
+
+/*
+ * Rows: what a reader picks from a list in the panel (an annotation, a Range, a cue, a
+ * search hit, a place on the map), written once. `xs` by `s` inside, an accent edge at
+ * the start when it is the current one. Each part keeps only its own layout.
+ */
+:is(
+  .clover-annotations-entry,
+  button.clover-contents-button,
+  .clover-transcript-cue > button,
+  button.clover-content-search-hit,
+  .clover-geomap-places button
+) {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: var(--clover-space-xs) var(--clover-space-s);
+  border: 0;
+  border-inline-start: 3px solid transparent;
+  border-radius: var(--clover-radius, 3px);
+  background: none;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+:is(
+    .clover-annotations-entry,
+    button.clover-contents-button,
+    .clover-transcript-cue > button,
+    button.clover-content-search-hit,
+    .clover-geomap-places button
+  ):is(:hover, [data-highlighted="true"]):not(:disabled) {
+  background-color: var(--clover-color-secondary-muted, #f1f1f1);
+}
+
+:is(
+  .clover-annotations-entry[data-selected="true"],
+  button.clover-contents-button[aria-current="true"],
+  .clover-transcript-cue[aria-current="true"] > button,
+  button.clover-content-search-hit[aria-current="true"],
+  .clover-geomap-places button[aria-current="true"]
+) {
+  border-inline-start-color: var(--clover-color-accent, #0065c3);
+  /* The accent, faintly: whatever the accent is, never a color of its own. */
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 8%,
+    transparent
+  );
+}
+
+/*
+ * Forced colors drop the tint and draw every row's edge in the text color: the others'
+ * in the ground, so only the current one's shows, in the highlight.
+ */
+@media (forced-colors: active) {
+  :is(
+    .clover-annotations-entry,
+    button.clover-contents-button,
+    .clover-transcript-cue > button,
+    button.clover-content-search-hit,
+    .clover-geomap-places button
+  ) {
+    border-inline-start-color: Canvas;
+  }
+
+  :is(
+    .clover-annotations-entry[data-selected="true"],
+    button.clover-contents-button[aria-current="true"],
+    .clover-transcript-cue[aria-current="true"] > button,
+    button.clover-content-search-hit[aria-current="true"],
+    .clover-geomap-places button[aria-current="true"]
+  ) {
+    border-inline-start-color: Highlight;
+  }
+}
+
+/*
+ * Lists of rows: no bullets, no indent, the rows `2xs` apart (they are one list); a
+ * nested list of Ranges steps in by `m`.
+ */
+:is(
+  .clover-annotations-list,
+  .clover-contents-list,
+  .clover-transcript-cues,
+  .clover-content-search-hits,
+  .clover-geomap-places
+) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-2xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---------- About ---------- */
+
+/*
+ * Down from the panel's inset, a step a level: About's parts are `m` apart. Its own
+ * headings (Rights, Homepage…) read as Metadata's labels do (`Primitives.css`), over
+ * their values.
+ */
+.clover-about {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-m);
+}
+
+.clover-about :is(p, ul) {
+  margin: 0;
+}
+
+.clover-about ul {
+  padding: 0;
+  list-style: none;
+}
+
+.clover-about a {
+  color: var(--clover-color-accent, #0065c3);
+  overflow-wrap: anywhere;
+}
+
+/*
+ * What a Canvas shown on its own is part of: each Manifest's label, and under it the
+ * button that opens it in place, as the read-more button reads, its target 24px or more
+ * (WCAG 2.5.8).
+ */
+.clover-about ul.clover-about-part-of {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clover-about-part-of > li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+button.clover-about-open {
+  min-height: var(--clover-space-l);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--clover-color-accent, #0065c3);
+  font-size: var(--clover-text-s);
+  text-decoration: underline 1px;
+  text-decoration-color: color-mix(in srgb, currentColor 20%, transparent);
+  text-underline-offset: var(--clover-space-3xs);
+  cursor: pointer;
+}
+
+button.clover-about-open:hover {
+  text-decoration-color: currentColor;
+}
+
+button.clover-about-open:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+  border-radius: var(--clover-radius, 3px);
+}
+
+.clover-about .clover-about-heading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: 500;
+}
+
+.clover-link-format {
+  color: var(--clover-color-primary-muted, #26292b);
+  font-size: var(--clover-text-s);
+}

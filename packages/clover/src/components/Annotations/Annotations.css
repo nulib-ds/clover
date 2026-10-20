@@ -1,6 +1,6 @@
 /*
  * Annotations: sets of entries, each entry its content and a button to find it. The rows
- * and their list are the panel's (`InformationPanel.css`, "Rows"). The Canvas's
+ * and their list are the panel's (`Panel.css`, "Rows"). The Canvas's
  * annotations menu (`AnnotationMenu.tsx`) takes the same classes, so these rules: its
  * pages are fieldsets, a page's header its legend, and an entry a radio's label, the
  * radio out of sight, the picked one marked as the list marks it.
@@ -156,8 +156,8 @@ label.clover-annotations-entry > input {
  * Every annotation (`scope="all"`): within a layer, each Canvas's annotations under its
  * label, `xs` over them, the Canvases `m` apart. A label is in the muted text at the
  * smaller size; the Canvases in view (`aria-current`) are marked by the accent's 3px
- * edge at their label's start, as a row is, and the text's colour, so by more than
- * colour (WCAG 1.4.1).
+ * edge at their label's start, as a row is, and the text's color, so by more than
+ * color (WCAG 1.4.1).
  */
 .clover-annotations-canvas {
   display: flex;

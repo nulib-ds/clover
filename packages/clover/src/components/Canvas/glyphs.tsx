@@ -2,13 +2,13 @@ import React from "react";
 
 /*
  * Glyphs for `Canvas`'s own controls, drawn like `Image/Controls/glyphs.tsx`: a 512 box,
- * taking the button's colour.
+ * taking the button's color.
  */
 
 /**
  * A solid speech bubble with two lines of "text": the annotations control.
  *
- * The lines are holes (`evenodd`), not a second colour, so they always show the button's
+ * The lines are holes (`evenodd`), not a second color, so they always show the button's
  * own background through them, at rest and inverted on hover alike.
  */
 export const Comment = () => (

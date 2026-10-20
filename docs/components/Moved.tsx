@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "docs/lib/router";
 import React, { useEffect, useState } from "react";
 
 /**
@@ -14,11 +16,18 @@ const MOVES: [RegExp, string][] = [
     "/docs/3.x/$1$2",
   ],
   /*
-   * The 3.x Viewer's own pages: content state, search and prefetched content. Its demo's
-   * address, /docs/viewer/demo, is Clover 4's demo now, and iiif.io's recipe pages link
-   * there, so it never reaches this page.
+   * Clover 4's demo is the homepage now: its playground opens what `?iiif-content=` names,
+   * as the demo page did, and iiif.io's recipe pages link to
+   * `/docs/viewer/demo?iiif-content=<manifest>`. The query and the hash go along.
    */
+  [/^\/docs\/viewer\/demo$/, "/"],
+  // The 3.x Viewer's own pages: content state, search and prefetched content.
   [/^\/docs\/viewer\/(.+)$/, "/docs/3.x/viewer/$1"],
+  // The component's page, from when the Panel was the InformationPanel.
+  [/^\/docs\/information-panel$/, "/docs/panel"],
+  // Pages folded into others: the templates under the Viewer, the element into Get Started.
+  [/^\/docs\/templates$/, "/docs/viewer/templates"],
+  [/^\/docs\/web-component$/, "/docs#web-component"],
 ];
 
 /** The page moved to from `path`, or nothing. */
@@ -43,7 +52,10 @@ export function Moved() {
     const next = movedTo(path);
     setTarget(next);
     if (next) {
-      router.replace(next + window.location.search + window.location.hash);
+      // A target's own section, unless the address names one (its headings came along).
+      const [path, section] = next.split("#");
+      const hash = window.location.hash || (section ? `#${section}` : "");
+      router.replace(path + window.location.search + hash);
     }
   }, [router]);
 

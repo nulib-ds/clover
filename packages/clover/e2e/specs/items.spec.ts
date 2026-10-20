@@ -38,7 +38,7 @@ test("Items: one tab stop; arrows select as they move, Home and End jump", async
   ).toBeFocused();
 });
 
-/** A 64 × 64 PNG of one colour, as `[r, g, b]`. */
+/** A 64 × 64 PNG of one color, as `[r, g, b]`. */
 function solidPng([r, g, b]: number[]) {
   const crc = (bytes: Buffer) => {
     let c = ~0;
@@ -74,7 +74,7 @@ function solidPng([r, g, b]: number[]) {
   ]);
 }
 
-/** Every picture (not an image service's `info.json`) as one colour. */
+/** Every picture (not an image service's `info.json`) as one color. */
 async function paintPictures(page: Page, rgb: number[]) {
   const png = solidPng(rgb);
   await page.route(
@@ -144,7 +144,7 @@ async function edgeContrast(page: Page, pictures: Locator) {
 
 /*
  * WCAG 1.4.1: selection follows focus, so the item in focus is the one selected. Focus
- * still shows by more than its ring's colour: a second ring inside the pictures' edge,
+ * still shows by more than its ring's color: a second ring inside the pictures' edge,
  * which a selected item without focus has not, and which stands out (3:1) from a light
  * page, as most scans are, and from a dark one alike.
  */
@@ -159,7 +159,7 @@ const PICTURES = [
 
 for (const [scene, url] of SCENES) {
   for (const [tone, rgb] of PICTURES) {
-    test(`${scene}: focus on the selected item shows inside a ${tone} picture, not by colour alone`, async ({
+    test(`${scene}: focus on the selected item shows inside a ${tone} picture, not by color alone`, async ({
       page,
     }) => {
       await serveIIIF(page);

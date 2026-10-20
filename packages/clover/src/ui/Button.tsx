@@ -7,7 +7,7 @@ interface ButtonProps {
   className?: string;
   id: string;
   label: string;
-  children: React.ReactChild;
+  children: React.ReactElement | string | number;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   /** For a control that opens something (Canvas's Choice menu): its state and target. */
   expanded?: boolean;

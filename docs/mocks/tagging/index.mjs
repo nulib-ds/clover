@@ -1,7 +1,7 @@
 /**
  * A photogravure with its printed words tagged: Northwestern University Libraries' record
  * of Edward S. Curtis's "The Vanishing Race - Navaho" (1904), plate 1 of _The North
- * American Indian_, as its Digital Collections API published it on 14 October 2026
+ * American Indian_, as its Digital Collections API published it on October 14, 2026
  * (`source.json`, kept as fetched), with three changes:
  *
  * - the Manifest and its Canvas take ids under the mock's own address;

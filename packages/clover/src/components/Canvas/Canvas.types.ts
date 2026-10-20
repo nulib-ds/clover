@@ -46,7 +46,7 @@ export interface CanvasControlsConfig {
 export interface CloverCanvasOptions {
   /** Which painter to use. `auto` (default) tries WebGL2, then Canvas2D. */
   backend?: BackendPreference;
-  /** Pointer, wheel and keyboard behaviour. Wheel zoom is off by default. */
+  /** Pointer, wheel and keyboard behavior. Wheel zoom is off by default. */
   gestures?: Partial<GestureOptions>;
   /** Largest zoom, in CSS pixels per image pixel. Default 1.1. */
   maxZoomPixelRatio?: number;

@@ -5,7 +5,7 @@ import { serveIIIF } from "./fixtures";
 /*
  * The information panel's Annotations, every Canvas's (`scope="all"`), in the Default
  * template, on the docs' `paged` mock: the catalog's "Then" and "Now" tags, a page of
- * them on each of eight plates, unlabelled, so one layer, by Canvas.
+ * them on each of eight plates, unlabeled, so one layer, by Canvas.
  */
 const CATALOG = "https://nulib-ds.github.io/clover/mocks/paged/manifest.json";
 

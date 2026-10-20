@@ -12,7 +12,7 @@ import { type Rect, rectCenter, transformRect } from "../math/rect";
 /**
  * Where the camera looks, in world units.
  *
- * - `x`, `y`: the world point at the centre of the viewport.
+ * - `x`, `y`: the world point at the center of the viewport.
  * - `zoom`: CSS pixels per world unit.
  * - `rotation`: radians, clockwise on screen.
  *
@@ -98,7 +98,7 @@ export function fitCamera(
   rotation = 0,
   padding = 0,
 ): CameraState {
-  // Fit the rotated bounds: rotate the world rect about its own centre and measure.
+  // Fit the rotated bounds: rotate the world rect about its own center and measure.
   const rotated = transformRect(rotate(rotation), bounds);
   const usableW = Math.max(1, viewport.width * (1 - padding * 2));
   const usableH = Math.max(1, viewport.height * (1 - padding * 2));
@@ -111,7 +111,7 @@ export function fitCamera(
 }
 
 /**
- * The centre that keeps world point `anchor` under screen point `screen` at the given
+ * The center that keeps world point `anchor` under screen point `screen` at the given
  * zoom and rotation. This is what makes zoom-at-cursor hold still mid-animation rather
  * than only at its end.
  */

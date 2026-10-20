@@ -1,5 +1,5 @@
 /*
- * A Canvas's placeholder: a still image fitted to the stage and centred, over a viewport
+ * A Canvas's placeholder: a still image fitted to the stage and centered, over a viewport
  * that waits, empty and hidden, until the reader opens the Canvas.
  *
  * The frame is sized from the stage (a size container, inside the Canvas's inset as the

@@ -120,7 +120,7 @@ function Scene() {
             data-testid="pane"
             style={{ width: "15rem", height: "24rem", overflowY: "auto" }}
           >
-            <Clover.InformationPanel layout="accordion">
+            <Clover.Panel layout="accordion">
               {PANEL_SECTIONS.map(([value, label, count]) => (
                 <Clover.Tab key={value} value={value} label={label}>
                   <ul>
@@ -134,7 +134,7 @@ function Scene() {
                   </ul>
                 </Clover.Tab>
               ))}
-            </Clover.InformationPanel>
+            </Clover.Panel>
           </div>
           <button type="button">After the panel</button>
         </Clover.Root>

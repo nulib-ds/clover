@@ -21,7 +21,7 @@ import { normalizeHex, setPageTheme, usePageTheme } from "docs/lib/page-theme";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import styles from "docs/components/Playground/Playground.module.css";
-import { useRouter } from "next/router";
+import { useRouter } from "docs/lib/router";
 
 /**
  * The Viewer in a template, as a page would write it: `<Viewer template={Document} />`.
@@ -50,7 +50,7 @@ const TemplateViewer = dynamic(
 
 /** Calls `onOutside` on a press outside `ref`'s element, while `active`. */
 function usePressOutside(
-  ref: React.RefObject<HTMLElement>,
+  ref: React.RefObject<HTMLElement | null>,
   active: boolean,
   onOutside: () => void,
 ) {
@@ -79,8 +79,8 @@ function usePressOutside(
  * measured again whenever it changes (a message under the field).
  */
 function useStuck(
-  bar: React.RefObject<HTMLElement>,
-  stage: React.RefObject<HTMLElement>,
+  bar: React.RefObject<HTMLElement | null>,
+  stage: React.RefObject<HTMLElement | null>,
 ) {
   useEffect(() => {
     const node = bar.current;
@@ -159,7 +159,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
     const [picked, setPicked] = useState<string | null>(null);
     const [own, setOwn] = useState("");
     /*
-     * The page's accent, set from the gear in the site header. The playground carries it in
+     * The page's accent, set in the homepage's "Why Clover" (`BrandPicker.tsx`). The playground carries it in
      * the share link; a link that names one sets it.
      */
     const { accent } = usePageTheme();
@@ -246,7 +246,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
     );
 
     /*
-     * Keep the link's accent in step with the header's. Debounced, because the colour
+     * Keep the link's accent in step with the header's. Debounced, because the color
      * wheel reports every frame of a drag and each would otherwise be a history entry.
      */
     const accentSynced = useRef(false);
@@ -330,7 +330,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
             />
           </div>
 
-          {/* No font and no colour here: Clover takes both from the page. */}
+          {/* No font and no color here: Clover takes both from the page. */}
           <div className={styles.stage} data-template={active} ref={stageRef}>
             {ready && (
               <TemplateViewer

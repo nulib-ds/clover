@@ -13,7 +13,7 @@ import { type LanguageMapLike, localize } from "../core/value";
  * A IIIF value, which may hold the HTML the Presentation API allows.
  *
  * Plain values render as text, at once. A value with markup renders as text first and
- * becomes sanitised HTML once the sanitiser (DOMPurify, loaded on demand) arrives, so a
+ * becomes sanitized HTML once the sanitizer (DOMPurify, loaded on demand) arrives, so a
  * page whose values carry no markup never loads it.
  */
 function useSanitized(
@@ -47,7 +47,7 @@ type MarkupProps = {
   markup?: LanguageMapLike;
   /**
    * Read strictly by it (`readAs`): `text/markdown` is converted to HTML (then
-   * sanitised), keeping its lists and headings; `text/html` is IIIF's HTML; `text/plain`
+   * sanitized), keeping its lists and headings; `text/html` is IIIF's HTML; `text/plain`
    * (or any other type) is shown as written, its line breaks kept. With none, IIIF's
    * rule: HTML only from a first `<` to a last `>`.
    */
@@ -61,7 +61,7 @@ type MarkupProps = {
   language?: string;
 } & Omit<React.HTMLAttributes<HTMLElement>, "dangerouslySetInnerHTML" | "lang">;
 
-/** A IIIF language map, in the closest language, as sanitised HTML. Nothing when empty. */
+/** A IIIF language map, in the closest language, as sanitized HTML. Nothing when empty. */
 export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
   { as: Tag = "span", markup, language, format, headingLevel, ...rest },
   ref,
@@ -69,7 +69,7 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
   const { text, lang } = localize(markup, language);
   const kind = readAs(format, text);
   const markdown = kind === "markdown";
-  // Plain text is never markup: nothing is sanitised, so nothing loads for it.
+  // Plain text is never markup: nothing is sanitized, so nothing loads for it.
   const html = useSanitized(
     kind === "plain" ? "" : text,
     markdown,
@@ -95,7 +95,7 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
       dangerouslySetInnerHTML={{ __html: html }}
     />
   ) : (
-    // Until the sanitiser arrives, Markdown shows without its syntax.
+    // Until the sanitizer arrives, Markdown shows without its syntax.
     <Tag ref={ref} {...rest} lang={lang}>
       {markdown ? markdownToPlainText(text) : toPlainText(text)}
     </Tag>

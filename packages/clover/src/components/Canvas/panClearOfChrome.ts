@@ -26,7 +26,7 @@ const overlap = (a: number, b: number, c: number, d: number) => a < d && c < b;
  * away from the edge it hangs on (the cluster from the top, its column on a phone from
  * the side, the transport from the bottom). A piece cuts only once the hotspot is beside
  * it, where cutting by another has moved it: the cluster only above a hotspot under it.
- * So one clear of the chrome stays where it is, and one larger than its part is centred
+ * So one clear of the chrome stays where it is, and one larger than its part is centered
  * in it. An open caption may leave too little; Escape closes it without moving focus
  * (`CanvasView`).
  */
@@ -115,14 +115,14 @@ export function panClearOfChrome(
     dy = shift(own.top, own.bottom, clear.top, clear.bottom);
   }
   if (!dx && !dy) return;
-  // Where the view's centre goes: the point now on screen `dx, dy` short of it.
-  const centre = renderer.worldToScreenPoint(renderer.getCamera());
+  // Where the view's center goes: the point now on screen `dx, dy` short of it.
+  const center = renderer.worldToScreenPoint(renderer.getCamera());
   renderer.panTo(
-    renderer.screenToWorldPoint({ x: centre.x - dx, y: centre.y - dy }),
+    renderer.screenToWorldPoint({ x: center.x - dx, y: center.y - dy }),
   );
 }
 
-/** How far to move `[start, end]` to bring it within `[min, max]`, or to centre it there. */
+/** How far to move `[start, end]` to bring it within `[min, max]`, or to center it there. */
 function shift(start: number, end: number, min: number, max: number) {
   if (end - start > max - min) return (min + max - start - end) / 2;
   if (start < min) return min - start;

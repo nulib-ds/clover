@@ -1,6 +1,6 @@
 /*
  * A transcript: cues as rows of time and text, the current one marked. The rows and the
- * list are the panel's (`InformationPanel.css`, "Rows"). The track menu sits `s` above the
+ * list are the panel's (`Panel.css`, "Rows"). The track menu sits `s` above the
  * cues.
  */
 .clover-transcript {

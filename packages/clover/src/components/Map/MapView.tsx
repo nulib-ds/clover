@@ -474,7 +474,7 @@ function MapView({
     const bounds = boundsOf([feature]);
     if (map && bounds) {
       frame(map, bounds, Math.max(map.getZoom(), POINT_ZOOM));
-      name.current?.(feature, centre(bounds));
+      name.current?.(feature, center(bounds));
     }
     onSelect?.(feature);
   };
@@ -564,7 +564,7 @@ function MapView({
   );
 }
 
-/** Frame a box: a lone point centred at `zoom`, anything else to its bounds. */
+/** Frame a box: a lone point centered at `zoom`, anything else to its bounds. */
 function frame(map: any, bounds: [Position, Position], zoom: number) {
   const [[west, south], [east, north]] = bounds;
   if (west === east && south === north) {
@@ -575,7 +575,7 @@ function frame(map: any, bounds: [Position, Position], zoom: number) {
 }
 
 /** The middle of a box. */
-function centre([[west, south], [east, north]]: [Position, Position]) {
+function center([[west, south], [east, north]]: [Position, Position]) {
   return [(west + east) / 2, (south + north) / 2];
 }
 

@@ -96,7 +96,7 @@ describe("the scale", () => {
 
 /*
  * The search field's placeholder is the theme's text mixed into its ground, at full
- * opacity: browsers' own (Safari's grey, Firefox's half opacity) fall under 4.5:1.
+ * opacity: browsers' own (Safari's gray, Firefox's half opacity) fall under 4.5:1.
  */
 describe("a field's placeholder", () => {
   const rule = readFileSync(SCALE, "utf8").match(

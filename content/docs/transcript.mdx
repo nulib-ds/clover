@@ -1,0 +1,186 @@
+---
+title: Transcript
+description: "The words of the video, sound or page in view: its WebVTT captions as text, the cue playing marked, or its transcript as plain text."
+---
+
+import { Callout } from "nextra/components";
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+
+# Transcript
+
+<Callout type="info">
+  `Transcript` replaces the transcript in the information panel of Clover 3.x's
+  [Viewer](/docs/3.x/viewer#information-panel), with its
+  `informationPanel.vtt.autoScroll`: see [From Clover 3.x](#from-clover-3x).
+</Callout>
+
+The words of what is in view, read from the Canvas's own files:
+
+- **Captions**, its WebVTT files (`supplementing` annotations with a `text/vtt` body, one
+  or a `Choice` of several), as a list of cues: each with the time it starts, its speaker
+  and its words. The cue playing is marked, and pressing one seeks there.
+- **A transcript as plain text** (`text/plain`), untimed, in paragraphs: the Canvas's
+  `rendering`, as in
+  [Cookbook 0017](https://iiif.io/api/cookbook/recipe/0017-transcription-av/), or a
+  `supplementing` body, as in
+  [Cookbook 0253](https://iiif.io/api/cookbook/recipe/0253-using-transcript-file/). Of a
+  recording, it is what is said; of an image, what is written on it, such as a page's OCR
+  or a letter's transcription.
+
+The `Default` and `Document` templates show it by themselves, in the
+[Panel](/docs/panel)'s Transcript section, whenever the view has either. In a layout of
+your own, place it anywhere inside a `Clover.Root`, beside the `Content` that plays.
+
+```jsx
+import * as Clover from "@nulib/clover";
+import "@nulib/clover/styles.css";
+
+<Clover.Root iiifContent={manifestUrl}>
+  <Clover.Content />
+  <Clover.Transcript />
+</Clover.Root>;
+```
+
+It reads the first Canvas of the view that has captions or a transcript, and follows the
+reader from view to view. It renders nothing when the view has neither.
+
+## Following playback
+
+Below, _Lunchroom Manners_ from Clover's [mocks](/docs/mocks), the film of
+[Cookbook 0219](https://iiif.io/api/cookbook/recipe/0219-using-caption-file/), with its
+English captions and its transcript as plain text, the Canvas's `rendering`. Play it,
+and the cue playing is marked; press a cue to go there, or choose TXT to read the
+transcript. The Transcript is given a height here, and scrolls in its own box.
+
+<PartDemo
+  part="Transcript"
+  resource="transcripts"
+  content
+  props={{
+    as: "section",
+    "aria-label": "Transcript",
+    tabIndex: 0,
+    style: { maxHeight: "20rem", overflowY: "auto" },
+  }}
+/>
+
+A Transcript that scrolls in a box of its own, as this one does, can hold text alone, with
+nothing in it to focus. Make the box a named region the keyboard can reach, as here, so it
+can be scrolled from the keyboard too (WCAG 2.1.1):
+
+```jsx
+<Clover.Transcript
+  as="section"
+  aria-label="Transcript"
+  tabIndex={0}
+  className="my-transcript"
+/>
+```
+
+```css
+.my-transcript {
+  max-height: 20rem;
+  overflow-y: auto;
+}
+```
+
+Each cue is an item of an ordered list, and a button: the time it starts (`0:04`, or
+`1:02:03` in a long recording), the speaker where a `<v>` tag names one, and the words,
+with WebVTT's voice and styling tags removed. The cue playing is `aria-current="true"`,
+updated as the media plays and seeks; between two cues, none is. Pressing a cue seeks the
+media there. Where the media has not loaded yet (behind its placeholder, say), it opens
+the Canvas at that time.
+
+While the media plays, the cue playing is kept in view, scrolled no further than needed
+(`block: "nearest"`). Paused, nothing moves. `follow={false}` leaves the scrolling to the
+reader. Playback re-renders the Transcript only when the cue playing changes, and writes
+nothing to the Root's state.
+
+A transcript as plain text has nothing to press: its paragraphs split at blank lines,
+each keeping its own line breaks (a speaker's turns, say). A file that is not UTF-8 is
+read as Windows-1252, as Cookbook 0017's is encoded, so its apostrophes are not lost.
+
+The cues' list, or the transcript's text, carries its file's `language` as `lang`, so it
+is read in its own (WCAG 3.1.2); a file in `none`, or in no language given, takes the
+page's. Each caption file is fetched once, for the Canvas's captions and the Transcript
+both.
+
+## Several files
+
+With more than one file, a row of choices over the cues picks one: native radio buttons
+in a `fieldset`. Each shows its file's language code ("EN", "IT"); a transcript as plain
+text shows "TXT", after the caption files, or "TXT EN" and so on where there are several.
+Where two files would show the same code, each shows its label instead. Each choice is
+named by its code and its file's label, the label in its own language ("IT Sottotitoli in
+formato WebVTT"), and the label shows in a popover on hover and focus. The row is a group
+named "Captions", or "Transcript" where a plain-text file is among them. It starts on the
+first file, or on the caption file chosen in the Canvas's Captions menu. Each choice is at
+least `--clover-space-l` square, past 24px at the browser's default text size (WCAG 2.5.8).
+
+In the Panel's accordion, the row sits beside the Transcript's heading, where it is not
+lost in the cues; in its tabs, and on its own, the row is over the cues.
+
+### One choice with the Canvas
+
+The Transcript and the Canvas's Captions menu make one choice of caption file, through
+the Root (`clover.captions`). A file chosen in the menu is the one the Transcript reads,
+chosen before it was shown or after. A file chosen in the Transcript is the one the
+Canvas shows while its captions are on. The Transcript never turns captions on, and
+turning them off leaves the Transcript as it is. A transcript as plain text is not a
+caption file: choosing it leaves the captions as they are.
+
+## WebVTT
+
+Clover reads WebVTT with its own parser, exported for a part of your own:
+
+```js
+import { cueAt, parseVtt } from "@nulib/clover";
+
+const cues = parseVtt(await (await fetch(vttUrl)).text());
+const index = cueAt(cues, video.currentTime);
+const words = index >= 0 ? cues[index].text : "";
+```
+
+| Export              | What it does                                                                                                                                                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `parseVtt(text)`    | The file's cues, `{ start, end, text, voice? }`, in seconds, in order of their start. The header, `NOTE`, `STYLE` and `REGION` blocks are skipped; voice and styling tags are removed, and character references decoded. |
+| `cueAt(cues, time)` | The index of the cue playing at `time`: the latest to start at or before it that has not ended. `-1` when none is.                                                                                                       |
+
+## Props
+
+| Prop     | Type         | Description                                               |
+| -------- | ------------ | --------------------------------------------------------- |
+| `follow` | `boolean`    | Keep the cue playing in view as it plays. Default `true`. |
+| `as`     | element type | Default `div`.                                            |
+
+Its other props (`id`, `className`, `style`, `tabIndex`, `aria-*`) go to its element, and
+so does its `ref`.
+
+### Styles
+
+| Class                          | What it is                                                                 |
+| ------------------------------ | -------------------------------------------------------------------------- |
+| `.clover-transcript`           | The part.                                                                  |
+| `.clover-transcript-languages` | The row of choices, a `fieldset`.                                          |
+| `.clover-transcript-language`  | A choice, the `label` round its radio; `.clover-transcript-code` its code. |
+| `.clover-transcript-cues`      | The list of cues.                                                          |
+| `.clover-transcript-cue`       | A cue, `aria-current` while it plays.                                      |
+| `.clover-transcript-time`      | A cue's start.                                                             |
+| `.clover-transcript-voice`     | A cue's speaker.                                                           |
+| `.clover-transcript-text`      | A cue's speaker and words.                                                 |
+| `.clover-transcript-body`      | A transcript as plain text, a `p` for each paragraph.                      |
+
+The cues share one grid of two columns: the times' is as wide as the widest time in the
+list, so every cue's words start on one line.
+
+## From Clover 3.x
+
+| 3.x                                      | Clover 4                                                             |
+| ---------------------------------------- | -------------------------------------------------------------------- |
+| The transcript in the Annotations tab    | A Transcript section of its own in the Panel                         |
+| `informationPanel.vtt.autoScroll: false` | `<Clover.Transcript follow={false} />` in a `Tab`                    |
+| `vtt.autoScroll: { behavior, block }`    | Not taken: the cue is scrolled no further than needed                |
+| `options.ignoreCaptionLabels`            | Not in Clover 4: every WebVTT `supplementing` body is a caption file |
+
+As in 3.x, the Transcript and the captions over the picture share one choice of file, and
+turning captions off leaves the Transcript as it is.

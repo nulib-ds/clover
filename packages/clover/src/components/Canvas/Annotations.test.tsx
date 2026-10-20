@@ -509,7 +509,7 @@ describe("a hotspot's popover", () => {
 /*
  * WCAG 2.4.11: a hotspot reached by Tab is panned clear of the chrome over the stage.
  * The camera is a stand-in whose screen is its world, so a pan's target is the screen
- * point the view's centre goes to.
+ * point the view's center goes to.
  */
 describe("a hotspot reached by Tab", () => {
   type Box = { left: number; top: number; width: number; height: number };
@@ -582,7 +582,7 @@ describe("a hotspot reached by Tab", () => {
       cluster,
     );
     tab(hotspot);
-    // Down 32px, to the cluster's foot: the view's centre goes up as far.
+    // Down 32px, to the cluster's foot: the view's center goes up as far.
     expect(hotspot.panTo).toHaveBeenCalledWith({ x: 500, y: 268 });
   });
 
@@ -673,13 +673,13 @@ describe("a hotspot reached by Tab", () => {
     expect(hotspot.panTo).toHaveBeenCalledWith({ x: 740, y: 420 });
   });
 
-  it("centres one larger than the part clear of the chrome", async () => {
+  it("centers one larger than the part clear of the chrome", async () => {
     const hotspot = await setup(
       { left: 0, top: 0, width: 1000, height: 100 },
       cluster,
     );
     tab(hotspot);
-    // Too wide, so centred across; down to clear the cluster.
+    // Too wide, so centered across; down to clear the cluster.
     expect(hotspot.panTo).toHaveBeenCalledWith({ x: 500, y: 248 });
   });
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 
 import * as Clover from "../../parts";
-import type { InformationPanelLayout, RootProps } from "../../parts";
+import type { PanelLayout, RootProps } from "../../parts";
 import { useDragToClose } from "../shared/useDragToClose";
 import { useFocusOnOpen, useSlide, useWideEnough } from "../shared/useSlide";
 import { useFollowFocus } from "../shared/useFollowFocus";
@@ -17,7 +17,7 @@ export type DocumentProps = Omit<RootProps, "children"> & {
    * How the information panel lays out its sections: `"accordion"` (the default, as
    * Default's), stacked boxes each opened by its heading, or `"tabs"`.
    */
-  panelLayout?: InformationPanelLayout;
+  panelLayout?: PanelLayout;
   /** A Download button in the toolbar, listing the Manifest's and the page's `rendering`. Default `true`. */
   download?: boolean;
   /**
@@ -204,7 +204,7 @@ function DocumentLayout({
    */
   const docked = !over && panel;
   const spine = useRef<HTMLDivElement>(null);
-  const main = (element: React.RefObject<HTMLElement>) => () =>
+  const main = (element: React.RefObject<HTMLElement | null>) => () =>
     element.current?.parentElement?.querySelector<HTMLElement>(
       ".clover-template-document-main",
     );
@@ -336,7 +336,7 @@ function DocumentLayout({
         )}
         <Clover.SplitPane
           className="clover-template-document-main"
-          // A minimum only beside another pane: Items, or the InformationPanel docked.
+          // A minimum only beside another pane: Items, or the Panel docked.
           min={
             (showSidebar && !narrow) || (panel && !over) ? PAGE_MIN : undefined
           }
@@ -370,7 +370,7 @@ function DocumentLayout({
           hidden={!panelShown}
         >
           {/* Over the page it floats, so Escape and its own button put it away too. */}
-          <Clover.InformationPanel
+          <Clover.Panel
             ref={panelRef}
             layout={panelLayout}
             headingLevel={below(headingLevel)}

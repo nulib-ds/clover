@@ -6,7 +6,7 @@ import { openPanel, serveIIIF } from "./fixtures";
 
 const axePath = createRequire(__filename).resolve("axe-core/axe.min.js");
 
-/** A basemap of one colour: nothing to fetch, nothing to draw but the ground. */
+/** A basemap of one color: nothing to fetch, nothing to draw but the ground. */
 const STYLE = {
   version: 8,
   sources: {},
@@ -125,7 +125,7 @@ test("a place is chosen from the keyboard, and named in its language", async ({
   await expect(label).toHaveText("Front of Bronze");
 });
 
-/** The Viewer on the places, its default basemap one colour, its panel open. */
+/** The Viewer on the places, its default basemap one color, its panel open. */
 async function openViewer(page: Page, isMobile: boolean, panel = "") {
   await serveIIIF(page);
   await page.route("https://tiles.openfreemap.org/**", (route) =>
@@ -177,11 +177,11 @@ test("in the accordion's Map section, the map is no second region", async ({
   );
 });
 
-test("in forced colours, only the current place's edge shows", async ({
+test("in forced colors, only the current place's edge shows", async ({
   page,
   browserName,
 }) => {
-  test.skip(browserName !== "chromium", "forced colours emulate in Chromium");
+  test.skip(browserName !== "chromium", "forced colors emulate in Chromium");
   await page.emulateMedia({ forcedColors: "active" });
   await open(page, `/?scene=map&content=${PLACES}`);
   const bronze = page.getByRole("button", {
@@ -191,7 +191,7 @@ test("in forced colours, only the current place's edge shows", async ({
     name: "Current Location of Painting",
   });
   await expect(bronze).toHaveAttribute("aria-current", "true");
-  // A system colour, as the browser resolves it.
+  // A system color, as the browser resolves it.
   const system = (name: string) =>
     page.evaluate((name) => {
       const probe = document.createElement("div");

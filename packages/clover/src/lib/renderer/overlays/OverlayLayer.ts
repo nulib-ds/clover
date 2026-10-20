@@ -102,7 +102,7 @@ export class OverlayLayer {
         (degrees ? ` rotate(${degrees}deg)` : "");
       /*
        * Where it sits in the layer, so what it shows beside itself (a hotspot's popover)
-       * can stay inside: its centre across, its top and bottom edges, and the side with
+       * can stay inside: its center across, its top and bottom edges, and the side with
        * more room, above it in the lower half and below it in the upper. Not while the
        * view is turned, since what it shows turns with it.
        */

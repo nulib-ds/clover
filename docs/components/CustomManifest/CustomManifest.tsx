@@ -1,8 +1,10 @@
+"use client";
+
 import React, { useEffect, useId, useRef, useState } from "react";
 
 import styles from "docs/components/CustomManifest/CustomManifest.module.css";
 import { IIIF_CONTENT_PARAM, pushIiifContent } from "docs/lib/iiif-content";
-import { useRouter } from "next/router";
+import { useRouter } from "docs/lib/router";
 
 interface CustomManifestProps {
   placeholder: string;
@@ -68,9 +70,7 @@ const CustomManifest = ({
   };
 
   return (
-    <div
-      className={`${styles.customManifest} nextra-search nx-relative ${className ?? ""}`}
-    >
+    <div className={`${styles.customManifest} ${className ?? ""}`}>
       <form onSubmit={handleSubmit} noValidate>
         {/* The placeholder is the only text naming the field on screen, so the name repeats it. */}
         <label htmlFor={id} className={styles.label}>
@@ -91,7 +91,7 @@ const CustomManifest = ({
             aria-invalid={message ? true : undefined}
             aria-describedby={message ? errorId : undefined}
             onInput={submitError ? () => setSubmitError(undefined) : undefined}
-            className="nx-block nx-w-full nx-appearance-none nx-rounded-lg nx-px-3 nx-py-2 nx-transition-colors nx-text-base nx-leading-tight md:nx-text-sm nx-bg-black/[.05] dark:nx-bg-gray-50/10 focus:nx-bg-white dark:focus:nx-bg-dark placeholder:nx-text-gray-500 dark:placeholder:nx-text-gray-400 contrast-more:nx-border contrast-more:nx-border-current"
+            className={styles.input}
           />
           {submitLabel && (
             <button type="submit" className={styles.submit}>

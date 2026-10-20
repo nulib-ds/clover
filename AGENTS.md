@@ -18,12 +18,26 @@ deadline.
 - This repository is `nulib-ds/clover`: the package `@nulib/clover` in `packages/clover`
   (an npm workspace, with its own rules in `packages/clover/AGENTS.md`) and its
   documentation site at the root. The root is the site, private, and publishes nothing.
-- Documentation site uses Next.js/Nextra in `pages/` and `docs/`.
+- The documentation site is Next.js 16 (App Router) with Nextra 4 (see "Nextra 4" below):
+  its pages are MDX in `content/`, ordered by `_meta.ts` files; its frame is `app/`
+  (`layout.tsx`, the page route `[[...mdxPath]]/page.tsx`, `not-found.tsx`); and its
+  components, helpers and styles are in `docs/`. `pages/` holds only the dev-only API
+  routes (`pages/api/`).
   - The docs lead with Clover 4, `@nulib/clover` (`packages/clover`): its pages are
-    `pages/docs/*` (URLs `/docs/…`), and the homepage shows it. Clover 3.x,
-    `@samvera/clover-iiif`, is kept at `pages/docs/3.x/` (URLs `/docs/3.x/…`), one
+    `content/docs/*` (URLs `/docs/…`), and the homepage shows it. Clover 3.x,
+    `@samvera/clover-iiif`, is kept at `content/docs/3.x/` (URLs `/docs/3.x/…`), one
     sidebar group titled "Clover 3.x", collapsed, under "Earlier versions" at the bottom.
     Its page titles end in "(3.x)" so search results tell the two apart.
+  - The 3.x pages are for reference, never the standard (Mat, 2026-10-20). They document
+    an earlier version: never take their API, behavior, wording or patterns as how
+    Clover 4 works or should work. The package's source, its tests, its own AGENTS.md
+    and DESIGN.md, and the 4.x pages are the authority. Every 3.x page says so to
+    readers, search engines and agents: a notice opening the page and a "(3.x)" title,
+    a description saying what it documents, schema.org data (`version: "3.x"`,
+    `creativeWorkStatus: "Superseded"`), and in the site's search a "(3.x)" title, a
+    `version` filter and half the weight of Clover 4's pages (`app/[[...mdxPath]]/page.tsx`,
+    `docs/lib/site.ts`). `public/llms.txt` tells agents the same. A new 3.x page gets all
+    of it from its place under `content/docs/3.x/`.
   - 3.x's source is not in this repository: it is `samvera-labs/clover-iiif`. The 3.x
     pages' live examples import the published `@samvera/clover-iiif` (a devDependency,
     pinned to `4.0.0-rc.2`, the release the pages were written against), through
@@ -38,39 +52,58 @@ deadline.
   - The site deploys to GitHub Pages through GitHub Actions
     (`.github/workflows/deploy-pages.yml`), after the Tests workflow passes on `main`, or
     by hand. `actions/configure-pages` reports where Pages serves it, and the build reads
-    that as `DOCS_BASE_PATH` (`next.config.js`) and `NEXT_PUBLIC_SITE_URL` (canonical
-    links, `theme.config.tsx`). Without them, a build is for `nulib-ds.github.io/clover`.
+    that as `DOCS_BASE_PATH` (`next.config.mjs`) and `NEXT_PUBLIC_SITE_URL` (canonical
+    links, `docs/lib/site.ts`). Without them, a build is for `nulib-ds.github.io/clover`.
   - The site is a static export, so there are no server redirects. URLs that moved
-    (3.x pages from `/docs/…`, 4.x pages from `/docs/4.x/…`) are sent on by the 404
-    page, `pages/404.mdx`, from the table in `docs/components/Moved.tsx`. Move a page
+    (3.x pages from `/docs/…`, 4.x pages from `/docs/4.x/…`, the demo, the Panel's page)
+    are sent on by the 404 page (`app/not-found.tsx`, exported as `404.html`, which Pages
+    serves for any missing path), from the table in `docs/components/Moved.tsx`, query
+    and hash kept. Move a page
     again, and add its old URL there. A 3.x page whose name 4.x now uses (`viewer`,
     `map`) shows the 4.x page, which links to its 3.x version.
   - How to compose a layout (`Root`, the parts, the property parts, the information
     panel's `Tab`s, `Split`, hooks, renderers, styles) lives on one page,
-    `pages/docs/composing.mdx` ("Composing Layouts", under Templates). The Viewer page
+    `content/docs/composing.mdx` ("Composing Layouts", under Templates). The Viewer page
     covers what the Viewer handles and links there; add composition material there, not
     to the Viewer page.
-  - A part with a reference of its own has a page under "Components": `Items`, `Canvas`,
-    `InformationPanel` and `Map`. `pages/docs/information-panel.mdx` holds the panel's
-    layouts and keys, its default sections and when each shows, `Tab`s, headings,
-    showing and closing it, the open section, its props (and `Tab`'s, `PanelToggle`'s,
-    `About`'s), and 3.x's `options.informationPanel`; Composing keeps a short section
-    with the `Tab` example and links there. Its demo (`InformationPanelDemo`) is the
-    `paged` mock, and its `headingLevel` follows the `h2` it sits under. `canvas.mdx`
-    says when to place `Content` rather than `Canvas`.
+  - Every part the homepage shows has a page under "Components" (Mat, 2026-10-20):
+    Content, Canvas, Items, Panel, the Panel's sections (Annotations, Collection with
+    CollectionSelect, Contents, Search, Transcript), Download and Map, then Primitives
+    (`content/docs/primitives/`, an overview and a page per property part: Label,
+    Thumbnail, Summary, Metadata, RequiredStatement, Rights, Homepage, SeeAlso,
+    Rendering, PartOf, Id, Value). Each has what it reads, a live example, its props from
+    the source, and "From Clover 3.x" where 3.x had it. Live examples are
+    `<PartDemo part="…" />` (`docs/components/Clover4/PartDemo.tsx`): the part named, its
+    props plain values, in a `Root` over a mock (`resource`), with a `Content` above it
+    (`content`) where it follows the view. The homepage's tiles link to these pages
+    (`DOCS` in `docs/components/Home/PartsLive.tsx`); a new part gets a page and a link.
+    `content/docs/panel.mdx` holds the Panel's layouts and keys, its default sections
+    and when each shows, `Tab`s, headings, showing and closing it, the open section, its
+    props (and `Tab`'s, `PanelToggle`'s, `About`'s), and 3.x's
+    `options.informationPanel`; Composing keeps a short section with the `Tab` example
+    and links there. Its demo (`PanelDemo`) is the `paged` mock, and its `headingLevel`
+    follows the `h2` it sits under. `canvas.mdx` says when to place `Content` rather
+    than `Canvas`.
+  - Use Clover: Get Started (`/docs`, which holds the web component, `<clover-viewer>`,
+    in its own section), Viewer (with Templates under it, `/docs/viewer/templates`, and
+    a section of its own on the templates, live), Composing Layouts, Cookbook Recipes.
   - A Viewer or standalone `Items` on a docs page takes the `headingLevel` one below the
     heading it sits under (`docs/components/Clover4/Demos.tsx`: 3 under an `h2`, 4 under
     an `h3`), so the page's outline stays true. Move a demo, and check its level. The DC
     item mock's Explore Further rows take 3.
-  - `/docs/viewer/demo` is Clover 4's demo: the field, featured items, and every IIIF
-    Cookbook recipe to open, handled or not (`docs/components/Clover4/CookbookDemo.tsx`).
-    iiif.io's recipe pages link to it as `…/docs/viewer/demo?iiif-content=<manifest>`, so
-    never move it without leaving the 404 table a forward. `/docs/viewer/progress` is
+  - The homepage is Clover 4's demo (Mat, 2026-10-20): its playground opens what
+    `?iiif-content=` names. iiif.io's recipe pages link to
+    `…/docs/viewer/demo?iiif-content=<manifest>`, the demo's old address, which the 404
+    table forwards to the homepage with its query: never drop that forward. Cookbook
+    Recipes (`/docs/cookbook`, last under Use Clover) lists every IIIF Cookbook recipe to
+    open in the Viewer, which slides in over the page, handled or not
+    (`docs/components/Clover4/CookbookDemo.tsx`); it has no field of its own, as the
+    homepage has one. `/docs/viewer/progress` is
     unlisted (hidden in the sidebar, out of search): each recipe's status in 4.x beside
     3.x, and what is missing. Its data is `docs/components/CookbookRecipes/progress4.ts`;
     when a recipe starts working, or stops, record it there with the date.
-  - The site banner (`theme.config.tsx`) says Clover 4 is in development. Retire it, or
-    change its `key`, when 4.0 ships.
+  - The site banner (`app/layout.tsx`) says Clover 4 is in development. Retire it, or
+    change its `storageKey`, when 4.0 ships.
   - The homepage (`docs/components/Home/`) opens with its headline, "Imagine a viewer built
     by you." (`Hero.tsx`, the page's `h1`), and one sentence on what Clover does
     for the distinctive collections a library, archive or museum shares (a lightweight,
@@ -84,11 +117,67 @@ deadline.
     linking to Composing Layouts). The parts follow the playground: `Homepage` holds the resource the playground reports
     (`onResourceChange`) and hands it down, and the section's chips put another of the
     playground's resources on its stage (`pickResource`).
+  - After the parts, "Why Clover" tells five stories, one at a time, the figure on
+    alternate sides (Mat, 2026-10-20: bolder, as a product page; a reveal driven by the
+    scroll, motion only where allowed, never a fade). It is in the parts' grid, in their
+    column, so the example viewer stays held beside it (Mat, 2026-10-20): `Homepage`
+    passes it to `Parts` as children, drawn on the server, and the Root draws no box
+    (`display: contents`), so the viewer spans every row. The story in the middle of the
+    window outlines the one part its `data-point` names in the viewer (or, for
+    `viewer`, every part), with its name tag, and one 3px line is drawn from its edge to
+    it (`StoryLines.tsx`; Mat, 2026-10-20: one line each, each chosen with thought):
+    decoration, hidden from assistive technology, only where the viewer is held, drawn in
+    only where motion is allowed. The Accessible story (`data-turn`) turns the viewer over, from as it comes into
+    view (two thirds down the window) until the next story reaches the middle, the
+    stories `2xl` apart so the turn has room (Mat, 2026-10-20). Its other side is an
+    inspector on the page's light ground (`AccessibilityTree.tsx`): WCAG 2.2 checks
+    measured on the viewer as it turns (names, tab stops, the smallest target, the lowest
+    text and control contrasts, marked languages, the reader's motion setting), then an
+    ARIA snapshot with each control's tab stop. A glimpse, not an audit, but every value
+    is measured, never written in. Focus in the viewer keeps its face up (WCAG 2.4.7),
+    and the other side is hidden from assistive technology. The Coverage story (`data-recipe`)
+    turns it to a third side the same way: a Cookbook recipe (0261, a polygon
+    annotation; Mat, 2026-10-20: "let's do an Annotation") in a Root of its own, its
+    Content and Annotations outlined, named at its head ("IIIF Cookbook 0261: …");
+    inert, loaded as the reader reaches the stories, the grid running about 30vh past the
+    last story so the viewer is held while it reads. Every face rests at its full size
+    and the turn clips rather than squeezes, since a Canvas set up mid-transform draws
+    into a sliver. Composable is about the parts, not the templates (the template count
+    belongs to the playground): its figure is counted from the Components menu
+    (`counts.ts`), and where the viewer is held the example viewer's code editor moves
+    into it (a portal into `data-composer`, so it keeps its Root), and makes a change of
+    its own as the story passes (`data-compose`), to the layout Mat set in it (2026-10-20):
+    Content first and taller (400, near square), then the Label and Summary, then Items
+    with larger pictures (`--clover-items-height` for a carousel, `--clover-items-size`
+    for a grid or list, as a page would write it), the Thumbnail and Metadata out, the code
+    crossfading from what it was with its new lines lit, and keeping 15 lines, none
+    wrapping (blank ones after), so its height holds; all put back after. The Yours story has the site's Font family and Color
+    (`BrandPicker.tsx`), setting the whole site and remembered (`page-theme.ts`), with
+    the CSS a page would write under them; its line goes to the viewer's right edge. As
+    it passes (`data-brand`, where the viewer is held) the site previews Northwestern
+    purple without keeping it (`previewPageTheme`), and goes back after unless the
+    reader chose meanwhile; never the font, which would shift the layout, and nothing on
+    a dark page, where a dark accent on the dark ground would fail 1.4.3 (Mat,
+    2026-10-20). The navbar has no settings
+    of its own: its gear was removed that day, appearance being in the footer. The Composable story lights nothing of its own: a
+    part lights as its code is pointed at. Above the stories, the tiles at the middle of the
+    window light themselves and their parts, and "And more." (a line across the tiles
+    after the Collection, with the same counts) leads to the rest; none of this syncing
+    runs where the viewer is not held, where the code stays under the viewer. It is set apart from the parts by
+    its size, not by colors of its own: the page's ground with the playground's
+    hairline and gray shadow, and the code editor's black, in turn (Mat, 2026-10-20:
+    accent fills were "a different site"). Its accent is the accent itself,
+    `--accent-9`, never a shade of it, and never a fill ("true accent color should be
+    USED always"): the figures on the page's ground, and on the black, under the
+    editor's white figures, the hero's marker stroke. Its words are Apple-style marketing (Mat, 2026-10-20): short sentences, titles too,
+    each ending in a period, in US English, every claim one Clover keeps. Every figure is the code's own: the
+    sizes are `size-budget.json`'s, which `npm run test:build` enforces, and the
+    Cookbook's counts and date are `progress4.ts`'s. Never write a figure into the copy.
   - That section is one `Root` for that resource. On the left its parts make a small
     viewer, held in view (by its foot, once taller than the window), with no caption (it
     is a region named "Example Viewer" for assistive technology; never `<Clover.Root />`),
     its parts in the order its code gives them. The code control under it opens that code
-    below, as an editor (Prism's Material colours on black, `--code-*` in
+    below, as an editor (Prism's Material colors on black, `--code-*` in
     `docs/styles/tokens.css`): its `Root` and parts as written. Its values are live
     (Content's `height` a number to type, step or drag, its `controls` a switch, Items'
     `layout` a menu), each part's lines drag into another order (by mouse anywhere on
@@ -104,10 +193,10 @@ deadline.
     a name). Pointing at a tile outlines the part in the viewer. A part the resource gives
     nothing to is a chip at the end, naming what it would read and the playground resource
     that has it (`SHOWN_IN`). Every value shown is the resource's own: no illustrations,
-    made-up figures or copy. Golden-ratio spaces, hairline edges, no grey fills.
+    made-up figures or copy. Golden-ratio spaces, hairline edges, no gray fills.
   - The playground shows how far one Viewer stretches: any layout with any kind of
-    resource. Two pickers, each changing the stage without the other. Over it, centred,
-    the resource (`ResourceField.tsx`): one field, labelled "IIIF resource" beside it, as "Template" is beside its dropdown, for the
+    resource. Two pickers, each changing the stage without the other. Over it, centered,
+    the resource (`ResourceField.tsx`): one field, labeled over it, centered, "View any IIIF Manifest or Collection" (Mat, 2026-10-20: what it does, in IIIF's words; its `<label>`), for the
     address or content state of the reader's own, with ours listed under it (`resources`
     in `playground-config.ts`: a catalog, a print, a Collection, a photo, a map, a film, a
     recording…), each by its thumbnail, its own label, and a few words on one thing it has
@@ -125,10 +214,10 @@ deadline.
     stage and the parts' tiles keep their hairlines (Mat, 2026-10-16; the tiles at 3:1
     was tried and put back). Under the stage, the
     "Template" dropdown listing the templates by name. No drawings of the layouts, no
-    fills of light grey, spaces on Clover's golden-ratio scale. Each template shows with its own defaults: no props, no generated code (a
+    fills of light gray, spaces on Clover's golden-ratio scale. Each template shows with its own defaults: no props, no generated code (a
     Customize drawer with both was removed on purpose). The section is wider than the
     reading sections but held off the screen's edges; the stage keeps one height for
-    every pairing, with a hairline edge and a small, soft grey shadow (never the accent).
+    every pairing, with a hairline edge and a small, soft gray shadow (never the accent).
     Keep it about layout and UX: names and those few words, no marketing lines.
   - Headers are solid, never frosted or translucent: the navbar (`docs/styles/layout.css`
     overrides Nextra's blur) and the playground's bar. From 48rem wide, on a screen at
@@ -141,28 +230,32 @@ deadline.
     `useStuck` sets the page's `scroll-padding-top` to the navbar and the bar, measured,
     so a control that takes focus in the stage comes into view below the bar (WCAG
     2.4.11).
-  - Titles and share cards are `useNextSeoProps` in `theme.config.tsx`: the homepage's
-    title is "Clover IIIF – Imagine a viewer built by you" and the site's description
-    the hero's sentence (less "designed", to fit a search result); a page with its own
-    `title` and `description` uses them. Every page's card picture is a 1200 × 630 band of
+  - Titles and share cards are `pageMetadata` (`docs/lib/site.ts`), the root layout's
+    `metadata` and each page's `generateMetadata` (`app/[[...mdxPath]]/page.tsx`): the
+    homepage's title is "Clover IIIF – Imagine a viewer built by you" and the site's
+    description the hero's sentence (less "designed", to fit a search result); a page
+    takes its `title` (front matter, else its first `h1`, Nextra's rule) and its
+    `description`. Every page's card picture is a 1200 × 630 band of
     the White catalog's cover, cut by Northwestern's IIIF Image server and linked from
     there, never copied into `public/` (Mat, 2026-10-16: the record's attribution does
-    not permit further distribution of its images). Its `head` replaces Nextra's
-    default, whose placeholder description and X handle had contradicted the cards.
-  - Under the navbar on every page, a line on the light grey surface (`--surface`) says
+    not permit further distribution of its images).
+  - Under the navbar on every page, a line on the light gray surface (`--surface`) says
     Clover is a project of Northwestern University Libraries, linking the Libraries'
     site (`docs/components/Subheader.tsx`, styled in `docs/styles/layout.css`). It is
     aligned to the end of the navbar's content. It is not held (Mat, 2026-10-16):
-    `navbar.component` in `theme.config.tsx` renders it after Nextra's `Navbar`, outside
-    the navbar's sticky box, so it scrolls away with the page.
+    the root layout's `navbar` renders it after Nextra's `Navbar`, outside the navbar's
+    sticky box, so it scrolls away with the page.
   - On the homepage the navbar's content, and that line, line up with the sections'
     1300px (and the shell's padding) at every width (`Home.module.css`); docs pages keep
-    Nextra's 90rem, which lines up with their sidebar.
+    Nextra's 90rem, which lines up with their sidebar. Nextra 4 has no `raw` layout: the
+    homepage and the `/test/` pages are `full` with the sidebar and the rest turned off
+    (`_meta.ts`), and their CSS modules undo the full layout's 90rem and its article's
+    padding around them alone (`:has()`), so they span the window as they did.
   - The homepage renders on the server, so a component it imports statically must not
     import `@iiif/helpers` (through `docs/lib/iiif-content`, say). It is an ESM external
     there, which makes the importing module async, and the homepage's import of it is
     then undefined ("Element type is invalid").
-  - `/test/…` (`pages/test/`) holds unlisted mocks of host pages, for trying Clover 4
+  - `/test/…` (`content/test/`) holds unlisted mocks of host pages, for trying Clover 4
     where it is meant to live: raw layout, no docs navbar or footer, out of search.
     `/test/dc-item` is a Digital Collections item page (`docs/components/DcItemMock/`),
     filled from the DC API, with the Viewer and `Items` where the site has 3.x's Viewer and
@@ -171,6 +264,50 @@ deadline.
 - Tests are colocated near code as `*.test.ts|tsx`: the package's, and the docs' own
   helpers in `docs/lib/` (the root `vitest.config.mjs`), run together through
   `vitest.workspace.mjs`.
+
+## Nextra 4
+
+- Pages are server components. An MDX page cannot hand a function to a component (an
+  `onClick`, a callback, an `adapt`): move it into a `"use client"` module, as
+  `docs/components/ContentState/`, `Examples/HomepageButton.tsx` and
+  `Canvas/adapters.ts` do. A docs component that uses hooks, `next/dynamic` or the DOM
+  starts with `"use client"`. `next/router` is gone: `useRouter` from `docs/lib/router.ts`
+  gives the old `query` (read once the page hydrates, `isReady`), `pathname`, `basePath`
+  and `push` / `replace` (`shallow` moves through the history API).
+- Front matter is compiled to `export const metadata`: an MDX page never exports another
+  `metadata`.
+- A folder's own page is its `index.mdx` with `asIndexPage: true` in its front matter, so
+  the folder in the sidebar is that page's link. Sidebar titles come from `_meta.ts`
+  first, then front matter. The Mocks page is never in the sidebar
+  (`content/docs/_meta.ts`): it stays at `/docs/mocks`, linked from the pages whose
+  examples use a mock.
+- Tabs are `<Tabs.Tab>` (no `Tab` export). Nextra gives each tab a hidden heading named by
+  its place among `<Tabs>`' children, so nothing else sits between tabs: a
+  `{/* prettier-ignore */}` goes before `<Tabs>`, which Prettier then leaves whole.
+  Every panel stays mounted; a tab holding a live demo is `<Tabs.Tab unmount>`, so the
+  demo loads when its tab opens.
+- Nextra's stylesheet is in cascade layers (Tailwind 4's `theme`, `base`, `components`,
+  `utilities`), so the site's unlayered CSS outranks it without `!important`, and
+  Clover's `@layer clover`, declared after, outranks it too. Its utilities are
+  `x:`-prefixed classes; match them whole, `[class~="x:text-primary-600"]`. A layered
+  `!important` beats any unlayered rule: meet it through the custom property it reads.
+  Re-check `docs/styles/layout.css`'s fixes (focus ring, hidden sidebar and phone-menu
+  links, link colors, the solid navbar) after a Nextra upgrade.
+- The ground is the site's `--gray-1` (`Head`'s `backgroundColor`, `app/layout.tsx`), not
+  Nextra's #fafafa. Code blocks use Shiki's `github-light-default` and
+  `github-dark-default` (`next.config.mjs`), whose colors hold 4.5:1; Nextra's own do
+  not.
+- Markdown tables render through `ScrollTable` (`mdx-components.tsx`): a box that, while
+  the table is wider than the page, is a focusable region named for its section (WCAG
+  2.1.1). Nextra's code blocks are focusable themselves.
+- Search is Pagefind: `postbuild:docs` indexes the built HTML (`.next/server/app`) into
+  `out/_pagefind`. In `npm run dev` search answers only after a build. Front matter
+  `searchable: false` keeps a page out.
+- Nextra 4.6.1 needs Zod 4.3 (4.4 and later reject its Layout's props, "expected
+  nonoptional … at children"): `overrides` in `package.json` hold Nextra's own Zod at
+  4.3.6. Drop them with a Nextra release past 4.6.1.
+- Nextra's "Copy page" menu is off (`copyPageButton={false}`) until it has been checked
+  against WCAG 2.2 AA.
 
 ## Build, Test, and Development Commands
 
@@ -182,7 +319,10 @@ deadline.
   restart it.
 - `npm run test`: run unit tests (Vitest/JSDOM).
 - `npm run coverage`: run tests with coverage reports (text/json/html).
-- `npm run lint`: Prettier check + `next lint`.
+- `npm run lint`: Prettier check + ESLint 9 (`eslint.config.mjs`, a flat config; Next 16
+  has no `next lint`). It lints the package's source, `app/`, `pages/` and `docs/lib/`,
+  as `next lint` did. The React Compiler rules of eslint-plugin-react-hooks 7 are off
+  (99 hits in code that passed before); turn them on deliberately.
 - `npm run typecheck`: TypeScript project checks.
 
 ## Coding Style & Naming Conventions
@@ -206,7 +346,7 @@ deadline.
 - Commits: concise, imperative (“Fix slider scroll behavior”); reference issues `#123`.
 - PRs: include description, linked issues, and screenshots/GIFs for UI changes.
 - Required: `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` must pass.
-- Update docs (`docs/` or `pages/`) when changing public APIs or behavior.
+- Update docs (`docs/` or `content/`) when changing public APIs or behavior.
 
 ## Agents: scope of work
 
@@ -252,6 +392,10 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
 
 ## i18n
 
+- The docs' i18n page (`content/docs/i18n.mdx`, under Contribute; Mat, 2026-10-20) is
+  for readers and contributors: the languages shipped, how one is chosen, and adding a
+  language, with a demo that switches one Viewer between them (`LanguagesDemo.tsx`).
+  Keep it in step with what follows.
 - Clover translates with its own small translator in `packages/clover/src/i18n/config.ts`
   (a copy of 3.x's). No i18next:
   it was about 20 kB gzip, and Clover used only key lookup, `{{name}}` interpolation,
@@ -313,7 +457,7 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
     the demos open the live copy, and files it names that are not deployed yet answer;
   - where the static site cannot answer (a search's `?q=`), a `mockFetch` the docs demos
     pass as `request.fetch`.
-- Document every mock on `pages/docs/mocks.mdx` (URLs, contents, example answers, how to
+- Document every mock on `content/docs/mocks.mdx` (URLs, contents, example answers, how to
   regenerate, rights). `public/mocks` is in `.prettierignore`; regenerate, don't hand-edit.
 - `next.config.js` applies `output: "export"` only outside `next dev`: an export turns
   API routes off in development too, which had silently broken the 3.x
@@ -343,7 +487,7 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   kept, with a Contributor metadata line from the record and Ireland tagged (static);
   `rudolf-hess-nuremberg`, the National Archives' reel of the Nuremberg judgment on
   Commons, made to show Rudolf Hess's distress beside the other defendants (Mat,
-  2026-10-19), labelled "Rudolf Hess at Nuremberg Sentencing, 30 September–1 October
+  2026-10-19), labeled "Rudolf Hess at Nuremberg Sentencing, 30 September–1 October
   1946": a "Rudolf Hess" page of three tracked annotations (`xywh=…&t=…`, `tracks.json`)
   and an "Other Defendants" page, English captions from the trial's record
   (`captions.json`, the Russian and French interpretation in the record's English), the

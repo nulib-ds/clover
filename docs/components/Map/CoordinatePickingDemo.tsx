@@ -1,3 +1,5 @@
+"use client";
+
 import CloverMap from "docs/components/DynamicImports/Map";
 import { useState } from "react";
 

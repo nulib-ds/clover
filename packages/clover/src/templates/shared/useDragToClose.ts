@@ -15,9 +15,9 @@ export interface DragToCloseOptions {
   side: "start" | "end";
   onClose: () => void;
   /** The wash over the page behind it, to fade as the pane goes. */
-  scrim?: React.RefObject<HTMLElement>;
+  scrim?: React.RefObject<HTMLElement | null>;
   /** What sits on the pane's edge and moves with it (its toggle, on its spine). */
-  alongside?: React.RefObject<HTMLElement>;
+  alongside?: React.RefObject<HTMLElement | null>;
   /**
    * The pane has no slide of its own (it is simply hidden): the drag finishes the motion
    * off the edge itself, then closes it. By default its own slide out carries on.
@@ -37,7 +37,7 @@ export interface DragToCloseOptions {
  * select text as they always have.
  */
 export function useDragToClose(
-  pane: React.RefObject<HTMLElement>,
+  pane: React.RefObject<HTMLElement | null>,
   {
     enabled,
     side,

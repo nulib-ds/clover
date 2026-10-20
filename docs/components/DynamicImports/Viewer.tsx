@@ -1,3 +1,5 @@
+"use client";
+
 import type {
   ContentSearchQuery,
   CustomDisplay,
@@ -5,7 +7,7 @@ import type {
   ViewerConfigOptions,
 } from "@samvera/clover-iiif/viewer";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
+import { useRouter } from "docs/lib/router";
 
 // todo: set this as a constant somewhere?
 const defaultIiifContent =
@@ -24,6 +26,14 @@ export const preloadViewer = () => {
   import("@samvera/clover-iiif/viewer").catch(() => undefined);
 };
 
+/* The 3.x Viewer page's example callback: the content state, encoded and as JSON. */
+const logState = ({ encoded, json }: { encoded: string; json: unknown }) => {
+  console.log({
+    encoded, // base64 encoded JSON
+    json, // raw JSON
+  });
+};
+
 const CloverViewer = ({
   iiifContent,
   options,
@@ -31,6 +41,7 @@ const CloverViewer = ({
   iiifContentSearchQuery,
   plugins,
   contentStateCallback,
+  logContentState = false,
 }: {
   iiifContent?: string;
   options?: ViewerConfigOptions;
@@ -38,6 +49,11 @@ const CloverViewer = ({
   iiifContentSearchQuery?: ContentSearchQuery;
   plugins?: Array<PluginConfig>;
   contentStateCallback?: (json: any) => void;
+  /**
+   * Log each content state to the console, as the 3.x Viewer page's example does. A page
+   * is drawn on the server, which cannot hand a callback to the Viewer, so it asks here.
+   */
+  logContentState?: boolean;
 }) => {
   const router = useRouter();
   /*
@@ -64,7 +80,9 @@ const CloverViewer = ({
    */
   return (
     <Viewer
-      contentStateCallback={contentStateCallback}
+      contentStateCallback={
+        contentStateCallback ?? (logContentState ? logState : undefined)
+      }
       iiifContent={iiifResource}
       iiifContentSearchQuery={iiifContentSearchQuery}
       options={options}

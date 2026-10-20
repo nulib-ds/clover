@@ -1,7 +1,7 @@
 /**
  * Detect whether a content resource id / format pair represents an HLS
  * playlist. Strips any query string before checking the file extension so
- * tokenised URLs like `…/playlist.m3u8?token=…` are matched, then falls
+ * tokenized URLs like `…/playlist.m3u8?token=…` are matched, then falls
  * back to a list of common HLS MIME types.
  */
 export const isHls = (id?: string, format?: string): boolean => {

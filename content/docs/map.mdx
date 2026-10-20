@@ -1,0 +1,144 @@
+---
+title: Map
+---
+
+import { Callout } from "nextra/components";
+import { MapDemo, MapViewerDemo } from "docs/components/Clover4/Demos";
+
+# Map
+
+<Callout type="info">
+  Looking for the Map of Clover 3.x, `@samvera/clover-iiif`? It is at [Clover
+  3.x › Map](/docs/3.x/map).
+</Callout>
+
+Where a IIIF resource is, on a map: its [navPlace](https://iiif.io/api/extension/navplace/)
+places, and its [georeferenced](https://iiif.io/api/extension/georef/) images warped onto
+the map by their control points. A Viewer shows it by itself, in a Map tab, whenever the
+Manifest has places or georeferences. On its own, `Map` comes from `@nulib/clover/map`.
+
+```jsx
+import { Map } from "@nulib/clover/map";
+import "@nulib/clover/styles.css";
+import "maplibre-gl/dist/maplibre-gl.css";
+
+<Map iiifContent="https://iiif.io/api/cookbook/recipe/0240-navPlace-on-canvases/manifest.json" />;
+```
+
+<MapDemo iiifContent="https://iiif.io/api/cookbook/recipe/0240-navPlace-on-canvases/manifest.json" />
+
+## What it loads
+
+The map draws with [MapLibre GL](https://maplibre.org/), which comes with Clover. Import
+its stylesheet beside Clover's.
+
+MapLibre is about 287 kB gzip, and it is downloaded only when a map is first shown: a
+Viewer whose Manifest has no places never loads it, and one that has loads it when the
+reader opens the Map tab. The Map tab itself costs a page without a map about 0.6 kB.
+`@nulib/clover/map` on its own is about 17 kB before MapLibre, most of it the `Root` it
+shares with the rest of Clover.
+
+### MapLibre's worker
+
+MapLibre 6 starts its worker from a file beside its own module, and that worker imports a
+second file by relative path. A bundler that moves or renames MapLibre's files breaks
+that: the basemap draws, but places and overlays never appear. Next and webpack do. If
+yours does, serve the worker yourself and tell Clover where, once, for every map (a
+Viewer's Map tab included), with `setMapWorkerUrl`; a standalone `Map` also takes
+`workerUrl`:
+
+- **Vite** bundles a worker with its imports: `import workerUrl from
+"maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url"`.
+- **Anywhere else**, copy `maplibre-gl-worker.mjs` and `maplibre-gl-shared.mjs` from
+  `node_modules/maplibre-gl/dist/` to the same static folder, and pass the worker's URL.
+
+```jsx
+import { setMapWorkerUrl } from "@nulib/clover";
+
+setMapWorkerUrl("/static/maplibre-gl-worker.mjs");
+```
+
+## In a Viewer
+
+Inside a `Root`, `Map` maps the Root's resource: its places, and the georeferenced image of
+the view on the stage, following the reader from page to page. Pressing a place, on the
+map or in the list under it, names it and goes to its Canvas.
+
+The Viewer, the templates and any default `Panel` add a Map tab by themselves
+when the Manifest, its Collection, a Canvas or an annotation has navPlace or a
+georeference. Nothing to pass:
+
+```jsx
+<Viewer iiifContent={url} />
+```
+
+Below, the georeferenced Evanston map from Clover's [mocks](/docs/mocks): open the Map tab.
+It sits under this page's `h2`, so it is given `headingLevel={3}`, as any Viewer under a
+heading of the page's own is (see [the Viewer](/docs/viewer#the-viewer)).
+
+<MapViewerDemo />
+
+## Georeferenced images
+
+A [Georeference Extension](https://iiif.io/api/extension/georef/) annotation names points
+on an image and where each is on the earth. `Map` reads them from the Canvases' annotation
+pages, or from `georeferences` you pass, whether they target a Canvas or an image service.
+
+It draws them the basic way: the best **affine** (first-order polynomial) fit of the
+control points, which is exact for three. One image of up to 2048 px, clipped to the
+annotation's `SvgSelector` mask, placed by its four corners. The image server must allow
+CORS, as MapLibre draws with WebGL.
+
+<MapDemo mock="georeference/manifest.json" />
+
+<Callout type="info">
+  Not drawn: thin-plate spline or higher-order warps, and deep zoom into the
+  overlay. [Allmaps](https://allmaps.org/) does both, and its MapLibre layer is
+  about 422 kB gzip; Clover's overlay is a few kB. A map that needs them can add
+  Allmaps' `WarpedMapLayer` to the same MapLibre map.
+</Callout>
+
+## Places
+
+navPlace is read on the Collection, the Manifest, each Canvas, and each loaded annotation,
+and so is an annotation whose body is GeoJSON
+([Cookbook 0139](https://iiif.io/api/cookbook/recipe/0139-geolocate-canvas-fragment/)).
+Points, lines and areas are drawn in the accent color, or in a feature's own
+[simplestyle](https://github.com/mapbox/simplestyle-spec) `fill`, `stroke` and
+`marker-color`. Each is named by its `label`, in the reader's language, or by the resource
+it belongs to.
+
+Under the map, a list names every place, and each georeferenced image drawn by its
+Canvas's label, each name in its own language. Each is a button. A place's frames it and
+names it on the map, and inside a `Root` goes to its Canvas, as pressing it on the map
+does; there, the places of the Canvases in view are marked current. The list is the map's
+text alternative and the keyboard's way to its places. It shows even where the map cannot,
+without WebGL. The map is a region named "Map", described by how many places the list
+holds; in the information panel, whose section is already that region, it is a group.
+
+## Properties
+
+| Prop             | Type                       | What it does                                                                     |
+| ---------------- | -------------------------- | -------------------------------------------------------------------------------- |
+| `iiifContent`    | URL or IIIF object         | Standalone: a resource to map. Inside a `Root`, leave it out.                    |
+| `navPlace`       | GeoJSON                    | Places to draw: a FeatureCollection, a Feature or a geometry.                    |
+| `georeferences`  | annotations                | Georeference Extension annotations to overlay.                                   |
+| `overlay`        | `boolean`                  | Draw georeferenced images. Default `true`.                                       |
+| `overlayOpacity` | `number`                   | Their opacity, 0 to 1. Default `0.75`.                                           |
+| `styleUrl`       | `string`                   | A MapLibre style, used as it is. Default: Clover's relief basemap.               |
+| `workerUrl`      | `string`                   | Where MapLibre's worker is served from, if your bundler moves it.                |
+| `scrollZoom`     | `boolean`                  | Zoom with the wheel or trackpad. Default `false`, so page scroll is not trapped. |
+| `onSelect`       | `(feature) => void`        | A place was pressed. Its `properties` hold `title`, `titleLang` and `canvasId`.  |
+| `request`        | `{ credentials, headers }` | Standalone: how to fetch.                                                        |
+
+Size the map with `--clover-map-height` (default `24rem`); its list follows it. `style`
+and `className` go to the element that holds both, so give the height as the property, not
+as `height`: `style={{ "--clover-map-height": "400px" } as React.CSSProperties}`, or set
+it in your CSS.
+
+The default basemap is OpenFreeMap's Liberty, keyless, with roads removed and relief from
+Mapzen's terrain tiles, as 3.x's Map draws it. Wheel zoom is off; the zoom buttons,
+double-click and pinch all work.
+
+`navPlaceOf`, `georeferencesOf`, `readGeoreference`, `affineTransform`, `cornersOf` and
+`boundsOf` are exported from `@nulib/clover/map` too, for a map of your own.

@@ -50,7 +50,7 @@ const asArray = (value: unknown): unknown[] =>
   Array.isArray(value) ? value : value === undefined ? [] : [value];
 
 /**
- * The layout behavior to use: the first recognised layout value, so a `behavior` array
+ * The layout behavior to use: the first recognized layout value, so a `behavior` array
  * may carry values from other sets (`auto-advance`, `hidden`) alongside it. The spec's
  * default is `individuals`.
  */

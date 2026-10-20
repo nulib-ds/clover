@@ -1,0 +1,34 @@
+---
+title: Viewer Content Search (3.x)
+---
+
+import Viewer from "docs/components/DynamicImports/Viewer";
+import CallToAction from "docs/components/CallToAction";
+
+## Viewer
+
+<br />
+<CallToAction href="/docs/3.x/viewer" text="Docs" size="small" />
+
+## Content search.
+
+Type in anything in the search field, and click the search button or type return. This demo will show the search results for "Berliner". Click on any of search results, and Clover will zoom and pan to that search result.
+
+Due to the fact that the Clover documentation site is a statically generated, search will only return results for "Berliner" because the search service returns a static content search manifest. In a fully functional site, the search service will return a dynamic content search manifest based on the entered search words.
+
+<Viewer
+  iiifContent="http://localhost:3000/manifest/content-search/newspaper.json"
+  iiifContentSearchQuery={{ q: "Berliner" }}
+  options={{
+    informationPanel: {
+      open: true,
+      defaultTab: "manifest-content-search",
+    },
+    canvasHeight: "640px",
+    openSeadragon: {
+      gestureSettingsMouse: {
+        scrollToZoom: true,
+      },
+    },
+  }}
+/>

@@ -1,0 +1,90 @@
+---
+title: Thumbnail
+description: A small picture of the Manifest, or of the current Canvas, as an image named by its label.
+---
+
+import { Callout } from "nextra/components";
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+
+# Thumbnail
+
+<Callout type="info">
+  Looking for the Thumbnail of Clover 3.x, `@samvera/clover-iiif`? It is at
+  [Clover 3.x › Thumbnail](/docs/3.x/thumbnail).
+</Callout>
+
+The Manifest's `thumbnail`, or the current Canvas's with `of="canvas"`, as an `img`. It
+asks for a picture about `size` pixels on its longer side (default 400), and gives the
+`img` that `width`. A Canvas without a `thumbnail` is pictured by the first image it
+paints, else by the first image of its placeholder or accompanying Canvas (for video and
+sound); a Manifest without one shows nothing. Outside a `Root`, give it the resource to
+picture as `value`: a Manifest, a Canvas or a Collection.
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+<Clover.Root iiifContent={manifestUrl}>
+  <Clover.Thumbnail size={200} />
+</Clover.Root>;
+```
+
+Below, the White Sewing Machine Company's 1896 bicycle catalog from Clover's
+[mocks](/docs/mocks), at `size={200}`.
+
+<PartDemo part="Thumbnail" props={{ size: 200 }} />
+
+## Where the picture comes from
+
+The first `thumbnail` a resource lists is the one shown.
+
+- An image service that can size images (level 1 or 2) is asked for one at once, at
+  `!size,size`.
+- A level 0 service, or one that declares no level, has its `info.json` read first, with
+  the Root's `request`. A level 0 service can only hand out the sizes it lists: the
+  smallest that fills `size` is used, else the largest.
+- Without a service, the image is used as it is. So is it when that `info.json` cannot be
+  read.
+
+The `img` loads lazily (`loading="lazy"`, `decoding="async"`). Until it has a picture, and
+for a resource with none, the part renders nothing.
+
+## Its `alt`
+
+The `alt` is the resource's label, as plain text, in the reader's language, and the `img`
+carries the label's `lang`. A resource without a label gives an empty `alt`.
+
+An `alt` of your own wins, and then Clover sets no `lang`: pass one with it where it is in
+a language other than the page's. Beside a `Label` that says the same, `alt=""` keeps
+assistive technology from reading the title twice:
+
+```jsx
+<Clover.Thumbnail alt="" />
+<Clover.Label as="h2" />
+```
+
+## Props
+
+| Prop        | Type                     | Description                                                                        |
+| ----------- | ------------------------ | ---------------------------------------------------------------------------------- |
+| `of`        | `"manifest" \| "canvas"` | Whose thumbnail. Default `manifest`.                                               |
+| `value`     | object                   | A resource to picture instead of the Root's: a Manifest, a Canvas or a Collection. |
+| `size`      | `number`                 | Pixels asked for on the longer side, and the `img`'s `width`. Default `400`.       |
+| `alt`       | `string`                 | Default: the resource's label.                                                     |
+| `className` | `string`                 | Added to `clover-thumbnail`.                                                       |
+
+Its other props (`width`, `loading`, `style`, `aria-*`) go to the `img`, over Clover's.
+
+### Styles
+
+Clover's stylesheet gives `.clover-thumbnail` no style of its own: its size on the page,
+and how it fills that (`object-fit`, `aspect-ratio`), are your CSS's.
+
+## From Clover 3.x
+
+| 3.x `Thumbnail`                                   | Clover 4                                                             |
+| ------------------------------------------------- | -------------------------------------------------------------------- |
+| `thumbnail`, `altAsLabel`                         | `value={{ thumbnail, label: altAsLabel }}`; inside a `Root`, neither |
+| `as="video"`, a `Video` thumbnail                 | Not in Clover 4: `Thumbnail` is an `img`                             |
+| `objectFit`                                       | `object-fit` on `.clover-thumbnail`, in your CSS                     |
+| `lang`                                            | The Root's `language`                                                |
+| `className`, `style`, `title`, `data-*`, `aria-*` | The same, on the `img`                                               |

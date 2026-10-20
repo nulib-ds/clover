@@ -2,7 +2,7 @@
  * What @nulib/clover's build emits, and what a consumer ships from it.
  *
  * The graph checks build in memory. The size table bundles the built `dist/` as a Vite
- * app builds it for production (`consumer-bundle.mjs`), so run
+ * app builds it for production (`sizes.mjs`, through `consumer-bundle.mjs`), so run
  * `npm run build -w @nulib/clover` first.
  */
 import assert from "node:assert/strict";
@@ -10,11 +10,9 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { gzipSync } from "node:zlib";
-import { transformSync } from "esbuild";
 import { build } from "vite";
 
-import { bundleAsConsumer, gzipSize } from "./consumer-bundle.mjs";
+import { measure } from "./sizes.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = resolve(root, "dist");
@@ -62,13 +60,13 @@ const LAZY_MODULES = [
   // The upgrader's fix for fragmented targets, loaded with the upgrader.
   "/core/keep-fragments.ts",
   // About's "Part of", for a Canvas shown on its own.
-  "/components/InformationPanel/PartOfManifest.tsx",
+  "/components/Panel/PartOfManifest.tsx",
   // Every language but English, the first time Clover is to speak it.
   ...["es", "fi", "fr", "nb", "nn", "no", "pt"].map(
     (lng) => `/i18n/locales/${lng}.json`,
   ),
 ];
-/** Packages imported only on demand: media streaming, sanitising, upgrading old IIIF. */
+/** Packages imported only on demand: media streaming, sanitizing, upgrading old IIIF. */
 const LAZY_PACKAGES = ["hls.js", "dompurify", "@iiif/parser", "maplibre-gl"];
 
 const packageName = (id) =>
@@ -135,7 +133,7 @@ test("three entries, only package source, externals within dependencies and peer
   }
 });
 
-test("media, caption details, hotspots, the Canvas's menus, the navigator, languages, the sanitiser, hls.js and the upgrader load only on demand", async () => {
+test("media, caption details, hotspots, the Canvas's menus, the navigator, languages, the sanitizer, hls.js and the upgrader load only on demand", async () => {
   const chunks = await emitted();
   const initial = closure(chunks, "index.mjs");
   const reachable = closure(chunks, "index.mjs", true);
@@ -189,132 +187,19 @@ test("MapLibre loads only on demand; the parts reach the map only lazily", async
   );
 });
 
-/**
- * What a consumer's app ships up front for some named exports, built as Vite builds it
- * (`consumer-bundle.mjs`): the entry and every chunk it imports statically, gzipped. Lazy
- * chunks are left out. `also` adds exports of another entry, `[exports, entry]`, for what
- * a page imports together. `onDemand` measures instead what loads later, from the lazy
- * chunks it matches (MapLibre's), not everything lazy (the upgrader loads with any
- * content).
- */
-async function initialGzip(
-  exports,
-  entry = "index.mjs",
-  { onDemand = null, also = null } = {},
-) {
-  const line = (names, file) =>
-    `export { ${names} } from ${JSON.stringify(resolve(dist, file))};`;
-  const bundle = await bundleAsConsumer(
-    [line(exports, entry), also && line(...also)].filter(Boolean).join("\n"),
-  );
-  const { chunks, initial } = bundle;
-  const sum = (fileNames) =>
-    [...fileNames].reduce(
-      (total, fileName) => total + gzipSize(chunks.get(fileName).code),
-      0,
-    );
-  if (!onDemand) return { size: sum(initial), bundle };
-  const later = new Set();
-  const reach = (fileName) => {
-    if (later.has(fileName) || !chunks.has(fileName)) return;
-    later.add(fileName);
-    const chunk = chunks.get(fileName);
-    [...chunk.imports, ...chunk.dynamicImports].forEach(reach);
-  };
-  for (const chunk of chunks.values()) {
-    if (chunk.isDynamicEntry && onDemand.test(chunk.facadeModuleId ?? "")) {
-      reach(chunk.fileName);
-    }
-  }
-  return {
-    size: sum([...later].filter((fileName) => !initial.has(fileName))),
-    bundle,
-  };
-}
-
-/**
- * A page's up-front size split three ways: the Viewer shell, the parts its template uses
- * (with their dependencies), and the template's own code. Gzip does not add up module by
- * module, so the exact total is divided by each group's share of the minified code.
- */
-function split({ chunks, initial }, size) {
-  const minified = { shell: 0, parts: 0, template: 0 };
-  for (const fileName of initial) {
-    for (const [id, module] of Object.entries(chunks.get(fileName).modules)) {
-      if (!module.code) continue;
-      const group = id.endsWith("/dist/components/Viewer/Viewer.mjs")
-        ? "shell"
-        : id.includes("/dist/templates/")
-          ? "template"
-          : "parts";
-      minified[group] += transformSync(module.code, {
-        minify: true,
-      }).code.length;
-    }
-  }
-  const all = minified.shell + minified.parts + minified.template;
-  const shell = Math.round((size * minified.shell) / all);
-  const parts = Math.round((size * minified.parts) / all);
-  return { shell, parts, template: size - shell - parts };
-}
-
 const kB = (bytes, digits = 1) => (bytes / 1000).toFixed(digits);
-
-const gzip = (file) => gzipSync(readFileSync(file), { level: 9 }).length;
 
 test("what a consumer ships stays within budget", async (t) => {
   assert.ok(
     existsSync(resolve(dist, "index.mjs")),
     "dist/ is missing: run `npm run build -w @nulib/clover` first",
   );
-  const rows = [];
-  const pages = [];
-  for (const [name, exports, limit, entry, options] of [
-    ["Canvas initial JS", "Canvas", budget.canvasInitialGzip],
-    // `import Viewer from "@nulib/clover"`: a shell. `<Viewer />` loads Default later.
-    ["Viewer shell", "default", budget.viewerShellGzip],
-    // `<Viewer template={X} />`: the shell, the template, and the parts it uses.
-    ...[
-      ["Default", budget.defaultTemplateGzip],
-      ["Document", budget.documentTemplateGzip],
-      ["Gallery", budget.galleryTemplateGzip],
-    ].map(([template, limit]) => [
-      `Viewer, ${template}`,
-      "default",
-      limit,
-      "index.mjs",
-      { also: [template, "templates/index.mjs"], template },
-    ]),
-    ["Map, before MapLibre", "Map", budget.mapInitialGzip, "map/index.mjs"],
-    // What a Viewer loads when its Map tab is first shown: MapLibre.
-    [
-      "MapLibre, on a map",
-      "default",
-      budget.mapOnDemandGzip,
-      "index.mjs",
-      { onDemand: /maplibre-gl/, also: ["Default", "templates/index.mjs"] },
-    ],
-  ]) {
-    const { size, bundle } = await initialGzip(exports, entry, options);
-    rows.push([name, size, limit]);
-    if (options?.template) {
-      pages.push([options.template, split(bundle, size), size]);
-    }
-  }
-  rows.push([
-    "styles.css",
-    gzip(resolve(dist, "styles.css")),
-    budget.stylesGzip,
-  ]);
-  rows.push([
-    "templates.css",
-    gzip(resolve(dist, "templates.css")),
-    budget.templatesStylesGzip,
-  ]);
+  // Measured as `sizes.mjs` measures them for `sizes.json`, the homepage's figures.
+  const { rows, pages } = await measure();
 
-  for (const [name, size, limit] of rows) {
+  for (const [name, key, size] of rows) {
     t.diagnostic(
-      `${name.padEnd(18)} ${kB(size)} kB gzip (budget ${kB(limit)} kB)`,
+      `${name.padEnd(18)} ${kB(size)} kB gzip (budget ${kB(budget[key])} kB)`,
     );
   }
 
@@ -340,7 +225,8 @@ test("what a consumer ships stays within budget", async (t) => {
     "  each group's share of the minified code. <Viewer /> with no template ships the",
   );
   t.diagnostic("  shell alone up front and loads Default when it first draws.");
-  for (const [name, size, limit] of rows) {
+  for (const [name, key, size] of rows) {
+    const limit = budget[key];
     assert.ok(size <= limit, `${name} is ${size} B gzip, over ${limit} B`);
   }
 });

@@ -26,3 +26,16 @@
   flex: 1 1 0;
   min-height: 0;
 }
+
+/*
+ * Nextra 4 has no `raw` layout: its `full` layout holds a page to 90rem and pads its
+ * article. The Viewer's test page runs the window's width, as it did on Nextra 2's raw layout, so both
+ * are undone around it, and only around it (as the homepage does, `Home.module.css`).
+ */
+:global(div):has(> :global(article) > :global(main) > .screen) {
+  max-width: none;
+}
+
+:global(article):has(> :global(main) > .screen) {
+  padding: 0;
+}

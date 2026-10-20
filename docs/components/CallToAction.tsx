@@ -24,9 +24,7 @@ const CallToAction: React.FC<CallToActionProps> = ({
 }) => {
   return (
     <Link
-      className={`${styles.cta} ${
-        size === "small" ? styles.small : ""
-      } nx-bg-primary-400/10`}
+      className={`${styles.cta} ${size === "small" ? styles.small : ""}`}
       href={href}
       id={id}
       target={target}

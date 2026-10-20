@@ -165,7 +165,7 @@ function TransportMenu({
         if (event.key !== "Escape") return;
         // Escape from inside the menu hands focus back to its button, not to the page,
         // and closes nothing else: not a modal `<dialog>` around it, nor a floating
-        // InformationPanel. Heard in the capture phase, before the page's handlers.
+        // Panel. Heard in the capture phase, before the page's handlers.
         if (menu.current?.contains(document.activeElement)) {
           event.preventDefault();
           trigger.current?.focus();
@@ -662,7 +662,7 @@ const Transport: React.FC<TransportProps> = ({
                 lang={langOf(fullscreenKey)}
                 className="clover-canvas-transport-button"
                 data-button="fullscreen"
-                // Straight from the click: the Fullscreen API only honours a
+                // Straight from the click: the Fullscreen API only honors a
                 // user gesture.
                 onClick={(event) =>
                   void toggleFullscreen(event.currentTarget, video)

@@ -31,7 +31,7 @@ describe("Search", () => {
   it("is a tab when the Manifest has a search service, and not otherwise", async () => {
     const { unmount } = render(
       <Clover.Root iiifContent={manifest([])}>
-        <Clover.InformationPanel />
+        <Clover.Panel />
       </Clover.Root>,
     );
     await screen.findByRole("tab", { name: "About" });
@@ -40,7 +40,7 @@ describe("Search", () => {
 
     render(
       <Clover.Root iiifContent={withSearch}>
-        <Clover.InformationPanel />
+        <Clover.Panel />
       </Clover.Root>,
     );
     expect(

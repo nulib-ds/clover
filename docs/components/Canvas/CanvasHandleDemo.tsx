@@ -1,3 +1,5 @@
+"use client";
+
 import CloverCanvas from "docs/components/DynamicImports/Canvas";
 import { useRef, useState } from "react";
 import { useMock } from "docs/lib/useMock";

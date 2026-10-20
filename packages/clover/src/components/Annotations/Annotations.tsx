@@ -57,7 +57,7 @@ export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
  * The annotations of the Root's resource — comments, tags, transcriptions — grouped by
  * set, as a list to read and to point with.
  *
- * - Each entry shows its content (IIIF's limited HTML, sanitised; an image body as an
+ * - Each entry shows its content (IIIF's limited HTML, sanitized; an image body as an
  *   image). Pressing it frames the annotation on the Canvas, going to its Canvas first if
  *   need be. For the keyboard, a button inside it does the same, out of sight, its focus
  *   drawn round the entry.
@@ -594,7 +594,7 @@ const AnnotationLayers = forwardRef<
                     ? [title, group.label]
                     : [title]
                   : [group.label];
-              const labelled = grouped && Boolean(label[0]?.text);
+              const labeled = grouped && Boolean(label[0]?.text);
               const current = grouped && shown.includes(group.canvasId);
               const labelId = `${id}-${layerIndex}-${groupIndex}`;
               return (
@@ -602,10 +602,10 @@ const AnnotationLayers = forwardRef<
                   key={group.canvasId}
                   className="clover-annotations-canvas"
                   data-canvas={group.canvasId}
-                  aria-labelledby={labelled ? labelId : undefined}
+                  aria-labelledby={labeled ? labelId : undefined}
                   aria-current={current ? "true" : undefined}
                 >
-                  {labelled && (
+                  {labeled && (
                     <Label
                       className="clover-annotations-canvas-label"
                       id={labelId}
@@ -628,7 +628,7 @@ const AnnotationLayers = forwardRef<
                         entry={entry}
                         canvas={canvasById.get(group.canvasId) ?? there?.canvas}
                         index={index}
-                        headingLevel={labelled ? Math.min(level + 1, 6) : level}
+                        headingLevel={labeled ? Math.min(level + 1, 6) : level}
                         language={language}
                         showLabel={showLabel}
                         selected={entry.id === selected}

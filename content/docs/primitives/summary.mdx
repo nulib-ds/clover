@@ -1,0 +1,122 @@
+---
+title: Summary
+description: The summary of the Manifest, or of the current Canvas, cut to five lines with a Read more button when it runs longer.
+---
+
+import { Callout } from "nextra/components";
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+
+# Summary
+
+<Callout type="info">
+  Looking for the Summary of Clover 3.x, `@samvera/clover-iiif`? It is at
+  [Clover 3.x › Summary](/docs/3.x/summary).
+</Callout>
+
+The Manifest's `summary`, or the current Canvas's with `of="canvas"`, in the reader's
+language, as a `p` (or `as`). It is cut to five lines, with a "Read more" button under it
+when it runs longer. Outside a `Root`, give it the summary to show as `value`.
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+<Clover.Root iiifContent={manifestUrl}>
+  <Clover.Label as="h2" />
+  <Clover.Summary />
+</Clover.Root>;
+```
+
+Below, the Canvas summary of Northwestern's Curtis photogravure from Clover's
+[mocks](/docs/mocks), cut to two lines with `--clover-summary-lines` in its `style`.
+
+<PartDemo
+  part="Summary"
+  props={{ of: "canvas", style: { "--clover-summary-lines": "2" } }}
+  resource="tagging"
+/>
+
+## Read more
+
+"Read more" opens the summary in full, and "Read less" cuts it short again. The button is
+`aria-expanded`, and `aria-controls` the summary. Its words are in Clover's interface
+language, marked with `lang` where that is not the page's.
+
+The button shows only once the text runs past its lines. It measures again when the
+summary is resized and when the page's styles or fonts change, so text that a reader's own
+text spacing, or a web font arriving, pushes past the cut gets the button too.
+
+The number of lines is a CSS custom property, `--clover-summary-lines` (default `5`), set
+on `.clover-summary` or anything around it; `none` shows it whole. Open, the summary is
+shown whole whatever the property says. Every summary Clover shows is cut this way:
+About's, a Collection's, and the one in a Canvas's information. So one rule sets them all:
+
+```css
+.my-layout .clover-summary {
+  --clover-summary-lines: 3;
+}
+```
+
+### `ReadMore`
+
+`ReadMore` gives text of your own the same button: wrap one element (or a component that
+forwards its ref) and clamp it in your CSS. While open, the element carries
+`data-read-more="open"`, for the clamp to leave it alone.
+
+```jsx
+<Clover.ReadMore>
+  <p className="my-note">{note}</p>
+</Clover.ReadMore>
+```
+
+```css
+.my-note:not([data-read-more="open"]) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+```
+
+It works inside a `Root` or outside one.
+
+## Text and language
+
+- A summary is HTML when it runs from a first `<` to a last `>`, as IIIF's rule has it,
+  and is shown as IIIF's limited HTML, sanitized (see [HTML](/docs/primitives#html)).
+  Any other summary is shown as written, tags and all, its line breaks kept.
+- Links in it are underlined, not only colored. Long unbroken text (an address, a file
+  name) wraps rather than push the layout sideways.
+- It carries the language it is in as `lang`. A summary in `none` carries no `lang`, and
+  takes the page's. A language's several values are joined with commas.
+- Without a summary it renders nothing: no button, and no empty box round it.
+
+## Props
+
+| Prop        | Type                     | Description                              |
+| ----------- | ------------------------ | ---------------------------------------- |
+| `of`        | `"manifest" \| "canvas"` | Whose summary. Default `manifest`.       |
+| `value`     | language map or `string` | A summary to show instead of the Root's. |
+| `as`        | element type             | Default `p`.                             |
+| `className` | `string`                 | Added to `clover-summary`.               |
+
+Its other props (`id`, `style`, `aria-*`) go to its element. A `div`, `.clover-read-more`,
+holds it and the button.
+
+### Styles
+
+| Property                 | Default | What it sets                                                      |
+| ------------------------ | ------- | ----------------------------------------------------------------- |
+| `--clover-summary-lines` | `5`     | The lines the summary runs to before "Read more"; `none` for all. |
+
+The button is `.clover-read-more-button`, in the accent color.
+
+## From Clover 3.x
+
+| 3.x `Summary`                                            | Clover 4                                                                              |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `summary`                                                | `value`; inside a `Root`, leave it out                                                |
+| `as` (default `span`)                                    | `as` (default `p`)                                                                    |
+| `lang`                                                   | The Root's `language`; outside a `Root`, the page's `<html lang>`, then the browser's |
+| `dir`, `className`, `style`, `title`, `data-*`, `aria-*` | The same                                                                              |
+
+New in Clover 4: the cut, with "Read more", and `--clover-summary-lines`.

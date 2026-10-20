@@ -14,7 +14,7 @@
  *
  * Only the latin and latin-ext subsets are vendored (53 KB together). Anything outside
  * them — the Arabic in the Scroll demo, for instance — falls back down the stack, which
- * is the same behaviour the subsetted Google-hosted version would have given.
+ * is the same behavior the subsetted Google-hosted version would have given.
  */
 
 /* latin */

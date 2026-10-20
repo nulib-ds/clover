@@ -29,7 +29,7 @@
 
 /* ── The bar: the resource ──────────────────────────────────────────────── */
 
-/* The resource's field, centred over the stage, `xl` over it as the template is under it. */
+/* The resource's field, centered over the stage, `xl` over it as the template is under it. */
 .bar {
   display: flex;
   justify-content: center;
@@ -63,7 +63,7 @@
   /*
    * Its background reaches the window's edges, while the bar keeps its place in the
    * playground's column (the page clips what reaches past its sides, `Home.module.css`).
-   * The page's own colour, solid, so nothing passing under shows through, not even in
+   * The page's own color, solid, so nothing passing under shows through, not even in
    * the frame before the bar is marked as held.
    */
   .bar::before {
@@ -91,7 +91,9 @@
     box-shadow: 0 1px 0 rgb(255 255 255 / 0.1);
   }
 
-  :global(html):has(.bar[data-stuck]) :global(.nextra-nav-container-blur) {
+  /* Nextra draws the navbar's edge as a border on its background (`nextra-border`). */
+  :global(html):has(.bar[data-stuck]) :global(.nextra-navbar-blur) {
+    border-bottom-color: transparent;
     box-shadow: none;
   }
 }
@@ -116,12 +118,12 @@
 
 /*
  * The edge of a field or a button that has no fill: 3:1 against the page in both themes
- * (1.4.11), so it shows where to type and press. The text's grey, lightened toward the
+ * (1.4.11), so it shows where to type and press. The text's gray, lightened toward the
  * page.
  */
 .section {
   --pg-edge: color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
-  /* The stage's close, soft grey shadow, which the field shares. */
+  /* The stage's close, soft gray shadow, which the field shares. */
   --pg-lift: 0 1px 2px rgb(0 0 0 / 0.04), 0 6px 24px rgb(0 0 0 / 0.06);
 }
 
@@ -149,9 +151,13 @@
   width: 100%;
 }
 
-.resourcePicker > .inlineLabel {
-  flex: none;
+/* The field's label, a line of its own over the field and Open, centered on them. */
+.resourcePicker > .fieldLabel {
+  color: var(--gray-11);
+  flex-basis: 100%;
   font-size: var(--text-sm);
+  line-height: 1.2;
+  text-align: center;
 }
 
 .resourcePicker > .error {
@@ -317,7 +323,7 @@
 /*
  * A resource: its thumbnail, its own label, and what it holds under it. Marked as the thumbnails of
  * Items are: a ring round the picture for the one on the stage, with its name in the text
- * accent and a check, so more than colour tells it; the one the arrow keys reach, an
+ * accent and a check, so more than color tells it; the one the arrow keys reach, an
  * inner ring in the text accent.
  */
 .option {
@@ -419,7 +425,7 @@
 .stage {
   background: var(--color-background);
   border-radius: var(--radius-4);
-  /* A hairline edge, then a close, soft grey shadow, just lifting the frame off the page. */
+  /* A hairline edge, then a close, soft gray shadow, just lifting the frame off the page. */
   box-shadow:
     0 0 0 1px var(--gray-6),
     var(--pg-lift);
@@ -468,7 +474,7 @@
 
 /*
  * The item above in another template, or a layout of one's own from the parts below:
- * centred under the stage, `xl` under it, wrapping on a narrow page.
+ * centered under the stage, `xl` under it, wrapping on a narrow page.
  */
 .choices {
   align-items: center;

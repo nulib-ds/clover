@@ -4,7 +4,7 @@ import type { Point } from "../math/affine";
 export interface GestureTarget {
   /** Move the content by `dx, dy` (drag semantics). */
   panBy(dx: number, dy: number, animate: boolean): void;
-  /** Zoom by `factor` about `at`, or the viewport centre. */
+  /** Zoom by `factor` about `at`, or the viewport center. */
   zoomBy(factor: number, at: Point | undefined, animate: boolean): void;
   /** Continue a released drag at `vx, vy` px/s. */
   flick(vx: number, vy: number): void;
@@ -12,7 +12,7 @@ export interface GestureTarget {
   /** The view is zoomed in as far as it goes. */
   atMaxZoom?(): boolean;
   rotateBy(degrees: number): void;
-  /** A pointer is down. The camera tracks it 1:1, so any animation is cancelled. */
+  /** A pointer is down. The camera tracks it 1:1, so any animation is canceled. */
   setInteracting(interacting: boolean): void;
   /** A mouse click that is not a zoom (click-to-zoom is off): video toggles playback. */
   tap?(at: Point): void;

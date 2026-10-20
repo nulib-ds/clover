@@ -1,0 +1,144 @@
+---
+title: Value
+description: Any IIIF language map you hold, in the reader's language, read strictly by its format as plain text, IIIF's HTML or Markdown.
+---
+
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+
+# Value
+
+Any IIIF language map you hold, an annotation's text say, shown in the reader's language
+and read strictly by its `format`. Unlike the other [primitives](/docs/primitives), it
+reads nothing from the Root's resource: pass it `value`, and the `format` it is in.
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+const note = { en: ["Plates pair <i>Then</i> with <i>Now</i>."] };
+
+<Clover.Value value={note} format="text/html" />;
+```
+
+`value` is a language map, `{ en: ["…"] }`, or a plain string. It is shown in the language
+closest to the reader's: the Root's `language`, inside a `Root`, else the page's
+`<html lang>`, else the browser's. Where that language has several strings, they are
+joined by a comma. The element carries the language's tag as `lang`; text in `none`, and
+a plain string, carry none and take the page's. With no text, `Value` renders nothing.
+
+## Formats
+
+| `format`                        | Read as                                                                                                 |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `text/html`                     | IIIF's HTML, sanitized to what the Presentation API allows ([below](#html))                             |
+| `text/markdown`                 | Markdown: its lists are lists and its headings headings ([below](#markdown))                            |
+| `text/plain`, or any other type | As written, markup and all, its line breaks kept                                                        |
+| None                            | IIIF's rule for property values: HTML only when it runs from a first `<` to a last `>`, else as written |
+
+Only the media type counts, in upper or lower case: `text/html; charset=utf-8` is HTML.
+The same text, `<p>Plates pair <i>Then</i> with <i>Now</i>.</p>`, with no `format`, where
+IIIF's rule reads it as HTML:
+
+<PartDemo
+  part="Value"
+  props={{
+    value: { en: ["<p>Plates pair <i>Then</i> with <i>Now</i>.</p>"] },
+    as: "div",
+  }}
+/>
+
+And with `format="text/plain"`, as written:
+
+<PartDemo
+  part="Value"
+  props={{
+    value: { en: ["<p>Plates pair <i>Then</i> with <i>Now</i>.</p>"] },
+    format: "text/plain",
+    as: "div",
+  }}
+/>
+
+## HTML
+
+HTML is limited to what the Presentation API allows in property values: `a`, `b`, `br`,
+`i`, `img`, `p`, `small`, `span`, `sub` and `sup`, with `href`, `src`, `alt`, `width`,
+`height`, `lang` and `dir`. A link or image keeps only an `http`, `https` or `mailto`
+address. Scripts, event handlers, `style`, `aria-*` and `data-*` attributes are removed.
+`lang` and `dir` stay, so a value can mark a phrase in another language or direction.
+
+The sanitizer, DOMPurify (about 9 kB gzip), loads the first time a value carries markup
+or an entity. Until it arrives, the value shows as text, its tags dropped and its
+entities decoded. A value without markup never loads it.
+
+## Markdown
+
+`format="text/markdown"` reads Markdown as `Annotations` does for a `text/markdown` body:
+paragraphs, line breaks (two spaces or a backslash at a line's end), `*emphasis*` and
+`**strong**`, `[links](https://…)` (`http`, `https` and `mailto` only), bullet and
+numbered lists, nested by indent, headings, and footnotes (`[^1]` and `[^1]: …`), numbered
+in order and set small at the end. HTML in it shows as text: only the markup Clover writes
+for the Markdown survives. It is not a full CommonMark parser, but enough for annotation
+text. Its module loads the first time it is needed, and until then the value shows as
+text, its syntax taken off.
+
+Its headings are headings to assistive technology, `role="heading"` with an `aria-level`,
+drawn bold, so your page's heading styles stay out of them. The first takes
+`headingLevel` (default 3), and each later one sits a level under the nearest shallower
+heading before it, down to 6, so none is skipped even where the source skips one. Set
+`headingLevel` one below the heading the value sits under.
+
+```jsx
+const description = {
+  en: [
+    `# The White bicycles
+
+Issued in 1896 by the **White Sewing Machine Company**.
+
+## Plates
+
+- Thulstrup
+- Mente
+- Veenfliet
+- Clarke`,
+  ],
+};
+
+<Clover.Value
+  value={description}
+  format="text/markdown"
+  headingLevel={3}
+  as="div"
+/>;
+```
+
+This one sits under this page's `h2`, so it takes `headingLevel={3}`: its `#` is a level 3
+heading, and its `##` a level 4.
+
+<PartDemo
+  part="Value"
+  props={{
+    value: {
+      en: [
+        "# The White bicycles\n\nIssued in 1896 by the **White Sewing Machine Company**.\n\n## Plates\n\n- Thulstrup\n- Mente\n- Veenfliet\n- Clarke",
+      ],
+    },
+    format: "text/markdown",
+    headingLevel: 3,
+    as: "div",
+  }}
+/>
+
+A reset that takes the markers off every list takes them off a Markdown value's lists too;
+[Styles](/docs/composing#styles) puts them back.
+
+## Props
+
+| Prop           | Type                    | Description                                                                       |
+| -------------- | ----------------------- | --------------------------------------------------------------------------------- |
+| `value`        | language map or string  | The text, as IIIF gives it: `{ en: ["…"] }`.                                      |
+| `format`       | `string`                | Its media type. Default: none, read by IIIF's rule.                               |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | With Markdown, its first heading's level. Default `3`.                            |
+| `as`           | element type            | Default `span`. A `div` for paragraphs and lists, which a `span` should not hold. |
+
+Its other props (`id`, `className`, `style`, `aria-*`) go to its element, beside its
+`clover-value` class. It takes no `of`, since it reads no resource, and no `lang`: the
+element carries the value's.

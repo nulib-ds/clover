@@ -36,7 +36,7 @@ interface PlaceholderProps {
 
 /**
  * A Canvas's `placeholderContainer`, shown as the Viewer shows it: a still image fitted
- * to the stage and centred, in place of the Canvas until the reader opens it. Nothing
+ * to the stage and centered, in place of the Canvas until the reader opens it. Nothing
  * of the Canvas is fetched, and none of its controls shown, until then.
  *
  * The toggle in the top right opens the Canvas and, once open, goes back to the

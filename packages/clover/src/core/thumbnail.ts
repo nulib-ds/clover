@@ -19,7 +19,7 @@ import {
 export interface ThumbnailSource {
   /** Ready to use. */
   src?: string;
-  /** Needs `info.json` before it has a URL: a level 0 (or unlabelled) service. */
+  /** Needs `info.json` before it has a URL: a level 0 (or unlabeled) service. */
   service?: string;
   /** Used if the service cannot answer. */
   fallback?: string;

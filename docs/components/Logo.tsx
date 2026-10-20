@@ -1,3 +1,5 @@
+"use client";
+
 const Logo = () => (
   <span>
     {/* The navbar's link home holds only this, so it names the link. */}

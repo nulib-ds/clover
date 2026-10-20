@@ -1,0 +1,268 @@
+---
+title: RequiredStatement (3.x)
+---
+
+import IIIFBadge from "docs/components/IIIFBadge";
+import { RequiredStatement } from "@samvera/clover-iiif/primitives";
+import { Tabs } from "nextra/components";
+
+# RequiredStatement
+
+The RequiredStatement component renders the required statement for a IIIF resource. The required statement is a human readable label and value pair that describes the rights status of the resource.
+
+<IIIFBadge
+  href="https://iiif.io/api/presentation/3.0/#requiredstatement"
+  text={["requiredStatement"]}
+/>
+
+<Tabs items={["Code", "Example", "HTML"]}>
+  <Tabs.Tab>
+    ```jsx
+    <RequiredStatement
+      requiredStatement={{
+        label: {
+          none: ["Attribution"],
+        },
+        value: {
+          none: [
+            "Courtesy of Northwestern University Libraries",
+            "The images on this web site are from material in the collections of the Charles Deering McCormick Library of Special Collections of Northwestern University Libraries, are provided for use by its students, faculty and staff, and by other researchers visiting this site, for research consultation and scholarly purposes only. Further distribution and/or any commercial use of the images from this site is not permitted.",
+          ],
+        },
+      }}
+    />
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <RequiredStatement
+      requiredStatement={{
+        label: {
+          none: ["Attribution"],
+        },
+        value: {
+          none: [
+            "Courtesy of Northwestern University Libraries",
+            "The images on this web site are from material in the collections of the Charles Deering McCormick Library of Special Collections of Northwestern University Libraries, are provided for use by its students, faculty and staff, and by other researchers visiting this site, for research consultation and scholarly purposes only. Further distribution and/or any commercial use of the images from this site is not permitted.",
+          ],
+        },
+      }}
+    />
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```html
+    <dl class="c-PJLV">
+      <div data-label="attribution">
+        <dt class="c-PJLV">Attribution</dt>
+        <dd class="c-PJLV">
+          Courtesy of Northwestern University Libraries, The images on this web
+          site are from material in the collections of the Charles Deering
+          McCormick Library of Special Collections of Northwestern University
+          Libraries, are provided for use by its students, faculty and staff,
+          and by other researchers visiting this site, for research consultation
+          and scholarly purposes only. Further distribution and/or any
+          commercial use of the images from this site is not permitted.
+        </dd>
+      </div>
+    </dl>
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+## Usage
+
+### React
+
+```jsx
+import { RequiredStatement } from "@samvera/clover-iiif/primitives";
+
+const CustomRequiredStatement = ({ requiredStatement }) => {
+  return <RequiredStatement requiredStatement={requiredStatement} />;
+};
+
+export default CustomRequiredStatement;
+```
+
+## API Reference
+
+| Prop                   | Type                                                                         | Default | Required |
+| ---------------------- | ---------------------------------------------------------------------------- | ------- | -------- |
+| `as`                   | `dl`                                                                         | `dl`    | --       |
+| `requiredStatement`    | [requiredStatement](https://iiif.io/api/presentation/3.0/#requiredStatement) | --      | **Yes**  |
+| `customValueDelimiter` | string?                                                                      | `,`     | --       |
+| `className`            | `string`, `undefined`                                                        | --      | --       |
+| `style`                | `CSSProperties`, `undefined`                                                 | --      | --       |
+| `lang`                 | `string`, `undefined`                                                        | --      | --       |
+| `title`                | `string`, `undefined`                                                        | --      | --       |
+| `data-*`               | `string`, `undefined`                                                        | --      | --       |
+| `aria-*`               | `AriaAttributes`, `undefined`                                                | --      | --       |
+
+### HTML Attributes
+
+`RequiredStatement`, like all Clover IIIF primitives accept common [HTMLElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement) attributes. Use the JSX style `className` prop to add custom classes. The same attribute methodology can be used for `id`, `style`, `title`, `data-*`, and `aria-*` props.
+
+<Tabs items={["Code", "Example", "HTML"]}>
+  <Tabs.Tab>
+    ```jsx
+    <RequiredStatement
+      requiredStatement={{
+        label: {
+          en: ["Rights"],
+        },
+        value: {
+          en: [
+            '<span><a href="http://rightsstatements.org/vocab/InC/1.0/"><img src="https://rightsstatements.org/files/buttons/InC.dark-white-interior-blue-type.svg" alt="In Copyright"/></a></span><br/><span><a href="http://rightsstatements.org/vocab/InC/1.0/">In Copyright</a>:  This Item is protected by copyright and/or related rights. You are free to use this Item in any way that is permitted by the copyright and related rights legislation that applies to your use. For other uses you need to obtain permission from the rights-holder(s).</span><br/>',
+          ],
+        },
+      }}
+      className="custom-class"
+    />
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <RequiredStatement
+      requiredStatement={{
+        label: {
+          en: ["Rights"],
+        },
+        value: {
+          en: [
+            '<span><a href="http://rightsstatements.org/vocab/InC/1.0/"><img src="https://rightsstatements.org/files/buttons/InC.dark-white-interior-blue-type.svg" alt="In Copyright"/></a></span><br/><span><a href="http://rightsstatements.org/vocab/InC/1.0/">In Copyright</a>:  This Item is protected by copyright and/or related rights. You are free to use this Item in any way that is permitted by the copyright and related rights legislation that applies to your use. For other uses you need to obtain permission from the rights-holder(s).</span><br/>',
+          ],
+        },
+      }}
+      className="custom-class"
+    />
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```html
+    <dl class="c-PJLV custom-class">
+      <div data-label="rights">
+        <dt class="c-PJLV">Rights</dt>
+        <dd class="c-PJLV">
+          <span>
+            <a href="http://rightsstatements.org/vocab/InC/1.0/">
+              <img src="https://rightsstatements.org/files/buttons/InC.dark-white-interior-blue-type.svg" alt="In Copyright" />
+            </a>
+          </span>
+          <br/>
+          <span>
+            <a href="http://rightsstatements.org/vocab/InC/1.0/">In Copyright</a>:  This Item is protected by copyright and/or related rights. You are free to use this Item in any way that is permitted by the copyright and related rights legislation that applies to your use. For other uses you need to obtain permission from the rights-holder(s).
+          </span>
+          <br/>
+        </dd>
+      </div>
+    </dl>
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Language
+
+Additional to being rendered to the DOM like other attributes, the value of [`lang`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/lang) will couple with [InternationalString](https://github.com/IIIF-Commons/presentation-3-types/blob/main/iiif/descriptive.d.ts#L6-L8) props to output the denoted `label`, `value`, `summary` entries. If `lang` is undefined, entries will default to the first entry in the array index. The value of `lang` should be a two letter [BCP 47](https://datatracker.ietf.org/doc/html/rfc5646) language code.
+
+<Tabs items={["Code", "Example", "HTML"]}>
+  <Tabs.Tab>
+    ```jsx
+    <RequiredStatement
+      requiredStatement={{
+        label: {
+          en: ["Attribution"],
+          no: ["Kreditering"],
+        },
+        value: {
+          en: ["Provided by University of Bergen Library"],
+          no: ["Tilgjengeliggjort av Universitetsbiblioteket i Bergen"],
+        },
+      }}
+      lang="no"
+    />
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <RequiredStatement
+      requiredStatement={{
+        label: {
+          en: ["Attribution"],
+          no: ["Kreditering"],
+        },
+        value: {
+          en: ["Provided by University of Bergen Library"],
+          no: ["Tilgjengeliggjort av Universitetsbiblioteket i Bergen"],
+        },
+      }}
+      lang="no"
+    />
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```html
+    <dl lang="no" class="c-PJLV">
+      <div data-label="attribution">
+        <dt lang="no" class="c-PJLV">
+          Kreditering
+        </dt>
+        <dd lang="no" class="c-PJLV">
+          Tilgjengeliggjort av Universitetsbiblioteket i Bergen
+        </dd>
+      </div>
+    </dl>
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Custom Delimiter
+
+<Tabs items={["Code", "Example", "HTML"]}>
+  <Tabs.Tab>
+    ```jsx
+    <RequiredStatement
+      requiredStatement={{
+        label: {
+          none: ["Attribution"],
+        },
+        value: {
+          none: [
+            "Courtesy of Northwestern University Libraries",
+            "The images on this web site are from material in the collections of the Charles Deering McCormick Library of Special Collections of Northwestern University Libraries, are provided for use by its students, faculty and staff, and by other researchers visiting this site, for research consultation and scholarly purposes only. Further distribution and/or any commercial use of the images from this site is not permitted.",
+          ],
+        },
+      }}
+      customValueDelimiter=". "
+    />
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab unmount>
+    <RequiredStatement
+      requiredStatement={{
+        label: {
+          none: ["Attribution"],
+        },
+        value: {
+          none: [
+            "Courtesy of Northwestern University Libraries",
+            "The images on this web site are from material in the collections of the Charles Deering McCormick Library of Special Collections of Northwestern University Libraries, are provided for use by its students, faculty and staff, and by other researchers visiting this site, for research consultation and scholarly purposes only. Further distribution and/or any commercial use of the images from this site is not permitted.",
+          ],
+        },
+      }}
+      customValueDelimiter=". "
+    />
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```html
+    <dl class="c-PJLV">
+      <div data-label="attribution">
+        <dt class="c-PJLV">Attribution</dt>
+        <dd class="c-PJLV">
+          Courtesy of Northwestern University Libraries. The images on this web
+          site are from material in the collections of the Charles Deering
+          McCormick Library of Special Collections of Northwestern University
+          Libraries, are provided for use by its students, faculty and staff,
+          and by other researchers visiting this site, for research consultation
+          and scholarly purposes only. Further distribution and/or any
+          commercial use of the images from this site is not permitted.
+        </dd>
+      </div>
+    </dl>
+    ```
+  </Tabs.Tab>
+</Tabs>

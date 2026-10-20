@@ -7,7 +7,7 @@ import { Markup } from "../../ui/Markup";
 
 /**
  * What an annotation says, as the Annotations list shows it and the Canvas's caption: each
- * text body by its format (IIIF's limited HTML sanitised, Markdown, plain text) and each
+ * text body by its format (IIIF's limited HTML sanitized, Markdown, plain text) and each
  * image (Cookbook 0377).
  */
 /** Whether there is text, which describes any image beside it (Cookbook 0377). */

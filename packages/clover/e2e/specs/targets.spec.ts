@@ -64,16 +64,16 @@ for (const [host, css] of HOSTS) {
       const boxes = await anchors.evaluateAll((elements) =>
         elements.map((element) => {
           const { top, bottom, height } = element.getBoundingClientRect();
-          return { centre: (top + bottom) / 2, height };
+          return { center: (top + bottom) / 2, height };
         }),
       );
       for (let index = 1; index < boxes.length; index++) {
         const [above, below] = [boxes[index - 1], boxes[index]];
         // Too short to be 24px itself, so a 24px circle on each must clear the other.
         if (above.height >= 24 && below.height >= 24) continue;
-        expect(below.centre - above.centre, list).toBeGreaterThanOrEqual(24);
+        expect(below.center - above.center, list).toBeGreaterThanOrEqual(24);
         expect(
-          below.centre - below.height / 2 - above.centre,
+          below.center - below.height / 2 - above.center,
           list,
         ).toBeGreaterThanOrEqual(12);
       }

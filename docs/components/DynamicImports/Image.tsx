@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 
 const Image = dynamic(() => import("@samvera/clover-iiif/image"), {

@@ -31,13 +31,14 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && vite build && node build/styles.mjs && npm run build:types && npm run build:web-components",
+    "build": "npm run clean && vite build && node build/styles.mjs && npm run build:types && npm run build:web-components && npm run build:sizes",
     "test": "vitest",
     "test:ci": "vitest run",
     "test:build": "node --test build/*.test.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build:types": "dts-bundle-generator --project tsconfig.json --out-file dist/index.d.mts src/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/templates/index.d.mts src/templates/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/map/index.d.mts src/map/index.ts --no-check",
     "build:web-components": "vite build --config build/web-components.config.mjs && cp build/web-components-loader.js dist/web-components/index.umd.js",
+    "build:sizes": "node build/sizes.mjs",
     "e2e": "playwright test --config=e2e/playwright.config.ts"
   },
   "dependencies": {

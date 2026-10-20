@@ -59,7 +59,7 @@ const MASKS =
  */
 export const resources: PlaygroundResource[] = [
   // The White Sewing Machine Company's 1896 bicycle catalog, from Northwestern's
-  // Transportation Library: a cover and its pages, some in colour, 31 Canvases in spreads.
+  // Transportation Library: a cover and its pages, some in color, 31 Canvases in spreads.
   // A mock, its double-page plate (Page 15) `facing-pages`, so it stands alone and the
   // openings after it pair as the book's do.
   {

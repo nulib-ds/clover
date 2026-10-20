@@ -1,0 +1,477 @@
+---
+title: Mocks
+---
+
+import { Callout } from "nextra/components";
+
+# Mocks
+
+IIIF resources Clover publishes for testing a viewer against: complete, valid, and stable
+at their URLs. Each is generated from one source in `docs/mocks/`, so the published files,
+the live service in `npm run dev`, and the docs' own demos always agree.
+
+Use them from any viewer, test suite or prototype. Publish a new mock the same way when
+it is complex enough to reuse: a generator in `docs/mocks/<name>/`, its files written to
+`public/mocks/<name>/` by `npm run build:mocks`, and a section on this page.
+
+## Content Search 2.0: a newspaper issue
+
+Two pages of the _Berliner Tageblatt_ of February 16, 1925, with their OCR and a IIIF
+Content Search 2.0 service. The OCR is the newspaper's own (Fraktur, errors included),
+with a position for every word, so search hits and text land where the print is.
+
+| Resource        | Published (static)                                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Manifest        | [`/mocks/content-search/manifest.json`](https://nulib-ds.github.io/clover/mocks/content-search/manifest.json)                                                 |
+| OCR, by line    | [`/mocks/content-search/ocr/p1-lines.json`](https://nulib-ds.github.io/clover/mocks/content-search/ocr/p1-lines.json), `p2-lines.json`                        |
+| OCR, by word    | [`/mocks/content-search/ocr/p1-words.json`](https://nulib-ds.github.io/clover/mocks/content-search/ocr/p1-words.json), `p2-words.json`                        |
+| Example answers | [`/mocks/content-search/search/examples/nicht.json`](https://nulib-ds.github.io/clover/mocks/content-search/search/examples/nicht.json) and others: see below |
+| Search service  | `/mocks/content-search/search`: answered live by `npm run dev` or `mockFetch`, not by the static site                                                         |
+
+All under `https://nulib-ds.github.io/clover`.
+
+### What is in it
+
+- **The Manifest** has two Canvases (3602 × 5000 and 3536 × 4999), drawn from the IIIF
+  Image API reference server, and a `SearchService2`. Each Canvas references its OCR by
+  line in `annotations`.
+- **OCR pages** are AnnotationPages of `supplementing` annotations with a `TextualBody`
+  (`language: "de"`) targeting the region it was read from, `canvas#xywh=x,y,w,h`, in the
+  Canvas's pixels. Each carries a [`textGranularity`](https://iiif.io/api/extension/text-granularity/)
+  of `line` (about 310 a page) or `word` (about 2,500 a page). The Manifest references
+  only the lines; the words are there for testing word-level highlighting.
+- **Search answers** follow Content Search 2.0:
+  - `items` are `highlighting` annotations on each match's OCR box, a SpecificResource
+    on the Canvas (with `partOf` naming the Manifest) and an `xywh=` FragmentSelector.
+  - `annotations` holds a page of `contextualizing` annotations, one per hit, quoting it
+    with a `TextQuoteSelector`: `prefix`, `exact` and `suffix`, six words either side.
+  - Results come 25 to a page, in an AnnotationCollection (`partOf` with `total`,
+    `first` and `last`), with `startIndex`, `prev` and `next`.
+- **Matching** ignores case, accents and punctuation, and reads the Fraktur long s (ſ) as
+  s. A word matches if it contains the query, so `berlin` finds "Berliner"; a phrase
+  matches consecutive words, its box the union of theirs.
+
+### Example answers
+
+Static files, for tests that need a fixed answer. Each is exactly what the live service
+returns for the query, except that page links point at the next file.
+
+| Query         | Hits | Files                                    |
+| ------------- | ---- | ---------------------------------------- |
+| `nicht`       | 36   | `nicht.json`, `nicht-2.json` (two pages) |
+| `moskau`      | 11   | `moskau.json`                            |
+| `drei jungen` | 4    | `drei-jungen.json` (a phrase)            |
+| `zzzz`        | 0    | `zzzz.json` (no results)                 |
+
+### Searching it live
+
+A static site cannot read `?q=`, so the published search service URL answers nothing by
+itself. Two ways to search any query:
+
+- **`npm run dev`** serves a live copy of the whole mock, with every id under the dev
+  server: `http://localhost:3000/api/mocks/content-search/manifest.json`. Its service
+  answers any `q` and `page`, with `Access-Control-Allow-Origin: *` so a viewer on
+  another port can use it.
+
+  ```sh
+  curl "http://localhost:3000/api/mocks/content-search/search?q=moskau"
+  ```
+
+- **`mockFetch`**, from the generator, is a `fetch` that answers the published mock's
+  URLs in the browser and passes everything else on. Hand it to anything that takes a
+  `fetch`. The [Viewer's Content Search demo](/docs/viewer#content-search) does:
+
+  ```jsx
+  import { mockFetch } from "docs/mocks/content-search/index.mjs";
+
+  <Clover.Viewer
+    iiifContent="https://nulib-ds.github.io/clover/mocks/content-search/manifest.json"
+    request={{ fetch: mockFetch() }}
+  />;
+  ```
+
+<Callout type="info">
+  Clover 3.x's older newspaper mock (`/manifest/content-search/`) is unchanged.
+  Its live service, `/api/fixtures/content-search/1`, works in `npm run dev`
+  again: the docs build is a static export, and the export setting used to turn
+  API routes off in development too.
+</Callout>
+
+### Changing it
+
+The generator is `docs/mocks/content-search/index.mjs`; the OCR is
+`docs/mocks/content-search/ocr.json` (words in reading order, `[text, x, y, w, h]`).
+After changing either, run `npm run build:mocks` and commit `public/mocks/`. The OCR
+pages are written compact, and Prettier leaves `public/mocks/` alone.
+
+## Georeference: a township map
+
+Northwestern University Libraries' scan of the _Map of the Township of Evanston, Cook
+County, Illinois_, as a Manifest of one Canvas, with:
+
+- the [Georeference Extension](https://iiif.io/api/extension/georef/) annotation its Meadow
+  authoring tool stored (three control points, the whole image as its mask, a first-order
+  polynomial transformation), on the Canvas's annotation page;
+- a [navPlace](https://iiif.io/api/extension/navplace/) point naming Evanston, Illinois;
+- the image from Northwestern's IIIF Image API (level 2, 7337 × 9833, CORS open).
+
+| Resource | Published (static)                                                                                        |
+| -------- | --------------------------------------------------------------------------------------------------------- |
+| Manifest | [`/mocks/georeference/manifest.json`](https://nulib-ds.github.io/clover/mocks/georeference/manifest.json) |
+
+It answers no query, so it is static only. The [Map](/docs/map) page draws it, warped
+onto the map, and in a Viewer's Map tab. Its generator is
+`docs/mocks/georeference/index.mjs`.
+
+## Tagging: a photogravure
+
+Northwestern University Libraries' record of Edward S. Curtis's _The Vanishing Race –
+Navaho_ (1904), plate 1 of _The North American Indian_, as a Manifest of one Canvas, with:
+
+- the four bits of text printed on the plate tagged where they sit, as
+  [Cookbook recipe 0021](https://iiif.io/api/cookbook/recipe/0021-tagging/) tags a
+  fountain: an Annotation with the motivation `tagging`, its body the words (a
+  `TextualBody` in English), its target a box on the Canvas;
+- the record's Caption as the Canvas's `summary`, no longer in the Manifest's `metadata`;
+- everything else as Northwestern's Digital Collections API published it on 14 October
+  2026, its Cultural Context note included, apart from the ids of the Manifest and its
+  Canvas, which are the mock's own;
+- the image from Northwestern's IIIF Image API (level 2, 4290 × 3528, CORS open).
+
+| Tag                                            | Box on the Canvas (`xywh`) |
+| ---------------------------------------------- | -------------------------- |
+| Plate 1                                        | `210,121,134,45`           |
+| From Copyright Photograph 1904 by E. S. Curtis | `1858,3148,578,47`         |
+| Photogravure John Andrew & Son                 | `3702,3144,424,44`         |
+| The Vanishing Race - Navaho                    | `219,3257,779,44`          |
+
+| Resource | Published (static)                                                                              |
+| -------- | ----------------------------------------------------------------------------------------------- |
+| Manifest | [`/mocks/tagging/manifest.json`](https://nulib-ds.github.io/clover/mocks/tagging/manifest.json) |
+
+It answers no query, so it is static only. The homepage opens on it. Its generator is
+`docs/mocks/tagging/index.mjs`, and the record as fetched is
+`docs/mocks/tagging/source.json`: to bring the record up to date, fetch
+`https://api.dc.library.northwestern.edu/api/v2/works/46dc28d1-9d59-4160-a511-72418f70cffc?as=iiif`
+into `source.json` again and run `npm run build:mocks`.
+
+## navPlace: a photograph's corner
+
+Northwestern University Libraries' record of a Ronald J. Sullivan slide, Chicago bus 516
+on route 151 at Michigan Avenue and Washington Street (July 3, 1955), as a Manifest of
+one Canvas, with:
+
+- a [navPlace](https://iiif.io/api/extension/navplace/) point at that corner,
+  `[-87.6245, 41.8833]`, labeled "Michigan Avenue and Washington Street, Chicago,
+  Illinois". The record carries no coordinates: the place is read from its summary, and
+  the photograph agrees (it looks north up Michigan Avenue, the new Prudential Building
+  on the right, the Coca-Cola clock and the Blatz sign on the left);
+- everything else as Northwestern's Digital Collections API published it on 14 October
+  2026, apart from the ids of the Manifest and its Canvas, which are the mock's own;
+- the image from Northwestern's IIIF Image API (level 2, 3968 × 2685, CORS open).
+
+| Resource | Published (static)                                                                                |
+| -------- | ------------------------------------------------------------------------------------------------- |
+| Manifest | [`/mocks/navplace/manifest.json`](https://nulib-ds.github.io/clover/mocks/navplace/manifest.json) |
+
+It answers no query, so it is static only. The homepage's playground shows it as Photo,
+its place in a Viewer's Map tab. Its generator is `docs/mocks/navplace/index.mjs`, and
+the record as fetched is `docs/mocks/navplace/source.json`: to bring the record up to
+date, fetch
+`https://api.dc.library.northwestern.edu/api/v2/works/24157482-0c2c-4907-8d25-7905adc3cfd9?as=iiif`
+into `source.json` again and run `npm run build:mocks`.
+
+## Paged: a catalog in spreads
+
+Northwestern University Libraries' record of the White Sewing Machine Company's
+_Portfolio of illustrations showing the White bicycles : then and now_ (1896), a `paged`
+Manifest of 31 Canvases (its covers and 29 pages), with:
+
+- a `summary`, which the record has none of, written from its own fields (Publisher,
+  Location, Date, the illustrators its Alternate Title names, Materials) and its pages,
+  in under 30 words: "The White Sewing Machine Company of Cleveland issued this bicycle
+  catalog in 1896. Color plates by Thulstrup, Mente, Veenfliet, and Clarke pair “Then”
+  with “Now”; specifications describe four models.";
+- `behavior: ["facing-pages"]` on Page 15. It is one image of a whole opening, a color
+  plate across both pages (9423 × 4694, twice a page's width), so it is shown alone and
+  the pages after it pair as the book's openings do. The spreads run Front Cover, 1–2 …
+  13–14, 15, 16–17 … 28–29, Back Cover. As published, the plate pairs with Page 16, and
+  every opening after it is split;
+- `structures`, which the record has none of: a Range for each of the catalog's sections,
+  titled exactly as the catalog has it, by the heading printed on its page (its words,
+  without the closing period), or, for a cover, by the Canvas's own label. Front Cover;
+  Introduction; Specifications “White” 1896 Model A, B, C and D, each with its engraving;
+  “White” Bearings (Crank Bearing, The Hubs); Important Features of the “White”, six
+  headings, where those that share a page each name their region of it (`#xywh=`);
+  Guaranty on “White” Bicycles; Tire Guarantees; Terms of Sale; Back Cover;
+- on each plate that pairs a "Then" with a "Now" (Pages 4, 6, 18, 20, 22, 24 and 26, and
+  the Back Cover), the two tagged where they are, as
+  [Cookbook recipe 0021](https://iiif.io/api/cookbook/recipe/0021-tagging/) tags a
+  fountain: "Then" round the inset scene and the word printed by it, "Now" round most of
+  the picture, clear of its edges (on the Back Cover, the round scene below). Page 15
+  prints "Now" with no "Then", so it has none;
+- everything else as Northwestern's Digital Collections API published it on 14 October
+  2026, apart from the ids of the Manifest and its Canvases, which are the mock's own;
+- the images from Northwestern's IIIF Image API (level 2, CORS open).
+
+| Resource | Published (static)                                                                          |
+| -------- | ------------------------------------------------------------------------------------------- |
+| Manifest | [`/mocks/paged/manifest.json`](https://nulib-ds.github.io/clover/mocks/paged/manifest.json) |
+
+It answers no query, so it is static only. The homepage's playground shows it as Catalog.
+Its generator is `docs/mocks/paged/index.mjs`, and the record as fetched is
+`docs/mocks/paged/source.json`: to bring the record up to date, fetch
+`https://api.dc.library.northwestern.edu/api/v2/works/386ff30f-1975-4d9c-9905-ec76381d6992?as=iiif`
+into `source.json` again and run `npm run build:mocks`. The package's tests use a copy, in
+`packages/clover/src/fixtures/mocks/paged/`; copy the published file there again after a
+change.
+
+## Transcripts: a film's captions and its transcript
+
+The IIIF Cookbook's [recipe 0219](https://iiif.io/api/cookbook/recipe/0219-using-caption-file/),
+_Lunchroom Manners_, a Manifest of one video Canvas (9 min 32 s), with:
+
+- its English captions as the recipe publishes them, a `supplementing` WebVTT file
+  labeled "Captions in WebVTT format";
+- the film's transcript as plain text beside them, as the Canvas's `rendering`, which is
+  how [recipe 0017](https://iiif.io/api/cookbook/recipe/0017-transcription-av/) gives a
+  transcript. The file is the one
+  [recipe 0253](https://iiif.io/api/cookbook/recipe/0253-using-transcript-file/)
+  (Presentation 4) provides for the same film, with that recipe's label, "Transcript in
+  plain text format", and its language, `en`;
+- everything else as recipe 0219 publishes it, apart from the ids of the Manifest, its
+  Canvas and their annotations, which are the mock's own;
+- the video, the captions and the transcript from the Cookbook's own fixtures, at
+  fixtures.iiif.io (CORS open).
+
+So a viewer has both kinds of transcript to offer, the timed captions and the untimed
+text: Clover's Transcript lists them as "EN" and "TXT".
+
+| Resource | Published (static)                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------------------- |
+| Manifest | [`/mocks/transcripts/manifest.json`](https://nulib-ds.github.io/clover/mocks/transcripts/manifest.json) |
+
+It answers no query, so it is static only. Its generator is
+`docs/mocks/transcripts/index.mjs`, and recipe 0219's Manifest as fetched is
+`docs/mocks/transcripts/source.json`: to bring it up to date, fetch
+`https://iiif.io/api/cookbook/recipe/0219-using-caption-file/manifest.json` into
+`source.json` again and run `npm run build:mocks`. The package's tests use a copy, in
+`packages/clover/src/fixtures/mocks/transcripts/`; copy the published file there again
+after a change.
+
+## Rudolf Hess at Nuremberg: people followed through a film
+
+_Sentencing of Nazi Leaders at Nuremberg_, a reel of the International Military
+Tribunal's judgment from the US National Archives (National Archives Identifier 23769,
+local identifier 111-ADC-10005), as
+[Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Sentencing_of_Nazi_Leaders_at_Nuremberg.webm)
+publishes it, made to show Rudolf Hess's distress in the dock beside the other defendants:
+Hess is marked wherever he is in view, and so are the defendants around him at that end
+of the dock, wherever each can be told: Hermann Göring and Joachim von Ribbentrop either
+side of him and Wilhelm Keitel beyond Ribbentrop, in the front row, and Erich Raeder,
+Baldur von Schirach and Fritz Sauckel in the row behind. Commons is not a
+IIIF publisher, so the Manifest is the mock's own, made from the file's Commons record
+(read on October 19, 2026):
+
+- **The Manifest** (Presentation 3) is labeled "Rudolf Hess at Nuremberg Sentencing, 30
+  September–1 October 1946", and its summary says what it shows of him. Its
+  metadata are the record's: the National Archives' title (the reel's, which the Canvas
+  keeps as its label) and description among them. Its rights are the public domain, the
+  film being the US Army Signal Corps'. Its homepages are the Commons page and the
+  National Archives Catalog's record.
+- **Its date** is the two days of the judgment the film shows, as its `navDate` (30
+  September 1946) and a Date line. The Commons record's only date is 1947-10, a year
+  after the trial, so the days are read from the film against the trial's record
+  ([30 September](https://avalon.law.yale.edu/imt/09-30-46.asp),
+  [1 October](https://avalon.law.yale.edu/imt/10-01-46.asp)). The soundtrack carries the
+  reading of 30 September up to its last words, on the SS and the General Staff, and the
+  Tribunal adjourning "until 1 October 1946 at 0930 hours" (5:21); from 5:46 it carries
+  the verdicts of 1 October, over the courtroom and then the dock. Hess is taken ill and
+  led out of the dock on 30 September, during the reading on the murder and
+  ill-treatment of the civilian population, if the film's sound was recorded with its
+  pictures (the record does not say when). Despite its title, the reel shows no
+  sentencing: the sentences were pronounced on the afternoon of 1 October.
+- **Its one Canvas** is 654 × 480 and 671.164 s, the film as shown (stored 720 × 480, at a
+  display aspect of 654:480). It paints the original WebM file (VP8 and Vorbis, 133 MB),
+  and its `placeholderCanvas` is the still Commons cuts from the file at 14 s (500 × 367,
+  Commons cuts stills at its own widths only).
+- **Two AnnotationPages.** "Rudolf Hess" holds three annotations, one for each part of
+  what the film shows of him, each `identifying` and `describing`: "Hess shows
+  distress" (0:12–1:25), "Hess is led out of the dock" (1:25–1:40) and "Hess returns to
+  the dock" (3:18 to the end). "Other Defendants" holds an `identifying` annotation for
+  each of the others followed, named by him, in the dock's order: Göring, Ribbentrop and
+  Keitel, then Raeder, Schirach and Sauckel. Each was told by his face, against a
+  photograph of the dock, and by where he sat. Karl Dönitz, who sat behind Göring, is not
+  marked: the close shots leave him out of frame, and in the wide shot from 1:25.7 and the
+  pan from 3:18 the back row is too small and soft to tell one man from another, so none
+  of the back row is marked there (nor Keitel in the wide shot). Nor is Keitel in the
+  close shot from 0:45, where only half his face is in frame and the man behind him is
+  hard to tell from him.
+- **Its English captions**, a `supplementing` WebVTT file (`captions.vtt`, 99 cues), as
+  [Cookbook recipe 0219](https://iiif.io/api/cookbook/recipe/0219-using-caption-file/)
+  gives one. The soundtrack is the courtroom's interpretation system, which cuts between
+  its channels, so the captions follow: the judgment read in English, in the published
+  judgment's words, checked against the soundtrack (where the record's two printings
+  differ, as on Göring's "16th July, 1941" and "desettling", the one the soundtrack
+  agrees with); the Russian interpretation (1:57–3:16, the euthanasia killings,
+  Bach-Zelewski's testimony and the persecution of the Jews; 7:02–7:25, the end of the
+  verdict on Hess) and the French (9:17–9:40, the end of Keitel's) in the record's
+  English, marked "[In Russian]" or "[In French]"; and a voice over the sound system
+  between the days ("Hello, sound recording…"), as heard. An ellipsis marks speech cut
+  by the film's editing. The soundtrack was transcribed with Whisper (`small` and
+  `medium.en`) only to place and check the words; none of its own words are used where
+  the record has them.
+- **Its transcript**, the same words as plain text (`transcript.txt`), the Canvas's
+  `rendering`, as
+  [Cookbook recipe 0017](https://iiif.io/api/cookbook/recipe/0017-transcription-av/)
+  gives one, labeled "Transcript in plain text format" (recipe 0253's words for a
+  film's). It has a paragraph for each stretch of the reading the film keeps whole: one
+  starts after a pause, at a cut, where the voice or language changes, and where the
+  editing cuts the speech. Each paragraph of a stretch in Russian or French opens with its
+  note, which the captions give once.
+- **Chapters**, a Range for each part of the film the National Archives' description
+  names, titled with its words (each cut to the clause that names the shot) and timed
+  to the film's cuts: "Sitting in prisoners' dock listening to testimony" (0:12.5),
+  "Hess taken ill leaves prisoners' dock" (1:25.6), "Shots of English and US prosecution
+  tables" (1:57.2), "Scenes of Justice Kravechenko, Russian Justice, reading statement
+  from bench" (2:38.1), "Pan of prisoners' dock and courtroom" (3:17.8), "Court
+  adjourns" (4:57.5), "MS of Erich Raeder, Fritz Sauckel, Hess, Goering, von
+  Ribbentrop, in dock" (6:19.7), "Justice Francis Biddle in speaking of von Ribbentrop"
+  (7:53.4) and "Camera on prisoners' dock as Justice Lawrence speaks about the
+  defendant, Ernst Kaltenbrunner" (8:48.2, to 10:00.4). Each is a SpecificResource on
+  the Canvas with a `t=start,end` FragmentSelector.
+- **Each annotation's targets** are the stretches of the film he is in view, each a
+  SpecificResource on the Canvas with a FragmentSelector of both Media Fragment
+  dimensions, `xywh=x,y,w,h&t=start,end`: the region of his head and shoulders (Hess
+  standing, down to the rail) through that stretch, in the Canvas's pixels. Stretches
+  that meet in time are one movement; a gap between two is time he is not in view. There
+  are 1,187 in all: Hess 230, Göring 207, Ribbentrop 239, Keitel 71, Raeder 89, Schirach
+  145 and Sauckel 206.
+
+| Stretch     | What the film shows                                                                                                                                                                                             |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0:12.6–0:23 | 30 September. The dock from its end: Göring, in dark glasses, Hess, his head bowed into his hand, Ribbentrop and Keitel; behind them Raeder, Schirach and Sauckel                                               |
+| 0:23–0:45   | An officer leans over the dock to Hess and hides him, and Ribbentrop, to 0:35; Göring, at the edge, his hand to his face; Raeder until the camera turns from him (0:25), Schirach, in dark glasses, and Sauckel |
+| 0:45–1:25.5 | Closer, Hess rocking forward and back between them, with Raeder, Schirach and Sauckel behind                                                                                                                    |
+| 1:25.7–1:57 | The whole dock: Hess stands, hiding Ribbentrop, steps past him (1:28.5) and is walked back along the dock by the guards, out of the door behind it (1:40.5)                                                     |
+| 3:18–3:35   | A pan along the dock, the three and Keitel side by side until they pass the frame's edge, before the day's adjournment                                                                                          |
+| 6:19.7–7:53 | 1 October, the three again, in two shots: Raeder (to 7:31), Schirach and Sauckel behind them in the first; Schirach, Sauckel and Keitel in the second                                                           |
+| 8:48–9:15   | Hess and Ribbentrop (Göring is out of frame, his sleeve at its edge), Keitel, and Schirach and Sauckel behind                                                                                                   |
+| 9:15–10:00  | The whole dock, under the guards: Keitel, and Sauckel behind Ribbentrop                                                                                                                                         |
+
+The regions were found with OpenCV's CSRT tracker on Commons' 480p transcode (the same
+654 × 480 frame), each shot begun from a region placed by eye, each box kept at its size,
+and the tracker's movement held to regions read by eye where it wandered: every 2.5 s
+for Hess in the close shot from 0:45, where its boxes grew onto Ribbentrop, and every few
+seconds for Göring from 6:28, when a man walking past the camera threw it. For Hess in
+the wide shot, where it lost him as he stood, the regions were read by eye every half
+second; Ribbentrop there was followed from the frame Hess uncovers him, checked every
+quarter second as Hess passes him again on his way out. The others were followed the
+same way, each stretch ending where he leaves the frame or the tracker could no longer
+hold him; where it lost Schirach and Sauckel as the officer leans across the dock
+(0:32–0:35), their regions were read by eye. The regions were then thinned to
+the fewest stretches that keep within 3 px of every frame, and each shot's frames were
+checked with its regions drawn on them. They are as good as the film allows, which is
+soft and dark: about a head's width either way.
+
+| Resource   | Published (static)                                                                                                            |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Manifest   | [`/mocks/rudolf-hess-nuremberg/manifest.json`](https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/manifest.json)   |
+| Captions   | [`/mocks/rudolf-hess-nuremberg/captions.vtt`](https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/captions.vtt)     |
+| Transcript | [`/mocks/rudolf-hess-nuremberg/transcript.txt`](https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/transcript.txt) |
+
+In `npm run dev` it is live too, at
+[`/api/mocks/rudolf-hess-nuremberg/manifest.json`](http://localhost:3000/api/mocks/rudolf-hess-nuremberg/manifest.json),
+with ids under the dev server, so the captions and the transcript it names are files the
+dev server answers (the published ones exist only once the site is deployed). The dev
+server gives that Manifest at the published path too, `/mocks/rudolf-hess-nuremberg/manifest.json`,
+as it does every mock with a live copy, so the homepage and the demos open it. Its
+generator is `docs/mocks/rudolf-hess-nuremberg/index.mjs`; the captions are
+`docs/mocks/rudolf-hess-nuremberg/captions.json`, one row a cue, `[start, end, text]`,
+which `captions()` writes as WebVTT and `transcript()` as plain text, and the regions are
+`docs/mocks/rudolf-hess-nuremberg/tracks.json`:
+each page, its annotations (with their motivations), and each annotation's stretches, one
+row a stretch, `[start, end, x, y, w, h]`. To follow another defendant, add an annotation
+to "Other Defendants" there and run `npm run build:mocks`. The video and the still are
+Wikimedia's (CORS open). The package's tests use a copy, in
+`packages/clover/src/fixtures/mocks/rudolf-hess-nuremberg/`; copy the published files there again after
+a change.
+
+## Page transcript: a newspaper's pages as text
+
+The newspaper issue of the [Content Search mock](#content-search-20-a-newspaper-issue)
+(the _Berliner Tageblatt_ of February 16, 1925, two pages), with each page's transcript as
+plain text: a `text/plain` file in the Canvas's `rendering`, labeled "Text (OCR)" and in
+German (`de`), as libraries publish a page's OCR text beside its image. It has no search
+service and no OCR annotations, so the text files are the one way to the words.
+
+Each file is the page's own OCR, as the Content Search mock reads it: its lines in
+reading order, a line of the page a line of the file, with a blank line where the next
+line jumps up a column or steps down more than 1.6 times the page's usual line pitch (a
+new block). Nothing in it is typed by hand, so it reads as the OCR does, long s (ſ) and
+misreadings included.
+
+| Resource        | Published (static)                                                                                              |
+| --------------- | --------------------------------------------------------------------------------------------------------------- |
+| Manifest        | [`/mocks/page-transcript/manifest.json`](https://nulib-ds.github.io/clover/mocks/page-transcript/manifest.json) |
+| Page 1, as text | [`/mocks/page-transcript/text/p1.txt`](https://nulib-ds.github.io/clover/mocks/page-transcript/text/p1.txt)     |
+| Page 2, as text | [`/mocks/page-transcript/text/p2.txt`](https://nulib-ds.github.io/clover/mocks/page-transcript/text/p2.txt)     |
+
+In `npm run dev` it is live too, at
+[`/api/mocks/page-transcript/manifest.json`](http://localhost:3000/api/mocks/page-transcript/manifest.json),
+with ids under the dev server, so the text files it names are ones the dev server
+answers (the published ones exist only once the site is deployed). Its generator is
+`docs/mocks/page-transcript/index.mjs`, which reads the Content Search mock's OCR
+(`docs/mocks/content-search/ocr.json`): run `npm run build:mocks` after changing either.
+The package's tests use a copy, in `packages/clover/src/fixtures/mocks/page-transcript/`;
+copy the published files there again after a change.
+
+## Standalone canvas: a map on its own
+
+A Canvas published on its own, not in a Manifest: the one Canvas of Northwestern
+University Libraries' record of Bartolomeo Borghi's map of the British Isles,
+_L'Isole Britanniche_, as Clover 3.x's site publishes it
+([`standalone-canvas.json`](https://samvera-labs.github.io/clover-iiif/canvas/standalone-canvas.json),
+fetched on October 19, 2026), with:
+
+- ids under the mock's own address for the Canvas, its painting page and annotation; its
+  `partOf` still names the record's Manifest, from which a viewer can open it;
+- `@context` for its `context` key, a slip in the published file;
+- a `metadata` line it does not carry, its Contributor, as the record's Manifest publishes
+  it: "Borghi, Bartolomeo, 1750-1821 (Cartographer)", "Costa, Agostino (Engraver)",
+  "Borghi, Bartolomeo, 1750-1821 (Contributor)";
+- an annotation page of its own, tagging Ireland where the map draws it
+  (`xywh=600,4160,2180,2800`, read from the image), by the name the map prints there,
+  "Irlanda", in Italian, as the map is;
+- everything else as published, its label, summary, thumbnail and placeholder included;
+- the image from Northwestern's IIIF Image API (level 2, CORS open).
+
+| Resource | Published (static)                                                                                              |
+| -------- | --------------------------------------------------------------------------------------------------------------- |
+| Canvas   | [`/mocks/standalone-canvas/canvas.json`](https://nulib-ds.github.io/clover/mocks/standalone-canvas/canvas.json) |
+
+It answers no query, so it is static only. The Canvas page shows it, loaded by a `Canvas`
+on its own. Its generator is `docs/mocks/standalone-canvas/index.mjs`, and the Canvas as
+fetched is `docs/mocks/standalone-canvas/source.json`: to bring it up to date, fetch the
+published file into `source.json` again and run `npm run build:mocks`.
+
+### Rights
+
+The newspaper's scans and text, in the Content Search and Page transcript mocks, are the
+_Berliner Tageblatt_, Staatsbibliothek zu Berlin –
+Preußischer Kulturbesitz, via Europeana, under the
+[Public Domain Mark](http://creativecommons.org/publicdomain/mark/1.0/). The Evanston map
+is Northwestern University Libraries'. The Curtis plate is in the public domain in the
+United States (No Copyright – United States); its record and image are Northwestern
+University Libraries', from the Charles Deering McCormick Library of Special
+Collections, and keep their attribution. The Sullivan slide is In Copyright, its rights-holders
+unlocatable or unidentifiable; its record and image are from Northwestern University
+Libraries' Transportation Library, with the attribution the record gives. The White
+catalog is in the public domain in the United States (No Copyright – United States); its
+record and images are Northwestern University Libraries', from the Transportation
+Library, and keep their attribution. _Lunchroom Manners_, its captions and its transcript
+are the IIIF Cookbook's fixtures, as recipes 0219 and 0253 publish them. Borghi's map is
+in the public domain in the United States (No Copyright – United States); its record and
+image are Northwestern University Libraries', from the Charles Deering McCormick Library
+of Special Collections, and keep their attribution. The mocks'
+structure is Clover's, under its license.

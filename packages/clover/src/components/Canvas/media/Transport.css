@@ -2,7 +2,7 @@
  * Canvas's transport: the Player's bar, rebuilt on native controls.
  *
  * Same palette contract as `Player/Custom/PlayerControls.css`. Buttons take the Clover
- * colour tokens, as every Clover control does; everything bare on the scrim (time, track,
+ * color tokens, as every Clover control does; everything bare on the scrim (time, track,
  * menu) is anchored to the `--clover-player-*` properties, read at the point of use and
  * declared nowhere, since the scrim is dark in every theme.
  */
@@ -154,8 +154,8 @@
 /* ── buttons ─────────────────────────────────────────────────────────────── */
 
 /*
- * The round control's shape and colours are in `ui/Button.css`; its glyphs are filled
- * here, in its glyph colour.
+ * The round control's shape and colors are in `ui/Button.css`; its glyphs are filled
+ * here, in its glyph color.
  */
 .clover-canvas-transport-button svg {
   fill: currentColor;
@@ -177,9 +177,9 @@
 }
 
 /*
- * Pressed (Repeat): a bar under the glyph, in the glyph's colour, the state's one mark,
- * never a fill of its own, so it is not told by colour (WCAG 1.4.1). Its Tip positions
- * the button. A border, not a fill: forced colours keep a border in the text's colour,
+ * Pressed (Repeat): a bar under the glyph, in the glyph's color, the state's one mark,
+ * never a fill of its own, so it is not told by color (WCAG 1.4.1). Its Tip positions
+ * the button. A border, not a fill: forced colors keep a border in the text's color,
  * where they would paint a fill as the page. Captions tell theirs by their glyph instead:
  * outlined while off, filled while they show (`CaptionsIcon`).
  */
@@ -480,9 +480,9 @@ button.clover-canvas-transport-time:focus-visible {
   }
 
   /*
-   * The sliders are a gradient and a shadow, both of which forced colours drop, leaving
-   * nothing: drawn again here in system colours, a rail with its edge, the part played
-   * in Highlight, and the thumb in the text's colour (WCAG 1.4.11).
+   * The sliders are a gradient and a shadow, both of which forced colors drop, leaving
+   * nothing: drawn again here in system colors, a rail with its edge, the part played
+   * in Highlight, and the thumb in the text's color (WCAG 1.4.11).
    */
   .clover-canvas-transport input[type="range"] {
     forced-color-adjust: none;
@@ -540,7 +540,7 @@ button.clover-canvas-transport-time:focus-visible {
     color: HighlightText;
   }
 
-  /* The filled card's letters, cut out of it: the button's own colour, never lost. */
+  /* The filled card's letters, cut out of it: the button's own color, never lost. */
   .clover-captions-icon[data-on] .clover-captions-icon-letters {
     stroke: ButtonFace;
   }

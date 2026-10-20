@@ -33,7 +33,7 @@ export function useClover(part = "This part"): CloverContextValue {
 
 /**
  * A value derived from the store, re-rendering only when it changes. Selectors should
- * return the same object for the same state (the core's are memoised), or pass `isEqual`.
+ * return the same object for the same state (the core's are memoized), or pass `isEqual`.
  */
 export function useCloverSelector<Value>(
   selector: (state: CloverState) => Value,

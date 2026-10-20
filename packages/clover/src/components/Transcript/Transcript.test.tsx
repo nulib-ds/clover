@@ -141,7 +141,7 @@ describe("Transcript", () => {
   it("sits beside its heading in the information panel's accordion", async () => {
     render(
       <Clover.Root iiifContent={languagesJson} request={{ fetch }}>
-        <Clover.InformationPanel layout="accordion" />
+        <Clover.Panel layout="accordion" />
       </Clover.Root>,
     );
     fireEvent.click(await screen.findByRole("button", { name: "Transcript" }));
@@ -290,7 +290,7 @@ describe("Transcript", () => {
         iiifContent={renderingJson}
         request={{ fetch: vi.fn(async () => new Response("The words.")) }}
       >
-        <Clover.InformationPanel />
+        <Clover.Panel />
       </Clover.Root>,
     );
     fireEvent.click(await screen.findByRole("tab", { name: "Transcript" }));
@@ -304,7 +304,7 @@ describe("Transcript", () => {
   it("joins the information panel when the view has captions", async () => {
     render(
       <Clover.Root iiifContent={captionsJson} request={{ fetch }}>
-        <Clover.InformationPanel />
+        <Clover.Panel />
       </Clover.Root>,
     );
     fireEvent.click(await screen.findByRole("tab", { name: "Transcript" }));

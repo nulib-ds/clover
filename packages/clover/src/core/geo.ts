@@ -147,7 +147,7 @@ const navPlaces = new WeakMap<object, Map<string, MapFeatureCollection>>();
 /**
  * Every navPlace feature of the Root's resource: the Collection's, the Manifest's, each
  * Canvas's, and each loaded annotation's (its `navPlace`, or a GeoJSON body as Cookbook
- * 0139 has). A feature from a Canvas or annotation names that Canvas. Memoised on the
+ * 0139 has). A feature from a Canvas or annotation names that Canvas. Memoized on the
  * Manifest (and the Collection), so the same collection comes back while nothing changes.
  */
 export function navPlaceOf(
@@ -309,7 +309,7 @@ const georeferences = new WeakMap<object, Georeference[]>();
 
 /**
  * The georeferenced images of the Manifest's Canvases, from their loaded annotation pages.
- * Memoised on the Manifest: embedding a fetched page makes a new one.
+ * Memoized on the Manifest: embedding a fetched page makes a new one.
  */
 export function georeferencesOf(manifest: Manifest | null): Georeference[] {
   if (!manifest) return NO_GEOREFERENCES;

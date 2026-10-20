@@ -104,7 +104,7 @@ async function layout(page: Page) {
         "button, input, .clover-canvas-transport-time",
       ),
     ].filter((node) => getComputedStyle(node).display !== "none");
-    // A row's parts are centred on one line.
+    // A row's parts are centered on one line.
     const rows = new Set(
       [...element.children].map((child) =>
         Math.round((box(child).top + box(child).bottom) / 2),
@@ -482,9 +482,9 @@ test.describe("transport", () => {
       const probe = document.createElement("span");
       probe.style.backgroundColor = "var(--clover-color-control, #1a1d1e)";
       element.parentElement!.append(probe);
-      const colour = getComputedStyle(probe).backgroundColor;
+      const color = getComputedStyle(probe).backgroundColor;
       probe.remove();
-      return colour;
+      return color;
     });
     expect(await fill()).toBe(control);
     // The mark is the glyph's shape: a filled card while on, an outlined one while off.
@@ -501,8 +501,8 @@ test.describe("transport", () => {
       ),
     ).toBe("none");
 
-    // In forced colours the fill is the system's Highlight; the card is in the button's
-    // own text colour, and its letters, cut out of it, in the Highlight it sits on.
+    // In forced colors the fill is the system's Highlight; the card is in the button's
+    // own text color, and its letters, cut out of it, in the Highlight it sits on.
     await page.emulateMedia({ forcedColors: "active" });
     const forced = await captions.evaluate((element) => {
       const card = getComputedStyle(
@@ -526,7 +526,7 @@ test.describe("transport", () => {
     expect(await mark()).toBe(false);
   });
 
-  test("draws the sliders and the buttons' edges in forced colours (WCAG 1.4.11)", async ({
+  test("draws the sliders and the buttons' edges in forced colors (WCAG 1.4.11)", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
@@ -537,7 +537,7 @@ test.describe("transport", () => {
     await expect(page.getByRole("button", { name: "Captions" })).toBeAttached();
     await page.emulateMedia({ forcedColors: "active" });
     // Each round button keeps an edge where its fill is dropped (once the change of
-    // colours, which the buttons ease into, is over).
+    // colors, which the buttons ease into, is over).
     const play = page.getByRole("button", { name: "Play" });
     await expect
       .poll(() =>

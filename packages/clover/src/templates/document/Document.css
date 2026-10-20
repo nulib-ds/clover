@@ -1,6 +1,6 @@
 /*
  * Document: reads like a PDF viewer. A toolbar; page thumbnails down the left; the pages
- * down one column on a grey ground, a spread to a sheet; the information panel to the
+ * down one column on a gray ground, a spread to a sheet; the information panel to the
  * right, beside the pages where there is room, sliding out over them where there is not.
  * Size it with `--clover-template-document-height`.
  *
@@ -47,7 +47,7 @@
  * open or put away: the control's dark fill and light glyph, which hold over any image,
  * the accent under the pointer or focused. It holds the glyph of a list of thumbnails
  * (its pictures filled while the thumbnails show, so open and closed differ by more than
- * colour) and where the reader is ("3 / 17"), `xs` apart, `s` before the glyph and
+ * color) and where the reader is ("3 / 17"), `xs` apart, `s` before the glyph and
  * `xs` and `3xs` after the count (whose letters sit tighter to their box than the
  * glyph's lines do).
  * `button.x`: one class ties with a reset's `[type="button"]`.
@@ -79,7 +79,7 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 }
 
 /*
- * The count in the control's light colour, small, right beside the glyph. It keeps no
+ * The count in the control's light color, small, right beside the glyph. It keeps no
  * room for its widest ("17 / 17"): nothing sits after the toggle to be moved as it
  * grows, so it is only as wide as the count it shows.
  */
@@ -206,7 +206,7 @@ button.clover-template-document-sidebar-toggle:focus-visible {
  * A sheet: its pictures side by side at one height, fitted whole with the inset round
  * them, as the Canvas fits them at home. At most as tall as the stage less twice the
  * inset, so under a sheet at rest the next one's picture shows by the inset's depth.
- * Between two sheets' pictures, the inset of each: `2l` of the grey ground. A document
+ * Between two sheets' pictures, the inset of each: `2l` of the gray ground. A document
  * of one sheet has nothing to show under it, and takes the whole stage.
  */
 .clover-template-document-sheet {
@@ -442,7 +442,7 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 /*
  * Open, the page thumbnails' toggle sits on the bar between them and the page, over them
  * but for its far rounded end, and the panel's on the bar between the page and it,
- * centred: each
+ * centered: each
  * on its spine (`useSpine`), level with the Canvas's controls (their chrome inset,
  * `--clover-inset`, down).
  */

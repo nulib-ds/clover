@@ -67,7 +67,7 @@ test("without the stylesheet, the Canvas's controls sit over the picture and tak
   );
   await expect.poll(() => area(page)).not.toBeNull();
 
-  // What a pointer reaches at each control's centre is the control, not the picture.
+  // What a pointer reaches at each control's center is the control, not the picture.
   const missed = await page
     .locator(".clover-canvas-controls button")
     .evaluateAll((buttons) =>

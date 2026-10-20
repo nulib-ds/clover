@@ -6,7 +6,7 @@
  * (`Playground.tsx`), 2xl apart on the golden scale. On the left, the
  * viewer its parts make, held in view while the parts scroll by; on the right, each part
  * on its own, the tiles `l` apart and `l` inside, so each reads as a thing of its own. No
- * grey fills: hairline edges, the resource's own pictures and words, the accent for what
+ * gray fills: hairline edges, the resource's own pictures and words, the accent for what
  * is pointed at.
  */
 .section {
@@ -16,20 +16,52 @@
 
 /* Until the parts have loaded: the room they will take, so nothing below jumps. */
 .placeholder {
+  grid-column: 1 / -1;
   min-height: 42rem;
 }
 
-/* The Root: the viewer beside the parts, one column where there is no room for both. */
-.root {
+/*
+ * The viewer beside the parts, and beside what follows them ("Why Clover", `.after`), one
+ * column where there is no room for both. The Root draws no box of its own
+ * (`display: contents`), so the viewer, the tiles and what follows are this grid's own:
+ * the viewer spans every row of the column beside it, so it is held through all of them.
+ * Rows are spaced by margins, not gaps, so a row the resource leaves empty adds none.
+ */
+.grid {
   align-items: start;
+  column-gap: 4.236rem;
   display: grid;
-  gap: 2.618rem 4.236rem;
   grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
 }
 
+.root {
+  display: contents;
+}
+
+.tiles,
+.loading,
+.after {
+  grid-column: 2;
+}
+
+/*
+ * The grid runs on past the last story, so the viewer is still held beside it while it
+ * reads its recipe (`StoryLines.tsx`): the viewer's foot, less half the window and half
+ * a story, about 30vh.
+ */
+.after {
+  padding-bottom: max(8rem, 30vh);
+}
+
 @media (max-width: 64rem) {
-  .root {
+  .grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tiles,
+  .loading,
+  .after {
+    grid-column: 1;
   }
 }
 
@@ -43,6 +75,8 @@
 .assembled {
   display: grid;
   gap: 1rem;
+  grid-column: 1;
+  grid-row: 1 / span 3;
   /* Its column, never wider: the title, kept to one line, would otherwise widen it. */
   grid-template-columns: minmax(0, 1fr);
   position: sticky;
@@ -54,6 +88,8 @@
 
 @media (max-width: 64rem) {
   .assembled {
+    grid-row: auto;
+    margin-bottom: 2.618rem;
     position: static;
   }
 }
@@ -70,7 +106,7 @@
 }
 
 /*
- * The code control: its icon alone, in the caption's grey, round. No fill: a hairline ring
+ * The code control: its icon alone, in the caption's gray, round. No fill: a hairline ring
  * on hover, the accent's while its code is open.
  */
 .codeToggle {
@@ -112,7 +148,7 @@
 }
 
 /*
- * The viewer's code, opened under its control as an editor: Prism's Material colours on
+ * The viewer's code, opened under its control as an editor: Prism's Material colors on
  * black (`--code-*`, `tokens.css`), in the tiles' monospace, line numbers in a gutter. It
  * opens downward, its row growing from nothing, and while shut it is hidden from everyone.
  * It shares a box with its control, so shut it leaves no gap: the space over it is its
@@ -146,11 +182,82 @@
   }
 }
 
+/*
+ * A change made for the reader (`ViewerCode`'s `change`): the code as it was, over the
+ * code as it is, fading out as the new fades in, and each new line lit a moment in the
+ * accent. Where the reader does not want motion, the new lines are only lit.
+ */
+.codeStack {
+  position: relative;
+}
+
+.codeGhost {
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.codeLine[data-fresh] {
+  background-color: color-mix(in srgb, var(--accent-9) 28%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .codeGhost {
+    animation: code-out 700ms ease both;
+  }
+
+  .codeText[data-crossfade] {
+    animation: code-in 700ms ease both;
+  }
+
+  .codeLine[data-fresh] {
+    animation: code-fresh 1600ms ease both;
+    background-color: transparent;
+  }
+}
+
+@keyframes code-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes code-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes code-fresh {
+  0%,
+  40% {
+    background-color: color-mix(in srgb, var(--accent-9) 36%, transparent);
+  }
+
+  to {
+    background-color: transparent;
+  }
+}
+
 .editorFrame {
   background: var(--code-background);
   border-radius: var(--radius-4);
   color: var(--code-text);
   margin-top: 0.618rem;
+}
+
+/* In a black story ("Why Clover"'s Composable), black on black: its hairline shows it. */
+:global(article[data-tone="code"]) .editorFrame {
+  box-shadow: inset 0 0 0 1px var(--code-rule);
 }
 
 /* On a dark page, black on near-black: a hairline round it, drawn inside. */
@@ -226,6 +333,22 @@
   overflow-wrap: anywhere;
   padding: 0.618rem 1rem 1rem 0.236rem;
   white-space: pre-wrap;
+}
+
+/*
+ * Where it keeps its rows (`ViewerCode`'s `rows`: in the Composable story, beside the
+ * viewer, on a wide screen only), no line wraps, so its height holds through a change; a
+ * line too long for it ends in an ellipsis (Copy has it whole). Clipped across only, so
+ * a control's focus ring in a line is never cut above or below.
+ */
+.editor[data-rows] .codeText {
+  overflow-wrap: normal;
+  white-space: pre;
+}
+
+.editor[data-rows] .lineText {
+  overflow-x: clip;
+  text-overflow: ellipsis;
 }
 
 /* A line: its grip (a part's first line only), its number, its code. */
@@ -369,7 +492,7 @@
 }
 
 /*
- * A value to change, in its token's colour, underlined with dashes; faintly lit under the
+ * A value to change, in its token's color, underlined with dashes; faintly lit under the
  * pointer. A number drags sideways, a `true` switches, a string picks from a menu.
  */
 .value {
@@ -450,6 +573,248 @@
   padding: 1.618rem;
 }
 
+/*
+ * The example viewer and its other side (`AccessibilityTree.tsx`), the one laid over the
+ * other. It turns over, narrowing to its edge as the other side opens out, and back;
+ * where the reader does not want motion it simply changes. At rest the viewer has no
+ * transform, so nothing in it is held in place by one.
+ */
+.flip {
+  position: relative;
+}
+
+/*
+ * Its other side is the page's, as the viewer is (Mat, 2026-10-20: "keep things light"):
+ * the same ground, hairline and soft grey shadow; the roles and the tab order in the
+ * accent itself, the names in the page's text.
+ */
+.viewerBack {
+  background: var(--color-background);
+  border-radius: var(--radius-4);
+  box-shadow:
+    0 0 0 1px var(--gray-6),
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 6px 24px rgb(0 0 0 / 0.06);
+  color: var(--gray-12);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.618;
+  overflow: hidden;
+}
+
+:global(.dark) .viewerBack {
+  box-shadow:
+    0 0 0 1px var(--gray-6),
+    0 6px 24px rgb(0 0 0 / 0.4);
+}
+
+.backHead {
+  border-bottom: 1px solid var(--gray-4);
+  color: var(--gray-11);
+  display: flex;
+  justify-content: space-between;
+  padding: 0.618rem 1rem;
+}
+
+/* The accent, 5.0:1 on white; on a dark page its lighter step, as small text needs. */
+.backStops,
+.backTab,
+.backRole {
+  color: var(--accent-9);
+}
+
+:global(.dark) :is(.backStops, .backTab, .backRole) {
+  color: var(--accent-11);
+}
+
+.backState,
+.backPunct {
+  color: var(--gray-11);
+}
+
+/* The checks: criterion, what was measured (and what it must meet), and its mark. */
+.backChecks {
+  border-bottom: 1px solid var(--gray-4);
+  display: grid;
+  gap: 0.146rem;
+  margin: 0;
+  padding: 0.618rem 1rem;
+}
+
+.backCheck {
+  display: grid;
+  gap: 0.618rem;
+  grid-template-columns: 6ch minmax(0, 1fr) auto;
+  white-space: nowrap;
+}
+
+.backCheck > dd {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.backValue {
+  font-weight: var(--weight-bold);
+}
+
+.backMark {
+  color: var(--accent-9);
+}
+
+:global(.dark) .backMark {
+  color: var(--accent-11);
+}
+
+/* Where the tree runs past the card, it fades out, inside the card's edge. */
+.backTree {
+  flex: 1;
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - 4.236rem),
+    transparent
+  );
+  min-height: 0;
+  overflow: hidden;
+  padding: 0.618rem 1rem;
+}
+
+.backLine {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  white-space: nowrap;
+}
+
+.backText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.backTab {
+  flex: none;
+}
+
+.backMore {
+  color: var(--gray-11);
+}
+
+/*
+ * The faces: the viewer itself (`front`), its inspector (`back`), and a Cookbook recipe
+ * read by the same parts (`recipe`). The others lie over the front, its size, hidden,
+ * until they are turned to; the front stays in the flow, so turning never moves the page.
+ *
+ * At rest every face is its full size, hidden or not, so a viewer drawn while hidden
+ * measures itself rightly, and the turn clips rather than squeezes (below). The front, turned away, is see-through rather than
+ * hidden, so assistive technology keeps it, and focus coming to it turns it back
+ * (`PartsLive.tsx`); no pointer reaches it then.
+ */
+.flip > [data-face-of]:not([data-face-of="front"]) {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  visibility: hidden;
+}
+
+.flip:is([data-face="back"], [data-face="recipe"]) > [data-face-of="front"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.flip[data-face="back"] > [data-face-of="back"],
+.flip[data-face="recipe"] > [data-face-of="recipe"] {
+  visibility: visible;
+}
+
+/* The turn: the face up closes to its middle, then the next opens out from its own. */
+@media (prefers-reduced-motion: no-preference) {
+  .flip > [data-face-of]:not([data-face-of="front"]) {
+    animation: face-out 180ms cubic-bezier(0.5, 0, 1, 1);
+    transition: visibility 0s 180ms;
+  }
+
+  .flip:is([data-face="back"], [data-face="recipe"]) > [data-face-of="front"] {
+    animation: face-out 180ms cubic-bezier(0.5, 0, 1, 1);
+  }
+
+  .flip[data-face="back"] > [data-face-of="back"],
+  .flip[data-face="recipe"] > [data-face-of="recipe"],
+  .flip[data-face="front"][data-moved] > [data-face-of="front"] {
+    animation: face-in 180ms cubic-bezier(0, 0, 0.5, 1) 180ms backwards;
+  }
+}
+
+/*
+ * Clipped to its middle and back, not squeezed: a Canvas measures its box as it is
+ * transformed, so one set up mid-squeeze draws into a sliver; a clip leaves it whole.
+ */
+@keyframes face-out {
+  from {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+  }
+
+  to {
+    clip-path: inset(0 50% 0 50%);
+    opacity: 1;
+  }
+}
+
+@keyframes face-in {
+  from {
+    clip-path: inset(0 50% 0 50%);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/*
+ * The recipe's face: the viewer's frame, the recipe named at its head, and its Content
+ * and Items outlined with their names, as the parts that read it.
+ */
+.recipeFace {
+  align-content: start;
+  overflow: hidden;
+}
+
+.recipeName {
+  color: var(--accent-9);
+  flex: 1 0 100%;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+:global(.dark) .recipeName {
+  color: var(--accent-11);
+}
+
+.recipeRoot {
+  display: grid;
+  flex: 1 0 100%;
+  gap: 1.618rem;
+  min-width: 0;
+}
+
+.recipeNotes {
+  min-width: 0;
+}
+
+.recipeLabel {
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* As the stage's, on a dark page. */
 :global(.dark) .viewer {
   box-shadow:
@@ -514,10 +879,10 @@
   --clover-items-height: 4.236rem;
 }
 
+/* In the text's own color, as Clover's Summary is: not muted. */
 .viewerSummary {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  color: var(--gray-11);
   display: -webkit-box;
   font-size: var(--text-sm);
   margin: 0;
@@ -578,6 +943,70 @@
   transform: none;
 }
 
+/* The Label's tag at its end, clear of the Thumbnail's beside it when both are lit. */
+.regionLabel > .regionName {
+  left: auto;
+  right: 0.618rem;
+}
+
+/*
+ * "Why Clover"'s line to the example viewer (`StoryLines.tsx`): over the page, in the
+ * window, never in a pointer's way, in the accent itself. It draws in as its story
+ * arrives, where the reader allows motion; otherwise it is simply there.
+ */
+.storyLines {
+  height: 100%;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  position: fixed;
+  width: 100%;
+  z-index: 5;
+}
+
+.storyLines path {
+  fill: none;
+  stroke: var(--accent-9);
+  stroke-dasharray: 1;
+  stroke-linecap: round;
+  /* 3px, as the selected item's ring and the current Range's mark are. */
+  stroke-width: 3;
+  visibility: hidden;
+}
+
+.storyLines circle {
+  fill: var(--accent-9);
+  transform-box: fill-box;
+  transform-origin: center;
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .storyLines[data-drawing] path {
+    animation: line-draw 700ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+
+  .storyLines[data-drawing] circle {
+    animation: line-end 160ms ease 560ms both;
+  }
+}
+
+@keyframes line-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes line-end {
+  from {
+    scale: 0;
+  }
+}
+
 /* ── The parts ────────────────────────────────────────────────────────────── */
 
 .tiles {
@@ -599,6 +1028,36 @@
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease;
+}
+
+/* "And more.": a line across the tiles, and how many parts there are to use. */
+.more {
+  border-top: 1px solid var(--gray-6);
+  display: grid;
+  gap: 0.382rem;
+  grid-column: 1 / -1;
+  margin-top: 1.618rem;
+  padding-top: 2.618rem;
+}
+
+.moreTitle {
+  font-size: clamp(1.618rem, 3vw, 2.618rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.moreBody {
+  color: var(--gray-11);
+  font-size: var(--text-lg);
+  margin: 0;
+}
+
+.moreBody a {
+  color: var(--accent-11);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .tile[data-span="2"] {
@@ -800,7 +1259,7 @@
   color: var(--accent-11);
 }
 
-/* A link in a part's text (Summary, Metadata, the statement), coloured and underlined. */
+/* A link in a part's text (Summary, Metadata, the statement), colored and underlined. */
 .tileBody :is(p, dd) a,
 .viewer :is(p, dd) a {
   color: var(--accent-11);
@@ -833,10 +1292,6 @@
   border-radius: var(--radius-3);
 }
 
-.loading {
-  grid-column: 2;
-}
-
 /* ── What this resource has nothing for ───────────────────────────────────── */
 
 /* Under the tiles, in their column, clear of the viewer held in view beside them. */
@@ -844,7 +1299,7 @@
   display: grid;
   gap: 1rem;
   grid-column: 2;
-  margin-top: 1.618rem;
+  margin-top: 4.236rem;
 }
 
 @media (max-width: 64rem) {

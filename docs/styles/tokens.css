@@ -23,10 +23,12 @@
   --gray-8: #b9bbc6;
   --gray-11: #60646c;
   --gray-12: #1c2024;
+  /* The sidebar's entries, at full strength (Mat, 2026-10-20). */
+  --nav-text: #000;
 
   /*
    * Accent — a clear, modern blue, IBM's in spirit (Carbon's Blue 60). Northwestern
-   * purple, where Clover was made, is one of the university options under the gear.
+   * purple, where Clover was made, is one of the university options in the homepage's "Why Clover".
    *
    * Only `--accent-9` is a literal; every other step is mixed from it. That is what
    * lets the playground's accent knob retint the entire site by setting a single
@@ -48,7 +50,7 @@
   /*
    * Surfaces.
    *
-   * Solid fills, not hairlines. A panel is a block of colour, and separation comes from
+   * Solid fills, not hairlines. A panel is a block of color, and separation comes from
    * contrast and space — a 1px border is not Clover's aesthetic. Each step is a distinct
    * fill, so a panel reads as a panel with nothing drawn around it.
    */
@@ -99,7 +101,7 @@
    *
    * The family is variable across a wide range, but using that range made the page read
    * as noise — every element at a slightly different weight. Hierarchy comes from size
-   * and colour instead, with weight reduced to a binary: regular for everything, bold
+   * and color instead, with weight reduced to a binary: regular for everything, bold
    * where text is genuinely bold. Nothing in the docs should introduce a third value,
    * which is why these are tokens rather than numbers typed at each site.
    */
@@ -111,7 +113,7 @@
    *
    * Tokens rather than literals so any future section heading joins that level of the
    * hierarchy by reference. (The playground's "Try it" used these too, until its
-   * heading was dropped in favour of the selected radio card carrying that meaning.)
+   * heading was dropped in favor of the selected radio card carrying that meaning.)
    */
   --section-heading-size: 2rem;
   --section-heading-weight: var(--weight-bold);
@@ -131,7 +133,7 @@
   --focus-ring: 0 0 0 2px var(--color-background), 0 0 0 4px var(--accent-11);
 
   /*
-   * Code, as Prism's Material theme colours it, on black: the homepage's code editor,
+   * Code, as Prism's Material theme colors it, on black: the homepage's code editor,
    * where it was asked for by name. Not themed: an editor stays dark on a light page.
    */
   --code-background: #000000;
@@ -165,11 +167,12 @@
   --gray-8: #4a4f55;
   --gray-11: #b0b4ba;
   --gray-12: #edeef0;
+  --nav-text: #fff;
 
   /* Same derivation, with the text step mixed toward white rather than black so it
    * stays legible on a dark ground. */
   /*
-   * The accent is not lifted for dark mode: the blue is the same colour in both
+   * The accent is not lifted for dark mode: the blue is the same color in both
    * themes. `--accent-9` is inherited from `:root` and the steps below remix it.
    */
   --accent-2: color-mix(in oklab, var(--accent-9) 10%, var(--gray-1));
@@ -200,6 +203,7 @@
     --gray-8: #4a4f55;
     --gray-11: #b0b4ba;
     --gray-12: #edeef0;
+    --nav-text: #fff;
 
     /* Same derivation as `.dark`, so the two cannot drift. */
     --accent-2: color-mix(in oklab, var(--accent-9) 10%, var(--gray-1));
@@ -247,10 +251,10 @@
 
 /* ── Typography ──────────────────────────────────────────────────────────────
  *
- * One family, two weights. Hierarchy comes from size and colour; weight only ever
+ * One family, two weights. Hierarchy comes from size and color; weight only ever
  * says "regular" or "bold".
  *
- * These are bare element selectors on purpose. Nextra's reset only neutralises
+ * These are bare element selectors on purpose. Nextra's reset only neutralizes
  * `font-size` and `font-weight` on headings, never `font-family`, so headings inherit
  * theirs from `html` — which means a single selector here is enough to retarget every
  * heading in the docs prose as well as in these components, without fighting
@@ -286,75 +290,53 @@ b {
 }
 
 /*
- * Nextra weights both its prose and its chrome with utility classes, which outrank a
- * bare element selector — so collapsing them into the two-weight system means naming
- * them. This is where most of the stray 500s and 600s were coming from: the sidebar,
- * the table of contents and the navbar all use `nx-font-medium` / `nx-font-semibold`.
+ * Nextra weights both its prose and its chrome with utility classes (`x:font-medium`,
+ * `x:font-semibold`: the sidebar, the table of contents and the navbar), so collapsing
+ * them into the two-weight system means naming them. Nextra's are in cascade layers and
+ * these are not, so these win whatever the specificity.
  */
-/*
- * Prefixed with `html` on purpose. A bare `.nx-font-medium` here would tie Nextra's
- * own `.nx-font-medium` on specificity (0,1,0), leaving source order to decide — and
- * Nextra's stylesheet loads after this one, so it won and the 500s survived. The
- * prefix costs one element and settles it regardless of load order.
- */
-html .nx-font-normal,
-html .nx-font-medium,
-html .nx-font-semibold {
+:is(
+  [class~="x:font-normal"],
+  [class~="x:font-medium"],
+  [class~="x:font-semibold"]
+) {
   font-weight: var(--weight-regular);
 }
 
-html .nx-font-bold {
+[class~="x:font-bold"] {
+  font-weight: var(--weight-bold);
+}
+
+/* Headings stay bold whichever utility Nextra put on them. */
+:is(h1, h2, h3, h4, h5, h6):is(
+  [class~="x:font-normal"],
+  [class~="x:font-medium"],
+  [class~="x:font-semibold"],
+  [class~="x:font-bold"]
+) {
   font-weight: var(--weight-bold);
 }
 
 /*
- * Headings stay bold whichever utility Nextra put on them. `:is()` contributes element
- * specificity, giving (0,1,1) — enough to beat both Nextra's own (0,1,0) classes and
- * the flattening rules above, without `!important`.
- */
-:is(h1, h2, h3, h4, h5, h6).nx-font-normal,
-:is(h1, h2, h3, h4, h5, h6).nx-font-medium,
-:is(h1, h2, h3, h4, h5, h6).nx-font-semibold,
-:is(h1, h2, h3, h4, h5, h6).nx-font-bold {
-  font-weight: var(--weight-bold);
-}
-
-/*
- * The sidebar's section titles ("IIIF Components" and the rest) are the one place the
+ * The sidebar's section titles ("Components" and the rest) are the one place the
  * flattening above is undone: they are separators, not links, and read as headings only
  * if they are heavier than the links beneath them.
  */
-html .nextra-sidebar-container li.nx-font-semibold {
+:is(.nextra-sidebar, .nextra-mobile-nav) li[class~="x:font-semibold"] {
   font-weight: var(--weight-bold);
 }
 
 /*
  * The current page's sidebar entry is bold again, so it is marked by more than its
- * colour; and the TOC's current entry is underlined.
+ * color; and the TOC's current entry is underlined.
  */
-html .nextra-sidebar-container :is(a, button).nx-font-semibold {
+:is(.nextra-sidebar, .nextra-mobile-nav)
+  :is(a, button)[class~="x:font-semibold"] {
   font-weight: var(--weight-bold);
 }
 
-html nav.nextra-toc a.nx-text-primary-600 {
+nav.nextra-toc a[class~="x:text-primary-600"] {
   text-decoration: underline;
-}
-
-/*
- * Code blocks' syntax colours at 4.5:1 on Nextra's tinted ground, highlighted lines
- * included. One element more than Nextra's `:root` and `.dark`, so they win whatever
- * the load order; the light ones only out of dark mode.
- */
-html:root:not(.dark) {
-  --shiki-token-string: #116329;
-  --shiki-token-constant: #0b62c4;
-  --shiki-token-comment: #5f6670;
-  --shiki-token-keyword: #b31d28;
-  --shiki-token-parameter: #953800;
-}
-
-html.dark {
-  --shiki-token-comment: #8b949e;
 }
 
 code,

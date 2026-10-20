@@ -1,0 +1,111 @@
+---
+title: Download
+description: "The rendering of the page in view and of the Manifest, a PDF, a text or a full-size file, as links behind one button."
+---
+
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+
+# Download
+
+What the Root's resource offers to download: the `rendering` of the Canvases in view
+("This page") and of the Manifest ("All pages"), such as a PDF, a text or a full-size
+image, as links behind one button. The `Document` template puts it in its toolbar;
+`Default` lists the same links in the [Panel](/docs/panel)'s About instead. In a layout
+of your own, place it anywhere inside a `Clover.Root`.
+
+```jsx
+import * as Clover from "@nulib/clover";
+import "@nulib/clover/styles.css";
+
+<Clover.Root iiifContent={manifestUrl}>
+  <Clover.Content />
+  <Clover.Download />
+</Clover.Root>;
+```
+
+It renders nothing when neither the Canvases in view nor the Manifest has a `rendering`.
+
+## This page and All pages
+
+Below, the newspaper from Clover's [mocks](/docs/mocks), whose pages each have their OCR
+as a plain-text `rendering`. The Manifest has no `rendering` of its own, so only "This
+page" shows, with the text of the page in view. The part sits under this page's `h2`, so
+it takes `headingLevel={3}`.
+
+<PartDemo
+  part="Download"
+  resource="page-transcript"
+  content
+  props={{ headingLevel: 3 }}
+/>
+
+The links are in two groups, each shown only when it has one: "This page", the
+`rendering` of the Canvases in view (both pages of a spread), and "All pages", the
+Manifest's. Each group is a `section` named by its heading, at `headingLevel`. A
+rendering is listed once in its group. A link reads the rendering's `label` in the
+reader's language, carrying that label's `lang`, or else its `format` or its address; its
+`format` follows in brackets where it is not the label. Each opens in a new tab.
+
+## Opening and closing
+
+The button is `aria-expanded`, and `aria-controls` the list under it. The list follows the
+button, so Tab goes from the button into its links. It opens towards the side of the
+window with room for it, and it closes:
+
+- on Escape, from anywhere in it, handing focus back to the button. The Escape is taken,
+  so a modal `dialog` or a floating panel of the host's round it stays open;
+- on a press outside it;
+- when focus moves out of it, leaving focus where it went, so the list never covers what
+  is focused;
+- when another of Clover's popups opens, such as a menu of the Canvas's controls: they
+  open one at a time ([`useOneOpen`](/docs/composing#controls-of-your-own)).
+
+The button says "Download", in the reader's language, with its `lang` where that differs
+from the page's. Give it words of your own as its children, and mark them where they are
+in a language other than the page's (WCAG 3.1.2):
+
+```jsx
+<Clover.Download>Download this issue</Clover.Download>
+```
+
+## In About
+
+About lists the same links, under a Download heading at its own `headingLevel`, with its
+groups a level below, and no button. So `Default`, whose About is in its panel, has no
+Download button. `Document` has one in its toolbar, its groups a level below the title,
+and `download={false}` leaves it out:
+
+```jsx
+<Viewer iiifContent={url} template={Document} download={false} />
+```
+
+For one resource's `rendering` alone, as a plain list of links, use
+[`Rendering`](/docs/primitives/rendering).
+
+## Props
+
+| Prop           | Type                    | Description                                                                          |
+| -------------- | ----------------------- | ------------------------------------------------------------------------------------ |
+| `children`     | `ReactNode`             | What the button says. Default: "Download", translated.                               |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | The level of the groups' headings, one below the heading it sits under. Default `3`. |
+
+Its other props (`id`, `className`, `style`, `aria-*`) go to the `div` round the button
+and its list. It takes no `as` or `ref`.
+
+### Styles
+
+| Class                     | What it is                                                      |
+| ------------------------- | --------------------------------------------------------------- |
+| `.clover-download`        | The part, with `data-open` and `data-align` (`start` or `end`). |
+| `.clover-download-button` | The button.                                                     |
+| `.clover-download-panel`  | The list under the button, at least 14rem wide.                 |
+| `.clover-download-groups` | The groups, here and in About.                                  |
+| `.clover-download-group`  | A group, under its heading (`.clover-download-title`).          |
+| `.clover-download-list`   | A group's links (`.clover-download-link`).                      |
+| `.clover-download-format` | A link's format, after its label.                               |
+
+## From Clover 3.x
+
+| 3.x                    | Clover 4                                                                     |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| `options.showDownload` | `Document`'s `download`, default `true`; in a layout of your own, `Download` |

@@ -8,8 +8,8 @@ import { localize } from "../../core/value";
 import { useOneOpen } from "../../ui/useOneOpen";
 
 /**
- * The summary and metadata, sanitised by the Primitives. Fetched the first time the
- * caption opens, so their HTML sanitiser (DOMPurify) costs a Canvas nothing until then.
+ * The summary and metadata, sanitized by the Primitives. Fetched the first time the
+ * caption opens, so their HTML sanitizer (DOMPurify) costs a Canvas nothing until then.
  */
 const CaptionDetails = lazy(() => import("./CaptionDetails"));
 

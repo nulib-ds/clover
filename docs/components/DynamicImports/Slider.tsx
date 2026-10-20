@@ -1,6 +1,8 @@
+"use client";
+
 import Slider, { type CloverSliderProps } from "@samvera/clover-iiif/slider";
 import { demoResources } from "docs/lib/demo-resources";
-import { useRouter } from "next/router";
+import { useRouter } from "docs/lib/router";
 
 /**
  * Forwards every Slider prop rather than naming a few.

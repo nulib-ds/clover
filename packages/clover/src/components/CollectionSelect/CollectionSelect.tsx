@@ -34,7 +34,7 @@ const STEPS = new Set([
 const STEP_TIME = 100;
 
 /**
- * A native `<select>` of the Collection's members, labelled by the Collection: choosing a
+ * A native `<select>` of the Collection's members, labeled by the Collection: choosing a
  * Manifest shows it, choosing a nested Collection enters it. Renders nothing outside a
  * Collection, or for a Collection of one.
  *

@@ -1,0 +1,65 @@
+---
+title: Templates
+---
+
+import { TemplateDemo } from "docs/components/Clover4/Demos";
+import DefaultReadme from "../../../packages/clover/src/templates/default/README.md";
+import DocumentReadme from "../../../packages/clover/src/templates/document/README.md";
+import GalleryReadme from "../../../packages/clover/src/templates/gallery/README.md";
+
+# Templates
+
+Layouts for the [Viewer](/docs/viewer), each built only from the parts
+`@nulib/clover` exports. Pass one as the Viewer's `template`, or copy its source
+(`packages/clover/src/templates/<name>/`) into your app and change it: nothing in a
+template is private. [Composing Layouts](/docs/composing) has the parts to build with.
+
+```jsx
+import Viewer from "@nulib/clover";
+import { Document } from "@nulib/clover/templates";
+import "@nulib/clover/styles.css";
+import "@nulib/clover/templates.css";
+
+<Viewer iiifContent={url} template={Document} />;
+```
+
+The Viewer is a shell: a page ships only the template it passes. `Default` is the one
+it draws when given none, loading it on demand, so its styles are in `styles.css`. The
+others are in the stylesheet `@nulib/clover/templates.css`, which a page that uses none
+of them can leave out. The Viewer passes every prop but `template`
+to its template, and every template takes the `Clover.Root` props: `request`,
+`canvasId`, `annotations`, `onContentStateChange` and the rest.
+
+Every template also takes `headingLevel`, the level of its title (default `2`), so it fits
+the outline of the page around it. The headings inside it follow a level below: the
+panel's sections in `Default` and `Document`, the Download menu's groups in `Document`,
+the lightbox's title in `Gallery`. `Default` without its header has no title, and its
+panel's sections take the title's level. Under a heading of your own, pass the level
+below it.
+
+<div className="clover-docs-template">
+  <DefaultReadme />
+</div>
+
+<TemplateDemo
+  name="Default"
+  iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+/>
+
+<div className="clover-docs-template">
+  <DocumentReadme />
+</div>
+
+<TemplateDemo
+  name="Document"
+  iiifContent="https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json"
+/>
+
+<div className="clover-docs-template">
+  <GalleryReadme />
+</div>
+
+<TemplateDemo
+  name="Gallery"
+  iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+/>

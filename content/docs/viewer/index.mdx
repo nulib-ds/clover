@@ -1,0 +1,289 @@
+---
+title: Viewer
+asIndexPage: true
+---
+
+import { Callout } from "nextra/components";
+import {
+  ContentSearchDemo,
+  ContentStateDemo,
+  TemplatesDemo,
+  ViewerDemo,
+} from "docs/components/Clover4/Demos";
+
+# Viewer
+
+<Callout type="info">
+  Looking for the Viewer of Clover 3.x, `@samvera/clover-iiif`? It is at [Clover
+  3.x › Viewer](/docs/3.x/viewer).
+</Callout>
+
+Clover 4.x is used two ways:
+
+- **The Viewer**, ready-made. Give it a Manifest, and a template for a layout other than
+  the default.
+- **The parts** it is built from, for a layout of your own, with dot notation.
+
+## The Viewer
+
+`Viewer` is the package's default export.
+
+```jsx
+import Viewer from "@nulib/clover";
+import "@nulib/clover/styles.css";
+
+<Viewer iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json" />;
+```
+
+<ViewerDemo />
+
+With no `template`, the Viewer draws `Default`: Clover 3.x's Viewer layout, with the
+information panel beside the stage and the thumbnails under it. For another layout,
+import a template and pass it:
+
+```jsx
+import Viewer from "@nulib/clover";
+import { Document } from "@nulib/clover/templates";
+import "@nulib/clover/styles.css";
+import "@nulib/clover/templates.css";
+
+<Viewer iiifContent={url} template={Document} />;
+```
+
+The Viewer itself is a shell of under 1 kB. It holds no layout, so a page ships only the
+template it passes, and the parts that template uses: a Gallery page carries no
+information panel. A template is passed, not named, for the same reason. The Viewer takes
+its template's props, and TypeScript checks them: `template={Document}` brings
+`defaultSidebarOpen`. See [Templates](/docs/viewer/templates) for each one.
+
+Given no template, the Viewer loads `Default` the first time it draws, as a chunk of its
+own. That costs one request before the Manifest starts to load, and the server draws
+nothing for it. To have it up front and drawn on the server, pass it like any other:
+
+```jsx
+import Viewer from "@nulib/clover";
+import { Default } from "@nulib/clover/templates";
+
+<Viewer iiifContent={url} template={Default} />;
+```
+
+`Default`'s props are below. Every template also takes the [`Root` props](/docs/composing#root).
+
+| Prop               | Default                     | What it does                                                    |
+| ------------------ | --------------------------- | --------------------------------------------------------------- |
+| `template`         | `Default`, loaded on demand | The layout: one from `@nulib/clover/templates`, or your own.    |
+| `header`           | `true`                      | The thumbnail and title over the stage.                         |
+| `headingLevel`     | `2`                         | The title's level; the panel's sections are a level below.      |
+| `panel`            | `true`                      | The information panel and its toggle.                           |
+| `defaultPanelOpen` | —                           | Whether the panel starts open. Unset: open when it fits beside. |
+| `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.             |
+| `items`            | `"carousel"`                | The thumbnails: `"carousel"`, `"list"`, `"grid"`, or `false`.   |
+| `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.      |
+| `fill`             | `false`                     | Fill the box it sits in; the stage takes what the rest leave.   |
+
+The Viewer's headings start at `h2`: its title, then the panel's sections under it. Where
+it sits under a heading of the page's own, give it the level below that heading, so a
+screen reader's list of headings matches the page as it looks. The Viewers on this page
+sit under its `h2`s and `h3`s, and pass `3` and `4`:
+
+```jsx
+<h3>Opening at a place</h3>
+<Viewer iiifContent={url} headingLevel={4} />
+```
+
+With `header={false}` the Viewer has no title, and the panel's sections take its place
+at `headingLevel` itself, so a Viewer under a page's `h1` keeps the default and its
+sections are `h2`s.
+
+## Templates
+
+A template is the Viewer's layout: where the Canvas, the thumbnails, the title and the
+Panel go, and how they open and close. Three come with Clover, in
+`@nulib/clover/templates`, each built only from the parts any layout can use.
+
+- **`Default`**, the Viewer's own: Clover 3.x's Viewer, the title over the Canvas, the
+  thumbnails under it and the Panel beside it.
+- **`Document`** reads like a PDF viewer: page thumbnails down the left, the pages down
+  one column, the Panel sliding out on the right.
+- **`Gallery`**: a grid of the views, one opening in a lightbox to pan, zoom and page
+  through.
+
+Choose one to see it on the same Manifest:
+
+<TemplatesDemo />
+
+[Templates](/docs/viewer/templates) has each one's props, and how to copy one into your
+app and change it.
+
+## Your own layout
+
+The templates are made of parts you can use yourself, in markup of your own: see
+[Composing Layouts](/docs/composing).
+
+## What it handles
+
+The Viewer takes the [`Root` props](/docs/composing#root) and hands them to its template.
+
+### What `iiifContent` can be
+
+- **A Manifest.** Shown from its `start` Canvas, or its first.
+- **A Collection.** Its first Manifest is shown, or the one `manifestId` names. Its
+  members are listed in the information panel's Collection section, or by
+  `Clover.CollectionSelect` or `<Clover.Items of="members">` of your own; choosing one
+  shows it, and a nested Collection is
+  entered. Paged Collections are followed through `next`. `manifestId` with
+  `onManifestChange` makes the Manifest controlled, as `canvasId` does the Canvas.
+- **A Canvas.** Shown on its own, About saying what the Canvas says of itself: its
+  label, summary and metadata. Where it is `partOf` a Manifest, About names it under
+  "Part of", with a button that opens the full Manifest in its place, at this Canvas.
+- **A content state**, as JSON or base64url. It opens at the Canvas it points to,
+  framing its region (`xywh=`) or seeking to its time (`t=`), past any placeholder. One
+  that carries a `body` (a note its sharer wrote, as Northwestern's Digital Collections
+  shared links do) shows that note on the Canvas as an annotation, picked, so it names
+  itself there and in the Annotations list.
+- **Annotations**: an AnnotationPage, or an AnnotationCollection (its pages followed from
+  `first` through `next`), made apart from any Manifest, as a page of tags across a
+  collection is. Each annotation names its Canvas's Manifest (`partOf`), and the Viewer
+  opens the first one's Manifest at that Canvas, the annotation picked. Every annotation
+  is listed in the panel, those on other Manifests named by their Manifest's label (each
+  fetched once, when the list first shows), and pressing one opens its Manifest there.
+- **An object** rather than a URL, from any of these. An object is identified by its
+  `id`, so a new object with the same `id` does not reload.
+
+Everything is upgraded to IIIF Presentation 4 as it loads, so every part reads one
+shape. `toPresentation4()` does the same for data you hold yourself.
+
+### Opening at a place
+
+A content state opens the Manifest at a Canvas, and frames a region of it. This one
+points at the title on the book's title page: the second spread, zoomed in, with no
+cover in the way.
+
+```jsx
+const state = {
+  type: "Annotation",
+  motivation: ["contentState"],
+  target: {
+    type: "SpecificResource",
+    source: {
+      id: "https://iiif.io/api/cookbook/recipe/0009-book-1/canvas/p3",
+      type: "Canvas",
+      partOf: [{ id: manifestUrl, type: "Manifest" }],
+    },
+    selector: { type: "FragmentSelector", value: "xywh=450,650,2300,1100" },
+  },
+};
+
+// Encoded for a link, as the Content State API spells it.
+const encoded = btoa(encodeURIComponent(JSON.stringify(state)))
+  .replace(/\+/g, "-")
+  .replace(/\//g, "_")
+  .replace(/=+$/, "");
+
+<Viewer iiifContent={encoded} />;
+```
+
+<ContentStateDemo />
+
+### Annotations and sharing
+
+Annotations on the Manifest's Canvases (comments, tags, transcriptions) appear in an
+Annotations tab and as hotspots on the Canvas. Picking one in the list frames it, moving
+to its Canvas first; hovering either the entry or the hotspot highlights both. Add your
+own with `annotations`:
+
+```jsx
+<Viewer iiifContent={manifestUrl} annotations={annotationPageUrl} />
+```
+
+`onContentStateChange` hands you a content state whenever the reader settles: the Canvas
+and region (or moment in a video) they are at, for a link of your own:
+
+```jsx
+<Clover.Root
+  iiifContent={url}
+  onContentStateChange={({ encoded }) =>
+    history.replaceState(null, "", `?iiif-content=${encoded}`)
+  }
+>
+```
+
+### Content Search
+
+A Manifest with a IIIF Content Search service (version 1 or 2) gets a Search tab. The
+hits are listed by page, each with the words around it, and drawn on the Canvas; choosing
+one goes to its page and frames it. `searchQuery` searches as the Manifest opens, as 3.x's
+`iiifContentSearchQuery` did:
+
+```jsx
+<Viewer iiifContent={manifestUrl} searchQuery="Vererbung" />
+```
+
+Below, the Viewer opens Clover's [Content Search mock](/docs/mocks) already searched for
+"Moskau": open the Search tab to see the hits, or search again.
+
+<ContentSearchDemo />
+
+`Clover.Search` is the same part anywhere in a layout, and `clover.search(query)` (from
+`useClover`) searches from a part of your own. The results are in the Root's state as
+`search`: its `query`, `status`, `hits`, and the `set` of annotations the Canvas draws
+(its id is `SEARCH_SET_ID`, so `setSetVisible` can hide the highlights).
+
+### Video and sound
+
+Video and sound play in the Canvas's own transport. Their WebVTT captions are drawn over
+the picture and listed in a Transcript tab, from one fetch of each file; the cue playing
+is marked, and pressing one seeks there. Chapters come from the Manifest's Ranges (a
+Range naming the Canvas with `#t=`): notched on the seek bar, listed in a menu, and
+named beside the time. A Manifest or Canvas with `auto-advance` plays the next view when
+one ends, and `repeat` wraps the last to the first. Playback re-renders only what shows
+the time, and changes nothing in the Root's state.
+
+### Animations
+
+A Canvas whose painting annotations are timed (`canvas#t=0,0.1`, one image per frame)
+plays as an animation: pick "0688 Animation" or "Muybridge plate 626" above. Each frame
+shows until the next starts; `auto-advance` plays it on arrival and `repeat` loops it, and
+a frame bar steps, scrubs and pauses it. Every frame is loaded from the start and only
+shown or hidden, so it never blinks, and nothing plays for a reader asking for reduced
+motion. The animation's code loads only when one is shown.
+
+### Renderers of your own
+
+`renderers` draws the views Clover does not (a 3D model, a PDF) with a component of your
+own, as 3.x's `customDisplays` did. See
+[Renderers of your own](/docs/composing#renderers-of-your-own).
+
+### Requests
+
+`request` applies to everything: the Manifest, referenced annotation pages, `info.json`,
+image tiles, captions and HLS segments.
+
+```jsx
+<Viewer
+  iiifContent={url}
+  request={{
+    credentials: "include",
+    headers: { Authorization: `Bearer ${token}` },
+  }}
+/>
+```
+
+A `<video>` element cannot send headers, so plain (non-HLS) video and sound get only the
+credentials. So does an image served without CORS, which Clover shows as an `<img>`.
+
+## Styles
+
+Import `@nulib/clover/styles.css` once, and size the stage with
+`--clover-content-height`. Or give the Viewer a box of a set height and `fill`: it is as
+tall as the box, and the stage takes what the title and the thumbnails leave, never less
+than 16rem (a shorter box scrolls). This page's demo fills the window under its header
+so:
+
+```jsx
+<div style={{ height: "calc(100dvh - 4rem)" }}>
+  <Viewer iiifContent={url} fill />
+</div>
+```
+
+The rest is in [Composing Layouts](/docs/composing#styles).

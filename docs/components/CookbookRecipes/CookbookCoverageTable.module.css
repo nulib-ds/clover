@@ -34,11 +34,11 @@
   display: block;
   font-family: monospace;
   font-size: 0.75rem;
-  /* A colour, not opacity, so the slug keeps 4.5:1 in both themes. */
+  /* A color, not opacity, so the slug keeps 4.5:1 in both themes. */
   color: var(--gray-11);
 }
 
-/* A solid rounded square in the state's colour with a white icon. */
+/* A solid rounded square in the state's color with a white icon. */
 .status {
   background: var(--status-color);
   border-radius: 0.375rem;
@@ -155,7 +155,7 @@ a.view {
   gap: 0.375rem;
 }
 
-/* Why a recipe is only partly covered, in the cell's own colour so it keeps its contrast. */
+/* Why a recipe is only partly covered, in the cell's own color so it keeps its contrast. */
 .note {
   display: block;
   font-size: var(--text-sm);

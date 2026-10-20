@@ -624,20 +624,20 @@ test.describe("Hotspots", () => {
     const tones = () =>
       line.evaluate((element) => {
         const style = getComputedStyle(element);
-        const colours = [
+        const colors = [
           style.borderTopColor,
           ...(style.boxShadow.match(/rgba?\([^)]+\)/g) ?? []),
           style.outlineColor,
         ];
         return {
-          colours,
+          colors,
           outline: style.outlineStyle,
           fill: style.backgroundColor,
         };
       });
     const rest = await tones();
     // The border and the inset line.
-    expect(ratio(rest.colours[0], rest.colours[1])).toBeGreaterThanOrEqual(9);
+    expect(ratio(rest.colors[0], rest.colors[1])).toBeGreaterThanOrEqual(9);
 
     await page.getByTestId("clover-canvas-viewport").focus();
     await page.keyboard.press("Tab");
@@ -645,12 +645,10 @@ test.describe("Hotspots", () => {
     const active = await tones();
     expect(active.outline).toBe("solid");
     // The light line inside, the dark edge outside, the accent between.
-    expect(ratio(active.colours[0], active.colours[1])).toBeGreaterThanOrEqual(
-      9,
-    );
+    expect(ratio(active.colors[0], active.colors[1])).toBeGreaterThanOrEqual(9);
     // Nothing over what it marks; the picture round it dims a little instead.
     expect(alpha(active.fill)).toBe(0);
-    expect(alpha(active.colours[2])).toBeGreaterThan(0);
+    expect(alpha(active.colors[2])).toBeGreaterThan(0);
   });
 
   /*
@@ -760,8 +758,8 @@ test.describe("Hotspots", () => {
     await expect.poll(masks).toEqual(["url(", "none"]);
   });
 
-  // Shadows are dropped in forced colours: two tones still at rest, and a ring active.
-  test("keep two tones and a ring in forced colours", async ({
+  // Shadows are dropped in forced colors: two tones still at rest, and a ring active.
+  test("keep two tones and a ring in forced colors", async ({
     page,
     isMobile,
   }) => {
@@ -775,13 +773,13 @@ test.describe("Hotspots", () => {
         return {
           border: [style.borderTopStyle, style.borderTopWidth],
           outline: [style.outlineStyle, style.outlineWidth],
-          colours: [style.borderTopColor, style.outlineColor],
+          colors: [style.borderTopColor, style.outlineColor],
         };
       });
     const rest = await edge();
     expect(rest.border).toEqual(["solid", "1px"]);
     expect(rest.outline).toEqual(["solid", "1px"]);
-    expect(ratio(rest.colours[0], rest.colours[1])).toBeGreaterThanOrEqual(4.5);
+    expect(ratio(rest.colors[0], rest.colors[1])).toBeGreaterThanOrEqual(4.5);
     const box = (await line.boundingBox())!;
     await page.mouse.move(box.x + box.width - 10, box.y + box.height / 2);
     await expect(line).toHaveAttribute("data-active", "true");
@@ -789,8 +787,8 @@ test.describe("Hotspots", () => {
   });
 });
 
-function luminance(colour: string) {
-  const [r, g, b] = colour.match(/[\d.]+/g)!.map(Number);
+function luminance(color: string) {
+  const [r, g, b] = color.match(/[\d.]+/g)!.map(Number);
   return [r, g, b]
     .map((c) => c / 255)
     .map((c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
@@ -802,8 +800,8 @@ function ratio(a: string, b: string) {
   return (light + 0.05) / (dark + 0.05);
 }
 
-/** A computed colour's alpha: 1 for `rgb()`, else its fourth number. */
-function alpha(colour: string) {
-  const numbers = colour.match(/[\d.]+/g)!.map(Number);
+/** A computed color's alpha: 1 for `rgb()`, else its fourth number. */
+function alpha(color: string) {
+  const numbers = color.match(/[\d.]+/g)!.map(Number);
   return numbers.length > 3 ? numbers[3] : 1;
 }

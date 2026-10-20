@@ -119,23 +119,34 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `Label`. Each reads the Root's Manifest, or the current Canvas with `of="canvas"`; a
   `value` prop wins, so they work outside a `Root` too. Text is in the reader's language
   and marked with `lang`. `Metadata` and `RequiredStatement` style their own pairs, so
-  they look alike wherever they appear (the InformationPanel's About, a Canvas's
-  caption): each label over its value, both in the text's colour as the summary is, at
+  they look alike wherever they appear (the Panel's About, a Canvas's
+  caption): each label over its value, both in the text's color as the summary is, at
   the same size, the label medium and the value at the text's own weight, the pairs
   stacked `s` apart. About's own headings (Rights, Homepage…) read as the labels do.
-- **HTML in IIIF values is sanitised**, allowing only the markup the Presentation API
+- **HTML in IIIF values is sanitized**, allowing only the markup the Presentation API
   permits and `http(s):` or `mailto:` links. Scripts, event handlers, `style`, SVG, and
   `javascript:` or `data:` URLs are removed. A value with markup shows as plain text until
-  the sanitiser (DOMPurify) has loaded, which happens only when some value needs it.
-- **`Clover.InformationPanel`**, information about the Root's resource in sections, with
-  About by default. Give it `Clover.Tab` children (`value`, `label`, and anything as
+  the sanitizer (DOMPurify) has loaded, which happens only when some value needs it.
+- **`Clover.Panel`**, information about the Root's resource in sections, with
+  About by default. (It was `Clover.InformationPanel` in development builds before
+  2026-10-20, with `InformationPanelProps` and `InformationPanelLayout`, now `PanelProps`
+  and `PanelLayout`, and the class `clover-information-panel`, now `clover-panel`.) Give it `Clover.Tab` children (`value`, `label`, and anything as
   content) to choose the sections, including your own; this replaces 3.x's information
   panel plugins. `value` / `defaultValue` / `onValueChange` control which section shows.
   The default sections past About (Collection, Contents, Search, Map, Transcript,
   Annotations) load when first opened, so their content arrives a moment after the
   section opens; in a test, find it with `findBy…`, not `getBy…`.
 
-  `layout` lays the sections out as `"tabs"` (the default) or `"accordion"`: stacked
+  `layout` lays the sections out as `"tabs"` (the default) or `"accordion"`. The tabs
+  keep to one row and never wrap: where they do not fit the row scrolls sideways (touch,
+  a wheel, a mouse's drag, or the tab focus moves to), fades out at an end while tabs lie
+  past it (`.clover-sections-tabs[data-more]`), and shows a round arrow there that pages
+  it ("Show more tabs", "Show previous tabs" on hover). The keyboard reaches every tab
+  already, so the arrows are for a pointer, out of the tab order and the accessibility
+  tree; a tab brought into view comes to rest clear of them. That row put the Viewer's
+  budgets up by 0.4 kB gzip (`Default` 66.5 kB, `Document` 69.2 kB, `<clover-viewer>`
+  104 kB) and `styles.css`'s by 0.2 kB (12.0 kB); its two strings put the Map's up to
+  18.1 kB. The accordion: stacked
   boxes, each opened by its heading; opening one closes the others, and one is always
   open, as a tab is. In a
   panel that scrolls, every accordion heading stays in sight: those scrolled past stack
@@ -148,8 +159,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   never runs under them. The Transcript's languages sit there. What scrolls under them
   shows faintly: a soft shadow under the open section's heading once the panel has
   scrolled, and over the next heading while there is more below. The headings are
-  controls, not links: each label is bold, in the text's colour, over a 3px line as wide
-  as the panel's content. A closed one's line is the colour of a split's bar at rest
+  controls, not links: each label is bold, in the text's color, over a 3px line as wide
+  as the panel's content. A closed one's line is the color of a split's bar at rest
   (`--clover-color-secondary-alt` at half strength), with a chevron; the open one's is
   the accent, with none, and a closed one's under the pointer the accent at half
   strength, as Items' hover is. The open
@@ -167,7 +178,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `data-layout`, `.clover-sections-button` and `.clover-sections-panel`.
 
   ```jsx
-  <Clover.InformationPanel layout="accordion" />
+  <Clover.Panel layout="accordion" />
   <Viewer iiifContent={url} panelLayout="tabs" />
   ```
 
@@ -184,7 +195,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   tab shows it, but for the thumbnail, which the layout places: `Default` shows it in
   its header, beside the title. Its Download section lists what `Clover.Download` does: the `rendering`
   of the page in view ("This page") and of the Manifest ("All pages").
-- **`Clover.PanelToggle`**, which shows and hides the `InformationPanel`. Given to
+- **`Clover.PanelToggle`**, which shows and hides the `Panel`. Given to
   `Clover.Content` as a child, it sits in the Canvas's controls. The controls still fade
   while the panel is open: only a menu open over the Canvas holds them on screen.
 
@@ -192,7 +203,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   <Clover.Content>
     <Clover.PanelToggle open={open} onOpenChange={setOpen} controls="panel" />
   </Clover.Content>
-  <Clover.InformationPanel
+  <Clover.Panel
     id="panel"
     hidden={!open}
     onClose={() => setOpen(false)}
@@ -225,7 +236,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   view ("This page") and of the Manifest ("All pages") — a PDF, a text, a full-size file —
   as links behind one button, opening towards the side with room. It is in `Document`'s
   toolbar (`download={false}` removes it, 3.x's `showDownload`); `Default` lists the same
-  links in the `InformationPanel`'s About instead. It renders nothing when there is
+  links in the `Panel`'s About instead. It renders nothing when there is
   nothing to download.
 - **Renderers of your own** (3.x's `customDisplays`): `renderers` on `Root` (or one
   `Content`) draws the views it claims — by Canvas id, painted body `format`, or a `match`
@@ -280,12 +291,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     through the Root, with no timers or polling.
   - Each set's header is its hide toggle, an eye (`label.clover-hide`: a checkbox,
     checked while hidden, the eye struck through), then a heading only when its
-    AnnotationPage has a `label` of its own: the `InformationPanel`'s Annotations section
+    AnnotationPage has a `label` of its own: the `Panel`'s Annotations section
     names the rest. The toggle's popover says "Hide" (`annotationsHideTip`); its name is
     that and the set's label, or "Hide Annotations" (`annotationsHide`) for a set without
     one. It takes the set's annotations off the Canvas only: the list, and the Canvas's
     annotations menu, keep them. HTML bodies are
-    sanitised; image bodies (Cookbook 0377) show as images. Caption files are left to the
+    sanitized; image bodies (Cookbook 0377) show as images. Caption files are left to the
     video or sound they caption.
   - `annotations` on `Root` adds AnnotationPages or AnnotationCollections (followed from
     `first` through `next`), as URLs or objects.
@@ -394,7 +405,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     above its words, fetched only once the popover shows. `Tip` takes `image`.
   - **Annotations on a whole Canvas** (Cookbook 0266), with no region to mark, are in the
     Canvas's information box (the `i`), under its metadata, under "Annotations", as the
-    list shows them: HTML (0019) sanitised with its links and images kept, Markdown and
+    list shows them: HTML (0019) sanitized with its links and images kept, Markdown and
     plain text by their `format`. A Canvas with only such annotations now has the `i`.
     Before, the Canvas showed nothing of them. The bodies' renderer is shared with the
     list (`components/Annotations/EntryBodies.tsx`).
@@ -436,7 +447,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     `polyline`, `rect`, `circle`, `ellipse`, `line`, numeric attributes only — never
     from the selector's markup. The SVG reader (1.3 kB) loads only when a shape is in
     view.
-  - The `InformationPanel`'s Annotations section lists every annotation in the
+  - The `Panel`'s Annotations section lists every annotation in the
     Manifest, not only the view's, as `<Clover.Annotations scope="all" />` does wherever
     it sits. They are grouped by layer (AnnotationPages that share a label, or have
     none), each layer with one hide toggle for all its pages, and under
@@ -530,7 +541,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - Standalone with `iiifContent`, `navPlace` or `georeferences`; inside a `Root` it maps
     the Root's resource and the view's georeferenced image, and pressing a place goes to
     its Canvas.
-  - The Viewer, its templates and a default `InformationPanel` add a Map tab by
+  - The Viewer, its templates and a default `Panel` add a Map tab by
     themselves when the Manifest, its Collection, a Canvas or an annotation has navPlace
     or a georeference. Nothing to pass.
   - `maplibre-gl` is a dependency, downloaded only when a map is first shown (about
@@ -560,7 +571,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   ```
 
 - **Collections.** A Collection's members are browsable within one `Root`.
-  - The `InformationPanel` shows a Collection section, after About, whenever the
+  - The `Panel` shows a Collection section, after About, whenever the
     Manifest was reached through a Collection or says it is `partOf` one: the
     Collection's name and summary over its members as
     `<Clover.Items of="members" layout="list">` (square thumbnails, `xl` on a side, and
@@ -574,7 +585,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     `h3` by default). The Presentation 4 Collection type is exported as
     `Presentation4Collection`, as the Canvas type is `Presentation4Canvas`, since the
     part takes the name `Collection`.
-  - `Clover.CollectionSelect`, a native `<select>` of the members labelled by the
+  - `Clover.CollectionSelect`, a native `<select>` of the members labeled by the
     Collection, is the same choice as a menu (in `Document`'s toolbar). Choosing a
     Manifest shows it; choosing a nested Collection enters it. A pointer, a phone's
     picker or the menu's own list chooses at once. From the keyboard, the arrows only
@@ -607,7 +618,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     Manifest's `Label` over the Canvas, after its `Thumbnail` (`xl` high, at its own
     shape up to 5rem wide, a wider one cropped to fill); `Items` under the Canvas, whose
     arrows are Previous and Next, headed by the labels of the view's Canvases (a dot
-    between a spread's two) and `Position` ("2 / 70"); the `InformationPanel` to the
+    between a spread's two) and `Position` ("2 / 70"); the `Panel` to the
     right of all three, the layout's full height, scrolling within. `fill` lays it out
     in the box it sits in, as tall as that box, the Canvas taking what the title and
     `Items` leave (never under 16rem; a shorter box scrolls), for a box of a set height,
@@ -622,7 +633,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
     The panel never stacks: it has its own space beside the Canvas, and a `SplitHandle` between them
     shares the width (remembered under `storageKey`). While it is open there, its
-    `PanelToggle` sits on that bar, centred, level with the Canvas's controls; closed,
+    `PanelToggle` sits on that bar, centered, level with the Canvas's controls; closed,
     it is back among them, and focus moves with it.
     Where there is no room for both (a phone), it slides over the Canvas instead, leaving
     a band of the page (`2xl`) that closes it on a press, as Escape and its close button
@@ -642,12 +653,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     Document's are; `panelLayout="tabs"` gives tabs. `items` picks `Items`' layout
     (`"carousel"`, `"list"` or `"grid"`), or `false` for none. `header={false}` leaves
     out the `Thumbnail` and `Label` over the Canvas (3.x's `showTitle: false`), and
-    `panel={false}` the `InformationPanel` and its `PanelToggle`.
+    `panel={false}` the `Panel` and its `PanelToggle`.
 
   - `Document`: reads like a PDF viewer. A toolbar (the `Label`, and `Download`),
     `Items` down the left (the Manifest's Canvases as page thumbnails), and the
     pages down one column, as a PDF reader's continuous view: a sheet for each view (a
-    spread is one), fitted whole on the grey ground with `--clover-inset` round it, and
+    spread is one), fitted whole on the gray ground with `--clover-inset` round it, and
     at most the stage less twice the inset tall, so the top of the next always shows
     under the one at rest. The column scrolls as any page does (wheel, trackpad, a
     finger, the scrollbar), and at either end the web page scrolls on. The top of the
@@ -673,7 +684,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     where they float over the page, it sits on their inner edge, and is dragged off with
     them. A `SplitHandle` between `Items` and the page resizes them; a one-page document
     has neither, nor the toggle. To change Collection member, use the panel's Collection
-    section. The `InformationPanel` sits to the right of the page in its own `SplitPane`, with a
+    section. The `Panel` sits to the right of the page in its own `SplitPane`, with a
     `SplitHandle` between them that shares the width (remembered under `storageKey`),
     where there is room for both, as `Default`'s does, its toggle on that bar while it
     is open; where there is not, it slides out over the page, taking focus and closing
@@ -684,7 +695,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     thumbnails, the page and the Canvas's controls share one edge; the Manifest's
     `Label` is `text-l`, `Items`' pane starts at 13rem (its thumbnails as wide as
     before), and the panel is as wide as `Default`'s floating one. The page keeps the
-    inset clear round it on its grey background.
+    inset clear round it on its gray background.
   - `Gallery`: `Items` as a grid of the views, opening one in a lightbox (a native
     `<dialog>`) with the Canvas and Items' pager.
 
@@ -699,7 +710,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **`visuallyHidden`**, the inline styles Clover hides labels with, for parts of your own
   that must read plainly without the stylesheet.
-- **Text is read strictly by its `format`.** `text/html` is IIIF's HTML, sanitised to
+- **Text is read strictly by its `format`.** `text/html` is IIIF's HTML, sanitized to
   the tags and attributes the Presentation API allows; `text/markdown` is Markdown;
   `text/plain`, and any other media type, is shown as written, a `<` included, with its
   line breaks kept. A value with no `format` (IIIF's `summary`, `metadata` and
@@ -722,7 +733,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   a `renderEntry` of your own.
 
 - **Markdown annotation bodies** (`format: "text/markdown"`) are read as Markdown —
-  paragraphs, emphasis, links, lists (nested), headings, footnotes — and sanitised like
+  paragraphs, emphasis, links, lists (nested), headings, footnotes — and sanitized like
   HTML. `Clover.Value`
   shows any language map (with `format`); `useAnnotationSets`, `useT` and `toPlainText`
   are exported; `Root` takes `annotationPages="all"` to fetch every Canvas's referenced
@@ -781,7 +792,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Manifest, a Collection (its first Manifest is shown, or `manifestId`), a Canvas, or a
   content state as JSON or base64url. A Canvas is shown on its own, as a Manifest of
   one that says what the Canvas says of itself (its label, summary, metadata, required
-  statement, rights, homepage, see also, rendering, thumbnail), so the InformationPanel's
+  statement, rights, homepage, see also, rendering, thumbnail), so the Panel's
   About is the Canvas's, its address under "IIIF Canvas" (`aboutCanvas`). Where it is
   `partOf` a Manifest, About opens with "Part of" (`aboutPartOf`): the Manifest's label
   and a button, "Open the full Manifest" (`aboutOpenManifest`), that shows it in place,
@@ -825,7 +836,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `--clover-space-2xl`, and `--clover-control` for the round controls), and every text
   size is that `1rem` plus or minus a space step: `--clover-text-xs` 0.764rem (a video's
   or sound's duration on its thumbnail), `-s` 0.854rem (secondary text), `-m` 1.146rem
-  (the `InformationPanel`'s section headings) and `-l` 1.236rem (titles). Those four and
+  (the `Panel`'s section headings) and `-l` 1.236rem (titles). Those four and
   your page's own size are the only sizes Clover's text takes; video captions step
   through them as the Canvas widens rather than growing smoothly. There is no larger
   display size: a page's headings are the page's. All are
@@ -838,7 +849,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   set.
 - **Round controls are dark, with white icons, in light and dark mode alike.** The
   Canvas's controls, its placeholder toggle, its playback controls, the way out of full
-  screen, `Items`' scroll arrows, the `InformationPanel`'s close button and Document's
+  screen, `Items`' scroll arrows, the `Panel`'s close button and Document's
   page-turn chevron read two new tokens of their own: `--clover-color-control` (the
   background, default `#1a1d1e`) and `--clover-color-control-glyph` (the icon, default
   `#fff`). They no longer read `--clover-color-secondary` and `--clover-color-primary`,
@@ -855,10 +866,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   ```
 
 - **Highlights are the accent's, whatever the accent is.** The selected row in the
-  `InformationPanel` (an annotation, a Range, a cue, a search hit), the fill of a
+  `Panel` (an annotation, a Range, a cue, a search hit), the fill of a
   selected annotation drawn as a shape on the Canvas, and the words that matched in
   `Search`'s hits are `--clover-color-accent`, faintly (8%, 18% and 20%). They were a
-  fixed blue and a fixed yellow, so they kept those colours under any other accent.
+  fixed blue and a fixed yellow, so they kept those colors under any other accent.
 
 - **`Clover.Items`' hover, selection and focus rings take no room.** They were outlines
   outside each thumbnail, so a carousel cut off the first thumbnail's ring and a list or
@@ -880,7 +891,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **The selected thumbnail is clearer.** Hover, selection and focus ring an item's
   pictures from outside, 1px clear of them, rather than inside their edge. It is always
   3px and transparent at rest, so it never grows: the accent for the selection, the text
-  colour for keyboard focus, and the accent at half strength for hover. Focus adds a
+  color for keyboard focus, and the accent at half strength for hover. Focus adds a
   second ring inside the pictures' edge, `secondary` beside `primary`, so it shows on
   any picture. It is an outline
   on `.clover-items-pictures`, in 4px of room the item keeps round itself
@@ -894,7 +905,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   spread's outer corners only: each picture now clips its image, where only a grid's did.
 - **Every region keeps what it holds 1.618rem in, the Canvas's controls too, and steps
   down from there.** A region's inset is a new token, `--clover-inset`
-  (`--clover-space-l`): `Default`'s header and `Items`, the `InformationPanel` and the
+  (`--clover-space-l`): `Default`'s header and `Items`, the `Panel` and the
   Gallery's lightbox. They were 1rem in (the panel's accordion text 1.6rem). The picture
   on the Canvas is not inset: it fills the Canvas edge to edge (below). Inside a region, each level is a
   step less: its parts are 1rem apart (the header's title and actions, the view's
@@ -921,10 +932,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
   - For a tighter layout everywhere, set `--clover-inset: var(--clover-space-m)` on
     `:root` or any ancestor.
-  - In the `InformationPanel`, the accordion's headings and content sit on the panel's
+  - In the `Panel`, the accordion's headings and content sit on the panel's
     inset, as its tabs' content does: the boxes reach out over the panel's padding.
   - A carousel's thumbnails slide under a shadow at either end, as the
-    `InformationPanel`'s headings do: at the start once the carousel has scrolled, at
+    `Panel`'s headings do: at the start once the carousel has scrolled, at
     the end while there is more, and at neither when all its thumbnails fit. Each shadow
     is as tall as the pictures and level with them, not the captions under them. The
     carousel's own scroll drives them (a named scroll timeline); browsers without
@@ -1028,7 +1039,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   widest. A pane's `min` holds in the
   layout too, not only under the bar: where the Split is narrow, a sized pane gives way
   down to its own `min` before the others go below theirs. Docked beside the Canvas at
-  about 580px, `Default`'s `InformationPanel` had kept its full 24rem and left the Canvas
+  about 580px, `Default`'s `Panel` had kept its full 24rem and left the Canvas
   171px; it now shrinks toward 14rem, and the Canvas keeps 16rem. With `storageKey` the
   reader's sizes are remembered. Not tied to any part: the templates use it, and so can
   your own layouts. Dragging the bar does not blink the picture: a `Canvas` redraws in
@@ -1041,7 +1052,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     </Clover.SplitPane>
     <Clover.SplitHandle />
     <Clover.SplitPane size="24rem" min="14rem">
-      <Clover.InformationPanel />
+      <Clover.Panel />
     </Clover.SplitPane>
   </Clover.Split>
   ```
@@ -1060,7 +1071,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     without moving.
   - The navigator hides by `opacity` and `pointer-events`, as the controls do, no longer
     by `visibility`.
-- **The `InformationPanel`'s toggle, `PanelToggle`, never fades.** The Canvas's other
+- **The `Panel`'s toggle, `PanelToggle`, never fades.** The Canvas's other
   controls fade when the pointer leaves; the toggle stays, in the Canvas's top corner (in
   `Default` and `Document`, on the bar beside the Canvas while the panel is open there),
   on wide screens and phones alike. That includes a lone video or sound, which shows no
@@ -1148,12 +1159,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     summary and metadata.
     `Canvas` renders as a `<figure>` (it was a `<div>`), and the box is its `<figcaption>`;
     the captioned Canvases' labels name the figure. Values keep IIIF's limited HTML,
-    sanitised as 3.x's Primitives do, and the sanitiser loads only when the box first opens.
+    sanitized as 3.x's Primitives do, and the sanitizer loads only when the box first opens.
     `controls={{ information: false }}` hides it. Its close button is the round control
     every other is.
   - **Placeholder Canvases.** A Canvas with a `placeholderContainer` (Presentation 3's
     `placeholderCanvas`) shows its image first,
-    fitted and centred, with a toggle in the top right (the Viewer's magnifier) to open
+    fitted and centered, with a toggle in the top right (the Viewer's magnifier) to open
     the Canvas; clicking the image opens it too. Once open, the toggle is a magnifier with
     a minus, which goes back to the image. Until then the Canvas is held back: no
     tiles, pan or zoom, hotspots, `Choice`, or video and sound. The information control
@@ -1274,7 +1285,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   OpenSeadragon is 121 kB. Video and sound add a separate 4.2 kB chunk, loaded only when
   a Canvas paints them. `hls.js`, DOMPurify and the Presentation 4 upgrader load only when
   needed. The budgets in `build/size-budget.json` were raised for `Root` (Canvas 34 kB)
-  and then for `Items`, the `InformationPanel`, annotations and transcripts (Canvas
+  and then for `Items`, the `Panel`, annotations and transcripts (Canvas
   36 kB, Viewer 54 kB, stylesheet 5.8 kB), and again for Contents and Collections
   (Viewer 56 kB, Classic 55 kB), for the Document template's stylesheet
   (`templates.css` 2.2 kB), and for Content Search (Viewer 58 kB, Classic 57 kB, Document
@@ -1294,7 +1305,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the panel sliding over the page, and the stylesheet's to 6.8 kB for the `SplitHandle`
   and controls that fade one by one.
   The Viewer's budget was raised to 61.5 kB and the stylesheet's to 7 kB for the
-  `InformationPanel`'s accordion layout (the Sections that hold tabs and boxes alike).
+  `Panel`'s accordion layout (the Sections that hold tabs and boxes alike).
   The Canvas budget was raised to 38.5 kB for full screen on iPhone (0.5 kB: the check
   for whether an element can go full screen, and handing a video, even one drawn into the
   `<canvas>` element, to the system player).
@@ -1312,10 +1323,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   content passing under them (7,891 B), and to 8 kB for a lone section that cannot be
   closed (7,905 B), then to 8.1 kB for the same shadows at a carousel's ends (8,082 B). For that, and for a content state opening a Collection on one of its
   members, `Document`'s budget was raised to 61.7 kB (61,609 B), then to 61.9 kB for the
-  `InformationPanel`'s Collection section beside its own `CollectionSelect` (61,784 B),
+  `Panel`'s Collection section beside its own `CollectionSelect` (61,784 B),
   and `<clover-viewer>`'s
   to 92.7 kB (92,603 B), then to 92.8 kB for the carousel's shadows in its inlined
-  stylesheet (92,710 B). For the `InformationPanel`'s Collection section fetching a
+  stylesheet (92,710 B). For the `Panel`'s Collection section fetching a
   `partOf` Collection when it opens (`openCollection`), `Document`'s was raised to 62 kB
   (61.92 kB) and `<clover-viewer>`'s to 93 kB (92.9 kB).
   For the Collection section's summary, homepage and id, `Default`'s header thumbnail, a
@@ -1440,8 +1451,32 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
   The API is experimental and may change in any release.
 
+### Changed
+
+- **A summary is no longer muted.** `Gallery`'s summary and the summary under each of
+  Items' members were drawn in `--clover-color-primary-muted`; they are now in the text's
+  own color (`--clover-color-primary`, or what they inherit), as `Clover.Summary` always
+  was, since a summary is the resource's own words, not a caption. To mute them again:
+
+  ```css
+  .clover-template-gallery-summary,
+  .clover-items-summary {
+    color: var(--clover-color-primary-muted);
+  }
+  ```
+
 ### Fixed
 
+- **`Download` keeps its own key handling when you pass `onKeyDown`.** Your handler
+  replaced the one that closes its list on Escape and hands focus back to its button. Both
+  now run, yours first. Nothing to change.
+- **The Panel's tabs are named for what they are.** Its row of tabs was named
+  "Select" (copied from 3.x), which said nothing of what it holds (WCAG 2.4.6). It is now "Information panel", as the panel's
+  close button names it, in every language Clover ships ("Panel de información",
+  "Panneau d’informations"…). A screen reader landing on the first tab says "About,
+  selected, tab, 1 of 4, Information panel, tab group". If you override the
+  `informationPanelTabs` string in `initCloverI18n`'s `resources`, your words still win:
+  check they name the panel, not an action.
 - **A recording's still keeps no empty place in the top right.** The control cluster
   moved in from the corner to leave room for the placeholder's toggle even where that
   toggle was the play button in the middle, so the annotations control, and the `i`,
@@ -1580,7 +1615,7 @@ are in the repository's `ACCESSIBILITY.md`.
     lies (its rectangle, or its shape's own outline), as a vector editor hides what a
     shape covers; those inside it and over it stay whole. It is a `mask-image` from
     `--clover-annotation-mask`, set inline on the hotspots beneath; a rule of yours that
-    sets `mask` on `.clover-canvas-annotation` replaces it. In forced colours a rectangle has a
+    sets `mask` on `.clover-canvas-annotation` replaces it. In forced colors a rectangle has a
     `CanvasText` edge round a `Canvas` line, and an active one a `Highlight` ring.
   - Hotspots are in the DOM in the annotations' order, so Tab and screen readers follow
     the menu's order, not size. Stacking is a `z-index` from `--clover-annotation-depth`,
@@ -1609,10 +1644,10 @@ are in the repository's `ACCESSIBILITY.md`.
   - In the iPhone's system player and in picture in picture, the chosen track is
     `showing`, and a choice made in the system's own menu is kept when the video comes
     back.
-  - The Captions button describes the track in use, and in forced colours shows
+  - The Captions button describes the track in use, and in forced colors shows
     Highlight while captions are on.
   - Captions on, or Repeat pressed, draws a bar under the button's glyph (an `::after`
-    border), in forced colours too. The transport's buttons take the accent fill under
+    border), in forced colors too. The transport's buttons take the accent fill under
     the pointer or on focus only, as Clover's other round controls do: no longer while
     captions are on, Repeat is pressed or their menu is open. A stylesheet that relied
     on that fill should mark `[data-active]`, `[aria-pressed="true"]` or
@@ -1669,7 +1704,7 @@ are in the repository's `ACCESSIBILITY.md`.
   - The full-screen button reads `imageFullScreen` and `imageExitFullScreen`, as the
     Canvas's own does. Move any `playerFullScreen` or `playerExitFullScreen` translation
     to those keys.
-  - In forced colours the seek and volume sliders draw in system colours: a `CanvasText`
+  - In forced colors the seek and volume sliders draw in system colors: a `CanvasText`
     rail and thumb, the played part in `Highlight`, and an outline on focus. The
     transport's buttons keep a 1px `ButtonText` border.
 
@@ -1709,8 +1744,8 @@ are in the repository's `ACCESSIBILITY.md`.
     give a `renderItem` figure the same. A `renderItem` item now shows a focus outline.
   - Keyboard focus adds a second ring inside the pictures' edge, in two tones
     (`--clover-color-secondary` at the edge, `--clover-color-primary` inside it, 2px
-    each), so a focused item differs from a selected one by more than colour. It is a
-    `CanvasText` outline in forced colours. Clover draws it on
+    each), so a focused item differs from a selected one by more than color. It is a
+    `CanvasText` outline in forced colors. Clover draws it on
     `.clover-items-pictures::after`; leave that pseudo-element to Clover.
   - On Enter and Space, `onSelect` gets the key's own event, as a click passes its own.
     `preventDefault()`, `stopPropagation()` and a `defaultPrevented` guard now work for
@@ -1770,7 +1805,7 @@ are in the repository's `ACCESSIBILITY.md`.
     `text-overflow: ellipsis` on
     `.clover-sections[data-layout="accordion"] .clover-sections-label`; it cuts any label
     that text spacing widens.
-  - In forced colours the current row (an annotation, a Range, a cue, a search hit, a
+  - In forced colors the current row (an annotation, a Range, a cue, a search hit, a
     place on the map) keeps its edge, in `Highlight`, and the other rows' edges are drawn
     in `Canvas`.
   - Escape puts away a floating panel even with focus on a control under it, and
@@ -1790,8 +1825,8 @@ are in the repository's `ACCESSIBILITY.md`.
   - The status region stays in the accessibility tree while empty (visually hidden, not
     `display: none`), so its first message is announced.
   - Matched words are bold as well as tinted, and take `Mark` and `MarkText` in forced
-    colours. If you restyle `.clover-content-search-hit mark`, keep a sign besides
-    colour.
+    colors. If you restyle `.clover-content-search-hit mark`, keep a sign besides
+    color.
 - **Status.** `Status` keeps one `role="status"` element, `p.clover-status`, for its whole
   life: empty and visually hidden once ready, only its words changing, so "Loading…" is
   announced on every load. An error renders the `role="alert"` box beside it. A test or
@@ -1842,7 +1877,7 @@ are in the repository's `ACCESSIBILITY.md`.
     handle now renders its `children` and the `.clover-tip` span, so a test that read
     its `textContent` should read its accessible name. Without the stylesheet the name
     shows, so the focus stop has a box.
-  - In forced colours the bar and grip are `CanvasText`, and `Highlight` while hovered,
+  - In forced colors the bar and grip are `CanvasText`, and `Highlight` while hovered,
     held or focused. Focus adds a 2px outline.
 
 - **Popovers.**
@@ -1856,7 +1891,7 @@ are in the repository's `ACCESSIBILITY.md`.
     `--clover-tip-room` and `--clover-tip-shift` inline. Give your own offset with
     `translate`, not `transform`, and drop any reliance on `white-space: nowrap`.
 - **Text.**
-  - Links in IIIF text are underlined, not only coloured. To opt out, set your own
+  - Links in IIIF text are underlined, not only colored. To opt out, set your own
     unlayered `text-decoration: none`.
   - Long unbroken values in Summary, Metadata and RequiredStatement wrap.
   - "Read more" appears when text spacing or a late font pushes a summary past its clamp.
@@ -1895,7 +1930,7 @@ are in the repository's `ACCESSIBILITY.md`.
 
   - IIIF HTML loses `aria-*` and `data-*` attributes, which the Presentation API does not
     allow.
-  - Clover sanitises with a private DOMPurify instance, so your page's own
+  - Clover sanitizes with a private DOMPurify instance, so your page's own
     `DOMPurify.sanitize` no longer drops relative `href` and `src` once Clover has run.
 
 - **Headings.**
@@ -1904,7 +1939,7 @@ are in the repository's `ACCESSIBILITY.md`.
     the headings inside sit a level below: the panel's sections, Document's Download
     groups, Gallery's lightbox title. `<clover-viewer>` takes `heading-level`.
     Standalone `Clover.Items` takes it for its title (default 2),
-    `Clover.InformationPanel` for its accordion headings (default 3), `Clover.Download`
+    `Clover.Panel` for its accordion headings (default 3), `Clover.Download`
     for its groups (default 3) and `Clover.Value` for a Markdown value's first heading
     (default 3). Under a heading of your own, pass the level below it:
 

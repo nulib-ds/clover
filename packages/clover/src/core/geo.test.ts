@@ -97,7 +97,7 @@ describe("navPlaceOf", () => {
     expect(features[0].properties.canvasId).toBe(annotationJson.items[0].id);
   });
 
-  it("is memoised on the Manifest, and shared when empty", () => {
+  it("is memoized on the Manifest, and shared when empty", () => {
     const manifest = p4(canvasesJson);
     expect(navPlaceOf(manifest)).toBe(navPlaceOf(manifest));
     const bare = p4({ ...canvasesJson, items: [] });
@@ -184,7 +184,7 @@ describe("the affine overlay", () => {
     const transform = affineTransform(georeference.points)!;
     for (const { resource, geo } of georeference.points.slice(0, 3)) {
       const [lng, lat] = transform(resource);
-      // Least squares over every point: within a few hundred metres of each.
+      // Least squares over every point: within a few hundred meters of each.
       expect(Math.abs(lng - geo[0])).toBeLessThan(0.01);
       expect(Math.abs(lat - geo[1])).toBeLessThan(0.01);
     }

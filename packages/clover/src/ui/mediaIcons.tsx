@@ -56,7 +56,7 @@ export const VolumeMutedIcon = () => (
 /**
  * Closed captions: a card with "CC" on it, outlined while they are off, filled while they
  * show (the letters then in the control's own fill, as if cut out). The state is told by
- * the shape, not by colour (WCAG 1.4.1).
+ * the shape, not by color (WCAG 1.4.1).
  */
 export const CaptionsIcon = ({ on = false }: { on?: boolean }) => (
   <svg {...svgProps} data-on={on || undefined} className="clover-captions-icon">

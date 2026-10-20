@@ -112,7 +112,7 @@ test("the transport's bar wraps onto two rows, every control on the stage", asyn
       child.style.transition = "none";
       child.style.translate = "none";
     });
-    // A row's parts are centred on one line.
+    // A row's parts are centered on one line.
     const rows = new Set(
       shown.map((child) => {
         const b = child.getBoundingClientRect();

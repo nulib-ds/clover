@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import React from "react";
@@ -457,5 +457,60 @@ describe("Sections", () => {
     );
     // Nothing that had been shown is mounted again.
     expect(mounts).toEqual(["About", "Notes"]);
+  });
+});
+
+describe("Sections, tabs that do not fit", () => {
+  /*
+   * jsdom lays nothing out: the row is given a width and a scroll of its own, which the
+   * row measures in the next frame.
+   */
+  const overflow = async (row: HTMLElement, scrollLeft: number) => {
+    Object.defineProperties(row, {
+      clientWidth: { configurable: true, value: 200 },
+      scrollWidth: { configurable: true, value: 500 },
+      scrollLeft: { configurable: true, writable: true, value: scrollLeft },
+    });
+    await act(async () => {
+      fireEvent.scroll(row);
+      await new Promise((frame) => requestAnimationFrame(frame));
+    });
+  };
+
+  it("keeps the tabs in one row, its arrows hidden while they fit", () => {
+    render(<Layout layout="tabs" />);
+    const row = screen.getByRole("tablist", { name: "Information" });
+    expect(within(row).getAllByRole("tab")).toHaveLength(3);
+    const arrows = document.querySelectorAll<HTMLButtonElement>(
+      ".clover-sections-scroll-prev, .clover-sections-scroll-next",
+    );
+    expect(arrows).toHaveLength(2);
+    arrows.forEach((arrow) => expect(arrow).not.toBeVisible());
+    // The arrows are not tabs: none sits in the tab list.
+    expect(row.querySelector("[class*=scroll]")).toBeNull();
+  });
+
+  it("shows an arrow at an end with tabs past it, out of the tab order and the tree", async () => {
+    render(<Layout layout="tabs" />);
+    const row = screen.getByRole("tablist", { name: "Information" });
+    await overflow(row, 0);
+    const next = document.querySelector<HTMLButtonElement>(
+      ".clover-sections-scroll-next",
+    )!;
+    const prev = document.querySelector<HTMLButtonElement>(
+      ".clover-sections-scroll-prev",
+    )!;
+    expect(next.hidden).toBe(false);
+    expect(prev.hidden).toBe(true);
+    expect(next).toHaveAttribute("aria-hidden", "true");
+    expect(next.tabIndex).toBe(-1);
+    expect(next.closest("[data-more]")).toHaveAttribute("data-more", "end");
+
+    await overflow(row, 150);
+    expect(prev.hidden).toBe(false);
+    expect(next.closest("[data-more]")).toHaveAttribute(
+      "data-more",
+      "start end",
+    );
   });
 });

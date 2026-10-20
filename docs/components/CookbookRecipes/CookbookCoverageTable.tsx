@@ -51,6 +51,8 @@ interface CookbookCoverageTableProps {
   showStatus?: boolean;
   /** Called when a View control is approached, so the viewer can load ahead of the click. */
   onPreload?: () => void;
+  /** The level of each group's title, one under the heading the table sits under. Default 4. */
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
 }
 
 /**
@@ -65,98 +67,102 @@ const CookbookCoverageTable: React.FC<CookbookCoverageTableProps> = ({
   onView,
   onPreload,
   showStatus = true,
-}) => (
-  <div className={styles.coverage} data-status={showStatus}>
-    {showStatus && (
-      <p className={styles.summary}>
-        <strong>{coverage.yes}</strong> of {coverage.total} recipes supported
-        {coverage.partial > 0 && <>, {coverage.partial} partially</>}.
-      </p>
-    )}
-    {cookbookSections.map((section) => (
-      <section key={section.title}>
-        <h4 className={styles.sectionTitle}>{section.title}</h4>
-        <table>
-          <thead>
-            <tr>
-              {showStatus && (
-                <th scope="col">
-                  <span className={styles.visuallyHidden}>Supported</span>
-                </th>
-              )}
-              <th>Recipe</th>
-              <th>Demo</th>
-            </tr>
-          </thead>
-          <tbody>
-            {section.recipes.map((recipe) => {
-              const status = statusFor(recipe.slug);
-              const resource = resourceFor(recipe.slug);
-              const note = showStatus ? partialNotes[recipe.slug] : undefined;
-              return (
-                <tr key={recipe.slug}>
-                  {showStatus && (
+  headingLevel = 4,
+}) => {
+  const Title = `h${headingLevel}` as "h4";
+  return (
+    <div className={styles.coverage} data-status={showStatus}>
+      {showStatus && (
+        <p className={styles.summary}>
+          <strong>{coverage.yes}</strong> of {coverage.total} recipes supported
+          {coverage.partial > 0 && <>, {coverage.partial} partially</>}.
+        </p>
+      )}
+      {cookbookSections.map((section) => (
+        <section key={section.title}>
+          <Title className={styles.sectionTitle}>{section.title}</Title>
+          <table>
+            <thead>
+              <tr>
+                {showStatus && (
+                  <th scope="col">
+                    <span className={styles.visuallyHidden}>Supported</span>
+                  </th>
+                )}
+                <th>Recipe</th>
+                <th>Demo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {section.recipes.map((recipe) => {
+                const status = statusFor(recipe.slug);
+                const resource = resourceFor(recipe.slug);
+                const note = showStatus ? partialNotes[recipe.slug] : undefined;
+                return (
+                  <tr key={recipe.slug}>
+                    {showStatus && (
+                      <td>
+                        <StatusIcon status={status} />
+                      </td>
+                    )}
                     <td>
-                      <StatusIcon status={status} />
+                      <div className={styles.titleRow}>
+                        {resource ? (
+                          <button
+                            type="button"
+                            className={styles.title}
+                            onClick={() => onView(resource)}
+                            onPointerEnter={onPreload}
+                            onFocus={onPreload}
+                          >
+                            {recipe.title}
+                          </button>
+                        ) : (
+                          recipe.title
+                        )}
+                      </div>
+                      <span className={styles.slug}>{recipe.slug}</span>
+                      {/* Why a recipe is only partly covered, as text: a hover tooltip
+                        could not be reached, dismissed or tapped (WCAG 1.4.13). */}
+                      {note && <span className={styles.note}>{note}</span>}
                     </td>
-                  )}
-                  <td>
-                    <div className={styles.titleRow}>
-                      {resource ? (
+                    <td>
+                      <div className={styles.actions}>
                         <button
                           type="button"
-                          className={styles.title}
-                          onClick={() => onView(resource)}
+                          className={styles.view}
+                          aria-label={`View ${recipe.title}`}
+                          disabled={!resource}
+                          title={
+                            resource ? undefined : "No example resource to open"
+                          }
+                          onClick={() => resource && onView(resource)}
                           onPointerEnter={onPreload}
                           onFocus={onPreload}
                         >
-                          {recipe.title}
+                          View
                         </button>
-                      ) : (
-                        recipe.title
-                      )}
-                    </div>
-                    <span className={styles.slug}>{recipe.slug}</span>
-                    {/* Why a recipe is only partly covered, as text: a hover tooltip
-                        could not be reached, dismissed or tapped (WCAG 1.4.13). */}
-                    {note && <span className={styles.note}>{note}</span>}
-                  </td>
-                  <td>
-                    <div className={styles.actions}>
-                      <button
-                        type="button"
-                        className={styles.view}
-                        aria-label={`View ${recipe.title}`}
-                        disabled={!resource}
-                        title={
-                          resource ? undefined : "No example resource to open"
-                        }
-                        onClick={() => resource && onView(resource)}
-                        onPointerEnter={onPreload}
-                        onFocus={onPreload}
-                      >
-                        View
-                      </button>
-                      <a
-                        className={styles.view}
-                        href={`${recipeBase}${recipe.slug}/`}
-                        target="_blank"
-                        rel="noreferrer"
-                        aria-label={`${recipe.title} recipe on iiif.io (opens in a new tab)`}
-                      >
-                        Recipe
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </section>
-    ))}
-  </div>
-);
+                        <a
+                          className={styles.view}
+                          href={`${recipeBase}${recipe.slug}/`}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={`${recipe.title} recipe on iiif.io (opens in a new tab)`}
+                        >
+                          Recipe
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </section>
+      ))}
+    </div>
+  );
+};
 
 export { StatusIcon };
 export default React.memo(CookbookCoverageTable);

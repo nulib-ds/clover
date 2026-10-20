@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect } from "react";
 const useLayout = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 /**
- * Lays `element` on a Split's bar, its spine: centred across the bar, or with `cap` all
+ * Lays `element` on a Split's bar, its spine: centered across the bar, or with `cap` all
  * of it over the pane before the bar but its far rounded end, which hangs over the pane
  * after it (the bar where that end's curve begins); and down at the top of `from` (the
  * stage whose controls it sits among), where its stylesheet adds the space. Render it in the Split right after the `SplitHandle`; it is placed by `left` and
@@ -18,7 +18,7 @@ const useLayout = typeof window === "undefined" ? useEffect : useLayoutEffect;
  * makes its contents presentational.
  */
 export function useSpine(
-  element: React.RefObject<HTMLElement>,
+  element: React.RefObject<HTMLElement | null>,
   from: () => HTMLElement | null | undefined,
   enabled: boolean,
   { cap = false }: { cap?: boolean } = {},
@@ -31,7 +31,7 @@ export function useSpine(
     const place = () => {
       const pane = handle.previousElementSibling as HTMLElement | null;
       const rtl = getComputedStyle(node).direction === "rtl";
-      const centre =
+      const center =
         handle.offsetWidth || !pane
           ? handle.offsetLeft + handle.offsetWidth / 2
           : pane.offsetLeft + (rtl ? 0 : pane.offsetWidth);
@@ -41,7 +41,7 @@ export function useSpine(
       const before = cap
         ? node.offsetWidth - node.offsetHeight / 2
         : node.offsetWidth / 2;
-      node.style.left = `${centre - (rtl ? node.offsetWidth - before : before)}px`;
+      node.style.left = `${center - (rtl ? node.offsetWidth - before : before)}px`;
       const top = from();
       node.style.setProperty(
         "--clover-template-spine-top",

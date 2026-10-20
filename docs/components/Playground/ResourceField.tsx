@@ -379,8 +379,13 @@ export default function ResourceField({
       }}
       onSubmit={submit}
     >
-      <label className={styles.inlineLabel} htmlFor={inputId}>
-        IIIF resource
+      {/*
+       * The field's label, over it (Mat, 2026-10-20): what it does, in IIIF's words. Its
+       * `<label>`, so it names the field (WCAG 1.3.1, 3.3.2), and the name holds the words
+       * shown (2.5.3).
+       */}
+      <label className={styles.fieldLabel} htmlFor={inputId}>
+        View any IIIF Manifest or Collection
       </label>
       <div className={styles.resourceRow}>
         <div className={styles.combo}>

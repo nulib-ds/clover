@@ -56,7 +56,7 @@ function renderingsOf(
 
 /**
  * What there is to download: the `rendering` of the Canvases in view (`page`) and of the
- * Manifest (`all`), each once, labelled in the reader's language.
+ * Manifest (`all`), each once, labeled in the reader's language.
  */
 export function useDownloads() {
   const { language } = useClover("Download");
@@ -148,6 +148,7 @@ export function Download({
   children,
   headingLevel = 3,
   onBlur,
+  onKeyDown,
   ...rest
 }: DownloadProps) {
   const { t, langOf } = useCloverTranslation();
@@ -174,11 +175,14 @@ export function Download({
 
   return (
     <div
+      {...rest}
       ref={root}
       className={join("clover-download", className)}
       data-open={open}
       data-align={align}
       onKeyDown={(event) => {
+        // A host's own handler runs too, first; Escape still closes the list.
+        onKeyDown?.(event);
         if (event.key !== "Escape" || !open) return;
         // Taken, so a host's modal `<dialog>` or floating panel around it stays open.
         event.preventDefault();
@@ -193,7 +197,6 @@ export function Download({
         const next = event.relatedTarget as Node | null;
         if (open && next && !root.current?.contains(next)) setOpen(false);
       }}
-      {...rest}
     >
       <button
         ref={button}

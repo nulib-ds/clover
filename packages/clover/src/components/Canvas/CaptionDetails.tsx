@@ -10,7 +10,7 @@ import { EntryBodies } from "../Annotations/EntryBodies";
 
 /**
  * A Canvas's `summary` and `metadata`: IIIF's limited HTML is kept, everything else is
- * sanitised away. Lazy, through `Caption`, so the sanitiser loads only when it opens.
+ * sanitized away. Lazy, through `Caption`, so the sanitizer loads only when it opens.
  *
  * Rendered as the Summary and Metadata parts render them, but in the Canvas's `language`,
  * which those parts cannot know outside a Root. Then the comments on the whole Canvas

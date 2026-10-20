@@ -21,7 +21,7 @@ describe("Camera", () => {
     expect(back.y).toBeCloseTo(world.y, 6);
   });
 
-  it("puts the camera centre in the middle of the viewport", () => {
+  it("puts the camera center in the middle of the viewport", () => {
     const camera = { x: 100, y: 50, zoom: 2, rotation: 0 };
     expect(worldPointToScreen(camera, viewport, { x: 100, y: 50 })).toEqual({
       x: 400,

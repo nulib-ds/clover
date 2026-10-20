@@ -9,6 +9,20 @@
   padding-bottom: 6rem;
 }
 
+/*
+ * Nextra 4 has no `raw` layout. Its `full` layout still holds a page to the docs' 90rem
+ * (`--nextra-content-width`) and pads its article, which boxed the homepage in. The
+ * homepage spans the window, as it did on Nextra 2's raw layout: both are undone around
+ * it, and only around it.
+ */
+:global(div):has(> :global(article) > :global(main) > .page) {
+  max-width: none;
+}
+
+:global(article):has(> :global(main) > .page) {
+  padding: 0;
+}
+
 .shell {
   padding: 0 2rem;
 }
@@ -25,7 +39,7 @@
  * with the docs' wider layout and its sidebar.
  */
 :global(html):has(.page)
-  :global(:is(.nextra-nav-container > nav, .site-subheader > p)) {
+  :global(:is(.nextra-navbar > nav, .site-subheader > p)) {
   max-width: calc(1300px + 4rem);
   padding-left: max(env(safe-area-inset-left), 2rem);
   padding-right: max(env(safe-area-inset-right), 2rem);
@@ -33,7 +47,7 @@
 
 @media (max-width: 640px) {
   :global(html):has(.page)
-    :global(:is(.nextra-nav-container > nav, .site-subheader > p)) {
+    :global(:is(.nextra-navbar > nav, .site-subheader > p)) {
     max-width: calc(1300px + 2rem);
     padding-left: max(env(safe-area-inset-left), 1rem);
     padding-right: max(env(safe-area-inset-right), 1rem);
@@ -42,7 +56,7 @@
 
 /*
  * The playground runs the full width of the page; the reading sections below it ("Why
- * Clover", "Install") are held to a readable measure and centred.
+ * Clover", "Install") are held to a readable measure and centered.
  */
 .contained {
   margin: 0 auto;
@@ -83,8 +97,8 @@
   z-index: 0;
 }
 
-.mark::after {
-  animation: mark-draw 700ms cubic-bezier(0.65, 0, 0.35, 1) 300ms both;
+.mark::after,
+.story[data-tone="code"] .figureValue::after {
   /* Faint where the pen comes down, the full accent where it lifts. */
   background: linear-gradient(
     to right,
@@ -106,6 +120,10 @@
   rotate: 1.5deg;
   /* Behind the letters: below them in its own layer (`.mark`), so they read over it. */
   z-index: -1;
+}
+
+.mark::after {
+  animation: mark-draw 700ms cubic-bezier(0.65, 0, 0.35, 1) 300ms both;
 }
 
 @keyframes mark-draw {
@@ -141,13 +159,19 @@
 
 /* ── Section heading ──────────────────────────────────────────────────────── */
 
+/*
+ * A clear break from what is above, and nearer what it heads, on the golden scale (Mat,
+ * 2026-10-20: "improve the white space"): 6.854rem over it (the step past `2xl`), `2xl`
+ * on a phone, and `xl` under, more than the stories' gap between one another, so the
+ * heading leads all of them.
+ */
 .sectionHead {
   align-items: baseline;
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1rem 1.618rem;
   justify-content: space-between;
-  margin: 5rem 0 1.25rem;
+  margin: clamp(4.236rem, 9vw, 6.854rem) 0 2.618rem;
 }
 
 /* "Why Clover" and "Install". Uniform with the playground's "Try it" — see the
@@ -159,10 +183,16 @@
   margin: 0;
 }
 
+/* After the parts' grid, which runs on past its last story, "Install" comes up close. */
+:global(section) + .contained > .sectionHead:first-child {
+  margin-top: 1.618rem;
+}
+
+/* `xs` under the title, so the two read as one heading. */
 .sectionNote {
   color: var(--gray-11);
   font-size: var(--text-sm);
-  margin: 0;
+  margin: 0.382rem 0 0;
 }
 
 /* A link in the note, underlined: Nextra's reset leaves it looking like the text round it. */
@@ -183,54 +213,407 @@
   text-decoration: underline;
 }
 
-/* ── Feature row ──────────────────────────────────────────────────────────── */
+/* ── Why Clover ───────────────────────────────────────────────────────────── */
 
-/* The four in a row, two by two where they would crowd, one above another on a phone. */
-.features {
+/*
+ * "Why Clover": one story at a time, down the page, its figure on alternate sides. Bigger
+ * and bolder than the parts above it, but in the homepage's own materials, never a color
+ * of its own (Mat, 2026-10-20: "it should not feel like I am on a different site"): the
+ * page's ground with the playground's hairline and soft gray shadow, and the code
+ * editor's black, in turn. The accent is the accent itself, never a shade of it (Mat,
+ * 2026-10-20: "true accent color should be USED always"), and never a fill: the figures
+ * on the page's ground, and on the black, where the figures are the editor's white, the
+ * hero's marker under each. The words keep their place in the page's order; only the
+ * figure moves.
+ */
+/*
+ * Beside the example viewer, in the parts' column (`Parts.tsx`), or the page's width
+ * where the two stack: each story is sized by the column it is in (`cqi`), not by the
+ * window.
+ */
+/* Room between stories, so each holds the viewer a while as it passes (`2xl`). */
+.stories {
+  container-type: inline-size;
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(1.618rem, 6vw, 4.236rem);
 }
 
-@media (max-width: 64rem) {
-  .features {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 40rem) {
-  .features {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.feature {
-  background: var(--surface);
+.story {
+  align-items: center;
   border-radius: var(--radius-4);
-  padding: 1.25rem;
+  display: grid;
+  gap: clamp(1.618rem, 4cqi, 4.236rem);
+  /* The words the golden share, so a line of code keeps to one line. */
+  grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr);
+  padding: clamp(1.618rem, 5cqi, 4.236rem);
 }
 
-.featureLabel {
-  color: var(--gray-11);
+/* The playground's edge and shadow (`Parts.module.css`'s small viewer has them too). */
+.story[data-tone="page"] {
+  background: var(--color-background);
+  box-shadow:
+    0 0 0 1px var(--gray-6),
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 6px 24px rgb(0 0 0 / 0.06);
+  color: var(--gray-12);
+}
+
+:global(.dark) .story[data-tone="page"] {
+  box-shadow:
+    0 0 0 1px var(--gray-6),
+    0 6px 24px rgb(0 0 0 / 0.4);
+}
+
+/* The code editor's black and its text (`--code-*`, `tokens.css`). */
+.story[data-tone="code"] {
+  background: var(--code-background);
+  color: var(--code-text);
+}
+
+/* On a dark page, black on near-black: a hairline round it, drawn inside, as the editor's. */
+:global(.dark) .story[data-tone="code"] {
+  box-shadow: inset 0 0 0 1px var(--gray-6);
+}
+
+/*
+ * The example viewer's code across a story's foot, under its words and figure
+ * (Composable's), so its layout turns from the others': the composer itself, live
+ * (`PartsLive.tsx` draws it here where the viewer is held beside the stories).
+ */
+.storyComposer {
+  grid-column: 1 / -1;
+  min-width: 0;
+  order: 1;
+}
+
+.storyComposer:empty {
+  display: none;
+}
+
+/* The figure first, on the left, in every other story. */
+.story[data-side="start"] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.618fr);
+}
+
+.story[data-side="start"] .storyFigures {
+  order: -1;
+}
+
+.storyLabel {
   font-family: var(--font-mono);
   font-size: var(--text-label);
   letter-spacing: 0.08em;
-  margin: 0 0 0.625rem;
+  margin: 0 0 0.75rem;
   text-transform: uppercase;
 }
 
-.featureTitle {
-  font-size: 1.25rem;
-  font-weight: var(--weight-bold);
-  line-height: 1.3;
-  margin: 0 0 0.5rem;
+/*
+ * The accent, 5.0:1 on white. On a dark page it is 3.8:1, enough for the figures but not
+ * for text this size, which takes the accent's lighter step there.
+ */
+.story[data-tone="page"] .storyLabel {
+  color: var(--accent-9);
 }
 
-.featureBody {
+:global(.dark) .story[data-tone="page"] .storyLabel {
+  color: var(--accent-11);
+}
+
+.story[data-tone="code"] .storyLabel {
+  color: var(--code-faint);
+}
+
+.storyTitle {
+  font-size: clamp(1.618rem, 4.5cqi, 2.618rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 1rem;
+}
+
+.storyBody {
+  font-size: var(--text-lg);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 34rem;
+}
+
+.storyBody a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* A link on the page's ground is the page's link. */
+.story[data-tone="page"] .storyBody a {
+  color: var(--accent-11);
+}
+
+/*
+ * A few lines of code, as the homepage's code editor shows them (`--code-*`, Prism's
+ * Material colors on black). They wrap rather than scroll, so a phone never needs to.
+ */
+.storyCode {
+  background: var(--code-background);
+  border-radius: var(--radius-3);
+  color: var(--code-text);
+  font-family: var(--font-mono);
+  font-size: var(--clover-text-s, 0.854rem);
+  line-height: 1.618;
+  margin: 1.618rem 0 0;
+  max-width: 34rem;
+  padding: 1rem 1.618rem;
+  white-space: pre-wrap;
+}
+
+.codeRun {
+  white-space: nowrap;
+}
+
+.codeValue {
+  color: var(--code-string);
+}
+
+/*
+ * The Yours story's Font family and Color (`BrandPicker.tsx`), which set the whole site,
+ * with the CSS a page would write under them. The controls'
+ * edges 3:1 against the page (WCAG 1.4.11), as the playground's are.
+ */
+.brand {
+  display: grid;
+  gap: 1.618rem;
+  margin-top: 1.618rem;
+}
+
+.brandControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.618rem;
+}
+
+.brandControl {
+  display: grid;
+  gap: 0.382rem;
+}
+
+.brandLabel {
   color: var(--gray-11);
   font-size: var(--text-sm);
-  line-height: 1.6;
+}
+
+.brandName {
+  color: var(--gray-12);
+  font-weight: var(--weight-bold);
+}
+
+.brandSelect {
+  background: var(--color-background);
+  border: 1px solid
+    color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
+  border-radius: var(--radius-3);
+  color: var(--gray-12);
+  font: inherit;
+  min-height: 2.25rem;
+  padding: 0.236rem 0.618rem;
+}
+
+.brandSelect:focus-visible,
+.brandSwatch:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+.brandSwatches {
+  display: flex;
+  gap: 0.382rem;
+  min-height: 2.25rem;
+  align-items: center;
+}
+
+/*
+ * A swatch: 28px, its color, and pressed, a ring in the page's text color round a gap of
+ * the page's ground, so the choice shows by more than color (WCAG 1.4.1).
+ */
+.brandSwatch {
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  height: 1.75rem;
+  padding: 0;
+  width: 1.75rem;
+}
+
+.brandSwatch[aria-pressed="true"] {
+  box-shadow:
+    0 0 0 2px var(--color-background),
+    0 0 0 4px var(--gray-12);
+}
+
+.brandSwatch[aria-pressed="true"]:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--color-background),
+    0 0 0 4px var(--gray-12),
+    var(--focus-ring);
+}
+
+/* A value the brand changed, lit a moment. */
+@media (prefers-reduced-motion: no-preference) {
+  .brandFresh {
+    animation: brand-fresh 1600ms ease both;
+    border-radius: 2px;
+  }
+}
+
+@keyframes brand-fresh {
+  0%,
+  40% {
+    background-color: color-mix(in srgb, var(--accent-9) 36%, transparent);
+  }
+
+  to {
+    background-color: transparent;
+  }
+}
+
+/* On a black story, the editor's black needs its hairline to be seen. */
+.story[data-tone="code"] .storyCode {
+  box-shadow: inset 0 0 0 1px var(--code-rule);
+}
+
+/* On a dark page, black on near-black: a hairline round it, drawn inside, as the editor's. */
+:global(.dark) .storyCode {
+  box-shadow: inset 0 0 0 1px var(--gray-6);
+}
+
+.codeSelector {
+  color: var(--code-tag);
+}
+
+.codeProperty {
+  color: var(--code-attr);
+}
+
+.codeFunction {
+  color: var(--code-property);
+}
+
+.codePunctuation {
+  color: var(--code-punctuation);
+}
+
+.storyFigures {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.figure {
+  display: grid;
+  gap: 0.25rem;
   margin: 0;
+}
+
+/* One line, always: "2.2 AA" is one figure. */
+.figureValue {
+  font-size: clamp(3rem, 10cqi, 6.5rem);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+}
+
+/* The accent itself: large, so 3:1 is enough, and it is 5.0:1 on white, 3.8:1 dark. */
+.story[data-tone="page"] .figureValue {
+  color: var(--accent-9);
+}
+
+/*
+ * On the black, the editor's white, over the hero's marker (`.mark::after`), the stroke
+ * as wide as the figure and at its foot. The figure is a layer of its own, the stroke at
+ * its bottom, so the figure reads over it.
+ */
+.story[data-tone="code"] .figureValue {
+  color: var(--code-text);
+  isolation: isolate;
+  justify-self: start;
+  position: relative;
+  z-index: 0;
+}
+
+.story[data-tone="code"] .figureValue::after {
+  bottom: 0.06em;
+  height: 0.26em;
+}
+
+/* Room under the figure for the stroke, before its caption. */
+.story[data-tone="code"] .figure {
+  gap: 0.618rem;
+}
+
+/* A figure's unit (`kB`) at half its size, on its baseline, so the number leads. */
+.figureUnit {
+  font-size: 0.5em;
+  letter-spacing: -0.03em;
+}
+
+/* Where a story has several figures, each is a little smaller. */
+.storyFigures:has(> .figure + .figure) .figureValue {
+  font-size: clamp(2.5rem, 9cqi, 4.5rem);
+}
+
+.figureCaption {
+  font-size: var(--text-md);
+  line-height: 1.4;
+}
+
+/* A narrow column: the words, then the figure under them. */
+@container (max-width: 36rem) {
+  .story,
+  .story[data-side="start"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .story[data-side="start"] .storyFigures {
+    order: 0;
+  }
+}
+
+/*
+ * Each story rises into place as it scrolls in, driven by the scroll (no script), only
+ * where the reader allows motion. It moves; it never fades, so its text is never shown
+ * at less than its contrast.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .story {
+      animation: story-in linear both;
+      animation-range: entry 0% cover 25%;
+      animation-timeline: view();
+    }
+
+    /* The marker under a figure on black draws in as the figure comes into view. */
+    .story[data-tone="code"] .figureValue {
+      view-timeline-name: --figure;
+    }
+
+    .story[data-tone="code"] .figureValue::after {
+      animation: mark-draw linear both;
+      animation-range: entry 40% cover 45%;
+      animation-timeline: --figure;
+    }
+  }
+}
+
+@keyframes story-in {
+  from {
+    scale: 0.97;
+    translate: 0 2.5rem;
+  }
+
+  to {
+    scale: 1;
+    translate: 0 0;
+  }
 }
 
 /* ── Install panel ────────────────────────────────────────────────────────── */

@@ -7,11 +7,7 @@ import React, {
 } from "react";
 
 import * as Clover from "../../parts";
-import type {
-  InformationPanelLayout,
-  ItemsLayout,
-  RootProps,
-} from "../../parts";
+import type { PanelLayout, ItemsLayout, RootProps } from "../../parts";
 import { useDragToClose } from "../shared/useDragToClose";
 import { useFocusOnOpen, useSlide, useWideEnough } from "../shared/useSlide";
 import { useFollowFocus } from "../shared/useFollowFocus";
@@ -46,7 +42,7 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    * How the information panel lays out its sections: `"accordion"` (the default),
    * stacked boxes each opened by its heading, or `"tabs"`.
    */
-  panelLayout?: InformationPanelLayout;
+  panelLayout?: PanelLayout;
   /** The thumbnails under the stage: a layout, or `false` for none. Default `carousel`. */
   items?: Exclude<ItemsLayout, "pager"> | false;
   /**
@@ -195,7 +191,7 @@ export function Default({
       >
         <Clover.SplitPane
           className="clover-template-default-main"
-          // A minimum only while the InformationPanel is docked beside it: over it, none.
+          // A minimum only while the Panel is docked beside it: over it, none.
           min={over ? undefined : STAGE_MIN}
         >
           {header && (
@@ -244,7 +240,7 @@ export function Default({
             data-open={over ? slide.open : open}
             hidden={!shown}
           >
-            <Clover.InformationPanel
+            <Clover.Panel
               ref={panelRef}
               layout={panelLayout}
               // With no title over them, the sections take its place in the outline.

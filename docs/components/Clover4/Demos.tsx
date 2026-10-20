@@ -1,3 +1,5 @@
+"use client";
+
 import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 import { useMapWorker } from "docs/lib/map-worker";
@@ -397,8 +399,8 @@ export function ItemsLayoutsDemo() {
 
 const PanelInRoot = dynamic(
   () =>
-    import("@nulib/clover").then(({ Root, Content, InformationPanel }) => {
-      function PanelDemo({
+    import("@nulib/clover").then(({ Root, Content, Panel }) => {
+      function PanelLayoutDemo({
         iiifContent,
         layout,
       }: {
@@ -429,22 +431,22 @@ const PanelInRoot = dynamic(
               }}
             >
               {/* Under the page's "Tabs or accordion" h2. */}
-              <InformationPanel layout={layout} headingLevel={3} />
+              <Panel layout={layout} headingLevel={3} />
             </div>
           </Root>
         );
       }
-      return PanelDemo;
+      return PanelLayoutDemo;
     }),
   { ssr: false },
 );
 
 /**
- * `InformationPanel` beside `Content`, over the White catalog mock (About, Collection,
+ * `Panel` beside `Content`, over the White catalog mock (About, Collection,
  * Contents, Annotations), in either layout. Not remounted on a switch: the open section
  * stays open, as it does for the reader.
  */
-export function InformationPanelDemo() {
+export function PanelDemo() {
   const url = useMock("paged/manifest.json");
   const [layout, setLayout] = useState<"tabs" | "accordion">("tabs");
   return (
@@ -505,11 +507,19 @@ const TemplateViewer = dynamic(
       function TemplateViewer({
         name,
         iiifContent,
+        headingLevel,
       }: {
         name: TemplateName;
         iiifContent: string;
+        headingLevel?: 2 | 3 | 4 | 5 | 6;
       }) {
-        return <Viewer iiifContent={iiifContent} template={templates[name]} />;
+        return (
+          <Viewer
+            iiifContent={iiifContent}
+            template={templates[name]}
+            headingLevel={headingLevel}
+          />
+        );
       }
       return TemplateViewer;
     }),
@@ -527,6 +537,51 @@ export function TemplateDemo({
   return (
     <div style={{ margin: "1.5rem 0 2rem" }}>
       <TemplateViewer name={name} iiifContent={iiifContent} />
+    </div>
+  );
+}
+
+const TEMPLATES: TemplateName[] = ["Default", "Document", "Gallery"];
+
+/**
+ * The three templates on one Manifest, the White catalog (a `paged` mock), switched by
+ * name: the Viewer page's showing of what a template changes. Each template mounts
+ * afresh, as a page passing another would.
+ */
+export function TemplatesDemo() {
+  const url = useMock("paged/manifest.json");
+  const [name, setName] = useState<TemplateName>("Default");
+  return (
+    <div style={{ margin: "1.5rem 0 2rem" }}>
+      <div
+        role="group"
+        aria-label="Template"
+        style={{ display: "flex", gap: "0.375rem", marginBottom: "1rem" }}
+      >
+        {TEMPLATES.map((template) => (
+          <button
+            key={template}
+            type="button"
+            aria-pressed={template === name}
+            onClick={() => setName(template)}
+            style={{
+              ...pill,
+              ...(template === name ? pillPressed : undefined),
+            }}
+          >
+            {template}
+          </button>
+        ))}
+      </div>
+      {url && (
+        <TemplateViewer
+          key={name}
+          name={name}
+          iiifContent={url}
+          // Under the Viewer page's "Templates" h2.
+          headingLevel={3}
+        />
+      )}
     </div>
   );
 }

@@ -7,7 +7,7 @@
  * and, in the row behind, Erich Raeder, Baldur von Schirach and Fritz Sauckel.
  *
  * Commons is not a IIIF publisher, so the Manifest is the mock's own, made from the file's
- * record there (its Commons API `videoinfo`, read on 19 October 2026):
+ * record there (its Commons API `videoinfo`, read on October 19, 2026):
  *
  * - its label and summary are its own, on Hess's distress beside the other defendants;
  *   its metadata are the record's (the National Archives' title and description, among
@@ -67,7 +67,7 @@ export const DURATION = 671.164;
  * What the Manifest is for, in its own words: Hess's distress, beside the other
  * defendants, on the two days the judgment was read. The days are read from the film and
  * the trial's record: its first part ends as the Tribunal adjourns after the judgment on
- * the SS, as the session of 30 September 1946 did ("adjourned until 1 October 1946 at
+ * the SS, as the session of September 30, 1946 did ("adjourned until 1 October 1946 at
  * 0930 hours"), and its second shows the verdicts on the defendants, read on 1 October.
  */
 const SUMMARY =

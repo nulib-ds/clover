@@ -12,7 +12,7 @@ import type { LoadedImage } from "./decode";
  *    aborted at once. A zoom generates far more requests than it consumes, and stale ones
  *    would hold the connection pool ahead of the tiles actually wanted.
  * 2. **Priority, not arrival order.** A bounded window of requests is fed from the front
- *    of the list — coarse tiles first, then nearest the centre of view.
+ *    of the list — coarse tiles first, then nearest the center of view.
  * 3. **One retry, then a negative cache.** A tile that fails twice is remembered as failed,
  *    so a 404 is not re-requested on every frame it stays in view. The retry goes to the
  *    tile's alternate spelling when it has one.

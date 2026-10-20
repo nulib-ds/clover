@@ -1,13 +1,39 @@
 .customManifest {
   margin: 2rem auto 0;
+  position: relative;
 }
 
-.customManifest input {
+/* Drawn as the docs' search field is: a soft fill, the page's ground once focused. */
+.input {
+  appearance: none;
+  background: var(--gray-3);
+  border-radius: 0.5rem;
+  display: block;
+  font-size: 1rem;
+  line-height: 1.25;
   padding: 0.75rem 1.25rem;
+  transition: background-color 150ms ease;
+  width: 100%;
 }
 
-/* The placeholder is the field's only visible label: Nextra's gray-500 is 4.3:1 on the field. */
-.customManifest input::placeholder {
+.input:focus {
+  background: var(--color-background);
+}
+
+@media (min-width: 768px) {
+  .input {
+    font-size: 0.875rem;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .input {
+    border: 1px solid currentColor;
+  }
+}
+
+/* The placeholder is the field's only visible label: it takes the muted text color. */
+.input::placeholder {
   color: var(--gray-11);
 }
 

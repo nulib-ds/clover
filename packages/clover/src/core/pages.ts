@@ -7,7 +7,7 @@ import { type CloverRequest, fetchJson } from "./request";
  * embedded where the reference was.
  *
  * The Manifest is never mutated. Embedding copies the path to the page (Manifest → its
- * `items` → the Canvas → its page list) and shares everything else, so selectors memoised
+ * `items` → the Canvas → its page list) and shares everything else, so selectors memoized
  * on object identity recompute for that Canvas and nothing more.
  */
 

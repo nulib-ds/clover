@@ -1,0 +1,59 @@
+---
+title: Rights
+description: The rights of the Manifest, or of the current Canvas, as a link to its license or rights statement.
+---
+
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+
+# Rights
+
+The Manifest's `rights`, or the current Canvas's with `of="canvas"`: the address of its
+license or rights statement, as a link. Outside a `Root`, give it the address as `value`.
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+<Clover.Root iiifContent={manifestUrl}>
+  <Clover.Content />
+  <Clover.Rights />
+</Clover.Root>;
+```
+
+Below, the rights statement of the White Sewing Machine Company's 1896 bicycle catalog,
+from Clover's [mocks](/docs/mocks).
+
+<PartDemo part="Rights" />
+
+## The link
+
+{/* prettier-ignore */}
+```html
+<a
+  href="http://rightsstatements.org/vocab/NoC-US/1.0/"
+  class="clover-rights"
+>
+  http://rightsstatements.org/vocab/NoC-US/1.0/
+</a>
+```
+
+The link's text, and so its name to assistive technology, is the address as the property
+gives it: Clover does not look up the name of the license or statement. Put it where its
+context says what it is, as [`About`](/docs/panel#sections) does, under a "Rights"
+heading.
+
+Without `rights` it renders nothing.
+
+## Props
+
+| Prop        | Type                     | Description                               |
+| ----------- | ------------------------ | ----------------------------------------- |
+| `of`        | `"manifest" \| "canvas"` | Whose rights. Default `manifest`.         |
+| `value`     | `string`                 | An address to link instead of the Root's. |
+| `className` | `string`                 | Added to `clover-rights`.                 |
+
+It takes no `as`: it is an `a`. Its other props (`id`, `style`, `aria-*`) go to the `a`.
+
+### Styles
+
+Clover's stylesheet gives `.clover-rights` no style of its own: it looks as your page's
+links do.
