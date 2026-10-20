@@ -1,0 +1,52 @@
+/*
+ * A page's hide toggle (`ui/HideToggle.tsx`): an eye, `text-s` wide with `xs` round it,
+ * as small as a transcript's language codes and the same `l` target, which keeps it over
+ * 24px (WCAG 2.5.8). The muted primary at rest; under the pointer or on keyboard focus
+ * the accent, as Clover's controls take it. The eye struck through says it is hidden;
+ * the checkbox itself is out of sight, still focused and read. Selected as `label.…`, so
+ * a menu's own rule for its labels (`ControlMenu.css`) does not pad or round it.
+ */
+label.clover-hide {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+  gap: 0;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--clover-color-primary-muted, #26292b);
+  cursor: pointer;
+}
+
+label.clover-hide svg {
+  width: var(--clover-text-s);
+  height: var(--clover-text-s);
+}
+
+label.clover-hide:is(:hover, :has(input:focus-visible)) {
+  background-color: var(--clover-color-accent, #0065c3);
+  color: var(--clover-color-secondary, #fff);
+}
+
+label.clover-hide:has(input:focus-visible) {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+}
+
+label.clover-hide input {
+  position: absolute;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  label.clover-hide:is(:hover, :has(input:focus-visible)) {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}

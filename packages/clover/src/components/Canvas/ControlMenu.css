@@ -53,32 +53,30 @@
 }
 
 /*
- * On a phone the controls are a column down the end, so these sit beside it instead, from
- * the top: below the way out of full screen when full screen. Beside every column of it:
- * a short stage wraps the column onto more (`--clover-canvas-controls-width`), and what
- * is left between them and the stage's start is the box's, however narrow, rather than
- * over a control (WCAG 2.5.8).
+ * On a short stage, where below the controls would leave one too little to read
+ * (`data-popups="beside"`, `ui/useClusterReach.ts`), it sits beside them instead, from the
+ * top, as wide as is left between them and the stage's start, rather than over a control
+ * (WCAG 2.5.8); below the way out of full screen when full screen.
  */
-@media (max-width: 575px) {
-  .clover-canvas > :is(.clover-canvas-caption, .clover-canvas-menu) {
-    --top: var(--clover-canvas-chrome-inset);
-    right: calc(
-      var(--clover-canvas-chrome-inset) +
-        var(--clover-canvas-controls-width, var(--clover-control)) +
-        var(--clover-space-s)
-    );
-    left: var(--clover-canvas-chrome-inset);
-    min-width: 0;
-    max-width: none;
-  }
+.clover-canvas[data-popups="beside"]
+  > :is(.clover-canvas-caption, .clover-canvas-menu) {
+  --top: var(--clover-canvas-chrome-inset);
+  right: calc(
+    var(--clover-canvas-chrome-inset) +
+      var(--clover-canvas-controls-width, var(--clover-control)) +
+      var(--clover-space-s)
+  );
+  left: var(--clover-canvas-chrome-inset);
+  min-width: 0;
+  max-width: none;
+}
 
-  .clover-canvas[data-fullscreen="true"]
-    > :is(.clover-canvas-caption, .clover-canvas-menu) {
-    --top: calc(
-      var(--clover-canvas-chrome-inset) + var(--clover-control) +
-        var(--clover-space-s)
-    );
-  }
+.clover-canvas[data-popups="beside"][data-fullscreen="true"]
+  > :is(.clover-canvas-caption, .clover-canvas-menu) {
+  --top: calc(
+    var(--clover-canvas-chrome-inset) + var(--clover-control) +
+      var(--clover-space-s)
+  );
 }
 
 /*

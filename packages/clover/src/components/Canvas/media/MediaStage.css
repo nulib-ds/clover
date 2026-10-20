@@ -32,16 +32,19 @@
  * it shows, moving with it.
  *
  * They sit at the foot of the stage above that line, in from its sides and foot by the
- * chrome's inset (`--clover-canvas-chrome-inset`), as the controls are. Too many to fit
+ * chrome's inset (`--clover-canvas-chrome-inset`), as the controls are, and over the
+ * seek bar's chapter popover while it shows, `2xs` clear of its top
+ * (`--clover-transport-preview-top`, `Transport.tsx`), unless it is put away. Too many to fit
  * there (a short stage, large text), they start from its top and run on over the bar,
  * rather than off the top of the stage, where they could not be read (WCAG 1.4.10).
  */
 .clover-canvas-captions {
   position: absolute;
   inset: 0 0
-    calc(
+    max(
       var(--clover-canvas-chrome-inset) + var(--clover-chrome-shown) *
-        (var(--clover-transport-room) - var(--clover-canvas-chrome-inset))
+        (var(--clover-transport-room) - var(--clover-canvas-chrome-inset)),
+      var(--clover-transport-preview-top, 0px) + var(--clover-space-2xs)
     );
   z-index: 3;
   display: flex;
@@ -53,6 +56,12 @@
   padding: 0 var(--clover-canvas-chrome-inset);
   pointer-events: none;
   transition: bottom var(--clover-chrome-timing);
+}
+
+/* The chapter popover put away (Escape): the cues back down. */
+.clover-canvas:has(.clover-canvas-transport-seek-area[data-tip-hidden])
+  .clover-canvas-captions {
+  --clover-transport-preview-top: 0px;
 }
 
 .clover-canvas-captions-cue {

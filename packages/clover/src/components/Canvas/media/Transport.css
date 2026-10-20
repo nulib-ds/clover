@@ -71,10 +71,15 @@
 
 /*
  * Over the captions, which may run down over the bar on a short stage, while a menu is
- * open or keyboard focus is in the bar: a cue must never hide the focused control, its
- * ring or its Tip (WCAG 2.4.7, 2.4.11).
+ * open, keyboard focus is in the bar, or the pointer is on the seek bar: a cue must never
+ * hide the focused control, its ring or its Tip (WCAG 2.4.7, 2.4.11), nor the chapter the
+ * pointer is on (WCAG 1.4.13).
  */
-.clover-canvas-transport:has([aria-expanded="true"], :focus-visible) {
+.clover-canvas-transport:has(
+  [aria-expanded="true"],
+  :focus-visible,
+  > .clover-canvas-transport-seek-area:hover
+) {
   z-index: 4;
 }
 
@@ -398,8 +403,15 @@ button.clover-canvas-transport-time:focus-visible {
   overflow-y: auto;
 }
 
+/*
+ * An option keeps the height of its words, however many lines they wrap to, and the list
+ * scrolls: its `min-height` overrides the flex item's own (`auto`), so without `flex:
+ * none` a list taller than its room squeezed its options, a chapter's long title over
+ * the next (WCAG 1.4.10, 1.4.12).
+ */
 .clover-canvas-transport-option {
   display: flex;
+  flex: none;
   align-items: center;
   gap: var(--clover-space-xs);
   min-height: var(--clover-space-l);
@@ -442,8 +454,13 @@ button.clover-canvas-transport-time:focus-visible {
   color: inherit;
 }
 
-/* With the codes' column, room for a name of a few words on a line or two. */
-.clover-canvas-transport-options:has(.clover-canvas-transport-code) {
+/*
+ * With the codes' column, room for a name of a few words on a line or two; and as much
+ * for chapters, beside their times.
+ */
+.clover-canvas-transport-options:has(.clover-canvas-transport-code),
+.clover-canvas-transport-menu:has([data-button="chapters"])
+  .clover-canvas-transport-options {
   min-width: min(16rem, 100cqi - 2 * var(--clover-canvas-chrome-inset));
 }
 
@@ -556,6 +573,46 @@ button.clover-canvas-transport-time:focus-visible {
   background-color: var(--clover-player-text, #fff);
   opacity: 0.7;
   pointer-events: none;
+}
+
+/*
+ * The chapter under the pointer (`Transport.tsx`): its stretch of the seek bar drawn out
+ * over the track, in the bar's own light, and its start and title in a popover (`Tip`)
+ * over the stretch's middle, at once rather than after a control's pause, while the
+ * pointer is on the bar or keyboard focus is. Escape puts it away (WCAG 1.4.13); the
+ * pointer can rest on it. A chapter marked from a list beside the Canvas has its stretch
+ * drawn out only.
+ */
+.clover-canvas-transport-chapter-span {
+  position: absolute;
+  top: 50%;
+  height: var(--clover-space-xs);
+  translate: 0 -50%;
+  border-radius: var(--clover-radius, 3px);
+  background-color: var(--clover-player-text, #fff);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.clover-canvas-transport-seek-area > .clover-tip {
+  left: var(--clover-transport-preview, 50%);
+}
+
+.clover-canvas-transport-seek-area:is(:hover, :has(> input:focus-visible)):not(
+    [data-tip-hidden]
+  )
+  > .clover-tip {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+@media (forced-colors: active) {
+  .clover-canvas-transport-chapter-span {
+    background-color: Highlight;
+    opacity: 1;
+  }
 }
 
 /*

@@ -130,6 +130,19 @@ export const resources: PlaygroundResource[] = [
     resource: nul("d8fb6329-f7fb-48bf-8bb7-70a64ded5a15"),
     thumbnail: `${works}/d8fb6329-f7fb-48bf-8bb7-70a64ded5a15/thumbnail`,
   },
+  // The National Archives' footage of the Nuremberg judgment, as Commons publishes it
+  // (a mock): Rudolf Hess and the other defendants followed through it, frame by frame
+  // (`xywh=…&t=…` annotations), with captions from the trial's record and chapters.
+  {
+    key: "footage",
+    name: "Footage",
+    title: "Rudolf Hess at Nuremberg Sentencing, 30 September–1 October 1946",
+    description: "Film with its defendants followed",
+    resource: "rudolf-hess-nuremberg/manifest.json",
+    mock: true,
+    thumbnail:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sentencing_of_Nazi_Leaders_at_Nuremberg.webm/250px-seek%3D14-Sentencing_of_Nazi_Leaders_at_Nuremberg.webm.jpg",
+  },
   {
     key: "recording",
     name: "Recording",

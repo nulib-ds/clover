@@ -6,7 +6,14 @@
  *   makes of a Presentation 3 string target);
  * - a `SpecificResource`, `{ source, selector }`, with a `FragmentSelector`,
  *   `PointSelector` or `SvgSelector` (or an array of them, of which the first that
- *   applies wins).
+ *   applies wins);
+ * - several of these, as Presentation 4 groups them (`Independents`, `List`,
+ *   `Composite`, which the upgrader makes of a Presentation 3 array), of which this reads
+ *   the first; `annotationTargets` (`components/Canvas/track.ts`, with the hotspots that
+ *   follow a recording) reads them all.
+ *
+ * A fragment may give a region and a time at once (`xywh=…&t=…`, both dimensions of a
+ * Media Fragment): the region through that stretch of a recording.
  */
 export interface ParsedAnnotationTarget {
   /** The Canvas (or other resource) targeted, without its fragment. */
@@ -30,21 +37,21 @@ type Target =
 const asArray = (value: unknown): unknown[] =>
   Array.isArray(value) ? value : value == null ? [] : [value];
 
-/** `xywh=` or `t=` in a fragment or a selector's value. */
+/** `xywh=`, `t=`, or both, in a fragment or a selector's value. */
 function readFragment(
   id: string,
   fragment: string,
 ): ParsedAnnotationTarget | null {
+  const time = /(?:^|[#&])t=([^&]+)/.exec(fragment);
+  const t = time && { t: time[1] };
   const xywh = /(?:^|[#&])xywh=(?:pixel:)?([^&]+)/.exec(fragment);
   if (xywh) {
     const [x, y, w, h] = xywh[1].split(",").map(Number);
     if ([x, y, w, h].every(Number.isFinite)) {
-      return { id, rect: { x, y, w, h } };
+      return { id, rect: { x, y, w, h }, ...t };
     }
   }
-  const time = /(?:^|[#&])t=([^&]+)/.exec(fragment);
-  if (time) return { id, t: time[1] };
-  return null;
+  return t && { id, ...t };
 }
 
 /** A URI with its fragment (`#…`, or the `&t=` some publishers append) read. */
@@ -59,7 +66,22 @@ function readUri(uri: string): ParsedAnnotationTarget {
   return { id: uri };
 }
 
+/** Presentation 4's groups of several targets (or bodies), each item one of its own. */
+export const GROUPS = ["Independents", "Composite", "List"];
+
+/** A target's first part: the first item of an array or a group, or the target itself. */
+const first = (target: any): Target =>
+  Array.isArray(target)
+    ? first(target[0])
+    : GROUPS.includes(target?.type)
+      ? first(target.items?.[0])
+      : target;
+
 export function parseAnnotationTarget(target: Target): ParsedAnnotationTarget {
+  return readTarget(first(target));
+}
+
+function readTarget(target: Target): ParsedAnnotationTarget {
   if (typeof target === "string") return readUri(target);
   if (!target || typeof target !== "object") return { id: "" };
 
@@ -90,9 +112,6 @@ export function parseAnnotationTarget(target: Target): ParsedAnnotationTarget {
   }
   return source;
 }
-
-/** Presentation 4 wraps several bodies in one of these; each item is a body of its own. */
-const GROUPS = ["Independents", "Composite", "List"];
 
 /** An annotation's bodies, with Presentation 4's groups unwrapped. */
 export function bodiesOf(

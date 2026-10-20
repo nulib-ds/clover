@@ -46,6 +46,9 @@ interface CanvasControlsProps {
   onSelect?: (key: string, index: number) => void;
   /** The Canvas's annotations, on its picture and its time. With any, a control lists them. */
   annotations?: ListedAnnotation[];
+  /** The pages whose annotations are hidden, which the menu lists with their toggles. */
+  hiddenPages?: string[];
+  onPageVisibilityChange?: (pageIds: string[], visible: boolean) => void;
   selectedAnnotation?: string | null;
   onAnnotationSelect?: (annotation: ListedAnnotation) => void;
   onAnnotationActivate?: (id: string | null) => void;
@@ -76,6 +79,8 @@ const Controls: React.FC<CanvasControlsProps> = ({
   selections = {},
   onSelect,
   annotations = [],
+  hiddenPages,
+  onPageVisibilityChange,
   selectedAnnotation = null,
   onAnnotationSelect,
   onAnnotationActivate,
@@ -268,6 +273,8 @@ const Controls: React.FC<CanvasControlsProps> = ({
           label={annotationsLabel}
           labelLang={annotationsLang}
           annotations={annotations}
+          hiddenPages={hiddenPages}
+          onPageVisibilityChange={onPageVisibilityChange}
           selected={selectedAnnotation}
           onSelect={onAnnotationSelect}
           onActivate={(id) => onAnnotationActivate?.(id)}

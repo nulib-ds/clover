@@ -10,6 +10,8 @@ import type { LanguageMapLike } from "./value";
  */
 
 export interface Chapter {
+  /** Its Range's id, as `Contents` keys the Range. */
+  id?: string;
   label?: LanguageMapLike;
   start: number;
   end?: number;
@@ -79,7 +81,12 @@ export function chaptersOf(
       const parsed = parseAnnotationTarget(rangeItemTarget(item) as any);
       if (parsed.id.split("#")[0] !== canvasId) continue;
       const time = parseTime(parsed.t);
-      if (time) found.push({ label: range.label, ...time });
+      if (time)
+        found.push({
+          ...(range.id ? { id: range.id } : {}),
+          label: range.label,
+          ...time,
+        });
     }
   };
   for (const structure of asArray((manifest as Json).structures) as Json[]) {

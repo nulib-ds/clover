@@ -36,6 +36,12 @@ import {
   manifest as transcriptsManifest,
 } from "../docs/mocks/transcripts/index.mjs";
 import {
+  PUBLIC_BASE as HESS_BASE,
+  captions as hessCaptions,
+  manifest as hessManifest,
+  transcript as hessTranscript,
+} from "../docs/mocks/rudolf-hess-nuremberg/index.mjs";
+import {
   PUBLIC_BASE as PAGE_TRANSCRIPT_BASE,
   manifest as pageTranscriptManifest,
   pageText,
@@ -134,6 +140,20 @@ writeFileSync(
   `${JSON.stringify(transcriptsManifest(TRANSCRIPTS_BASE), null, 2)}\n`,
 );
 console.log("transcripts: manifest.json");
+
+// The film with defendants followed through it: a Manifest and its captions.
+const hess = join(root, "public/mocks/rudolf-hess-nuremberg");
+rmSync(hess, { recursive: true, force: true });
+mkdirSync(hess, { recursive: true });
+writeFileSync(
+  join(hess, "manifest.json"),
+  `${JSON.stringify(hessManifest(HESS_BASE), null, 2)}\n`,
+);
+writeFileSync(join(hess, "captions.vtt"), `${hessCaptions()}\n`);
+writeFileSync(join(hess, "transcript.txt"), `${hessTranscript()}\n`);
+console.log(
+  "rudolf-hess-nuremberg: manifest.json, captions.vtt, transcript.txt",
+);
 
 // The newspaper issue with each page's OCR as a text file: a Manifest and two texts.
 const pageTranscript = join(root, "public/mocks/page-transcript");

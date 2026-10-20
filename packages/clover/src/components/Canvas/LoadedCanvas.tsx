@@ -161,9 +161,11 @@ async function annotationsOf(
   const pages = (canvas.annotations ?? []) as Array<Record<string, any>>;
   const embedded = pages.filter((page) => Array.isArray(page?.items));
   const referenced = pages.filter((page) => !Array.isArray(page?.items));
-  // Each with its page's label, which the menu and a recording's cues show.
-  const sets: Array<Pick<AnnotationSet, "label" | "entries">> = [
+  // Each with its page's label, which the menu and a recording's cues show, and its id,
+  // by which the menu hides it.
+  const sets: Array<Pick<AnnotationSet, "id" | "label" | "entries">> = [
     ...embedded.map((page, index) => ({
+      id: page.id ?? `annotations-${index}`,
       label: page.label,
       entries: readPage(page, page.id ?? `annotations-${index}`, canvas.id),
     })),
@@ -173,6 +175,7 @@ async function annotationsOf(
     ...(content.annotation
       ? [
           {
+            id: "content-state",
             entries: readPage({ items: [content.annotation] }, "content-state"),
           },
         ]
@@ -185,6 +188,7 @@ async function annotationsOf(
       .map((entry) => ({
         annotation: entry.annotation as CanvasAnnotation["annotation"],
         targetIndex: 0,
+        pageId: set.id,
         ...(set.label ? { pageLabel: set.label } : {}),
       })),
   );

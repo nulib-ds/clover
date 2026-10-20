@@ -101,6 +101,12 @@ button.clover-canvas-placeholder-toggle {
   cursor: pointer;
 }
 
+/* Its toggle is in the middle, so the cluster keeps no room for it in the corner. */
+.clover-canvas[data-placeholder="true"][data-media]
+  > .clover-canvas-controls[data-has-placeholder="true"] {
+  right: var(--clover-canvas-chrome-inset);
+}
+
 /* The whole still plays it: pointing anywhere on it lights the play button, as on it. */
 .clover-canvas[data-placeholder="true"][data-media]:has(
     > .clover-canvas-placeholder[data-media="true"]:hover
@@ -126,9 +132,9 @@ button.clover-canvas-placeholder-toggle {
 
 /*
  * The information panel's toggle keeps the corner (see `Canvas.css`). Where the Canvas
- * has a placeholder (`data-placeholder`, absent otherwise), its toggle steps aside for it, beside it in the row and under it in a narrow screen's
- * column, and the cluster keeps the room between them. A video's still has its toggle in
- * the middle, as a play button, so no room is kept there.
+ * has a placeholder (`data-placeholder`, absent otherwise), its toggle sits beside it,
+ * and the cluster keeps the room for both. A video's still has its toggle in the middle,
+ * as a play button, so no room is kept there.
  */
 .clover-canvas:has(> .clover-canvas-controls > [data-button="panel"])
   > .clover-canvas-controls[data-has-placeholder="true"] {
@@ -139,9 +145,8 @@ button.clover-canvas-placeholder-toggle {
 .clover-canvas[data-placeholder]:not([data-placeholder="true"][data-media]):has(
     > .clover-canvas-controls > [data-button="panel"]
   )
-  > .clover-canvas-controls
-  > [data-button="panel"] {
-  margin-inline-start: calc(var(--clover-control) + var(--clover-space-s));
+  > .clover-canvas-controls {
+  padding-right: calc(2 * (var(--clover-control) + var(--clover-space-s)));
 }
 
 .clover-canvas[data-placeholder]:not([data-placeholder="true"][data-media]):has(
@@ -152,26 +157,4 @@ button.clover-canvas-placeholder-toggle {
     var(--clover-canvas-chrome-inset) + var(--clover-control) +
       var(--clover-space-s)
   );
-}
-
-@media (max-width: 575px) {
-  .clover-canvas[data-placeholder]:not(
-      [data-placeholder="true"][data-media]
-    ):has(> .clover-canvas-controls > [data-button="panel"])
-    > .clover-canvas-controls
-    > [data-button="panel"] {
-    margin-inline-start: 0;
-    margin-block-end: calc(var(--clover-control) + var(--clover-space-s));
-  }
-
-  .clover-canvas[data-placeholder]:not(
-      [data-placeholder="true"][data-media]
-    ):has(> .clover-canvas-controls > [data-button="panel"])
-    > button.clover-canvas-placeholder-toggle {
-    top: calc(
-      var(--clover-canvas-chrome-inset) + var(--clover-control) +
-        var(--clover-space-s)
-    );
-    right: var(--clover-canvas-chrome-inset);
-  }
 }

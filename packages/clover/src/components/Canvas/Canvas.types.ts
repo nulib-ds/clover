@@ -190,6 +190,14 @@ export interface CloverCanvasProps {
    * targets are drawn; coordinates are the target image's own.
    */
   annotations?: CanvasAnnotation[];
+  /**
+   * The AnnotationPages (each annotation's `pageId`) whose annotations are hidden: none
+   * of them is drawn, but the annotations menu still lists them under their page, with
+   * its hide toggle, to show them again. Leave it out for the Canvas to keep its own.
+   */
+  hiddenPages?: string[];
+  /** The reader hid AnnotationPages from the picture (`visible` false), or showed them. */
+  onPageVisibilityChange?: (pageIds: string[], visible: boolean) => void;
   /** The hovered or focused annotation's id, or null when none is. */
   onAnnotationActive?: (id: string | null) => void;
   /**
@@ -258,11 +266,17 @@ export interface CloverCanvasProps {
    * is the language a label is written in, set on it where it shows.
    */
   chapters?: Array<{
+    /** Its own id (a Range's), by which `highlightedChapter` names it. */
+    id?: string;
     label: string;
     lang?: string;
     start: number;
     end?: number;
   }>;
+  /** A chapter (by its `id`) to mark on the seek bar, as hovering it in a list does. */
+  highlightedChapter?: string | null;
+  /** The chapter under the pointer on the seek bar (its `id`), or null as it leaves. */
+  onChapterHighlight?: (id: string | null) => void;
   /**
    * Show a Canvas's `placeholderContainer` first (the default). `false` opens the Canvas
    * straight away, as a host does when a link or content state points into it.

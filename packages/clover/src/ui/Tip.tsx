@@ -142,12 +142,13 @@ function tipOf(control: Element) {
 }
 
 /**
- * The control whose popover an element shows: the element itself, or, for a radio or a
- * checkbox, the label around it, which holds the popover while focus is on the input.
+ * The control whose popover an element shows: the element itself, or, for an input, what
+ * holds it and the popover while focus is on the input: a radio's or a checkbox's label,
+ * or the seek bar's area, whose popover names the chapter (`Transport.tsx`).
  */
 function controlOf(element: Element): Element {
-  const label = element.matches("input") ? element.parentElement : null;
-  return label?.matches("label") && tipOf(label) ? label : element;
+  const holder = element.matches("input") ? element.parentElement : null;
+  return holder && tipOf(holder) ? holder : element;
 }
 
 function isShown(tip: HTMLElement) {

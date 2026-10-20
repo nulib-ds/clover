@@ -1,8 +1,9 @@
 import React from "react";
 
-import { type ListedAnnotation, isTimed } from "./Annotations";
+import { type ListedAnnotation, startOf } from "./Annotations";
 import ControlMenu from "./ControlMenu";
 import { formatTime } from "./media/useMediaController";
+import { HideToggle } from "../../ui/HideToggle";
 import { useContainerName } from "../../ui/useContainerName";
 
 interface AnnotationMenuProps {
@@ -13,6 +14,10 @@ interface AnnotationMenuProps {
   /** The language of `label`, where it is not the page's. */
   labelLang?: string;
   annotations: ListedAnnotation[];
+  /** The pages whose annotations are hidden from the picture (each annotation's `pageId`). */
+  hiddenPages?: string[];
+  /** Hides a page's annotations, or shows them: with it, each page has its toggle. */
+  onPageVisibilityChange?: (pageIds: string[], visible: boolean) => void;
   /** The annotation last picked, which is checked. */
   selected: string | null;
   onSelect: (annotation: ListedAnnotation) => void;
@@ -25,9 +30,16 @@ interface AnnotationMenuProps {
 /**
  * The Canvas's annotations, listed by their text: picking one zooms to it, as clicking
  * its hotspot does, or, on a recording's time (Cookbook 0103), goes to where it starts,
- * shown beside it. The menu stays open to move on to the next. One without text is listed
- * by its number. Those of an AnnotationPage with a `label` are grouped under it, as the
- * Annotations list groups them.
+ * shown beside it. One that follows the recording (`xywh=…&t=…`) shows where it starts
+ * too, and is gone to there unless it is on the recording already. The menu stays open
+ * to move on to the next. One without text is listed by its number.
+ *
+ * Drawn as the Annotations list draws its own, with its classes, so its rules: each page
+ * under its `label` after its hide toggle (`HideToggle`; a page without a label has the
+ * toggle alone), then its rows, the picked one marked. The list holds the whole
+ * Manifest's; this, those of the Canvases in view. Hiding a page hides only its
+ * annotations on the picture: its items stay here as they were, and a pick still goes
+ * to where one is.
  */
 const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
   id,
@@ -35,6 +47,8 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
   label,
   labelLang,
   annotations,
+  hiddenPages = [],
+  onPageVisibilityChange,
   selected,
   onSelect,
   onActivate,
@@ -53,61 +67,93 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
   const unlabelled = groups.some((group) => !group.page);
   return (
     <ControlMenu
+      // Drawn as the Annotations list draws its entries, the same parts and rules.
+      className="clover-canvas-annotation-menu"
       data-testid="clover-canvas-annotation-menu"
       id={id}
       onClose={onClose}
       triggerId={triggerId}
     >
       {unlabelled && name.node}
-      {groups.map((group, g) => (
-        <fieldset
-          {...(group.page ? {} : name.props)}
-          className="clover-canvas-menu-group"
-          key={g}
-        >
-          {group.page && (
-            <legend
-              className="clover-canvas-menu-legend"
-              lang={group.page.lang}
-            >
-              {group.page.text}
-            </legend>
-          )}
-          {group.items.map((index) => {
-            const annotation = annotations[index];
-            return (
-              <label
-                className="clover-canvas-menu-item"
-                data-active={selected === annotation.id ? "true" : undefined}
-                key={annotation.id}
-                onMouseEnter={() => onActivate(annotation.id)}
-                onMouseLeave={() => onActivate(null)}
-              >
-                <input
-                  type="radio"
-                  name={id}
-                  checked={selected === annotation.id}
-                  onChange={() => onSelect(annotation)}
-                  // Re-picking the checked item goes back to it.
-                  onClick={() =>
-                    selected === annotation.id && onSelect(annotation)
-                  }
-                  onFocus={() => onActivate(annotation.id)}
-                  onBlur={() => onActivate(null)}
-                />
-                {isTimed(annotation) && (
-                  <span className="clover-canvas-menu-time">
-                    {formatTime(annotation.start)}
-                  </span>
-                )}
-                <span lang={annotation.label ? annotation.lang : undefined}>
-                  {annotation.label ?? String(index + 1)}
+      {groups.map((group, g) => {
+        // The pages its annotations are from, hidden and shown together.
+        const pageIds = [
+          ...new Set(
+            group.items.flatMap((index) => annotations[index].pageId ?? []),
+          ),
+        ];
+        const labelId = `${id}-page-${g}`;
+        const toggle = onPageVisibilityChange && pageIds.length > 0 && (
+          <HideToggle
+            hidden={pageIds.every((page) => hiddenPages.includes(page))}
+            onChange={(hide) => onPageVisibilityChange(pageIds, !hide)}
+            of={group.page ? labelId : undefined}
+          />
+        );
+        return (
+          <fieldset
+            // Named by its page's label alone: its legend holds the toggle too.
+            {...(group.page ? { "aria-labelledby": labelId } : name.props)}
+            className="clover-canvas-menu-group"
+            key={g}
+          >
+            {group.page ? (
+              <legend className="clover-canvas-menu-legend clover-annotations-set-header">
+                {toggle}
+                <span
+                  className="clover-annotations-title"
+                  id={labelId}
+                  lang={group.page.lang}
+                >
+                  {group.page.text}
                 </span>
-              </label>
-            );
-          })}
-        </fieldset>
-      ))}
+              </legend>
+            ) : (
+              toggle && (
+                <div className="clover-annotations-set-header">{toggle}</div>
+              )
+            )}
+            <div className="clover-annotations-list">
+              {group.items.map((index) => {
+                const annotation = annotations[index];
+                const start = startOf(annotation);
+                const picked = selected === annotation.id;
+                return (
+                  <label
+                    className="clover-canvas-menu-item clover-annotations-entry"
+                    data-selected={picked}
+                    key={annotation.id}
+                    onMouseEnter={() => onActivate(annotation.id)}
+                    onMouseLeave={() => onActivate(null)}
+                  >
+                    <input
+                      type="radio"
+                      name={id}
+                      checked={picked}
+                      onChange={() => onSelect(annotation)}
+                      // Re-picking the checked item goes back to it.
+                      onClick={() => picked && onSelect(annotation)}
+                      onFocus={() => onActivate(annotation.id)}
+                      onBlur={() => onActivate(null)}
+                    />
+                    {start !== undefined && (
+                      <span className="clover-annotations-time">
+                        {formatTime(start)}
+                      </span>
+                    )}
+                    <span
+                      className="clover-annotations-body"
+                      lang={annotation.label ? annotation.lang : undefined}
+                    >
+                      {annotation.label ?? String(index + 1)}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
+        );
+      })}
     </ControlMenu>
   );
 };

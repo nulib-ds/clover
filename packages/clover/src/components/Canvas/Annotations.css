@@ -55,9 +55,17 @@
   mask-clip: no-clip;
 }
 
-/* One that follows its link (Cookbook 0022) goes there, rather than zooming. */
-.clover-canvas-annotation[data-link] {
+/*
+ * One that follows its link (Cookbook 0022) goes there, rather than zooming; one that
+ * follows a recording (`xywh=…&t=…`) is picked where it is, and moves.
+ */
+.clover-canvas-annotation:is([data-link], [data-track]) {
   cursor: pointer;
+}
+
+/* Away from the recording's present moment, a tracked one is not there at all. */
+.clover-canvas-annotation[hidden] {
+  display: none;
 }
 
 /*

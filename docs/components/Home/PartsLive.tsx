@@ -116,8 +116,8 @@ const placesOf = (manifest: Json, canvases: Json[]) =>
 
 /**
  * For each conditional part, a playground resource that gives it something: the chips
- * offer it. Read from the resources themselves; none of them has a table of contents, a
- * search service, captions or downloads.
+ * offer it. Read from the resources themselves; none of them has a search service or
+ * downloads.
  */
 const SHOWN_IN: Partial<Record<PartKey, string>> = {
   summary: "collection",
@@ -130,6 +130,8 @@ const SHOWN_IN: Partial<Record<PartKey, string>> = {
   items: "catalog",
   annotations: "print",
   map: "map",
+  contents: "catalog",
+  transcript: "footage",
 };
 
 /** Where each part is documented. */

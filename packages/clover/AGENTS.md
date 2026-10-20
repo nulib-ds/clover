@@ -464,17 +464,31 @@ every rule below.
   - The Canvas's annotations menu, its hotspots and the panel share `annotationId` and
     `hiddenSets` through the store, as the captions' language goes through
     `clover.captions`: nothing of the choice is local to any of them.
+  - Hiding a set hides only what the Canvas draws (Mat, 2026-10-20). `Connected` hands
+    the Canvas every set's annotations with `pageId`, and the store's `hiddenSets` as
+    `hiddenPages`; `CanvasView` filters what it draws and keeps the menu's list whole,
+    each page after its `HideToggle` (`ui/HideToggle.tsx`: an eye, a checkbox checked
+    while hidden, its Tip "Hide", its name "Hide" and the page's label through
+    `aria-labelledby`), as the panel's set headers have it. A menu group with a legend is
+    named by `aria-labelledby` on its label alone: from its legend's content its name
+    would take in the toggle's. A pick of a hidden page's annotation still frames it or
+    goes to it. `ControlMenu` focuses a checked radio on opening, never the checked eye.
 - **Hotspot look.** Active (picked, hovered, focused), a rectangle keeps its edges and
   covers nothing it marks; the picture round it dims (`0 0 38vw 38vw #0002`, lighter than
   3.x's `#0003`). The 18% accent tint inside it, and inside a shape, was dropped at
   Mat's request, 2026-10-19: it washed out what the annotation points to. Hotspots beneath the
   active one (`depthOf` below its own) that meet it carry `--clover-annotation-mask`
   (`maskUnder`, Mat 2026-10-19): an SVG drawn in their own world box (a tenth spare each
-  side, for a shape's stroke past it) less the active one's rectangle or shape, so it is
-  set once per change of active, never per frame, and holds through zoom and rotation
-  (the overlay layer sizes each box to its world rect and rotates it about its centre).
-  Those over the active one are never masked: a masked hotspot on top would be an unseen
-  target. A point masks nothing; its marker is opaque.
+  side, for a shape's stroke past it) less the active one's rectangle or shape, so it
+  holds through zoom and rotation (the overlay layer sizes each box to its world rect and
+  rotates it about its centre). The layer sets it on each element (`remask`), never in
+  the rendered `style`: where both stand still, once per change of active; where either
+  follows a recording, again on each frame either moves (`moved`, from `useFollow`), from
+  where each is then, and not at all under an active one off the recording. A mask is
+  written only when it changes. Those over the active one are never masked: a masked
+  hotspot on top would be an unseen target. A point masks nothing; its marker is opaque.
+  The active one always wins over a tracked one (Mat, 2026-10-19): none is raised over
+  it, and a tracked one is never raised over the active.
 - **Letting go of a pick** (Mat, 2026-10-19). A tap or click on the stage off every
   hotspot first asks the renderer's `dismiss()` (`setDismiss`, set by `CanvasView` to
   `releaseAnnotation`); if there was a pick it is let go and the tap does nothing more
@@ -536,6 +550,18 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     seconds), the menu lists it by its start, and a pick seeks (`sought`), never plays.
     Each cue carries its own `lang`, not the captions box. `CanvasAnnotation.pageLabel`
     (its AnnotationPage's) labels its cue and groups the menu.
+  - An annotation whose targets each give a region and a time, `xywh=…&t=…` (Mat,
+    2026-10-19: a person followed through a film), is a track: `PlacedAnnotation.track`,
+    its keys in time order (`Canvas/track.ts`, lazy with the hotspots, as is
+    `annotationTargets`, which reads every target; `parseAnnotationTarget`, which every
+    Canvas loads, reads the first, through Presentation 4's `Independents`, `List` and
+    `Composite`). Keys that meet in time glide (`boxAt`); a gap is time it is not there.
+    Its hotspot follows the recording in `useFollow`: `requestVideoFrameCallback`'s
+    `mediaTime` while a video plays (each display frame for sound), every seek while
+    paused, moved by `renderer.overlays.move`, never a render, and `hidden` off its keys;
+    one losing focus that way hands it to the viewport (WCAG 2.4.3). It is never framed; a
+    pick goes to its start only when it is off the recording (`goToTrack`), from the menu
+    or the list. The docs' `rudolf-hess-nuremberg` mock is one.
 - **A Canvas as the content** (Mat, 2026-10-19). Shown on its own, never its `partOf`
   Manifest up front: `loneCanvas` (in `core/load.ts`) wraps it as a Manifest of one with
   the Canvas's id (`isLoneCanvas` tells it apart: its id is its one Canvas's) and the
@@ -868,6 +894,21 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   - With media, `clickToZoom` is off, and a mouse click or a hovering pen's (renderer
     `"tap"`) plays and pauses. A finger's tap, or a pen's that has not hovered, only
     toggles the chrome.
+  - The chapter under the pointer on the seek bar (`Transport.tsx`, Mat 2026-10-20) is
+    state that changes only as the pointer crosses into another chapter, never per
+    move: its stretch drawn out (`.clover-canvas-transport-chapter-span`) and a `Tip`
+    over the stretch's middle (`--clover-transport-preview`), keyed by chapter so it
+    measures itself into the stage each time; keyboard focus on the bar shows the one
+    playing, and `aria-valuetext` names it. The Tip's Escape finds it through
+    `controlOf`, which takes any element holding a focused input and its popover, not
+    only a label. In a `Root`, `clover.chapter` (a Range's id) is one highlight between
+    the seek bar and `Contents`; one from `Contents` draws the stretch only, since a
+    popover away from the pointer could not be hovered (WCAG 1.4.13). While the popover
+    shows the caption cues stay over it, whichever chapter it is: the transport writes
+    how far its top is from the figure's foot (`--clover-transport-preview-top`,
+    measured from the popover alone, never the cues, whose glide would skew it), and the
+    captions' foot is the larger of their usual room and that, `2xs` clear. Escape's
+    `data-tip-hidden` on the seek area puts it back to 0 in CSS.
   - The transport and the caption cues sit `--clover-canvas-chrome-inset` in from the
     stage's sides and foot, as the cluster does (Mat, 2026-10-19), never a step of their
     own; below 28rem of stage width the bar's controls go `xs` apart so 320px keeps two
@@ -1041,6 +1082,10 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   - A piece of chrome cuts the clear area only once the hotspot is beside it on the
     other axis. This is rechecked after each cut, so a hotspot that is already clear
     never moves. Add any new chrome over the stage to its `CHROME` list.
+- While the view is upright, the overlay layer places each element's edges and size on
+  whole device pixels (`snap` in `OverlayLayer.position`, Mat 2026-10-20). Placed between
+  pixels, a hotspot's hairlines were shared by two, and tracked ones gliding over a film
+  pulsed, each at its own speed. Keep it; a turned view is left unsnapped.
 - While the view is upright, the overlay layer writes `--clover-overlay-x`,
   `--clover-overlay-top`, `--clover-overlay-bottom` and `data-overlay-room` on each
   pinned element. A hotspot's Tip uses them to clamp itself into the stage with

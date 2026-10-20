@@ -300,7 +300,9 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
     (`scripts/build-mocks.mjs`, run with vite-node) and committed, published with the
     docs at `https://nulib-ds.github.io/clover/mocks/<name>/`;
   - a live copy for `npm run dev` under `pages/api/mocks/<name>/`, ids under the dev
-    server and CORS open;
+    server and CORS open. In `next dev` its Manifest is given at the static path too
+    (`/mocks/<name>/manifest.json`, a rewrite in `next.config.js`), so the homepage and
+    the demos open the live copy, and files it names that are not deployed yet answer;
   - where the static site cannot answer (a search's `?q=`), a `mockFetch` the docs demos
     pass as `request.fetch`.
 - Document every mock on `pages/docs/mocks.mdx` (URLs, contents, example answers, how to
@@ -330,7 +332,18 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   `pages/api/mocks/page-transcript/`, since its text files are its own);
   `standalone-canvas`, the one Canvas of Northwestern's record of Borghi's map of the
   British Isles, as 3.x's site publishes it on its own (`source.json`), its `partOf`
-  kept, with a Contributor metadata line from the record and Ireland tagged (static). The package's tests use copies of these two and of `paged`, in
+  kept, with a Contributor metadata line from the record and Ireland tagged (static);
+  `rudolf-hess-nuremberg`, the National Archives' reel of the Nuremberg judgment on
+  Commons, made to show Rudolf Hess's distress beside the other defendants (Mat,
+  2026-10-19), labelled "Rudolf Hess at Nuremberg Sentencing, 30 September–1 October
+  1946": a "Rudolf Hess" page of three tracked annotations (`xywh=…&t=…`, `tracks.json`)
+  and an "Other Defendants" page, English captions from the trial's record
+  (`captions.json`, the Russian and French interpretation in the record's English), the
+  same words as a plain-text transcript (the Canvas's `rendering`), and chapters titled
+  with the archive's description (static, and live in `npm run dev` under
+  `pages/api/mocks/rudolf-hess-nuremberg/`, since its captions and transcript are its
+  own). It is the playground's Footage. The package's tests use copies of
+  `page-transcript`, `paged`, `rudolf-hess-nuremberg` and `transcripts`, in
   `packages/clover/src/fixtures/mocks/<name>/`.
 
 ## Environment & Tooling

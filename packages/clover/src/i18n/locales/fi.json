@@ -37,6 +37,7 @@
   "aboutOpenManifest": "Avaa koko manifesti",
   "aboutCollection": "IIIF-kokoelma",
   "annotationsHide": "Piilota annotaatiot",
+  "annotationsHideTip": "Piilota",
   "readMore": "Lue lisää",
   "readLess": "Näytä vähemmän",
   "annotationsShow": "Näytä kuvassa",

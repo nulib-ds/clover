@@ -85,27 +85,34 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
     clover.highlight.get,
     clover.highlight.get,
   );
+  // The chapter hovered in `Contents`, marked on the seek bar; and the seek bar's, there.
+  const highlightedChapter = useSyncExternalStore(
+    clover.chapter.subscribe,
+    clover.chapter.get,
+    clover.chapter.get,
+  );
 
   const canvasKey = canvases.map((canvas) => canvas.id).join("|");
   /*
-   * The visible sets' annotations on the Canvases shown, as hotspots. Each targets its
+   * Every set's annotations on the Canvases shown, as hotspots, each with its set as its
+   * page: those of a hidden set are not drawn (`hiddenPages`), but stay in the menu, where
+   * the set's toggle shows them again, as the Annotations list's does. Each targets its
    * Canvas by index, for one whose target names no Canvas of the view.
    */
   const annotations = useMemo<CanvasAnnotation[]>(() => {
     if (givenAnnotations) return givenAnnotations;
     const shown = canvases.map((canvas) => canvas.id);
-    return sets
-      .filter((set) => !hiddenSets.includes(set.id))
-      .flatMap((set) =>
-        set.entries
-          .filter((entry) => shown.includes(entry.canvasId))
-          .map((entry) => ({
-            annotation: entry.annotation as CanvasAnnotation["annotation"],
-            targetIndex: shown.indexOf(entry.canvasId),
-            ...(set.label ? { pageLabel: set.label } : {}),
-          })),
-      );
-  }, [givenAnnotations, sets, hiddenSets, canvases]);
+    return sets.flatMap((set) =>
+      set.entries
+        .filter((entry) => shown.includes(entry.canvasId))
+        .map((entry) => ({
+          annotation: entry.annotation as CanvasAnnotation["annotation"],
+          targetIndex: shown.indexOf(entry.canvasId),
+          pageId: set.id,
+          ...(set.label ? { pageLabel: set.label } : {}),
+        })),
+    );
+  }, [givenAnnotations, sets, canvases]);
   const shows = (canvasId?: string) =>
     Boolean(canvasId) && canvases.some((canvas) => canvas.id === canvasId);
   const deepLinked = target ? shows(target.canvasId) : false;
@@ -138,6 +145,7 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
           // The label's language goes with it, for the transport to tag (WCAG 3.1.2).
           const value = localize(chapter.label, language);
           return {
+            ...(chapter.id ? { id: chapter.id } : {}),
             label: value.text,
             lang: value.lang,
             start: chapter.start,
@@ -288,7 +296,13 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
       }}
       onEnded={handleEnded}
       annotations={annotations}
+      hiddenPages={hiddenSets}
+      onPageVisibilityChange={(pageIds, visible) =>
+        pageIds.forEach((id) => clover.setSetVisible(id, visible))
+      }
       chapters={givenChapters ?? rangeChapters}
+      highlightedChapter={highlightedChapter}
+      onChapterHighlight={(id) => clover.chapter.emit(id)}
       selectedAnnotation={selectedAnnotation}
       highlightedAnnotation={highlighted}
       onAnnotationSelect={(id) => clover.selectAnnotation(id)}

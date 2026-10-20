@@ -101,8 +101,19 @@ describe("chaptersOf", () => {
     ["a string", (t: string) => `${canvas}#t=${t}`],
   ])("reads nested Ranges with %s, sorted with the gaps closed", (_, item) => {
     expect(chaptersOf(manifest(item), canvas, 90)).toEqual([
-      { label: { en: ["Act one"] }, start: 0, end: 30 },
-      { label: { en: ["Act two"] }, start: 30, end: 60 },
+      // Each with its Range's id, as Contents keys it.
+      {
+        id: "https://example.org/r/2",
+        label: { en: ["Act one"] },
+        start: 0,
+        end: 30,
+      },
+      {
+        id: "https://example.org/r/1",
+        label: { en: ["Act two"] },
+        start: 30,
+        end: 60,
+      },
     ]);
   });
 
@@ -125,7 +136,7 @@ describe("chaptersOf", () => {
         canvas,
         10,
       ),
-    ).toEqual([{ label: undefined, start: 5, end: 10 }]);
+    ).toEqual([{ id: "loop", label: undefined, start: 5, end: 10 }]);
   });
 
   it("reads time fragments leniently, never as NaN", () => {

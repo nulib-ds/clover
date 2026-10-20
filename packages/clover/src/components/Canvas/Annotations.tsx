@@ -1,8 +1,16 @@
 import type { Annotation } from "@iiif/presentation-3";
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 
 import type { IIIFCanvas } from "./layout";
+import { type TrackKey, annotationTargets, boxAt, orderKeys } from "./track";
 import type { SvgReader } from "./useSvgReader";
 import { bodiesOf, parseAnnotationTarget } from "../../core/annotations";
 import { type AnnotationLink, readLink } from "../../core/link";
@@ -19,6 +27,8 @@ export interface CanvasAnnotation {
   targetIndex: number;
   /** Its AnnotationPage's `label`, which the menu and a recording's cues show it under. */
   pageLabel?: LanguageMapLike;
+  /** Its AnnotationPage's `id`, by which the menu hides its page (`hiddenPages`). */
+  pageId?: string;
 }
 
 /**
@@ -45,12 +55,20 @@ export interface PlacedAnnotation {
   world: Rect;
   /** A point's marker, or an SVG shape drawn in `world`; a rectangle needs neither. */
   shape?: { kind: "point" } | { kind: "svg"; svg: SvgShape };
+  /**
+   * Where it is through a recording, for one whose targets give a region and a time each
+   * (`xywh=…&t=…`): its keys in time order, in world units. Its hotspot follows the
+   * recording there, and is gone between them; `world` is the first key's region.
+   */
+  track?: TrackKey[];
   /** Where a `linking` annotation leads (Cookbook 0022): pressing it follows. */
   link?: AnnotationLink;
   /** An image it carries (Cookbook 0377), shown in its popover above its text. */
   image?: string;
   /** Its AnnotationPage's label, read: the menu lists it under it. */
   page?: { text: string; lang?: string };
+  /** Its AnnotationPage's id, by which the menu hides and shows its page. */
+  pageId?: string;
 }
 
 /**
@@ -65,6 +83,7 @@ export interface TimedAnnotation {
   start: number;
   end?: number;
   page?: { text: string; lang?: string };
+  pageId?: string;
 }
 
 /** What the Canvas's annotations menu lists: those on its picture, and on its time. */
@@ -73,6 +92,54 @@ export type ListedAnnotation = PlacedAnnotation | TimedAnnotation;
 export const isTimed = (
   annotation: ListedAnnotation,
 ): annotation is TimedAnnotation => "start" in annotation;
+
+/** Where an annotation on a recording's time starts: its own start, or its track's. */
+export const startOf = (annotation: ListedAnnotation): number | undefined =>
+  isTimed(annotation) ? annotation.start : annotation.track?.[0]?.start;
+
+/**
+ * Whether a tracked annotation is on the recording at `time`; true for any other, whose
+ * hotspot does not come and go.
+ */
+export const onAt = (annotation: PlacedAnnotation, time: number): boolean =>
+  !annotation.track || boxAt(annotation.track, time) !== null;
+
+/**
+ * Goes to a tracked annotation on its recording: to where it starts, unless it is on the
+ * recording now. Whether the recording was moved.
+ */
+export function goToTrack(
+  annotation: PlacedAnnotation,
+  media: HTMLMediaElement,
+): boolean {
+  if (onAt(annotation, media.currentTime)) return false;
+  media.currentTime = annotation.track![0].start;
+  return true;
+}
+
+/**
+ * Its keys, placed: each target with a region and a time, in time order. None for an
+ * annotation whose first target is not one, which is drawn as it is (a region, a point
+ * or a shape) and follows nothing.
+ */
+function trackOf(
+  annotation: Annotation,
+  place: AnnotationPlacer,
+  targetIndex: number,
+): TrackKey[] | null {
+  const targets = annotationTargets(annotation?.target);
+  if (!targets[0]?.rect || !targets[0]?.t) return null;
+  const keys: TrackKey[] = [];
+  for (const target of targets) {
+    const time = parseTime(target.t?.replace(/^npt:/, ""));
+    if (!target.rect || !time) continue;
+    const { x, y, w, h } = target.rect;
+    const world = place({ x, y, width: w, height: h }, target.id, targetIndex);
+    if (world)
+      keys.push({ start: time.start, end: time.end ?? Infinity, world });
+  }
+  return keys.length ? orderKeys(keys) : null;
+}
 
 /** An AnnotationPage's label, in the reader's language; none for one without. */
 function pageOf(
@@ -89,7 +156,7 @@ export function timeAnnotations(
   language?: string,
 ): TimedAnnotation[] {
   const timed: TimedAnnotation[] = [];
-  for (const { annotation, pageLabel } of annotations) {
+  for (const { annotation, pageLabel, pageId } of annotations) {
     const target = parseAnnotationTarget([annotation?.target].flat()[0] as any);
     const time = parseTime(target?.t?.replace(/^npt:/, ""));
     if (!time || target.rect || target.point || target.svg) continue;
@@ -100,6 +167,7 @@ export function timeAnnotations(
       ...(lang ? { lang } : {}),
       ...time,
       ...pageOf(pageLabel, language),
+      ...(pageId ? { pageId } : {}),
     });
   }
   return timed;
@@ -121,12 +189,16 @@ export function placeAnnotations(
   language?: string,
 ): PlacedAnnotation[] {
   const placed: PlacedAnnotation[] = [];
-  for (const { annotation, targetIndex, pageLabel } of annotations) {
+  for (const { annotation, targetIndex, pageLabel, pageId } of annotations) {
     const target = parseAnnotationTarget(annotation?.target as any);
     if (!target) continue;
     let rect: Rect | null = null;
     let shape: PlacedAnnotation["shape"];
-    if (target.rect) {
+    const track = trackOf(annotation, place, targetIndex);
+    if (track) {
+      const { x, y, w, h } = target.rect!;
+      rect = { x, y, width: w, height: h };
+    } else if (target.rect) {
       const { x, y, w, h } = target.rect;
       rect = { x, y, width: w, height: h };
     } else if (target.point) {
@@ -146,7 +218,7 @@ export function placeAnnotations(
       }
     }
     if (!rect) continue;
-    const world = place(rect, target.id, targetIndex);
+    const world = track ? track[0].world : place(rect, target.id, targetIndex);
     if (!world) continue;
     const { text, lang } = annotationLabel(annotation, language);
     const link = readLink(annotation);
@@ -159,9 +231,11 @@ export function placeAnnotations(
       ...(lang ? { lang } : {}),
       world,
       ...(shape ? { shape } : {}),
+      ...(track ? { track } : {}),
       ...(link ? { link } : {}),
       ...(image ? { image } : {}),
       ...pageOf(pageLabel, language),
+      ...(pageId ? { pageId } : {}),
     });
   }
   return placed;
@@ -184,6 +258,12 @@ interface AnnotationsProps {
    * hotspot is picked as any other. A link to a web page is a link, and needs none.
    */
   onFollow?: (annotation: PlacedAnnotation) => void;
+  /**
+   * The recording the Canvas plays, whose time a tracked hotspot follows: null while it
+   * is on its way, when tracked hotspots wait. Undefined on a Canvas with none, where a
+   * track stands at its first region.
+   */
+  media?: HTMLMediaElement | null;
 }
 
 const area = ({ world }: PlacedAnnotation) => world.width * world.height;
@@ -269,6 +349,7 @@ const Annotations: React.FC<AnnotationsProps> = ({
   onActivate,
   onSelect,
   onFollow,
+  media,
 }) => {
   // Each hotspot's rank by size, largest first, and of two alike the later over the
   // earlier (the sort is stable): the order they stack in.
@@ -282,6 +363,20 @@ const Annotations: React.FC<AnnotationsProps> = ({
   const current = placed.find((entry) => entry.id === active);
 
   /*
+   * A pick that follows the recording, not gone to yet (a host's, or one made behind the
+   * placeholder), is gone to once its hotspot is placed: to where it starts, unless it is
+   * on the recording already. Once for each pick, so a reader's own seeking stays theirs.
+   */
+  const sought = useRef<string | null>(null);
+  useEffect(() => {
+    const picked = placed.find((entry) => entry.id === selected && entry.track);
+    if (!selected) sought.current = null;
+    if (!picked || !media || sought.current === selected) return;
+    sought.current = selected;
+    goToTrack(picked, media);
+  }, [placed, selected, media]);
+
+  /*
    * In the given order, which Tab and a screen reader follow, as the menu lists them
    * (WCAG 2.4.3, 1.3.2). Stacked smaller over larger, so a hotspot inside another stays
    * within reach. The active one goes over them all, so its popover takes the pointer,
@@ -293,10 +388,66 @@ const Annotations: React.FC<AnnotationsProps> = ({
     const own = rank.get(entry) ?? 0;
     if (!current) return own;
     if (entry === current) return placed.length;
-    return own > (rank.get(current) ?? 0) && within(entry.world, current.world)
+    // Where either moves, the active one wins: none is raised over it.
+    return own > (rank.get(current) ?? 0) &&
+      !entry.track &&
+      !current.track &&
+      within(entry.world, current.world)
       ? placed.length + 1 + own
       : own;
   };
+
+  /*
+   * Beneath the active one, each hotspot it meets is masked where it lies (`maskUnder`),
+   * set on the element, not rendered: where both stand still, once for each change of
+   * active; where either follows a recording, again each frame either moves, from where
+   * each is then (`moved`). Nothing is masked under an active one not on the recording
+   * now. A mask is written only when it changes.
+   */
+  const elements = useRef(new Map<string, HTMLElement>());
+  const now = useRef(new Map<string, Rect | null>());
+  const written = useRef(new WeakMap<HTMLElement, string>());
+  const latest = useRef({ placed, current, depthOf });
+  latest.current = { placed, current, depthOf };
+  const remask = useCallback((only?: PlacedAnnotation) => {
+    const { placed, current, depthOf } = latest.current;
+    const at = (entry: PlacedAnnotation) => now.current.get(entry.id);
+    const over = current && at(current) !== null ? current : undefined;
+    const apply = (entry: PlacedAnnotation) => {
+      const element = elements.current.get(entry.id);
+      if (!element) return;
+      const world = at(entry);
+      const mask =
+        over &&
+        entry !== over &&
+        world !== null &&
+        depthOf(entry) < placed.length
+          ? maskUnder(
+              { ...entry, world: world ?? entry.world },
+              { ...over, world: at(over) ?? over.world },
+            )
+          : null;
+      if ((written.current.get(element) ?? "") === (mask ?? "")) return;
+      written.current.set(element, mask ?? "");
+      if (mask) element.style.setProperty("--clover-annotation-mask", mask);
+      else element.style.removeProperty("--clover-annotation-mask");
+    };
+    // The active one moved, or went: every other again; another, only that one.
+    if (only && only !== current) apply(only);
+    else placed.forEach(apply);
+  }, []);
+  useLayoutEffect(() => remask());
+  const register = useCallback((id: string, element: HTMLElement | null) => {
+    if (element) elements.current.set(id, element);
+    else elements.current.delete(id);
+  }, []);
+  const moved = useCallback(
+    (entry: PlacedAnnotation, world: Rect | null) => {
+      now.current.set(entry.id, world);
+      remask(entry);
+    },
+    [remask],
+  );
 
   return createPortal(
     <>
@@ -308,18 +459,15 @@ const Annotations: React.FC<AnnotationsProps> = ({
           name={entry.label ?? String(index + 1)}
           lang={entry.label ? entry.lang : undefined}
           depth={depthOf(entry)}
-          // Beneath the active one, its lines stop where that one lies.
-          mask={
-            current && entry !== current && depthOf(entry) < placed.length
-              ? maskUnder(entry, current)
-              : null
-          }
+          register={register}
+          onMove={moved}
           renderer={renderer}
           active={active === entry.id}
           selected={selected === entry.id}
           onActivate={onActivate}
           onSelect={onSelect}
           onFollow={onFollow}
+          media={media}
         />
       ))}
     </>,
@@ -339,28 +487,41 @@ const AnnotationButton: React.FC<{
   lang?: string;
   /** Where it stacks among the hotspots, higher over lower. */
   depth: number;
-  /** What of it shows beneath the active hotspot (`maskUnder`), or null for all of it. */
-  mask: string | null;
+  /** Hands the layer its element, which masks it beneath the active one. */
+  register: (id: string, element: HTMLElement | null) => void;
+  /** Where one that follows a recording is now, or null while it is not there. */
+  onMove: (entry: PlacedAnnotation, world: Rect | null) => void;
   renderer: CanvasRenderer;
   active: boolean;
   selected: boolean;
   onActivate: (id: string | null) => void;
   onSelect: (annotation: PlacedAnnotation) => void;
   onFollow?: (annotation: PlacedAnnotation) => void;
+  media?: HTMLMediaElement | null;
 }> = ({
   entry,
   name,
   lang,
   depth,
-  mask,
+  register,
+  onMove,
   renderer,
   active,
   selected,
   onActivate,
   onSelect,
   onFollow,
+  media,
 }) => {
   const [element, setElement] = useState<HTMLElement | null>(null);
+  const { id } = entry;
+  const attach = useCallback(
+    (node: HTMLElement | null) => {
+      setElement(node);
+      register(id, node);
+    },
+    [id, register],
+  );
   // Re-pinned when the numbers change, not whenever a new object carries the same ones.
   const { x, y, width, height } = entry.world;
 
@@ -370,6 +531,15 @@ const AnnotationButton: React.FC<{
     renderer.invalidate();
     return unpin;
   }, [element, renderer, x, y, width, height]);
+  // After pinning, so a tracked one is moved from its first region to where it is now.
+  const shown = useFollow(
+    element,
+    entry.track,
+    renderer,
+    media,
+    () => onActivate(null),
+    (world) => onMove(entry, world),
+  );
 
   /*
    * A link to a web page is a link (`<a>`), opening it beside the viewer; one to a Canvas
@@ -381,14 +551,17 @@ const AnnotationButton: React.FC<{
   const Hotspot = (web ? "a" : "button") as "button";
   return (
     <Hotspot
-      ref={setElement as React.Ref<HTMLButtonElement>}
+      ref={attach as React.Ref<HTMLButtonElement>}
       {...(web
         ? { href: web, target: "_blank", rel: "noopener noreferrer" }
         : { type: "button" })}
       id={entry.id}
       className="clover-canvas-annotation"
+      // A tracked one, away from the recording's present moment, is not there at all.
+      hidden={!shown}
       data-active={active ? "true" : "false"}
       data-shape={entry.shape?.kind ?? "rect"}
+      data-track={entry.track ? "" : undefined}
       data-link={web || follow ? "true" : undefined}
       aria-label={name}
       // A command (zoom to it), not a toggle: pressing the picked one again frames it
@@ -398,7 +571,6 @@ const AnnotationButton: React.FC<{
       style={
         {
           "--clover-annotation-depth": depth,
-          "--clover-annotation-mask": mask ?? undefined,
         } as React.CSSProperties
       }
       // Enter and leave, not over and out: the pointer crossing onto its own marker or
@@ -438,6 +610,120 @@ const AnnotationButton: React.FC<{
     </Hotspot>
   );
 };
+
+/**
+ * A tracked hotspot follows its recording: moved where its region is in each frame shown
+ * while it plays (`requestVideoFrameCallback`, or each display frame for sound), and at
+ * each seek while it is paused, by the overlay layer, never a render; and shown only
+ * while the recording is within one of its keys. Returns whether it is shown. As its
+ * region goes, one that holds focus hands it to the viewport, which holds the hotspots
+ * and takes the recording's keys, so focus is never lost (WCAG 2.4.3), and one under the
+ * pointer lets go of the highlight (`onGone`).
+ */
+function useFollow(
+  element: HTMLElement | null,
+  track: TrackKey[] | undefined,
+  renderer: CanvasRenderer,
+  media: HTMLMediaElement | null | undefined,
+  onGone: () => void,
+  /** Where it is now, each time it moves, or null as it goes. */
+  onMove: (world: Rect | null) => void,
+): boolean {
+  const follows = Boolean(track) && media !== undefined;
+  const [shown, setShown] = useState(
+    () =>
+      !follows || (media ? boxAt(track!, media.currentTime) !== null : false),
+  );
+  const onGoneRef = useRef(onGone);
+  onGoneRef.current = onGone;
+  const onMoveRef = useRef(onMove);
+  onMoveRef.current = onMove;
+
+  useEffect(() => {
+    if (!track || media === undefined) {
+      setShown(true);
+      return;
+    }
+    if (!media) {
+      setShown(false);
+      return;
+    }
+    let last: boolean | undefined;
+    const update = (time: number) => {
+      const box = boxAt(track, time);
+      if (box && element) renderer.overlays.move(element, box);
+      onMoveRef.current(box);
+      const now = box !== null;
+      if (now === last) return;
+      last = now;
+      if (!now && element) {
+        const hovered = element.matches(":hover");
+        if (element.contains(document.activeElement)) {
+          renderer.overlays.container.parentElement?.focus({
+            preventScroll: true,
+          });
+        } else if (hovered) onGoneRef.current();
+      }
+      setShown(now);
+    };
+
+    // Frame by frame, at the time of the frame shown; sound has no frames, so each
+    // display frame, at the playback position.
+    const video = media as HTMLVideoElement;
+    const byFrame = () =>
+      typeof video.requestVideoFrameCallback === "function" &&
+      video.videoWidth > 0;
+    let frame = 0;
+    let videoFrame = 0;
+    const onVideoFrame: VideoFrameRequestCallback = (_, { mediaTime }) => {
+      update(mediaTime);
+      videoFrame = video.requestVideoFrameCallback(onVideoFrame);
+    };
+    const tick = () => {
+      update(media.currentTime);
+      frame = requestAnimationFrame(tick);
+    };
+    const stop = () => {
+      cancelAnimationFrame(frame);
+      if (videoFrame) video.cancelVideoFrameCallback(videoFrame);
+      frame = videoFrame = 0;
+    };
+    const start = () => {
+      stop();
+      if (byFrame()) videoFrame = video.requestVideoFrameCallback(onVideoFrame);
+      else frame = requestAnimationFrame(tick);
+    };
+    const now = () => update(media.currentTime);
+    // While it plays, the frames move it; a time reported between them would jump it back.
+    const paused = () => media.paused && now();
+    const halt = () => {
+      stop();
+      now();
+    };
+    const events: Array<[string, () => void]> = [
+      ["play", start],
+      ["pause", halt],
+      ["ended", halt],
+      ["seeking", now],
+      ["seeked", now],
+      ["loadeddata", now],
+      ["timeupdate", paused],
+    ];
+    events.forEach(([type, listener]) =>
+      media.addEventListener(type, listener),
+    );
+    now();
+    if (!media.paused) start();
+    return () => {
+      stop();
+      events.forEach(([type, listener]) =>
+        media.removeEventListener(type, listener),
+      );
+    };
+  }, [element, track, media, renderer]);
+
+  return shown;
+}
 
 /**
  * An SvgSelector's shapes, drawn to fill the hotspot: the viewBox is their box, so they
@@ -532,6 +818,7 @@ export function annotationLabel(
 }
 
 export default Annotations;
+export { boxAt };
 
 /** How far a key scrolls a popover that scrolls: a line, a page, or to an end. */
 const SCROLL_KEYS: Record<string, (tip: HTMLElement) => number> = {

@@ -13,6 +13,7 @@ import languagesJson from "../../../fixtures/iiif-cookbook/0074-multiple-languag
 import operaJson from "../../../fixtures/iiif-cookbook/0026-toc-opera.json";
 import captionsJson from "../../../fixtures/iiif-cookbook/0219-using-caption-file.json";
 import poetryJson from "../../../fixtures/iiif-cookbook/0103-poetry-reading-annotations.json";
+import hessJson from "../../../fixtures/mocks/rudolf-hess-nuremberg/manifest.json";
 import { clearVttCache } from "../../../core/vtt";
 import * as Clover from "../../../index";
 
@@ -23,6 +24,7 @@ const accompanying = p4(accompanyingJson);
 const languages = p4(languagesJson);
 const captions = p4(captionsJson);
 const poetry = p4(poetryJson);
+const tracking = p4(hessJson);
 
 const listeners: Record<string, (detail?: unknown) => void> = {};
 let renderer: Record<string, any>;
@@ -306,6 +308,81 @@ describe("Canvas media", () => {
     // Closed, with focus back on its button rather than on the page.
     expect(button).toHaveAttribute("aria-expanded", "false");
     expect(button).toHaveFocus();
+  });
+
+  /*
+   * The chapter under the pointer on the seek bar: its stretch drawn out, its start and
+   * title in a popover over it, and the host told, once a chapter, not once a move. The
+   * bar's value names the chapter playing, for a screen reader. One a list beside the
+   * Canvas marks (`highlightedChapter`) has its stretch drawn out, and no popover.
+   */
+  it("shows the chapter under the pointer on the seek bar, and tells the host", async () => {
+    const onMediaElement = vi.fn();
+    const onChapterHighlight = vi.fn();
+    const chapters = [
+      { id: "range/1", label: "Opening", start: 0, end: 10 },
+      { id: "range/2", label: "Lunch", start: 10, end: 20 },
+    ];
+    const stage = (highlightedChapter?: string) => (
+      <Canvas
+        canvases={video.items as any}
+        onMediaElement={onMediaElement}
+        chapters={chapters}
+        highlightedChapter={highlightedChapter}
+        onChapterHighlight={onChapterHighlight}
+      />
+    );
+    const { container, rerender } = render(stage());
+    await transport();
+    const element = onMediaElement.mock.calls.at(-1)?.[0] as HTMLVideoElement;
+    Object.defineProperty(element, "duration", {
+      configurable: true,
+      value: 20,
+    });
+    act(() => {
+      element.dispatchEvent(new Event("durationchange"));
+    });
+    const area = container.querySelector<HTMLElement>(
+      ".clover-canvas-transport-seek-area",
+    )!;
+    area.getBoundingClientRect = () =>
+      ({ left: 0, width: 200, top: 0, height: 26 }) as DOMRect;
+    const stretch = () =>
+      area.querySelector<HTMLElement>(".clover-canvas-transport-chapter-span");
+
+    // jsdom has no PointerEvent: a mouse event of its name carries the place.
+    const move = (clientX: number) =>
+      fireEvent(
+        area,
+        new MouseEvent("pointermove", { bubbles: true, clientX }),
+      );
+    move(150);
+    expect(onChapterHighlight).toHaveBeenLastCalledWith("range/2");
+    expect(area.querySelector(":scope > .clover-tip")).toHaveTextContent(
+      "0:10 Lunch",
+    );
+    expect(area.style.getPropertyValue("--clover-transport-preview")).toBe(
+      "75%",
+    );
+    expect(stretch()!.style.left).toBe("50%");
+    expect(stretch()!.style.width).toBe("50%");
+    // Along the same chapter, nothing more is said.
+    move(170);
+    expect(onChapterHighlight).toHaveBeenCalledTimes(1);
+    fireEvent.pointerLeave(area);
+    expect(onChapterHighlight).toHaveBeenLastCalledWith(null);
+    expect(area.querySelector(".clover-tip")).toBeNull();
+    expect(stretch()).toBeNull();
+
+    expect(screen.getByRole("slider", { name: "Seek" })).toHaveAttribute(
+      "aria-valuetext",
+      "0:00 / 0:20, Opening",
+    );
+
+    rerender(stage("range/1"));
+    expect(stretch()!.style.left).toBe("0%");
+    expect(stretch()!.style.width).toBe("50%");
+    expect(area.querySelector(".clover-tip")).toBeNull();
   });
 
   it("keeps a menu open while the arrow keys move through it", async () => {
@@ -774,6 +851,217 @@ describe("Canvas media", () => {
       expect(play).not.toHaveBeenCalled();
       act(() => element.dispatchEvent(new Event("seeked")));
       expect(cues()).toHaveLength(1);
+    });
+  });
+
+  /*
+   * The docs' `rudolf-hess-nuremberg` mock: Rudolf Hess, marked through a film in stretches of
+   * `xywh=…&t=…`, his distress first, from 0:12.62, and not while an officer hides him
+   * (0:23–0:35).
+   */
+  describe("annotations that follow the recording", () => {
+    const [film] = tracking.items as any[];
+    const page = film.annotations[0];
+    const annotations = page.items.map((annotation: any) => ({
+      annotation,
+      targetIndex: 0,
+      pageLabel: page.label,
+    }));
+    const drawn = async () => {
+      // The renderer's overlay layer, in its viewport, and its first drawing.
+      const container = document.createElement("div");
+      renderer.host.appendChild(container);
+      Object.assign(renderer, {
+        overlays: { container, add: () => () => undefined, move: vi.fn() },
+        invalidate: vi.fn(),
+        fitAnnotation: vi.fn(),
+      });
+      await act(async () => {
+        await import("../Annotations");
+        await import("../AnnotationMenu");
+      });
+      await act(async () => listeners.open?.());
+    };
+    const hess = () =>
+      document.querySelector<HTMLElement>(".clover-canvas-annotation")!;
+    const seek = (element: HTMLMediaElement, seconds: number) =>
+      act(() => {
+        element.currentTime = seconds;
+        element.dispatchEvent(new Event("seeked"));
+      });
+
+    it("lists one where it starts, and a pick goes there only when it is not on the recording", async () => {
+      const onMediaElement = vi.fn();
+      render(
+        <Canvas
+          canvases={[film]}
+          annotations={annotations}
+          onMediaElement={onMediaElement}
+        />,
+      );
+      const item = async () => {
+        if (!screen.queryByTestId("clover-canvas-annotation-menu"))
+          fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
+        const menu = await screen.findByTestId("clover-canvas-annotation-menu");
+        return within(
+          within(menu).getByRole("group", { name: "Rudolf Hess" }),
+        ).getByRole("radio", { name: "0:12 Hess shows distress" });
+      };
+      // Over the film's still, the menu lists it already; a pick opens the film.
+      pick(await item());
+      await transport();
+      await drawn();
+      const element = onMediaElement.mock.calls.at(-1)?.[0] as HTMLMediaElement;
+      expect(element.currentTime).toBe(12.62);
+      // Not played, as its play button would; it moves, so nothing is zoomed to.
+      expect(play).not.toHaveBeenCalled();
+      expect(renderer.fitAnnotation).not.toHaveBeenCalled();
+      act(() => element.dispatchEvent(new Event("seeked")));
+      expect(hess()).not.toHaveAttribute("hidden");
+      expect(hess()).toHaveAttribute("aria-current", "true");
+      expect(renderer.overlays.move).toHaveBeenLastCalledWith(
+        hess(),
+        expect.objectContaining({ x: 262, y: 151 }),
+      );
+
+      // On the recording, picked again: the recording stays where it is.
+      seek(element, 60);
+      pick(await item());
+      expect(element.currentTime).toBe(60);
+      // Hidden behind the officer: back to where he is first marked.
+      seek(element, 30);
+      expect(hess()).toHaveAttribute("hidden");
+      pick(await item());
+      expect(element.currentTime).toBe(12.62);
+    });
+
+    it("goes there when picked from the Annotations list beside it", async () => {
+      let media: HTMLMediaElement | null = null;
+      const Spy = () => {
+        const { clover } = Clover.useClover("Spy");
+        React.useEffect(
+          () => clover.media.subscribe(() => (media = clover.media.get())),
+          [clover],
+        );
+        return null;
+      };
+      render(
+        <Clover.Root iiifContent={hessJson}>
+          <Clover.Content />
+          <Clover.Annotations />
+          <Spy />
+        </Clover.Root>,
+      );
+      const entry = await screen.findByRole("button", {
+        name: "Find in the recording: Hess shows distress",
+      });
+      // Listed where it starts.
+      expect(entry.closest("li")).toHaveTextContent("0:12");
+      // The pick opens the film past its still, without playing it, and goes there.
+      fireEvent.click(entry);
+      await transport();
+      await drawn();
+      expect(media!.currentTime).toBe(12.62);
+      expect(play).not.toHaveBeenCalled();
+    });
+
+    /*
+     * Each page in the menu has its hide toggle, an eye before its label: hiding a page
+     * hides only its annotations on the picture. Its items stay listed, the control that
+     * opens the menu stays, and a pick still goes where the annotation is.
+     */
+    it("hides a page's annotations from the picture by its eye in the menu", async () => {
+      const onMediaElement = vi.fn();
+      render(
+        <Canvas
+          canvases={[film]}
+          annotations={annotations.map((each: any) => ({
+            ...each,
+            pageId: page.id,
+          }))}
+          onMediaElement={onMediaElement}
+        />,
+      );
+      const menu = async () => {
+        if (!screen.queryByTestId("clover-canvas-annotation-menu"))
+          fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
+        return within(
+          await screen.findByTestId("clover-canvas-annotation-menu"),
+        ).getByRole("group", { name: "Rudolf Hess" });
+      };
+      pick(within(await menu()).getByRole("radio", { name: /distress/ }));
+      await transport();
+      await drawn();
+      const element = onMediaElement.mock.calls.at(-1)?.[0] as HTMLMediaElement;
+      seek(element, 14);
+      expect(hess()).not.toHaveAttribute("hidden");
+
+      // Named "Hide" and its page's label, its popover the one word.
+      const eye = within(await menu()).getByRole("checkbox", {
+        name: "Hide Rudolf Hess",
+      });
+      expect(
+        eye.closest("label")!.querySelector(".clover-tip"),
+      ).toHaveTextContent("Hide");
+      fireEvent.click(eye);
+      expect(eye).toBeChecked();
+      expect(document.querySelector(".clover-canvas-annotation")).toBeNull();
+      // Listed still, and still to be picked.
+      expect(within(await menu()).getAllByRole("radio")).toHaveLength(3);
+      expect(screen.getByRole("button", { name: "Annotations" })).toBeVisible();
+      seek(element, 300);
+      pick(within(await menu()).getByRole("radio", { name: /led out/ }));
+      expect(element.currentTime).toBe(85.67);
+
+      // Opened again, the menu focuses the picked item, not the checked eye before it.
+      fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
+      fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
+      await menu();
+      expect(document.activeElement).toHaveAccessibleName(
+        "1:25 Hess is led out of the dock",
+      );
+
+      fireEvent.click(within(await menu()).getByRole("checkbox"));
+      expect(hess()).toBeInTheDocument();
+    });
+
+    it("hides a set from the Root, so the menu and the list hide it together", async () => {
+      let hidden: string[] = [];
+      const Spy = () => {
+        const { clover } = Clover.useClover("Spy");
+        React.useEffect(
+          () =>
+            clover.store.subscribe(
+              () => (hidden = clover.store.get().hiddenSets),
+            ),
+          [clover],
+        );
+        return null;
+      };
+      render(
+        <Clover.Root iiifContent={hessJson}>
+          <Clover.Content />
+          <Clover.Annotations />
+          <Spy />
+        </Clover.Root>,
+      );
+      // The list's toggle, beside the page's heading.
+      const listed = await screen.findByRole("checkbox", {
+        name: "Hide Rudolf Hess",
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
+      const menu = await screen.findByTestId("clover-canvas-annotation-menu");
+      fireEvent.click(
+        within(menu).getByRole("checkbox", { name: "Hide Rudolf Hess" }),
+      );
+      expect(hidden).toEqual([page.id]);
+      expect(listed).toBeChecked();
+      // The page's items stay in the menu.
+      expect(
+        within(
+          within(menu).getByRole("group", { name: "Rudolf Hess" }),
+        ).getAllByRole("radio"),
+      ).toHaveLength(3);
     });
   });
 

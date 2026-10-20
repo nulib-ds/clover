@@ -1,9 +1,14 @@
+const fs = require("node:fs");
+const path = require("node:path");
 const { PHASE_DEVELOPMENT_SERVER } = require("next/constants");
 
 const withNextra = require("nextra")({
   theme: "nextra-theme-docs",
   themeConfig: "./theme.config.tsx",
 });
+
+/* The mocks with a live copy for `npm run dev` (see /docs/mocks). */
+const liveMocks = () => fs.readdirSync(path.join(__dirname, "pages/api/mocks"));
 
 module.exports = (phase) => {
   const isDev = phase === PHASE_DEVELOPMENT_SERVER;
@@ -30,5 +35,20 @@ module.exports = (phase) => {
      * /docs/mocks) need them.
      */
     ...(isDev ? {} : { output: "export" }),
+    /*
+     * In `next dev`, a mock with a live copy opens live at its published address too, as
+     * the homepage and the demos open it: the live Manifest's ids are under the dev server,
+     * which answers them, so what the static one points to on the published site and that
+     * is not deployed yet (a new mock's captions) is there. Only the Manifest, as the live
+     * copy does not serve every static file (content-search's example answers).
+     */
+    ...(isDev && {
+      rewrites: async () => ({
+        beforeFiles: liveMocks().map((name) => ({
+          source: `/mocks/${name}/manifest.json`,
+          destination: `/api/mocks/${name}/manifest.json`,
+        })),
+      }),
+    }),
   });
 };

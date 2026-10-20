@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 
+import { join } from "../../lib/classnames";
 import { useOneOpen } from "../../ui/useOneOpen";
 
 interface ControlMenuProps {
@@ -9,6 +10,8 @@ interface ControlMenuProps {
   /** Close, returning focus to the control that opened it when `restoreFocus`. */
   onClose: (restoreFocus: boolean) => void;
   "data-testid"?: string;
+  /** Classes beside its own, for a menu that takes another part's look. */
+  className?: string;
   children: React.ReactNode;
 }
 
@@ -18,7 +21,7 @@ interface ControlMenuProps {
  *
  * Its items are native radios in fieldsets, so a reader moves between them with the
  * arrow keys and hears the group's name and the current item. Opening focuses the checked
- * item (else the first), scrolled into the menu's view. It closes on Escape (returning
+ * item (else the first that can be picked), scrolled into the menu's view. It closes on Escape (returning
  * focus to the control when focus was in the menu or on the control, and then closing
  * nothing else), on a press outside, and when another popup opens (`useOneOpen`).
  */
@@ -27,6 +30,7 @@ const ControlMenu: React.FC<ControlMenuProps> = ({
   triggerId,
   onClose,
   "data-testid": testId,
+  className,
   children,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -35,8 +39,12 @@ const ControlMenu: React.FC<ControlMenuProps> = ({
 
   useEffect(() => {
     const menu = ref.current;
+    // An item, never a page's hide toggle (`HideToggle`), which is checked while hidden.
     const item =
-      menu?.querySelector<HTMLInputElement>("input:checked") ??
+      menu?.querySelector<HTMLInputElement>('input[type="radio"]:checked') ??
+      menu?.querySelector<HTMLInputElement>(
+        'input[type="radio"]:not(:disabled)',
+      ) ??
       menu?.querySelector<HTMLInputElement>("input");
     // Its whole row in sight within the menu (a long one scrolls), never the page.
     const row = item?.closest("label");
@@ -80,7 +88,12 @@ const ControlMenu: React.FC<ControlMenuProps> = ({
   }, [triggerId, onClose]);
 
   return (
-    <div className="clover-canvas-menu" data-testid={testId} id={id} ref={ref}>
+    <div
+      className={join("clover-canvas-menu", className)}
+      data-testid={testId}
+      id={id}
+      ref={ref}
+    >
       {children}
     </div>
   );

@@ -24,6 +24,9 @@ export interface ContentsProps extends React.HTMLAttributes<HTMLElement> {
  * The Manifest's table of contents, from its Ranges: chapters of a book, acts of an opera,
  * nested as they nest. The entry the reader is in is marked, following playback through a
  * time-based Canvas. Choosing an entry goes to its Canvas, and to its region or its moment.
+ * Hovering or focusing one marks its chapter on the Canvas's seek bar, and the chapter
+ * under the pointer there marks its entry here: one highlight, through the Root
+ * (`clover.chapter`), as the annotations share theirs.
  */
 export const Contents = forwardRef<HTMLElement, ContentsProps>(
   function Contents({ as: Tag = "nav", className, ...rest }, ref) {
@@ -42,6 +45,11 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
       clover.media.get,
     );
     const current = useCurrent(nodes, canvasId, element);
+    const highlighted = useSyncExternalStore(
+      clover.chapter.subscribe,
+      clover.chapter.get,
+      clover.chapter.get,
+    );
     if (!nodes.length) return null;
 
     const choose = (node: ContentsNode) => {
@@ -67,7 +75,12 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
                 type="button"
                 className="clover-contents-button"
                 aria-current={node.id === current ? "true" : undefined}
+                data-highlighted={node.id === highlighted ? "true" : undefined}
                 disabled={!node.canvasId}
+                onMouseEnter={() => clover.chapter.emit(node.id)}
+                onMouseLeave={() => clover.chapter.emit(null)}
+                onFocus={() => clover.chapter.emit(node.id)}
+                onBlur={() => clover.chapter.emit(null)}
                 lang={label.text ? label.lang : undefined}
                 onClick={() => choose(node)}
               >

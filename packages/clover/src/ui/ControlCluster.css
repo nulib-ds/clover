@@ -1,9 +1,11 @@
 /*
  * The control cluster over the canvas: `--clover-canvas-chrome-inset` in from the stage's
- * top and end (see `Canvas.css`), its buttons
- * `s` apart, a row that wraps (a column on a phone) rather than running past the stage
- * at a large zoom (WCAG 1.4.10). A placeholder's toggle takes a place of its own beside
- * it (see `Placeholder.css`).
+ * top and end (see `Canvas.css`), its buttons `s` apart, a row at the end that wraps onto
+ * more rows below, each at the end too, rather than running past a narrow stage or one at
+ * a large zoom (WCAG 1.4.10). Rows at every size, never a column: a column wrapped onto
+ * columns on a short stage, out of order. Read and reached in the order they show (WCAG
+ * 1.3.2, 2.4.3). The panel's toggle and a placeholder's take places of their own in the
+ * corner (see `Canvas.css`, `Placeholder.css`).
  */
 .clover-canvas-controls {
   --top: var(--clover-canvas-chrome-inset);
@@ -19,29 +21,10 @@
   max-height: calc(100% - var(--top) - var(--clover-canvas-chrome-inset));
 }
 
-@media (max-width: 575px) {
-  .clover-canvas-controls {
-    flex-direction: column;
-    z-index: 2;
-    /* A wrapped column grows sideways, so send it back toward the pinned edge. */
-    align-content: flex-end;
-  }
-}
-
-/* Room in the corner for a placeholder's toggle, beside the cluster or above its column. */
+/* Room in the corner for a placeholder's toggle, beside the cluster. */
 .clover-canvas-controls[data-has-placeholder="true"] {
   right: calc(
     var(--clover-canvas-chrome-inset) + var(--clover-control) +
       var(--clover-space-s)
   );
-}
-
-@media (max-width: 575px) {
-  .clover-canvas-controls[data-has-placeholder="true"] {
-    --top: calc(
-      var(--clover-canvas-chrome-inset) + var(--clover-control) +
-        var(--clover-space-s)
-    );
-    right: var(--clover-canvas-chrome-inset);
-  }
 }

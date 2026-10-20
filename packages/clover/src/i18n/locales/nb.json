@@ -37,6 +37,7 @@
   "aboutOpenManifest": "Åpne hele manifestet",
   "aboutCollection": "IIIF-samling",
   "annotationsHide": "Skjul annoteringer",
+  "annotationsHideTip": "Skjul",
   "readMore": "Les mer",
   "readLess": "Les mindre",
   "annotationsShow": "Vis på bildet",

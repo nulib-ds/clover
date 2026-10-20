@@ -47,6 +47,9 @@ export interface MediaStageProps {
   autoPlay?: boolean;
   /** Chapters, for the transport. */
   chapters?: TransportChapter[];
+  /** A chapter to mark on the seek bar, by its `id`, and the one the pointer is on. */
+  highlightedChapter?: string | null;
+  onChapterHighlight?: (id: string | null) => void;
   /** The language to read IIIF text in. The Root's, or the reader's. */
   language?: string;
   /**
@@ -90,6 +93,8 @@ const MediaStage: React.FC<MediaStageProps> = ({
   isFullscreen = false,
   autoPlay = false,
   chapters,
+  highlightedChapter,
+  onChapterHighlight,
   language: givenLanguage,
   notes,
 }) => {
@@ -253,6 +258,8 @@ const MediaStage: React.FC<MediaStageProps> = ({
         isFullscreen={isFullscreen}
         video={media.kind === "video" ? element : null}
         chapters={chapters}
+        highlightedChapter={highlightedChapter}
+        onChapterHighlight={onChapterHighlight}
       />
       {/*
         After the transport: the stylesheet lifts the cues clear of it. The annotations

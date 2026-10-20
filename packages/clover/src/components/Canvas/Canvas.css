@@ -184,20 +184,21 @@
 
 /*
  * The information panel's toggle never fades: the panel is beside the picture, not
- * chrome over it, and a reader who cannot see the toggle cannot find the panel. It
- * keeps the corner: last in the row, so at its far end, and first in the narrow
- * screen's column, so at its top.
+ * chrome over it, and a reader who cannot see the toggle cannot find the panel. It keeps
+ * the corner at every size (Mat, 2026-10-19): out of the row, pinned to the cluster's top
+ * end, with its room kept there, so however the other controls wrap onto rows beside
+ * it, it stays top right.
  */
-.clover-canvas > .clover-canvas-controls > [data-button="panel"] {
-  order: 1;
-  --clover-chrome-shown: 1;
-  --clover-chrome-events: auto;
+.clover-canvas > .clover-canvas-controls:has(> [data-button="panel"]) {
+  padding-right: calc(var(--clover-control) + var(--clover-space-s));
 }
 
-@media (max-width: 575px) {
-  .clover-canvas > .clover-canvas-controls > [data-button="panel"] {
-    order: -1;
-  }
+.clover-canvas > .clover-canvas-controls > [data-button="panel"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  --clover-chrome-shown: 1;
+  --clover-chrome-events: auto;
 }
 
 /*

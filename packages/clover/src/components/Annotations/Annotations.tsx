@@ -33,6 +33,7 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { formatTime } from "../Canvas/media/useMediaController";
 import { useClover, useCloverSelector } from "../../react/context";
+import { HideToggle } from "../../ui/HideToggle";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 
 export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
@@ -62,8 +63,9 @@ export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
  *   drawn round the entry.
  * - Hovering or focusing an entry highlights its hotspot, and hovering a hotspot
  *   highlights its entry: one highlight, shared through the Root, with no timers.
- * - Each set is headed by its AnnotationPage's own label, when it has one, and has a
- *   checkbox to hide its annotations from the Canvas, "Hide Annotations".
+ * - Each set is headed by its AnnotationPage's own label, when it has one, after a toggle
+ *   that hides its annotations from the Canvas (`HideToggle`: an eye, "Hide" and the
+ *   page's label, or "Hide Annotations" for a page without one).
  */
 export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
   function Annotations(
@@ -106,10 +108,6 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
       .map((set) => ({ set, entries: visible(set) }))
       .filter(({ entries }) => entries.length);
     const Heading = `h${headingLevel}` as React.ElementType;
-    const hideLabel = {
-      text: t("annotationsHide"),
-      lang: langOf("annotationsHide"),
-    };
     const showLabel = {
       text: t("annotationsShow"),
       lang: langOf("annotationsShow"),
@@ -126,7 +124,6 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
           shown={shown.map((canvas) => canvas.id)}
           headingLevel={headingLevel}
           language={language}
-          hideLabel={hideLabel}
           showLabel={showLabel}
           hiddenSets={hiddenSets}
           selected={selected}
@@ -157,7 +154,6 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
             language={language}
             // The AnnotationPage's own label, or none: the panel's section names them.
             title={localize(set.label, language)}
-            hideLabel={hideLabel}
             showLabel={showLabel}
             hidden={hiddenSets.includes(set.id)}
             selected={selected}
@@ -181,7 +177,6 @@ function AnnotationGroup({
   headingLevel: setLevel,
   title,
   language,
-  hideLabel,
   showLabel,
   hidden,
   selected,
@@ -201,8 +196,7 @@ function AnnotationGroup({
   /** The AnnotationPage's label, and its language; empty when none, and then no heading. */
   title: LocalizedValue;
   language?: string;
-  /** Clover's strings, each with its language where it is not the page's. */
-  hideLabel: LocalizedValue;
+  /** Clover's words for finding one, with their language where it is not the page's. */
   showLabel: LocalizedValue;
   hidden: boolean;
   selected: string | null;
@@ -221,16 +215,13 @@ function AnnotationGroup({
       aria-labelledby={title.text ? `${id}-title` : undefined}
       data-set={set.id}
     >
-      {/* The checkbox first, over the AnnotationPage's label when it has one. */}
+      {/* Its hide toggle first, beside the AnnotationPage's label when it has one. */}
       <div className="clover-annotations-set-header">
-        <label className="clover-annotations-markers" lang={hideLabel.lang}>
-          <input
-            type="checkbox"
-            checked={hidden}
-            onChange={(event) => onVisible(!event.target.checked)}
-          />
-          {hideLabel.text}
-        </label>
+        <HideToggle
+          hidden={hidden}
+          onChange={(hide) => onVisible(!hide)}
+          of={title.text ? `${id}-title` : undefined}
+        />
         {title.text && (
           <Heading
             className="clover-annotations-title"
@@ -461,7 +452,6 @@ const AnnotationLayers = forwardRef<
     shown: string[];
     headingLevel: number;
     language?: string;
-    hideLabel: LocalizedValue;
     showLabel: LocalizedValue;
     hiddenSets: string[];
     selected: string | null;
@@ -480,7 +470,6 @@ const AnnotationLayers = forwardRef<
     shown,
     headingLevel,
     language,
-    hideLabel,
     showLabel,
     hiddenSets,
     selected,
@@ -575,19 +564,11 @@ const AnnotationLayers = forwardRef<
             }
           >
             <div className="clover-annotations-set-header">
-              <label
-                className="clover-annotations-markers"
-                lang={hideLabel.lang}
-              >
-                <input
-                  type="checkbox"
-                  checked={hidden}
-                  onChange={(event) =>
-                    onVisible(layer.setIds, !event.target.checked)
-                  }
-                />
-                {hideLabel.text}
-              </label>
+              <HideToggle
+                hidden={hidden}
+                onChange={(hide) => onVisible(layer.setIds, !hide)}
+                of={layer.title.text ? `${id}-${layerIndex}` : undefined}
+              />
               {layer.title.text && (
                 <Title
                   className="clover-annotations-title"
@@ -719,8 +700,9 @@ function AnnotationItem({
   // no two read alike.
   const own = entryText(entry, language);
   const text = own.text ? own : { text: String(index + 1) };
-  // One on a recording's time (Cookbook 0103) is found there, from where it starts.
-  const time = entry.target.rect ? undefined : parseTime(entry.target.t);
+  // One on a recording's time (Cookbook 0103), or following it there (`xywh=…&t=…`), is
+  // found there, from where it starts.
+  const time = parseTime(entry.target.t);
   const show = time
     ? { text: t("annotationsShowTime"), lang: langOf("annotationsShowTime") }
     : showLabel;

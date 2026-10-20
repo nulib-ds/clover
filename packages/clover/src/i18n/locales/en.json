@@ -37,6 +37,7 @@
   "aboutOpenManifest": "Open the full Manifest",
   "aboutCollection": "IIIF Collection",
   "annotationsHide": "Hide Annotations",
+  "annotationsHideTip": "Hide",
   "readMore": "Read more",
   "readLess": "Read less",
   "annotationsShow": "Find on the image",

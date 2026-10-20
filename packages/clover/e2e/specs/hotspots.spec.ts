@@ -170,13 +170,19 @@ test.describe("Hotspots", () => {
   });
 
   /*
-   * Under a control at home, wherever the cluster is: a row along the top on a desktop, a
-   * column down the side on a phone. The hotspot is placed under a control as laid out,
-   * found through one covering the whole Canvas.
+   * Under a control at home: the cluster's row along the top. The hotspot is placed under
+   * a control as laid out, found through one covering the whole Canvas. On a phone the
+   * row sits in the margin over this wide page at home, over none of it, so there is no
+   * control to place it under; the clearing is the same there.
    */
   test("one reached by Tab under the controls is panned clear of them (WCAG 2.4.11)", async ({
     page,
+    isMobile,
   }) => {
+    test.skip(
+      isMobile,
+      "on a phone the controls' row lies over the margin above this wide page at home",
+    );
     await open(page, [["The page", "xywh=0,0,2000,1000"]]);
     const viewport = page.getByTestId("clover-canvas-viewport");
     const controls = page.locator(".clover-canvas-controls > *");

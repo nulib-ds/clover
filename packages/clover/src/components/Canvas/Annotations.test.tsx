@@ -1,4 +1,4 @@
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, waitFor } from "@testing-library/react";
 import React from "react";
 
 import {
@@ -13,6 +13,7 @@ import pointJson from "../../fixtures/iiif-cookbook/0135-annotating-point-in-can
 import shapeJson from "../../fixtures/iiif-cookbook/0261-non-rectangular-commenting.json";
 import hotspotJson from "../../fixtures/iiif-cookbook/0022-linking-with-a-hotspot.json";
 import imageJson from "../../fixtures/iiif-cookbook/0377-image-in-annotation.json";
+import hessJson from "../../fixtures/mocks/rudolf-hess-nuremberg/manifest.json";
 import { p4 } from "../../fixtures/presentation4";
 
 const canvas = "https://example.org/canvas/1";
@@ -185,14 +186,19 @@ async function renderHotspots(
     onActivate: (id: string | null) => void;
     onSelect: (annotation: unknown) => void;
     onFollow: (annotation: unknown) => void;
+    media: HTMLMediaElement | null;
   }> = {},
   renderer: Record<string, unknown> = {},
 ) {
   const { default: Annotations } = await import("./Annotations");
+  // The layer in its viewport, which takes focus a hotspot gives up.
+  const viewport = document.createElement("div");
+  viewport.tabIndex = 0;
   const container = document.createElement("div");
-  document.body.appendChild(container);
+  viewport.appendChild(container);
+  document.body.appendChild(viewport);
   const stand = {
-    overlays: { container, add: () => () => undefined },
+    overlays: { container, add: () => () => undefined, move: vi.fn() },
     invalidate: () => undefined,
     ...renderer,
   };
@@ -206,11 +212,12 @@ async function renderHotspots(
       onActivate={props.onActivate ?? (() => undefined)}
       onSelect={props.onSelect ?? (() => undefined)}
       onFollow={props.onFollow}
+      {...("media" in props ? { media: props.media } : {})}
     />,
   );
   const buttons = () =>
     Array.from(container.querySelectorAll<HTMLButtonElement>("button"));
-  return { layer: container, buttons, renderer: stand };
+  return { layer: container, viewport, buttons, renderer: stand };
 }
 
 const depth = (button: HTMLElement) =>
@@ -804,5 +811,219 @@ describe("an image in a hotspot's popover", () => {
     expect(image).toHaveAttribute("alt", "");
     expect(image).toHaveAttribute("loading", "lazy");
     expect(buttons()[0]).toHaveAccessibleName(/Night picture/);
+  });
+});
+
+/*
+ * An annotation whose targets give a region and a time each (`xywh=…&t=…`) follows its
+ * recording: the docs' `rudolf-hess-nuremberg` mock marks Rudolf Hess through a film so.
+ */
+describe("a hotspot that follows a recording", () => {
+  const fragment = (value: string) => ({
+    type: "SpecificResource",
+    source: { id: canvas, type: "Canvas" },
+    selector: { type: "FragmentSelector", value },
+  });
+  // Two stretches that meet, then a gap, then one more, as Presentation 4 groups them.
+  const tracked = () =>
+    placeAnnotations(
+      [
+        annotation("hess", {
+          type: "Independents",
+          items: [
+            fragment("xywh=0,0,10,20&t=10,12"),
+            fragment("xywh=100,0,10,20&t=12,14"),
+            fragment("xywh=500,0,10,20&t=20,22"),
+          ],
+        }),
+      ],
+      place,
+    );
+  /** A recording as the hotspot reads one: its time, whether it plays, its events. */
+  const recording = (extra: Record<string, unknown> = {}) =>
+    Object.assign(new EventTarget(), {
+      currentTime: 0,
+      paused: true,
+      videoWidth: 0,
+      ...extra,
+    }) as unknown as HTMLMediaElement;
+  const seek = (media: HTMLMediaElement, time: number) =>
+    act(() => {
+      media.currentTime = time;
+      media.dispatchEvent(new Event("seeked"));
+    });
+  const movedTo = (renderer: any) =>
+    renderer.overlays.move.mock.lastCall?.[1]?.x as number | undefined;
+
+  it("is placed by its keys, in time order, its first region its own", () => {
+    const [entry] = tracked();
+    expect(entry.world).toEqual({ x: 1000, y: 0, width: 10, height: 20 });
+    expect(
+      entry.track!.map(({ start, end, world }) => [start, end, world.x]),
+    ).toEqual([
+      [10, 12, 1000],
+      [12, 14, 1100],
+      [20, 22, 1500],
+    ]);
+  });
+
+  it("reads the mock's Rudolf Hess, through Presentation 4", () => {
+    const [film] = p4(hessJson).items as any[];
+    const [page] = film.annotations;
+    expect(page.label).toEqual({ en: ["Rudolf Hess"] });
+    expect(page.items[0].target.type).toBe("Independents");
+    const [hess, removal, back] = placeAnnotations(
+      page.items.map((each: any) => ({ annotation: each, targetIndex: 0 })),
+      (rect) => rect,
+    );
+    expect([hess, removal, back].map(({ label }) => label)).toEqual([
+      "Hess shows distress",
+      "Hess is led out of the dock",
+      "Hess returns to the dock",
+    ]);
+    // Each takes up where the last left off.
+    expect(removal.track![0].start).toBeGreaterThan(hess.track!.at(-1)!.end);
+    expect(back.track![0].start).toBeGreaterThan(removal.track!.at(-1)!.end);
+    expect(hess.track).toHaveLength(page.items[0].target.items.length);
+    expect(hess.track![0]).toMatchObject({
+      start: 12.62,
+      world: { x: 262, y: 151, width: 128, height: 160 },
+    });
+    // Hidden behind the officer who leans over to him, he is not marked.
+    expect(hess.track!.some(({ start, end }) => start < 30 && end > 30)).toBe(
+      false,
+    );
+  });
+
+  it("is there only while the recording is within it, where it is then", async () => {
+    const media = recording();
+    const { buttons, renderer } = await renderHotspots(tracked(), { media });
+    const [hotspot] = buttons();
+    // Not there at all, for the pointer, Tab or a screen reader.
+    expect(hotspot).toHaveAttribute("hidden");
+    seek(media, 11);
+    expect(hotspot).not.toHaveAttribute("hidden");
+    expect(hotspot).toHaveAttribute("data-track");
+    // Halfway from the first region to the next, where the two meet.
+    expect(movedTo(renderer)).toBe(1050);
+    seek(media, 13);
+    expect(movedTo(renderer)).toBe(1100);
+    seek(media, 17);
+    expect(hotspot).toHaveAttribute("hidden");
+    seek(media, 21);
+    expect(hotspot).not.toHaveAttribute("hidden");
+    expect(movedTo(renderer)).toBe(1500);
+  });
+
+  it("moves with each frame of the recording shown while it plays", async () => {
+    let onFrame: VideoFrameRequestCallback | undefined;
+    const media = recording({
+      currentTime: 10,
+      videoWidth: 654,
+      requestVideoFrameCallback: vi.fn((callback) => {
+        onFrame = callback;
+        return 1;
+      }),
+      cancelVideoFrameCallback: vi.fn(),
+    });
+    const { renderer } = await renderHotspots(tracked(), { media });
+    act(() => {
+      (media as any).paused = false;
+      media.dispatchEvent(new Event("play"));
+    });
+    // The time of the frame shown, not the playback position, which runs ahead of it.
+    media.currentTime = 13;
+    act(() => onFrame!(0, { mediaTime: 11.5 } as VideoFrameCallbackMetadata));
+    expect(movedTo(renderer)).toBe(1075);
+    // Paused, it stops asking for frames.
+    act(() => {
+      (media as any).paused = true;
+      media.dispatchEvent(new Event("pause"));
+    });
+    expect(
+      (media as HTMLVideoElement).cancelVideoFrameCallback,
+    ).toHaveBeenCalled();
+    expect(movedTo(renderer)).toBe(1100);
+  });
+
+  it("follows sound, which has no frames, display frame by display frame", async () => {
+    const media = recording({ currentTime: 10 });
+    const { renderer } = await renderHotspots(tracked(), { media });
+    act(() => {
+      (media as any).paused = false;
+      media.dispatchEvent(new Event("play"));
+    });
+    media.currentTime = 11;
+    await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    expect(movedTo(renderer)).toBe(1050);
+    act(() => media.dispatchEvent(new Event("ended")));
+  });
+
+  it("hands focus to the viewport as it goes, so focus is never lost (WCAG 2.4.3)", async () => {
+    const media = recording({ currentTime: 11 });
+    const onActivate = vi.fn();
+    const { buttons, viewport } = await renderHotspots(tracked(), {
+      media,
+      onActivate,
+    });
+    const [hotspot] = buttons();
+    act(() => hotspot.focus());
+    expect(onActivate).toHaveBeenLastCalledWith("hess");
+    seek(media, 17);
+    expect(viewport).toHaveFocus();
+    // Its highlight goes with it.
+    expect(onActivate).toHaveBeenLastCalledWith(null);
+  });
+
+  it("waits for a recording on its way, and stands at its first region with none", async () => {
+    const waiting = await renderHotspots(tracked(), { media: null });
+    expect(waiting.buttons()[0]).toHaveAttribute("hidden");
+    waiting.viewport.remove();
+    const still = await renderHotspots(tracked());
+    expect(still.buttons()[0]).not.toHaveAttribute("hidden");
+    expect(still.renderer.overlays.move).not.toHaveBeenCalled();
+  });
+
+  /*
+   * The active one always wins: whichever moves, each hotspot beneath the active one is
+   * masked where the active one is now, and again each time either moves.
+   */
+  it("masks those beneath it where it is now, and is masked beneath another", async () => {
+    const [bench] = placeAnnotations(
+      [annotation("bench", `${canvas}#xywh=0,0,600,100`)],
+      place,
+    );
+    const [hess] = tracked();
+    const at = (x: number) => ({ ...hess, world: { ...hess.world, x } });
+    const mask = (button: HTMLElement) =>
+      button.style.getPropertyValue("--clover-annotation-mask");
+
+    // Hess active, moving over the bench.
+    const media = recording({ currentTime: 11 });
+    const first = await renderHotspots([bench, hess], {
+      media,
+      active: "hess",
+    });
+    const [benchButton, hessButton] = first.buttons();
+    expect(mask(benchButton)).toBe(maskUnder(bench, at(1050)));
+    seek(media, 13);
+    expect(mask(benchButton)).toBe(maskUnder(bench, at(1100)));
+    expect(mask(hessButton)).toBe("");
+    // Gone from the recording, it masks nothing.
+    seek(media, 17);
+    expect(mask(benchButton)).toBe("");
+    first.viewport.remove();
+
+    // The bench active: Hess, moving beneath it, is masked where it lies.
+    const other = recording({ currentTime: 11 });
+    const second = await renderHotspots([bench, hess], {
+      media: other,
+      active: "bench",
+    });
+    const [, moving] = second.buttons();
+    expect(mask(moving)).toBe(maskUnder(at(1050), bench));
+    seek(other, 13);
+    expect(mask(moving)).toBe(maskUnder(at(1100), bench));
   });
 });

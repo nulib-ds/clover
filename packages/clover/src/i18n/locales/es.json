@@ -37,6 +37,7 @@
   "aboutOpenManifest": "Abrir el manifiesto completo",
   "aboutCollection": "Colección IIIF",
   "annotationsHide": "Ocultar anotaciones",
+  "annotationsHideTip": "Ocultar",
   "readMore": "Leer más",
   "readLess": "Leer menos",
   "annotationsShow": "Ver en la imagen",

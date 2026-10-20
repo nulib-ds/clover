@@ -25,6 +25,9 @@ beforeEach(() => {
   vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockImplementation(
     box("height"),
   );
+  vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockImplementation(
+    box("height"),
+  );
   // Laid out, unless hidden.
   vi.spyOn(HTMLElement.prototype, "offsetParent", "get").mockImplementation(
     function (this: HTMLElement) {
@@ -38,15 +41,26 @@ afterEach(() => vi.restoreAllMocks());
 function Stage({
   width,
   controls,
+  height = 600,
+  at = { left: 400, top: 26 },
 }: {
   width: number;
   controls: Array<{ left: number; top: number; hidden?: boolean }>;
+  /** The stage's height. */
+  height?: number;
+  /** Where the cluster sits in the stage. */
+  at?: { left: number; top: number };
 }) {
   const [cluster, setCluster] = useState<HTMLDivElement | null>(null);
   useClusterReach(cluster);
   return (
-    <div className="clover-canvas" data-testid="canvas">
-      <div data-width={width} ref={setCluster}>
+    <div className="clover-canvas" data-testid="canvas" data-height={height}>
+      <div
+        data-width={width}
+        data-left={at.left}
+        data-top={at.top}
+        ref={setCluster}
+      >
         {controls.map(({ left, top, hidden }, index) => (
           <button
             data-height={36}
@@ -69,7 +83,7 @@ const reach = (canvas: HTMLElement) => ({
 });
 
 describe("useClusterReach", () => {
-  it("measures one column from its controls, not a box Chromium sizes wider", () => {
+  it("measures from its controls, not its box, which may be wider", () => {
     const { getByTestId } = render(
       <Stage
         width={81}
@@ -85,7 +99,7 @@ describe("useClusterReach", () => {
     });
   });
 
-  it("measures a column a short stage has wrapped onto two, and leaves out a hidden control", () => {
+  it("measures the rows it wraps onto, and leaves out a hidden control", () => {
     const { getByTestId, unmount } = render(
       <Stage
         width={81}
@@ -101,5 +115,30 @@ describe("useClusterReach", () => {
     // Gone with the cluster.
     unmount();
     expect(reach(canvas)).toEqual({ width: "", height: "" });
+  });
+
+  // A short stage: below the controls, a popup would have nothing to show.
+  it("puts its popups beside it on a short stage, where there is room", () => {
+    const one = [{ left: 0, top: 0 }];
+    const short = render(<Stage width={36} controls={one} height={117} />);
+    expect(short.getByTestId("canvas")).toHaveAttribute(
+      "data-popups",
+      "beside",
+    );
+    short.unmount();
+    // Tall: below it.
+    const tall = render(<Stage width={36} controls={one} />);
+    expect(tall.getByTestId("canvas")).not.toHaveAttribute("data-popups");
+    tall.unmount();
+    // Short, but the controls fill the width: below it still.
+    const full = render(
+      <Stage
+        width={36}
+        controls={one}
+        height={117}
+        at={{ left: 60, top: 26 }}
+      />,
+    );
+    expect(full.getByTestId("canvas")).not.toHaveAttribute("data-popups");
   });
 });

@@ -278,9 +278,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     image: …", `annotationsShow`) does the same out of sight, and its focus is drawn
     round the entry. Hovering an entry or its region on the Canvas highlights both,
     through the Root, with no timers or polling.
-  - Each set starts with a "Hide Annotations" checkbox (`annotationsHide`) that takes its
-    regions off the Canvas, and under it a heading only when its AnnotationPage has a
-    `label` of its own: the `InformationPanel`'s Annotations section names the rest. HTML bodies are
+  - Each set's header is its hide toggle, an eye (`label.clover-hide`: a checkbox,
+    checked while hidden, the eye struck through), then a heading only when its
+    AnnotationPage has a `label` of its own: the `InformationPanel`'s Annotations section
+    names the rest. The toggle's popover says "Hide" (`annotationsHideTip`); its name is
+    that and the set's label, or "Hide Annotations" (`annotationsHide`) for a set without
+    one. It takes the set's annotations off the Canvas only: the list, and the Canvas's
+    annotations menu, keep them. HTML bodies are
     sanitised; image bodies (Cookbook 0377) show as images. Caption files are left to the
     video or sound they caption.
   - `annotations` on `Root` adds AnnotationPages or AnnotationCollections (followed from
@@ -330,6 +334,54 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     "Find in the recording" (`annotationsShowTime`, in every locale) rather than "Find on
     the image". Before, the Canvas showed nothing of them, and a press in the list did not
     seek.
+  - **Annotations that follow a recording.** An annotation whose targets each give a
+    region and a time, `xywh=x,y,w,h&t=start,end` (both dimensions of a Media Fragment,
+    as a FragmentSelector or a URI), is a track: a person followed through a film. Its
+    hotspot is there only while the recording is within one of its stretches (`hidden`
+    otherwise, so out of the Tab order and the accessibility tree), and moves with the
+    recording, frame by frame (`requestVideoFrameCallback`; each display frame for
+    sound), through the overlay layer, with no render. Stretches that meet in time glide
+    from one region to the next; across a gap the hotspot is gone. It is listed where it
+    starts, in the annotations control and in `Clover.Annotations`, and a pick goes there
+    only when it is not on the recording now; it is never zoomed to. A hotspot that holds
+    focus as its region goes hands focus to the viewport. Tracked hotspots carry
+    `data-track` and a pointer cursor. The active hotspot always wins: those beneath it
+    that it meets are masked where it is now, again on each frame either moves, and none
+    is raised over a tracked one, nor a tracked one over the active. Masks are now set on
+    each hotspot by the layer, not in its rendered `style`. The docs publish a mock of
+    them, `/mocks/rudolf-hess-nuremberg/`: Rudolf Hess, and the defendants around him,
+    through the Nuremberg tribunal's judgment.
+  - **Several targets.** An annotation's targets are read through Presentation 4's
+    `Independents`, `List` and `Composite` (the upgrader makes `Independents` of a
+    Presentation 3 array), and a fragment's `xywh=` and `t=` together. Before, an
+    annotation with more than one target drew no hotspot (it named no region), and a
+    fragment with both kept the region and lost the time. Where one target is read (a list
+    entry's region, a content state, a link), it is the first. An annotation with
+    `xywh=…&t=…` on a recording, which showed throughout, now shows only through its
+    time; one on an image, which has no time, shows as before.
+  - **A page hidden from the Canvas's annotations menu.** Each page in the menu has the
+    list's eye before its label (a page without one, the eye alone over its items). The
+    Canvas takes every page's annotations, each with its page's id
+    (`CanvasAnnotation.pageId`), and draws all but those of `hiddenPages`;
+    `onPageVisibilityChange(pageIds, visible)` reports the reader's toggles, and without
+    `hiddenPages` the Canvas keeps its own. In a `Root` these are its hidden sets
+    (`setSetVisible`), so the menu and `Clover.Annotations` hide and show together.
+    Hiding hides only what is drawn: a hidden page's annotations stay in the menu as they
+    were, and a pick still frames one, or goes to it on its recording. Before, a hidden
+    set's annotations never reached the Canvas, so its menu lost them, and hiding every
+    set took the annotations control away. Opening a menu focuses its checked item,
+    never a checked hide toggle.
+  - **The chapter under the pointer on the seek bar.** Its stretch of the bar is drawn
+    out, and its start and title show over it in a popover, as a control's name does
+    (Escape puts it away, and the pointer can rest on it; WCAG 1.4.13), the transport
+    over the captions meanwhile, and the caption cues move up clear of it
+    (`--clover-transport-preview-top`), and back as it goes. Keyboard focus on the bar shows the chapter playing,
+    and the bar's value names it (`aria-valuetext`, "0:30 / 11:11, Opening"). The
+    Canvas takes `highlightedChapter` and `onChapterHighlight` (chapters take an `id`),
+    and in a `Root` they are one highlight with `Clover.Contents` (`clover.chapter`):
+    hovering an entry there draws its chapter out on the bar, without a popover, and the
+    chapter under the pointer on the bar marks its entry. `Chapter` from `chaptersOf`
+    carries its Range's `id`.
   - **The annotations menu groups by AnnotationPage**, under each page's `label`, as the
     list does; a page with none is named by the control. `CanvasAnnotation` takes
     `pageLabel` for a host's own annotations; inside a `Root`, and loading its own, the
@@ -387,7 +439,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - The `InformationPanel`'s Annotations section lists every annotation in the
     Manifest, not only the view's, as `<Clover.Annotations scope="all" />` does wherever
     it sits. They are grouped by layer (AnnotationPages that share a label, or have
-    none), each layer with one "Hide Annotations" checkbox for all its pages, and under
+    none), each layer with one hide toggle for all its pages, and under
     that by Canvas, under the Canvas's label: `section.clover-annotations-canvas`, named
     by its `.clover-annotations-canvas-label` heading, one level under the layer's. A
     Manifest of one Canvas has no Canvas labels, so its notes' headings keep their level. The
@@ -1368,11 +1420,47 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (57,519 B), `@nulib/clover/map` before MapLibre to 17.9 (17,929 B), the stylesheet to
   11.6 (11,586 B) and `<clover-viewer>` to 102.1 (102,132 B). Reading the links, the
   comments and the timed annotations loads only for a Canvas with annotations.
+  Annotations that follow a recording, and reading an annotation's several targets,
+  then raised a standalone `Canvas` to 37.6 kB (37,473 B), the Viewer with `Default` to
+  65.6 (65.51 kB), `Document` to 68.3 (68.18 kB), `Gallery` to 57.8 (57.71 kB) and
+  `<clover-viewer>` to 102.6 (102,501 B). What a Canvas loads up front is the reading of
+  `xywh=…&t=…` and of groups of targets, a pick that follows the recording left unframed,
+  and the overlay layer's `move`; the track itself, following it frame by frame, and
+  going to a pick load with the hotspots, for a Canvas with annotations. Placing each
+  hotspot on whole device pixels (under Fixed) then raised a standalone `Canvas` to
+  37.7 kB (37,630 B), the Viewer with `Default` to 65.7, `Document` to 68.4 (68,338 B),
+  `Gallery` to 57.9 and `<clover-viewer>` to 102.7 (102,635 B): 29 B on a Canvas.
+  Hiding a page from the Canvas's menu (the hidden pages' state and the one filter of
+  what is drawn), the seek bar's chapter under the pointer and its highlight shared with
+  `Contents`, and their styles, then raised a standalone `Canvas` to 38.0 kB (37,925 B),
+  the Viewer with `Default` to 66.1 (66,073 B), `Document` to 68.8 (68,771 B),
+  `Gallery` to 58.4 (58,314 B), `<clover-viewer>` to 103.3 (103,270 B) and the
+  stylesheet to 11.8 (11,783 B). The menus, the eye, the transport and `Contents` load
+  on demand; what a Canvas loads up front is the pages' state and the props it passes.
 
   The API is experimental and may change in any release.
 
 ### Fixed
 
+- **A recording's still keeps no empty place in the top right.** The control cluster
+  moved in from the corner to leave room for the placeholder's toggle even where that
+  toggle was the play button in the middle, so the annotations control, and the `i`,
+  sat a control's width from the corner with nothing beside them. Over a recording's
+  still they now take the corner; once it opens, the close control takes it and they
+  sit beside it, as before.
+- **Hotspots no longer shimmer as they move.** Each was placed at the fraction of a
+  pixel its region falls on, so its hairlines were shared between two rows or columns of
+  pixels, and a hotspot gliding with a recording pulsed from crisp to soft and back, each
+  at its own speed, several at once over a film. While the view is upright, a hotspot's
+  edges, and its size, are now on whole device pixels (half a CSS pixel on a 2× screen):
+  its lines stay crisp and it moves a pixel at a time. A turned view is placed as before.
+  The `--clover-overlay-top` and `--clover-overlay-bottom` a popover keeps within are the
+  edges as placed. Nothing to change.
+- **A transport menu's long options no longer overlap.** In a list taller than its room
+  (the Chapters menu with long titles), each option shrank to one line's height and its
+  words ran over the next; options now keep their height and the list scrolls. The
+  Chapters menu is as wide as the Captions menu with its codes (16rem, within the stage),
+  so a title of a few words takes a line or two.
 - **A Canvas never shows the browser's picture of a lost WebGL context** (Chrome's face in
   a box). Browsers cap a page's WebGL contexts (about 16 on desktop, 8 on Android) and
   kill the oldest past the cap, and every `Canvas` used to take one as it was made, in

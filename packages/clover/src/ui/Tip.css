@@ -274,25 +274,6 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
   height: auto;
 }
 
-/* The cluster as a column on a phone: beside each control, toward the stage. */
-@media (max-width: 575px) {
-  .clover-canvas-controls .clover-tip,
-  .clover-canvas-controls > button:last-of-type > .clover-tip {
-    top: 50%;
-    bottom: auto;
-    inset-inline: auto calc(100% + var(--clover-space-xs));
-    translate: 0 -50%;
-  }
-
-  .clover-canvas-controls .clover-tip::before {
-    top: 0;
-    bottom: 0;
-    inset-inline: 100% auto;
-    width: var(--clover-space-xs);
-    height: auto;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .clover-tip {
     transition: none;

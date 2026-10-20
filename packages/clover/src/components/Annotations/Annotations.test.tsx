@@ -160,11 +160,16 @@ describe("Annotations", () => {
     expect(entry).toHaveAttribute("data-highlighted", "true");
   });
 
-  it("hides a set's annotations from the Canvas with its checkbox", async () => {
+  it("hides a set's annotations from the Canvas with its eye", async () => {
     await renderWithStage();
     expect(document.getElementById(annotationId)).not.toBeNull();
+    // A checkbox drawn as an eye, its popover the one word.
     const hide = screen.getByRole("checkbox", { name: "Hide Annotations" });
     expect(hide).not.toBeChecked();
+    expect(hide.closest("label")).toHaveClass("clover-hide");
+    expect(
+      hide.closest("label")!.querySelector(".clover-tip"),
+    ).toHaveTextContent("Hide");
     // Its AnnotationPage has no label, so the set has no heading of its own.
     expect(screen.queryByRole("heading")).toBeNull();
     fireEvent.click(hide);
@@ -513,7 +518,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
     return null;
   }
 
-  it("lists them by layer, one checkbox each, then by Canvas under its label, those in view current", async () => {
+  it("lists them by layer, one hide toggle each, then by Canvas under its label, those in view current", async () => {
     const fetch = vi.fn(async () => new Response(JSON.stringify(referenced)));
     render(
       <Clover.Root iiifContent={manifest} request={{ fetch }}>
@@ -527,9 +532,17 @@ describe("Annotations, every Canvas's (scope all)", () => {
       `${base}/page/comments-3`,
       expect.anything(),
     );
-    // Two layers: the unlabelled tags (two pages, one checkbox), and the Comments.
-    const boxes = screen.getAllByRole("checkbox", { name: "Hide Annotations" });
-    expect(boxes).toHaveLength(2);
+    /*
+     * Two layers: the unlabelled tags (two pages, one toggle), and the Comments, each
+     * toggle named "Hide" and its layer's label, which follows it in the header.
+     */
+    const boxes = [
+      screen.getByRole("checkbox", { name: "Hide Annotations" }),
+      screen.getByRole("checkbox", { name: "Hide Comments" }),
+    ];
+    expect(
+      boxes[1].closest(".clover-annotations-set-header"),
+    ).toHaveTextContent("Comments");
     const comments = screen.getByRole("region", { name: "Comments" });
     expect(
       within(comments)
@@ -558,7 +571,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
       ["Page 3", "true"],
     ]);
 
-    // One checkbox hides the whole layer, both of its pages.
+    // One toggle hides the whole layer, both of its pages.
     fireEvent.click(boxes[0]);
     expect(clover.store.get().hiddenSets).toEqual([
       `${base}/page/tags-1`,

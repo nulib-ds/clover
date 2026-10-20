@@ -39,9 +39,15 @@ interface TransportProps {
   video?: HTMLVideoElement | null;
   /** Chapters, from the Manifest's Ranges: marked on the seek bar and listed in a menu. */
   chapters?: TransportChapter[];
+  /** A chapter (its `id`) marked from outside, as hovering it in `Contents` does. */
+  highlightedChapter?: string | null;
+  /** The chapter under the pointer on the seek bar, by its `id`; null as it leaves. */
+  onChapterHighlight?: (id: string | null) => void;
 }
 
 export interface TransportChapter {
+  /** Its Range's id, by which a list beside the Canvas names it. */
+  id?: string;
   label: string;
   /** The language the label is written in (WCAG 3.1.2). */
   lang?: string;
@@ -298,6 +304,19 @@ function TransportMenu({
   );
 }
 
+/** The popover an element holds itself, if it holds one. */
+const tipIn = (element: Element) =>
+  element.querySelector<HTMLElement>(":scope > .clover-tip");
+
+/** Whether keyboard focus is on an element: where `:focus-visible` is unknown, not. */
+const focusVisible = (element: Element) => {
+  try {
+    return element.matches(":focus-visible");
+  } catch {
+    return false;
+  }
+};
+
 /**
  * Clover's own transport for a Canvas's video or sound, styled as the Player's bar:
  * the seek bar across the top, play, volume and time below, captions to the right.
@@ -317,6 +336,8 @@ const Transport: React.FC<TransportProps> = ({
   isFullscreen = false,
   video,
   chapters = [],
+  highlightedChapter = null,
+  onChapterHighlight,
 }) => {
   const { t, langOf } = useCloverTranslation();
   // Where the root cannot go full screen (iPhone), a video still can, in the system player.
@@ -324,11 +345,74 @@ const Transport: React.FC<TransportProps> = ({
   const bar = useRef<HTMLDivElement>(null);
   useBarHeight(bar);
   const { paused, currentTime, duration, buffered, muted, volume } = controller;
-  // The chapter playing: the last to start at or before now.
-  let chapter = -1;
-  chapters.forEach((candidate, index) => {
-    if (candidate.start <= currentTime) chapter = index;
-  });
+  // The chapter at a time: the last to start at or before it.
+  const chapterAt = (time: number) => {
+    let found = -1;
+    chapters.forEach((candidate, index) => {
+      if (candidate.start <= time) found = index;
+    });
+    return found;
+  };
+  // The chapter playing.
+  const chapter = chapterAt(currentTime);
+  /*
+   * The chapter under the pointer on the seek bar: its stretch of the bar drawn out, its
+   * start and title in a popover over it, and the host told (`onChapterHighlight`), for a
+   * list beside the Canvas to mark. Keyboard focus on the bar shows the playing chapter's.
+   * Set only as the pointer crosses from one chapter to the next, so a move along the
+   * bar renders nothing. One marked from outside (`highlightedChapter`) has its stretch
+   * drawn out only: a popover away from the pointer could not be hovered (WCAG 1.4.13).
+   */
+  const [pointed, setPointed] = useState(-1);
+  const pointedRef = useRef(-1);
+  const point = (index: number) => {
+    if (pointedRef.current === index) return;
+    pointedRef.current = index;
+    setPointed(index);
+    onChapterHighlight?.(chapters[index]?.id ?? null);
+  };
+  const [seekFocused, setSeekFocused] = useState(false);
+  const previewed = pointed >= 0 ? pointed : seekFocused ? chapter : -1;
+  const marked =
+    pointed >= 0
+      ? pointed
+      : chapters.findIndex(
+          (each) => each.id !== undefined && each.id === highlightedChapter,
+        );
+  /*
+   * While the popover shows, the caption cues stay above it: how far its top is from the
+   * figure's foot, `--clover-transport-preview-top`, which the captions keep their foot
+   * over (`MediaStage.css`). Taken from the popover alone, so a cue's own glide never
+   * skews it; measured as it shows, and again if it wraps.
+   */
+  const seekArea = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const area = seekArea.current;
+    const figure = area?.closest<HTMLElement>(".clover-canvas");
+    const tip = area && previewed >= 0 ? tipIn(area) : null;
+    if (!figure || !tip) return;
+    const top = "--clover-transport-preview-top";
+    const place = () =>
+      figure.style.setProperty(
+        top,
+        `${figure.getBoundingClientRect().bottom - tip.getBoundingClientRect().top}px`,
+      );
+    place();
+    const observer = new ResizeObserver(place);
+    observer.observe(tip);
+    return () => {
+      observer.disconnect();
+      figure.style.removeProperty(top);
+    };
+  }, [previewed]);
+  // Where a chapter lies along the bar, in percent of it.
+  const along = (index: number) => {
+    const { start, end = duration } = chapters[index];
+    return {
+      left: (start / duration) * 100,
+      width: ((end - start) / duration) * 100,
+    };
+  };
 
   const playKey = paused ? "playerPlay" : "playerPause";
   const captionsOff = {
@@ -382,12 +466,37 @@ const Transport: React.FC<TransportProps> = ({
         });
       }}
     >
-      <div className="clover-canvas-transport-seek-area">
+      <div
+        ref={seekArea}
+        className="clover-canvas-transport-seek-area"
+        onPointerMove={(event) => {
+          // Over its popover, the chapter it shows stays.
+          if (!duration || (event.target as Element).closest(".clover-tip"))
+            return;
+          const box = event.currentTarget.getBoundingClientRect();
+          point(chapterAt(((event.clientX - box.left) / box.width) * duration));
+        }}
+        onPointerLeave={() => point(-1)}
+        style={
+          previewed >= 0 && duration > 0
+            ? ({
+                "--clover-transport-preview": `${
+                  along(previewed).left + along(previewed).width / 2
+                }%`,
+              } as React.CSSProperties)
+            : undefined
+        }
+      >
         <input
           aria-label={t("playerSeek")}
           lang={langOf("playerSeek")}
-          aria-valuetext={`${formatTime(currentTime)} / ${formatTime(duration)}`}
+          // Where it is, and in which chapter, as the popover shows it to the eye.
+          aria-valuetext={`${formatTime(currentTime)} / ${formatTime(duration)}${
+            chapter >= 0 ? `, ${chapters[chapter].label}` : ""
+          }`}
           className="clover-canvas-transport-seek"
+          onFocus={(event) => setSeekFocused(focusVisible(event.currentTarget))}
+          onBlur={() => setSeekFocused(false)}
           max={duration || 0}
           min={0}
           onChange={(event) => controller.seek(Number(event.target.value))}
@@ -412,6 +521,24 @@ const Transport: React.FC<TransportProps> = ({
                 style={{ left: `${(marker.start / duration) * 100}%` }}
               />
             ))}
+        {marked >= 0 && duration > 0 && (
+          <span
+            aria-hidden="true"
+            className="clover-canvas-transport-chapter-span"
+            style={{
+              left: `${along(marked).left}%`,
+              width: `${along(marked).width}%`,
+            }}
+          />
+        )}
+        {previewed >= 0 && duration > 0 && (
+          // Made anew for each chapter, so it measures itself into the stage each time.
+          <Tip
+            key={previewed}
+            label={`${formatTime(chapters[previewed].start)} ${chapters[previewed].label}`}
+            lang={chapters[previewed].lang}
+          />
+        )}
       </div>
 
       {/*

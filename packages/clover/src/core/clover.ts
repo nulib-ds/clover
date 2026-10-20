@@ -107,6 +107,8 @@ export interface Clover {
   captions: Channel<string | null>;
   /** The annotation hovered or focused, in a list or on the Canvas. */
   highlight: Channel<string | null>;
+  /** The chapter (its Range's id) under the pointer on a seek bar, or in `Contents`. */
+  chapter: Channel<string | null>;
   readonly request: CloverRequest | undefined;
   setRequest(request: CloverRequest | undefined): void;
   /** Load content. `canvasId` wins over everything; `defaultCanvasId` over `start`. */
@@ -195,6 +197,7 @@ export function createClover(options: CloverOptions = {}): Clover {
   const media = createChannel<HTMLVideoElement | null>(null);
   const captions = createChannel<string | null>(null);
   const highlight = createChannel<string | null>(null);
+  const chapter = createChannel<string | null>(null);
   let annotating: AbortController | null = null;
   let searching: AbortController | null = null;
   /*
@@ -444,6 +447,7 @@ export function createClover(options: CloverOptions = {}): Clover {
     media,
     captions,
     highlight,
+    chapter,
     get request() {
       return request;
     },

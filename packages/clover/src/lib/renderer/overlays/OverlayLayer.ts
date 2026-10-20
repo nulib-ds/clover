@@ -16,6 +16,8 @@ import type { Rect } from "../math/rect";
 export class OverlayLayer {
   readonly container: HTMLDivElement;
   private overlays = new Map<HTMLElement, Rect>();
+  /** The view last positioned in, so one element can be moved between frames. */
+  private view?: [CameraState, ViewportSize];
 
   constructor(parent: HTMLElement) {
     const container = document.createElement("div");
@@ -51,24 +53,52 @@ export class OverlayLayer {
     };
   }
 
+  /**
+   * Pin `element`, already added, to another `rect` and place it there now, in the view
+   * last drawn: a hotspot following a recording, moved frame by frame with no frame of
+   * the renderer's. Nothing, for an element not pinned.
+   */
+  move(element: HTMLElement, rect: Rect): void {
+    if (!this.overlays.has(element)) return;
+    this.overlays.set(element, rect);
+    if (this.view) this.position(...this.view, element);
+  }
+
   get size(): number {
     return this.overlays.size;
   }
 
-  position(camera: CameraState, viewport: ViewportSize): void {
+  /** Place every element pinned, or `only` that one, in the view. */
+  position(
+    camera: CameraState,
+    viewport: ViewportSize,
+    only?: HTMLElement,
+  ): void {
+    this.view = [camera, viewport];
     const degrees = (camera.rotation * 180) / Math.PI;
     const upright = Math.cos(camera.rotation) > 0.9999;
+    /*
+     * Upright, each edge on a whole device pixel. Between pixels, a hairline is shared
+     * by two, and one gliding with a recording pulses as the share changes frame by
+     * frame; snapped, it stays crisp and steps a pixel at a time.
+     */
+    const ratio = upright ? window.devicePixelRatio || 1 : 0;
+    const snap = (value: number) =>
+      ratio ? Math.round(value * ratio) / ratio : value;
     for (const [element, rect] of this.overlays) {
+      if (only && element !== only) continue;
       const center = worldPointToScreen(camera, viewport, {
         x: rect.x + rect.width / 2,
         y: rect.y + rect.height / 2,
       });
-      const width = rect.width * camera.zoom;
-      const height = rect.height * camera.zoom;
+      const left = snap(center.x - (rect.width * camera.zoom) / 2);
+      const top = snap(center.y - (rect.height * camera.zoom) / 2);
+      const width = snap(rect.width * camera.zoom);
+      const height = snap(rect.height * camera.zoom);
       element.style.width = `${width}px`;
       element.style.height = `${height}px`;
       element.style.transform =
-        `translate(${center.x - width / 2}px, ${center.y - height / 2}px)` +
+        `translate(${left}px, ${top}px)` +
         (degrees ? ` rotate(${degrees}deg)` : "");
       /*
        * Where it sits in the layer, so what it shows beside itself (a hotspot's popover)
@@ -79,11 +109,8 @@ export class OverlayLayer {
       const { style, dataset } = element;
       if (upright) {
         style.setProperty("--clover-overlay-x", `${center.x}px`);
-        style.setProperty("--clover-overlay-top", `${center.y - height / 2}px`);
-        style.setProperty(
-          "--clover-overlay-bottom",
-          `${center.y + height / 2}px`,
-        );
+        style.setProperty("--clover-overlay-top", `${top}px`);
+        style.setProperty("--clover-overlay-bottom", `${top + height}px`);
         const room = center.y > viewport.height / 2 ? "above" : "below";
         if (dataset.overlayRoom !== room) dataset.overlayRoom = room;
       } else {

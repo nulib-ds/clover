@@ -1,4 +1,5 @@
 import { parseAnnotationTarget } from "./annotations";
+import { annotationTargets } from "../components/Canvas/track";
 
 const canvas = "https://example.org/canvas/1";
 
@@ -60,5 +61,65 @@ describe("parseAnnotationTarget", () => {
         source: { id: `${canvas}&t=12` },
       }),
     ).toEqual({ id: canvas, t: "12" });
+  });
+});
+
+/*
+ * Both dimensions of a Media Fragment at once, `xywh=…&t=…`: a region through a stretch
+ * of a recording, as a person followed through a film is marked (the docs'
+ * `rudolf-hess-nuremberg` mock).
+ */
+describe("a region and a time together", () => {
+  const source = { id: canvas, type: "Canvas" };
+  const fragment = (value: string) => ({
+    type: "SpecificResource",
+    source,
+    selector: {
+      type: "FragmentSelector",
+      conformsTo: "http://www.w3.org/TR/media-frags/",
+      value,
+    },
+  });
+
+  it("reads both, in either order", () => {
+    const both = { id: canvas, rect: { x: 1, y: 2, w: 3, h: 4 }, t: "5,6" };
+    expect(parseAnnotationTarget(fragment("xywh=1,2,3,4&t=5,6"))).toEqual(both);
+    expect(parseAnnotationTarget(fragment("t=5,6&xywh=1,2,3,4"))).toEqual(both);
+    expect(parseAnnotationTarget(`${canvas}#xywh=1,2,3,4&t=5,6`)).toEqual(both);
+  });
+
+  it("reads the first of several targets, however they are grouped", () => {
+    const targets = [
+      fragment("xywh=1,2,3,4&t=5,6"),
+      fragment("xywh=7,8,9,10&t=6,7"),
+    ];
+    const first = { id: canvas, rect: { x: 1, y: 2, w: 3, h: 4 }, t: "5,6" };
+    // A Presentation 3 array, and the groups Presentation 4 has (the upgrader makes an
+    // array `Independents`).
+    expect(parseAnnotationTarget(targets as never)).toEqual(first);
+    for (const type of ["Independents", "List", "Composite"])
+      expect(parseAnnotationTarget({ type, items: targets } as never)).toEqual(
+        first,
+      );
+    expect(parseAnnotationTarget({ type: "Independents" } as never)).toEqual({
+      id: "",
+    });
+  });
+
+  it("lists every target, in the order given", () => {
+    expect(
+      annotationTargets({
+        type: "Independents",
+        items: [
+          fragment("xywh=1,2,3,4&t=5,6"),
+          `${canvas}#xywh=7,8,9,10&t=6,7`,
+        ],
+      }),
+    ).toEqual([
+      { id: canvas, rect: { x: 1, y: 2, w: 3, h: 4 }, t: "5,6" },
+      { id: canvas, rect: { x: 7, y: 8, w: 9, h: 10 }, t: "6,7" },
+    ]);
+    expect(annotationTargets(canvas)).toEqual([{ id: canvas }]);
+    expect(annotationTargets(undefined)).toEqual([]);
   });
 });
