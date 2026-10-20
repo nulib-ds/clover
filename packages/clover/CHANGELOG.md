@@ -1137,7 +1137,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - **One place for what the controls open.** The information box (below) and the menus
     (annotations, Choice) hang `s` below the Canvas's controls, lined up with their end
     (`--clover-canvas-chrome-inset`), no wider than 22rem or taller than the Canvas leaves
-    room for, with one look; on a phone, beside the controls' column. The information box
+    room for, with one look; on a short stage, beside the controls. The information box
     had hung at its own distance, 1rem in from the edge, out of line with the menus. The
     menus are now the Canvas's own children, as the box is, not the controls': a
     stylesheet that reached them through `.clover-canvas-controls .clover-canvas-menu`
@@ -1526,11 +1526,20 @@ are in the repository's `ACCESSIBILITY.md`.
     }
     ```
 
-  - The information box and the Canvas's menus sit below every row of the controls, or
-    beside every column on a phone, however the controls wrap on a short stage. The
-    Canvas writes `--clover-canvas-controls-width` and `--clover-canvas-controls-height`
-    inline on `.clover-canvas` for them. On a phone they have no minimum width. The
-    controls' own box takes no presses; only the controls do.
+  - The information box and the Canvas's menus sit below every row of the controls,
+    however the controls wrap. On a stage too short to leave them room to read there
+    (under about 7rem), and with room beside the controls, they sit beside them from
+    the top instead, with no minimum width: the Canvas says so with
+    `data-popups="beside"`. The Canvas writes `--clover-canvas-controls-width` and
+    `--clover-canvas-controls-height` inline on `.clover-canvas` for them. The controls'
+    own box takes no presses; only the controls do.
+  - **The controls on a narrow stage** (a phone) are rows, never a column: the row at
+    the top end wraps onto more rows below, each at the end, read and reached in the
+    order they show. A column used to wrap onto more columns on a short stage, out of
+    order, with the panel's toggle among them. The panel's toggle now keeps the top
+    right corner at every size, out of the row (pinned to the cluster's top end, the
+    room for it kept), with a placeholder's toggle beside it. A stylesheet that relied
+    on the column (below 575px wide) or on the toggle's `order` no longer applies.
   - Escape returns focus to a menu's control (Choice, annotations, frames) only when it
     is pressed in the menu or on the control. From elsewhere it closes the menu and
     leaves focus where it is. Escape now closes the information box from anywhere in

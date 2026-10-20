@@ -814,10 +814,19 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   Labels come from `useCloverTranslation` (`t`), each with `lang={langOf(key)}`: see the
   root AGENTS.md's i18n section. `useClusterReach` (`src/ui/useClusterReach.ts`) writes
   how far the cluster's controls reach, `--clover-canvas-controls-width` and `-height`,
-  on `.clover-canvas`, so the information box and the menus clear every row (or, on a
-  phone, every column) however the cluster wraps. It measures the controls, not the
-  cluster's box, which Chromium makes wider than its controls when a column wraps; the
-  box itself takes no presses.
+  on `.clover-canvas`, so the information box and the menus clear every row however the
+  cluster wraps, and sets `data-popups="beside"` where a short stage leaves them under
+  `BELOW_MIN` (112px) below it and `BESIDE_MIN` (128px) beside it (`ControlMenu.css`
+  then hangs them from the top, beside the cluster). It measures the controls, not the
+  cluster's box, which the pinned panel toggle's room is part of; the box itself takes
+  no presses.
+- **Rows at every size, never a column** (Mat, 2026-10-20: a column wrapped onto columns
+  on a short phone stage, jumbled, the panel toggle mid-pack). The cluster is a row at
+  the top end that wraps onto more rows, each right-aligned, in DOM order (WCAG 1.3.2,
+  2.4.3). The panel toggle is out of the row (`position: absolute` at the cluster's top
+  end, `padding-right` keeping its room; twice that with a placeholder's toggle beside
+  it, `Placeholder.css`), so it is top right at every size. No column rules for phones
+  (once `@media (max-width: 575px)`) remain; do not bring one back.
 - IIIF text in the Canvas (the caption's label, Choice's legend and items, the
   placeholder's alt, the viewport's name, hotspots) is read with `localize()` in the
   Canvas's `language` (Connected passes the Root's) and carries its `lang`. The viewport
@@ -970,8 +979,8 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   opens `Caption.tsx`, the figure's `<figcaption>`, which must stay its last child.
   - The caption hangs below the cluster's last row, right-aligned, as the Choice and
     annotations menus do. Its z-index is below the cluster's, so zoom and the other
-    controls stay usable while it is open. On a phone it sits beside the cluster's
-    columns.
+    controls stay usable while it is open. On a short stage (`data-popups="beside"`)
+    it sits beside the cluster, from the top.
   - It is content, not a menu: it does not fade with the chrome or close on an outside
     press. It closes from its ×, the `i` control, or Escape anywhere in the figure, and
     stays open as the host moves between Canvases that have information. Escape inside
