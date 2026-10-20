@@ -715,6 +715,25 @@ margin clear round it at home (zoomed in, it still runs to the edges). The contr
 }
 ```
 
+### `Canvas` or `Content`
+
+In a layout, place `Content` rather than `Canvas`. `Content` draws the Root's current
+view with this Canvas, and adds what a layout needs round it:
+
+- **A height.** The Canvas fills its parent, and `Content` is that parent, sized by
+  `--clover-content-height` (default `60vh`), set inline so it holds without the
+  stylesheet.
+- **Renderers of your own.** A view that one of `renderers` (on `Content` or the `Root`)
+  claims is drawn by it in place of the Canvas. See
+  [Composing Layouts](/docs/composing#renderers-of-your-own).
+- **Loading.** While the Root loads a Manifest, `Content` is `aria-busy` and shows
+  Clover's loading mark over what it still shows, keeping its size.
+
+It takes this Canvas's props, but for `canvases`, `body`, `src`, `isTiledImage` and
+`viewingDirection`, which come from the Root, and passes its children on as controls. A
+`Canvas` alone in a Root shows the same view, without those three. Place `Canvas`
+itself to draw what you hand it, in a Root or out of one.
+
 ## Props
 
 `Canvas` reads IIIF Presentation 4, Clover's one data shape. Upgrade Presentation 2 or 3

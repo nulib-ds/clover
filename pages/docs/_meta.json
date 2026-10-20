@@ -19,6 +19,7 @@
   },
   "items": "Items",
   "canvas": "Canvas",
+  "information-panel": "InformationPanel",
   "map": "Map",
   "--contribute": {
     "type": "separator",

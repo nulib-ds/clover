@@ -102,7 +102,7 @@ template, and the Viewer, takes these props and hands them to its `Root`.
 | `Position`         | "2 / 5", counted in views (or members); "Item 2 of 5" to assistive technology, in the reader's language. Its room is its widest count's.                                                                                            |
 | `Status`           | Loading, as Clover's loading mark (announced "Loading…"), or what went wrong. Once loaded, its status region stays, empty and hidden, so the next load is announced. `loading={false}` only announces it, where `Content` shows it. |
 | `Items`            | Thumbnails of the views, as a carousel, list or grid, or `layout="pager"`: `Position`, `Previous` and `Next` in a `nav`. See [Items](/docs/items).                                                                                  |
-| `InformationPanel` | Tabs of information. About by default; give it `Tab`s to choose your own.                                                                                                                                                           |
+| `InformationPanel` | The resource's information in sections, as tabs or an accordion: the ones it has data for, or `Tab`s of your own. See [InformationPanel](/docs/information-panel).                                                                  |
 | `Tab`              | One tab of the panel: `value`, `label`, and what it shows. Your own components go here.                                                                                                                                             |
 | `About`            | Everything the Manifest says about itself, as 3.x's About tab shows it.                                                                                                                                                             |
 | `PanelToggle`      | Shows and hides the panel. As a child of `Content`, it sits with the Canvas's controls.                                                                                                                                             |
@@ -174,21 +174,10 @@ open.
 
 ## The information panel
 
-`InformationPanel` shows the sections that have something to show: About, and
-Collection, Annotations, Contents, Search, Transcript and Map when the content has
-them. Collection, after About, lists the members of the Collection the Manifest was
-reached through, or the one it is `partOf` (fetched only when the section opens), and
-choosing one shows it. It lays them
-out as tabs (`layout="tabs"`, the default) or stacked boxes (`layout="accordion"`), from
-the same parts and the same state, so switching keeps what is open. `value`,
-`defaultValue` and `onValueChange` choose the open section. `headingLevel` (default 3)
-is the level of the boxes' headings, a level under the heading the panel belongs to; the
-default sections' own headings are a level below them, or at it in tabs, which are not
-headings.
-
-Give it `Tab`s to choose the sections yourself. Each part a default section uses (`About`,
-`Annotations`, `Contents`, `Search`, `Transcript`) works on its own too, in a `Tab` or
-anywhere in the layout.
+`InformationPanel` shows About, and each other section the content has something for:
+Collection, Contents, Search, Map, Transcript and Annotations. Give it `Tab`s to choose
+the sections yourself, in your order. Each part a default section uses works on its own
+too, in a `Tab` or anywhere in the layout, and so does a part of your own.
 
 ```jsx
 <Clover.InformationPanel>
@@ -204,9 +193,8 @@ anywhere in the layout.
 ```
 
 `PanelToggle` shows and hides it; as a child of `Content`, it sits with the Canvas's
-controls. Give the panel `onClose` and it gets a close button. Closing from inside it
-hands focus back to its `PanelToggle` (whatever names it in `aria-controls`). Add
-`closeOnEscape` when the panel floats over the page rather than sitting beside it.
+controls. [InformationPanel](/docs/information-panel) has its layouts, the sections and
+when each shows, headings, closing a panel that floats over the page, and its props.
 
 ## Panes side by side
 

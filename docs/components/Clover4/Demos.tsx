@@ -1,5 +1,4 @@
 import dynamic from "next/dynamic";
-import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { useMapWorker } from "docs/lib/map-worker";
 import { useMock } from "docs/lib/useMock";
@@ -392,6 +391,85 @@ export function ItemsLayoutsDemo() {
         layout={layout}
         iiifContent={`${RECIPES}/0009-book-1/manifest.json`}
       />
+    </div>
+  );
+}
+
+const PanelInRoot = dynamic(
+  () =>
+    import("@nulib/clover").then(({ Root, Content, InformationPanel }) => {
+      function PanelDemo({
+        iiifContent,
+        layout,
+      }: {
+        iiifContent: string;
+        layout: "tabs" | "accordion";
+      }) {
+        return (
+          <Root
+            iiifContent={iiifContent}
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "1rem",
+              alignItems: "start",
+            }}
+          >
+            <Content style={{ flex: "2 1 20rem", minWidth: 0, height: 420 }} />
+            {/*
+             * The panel is as tall as its sections: it scrolls here, beside the Canvas, as
+             * the templates' does, so the accordion's headings stick within it.
+             */}
+            <div
+              style={{
+                flex: "1 1 18rem",
+                minWidth: 0,
+                height: 420,
+                overflowY: "auto",
+              }}
+            >
+              {/* Under the page's "Tabs or accordion" h2. */}
+              <InformationPanel layout={layout} headingLevel={3} />
+            </div>
+          </Root>
+        );
+      }
+      return PanelDemo;
+    }),
+  { ssr: false },
+);
+
+/**
+ * `InformationPanel` beside `Content`, over the White catalog mock (About, Collection,
+ * Contents, Annotations), in either layout. Not remounted on a switch: the open section
+ * stays open, as it does for the reader.
+ */
+export function InformationPanelDemo() {
+  const url = useMock("paged/manifest.json");
+  const [layout, setLayout] = useState<"tabs" | "accordion">("tabs");
+  return (
+    <div style={{ margin: "1.5rem 0 2rem" }}>
+      <div
+        role="group"
+        aria-label="Layout"
+        style={{ display: "flex", gap: "0.375rem", marginBottom: "1rem" }}
+      >
+        {(["tabs", "accordion"] as const).map((name) => (
+          <button
+            key={name}
+            type="button"
+            aria-pressed={name === layout}
+            onClick={() => setLayout(name)}
+            style={{
+              ...pill,
+              ...(name === layout ? pillPressed : undefined),
+            }}
+          >
+            {name}
+          </button>
+        ))}
+      </div>
+      {url && <PanelInRoot layout={layout} iiifContent={url} />}
     </div>
   );
 }

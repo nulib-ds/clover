@@ -50,6 +50,14 @@ deadline.
     `pages/docs/composing.mdx` ("Composing Layouts", under Templates). The Viewer page
     covers what the Viewer handles and links there; add composition material there, not
     to the Viewer page.
+  - A part with a reference of its own has a page under "Components": `Items`, `Canvas`,
+    `InformationPanel` and `Map`. `pages/docs/information-panel.mdx` holds the panel's
+    layouts and keys, its default sections and when each shows, `Tab`s, headings,
+    showing and closing it, the open section, its props (and `Tab`'s, `PanelToggle`'s,
+    `About`'s), and 3.x's `options.informationPanel`; Composing keeps a short section
+    with the `Tab` example and links there. Its demo (`InformationPanelDemo`) is the
+    `paged` mock, and its `headingLevel` follows the `h2` it sits under. `canvas.mdx`
+    says when to place `Content` rather than `Canvas`.
   - A Viewer or standalone `Items` on a docs page takes the `headingLevel` one below the
     heading it sits under (`docs/components/Clover4/Demos.tsx`: 3 under an `h2`, 4 under
     an `h3`), so the page's outline stays true. Move a demo, and check its level. The DC
