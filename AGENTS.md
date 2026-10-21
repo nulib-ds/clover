@@ -85,8 +85,30 @@ deadline.
     follows the `h2` it sits under. `canvas.mdx` says when to place `Content` rather
     than `Canvas`.
   - Use Clover: Get Started (`/docs`, which holds the web component, `<clover-viewer>`,
-    in its own section), Viewer (with Templates under it, `/docs/viewer/templates`, and
-    a section of its own on the templates, live), Composing Layouts, Cookbook Recipes.
+    in its own section), Viewer (`/docs/viewer`, the templates on it: their old page,
+    `/docs/viewer/templates`, forwards to `#templates`), Composing Layouts, Cookbook
+    Recipes.
+  - The Viewer page reads as Radix Themes' component pages do (Mat, 2026-10-21): the
+    title and a lede (`docs-lede`), one example at the top (the template, switched
+    by a large segmented control, its code following), then "API Reference" (the
+    Viewer's props, then each template's: Prop, Type, Default, Description), then
+    "Examples", an `h3` each with one sentence, a live example and its code. Its
+    examples are `ViewerExample` and `OptionsExample` (`docs/components/Clover4/
+ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
+    `playground-config.ts`, never a Cookbook recipe; the one exception is Content
+    Search, the newspaper mock, as none of those has a search service), mounted only
+    near the window (a browser keeps only so many WebGL contexts), in a hairline frame
+    with little room at its sides, its code attached under it. The page has no table of
+    contents, so the examples have the width; its prose keeps a reading measure, and
+    its sections more room (`layout.css`).
+  - Under Viewer, the Default template's page (`/docs/viewer/default`; Mat, 2026-10-21,
+    an experiment he may drop) walks through Default region by region: a live example,
+    its regions where it lays them out (`DefaultAnatomy.tsx`, an ordered list in reading
+    order), each region with its real code, its styles, what it does for accessibility,
+    how to copy it, and its full source. Every quote is `SourceFile`
+    (`docs/components/SourceFile.tsx`): the package's file, or a stretch of it from one
+    line to another, read and highlighted as the page is built, so a quote that no
+    longer matches fails the build rather than going stale.
   - A Viewer or standalone `Items` on a docs page takes the `headingLevel` one below the
     heading it sits under (`docs/components/Clover4/Demos.tsx`: 3 under an `h2`, 4 under
     an `h3`), so the page's outline stays true. Move a demo, and check its level. The DC
@@ -211,7 +233,8 @@ deadline.
   - The homepage's three sections after the playground open alike, with `SectionIntro`
     (`docs/components/Home/SectionIntro.tsx`): a hairline over it, a title ending in a
     period, one short note (`--text-lede`, as the hero's sentence and the choice's), and one call to action (`cta-solid` or `cta-outline`,
-    `tokens.css`). And more (the parts counted, "See them all"), Why Clover ("Read the
+    `tokens.css`). And more (the parts counted, "See them all"; the Collection's tile the first under it, Mat,
+    2026-10-21), Why Clover ("Read the
     docs") and Install ("Get started"), the last in the gap after Coverage, beside the
     held viewer, so the hold runs to the page's foot.
   - The footer (`docs/components/SiteFooter.tsx`, inside Nextra's `Footer`, styled in

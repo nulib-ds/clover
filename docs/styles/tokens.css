@@ -235,6 +235,13 @@
 :root,
 .dark {
   --clover-color-accent: var(--accent-9);
+  /*
+   * Clover's text in the accent (links, Read more, the selected item's label): the
+   * accent's text step, darker on light and lighter on dark, 4.5:1 on the page in both.
+   * One accent cannot pass as text on the dark ground and under the round controls'
+   * white glyphs at once (D1).
+   */
+  --clover-color-accent-text: var(--accent-11);
   --clover-color-accent-muted: var(--accent-11);
   --clover-color-accent-alt: var(--accent-10);
 

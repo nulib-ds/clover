@@ -1,0 +1,424 @@
+---
+title: Default template
+description: How the Viewer's own layout is built from Clover's parts, region by region, so you can change it or build your own from it.
+---
+
+import { DefaultAnatomy } from "docs/components/Clover4/DefaultAnatomy";
+import {
+  OptionsExample,
+  ViewerExample,
+} from "docs/components/Clover4/ViewerDocs";
+import { SourceFile } from "docs/components/SourceFile";
+
+# Default template
+
+<div className="docs-lede">
+  The Viewer's own layout, region by region: how it is built from Clover's
+  parts, so you can change it, or start a layout of your own from it.
+</div>
+
+<ViewerExample resource="catalog" headingLevel={2} height="24rem">
+
+```jsx
+import Viewer from "@nulib/clover";
+import "@nulib/clover/styles.css";
+
+<Viewer iiifContent="https://nulib-ds.github.io/clover/mocks/paged/manifest.json" />;
+```
+
+</ViewerExample>
+
+## How it is put together
+
+`Default` is what the Viewer draws when you give it no `template`: Clover 3.x's Viewer,
+rebuilt. It is one React component of about 300 lines and one stylesheet, and it uses
+nothing private. Every piece is a part `@nulib/clover` exports, or one of four small
+hooks beside it in `templates/shared/`. Anything it does, a layout of yours can do.
+
+It has five regions. The header, the stage and the strip run down a main pane; the panel
+has a pane of its own beside it, and the bar between them shares the width.
+
+<DefaultAnatomy />
+
+1. **The header**: the resource's thumbnail and title.
+2. **The stage**: the view itself (an image to zoom, a spread, video or sound), with its
+   controls, and the panel's toggle while the panel is closed.
+3. **The strip**: where the reader is, as "Page 3 · Page 4" and "3 / 17", and the
+   thumbnails.
+4. **The bar**: drag it, click it or use the arrow keys on it to share the width.
+5. **The panel**: About, and whichever of Collection, Contents, Annotations, Search,
+   Transcript and Map the resource has.
+
+In outline, simplified, the markup is:
+
+```jsx
+<Clover.Root className="clover-template-default">
+  <Clover.Split className="clover-template-default-body">
+    <Clover.SplitPane className="clover-template-default-main">
+      <header className="clover-template-default-header">
+        <Clover.Thumbnail />
+        <Clover.Label as="h2" />
+      </header>
+      <Clover.Content className="clover-template-default-stage" />
+      <div className="clover-template-default-rail">
+        <ViewTitles />
+        <Clover.Position />
+        <Clover.Items layout="carousel" />
+      </div>
+    </Clover.SplitPane>
+    <Clover.SplitHandle />
+    <Clover.SplitPane name="panel" size="24rem">
+      <Clover.Panel />
+    </Clover.SplitPane>
+  </Clover.Split>
+</Clover.Root>
+```
+
+The rest of this page walks through the real code, region by region, then gives the
+whole of it.
+
+## Props
+
+`Default` takes the props in the Viewer's [API Reference](/docs/viewer#default), each
+with its default here, and every `Root` prop besides, which it hands to its `Root`
+untouched (`...root`).
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="export function Default({"
+  to="}: DefaultProps) {"
+/>
+
+## The root and the split
+
+Everything sits in one `Clover.Root`, which loads the resource and shares it with every
+part inside, wherever it is placed. The root carries the template's class, and
+`data-fill` when `fill` is set.
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="<Clover.Root"
+  toLine=">"
+/>
+
+Inside it, a `Clover.Split` lays out the main pane and the panel's pane side by side,
+with the bar between them. It remembers the width the reader chooses, under
+`storageKey`. It also says where the panel is, in `data-panel` and `data-panel-open`, for
+the stylesheet. Escape anywhere in it puts a floating panel away.
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="<Clover.Split"
+  toLine=">"
+/>
+
+## Beside or over
+
+The panel sits beside the stage where there is room for both, and slides over it where
+there is not. Default measures its own width, not the window's, so a Viewer in a narrow
+column of a wide page behaves as it would on a phone. The stage keeps at least 16rem and
+the panel 14rem; under that and the bar, 31rem, the panel goes over.
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="const STAGE_MIN"
+  to="const BESIDE_REM"
+/>
+
+Until the reader opens or closes it, the panel is open when it fits beside the stage, and
+closed when it would cover it. `defaultPanelOpen` starts it one way or the other.
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="const beside = useWideEnough"
+  to="const open = choice ?? beside;"
+/>
+
+If the Viewer narrows under an open panel, the panel closes, rather than suddenly
+covering the page, and focus that was inside it goes to its toggle.
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="const wasBeside = useRef(beside);"
+  toLine="}, [beside]);"
+/>
+
+Narrow the box to see the panel go over the stage, its toggle among the stage's controls.
+
+<OptionsExample
+  prop="width"
+  label="Width"
+  options={["100%", "24rem"]}
+  labels={["Wide", "Narrow"]}
+  resource="catalog"
+  headingLevel={3}
+  height="22rem"
+>
+<div data-option="100%">
+
+```jsx
+<Viewer iiifContent={url} />
+```
+
+</div>
+<div data-option="24rem">
+
+```jsx
+<div style={{ width: "24rem" }}>
+  <Viewer iiifContent={url} />
+</div>
+```
+
+</div>
+</OptionsExample>
+
+## The header
+
+The resource's thumbnail and title, unless `header={false}`. The thumbnail is
+decorative (`alt=""`), since the title beside it says what it shows. The title is a
+heading at `headingLevel`, an `h2` by default.
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="{header && ("
+  toLine=")}"
+/>
+
+## The stage
+
+`Clover.Content` is the stage. It draws whatever the view is (an image to zoom, a
+spread, video or sound with its transport, an animation) with the controls over it. Its
+children are drawn among those controls, which is where the panel's toggle goes while
+the panel is not docked beside it. `Clover.Status` tells screen readers the resource is
+loading, or why it failed; the stage shows it, so nothing on the page moves.
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="<Clover.Status"
+  to="</Clover.Content>"
+/>
+
+The stage is `--clover-content-height` tall, `min(65vh, 40rem)` by default. With
+`fill`, it takes what the header and the strip leave in the box instead, never less than
+16rem.
+
+## The strip
+
+Under the stage: where the reader is, and the thumbnails. `Clover.Position` is the
+count, "3 / 17". `Clover.Items` draws the thumbnails, as a carousel by default (`items`
+picks another layout, or none), and its arrows are Previous and Next. A resource of one
+view has no strip at all.
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from={'<div className="clover-template-default-rail">'}
+  toLine="</div>"
+  nth={2}
+/>
+
+`ViewTitles` is the template's own: the label of the page in view, or both of a
+spread's, a dot between them. `useVisibleCanvases()`, which `@nulib/clover` exports,
+gives the Canvases in view, and `Clover.Label` reads each one's label in the reader's
+language.
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="function ViewTitles()"
+  toLine="}"
+/>
+
+## The bar
+
+`Clover.SplitHandle` is the bar between the panes, drawn only while the panel is docked.
+Drag it by its grip; click or tap it to step the panel from its narrowest to 24rem to
+its widest and round again; or focus it and use the arrow keys, Home and End for the
+limits. No step needs a drag.
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="{docked && <Clover.SplitHandle"
+  toLine=")}"
+/>
+
+Right after the bar sits the panel's toggle, on the bar itself, its spine. `useSpine`
+lays it across the bar, level with the stage's controls, and measures again as the panes
+resize: the bar dragged, a title wrapping. It is not inside the handle, a `separator`,
+whose contents assistive technology does not reach.
+
+<SourceFile file="templates/default/Default.tsx" from="useSpine(" toLine=");" />
+
+## The panel
+
+The panel's pane is 24rem wide to start, and at least 14rem. `Clover.Panel` lists the
+resource's sections, stacked as an accordion or, with `panelLayout="tabs"`, as tabs. Its
+headings are a level below the title, or at `headingLevel` with no header, where they
+take the title's place in the page's outline. Docked, the toggle closes it; over the
+stage, it carries its own close button and closes on Escape.
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="{panel && ("
+  toLine=")}"
+/>
+
+<SourceFile file="templates/default/Default.tsx" from="const below" />
+
+### Its toggle
+
+One `Clover.PanelToggle`, drawn in one of two places: on the bar while the panel is
+docked, and among the stage's controls otherwise. A press moves it, so focus follows it
+to its new place (`useFollowFocus`), and is never left on something gone or hidden. The
+panel's `id` ties the toggle to what it opens (`aria-controls`).
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="const toggle = ("
+  toLine=");"
+/>
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="const followFocus = useFollowFocus();"
+  toLine="};"
+/>
+
+### Over the stage
+
+On a phone the panel is a drawer. `useSlide` slides it in and out, and hides it once it
+is out of sight. `useFocusOnOpen` takes focus into it as it opens, as an overlay should.
+`useDragToClose` lets a finger drag it back off the way it came. A scrim covers the stage
+under it, and a strip of the page stays uncovered: a click there, Escape, or the panel's
+close button puts it away, and focus in it goes back to the toggle.
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="const slide = useSlide(over && open);"
+  to="const shown = over"
+/>
+
+<SourceFile
+  file="templates/default/Default.tsx"
+  from="{panel && over && slide.mounted && ("
+  toLine=")}"
+/>
+
+## Styles
+
+Default's styles are in `@nulib/clover/styles.css`, with the parts', so a Viewer with no
+template needs one stylesheet. Every class starts with `clover-template-default`. Each
+region is `--clover-inset` inside all round, so nothing around it needs a margin.
+
+| Class                                 | What it styles                                                               |
+| ------------------------------------- | ---------------------------------------------------------------------------- |
+| `.clover-template-default`            | The root: a column, and the stage's height, `--clover-content-height`.       |
+| `.clover-template-default[data-fill]` | With `fill`: as tall as its box, the stage taking what the rest leave.       |
+| `.clover-template-default-header`     | The header: the thumbnail and the title, `s` apart.                          |
+| `.clover-template-default-thumbnail`  | The thumbnail, `xl` high, at its own shape up to 5rem wide.                  |
+| `.clover-template-default-title`      | The title, at the large text step.                                           |
+| `.clover-template-default-body`       | The split, with `data-panel` (`"beside"` or `"over"`) and `data-panel-open`. |
+| `.clover-template-default-main`       | The main pane: the header, the stage and the strip, in a column.             |
+| `.clover-template-default-stage`      | The stage, `Clover.Content`.                                                 |
+| `.clover-template-default-rail`       | The strip; `-rail-header` holds `-titles` and the position.                  |
+| `.clover-template-default-spine`      | The toggle on the bar.                                                       |
+| `.clover-template-default-panel`      | The panel's pane: beside, it scrolls within the main pane's height.          |
+| `.clover-template-default-scrim`      | The wash over the stage under a floating panel.                              |
+
+Beside the stage, the panel's pane is as tall as the main pane, however long its
+sections run: size containment keeps them from making the row taller, and it scrolls
+within.
+
+<SourceFile
+  file="templates/default/Default.css"
+  from=".clover-template-default-panel {"
+  toLine="}"
+/>
+
+Over the stage, it slides in from the end, never wider than the Viewer less a strip of
+the page. Nothing slides for a reader who asks for reduced motion.
+
+<SourceFile
+  file="templates/default/Default.css"
+  from={'.clover-template-default-body[data-panel="over"] {'}
+  toLine="}"
+  nth={2}
+/>
+
+`fill` gives the stage what the header and the strip leave, as flex rather than a height:
+
+<SourceFile
+  file="templates/default/Default.css"
+  from=".clover-template-default[data-fill] {"
+  toLine="}"
+  nth={3}
+/>
+
+## Accessibility
+
+Default meets WCAG 2.2 AA, with the parts it is made of. What is left is checking, not
+code: on phones, in screen readers, and with native speakers of its translations, as
+[ACCESSIBILITY.md](https://github.com/nulib-ds/clover/blob/main/ACCESSIBILITY.md) lists.
+What Default adds as a layout:
+
+- **Headings that fit the page.** The title is at `headingLevel` and the panel's
+  sections a level below, so a screen reader's list of headings matches the page as it
+  looks.
+- **Focus that follows.** The toggle moves as it is pressed, and focus goes with it. A
+  floating panel takes focus as it opens and gives it back to the toggle as it closes;
+  one that closes as the Viewer narrows hands focus back first.
+- **No step needs a drag.** The bar steps on a click or a tap, and moves with the arrow
+  keys; a drawer dragged closed also closes from its button, Escape, or a click beside it.
+- **Nothing covered for good.** A floating panel always leaves a strip of the page in
+  sight, and Escape anywhere in the Viewer puts it away.
+- **Zoom and text spacing.** It measures its own width, so at 400% zoom it lays out as on
+  a phone. Titles wrap rather than being cut short.
+- **Reduced motion.** The panel and its scrim appear and go without sliding or fading.
+
+## Make it yours
+
+Copy it, and change what you like:
+
+1. Copy `Default.tsx` and `Default.css` from `packages/clover/src/templates/default/`
+   into your app, with the four hooks it imports from `templates/shared/`: `useSlide.ts`,
+   `useSpine.ts`, `useFollowFocus.ts` and `useDragToClose.ts`.
+2. Import the parts from `@nulib/clover` where it imports `../../parts`.
+3. Rename it, and its classes from `clover-template-default` to your own, so its styles
+   and Clover's never meet.
+4. Pass it as the Viewer's `template`. A template is a component that takes the Root's
+   props, and the Viewer hands it everything but `template`.
+
+```jsx
+import Viewer from "@nulib/clover";
+import { Catalog } from "./Catalog";
+import "@nulib/clover/styles.css";
+import "./Catalog.css";
+
+<Viewer iiifContent={url} template={Catalog} />;
+```
+
+The parts read the Root's state wherever they sit, so moving one is moving its markup:
+to put the strip over the stage, move its `div` above `Clover.Content`. Moving the panel
+to the other side takes more, since the bar and the toggle go with it and the drawer
+slides from that side (`useDragToClose`'s `side`, and the stylesheet's
+`inset-inline-end`). For a layout that starts from nothing, see
+[Composing Layouts](/docs/composing).
+
+## The full source
+
+All of it, as it is in `@nulib/clover` now, read from the package as this page is built.
+
+<SourceFile file="templates/default/Default.tsx" />
+
+<SourceFile file="templates/default/Default.css" />
+
+<details>
+<summary>The shared hooks it imports</summary>
+
+<SourceFile file="templates/shared/useSlide.ts" />
+
+<SourceFile file="templates/shared/useSpine.ts" />
+
+<SourceFile file="templates/shared/useFollowFocus.ts" />
+
+<SourceFile file="templates/shared/useDragToClose.ts" />
+
+</details>

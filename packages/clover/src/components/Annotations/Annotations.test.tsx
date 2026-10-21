@@ -62,7 +62,7 @@ beforeEach(() => {
 afterEach(() => viewport.restore());
 
 async function renderWithStage(
-  children: React.ReactNode = <Clover.Annotations />,
+  children: React.ReactNode = <Clover.Annotations scope="view" />,
 ) {
   render(
     <Clover.Root iiifContent={imageJson}>
@@ -103,7 +103,7 @@ describe("Annotations", () => {
     render(
       <Clover.Root iiifContent={hotspotJson}>
         <Clover.Content />
-        <Clover.Annotations />
+        <Clover.Annotations scope="view" />
         <Spy />
       </Clover.Root>,
     );
@@ -208,7 +208,7 @@ describe("Annotations", () => {
     };
     render(
       <Clover.Root iiifContent={imageJson} annotations={page}>
-        <Clover.Annotations />
+        <Clover.Annotations scope="view" />
       </Clover.Root>,
     );
     // Marked with its label's language.
@@ -251,7 +251,7 @@ describe("Annotations", () => {
         iiifContent={imageJson}
         annotations={pageOf({ en: ["Notes"] })}
       >
-        <Clover.Annotations headingLevel={4} />
+        <Clover.Annotations scope="view" headingLevel={4} />
       </Clover.Root>,
     );
     expect(
@@ -280,7 +280,7 @@ describe("Annotations", () => {
 
     render(
       <Clover.Root iiifContent={imageJson} annotations={pageOf()}>
-        <Clover.Annotations headingLevel={4} />
+        <Clover.Annotations scope="view" headingLevel={4} />
       </Clover.Root>,
     );
     expect(
@@ -315,7 +315,7 @@ describe("Annotations", () => {
     const added = async (annotation: Record<string, unknown>) => {
       const { container } = render(
         <Clover.Root iiifContent={imageJson} annotations={pageOf(annotation)}>
-          <Clover.Annotations />
+          <Clover.Annotations scope="view" />
         </Clover.Root>,
       );
       await waitFor(() =>
@@ -368,7 +368,7 @@ describe("Annotations", () => {
       };
       render(
         <Clover.Root iiifContent={imageJson} annotations={page}>
-          <Clover.Annotations />
+          <Clover.Annotations scope="view" />
         </Clover.Root>,
       );
       expect(
@@ -403,7 +403,7 @@ describe("Annotations", () => {
       };
       const { container } = render(
         <Clover.Root iiifContent={imageJson} annotations={page}>
-          <Clover.Annotations />
+          <Clover.Annotations scope="view" />
         </Clover.Root>,
       );
       const button = await screen.findByRole("button", {

@@ -458,8 +458,9 @@ every rule below.
   the `highlight` channel. Selection is controlled on the Canvas (`selectedAnnotation`),
   which frames a new id once its hotspot is placed. Presentation 4 groups several bodies
   in `Independents`/`Composite`/`List`; read bodies through `bodiesOf()`.
-  - The `Panel` lists every annotation (`Annotations scope="all"`, Mat
-    2026-10-19): `AnnotationLayers`, by layer (`layersOf`: sets sharing a localized label
+  - The `Panel` lists every annotation (Mat, 2026-10-19), as `Annotations` does by
+    default (`scope="all"`, since 2026-10-21: handled at the part, so one placed alone
+    lists what the panel would, and no template passes it): `AnnotationLayers`, by layer (`layersOf`: sets sharing a localized label
     are one layer, the unlabeled ones another) and then by Canvas, in sequence order;
     a Manifest of one Canvas gets no Canvas labels or `aria-current` (`grouped`), which
     would only repeat the item and push a note's headings a level deeper.

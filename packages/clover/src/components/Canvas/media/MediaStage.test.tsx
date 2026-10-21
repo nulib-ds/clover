@@ -822,7 +822,7 @@ describe("Canvas media", () => {
       render(
         <Clover.Root iiifContent={poetryJson}>
           <Clover.Content />
-          <Clover.Annotations />
+          <Clover.Annotations scope="view" />
           <Spy />
         </Clover.Root>,
       );
@@ -948,7 +948,7 @@ describe("Canvas media", () => {
       render(
         <Clover.Root iiifContent={hessJson}>
           <Clover.Content />
-          <Clover.Annotations />
+          <Clover.Annotations scope="view" />
           <Spy />
         </Clover.Root>,
       );
@@ -1041,7 +1041,7 @@ describe("Canvas media", () => {
       render(
         <Clover.Root iiifContent={hessJson}>
           <Clover.Content />
-          <Clover.Annotations />
+          <Clover.Annotations scope="view" />
           <Spy />
         </Clover.Root>,
       );

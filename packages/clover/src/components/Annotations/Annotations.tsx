@@ -38,9 +38,10 @@ import { visuallyHidden } from "../../ui/visuallyHidden";
 
 export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
   /**
-   * The view's annotations (default), or every annotation in the Manifest: by layer
-   * (AnnotationPages that share a label, or have none), then by Canvas, under each
-   * Canvas's label, the ones in view marked current and kept in sight as the reader moves.
+   * Every annotation in the Manifest (default), as the Viewer's panel lists them: by
+   * layer (AnnotationPages that share a label, or have none), then by Canvas, under each
+   * Canvas's label, the ones in view marked current and kept in sight as the reader
+   * moves. Or `"view"`: the view's alone, by set.
    */
   scope?: "view" | "all";
   /** Your own rendering of an annotation's content. */
@@ -70,7 +71,7 @@ export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
 export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
   function Annotations(
     {
-      scope = "view",
+      scope = "all",
       renderEntry,
       headingLevel = 3,
       as: Tag = "div",

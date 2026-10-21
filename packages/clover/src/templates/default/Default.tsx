@@ -253,12 +253,18 @@ export function Default({
         )}
         {panel && over && slide.mounted && (
           // The uncovered strip, and the stage under the panel: a click puts it away.
+          // A press on it takes no focus, so focus in the panel is still there to hand
+          // back to the toggle, never left to fall to the page (WCAG 2.4.3).
           <div
             ref={scrim}
             className="clover-template-default-scrim"
             data-open={slide.open}
             aria-hidden="true"
-            onClick={() => setOpen(false)}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={() => {
+              handBack();
+              setOpen(false);
+            }}
           />
         )}
       </Clover.Split>

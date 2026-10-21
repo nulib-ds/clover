@@ -52,5 +52,5 @@ button.clover-template-lightbox-close {
 
 button.clover-template-lightbox-close:is(:hover, :focus-visible) {
   background: var(--clover-color-accent, #0065c3);
-  color: var(--clover-color-secondary, #fff);
+  color: var(--clover-color-control-glyph, #fff);
 }

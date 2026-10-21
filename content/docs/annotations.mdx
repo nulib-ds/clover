@@ -24,8 +24,9 @@ import "@nulib/clover/styles.css";
 
 ## What it lists
 
-By default, the annotations of the view: the Canvases on show, a page or a spread. They
-come from each Canvas's `annotations`, the AnnotationPages fetched as the reader reaches
+By default, every annotation in the Manifest, as the `Panel` lists them (see
+[Every Canvas's annotations](#every-canvass-annotations)); `scope="view"` lists the
+view's alone, the Canvases on show, a page or a spread. They come from each Canvas's `annotations`, the AnnotationPages fetched as the reader reaches
 them, and from the pages the Root's `annotations` prop adds, after the Manifest's own.
 Painting annotations are the picture, not commentary, and caption files belong to the
 [Transcript](/docs/transcript), so neither is listed. A Content Search's hits are drawn
@@ -85,8 +86,10 @@ framed.
 
 ## Every Canvas's annotations
 
-`scope="all"` lists every annotation in the Manifest, as the `Panel` does. While it
-shows, every Canvas's annotation pages are fetched, not only the view's.
+By default (`scope="all"`) it lists every annotation in the Manifest, as the `Panel`
+does, wherever it is placed: a part beside the stage lists what the panel would. While
+it shows, every Canvas's annotation pages are fetched, not only the view's;
+`scope="view"` lists and fetches the view's alone.
 
 It lists them by layer: AnnotationPages that share a label are one layer, with one eye
 that hides them all, however many pages it was published in, and the pages with no label
@@ -112,13 +115,13 @@ page's tags sit under that page's label, at level 3.
   part="Annotations"
   resource="paged"
   content
-  props={{ scope: "all", headingLevel: 3 }}
+  props={{ headingLevel: 3 }}
 />
 
 ## Headings
 
-`headingLevel` (default 3) is the level of each set's title, and with `scope="all"` of
-each layer's. A layer's Canvas labels sit a level below its title, or at its level in a
+`headingLevel` (default 3) is the level of each set's title, and, listing every Canvas's,
+of each layer's. A layer's Canvas labels sit a level below its title, or at its level in a
 layer with none. Headings in an annotation's Markdown sit a level below the heading over
 them, or at its level where there is none. Set it one below the heading the list sits
 under. In a `Panel` of your own, see
@@ -167,7 +170,7 @@ published.
 
 | Prop           | Type                    | Description                                          |
 | -------------- | ----------------------- | ---------------------------------------------------- |
-| `scope`        | `"view" \| "all"`       | The view's annotations (default), or the Manifest's. |
+| `scope`        | `"all" \| "view"`       | The Manifest's annotations (default), or the view's. |
 | `renderEntry`  | `(entry) => ReactNode`  | Your own rendering of an annotation's content.       |
 | `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Default `3`. See [Headings](#headings).              |
 | `as`           | element type            | Default `div`.                                       |
@@ -194,7 +197,7 @@ A reset that takes the markers off every list takes them off a Markdown body's t
 | 3.x `Viewer`                                          | Clover 4                                                                   |
 | ----------------------------------------------------- | -------------------------------------------------------------------------- |
 | `informationPanel.renderAnnotation: false`            | The `Panel`'s `Tab`s, without Annotations                                  |
-| `informationPanel.annotationTabLabel`                 | A `Tab` with your `label` round `<Clover.Annotations scope="all" />`       |
+| `informationPanel.annotationTabLabel`                 | A `Tab` with your `label` round `<Clover.Annotations />`                   |
 | `informationPanel.defaultTab: "manifest-annotations"` | `<Clover.Panel defaultValue="annotations" />`                              |
 | Captions in the Annotations tab                       | The [Transcript](/docs/transcript); `Annotations` leaves caption files out |
 | `options.annotations.motivations`                     | Not in Clover 4: every annotation is listed but painting ones and captions |

@@ -266,9 +266,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
                 value: "annotations",
                 label: tabLabel("informationPanelTabsAnnotations"),
                 // Every Canvas's, by Canvas, those in view kept in sight.
-                content: later(
-                  <Annotations scope="all" headingLevel={inner} />,
-                ),
+                content: later(<Annotations headingLevel={inner} />),
               },
             ]
           : []),

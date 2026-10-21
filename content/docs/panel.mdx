@@ -123,8 +123,8 @@ its own (WCAG 3.1.2): `label={<span lang="fr">Notes</span>}`.
 The default sections set their headings from the panel's `headingLevel` (below). In a
 `Tab`, pass `headingLevel` to `About`, `Collection`, `Search` and `Annotations` yourself:
 the panel's own level in tabs, one below it in an accordion. The Annotations section is
-`<Clover.Annotations scope="all" />`, every Canvas's annotations; on its own `Annotations`
-lists those of the view.
+`<Clover.Annotations />`, which lists every Canvas's annotations by default, here or
+anywhere else.
 
 ## Headings
 
@@ -263,7 +263,7 @@ CSS to select.
 ## From Clover 3.x
 
 The `Default` template draws the panel with the default sections. To choose them, compose
-a layout (or copy `Default`, see [Templates](/docs/viewer/templates)) and give its
+a layout (or copy `Default`, see [Templates](/docs/viewer#templates)) and give its
 `Panel` `Tab`s.
 
 | 3.x `options.informationPanel`  | Clover 4                                                         |

@@ -319,6 +319,44 @@ footer.site-footer {
 }
 
 /*
+ * A page without a table of contents (`theme.toc: false` in `_meta.ts`) gets its column:
+ * Nextra leaves the empty `nav` holding 16rem.
+ */
+nav.nextra-toc:empty {
+  display: none;
+}
+
+/*
+ * A reference page, laid out as Radix Themes lays out its components' (the Viewer's; Mat,
+ * 2026-10-21): a lede under the title (`<div className="docs-lede">`), room between the
+ * sections, and its prose held to a reading measure, while its examples and tables take
+ * the page's width.
+ */
+.docs-lede {
+  color: var(--gray-11);
+  font-size: var(--text-lede);
+  line-height: 1.5;
+  margin-top: var(--clover-space-m, 1rem);
+  max-width: 44rem;
+}
+
+.docs-lede > p {
+  margin: 0;
+}
+
+main:has(> .docs-lede) > :is(p, ul, ol) {
+  max-width: 44rem;
+}
+
+main:has(> .docs-lede) > h2 {
+  margin-top: 6.854rem;
+}
+
+main:has(> .docs-lede) > h3 {
+  margin-top: 4.236rem;
+}
+
+/*
  * The navbar's link and its search field at the page's 1rem, not Nextra's 0.875rem (Mat,
  * 2026-10-20). The search's key hint keeps its own size.
  */

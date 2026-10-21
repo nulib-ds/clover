@@ -378,14 +378,19 @@ function DocumentLayout({
             closeOnEscape={over}
           />
         </Clover.SplitPane>
-        {/* A press on the page beside what covers it puts that away. */}
+        {/*
+         * A press on the page beside what covers it puts that away. It takes no focus, so
+         * focus in the pane is still there to hand back to its toggle, never left to fall
+         * to the page (WCAG 2.4.3).
+         */}
         {over && slide.mounted && (
           <div
             ref={scrim}
             className="clover-template-document-scrim"
             data-open={slide.open}
             aria-hidden="true"
-            onClick={() => setPanel(false)}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={closePanel}
           />
         )}
         {narrow && showSidebar && (
@@ -394,6 +399,7 @@ function DocumentLayout({
             data-for="sidebar"
             data-open="true"
             aria-hidden="true"
+            onMouseDown={(event) => event.preventDefault()}
             onClick={closeSidebar}
           />
         )}

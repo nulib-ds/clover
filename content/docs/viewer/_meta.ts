@@ -1,7 +1,7 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  templates: "Templates",
+  default: "Default template",
   progress: {
     display: "hidden",
     title: "Cookbook progress",

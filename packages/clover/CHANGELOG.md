@@ -12,6 +12,24 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`--clover-color-accent-text`, the accent for text.** Links, Read more, the selected
+  item's label, Download's links and the other text Clover draws in the accent read it,
+  falling back to `--clover-color-accent`, so nothing changes unless you set it. On a
+  dark page no one accent reads as text (4.5:1 on the ground) and stays dark enough
+  under the round controls' white glyphs (4.5:1 on the accent): set this one lighter
+  for text, and keep `--clover-color-accent` for rings and fills.
+
+  ```css
+  .dark {
+    --clover-color-accent: #0f62fe;
+    --clover-color-accent-text: #8fb4ff;
+  }
+  ```
+
+  A text button's label and the lightbox's close, on the accent under the pointer, are
+  now drawn in `--clover-color-control-glyph` rather than `--clover-color-secondary`: the
+  same white by default, and the pair a dark mode keeps 4.5:1 apart.
+
 - **The package.** One entry, ES modules only, with named exports, so
   `import * as Clover from "@nulib/clover"` gives dot notation and tree-shakes. Styles
   ship as one stylesheet, `@nulib/clover/styles.css`, in `@layer clover`, so your own
@@ -1453,6 +1471,17 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **`Annotations` lists every annotation by default.** Its `scope` defaults to `"all"`:
+  every Canvas's annotations, by layer and then by Canvas, as the Viewer's panel lists
+  them, wherever the part is placed. It was `"view"`, so `Annotations` placed on its own
+  showed only the view's, and nothing on a view without any. To keep the view's alone:
+
+  ```jsx
+  <Clover.Annotations scope="view" />
+  ```
+
+  The `Panel` no longer passes `scope` itself; its Annotations section is unchanged.
+
 - **A summary is no longer muted.** `Gallery`'s summary and the summary under each of
   Items' members were drawn in `--clover-color-primary-muted`; they are now in the text's
   own color (`--clover-color-primary`, or what they inherit), as `Clover.Summary` always
@@ -1465,7 +1494,24 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   }
   ```
 
+- **Long annotation lists render lazily.** Each entry of `Annotations`
+  (`.clover-annotations-entry`, in the list and in the menu) now has
+  `content-visibility: auto`, so a list of hundreds (a page's lines of OCR) lays out and
+  paints only the entries near view. Every entry stays in the page, for find-in-page and
+  assistive technology, and keeps its place (`contain-intrinsic-size: auto 2.618rem`).
+  Nothing to do; a style of yours that draws outside an entry's box (a shadow on its
+  children) is now clipped to it, so draw it on the entry itself.
+
 ### Fixed
+
+- **A press beside a floating panel hands focus back to its toggle.** In `Default` on a
+  narrow screen, and in `Document`, closing the information panel (or Document's page
+  thumbnails) by a press on the page beside it left focus on the page itself, since the
+  press moved it there before the panel went. The scrim now takes no focus, so focus in
+  the panel goes to its toggle, as the close button and Escape already did (WCAG 2.4.3).
+  Nothing to do; a copied template takes the fix by adding
+  `onMouseDown={(event) => event.preventDefault()}` to its scrim and closing through the
+  same hand-back as its close button.
 
 - **`Download` keeps its own key handling when you pass `onKeyDown`.** Your handler
   replaced the one that closes its list on Escape and hands focus back to its button. Both

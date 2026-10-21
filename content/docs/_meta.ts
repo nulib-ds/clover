@@ -12,7 +12,13 @@ const meta: MetaRecord = {
     title: "Use Clover",
   },
   index: "Get Started",
-  viewer: "Viewer",
+  // No table of contents: its examples need the width, as Radix Themes' pages give theirs.
+  viewer: {
+    title: "Viewer",
+    theme: {
+      toc: false,
+    },
+  },
   composing: "Composing Layouts",
   cookbook: {
     title: "Cookbook Recipes",

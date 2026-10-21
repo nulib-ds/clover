@@ -1,0 +1,152 @@
+/*
+ * The Viewer page's examples, as Radix Themes frames its components' (Mat, 2026-10-21):
+ * a hairline box on the page's ground, the live Viewer in it with little room at its
+ * sides, so it has the width to lay out as it would on a page, and its code attached
+ * under it. Spaces on the golden scale; no fills but the code's own.
+ */
+.example {
+  border: 1px solid var(--gray-6);
+  border-radius: var(--radius-4);
+  margin: var(--clover-space-l, 1.618rem) 0 var(--clover-space-xl, 2.618rem);
+}
+
+.preview {
+  padding: var(--clover-space-l, 1.618rem) var(--clover-space-s, 0.618rem);
+}
+
+@media (min-width: 48rem) {
+  .preview {
+    padding-inline: var(--clover-space-m, 1rem);
+  }
+}
+
+.live {
+  display: block;
+}
+
+/* The code, under a hairline, its block's own margin and corners given up to the box. */
+.code {
+  border-top: 1px solid var(--gray-6);
+}
+
+.code :global(.nextra-code),
+.code pre {
+  margin: 0;
+}
+
+.code pre {
+  border: 0;
+  border-radius: 0 0 var(--radius-4) var(--radius-4);
+}
+
+/* ── A switch over the Viewer: the prop's values, one pressed ───────────────── */
+
+.switchBar {
+  align-items: center;
+  border-bottom: 1px solid var(--gray-6);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clover-space-s, 0.618rem) var(--clover-space-m, 1rem);
+  padding: var(--clover-space-m, 1rem) var(--clover-space-l, 1.618rem);
+}
+
+.switchLabel {
+  color: var(--gray-11);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+/*
+ * The buttons in one edge at 3:1, as the site's controls without a fill are; the one
+ * pressed filled with the accent, its text white on it (4.5:1) and bold, so it shows by
+ * more than color (WCAG 1.4.1).
+ */
+.segmented {
+  border: 1px solid
+    color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
+  border-radius: var(--radius-3);
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--clover-space-2xs, 0.236rem);
+  padding: var(--clover-space-2xs, 0.236rem);
+}
+
+.segment {
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-2);
+  color: var(--gray-12);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--text-sm);
+  min-height: 2rem;
+  padding: var(--clover-space-xs, 0.382rem) var(--clover-space-m, 1rem);
+}
+
+.segment:hover {
+  background: color-mix(in srgb, var(--accent-9) 10%, transparent);
+}
+
+.segment[aria-pressed="true"] {
+  background: var(--accent-9);
+  color: var(--accent-contrast);
+  font-weight: var(--weight-bold);
+}
+
+.segment:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+@media (forced-colors: active) {
+  .segment[aria-pressed="true"] {
+    outline: 2px solid Highlight;
+  }
+}
+
+/*
+ * The page's first example, the template: the switch is the thing to try (Mat,
+ * 2026-10-21, "very obvious"), so it is large, centered over the Viewer, and named in
+ * the page's own type.
+ */
+.example[data-lead] {
+  margin-top: var(--clover-space-xl, 2.618rem);
+}
+
+.example[data-lead] .switchBar {
+  justify-content: center;
+  padding: var(--clover-space-l, 1.618rem);
+}
+
+.example[data-lead] .switchLabel {
+  color: var(--gray-12);
+  font-family: inherit;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+}
+
+.example[data-lead] .segment {
+  font-size: 1rem;
+  min-height: 2.75rem;
+  min-width: 7rem;
+  padding-inline: var(--clover-space-l, 1.618rem);
+}
+
+/* On a phone, the three share the row: one line, the label over them. */
+@media (max-width: 30rem) {
+  .example[data-lead] .switchBar {
+    padding: var(--clover-space-m, 1rem) var(--clover-space-s, 0.618rem);
+  }
+
+  .example[data-lead] .segmented {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  .example[data-lead] .segment {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-inline: var(--clover-space-xs, 0.382rem);
+  }
+}

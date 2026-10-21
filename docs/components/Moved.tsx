@@ -21,12 +21,14 @@ const MOVES: [RegExp, string][] = [
    * `/docs/viewer/demo?iiif-content=<manifest>`. The query and the hash go along.
    */
   [/^\/docs\/viewer\/demo$/, "/"],
+  // The templates' page, folded into the Viewer's (Mat, 2026-10-21).
+  [/^\/docs\/viewer\/templates$/, "/docs/viewer#templates"],
   // The 3.x Viewer's own pages: content state, search and prefetched content.
   [/^\/docs\/viewer\/(.+)$/, "/docs/3.x/viewer/$1"],
   // The component's page, from when the Panel was the InformationPanel.
   [/^\/docs\/information-panel$/, "/docs/panel"],
   // Pages folded into others: the templates under the Viewer, the element into Get Started.
-  [/^\/docs\/templates$/, "/docs/viewer/templates"],
+  [/^\/docs\/templates$/, "/docs/viewer#templates"],
   [/^\/docs\/web-component$/, "/docs#web-component"],
 ];
 

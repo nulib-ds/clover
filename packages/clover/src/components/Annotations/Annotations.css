@@ -51,6 +51,18 @@
   gap: var(--clover-space-s);
 }
 
+/*
+ * A long list (a page's lines of OCR, hundreds of them) lays out and paints only the
+ * entries near view; the rest keep a place their height (once seen, their own) and stay
+ * in the page, for find-in-page and assistive technology. Its edge, tint and focus
+ * outline are the entry's own, so nothing of it is clipped; a menu entry's radio is
+ * placed within it.
+ */
+:is(li, label).clover-annotations-entry {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 2.618rem;
+}
+
 label.clover-annotations-entry > input {
   position: absolute;
   margin: 0;
@@ -104,7 +116,7 @@ label.clover-annotations-entry > input {
 }
 
 .clover-annotations-body a {
-  color: var(--clover-color-accent, #0065c3);
+  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
 }
 
 /* Where a linking annotation leads (Cookbook 0022), under what it says. */
@@ -115,7 +127,7 @@ label.clover-annotations-entry > input {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--clover-color-accent, #0065c3);
+  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
   font: inherit;
   font-size: var(--clover-text-s);
   text-decoration: underline 1px;

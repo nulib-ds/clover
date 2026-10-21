@@ -17,7 +17,7 @@ planned below. The package has 79 (73 fixed), the docs 81 (54 fixed).
 
 ## Package
 
-There are 79 verified findings in the package. 73 are fixed (19 serious, 39 moderate, 15 minor) and 6 remain (3 serious, 3 moderate). Four of the six (P19, P7, P104, P56) are done in code and wait on a check no test can make: picture in picture on a phone, screen readers, native speakers. Two (P51, P68) rest on the color guidance and the docs' dark mode. Since the audit, the work found three more, all now fixed.
+There are 79 verified findings in the package. 75 are fixed (20 serious, 40 moderate, 15 minor) and 4 remain (2 serious, 2 moderate). All four (P19, P7, P104, P56) are done in code and wait on a check no test can make: picture in picture on a phone, screen readers, native speakers. Since the audit, the work found four more, all now fixed.
 
 ### Fixed
 
@@ -45,6 +45,8 @@ There are 79 verified findings in the package. 73 are fixed (19 serious, 39 mode
 - **Long titles under thumbnails:** a carousel's or grid's title cut at three lines shows in full over its picture while its item is hovered or focused, and Escape hides it. Default's rail titles wrap (1.4.12, 1.4.13; P57).
 - **Sliders in forced colors,** found since the audit: the transport's seek and volume sliders draw in system colors, with an outline on focus, and its buttons keep their edge (1.4.11, 2.4.7).
 - **Focus rings over pictures,** found since the audit: the viewport's and the map's rings are a dark edge, the accent and a light band at full strength, `primary` and `secondary` 9:1 apart, so one keeps 3:1 over any picture (1.4.11, C40; N1).
+- **Accent text on a dark page** (1.4.3; P51, P68): Clover's text in the accent (links, Read more, the selected item's label, Download's links) reads `--clover-color-accent-text`, the accent unless a page sets it, so a dark mode gives text a lighter accent and keeps the accent for rings and fills. No one accent can do both on a dark ground: 4.5:1 as text and 4.5:1 under the round controls' white glyphs need a ground lighter than a dark mode's. A text button's label and the lightbox's close, on the accent under the pointer, are drawn in `control-glyph`. "Colors and contrast" in `content/docs/composing.mdx` gives the pairs; the panel's text against the page (P68) is the page's to keep there, as the docs now do in both modes. Fixed on October 21, 2026.
+- **A press beside a floating panel hands focus back,** found since the audit: in `Default` on a narrow screen, and in `Document`, closing the panel (or Document's page thumbnails) by a press on the page beside it left focus on the page, since the press moved it there first. The scrim takes no focus now, so focus in the pane goes to its toggle (2.4.3; N3).
 - **The panel's tab row has a name that says what it is,** found since the audit: it was "Select", copied from 3.x, and is now "Information panel", as the close button names the panel, in every locale (2.4.6; N2).
 
 ### Plan
@@ -59,20 +61,19 @@ What remains. Items 1 to 4 are done in code and need a check the tests cannot ma
 
 4. **Locale review** (3.1.2). Every locale has every string, and `locales.test.ts` keeps them complete, but no native speaker has read the new ones: es, fi, fr, nb (and no, its copy), nn, and pt, which is European Portuguese and what Brazilian readers get too. Mat owns this, and will make the English strings more concise and consistent, then ask translators to review. It does not block the rest of this plan, and agents leave the translations alone until then. (P56)
 
-5. **Accent text** (1.4.3). The selected item's label and View All fail contrast on dark pages, where the page sets the accent and the background. Mat's call: no new token. Clover's defaults meet 4.5:1, and "Colors and contrast" in `content/docs/composing.mdx` tells a page that sets its own tokens which pairs to keep at which ratio. What remains is the docs' own dark mode (docs plan, item 5). (P51, P68)
-
 ### Decisions
 
-All settled on October 16, 2026: the two-tone hotspot outlines and the Split grip stay, the grip now 1px wider than the bar on each side (P9, P80); and Clover speaks the page's `<html lang>` first and the browser's languages after, for its own strings and for IIIF text (P39). A focused viewport shows no key hint: its keys work (2.1.1), assistive technology hears them in its description and `aria-keyshortcuts`, and each control's tip names its key; a visible hint is help beyond AA (P7). A title cut short under a thumbnail shows in full on hover and focus, over the picture, and Default's rail titles wrap (P57). Leaving CollectionSelect takes back a step not yet chosen, and it gets no Open button: nothing loads on a change (3.2.2), a load after focus moved on could remove the control focus went to (2.4.3), and Enter, Alt+↓ and the menu's own list each choose (P54).
+On October 21, 2026, Mat chose a text accent, `--clover-color-accent-text`, over the call of October 16 against a new token, once it was shown that no one accent passes both ways on a dark page (P51). The rest all settled on October 16, 2026: the two-tone hotspot outlines and the Split grip stay, the grip now 1px wider than the bar on each side (P9, P80); and Clover speaks the page's `<html lang>` first and the browser's languages after, for its own strings and for IIIF text (P39). A focused viewport shows no key hint: its keys work (2.1.1), assistive technology hears them in its description and `aria-keyshortcuts`, and each control's tip names its key; a visible hint is help beyond AA (P7). A title cut short under a thumbnail shows in full on hover and focus, over the picture, and Default's rail titles wrap (P57). Leaving CollectionSelect takes back a step not yet chosen, and it gets no Open button: nothing loads on a change (3.2.2), a load after focus moved on could remove the control focus went to (2.4.3), and Enter, Alt+↓ and the menu's own list each choose (P54).
 
 ## Docs
 
-Of 81 verified docs findings, 58 are fixed (16 serious, 28 moderate, 14 minor) and 23 remain (7 serious, 9 moderate, 7 minor). The site moved to Nextra 4 on October 20, 2026 (Mat: upgrade rather than patch 2.13.4); every fix below was checked again on its markup, and axe-core (WCAG 2.2 A and AA rules) on every page in light and dark found nothing the Nextra 2 site did not have.
+Of 81 verified docs findings, 59 are fixed (17 serious, 28 moderate, 14 minor) and 22 remain (6 serious, 9 moderate, 7 minor). The site moved to Nextra 4 on October 20, 2026 (Mat: upgrade rather than patch 2.13.4); every fix below was checked again on its markup, and axe-core (WCAG 2.2 A and AA rules) on every page in light and dark found nothing the Nextra 2 site did not have.
 
 Mat, October 16, 2026: the docs plan below waits until 4.x is being readied for release, and is done then, before it ships. The Example Viewer's editor was fixed at once, before it first shipped.
 
 ### Fixed
 
+- Clover's accent text reads `--accent-11` (`--clover-color-accent-text`, `tokens.css`): under every accent preset, 7.05:1 or more on the page in light and 4.98:1 or more in dark, with white 4.59:1 or more on the accent's fills. axe finds nothing on the homepage, the Viewer's pages or Annotations in either mode (1.4.3; D1). October 21, 2026.
 - Focus rings drawn in `--accent-11` and no longer clipped or covered. Hidden sidebar and menu links are out of the tab order (2.4.7, 1.4.11; D2, D6, D21, D42).
 - Text reaches 4.5:1: Nextra links, syntax colors, editor text, search, placeholders, demo labels, the dark hover accent, the DC mock. The "Not yet" icon reaches 3:1 (1.4.3, 1.4.11; D7, D12, D15, D26, D27, D38, D49, D59, D61, D76, D86).
 - Names added: the logo link, image demos, rights badge, homepage Items, textareas, demo field, the "Your own" state, Cookbook and Mocks links (1.1.1, 2.4.4, 2.5.3, 4.1.2; D8, D13, D17, D18, D19, D20, D24, D46, D52, D58, D62, D68, D82).
@@ -98,7 +99,7 @@ Mat, October 16, 2026: the docs plan below waits until 4.x is being readied for 
 
 3. **Reflow** (1.4.10, 1.4.12). On phones the banner cuts off its 3.x link, recipe tables and Content State's columns crush, and tile names clip. Let the banner wrap and stop pinning it below 768px, then remove D34's scroll padding. Stack the table actions, and let the columns and `.tileName` wrap. `layout.css`, `CookbookCoverageTable.module.css`, `content-state.mdx`, `Parts.module.css`. S. (D9, D11, D71, D84)
 
-4. **Accent text and edges** (1.4.3, 1.4.11). Accent text is 3.77:1 in dark mode, and the Content State textareas have edges of 1.2:1. Add a text-accent token to the package, with a CHANGELOG entry, and map it to `--accent-11` in the docs' dark bridge. Add a 3:1 boundary step. `tokens.css`, package CSS. M. (D1, D83)
+4. **Field edges** (1.4.11). The Content State textareas have edges of 1.2:1. Add a 3:1 boundary step (the accent text, D1, is fixed). `tokens.css`. S. (D83)
 
 5. **3.x pages** (2.1.1, 2.4.2, 2.4.5). The Map demo takes coordinates from a pointer only, and nothing links to two pages. Add coordinate inputs, and link both pages from the 3.x Viewer page. `CoordinatePickingDemo.tsx`, `content/docs/3.x/`. S. (D14, D67)
 
@@ -125,17 +126,14 @@ The audit's ids, cited by the plans, and N for those found since. Most severe fi
 | Id   | Criterion               | Severity | Finding                                                                                                              | Where                                                                                                                                          |
 | ---- | ----------------------- | -------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | P19  | 1.2.2 Captions          | serious  | Checked in the system player on the iOS Simulator; captions in picture in picture are unchecked                      | `packages/clover/src/components/Canvas/media/useCaptionTracks.ts:33-60`, `packages/clover/src/components/Canvas/media/useCaptionTracks.ts:170` |
-| P51  | 1.4.3 Contrast          | serious  | Accent-colored text fails contrast on a dark page (selected item label, View All)                                    | `packages/clover/src/components/Items/Items.css:435`, `packages/clover/src/components/Items/Items.css:47` …                                    |
 | P56  | 3.1.2 Language of Parts | serious  | Every locale is complete, but no native speaker has reviewed the new strings                                         | `packages/clover/src/i18n/locales/es.json`, `packages/clover/src/i18n/locales/pt.json` …                                                       |
 | P7   | 4.1.2 Name              | moderate | The viewport's role and key description are untested in NVDA, JAWS and VoiceOver, and nothing visible names its keys | `packages/clover/src/components/Canvas/CanvasView.tsx:753-757`, `packages/clover/src/components/Canvas/CanvasView.tsx:79-95`                   |
-| P68  | 1.4.3 Contrast          | moderate | The panel sets its text color but leaves the background to the page                                                  | `packages/clover/src/components/Panel/Panel.css:20`, `packages/clover/src/templates/default/Default.css:62-65` …                               |
 | P104 | 2.2.1 Timing Adjustable | moderate | Fixed in code for touch and pen, untested with VoiceOver and TalkBack, whose cursor may rest on a faded control      | `packages/clover/src/components/Canvas/useChromeVisibility.ts:19-30`                                                                           |
 
 ### Docs
 
 | Id  | Criterion                              | Severity | Finding                                                                                                        | Where                                                                                                                                         |
 | --- | -------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| D1  | 1.4.3 Contrast                         | serious  | Clover's accent-colored text is 3.77:1 in docs dark mode, and 4.40:1 on hover in light                         | `docs/styles/tokens.css:37`, `docs/styles/tokens.css:150-170` …                                                                               |
 | D9  | 1.4.10 Reflow                          | serious  | The site banner cuts off its text and its 'Clover 3.x docs' link                                               | `app/layout.tsx`, `node_modules/nextra-theme-docs/dist/index.js:385` …                                                                        |
 | D10 | 2.4.3 Focus Order                      | serious  | The demo's full-window Viewer panel is not modal, so focus moves to page chrome hidden under it                | `docs/components/CookbookRecipes/CookbookViewerPanel.tsx:68`, `docs/components/CookbookRecipes/CookbookViewerPanel.tsx:94` …                  |
 | D11 | 1.4.10 Reflow                          | serious  | The Cookbook recipe tables crush and overlap their titles at phone widths and under text spacing               | `docs/components/CookbookRecipes/CookbookCoverageTable.module.css:1`, `docs/components/CookbookRecipes/CookbookCoverageTable.module.css:18` … |

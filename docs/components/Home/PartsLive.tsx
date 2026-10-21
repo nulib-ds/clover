@@ -682,7 +682,8 @@ function Exploded({
   const region = (key: PartKey) => ({ ...point(key), "data-part": key });
   const shown = useMemo(() => parts.filter((part) => part.present), [parts]);
   const missing = useMemo(() => parts.filter((part) => !part.present), [parts]);
-  // The first tile past the viewer's own parts and the Collection: "And more." goes over it.
+  // The first tile past the viewer's own parts: "And more." goes over it, the Collection
+  // among those under it (Mat, 2026-10-21).
   const firstMore = shown.find(
     (part) =>
       !(
@@ -693,7 +694,6 @@ function Exploded({
           "items",
           "summary",
           "metadata",
-          "partOf",
         ] as PartKey[]
       ).includes(part.key),
   )?.key;

@@ -186,7 +186,8 @@ button.clover-canvas-button[data-button="reset"]:is(:hover, :focus-visible)
 button.clover-download-button[aria-expanded="true"] {
   border-color: var(--clover-color-accent, #0065c3);
   background-color: var(--clover-color-accent, #0065c3);
-  color: var(--clover-color-secondary, #fff);
+  /* On the accent, the round controls' glyph color: kept 4.5:1 from it in either mode. */
+  color: var(--clover-color-control-glyph, #fff);
 }
 
 @media (prefers-reduced-motion: reduce) {

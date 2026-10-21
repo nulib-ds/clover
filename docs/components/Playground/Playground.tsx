@@ -462,7 +462,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
             <span id="pg-layout">template</span> or build your own layout.
           </p>
           <div className={styles.choiceActions}>
-            <Link href="/docs/viewer/templates" className="cta-outline">
+            <Link href="/docs/viewer#templates" className="cta-outline">
               Templates
               <span className="cta-arrow" aria-hidden="true">
                 →

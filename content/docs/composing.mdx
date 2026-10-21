@@ -43,7 +43,7 @@ import "@nulib/clover/styles.css";
 
 ## Start from a template
 
-The [templates](/docs/viewer/templates) are built only from these parts, so a template's source
+The [templates](/docs/viewer#templates) are built only from these parts, so a template's source
 is a good place to start. Copy `Default.tsx` and `Default.css` from
 `packages/clover/src/templates/default/` (or another template's folder) into your app,
 and read `../../parts` in its imports as `@nulib/clover`. Rename its
@@ -400,7 +400,10 @@ page's type and size. Its colors are custom properties (`--clover-color-accent` 
 the rest): set one on any ancestor and it cascades. The round controls have two of their
 own, a dark fill (`--clover-color-control`) and white glyphs
 (`--clover-color-control-glyph`), and keep them in a dark mode: they sit over a Canvas's
-images, so they do not swap with the page's text and background colors. Each part names itself with one
+images, so they do not swap with the page's text and background colors. Text in the
+accent (links, Read more, the selected item's label) is `--clover-color-accent-text`,
+the accent itself unless you set it: a dark mode can keep the accent for rings and fills
+and give its text a lighter one. Each part names itself with one
 `clover-*` class on its root and states what it is doing in `data-*` attributes
 (`data-media` on a Canvas playing video or sound, `data-layout` on the panel's sections),
 for your own CSS to select.
@@ -436,11 +439,11 @@ the ratio each needs, and what the defaults measure. Names drop `--clover-color-
 | `primary-muted` on `secondary`                       | Quieter text: descriptions, formats, legends, status; the edges of fields and text buttons; a split's grip                                                                                                                                                                                              | 4.5:1                              | 1.4.3, 1.4.11 | 14.64:1 |
 | `primary` or `primary-muted` on `secondary-muted`    | Text on a row or menu option under the pointer; the map's message on its empty ground; a split's grip beside Document's page                                                                                                                                                                            | 4.5:1                              | 1.4.3, 1.4.11 | 11.93:1 |
 | `primary` 65% into `secondary`                       | The search field's placeholder                                                                                                                                                                                                                                                                          | 4.5:1                              | 1.4.3         | 5.28:1  |
-| `accent` on `secondary`                              | Links, Read more, the selected item's label; reversed, a text button's label and the lightbox's close, under the pointer, focused or open                                                                                                                                                               | 4.5:1                              | 1.4.3         | 5.75:1  |
+| `accent-text` on `secondary`                         | Links, Read more, the selected item's label                                                                                                                                                                                                                                                             | 4.5:1                              | 1.4.3         | 5.75:1  |
 | `accent` against `secondary`                         | Focus rings, the selected item's ring, the edge of the current tab and row; the line under the open accordion heading                                                                                                                                                                                   | 3:1                                | 1.4.11        | 5.75:1  |
 | `accent` at half strength against `secondary`        | Under the pointer: an item's ring, and the line under a closed accordion heading                                                                                                                                                                                                                        | None: a preview; the press decides | 1.4.11        | 2.24:1  |
 | `control-glyph` on `control`                         | The round controls' glyphs; Exit full screen's label                                                                                                                                                                                                                                                    | 4.5:1                              | 1.4.3, 1.4.11 | 16.96:1 |
-| `control-glyph` on `accent`                          | A round control under the pointer or focused                                                                                                                                                                                                                                                            | 4.5:1                              | 1.4.3, 1.4.11 | 5.75:1  |
+| `control-glyph` on `accent`                          | A round control under the pointer or focused; a text button's label and the lightbox's close, under the pointer, focused or open                                                                                                                                                                        | 4.5:1                              | 1.4.3, 1.4.11 | 5.75:1  |
 | `secondary-muted` against `secondary`                | Hairlines between regions; fills under the pointer                                                                                                                                                                                                                                                      | None: they mark nothing            | 1.4.11        | 1.23:1  |
 | `secondary-alt` at half strength against `secondary` | The bar between split panes, beside its grip; the line under a closed accordion heading, beside its chevron                                                                                                                                                                                             | None: the grip or chevron marks it | 1.4.11        | 1.28:1  |
 | `primary` beside `secondary`, over a picture         | The Canvas's hotspots: their two-tone outline at rest, and the edges either side of the accent when active or focused; the Canvas's and the map's focus rings, either side of the accent; Items' focus: inside its ring, a `secondary` ring and a `primary` one, side by side over the thumbnail's edge | 9:1 between them                   | 1.4.11        | 16.96:1 |
@@ -453,15 +456,17 @@ ratio is not rounded up: 4.49:1 fails.
 - **Measure against what is behind.** Most parts paint no ground of their own: the panel
   beside the stage and Items sit on the page. Set `--clover-color-secondary` to the
   page's background, or measure against the page's.
-- **Check the accent as text.** It draws links and labels as well as rings, so it needs
-  4.5:1 against `secondary`, not 3:1, and against `secondary-muted` too.
+- **Check the accent as text.** `accent-text` (the accent, unless you set it) draws
+  links and labels, so it needs 4.5:1 against `secondary`, not 3:1, and against
+  `secondary-muted` too.
 - **Keep `control` and `control-glyph` 4.5:1 apart.** The round controls sit over any
   picture, so their fill is the only ground a glyph can count on, and Exit full screen
   writes its name there. Under the pointer or focused, the fill turns the accent: check
   the glyph on that too.
 - **Check a dark mode on its own.** Ratios do not carry over, so measure every pair again
-  with the dark values. An accent light enough to read on a dark `secondary` can be too
-  light under a white `control-glyph`.
+  with the dark values. An accent light enough to read on a dark `secondary` is too light
+  under a white `control-glyph`: no one accent passes both on a dark page, so set
+  `accent-text` lighter for text and keep the accent for the fills.
 - **Over a picture, two tones 9:1 apart.** A picture has no one color to measure
   against. At 9:1 between two tones, one of them keeps 3:1 against any picture (WCAG
   technique C40). So over a picture Clover draws with `primary` and `secondary` side by

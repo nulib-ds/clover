@@ -6,7 +6,7 @@
 
 - [Get Started](https://nulib-ds.github.io/clover/docs): what Clover is, installing it, what each import ships, the web component, and moving from 3.x
 - [Viewer](https://nulib-ds.github.io/clover/docs/viewer): the ready-made Viewer, its templates and what it handles
-- [Templates](https://nulib-ds.github.io/clover/docs/viewer/templates): Default, Document and Gallery
+- [Templates](https://nulib-ds.github.io/clover/docs/viewer#templates): Default, Document and Gallery
 - [Composing Layouts](https://nulib-ds.github.io/clover/docs/composing): a layout of your own from Clover's parts, hooks, renderers, languages and styles
 - [Cookbook Recipes](https://nulib-ds.github.io/clover/docs/cookbook): every IIIF Cookbook recipe, to open in the Viewer
 - Components: [Content](https://nulib-ds.github.io/clover/docs/content), [Canvas](https://nulib-ds.github.io/clover/docs/canvas), [Items](https://nulib-ds.github.io/clover/docs/items), [Panel](https://nulib-ds.github.io/clover/docs/panel), [Map](https://nulib-ds.github.io/clover/docs/map), and the [Primitives](https://nulib-ds.github.io/clover/docs/primitives), one part per IIIF descriptive property
