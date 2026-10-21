@@ -29,7 +29,7 @@ label.clover-hide svg {
 
 label.clover-hide:is(:hover, :has(input:focus-visible)) {
   background-color: var(--clover-color-accent, #0065c3);
-  color: var(--clover-color-secondary, #fff);
+  color: var(--clover-color-control-glyph, #fff);
 }
 
 label.clover-hide:has(input:focus-visible) {

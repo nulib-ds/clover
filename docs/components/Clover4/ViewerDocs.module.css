@@ -24,6 +24,14 @@
   display: block;
 }
 
+/* A part's demo, or another of the docs' demos, gives its own box and margins to the frame. */
+.preview > :global(.docs-part-demo),
+.preview > div[style*="margin"] {
+  border: 0;
+  margin: 0 !important;
+  padding: 0;
+}
+
 /* The code, under a hairline, its block's own margin and corners given up to the box. */
 .code {
   border-top: 1px solid var(--gray-6);

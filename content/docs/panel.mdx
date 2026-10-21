@@ -1,103 +1,164 @@
 ---
 title: Panel
-description: What a IIIF resource says about itself, beside its Canvas, in sections as tabs or an accordion, including sections of your own.
+description: What a IIIF resource says about itself, in sections as tabs or an accordion, including sections of your own.
 ---
 
-import { Callout } from "nextra/components";
-import { PanelDemo } from "docs/components/Clover4/Demos";
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
 
 # Panel
 
-<Callout type="info">
-  `Panel` replaces the information panel of Clover 3.x's
-  [Viewer](/docs/3.x/viewer#information-panel), with its
-  `options.informationPanel` and plugins: see [From Clover
-  3.x](#from-clover-3x).
-</Callout>
+<div className="docs-lede">
+  What the resource says about itself, in sections: tabs or an accordion.
+</div>
 
-What the Root's resource says about itself, in sections: About, and each other section
-the resource has something for. It lays them out as tabs or as an accordion, and takes
-sections of your own. The `Default` and `Document` templates draw one; in a layout of
-your own, place it anywhere inside a `Clover.Root`.
+<Example>
+<PartDemo part="Panel" props={{ headingLevel: 2 }} content box="24rem" />
 
 ```jsx
-import * as Clover from "@nulib/clover";
-import "@nulib/clover/styles.css";
-
-<Clover.Root iiifContent={manifestUrl}>
+<Clover.Root iiifContent={url}>
   <Clover.Content />
-  <Clover.Panel />
-</Clover.Root>;
+  <div style={{ height: "24rem", overflowY: "auto" }}>
+    <Clover.Panel />
+  </div>
+</Clover.Root>
 ```
 
-## Tabs or accordion
+</Example>
 
-`layout="tabs"`, the default, is a row of tabs over one section at a time.
-`layout="accordion"` stacks the sections as boxes, each opened by its heading; the
-`Default` and `Document` templates use it (their `panelLayout` prop). In both, one
-section is always open. The two layouts are drawn from the same parts and the same
-state, so switching keeps the open section, and nothing in it loads again.
+## API Reference
 
-Below, the White Sewing Machine Company's 1896 bicycle catalog from Clover's
-[mocks](/docs/mocks), which has an About, a Collection, Contents and Annotations. The
-panel sits under this page's `h2`, so it takes `headingLevel={3}`.
+Inside a `Root`, it shows About and each section the resource has data for, or `Tab`s of
+your own: one always open, each loaded the first time it opens. Its tabs and accordion
+follow WAI-ARIA's patterns. It is as tall as its sections; to scroll it, give the element
+around it a height and `overflow-y: auto`, as the templates do. Its other props, and its
+`ref`, go to its element.
 
-<PanelDemo />
+### Panel
 
-Tabs follow the WAI-ARIA tabs pattern, and the accordion its accordion pattern:
+| Prop            | Type                      | Default   | Description                                                     |
+| --------------- | ------------------------- | --------- | --------------------------------------------------------------- |
+| `layout`        | `"tabs" \| "accordion"`   | `"tabs"`  | A row of tabs, or sections stacked, each under its heading.     |
+| `defaultValue`  | `string`                  | The first | The section open first.                                         |
+| `value`         | `string`                  | —         | The section open, controlled.                                   |
+| `onValueChange` | `(value: string) => void` | —         | A section was opened.                                           |
+| `onClose`       | `() => void`              | —         | A close button, for a panel floating over the page.             |
+| `closeOnEscape` | `boolean`                 | `false`   | Escape closes it too; its close button moves to its inner edge. |
+| `headingLevel`  | `2 \| 3 \| 4 \| 5 \| 6`   | `3`       | Its first headings: one below the heading over it.              |
+| `as`            | element type              | `"aside"` | The element to render.                                          |
+| `children`      | `ReactNode`               | —         | `Tab`s: sections of your own, in place of the defaults.         |
+| `className`     | `string`                  | —         | Added to `clover-panel`.                                        |
 
-| Key          | Tabs                                   | Accordion                                  |
-| ------------ | -------------------------------------- | ------------------------------------------ |
-| Tab          | To the open tab, then into its section | To each heading, and into the open section |
-| Left, Right  | The previous or next tab, opening it   |                                            |
-| Up, Down     |                                        | The previous or next heading               |
-| Home, End    | The first or last tab, opening it      | The first or last heading                  |
-| Enter, Space |                                        | Opens the heading's section                |
+### Tab
 
-The arrows wrap round at the ends. The open section's heading is `aria-disabled`, since
-one is always open.
+One section of a `Panel`: a tab, or a heading in an accordion. It renders nothing itself.
 
-In a container that scrolls, the accordion's headings stay in sight: those scrolled past
-stack at its top, those below the open section stack at its bottom, and what is focused
-in the open section is kept clear of both. Where that would leave the open section too
-little room, in a short window, the headings scroll with it instead. A label wraps, never
-cut short.
+| Prop       | Type        | Default  | Description                                                     |
+| ---------- | ----------- | -------- | --------------------------------------------------------------- |
+| `value`    | `string`    | Required | Names it, for the panel's `value` and `defaultValue`.           |
+| `label`    | `ReactNode` | Required | Its tab's or heading's text. Mark another language with `lang`. |
+| `children` | `ReactNode` | —        | What the section shows.                                         |
 
-## Sections
+### PanelToggle
 
-With no children, the panel shows About and each section the resource has something
-for, in this order:
+A round button that shows and hides the panel. As a child of `Content`, it sits among the
+Canvas's controls.
 
-| Section     | Shown when                                                     | Part               |
-| ----------- | -------------------------------------------------------------- | ------------------ |
-| About       | Always                                                         | `About`            |
-| Collection  | The Manifest was opened from a Collection, or is `partOf` one  | `Collection`       |
-| Contents    | The Manifest has Ranges (`structures`)                         | `Contents`         |
-| Search      | The Manifest has a Content Search service, 1 or 2              | `Search`           |
-| Map         | The Collection, Manifest, a Canvas or an annotation has places | [`Map`](/docs/map) |
-| Transcript  | The video or sound in view has captions or a text transcript   | `Transcript`       |
-| Annotations | Any Canvas has annotations                                     | `Annotations`      |
+| Prop           | Type                      | Default  | Description                            |
+| -------------- | ------------------------- | -------- | -------------------------------------- |
+| `open`         | `boolean`                 | Required | Whether the panel is showing.          |
+| `onOpenChange` | `(open: boolean) => void` | Required | Called with `!open` when pressed.      |
+| `controls`     | `string`                  | —        | The panel's `id`, for `aria-controls`. |
 
-About holds the Manifest's summary, metadata, required statement, rights, homepage, see
-also, downloads (its `rendering` and the page's) and its own address. For a Canvas shown
-on its own, it starts with what the Canvas is part of, and a button to open that
-Manifest. The Manifest's thumbnail is the layout's to place.
+### About
 
-Each section past About loads the first time it opens, so a section the reader never
-opens is never downloaded. MapLibre loads only with the Map. Places are navPlace or a
-georeference ([Map](/docs/map) has both).
+The panel's first section, and a part of its own: the resource's summary, metadata,
+required statement, rights, homepage, see also, downloads and address. For a Canvas shown
+on its own, it starts with the Manifest the Canvas is part of.
 
-## Sections of your own
+| Prop            | Type                    | Default | Description                                              |
+| --------------- | ----------------------- | ------- | -------------------------------------------------------- |
+| `canvasSummary` | `boolean`               | `false` | The current Canvas's summary too, before the resource's. |
+| `headingLevel`  | `2 \| 3 \| 4 \| 5 \| 6` | `3`     | Its titles: Rights, Homepage and the rest.               |
+| `className`     | `string`                | —       | Added to `clover-about`.                                 |
 
-Give the panel `Tab`s, and they are its sections, in their order, in either layout. The
-defaults are left out, so include the ones you want: each part above works on its own, in
-a `Tab` or anywhere inside the Root. A `Tab` takes a `value` that identifies it, a
-`label`, and what it shows: Clover's parts, or a component of your own reading the Root
-through hooks, which is how Clover 3.x's information panel plugins are written now.
+## Examples
+
+### Sections
+
+With no `Tab`s, it shows [About](#about), then each section the resource has data for:
+[Collection](/docs/collection), [Contents](/docs/contents), [Search](/docs/search),
+[Map](/docs/map), [Transcript](/docs/transcript) and [Annotations](/docs/annotations).
+This newspaper has a Content Search service, and its OCR as annotations.
+
+<Example>
+<PartDemo
+  part="Panel"
+  resource="search"
+  props={{ headingLevel: 4 }}
+  content
+  box="24rem"
+/>
 
 ```jsx
-import * as Clover from "@nulib/clover";
+<Clover.Root iiifContent="https://nulib-ds.github.io/clover/mocks/content-search/manifest.json">
+  <Clover.Content />
+  <div style={{ height: "24rem", overflowY: "auto" }}>
+    <Clover.Panel />
+  </div>
+</Clover.Root>
+```
 
+</Example>
+
+### Tabs or accordion
+
+Use `layout="accordion"` to stack the sections, each opened by its heading, as the
+[templates](/docs/viewer#panel-layout) do. In a box that scrolls, the headings stay in
+sight, at its top and its foot.
+
+<Example>
+<PartDemo
+  part="Panel"
+  props={{ layout: "accordion", headingLevel: 4 }}
+  content
+  box="24rem"
+/>
+
+```jsx
+<Clover.Panel layout="accordion" />
+```
+
+</Example>
+
+### The open section
+
+Use `defaultValue` to choose the section open first, or `value` and `onValueChange` to
+control it. The default sections are `about`, `collection`, `contents`, `search`, `map`,
+`transcript` and `annotations`. This film opens on its chapters.
+
+<Example>
+<PartDemo
+  part="Panel"
+  resource="footage"
+  props={{ defaultValue: "contents", headingLevel: 4 }}
+  content
+  box="24rem"
+/>
+
+```jsx
+<Clover.Panel defaultValue="contents" />
+```
+
+</Example>
+
+### Sections of your own
+
+Give it `Tab`s, and they are its sections, in their order. Each holds Clover's parts or a
+component of your own that reads the Root through hooks. Give the parts in them the
+heading level the panel would: its own in tabs, one below it in an accordion.
+
+```jsx
 function PageNotes({ notes }) {
   const canvas = Clover.useActiveCanvas();
   return <p>{notes[canvas?.id] ?? "No notes for this page."}</p>;
@@ -107,36 +168,17 @@ function PageNotes({ notes }) {
   <Clover.Tab value="about" label="About">
     <Clover.About />
   </Clover.Tab>
-  <Clover.Tab value="contents" label="Contents">
-    <Clover.Contents />
-  </Clover.Tab>
   <Clover.Tab value="notes" label="Notes">
     <PageNotes notes={notes} />
   </Clover.Tab>
 </Clover.Panel>;
 ```
 
-Clover names its own sections in the reader's language. A label of yours is yours to
-translate; where it is in a language other than the page's, mark it, so it is read in
-its own (WCAG 3.1.2): `label={<span lang="fr">Notes</span>}`.
+### Showing and hiding it
 
-The default sections set their headings from the panel's `headingLevel` (below). In a
-`Tab`, pass `headingLevel` to `About`, `Collection`, `Search` and `Annotations` yourself:
-the panel's own level in tabs, one below it in an accordion. The Annotations section is
-`<Clover.Annotations />`, which lists every Canvas's annotations by default, here or
-anywhere else.
-
-## Headings
-
-`headingLevel` (default 3) fits the panel into the page's outline: set it one below the
-heading the panel sits under. In an accordion it is the level of the sections' headings,
-and the headings inside a section start a level below. Tabs are not headings, so there
-the headings inside a section start at it.
-
-## Showing and hiding it
-
-`PanelToggle` shows and hides the panel. As a child of `Content` it sits among the
-Canvas's controls. Name the panel in its `controls`, and hide the panel with `hidden`:
+`PanelToggle` shows and hides it: name the panel in its `controls`, and hide the panel with
+`hidden`. A panel floating over the page also takes `onClose`, for a close button, and
+`closeOnEscape`; move focus into it as it opens.
 
 ```jsx
 function Layout({ url }) {
@@ -156,126 +198,11 @@ function Layout({ url }) {
 }
 ```
 
-A panel docked beside the Canvas needs nothing more: its toggle closes it. A panel that
-floats over the page needs a way out from inside it:
+## Previous versions
 
-- `onClose` gives it a close button. Closing from inside the panel hands focus back to
-  the control that opens it (whatever names the panel, or an element round it, in
-  `aria-controls`), so focus is never left on something hidden.
-- `closeOnEscape` closes it on Escape too, and puts the close button at its inner edge
-  (the start, for a panel over the end of the page).
+[Clover 3.x › Viewer › Information Panel](/docs/3.x/viewer#information-panel)
 
-When a floating panel opens, move focus into it, to its open tab or heading, as the
-templates do. The panel forwards its `ref`:
-
-```jsx
-const panel = React.useRef(null);
-
-React.useEffect(() => {
-  if (!open) return;
-  panel.current
-    ?.querySelector('[aria-selected="true"], [aria-expanded="true"]')
-    ?.focus();
-}, [open]);
-
-<Clover.Panel
-  ref={panel}
-  id="panel"
-  hidden={!open}
-  onClose={() => setOpen(false)}
-  closeOnEscape
-/>;
-```
-
-## Choosing the open section
-
-`defaultValue` names the section open first; by default, the first. A section that is
-not there yet, while its data loads, opens when it arrives. `value` and `onValueChange`
-control it, so something else on the page can open a section. The default sections'
-values are `about`, `collection`, `contents`, `search`, `map`, `transcript` and
-`annotations`.
-
-```jsx
-const [section, setSection] = React.useState("about");
-
-<button type="button" onClick={() => setSection("contents")}>
-  Table of contents
-</button>
-<Clover.Panel value={section} onValueChange={setSection} />
-```
-
-## Props
-
-| Prop            | Type                    | Description                                         |
-| --------------- | ----------------------- | --------------------------------------------------- |
-| `layout`        | `"tabs" \| "accordion"` | Default `tabs`.                                     |
-| `defaultValue`  | `string`                | The section open first. Default: the first.         |
-| `value`         | `string`                | The section open, controlled.                       |
-| `onValueChange` | `(value) => void`       | A section was opened.                               |
-| `onClose`       | `() => void`            | A close button, for a panel floating over the page. |
-| `closeOnEscape` | `boolean`               | Escape closes it too. Default `false`.              |
-| `headingLevel`  | `2 \| 3 \| 4 \| 5 \| 6` | Default `3`. See [Headings](#headings).             |
-| `as`            | element type            | Default `aside`.                                    |
-| `children`      | `Tab`s                  | Sections of your own, in place of the defaults.     |
-
-Its other props (`id`, `hidden`, `className`, `style`, `aria-*`) go to its element, and
-so does its `ref`.
-
-### `Tab`
-
-| Prop       | Type        | Description                                             |
-| ---------- | ----------- | ------------------------------------------------------- |
-| `value`    | `string`    | Identifies the section, for `value` and `defaultValue`. |
-| `label`    | `ReactNode` | The tab's or heading's text.                            |
-| `children` | `ReactNode` | What the section shows.                                 |
-
-### `PanelToggle`
-
-| Prop           | Type                      | Description                            |
-| -------------- | ------------------------- | -------------------------------------- |
-| `open`         | `boolean`                 | Whether the panel is showing.          |
-| `onOpenChange` | `(open: boolean) => void` | The reader pressed it.                 |
-| `controls`     | `string`                  | The panel's `id`, for `aria-controls`. |
-
-### `About`
-
-| Prop            | Type                    | Description                                         |
-| --------------- | ----------------------- | --------------------------------------------------- |
-| `canvasSummary` | `boolean`               | Also the current Canvas's summary. Default `false`. |
-| `headingLevel`  | `2 \| 3 \| 4 \| 5 \| 6` | Each section's title. Default `3`.                  |
-
-### Styles
-
-The panel keeps `--clover-inset` inside its edges and is as tall as its sections. To
-have it scroll beside the Canvas, give the element round it a height and let it scroll,
-as the templates do:
-
-```css
-.my-panel {
-  height: var(--clover-content-height, 60vh);
-  overflow-y: auto;
-}
-```
-
-`.clover-panel` carries `data-layout` (`tabs` or `accordion`) for your own
-CSS to select.
-
-## From Clover 3.x
-
-The `Default` template draws the panel with the default sections. To choose them, compose
-a layout (or copy `Default`, see [Templates](/docs/viewer#templates)) and give its
-`Panel` `Tab`s.
-
-| 3.x `options.informationPanel`  | Clover 4                                                         |
-| ------------------------------- | ---------------------------------------------------------------- |
-| `open`                          | `defaultPanelOpen` on the template; your own state and `hidden`  |
-| `renderAbout`, `renderContents` | `Tab`s for the sections you want                                 |
-| `renderAnnotation`              | The same                                                         |
-| `renderContentSearch`           | The same                                                         |
-| `renderToggle`                  | Leave out `PanelToggle`; `panel={false}` removes both            |
-| `toggleComponent`               | A button of your own, `aria-expanded`, `aria-controls` the panel |
-| `renderCanvasSummary`           | `<Clover.About canvasSummary />` in a `Tab`                      |
-| `defaultTab`                    | `defaultValue`                                                   |
-| `annotationTabLabel`            | A `Tab` with your `label` round `Annotations`                    |
-| `vtt.autoScroll: false`         | `<Clover.Transcript follow={false} />` in a `Tab`                |
-| Plugins' `informationPanel`     | A `Tab`, its component reading the Root with hooks               |
+- `options.informationPanel` becomes [`Default`](/docs/viewer#default)'s panel props, and
+  `Tab`s.
+- A plugin's panel is a `Tab` of your own.
+- `defaultTab` is `defaultValue`.

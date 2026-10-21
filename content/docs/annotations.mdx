@@ -1,203 +1,113 @@
 ---
 title: Annotations
-description: A IIIF resource's annotations by set, to read, to find on the Canvas, and to hide from it.
+description: Every annotation of a IIIF resource, by layer and by Canvas, to read, to find on the Canvas, and to hide from it.
 ---
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
 
 # Annotations
 
-What the annotations of the Root's resource say (comments, tags, transcriptions) by set,
-as a list to read and to point with. Pressing one finds it on the Canvas; an eye before
-each set hides its annotations there. The `Panel`'s Annotations section is this part,
-listing every Canvas's. In a layout of your own, place it anywhere inside a `Clover.Root`.
+<div className="docs-lede">
+  The resource's annotations, by layer and by Canvas: to read, to find on the
+  Canvas, and to hide from it.
+</div>
+
+<Example>
+<PartDemo
+  part="Annotations"
+  props={{
+    headingLevel: 2,
+    style: { maxHeight: "20rem", overflowY: "auto" },
+  }}
+  content
+/>
 
 ```jsx
-import * as Clover from "@nulib/clover";
-import "@nulib/clover/styles.css";
-
-<Clover.Root iiifContent={manifestUrl}>
+<Clover.Root iiifContent={url}>
   <Clover.Content />
   <Clover.Annotations />
-</Clover.Root>;
+</Clover.Root>
 ```
 
-## What it lists
+</Example>
 
-By default, every annotation in the Manifest, as the `Panel` lists them (see
-[Every Canvas's annotations](#every-canvass-annotations)); `scope="view"` lists the
-view's alone, the Canvases on show, a page or a spread. They come from each Canvas's `annotations`, the AnnotationPages fetched as the reader reaches
-them, and from the pages the Root's `annotations` prop adds, after the Manifest's own.
-Painting annotations are the picture, not commentary, and caption files belong to the
-[Transcript](/docs/transcript), so neither is listed. A Content Search's hits are drawn
-on the Canvas, and listed by [Search](/docs/search), not here.
+## API Reference
 
-Each AnnotationPage is a set, headed by an eye that hides it and, when the page has a
-`label`, by that label as a heading. Each annotation is an entry in the set's list:
+Inside a `Root`, it lists every Canvas's annotations, and those of pages the Root's
+`annotations` adds, by layer (AnnotationPages that share a label) and then by Canvas; with
+none, it renders nothing. Pressing one finds it on the Canvas, and the eye before a layer
+hides the layer there; in a box that scrolls, the Canvases in view come to its top as the
+reader moves. Its other props, and its `ref`, go to its element.
 
-- **What it says.** Text bodies by their `format`: plain text, Markdown, or IIIF's limited
-  HTML, sanitized. Image bodies as images
-  ([Cookbook 0377](https://iiif.io/api/cookbook/recipe/0377-image-in-annotation/)).
-- **What it marks.** A small picture of its region of the Canvas, cut by the image's
-  server (a level 1 or 2 service; none for a level 0 or a plain image). On a recording,
-  the time it starts.
-- **Where it leads.** A `linking` annotation
-  ([Cookbook 0022](https://iiif.io/api/cookbook/recipe/0022-linking-with-a-hotspot/))
-  adds "Open the link": a web page opens in a new tab; a Canvas or a Manifest is shown in
-  the Root, and focus moves to the Canvas, since the list may change under the button.
+| Prop           | Type                                    | Default | Description                                                         |
+| -------------- | --------------------------------------- | ------- | ------------------------------------------------------------------- |
+| `scope`        | `"view" \| "all"`                       | `"all"` | Every Canvas's annotations, all fetched as it shows, or the view's. |
+| `renderEntry`  | `(entry: AnnotationEntry) => ReactNode` | —       | Your own rendering of an entry's content.                           |
+| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6`                 | `3`     | Its first headings: one below the heading over it.                  |
+| `as`           | element type                            | `"div"` | The element to render.                                              |
+| `className`    | `string`                                | —       | Added to `clover-annotations`.                                      |
 
-With no annotations in view, it renders nothing.
+## Examples
 
-Below, the Curtis photogravure from Clover's [mocks](/docs/mocks), with the words printed
-on the plate tagged. It sits under this page's `h2`, so it is given `headingLevel: 3`.
+### On a recording
 
+On a recording, each annotation shows when it starts, and pressing it goes there. These
+follow the defendants through the film, in two layers; its captions are the
+[Transcript](/docs/transcript)'s.
+
+<Example>
 <PartDemo
   part="Annotations"
-  resource="tagging"
+  resource="footage"
+  props={{ headingLevel: 4 }}
   content
-  props={{ headingLevel: 3 }}
 />
-
-## Finding one on the Canvas
-
-Pressing an entry anywhere frames its annotation on the Canvas, going to its Canvas first
-if need be. For the keyboard, each entry holds a button that does the same, out of sight,
-its focus drawn round the entry. The button is named "Find on the image" and the entry's
-text, or "Find in the recording" for one on a recording's time. It is `aria-pressed`
-while its annotation is the one picked. An entry with no text is named by its number in
-its list, as its hotspot is, so no two read alike.
-
-Hovering or focusing an entry highlights its hotspot, and hovering a hotspot highlights
-its entry: one highlight, shared through the Root, with no timers. The pick is shared
-too: one picked on the Canvas, or in its annotations menu, is picked here. An annotation
-on a recording's time is found by seeking there; see
-[Annotations on a recording's time](/docs/canvas#annotations-on-a-recordings-time).
-
-## Hiding a set
-
-The eye before a set's label is a checkbox, checked while the set is hidden, the eye
-struck through. Its popover says "Hide"; its name is "Hide" and the page's label, or
-"Hide Annotations" for a page without one, so no two read alike beside several sets.
-
-Hiding a set takes its annotations off the Canvas only. The list keeps them, to show them
-again, and the Canvas's annotations menu lists them still, after the same eye: the hidden
-sets are the Root's, shared by both. An annotation of a hidden set, picked, is still
-framed.
-
-## Every Canvas's annotations
-
-By default (`scope="all"`) it lists every annotation in the Manifest, as the `Panel`
-does, wherever it is placed: a part beside the stage lists what the panel would. While
-it shows, every Canvas's annotation pages are fetched, not only the view's;
-`scope="view"` lists and fetches the view's alone.
-
-It lists them by layer: AnnotationPages that share a label are one layer, with one eye
-that hides them all, however many pages it was published in, and the pages with no label
-are another. Within a layer, the annotations are by Canvas, in the Manifest's order, each
-Canvas's under its label. A Manifest of one Canvas is listed by layer alone.
-
-The Canvases in view are `aria-current`, their labels marked by the accent's edge at
-their start and the stronger text, so by more than color. As the reader moves, their
-annotations come to the top of the list's scrolling box, and one picked on the Canvas is
-brought into view. Neither happens while the pointer is over the list or focus is in it,
-so nothing moves under the reader, and the page itself is never scrolled.
-
-Annotations given as the content, an AnnotationPage or AnnotationCollection made apart
-from any Manifest, may be on Canvases of other Manifests. Each of those Canvases is named
-by its Manifest's label (and its own, where the Manifest has several), each Manifest
-fetched once, when the list first shows.
-
-Below, the White catalog, whose plates have their "Then" and "Now" tagged on eight pages.
-Its tag pages have no label, so they are one layer with no heading of its own, and each
-page's tags sit under that page's label, at level 3.
-
-<PartDemo
-  part="Annotations"
-  resource="paged"
-  content
-  props={{ headingLevel: 3 }}
-/>
-
-## Headings
-
-`headingLevel` (default 3) is the level of each set's title, and, listing every Canvas's,
-of each layer's. A layer's Canvas labels sit a level below its title, or at its level in a
-layer with none. Headings in an annotation's Markdown sit a level below the heading over
-them, or at its level where there is none. Set it one below the heading the list sits
-under. In a `Panel` of your own, see
-[Sections of your own](/docs/panel#sections-of-your-own).
-
-A set with a title is a `section` named by it, and a Canvas's group in a layer is one
-named by its label.
-
-## Languages
-
-Each set's title, Canvas label and annotation carries its own `lang`, and text in `none`
-takes the page's. Clover's own words ("Find on the image") carry theirs where it differs
-from the page's. Where either is not in the page's language, an entry's button is named
-by its content, each part marked with its own (WCAG 3.1.2).
-
-An image with no text beside it is described by its own label, else its annotation's,
-else "Image". Beside text, it says nothing more (`alt=""`), since the text describes it.
-
-## Your own rendering
-
-`renderEntry` draws an entry's content in place of Clover's. The entry keeps its region's
-picture, its link, its button and its highlight.
 
 ```jsx
-// Each text body as plain text, in its own language.
-function Entry({ entry }) {
-  return entry.bodies
+<Clover.Root iiifContent="https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/manifest.json">
+  <Clover.Content />
+  <Clover.Annotations />
+</Clover.Root>
+```
+
+</Example>
+
+### Pages of your own
+
+Give the Root `annotations`, an AnnotationPage or AnnotationCollection of your own, and
+its annotations are listed with the Manifest's.
+
+```jsx
+<Clover.Root iiifContent={url} annotations={annotationPageUrl}>
+  <Clover.Content />
+  <Clover.Annotations />
+</Clover.Root>
+```
+
+### Your own rendering
+
+Use `renderEntry` to draw an entry's content yourself, from its read `bodies` or the
+`annotation` as published. The entry keeps its picture, its link, its button and its
+highlight.
+
+```jsx
+const renderEntry = (entry) =>
+  entry.bodies
     .filter((body) => body.value)
     .map((body, index) => (
       <p key={index} lang={body.language}>
         {body.value}
       </p>
     ));
-}
-
-const renderEntry = (entry) => <Entry entry={entry} />;
 
 <Clover.Annotations renderEntry={renderEntry} />;
 ```
 
-An entry (`AnnotationEntry`) has its `id`, its set's `setId`, the `canvasId` it targets,
-its parsed `target`, its `motivation`, its read `bodies`, and the `annotation` as
-published.
+## Previous versions
 
-## Props
+[Clover 3.x › Viewer › Information Panel](/docs/3.x/viewer#information-panel)
 
-| Prop           | Type                    | Description                                          |
-| -------------- | ----------------------- | ---------------------------------------------------- |
-| `scope`        | `"all" \| "view"`       | The Manifest's annotations (default), or the view's. |
-| `renderEntry`  | `(entry) => ReactNode`  | Your own rendering of an annotation's content.       |
-| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | Default `3`. See [Headings](#headings).              |
-| `as`           | element type            | Default `div`.                                       |
-
-Its other props (`id`, `className`, `style`, `aria-*`) go to its element, and so does its
-`ref`.
-
-### Styles
-
-`.clover-annotations` is the list's root, with `data-scope="all"` for every Canvas's. A
-set is `.clover-annotations-set`, its header `.clover-annotations-set-header` (the eye is
-`.clover-hide`) and its title `.clover-annotations-title`. A Canvas's group is
-`.clover-annotations-canvas`, under `.clover-annotations-canvas-label`. Each entry is
-`.clover-annotations-entry`, with `data-selected` and `data-highlighted`; inside it,
-`.clover-annotations-thumbnail` or `.clover-annotations-time`, then
-`.clover-annotations-body`, holding `.clover-annotations-text`,
-`.clover-annotations-image` and `.clover-annotations-link`.
-
-A reset that takes the markers off every list takes them off a Markdown body's too; see
-[Styles](/docs/composing#styles) to put them back.
-
-## From Clover 3.x
-
-| 3.x `Viewer`                                          | Clover 4                                                                   |
-| ----------------------------------------------------- | -------------------------------------------------------------------------- |
-| `informationPanel.renderAnnotation: false`            | The `Panel`'s `Tab`s, without Annotations                                  |
-| `informationPanel.annotationTabLabel`                 | A `Tab` with your `label` round `<Clover.Annotations />`                   |
-| `informationPanel.defaultTab: "manifest-annotations"` | `<Clover.Panel defaultValue="annotations" />`                              |
-| Captions in the Annotations tab                       | The [Transcript](/docs/transcript); `Annotations` leaves caption files out |
-| `options.annotations.motivations`                     | Not in Clover 4: every annotation is listed but painting ones and captions |
+- The Annotations tab is now this part, placed anywhere.
+- Captions are the [Transcript](/docs/transcript)'s.
+- `annotationTabLabel` is a `Tab` of your own.

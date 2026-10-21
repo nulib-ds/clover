@@ -1021,7 +1021,6 @@
 /* "And more." across the tiles, its space above from the tiles' gap and its own. */
 .more {
   grid-column: 1 / -1;
-  margin-bottom: 0;
 }
 
 .tile[data-span="2"] {

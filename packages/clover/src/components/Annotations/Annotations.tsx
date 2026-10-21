@@ -33,6 +33,7 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { formatTime } from "../Canvas/media/useMediaController";
 import { useClover, useCloverSelector } from "../../react/context";
+import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { HideToggle } from "../../ui/HideToggle";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 
@@ -329,40 +330,6 @@ function inOrder<T>(groups: Array<[string, T]>, order: Map<string, number>) {
     : groups;
 }
 
-/** The box that scrolls an element, short of the page itself, which is never moved. */
-function scrollerOf(node: Element): HTMLElement | null {
-  for (
-    let at = node.parentElement;
-    at && at !== document.body;
-    at = at.parentElement
-  ) {
-    if (/auto|scroll/.test(getComputedStyle(at).overflowY)) return at;
-  }
-  return null;
-}
-
-/**
- * Moves `scroller` so `target` sits at its top (`start`), or just into view (`nearest`),
- * clear of what it keeps clear of (the target's scroll margins: an accordion's stuck
- * headings), and smoothly unless the reader asks for less motion.
- */
-function bringIntoView(target: HTMLElement, where: "start" | "nearest") {
-  const scroller = scrollerOf(target);
-  if (!scroller) return;
-  const style = getComputedStyle(target);
-  const above = parseFloat(style.scrollMarginTop) || 0;
-  const below = parseFloat(style.scrollMarginBottom) || 0;
-  const box = target.getBoundingClientRect();
-  const port = scroller.getBoundingClientRect();
-  const top = box.top - port.top - above;
-  const bottom = box.bottom - port.bottom + below;
-  const by =
-    where === "start" || top < 0 ? top : bottom > 0 ? Math.min(bottom, top) : 0;
-  if (Math.abs(by) < 1) return;
-  const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-  scroller.scrollBy({ top: by, behavior: still ? "auto" : "smooth" });
-}
-
 /** Manifests the annotations name, fetched once a Root, as the listing first needs them. */
 const fetched = new WeakMap<Clover, Map<string, Promise<Manifest | null>>>();
 function fetchManifest(clover: Clover, id: string) {
@@ -503,17 +470,28 @@ const AnnotationLayers = forwardRef<
   // By Canvas only where there are Canvases to tell apart: several, or some elsewhere.
   const grouped = canvases.length > 1 || elsewhere.named;
   const root = useRef<HTMLElement | null>(null);
-  const reading = () => {
+  /*
+   * Whether to leave the list where it is: it is not shown (a closed section's measures
+   * as nothing, and scrolling to it would throw its pane about), or the reader is in the
+   * box it scrolls in, the pointer over it or focus anywhere in it: on the list, or on
+   * what shares its scroll (a panel's tabs), which a move would push out of sight (WCAG
+   * 2.4.11). Nothing moves under the reader.
+   */
+  const still = () => {
     const node = root.current;
-    return Boolean(
-      node && (node.matches(":hover") || node.contains(document.activeElement)),
-    );
+    if (!node || !node.getClientRects().length) return true;
+    const box = scrollerOf(node) ?? node;
+    return box.matches(":hover") || box.contains(document.activeElement);
   };
-  // The Canvases in view come to the top as the reader moves to them.
+  /*
+   * The Canvases in view come to the top as the reader moves to them: only where the
+   * list is by Canvas, since with one there is no group to bring up, only the layer's
+   * title and eye to hide.
+   */
   const shownKey = shown.join("\n");
   useEffect(() => {
     const node = root.current;
-    if (!node || reading()) return;
+    if (!node || !grouped || still()) return;
     const group = shown
       .map((canvasId) =>
         node.querySelector<HTMLElement>(
@@ -527,7 +505,7 @@ const AnnotationLayers = forwardRef<
   // One chosen on the Canvas is brought into view.
   useEffect(() => {
     const node = root.current;
-    if (!node || !selected || reading()) return;
+    if (!node || !selected || still()) return;
     const entry = node.querySelector<HTMLElement>(
       `[data-entry="${CSS.escape(selected)}"]`,
     );

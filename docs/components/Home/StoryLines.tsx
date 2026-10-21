@@ -21,11 +21,12 @@ const BAND = 48;
  * of the window are lit too, with their parts in the viewer. Lit is `data-lit`, written
  * here on the page itself, never through React's state, so scrolling redraws nothing.
  *
- * A story with `data-turn` turns the viewer to its accessibility tree (`onTurn`) and one
- * with `data-recipe` to its recipe (`onRecipe`), each from as it comes into view (two
- * thirds down the window) until the next story reaches the middle. One with
- * `data-compose` or `data-brand` makes its change (`onCompose`, `onBrandStory`) once a
- * third of it is past the middle. Each is undone only `BAND` past where it began. Only
+ * A story's own change starts as its line is drawn, and holds as long as the line does
+ * (Mat, 2026-10-21: in sync): one with `data-turn` turns the viewer to its accessibility
+ * tree (`onTurn`), one with `data-recipe` to its recipe (`onRecipe`), and one with
+ * `data-compose` or `data-brand` makes its change (`onCompose`, `onBrandStory`). Each is
+ * undone only `BAND` past where it began. A story the line has reached is marked
+ * `data-drawn`, for good, so its figure's stroke draws then too (`Home.module.css`). Only
  * where the viewer is held beside the stories; elsewhere nothing is drawn, lit or turned.
  *
  * The line is decoration, hidden from assistive technology: what each story is about is
@@ -101,28 +102,6 @@ export const StoryLines = React.memo(function StoryLines({
       })[name](on);
     };
 
-    /*
-     * From as `element` comes into view until the story after it reaches the middle (or,
-     * the last, until it has passed the middle), held `BAND` longer once begun.
-     */
-    const inView = (
-      stories: HTMLElement[],
-      element: HTMLElement | undefined,
-      on: boolean,
-    ) => {
-      if (!element) return false;
-      const band = on ? BAND : 0;
-      const middle = innerHeight / 2;
-      const next = stories[stories.indexOf(element) + 1];
-      const box = element.getBoundingClientRect();
-      return (
-        box.top <= innerHeight * (2 / 3) + band &&
-        (next
-          ? next.getBoundingClientRect().top > middle - band
-          : box.bottom >= middle - band)
-      );
-    };
-
     const draw = () => {
       frame = 0;
       const middle = innerHeight / 2;
@@ -187,29 +166,19 @@ export const StoryLines = React.memo(function StoryLines({
         overlay.dataset.drawing = "";
       }
 
-      const turner = stories.find((element) =>
-        element.hasAttribute("data-turn"),
-      );
-      set("turned", inView(stories, turner, was.turned));
-      const reader = stories.find((element) => element.dataset.recipe);
-      set("reading", inView(stories, reader, was.reading));
+      // The story's own change, with its line: begun and undone as the line is.
+      set("turned", Boolean(story?.hasAttribute("data-turn")));
+      set("reading", Boolean(story?.dataset.recipe));
+      set("composing", Boolean(story?.hasAttribute("data-compose")));
+      set("branding", Boolean(story?.hasAttribute("data-brand")));
 
-      // A change of the story's own, once a third of it is past the middle.
+      // Every story the line has reached (past the last, all), its figure's stroke drawn
+      // as the line reached it.
+      const reached = story ? stories.indexOf(story) : passed - 1;
+      for (let index = 0; index <= reached; index++)
+        if (!stories[index].hasAttribute("data-drawn"))
+          stories[index].setAttribute("data-drawn", "");
       const storyBox = story && tops[stories.indexOf(story)];
-      const past = (on: boolean) =>
-        Boolean(
-          storyBox &&
-            storyBox.top <=
-              middle - Math.min(storyBox.height / 3, 200) + (on ? BAND : 0),
-        );
-      set(
-        "composing",
-        Boolean(story?.hasAttribute("data-compose")) && past(was.composing),
-      );
-      set(
-        "branding",
-        Boolean(story?.hasAttribute("data-brand")) && past(was.branding),
-      );
 
       const flip = viewer.current?.parentElement;
       // The part on the side shown (`.flip`'s `data-face`).

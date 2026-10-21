@@ -1,7 +1,7 @@
 "use client";
 
 import CloverCanvas from "docs/components/DynamicImports/Canvas";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMock } from "docs/lib/useMock";
 import type { CanvasHandle } from "@nulib/clover";
 
@@ -39,6 +39,12 @@ const CanvasHandleDemo = ({
   const handle = useRef<CanvasHandle | null>(null);
   const [backend, setBackend] = useState("");
   const [region, setRegion] = useState("");
+  /*
+   * The view's region, written once it settles: the readout is a live region (`output`),
+   * and a pan or zoom changes the view every frame, which would be read out as it goes.
+   */
+  const settle = useRef(0);
+  useEffect(() => () => window.clearTimeout(settle.current), []);
 
   const button = (label: string, action: (h: CanvasHandle) => void) => (
     <button
@@ -87,13 +93,18 @@ const CanvasHandleDemo = ({
             // Another when a context is lost, or taken anew back in view.
             h.on("backend", () => setBackend(h.backendKind));
           }}
-          onViewportChange={(bounds) =>
-            setRegion(
-              `xywh=${[bounds.x, bounds.y, bounds.width, bounds.height]
-                .map(Math.round)
-                .join(",")}`,
-            )
-          }
+          onViewportChange={(bounds) => {
+            window.clearTimeout(settle.current);
+            settle.current = window.setTimeout(
+              () =>
+                setRegion(
+                  `xywh=${[bounds.x, bounds.y, bounds.width, bounds.height]
+                    .map(Math.round)
+                    .join(",")}`,
+                ),
+              250,
+            );
+          }}
         />
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>

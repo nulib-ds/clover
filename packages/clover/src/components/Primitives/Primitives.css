@@ -65,3 +65,17 @@
   > li {
   min-block-size: 24px;
 }
+
+/*
+ * Clover's own links (the link lists', the id's and the rights statement's) read as links
+ * whatever a page's reset does: underlined, in the text accent, not only colored (WCAG
+ * 1.4.1). An address, with nowhere to break, wraps rather than push the page sideways
+ * (1.4.10).
+ */
+:is(.clover-homepage, .clover-rendering, .clover-see-also, .clover-part-of) a,
+a:is(.clover-id, .clover-rights) {
+  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+  overflow-wrap: anywhere;
+  text-decoration-line: underline;
+  text-underline-offset: var(--clover-space-3xs);
+}

@@ -16,8 +16,10 @@ const asArray = (value: unknown): unknown[] =>
  * A small picture of a region of a Canvas (an annotation's `xywh`, in the Canvas's own
  * coordinates), cut by the image server: the image painted there is found, the region
  * read in its pixels (scaled from where it is painted), and asked for at no more than
- * `size` pixels a side. Only from a service that can cut and size (level 1 or 2), so
- * nothing larger than that is ever fetched; null otherwise, or where nothing is painted.
+ * `size` pixels a side, nor more than the region has: Image API 3 refuses to scale up
+ * unless asked with `^`, and a region smaller than `size` would need it. Only from a
+ * service that can cut and size (level 1 or 2), so nothing larger than that is ever
+ * fetched; null otherwise, or where nothing is painted.
  */
 export function regionSource(
   canvas: Json | undefined,
@@ -47,7 +49,9 @@ export function regionSource(
         const w = Math.round(Math.min(body.width, left + rect.w * sx)) - x;
         const h = Math.round(Math.min(body.height, top + rect.h * sy)) - y;
         if (!(w > 0 && h > 0)) continue; // Not on this image.
-        return `${service}/${x},${y},${w},${h}/!${size},${size}/0/default.jpg`;
+        // Best fit within both: never more pixels than the region has.
+        const fit = `!${Math.min(size, w)},${Math.min(size, h)}`;
+        return `${service}/${x},${y},${w},${h}/${fit}/0/default.jpg`;
       }
     }
   }

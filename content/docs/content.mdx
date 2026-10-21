@@ -1,167 +1,128 @@
 ---
 title: Content
-description: The Root's current view, drawn by Canvas or by a renderer of your own, in an element sized for it.
+description: The Root's current view, drawn by Canvas or by a renderer of your own, in a box with a height.
 ---
 
-import { Callout } from "nextra/components";
 import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
 
 # Content
 
-<Callout type="info">
-  `Content` is not `Contents`. [Contents](/docs/contents) is the table of
-  contents from the Manifest's Ranges.
-</Callout>
+<div className="docs-lede">
+  The Root's current view, drawn: a page, a spread, a video or sound.
+</div>
 
-The Root's current view, drawn: a page, a spread, a video or sound.
-[`Canvas`](/docs/canvas) draws it, unless a renderer of your own claims the view.
-`Content` gives it a height, shows Clover's loading mark while the Root loads, and takes
-your controls. The templates draw it; in a layout of your own, place it anywhere inside a
-`Clover.Root`. It reads the Root, so it cannot stand on its own.
-
-```jsx
-import * as Clover from "@nulib/clover";
-import "@nulib/clover/styles.css";
-
-<Clover.Root iiifContent={manifestUrl}>
-  <Clover.Content />
-  <Clover.Items />
-</Clover.Root>;
-```
-
-Below, the White Sewing Machine Company's 1896 bicycle catalog from Clover's
-[mocks](/docs/mocks), at its front cover.
-
+<Example>
 <PartDemo part="Content" />
 
-## Its height
-
-The Canvas fills its parent, and `Content` is that parent. Its height is
-`var(--clover-content-height, 60vh)`, set inline, so it holds without the stylesheet. Set
-the property on `Content` or on any element round it; `100%` fills a parent that has a
-height of its own.
-
-```css
-.my-layout {
-  --clover-content-height: 70vh;
-}
-```
-
-`style` is merged over the inline height, so a `height` given there wins.
-
-## Controls of your own
-
-Children join the Canvas's controls, after Clover's own. Over a placeholder, and over a
-lone video or sound, where Clover's image controls are left out, the controls stay for
-yours. `PanelToggle` is made for this place:
-
 ```jsx
-<Clover.Content>
-  <Clover.PanelToggle
-    open={panelOpen}
-    onOpenChange={setPanelOpen}
-    controls="panel"
-  />
-</Clover.Content>
-```
-
-See [Showing and hiding it](/docs/panel#showing-and-hiding-it) on the Panel page for
-the rest. A control of your own names itself as Clover's do: see
-[Controls of your own](/docs/composing#controls-of-your-own).
-
-## Renderers of your own
-
-Give `Content` or the `Root` `renderers`, and a view one of them claims is drawn by your
-component in place of the Canvas: a 3D model, a PDF, anything a Canvas paints that Clover
-does not draw. A renderer claims a view by a Canvas id, by a painted body's `format`, or
-with a `match` test. The first that claims it draws it; every other view is the Canvas's.
-
-```jsx
-function ModelViewer({ bodies }) {
-  return <model-viewer src={bodies[0].id} camera-controls />;
-}
-
-const modelRenderers = [
-  { format: ["model/gltf-binary"], component: ModelViewer },
-];
-
-<Clover.Root iiifContent={manifestUrl} renderers={modelRenderers}>
-  <Clover.Content />
-</Clover.Root>;
-```
-
-The component renders inside the Root, so Clover's hooks work in it (`useNavigation`,
-`useActiveCanvas`, `useClover`…). It is given the view's `canvases`, the `bodies` they
-paint (a `Choice` as its first item, a `SpecificResource` as its source) and `Content`'s
-`children`, its controls, to place where it likes.
-
-A `Content`'s own `renderers` stand in place of the Root's: `renderers={[]}` leaves every
-view in that one to the Canvas. A list written inline, equal on each render, does not
-remount the renderer. `.clover-content` carries `data-renderer`, `canvas` or `custom`, for
-your CSS to select. [Composing Layouts](/docs/composing#renderers-of-your-own) maps 3.x's
-`customDisplays` onto `renderers`.
-
-### `ContentRenderer`
-
-| Prop        | Type                                        | Description                                            |
-| ----------- | ------------------------------------------- | ------------------------------------------------------ |
-| `canvasId`  | `string[]`                                  | Draws a view showing one of these Canvases.            |
-| `format`    | `string[]`                                  | Draws a view painting a body of one of these formats.  |
-| `match`     | `({ canvases, bodies }) => boolean`         | Draws any view this says yes to.                       |
-| `component` | `React.ComponentType<ContentRendererProps>` | What draws it: given `canvases`, `bodies`, `children`. |
-
-## Loading
-
-While the Root loads (its first Manifest, or another it moves to, from a Collection say),
-`Content` is `aria-busy`. Clover's loading mark, a 3px line in the accent, runs along its
-top edge, over what it still shows. It takes no room and catches no presses, and
-`Content` keeps its size and its background, so nothing moves. The mark waits a quarter
-of a second before it shows, so a quick load never flashes it, and it draws more slowly
-for a reader who asks for less motion.
-
-The mark is decorative (`aria-hidden`). To announce the load, place a `Status` with
-`loading={false}`: it announces "Loading…" and shows nothing, since `Content` shows it.
-
-```jsx
-<Clover.Root iiifContent={manifestUrl}>
-  <Clover.Status loading={false} />
+<Clover.Root iiifContent={url}>
   <Clover.Content />
 </Clover.Root>
 ```
 
-## `Canvas` or `Content`
+</Example>
 
-`Content` draws the view with `Canvas`, connected to the Root. The Canvas's name is the
-current Canvas's label, or the Manifest's; its annotations, its chapters (from the
-Manifest's Ranges), its language and its request settings are the Root's. Pass `label`,
-`annotations`, `chapters` or `language` to `Content`, or `options.request`, to give your
-own. `Canvas` alone in a Root shows the same view, without the height, the renderers and
-the loading mark. See [`Canvas` or `Content`](/docs/canvas#canvas-or-content).
+## API Reference
 
-## Props
+Draws the Root's current view with [`Canvas`](/docs/canvas), or with a renderer of yours
+that claims it, in a box as tall as `--clover-content-height`, `60vh` by default. It works
+only inside a `Root`. Its other props are [Canvas's](/docs/canvas#api-reference), and go to
+the Canvas, but for what to draw, which comes from the Root; its label, annotations,
+chapters and language do too, unless you pass your own.
 
-| Prop        | Type                  | Description                                                |
-| ----------- | --------------------- | ---------------------------------------------------------- |
-| `renderers` | `ContentRenderer[]`   | Renderers for this `Content` only, in place of the Root's. |
-| `style`     | `React.CSSProperties` | Merged over its inline height.                             |
-| `className` | `string`              | Added to `clover-content`.                                 |
-| `children`  | `ReactNode`           | Controls, after the Canvas's own; a renderer's `children`. |
+While the Root loads, it is `aria-busy` and shows Clover's loading mark along its top
+edge; `<Clover.Status loading={false} />` announces it. The table of contents is
+[`Contents`](/docs/contents).
 
-Its other props are [Canvas's](/docs/canvas#props) (`controls`, `navigator`, `options`,
-`onReady`, `onViewportChange` and the rest), and go to the Canvas. `canvases`, `body`,
-`src`, `isTiledImage` and `viewingDirection` are not among them: they come from the Root.
-A view a renderer of yours draws takes none of them.
+| Prop        | Type                  | Default    | Description                                                |
+| ----------- | --------------------- | ---------- | ---------------------------------------------------------- |
+| `renderers` | `ContentRenderer[]`   | The Root's | Components of yours that draw the views they claim.        |
+| `style`     | `React.CSSProperties` | —          | On its box, merged over its inline `height`.               |
+| `className` | `string`              | —          | Added to `clover-content`.                                 |
+| `children`  | `ReactNode`           | —          | Controls after Clover's own, or the renderer's `children`. |
 
-### `Root`
+## Examples
 
-| Prop        | Type                | Description                                                  |
-| ----------- | ------------------- | ------------------------------------------------------------ |
-| `renderers` | `ContentRenderer[]` | Renderers for every `Content` inside, unless it has its own. |
+### Height
 
-## From Clover 3.x
+Set `--clover-content-height` on it, or on anything around it: `100%` fills a parent with
+a height of its own.
 
-| 3.x `Viewer`                       | Clover 4                                                   |
-| ---------------------------------- | ---------------------------------------------------------- |
-| `options.canvasHeight` (`500px`)   | `--clover-content-height` (`60vh`)                         |
-| `canvasHeight: "auto"` or `"100%"` | `--clover-content-height: 100%`, in a parent with a height |
-| `customDisplays`                   | `renderers`, on `Content` or `Root`                        |
+<Example>
+<PartDemo
+  part="Content"
+  props={{ style: { "--clover-content-height": "16rem" } }}
+/>
+
+```jsx
+<Clover.Content style={{ "--clover-content-height": "16rem" }} />
+```
+
+</Example>
+
+### Controls
+
+Use `controls` to choose Clover's controls: `false` for none, or an object that leaves some
+out.
+
+<Example>
+<PartDemo
+  part="Content"
+  props={{ controls: { rotation: false } }}
+  resource="page-transcript"
+/>
+
+```jsx
+<Clover.Content controls={{ rotation: false }} />
+```
+
+</Example>
+
+### Navigator
+
+Use `navigator` for an overview of the whole image, in the top left, to press or drag in.
+
+<Example>
+<PartDemo
+  part="Content"
+  props={{ navigator: true }}
+  resource="page-transcript"
+/>
+
+```jsx
+<Clover.Content navigator />
+```
+
+</Example>
+
+### Controls of your own
+
+Children join the Canvas's controls, after Clover's, and stay where Clover's are left out:
+over a placeholder, or a lone recording. Name each one as Clover's are named
+([Controls of your own](/docs/composing#controls-of-your-own)).
+
+```jsx
+<Clover.Content>
+  <Clover.PanelToggle open={open} onOpenChange={setOpen} controls="panel" />
+</Clover.Content>
+```
+
+### Renderers of your own
+
+Give `renderers` to `Content`, or to the `Root` for every `Content` in it, and a view that
+one claims, by Canvas id, painting `format` or a `match` test, is drawn by your component
+([Renderers of your own](/docs/composing#renderers-of-your-own)).
+
+```jsx
+const renderers = [{ format: ["model/gltf-binary"], component: ModelViewer }];
+
+<Clover.Content renderers={renderers} />;
+```
+
+## Previous versions
+
+[Clover 3.x › Viewer](/docs/3.x/viewer)
+
+- `options.canvasHeight` is `--clover-content-height`.
+- `customDisplays` is `renderers`, on `Content` or the `Root`.

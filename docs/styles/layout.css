@@ -318,6 +318,14 @@ footer.site-footer {
   margin: 0 0 0.382rem;
 }
 
+/* A part's demo on its own (`PartDemo`): a hairline box. In an example's frame, the frame's. */
+.docs-part-demo {
+  border: 1px solid var(--gray-6);
+  border-radius: var(--radius-3);
+  margin: 1.5rem 0 2rem;
+  padding: 1rem;
+}
+
 /*
  * A page without a table of contents (`theme.toc: false` in `_meta.ts`) gets its column:
  * Nextra leaves the empty `nav` holding 16rem.
@@ -365,6 +373,14 @@ main:has(> .docs-lede) > h3 {
   font-size: 1rem;
 }
 
+/*
+ * The navbar's link home draws the hero's stroke under the wordmark on hover and focus
+ * (`Logo.tsx`), so it never fades as Nextra's links do.
+ */
+.nextra-navbar nav > a[class~="x:hover:opacity-75"]:hover {
+  opacity: 1;
+}
+
 /* The wordmark, the navbar's, home: 24px tall at the least (WCAG 2.5.8). */
 .site-footer .site-footer-logo {
   color: var(--gray-12);
@@ -374,9 +390,9 @@ main:has(> .docs-lede) > h3 {
   text-decoration: none;
 }
 
-.site-footer-logo svg {
-  height: 1.25rem;
-  width: auto;
+/* The footer's wordmark, larger; its stroke follows (`Logo.tsx`). */
+.site-footer .site-footer-logo > span {
+  --wordmark-height: 1.25rem;
 }
 
 .site-footer-about p {

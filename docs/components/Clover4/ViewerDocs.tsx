@@ -340,3 +340,30 @@ export function OptionsExample({
     </figure>
   );
 }
+
+/**
+ * Any demo in the examples' frame, its code attached under it: the first child is the
+ * demo (a `PartDemo`, say), the rest its code, as the Components pages write them.
+ *
+ * ```mdx
+ * <Example>
+ * <PartDemo part="Label" />
+ *
+ * ```jsx
+ * <Clover.Label />
+ * ```
+ *
+ * </Example>
+ * ```
+ */
+export function Example({ children }: { children: React.ReactNode }) {
+  const [demo, ...code] = React.Children.toArray(children).filter(
+    (child) => !(typeof child === "string" && !child.trim()),
+  );
+  return (
+    <figure className={styles.example}>
+      <div className={styles.preview}>{demo}</div>
+      {code.length > 0 && <div className={styles.code}>{code}</div>}
+    </figure>
+  );
+}

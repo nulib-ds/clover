@@ -26,9 +26,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   }
   ```
 
-  A text button's label and the lightbox's close, on the accent under the pointer, are
-  now drawn in `--clover-color-control-glyph` rather than `--clover-color-secondary`: the
-  same white by default, and the pair a dark mode keeps 4.5:1 apart.
+  What Clover draws on the accent (a text button's label and the lightbox's close under
+  the pointer, the Transcript's chosen file, and the eye that hides a set of annotations)
+  is now `--clover-color-control-glyph` rather than `--clover-color-secondary`: the same
+  white by default, and the pair a dark mode keeps 4.5:1 apart.
 
 - **The package.** One entry, ES modules only, with named exports, so
   `import * as Clover from "@nulib/clover"` gives dot notation and tree-shakes. Styles
@@ -1503,6 +1504,34 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   children) is now clipped to it, so draw it on the entry itself.
 
 ### Fixed
+
+- **An annotation's thumbnail no longer asks for more pixels than its region has.** The
+  small picture of each entry's region (`Annotations`) was asked for at `!52,52`, which
+  an Image API 3 server refuses for a region smaller than that, since it would have to
+  scale up (Northwestern's answers 400), so the entry showed none. It is now asked for
+  at no more than the region's own size on either side. Nothing to do.
+- **The Annotations list stays where it is while it is hidden or in use.** It brings the
+  Canvases in view to the top of the box it scrolls in, and one picked on the Canvas into
+  view. It did so in a closed accordion section, where it measures as nothing and threw
+  its pane about, and with focus elsewhere in its box, such as on a panel's tabs, which
+  it pushed out of sight (WCAG 2.4.11). It now leaves the list still when it is not
+  shown, when the pointer or focus is anywhere in its box, and, for a Manifest of one
+  Canvas, always: there is no group to bring up, only the layer's title to hide.
+  Nothing to do.
+
+- **`Transcript` follows the playing cue within its own box, never the page.** With
+  `follow` on, it brought the cue into view with `scrollIntoView`, which scrolls every
+  scrolling box round it, the page too: a reader who had scrolled away while a recording
+  played was pulled back to the Transcript at each cue. It now scrolls only the box the
+  Transcript scrolls in, as `Annotations` does; with none (a Transcript in the page's
+  flow), the page is left where the reader put it. Nothing to do.
+
+- **Clover's own links read as links under a page's reset.** `Homepage`, `Rendering`,
+  `SeeAlso` and `PartOf` (their lists' links), `Id` and `Rights` now underline their links
+  in `--clover-color-accent-text`, and an address with nowhere to break wraps. A reset
+  such as Tailwind's took the browser's underline and color away, so on their own they
+  read as plain text (WCAG 1.4.1), and a long address pushed the page sideways (1.4.10).
+  Nothing to do; a link style of your own still wins over Clover's layer.
 
 - **A press beside a floating panel hands focus back to its toggle.** In `Default` on a
   narrow screen, and in `Document`, closing the information panel (or Document's page

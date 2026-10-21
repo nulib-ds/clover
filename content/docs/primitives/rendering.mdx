@@ -3,92 +3,100 @@ title: Rendering
 description: A IIIF resource's rendering, the other formats it comes in, such as a PDF or a transcript, as a list of links.
 ---
 
-import { Callout } from "nextra/components";
 import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
 
 # Rendering
 
-<Callout type="info">
-  Looking for the Rendering of Clover 3.x, `@samvera/clover-iiif`? It is at
-  [Clover 3.x › Rendering](/docs/3.x/rendering).
-</Callout>
+<div className="docs-lede">
+  The other formats the resource comes in, such as a PDF or a transcript, as a
+  list of links.
+</div>
 
-Other formats of the object, such as a PDF of the whole of it or a Canvas's transcript as
-text, from its [`rendering`](https://iiif.io/api/presentation/3.0/#rendering), as a list
-of links. Inside a `Root` it reads the Root's Manifest, or the current Canvas with
-`of="canvas"`, which changes as the reader moves. A `value` you pass wins, so it works
-outside a `Root` too.
-
-```jsx
-import * as Clover from "@nulib/clover";
-
-<Clover.Root iiifContent={manifestUrl}>
-  <Clover.Content />
-  <Clover.Rendering of="canvas" />
-</Clover.Root>;
-```
-
-Below, _Lunchroom Manners_ from Clover's [mocks](/docs/mocks), whose Canvas gives the
-film's transcript as plain text, read with `of="canvas"`.
-
+<Example>
 <PartDemo part="Rendering" resource="transcripts" props={{ of: "canvas" }} />
 
-Outside a `Root`, pass the property as IIIF gives it, one resource or a list:
+```jsx
+<Clover.Root iiifContent={url}>
+  <Clover.Rendering of="canvas" />
+</Clover.Root>
+```
+
+</Example>
+
+## API Reference
+
+Reads `rendering` from the Root's resource and renders a `ul`: a link to each format, named
+by its label or else its address, with its `format` after it. It renders nothing while
+there is none, and its other props go to the `ul`. [`Download`](/docs/download) offers the
+view's and the resource's behind one button.
+
+| Prop        | Type                      | Default      | Description                                                        |
+| ----------- | ------------------------- | ------------ | ------------------------------------------------------------------ |
+| `of`        | `"manifest" \| "canvas"`  | `"manifest"` | Whose `rendering`: the resource's, or the Canvas the reader is on. |
+| `value`     | `{ id, label, format }[]` | —            | Formats to show instead of the Root's, as IIIF gives them.         |
+| `className` | `string`                  | —            | Added to `clover-rendering`.                                       |
+
+## Examples
+
+### The current Canvas
+
+Beside a `Content`, `of="canvas"` lists the formats of the Canvas in view, and changes as
+the reader moves. Each page of this newspaper links its own text.
+
+<Example>
+<PartDemo
+  part="Rendering"
+  resource="page-transcript"
+  props={{ of: "canvas" }}
+  content
+/>
+
+```jsx
+<Clover.Content />
+<Clover.Rendering of="canvas" />
+```
+
+</Example>
+
+### Outside a Root
+
+Give it `value`, the formats as IIIF gives them, and it needs no `Root`.
+
+<Example>
+<PartDemo
+  part="Rendering"
+  props={{
+    value: [
+      {
+        id: "https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/transcript.txt",
+        type: "Text",
+        label: { en: ["Transcript in plain text format"] },
+        format: "text/plain",
+      },
+    ],
+  }}
+/>
 
 ```jsx
 <Clover.Rendering
   value={[
     {
-      id: "https://example.org/catalog.pdf",
+      id: "https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/transcript.txt",
       type: "Text",
-      label: { en: ["PDF"] },
-      format: "application/pdf",
+      label: { en: ["Transcript in plain text format"] },
+      format: "text/plain",
     },
   ]}
 />
 ```
 
-## Links
+</Example>
 
-Each resource is a link to its `id`, named by its `label` as plain text, in the reader's
-language: the Root's `language`, else the page's, else the browser's. The link carries
-the label's `lang`; a label in `none` carries none, and takes the page's. A resource with
-no label is named by its address. Its `format` follows the link, in parentheses and
-outside it, so the link's name is the label alone. Of each resource, only its `id`,
-`label` and `format` are read. One with no `id` is left out, and with none to show,
-`Rendering` renders nothing.
+## Previous versions
 
-The list is a `ul`, a link to each `li`. With Clover's stylesheet, each `li` is at least
-24px tall, so the links' centers are 24px apart at any type size (WCAG 2.5.8).
+[Clover 3.x › Rendering](/docs/3.x/rendering)
 
-About does not show `Rendering`. Its Download section lists the `rendering` of the
-Canvases in view and of the Manifest, as [`Download`](/docs/download) does behind its button. `Rendering`
-is one resource's, as a plain list, for a layout of your own.
-
-## Props
-
-| Prop    | Type                     | Description                                                          |
-| ------- | ------------------------ | -------------------------------------------------------------------- |
-| `of`    | `"manifest" \| "canvas"` | Whose `rendering`: the Manifest's (default) or the current Canvas's. |
-| `value` | resource or list         | `{ id, label, format }`, shown in place of the Root's.               |
-
-Its other props (`id`, `className`, `style`, `aria-*`) go to the `ul`. It takes no `as`
-and no `lang`: it is always a list, and each link carries its label's language.
-
-### Styles
-
-`.clover-rendering` is the list, and `.clover-link-format` each format, in
-`--clover-color-primary-muted` at `--clover-text-s`. Clover leaves the list's markers to
-your page.
-
-## From Clover 3.x
-
-Import it from `@nulib/clover`, as `Clover.Rendering` or by name.
-
-| 3.x `Rendering`                                   | Clover 4                                         |
-| ------------------------------------------------- | ------------------------------------------------ |
-| `rendering`                                       | `value`; inside a `Root`, read from the Manifest |
-| `as` (`ul` or `ol`)                               | Not taken: always a `ul`                         |
-| `className`, `style`, `title`, `data-*`, `aria-*` | The same, on the `ul`                            |
-| `lang`                                            | Not taken: each link carries its label's         |
-| No format shown                                   | Each resource's `format` follows its link        |
+- `rendering` is `value`: inside a `Root`, leave it out.
+- For the Canvas in view, `of="canvas"`.
+- Always a `ul`: no `as`.

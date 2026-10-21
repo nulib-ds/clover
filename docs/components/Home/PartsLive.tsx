@@ -22,7 +22,7 @@ import { useMapWorker } from "docs/lib/map-worker";
 import { StoryLines } from "docs/components/Home/StoryLines";
 import { AccessibilityTree } from "docs/components/Home/AccessibilityTree";
 import { SectionIntro } from "docs/components/Home/SectionIntro";
-import { componentCount, primitiveCount } from "docs/components/Home/counts";
+import { partCount } from "docs/components/Home/counts";
 import { endPageThemePreview, previewPageTheme } from "docs/lib/page-theme";
 
 /**
@@ -472,9 +472,20 @@ function Exploded({
           .filter(Boolean)
           .join(" · "),
         present: notes.length > 0,
-        span: 6,
+        // Beside Contents, the list beside the list (Mat, 2026-10-21).
+        span: 3,
         href: DOCS.Annotations,
         body: <Clover.Annotations className={styles.scroll} />,
+      },
+      {
+        key: "contents",
+        name: "Contents",
+        reads: "structures",
+        fact: count(asArray(manifest.structures).length, "range"),
+        present: asArray(manifest.structures).length > 0,
+        span: 3,
+        href: DOCS.Contents,
+        body: <Clover.Contents className={styles.scroll} />,
       },
       {
         key: "map",
@@ -491,16 +502,6 @@ function Exploded({
         tall: true,
         href: DOCS.Map,
         body: <MapTile />,
-      },
-      {
-        key: "contents",
-        name: "Contents",
-        reads: "structures",
-        fact: count(asArray(manifest.structures).length, "range"),
-        present: asArray(manifest.structures).length > 0,
-        span: 3,
-        href: DOCS.Contents,
-        body: <Clover.Contents className={styles.scroll} />,
       },
       {
         key: "search",
@@ -1015,7 +1016,7 @@ function More() {
       as="h3"
       className={styles.more}
       title="And more."
-      note={`${componentCount} components and ${primitiveCount} primitives. Every one yours to compose.`}
+      note={`${partCount} IIIF-focused building blocks. Every one yours to compose.`}
       cta={{ href: "/docs/content", label: "See them all" }}
     />
   );

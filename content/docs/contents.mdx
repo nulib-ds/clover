@@ -3,99 +3,88 @@ title: Contents
 description: A Manifest's table of contents from its Ranges, the entry the reader is in marked, each entry going to its Canvas.
 ---
 
-import { Callout } from "nextra/components";
 import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
 
 # Contents
 
-<Callout type="info">
-  `Contents` is not `Content`. [Content](/docs/content) draws the Root's current
-  view.
-</Callout>
+<div className="docs-lede">
+  A Manifest's table of contents, from its Ranges, with the entry the reader is
+  in marked.
+</div>
 
-The Manifest's table of contents, from its Ranges (`structures`): the chapters of a book,
-the acts of an opera, nested as they nest. The entry the reader is in is marked, and
-choosing one goes there. The `Panel`'s Contents section is this part. In a layout of your
-own, place it anywhere inside a `Clover.Root`.
+<Example>
+<PartDemo part="Contents" content />
 
 ```jsx
-import * as Clover from "@nulib/clover";
-import "@nulib/clover/styles.css";
-
-<Clover.Root iiifContent={manifestUrl}>
+<Clover.Root iiifContent={url}>
   <Clover.Content />
   <Clover.Contents />
-</Clover.Root>;
+</Clover.Root>
 ```
 
-Below, the White catalog from Clover's [mocks](/docs/mocks): its sections, titled by their
-printed headings or the covers' Canvas labels, some naming a region of their page.
+</Example>
 
-<PartDemo part="Contents" resource="paged" content />
+## API Reference
 
-## The entries
+Inside a `Root`, it lists the Manifest's Ranges (`structures`), nested as they nest, in a
+`nav` named "Contents": choosing an entry goes to its Canvas, framed to its region or at
+its time, and the entry the reader is in is `aria-current`. It renders nothing without
+Ranges. Its other props, and its `ref`, go to its element. For the view itself, see
+[`Content`](/docs/content).
 
-Each Range is an entry, by its `label` in its own language (or its `id`, with none), and
-the Ranges inside it a list under it. A single Range at the top that holds the others is
-unwrapped, so its Ranges are the entries. A Range whose `behavior` is `no-nav` is left
-out, the Ranges inside it kept. With no Ranges, it renders nothing.
+| Prop         | Type         | Default      | Description                                       |
+| ------------ | ------------ | ------------ | ------------------------------------------------- |
+| `as`         | element type | `"nav"`      | The element to render.                            |
+| `aria-label` | `string`     | `"Contents"` | Its name. Give each its own where a page has two. |
+| `className`  | `string`     | —            | Added to `clover-contents`.                       |
 
-Choosing an entry goes to the first Canvas its Range names, or its first Range's: framed
-to its region, where the Range names one, or at its time on a recording. On the Canvas
-already playing, it seeks there. A Range that names no Canvas is a disabled entry.
+## Examples
 
-The entry the reader is in is `aria-current`: the deepest whose Range covers the current
-Canvas and, on a recording, whose time holds the moment playing. It follows playback and
-seeking. It is marked by the accent's edge at its start, a faint tint of the accent and
-bolder text, so by more than color; in forced colors, by the edge in the highlight
-color.
+### Chapters
 
-The entries are buttons in nested ordered lists, in a `nav` named "Contents", in the
-reader's language. A page with two gives each its own name, with `aria-label` or
-`aria-labelledby`.
+On a video or sound, Ranges that name a time are chapters, on the seek bar too. The entry
+follows playback, and pointing at either marks the other.
 
-## With the seek bar
-
-On a video or sound, the Canvas reads the same Ranges: one whose items name the Canvas
-playing with a time (`#t=` or a `FragmentSelector`) is a chapter, on its seek bar and in
-its chapters menu. `Contents` and the seek bar share one highlight, through the Root.
-Hovering or focusing an entry draws its chapter out on the seek bar, and the chapter under
-the pointer on the seek bar marks its entry (`data-highlighted`).
-
-Below, the Nuremberg reel from Clover's mocks, its chapters titled with the archive's
-description. Play it, and the current entry follows; point at an entry, or at the seek
-bar, and the other marks it.
-
+<Example>
 <PartDemo part="Contents" resource="footage" content />
 
-## Props
+```jsx
+<Clover.Root iiifContent="https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/manifest.json">
+  <Clover.Content />
+  <Clover.Contents />
+</Clover.Root>
+```
 
-| Prop | Type         | Description    |
-| ---- | ------------ | -------------- |
-| `as` | element type | Default `nav`. |
+</Example>
 
-Its other props (`id`, `className`, `style`, `aria-*`) go to its element, and so does its
-`ref`. An `aria-label` or `aria-labelledby` replaces its name.
+### In the Viewer
 
-### Styles
+The Viewer's Panel shows it as its Contents section, for a Manifest with Ranges.
 
-`.clover-contents` is its root; each list is `.clover-contents-list`, each entry
-`.clover-contents-item`, and its button `.clover-contents-button`, with `aria-current`
-and `data-highlighted`. A nested list steps in behind a hairline. The entries are rows as
-the `Panel`'s other lists are: Annotations, Search's hits, the Transcript's cues.
+<ViewerExample resource="catalog">
+
+```jsx
+<Viewer iiifContent="https://nulib-ds.github.io/clover/mocks/paged/manifest.json" />
+```
+
+</ViewerExample>
 
 ### Your own
 
-`tableOfContents(manifest)` gives the entries as `ContentsNode`s (`id`, `label`, the
-`canvasId` it goes to, every Canvas it covers in `canvasIds`, its `time` or `region`, and
-its `children`). `currentContents(nodes, canvasId, time)` gives the id of the entry the
-reader is in, and `chaptersOf(manifest, canvasId, duration)` a recording's chapters. All
-three are exported from `@nulib/clover`.
+Use `tableOfContents` for the same entries, in a table of your own: each has its `label`,
+the `canvasId` it goes to, its `time` or `region`, and its `children`. `currentContents`
+names the entry the reader is in, and `chaptersOf` gives a recording's chapters.
 
-## From Clover 3.x
+```jsx
+const manifest = Clover.useManifest();
+const entries = Clover.tableOfContents(manifest);
+```
 
-| 3.x `Viewer`                                       | Clover 4                                                          |
-| -------------------------------------------------- | ----------------------------------------------------------------- |
-| `informationPanel.renderContents: false`           | The `Panel`'s `Tab`s, without Contents                            |
-| `informationPanel.defaultTab: "manifest-contents"` | `<Clover.Panel defaultValue="contents" />`                        |
-| A Range chosen opens its first Canvas              | The same, framed to its region or at its time, where it names one |
+## Previous versions
+
+[Clover 3.x › Viewer](/docs/3.x/viewer#information-panel)
+
+- The Contents tab is a part of its own, for anywhere in a `Root`.
+- `renderContents: false` is a `Panel` of `Tab`s without it.
+- `defaultTab: "manifest-contents"` is the Panel's `defaultValue="contents"`.

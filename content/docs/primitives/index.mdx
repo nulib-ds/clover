@@ -5,62 +5,61 @@ asIndexPage: true
 ---
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
 
 # Primitives
 
-Each IIIF descriptive property is a part of its own. Inside a `Root`, each reads the
-Manifest, or with `of="canvas"` the Canvas the reader is on. A value you pass as `value`
-wins (`label`, for `Label`), so each works outside a `Root` too. A part whose property is
-absent renders nothing.
+<div className="docs-lede">
+  A part for each IIIF descriptive property, to place anywhere in a layout or
+  use on its own.
+</div>
+
+<Example>
+<PartDemo
+  parts={[
+    { part: "Thumbnail", props: { size: 160, alt: "" } },
+    { part: "Label", props: { as: "h2" } },
+    { part: "Summary" },
+    { part: "Rights" },
+  ]}
+/>
 
 ```jsx
-import * as Clover from "@nulib/clover";
-import "@nulib/clover/styles.css";
-
-<Clover.Root iiifContent={manifestUrl}>
-  <Clover.Content />
+<Clover.Root iiifContent={url}>
+  <Clover.Thumbnail size={160} alt="" />
   <Clover.Label as="h2" />
   <Clover.Summary />
-  <Clover.Metadata />
-  <Clover.RequiredStatement />
   <Clover.Rights />
-</Clover.Root>;
+</Clover.Root>
 ```
+
+</Example>
 
 ## The parts
 
-| Part                                                       | What it shows                                                          |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------- |
-| [`Label`](/docs/primitives/label)                          | `label`, as text, in the element you choose                            |
-| [`Thumbnail`](/docs/primitives/thumbnail)                  | `thumbnail`, or a Canvas's first image, as an `img` named by its label |
-| [`Summary`](/docs/primitives/summary)                      | `summary`, cut to five lines with "Read more"                          |
-| [`Metadata`](/docs/primitives/metadata)                    | `metadata`, as a description list of labels and values                 |
-| [`RequiredStatement`](/docs/primitives/required-statement) | `requiredStatement`, the text that must be shown with the resource     |
-| [`Rights`](/docs/primitives/rights)                        | `rights`, as a link to the license or rights statement                 |
-| [`Homepage`](/docs/primitives/homepage)                    | `homepage`, the resource's own web page, as links                      |
-| [`SeeAlso`](/docs/primitives/see-also)                     | `seeAlso`, machine-readable descriptions elsewhere, as links           |
-| [`Rendering`](/docs/primitives/rendering)                  | `rendering`, other formats of the resource (a PDF, say), as links      |
-| [`PartOf`](/docs/primitives/part-of)                       | `partOf`, the Collections the resource belongs to, as links            |
-| [`Id`](/docs/primitives/id)                                | `id`, as a link to the resource's IIIF JSON                            |
-| [`Value`](/docs/primitives/value)                          | Any IIIF language map you hold, read by its `format`                   |
+Inside a `Root`, each reads its property from the resource, or with `of="canvas"` from
+the Canvas the reader is on, wherever it sits in your markup. Give it a `value` (a
+`label`, for `Label`), and it shows that instead, in a `Root` or on its own. With nothing
+to show, it renders nothing.
 
-`Homepage`, `SeeAlso`, `Rendering` and `PartOf` list each resource by its label (its `id`
-where it has none), with its format.
+- [`Label`](/docs/primitives/label): `label`, as text.
+- [`Thumbnail`](/docs/primitives/thumbnail): `thumbnail`, as an image named by its label.
+- [`Summary`](/docs/primitives/summary): `summary`, cut short with Read more.
+- [`Metadata`](/docs/primitives/metadata): `metadata`, as a list of labels and values.
+- [`RequiredStatement`](/docs/primitives/required-statement): `requiredStatement`, the
+  text that must be shown with the resource.
+- [`Rights`](/docs/primitives/rights): `rights`, as a link to the license or rights
+  statement.
+- [`Homepage`](/docs/primitives/homepage): `homepage`, the resource's own web page.
+- [`SeeAlso`](/docs/primitives/see-also): `seeAlso`, descriptions of it elsewhere.
+- [`Rendering`](/docs/primitives/rendering): `rendering`, other formats of it, such as a
+  PDF.
+- [`PartOf`](/docs/primitives/part-of): `partOf`, the Collections it belongs to.
+- [`Id`](/docs/primitives/id): `id`, as a link to its IIIF JSON.
+- [`Value`](/docs/primitives/value): any IIIF language map you hold, read by its
+  `format`.
 
-## In a Root, or on its own
-
-Inside a `Root`, a part reads the Root's resource wherever it sits in your markup. With
-`of="canvas"` it reads the Canvas the reader is on, and changes as they move. On its own,
-it shows what you give it:
-
-```jsx
-<Clover.Label label={{ en: ["A letter"] }} as="h2" />
-<Clover.Summary value={{ en: ["Written in 1849."] }} />
-<Clover.Rights value="http://rightsstatements.org/vocab/InC/1.0/" />
-```
-
-`Thumbnail` takes the resource to picture as its `value` (a Manifest, a Canvas or a
-Collection), not its `thumbnail`. `Value` has no `of`: it shows only the value it is given.
+The [Panel](/docs/panel)'s About section shows several of them together.
 
 ## Languages
 
@@ -69,44 +68,20 @@ languages: the closest language the value has (`fr` for a reader in `fr-CA`), el
 `none`, else the first it has. A language's several values are joined with commas.
 
 Each element carries the language its text is in as `lang`, so assistive technology reads
-it in that language (WCAG 3.1.2). Text in `none` carries no `lang`, and takes the page's.
-Clover sets each `lang` itself.
+it in that language. Text in `none` carries no `lang`, and takes the page's.
 
 ## HTML
 
-IIIF allows a little HTML in its values. A value is HTML when it runs from a first `<` to a
-last `>`, as IIIF's rule has it; any other value is shown as written, tags and all, its
-line breaks kept. `Summary`, the values of `Metadata` and `RequiredStatement`, and `Value`
-show HTML. `Label`, a link's label and a thumbnail's `alt` are plain text: tags are
-dropped, and entities such as `&amp;` decoded.
+IIIF allows a little HTML in its values. A value is HTML when it runs from a first `<` to
+a last `>`, as IIIF's rule has it; any other value is shown as written, its line breaks
+kept.
 
-HTML shows as plain text at first, then as HTML once the sanitizer arrives, limited to what
-the Presentation API allows: `a`, `b`, `br`, `i`, `img`, `p`, `small`, `span`, `sub` and
-`sup`, with links to `http:`, `https:` and `mailto:` addresses only. Scripts, event
-handlers, `style`, `aria-*` and `data-*` attributes are removed, and so are `javascript:`
-and `data:` addresses. `lang` and `dir` are kept, so a value can mark a phrase in another
-language or direction. The sanitizer, DOMPurify (about 9 kB gzip), loads only when a value
-carries markup, so a page whose values are plain never fetches it.
-
-## Together
-
-`About`, the [Panel](/docs/panel)'s first section, is these parts together: `Summary`,
-`Metadata` and `RequiredStatement`, then `Rights`, `Homepage`, `SeeAlso`, the downloads
-and `Id`, each under a heading. Below, the White Sewing Machine Company's 1896 bicycle
-catalog from Clover's [mocks](/docs/mocks). It sits under this page's `h2`, so it takes
-`headingLevel={3}`.
-
-<PartDemo part="About" props={{ headingLevel: 3 }} />
-
-## Styles
-
-Each part names itself with one class on its element, and `className` adds your own:
-`.clover-label`, `.clover-thumbnail`, `.clover-summary`, `.clover-metadata`,
-`.clover-required-statement`, `.clover-rights`, `.clover-homepage`, `.clover-see-also`,
-`.clover-rendering`, `.clover-part-of`, `.clover-id` and `.clover-value`. Their other props
-(`id`, `style`, `aria-*`) go to that element.
-
-In `Summary`, `Metadata` and `RequiredStatement`, Clover's stylesheet underlines the links
-in IIIF's HTML, not only colors them, since a page's reset may take the browser's
-underline away; and long unbroken values (an address, a file name) wrap, rather than push
-the layout sideways.
+- `Summary`, the values of `Metadata` and `RequiredStatement`, and `Value` show HTML.
+  `Label`, a link's label and a thumbnail's `alt` are plain text.
+- HTML is limited to what the Presentation API allows: `a`, `b`, `br`, `i`, `img`, `p`,
+  `small`, `span`, `sub` and `sup`, with links to `http:`, `https:` and `mailto:` only.
+  `lang` and `dir` are kept, so a value can mark a phrase in another language.
+- The sanitizer, DOMPurify (about 9 kB gzip), loads only when a value carries markup.
+  Until it arrives, the value shows as plain text.
+- In `Summary`, `Metadata` and `RequiredStatement`, links are underlined, and long
+  unbroken text wraps.

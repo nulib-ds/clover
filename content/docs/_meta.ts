@@ -6,6 +6,12 @@ import type { MetaRecord } from "nextra";
  * the Cookbook's recipes are from the Viewer's, and every mock is still documented on it
  * (AGENTS.md).
  */
+/*
+ * The Components pages read as Radix Themes' component pages do (Mat, 2026-10-21): no
+ * table of contents, so their examples have the page's width.
+ */
+const reference = (title: string) => ({ title, theme: { toc: false } });
+
 const meta: MetaRecord = {
   "--viewer": {
     type: "separator",
@@ -30,18 +36,19 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Components",
   },
-  content: "Content",
-  canvas: "Canvas",
-  items: "Items",
-  panel: "Panel",
-  annotations: "Annotations",
-  collection: "Collection",
-  contents: "Contents",
-  search: "Search",
-  transcript: "Transcript",
-  download: "Download",
-  map: "Map",
-  primitives: "Primitives",
+  content: reference("Content"),
+  canvas: reference("Canvas"),
+  items: reference("Items"),
+  panel: reference("Panel"),
+  annotations: reference("Annotations"),
+  collection: reference("Collection"),
+  contents: reference("Contents"),
+  search: reference("Search"),
+  transcript: reference("Transcript"),
+  download: reference("Download"),
+  map: reference("Map"),
+  // The folder's pages too: a folder's theme carries to them.
+  primitives: reference("Primitives"),
   "--contribute": {
     type: "separator",
     title: "Contribute",

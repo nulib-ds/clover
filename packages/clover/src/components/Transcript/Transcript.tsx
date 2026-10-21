@@ -29,6 +29,7 @@ import {
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
+import { bringIntoView } from "../../ui/bringIntoView";
 import { languageCode } from "../../ui/languageCode";
 import { useSectionActions } from "../../ui/Sections";
 import { Tip } from "../../ui/Tip";
@@ -140,12 +141,15 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
     );
     const active = useActiveCue(element, cues);
 
-    // Keep the current cue in view while playing, within the transcript's own scroll.
+    /*
+     * Keep the current cue in view while playing, within the transcript's own scroll:
+     * never the page, which the reader may have scrolled elsewhere.
+     */
     const list = useRef<HTMLOListElement>(null);
     useEffect(() => {
       if (!follow || active < 0 || !element || element.paused) return;
       const item = list.current?.children[active] as HTMLElement | undefined;
-      item?.scrollIntoView?.({ block: "nearest" });
+      if (item) bringIntoView(item, "nearest");
     }, [active, follow, element]);
 
     const id = useId();

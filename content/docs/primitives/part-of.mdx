@@ -3,91 +3,108 @@ title: PartOf
 description: A IIIF resource's partOf, the Collections it belongs to, as a list of links, each named by its label.
 ---
 
-import { Callout } from "nextra/components";
 import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
 
 # PartOf
 
-<Callout type="info">
-  Looking for the PartOf of Clover 3.x, `@samvera/clover-iiif`? It is at [Clover
-  3.x › PartOf](/docs/3.x/partOf).
-</Callout>
+<div className="docs-lede">
+  The Collections the resource belongs to, as a list of links.
+</div>
 
-What the object is part of, from its
-[`partOf`](https://iiif.io/api/presentation/3.0/#partof), as a list of links: for a
-Manifest, the Collections it belongs to. Inside a `Root` it reads the Root's Manifest, or
-the current Canvas with `of="canvas"`. A `value` you pass wins, so it works outside a
-`Root` too.
-
-```jsx
-import * as Clover from "@nulib/clover";
-
-<Clover.Root iiifContent={manifestUrl}>
-  <Clover.PartOf />
-</Clover.Root>;
-```
-
-Below, the White Sewing Machine Company's 1896 bicycle catalog from Clover's
-[mocks](/docs/mocks), part of one Collection at Northwestern University Libraries, of
-bicycle and bicycle parts catalogs.
-
+<Example>
 <PartDemo part="PartOf" />
 
-Outside a `Root`, pass the property as IIIF gives it, one resource or a list:
+```jsx
+<Clover.Root iiifContent={url}>
+  <Clover.PartOf />
+</Clover.Root>
+```
+
+</Example>
+
+## API Reference
+
+Reads `partOf` from the Root's resource and renders a `ul`: a link to each Collection,
+named by its label or else its address. It renders nothing while there is none, and its
+other props go to the `ul`. A link opens the Collection's IIIF JSON: to show the
+Collection itself, use [`Collection`](/docs/collection).
+
+| Prop        | Type                      | Default      | Description                                                     |
+| ----------- | ------------------------- | ------------ | --------------------------------------------------------------- |
+| `of`        | `"manifest" \| "canvas"`  | `"manifest"` | Whose `partOf`: the resource's, or the Canvas the reader is on. |
+| `value`     | `{ id, label, format }[]` | —            | Collections to show instead of the Root's, as IIIF gives them.  |
+| `className` | `string`                  | —            | Added to `clover-part-of`.                                      |
+
+## Examples
+
+### Outside a Root
+
+Give it `value`, the Collections as IIIF gives them, and it needs no `Root`.
+
+<Example>
+<PartDemo
+  part="PartOf"
+  props={{
+    value: [
+      {
+        id: "https://api.dc.library.northwestern.edu/api/v2/collections/c373ecd2-2c45-45f2-9f9e-52dc244870bd?as=iiif",
+        type: "Collection",
+        label: { none: ["Commedia dell'Arte: The Masks of Antonio Fava"] },
+      },
+    ],
+  }}
+/>
 
 ```jsx
 <Clover.PartOf
   value={[
     {
-      id: "https://example.org/collection.json",
+      id: "https://api.dc.library.northwestern.edu/api/v2/collections/c373ecd2-2c45-45f2-9f9e-52dc244870bd?as=iiif",
       type: "Collection",
-      label: { en: ["Bicycle catalogs"] },
+      label: { none: ["Commedia dell'Arte: The Masks of Antonio Fava"] },
     },
   ]}
 />
 ```
 
-## Links
+</Example>
 
-Each resource is a link to its `id`, named by its `label` as plain text, in the reader's
-language: the Root's `language`, else the page's, else the browser's. The link carries
-the label's `lang`; a label in `none` carries none, and takes the page's. A resource with
-no label is named by its address, and one with a `format` has it after the link, in
-parentheses and outside it. Of each resource, only its `id`, `label` and `format` are
-read, so a `summary` given in `partOf` is not shown. One with no `id` is left out, and
-with none to show, `PartOf` renders nothing.
+### Without a label
 
-A Collection's `id` is the address of its IIIF JSON, so each link opens the JSON, not a
-web page. To show the Collection itself, its label, summary and members, use the Panel's
-[Collection section](/docs/panel#sections), the `Collection` part, which fetches the
-Collection when it first shows.
+A Collection without a label is named by its address. Its address wraps, with
+nowhere else to break, rather than pushing the page sideways.
 
-The list is a `ul`, a link to each `li`. With Clover's stylesheet, each `li` is at least
-24px tall, so the links' centers are 24px apart at any type size (WCAG 2.5.8).
+<Example>
+<PartDemo
+  part="PartOf"
+  props={{
+    value: [
+      {
+        id: "https://api.dc.library.northwestern.edu/api/v2/collections/0ba3a256-4952-44ea-b0d9-0772835ff137?as=iiif",
+        type: "Collection",
+      },
+    ],
+  }}
+/>
 
-## Props
+```jsx
+<Clover.PartOf
+  value={[
+    {
+      id: "https://api.dc.library.northwestern.edu/api/v2/collections/0ba3a256-4952-44ea-b0d9-0772835ff137?as=iiif",
+      type: "Collection",
+    },
+  ]}
+/>
+```
 
-| Prop    | Type                     | Description                                                       |
-| ------- | ------------------------ | ----------------------------------------------------------------- |
-| `of`    | `"manifest" \| "canvas"` | Whose `partOf`: the Manifest's (default) or the current Canvas's. |
-| `value` | resource or list         | `{ id, label, format }`, shown in place of the Root's.            |
+</Example>
 
-Its other props (`id`, `className`, `style`, `aria-*`) go to the `ul`. It takes no `as`
-and no `lang`: it is always a list, and each link carries its label's language.
+## Previous versions
 
-### Styles
+[Clover 3.x › PartOf](/docs/3.x/partOf)
 
-`.clover-part-of` is the list, and `.clover-link-format` each format, in
-`--clover-color-primary-muted` at `--clover-text-s`. Clover leaves the list's markers to
-your page.
-
-## From Clover 3.x
-
-Import it from `@nulib/clover`, as `Clover.PartOf` or by name.
-
-| 3.x `PartOf`                                      | Clover 4                                         |
-| ------------------------------------------------- | ------------------------------------------------ |
-| `partOf`                                          | `value`; inside a `Root`, read from the Manifest |
-| `as` (`ul` or `ol`)                               | Not taken: always a `ul`                         |
-| `className`, `style`, `title`, `data-*`, `aria-*` | The same, on the `ul`                            |
-| `lang`                                            | Not taken: each link carries its label's         |
+- `partOf` is `value`: inside a `Root`, leave it out.
+- Always a `ul`: no `as`.
+- 3.x's `lang` is the Root's `language`.

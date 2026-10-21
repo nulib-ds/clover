@@ -14,6 +14,7 @@ import { useMock } from "docs/lib/useMock";
  * ```mdx
  * <PartDemo part="Summary" resource="paged" />
  * <PartDemo part="Label" props={{ of: "canvas", as: "p" }} content />
+ * <PartDemo parts={[{ part: "Thumbnail" }, { part: "Label" }]} row />
  * ```
  */
 
@@ -59,6 +60,7 @@ const PARTS = [
   "Label",
   "Metadata",
   "Next",
+  "Panel",
   "PartOf",
   "Position",
   "Previous",
@@ -76,11 +78,26 @@ const PARTS = [
 
 export type PartName = (typeof PARTS)[number];
 
+/** A part to show and its props, plain values only. */
+interface Shown {
+  part: PartName;
+  props?: Record<string, unknown>;
+}
+
 interface PartDemoProps {
   /** The part, as `@nulib/clover` exports it. */
-  part: PartName;
+  part?: PartName;
   /** Its props: plain values only. */
   props?: Record<string, unknown>;
+  /** Several parts in the one Root, in order, as a layout places them: for `part`. */
+  parts?: Shown[];
+  /** The parts on one line, centered across it, rather than stacked. */
+  row?: boolean;
+  /**
+   * A box of this height round the parts, which scrolls: as a layout scrolls a tall part
+   * (a Panel), and as its code shows it.
+   */
+  box?: string;
   /** The mock it reads. Default `paged`. */
   resource?: PartDemoResource;
   /** A `Content` above it, for a part that follows the view (`of="canvas"`, a pager). */
@@ -93,31 +110,49 @@ const Live = dynamic(
   () =>
     import("@nulib/clover").then((clover) => {
       function Live({
-        part,
-        props,
+        shown,
+        row,
+        box,
         iiifContent,
         request,
         content,
         height,
       }: {
-        part: PartName;
-        props: Record<string, unknown>;
+        shown: Shown[];
+        row: boolean;
+        box?: string;
         iiifContent: string;
         request?: { fetch: typeof fetch };
         content: boolean;
         height: number;
       }) {
-        const Part = clover[part] as React.ComponentType<
-          Record<string, unknown>
-        >;
+        const parts = shown.map(({ part, props }, index) => {
+          const Part = clover[part] as React.ComponentType<
+            Record<string, unknown>
+          >;
+          return <Part key={`${part}-${index}`} {...props} />;
+        });
         return (
           <clover.Root
             iiifContent={iiifContent}
             request={request}
-            style={{ display: "grid", gap: "1rem" }}
+            style={
+              row
+                ? {
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignItems: "center",
+                    gap: "1rem",
+                  }
+                : { display: "grid", gap: "1rem" }
+            }
           >
             {content && <clover.Content style={{ height }} />}
-            <Part {...props} />
+            {box ? (
+              <div style={{ height: box, overflowY: "auto" }}>{parts}</div>
+            ) : (
+              parts
+            )}
           </clover.Root>
         );
       }
@@ -129,6 +164,9 @@ const Live = dynamic(
 export function PartDemo({
   part,
   props = {},
+  parts,
+  row = false,
+  box,
   resource = "paged",
   content = false,
   height = 320,
@@ -152,18 +190,13 @@ export function PartDemo({
   }, [searching]);
   const ready = url && (!searching || request);
   return (
-    <div
-      style={{
-        margin: "1.5rem 0 2rem",
-        padding: "1rem",
-        border: "1px solid var(--gray-6)",
-        borderRadius: "var(--radius-3)",
-      }}
-    >
+    // Its own box (`layout.css`), given up inside an example's frame.
+    <div className="docs-part-demo">
       {ready && (
         <Live
-          part={part}
-          props={props}
+          shown={parts ?? (part ? [{ part, props }] : [])}
+          row={row}
+          box={box}
           iiifContent={url}
           request={request ?? undefined}
           content={content}

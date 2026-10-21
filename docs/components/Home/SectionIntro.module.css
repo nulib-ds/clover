@@ -1,18 +1,17 @@
 /*
  * The homepage's section intros, "Why Clover.", "And more." and "Install." (Mat,
- * 2026-10-20: styled alike, concise, each with a clear way out): a hairline over it, a
- * title, a sentence, and its call to action at the end of the row, which wraps under
- * them where the row is narrow. Spaces on the golden scale.
+ * 2026-10-20: styled alike, concise, each with a clear way out): a title under the hero's
+ * stroke, a sentence, and its call to action at the end of the row, which wraps under
+ * them where the row is narrow. No rule over it, and room round it, so space alone sets
+ * it apart (Mat, 2026-10-21). Spaces on the golden scale.
  */
 .intro {
   align-items: flex-end;
-  border-top: 1px solid var(--gray-6);
   display: flex;
   flex-wrap: wrap;
   gap: 1rem 1.618rem;
   justify-content: space-between;
-  margin: clamp(2.618rem, 6vw, 4.236rem) 0 2.618rem;
-  padding-top: 2.618rem;
+  margin: clamp(4.236rem, 9vw, 6.854rem) 0 clamp(2.618rem, 6vw, 4.236rem);
 }
 
 .text {

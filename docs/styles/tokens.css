@@ -136,11 +136,24 @@
   --focus-ring: 0 0 0 2px var(--color-background), 0 0 0 4px var(--accent-11);
 
   /*
+   * The hero's marker stroke: a hand-drawn swoosh, used as a mask over the accent, so it
+   * takes the site's accent whatever it is set to. Every stroke on the site is this
+   * shape: the marks (`Home.module.css`), the figures' strokes, and the wordmark's on
+   * hover and focus (`Logo.tsx`).
+   */
+  --swoosh: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24' preserveAspectRatio='none'%3E%3Cpath d='M3 14.5c34-4.2 74-6.1 118-6.6 52-.6 107 .9 175-3.4 2.2-.1 3.6 1.6 3.4 3.4-.2 1.6-1.4 2.7-3 2.9-69 6.3-122 5.3-175 5.9-41 .5-79 2.3-115 6.5-2.4.3-4.5-1.4-4.7-3.8-.2-2.3 1.4-4.5 3.7-4.9z'/%3E%3C/svg%3E");
+
+  /*
    * Code, as Prism's Material theme colors it, on black: the homepage's code editor,
    * where it was asked for by name. Not themed: an editor stays dark on a light page.
    */
   --code-background: #000000;
   --code-text: #eeffff;
+  /*
+   * White, for what on the editor's black is not code: the stories' titles, words and
+   * figures (Mat, 2026-10-21: white, never the editor's tinted text).
+   */
+  --code-bright: #ffffff;
   /* Faint, yet 4.5:1 on black for the editor's labels and line numbers. */
   --code-faint: color-mix(in srgb, var(--code-text) 55%, transparent);
   --code-rule: color-mix(in srgb, var(--code-text) 14%, transparent);

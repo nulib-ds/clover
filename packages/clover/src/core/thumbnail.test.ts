@@ -151,10 +151,17 @@ describe("regionSource", () => {
       { width: 500, height: 500 },
     );
     expect(regionSource(placed, { x: 600, y: 100, w: 50, h: 50 }, 52)).toBe(
-      `${SERVICE}/100,100,50,50/!52,52/0/default.jpg`,
+      `${SERVICE}/100,100,50,50/!50,50/0/default.jpg`,
     );
     // Off that image, nothing.
     expect(regionSource(placed, { x: 0, y: 0, w: 50, h: 50 }, 52)).toBeNull();
+  });
+
+  it("never asks for more pixels than the region has, which Image API 3 refuses", () => {
+    // A line of text 300 by 20 pixels: fitted within 52 by 20, never scaled up.
+    expect(
+      regionSource(canvas("level2"), { x: 0, y: 0, w: 150, h: 10 }, 52),
+    ).toBe(`${SERVICE}/0,0,300,20/!52,20/0/default.jpg`);
   });
 
   it("asks nothing of a level 0 service, which cannot cut", () => {

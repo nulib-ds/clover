@@ -247,6 +247,12 @@ The stylesheet's size is part of the design.
 - **The viewport lies beneath everything else in the figure**: `z-index: -1` in an
   isolated figure, inline as well as in the stylesheet. Chrome, in the flow or
   positioned, then takes its own presses with or without the stylesheet (WCAG 2.5.8).
+- **A hotspot is as large as its region**, however small: a line of OCR can be a few
+  pixels tall at the zoom shown. It meets WCAG 2.5.8 by the Equivalent exception: the
+  Canvas's annotations menu lists the view's annotations, each a row at least 24px tall,
+  and picking one does what pressing its hotspot does. A layout that turns the menu off
+  (`controls={{ annotations: false }}`) keeps the exception only with an `Annotations`
+  list on the page. axe-core's `target-size` rule reports such hotspots, as expected.
 - **A toggle that is on** (Captions showing, Repeat pressed) shows a mark that hover and
   focus never draw: a 2px bar under the glyph, inset `s` from the sides and `2xs` from
   the bottom. It is a border, not a fill, because forced colors keep a border in the

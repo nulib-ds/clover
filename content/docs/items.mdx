@@ -1,126 +1,131 @@
 ---
 title: Items
+description: A sequence and where the reader is in it, as thumbnails in a carousel, a list or a grid, or one item at a time.
 ---
 
-import { Callout } from "nextra/components";
-import {
-  CollectionItemsDemo,
-  ItemsLayoutsDemo,
-} from "docs/components/Clover4/Demos";
+import { CollectionItemsDemo } from "docs/components/Clover4/Demos";
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
 
 # Items
 
-<Callout type="info">
-  `Items` replaces Clover 3.x's [Slider](/docs/3.x/slider) and the Viewer's
-  thumbnail strip.
-</Callout>
+<div className="docs-lede">
+  A sequence and where the reader is in it: thumbnails in a carousel, a list or
+  a grid, or one item at a time.
+</div>
 
-A sequence and where the reader is in it: thumbnails as a carousel, a list or a grid, or
-one item at a time as a pager.
-
-- **Inside a `Clover.Root`**, `Items` lists the Root's views (a spread is one item) and
-  selecting one goes there. It is a listbox, and like a radio group the selection
-  follows focus: one tab stop, and the arrow keys, Home and End select as they move
-  (where a held arrow stops, not each page it passes). Enter, Space or a click is a
-  choice, which `onSelect` reports. The selection follows the pager too. A Collection's
-  members move with the arrows and are chosen with Enter, since each loads a Manifest.
-- **On its own**, given `iiifContent` or `items`, it lists a Collection's members as links
-  to their `homepage`, as the Slider did.
+<Example>
+<PartDemo part="Items" content />
 
 ```jsx
-import * as Clover from "@nulib/clover";
-
-<Clover.Root iiifContent={manifestUrl}>
+<Clover.Root iiifContent={url}>
   <Clover.Content />
-  <Clover.Items layout="carousel" />
-</Clover.Root>;
-```
-
-<ItemsLayoutsDemo />
-
-## One at a time
-
-`layout="pager"` shows no thumbnails: the count, then Previous and Next, in a `nav` named
-"Items". It steps through what the strip would list, a spread at a time in a paged book,
-and the two follow each other. With `of="members"` it steps through the Collection's
-Manifests instead, telling `onSelect` of each. A right-to-left book mirrors it.
-
-```jsx
-<Clover.Root iiifContent={manifestUrl}>
-  <Clover.Content />
-  <Clover.Items layout="pager" />
+  <Clover.Items />
 </Clover.Root>
 ```
 
-The count keeps the room of its widest ("17 / 17"), so the arrows never move as it grows.
-The pager is a flex row (`.clover-pager`): move a piece with `order`, or place the three
-parts yourself, which take `of` too. A layout with a pager and no thumbnails is lighter
-that way: `Items` brings every layout with it, about 7.4 kB gzip, where the three parts
-alone are 1.2 kB.
+</Example>
+
+## API Reference
+
+Inside a `Root`, it lists the resource's views (a spread is one item), and selecting one
+goes there: a listbox whose selection follows focus and the arrow keys. On its own, it
+lists a Collection's members as links.
+
+| Prop            | Type                                        | Default                         | Description                                                  |
+| --------------- | ------------------------------------------- | ------------------------------- | ------------------------------------------------------------ |
+| `layout`        | `"carousel" \| "list" \| "grid" \| "pager"` | `"carousel"`                    | Thumbnails in a row, a column or a grid, or one at a time.   |
+| `of`            | `"views" \| "members"`                      | `"views"`                       | In a `Root`: its views, or its Collection's members.         |
+| `iiifContent`   | `string \| object`                          | —                               | On its own: a Collection (its members) or a Manifest.        |
+| `items`         | `object[]`                                  | —                               | On its own: IIIF resources to list as they are.              |
+| `navigation`    | `"id" \| "homepage"`                        | `"id"`; `"homepage"` on its own | Select a view, or link to each item's `homepage`.            |
+| `onSelect`      | `(item, event) => void`                     | —                               | An item was chosen; on a link, `preventDefault()` stays put. |
+| `header`        | `boolean`                                   | `true`                          | On its own: the resource's label, summary and homepage link. |
+| `headingLevel`  | `2 \| 3 \| 4 \| 5 \| 6`                     | `2`                             | On its own: the header's title level.                        |
+| `thumbnailSize` | `number`                                    | `200`                           | Pixels asked for each thumbnail's longer side.               |
+| `renderItem`    | `(item, { selected }) => ReactNode`         | —                               | Your own item in place of the figure.                        |
+| `request`       | `{ credentials, headers, fetch }`           | The Root's                      | On its own: for every request.                               |
+| `language`      | `string`                                    | The reader's                    | On its own: the language to read IIIF text in.               |
+
+## Examples
+
+### Grid
+
+Use `layout="grid"` for thumbnails that wrap into rows.
+
+<Example>
+<PartDemo part="Items" props={{ layout: "grid" }} content />
 
 ```jsx
-<header className="my-toolbar">
-  <Clover.Label as="h2" />
-  <Clover.Previous />
-  <Clover.Next />
-  <Clover.Position />
-</header>
+<Clover.Items layout="grid" />
 ```
 
-## A Collection
+</Example>
+
+### List
+
+Use `layout="list"` for a column, each item's title beside its picture.
+
+<Example>
+<PartDemo part="Items" props={{ layout: "list" }} content />
 
 ```jsx
-<Clover.Items iiifContent={collectionUrl} />
+<Clover.Items layout="list" />
 ```
 
-Its header's title is an `h2`. Under a heading of the page's own, pass the level below
-it: this one sits under the page's `h2`, so it takes `headingLevel={3}`.
+</Example>
 
+### One at a time
+
+Use `layout="pager"` for the count with Previous and Next, and no thumbnails. It steps a
+spread at a time through a paged book.
+
+<Example>
+<PartDemo part="Items" props={{ layout: "pager" }} content />
+
+```jsx
+<Clover.Items layout="pager" />
+```
+
+</Example>
+
+### Size
+
+Size the thumbnails with CSS: `--clover-items-height` for a carousel's pictures (default
+`8rem`), `--clover-items-size` for a grid's columns (`10rem`), `--clover-items-gap`
+between them (`1rem`).
+
+<Example>
+<PartDemo
+  part="Items"
+  props={{ style: { "--clover-items-height": "5rem" } }}
+  content
+/>
+
+```jsx
+<Clover.Items style={{ "--clover-items-height": "5rem" }} />
+```
+
+</Example>
+
+### A Collection
+
+Give it a Collection on its own, and it lists the members as links to each one's
+`homepage`, under the Collection's label and summary.
+
+<Example>
 <CollectionItemsDemo />
 
-The carousel is the browser's own scrolling with CSS scroll snapping, so wheel,
-trackpad, touch and keyboard scrolling all work, and a mouse can drag it. Thumbnails load
-lazily (`loading="lazy"`), at the size asked of each image service.
+```jsx
+<Clover.Items iiifContent="https://api.dc.library.northwestern.edu/api/v2/collections/c373ecd2-2c45-45f2-9f9e-52dc244870bd?as=iiif" />
+```
 
-## Props
+</Example>
 
-| Prop            | Type                                        | Description                                                                                 |
-| --------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `layout`        | `"carousel" \| "list" \| "grid" \| "pager"` | Default `carousel`. `pager`: one item at a time.                                            |
-| `of`            | `"views" \| "members"`                      | In a Root: its views (default), or its Collection's members.                                |
-| `iiifContent`   | `string \| object`                          | On its own: a Collection (its members) or a Manifest (its views).                           |
-| `items`         | `object[]`                                  | On its own: IIIF resources to list as they are.                                             |
-| `navigation`    | `"id" \| "homepage"`                        | Select (a listbox) or leave (links). Defaults to `id` for views and `homepage` for members. |
-| `onSelect`      | `(item, event) => void`                     | An item was chosen. On a link, `event.preventDefault()` keeps the reader on the page.       |
-| `header`        | `boolean`                                   | On its own: the resource's label, summary and homepage link. Default `true`.                |
-| `headingLevel`  | `2 \| 3 \| 4 \| 5 \| 6`                     | On its own: the level of the header's title, to fit the page's outline. Default `2`.        |
-| `thumbnailSize` | `number`                                    | Pixels asked for each thumbnail's longer side. Default `200`.                               |
-| `renderItem`    | `(item, { selected }) => ReactNode`         | Your own item in place of the figure.                                                       |
-| `request`       | `{ credentials, headers, fetch }`           | On its own. Inside a Root, the Root's.                                                      |
+## Previous versions
 
-### Styles
+[Clover 3.x › Slider](/docs/3.x/slider)
 
-| Property                   | Default | What it sets                                                             |
-| -------------------------- | ------- | ------------------------------------------------------------------------ |
-| `--clover-items-height`    | `8rem`  | A carousel's picture height.                                             |
-| `--clover-items-size`      | `10rem` | A grid column's width.                                                   |
-| `--clover-items-gap`       | `1rem`  | The space between items.                                                 |
-| `--clover-items-lines`     | `3`     | The lines a carousel's or grid's title runs to before it is cut short.   |
-| `--clover-items-ring-room` | `4px`   | Room round each item's pictures for the hover, selection and focus ring. |
-
-## From the Slider
-
-| `Slider`                  | `Items`                                                             |
-| ------------------------- | ------------------------------------------------------------------- |
-| `iiifContent`, `items`    | The same.                                                           |
-| `label`, `summary`        | Read from the Collection; hide them with `header={false}`.          |
-| `options.breakpoints`     | CSS: `--clover-items-height`, `--clover-items-gap`, media queries.  |
-| `options.customViewAll`   | The Collection's `homepage`, or your own link beside it.            |
-| `options.credentials`     | `request={{ credentials }}`.                                        |
-| `onItemInteraction(item)` | `onSelect(item, event)`; call `event.preventDefault()` to stay put. |
-| `search`, `onSearch`      | Not in Clover 4.                                                    |
-| `pager`                   | `<Clover.Items layout="pager" />`, beside the strip in a `Root`.    |
-| `activeIndex`             | Follows the Root's current view.                                    |
-| `renderItem(item, index)` | `renderItem(item, { selected })`.                                   |
-| `behavior="paged"`        | Inside a Root, spreads are one item each.                           |
-| `isRtl`                   | Follows the Manifest's `viewingDirection`.                          |
+- `Items` replaces both the Slider and the Viewer's thumbnail strip.
+- Sizes and breakpoints are CSS: `--clover-items-height`, `--clover-items-gap`.
+- `onItemInteraction` is `onSelect`.

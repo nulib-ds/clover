@@ -1,115 +1,130 @@
 ---
 title: Metadata
-description: The metadata of the Manifest, or of the current Canvas, as a description list of labels and values in the reader's language.
+description: The metadata of the resource, or of the current Canvas, as a description list of labels and values in the reader's language.
 ---
 
-import { Callout } from "nextra/components";
 import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
 
 # Metadata
 
-<Callout type="info">
-  Looking for the Metadata of Clover 3.x, `@samvera/clover-iiif`? It is at
-  [Clover 3.x › Metadata](/docs/3.x/metadata).
-</Callout>
+<div className="docs-lede">
+  The resource's metadata, or the current Canvas's, as a list of labels and
+  values.
+</div>
 
-The Manifest's `metadata`, or the current Canvas's with `of="canvas"`: each label and
-value pair, in the reader's language, in a description list. Outside a `Root`, give it the
-pairs to show as `value`.
-
-```jsx
-import * as Clover from "@nulib/clover";
-
-<Clover.Root iiifContent={manifestUrl}>
-  <Clover.Label as="h2" />
-  <Clover.Metadata />
-</Clover.Root>;
-```
-
-Below, the thirteen pairs of the White Sewing Machine Company's 1896 bicycle catalog, from
-Clover's [mocks](/docs/mocks).
-
+<Example>
 <PartDemo part="Metadata" />
 
-## What it renders
-
-A `dl`. Each pair is a `div` round its `dt`, the label, and its `dd`, the value, which
-keeps the two associated for assistive technology.
-
-```html
-<dl class="clover-metadata">
-  <div data-label="date">
-    <dt>Date</dt>
-    <dd>1896</dd>
-  </div>
-</dl>
+```jsx
+<Clover.Root iiifContent={url}>
+  <Clover.Metadata />
+</Clover.Root>
 ```
 
-- Each `div`'s `data-label` is its label in lower case, hyphens for spaces
-  (`alternate-title`). It is read in `none`, else the label's first language, so it stays
-  the same whatever the reader's language: a hook for your CSS.
-- Labels and values carry the language they are in as `lang`; those in `none` carry none.
-  A language's several values are joined with commas.
-- A value is shown as IIIF's limited HTML, sanitized, when it runs from a first `<` to a
-  last `>` (see [HTML](/docs/primitives#html)); otherwise as written. Links in it are
-  underlined, not only colored, and long unbroken values wrap.
-- Without metadata it renders nothing.
+</Example>
 
-## Values of your own
+## API Reference
 
-`renderValue` is called with each pair, `{ label, value }`. Return what its `dd` should
-hold, or `undefined` to keep Clover's. Here each subject links to a search of your own, for
-a record whose labels and values are in `none`, as the catalog's are:
+Reads `metadata` from the Root's resource and renders a description list, each label a
+`dt` and each value a `dd`. A value may be IIIF's [HTML](/docs/primitives#html). It
+renders nothing while there is no metadata. Its other props go to the `dl`.
+
+| Prop          | Type                     | Default      | Description                                                      |
+| ------------- | ------------------------ | ------------ | ---------------------------------------------------------------- |
+| `of`          | `"manifest" \| "canvas"` | `"manifest"` | Whose metadata: the resource's, or the Canvas the reader is on.  |
+| `value`       | `{ label, value }[]`     | —            | Pairs to show instead of the Root's. Outside a `Root`, the ones. |
+| `renderValue` | `(item) => ReactNode`    | —            | A value of your own; Clover's where it returns `undefined`.      |
+| `className`   | `string`                 | —            | Added to `clover-metadata`.                                      |
+
+## Examples
+
+### Columns
+
+Lay the pairs out with your CSS. Each is a `div` around its `dt` and `dd`, its label as
+`data-label` (`date`, `alternate-title`) for your selectors.
+
+<Example>
+<PartDemo
+  part="Metadata"
+  props={{
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(14rem, 1fr))",
+    },
+  }}
+/>
 
 ```jsx
-import React from "react";
-import * as Clover from "@nulib/clover";
+<Clover.Metadata
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(14rem, 1fr))",
+  }}
+/>
+```
+
+</Example>
+
+### Pairs of your own
+
+Give it `value` to show pairs you hold, in a `Root` or on its own.
+
+<Example>
+<PartDemo
+  part="Metadata"
+  props={{
+    value: [
+      { label: { none: ["Date"] }, value: { none: ["1896"] } },
+      {
+        label: { none: ["Publisher"] },
+        value: { none: ["The White Sewing Machine Co."] },
+      },
+    ],
+  }}
+/>
+
+```jsx
+<Clover.Metadata
+  value={[
+    { label: { none: ["Date"] }, value: { none: ["1896"] } },
+    {
+      label: { none: ["Publisher"] },
+      value: { none: ["The White Sewing Machine Co."] },
+    },
+  ]}
+/>
+```
+
+</Example>
+
+### Values of your own
+
+`renderValue` is called with each pair: return what its `dd` holds, or `undefined` for
+Clover's. Here each subject links to a search. A value you render carries no `lang`, so
+mark one in another language yourself.
+
+```jsx
+import { Fragment } from "react";
 
 function renderValue(item) {
   if (item.label.none?.[0] !== "Subject") return undefined;
-  return (item.value.none ?? []).map((subject, index) => {
-    const href = `/search?subject=${encodeURIComponent(subject)}`;
-    return (
-      <React.Fragment key={subject}>
-        {index > 0 && ", "}
-        <a href={href}>{subject}</a>
-      </React.Fragment>
-    );
-  });
+  return (item.value.none ?? []).map((subject, index) => (
+    <Fragment key={subject}>
+      {index > 0 && ", "}
+      <a href={`/search?subject=${encodeURIComponent(subject)}`}>{subject}</a>
+    </Fragment>
+  ));
 }
 
 <Clover.Metadata renderValue={renderValue} />;
 ```
 
-A `dd` you fill carries no `lang`: mark text in a language other than the page's yourself.
-`renderValue` is called while `Metadata` renders, so it calls no hooks; to use them (to read
-a value with `useLocalized`, say), return an element of a component of your own.
+## Previous versions
 
-## Props
+[Clover 3.x › Metadata](/docs/3.x/metadata)
 
-| Prop          | Type                     | Description                                                 |
-| ------------- | ------------------------ | ----------------------------------------------------------- |
-| `of`          | `"manifest" \| "canvas"` | Whose metadata. Default `manifest`.                         |
-| `value`       | `{ label, value }[]`     | Pairs to show instead of the Root's.                        |
-| `renderValue` | `(item) => ReactNode`    | A value of your own; Clover's where it returns `undefined`. |
-| `className`   | `string`                 | Added to `clover-metadata`.                                 |
-
-It takes no `as`: it is a `dl`. Its other props (`id`, `style`, `aria-*`) go to the `dl`.
-
-### Styles
-
-`.clover-metadata` stacks its pairs `--clover-space-s` apart, each label over its value, in
-the text's color and size. Labels are medium weight (500); values keep the text's own.
-
-## From Clover 3.x
-
-| 3.x `Metadata`                                    | Clover 4                                                                                        |
-| ------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `metadata`                                        | `value`; inside a `Root`, leave it out                                                          |
-| `customValueContent`: `matchingLabel`, `Content`  | `renderValue(item)`: match `item.label`, return the content                                     |
-| `customValueDelimiter`                            | Not in Clover 4: a language's values are joined with commas. `renderValue` joins them otherwise |
-| `as` (`dl`)                                       | Always a `dl`                                                                                   |
-| `lang`                                            | The Root's `language`; outside a `Root`, the page's `<html lang>`, then the browser's           |
-| `className`, `style`, `title`, `data-*`, `aria-*` | The same, on the `dl`                                                                           |
-
-Each pair keeps its `div` with `data-label`, as in 3.x.
+- `metadata` is now `value`; inside a `Root`, leave it out.
+- `customValueContent` is `renderValue`.
+- A language's values are joined with commas: no `customValueDelimiter`.
+- 3.x's `lang` is the Root's `language`.

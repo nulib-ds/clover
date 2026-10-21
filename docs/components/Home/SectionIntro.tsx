@@ -1,10 +1,12 @@
 import Link from "next/link";
 import React from "react";
+import home from "docs/components/Home/Home.module.css";
 import styles from "docs/components/Home/SectionIntro.module.css";
 
 /**
- * A section's intro on the homepage: its title, one sentence, and where to go from it,
- * a button (`cta-solid` for the page's one primary way on, `cta-outline` otherwise).
+ * A section's intro on the homepage: its title, under the hero's stroke, one sentence,
+ * and where to go from it, a button (`cta-solid` for the page's one primary way on,
+ * `cta-outline` otherwise).
  */
 export function SectionIntro({
   title,
@@ -14,7 +16,7 @@ export function SectionIntro({
   className,
   id,
 }: {
-  title: string;
+  title: React.ReactNode;
   note: React.ReactNode;
   cta: { href: string; label: string; primary?: boolean };
   as?: "h2" | "h3";
@@ -25,7 +27,8 @@ export function SectionIntro({
     <div className={className ? `${styles.intro} ${className}` : styles.intro}>
       <div className={styles.text}>
         <Heading className={styles.title} id={id}>
-          {title}
+          {/* Under the hero's stroke, drawn in as it comes into view. */}
+          <span className={`${home.mark} ${home.markOnScroll}`}>{title}</span>
         </Heading>
         <p className={styles.note}>{note}</p>
       </div>

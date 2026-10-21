@@ -1,59 +1,73 @@
 ---
 title: Rights
-description: The rights of the Manifest, or of the current Canvas, as a link to its license or rights statement.
+description: The rights of the resource, or of the current Canvas, as a link to its license or rights statement.
 ---
 
+import { Fragment } from "react";
 import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
 
 # Rights
 
-The Manifest's `rights`, or the current Canvas's with `of="canvas"`: the address of its
-license or rights statement, as a link. Outside a `Root`, give it the address as `value`.
+<div className="docs-lede">
+  The resource's rights, or the current Canvas's: a link to its license or
+  rights statement.
+</div>
 
-```jsx
-import * as Clover from "@nulib/clover";
-
-<Clover.Root iiifContent={manifestUrl}>
-  <Clover.Content />
-  <Clover.Rights />
-</Clover.Root>;
-```
-
-Below, the rights statement of the White Sewing Machine Company's 1896 bicycle catalog,
-from Clover's [mocks](/docs/mocks).
-
+<Example>
 <PartDemo part="Rights" />
 
-## The link
-
-{/* prettier-ignore */}
-```html
-<a
-  href="http://rightsstatements.org/vocab/NoC-US/1.0/"
-  class="clover-rights"
->
-  http://rightsstatements.org/vocab/NoC-US/1.0/
-</a>
+```jsx
+<Clover.Root iiifContent={url}>
+  <Clover.Rights />
+</Clover.Root>
 ```
 
-The link's text, and so its name to assistive technology, is the address as the property
-gives it: Clover does not look up the name of the license or statement. Put it where its
-context says what it is, as [`About`](/docs/panel#sections) does, under a "Rights"
-heading.
+</Example>
 
-Without `rights` it renders nothing.
+## API Reference
 
-## Props
+Reads `rights` from the Root's resource and renders a link to it, the address as its
+text. It renders nothing while there is none. Its other props go to the `a`.
 
-| Prop        | Type                     | Description                               |
-| ----------- | ------------------------ | ----------------------------------------- |
-| `of`        | `"manifest" \| "canvas"` | Whose rights. Default `manifest`.         |
-| `value`     | `string`                 | An address to link instead of the Root's. |
-| `className` | `string`                 | Added to `clover-rights`.                 |
+| Prop        | Type                     | Default      | Description                                                          |
+| ----------- | ------------------------ | ------------ | -------------------------------------------------------------------- |
+| `of`        | `"manifest" \| "canvas"` | `"manifest"` | Whose rights: the resource's, or the Canvas the reader is on.        |
+| `value`     | `string`                 | —            | An address to link instead of the Root's. Outside a `Root`, the one. |
+| `className` | `string`                 | —            | Added to `clover-rights`.                                            |
 
-It takes no `as`: it is an `a`. Its other props (`id`, `style`, `aria-*`) go to the `a`.
+## Examples
 
-### Styles
+### Under a heading
 
-Clover's stylesheet gives `.clover-rights` no style of its own: it looks as your page's
-links do.
+The link's text is the address, as the property gives it, so place it where its context
+says what it is, as the [Panel](/docs/panel)'s About section does.
+
+<Example>
+<Fragment key="rights">
+<h4>Rights</h4>
+<PartDemo part="Rights" />
+</Fragment>
+
+```jsx
+<h4>Rights</h4>
+<Clover.Rights />
+```
+
+</Example>
+
+### An address of your own
+
+Give it `value` to link an address you hold, in a `Root` or on its own.
+
+<Example>
+<PartDemo
+  part="Rights"
+  props={{ value: "http://creativecommons.org/publicdomain/mark/1.0/" }}
+/>
+
+```jsx
+<Clover.Rights value="http://creativecommons.org/publicdomain/mark/1.0/" />
+```
+
+</Example>

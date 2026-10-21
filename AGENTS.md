@@ -71,18 +71,27 @@ deadline.
     CollectionSelect, Contents, Search, Transcript), Download and Map, then Primitives
     (`content/docs/primitives/`, an overview and a page per property part: Label,
     Thumbnail, Summary, Metadata, RequiredStatement, Rights, Homepage, SeeAlso,
-    Rendering, PartOf, Id, Value). Each has what it reads, a live example, its props from
-    the source, and "From Clover 3.x" where 3.x had it. Live examples are
+    Rendering, PartOf, Id, Value). Each reads as Radix Themes' component pages do (Mat,
+    2026-10-21): a lede (`docs-lede`), one example at the top, "API Reference" (what it
+    reads and renders, then one table per component, Prop, Type, Default and Description,
+    from the source), "Examples" (an `###` each: one sentence and an `<Example>`, the demo
+    with its code attached, `ViewerDocs.tsx`), and "Previous versions" where 3.x had it:
+    a link and a few words of direction, never a mapping of the differences. No other
+    tables, and no table of contents (`reference()` in `content/docs/_meta.ts`), so the
+    examples have the width. Live examples are
     `<PartDemo part="…" />` (`docs/components/Clover4/PartDemo.tsx`): the part named, its
     props plain values, in a `Root` over a mock (`resource`), with a `Content` above it
-    (`content`) where it follows the view. The homepage's tiles link to these pages
+    (`content`) where it follows the view; several parts in the one `Root` (`parts`, on
+    a line with `row`); a tall part in a box that scrolls (`box`), as the templates
+    scroll the Panel, the box in the example's code too. The homepage's tiles link to these pages
     (`DOCS` in `docs/components/Home/PartsLive.tsx`); a new part gets a page and a link.
     `content/docs/panel.mdx` holds the Panel's layouts and keys, its default sections
     and when each shows, `Tab`s, headings, showing and closing it, the open section, its
     props (and `Tab`'s, `PanelToggle`'s, `About`'s), and 3.x's
     `options.informationPanel`; Composing keeps a short section with the `Tab` example
-    and links there. Its demo (`PanelDemo`) is the `paged` mock, and its `headingLevel`
-    follows the `h2` it sits under. `canvas.mdx` says when to place `Content` rather
+    and links there. Its demos are each in a 24rem box (`box`), so the page stays
+    scannable (the catalog's About is long), each `headingLevel` one
+    below the heading it sits under. `canvas.mdx` says when to place `Content` rather
     than `Canvas`.
   - Use Clover: Get Started (`/docs`, which holds the web component, `<clover-viewer>`,
     in its own section), Viewer (`/docs/viewer`, the templates on it: their old page,
@@ -144,7 +153,7 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
   - After the parts, "Why Clover" tells five stories, one at a time: Accessible, Yours,
     Composable, Light, Coverage, on the code editor's black and the page's ground in
     turn, black first (Mat, 2026-10-20). Set apart from the parts by size, not colors of
-    its own; its accent is `--accent-9` itself, never a shade or a fill: the hero's marker stroke under every figure, the figures themselves in the text's color (black on the page's ground, white on black; Mat, 2026-10-20). Its
+    its own; its accent is `--accent-9` itself, never a shade or a fill: the hero's marker stroke under every figure, the figures themselves in the text's color (black on the page's ground; on black, white, `--code-bright`, never the editor's tinted text; Mat, 2026-10-20 and 2026-10-21). Its
     words are Apple-style marketing: short sentences, titles too, each ending in a period,
     US English, every claim one Clover keeps. Every figure is the code's own: sizes from
     `sizes.json` (measured by the package's build), the parts counted from the
@@ -164,8 +173,9 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     example viewer's own code editor (a portal into `data-composer`) change the layout
     Mat set (Content first at 400, then Label, Summary, Items larger), the code
     crossfading with its new lines lit at a fixed 15 lines, the viewer fading out and in
-    around it, and puts it back after. Each change waits `BAND` past its edge before
-    undoing. Yours has the site's Font family and Color (`BrandPicker.tsx`), which set the
+    around it, and puts it back after. Each change starts with its story's line (Mat, 2026-10-21: in sync) and waits
+    `BAND` past its edge before undoing; where the viewer is held, a story's figure strokes
+    draw as its line reaches it too (`data-drawn`), and elsewhere as it scrolls in. Yours has the site's Font family and Color (`BrandPicker.tsx`), which set the
     whole site and are remembered (`page-theme.ts`); the navbar has no settings of its
     own (its gear was removed on 2026-10-20), appearance being in the footer.
   - Scrolling there stays smooth (Mat, 2026-10-20: "everything should VERY SMOOTH"; 0 of
@@ -231,9 +241,9 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     Keep the playground itself about layout and UX: names and those few words, no
     marketing lines; the marketing is in the choice under it and in Why Clover.
   - The homepage's three sections after the playground open alike, with `SectionIntro`
-    (`docs/components/Home/SectionIntro.tsx`): a hairline over it, a title ending in a
-    period, one short note (`--text-lede`, as the hero's sentence and the choice's), and one call to action (`cta-solid` or `cta-outline`,
-    `tokens.css`). And more (the parts counted, "See them all"; the Collection's tile the first under it, Mat,
+    (`docs/components/Home/SectionIntro.tsx`): no rule over it and room round it (Mat,
+    2026-10-21), a title ending in a period under the hero's stroke, one short note (`--text-lede`, as the hero's sentence and the choice's), and one call to action (`cta-solid` or `cta-outline`,
+    `tokens.css`). And more (the parts counted, "See them all"; the Collection's tile the first under it, and Annotations beside Contents; Mat,
     2026-10-21), Why Clover ("Read the
     docs") and Install ("Get started"), the last in the gap after Coverage, beside the
     held viewer, so the hold runs to the page's foot.
@@ -242,6 +252,11 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     and npm's release dates), its acknowledgments, and that it is MIT licensed and fully
     open source, holders as `LICENSE` names them (Mat, 2026-10-20). Keep each fact the
     record's.
+  - The wordmark (`docs/components/Logo.tsx`, the navbar's and the footer's) is the text's
+    color; on hover and keyboard focus the hero's stroke is drawn under it, point to point
+    (revealed, never stretched), sized and set in `em` of the wordmark's height as the
+    marks are (`--wordmark-height`; Mat, 2026-10-21), never a fade or a fill. Every stroke on the site is one shape,
+    `--swoosh` (`tokens.css`).
   - Headers are solid, never frosted or translucent: the navbar (`docs/styles/layout.css`
     overrides Nextra's blur) and the playground's bar. From 48rem wide, on a screen at
     least 36rem tall (not a phone, where with the navbar it would take too much height),
