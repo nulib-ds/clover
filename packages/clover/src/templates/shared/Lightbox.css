@@ -28,12 +28,13 @@
   gap: var(--clover-space-m);
 }
 
-/* Its title, at whatever level the layout gives it. */
-.clover-template-lightbox-header :is(h2, h3, h4, h5, h6) {
+/* Its title, at whatever level the layout gives it (past h6, no heading). */
+.clover-template-lightbox-title {
   flex: 1 1 auto;
   min-width: 0;
   margin: 0;
   font-size: var(--clover-text-l);
+  font-weight: 700;
 }
 
 button.clover-template-lightbox-close {

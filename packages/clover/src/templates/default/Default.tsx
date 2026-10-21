@@ -33,7 +33,7 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    * an `h2`, 3). The panel's sections are a level below it, or at it with no header,
    * taking the title's place. Default 2.
    */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  headingLevel?: number;
   /** The information panel beside the stage, with its toggle. Default `true`. */
   panel?: boolean;
   /** Whether the panel starts open. Default: open when it has room beside the stage. */
@@ -93,7 +93,10 @@ export function Default({
   const [choice, setChoice] = useState<boolean | undefined>(defaultPanelOpen);
   const open = choice ?? beside;
   const setOpen = (value: boolean) => setChoice(value);
-  const panelId = `${useId().replace(/:/g, "")}-panel`;
+  const baseId = useId().replace(/:/g, "");
+  const panelId = `${baseId}-panel`;
+  // Past h6 the title is no heading, and names the Viewer instead (`Clover.titled`).
+  const title = Clover.titled(headingLevel, `${baseId}-title`);
   const pane = useRef<HTMLElement>(null);
   /*
    * The panel's toggle sits on the spine, the bar between stage and panel, while the
@@ -166,6 +169,7 @@ export function Default({
         .filter(Boolean)
         .join(" ")}
       data-fill={fill || undefined}
+      {...(header ? title.group : null)}
       {...root}
     >
       <Clover.Split
@@ -203,8 +207,9 @@ export function Default({
                 size={128}
               />
               <Clover.Label
-                as={`h${headingLevel}`}
+                as={title.as}
                 className="clover-template-default-title"
+                {...title.title}
               />
             </header>
           )}
@@ -272,8 +277,8 @@ export function Default({
   );
 }
 
-/** The heading level under another, no deeper than 6. */
-const below = (level: number) => Math.min(level + 1, 6) as 2 | 3 | 4 | 5 | 6;
+/** The heading level under another. Past 6, the parts' titles name what they head. */
+const below = (level: number) => level + 1;
 
 /**
  * The titles of the view the reader is on: a page's label, or both of a spread's, a dot

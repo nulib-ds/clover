@@ -1,6 +1,6 @@
 # Clover IIIF
 
-> Clover is an accessible, composable viewer for IIIF Manifests, Collections and the material they describe, made by Northwestern University Libraries. These docs lead with Clover 4, `@nulib/clover`, which is in development and not yet on npm. Clover 3.x, `@samvera/clover-iiif`, is the earlier version: it is still the one on npm, and its docs are kept under /docs/3.x/ for reference only. Do not take 3.x's API or behavior as Clover 4's.
+> Clover IIIF is a viewer as distinctive as your collections: design the user experience that you imagine for your IIIF resources, Manifests and Collections. A project of Northwestern University Libraries. These docs lead with Clover 4, `@nulib/clover`, which is in development and not yet on npm. Clover 3.x, `@samvera/clover-iiif`, is the earlier version: it is still the one on npm, and its docs are kept under /docs/3.x/ for reference only. Do not take 3.x's API or behavior as Clover 4's.
 
 ## Clover 4 (current docs)
 

@@ -4,6 +4,7 @@ import { isLoneCanvas } from "../../core/load";
 import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { useClover } from "../../react/context";
+import { titled } from "../../ui/heading";
 
 /**
  * A Canvas shown on its own (given as the content) says what it is part of, and opens
@@ -11,11 +12,12 @@ import { useClover } from "../../react/context";
  */
 export default function PartOfManifest({
   manifest,
-  Heading,
+  headingLevel,
   onOpened,
 }: {
   manifest: Record<string, any>;
-  Heading: React.ElementType;
+  /** About's, for its title. */
+  headingLevel: number;
   /** Once the Manifest is in place, and this, with its button, is gone. */
   onOpened: () => void;
 }) {
@@ -27,11 +29,16 @@ export default function PartOfManifest({
     .filter((part) => part?.id && (!part.type || part.type === "Manifest"));
   if (!isLoneCanvas(manifest) || !parts.length) return null;
   const canvasId = manifest.items[0].id;
+  const { as: Title, title, group } = titled(headingLevel, `${id}-title`);
   return (
-    <section className="clover-about-section">
-      <Heading className="clover-about-heading" lang={langOf("aboutPartOf")}>
+    <section className="clover-about-section" {...group}>
+      <Title
+        className="clover-about-heading"
+        lang={langOf("aboutPartOf")}
+        {...title}
+      >
         {t("aboutPartOf")}
-      </Heading>
+      </Title>
       <ul className="clover-about-part-of">
         {parts.map((part, index) => {
           const label = localize(part.label, language);

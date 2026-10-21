@@ -22,9 +22,9 @@
  * Under the navbar, the line saying whose project Clover is (`docs/components/
  * Subheader.tsx`): a small acknowledgment in the corner, on the page's own ground, no
  * band of its own (Mat, 2026-10-20). Not held: it scrolls away with the page while the
- * navbar stays. Its text in the muted color (5.2:1 light, 7.6:1 dark), its link the text
- * accent (6.2:1 or more under every accent preset, either theme) and underlined, so it is
- * told apart by more than color (WCAG 1.4.1). It lines up with the end of the navbar's
+ * navbar stays. Its text in the sidebar's black (`--nav-text`; Mat, 2026-10-21), its link
+ * the text accent (6.2:1 or more under every accent preset, either theme) and underlined,
+ * so it is told apart by more than color (WCAG 1.4.1). It lines up with the end of the navbar's
  * content (its last control): Nextra's 90rem and 1.5rem here, the homepage's own in
  * `Home.module.css`.
  */
@@ -34,7 +34,7 @@
   padding-block: 0.618rem 0;
   padding-left: max(env(safe-area-inset-left), 1.5rem);
   padding-right: max(env(safe-area-inset-right), 1.5rem);
-  color: var(--gray-11);
+  color: var(--nav-text);
   /* Small, as an acknowledgment is: under the docs' floor (Mat, 2026-10-16). */
   font-size: 0.875rem;
   line-height: 1.5;
@@ -79,7 +79,8 @@
  * a layered `!important`, which no unlayered rule outranks, so it is given the color
  * through the variable it reads.
  */
-:root:root {
+:root:root,
+[data-page-theme] {
   --accent-link: var(--accent-11);
 }
 
@@ -256,25 +257,32 @@ html:not(.dark) .nextra-callout :not(pre) > code {
 }
 
 /*
- * The footer (`docs/components/SiteFooter.tsx`), in the site's own materials: the light
- * gray surface (`--surface`), a hairline, the page's text
- * and muted text, links in the text accent and underlined (WCAG 1.4.1), spaces on the
+ * The footer (`docs/components/SiteFooter.tsx`), in the site's own materials: the
+ * page's white (`--color-background`, as the navbar's), set off by white space alone, no
+ * line over it (Mat, 2026-10-21), the page's text and muted text, links in the text accent and underlined (WCAG 1.4.1), spaces on the
  * golden scale. Nextra draws the band and its row of switches (appearance); these take
  * them over, matched by Nextra's own classes, whole (its utilities are layered, so these
  * outrank them).
  */
 [class~="x:pb-[env(safe-area-inset-bottom)]"] {
-  background-color: var(--surface);
+  background-color: var(--color-background);
 }
 
 [class~="x:pb-[env(safe-area-inset-bottom)]"] > hr {
-  border-color: var(--gray-6);
+  display: none;
 }
 
+/* Its appearance switch as the sidebar's is drawn: 1rem, in the sidebar's color. */
+[class~="x:pb-[env(safe-area-inset-bottom)]"] > div > button {
+  color: var(--nav-text);
+  font-size: 1rem;
+}
+
+/* The sidebar's size and color (`--nav-text`; Mat, 2026-10-21). */
 footer.site-footer {
-  color: var(--gray-12);
+  color: var(--nav-text);
   display: block;
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.618;
   padding-block: 2.618rem 4.236rem;
 }
@@ -286,7 +294,6 @@ footer.site-footer {
 }
 
 .site-footer p {
-  color: var(--gray-11);
   margin: 0;
 }
 
@@ -297,25 +304,6 @@ footer.site-footer {
 .site-footer code {
   font-family: var(--font-mono);
   font-size: 0.9em;
-}
-
-.site-footer-grid {
-  display: grid;
-  gap: 2.618rem;
-  grid-template-columns: minmax(0, 1.618fr) repeat(2, minmax(0, 1fr));
-}
-
-@media (max-width: 48rem) {
-  .site-footer-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-.site-footer h2 {
-  color: var(--gray-12);
-  font-size: 0.875rem;
-  font-weight: var(--weight-bold);
-  margin: 0 0 0.382rem;
 }
 
 /* A part's demo on its own (`PartDemo`): a hairline box. In an example's frame, the frame's. */
@@ -332,6 +320,17 @@ footer.site-footer {
  */
 nav.nextra-toc:empty {
   display: none;
+}
+
+/*
+ * Such a page takes more room at its sides where the window has room to spare (Mat,
+ * 2026-10-21), easing in: Nextra's 3rem up to 64rem wide, then wider with the window, to
+ * 6rem at 90rem, where the layout stops widening. Narrower screens keep Nextra's.
+ */
+@media (min-width: 64rem) {
+  nav.nextra-toc:empty ~ article {
+    padding-inline: clamp(3rem, 3rem + (100vw - 64rem) * 0.1154, 6rem);
+  }
 }
 
 /*
@@ -385,7 +384,7 @@ main:has(> .docs-lede) > h3 {
 .site-footer .site-footer-logo {
   color: var(--gray-12);
   display: inline-flex;
-  margin-bottom: 0.618rem;
+  margin-bottom: 1.618rem;
   min-height: 24px;
   text-decoration: none;
 }
@@ -395,8 +394,42 @@ main:has(> .docs-lede) > h3 {
   --wordmark-height: 1.25rem;
 }
 
-.site-footer-about p {
-  max-width: 28rem;
+/*
+ * The hero's words, a sentence a line, across the footer's width (Mat, 2026-10-21): the
+ * headline's in its bold, a step up the golden scale, and the sentence under it at the
+ * size it is wherever it is said (`--text-lede`). The spaces are the scale's: the
+ * headline `xs` from its sentence, the paragraph under them `m` away.
+ */
+.site-footer .site-footer-lede {
+  font-size: var(--text-lede);
+  line-height: 1.5;
+}
+
+.site-footer-lede > span {
+  display: block;
+}
+
+/* The golden ratio of the footer's width (Mat, 2026-10-21), the legal line `3xl` under it. */
+.site-footer-about {
+  max-width: 61.8%;
+}
+
+@media (max-width: 48rem) {
+  .site-footer-about {
+    max-width: none;
+  }
+}
+
+.site-footer-lede > span:first-child {
+  font-size: 1.618rem;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 0.382rem;
+}
+
+.site-footer .site-footer-lede + p {
+  margin-top: 1rem;
 }
 
 .site-footer-legal {
@@ -406,7 +439,7 @@ main:has(> .docs-lede) > h3 {
   flex-wrap: wrap;
   gap: 0.618rem 1.618rem;
   justify-content: space-between;
-  margin-top: 2.618rem;
+  margin-top: 4.236rem;
   padding-top: 1.618rem;
 }
 

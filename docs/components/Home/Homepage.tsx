@@ -275,13 +275,16 @@ const Homepage: React.FC = () => {
                   {story.figures.map((figure) => (
                     <p className={styles.figure} key={figure.caption}>
                       <span className={styles.figureValue}>
-                        {figure.value}
-                        {figure.unit && (
-                          <span className={styles.figureUnit}>
-                            {" "}
-                            {figure.unit}
-                          </span>
-                        )}
+                        {/* The stroke under it, set as every mark's is (`.mark`). */}
+                        <span className={styles.figureMark}>
+                          {figure.value}
+                          {figure.unit && (
+                            <span className={styles.figureUnit}>
+                              {" "}
+                              {figure.unit}
+                            </span>
+                          )}
+                        </span>
                       </span>{" "}
                       <span className={styles.figureCaption}>
                         {figure.caption}

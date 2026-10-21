@@ -34,6 +34,7 @@ import { join } from "../../lib/classnames";
 import { formatTime } from "../Canvas/media/useMediaController";
 import { useClover, useCloverSelector } from "../../react/context";
 import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
+import { titleTag } from "../../ui/heading";
 import { HideToggle } from "../../ui/HideToggle";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 
@@ -51,7 +52,7 @@ export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
    * The heading level for each set's title. Headings in an annotation's Markdown sit a
    * level below it, or at it in a set with no title. Default 3.
    */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  headingLevel?: number;
   as?: React.ElementType;
 }
 
@@ -109,7 +110,8 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
     const groups = sets
       .map((set) => ({ set, entries: visible(set) }))
       .filter(({ entries }) => entries.length);
-    const Heading = `h${headingLevel}` as React.ElementType;
+    // Past 6 not a heading (`ui/heading.ts`): each set is named by its title either way.
+    const Heading = titleTag(headingLevel);
     const showLabel = {
       text: t("annotationsShow"),
       lang: langOf("annotationsShow"),
@@ -210,7 +212,7 @@ function AnnotationGroup({
 }) {
   const id = useId();
   // Headings in an entry's Markdown sit under the set's own, or at its level without one.
-  const headingLevel = title.text ? Math.min(setLevel + 1, 6) : setLevel;
+  const headingLevel = title.text ? setLevel + 1 : setLevel;
   return (
     <section
       className="clover-annotations-set"
@@ -525,12 +527,11 @@ const AnnotationLayers = forwardRef<
       {...rest}
     >
       {layers.map((layer, layerIndex) => {
-        const Title = `h${headingLevel}` as React.ElementType;
+        // Past 6 not headings (`ui/heading.ts`): each names its section either way.
+        const Title = titleTag(headingLevel);
         // A layer's Canvases sit a level under its title, or at its level without one.
-        const level = layer.title.text
-          ? Math.min(headingLevel + 1, 6)
-          : headingLevel;
-        const Label = `h${level}` as React.ElementType;
+        const level = layer.title.text ? headingLevel + 1 : headingLevel;
+        const Label = titleTag(level);
         const hidden = layer.setIds.every((setId) =>
           hiddenSets.includes(setId),
         );
@@ -607,7 +608,7 @@ const AnnotationLayers = forwardRef<
                         entry={entry}
                         canvas={canvasById.get(group.canvasId) ?? there?.canvas}
                         index={index}
-                        headingLevel={labeled ? Math.min(level + 1, 6) : level}
+                        headingLevel={labeled ? level + 1 : level}
                         language={language}
                         showLabel={showLabel}
                         selected={entry.id === selected}

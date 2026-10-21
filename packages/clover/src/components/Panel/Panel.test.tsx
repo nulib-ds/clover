@@ -222,6 +222,35 @@ describe("Panel", () => {
     ).toBeInTheDocument();
   });
 
+  it("past h6 draws no heading: each title names what it heads", async () => {
+    const { unmount } = render(
+      <Clover.Root iiifContent={manifest}>
+        <Clover.Panel layout="accordion" headingLevel={6} />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByRole("heading", { name: "About", level: 6 }),
+    ).toBeInTheDocument();
+    // About's titles would be 7: each names its section instead.
+    expect(
+      await screen.findByRole("group", { name: "Rights" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Rights" }),
+    ).not.toBeInTheDocument();
+    unmount();
+    // The accordion's own headings, past 6 too, leave each panel named by its button.
+    render(
+      <Clover.Root iiifContent={manifest}>
+        <Clover.Panel layout="accordion" headingLevel={7} />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByRole("region", { name: "About" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
+  });
+
   it("takes tabs of your own, moved between with the arrow keys", async () => {
     render(
       <Clover.Root iiifContent={manifest}>

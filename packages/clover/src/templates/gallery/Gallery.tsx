@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useId, useState } from "react";
 
 import * as Clover from "../../parts";
 import type { RootProps } from "../../parts";
@@ -11,11 +11,11 @@ export type GalleryProps = Omit<RootProps, "children"> & {
    * The title's heading level, to fit the outline of the page around the layout (under
    * an `h2`, 3). The lightbox's title is a level below it. Default 2.
    */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  headingLevel?: number;
 };
 
-/** The heading level under another, no deeper than 6. */
-const below = (level: number) => Math.min(level + 1, 6) as 2 | 3 | 4 | 5 | 6;
+/** The heading level under another. Past 6, the parts' titles name what they head. */
+const below = (level: number) => level + 1;
 
 /**
  * A grid of the Manifest's views — a spread is one cell — that opens one in a lightbox
@@ -30,6 +30,11 @@ export function Gallery({
   ...root
 }: GalleryProps) {
   const [open, setOpen] = useState(false);
+  // Past h6 the title is no heading, and names the Viewer instead (`Clover.titled`).
+  const title = Clover.titled(
+    headingLevel,
+    `${useId().replace(/:/g, "")}-title`,
+  );
   return (
     <Clover.Root
       className={["clover-template-gallery", className]
@@ -40,12 +45,14 @@ export function Gallery({
           ? ({ ...style, "--clover-items-size": size } as React.CSSProperties)
           : style
       }
+      {...title.group}
       {...root}
     >
       <header className="clover-template-gallery-header">
         <Clover.Label
-          as={`h${headingLevel}`}
+          as={title.as}
           className="clover-template-gallery-title"
+          {...title.title}
         />
         <Clover.Summary className="clover-template-gallery-summary" />
       </header>

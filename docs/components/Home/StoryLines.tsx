@@ -13,6 +13,12 @@ const WHOLE = "viewer";
  */
 const BAND = 48;
 
+/** How long a line takes to fade as its story goes (`.storyLines[data-gone]`). */
+const FADE = 320;
+
+/** How long a new story's part is looked for, frame by frame, as the viewer turns to it. */
+const SEEK = 1200;
+
 /**
  * "Why Clover", drawn to the example viewer. The story at the middle of the window (the
  * last whose top has passed it), an element with `data-point` (`Homepage.tsx`), has one
@@ -28,10 +34,15 @@ const BAND = 48;
  * undone only `BAND` past where it began. A story the line has reached is marked
  * `data-drawn`, for good, so its figure's stroke draws then too (`Home.module.css`). Only
  * where the viewer is held beside the stories; elsewhere nothing is drawn, lit or turned.
+ * At the page's foot the last story is over too (Mat, 2026-10-21): its line fades and its
+ * change is undone, until the page is scrolled `BAND` back up from the foot.
  *
  * The line is decoration, hidden from assistive technology: what each story is about is
- * in its words. It is drawn in as a story arrives, only where the reader allows motion,
- * and follows the viewer and the story as the page scrolls.
+ * in its words. It is drawn in as a story arrives, from the moment its end can be shown
+ * (a part on a face the viewer is turning to is looked for each frame until it is there),
+ * only where the reader allows motion, and follows the viewer and the story as the page
+ * scrolls. As a story goes with none after it, its line fades (`data-gone`), still
+ * following the story it was drawn to.
  */
 export const StoryLines = React.memo(function StoryLines({
   viewer,
@@ -57,6 +68,14 @@ export const StoryLines = React.memo(function StoryLines({
     if (!overlay || !line || !end) return;
     const held = window.matchMedia(HELD);
     let current: HTMLElement | null = null;
+    // When the current story began, and the one whose line was last drawn in.
+    let since = 0;
+    let shownFor: HTMLElement | null = null;
+    // The story the line is drawn to, kept as it fades once its story has gone.
+    let drawn: { story: HTMLElement; point: string } | null = null;
+    let fading = 0;
+    // At the page's foot, where the last story is over.
+    let atFoot = false;
     const was = {
       turned: false,
       reading: false,
@@ -69,8 +88,28 @@ export const StoryLines = React.memo(function StoryLines({
     let pad = -1;
 
     const hide = () => {
+      window.clearTimeout(fading);
+      fading = 0;
+      drawn = null;
+      shownFor = null;
       line.style.visibility = "hidden";
       end.style.visibility = "hidden";
+    };
+    const show = () => {
+      window.clearTimeout(fading);
+      fading = 0;
+      delete overlay.dataset.gone;
+      line.style.visibility = "visible";
+      end.style.visibility = "visible";
+    };
+    // Faded where motion is allowed, and gone once it has: still drawn to its story meanwhile.
+    const fade = () => {
+      if (fading || line.style.visibility !== "visible") return;
+      overlay.dataset.gone = "";
+      const reduced = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      fading = window.setTimeout(hide, reduced ? 0 : FADE);
     };
 
     // Lights exactly these parts in the viewer, and these tiles, and nothing else.
@@ -111,6 +150,7 @@ export const StoryLines = React.memo(function StoryLines({
           set(name, false),
         );
         current = null;
+        atFoot = false;
         return hide();
       }
       const stories = [
@@ -138,6 +178,12 @@ export const StoryLines = React.memo(function StoryLines({
         )
           story = current;
       }
+      // At the page's foot, the last story is over; `BAND` back up, it is not.
+      const toFoot =
+        document.documentElement.scrollHeight - innerHeight - scrollY;
+      if (toFoot <= 1) atFoot = true;
+      else if (toFoot > BAND) atFoot = false;
+      if (atFoot && story === stories.at(-1)) story = null;
 
       const point = story?.dataset.point ?? "";
       const whole = point === WHOLE;
@@ -158,12 +204,10 @@ export const StoryLines = React.memo(function StoryLines({
 
       if (story !== current) {
         current = story;
+        since = performance.now();
+        if (!story) shownFor = null;
         // Drawn again once the viewer has crossfaded (700ms), to the side then shown.
         window.setTimeout(schedule, 760);
-        // Drawn in afresh for each story: the attribute's return restarts the animation.
-        delete overlay.dataset.drawing;
-        void overlay.getBoundingClientRect();
-        overlay.dataset.drawing = "";
       }
 
       // The story's own change, with its line: begun and undone as the line is.
@@ -178,26 +222,50 @@ export const StoryLines = React.memo(function StoryLines({
       for (let index = 0; index <= reached; index++)
         if (!stories[index].hasAttribute("data-drawn"))
           stories[index].setAttribute("data-drawn", "");
-      const storyBox = story && tops[stories.indexOf(story)];
-
       const flip = viewer.current?.parentElement;
-      // The part on the side shown (`.flip`'s `data-face`).
-      const shownFace = flip?.dataset.face ?? "front";
-      const part = whole
-        ? flip
-        : point
+      // The part a story points to, on the side shown (`.flip`'s `data-face`).
+      const partOf = (to: string) => {
+        if (to === WHOLE) return flip;
+        const shownFace = flip?.dataset.face ?? "front";
+        return to
           ? flip?.querySelector<HTMLElement>(
-              `[data-face-of="${shownFace}"] [data-part="${CSS.escape(point)}"]`,
+              `[data-face-of="${shownFace}"] [data-part="${CSS.escape(to)}"]`,
             )
           : null;
-      if (!story || !part || !flip || !viewer.current) return hide();
+      };
+      const part = story ? partOf(point) : null;
+      let target: { story: HTMLElement; point: string; part: HTMLElement };
+      if (story && part) {
+        // Drawn in from the moment it can be shown: the attribute's return restarts it.
+        if (shownFor !== story) {
+          shownFor = story;
+          delete overlay.dataset.drawing;
+          void overlay.getBoundingClientRect();
+          overlay.dataset.drawing = "";
+        }
+        drawn = { story, point };
+        target = { story, point, part };
+        show();
+      } else {
+        // A part on a face the viewer is turning to: looked for again next frame.
+        if (story && performance.now() - since < SEEK) schedule();
+        const last = drawn && partOf(drawn.point);
+        if (!drawn || !flip || !viewer.current) return hide();
+        fade();
+        // Its part gone with the face it was on: the line stays as it was, fading.
+        if (!last) return;
+        target = { ...drawn, part: last };
+      }
+      if (!flip || !viewer.current) return hide();
+      const lineWhole = target.point === WHOLE;
 
       const frameBox = flip.getBoundingClientRect();
       const navbar =
         document.querySelector(".nextra-navbar")?.getBoundingClientRect()
           .bottom ?? 0;
-      const from = storyBox!;
-      const box = part.getBoundingClientRect();
+      const from = tops[stories.indexOf(target.story)];
+      if (!from) return hide();
+      const box = target.part.getBoundingClientRect();
       // From the story's edge, level with its middle as far as the window shows it.
       const x0 = from.left;
       const y0 =
@@ -211,7 +279,7 @@ export const StoryLines = React.memo(function StoryLines({
       if (pad < 0)
         pad = parseFloat(getComputedStyle(viewer.current).paddingRight) || 0;
       const inner = frameBox.right - pad;
-      const x1 = whole ? frameBox.right : Math.max(box.right, inner) + 6;
+      const x1 = lineWhole ? frameBox.right : Math.max(box.right, inner) + 6;
       // Level with the middle of what of it is in view.
       const top = Math.max(box.top, navbar) + 8;
       const bottom = Math.min(box.bottom, innerHeight) - 8;
@@ -226,8 +294,6 @@ export const StoryLines = React.memo(function StoryLines({
       );
       end.setAttribute("cx", String(x1));
       end.setAttribute("cy", String(y1));
-      line.style.visibility = "visible";
-      end.style.visibility = "visible";
     };
 
     const schedule = () => {
@@ -240,8 +306,18 @@ export const StoryLines = React.memo(function StoryLines({
     // The viewer changes size (its code opened, another layout) and so where it is held.
     const observer = new ResizeObserver(schedule);
     if (viewer.current) observer.observe(viewer.current);
+    // It turns to another face, where the story's part may be: drawn to it as it does.
+    const turning = new MutationObserver(schedule);
+    const flip = viewer.current?.parentElement;
+    if (flip)
+      turning.observe(flip, {
+        attributes: true,
+        attributeFilter: ["data-face"],
+      });
     return () => {
       cancelAnimationFrame(frame);
+      window.clearTimeout(fading);
+      turning.disconnect();
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
       held.removeEventListener("change", schedule);

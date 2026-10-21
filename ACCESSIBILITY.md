@@ -17,7 +17,7 @@ planned below. The package has 79 (73 fixed), the docs 81 (54 fixed).
 
 ## Package
 
-There are 79 verified findings in the package. 75 are fixed (20 serious, 40 moderate, 15 minor) and 4 remain (2 serious, 2 moderate). All four (P19, P7, P104, P56) are done in code and wait on a check no test can make: picture in picture on a phone, screen readers, native speakers. Since the audit, the work found seven more: six are fixed, and one (N6) is planned below.
+There are 79 verified findings in the package. 75 are fixed (20 serious, 40 moderate, 15 minor) and 4 remain (2 serious, 2 moderate). All four (P19, P7, P104, P56) are done in code and wait on a check no test can make: picture in picture on a phone, screen readers, native speakers. Since the audit, the work found seven more, all now fixed.
 
 ### Fixed
 
@@ -49,11 +49,12 @@ There are 79 verified findings in the package. 75 are fixed (20 serious, 40 mode
 - **A press beside a floating panel hands focus back,** found since the audit: in `Default` on a narrow screen, and in `Document`, closing the panel (or Document's page thumbnails) by a press on the page beside it left focus on the page, since the press moved it there first. The scrim takes no focus now, so focus in the pane goes to its toggle (2.4.3; N3).
 - **The panel's tab row has a name that says what it is,** found since the audit: it was "Select", copied from 3.x, and is now "Information panel", as the close button names the panel, in every locale (2.4.6; N2).
 - **The Annotations list keeps focus in sight,** found since the audit: bringing the Canvases in view to the top of its box, it pushed focus on a panel's tabs out of sight, and threw a closed accordion section's pane about. It holds still now while the pointer or focus is in its box, and while it is not shown (2.4.11; N4).
+- **No heading past h6,** found since the audit: every part capped its headings at h6, so under a page's `h3` or deeper a template's deepest titles were drawn as h6, siblings of the heading they belong under (in `Document` at `headingLevel={4}`, About's Download an h6 and its "This page" another). An `aria-level` past 6 would not do, since JAWS, and TalkBack with Chrome, announce it as level 2 (Adrian Roselli, "Level-Setting Heading Levels", 2024, updated 2026). Mat chose, on October 21, 2026: past 6 a title is no heading, and names the group it heads instead (`ui/heading.ts`, `Clover.titled`), so every screen reader hears an outline that is true as far as it goes; Markdown's headings past 6 name the group of what follows them (1.3.1; N6).
 - **Clover's own links read as links under a page's reset,** found since the audit: `Homepage`, `Rendering`, `SeeAlso`, `PartOf`, `Id` and `Rights` underline their links in the accent text and wrap a long address, where a reset such as Tailwind's left them plain text and a long address pushed the page sideways (1.4.1, 1.4.10; N5).
 
 ### Plan
 
-What remains. Items 1 to 4 are done in code and need a check the tests cannot make; item 5 is not started.
+What remains. Items 1 to 4 are done in code and need a check the tests cannot make.
 
 1. **Captions in picture in picture** (1.2.2). Checked on October 16, 2026 in the iOS 26 Simulator (iPhone 17 Pro, Safari, the harness with Cookbook 0074's English and Italian captions): the system player shows the chosen track; its own Subtitles menu lists both by their labels, and Italian chosen there stays chosen, in the player again and inline; back on the page, Clover draws the one copy, and nothing is doubled. Not yet seen: picture in picture, which the Simulator did not start on Home from the system player, and Clover offers no control for. Check it on an iPhone (and Chrome's on Android, which `enterpictureinpicture` also reaches): its window shows the chosen track, and the page shows one copy afterwards. Size S. (P19)
 
@@ -62,8 +63,6 @@ What remains. Items 1 to 4 are done in code and need a check the tests cannot ma
 3. **Touch with a screen reader** (2.2.1). Under a finger or a pen that does not hover, the chrome has no timer, and focus no press brought holds it. Test VoiceOver in iOS Safari and TalkBack in Chrome on Android: a screen reader that moves only its own cursor sends the page no event, so a faded control could still sit unseen under it. File: `useChromeVisibility.ts`. Size S. (P104)
 
 4. **Locale review** (3.1.2). Every locale has every string, and `locales.test.ts` keeps them complete, but no native speaker has read the new ones: es, fi, fr, nb (and no, its copy), nn, and pt, which is European Portuguese and what Brazilian readers get too. Mat owns this, and will make the English strings more concise and consistent, then ask translators to review. It does not block the rest of this plan, and agents leave the translations alone until then. (P56)
-
-5. **Headings past h6** (1.3.1). Each part caps its headings at h6 (`Math.min(…, 6)`), so under a page's `h3` or deeper a template's deepest headings, which would be h7, are drawn as h6: siblings of the heading they belong under. In `Document` at `headingLevel={4}`, as the docs' examples under an `h3` set it, About's Download title is an h6 and its "This page" group another. Draw a level past 6 as `role="heading"` with `aria-level` (ARIA12), through one heading helper in place of each cap, and let `headingLevel` go past 6. Files: `components/Download/Download.tsx`, `components/Panel/About.tsx`, `components/Panel/Panel.tsx`, `components/Annotations/Annotations.tsx`, `core/markdown.ts`, the templates' `below`. Size M. (N6)
 
 ### Decisions
 
@@ -127,13 +126,12 @@ The audit's ids, cited by the plans, and N for those found since. Most severe fi
 
 ### Package
 
-| Id   | Criterion                    | Severity | Finding                                                                                                              | Where                                                                                                                                          |
-| ---- | ---------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| P19  | 1.2.2 Captions               | serious  | Checked in the system player on the iOS Simulator; captions in picture in picture are unchecked                      | `packages/clover/src/components/Canvas/media/useCaptionTracks.ts:33-60`, `packages/clover/src/components/Canvas/media/useCaptionTracks.ts:170` |
-| P56  | 3.1.2 Language of Parts      | serious  | Every locale is complete, but no native speaker has reviewed the new strings                                         | `packages/clover/src/i18n/locales/es.json`, `packages/clover/src/i18n/locales/pt.json` …                                                       |
-| P7   | 4.1.2 Name                   | moderate | The viewport's role and key description are untested in NVDA, JAWS and VoiceOver, and nothing visible names its keys | `packages/clover/src/components/Canvas/CanvasView.tsx:753-757`, `packages/clover/src/components/Canvas/CanvasView.tsx:79-95`                   |
-| P104 | 2.2.1 Timing Adjustable      | moderate | Fixed in code for touch and pen, untested with VoiceOver and TalkBack, whose cursor may rest on a faded control      | `packages/clover/src/components/Canvas/useChromeVisibility.ts:19-30`                                                                           |
-| N6   | 1.3.1 Info and Relationships | minor    | Headings past h6 are drawn as h6, siblings of the heading they belong under                                          | `packages/clover/src/components/Download/Download.tsx:91`, `packages/clover/src/templates/document/Document.tsx:77` …                          |
+| Id   | Criterion               | Severity | Finding                                                                                                              | Where                                                                                                                                          |
+| ---- | ----------------------- | -------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| P19  | 1.2.2 Captions          | serious  | Checked in the system player on the iOS Simulator; captions in picture in picture are unchecked                      | `packages/clover/src/components/Canvas/media/useCaptionTracks.ts:33-60`, `packages/clover/src/components/Canvas/media/useCaptionTracks.ts:170` |
+| P56  | 3.1.2 Language of Parts | serious  | Every locale is complete, but no native speaker has reviewed the new strings                                         | `packages/clover/src/i18n/locales/es.json`, `packages/clover/src/i18n/locales/pt.json` …                                                       |
+| P7   | 4.1.2 Name              | moderate | The viewport's role and key description are untested in NVDA, JAWS and VoiceOver, and nothing visible names its keys | `packages/clover/src/components/Canvas/CanvasView.tsx:753-757`, `packages/clover/src/components/Canvas/CanvasView.tsx:79-95`                   |
+| P104 | 2.2.1 Timing Adjustable | moderate | Fixed in code for touch and pen, untested with VoiceOver and TalkBack, whose cursor may rest on a faded control      | `packages/clover/src/components/Canvas/useChromeVisibility.ts:19-30`                                                                           |
 
 ### Docs
 

@@ -76,8 +76,47 @@ describe("markdownToHtml", () => {
     // The first heading takes the level, deeper or not; a shallower one later backs out.
     expect(levels("### A\n# B\n## C\n#### D\n## E")).toEqual([3, 3, 4, 5, 4]);
     expect(levels("# Notes", 5)).toEqual([5]);
-    // Never deeper than 6.
-    expect(levels("# One\n## Two\n### Three", 5)).toEqual([5, 6, 6]);
+    // Never deeper than 6: past it, no heading (below).
+    expect(levels("# One\n## Two\n### Three", 5)).toEqual([5, 6]);
+  });
+
+  it("past 6, writes a heading as a paragraph naming the group of what follows it", () => {
+    const html = markdownToHtml(
+      "# Notes\n\n## Sources\n\nOne.\n\n### Letters\n\nTwo.\n\n## Places\n\nThree.",
+      { headingLevel: 6 },
+    );
+    const parsed = new DOMParser().parseFromString(html, "text/html").body;
+    expect(
+      parsed.querySelector('[role="heading"]')?.getAttribute("aria-level"),
+    ).toBe("6");
+    const groups = [...parsed.querySelectorAll('div[role="group"]')];
+    // "Sources" holds its text and "Letters" inside it; "Places" is its own.
+    expect(groups).toHaveLength(3);
+    const name = (group: Element) =>
+      parsed.querySelector(`#${group.getAttribute("aria-labelledby")}`)
+        ?.textContent;
+    expect(groups.map(name)).toEqual(["Sources", "Letters", "Places"]);
+    expect(groups[0].textContent).toBe("SourcesOne.LettersTwo.");
+    expect(groups[1].parentElement).toBe(groups[0]);
+    expect(groups[2].parentElement).toBe(parsed);
+    // None is a heading.
+    expect(parsed.querySelectorAll('[role="heading"]')).toHaveLength(1);
+    // Each id is its own.
+    const again = markdownToHtml("# A\n## B", { headingLevel: 7 });
+    expect(again.match(/id="(clover-md-\d+)"/g)).toHaveLength(2);
+    expect(html).not.toContain(again.match(/id="(clover-md-\d+)"/)![1] + '"');
+  });
+
+  it("keeps its groups past 6 through the Markdown sanitizer", () => {
+    const html = markdownToHtml("# Notes\n\nText.", { headingLevel: 7 });
+    const parse = (markup: string) => {
+      const template = document.createElement("template");
+      template.innerHTML = markup;
+      return template.content;
+    };
+    expect(
+      parse(sanitizeHTML(html, { markdown: true })).isEqualNode(parse(html)),
+    ).toBe(true);
   });
 
   it("takes a heading from the lines round it, and its closing hashes off", () => {

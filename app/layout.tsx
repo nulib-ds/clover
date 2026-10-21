@@ -21,6 +21,7 @@ import { Banner, Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
 import { Footer, Layout, Navbar } from "nextra-theme-docs";
 import { SiteFooter } from "docs/components/SiteFooter";
+import { NoLastUpdated } from "docs/components/NoLastUpdated";
 import React from "react";
 
 import Logo from "docs/components/Logo";
@@ -108,6 +109,9 @@ export default async function RootLayout({
            * against WCAG 2.2 AA (AGENTS.md); bring it in through that check, not by default.
            */
           copyPageButton={false}
+          // No previous and next page links at a page's foot (Mat, 2026-10-21).
+          navigation={false}
+          lastUpdated={<NoLastUpdated />}
           sidebar={{
             /*
              * Off, so an opened folder stays open while focus moves through it. On, Nextra

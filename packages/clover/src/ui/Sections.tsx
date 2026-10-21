@@ -8,6 +8,7 @@ import React, {
   useState,
 } from "react";
 
+import { titleTag } from "./heading";
 import { Tip } from "./Tip";
 import { useContainerName } from "./useContainerName";
 import { useScrollTrack } from "./useScrollTrack";
@@ -52,8 +53,11 @@ export interface SectionsProps {
   label?: string;
   /** The language of `label`, where it is not the page's. */
   labelLang?: string;
-  /** The heading level each button sits in (`accordion`). Default 3. */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  /**
+   * The heading level each button sits in (`accordion`). Default 3. Past 6 it sits in no
+   * heading (`ui/heading.ts`); its panel is named by the button either way.
+   */
+  headingLevel?: number;
   className?: string;
 }
 
@@ -379,7 +383,7 @@ export function Sections({
     );
   };
 
-  const Heading = `h${headingLevel}` as "h3";
+  const Heading = titleTag(headingLevel, "div") as "h3";
   const button = (item: SectionSpec, index: number) => {
     const isOpen = item.value === open;
     return (

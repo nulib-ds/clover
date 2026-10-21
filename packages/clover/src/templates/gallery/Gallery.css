@@ -15,6 +15,7 @@
 .clover-template-gallery-title {
   margin: 0;
   font-size: var(--clover-text-l);
+  font-weight: 700;
 }
 
 /* In the text's own color, not muted: a summary is the resource's own words. */

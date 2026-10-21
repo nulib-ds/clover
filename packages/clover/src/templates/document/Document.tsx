@@ -25,7 +25,7 @@ export type DocumentProps = Omit<RootProps, "children"> & {
    * an `h2`, 3). The panel's sections, and the Download menu's groups, are a level below
    * it. Default 2.
    */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  headingLevel?: number;
   /**
    * Where the thumbnails' width is remembered once the reader drags the bar beside them
    * (`localStorage`). Default `"clover-template-document"`; `false` forgets it.
@@ -52,14 +52,21 @@ export function Document({
   storageKey = "clover-template-document",
   ...root
 }: DocumentProps) {
+  // Past h6 the title is no heading, and names the Viewer instead (`Clover.titled`).
+  const title = Clover.titled(
+    headingLevel,
+    `${useId().replace(/:/g, "")}-title`,
+  );
   return (
     <Clover.Root
       className={["clover-template-document", className]
         .filter(Boolean)
         .join(" ")}
+      {...title.group}
       {...root}
     >
       <DocumentLayout
+        title={title}
         defaultSidebarOpen={defaultSidebarOpen}
         defaultPanelOpen={defaultPanelOpen}
         panelLayout={panelLayout}
@@ -73,8 +80,8 @@ export function Document({
 
 const NARROW = "(max-width: 40rem)";
 
-/** The heading level under another, no deeper than 6. */
-const below = (level: number) => Math.min(level + 1, 6) as 2 | 3 | 4 | 5 | 6;
+/** The heading level under another. Past 6, the parts' titles name what they head. */
+const below = (level: number) => level + 1;
 
 /** The narrowest the page and the panel may be dragged, side by side. */
 const PAGE_MIN = "16rem";
@@ -94,7 +101,8 @@ function DocumentLayout({
   headingLevel = 2,
   storageKey,
   panelLayout,
-}: Pick<
+  title,
+}: { title: Clover.Titled } & Pick<
   DocumentProps,
   | "defaultSidebarOpen"
   | "defaultPanelOpen"
@@ -268,8 +276,9 @@ function DocumentLayout({
     <>
       <header className="clover-template-document-toolbar">
         <Clover.Label
-          as={`h${headingLevel}`}
+          as={title.as}
           className="clover-template-document-title"
+          {...title.title}
         />
         {download && <Clover.Download headingLevel={below(headingLevel)} />}
       </header>

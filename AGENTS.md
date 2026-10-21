@@ -168,31 +168,50 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     snapshot with tab stops) and Coverage (`data-recipe`) a Cookbook recipe (0261, a
     polygon annotation), each crossfading with the viewer (no flip), inert, and given
     up when focus comes to the viewer (2.4.7); Yours (`data-brand`) previews Northwestern
-    purple site-wide without keeping it (never the font, which would shift the layout;
-    not on a dark page, where it would fail 1.4.3); Composable (`data-compose`) has the
+    purple without keeping it, on what is in view as it begins (the navbar, the viewer,
+    the stories and their line, the tiles and chips on screen; `previewPageTheme`'s
+    elements, marked `data-page-theme` so the accent's steps mix again there,
+    `tokens.css`), which looks site-wide and spares the page a restyle of every element
+    (about 2,400, 15ms) mid-scroll (Mat, 2026-10-21) (never the font, which would shift
+    the layout; not on a dark page, where it would fail 1.4.3); Composable (`data-compose`) has the
     example viewer's own code editor (a portal into `data-composer`) change the layout
     Mat set (Content first at 400, then Label, Summary, Items larger), the code
     crossfading with its new lines lit at a fixed 15 lines, the viewer fading out and in
-    around it, and puts it back after. Each change starts with its story's line (Mat, 2026-10-21: in sync) and waits
-    `BAND` past its edge before undoing; where the viewer is held, a story's figure strokes
-    draw as its line reaches it too (`data-drawn`), and elsewhere as it scrolls in. Yours has the site's Font family and Color (`BrandPicker.tsx`), which set the
+    around it, and puts it back after. Each change starts with its story's line (Mat,
+    2026-10-21: in sync) and waits `BAND` past its edge before undoing; the line draws in
+    from the moment its end can be shown (a part on a face the viewer is turning to is
+    looked for each frame), and the page's foot ends the last story too, its line fading
+    (`data-gone`), still drawn to it, and its change undone. Where the viewer is held, a
+    story's figure strokes draw as its line reaches it too (`data-drawn`), and elsewhere
+    as it scrolls in. Yours has the site's Font family and Color (`BrandPicker.tsx`), which set the
     whole site and are remembered (`page-theme.ts`); the navbar has no settings of its
     own (its gear was removed on 2026-10-20), appearance being in the footer.
-  - Scrolling there stays smooth (Mat, 2026-10-20: "everything should VERY SMOOTH"; 0 of
-    1,600 frames over 25ms in Chrome 155, at 1440, 1728 and 390 wide). Keep it so:
-    nothing the scroll drives re-renders React (lights are `data-lit`, written by
-    `StoryLines`; the rest are a handful of state changes, each once per story);
-    `Tile`, the viewer's parts, `ViewerCode` and `RecipeFace` are memoized on what they
-    show; animations are opacity or transform only (no `background-color` or
+  - Scrolling there stays smooth (Mat, 2026-10-20: "everything should VERY SMOOTH"; and
+    2026-10-21: "really dial in the smoothness"). Keep it so: nothing the scroll drives
+    re-renders React (lights are `data-lit`, written by `StoryLines`; the rest are a
+    handful of state changes, each once per story); nor does the page scrolling under a
+    resting pointer: a part's hover (`point`, `Tile`) takes the pointer's moves, not what
+    passes under it (`docs/lib/scrolling.ts`), and a tile's list in a box of its own
+    (`.scroll`) lets the wheel pass to the page until the reader points into it or
+    focuses in it (`data-armed`), so a trackpad's gesture is never spent on a box the
+    page brought under the pointer; `Tile`, the viewer's parts, `ViewerCode`,
+    `RecipeFace` and `AccessibilityTree` are memoized on what they show; animations are opacity or transform only (no `background-color` or
     `clip-path`, which the main thread redraws every frame); the recipe and the
     inspector's snapshot load while the page is idle, never mid-scroll; a change of the
     viewer renders as a React transition; no `:has()` on the page's root or its
     ancestors (attributes instead: `data-bar-stuck`, `data-banner`, and
     `docs/lib/full-width.ts`'s rules); no view transitions (their snapshot costs frames).
     Measure with a scroll in a current Chrome (`npx playwright` with
-    `channel: "chrome"`), since Playwright's bundled Chromium is slower to restyle.
+    `channel: "chrome"`), since Playwright's bundled Chromium is slower to restyle, and
+    on a production build (`next dev`'s React is several times slower at each story's
+    change), by wheel (as a trackpad scrolls) at Mat's size too, about 1876 × 1960:
+    there, on October 21, 2026, main-thread tasks were 1.7ms at the median, the Yours
+    restyle 6ms, and the only long frames the headless browser's own software raster.
   - That section is one `Root` for that resource. On the left its parts make a small
-    viewer, held in view (by its foot, once taller than the window), with no caption (it
+    viewer, held in view (by its foot, once taller than the window), and held so that
+    at the page's end its foot meets the npm block's (Install's, where the grid ends;
+    lower on a window too tall for the page to scroll so far, `--assembled-end`), with
+    no caption (it
     is a region named "Example Viewer" for assistive technology; never `<Clover.Root />`),
     its parts in the order its code gives them. The code control under it opens that code
     below, as an editor (Prism's Material colors on black, `--code-*` in
@@ -246,17 +265,28 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     `tokens.css`). And more (the parts counted, "See them all"; the Collection's tile the first under it, and Annotations beside Contents; Mat,
     2026-10-21), Why Clover ("Read the
     docs") and Install ("Get started"), the last in the gap after Coverage, beside the
-    held viewer, so the hold runs to the page's foot.
+    held viewer, the grid ending with its npm block, and a few rem under it, no more
+    (`4.236rem`, the page's own; Nextra's empty room under the article hidden on full
+    pages, `full-width.ts`), before the footer (Mat, 2026-10-21).
   - The footer (`docs/components/SiteFooter.tsx`, inside Nextra's `Footer`, styled in
-    `layout.css` on `--surface`) says what Clover is, its history (from the first commit
-    and npm's release dates), its acknowledgments, and that it is MIT licensed and fully
-    open source, holders as `LICENSE` names them (Mat, 2026-10-20). Keep each fact the
-    record's.
+    `layout.css`; Mat, 2026-10-20 and 2026-10-21) is one column on the page's white
+    (`--color-background`), set off by white space alone, no line over it, its text at
+    the sidebar's size and black (`--nav-text`, 1rem), the legal line too: the wordmark,
+    then what Clover is in the homepage hero's words, a sentence a line (the headline's
+    in bold, a step up, `1.618rem`; the sentence at `--text-lede`), then one paragraph in
+    Mat's words, whose project Clover is, who developed it and who contributed, its
+    "more" linking to the repository's contributors; the two across 61.8% of the
+    footer's width (all of it on a phone). No history, and no titles. Under it, `3xl`
+    away, that it is MIT licensed and fully open source, the holder as `LICENSE` names
+    it: Northwestern University Libraries, from 2026. Keep each fact the record's.
   - The wordmark (`docs/components/Logo.tsx`, the navbar's and the footer's) is the text's
-    color; on hover and keyboard focus the hero's stroke is drawn under it, point to point
-    (revealed, never stretched), sized and set in `em` of the wordmark's height as the
-    marks are (`--wordmark-height`; Mat, 2026-10-21), never a fade or a fill. Every stroke on the site is one shape,
-    `--swoosh` (`tokens.css`).
+    color, the hero's stroke always under it (Mat, 2026-10-21: no longer drawn on hover),
+    sized and set in `em` of the wordmark's height as the marks are (`--wordmark-height`),
+    never a fade or a fill. Every stroke on the site is one shape,
+    `--swoosh` (`tokens.css`), set one way (Mat, 2026-10-21): 0.42em tall, its ink from
+    0.1em to 0.25em under the letters' foot, a little off them, crossing only what
+    descends. The marks (`.mark::after`), the figures (on `.figureMark`, inline, so they
+    sit as the marks do) and the wordmark keep that; measure a new one against them.
   - Headers are solid, never frosted or translucent: the navbar (`docs/styles/layout.css`
     overrides Nextra's blur) and the playground's bar. From 48rem wide, on a screen at
     least 36rem tall (not a phone, where with the navbar it would take too much height),
@@ -278,7 +308,8 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     there, never copied into `public/` (Mat, 2026-10-16: the record's attribution does
     not permit further distribution of its images).
   - Under the navbar on every page, a small acknowledgment in the corner, on the page's
-    ground with no band of its own (Mat, 2026-10-20), says Clover is a project of
+    ground with no band of its own (Mat, 2026-10-20), in the sidebar's black (2026-10-21),
+    says Clover is a project of
     Northwestern University Libraries, linking the Libraries'
     site (`docs/components/Subheader.tsx`, styled in `docs/styles/layout.css`). It is
     aligned to the end of the navbar's content. It is not held (Mat, 2026-10-16):

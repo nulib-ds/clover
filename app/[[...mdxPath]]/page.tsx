@@ -25,6 +25,13 @@ type Props = { params: Promise<{ mdxPath?: string[] }> };
 const routeOf = (mdxPath?: string[]) => `/${(mdxPath ?? []).join("/")}`;
 
 /*
+ * When the page last changed, its last commit's time (Nextra's `timestamp`): for crawlers
+ * and agents, in the page's structured data and Open Graph, as no line on the page says it.
+ */
+const modifiedOf = (timestamp?: number) =>
+  timestamp ? new Date(timestamp).toISOString() : undefined;
+
+/*
  * A page from `content/`, or the not-found page for a path that is none (in `next dev`,
  * where any path reaches this route: a browser's `/favicon.ico`, say).
  */
@@ -51,6 +58,7 @@ export async function generateMetadata(props: Props) {
       ? earlierDescription(metadata.description ?? undefined)
       : (metadata.description ?? undefined),
     route,
+    modified: route === "/" ? undefined : modifiedOf(metadata.timestamp),
   });
 }
 
@@ -86,6 +94,7 @@ export default async function Page(props: Props) {
       ? earlierDescription(metadata.description ?? undefined)
       : (metadata.description ?? siteDescription),
     route,
+    modified: modifiedOf(metadata.timestamp),
   });
   return (
     <Wrapper toc={toc} metadata={metadata} sourceCode={sourceCode}>

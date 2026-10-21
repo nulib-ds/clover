@@ -113,7 +113,7 @@ export interface PanelProps
    * belongs to. The default sections' own headings are a level below them; tabs are not
    * headings, so there they start at this level. Default 3.
    */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  headingLevel?: number;
   /** The element to render. Default `aside`. */
   as?: React.ElementType;
   /**
@@ -200,9 +200,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
   );
   // In the accordion what a section holds is a level below its heading; tabs are not
   // headings.
-  const inner = (
-    layout === "accordion" ? Math.min(headingLevel + 1, 6) : headingLevel
-  ) as 3;
+  const inner = layout === "accordion" ? headingLevel + 1 : headingLevel;
   const tabs: SectionSpec[] = given.length
     ? given.map(({ props }) => ({
         value: props.value,

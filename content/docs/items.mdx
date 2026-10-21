@@ -41,7 +41,7 @@ lists a Collection's members as links.
 | `navigation`    | `"id" \| "homepage"`                        | `"id"`; `"homepage"` on its own | Select a view, or link to each item's `homepage`.            |
 | `onSelect`      | `(item, event) => void`                     | —                               | An item was chosen; on a link, `preventDefault()` stays put. |
 | `header`        | `boolean`                                   | `true`                          | On its own: the resource's label, summary and homepage link. |
-| `headingLevel`  | `2 \| 3 \| 4 \| 5 \| 6`                     | `2`                             | On its own: the header's title level.                        |
+| `headingLevel`  | `number`                                    | `2`                             | On its own: the header's title level.                        |
 | `thumbnailSize` | `number`                                    | `200`                           | Pixels asked for each thumbnail's longer side.               |
 | `renderItem`    | `(item, { selected }) => ReactNode`         | —                               | Your own item in place of the figure.                        |
 | `request`       | `{ credentials, headers, fetch }`           | The Root's                      | On its own: for every request.                               |

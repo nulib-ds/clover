@@ -28,6 +28,7 @@ import { useCloverSelector, useOptionalClover } from "../../react/context";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useRootLanguage } from "../../react/language";
 import { useContainerName } from "../../ui/useContainerName";
+import { titleTag } from "../../ui/heading";
 import { useRovingFocus } from "../../ui/useRovingFocus";
 import { useScrollTrack } from "../../ui/useScrollTrack";
 import { visuallyHidden } from "../../ui/visuallyHidden";
@@ -74,7 +75,7 @@ export interface ItemsProps
    * Standalone: the level of the header's title, to fit the outline of the page around
    * it (a carousel under an `h2` takes 3). Default 2.
    */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  headingLevel?: number;
   /** Pixels requested for each thumbnail's longer side. Default 200. */
   thumbnailSize?: number;
   /** Standalone: credentials, headers and `fetch`. In a `Root`, the Root's are used. */
@@ -470,7 +471,8 @@ function ItemsView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [carousel, selected]);
 
-  const Title = `h${headingLevel}` as "h2";
+  // Past 6 not a heading (`ui/heading.ts`): the list is named by it either way.
+  const Title = titleTag(headingLevel) as "h2";
   const headingLabel = heading ? localize(heading.label, language) : null;
   const headingSummary = heading ? localize(heading.summary, language) : null;
   /*

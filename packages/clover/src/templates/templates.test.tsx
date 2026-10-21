@@ -465,6 +465,40 @@ describe("templates", () => {
     ).toBeInTheDocument();
   });
 
+  it("Document: a title that would be past h6 names what it heads, never an h6 beside its own", async () => {
+    render(
+      <Templates.Document
+        iiifContent={renderingJson}
+        headingLevel={4}
+        defaultPanelOpen
+      />,
+    );
+    await screen.findByRole("heading", { level: 4 });
+    const panel = document.querySelector<HTMLElement>(
+      ".clover-template-document-panel",
+    )!;
+    // About is a 5, its titles 6: its downloads' groups would be 7.
+    expect(
+      await within(panel).findByRole("heading", { level: 6, name: "Download" }),
+    ).toBeInTheDocument();
+    expect(
+      within(panel).getByRole("region", { name: "All pages" }),
+    ).toBeInTheDocument();
+    expect(
+      within(panel).queryByRole("heading", { name: "All pages" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("Gallery: past h6 its title is no heading, and names the Viewer", async () => {
+    render(<Templates.Gallery iiifContent={bookJson} headingLevel={7} />);
+    expect(
+      await screen.findByRole("group", { name: "Simple Manifest - Book" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Simple Manifest - Book" }),
+    ).not.toBeInTheDocument();
+  });
+
   describe("Document, with no room for the panel beside the page", () => {
     // jsdom lays nothing out: a phone-wide layout, as the template measures it.
     let width: ReturnType<typeof vi.spyOn>;

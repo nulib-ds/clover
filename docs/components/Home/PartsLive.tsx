@@ -19,6 +19,7 @@ import {
 } from "docs/components/Playground/playground-config";
 import styles from "docs/components/Home/Parts.module.css";
 import { useMapWorker } from "docs/lib/map-worker";
+import { isScrolling } from "docs/lib/scrolling";
 import { StoryLines } from "docs/components/Home/StoryLines";
 import { AccessibilityTree } from "docs/components/Home/AccessibilityTree";
 import { SectionIntro } from "docs/components/Home/SectionIntro";
@@ -266,7 +267,11 @@ function Exploded({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [pointed]);
 
-  // Its height, for holding it in view by its foot once it is taller than the window.
+  /*
+   * Its height, for holding it in view by its foot once it is taller than the window, and
+   * what is under the grid it is held in, for holding it just low enough that its foot
+   * meets the grid's (the npm block's) at the page's end (`.assembled`).
+   */
   const assembled = useRef<HTMLDivElement>(null);
   /*
    * Held, a part of it can sit above the window, where no scrolling reaches while it is
@@ -293,10 +298,22 @@ function Exploded({
   useEffect(() => {
     const node = assembled.current;
     if (!node) return;
-    const observer = new ResizeObserver(() =>
-      node.style.setProperty("--assembled-height", `${node.offsetHeight}px`),
-    );
+    const grid = node.closest<HTMLElement>(`.${styles.grid}`);
+    const measure = () => {
+      node.style.setProperty("--assembled-height", `${node.offsetHeight}px`);
+      if (!grid) return;
+      const under =
+        document.documentElement.scrollHeight -
+        (grid.getBoundingClientRect().bottom + window.scrollY);
+      node.style.setProperty(
+        "--assembled-end",
+        `${Math.max(0, Math.round(under))}px`,
+      );
+    };
+    const observer = new ResizeObserver(measure);
     observer.observe(node);
+    // The page under the grid grows and shrinks with the window (the footer's lines).
+    observer.observe(document.documentElement);
     return () => observer.disconnect();
   }, [ready]);
 
@@ -570,17 +587,44 @@ function Exploded({
    * (`previewPageTheme`), and put back as the story goes, unless the reader chose
    * meanwhile. Never the font, which would reflow the page under the reader (Mat,
    * 2026-10-20: a layout shift). Not on a dark page, where a dark accent on the dark
-   * ground would fall below the contrast its text needs (WCAG 1.4.3).
+   * ground would fall below the contrast its text needs (WCAG 1.4.3). Shown on what is
+   * in view as it begins (the navbar, the viewer, the stories and their line, the tiles
+   * and chips on screen), which looks the same as the whole page and spares it a restyle
+   * of every element mid-scroll (Mat, 2026-10-21: smooth).
    */
   const [branding, setBranding] = useState(false);
   useEffect(() => {
     if (!branding) return endPageThemePreview();
     if (document.documentElement.classList.contains("dark")) return;
-    previewPageTheme({
-      accent:
-        accentPresets.find((preset) => preset.name === "Northwestern purple")
-          ?.value ?? "",
-    });
+    const node = assembled.current;
+    const inView = (element: Element) => {
+      const { top, bottom } = element.getBoundingClientRect();
+      return bottom > 0 && top < window.innerHeight;
+    };
+    const within = [
+      document.querySelector<HTMLElement>(".nextra-navbar"),
+      node,
+      node
+        ?.closest<HTMLElement>(`.${styles.grid}`)
+        ?.querySelector<HTMLElement>(`.${styles.after}`),
+      document.querySelector<HTMLElement>(`.${styles.storyLines}`),
+      ...[
+        ...(document.querySelector<HTMLElement>(`.${styles.tiles}`)?.children ??
+          []),
+        document.querySelector<HTMLElement>(`.${styles.missing}`),
+      ].filter(
+        (element): element is HTMLElement =>
+          Boolean(element) && inView(element!),
+      ),
+    ].filter((element): element is HTMLElement => Boolean(element));
+    previewPageTheme(
+      {
+        accent:
+          accentPresets.find((preset) => preset.name === "Northwestern purple")
+            ?.value ?? "",
+      },
+      within,
+    );
   }, [branding]);
   useEffect(() => () => endPageThemePreview(), []);
 
@@ -669,18 +713,70 @@ function Exploded({
    * Pointing at a part, or focusing in it, outlines it in the viewer, and back. What a
    * story names, and the tiles at the middle of the window, are lit by `StoryLines` itself
    * (`data-lit`), never through this component's state, so scrolling redraws nothing here.
+   * Nor does the page scrolling under a resting pointer: what passes under it is not
+   * pointed at (`isScrolling`), only what the pointer then moves over.
    */
   const point = useCallback(
     (key: PartKey) => ({
       "data-on": pointed === key || undefined,
-      onPointerEnter: () => setPointed(key),
-      onPointerLeave: () => setPointed(null),
+      ...pointerTo(key, setPointed),
       onFocus: () => setPointed(key),
       onBlur: () => setPointed(null),
     }),
     [pointed],
   );
   const region = (key: PartKey) => ({ ...point(key), "data-part": key });
+
+  /*
+   * A tile's list scrolls in a box of its own (`.scroll`), and a box under the pointer
+   * takes the wheel from the page: a page scrolled under a resting pointer stopped at
+   * each, the reader's gesture spent on the box (Mat, 2026-10-21: smooth). So a box takes
+   * the wheel only once the reader points into it (moves the pointer over it, presses,
+   * or focuses in it; `data-armed`), never as the page brings it under the pointer
+   * (`isScrolling`), and the page scrolling lets it go. Until then it lets the wheel pass
+   * (`Parts.module.css`). Its own scrolling (a transcript following its cue) is as ever.
+   */
+  const armed = useRef<HTMLElement | null>(null);
+  const disarmList = useCallback(() => {
+    armed.current?.removeAttribute("data-armed");
+    armed.current = null;
+  }, []);
+  const armList = useCallback(
+    (event: React.PointerEvent<HTMLElement>) => {
+      if (isScrolling()) return;
+      const { clientX: x, clientY: y } = event;
+      const box =
+        [
+          ...event.currentTarget.querySelectorAll<HTMLElement>(
+            `.${styles.scroll}`,
+          ),
+        ].find((list) => {
+          const { left, right, top, bottom } = list.getBoundingClientRect();
+          return x >= left && x <= right && y >= top && y <= bottom;
+        }) ?? null;
+      if (box === armed.current) return;
+      disarmList();
+      armed.current = box;
+      box?.setAttribute("data-armed", "");
+    },
+    [disarmList],
+  );
+  useEffect(() => {
+    // The page scrolled, not the armed box: what it brings under the pointer is not pointed at.
+    const onScroll = (event: Event) => {
+      if (
+        event.target === document ||
+        event.target === document.documentElement
+      )
+        disarmList();
+    };
+    window.addEventListener("scroll", onScroll, {
+      capture: true,
+      passive: true,
+    });
+    return () =>
+      window.removeEventListener("scroll", onScroll, { capture: true });
+  }, [disarmList]);
   const shown = useMemo(() => parts.filter((part) => part.present), [parts]);
   const missing = useMemo(() => parts.filter((part) => !part.present), [parts]);
   // The first tile past the viewer's own parts: "And more." goes over it, the Collection
@@ -934,7 +1030,14 @@ function Exploded({
         onBrandStory={setBranding}
       />
 
-      <div className={styles.tiles}>{tiles}</div>
+      <div
+        className={styles.tiles}
+        onPointerMove={armList}
+        onPointerDown={armList}
+        onPointerLeave={disarmList}
+      >
+        {tiles}
+      </div>
 
       {missing.length > 0 && (
         <div className={styles.missing}>
@@ -970,6 +1073,24 @@ function Exploded({
   );
 }
 
+/*
+ * A part's pointer handlers: pointed at as the pointer enters it or moves over it, but
+ * not as the page scrolls it under a resting pointer (`isScrolling`), and let go as the
+ * pointer leaves, scrolled or not, so nothing stays outlined that the pointer is off.
+ */
+const pointerTo = (
+  key: PartKey,
+  onPoint: (key: PartKey | null) => void,
+): React.HTMLAttributes<HTMLElement> => ({
+  onPointerEnter: () => {
+    if (!isScrolling()) onPoint(key);
+  },
+  onPointerMove: () => {
+    if (!isScrolling()) onPoint(key);
+  },
+  onPointerLeave: () => onPoint(null),
+});
+
 /** A part on its own: drawn again only when it, or whether it is pointed at, changes. */
 const Tile = React.memo(function Tile({
   part,
@@ -988,8 +1109,7 @@ const Tile = React.memo(function Tile({
       data-tall={part.tall || undefined}
       data-tile={part.key}
       data-on={on || undefined}
-      onPointerEnter={() => onPoint(part.key)}
-      onPointerLeave={() => onPoint(null)}
+      {...pointerTo(part.key, onPoint)}
       onFocus={() => onPoint(part.key)}
       onBlur={() => onPoint(null)}
     >

@@ -113,6 +113,9 @@ export type { Shortcut } from "./ui/Tip";
 export { useOneOpen } from "./ui/useOneOpen";
 /** "Read more" for text of your own that its CSS cuts short, as `Summary` is. */
 export { ReadMore } from "./ui/ReadMore";
+/** A title at a heading level, and past h6, where headings end, the group it names. */
+export { titled } from "./ui/heading";
+export type { Titled } from "./ui/heading";
 export type { Navigation } from "./react/hooks";
 export { useClover, useCloverSelector } from "./react/context";
 

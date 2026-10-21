@@ -25,13 +25,14 @@
  * column where there is no room for both. The Root draws no box of its own
  * (`display: contents`), so the viewer, the tiles and what follows are this grid's own:
  * the viewer spans every row of the column beside it, so it is held through all of them.
+ * The two columns are in the golden ratio (Mat, 2026-10-21), as the footer's are below.
  * Rows are spaced by margins, not gaps, so a row the resource leaves empty adds none.
  */
 .grid {
   align-items: start;
   column-gap: 4.236rem;
   display: grid;
-  grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.618fr);
 }
 
 .root {
@@ -42,15 +43,6 @@
 .loading,
 .after {
   grid-column: 2;
-}
-
-/*
- * The grid runs on past the last story, so the viewer is still held beside it while it
- * reads its recipe (`StoryLines.tsx`): Install, after the stories, gives it that room,
- * and the padding makes up what is left on a tall window.
- */
-.after {
-  padding-bottom: max(2.618rem, 30vh - 14rem);
 }
 
 @media (max-width: 64rem) {
@@ -70,7 +62,11 @@
 /*
  * Held in view beside the tiles, under the navbar, while it fits the window; taller than
  * the window (its code open, say), held by its foot instead, so the code stays in view.
- * `PartsLive` writes its height.
+ * The grid ends with the npm block (Install's), and so does the hold: at the page's end
+ * the viewer's foot meets the block's (Mat, 2026-10-21). On a window too tall for the
+ * page to scroll that far it is held lower, just so far down that its foot is there at
+ * the end: the window less its height and what is under the grid (`--assembled-end`).
+ * `PartsLive` writes both.
  */
 .assembled {
   display: grid;
@@ -81,7 +77,10 @@
   grid-template-columns: minmax(0, 1fr);
   position: sticky;
   top: min(
-    calc(var(--nextra-navbar-height, 4rem) + 1.618rem),
+    max(
+      calc(var(--nextra-navbar-height, 4rem) + 1.618rem),
+      calc(100vh - var(--assembled-height, 0px) - var(--assembled-end, 100vh))
+    ),
     calc(100vh - var(--assembled-height, 0px) - 1.618rem)
   );
 }
@@ -979,6 +978,17 @@
   }
 }
 
+/*
+ * A story gone with none after it: its line fades (`StoryLines`' `FADE`), by the overlay's
+ * opacity, which the compositor runs, still drawn to the story as the page scrolls.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .storyLines[data-gone] {
+    opacity: 0;
+    transition: opacity 320ms ease;
+  }
+}
+
 @keyframes line-draw {
   from {
     stroke-dashoffset: 1;
@@ -1238,6 +1248,17 @@
   max-height: 18rem;
   overflow: hidden auto;
   padding-inline: 4px;
+}
+
+/*
+ * Until the reader points into it (`data-armed`, `PartsLive`) or focuses in it, a list's
+ * box lets the wheel pass to the page, so a page scrolled under a resting pointer never
+ * stops at it. With a mouse or a trackpad only: a finger scrolls the box it drags, as ever.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .scroll:not([data-armed]):not(:focus-within) {
+    pointer-events: none;
+  }
 }
 
 /* Taller for a Collection, so its members show under its label and summary. */

@@ -5,6 +5,7 @@ import { type LanguageMapLike, localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
+import { titleTag } from "../../ui/heading";
 import { useOneOpen } from "../../ui/useOneOpen";
 
 export interface DownloadProps
@@ -15,7 +16,7 @@ export interface DownloadProps
    * The level of its groups' titles ("This page", "All pages"), a level under the
    * heading it sits beneath. Default 3.
    */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  headingLevel?: number;
 }
 
 export interface Rendering {
@@ -74,7 +75,7 @@ export interface DownloadGroupsProps {
   page: Rendering[];
   all: Rendering[];
   /** The level of each group's title ("This page", "All pages"). Default 3. */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  headingLevel?: number;
 }
 
 /**
@@ -88,7 +89,8 @@ export function DownloadGroups({
 }: DownloadGroupsProps) {
   const { t, langOf } = useCloverTranslation();
   const id = useId();
-  const Heading = `h${headingLevel}` as "h3";
+  // Past 6 not a heading (`ui/heading.ts`): each group is named by it either way.
+  const Heading = titleTag(headingLevel) as "h3";
   const list = (titleKey: string, items: Rendering[], key: string) =>
     items.length > 0 && (
       <section

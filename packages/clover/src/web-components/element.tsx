@@ -17,7 +17,7 @@ import { initCloverI18n } from "../i18n/config";
  *
  * Attributes: `iiif-content`, `canvas-id` (the Canvas to open on), `manifest-id`,
  * `language` (the language to read IIIF text in), `search-query`, `heading-level` (the
- * title's, 2 to 6, to fit the page's outline), and `items`, `header`, `panel`,
+ * title's, 2 or more, to fit the page's outline), and `items`, `header`, `panel`,
  * `download` (`"false"` turns one off; `items` also takes `carousel`, `list` or `grid`).
  * The `iiifContent` property takes an object too. Events: `canvaschange`,
  * `manifestchange`, `contentstatechange`, each with its value in `detail`.
@@ -221,7 +221,8 @@ export function defineCloverViewer(assets: ElementAssets): void {
       const items = this.getAttribute("items");
       if (items) props.items = items === "false" ? false : items;
       const level = Number(this.getAttribute("heading-level"));
-      if ([2, 3, 4, 5, 6].includes(level)) props.headingLevel = level;
+      // Past 6 the titles name what they head instead (`ui/heading.ts`).
+      if (Number.isInteger(level) && level >= 2) props.headingLevel = level;
       for (const name of SWITCHES) {
         if (this.getAttribute(name) === "false") props[name] = false;
       }

@@ -28,13 +28,11 @@ const Wordmark = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 /*
- * The wordmark, in the text's color. Under the pointer, or with focus on its link, the
- * hero's stroke is drawn under it, point to point from its left end, as the hero's is
- * (Mat, 2026-10-21): revealed, never stretched. Sized and set as the marks are, in `em`
- * of a type the wordmark's height (its tallest letters are 0.75em of it): 0.42em tall,
- * 0.07em over the baseline and the rest under it, a little off the letters. It sits
- * behind them, so they read over it, and is simply there for a reader who asks for
- * reduced motion.
+ * The wordmark, in the text's color, the hero's stroke always under it (Mat,
+ * 2026-10-21). Sized and set as every mark is (`Home.module.css`'s `.mark`), in `em` of
+ * a type the wordmark's height (its tallest letters are 0.75em of it): 0.42em tall, its
+ * box from just over the letters' foot down, so its ink runs from 0.1em under them, a
+ * little off the letters. It sits behind them, so they read over it.
  */
 const Logo = () => (
   <span>
@@ -60,8 +58,7 @@ const Logo = () => (
           var(--accent-9)
         );
         /* The wordmark's foot is the span's bottom padding up from its edge. */
-        bottom: calc(0.5rem - 0.35em);
-        clip-path: inset(0 100% 0 0);
+        bottom: calc(0.5rem - 0.385em);
         content: "";
         font-size: calc(var(--wordmark-height) / 0.75);
         height: 0.42em;
@@ -70,17 +67,7 @@ const Logo = () => (
         position: absolute;
         right: calc(0.5rem - 0.06em);
         rotate: 1.5deg;
-        transition: clip-path 600ms cubic-bezier(0.65, 0, 0.35, 1);
         z-index: -1;
-      }
-      :global(a:hover) > span::after,
-      :global(a:focus-visible) > span::after {
-        clip-path: inset(0 0 0 0);
-      }
-      @media (prefers-reduced-motion: reduce) {
-        span::after {
-          transition: none;
-        }
       }
     `}</style>
   </span>

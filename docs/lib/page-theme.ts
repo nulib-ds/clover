@@ -85,10 +85,13 @@ export interface PageTheme {
 }
 
 /** Applies both overrides to the document root, clearing whichever is empty. */
-export const applyPageTheme = ({ accent, font }: Partial<PageTheme>) => {
+export const applyPageTheme = (theme: Partial<PageTheme>) => {
   if (typeof document === "undefined") return;
-  const root = document.documentElement;
+  applyTo(document.documentElement, theme);
+};
 
+/** Applies both overrides to one element (the root, or a preview's), clearing either if empty. */
+const applyTo = (root: HTMLElement, { accent, font }: Partial<PageTheme>) => {
   if (accent !== undefined) {
     if (accent && isHexColor(accent)) {
       const { hue, saturation } = hexToHueSaturation(accent);
@@ -177,13 +180,38 @@ const subscribePageTheme = (listener: () => void) => {
  * (`PartsLive.tsx`). It is applied and announced as a choice is, so the settings show
  * it, but never stored. Ending it puts back what is stored, unless a choice was made
  * meanwhile, which keeps what is shown and ends it.
+ *
+ * Shown `within` some elements (what is in view), it is set on them alone, each marked
+ * `data-page-theme` so its accent's steps are mixed again there (`tokens.css`), and the
+ * root is left as it was. A change on the root restyles every element on the page, some
+ * 2,400 on the homepage, a frame dropped mid-scroll; on what is in view it looks the
+ * same (Mat, 2026-10-21: smooth). Only the accent is so shown: a font would reflow.
  */
 let previewing = false;
+let within: HTMLElement[] = [];
 
-export const previewPageTheme = (next: Partial<PageTheme>) => {
+const endWithin = () => {
+  within.forEach((element) => {
+    delete element.dataset.pageTheme;
+    ACCENT_PROPERTIES.forEach((prop) => element.style.removeProperty(prop));
+  });
+  within = [];
+};
+
+export const previewPageTheme = (
+  next: Partial<PageTheme>,
+  elements?: HTMLElement[],
+) => {
   previewing = true;
   current = { ...getPageTheme(), ...next };
-  applyPageTheme(next);
+  if (elements?.length && next.font === undefined) {
+    endWithin();
+    within = elements;
+    within.forEach((element) => {
+      element.dataset.pageTheme = "";
+      applyTo(element, { accent: next.accent });
+    });
+  } else applyPageTheme(next);
   listeners.forEach((listener) => listener());
 };
 
@@ -191,14 +219,19 @@ export const endPageThemePreview = () => {
   if (!previewing) return;
   previewing = false;
   current = readStoredPageTheme();
-  applyPageTheme(current);
+  if (within.length) endWithin();
+  else applyPageTheme(current);
   listeners.forEach((listener) => listener());
 };
 
 /** Change the accent and/or font: applied to the page, remembered, and announced. */
 export const setPageTheme = (next: Partial<PageTheme>) => {
   current = { ...getPageTheme(), ...next };
-  applyPageTheme(next);
+  // A choice over a preview shown within some elements: all of it to the root now.
+  if (previewing && within.length) {
+    endWithin();
+    applyPageTheme(current);
+  } else applyPageTheme(next);
   // A choice made over a preview keeps all that is shown, the preview's part too.
   storePageTheme(previewing ? current : next);
   previewing = false;

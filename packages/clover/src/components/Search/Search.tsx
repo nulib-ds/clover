@@ -12,11 +12,12 @@ import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
+import { titleTag } from "../../ui/heading";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 
 export interface SearchProps extends React.HTMLAttributes<HTMLElement> {
   /** The heading level of each Canvas's group of hits. Default 3. */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  headingLevel?: number;
   /** The element to render. Default `div`. */
   as?: React.ElementType;
 }
@@ -58,7 +59,8 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
     if (last?.canvasId === hit.canvasId) last.hits.push(hit);
     else groups.push({ canvasId: hit.canvasId, hits: [hit] });
   }
-  const Heading = `h${headingLevel}` as React.ElementType;
+  // Past 6 not a heading (`ui/heading.ts`): each group is named by it either way.
+  const Heading = titleTag(headingLevel);
   const count = search.hits.length;
   const statusKey =
     search.status === "loading"

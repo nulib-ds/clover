@@ -6,7 +6,7 @@ export interface LightboxProps {
   open: boolean;
   onClose: () => void;
   /** The level of its title, a level under the layout's. Default 3. */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  headingLevel?: number;
   className?: string;
 }
 
@@ -54,7 +54,13 @@ export function Lightbox({
       {open && (
         <div className="clover-template-lightbox-body">
           <header className="clover-template-lightbox-header">
-            <Clover.Label of="canvas" as={`h${headingLevel}`} id={titleId} />
+            {/* Past h6 no heading; the dialog is named by it either way. */}
+            <Clover.Label
+              of="canvas"
+              as={Clover.titled(headingLevel, titleId).as}
+              id={titleId}
+              className="clover-template-lightbox-title"
+            />
             {/* Hidden: a name still reads it, and the content does not repeat it. */}
             {named === manifestTitleId && (
               <Clover.Label id={manifestTitleId} hidden />

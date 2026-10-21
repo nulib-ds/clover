@@ -431,11 +431,19 @@ every rule below.
 - Parts take `as`, `className` and rest props, render nothing when they have nothing to
   show, and throw a message naming themselves outside a `Root`.
 - **Heading levels.** Every part or template that renders a heading takes
-  `headingLevel?: 2|3|4|5|6` and never hard-codes `h2` or `h3` (WCAG 1.3.1). It hands
-  `Math.min(level + 1, 6)` to the parts inside it: the Panel, Download, the
-  Lightbox, About, and the Annotations' Markdown. When a layout drops its title, as
-  `Default` does with `header={false}`, it hands its own level to whatever takes the
-  title's place, not the level below.
+  `headingLevel?: number` and never hard-codes `h2` or `h3` (WCAG 1.3.1). It hands
+  `level + 1` to the parts inside it: the Panel, Download, the Lightbox, About, and the
+  Annotations' Markdown. When a layout drops its title, as `Default` does with
+  `header={false}`, it hands its own level to whatever takes the title's place, not the
+  level below. Never cap a level at 6, and never write `h${level}`: take the element from
+  `ui/heading.ts` (Mat, 2026-10-21). To h6 it is the heading; past 6 it is no heading,
+  since JAWS, and TalkBack with Chrome, read an `aria-level` past 6 as 2, and the title
+  names the group it heads: `titleTag` where that group is already named by it (a
+  section `aria-labelledby` it, Sections' panels), `titled` where it is not (About's and
+  Collection's sections, a template's Root, `Clover.titled` publicly). Markdown's
+  headings past 6 name the group of what follows them (`core/markdown.ts`), through
+  the sanitizer's rules for them (`core/sanitize.ts`). Style a title by its class,
+  never its tag.
 - **Live regions stay mounted** and change only their words (WCAG 4.1.3). `Status`
   keeps its `role="status"` `<p>` for its whole life, empty and visually hidden once
   ready, with the `role="alert"` box beside it on failure. Search's status is visually

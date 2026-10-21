@@ -12,7 +12,10 @@
  * to `h6`, so the page's own heading styles never reach annotation text. Its level is
  * set by the part around it (`headingLevel`): the first heading takes that level, and
  * each later one sits a level under the nearest shallower heading before it, so none is
- * skipped, whatever the source skips, down to 6.
+ * skipped, whatever the source skips. Past 6, where screen readers misread an
+ * `aria-level` (`ui/heading.ts`), a heading is a bold paragraph that names the group of
+ * what follows it, up to the next heading as shallow (`role="group"`,
+ * `aria-labelledby`), by an id of its own.
  *
  * The output is always passed through `sanitizeHTML(html, { markdown: true })` before
  * it is shown; nothing here is trusted. Text is escaped first, so only the markup this
@@ -27,6 +30,9 @@ export interface MarkdownOptions {
 const BULLET = /^\s*[-*+]\s+/;
 const NUMBER = /^\s*(\d+)[.)]\s+/;
 const HEADING = /^(#{1,6})\s+(\S.*?)(?:\s+#+)?\s*$/;
+
+/** The groups past h6, numbered on the page so each heading's id is its own. */
+let groups = 0;
 
 // A quote too, so no text (a link's address) can end the attribute it is written into.
 const escape = (text: string) =>
@@ -164,21 +170,38 @@ export function markdownToHtml(
       return "";
     });
 
-  const base = Math.min(Math.max(headingLevel, 1), 6);
+  const base = Math.max(headingLevel, 1);
   // The `#` depths of the headings a later one may sit under, the outermost first.
   const above: number[] = [];
+  // The `#` depths of the groups open round headings past 6, each closed by a heading as
+  // shallow, or at the end.
+  const open: number[] = [];
 
-  const html = blocksOf(body).map((block) => {
+  const html: string[] = [];
+  for (const block of blocksOf(body)) {
     if (block.kind === "heading") {
       while (above.length && above[above.length - 1] >= block.depth)
         above.pop();
-      const level = Math.min(base + above.length, 6);
+      while (open.length && open[open.length - 1] >= block.depth) {
+        open.pop();
+        html.push("</div>");
+      }
+      const level = base + above.length;
       above.push(block.depth);
-      return `<p role="heading" aria-level="${level}"><b>${inline(block.text, notes)}</b></p>`;
-    }
-    if (block.kind === "list") return list(block.lines, notes);
-    return `<p>${inline(block.lines.join("\n").trim(), notes)}</p>`;
-  });
+      const text = `<b>${inline(block.text, notes)}</b>`;
+      if (level <= 6) {
+        html.push(`<p role="heading" aria-level="${level}">${text}</p>`);
+      } else {
+        const id = `clover-md-${++groups}`;
+        open.push(block.depth);
+        html.push(
+          `<div role="group" aria-labelledby="${id}"><p id="${id}">${text}</p>`,
+        );
+      }
+    } else if (block.kind === "list") html.push(list(block.lines, notes));
+    else html.push(`<p>${inline(block.lines.join("\n").trim(), notes)}</p>`);
+  }
+  while (open.pop() !== undefined) html.push("</div>");
 
   if (definitions.length) {
     html.push(

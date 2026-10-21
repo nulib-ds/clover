@@ -12,6 +12,18 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`Clover.titled(level, id)`, for a layout of your own.** A title at a heading level
+  and the group it heads: to `h6`, the heading (`as`); past it, a `p` with `id`, and
+  `role="group"` with `aria-labelledby` for the element round what it heads, as Clover's
+  own parts and templates do (see Changed).
+
+  ```jsx
+  const title = Clover.titled(headingLevel, "my-title");
+  <Clover.Root iiifContent={url} {...title.group}>
+    <Clover.Label as={title.as} {...title.title} />
+  </Clover.Root>;
+  ```
+
 - **`--clover-color-accent-text`, the accent for text.** Links, Read more, the selected
   item's label, Download's links and the other text Clover draws in the accent read it,
   falling back to `--clover-color-accent`, so nothing changes unless you set it. On a
@@ -1472,6 +1484,27 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **No heading past `h6`: a title that would be an `h7` names what it heads instead.**
+  Every part capped its headings at 6, so under a page's `h3` or deeper a template's
+  deepest titles were drawn as `h6`, siblings of the heading they belong under: in
+  `Document` at `headingLevel={4}`, About's Download was an `h6` and its "This page"
+  another (WCAG 1.3.1). An `aria-level` past 6 is no answer, since JAWS, and TalkBack
+  with Chrome, announce it as level 2. Now a title past 6 is a `p` (the accordion's, a
+  `div`), drawn as before, and the group it heads takes its name from it: About's and
+  Collection's sections, and a template's Root, become `role="group"`, named by their
+  title; a section already named by its title (Download's, Search's and Annotations'
+  groups, Items' list, the accordion's panels, the lightbox) keeps that name. Markdown's
+  headings past 6 are bold paragraphs that name the group of what follows them. Every
+  `headingLevel` now takes any level, `2` and up (`heading-level` on
+  `<clover-viewer>` too), so under your own `h6` pass `7`:
+
+  ```jsx
+  <h6>Plates</h6>
+  <Clover.Annotations headingLevel={7} />
+  ```
+
+  If you style Clover's titles by tag (`h6`), style them by class.
+
 - **`Annotations` lists every annotation by default.** Its `scope` defaults to `"all"`:
   every Canvas's annotations, by layer and then by Canvas, as the Viewer's panel lists
   them, wherever the part is placed. It was `"view"`, so `Annotations` placed on its own
@@ -1504,6 +1537,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   children) is now clipped to it, so draw it on the entry itself.
 
 ### Fixed
+
+- **The Lightbox's title keeps its look at any level.** It was styled by tag
+  (`.clover-template-lightbox-header :is(h2, h3, h4, h5, h6)`); it is now
+  `.clover-template-lightbox-title`, bold as its heading was, and so is Gallery's title
+  (`.clover-template-gallery-title`). A copied template takes the class on its
+  `Clover.Label`.
 
 - **An annotation's thumbnail no longer asks for more pixels than its region has.** The
   small picture of each entry's region (`Annotations`) was asked for at `!52,52`, which
@@ -2009,7 +2048,7 @@ are in the repository's `ACCESSIBILITY.md`.
     `DOMPurify.sanitize` no longer drops relative `href` and `src` once Clover has run.
 
 - **Headings.**
-  - `headingLevel` (2 to 6) fits Clover's headings into your page's outline. `Default`,
+  - `headingLevel` (2 and up) fits Clover's headings into your page's outline. `Default`,
     `Document` and `Gallery`, and so the Viewer, take it for the title (default 2), and
     the headings inside sit a level below: the panel's sections, Document's Download
     groups, Gallery's lightbox title. `<clover-viewer>` takes `heading-level`.
@@ -2026,9 +2065,9 @@ are in the repository's `ACCESSIBILITY.md`.
   - `Default` with `header={false}` has no title, so its panel's sections take the
     title's level: `h2` by default, where they were `h3`. Pass `headingLevel={3}` to keep
     `h3`.
-  - Select these headings by class, not tag (`h2.clover-template-default-title`,
-    `h2.clover-items-title`, `.clover-template-lightbox-header h3`), so a rule holds at
-    any level.
+  - Select these headings by class, not tag (`.clover-template-default-title`,
+    `.clover-items-title`, `.clover-template-lightbox-title`), so a rule holds at any
+    level, and past `h6`, where a title is no heading at all.
 
 - **Language.**
   - IIIF HTML keeps `lang` and `dir`, and an image its `width` and `height`. Contents,

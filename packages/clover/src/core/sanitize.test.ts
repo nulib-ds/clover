@@ -99,6 +99,12 @@ describe("sanitizeHTML", () => {
         '<ul><li>a</li></ul><ol start="2"><li>b</li></ol><p role="heading" aria-level="2">c</p>',
       ),
     ).toBe("ab<p>c</p>");
+    // And Markdown's groups past h6.
+    expect(
+      sanitizeHTML(
+        '<div role="group" aria-labelledby="clover-md-1"><p id="clover-md-1">t</p></div>',
+      ),
+    ).toBe("<p>t</p>");
   });
 
   it("keeps Markdown's lists and headings, with only the values it writes", () => {
@@ -118,6 +124,23 @@ describe("sanitizeHTML", () => {
         '<p role="button" aria-level="9" aria-hidden="true">x</p><ol start="x"><li>y</li></ol>',
       ),
     ).toBe("<p>x</p><ol><li>y</li></ol>");
+    // Its groups past h6, named by their titles' ids, and nothing else of the kind.
+    const group = new DOMParser().parseFromString(
+      markdown(
+        '<div role="group" aria-labelledby="clover-md-3"><p id="clover-md-3"><b>t</b></p></div>',
+      ),
+      "text/html",
+    );
+    expect(group.querySelector("div")?.getAttribute("role")).toBe("group");
+    expect(group.querySelector("div")?.getAttribute("aria-labelledby")).toBe(
+      "clover-md-3",
+    );
+    expect(group.querySelector("p")?.id).toBe("clover-md-3");
+    expect(
+      markdown(
+        '<div role="note" aria-labelledby="page-title"><p id="page-title" role="group">x</p></div><span id="clover-md-1" aria-labelledby="clover-md-1">y</span>',
+      ),
+    ).toBe("<div><p>x</p></div><span>y</span>");
     // Only on the elements Markdown writes them on.
     expect(
       markdown(

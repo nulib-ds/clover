@@ -399,7 +399,11 @@ function checksOf(root: Element, tree: TreeNode, stops: number): Check[] {
 const short = (text: string) =>
   text.length > LONGEST ? `${text.slice(0, LONGEST - 1)}…` : text;
 
-export function AccessibilityTree({
+/*
+ * Drawn again only when it is shown or put away: the viewer around it redraws as the
+ * reader points at its parts, and this, the larger, need not.
+ */
+export const AccessibilityTree = React.memo(function AccessibilityTree({
   of,
   shown: turned,
 }: {
@@ -497,7 +501,7 @@ export function AccessibilityTree({
       </div>
     </div>
   );
-}
+});
 
 function countStops(node: TreeNode): number {
   return (

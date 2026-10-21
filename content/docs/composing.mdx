@@ -149,7 +149,7 @@ headings to assistive technology (`role="heading"`, drawn bold, so your page's h
 styles stay out of them). The first heading takes `headingLevel` (default 3), and each
 later one sits a level under the nearest shallower heading before it, so none is skipped
 even where the source skips one. In `Annotations` they sit a level under the set's
-heading.
+heading. Past `h6`, none is a heading ([Headings](#headings)).
 
 Every summary Clover shows is `Summary`, cut to five lines with a "Read more" button
 under it when it runs longer, and "Read less" to cut it again. The number of lines is a
@@ -252,6 +252,26 @@ function PageCount() {
 `useClover()` gives `{ clover }`, the Root's state and actions (`clover.goTo(canvasId)`,
 `clover.next()`, `clover.search(query)` and the rest), for parts that act rather than
 read.
+
+### Headings
+
+Every part that draws a title takes `headingLevel`, one below the heading it sits under,
+so a screen reader's list of headings follows your page. HTML's headings end at `h6`, and
+screen readers misread a deeper `aria-level` (JAWS, and TalkBack with Chrome, announce a
+7 as a 2), so past 6 Clover draws no heading: a title that would be an `h7` names the
+group it heads instead. `Clover.titled` does the same in a layout of your own.
+
+```jsx
+function MyLayout({ url, headingLevel }) {
+  const title = Clover.titled(headingLevel, "my-title");
+  return (
+    <Clover.Root iiifContent={url} {...title.group}>
+      <Clover.Label as={title.as} {...title.title} />
+      <Clover.Content />
+    </Clover.Root>
+  );
+}
+```
 
 ### Controls of your own
 

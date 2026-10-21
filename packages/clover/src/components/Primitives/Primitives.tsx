@@ -115,7 +115,7 @@ export function Value({
 }: Omit<PartProps<LanguageMapLike>, "of"> & {
   format?: string;
   /** With Markdown, the level of its first heading; the rest follow under it. Default 3. */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  headingLevel?: number;
 }) {
   const language = useLanguage();
   return (

@@ -120,7 +120,7 @@ the thumbnails under it, and the information panel beside them, as in Clover 3.x
 | Prop               | Type                                      | Default                     | Description                                                   |
 | ------------------ | ----------------------------------------- | --------------------------- | ------------------------------------------------------------- |
 | `header`           | `boolean`                                 | `true`                      | The thumbnail and title over the stage.                       |
-| `headingLevel`     | `2 \| 3 \| 4 \| 5 \| 6`                   | `2`                         | The title's level; the panel's sections are a level below.    |
+| `headingLevel`     | `number`                                  | `2`                         | The title's level; the panel's sections are a level below.    |
 | `panel`            | `boolean`                                 | `true`                      | The information panel and its toggle.                         |
 | `defaultPanelOpen` | `boolean`                                 | Open where it fits          | Whether the panel starts open.                                |
 | `panelLayout`      | `"accordion" \| "tabs"`                   | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.            |
@@ -139,7 +139,7 @@ left, the pages down one column, and the information panel sliding out on the ri
 | `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the information panel starts open.                        |
 | `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | The panel's sections as stacked boxes, or as tabs.                |
 | `download`           | `boolean`               | `true`                       | A Download button, when the Manifest or a page has a `rendering`. |
-| `headingLevel`       | `2 \| 3 \| 4 \| 5 \| 6` | `2`                          | The title's level; the panel's sections are a level below.        |
+| `headingLevel`       | `number`                | `2`                          | The title's level; the panel's sections are a level below.        |
 | `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.    |
 
 ### Gallery
@@ -147,10 +147,10 @@ left, the pages down one column, and the information panel sliding out on the ri
 A grid of the views, a spread one cell, that opens one in a lightbox to pan, zoom and
 page through.
 
-| Prop           | Type                    | Default | Description                                           |
-| -------------- | ----------------------- | ------- | ----------------------------------------------------- |
-| `size`         | `string`                | `10rem` | A cell's width (sets `--clover-items-size`).          |
-| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6` | `2`     | The title's level; the lightbox's title is one below. |
+| Prop           | Type     | Default | Description                                           |
+| -------------- | -------- | ------- | ----------------------------------------------------- |
+| `size`         | `string` | `10rem` | A cell's width (sets `--clover-items-size`).          |
+| `headingLevel` | `number` | `2`     | The title's level; the lightbox's title is one below. |
 
 ## Examples
 

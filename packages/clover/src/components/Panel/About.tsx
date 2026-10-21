@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useRef } from "react";
+import React, { Suspense, lazy, useId, useRef } from "react";
 
 import { isLoneCanvas } from "../../core/load";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
@@ -14,12 +14,16 @@ import {
   Summary,
 } from "../Primitives/Primitives";
 import { DownloadGroups, useDownloads } from "../Download/Download";
+import { titled } from "../../ui/heading";
 
 export interface AboutProps extends React.HTMLAttributes<HTMLElement> {
   /** Also show the current Canvas's summary, for Manifests that describe each image. */
   canvasSummary?: boolean;
-  /** The heading level for each section's title. Default 3. */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
+  /**
+   * The heading level for each section's title. Default 3. Past 6 a title is not a
+   * heading, and names its section instead (`ui/heading.ts`).
+   */
+  headingLevel?: number;
 }
 
 /*
@@ -55,6 +59,7 @@ export function About({
    * About itself, never lost to the page (WCAG 2.4.3).
    */
   const root = useRef<HTMLDivElement>(null);
+  const id = useId();
   const onOpened = () => {
     const about = root.current;
     const heading = about
@@ -63,16 +68,26 @@ export function About({
     (heading ?? about)?.focus({ preventScroll: true });
   };
   if (!manifest) return null;
-  const Heading = `h${headingLevel}` as React.ElementType;
-  const section = (titleKey: string, has: unknown, part: React.ReactNode) =>
-    has ? (
-      <section className="clover-about-section">
-        <Heading className="clover-about-heading" lang={langOf(titleKey)}>
+  const section = (titleKey: string, has: unknown, part: React.ReactNode) => {
+    if (!has) return null;
+    const {
+      as: Title,
+      title,
+      group,
+    } = titled(headingLevel, `${id}-${titleKey}`);
+    return (
+      <section className="clover-about-section" {...group}>
+        <Title
+          className="clover-about-heading"
+          lang={langOf(titleKey)}
+          {...title}
+        >
           {t(titleKey)}
-        </Heading>
+        </Title>
         {part}
       </section>
-    ) : null;
+    );
+  };
   const hasAny = (key: string) =>
     Array.isArray(manifest[key])
       ? manifest[key].length > 0
@@ -92,7 +107,7 @@ export function About({
         <Suspense fallback={null}>
           <PartOfManifest
             manifest={manifest}
-            Heading={Heading}
+            headingLevel={headingLevel}
             onOpened={onOpened}
           />
         </Suspense>
@@ -109,7 +124,7 @@ export function About({
         <DownloadGroups
           page={downloads.page}
           all={downloads.all}
-          headingLevel={Math.min(headingLevel + 1, 6) as 3}
+          headingLevel={headingLevel + 1}
         />,
       )}
       {section(

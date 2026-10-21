@@ -44,7 +44,7 @@ reader moves. Its other props, and its `ref`, go to its element.
 | -------------- | --------------------------------------- | ------- | ------------------------------------------------------------------- |
 | `scope`        | `"view" \| "all"`                       | `"all"` | Every Canvas's annotations, all fetched as it shows, or the view's. |
 | `renderEntry`  | `(entry: AnnotationEntry) => ReactNode` | —       | Your own rendering of an entry's content.                           |
-| `headingLevel` | `2 \| 3 \| 4 \| 5 \| 6`                 | `3`     | Its first headings: one below the heading over it.                  |
+| `headingLevel` | `number`                                | `3`     | Its first headings: one below the heading over it.                  |
 | `as`           | element type                            | `"div"` | The element to render.                                              |
 | `className`    | `string`                                | —       | Added to `clover-annotations`.                                      |
 

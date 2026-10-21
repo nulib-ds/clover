@@ -93,7 +93,8 @@ untouched (`...root`).
 
 Everything sits in one `Clover.Root`, which loads the resource and shares it with every
 part inside, wherever it is placed. The root carries the template's class, and
-`data-fill` when `fill` is set.
+`data-fill` when `fill` is set. Past `h6`, it is the group its title names
+([The header](#the-header)).
 
 <SourceFile
   file="templates/default/Default.tsx"
@@ -176,7 +177,9 @@ Narrow the box to see the panel go over the stage, its toggle among the stage's 
 
 The resource's thumbnail and title, unless `header={false}`. The thumbnail is
 decorative (`alt=""`), since the title beside it says what it shows. The title is a
-heading at `headingLevel`, an `h2` by default.
+heading at `headingLevel`, an `h2` by default. Past `h6`, where HTML's headings end, it
+is no heading: `Clover.titled` makes it a paragraph that names the Viewer instead, as
+every part does with a title that would be an `h7`.
 
 <SourceFile
   file="templates/default/Default.tsx"
@@ -361,7 +364,7 @@ What Default adds as a layout:
 
 - **Headings that fit the page.** The title is at `headingLevel` and the panel's
   sections a level below, so a screen reader's list of headings matches the page as it
-  looks.
+  looks. None is ever past `h6`: there, a title names what it heads instead.
 - **Focus that follows.** The toggle moves as it is pressed, and focus goes with it. A
   floating panel takes focus as it opens and gives it back to the toggle as it closes;
   one that closes as the Viewer narrows hands focus back first.

@@ -55,10 +55,13 @@ export function pageMetadata({
   title,
   description,
   route,
+  modified,
 }: {
   title?: string;
   description?: string;
   route: string;
+  /** When the page last changed (ISO 8601), its last commit's time. */
+  modified?: string;
 }): Metadata {
   const fullTitle = title ? `${title} – ${siteTitle}` : homeTitle;
   const text = description || siteDescription;
@@ -68,7 +71,10 @@ export function pageMetadata({
     description: text,
     alternates: { canonical },
     openGraph: {
-      type: "website",
+      // A page with a date of its own is an article to Open Graph (`article:modified_time`).
+      ...(modified
+        ? { type: "article" as const, modifiedTime: modified }
+        : { type: "website" as const }),
       url: canonical,
       title: fullTitle,
       description: text,
@@ -115,10 +121,13 @@ export function structuredData({
   title,
   description,
   route,
+  modified,
 }: {
   title: string;
   description: string;
   route: string;
+  /** When the page last changed (ISO 8601), its last commit's time. */
+  modified?: string;
 }) {
   const earlier = isEarlierVersion(route);
   return {
@@ -128,6 +137,7 @@ export function structuredData({
     description,
     url: `${siteUrl}${route === "/" ? "" : route}`,
     inLanguage: "en",
+    ...(modified && { dateModified: modified }),
     version: earlier ? "3.x" : "4",
     ...(earlier && { creativeWorkStatus: "Superseded" }),
     isPartOf: { "@type": "WebSite", name: siteTitle, url: siteUrl },

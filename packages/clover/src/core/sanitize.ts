@@ -9,8 +9,10 @@ import DOMPurify from "dompurify";
  * direction.
  *
  * Markdown's output (`{ markdown: true }`) may also hold what `markdownToHtml` writes:
- * lists (`ul`, `ol` with `start`, `li`) and headings (`role="heading"` with an
- * `aria-level`). IIIF's HTML never may.
+ * lists (`ul`, `ol` with `start`, `li`), headings (`role="heading"` with an
+ * `aria-level`, 1 to 6), and past 6 the groups their titles name (a `div` with
+ * `role="group"`, `aria-labelledby` its title's id, `clover-md-` and a number). IIIF's
+ * HTML never may.
  *
  * DOMPurify is about 9 kB gzip, so this module is only ever imported dynamically (see
  * `ui/Markup.tsx`); `build/bundle.test.mjs` keeps it out of the initial chunk.
@@ -37,17 +39,40 @@ const CONFIG = {
 
 const MARKDOWN_CONFIG = {
   ...CONFIG,
-  ALLOWED_TAGS: [...TAGS, "ul", "ol", "li"],
-  ALLOWED_ATTR: [...ATTRIBUTES, "role", "aria-level", "start"],
-  ADD_URI_SAFE_ATTR: [...URI_SAFE, "aria-level", "start"],
+  ALLOWED_TAGS: [...TAGS, "ul", "ol", "li", "div"],
+  ALLOWED_ATTR: [
+    ...ATTRIBUTES,
+    "role",
+    "aria-level",
+    "start",
+    "id",
+    "aria-labelledby",
+  ],
+  ADD_URI_SAFE_ATTR: [
+    ...URI_SAFE,
+    "aria-level",
+    "start",
+    "id",
+    "aria-labelledby",
+  ],
 };
 
-/** Markdown's own attributes: on the elements it writes them on, with the values it writes. */
-const MARKDOWN_VALUES: Array<[string, string, RegExp]> = [
-  ["role", "P", /^heading$/],
-  ["aria-level", "P", /^[1-6]$/],
-  ["start", "OL", /^\d+$/],
-];
+const GROUP_ID = /^clover-md-\d+$/;
+
+/**
+ * Markdown's own attributes: on the elements it writes them on, with the values it
+ * writes. Any other is removed.
+ */
+const MARKDOWN_VALUES: Record<string, Array<[string, RegExp]>> = {
+  role: [
+    ["P", /^heading$/],
+    ["DIV", /^group$/],
+  ],
+  "aria-level": [["P", /^[1-6]$/]],
+  start: [["OL", /^\d+$/]],
+  id: [["P", GROUP_ID]],
+  "aria-labelledby": [["DIV", GROUP_ID]],
+};
 
 export interface SanitizeOptions {
   /** The HTML is `markdownToHtml`'s: its lists and headings are kept. */
@@ -70,9 +95,14 @@ function purifier() {
       const value = node.getAttribute?.(name);
       if (value && !URI.test(value.trim())) node.removeAttribute(name);
     }
-    for (const [name, tag, pattern] of MARKDOWN_VALUES) {
+    for (const [name, allowed] of Object.entries(MARKDOWN_VALUES)) {
       const value = node.getAttribute?.(name);
-      if (value != null && (node.nodeName !== tag || !pattern.test(value)))
+      if (
+        value != null &&
+        !allowed.some(
+          ([tag, pattern]) => node.nodeName === tag && pattern.test(value),
+        )
+      )
         node.removeAttribute(name);
     }
   });

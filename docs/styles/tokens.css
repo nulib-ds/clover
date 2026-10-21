@@ -36,13 +36,6 @@
    * on the same element the override is substituted before they resolve.
    */
   /* Blue 60, hsl(219 99% 53%) — 5.0:1 under white button text, 4.9:1 as a link. */
-  --accent-9: #0f62fe;
-  --accent-2: color-mix(in oklab, var(--accent-9) 5%, var(--gray-1));
-  --accent-3: color-mix(in oklab, var(--accent-9) 12%, var(--gray-1));
-  --accent-6: color-mix(in oklab, var(--accent-9) 38%, var(--gray-1));
-  --accent-10: color-mix(in oklab, var(--accent-9) 88%, #000);
-  --accent-11: color-mix(in oklab, var(--accent-9) 82%, #000);
-  --accent-contrast: #ffffff;
 
   /* Error text. */
   --red-11: #ce2c31;
@@ -133,7 +126,6 @@
    * Focus ring, used consistently on every interactive surface: the text accent, so it
    * holds 3:1 against the page in both themes and under every accent preset.
    */
-  --focus-ring: 0 0 0 2px var(--color-background), 0 0 0 4px var(--accent-11);
 
   /*
    * The hero's marker stroke: a hand-drawn swoosh, used as a mask over the accent, so it
@@ -164,6 +156,25 @@
   --code-punctuation: #89ddff;
   --code-number: #f78c6c;
   --code-property: #82aaff;
+}
+
+/*
+ * The accent and its steps, on the root and on an element a theme is previewed within
+ * (`data-page-theme`, `page-theme.ts`: the Yours story's, which sets its accent on what is
+ * in view rather than on the root, sparing the page a restyle of every element mid-scroll;
+ * Mat, 2026-10-21). Mixed again there from the accent set on it. Light values: no preview
+ * is shown on a dark page. Never the font here, which a preview leaves as it is.
+ */
+:root,
+[data-page-theme] {
+  --accent-9: #0f62fe;
+  --accent-2: color-mix(in oklab, var(--accent-9) 5%, var(--gray-1));
+  --accent-3: color-mix(in oklab, var(--accent-9) 12%, var(--gray-1));
+  --accent-6: color-mix(in oklab, var(--accent-9) 38%, var(--gray-1));
+  --accent-10: color-mix(in oklab, var(--accent-9) 88%, #000);
+  --accent-11: color-mix(in oklab, var(--accent-9) 82%, #000);
+  --accent-contrast: #ffffff;
+  --focus-ring: 0 0 0 2px var(--color-background), 0 0 0 4px var(--accent-11);
 }
 
 /*
@@ -246,7 +257,8 @@
  * live demonstration of what a consumer can do.
  */
 :root,
-.dark {
+.dark,
+[data-page-theme] {
   --clover-color-accent: var(--accent-9);
   /*
    * Clover's text in the accent (links, Read more, the selected item's label): the

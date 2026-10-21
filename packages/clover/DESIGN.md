@@ -40,9 +40,13 @@ schedule excuses a failure.
   keeps focus (2.4.3). One the stylesheet hides at an end also leaves the tab order
   (`tabindex="-1"`), and stays in sight while focused.
 - Headings follow the page's outline (1.3.1). A part or template that renders a heading
-  takes `headingLevel` (2 to 6), and the headings inside it are exactly one level below.
-  A part with no title gives its own level to whatever takes the title's place.
-  Markdown headings get their level from the part around them and never skip one.
+  takes `headingLevel` (2 and up), and the headings inside it are exactly one level
+  below. A part with no title gives its own level to whatever takes the title's place.
+  Markdown headings get their level from the part around them and never skip one. No
+  heading is ever past `h6`, and none is capped there either: a title that would be an
+  `h7` is no heading, and names the group it heads instead (`ui/heading.ts`; Mat,
+  2026-10-21), since an `aria-level` past 6 reads as 2 in JAWS, and in TalkBack with
+  Chrome.
 - Mark each of Clover's strings, never a container (3.1.2). An element that shows a
   Clover string, or is named by one, carries `lang={langOf(key)}`. A container's name in
   another language is a hidden element's, reached through `aria-labelledby`
