@@ -148,15 +148,6 @@
   width: 100%;
 }
 
-/* The field's label, a line of its own over the field and Open, centered on them. */
-.resourcePicker > .fieldLabel {
-  color: var(--gray-11);
-  flex-basis: 100%;
-  font-size: var(--text-sm);
-  line-height: 1.2;
-  text-align: center;
-}
-
 .resourcePicker > .error {
   flex-basis: 100%;
 }
@@ -201,6 +192,70 @@
 
 .field:focus-within {
   box-shadow: var(--focus-ring), var(--pg-lift);
+}
+
+/*
+ * The field with its label joined to its start: one box, lifted as the field is, its
+ * parts sharing an edge at 3:1. The label has no fill. On a phone, where it would crowd
+ * the field, it is a tab on the field's top edge instead.
+ */
+.fieldGroup {
+  border-radius: var(--radius-3);
+  box-shadow: var(--pg-lift);
+  display: flex;
+}
+
+.fieldGroup:focus-within {
+  box-shadow: var(--focus-ring), var(--pg-lift);
+}
+
+.fieldLabel {
+  align-items: center;
+  border: 1px solid var(--pg-edge);
+  border-inline-end: 0;
+  border-radius: var(--radius-3) 0 0 var(--radius-3);
+  color: var(--gray-11);
+  display: flex;
+  flex: none;
+  font-size: var(--text-sm);
+  height: 2.5rem;
+  padding-inline: var(--clover-space-s, 0.618rem);
+  white-space: nowrap;
+}
+
+.fieldGroup .field,
+.fieldGroup .field:focus-within {
+  border-radius: 0 var(--radius-3) var(--radius-3) 0;
+  box-shadow: none;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+@media (max-width: 30rem) {
+  .fieldGroup {
+    flex-direction: column;
+  }
+
+  .fieldLabel {
+    align-self: flex-start;
+    border-block-end: 0;
+    border-inline-end: 1px solid var(--pg-edge);
+    border-radius: var(--radius-3) var(--radius-3) 0 0;
+    height: auto;
+    line-height: 1.2;
+    padding-block: var(--clover-space-xs, 0.382rem);
+  }
+
+  .fieldGroup .field,
+  .fieldGroup .field:focus-within {
+    border-radius: 0 var(--radius-3) var(--radius-3) var(--radius-3);
+  }
+
+  /* Open, beside the field, at its height rather than the tab's and the field's. */
+  .resourceRow > .openButton {
+    align-self: flex-end;
+    height: 2.5rem;
+  }
 }
 
 /* Thumbnails square, in the field and the list. */

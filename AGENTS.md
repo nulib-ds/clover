@@ -106,7 +106,7 @@ deadline.
     change its `storageKey`, when 4.0 ships.
   - The homepage (`docs/components/Home/`) opens with its headline, "A viewer as distinctive /
     as your collections." (two lines, its stroke under "distinctive") (`Hero.tsx`, the page's `h1`), and one sentence, on one line where it fits
-    (Mat, 2026-10-20): "Design the user experience you imagine for your IIIF resources." It has two halves: the templates live under it
+    (Mat, 2026-10-20): "Design the user experience that you imagine for your IIIF resources." It has two halves: the templates live under it
     (`docs/components/Playground/`), and below them the same resource shown one IIIF
     property at a time by the components the templates are made of (`Parts.tsx` and
     `PartsLive.tsx`), with no heading of its own. Between the two, under the playground's
@@ -182,7 +182,8 @@ deadline.
     made-up figures or copy. Golden-ratio spaces, hairline edges, no gray fills.
   - The playground shows how far one Viewer stretches: any layout with any kind of
     resource. Two pickers, each changing the stage without the other. Over it, centered,
-    the resource (`ResourceField.tsx`): one field, labeled over it, centered, "View any IIIF Manifest or Collection" (Mat, 2026-10-20: what it does, in IIIF's words; its `<label>`), for the
+    the resource (`ResourceField.tsx`): one field, its label, "Select an item", joined to its start outside its edge (Mat,
+    2026-10-20; a tab on its top edge on a phone; its `<label>`), for the
     address or content state of the reader's own, with ours listed under it (`resources`
     in `playground-config.ts`: a catalog, a print, a Collection, a photo, a map, a film, a
     recording…), each by its thumbnail, its own label, and a few words on one thing it has
@@ -232,14 +233,15 @@ deadline.
   - Titles and share cards are `pageMetadata` (`docs/lib/site.ts`), the root layout's
     `metadata` and each page's `generateMetadata` (`app/[[...mdxPath]]/page.tsx`): the
     homepage's title is "Clover IIIF – A viewer as distinctive as your collections" and the site's
-    description the hero's sentence and the field's label; a page
+    description the hero's sentence and what the field does; a page
     takes its `title` (front matter, else its first `h1`, Nextra's rule) and its
     `description`. Every page's card picture is a 1200 × 630 band of
     the White catalog's cover, cut by Northwestern's IIIF Image server and linked from
     there, never copied into `public/` (Mat, 2026-10-16: the record's attribution does
     not permit further distribution of its images).
-  - Under the navbar on every page, a line on the light gray surface (`--surface`) says
-    Clover is a project of Northwestern University Libraries, linking the Libraries'
+  - Under the navbar on every page, a small acknowledgment in the corner, on the page's
+    ground with no band of its own (Mat, 2026-10-20), says Clover is a project of
+    Northwestern University Libraries, linking the Libraries'
     site (`docs/components/Subheader.tsx`, styled in `docs/styles/layout.css`). It is
     aligned to the end of the navbar's content. It is not held (Mat, 2026-10-16):
     the root layout's `navbar` renders it after Nextra's `Navbar`, outside the navbar's

@@ -379,91 +379,93 @@ export default function ResourceField({
       }}
       onSubmit={submit}
     >
-      {/*
-       * The field's label, over it (Mat, 2026-10-20): what it does, in IIIF's words. Its
-       * `<label>`, so it names the field (WCAG 1.3.1, 3.3.2), and the name holds the words
-       * shown (2.5.3).
-       */}
-      <label className={styles.fieldLabel} htmlFor={inputId}>
-        View any IIIF Manifest or Collection
-      </label>
       <div className={styles.resourceRow}>
         <div className={styles.combo}>
-          <div className={styles.field}>
-            <Picture
-              className={styles.fieldMedia}
-              onBroken={brake}
-              // While the reader types, the field is theirs: an empty slot.
-              src={draft === null ? pictured(chosen?.thumbnail) : undefined}
-            />
-            <input
-              aria-activedescendant={
-                expanded && active ? optionId(active) : undefined
-              }
-              aria-autocomplete="list"
-              aria-controls={listId}
-              aria-describedby={error ? errorId : undefined}
-              aria-expanded={expanded}
-              aria-invalid={error ? true : undefined}
-              autoCapitalize="off"
-              autoComplete="off"
-              className={styles.fieldInput}
-              enterKeyHint="go"
-              id={inputId}
-              inputMode="url"
-              // The label's language, while the field shows a label in another.
-              lang={draft === null ? shown.lang : undefined}
-              onChange={(event) => {
-                setDraft(event.target.value);
-                setFilter(event.target.value);
-                setError(undefined);
-                setOpen(true);
-                setActive(null);
-              }}
-              onClick={(event) => {
-                // Untouched, a press selects the label, so a paste replaces it, and lists ours.
-                if (draft !== null) return;
-                event.currentTarget.select();
-                if (!expanded) show(null);
-              }}
-              onKeyDown={onKeyDown}
-              placeholder="https://"
-              ref={inputRef}
-              role="combobox"
-              spellCheck={false}
-              type="text"
-              value={draft ?? shown.text}
-            />
-            <button
-              aria-controls={listId}
-              aria-expanded={expanded}
-              aria-label="IIIF resources"
-              className={styles.fieldToggle}
-              // Focus stays in the field.
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => {
-                inputRef.current?.focus();
-                if (expanded) close();
-                else show(null);
-              }}
-              tabIndex={-1}
-              type="button"
-            >
-              <svg
-                aria-hidden="true"
-                className={styles.chevron}
-                fill="none"
-                height="16"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                width="16"
+          {/*
+           * The field's label, joined to its start, outside its edge (Mat, 2026-10-20). Its
+           * `<label>`, so it names the field (WCAG 1.3.1, 3.3.2), and the name holds the
+           * words shown (2.5.3).
+           */}
+          <div className={styles.fieldGroup}>
+            <label className={styles.fieldLabel} htmlFor={inputId}>
+              Select an item
+            </label>
+            <div className={styles.field}>
+              <Picture
+                className={styles.fieldMedia}
+                onBroken={brake}
+                // While the reader types, the field is theirs: an empty slot.
+                src={draft === null ? pictured(chosen?.thumbnail) : undefined}
+              />
+              <input
+                aria-activedescendant={
+                  expanded && active ? optionId(active) : undefined
+                }
+                aria-autocomplete="list"
+                aria-controls={listId}
+                aria-describedby={error ? errorId : undefined}
+                aria-expanded={expanded}
+                aria-invalid={error ? true : undefined}
+                autoCapitalize="off"
+                autoComplete="off"
+                className={styles.fieldInput}
+                enterKeyHint="go"
+                id={inputId}
+                inputMode="url"
+                // The label's language, while the field shows a label in another.
+                lang={draft === null ? shown.lang : undefined}
+                onChange={(event) => {
+                  setDraft(event.target.value);
+                  setFilter(event.target.value);
+                  setError(undefined);
+                  setOpen(true);
+                  setActive(null);
+                }}
+                onClick={(event) => {
+                  // Untouched, a press selects the label, so a paste replaces it, and lists ours.
+                  if (draft !== null) return;
+                  event.currentTarget.select();
+                  if (!expanded) show(null);
+                }}
+                onKeyDown={onKeyDown}
+                placeholder="https://"
+                ref={inputRef}
+                role="combobox"
+                spellCheck={false}
+                type="text"
+                value={draft ?? shown.text}
+              />
+              <button
+                aria-controls={listId}
+                aria-expanded={expanded}
+                aria-label="IIIF resources"
+                className={styles.fieldToggle}
+                // Focus stays in the field.
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  inputRef.current?.focus();
+                  if (expanded) close();
+                  else show(null);
+                }}
+                tabIndex={-1}
+                type="button"
               >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </button>
+                <svg
+                  aria-hidden="true"
+                  className={styles.chevron}
+                  fill="none"
+                  height="16"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  width="16"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           <ul

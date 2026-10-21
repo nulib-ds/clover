@@ -15,11 +15,11 @@ export const homeTitle = `${siteTitle} – A viewer as distinctive as your colle
 
 /*
  * The site's description, for the homepage and any page without one of its own: the
- * hero's sentence, then the label of the field under it, the page's own words, which
- * keep "Manifest" and "Collection" for search.
+ * hero's sentence, then what the field under it does, which keeps "Manifest" and
+ * "Collection" for search.
  */
 export const siteDescription =
-  "Design the user experience you imagine for your IIIF resources. View any IIIF Manifest or Collection.";
+  "Design the user experience that you imagine for your IIIF resources. View any IIIF Manifest or Collection.";
 
 /*
  * Every page's share card picture: the cover of the White Sewing Machine Company's 1896

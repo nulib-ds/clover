@@ -19,7 +19,7 @@ const Hero: React.FC = () => (
         <span className={styles.line}>as your collections.</span>
       </h1>
       <p className={styles.subtitle}>
-        Design the user experience you imagine for your IIIF resources.
+        Design the user experience that you imagine for your IIIF resources.
       </p>
     </div>
   </header>

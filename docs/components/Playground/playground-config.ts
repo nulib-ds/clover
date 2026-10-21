@@ -137,7 +137,7 @@ export const resources: PlaygroundResource[] = [
     key: "footage",
     name: "Footage",
     title: "Rudolf Hess at Nuremberg Sentencing, 30 September–1 October 1946",
-    description: "Film with its defendants followed",
+    description: "Film with spatial annotations through time",
     resource: "rudolf-hess-nuremberg/manifest.json",
     mock: true,
     thumbnail:
