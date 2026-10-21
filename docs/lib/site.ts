@@ -11,15 +11,15 @@ export const siteTitle = "Clover IIIF";
  * The homepage's title, and any page's without one of its own: the site's name and the
  * hero's headline (`docs/components/Home/Hero.tsx`).
  */
-export const homeTitle = `${siteTitle} – Imagine a viewer built by you`;
+export const homeTitle = `${siteTitle} – A viewer as distinctive as your collections`;
 
 /*
  * The site's description, for the homepage and any page without one of its own: the
- * hero's sentence, less "designed", so it fits the 160 or so characters a search result
- * shows. Keeps "Manifests" and "Collections" for search.
+ * hero's sentence, then the label of the field under it, the page's own words, which
+ * keep "Manifest" and "Collection" for search.
  */
 export const siteDescription =
-  "Share your distinctive collections through a lightweight, accessible, and modular viewer for IIIF Manifests, Collections, and the material they describe.";
+  "Design the user experience you imagine for your IIIF resources. View any IIIF Manifest or Collection.";
 
 /*
  * Every page's share card picture: the cover of the White Sewing Machine Company's 1896

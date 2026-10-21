@@ -153,6 +153,18 @@ const getPageTheme = (): PageTheme =>
   (current ??=
     typeof window === "undefined" ? SERVER_THEME : readStoredPageTheme());
 
+/*
+ * Choices only (`setPageTheme`), not previews: for what records a choice elsewhere, as
+ * the playground's share link does, which a preview must never reach.
+ */
+const choiceListeners = new Set<() => void>();
+export const onPageThemeChoice = (listener: () => void) => {
+  choiceListeners.add(listener);
+  return () => {
+    choiceListeners.delete(listener);
+  };
+};
+
 const subscribePageTheme = (listener: () => void) => {
   listeners.add(listener);
   return () => {
@@ -191,6 +203,7 @@ export const setPageTheme = (next: Partial<PageTheme>) => {
   storePageTheme(previewing ? current : next);
   previewing = false;
   listeners.forEach((listener) => listener());
+  choiceListeners.forEach((listener) => listener());
 };
 
 /** The current accent and font, re-rendering when either changes. */

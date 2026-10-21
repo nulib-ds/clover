@@ -271,16 +271,3 @@
   --clover-items-height: 11rem;
   margin-bottom: 2.618rem;
 }
-
-/*
- * Nextra 4 has no `raw` layout: its `full` layout holds a page to 90rem and pads its
- * article. The mock of a host page runs the window's width, as it did on Nextra 2's raw layout, so both
- * are undone around it, and only around it (as the homepage does, `Home.module.css`).
- */
-:global(div):has(> :global(article) > :global(main) > .page) {
-  max-width: none;
-}
-
-:global(article):has(> :global(main) > .page) {
-  padding: 0;
-}

@@ -91,8 +91,12 @@
     box-shadow: 0 1px 0 rgb(255 255 255 / 0.1);
   }
 
-  /* Nextra draws the navbar's edge as a border on its background (`nextra-border`). */
-  :global(html):has(.bar[data-stuck]) :global(.nextra-navbar-blur) {
+  /*
+   * Nextra draws the navbar's edge as a border on its background (`nextra-border`).
+   * `data-bar-stuck` on `<html>`, written with the bar's `data-stuck` (`useStuck`), not
+   * `html:has(…)`, which can make a browser restyle the whole document on any change.
+   */
+  :global(html[data-bar-stuck]) :global(.nextra-navbar-blur) {
     border-bottom-color: transparent;
     box-shadow: none;
   }
@@ -107,13 +111,6 @@
   :global(.dark) .bar[data-stuck]::before {
     box-shadow: 0 1px 0 #fff;
   }
-}
-
-/* A control's label, over it, in the page's own type. */
-.inlineLabel {
-  color: var(--gray-11);
-  font-size: var(--clover-text-s, 0.854rem);
-  line-height: 1.2;
 }
 
 /*
@@ -473,78 +470,66 @@
 /* ── Under the stage: a template, or a layout of one's own ──────────────── */
 
 /*
- * The item above in another template, or a layout of one's own from the parts below:
- * centered under the stage, `xl` under it, wrapping on a narrow page.
+ * The two ways to use Clover, under the stage, as cards in "Why Clover"'s manner (Mat,
+ * 2026-10-20): the page's ground with the stage's hairline and soft gray shadow, and the
+ * code editor's black; a label, a title with the hero's stroke under its key words, a
+ * sentence, and the way on. Side by side, one above the other on a phone.
  */
-.choices {
+/*
+ * The two ways to use Clover, centered on the page's ground (Mat, 2026-10-20), held well
+ * off the stage and the parts: a short headline, one sentence with the template named
+ * in it by its menu, and the two actions under it.
+ */
+.choice {
   align-items: center;
+  display: flex;
+  flex-direction: column;
+  margin: clamp(4.236rem, 9vw, 6.854rem) auto clamp(2.618rem, 6vw, 4.236rem);
+  max-width: 44rem;
+  text-align: center;
+}
+
+/* The size of the stories' titles ("Why Clover"'s cards) at the same widths. */
+.choiceTitle {
+  color: var(--gray-12);
+  font-size: clamp(1.618rem, 2.45vw, 2.618rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 var(--clover-space-m, 1rem);
+}
+
+/* Where it must break, it breaks after "template". */
+.nowrap {
+  white-space: nowrap;
+}
+
+.choiceLine {
+  color: var(--gray-11);
+  font-size: var(--text-lede);
+  line-height: 1.5;
+  margin: 0 0 var(--clover-space-xl, 2.618rem);
+  text-wrap: balance;
+}
+
+.choiceActions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--clover-space-s, 0.618rem) var(--clover-space-m, 1rem);
+  gap: var(--clover-space-m, 1rem);
   justify-content: center;
-  margin-top: var(--clover-space-xl, 2.618rem);
 }
 
-.or {
-  color: var(--gray-11);
-  font-size: var(--text-sm);
-}
+/* ── The template: a menu of the three, by name, in the sentence ──────────── */
 
-/* The call to action: the accent, filled, round-ended, the arrow nudging on hover. */
-.cta {
-  align-items: center;
-  background: var(--accent-9);
-  border-radius: 999px;
-  color: var(--accent-contrast);
-  display: inline-flex;
-  font-size: var(--text-sm);
-  gap: var(--clover-space-xs, 0.382rem);
-  height: 2.5rem;
-  padding: 0 var(--clover-space-l, 1.618rem);
-  text-decoration: none;
-  transition: background-color 120ms ease;
-}
-
-.cta:hover {
-  background: var(--accent-10);
-}
-
-.cta:focus-visible {
-  box-shadow: var(--focus-ring);
-  outline: none;
-}
-
-.cta span {
-  transition: translate 120ms ease;
-}
-
-.cta:hover span {
-  translate: 0.236rem 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cta span {
-    transition: none;
-  }
-}
-
-/* ── The template: a dropdown of the four, by name ──────────────────────── */
-
-/* Its label beside it, in the row with the call to action. */
 .layoutPicker {
-  align-items: center;
-  display: flex;
-  gap: var(--clover-space-xs, 0.382rem);
+  display: inline-block;
   position: relative;
 }
 
-.layoutPicker .inlineLabel {
-  font-size: var(--text-sm);
-}
-
 /*
- * The layout on the stage and a chevron that turns while open. No fill: a hairline edge,
- * at 3:1 as the field's, tinted with the accent under the pointer and while open.
+ * The template on the stage, in the sentence's own type, and a chevron that turns while
+ * open. No fill: a hairline edge, at 3:1 as the field's, tinted with the accent under the
+ * pointer and while open.
  */
 .layoutTrigger {
   align-items: center;
@@ -555,13 +540,11 @@
   cursor: pointer;
   display: inline-flex;
   font: inherit;
-  font-size: var(--text-sm);
-  gap: var(--clover-space-xs, 0.382rem);
-  height: 2.5rem;
-  justify-content: space-between;
-  /* Wide enough for the longest name, so it holds still as the layout changes. */
-  min-width: 8.5rem;
-  padding: 0 var(--clover-space-s, 0.618rem) 0 var(--clover-space-m, 1rem);
+  gap: 0.2em;
+  letter-spacing: inherit;
+  /* Within the sentence's line, edge and all, so the lines keep their spacing. */
+  line-height: 1.3;
+  padding: 0 0.3em 0 0.5em;
   transition: background-color 120ms ease;
 }
 
@@ -575,17 +558,34 @@
   outline: none;
 }
 
+/* Every name in one cell, only the current one shown: as wide as the longest. */
+.layoutNames {
+  display: inline-grid;
+  justify-items: start;
+}
+
+.layoutNames > span {
+  grid-area: 1 / 1;
+  visibility: hidden;
+}
+
+.layoutNames > [data-current] {
+  visibility: visible;
+}
+
 .chevron {
   color: var(--gray-11);
   flex: none;
+  height: 0.8em;
   transition: rotate 160ms ease;
+  width: 0.8em;
 }
 
 .layoutTrigger[aria-expanded="true"] .chevron {
   rotate: 180deg;
 }
 
-/* The four, listed under the button and flush with its end. */
+/* The three, listed under the button, from its start, in the page's body type. */
 .layoutMenu {
   background: var(--color-background);
   border-radius: var(--radius-4);
@@ -594,16 +594,21 @@
     0 12px 40px rgb(0 0 0 / 0.18);
   display: flex;
   flex-direction: column;
+  font-size: 1rem;
+  font-weight: var(--weight-regular);
   gap: var(--clover-space-2xs, 0.236rem);
+  left: 0;
+  letter-spacing: normal;
+  line-height: 1.5;
   min-width: 100%;
   padding: var(--clover-space-xs, 0.382rem);
   position: absolute;
-  right: 0;
+  text-align: start;
   top: calc(100% + var(--clover-space-xs, 0.382rem));
   z-index: 30;
 }
 
-/* A row per layout: the current one filled with the accent. */
+/* A row per template: the current one filled with the accent. */
 .layoutOption {
   border-radius: var(--radius-2);
   color: var(--gray-12);

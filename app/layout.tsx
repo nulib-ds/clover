@@ -20,6 +20,7 @@ import Link from "next/link";
 import { Banner, Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
 import { Footer, Layout, Navbar } from "nextra-theme-docs";
+import { SiteFooter } from "docs/components/SiteFooter";
 import React from "react";
 
 import Logo from "docs/components/Logo";
@@ -94,9 +95,8 @@ export default async function RootLayout({
             </>
           }
           footer={
-            <Footer>
-              A suite of accessible UI components for IIIF content. Created at
-              Northwestern University Libraries.
+            <Footer className="site-footer">
+              <SiteFooter />
             </Footer>
           }
           pageMap={await getPageMap()}

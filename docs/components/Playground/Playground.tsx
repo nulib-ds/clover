@@ -16,11 +16,17 @@ import {
 } from "docs/components/Playground/playground-config";
 import ResourceField, { OWN } from "docs/components/Playground/ResourceField";
 import { loadMapWorker, useMapWorker } from "docs/lib/map-worker";
-import { normalizeHex, setPageTheme, usePageTheme } from "docs/lib/page-theme";
+import {
+  normalizeHex,
+  onPageThemeChoice,
+  readStoredPageTheme,
+  setPageTheme,
+} from "docs/lib/page-theme";
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import styles from "docs/components/Playground/Playground.module.css";
+import home from "docs/components/Home/Home.module.css";
 import { useRouter } from "docs/lib/router";
 
 /**
@@ -92,10 +98,11 @@ function useStuck(
     const read = () => {
       frame = 0;
       const { bottom } = node.getBoundingClientRect();
-      node.toggleAttribute(
-        "data-stuck",
-        bottom > line + 1 && under.getBoundingClientRect().top < bottom,
-      );
+      const stuck =
+        bottom > line + 1 && under.getBoundingClientRect().top < bottom;
+      if (stuck === node.hasAttribute("data-stuck")) return;
+      node.toggleAttribute("data-stuck", stuck);
+      document.documentElement.toggleAttribute("data-bar-stuck", stuck);
     };
     const root = document.documentElement;
     const measure = () => {
@@ -116,6 +123,7 @@ function useStuck(
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", measure);
       root.style.scrollPaddingTop = "";
+      root.removeAttribute("data-bar-stuck");
     };
   }, [bar, stage]);
 }
@@ -159,10 +167,12 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
     const [picked, setPicked] = useState<string | null>(null);
     const [own, setOwn] = useState("");
     /*
-     * The page's accent, set in the homepage's "Why Clover" (`BrandPicker.tsx`). The playground carries it in
-     * the share link; a link that names one sets it.
+     * The page's accent, chosen in the homepage's "Why Clover" (`BrandPicker.tsx`), rides
+     * in the share link, and a link that names one sets it. The link reads the chosen
+     * accent, as stored, when it is written, and is rewritten when a choice is made, not
+     * re-rendering the playground: a preview of a color, shown as "Why Clover" passes,
+     * never reaches the link, and never redraws the stage.
      */
-    const { accent } = usePageTheme();
 
     const spec = templateSpecs[active];
     const current = picked ?? spec.defaultResource;
@@ -239,31 +249,31 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
         const query: Record<string, string> = {};
         if (t !== "default") query.t = t;
         if (content) query["iiif-content"] = content;
+        const { accent } = readStoredPageTheme();
         if (accent) query.accent = accent;
         router.replace({ query }, undefined, { shallow: true, scroll: false });
       },
-      [accent, router],
+      [router],
     );
 
     /*
-     * Keep the link's accent in step with the header's. Debounced, because the color
-     * wheel reports every frame of a drag and each would otherwise be a history entry.
+     * Keep the link's accent in step with the reader's choice. Debounced, because a choice
+     * can come quickly after another, and each would otherwise be a history entry.
      */
-    const accentSynced = useRef(false);
+    const syncLatest = useRef(() => {});
+    syncLatest.current = () => syncUrl(active, picked ? resource : null);
     useEffect(() => {
       if (!router.isReady) return;
-      if (!accentSynced.current) {
-        accentSynced.current = true;
-        return;
-      }
-      const timer = setTimeout(
-        () => syncUrl(active, picked ? resource : null),
-        300,
-      );
-      return () => clearTimeout(timer);
-      // Only the accent changing should rewrite the link here.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [accent, router.isReady]);
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const off = onPageThemeChoice(() => {
+        clearTimeout(timer);
+        timer = setTimeout(() => syncLatest.current(), 300);
+      });
+      return () => {
+        off();
+        clearTimeout(timer);
+      };
+    }, [router.isReady]);
 
     const selectTemplate = (key: TemplateKey) => {
       setActive(key);
@@ -292,11 +302,11 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
      * closes them, and so does a press outside or focus moving away.
      */
     const [layoutOpen, setLayoutOpen] = useState(false);
-    const layoutRef = useRef<HTMLDivElement>(null);
+    const layoutRef = useRef<HTMLSpanElement>(null);
     const barRef = useRef<HTMLDivElement>(null);
     const stageRef = useRef<HTMLDivElement>(null);
     const layoutTriggerRef = useRef<HTMLButtonElement>(null);
-    const layoutMenuRef = useRef<HTMLDivElement>(null);
+    const layoutMenuRef = useRef<HTMLSpanElement>(null);
     /* Whether the menu's last input was a press rather than a key. */
     const pressed = useRef(false);
     const closeLayout = useCallback((focusTrigger = true) => {
@@ -343,90 +353,128 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
         </div>
 
         {/*
-         * Between the playground and the parts: the item above in another template, or a
-         * layout of one's own from the parts below.
+         * Between the playground and the parts, the two ways to use Clover, centered
+         * (Mat, 2026-10-20): a short headline, then one sentence with both, a template
+         * named in it by the stage's own menu, or a layout of one's own from the parts;
+         * under it, where to read about each. The headline's last words marked with the
+         * hero's stroke, drawn in as they come into view.
          */}
-        <div className={styles.choices}>
-          <div
-            className={styles.layoutPicker}
-            onBlur={(e) => {
-              if (layoutOpen && !e.currentTarget.contains(e.relatedTarget))
-                closeLayout(false);
-            }}
-            ref={layoutRef}
-          >
-            <span className={styles.inlineLabel} id="pg-layout">
-              Template
+        <div className={styles.choice}>
+          <h2 className={styles.choiceTitle}>
+            Use a template{" "}
+            <span className={styles.nowrap}>
+              or build{" "}
+              <span className={`${home.mark} ${home.markOnScroll}`}>
+                your own.
+              </span>
             </span>
-            <button
-              aria-controls="pg-layouts"
-              aria-expanded={layoutOpen}
-              aria-labelledby="pg-layout pg-layout-current"
-              className={styles.layoutTrigger}
-              onClick={() => (layoutOpen ? closeLayout() : setLayoutOpen(true))}
-              ref={layoutTriggerRef}
-              type="button"
+          </h2>
+          <p className={styles.choiceLine}>
+            Start with a{" "}
+            <span
+              className={styles.layoutPicker}
+              onBlur={(e) => {
+                if (layoutOpen && !e.currentTarget.contains(e.relatedTarget))
+                  closeLayout(false);
+              }}
+              ref={layoutRef}
             >
-              <span id="pg-layout-current">{spec.name}</span>
-              <svg
-                aria-hidden="true"
-                className={styles.chevron}
-                fill="none"
-                height="16"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                width="16"
+              <button
+                aria-controls="pg-layouts"
+                aria-expanded={layoutOpen}
+                aria-labelledby="pg-layout-current pg-layout"
+                className={styles.layoutTrigger}
+                onClick={() =>
+                  layoutOpen ? closeLayout() : setLayoutOpen(true)
+                }
+                ref={layoutTriggerRef}
+                type="button"
               >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </button>
+                {/* Every name in one place, the others hidden, so the button is as
+                    wide as the longest and the sentence holds still as it changes. */}
+                <span className={styles.layoutNames}>
+                  {templateOrder.map((key) => (
+                    <span
+                      aria-hidden={key === active ? undefined : true}
+                      data-current={key === active || undefined}
+                      id={key === active ? "pg-layout-current" : undefined}
+                      key={key}
+                    >
+                      {templateSpecs[key].name}
+                    </span>
+                  ))}
+                </span>
+                <svg
+                  aria-hidden="true"
+                  className={styles.chevron}
+                  fill="none"
+                  height="16"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  width="16"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
 
-            {layoutOpen && (
-              <div
-                aria-labelledby="pg-layout"
-                className={styles.layoutMenu}
-                id="pg-layouts"
-                onKeyDown={(e) => {
-                  pressed.current = false;
-                  if (e.key === "Escape" || e.key === "Enter") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    closeLayout();
-                  }
-                }}
-                onPointerDown={() => (pressed.current = true)}
-                ref={layoutMenuRef}
-                role="radiogroup"
-              >
-                {templateOrder.map((key) => (
-                  <label
-                    className={styles.layoutOption}
-                    data-selected={key === active}
-                    key={key}
-                  >
-                    <input
-                      checked={key === active}
-                      className={styles.choiceInput}
-                      name="pg-layout"
-                      onChange={() => selectTemplate(key)}
-                      // A press chooses and closes; an arrow key only chooses.
-                      onClick={() => pressed.current && closeLayout()}
-                      type="radio"
-                      value={key}
-                    />
-                    {templateSpecs[key].name}
-                  </label>
-                ))}
-              </div>
-            )}
+              {layoutOpen && (
+                <span
+                  aria-labelledby="pg-layout"
+                  className={styles.layoutMenu}
+                  id="pg-layouts"
+                  onKeyDown={(e) => {
+                    pressed.current = false;
+                    if (e.key === "Escape" || e.key === "Enter") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      closeLayout();
+                    }
+                  }}
+                  onPointerDown={() => (pressed.current = true)}
+                  ref={layoutMenuRef}
+                  role="radiogroup"
+                >
+                  {templateOrder.map((key) => (
+                    <label
+                      className={styles.layoutOption}
+                      data-selected={key === active}
+                      key={key}
+                    >
+                      <input
+                        checked={key === active}
+                        className={styles.choiceInput}
+                        name="pg-layout"
+                        onChange={() => selectTemplate(key)}
+                        // A press chooses and closes; an arrow key only chooses.
+                        onClick={() => pressed.current && closeLayout()}
+                        type="radio"
+                        value={key}
+                      />
+                      {templateSpecs[key].name}
+                    </label>
+                  ))}
+                </span>
+              )}
+            </span>{" "}
+            <span id="pg-layout">template</span> or build your own layout.
+          </p>
+          <div className={styles.choiceActions}>
+            <Link href="/docs/viewer/templates" className="cta-outline">
+              Templates
+              <span className="cta-arrow" aria-hidden="true">
+                →
+              </span>
+            </Link>
+            <Link href="/docs/composing" className="cta-solid">
+              Build a layout
+              <span className="cta-arrow" aria-hidden="true">
+                →
+              </span>
+            </Link>
           </div>
-          <span className={styles.or}>or</span>
-          <Link href="/docs/composing" className={styles.cta}>
-            Build a layout <span aria-hidden="true">→</span>
-          </Link>
         </div>
       </section>
     );

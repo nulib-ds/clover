@@ -1,0 +1,54 @@
+/*
+ * The homepage's section intros, "Why Clover.", "And more." and "Install." (Mat,
+ * 2026-10-20: styled alike, concise, each with a clear way out): a hairline over it, a
+ * title, a sentence, and its call to action at the end of the row, which wraps under
+ * them where the row is narrow. Spaces on the golden scale.
+ */
+.intro {
+  align-items: flex-end;
+  border-top: 1px solid var(--gray-6);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.618rem;
+  justify-content: space-between;
+  margin: clamp(2.618rem, 6vw, 4.236rem) 0 2.618rem;
+  padding-top: 2.618rem;
+}
+
+.text {
+  display: grid;
+  gap: 0.382rem;
+  min-width: 0;
+}
+
+.title {
+  font-size: clamp(1.618rem, 3vw, 2.618rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.note {
+  color: var(--gray-11);
+  font-size: var(--text-lede);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 44rem;
+}
+
+/* A link in the note, underlined: Nextra's reset leaves it looking like the text round it. */
+.note a {
+  color: var(--accent-11);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.note code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+.cta {
+  flex: none;
+}

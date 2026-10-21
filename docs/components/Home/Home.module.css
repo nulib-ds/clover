@@ -6,21 +6,7 @@
    * page sideways. `clip`, not `hidden`, so nothing inside stops sticking.
    */
   overflow-x: clip;
-  padding-bottom: 6rem;
-}
-
-/*
- * Nextra 4 has no `raw` layout. Its `full` layout still holds a page to the docs' 90rem
- * (`--nextra-content-width`) and pads its article, which boxed the homepage in. The
- * homepage spans the window, as it did on Nextra 2's raw layout: both are undone around
- * it, and only around it.
- */
-:global(div):has(> :global(article) > :global(main) > .page) {
-  max-width: none;
-}
-
-:global(article):has(> :global(main) > .page) {
-  padding: 0;
+  padding-bottom: 2.618rem;
 }
 
 .shell {
@@ -30,27 +16,6 @@
 @media (max-width: 640px) {
   .shell {
     padding: 0 1rem;
-  }
-}
-
-/*
- * On the homepage the navbar's content, and the line under it, line up with the sections'
- * (`Parts.module.css`'s 1300px, inside the shell's padding) at every width, rather than
- * with the docs' wider layout and its sidebar.
- */
-:global(html):has(.page)
-  :global(:is(.nextra-navbar > nav, .site-subheader > p)) {
-  max-width: calc(1300px + 4rem);
-  padding-left: max(env(safe-area-inset-left), 2rem);
-  padding-right: max(env(safe-area-inset-right), 2rem);
-}
-
-@media (max-width: 640px) {
-  :global(html):has(.page)
-    :global(:is(.nextra-navbar > nav, .site-subheader > p)) {
-    max-width: calc(1300px + 2rem);
-    padding-left: max(env(safe-area-inset-left), 1rem);
-    padding-right: max(env(safe-area-inset-right), 1rem);
   }
 }
 
@@ -72,19 +37,23 @@
 }
 
 .headline {
-  /* Sized to break over two lines at the measure below. Smaller than it was as a
-   * three-line block — the headline reads as one statement rather than a stack. */
-  font-size: clamp(1.875rem, 4.4vw, 3rem);
+  /* Two lines, each a `.line`, wrapping within itself, balanced, on a narrow screen.
+   * Large, and wide enough for each line. */
+  font-size: clamp(2.25rem, 5vw, 4.236rem);
   font-weight: var(--weight-bold);
   letter-spacing: -0.032em;
   line-height: 1.1;
   margin: 0 auto 1rem;
-  max-width: 64rem;
+  max-width: 76rem;
   text-wrap: balance;
 }
 
+.line {
+  display: block;
+}
+
 /*
- * "built by you", marked as by hand: a marker stroke under the words, drawn in once
+ * "distinctive", marked as by hand: a marker stroke under the words, drawn in once
  * from the left. The stroke is an SVG shape used as a mask over the accent, so it takes
  * the site's accent whatever it is set to. It sits behind the letters, at their baseline,
  * so they read over it: the words are a layer of their own (`z-index: 0`) with the
@@ -98,7 +67,7 @@
 }
 
 .mark::after,
-.story[data-tone="code"] .figureValue::after {
+.story .figureValue::after {
   /* Faint where the pen comes down, the full accent where it lifts. */
   background: linear-gradient(
     to right,
@@ -135,6 +104,26 @@
   }
 }
 
+/*
+ * The marker drawn in as it scrolls into view rather than as the page loads (the
+ * playground's cards, `Playground.tsx`), by scale from its left end, which the compositor
+ * runs. Where scroll timelines are missing, it draws as the hero's does.
+ */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .markOnScroll {
+      view-timeline-name: --mark;
+    }
+
+    .markOnScroll::after {
+      animation: figure-draw linear both;
+      animation-range: entry 70% cover 40%;
+      animation-timeline: --mark;
+      transform-origin: left center;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mark::after {
     animation: none;
@@ -147,70 +136,15 @@
  */
 .subtitle {
   color: var(--gray-11);
-  font-size: 1.125rem;
+  font-size: var(--text-lede);
   line-height: 1.5;
   /* No bottom margin: the hero's own bottom padding sets the gap to the playground
    * now that no buttons sit between them. */
   margin: 0 auto;
-  /* Two lines, balanced, with room to spare for a browser that sets the type wider. */
-  max-width: 44rem;
+  /* One line where it fits, with room to spare for a browser that sets the type wider;
+   * balanced where it wraps. */
+  max-width: 52rem;
   text-wrap: balance;
-}
-
-/* ── Section heading ──────────────────────────────────────────────────────── */
-
-/*
- * A clear break from what is above, and nearer what it heads, on the golden scale (Mat,
- * 2026-10-20: "improve the white space"): 6.854rem over it (the step past `2xl`), `2xl`
- * on a phone, and `xl` under, more than the stories' gap between one another, so the
- * heading leads all of them.
- */
-.sectionHead {
-  align-items: baseline;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem 1.618rem;
-  justify-content: space-between;
-  margin: clamp(4.236rem, 9vw, 6.854rem) 0 2.618rem;
-}
-
-/* "Why Clover" and "Install". Uniform with the playground's "Try it" — see the
- * shared tokens in tokens.css. */
-.sectionTitle {
-  font-size: var(--section-heading-size);
-  font-weight: var(--section-heading-weight);
-  line-height: 1.2;
-  margin: 0;
-}
-
-/* After the parts' grid, which runs on past its last story, "Install" comes up close. */
-:global(section) + .contained > .sectionHead:first-child {
-  margin-top: 1.618rem;
-}
-
-/* `xs` under the title, so the two read as one heading. */
-.sectionNote {
-  color: var(--gray-11);
-  font-size: var(--text-sm);
-  margin: 0.382rem 0 0;
-}
-
-/* A link in the note, underlined: Nextra's reset leaves it looking like the text round it. */
-.sectionNote a {
-  color: var(--accent-11);
-  text-decoration: underline;
-}
-
-.sectionLink {
-  color: var(--accent-11);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-regular);
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.sectionLink:hover {
-  text-decoration: underline;
 }
 
 /* ── Why Clover ───────────────────────────────────────────────────────────── */
@@ -236,6 +170,11 @@
   container-type: inline-size;
   display: grid;
   gap: clamp(1.618rem, 6vw, 4.236rem);
+}
+
+/* The words' column never grows past its share, so a long line of code wraps in it. */
+.story > div {
+  min-width: 0;
 }
 
 .story {
@@ -366,8 +305,15 @@
   white-space: pre-wrap;
 }
 
+/* A declaration that wraps hangs under its property, as an editor would show it. */
 .codeRun {
-  white-space: nowrap;
+  box-sizing: border-box;
+  display: inline-block;
+  max-width: calc(100% - 2ch);
+  overflow-wrap: anywhere;
+  padding-inline-start: 2ch;
+  text-indent: -2ch;
+  vertical-align: top;
 }
 
 .codeValue {
@@ -456,22 +402,33 @@
     var(--focus-ring);
 }
 
-/* A value the brand changed, lit a moment. */
+/* A value the brand changed, lit a moment: an overlay fading by opacity alone. */
+.brandFresh {
+  isolation: isolate;
+  position: relative;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .brandFresh {
+  .brandFresh::before {
     animation: brand-fresh 1600ms ease both;
+    background-color: color-mix(in srgb, var(--accent-9) 36%, transparent);
     border-radius: 2px;
+    content: "";
+    inset: 0 -2px;
+    pointer-events: none;
+    position: absolute;
+    z-index: -1;
   }
 }
 
 @keyframes brand-fresh {
   0%,
   40% {
-    background-color: color-mix(in srgb, var(--accent-9) 36%, transparent);
+    opacity: 1;
   }
 
   to {
-    background-color: transparent;
+    opacity: 0;
   }
 }
 
@@ -518,42 +475,52 @@
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
   font-weight: var(--weight-bold);
-  letter-spacing: -0.05em;
+  letter-spacing: -0.06em;
   line-height: 0.95;
 }
 
-/* The accent itself: large, so 3:1 is enough, and it is 5.0:1 on white, 3.8:1 dark. */
+/* On the page's ground, the page's text; the accent is the stroke under it. */
 .story[data-tone="page"] .figureValue {
-  color: var(--accent-9);
+  color: var(--gray-12);
 }
 
 /*
- * On the black, the editor's white, over the hero's marker (`.mark::after`), the stroke
+ * In the text's own color (the editor's white on black, the page's text on its ground;
+ * Mat, 2026-10-20), over the hero's marker in the accent (`.mark::after`), the stroke
  * as wide as the figure and at its foot. The figure is a layer of its own, the stroke at
  * its bottom, so the figure reads over it.
  */
 .story[data-tone="code"] .figureValue {
   color: var(--code-text);
+}
+
+.story .figureValue {
   isolation: isolate;
   justify-self: start;
   position: relative;
   z-index: 0;
 }
 
-.story[data-tone="code"] .figureValue::after {
+.story .figureValue::after {
   bottom: 0.06em;
   height: 0.26em;
 }
 
 /* Room under the figure for the stroke, before its caption. */
-.story[data-tone="code"] .figure {
+.story .figure {
   gap: 0.618rem;
 }
 
-/* A figure's unit (`kB`) at half its size, on its baseline, so the number leads. */
+/*
+ * A figure's unit at half its size, on its baseline, close to the number, so the number
+ * leads; shown lowercase (Mat, 2026-10-20), its text still "kB", a kilobyte, as a screen
+ * reader and a copy read it.
+ */
 .figureUnit {
   font-size: 0.5em;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
+  margin-inline-start: -0.12em;
+  text-transform: lowercase;
 }
 
 /* Where a story has several figures, each is a little smaller. */
@@ -592,15 +559,30 @@
     }
 
     /* The marker under a figure on black draws in as the figure comes into view. */
-    .story[data-tone="code"] .figureValue {
+    .story .figureValue {
       view-timeline-name: --figure;
     }
 
-    .story[data-tone="code"] .figureValue::after {
-      animation: mark-draw linear both;
+    /*
+     * Drawn by scale, from its left end, not by clip-path: a scale runs on the compositor
+     * as the page scrolls, where a clip would be redrawn on the main thread every frame.
+     */
+    .story .figureValue::after {
+      animation: figure-draw linear both;
       animation-range: entry 40% cover 45%;
       animation-timeline: --figure;
+      transform-origin: left center;
     }
+  }
+}
+
+@keyframes figure-draw {
+  from {
+    scale: 0 1;
+  }
+
+  to {
+    scale: 1 1;
   }
 }
 
@@ -618,23 +600,18 @@
 
 /* ── Install panel ────────────────────────────────────────────────────────── */
 
+/* The command, as the code editor shows code: Prism's Material colors on black. */
 .install {
-  align-items: center;
-  background: var(--surface);
+  background: var(--code-background);
   border-radius: var(--radius-4);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: space-between;
-  padding: 1.25rem 1.5rem;
-}
-
-.installCode {
-  background: var(--surface-raised);
-  border-radius: var(--radius-3);
-  color: var(--gray-12);
+  color: var(--code-text);
   font-family: var(--font-mono);
   font-size: var(--text-sm);
+  margin: 0;
   overflow-x: auto;
-  padding: 0.625rem 0.875rem;
+  padding: 1rem 1.618rem;
+}
+
+:global(.dark) .install {
+  box-shadow: inset 0 0 0 1px var(--gray-6);
 }

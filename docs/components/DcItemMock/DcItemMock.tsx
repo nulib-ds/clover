@@ -1,5 +1,6 @@
 "use client";
 
+import { FULL_WIDTH } from "docs/lib/full-width";
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import styles from "docs/components/DcItemMock/DcItemMock.module.css";
@@ -143,6 +144,7 @@ const DcItemMock: React.FC = () => {
 
   return (
     <div className={styles.page}>
+      <style>{FULL_WIDTH}</style>
       <p className={styles.notice}>
         Mock Digital Collections item page, for testing Clover 4
       </p>

@@ -1,5 +1,6 @@
 "use client";
 
+import { FULL_WIDTH } from "docs/lib/full-width";
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { resourceByKey } from "docs/components/Playground/playground-config";
@@ -45,6 +46,7 @@ const ViewerScreen: React.FC = () => {
 
   return (
     <div className={styles.screen}>
+      <style>{FULL_WIDTH}</style>
       {resource && <Viewer key={resource} iiifContent={resource} />}
     </div>
   );

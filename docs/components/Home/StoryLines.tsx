@@ -4,62 +4,50 @@ import styles from "docs/components/Home/Parts.module.css";
 /** Where the example viewer is held beside the stories (`Parts.module.css`, `.grid`). */
 const HELD = "(min-width: 64.0625rem)";
 
-/** A story's point that is the example viewer as a whole, every part of it lit. */
+/** A story's point that is the example viewer as a whole: drawn to, not lit. */
 const WHOLE = "viewer";
+
+/**
+ * How far past an edge the page must scroll back before what it started is undone, so
+ * nothing switches back and forth while the reader lingers at an edge.
+ */
+const BAND = 48;
 
 /**
  * "Why Clover", drawn to the example viewer. The story at the middle of the window (the
  * last whose top has passed it), an element with `data-point` (`Homepage.tsx`), has one
- * line drawn from its edge to the part it is about in the viewer (`data-part`), or to
- * the viewer itself (`viewer`), and `onLight` hands the part, or every part, to the
- * viewer, which outlines it as pointing at a tile does (the whole viewer is only drawn to,
- * its parts lit as its code is pointed at). A story with `data-turn` turns
- * the viewer over (`onTurn`) until the next one arrives, and one with `data-recipe` has it
- * read that Cookbook recipe (`onRecipe`) while it holds; the recipe is handed over as the
- * reader first reaches the stories (`onArrive`), so it has loaded by then. Only where the viewer is held
- * beside the stories; elsewhere nothing is drawn, lit or turned.
+ * line drawn from its edge to the part it is about in the viewer (`data-part`), which is
+ * lit, or to the viewer itself (`viewer`), only drawn to. The tiles crossing the middle
+ * of the window are lit too, with their parts in the viewer. Lit is `data-lit`, written
+ * here on the page itself, never through React's state, so scrolling redraws nothing.
+ *
+ * A story with `data-turn` turns the viewer to its accessibility tree (`onTurn`) and one
+ * with `data-recipe` to its recipe (`onRecipe`), each from as it comes into view (two
+ * thirds down the window) until the next story reaches the middle. One with
+ * `data-compose` or `data-brand` makes its change (`onCompose`, `onBrandStory`) once a
+ * third of it is past the middle. Each is undone only `BAND` past where it began. Only
+ * where the viewer is held beside the stories; elsewhere nothing is drawn, lit or turned.
  *
  * The line is decoration, hidden from assistive technology: what each story is about is
  * in its words. It is drawn in as a story arrives, only where the reader allows motion,
  * and follows the viewer and the story as the page scrolls.
  */
-export function StoryLines({
+export const StoryLines = React.memo(function StoryLines({
   viewer,
-  onLight,
   onTurn,
   onRecipe,
-  onArrive,
-  onPassing,
   onCompose,
   onBrandStory,
 }: {
   viewer: React.RefObject<HTMLElement | null>;
-  onLight: (parts: string[]) => void;
   onTurn: (turned: boolean) => void;
   onRecipe: (reading: boolean) => void;
-  onArrive: (recipe: { url: string; name: string } | null) => void;
-  /** The parts whose tiles (`data-tile`) are at the middle of the window. */
-  onPassing: (parts: string[]) => void;
-  /** Whether a story with `data-compose` is well past the middle: its code's own change. */
   onCompose: (composing: boolean) => void;
-  /** The same for a story with `data-brand`. */
   onBrandStory: (branding: boolean) => void;
 }) {
   const svg = useRef<SVGSVGElement>(null);
-  const light = useRef(onLight);
-  light.current = onLight;
-  const turn = useRef(onTurn);
-  turn.current = onTurn;
-  const read = useRef(onRecipe);
-  read.current = onRecipe;
-  const arrive = useRef(onArrive);
-  arrive.current = onArrive;
-  const pass = useRef(onPassing);
-  pass.current = onPassing;
-  const compose = useRef(onCompose);
-  compose.current = onCompose;
-  const brandStory = useRef(onBrandStory);
-  brandStory.current = onBrandStory;
+  const callbacks = useRef({ onTurn, onRecipe, onCompose, onBrandStory });
+  callbacks.current = { onTurn, onRecipe, onCompose, onBrandStory };
 
   useEffect(() => {
     const overlay = svg.current;
@@ -68,182 +56,192 @@ export function StoryLines({
     if (!overlay || !line || !end) return;
     const held = window.matchMedia(HELD);
     let current: HTMLElement | null = null;
-    let wasTurned = false;
-    let wasReading = false;
-    let wasComposing = false;
-    let wasBranding = false;
-    let arrived = false;
-    let crossed = "";
+    const was = {
+      turned: false,
+      reading: false,
+      composing: false,
+      branding: false,
+    };
+    let litKey = "";
     let frame = 0;
+    // The viewer's padding, read once (a style read every frame costs a recalculation).
+    let pad = -1;
 
     const hide = () => {
       line.style.visibility = "hidden";
       end.style.visibility = "hidden";
     };
 
+    // Lights exactly these parts in the viewer, and these tiles, and nothing else.
+    const light = (parts: Set<string>, tiles: Set<string>) => {
+      const key = `${[...parts].sort().join(" ")}|${[...tiles].sort().join(" ")}`;
+      if (key === litKey) return;
+      litKey = key;
+      viewer.current
+        ?.querySelectorAll<HTMLElement>("[data-part]")
+        .forEach((part) =>
+          part.toggleAttribute("data-lit", parts.has(part.dataset.part ?? "")),
+        );
+      document
+        .querySelectorAll<HTMLElement>("[data-tile]")
+        .forEach((tile) =>
+          tile.toggleAttribute("data-lit", tiles.has(tile.dataset.tile ?? "")),
+        );
+    };
+
+    const set = (name: keyof typeof was, on: boolean) => {
+      if (was[name] === on) return;
+      was[name] = on;
+      const { onTurn, onRecipe, onCompose, onBrandStory } = callbacks.current;
+      ({
+        turned: onTurn,
+        reading: onRecipe,
+        composing: onCompose,
+        branding: onBrandStory,
+      })[name](on);
+    };
+
+    /*
+     * From as `element` comes into view until the story after it reaches the middle (or,
+     * the last, until it has passed the middle), held `BAND` longer once begun.
+     */
+    const inView = (
+      stories: HTMLElement[],
+      element: HTMLElement | undefined,
+      on: boolean,
+    ) => {
+      if (!element) return false;
+      const band = on ? BAND : 0;
+      const middle = innerHeight / 2;
+      const next = stories[stories.indexOf(element) + 1];
+      const box = element.getBoundingClientRect();
+      return (
+        box.top <= innerHeight * (2 / 3) + band &&
+        (next
+          ? next.getBoundingClientRect().top > middle - band
+          : box.bottom >= middle - band)
+      );
+    };
+
     const draw = () => {
       frame = 0;
-      const middle = window.innerHeight / 2;
+      const middle = innerHeight / 2;
+      if (!held.matches) {
+        light(new Set(), new Set());
+        (Object.keys(was) as (keyof typeof was)[]).forEach((name) =>
+          set(name, false),
+        );
+        current = null;
+        return hide();
+      }
+      const stories = [
+        ...document.querySelectorAll<HTMLElement>("[data-point]"),
+      ];
+      const tops = stories.map((element) => element.getBoundingClientRect());
+
       /*
        * A story holds from when its top passes the middle until the next one's does, so
-       * the gaps between them keep the last; after the last story has passed, none.
+       * the gaps between them keep the last; after the last story has passed, none. The
+       * one held keeps its hold `BAND` either side of those edges.
        */
-      const stories = held.matches
-        ? [...document.querySelectorAll<HTMLElement>("[data-point]")]
-        : [];
-      const passed = stories.filter(
-        (element) => element.getBoundingClientRect().top <= middle,
-      );
-      const last = passed.at(-1) ?? null;
-      const story =
-        last &&
-        (last !== stories.at(-1) ||
-          last.getBoundingClientRect().bottom >= middle)
-          ? last
-          : null;
-      /*
-       * The tiles crossing the middle of the window light themselves and their parts, as
-       * pointing at them does: the parts scroll past the viewer and name what they are in
-       * it. Only where the viewer is held beside them.
-       */
-      const crossing = held.matches
-        ? [...document.querySelectorAll<HTMLElement>("[data-tile]")]
-            .filter((tile) => {
-              const { top, bottom } = tile.getBoundingClientRect();
-              return top <= middle && bottom >= middle;
-            })
-            .map((tile) => tile.dataset.tile ?? "")
-        : [];
-      if (crossing.join(" ") !== crossed) {
-        crossed = crossing.join(" ");
-        pass.current(crossing);
+      const passed = tops.filter((box) => box.top <= middle).length;
+      let story: HTMLElement | null = passed ? stories[passed - 1] : null;
+      if (story === stories.at(-1) && tops[passed - 1].bottom < middle)
+        story = null;
+      if (current && story !== current) {
+        const at = stories.indexOf(current);
+        const box = tops[at];
+        const next = tops[at + 1];
+        if (
+          box &&
+          box.top <= middle + BAND &&
+          (next ? next.top > middle - BAND : box.bottom >= middle - BAND)
+        )
+          story = current;
       }
 
       const point = story?.dataset.point ?? "";
       const whole = point === WHOLE;
 
-      if (story && !arrived) {
-        arrived = true;
-        const recipe = stories.find((element) => element.dataset.recipe);
-        arrive.current(
-          recipe?.dataset.recipe
-            ? {
-                url: recipe.dataset.recipe,
-                name: recipe.dataset.recipeName ?? "",
-              }
-            : null,
-        );
-      }
+      // The tiles crossing the middle of the window, lit with their parts.
+      const crossing = new Set(
+        [...document.querySelectorAll<HTMLElement>("[data-tile]")]
+          .filter((tile) => {
+            const { top, bottom } = tile.getBoundingClientRect();
+            return top <= middle && bottom >= middle;
+          })
+          .map((tile) => tile.dataset.tile ?? ""),
+      );
+      light(
+        new Set([...crossing, ...(point && !whole ? [point] : [])]),
+        crossing,
+      );
 
       if (story !== current) {
         current = story;
-        // The whole viewer is drawn to, not lit: its parts light as its code is pointed at.
-        light.current(whole || !point ? [] : [point]);
-        // Drawn again once the viewer has turned (two 180ms halves), to the side then up.
-        window.setTimeout(schedule, 400);
+        // Drawn again once the viewer has crossfaded (700ms), to the side then shown.
+        window.setTimeout(schedule, 760);
         // Drawn in afresh for each story: the attribute's return restarts the animation.
         delete overlay.dataset.drawing;
         void overlay.getBoundingClientRect();
         overlay.dataset.drawing = "";
       }
 
-      // The viewer's place, which stays put as it turns over (`.flip`).
-      /*
-       * A story with `data-turn` turns the viewer over early, as it comes into view (two
-       * thirds down the window), and back once the next story reaches the middle, so it
-       * has room to be seen (Mat, 2026-10-20: "the flip zone for this is tight").
-       */
       const turner = stories.find((element) =>
         element.hasAttribute("data-turn"),
       );
-      const next = turner && stories[stories.indexOf(turner) + 1];
-      const turned = Boolean(
-        turner &&
-          turner.getBoundingClientRect().top <= innerHeight * (2 / 3) &&
-          (next
-            ? next.getBoundingClientRect().top > middle
-            : turner.getBoundingClientRect().bottom >= middle),
-      );
-      if (turned !== wasTurned) {
-        wasTurned = turned;
-        turn.current(turned);
-      }
-
-      // A story with a recipe reads it from as early, until it has passed the middle.
+      set("turned", inView(stories, turner, was.turned));
       const reader = stories.find((element) => element.dataset.recipe);
-      const after = reader && stories[stories.indexOf(reader) + 1];
-      const reading = Boolean(
-        reader &&
-          reader.getBoundingClientRect().top <= innerHeight * (2 / 3) &&
-          (after
-            ? after.getBoundingClientRect().top > middle
-            : reader.getBoundingClientRect().bottom >= middle),
-      );
-      if (reading !== wasReading) {
-        wasReading = reading;
-        read.current(reading);
-      }
+      set("reading", inView(stories, reader, was.reading));
 
-      // A story with `data-compose`, once a third of it is past the middle, while it holds.
-      const storyBox = story?.getBoundingClientRect();
-      const composing = Boolean(
-        story?.hasAttribute("data-compose") &&
+      // A change of the story's own, once a third of it is past the middle.
+      const storyBox = story && tops[stories.indexOf(story)];
+      const past = (on: boolean) =>
+        Boolean(
           storyBox &&
-          storyBox.top <= middle - Math.min(storyBox.height / 3, 200),
+            storyBox.top <=
+              middle - Math.min(storyBox.height / 3, 200) + (on ? BAND : 0),
+        );
+      set(
+        "composing",
+        Boolean(story?.hasAttribute("data-compose")) && past(was.composing),
       );
-      if (composing !== wasComposing) {
-        wasComposing = composing;
-        compose.current(composing);
-      }
-      const branding = Boolean(
-        story?.hasAttribute("data-brand") &&
-          storyBox &&
-          storyBox.top <= middle - Math.min(storyBox.height / 3, 200),
+      set(
+        "branding",
+        Boolean(story?.hasAttribute("data-brand")) && past(was.branding),
       );
-      if (branding !== wasBranding) {
-        wasBranding = branding;
-        brandStory.current(branding);
-      }
 
-      const frameBox = viewer.current?.parentElement?.getBoundingClientRect();
-      // The part on whichever side is up (`.flip`): of its namesakes, one on a face shown.
+      const flip = viewer.current?.parentElement;
+      // The part on the side shown (`.flip`'s `data-face`).
+      const shownFace = flip?.dataset.face ?? "front";
       const part = whole
-        ? viewer.current?.parentElement
+        ? flip
         : point
-          ? ([
-              ...(viewer.current?.parentElement?.querySelectorAll<HTMLElement>(
-                `[data-part="${CSS.escape(point)}"]`,
-              ) ?? []),
-            ].find((part) => {
-              const face = part.closest<HTMLElement>("[data-face-of]");
-              const style = face && getComputedStyle(face);
-              return (
-                !style ||
-                (style.visibility !== "hidden" && style.opacity !== "0")
-              );
-            }) ?? null)
+          ? flip?.querySelector<HTMLElement>(
+              `[data-face-of="${shownFace}"] [data-part="${CSS.escape(point)}"]`,
+            )
           : null;
-      if (!story || !part || !frameBox || !viewer.current) return hide();
+      if (!story || !part || !flip || !viewer.current) return hide();
 
+      const frameBox = flip.getBoundingClientRect();
       const navbar =
         document.querySelector(".nextra-navbar")?.getBoundingClientRect()
           .bottom ?? 0;
-      const from = story.getBoundingClientRect();
+      const from = storyBox!;
       const box = part.getBoundingClientRect();
       // From the story's edge, level with its middle as far as the window shows it.
       const x0 = from.left;
       const y0 =
         (Math.max(from.top, navbar) + Math.min(from.bottom, innerHeight)) / 2;
       /*
-       * To the viewer's frame for the whole (and for its other side, turned over), or else
-       * to the viewer's right edge, inside
-       * its frame, where the parts in full rows end, just past the part's outline (4px
-       * out, `.region`): a line to a part beside another (the Label, by the Thumbnail)
-       * never crosses its neighbor.
+       * To the viewer's frame for the whole, or else to the viewer's right edge, inside
+       * its frame (its padding, `.viewer`), where the parts in full rows end, just past
+       * the part's outline (4px out, `.region`): a line to a part beside another (the
+       * Label, by the Thumbnail) never crosses its neighbor.
        */
-      const inner =
-        frameBox.right -
-        parseFloat(getComputedStyle(viewer.current).paddingRight);
+      if (pad < 0)
+        pad = parseFloat(getComputedStyle(viewer.current).paddingRight) || 0;
+      const inner = frameBox.right - pad;
       const x1 = whole ? frameBox.right : Math.max(box.right, inner) + 6;
       // Level with the middle of what of it is in view.
       const top = Math.max(box.top, navbar) + 8;
@@ -279,12 +277,10 @@ export function StoryLines({
       window.removeEventListener("resize", schedule);
       held.removeEventListener("change", schedule);
       observer.disconnect();
-      light.current([]);
-      turn.current(false);
-      read.current(false);
-      pass.current([]);
-      compose.current(false);
-      brandStory.current(false);
+      light(new Set(), new Set());
+      (Object.keys(was) as (keyof typeof was)[]).forEach((name) =>
+        set(name, false),
+      );
     };
   }, [viewer]);
 
@@ -299,4 +295,4 @@ export function StoryLines({
       <circle r={5} />
     </svg>
   );
-}
+});

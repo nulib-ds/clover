@@ -46,11 +46,11 @@
 
 /*
  * The grid runs on past the last story, so the viewer is still held beside it while it
- * reads its recipe (`StoryLines.tsx`): the viewer's foot, less half the window and half
- * a story, about 30vh.
+ * reads its recipe (`StoryLines.tsx`): Install, after the stories, gives it that room,
+ * and the padding makes up what is left on a tall window.
  */
 .after {
-  padding-bottom: max(8rem, 30vh);
+  padding-bottom: max(2.618rem, 30vh - 14rem);
 }
 
 @media (max-width: 64rem) {
@@ -198,8 +198,23 @@
   position: absolute;
 }
 
+/*
+ * A new line's light: an overlay behind its text that fades by opacity alone, so the
+ * compositor runs it and the page's frames never wait on it as it scrolls.
+ */
 .codeLine[data-fresh] {
-  background-color: color-mix(in srgb, var(--accent-9) 28%, transparent);
+  isolation: isolate;
+  position: relative;
+}
+
+.codeLine[data-fresh]::before {
+  background-color: color-mix(in srgb, var(--accent-9) 32%, transparent);
+  content: "";
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -211,9 +226,8 @@
     animation: code-in 700ms ease both;
   }
 
-  .codeLine[data-fresh] {
+  .codeLine[data-fresh]::before {
     animation: code-fresh 1600ms ease both;
-    background-color: transparent;
   }
 }
 
@@ -240,11 +254,11 @@
 @keyframes code-fresh {
   0%,
   40% {
-    background-color: color-mix(in srgb, var(--accent-9) 36%, transparent);
+    opacity: 1;
   }
 
   to {
-    background-color: transparent;
+    opacity: 0;
   }
 }
 
@@ -706,15 +720,16 @@
 /*
  * The faces: the viewer itself (`front`), its inspector (`back`), and a Cookbook recipe
  * read by the same parts (`recipe`). The others lie over the front, its size, hidden,
- * until they are turned to; the front stays in the flow, so turning never moves the page.
- *
- * At rest every face is its full size, hidden or not, so a viewer drawn while hidden
- * measures itself rightly, and the turn clips rather than squeezes (below). The front, turned away, is see-through rather than
- * hidden, so assistive technology keeps it, and focus coming to it turns it back
+ * until one is shown; the front stays in the flow, so a change never moves the page.
+ * One crossfades into the next, as the code does (Mat, 2026-10-20: no flip), and at rest
+ * every face is its full size, shown or not, so a viewer drawn while hidden measures
+ * itself rightly. The front, while another is shown, is see-through rather than hidden,
+ * so assistive technology keeps it, and focus coming to it brings it back
  * (`PartsLive.tsx`); no pointer reaches it then.
  */
 .flip > [data-face-of]:not([data-face-of="front"]) {
   inset: 0;
+  opacity: 0;
   pointer-events: none;
   position: absolute;
   visibility: hidden;
@@ -727,50 +742,23 @@
 
 .flip[data-face="back"] > [data-face-of="back"],
 .flip[data-face="recipe"] > [data-face-of="recipe"] {
+  opacity: 1;
   visibility: visible;
 }
 
-/* The turn: the face up closes to its middle, then the next opens out from its own. */
+/* The crossfade: the face going fades out as the face coming fades in. */
 @media (prefers-reduced-motion: no-preference) {
-  .flip > [data-face-of]:not([data-face-of="front"]) {
-    animation: face-out 180ms cubic-bezier(0.5, 0, 1, 1);
-    transition: visibility 0s 180ms;
-  }
-
-  .flip:is([data-face="back"], [data-face="recipe"]) > [data-face-of="front"] {
-    animation: face-out 180ms cubic-bezier(0.5, 0, 1, 1);
+  .flip > [data-face-of] {
+    transition:
+      opacity 700ms ease,
+      visibility 0s linear 700ms;
   }
 
   .flip[data-face="back"] > [data-face-of="back"],
-  .flip[data-face="recipe"] > [data-face-of="recipe"],
-  .flip[data-face="front"][data-moved] > [data-face-of="front"] {
-    animation: face-in 180ms cubic-bezier(0, 0, 0.5, 1) 180ms backwards;
-  }
-}
-
-/*
- * Clipped to its middle and back, not squeezed: a Canvas measures its box as it is
- * transformed, so one set up mid-squeeze draws into a sliver; a clip leaves it whole.
- */
-@keyframes face-out {
-  from {
-    clip-path: inset(0 0 0 0);
-    opacity: 1;
-  }
-
-  to {
-    clip-path: inset(0 50% 0 50%);
-    opacity: 1;
-  }
-}
-
-@keyframes face-in {
-  from {
-    clip-path: inset(0 50% 0 50%);
-  }
-
-  to {
-    clip-path: inset(0 0 0 0);
+  .flip[data-face="recipe"] > [data-face-of="recipe"] {
+    transition:
+      opacity 700ms ease,
+      visibility 0s;
   }
 }
 
@@ -914,7 +902,7 @@
   transition: outline-color 160ms ease;
 }
 
-.region[data-on] {
+.region:is([data-on], [data-lit]) {
   outline-color: var(--accent-9);
 }
 
@@ -938,7 +926,7 @@
   z-index: 6;
 }
 
-.region[data-on] > .regionName {
+.region:is([data-on], [data-lit]) > .regionName {
   opacity: 1;
   transform: none;
 }
@@ -1030,34 +1018,10 @@
     box-shadow 160ms ease;
 }
 
-/* "And more.": a line across the tiles, and how many parts there are to use. */
+/* "And more." across the tiles, its space above from the tiles' gap and its own. */
 .more {
-  border-top: 1px solid var(--gray-6);
-  display: grid;
-  gap: 0.382rem;
   grid-column: 1 / -1;
-  margin-top: 1.618rem;
-  padding-top: 2.618rem;
-}
-
-.moreTitle {
-  font-size: clamp(1.618rem, 3vw, 2.618rem);
-  font-weight: var(--weight-bold);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  margin: 0;
-}
-
-.moreBody {
-  color: var(--gray-11);
-  font-size: var(--text-lg);
-  margin: 0;
-}
-
-.moreBody a {
-  color: var(--accent-11);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
+  margin-bottom: 0;
 }
 
 .tile[data-span="2"] {
@@ -1072,7 +1036,7 @@
   grid-column: span 4;
 }
 
-.tile[data-on] {
+.tile:is([data-on], [data-lit]) {
   border-color: var(--accent-9);
   box-shadow: 0 0 0 1px var(--accent-9);
 }

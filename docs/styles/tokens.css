@@ -71,6 +71,9 @@
   /* One step above body, for a label that titles something without being a heading.
    * The scale otherwise jumped straight from 1rem to `--section-heading-size`. */
   --text-lg: 1.125rem;
+  /* The homepage's summary lines, one size, so they read as one voice: the hero's, the
+   * choice's under the playground, and the section intros' notes (Mat, 2026-10-20). */
+  --text-lede: clamp(var(--text-lg), 2vw, 1.375rem);
   /*
    * Display sizes, for the site only: Clover packages none (its largest is
    * `--clover-text-l`). Built as Clover's text steps are, the page's 1rem plus a space
@@ -353,8 +356,8 @@ pre {
  * definition means "styled like the Get started button" stays true instead of
  * drifting between copies.
  *
- * There was a `.cta-soft` companion for the hero's secondary link. The hero no
- * longer has buttons, and a variant with no callers is a variant that goes stale.
+ * `.cta-outline` is its companion, for a way on that is not the page's main one (the
+ * homepage's section intros, `SectionIntro.tsx`).
  */
 
 .cta-solid {
@@ -384,6 +387,43 @@ pre {
 }
 
 .cta-solid:active {
+  transform: translateY(1px);
+}
+
+/*
+ * A way on that is not the page's main one: the same shape, no fill, its edge 3:1
+ * against the page (WCAG 1.4.11), as the playground's controls' is; the accent's text
+ * color under the pointer.
+ */
+.cta-outline {
+  align-items: center;
+  border: 1px solid
+    color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
+  border-radius: var(--radius-3);
+  color: var(--gray-12);
+  display: inline-flex;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+  gap: 0.5rem;
+  padding: calc(0.625rem - 1px) calc(1.125rem - 1px);
+  text-decoration: none;
+  transition:
+    border-color 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+.cta-outline:hover {
+  border-color: var(--accent-11);
+  color: var(--accent-11);
+}
+
+.cta-outline:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+.cta-outline:active {
   transform: translateY(1px);
 }
 

@@ -15,7 +15,9 @@ import {
   progressFor,
 } from "docs/components/CookbookRecipes/progress4";
 import { partCount } from "docs/components/Home/counts";
+import { FULL_WIDTH } from "docs/lib/full-width";
 import { BrandPicker } from "docs/components/Home/BrandPicker";
+import { SectionIntro } from "docs/components/Home/SectionIntro";
 import sizes from "../../../packages/clover/build/sizes.json";
 
 /*
@@ -178,6 +180,32 @@ const stories: Story[] = [
   },
 ];
 
+/*
+ * Nextra's chrome, as the homepage needs it, in rules drawn with the page and gone with it
+ * (a `<style>` it renders, no `:has()` on the page's ancestors, `full-width.ts`).
+ *
+ * The page spans the window (`FULL_WIDTH`, `docs/lib/full-width.ts`). And the navbar's
+ * content, the line under it and the footer line up with the sections' 1300px (and the shell's
+ * padding, `Home.module.css`) at every width, rather than with the docs' wider layout.
+ * Unlayered, these outweigh Nextra's utilities, which are in cascade layers.
+ */
+const HOMEPAGE_CHROME = `${FULL_WIDTH}
+.nextra-navbar > nav, .site-subheader > p, footer.site-footer,
+[class~="x:pb-[env(safe-area-inset-bottom)]"] > div:first-child {
+  max-width: calc(1300px + 4rem);
+  padding-left: max(env(safe-area-inset-left), 2rem);
+  padding-right: max(env(safe-area-inset-right), 2rem);
+}
+@media (max-width: 640px) {
+  .nextra-navbar > nav, .site-subheader > p, footer.site-footer,
+  [class~="x:pb-[env(safe-area-inset-bottom)]"] > div:first-child {
+    max-width: calc(1300px + 2rem);
+    padding-left: max(env(safe-area-inset-left), 1rem);
+    padding-right: max(env(safe-area-inset-right), 1rem);
+  }
+}
+`;
+
 /**
  * The homepage, for Clover 4.
  *
@@ -193,6 +221,7 @@ const Homepage: React.FC = () => {
   const [resource, setResource] = useState<string | null>(null);
   return (
     <div className={styles.page}>
+      <style>{HOMEPAGE_CHROME}</style>
       <Hero />
 
       <main className={styles.shell}>
@@ -209,17 +238,11 @@ const Homepage: React.FC = () => {
           resource={resource}
           onTry={(key) => playground.current?.pickResource(key)}
         >
-          <div className={styles.sectionHead}>
-            <div>
-              <h2 className={styles.sectionTitle}>Why Clover</h2>
-              <p className={styles.sectionNote}>
-                Reads IIIF Presentation 2, 3, and 4. From the parts up.
-              </p>
-            </div>
-            <Link href="/docs" className={styles.sectionLink}>
-              Read the docs →
-            </Link>
-          </div>
+          <SectionIntro
+            title="Why Clover."
+            note="Reads IIIF Presentation 2, 3, and 4. From the parts up."
+            cta={{ href: "/docs", label: "Read the docs" }}
+          />
 
           {/*
            * One story at a time, the figure on alternate sides. The words come first in
@@ -269,32 +292,25 @@ const Homepage: React.FC = () => {
               </article>
             ))}
           </div>
+
+          {/*
+           * Install, last in the stories' column, beside the held viewer: the room the
+           * viewer needs to stay held while Coverage reads its recipe, put to use.
+           */}
+          <SectionIntro
+            title="Install."
+            note={
+              <>
+                Clover 4 is in development, not yet on npm. Today&rsquo;s
+                release is <Link href="/docs/3.x">Clover 3.x</Link>.
+              </>
+            }
+            cta={{ href: "/docs", label: "Get started", primary: true }}
+          />
+          <pre className={styles.install}>
+            <code>npm install @nulib/clover</code>
+          </pre>
         </Parts>
-
-        <div className={styles.contained}>
-          <div className={styles.sectionHead}>
-            <div>
-              <h2 className={styles.sectionTitle}>Install</h2>
-              <p className={styles.sectionNote}>
-                Clover 4 is in development and not on npm yet. The released
-                Clover is <Link href="/docs/3.x">3.x</Link>,{" "}
-                <code>@samvera/clover-iiif</code>.
-              </p>
-            </div>
-          </div>
-
-          <div className={styles.install}>
-            <code className={styles.installCode}>
-              npm install @nulib/clover
-            </code>
-            <Link href="/docs" className="cta-solid">
-              Get started
-              <span className="cta-arrow" aria-hidden="true">
-                →
-              </span>
-            </Link>
-          </div>
-        </div>
       </main>
     </div>
   );

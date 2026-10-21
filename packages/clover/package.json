@@ -2,7 +2,7 @@
   "name": "@nulib/clover",
   "private": true,
   "description": "Composable IIIF components for the web: Clover 4.x, in development.",
-  "license": "ISC",
+  "license": "MIT",
   "sideEffects": [
     "*.css"
   ],

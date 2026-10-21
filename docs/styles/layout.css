@@ -162,10 +162,10 @@
 /*
  * Below 768px the banner stays pinned above the navbar, but Nextra's scroll padding
  * reserves only the navbar, so a link brought into view could sit wholly under it. While
- * the banner shows, the padding covers both.
+ * the banner shows (`data-banner`, written by `SiteEffects.tsx`), the padding covers both.
  */
 @media not all and (min-width: 768px) {
-  html:has(.nextra-banner:not([class$="hidden"])) {
+  html[data-banner] {
     scroll-padding-top: calc(
       var(--nextra-navbar-height) + var(--nextra-banner-height)
     );
@@ -259,4 +259,110 @@ html:not(.dark) .nextra-callout :not(pre) > code {
 :is(.clover-annotations-body, .clover-value) ol {
   list-style: decimal;
   padding-inline-start: var(--clover-space-l);
+}
+
+/*
+ * The footer (`docs/components/SiteFooter.tsx`), in the site's own materials: the light
+ * gray surface the line under the navbar has (`--surface`), its hairline, the page's text
+ * and muted text, links in the text accent and underlined (WCAG 1.4.1), spaces on the
+ * golden scale. Nextra draws the band and its row of switches (appearance); these take
+ * them over, matched by Nextra's own classes, whole (its utilities are layered, so these
+ * outrank them).
+ */
+[class~="x:pb-[env(safe-area-inset-bottom)]"] {
+  background-color: var(--surface);
+}
+
+[class~="x:pb-[env(safe-area-inset-bottom)]"] > hr {
+  border-color: var(--gray-6);
+}
+
+footer.site-footer {
+  color: var(--gray-12);
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.618;
+  padding-block: 2.618rem 4.236rem;
+}
+
+.site-footer a {
+  color: var(--accent-link);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.site-footer p {
+  color: var(--gray-11);
+  margin: 0;
+}
+
+.site-footer p + p {
+  margin-top: 0.618rem;
+}
+
+.site-footer code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+.site-footer-grid {
+  display: grid;
+  gap: 2.618rem;
+  grid-template-columns: minmax(0, 1.618fr) repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 48rem) {
+  .site-footer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.site-footer h2 {
+  color: var(--gray-12);
+  font-size: 0.875rem;
+  font-weight: var(--weight-bold);
+  margin: 0 0 0.382rem;
+}
+
+/* The wordmark, the navbar's, home: 24px tall at the least (WCAG 2.5.8). */
+.site-footer .site-footer-logo {
+  color: var(--gray-12);
+  display: inline-flex;
+  margin-bottom: 0.618rem;
+  min-height: 24px;
+  text-decoration: none;
+}
+
+.site-footer-logo svg {
+  height: 1.25rem;
+  width: auto;
+}
+
+.site-footer-about p {
+  max-width: 28rem;
+}
+
+.site-footer-legal {
+  align-items: baseline;
+  border-top: 1px solid var(--gray-6);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.618rem 1.618rem;
+  justify-content: space-between;
+  margin-top: 2.618rem;
+  padding-top: 1.618rem;
+}
+
+.site-footer-legal ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.382rem 1.618rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Each link's line 24px at the least, so the links stand 24px apart (WCAG 2.5.8). */
+.site-footer-legal li {
+  min-block-size: 24px;
 }

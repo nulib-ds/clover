@@ -225,7 +225,15 @@ function linesOf(node: TreeNode, depth = 0, lines: Line[] = []): Line[] {
 
 /** A CSS color as RGBA, whatever its notation (`oklab()`, `color-mix()`…), by painting it. */
 let paint: CanvasRenderingContext2D | null | undefined;
+const painted = new Map<string, [number, number, number, number] | null>();
 function rgba(color: string): [number, number, number, number] | null {
+  if (painted.has(color)) return painted.get(color)!;
+  const value = paintOnce(color);
+  painted.set(color, value);
+  return value;
+}
+
+function paintOnce(color: string): [number, number, number, number] | null {
   if (paint === undefined) {
     const canvas = document.createElement("canvas");
     canvas.width = canvas.height = 1;
@@ -401,14 +409,26 @@ export function AccessibilityTree({
   const [lines, setLines] = useState<Line[]>([]);
   const [stops, setStops] = useState(0);
   const [checks, setChecks] = useState<Check[]>([]);
-  // Read afresh each time it is turned to, so it is the viewer as it is then.
+  /*
+   * Read from the viewer while the page is idle: soon after it loads, so it is ready
+   * before the reader reaches the story that shows it, and again each time it is shown,
+   * so it is the viewer as it is then. Never in the middle of a frame the reader scrolls.
+   */
   useEffect(() => {
-    if (!turned || !of.current) return;
-    const tree = snapshot(of.current);
-    const count = countStops(tree);
-    setLines(linesOf(tree));
-    setStops(count);
-    setChecks(checksOf(of.current, tree, count));
+    const read = () => {
+      if (!of.current) return;
+      const tree = snapshot(of.current);
+      const count = countStops(tree);
+      setLines(linesOf(tree));
+      setStops(count);
+      setChecks(checksOf(of.current, tree, count));
+    };
+    if (!("requestIdleCallback" in window)) {
+      const timer = setTimeout(read, turned ? 0 : 3000);
+      return () => clearTimeout(timer);
+    }
+    const idle = requestIdleCallback(read, { timeout: turned ? 500 : 5000 });
+    return () => cancelIdleCallback(idle);
   }, [turned, of]);
 
   return (

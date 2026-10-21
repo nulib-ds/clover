@@ -3,6 +3,9 @@ import { createPortal } from "react-dom";
 import React, {
   Suspense,
   lazy,
+  startTransition,
+  useCallback,
+  useLayoutEffect,
   useEffect,
   useId,
   useMemo,
@@ -18,6 +21,7 @@ import styles from "docs/components/Home/Parts.module.css";
 import { useMapWorker } from "docs/lib/map-worker";
 import { StoryLines } from "docs/components/Home/StoryLines";
 import { AccessibilityTree } from "docs/components/Home/AccessibilityTree";
+import { SectionIntro } from "docs/components/Home/SectionIntro";
 import { componentCount, primitiveCount } from "docs/components/Home/counts";
 import { endPageThemePreview, previewPageTheme } from "docs/lib/page-theme";
 
@@ -212,8 +216,6 @@ function Exploded({
     (state) => state.collection,
   ) as Json | null;
   const [pointed, setPointed] = useState<PartKey | null>(null);
-  // The parts the story in the middle of the window names (`StoryLines`).
-  const [lit, setLit] = useState<string[]>([]);
   const viewer = useRef<HTMLElement>(null);
   /*
    * Turned over to its accessibility tree while a story asks (`data-turn`), unless focus
@@ -226,8 +228,21 @@ function Exploded({
     null,
   );
   const [reading, setReading] = useState(false);
-  // The tiles at the middle of the window, lit as pointing at them lights them.
-  const [passing, setPassing] = useState<string[]>([]);
+  useEffect(() => {
+    const story = document.querySelector<HTMLElement>("[data-recipe]");
+    if (!story?.dataset.recipe) return;
+    const load = () =>
+      setRecipe({
+        url: story.dataset.recipe!,
+        name: story.dataset.recipeName ?? "",
+      });
+    if (!("requestIdleCallback" in window)) {
+      const timer = setTimeout(load, 2000);
+      return () => clearTimeout(timer);
+    }
+    const idle = requestIdleCallback(load, { timeout: 4000 });
+    return () => cancelIdleCallback(idle);
+  }, []);
   const face = focused
     ? "front"
     : turned
@@ -235,11 +250,7 @@ function Exploded({
       : reading && recipe
         ? "recipe"
         : "front";
-  // Once it has turned, coming back to its face is a turn too (not on the first draw).
-  const [turnedOnce, setTurnedOnce] = useState(false);
-  useEffect(() => {
-    if (face !== "front") setTurnedOnce(true);
-  }, [face]);
+
   const [code, setCode] = useState(false);
   const codeId = useId();
   // What the viewer's code says, and so what the viewer shows.
@@ -577,6 +588,49 @@ function Exploded({
   const scripted = useRef<{ before: ViewValues; after: ViewValues } | null>(
     null,
   );
+  /*
+   * The viewer fades from the old layout to the new as the code crossfades (Mat,
+   * 2026-10-20: no flip): out, the change made while it is unseen, and in, 700ms in all,
+   * by opacity alone, so the compositor runs it and scrolling never waits on it. (A view
+   * transition crossfaded it too, but its snapshot cost the scroll a frame or three.)
+   * Where the reader wants no motion, it simply changes.
+   */
+  /*
+   * The change renders as a transition, which React can break across frames, so the
+   * page scrolls on while it does; the viewer fades in once it has landed (`landed`).
+   */
+  const landed = useRef<(() => void) | null>(null);
+  useLayoutEffect(() => {
+    landed.current?.();
+    landed.current = null;
+  }, [view]);
+  const crossfade = (change: () => void) => {
+    const node = viewer.current;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduced || !node?.animate) return change();
+    const out = node.animate([{ opacity: 1 }, { opacity: 0 }], {
+      duration: 220,
+      easing: "ease-in",
+      fill: "forwards",
+    });
+    out.finished.then(
+      () => {
+        landed.current = () => {
+          node
+            .animate([{ opacity: 0 }, { opacity: 1 }], {
+              duration: 480,
+              easing: "ease-out",
+            })
+            .finished.catch(() => undefined);
+          out.cancel();
+        };
+        startTransition(change);
+      },
+      () => change(),
+    );
+  };
   useEffect(() => {
     if (composing && !scripted.current && manifest) {
       const before = view;
@@ -594,46 +648,40 @@ function Exploded({
         ],
       };
       scripted.current = { before, after };
-      setView(after);
-      setChange((n) => n + 1);
+      crossfade(() => {
+        setView(after);
+        setChange((n) => n + 1);
+      });
     } else if (!composing && scripted.current) {
       const { before, after } = scripted.current;
       scripted.current = null;
-      setView((current) =>
-        JSON.stringify(current) === JSON.stringify(after) ? before : current,
-      );
-      setChange((n) => n + 1);
+      crossfade(() => {
+        setView((current) =>
+          JSON.stringify(current) === JSON.stringify(after) ? before : current,
+        );
+        setChange((n) => n + 1);
+      });
     }
   }, [composing]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!manifest) {
-    return (
-      <>
-        <div className={styles.assembled} aria-hidden="true" />
-        <Clover.Status className={styles.loading} />
-      </>
-    );
-  }
-
-  // Pointing at a part, or focusing in it, outlines it in the viewer, and back.
-  const point = (key: PartKey) => ({
-    "data-on": pointed === key || undefined,
-    onPointerEnter: () => setPointed(key),
-    onPointerLeave: () => setPointed(null),
-    onFocus: () => setPointed(key),
-    onBlur: () => setPointed(null),
-  });
-  // A part in the viewer: as a tile's, and lit while a story names it.
-  const region = (key: PartKey) => ({
-    ...point(key),
-    "data-on":
-      pointed === key ||
-      lit.includes(key) ||
-      passing.includes(key) ||
-      undefined,
-    "data-part": key,
-  });
-  const shown = parts.filter((part) => part.present);
+  /*
+   * Pointing at a part, or focusing in it, outlines it in the viewer, and back. What a
+   * story names, and the tiles at the middle of the window, are lit by `StoryLines` itself
+   * (`data-lit`), never through this component's state, so scrolling redraws nothing here.
+   */
+  const point = useCallback(
+    (key: PartKey) => ({
+      "data-on": pointed === key || undefined,
+      onPointerEnter: () => setPointed(key),
+      onPointerLeave: () => setPointed(null),
+      onFocus: () => setPointed(key),
+      onBlur: () => setPointed(null),
+    }),
+    [pointed],
+  );
+  const region = (key: PartKey) => ({ ...point(key), "data-part": key });
+  const shown = useMemo(() => parts.filter((part) => part.present), [parts]);
+  const missing = useMemo(() => parts.filter((part) => !part.present), [parts]);
   // The first tile past the viewer's own parts and the Collection: "And more." goes over it.
   const firstMore = shown.find(
     (part) =>
@@ -649,15 +697,90 @@ function Exploded({
         ] as PartKey[]
       ).includes(part.key),
   )?.key;
-  const missing = parts.filter((part) => !part.present);
   // The parts the example viewer shows, in the order its code gives them.
-  const order = view.order.filter(
-    (key) =>
-      key === "thumbnail" ||
-      key === "label" ||
-      key === "content" ||
-      shown.some((part) => part.key === key),
+  const order = useMemo(
+    () =>
+      view.order.filter(
+        (key) =>
+          key === "thumbnail" ||
+          key === "label" ||
+          key === "content" ||
+          shown.some((part) => part.key === key),
+      ),
+    [view.order, shown],
   );
+
+  /*
+   * The viewer's parts themselves, made once for the values they take: an outline coming
+   * or going redraws its Region, never the part inside it.
+   */
+  const thumbnailPart = useMemo(
+    () => <Clover.Thumbnail alt="" size={128} className={styles.viewerThumb} />,
+    [],
+  );
+  const labelPart = useMemo(
+    () => <Clover.Label as="h3" className={styles.viewerTitle} />,
+    [],
+  );
+  const contentPart = useMemo(
+    () => (
+      <Clover.Content
+        controls={view.controls}
+        style={{ height: view.height }}
+      />
+    ),
+    [view.controls, view.height],
+  );
+  const itemsPart = useMemo(
+    () => (
+      <Clover.Items
+        className={styles.viewerStrip}
+        layout={view.layout}
+        style={
+          view.itemsSize
+            ? ({
+                [itemsSizeProperty(view.layout)]: view.itemsSize,
+              } as React.CSSProperties)
+            : undefined
+        }
+      />
+    ),
+    [view.layout, view.itemsSize],
+  );
+  const summaryPart = useMemo(
+    () => <Clover.Summary className={styles.viewerSummary} />,
+    [],
+  );
+  const metadataPart = useMemo(
+    () => <Clover.Metadata className={styles.viewerFields} />,
+    [],
+  );
+
+  // The tiles, drawn again only for what they show, or a pointer coming or going.
+  const tiles = useMemo(
+    () =>
+      shown.map((part, index) => (
+        <React.Fragment key={part.key}>
+          {/*
+           * After the parts the viewer is made of (and the Collection it belongs to), a
+           * line: the rest are more of the same kit, and how many there are to use.
+           */}
+          {part.key === firstMore && index > 0 && <More />}
+          <Tile part={part} on={pointed === part.key} onPoint={setPointed} />
+        </React.Fragment>
+      )),
+    [shown, firstMore, pointed],
+  );
+
+  if (!manifest) {
+    return (
+      <>
+        <div className={styles.assembled} aria-hidden="true" />
+        <Clover.Status className={styles.loading} />
+      </>
+    );
+  }
+
   const regions: Record<ViewerPart, React.ReactNode> = {
     thumbnail: (
       <Region
@@ -666,7 +789,7 @@ function Exploded({
         className={styles.regionThumb}
         {...region("thumbnail")}
       >
-        <Clover.Thumbnail alt="" size={128} className={styles.viewerThumb} />
+        {thumbnailPart}
       </Region>
     ),
     label: (
@@ -676,15 +799,12 @@ function Exploded({
         className={styles.regionLabel}
         {...region("label")}
       >
-        <Clover.Label as="h3" className={styles.viewerTitle} />
+        {labelPart}
       </Region>
     ),
     content: (
       <Region key="content" name="Content" {...region("content")}>
-        <Clover.Content
-          controls={view.controls}
-          style={{ height: view.height }}
-        />
+        {contentPart}
       </Region>
     ),
     items: (
@@ -694,17 +814,7 @@ function Exploded({
         className={styles.regionItems}
         {...region("items")}
       >
-        <Clover.Items
-          className={styles.viewerStrip}
-          layout={view.layout}
-          style={
-            view.itemsSize
-              ? ({
-                  [itemsSizeProperty(view.layout)]: view.itemsSize,
-                } as React.CSSProperties)
-              : undefined
-          }
-        />
+        {itemsPart}
       </Region>
     ),
     summary: (
@@ -714,7 +824,7 @@ function Exploded({
         className={styles.regionSummary}
         {...region("summary")}
       >
-        <Clover.Summary className={styles.viewerSummary} />
+        {summaryPart}
       </Region>
     ),
     metadata: (
@@ -724,7 +834,7 @@ function Exploded({
         className={styles.regionMetadata}
         {...region("metadata")}
       >
-        <Clover.Metadata className={styles.viewerFields} />
+        {metadataPart}
       </Region>
     ),
   };
@@ -740,7 +850,6 @@ function Exploded({
         <div
           className={styles.flip}
           data-face={face}
-          data-moved={turnedOnce || undefined}
           onFocus={() => setFocused(true)}
           onBlur={(event) => {
             if (
@@ -759,7 +868,7 @@ function Exploded({
             {order.map((key) => regions[key])}
           </section>
           <AccessibilityTree of={viewer} shown={face === "back"} />
-          {recipe && <RecipeFace recipe={recipe} height={view.height} />}
+          {recipe && <RecipeFace recipe={recipe} height={RECIPE_HEIGHT} />}
         </div>
         {slot ? (
           createPortal(
@@ -818,46 +927,13 @@ function Exploded({
 
       <StoryLines
         viewer={viewer}
-        onLight={setLit}
         onTurn={setTurned}
         onRecipe={setReading}
-        onArrive={setRecipe}
-        onPassing={setPassing}
         onCompose={setComposing}
         onBrandStory={setBranding}
       />
 
-      <div className={styles.tiles}>
-        {shown.map((part, index) => (
-          <React.Fragment key={part.key}>
-            {/*
-             * After the parts the viewer is made of (and the Collection it belongs to), a
-             * line: the rest are more of the same kit, and how many there are to use.
-             */}
-            {part.key === firstMore && index > 0 && <More />}
-            <section
-              aria-labelledby={`part-${part.key}`}
-              className={styles.tile}
-              data-span={part.span}
-              data-tall={part.tall || undefined}
-              data-tile={part.key}
-              {...point(part.key)}
-              data-on={
-                pointed === part.key || passing.includes(part.key) || undefined
-              }
-            >
-              <header className={styles.tileHead}>
-                <h3 id={`part-${part.key}`} className={styles.tileName}>
-                  <Link href={part.href}>{`<Clover.${part.name} />`}</Link>
-                </h3>
-                <span className={styles.reads}>{part.reads}</span>
-                {part.fact && <span className={styles.fact}>{part.fact}</span>}
-              </header>
-              <div className={styles.tileBody}>{part.body}</div>
-            </section>
-          </React.Fragment>
-        ))}
-      </div>
+      <div className={styles.tiles}>{tiles}</div>
 
       {missing.length > 0 && (
         <div className={styles.missing}>
@@ -893,6 +969,41 @@ function Exploded({
   );
 }
 
+/** A part on its own: drawn again only when it, or whether it is pointed at, changes. */
+const Tile = React.memo(function Tile({
+  part,
+  on,
+  onPoint,
+}: {
+  part: PartSpec;
+  on: boolean;
+  onPoint: (key: PartKey | null) => void;
+}) {
+  return (
+    <section
+      aria-labelledby={`part-${part.key}`}
+      className={styles.tile}
+      data-span={part.span}
+      data-tall={part.tall || undefined}
+      data-tile={part.key}
+      data-on={on || undefined}
+      onPointerEnter={() => onPoint(part.key)}
+      onPointerLeave={() => onPoint(null)}
+      onFocus={() => onPoint(part.key)}
+      onBlur={() => onPoint(null)}
+    >
+      <header className={styles.tileHead}>
+        <h3 id={`part-${part.key}`} className={styles.tileName}>
+          <Link href={part.href}>{`<Clover.${part.name} />`}</Link>
+        </h3>
+        <span className={styles.reads}>{part.reads}</span>
+        {part.fact && <span className={styles.fact}>{part.fact}</span>}
+      </header>
+      <div className={styles.tileBody}>{part.body}</div>
+    </section>
+  );
+});
+
 /**
  * A line across the tiles, between the parts the example viewer is made of and the rest:
  * how many there are to build with, each documented. Its figures are counted from the
@@ -900,13 +1011,13 @@ function Exploded({
  */
 function More() {
   return (
-    <div className={styles.more}>
-      <p className={styles.moreTitle}>And more.</p>
-      <p className={styles.moreBody}>
-        {componentCount} components and {primitiveCount} primitives, every one
-        yours to compose. <Link href="/docs/content">See them all</Link>
-      </p>
-    </div>
+    <SectionIntro
+      as="h3"
+      className={styles.more}
+      title="And more."
+      note={`${componentCount} components and ${primitiveCount} primitives. Every one yours to compose.`}
+      cta={{ href: "/docs/content", label: "See them all" }}
+    />
   );
 }
 
@@ -917,7 +1028,7 @@ function More() {
  * the page scrolls, so it is inert: focus and assistive technology stay with the viewer
  * itself, which turns back the moment focus comes to it.
  */
-function RecipeFace({
+const RecipeFace = React.memo(function RecipeFace({
   recipe,
   height,
 }: {
@@ -942,7 +1053,7 @@ function RecipeFace({
       </Clover.Root>
     </section>
   );
-}
+});
 
 /**
  * A part in the assembled viewer: outlined, its name shown, while its tile is pointed at.
@@ -1014,6 +1125,12 @@ const VIEW_DEFAULTS: ViewValues = {
 };
 
 const LAYOUTS: Clover.ItemsLayout[] = ["carousel", "list", "grid"];
+
+/*
+ * The recipe side's Content height, its own: tied to the viewer's code, every change
+ * there redrew the recipe's viewer too, unseen.
+ */
+const RECIPE_HEIGHT = 280;
 
 /** The custom property that sizes Items' pictures in a layout (`Items.css`). */
 const itemsSizeProperty = (layout: Clover.ItemsLayout) =>
@@ -1089,7 +1206,7 @@ const moved = <T,>(list: T[], from: number, to: number) => {
  * viewer follows, so the code is always what it shows. A part's lines outline the part in
  * the viewer while pointed at, as its tile does.
  */
-function ViewerCode({
+const ViewerCode = React.memo(function ViewerCode({
   id,
   open,
   resource,
@@ -1661,7 +1778,7 @@ function ViewerCode({
       </div>
     </div>
   );
-}
+});
 
 /**
  * A number to type, step with the arrow keys (Shift for tens), or drag sideways a pixel a

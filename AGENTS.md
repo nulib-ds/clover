@@ -104,75 +104,61 @@ deadline.
     when a recipe starts working, or stops, record it there with the date.
   - The site banner (`app/layout.tsx`) says Clover 4 is in development. Retire it, or
     change its `storageKey`, when 4.0 ships.
-  - The homepage (`docs/components/Home/`) opens with its headline, "Imagine a viewer built
-    by you." (`Hero.tsx`, the page's `h1`), and one sentence on what Clover does
-    for the distinctive collections a library, archive or museum shares (a lightweight,
-    accessible, and modular viewer designed for IIIF Manifests, Collections, and the
-    material they describe). It has two halves: the templates live under it
+  - The homepage (`docs/components/Home/`) opens with its headline, "A viewer as distinctive /
+    as your collections." (two lines, its stroke under "distinctive") (`Hero.tsx`, the page's `h1`), and one sentence, on one line where it fits
+    (Mat, 2026-10-20): "Design the user experience you imagine for your IIIF resources." It has two halves: the templates live under it
     (`docs/components/Playground/`), and below them the same resource shown one IIIF
     property at a time by the components the templates are made of (`Parts.tsx` and
     `PartsLive.tsx`), with no heading of its own. Between the two, under the playground's
-    stage, is the choice: a template for the item above ("Template", a dropdown), or a
-    layout of one's own from the parts below ("Build a layout", the one call to action,
-    linking to Composing Layouts). The parts follow the playground: `Homepage` holds the resource the playground reports
+    stage, is the choice, one thing, centered and floating on the page with room all
+    round (Mat, 2026-10-20): a headline, "Use a template or build your own." (its last
+    words under the stories' stroke), then one sentence in the summary's size, "Start with a [Default ▾]
+    template or build your own layout.", the dropdown in it naming the template on the
+    stage (as wide as the longest name, so the sentence holds still), and under it two
+    calls to action, Templates (the templates' page) and Build a layout (Composing
+    Layouts). No boxes, no figure, no code. The parts follow the playground: `Homepage` holds the resource the playground reports
     (`onResourceChange`) and hands it down, and the section's chips put another of the
     playground's resources on its stage (`pickResource`).
-  - After the parts, "Why Clover" tells five stories, one at a time, the figure on
-    alternate sides (Mat, 2026-10-20: bolder, as a product page; a reveal driven by the
-    scroll, motion only where allowed, never a fade). It is in the parts' grid, in their
-    column, so the example viewer stays held beside it (Mat, 2026-10-20): `Homepage`
-    passes it to `Parts` as children, drawn on the server, and the Root draws no box
-    (`display: contents`), so the viewer spans every row. The story in the middle of the
-    window outlines the one part its `data-point` names in the viewer (or, for
-    `viewer`, every part), with its name tag, and one 3px line is drawn from its edge to
-    it (`StoryLines.tsx`; Mat, 2026-10-20: one line each, each chosen with thought):
-    decoration, hidden from assistive technology, only where the viewer is held, drawn in
-    only where motion is allowed. The Accessible story (`data-turn`) turns the viewer over, from as it comes into
-    view (two thirds down the window) until the next story reaches the middle, the
-    stories `2xl` apart so the turn has room (Mat, 2026-10-20). Its other side is an
-    inspector on the page's light ground (`AccessibilityTree.tsx`): WCAG 2.2 checks
-    measured on the viewer as it turns (names, tab stops, the smallest target, the lowest
-    text and control contrasts, marked languages, the reader's motion setting), then an
-    ARIA snapshot with each control's tab stop. A glimpse, not an audit, but every value
-    is measured, never written in. Focus in the viewer keeps its face up (WCAG 2.4.7),
-    and the other side is hidden from assistive technology. The Coverage story (`data-recipe`)
-    turns it to a third side the same way: a Cookbook recipe (0261, a polygon
-    annotation; Mat, 2026-10-20: "let's do an Annotation") in a Root of its own, its
-    Content and Annotations outlined, named at its head ("IIIF Cookbook 0261: …");
-    inert, loaded as the reader reaches the stories, the grid running about 30vh past the
-    last story so the viewer is held while it reads. Every face rests at its full size
-    and the turn clips rather than squeezes, since a Canvas set up mid-transform draws
-    into a sliver. Composable is about the parts, not the templates (the template count
-    belongs to the playground): its figure is counted from the Components menu
-    (`counts.ts`), and where the viewer is held the example viewer's code editor moves
-    into it (a portal into `data-composer`, so it keeps its Root), and makes a change of
-    its own as the story passes (`data-compose`), to the layout Mat set in it (2026-10-20):
-    Content first and taller (400, near square), then the Label and Summary, then Items
-    with larger pictures (`--clover-items-height` for a carousel, `--clover-items-size`
-    for a grid or list, as a page would write it), the Thumbnail and Metadata out, the code
-    crossfading from what it was with its new lines lit, and keeping 15 lines, none
-    wrapping (blank ones after), so its height holds; all put back after. The Yours story has the site's Font family and Color
-    (`BrandPicker.tsx`), setting the whole site and remembered (`page-theme.ts`), with
-    the CSS a page would write under them; its line goes to the viewer's right edge. As
-    it passes (`data-brand`, where the viewer is held) the site previews Northwestern
-    purple without keeping it (`previewPageTheme`), and goes back after unless the
-    reader chose meanwhile; never the font, which would shift the layout, and nothing on
-    a dark page, where a dark accent on the dark ground would fail 1.4.3 (Mat,
-    2026-10-20). The navbar has no settings
-    of its own: its gear was removed that day, appearance being in the footer. The Composable story lights nothing of its own: a
-    part lights as its code is pointed at. Above the stories, the tiles at the middle of the
-    window light themselves and their parts, and "And more." (a line across the tiles
-    after the Collection, with the same counts) leads to the rest; none of this syncing
-    runs where the viewer is not held, where the code stays under the viewer. It is set apart from the parts by
-    its size, not by colors of its own: the page's ground with the playground's
-    hairline and gray shadow, and the code editor's black, in turn (Mat, 2026-10-20:
-    accent fills were "a different site"). Its accent is the accent itself,
-    `--accent-9`, never a shade of it, and never a fill ("true accent color should be
-    USED always"): the figures on the page's ground, and on the black, under the
-    editor's white figures, the hero's marker stroke. Its words are Apple-style marketing (Mat, 2026-10-20): short sentences, titles too,
-    each ending in a period, in US English, every claim one Clover keeps. Every figure is the code's own: the
-    sizes are `size-budget.json`'s, which `npm run test:build` enforces, and the
-    Cookbook's counts and date are `progress4.ts`'s. Never write a figure into the copy.
+  - After the parts, "Why Clover" tells five stories, one at a time: Accessible, Yours,
+    Composable, Light, Coverage, on the code editor's black and the page's ground in
+    turn, black first (Mat, 2026-10-20). Set apart from the parts by size, not colors of
+    its own; its accent is `--accent-9` itself, never a shade or a fill: the hero's marker stroke under every figure, the figures themselves in the text's color (black on the page's ground, white on black; Mat, 2026-10-20). Its
+    words are Apple-style marketing: short sentences, titles too, each ending in a period,
+    US English, every claim one Clover keeps. Every figure is the code's own: sizes from
+    `sizes.json` (measured by the package's build), the parts counted from the
+    Components menu (`counts.ts`), the Cookbook's counts and date from `progress4.ts`.
+    Never write a figure into the copy.
+  - It sits in the parts' grid, beside the held example viewer (`Homepage` passes it to
+    `Parts` as children; the Root draws no box). `StoryLines.tsx` drives it from the
+    scroll, only where the viewer is held: one 3px line from the story at the middle to
+    the part it names (`data-point`, or `viewer` for the frame); `data-lit` on that part
+    and on the tiles crossing the middle; Accessible (`data-turn`) shows the viewer's
+    inspector (`AccessibilityTree.tsx`: WCAG checks measured on the viewer, then an ARIA
+    snapshot with tab stops) and Coverage (`data-recipe`) a Cookbook recipe (0261, a
+    polygon annotation), each crossfading with the viewer (no flip), inert, and given
+    up when focus comes to the viewer (2.4.7); Yours (`data-brand`) previews Northwestern
+    purple site-wide without keeping it (never the font, which would shift the layout;
+    not on a dark page, where it would fail 1.4.3); Composable (`data-compose`) has the
+    example viewer's own code editor (a portal into `data-composer`) change the layout
+    Mat set (Content first at 400, then Label, Summary, Items larger), the code
+    crossfading with its new lines lit at a fixed 15 lines, the viewer fading out and in
+    around it, and puts it back after. Each change waits `BAND` past its edge before
+    undoing. Yours has the site's Font family and Color (`BrandPicker.tsx`), which set the
+    whole site and are remembered (`page-theme.ts`); the navbar has no settings of its
+    own (its gear was removed on 2026-10-20), appearance being in the footer.
+  - Scrolling there stays smooth (Mat, 2026-10-20: "everything should VERY SMOOTH"; 0 of
+    1,600 frames over 25ms in Chrome 155, at 1440, 1728 and 390 wide). Keep it so:
+    nothing the scroll drives re-renders React (lights are `data-lit`, written by
+    `StoryLines`; the rest are a handful of state changes, each once per story);
+    `Tile`, the viewer's parts, `ViewerCode` and `RecipeFace` are memoized on what they
+    show; animations are opacity or transform only (no `background-color` or
+    `clip-path`, which the main thread redraws every frame); the recipe and the
+    inspector's snapshot load while the page is idle, never mid-scroll; a change of the
+    viewer renders as a React transition; no `:has()` on the page's root or its
+    ancestors (attributes instead: `data-bar-stuck`, `data-banner`, and
+    `docs/lib/full-width.ts`'s rules); no view transitions (their snapshot costs frames).
+    Measure with a scroll in a current Chrome (`npx playwright` with
+    `channel: "chrome"`), since Playwright's bundled Chromium is slower to restyle.
   - That section is one `Root` for that resource. On the left its parts make a small
     viewer, held in view (by its foot, once taller than the window), with no caption (it
     is a region named "Example Viewer" for assistive technology; never `<Clover.Root />`),
@@ -212,13 +198,26 @@ deadline.
     typed, Escape closes the list and then puts the field back; focus stays in the field.
     Its edge, and the Template button's, is 3:1 (`--pg-edge`): controls only, while the
     stage and the parts' tiles keep their hairlines (Mat, 2026-10-16; the tiles at 3:1
-    was tried and put back). Under the stage, the
-    "Template" dropdown listing the templates by name. No drawings of the layouts, no
+    was tried and put back). Under the stage, in the choice's sentence, the template's
+    dropdown listing the templates by name (named "Default template", its visible name
+    first, WCAG 2.5.3). No drawings of the layouts, no
     fills of light gray, spaces on Clover's golden-ratio scale. Each template shows with its own defaults: no props, no generated code (a
     Customize drawer with both was removed on purpose). The section is wider than the
     reading sections but held off the screen's edges; the stage keeps one height for
     every pairing, with a hairline edge and a small, soft gray shadow (never the accent).
-    Keep it about layout and UX: names and those few words, no marketing lines.
+    Keep the playground itself about layout and UX: names and those few words, no
+    marketing lines; the marketing is in the choice under it and in Why Clover.
+  - The homepage's three sections after the playground open alike, with `SectionIntro`
+    (`docs/components/Home/SectionIntro.tsx`): a hairline over it, a title ending in a
+    period, one short note (`--text-lede`, as the hero's sentence and the choice's), and one call to action (`cta-solid` or `cta-outline`,
+    `tokens.css`). And more (the parts counted, "See them all"), Why Clover ("Read the
+    docs") and Install ("Get started"), the last in the gap after Coverage, beside the
+    held viewer, so the hold runs to the page's foot.
+  - The footer (`docs/components/SiteFooter.tsx`, inside Nextra's `Footer`, styled in
+    `layout.css` on `--surface`) says what Clover is, its history (from the first commit
+    and npm's release dates), its acknowledgments, and that it is MIT licensed and fully
+    open source, holders as `LICENSE` names them (Mat, 2026-10-20). Keep each fact the
+    record's.
   - Headers are solid, never frosted or translucent: the navbar (`docs/styles/layout.css`
     overrides Nextra's blur) and the playground's bar. From 48rem wide, on a screen at
     least 36rem tall (not a phone, where with the navbar it would take too much height),
@@ -232,8 +231,8 @@ deadline.
     2.4.11).
   - Titles and share cards are `pageMetadata` (`docs/lib/site.ts`), the root layout's
     `metadata` and each page's `generateMetadata` (`app/[[...mdxPath]]/page.tsx`): the
-    homepage's title is "Clover IIIF – Imagine a viewer built by you" and the site's
-    description the hero's sentence (less "designed", to fit a search result); a page
+    homepage's title is "Clover IIIF – A viewer as distinctive as your collections" and the site's
+    description the hero's sentence and the field's label; a page
     takes its `title` (front matter, else its first `h1`, Nextra's rule) and its
     `description`. Every page's card picture is a 1200 × 630 band of
     the White catalog's cover, cut by Northwestern's IIIF Image server and linked from

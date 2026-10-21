@@ -13,12 +13,13 @@ const Hero: React.FC = () => (
   <header className={styles.hero}>
     <div className={styles.shell}>
       <h1 className={styles.headline}>
-        Imagine a viewer <span className={styles.mark}>built by you</span>.
+        <span className={styles.line}>
+          A viewer as <span className={styles.mark}>distinctive</span>
+        </span>{" "}
+        <span className={styles.line}>as your collections.</span>
       </h1>
       <p className={styles.subtitle}>
-        Share your distinctive collections through a lightweight, accessible,
-        and modular viewer designed for IIIF Manifests, Collections, and the
-        material they describe.
+        Design the user experience you imagine for your IIIF resources.
       </p>
     </div>
   </header>
