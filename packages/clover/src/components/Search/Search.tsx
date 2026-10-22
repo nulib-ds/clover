@@ -1,10 +1,10 @@
 import React, {
   forwardRef,
   useEffect,
-  useId,
   useState,
   useSyncExternalStore,
 } from "react";
+import { useUniqueId } from "../../ui/useUniqueId";
 
 import { type SearchHit, searchServiceOf } from "../../core/search-service";
 import { selectSequence } from "../../core/selectors";
@@ -47,7 +47,7 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
     clover.highlight.get,
     clover.highlight.get,
   );
-  const id = useId();
+  const id = useUniqueId();
   // The field holds what is typed; a search from elsewhere (the Root) fills it.
   const [draft, setDraft] = useState(search.query);
   useEffect(() => setDraft(search.query), [search.query]);

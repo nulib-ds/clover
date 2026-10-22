@@ -1,11 +1,11 @@
 import React, {
   useCallback,
   useEffect,
-  useId,
   useMemo,
   useRef,
   useState,
 } from "react";
+import { useUniqueId } from "../../ui/useUniqueId";
 
 import ChoiceMenu from "./ChoiceMenu";
 import { type AnimationFrame, resolveBody } from "./layout";
@@ -136,7 +136,7 @@ export function FrameControls({
   const { t, langOf } = useCloverTranslation();
   const { frame, playing, repeat, setFrame, setPlaying, setRepeat } = animation;
   const last = frames.length - 1;
-  const triggerId = `${useId().replace(/:/g, "")}-frames`;
+  const triggerId = `${useUniqueId().replace(/:/g, "")}-frames`;
   const menuId = `${triggerId}-menu`;
   const [open, setOpen] = useState(false);
   const bar = useRef<HTMLDivElement>(null);

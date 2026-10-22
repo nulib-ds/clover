@@ -1,13 +1,12 @@
-import {
-  act,
-  fireEvent,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+/*
+ * Under Preact, as the element ships (`vitest.preact.config.mjs`), so with DOM Testing
+ * Library: React Testing Library would bring React.
+ */
+import { fireEvent, waitFor, within } from "@testing-library/dom";
 
 import { defineCloverViewer } from "./element";
 import bookJson from "../fixtures/iiif-cookbook/0009-book-1.json";
+import renderingJson from "../fixtures/iiif-cookbook/0046-rendering.json";
 import { stubViewport } from "../components/Canvas/testing/viewport";
 import { initCloverI18n } from "../i18n";
 
@@ -32,15 +31,20 @@ vi.mock("../lib/renderer", async (importOriginal) => ({
 let viewport: ReturnType<typeof stubViewport>;
 /** The stylesheet in runs, as the build hands it: the middle one only for a map. */
 const loadMapRun = vi.fn(async () => ".clover-geomap{}");
-beforeAll(() =>
+type CloverViewer = HTMLElement & { iiifContent: unknown };
+/** Made, and given its content, before the element is defined: a script loaded late. */
+let early: CloverViewer;
+beforeAll(() => {
+  early = document.createElement("clover-viewer") as CloverViewer;
+  early.iiifContent = bookJson;
   defineCloverViewer({
     styles: [
       { key: "clover-1", css: ".clover-root{}" },
       { key: "map", when: ".clover-geomap", load: loadMapRun },
       { key: "clover-2", css: ".clover-status{}" },
     ],
-  }),
-);
+  });
+});
 beforeEach(() => {
   initCloverI18n({ lng: "en" });
   viewport = stubViewport();
@@ -50,19 +54,22 @@ afterEach(() => {
   document.body.innerHTML = "";
 });
 
-function mount(attributes: Record<string, string> = {}) {
-  const element = document.createElement("clover-viewer") as HTMLElement & {
-    iiifContent: unknown;
-  };
+function mount(
+  attributes: Record<string, string> = {},
+  content: unknown = bookJson,
+) {
+  const element = document.createElement("clover-viewer") as CloverViewer;
   for (const [name, value] of Object.entries(attributes)) {
     element.setAttribute(name, value);
   }
-  element.iiifContent = bookJson;
-  act(() => {
-    document.body.append(element);
-  });
+  element.iiifContent = content;
+  document.body.append(element);
   return element;
 }
+
+/** Wait for the Viewer to draw its title. */
+const drawn = (element: HTMLElement) =>
+  within(element).findByRole("heading", { name: "Simple Manifest - Book" });
 
 describe("<clover-viewer>", () => {
   it("renders the Viewer in its light DOM, from a IIIF object set as a property", async () => {
@@ -82,9 +89,7 @@ describe("<clover-viewer>", () => {
 
   it("loads a run only some pages need when what needs it draws, in its place", async () => {
     const element = mount();
-    await within(element).findByRole("heading", {
-      name: "Simple Manifest - Book",
-    });
+    await drawn(element);
     const order = () =>
       [...document.head.querySelectorAll("style[data-clover]")].map(
         (style) => (style as HTMLElement).dataset.clover,
@@ -94,30 +99,90 @@ describe("<clover-viewer>", () => {
 
     const map = document.createElement("div");
     map.className = "clover-geomap";
-    await act(async () => {
-      element.querySelector(".clover-root")!.append(map);
-      await Promise.resolve();
-    });
+    element.querySelector(".clover-root")!.append(map);
+    await Promise.resolve();
     await waitFor(() =>
       expect(order()).toEqual(["clover-1", "map", "clover-2"]),
     );
     expect(loadMapRun).toHaveBeenCalledTimes(1);
   });
 
-  it("maps attributes to the Viewer's props, `false` turning a part off", async () => {
-    const element = mount({
-      panel: "false",
-      download: "false",
-      items: "false",
-    });
-    await within(element).findByRole("heading", {
-      name: "Simple Manifest - Book",
-    });
+  it("maps attributes to the Viewer's props, `false`, in any case, turning a part off", async () => {
+    const element = mount({ panel: " FALSE ", items: "False" });
+    await drawn(element);
     expect(within(element).queryByRole("tab", { name: "About" })).toBeNull();
+    expect(element.querySelector(".clover-items")).toBeNull();
+  });
+
+  it("download=false leaves the downloads out of About", async () => {
+    const shown = mount({}, renderingJson);
     expect(
-      within(element).queryByRole("button", { name: "Download" }),
+      await within(shown).findByRole("heading", { name: "Download" }),
+    ).toBeInTheDocument();
+    shown.remove();
+
+    const element = mount({ download: "false" }, renderingJson);
+    await within(element).findByRole("heading", { name: "About" });
+    expect(
+      within(element).queryByRole("heading", { name: "Download" }),
     ).toBeNull();
-    expect(within(element).queryByRole("listbox")).toBeNull();
+    expect(within(element).queryByRole("link", { name: /PDF/ })).toBeNull();
+  });
+
+  it("takes items' layout in any case, and warns of one it doesn't know", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const listed = mount({ items: "List" });
+    await drawn(listed);
+    expect(listed.querySelector(".clover-items")).toHaveAttribute(
+      "data-layout",
+      "list",
+    );
+    expect(warn).not.toHaveBeenCalled();
+
+    const element = mount({ items: "slider" });
+    await drawn(element);
+    expect(element.querySelector(".clover-items")).toHaveAttribute(
+      "data-layout",
+      "carousel",
+    );
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('items="slider"'),
+    );
+    warn.mockRestore();
+  });
+
+  it("takes a property set before the element was defined", async () => {
+    document.body.append(early); // upgraded as it connects
+    expect(await drawn(early)).toBeInTheDocument();
+    expect(Object.prototype.hasOwnProperty.call(early, "iiifContent")).toBe(
+      false,
+    );
+    expect(early.iiifContent).toBe(bookJson);
+  });
+
+  it("gives two viewers on one page ids of their own, each naming its own", async () => {
+    const one = mount();
+    const two = mount();
+    await drawn(one);
+    await drawn(two);
+    const ids = [...document.querySelectorAll("[id]")].map(({ id }) => id);
+    expect(ids.length).toBeGreaterThan(0);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const element of [one, two]) {
+      const references = [
+        ...element.querySelectorAll(
+          "[aria-controls], [aria-labelledby], [aria-describedby], label[for]",
+        ),
+      ].flatMap((node) =>
+        ["aria-controls", "aria-labelledby", "aria-describedby", "for"]
+          .flatMap((name) => node.getAttribute(name)?.split(/\s+/) ?? [])
+          .filter(Boolean),
+      );
+      expect(references.length).toBeGreaterThan(0);
+      for (const id of references) {
+        expect(element.contains(document.getElementById(id))).toBe(true);
+      }
+    }
   });
 
   it("header=false leaves out the title over the stage", async () => {
@@ -175,34 +240,28 @@ describe("<clover-viewer>", () => {
     await waitFor(() => expect(next).toHaveAttribute("lang", "en"));
     expect(element.querySelector(".clover-root")).not.toHaveAttribute("lang");
 
-    act(() => {
-      Element.initCloverI18n({ lng: "fr" });
+    Element.initCloverI18n({ lng: "fr" });
+    // Not even `lang=""`, which says the language is unknown: Preact leaves it.
+    const suivant = await within(element).findByRole("button", {
+      name: "Suivant",
     });
-    expect(
-      await within(element).findByRole("button", { name: "Suivant" }),
-    ).not.toHaveAttribute("lang");
+    await waitFor(() => expect(suivant).not.toHaveAttribute("lang"));
+    expect(element.querySelector('[lang=""]')).toBeNull();
     document.documentElement.lang = "";
   });
 
   it("tears down when removed, and not when moved", async () => {
     const element = mount();
-    await within(element).findByRole("heading", {
-      name: "Simple Manifest - Book",
-    });
+    await drawn(element);
     const other = document.createElement("div");
     document.body.append(other);
-    await act(async () => {
-      other.append(element); // a move: disconnected, then connected again at once
-      await Promise.resolve();
-    });
+    other.append(element); // a move: disconnected, then connected again at once
+    await Promise.resolve();
     expect(
       within(element).getByRole("heading", { name: "Simple Manifest - Book" }),
     ).toBeInTheDocument();
-    await act(async () => {
-      element.remove();
-      await Promise.resolve();
-    });
-    expect(element.childNodes).toHaveLength(0);
-    void screen;
+    element.remove();
+    await Promise.resolve();
+    await waitFor(() => expect(element.childNodes).toHaveLength(0));
   });
 });

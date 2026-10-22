@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 import * as Clover from "../../parts";
 
@@ -24,7 +24,7 @@ export function Lightbox({
   const t = Clover.useT();
   const langOf = Clover.useLangOf();
   const dialog = useRef<HTMLDialogElement>(null);
-  const baseId = useId().replace(/:/g, "");
+  const baseId = Clover.useUniqueId().replace(/:/g, "");
   const titleId = `${baseId}-title`;
   const manifestTitleId = `${baseId}-manifest`;
   // Named by the Canvas's label, else by the Manifest's, so it always has a name.

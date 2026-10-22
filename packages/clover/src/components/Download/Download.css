@@ -1,37 +1,7 @@
 /*
- * Download: a pill (`ui/Button.css`), and a panel of links hanging `xs` below it, `s` by
- * `m` inside. Its groups (this page, the whole work) are `s` apart; a group's title is
- * `2xs` over its links.
+ * Download: its links in groups (this page, the whole work), `s` apart; a group's title
+ * `2xs` over its links. The same wherever they are listed: the part, or About's section.
  */
-.clover-download {
-  position: relative;
-  display: inline-block;
-}
-
-.clover-download-panel {
-  position: absolute;
-  inset-inline-end: 0;
-  top: calc(100% + var(--clover-space-xs));
-  z-index: 10;
-  min-width: 14rem;
-  max-width: min(22rem, 90vw);
-  padding: var(--clover-space-s) var(--clover-space-m);
-  border: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
-  border-radius: var(--clover-radius, 3px);
-  background-color: var(--clover-color-secondary, #fff);
-  box-shadow: 0 var(--clover-space-s) var(--clover-space-l) rgb(0 0 0 / 0.12);
-}
-
-/* Opened near the start of the page, it hangs from the button's start instead. */
-.clover-download[data-align="start"] .clover-download-panel {
-  inset-inline: 0 auto;
-}
-
-.clover-download-panel[hidden] {
-  display: none;
-}
-
-/* The groups, `s` apart, wherever they are listed: the panel, or About's own section. */
 .clover-download-groups {
   display: flex;
   flex-direction: column;

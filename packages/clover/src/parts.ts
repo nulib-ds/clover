@@ -111,6 +111,8 @@ export { Tip } from "./ui/Tip";
 export type { Shortcut } from "./ui/Tip";
 /** Joins a popup of your own to Clover's, which open one at a time. */
 export { useOneOpen } from "./ui/useOneOpen";
+/** An id unique on the page, across Clover's roots: `useId` for a part of your own. */
+export { useUniqueId } from "./ui/useUniqueId";
 /** "Read more" for text of your own that its CSS cuts short, as `Summary` is. */
 export { ReadMore } from "./ui/ReadMore";
 /** A title at a heading level, and past h6, where headings end, the group it names. */

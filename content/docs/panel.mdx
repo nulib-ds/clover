@@ -45,6 +45,7 @@ around it a height and `overflow-y: auto`, as the templates do. Its other props,
 | `onClose`       | `() => void`              | —         | A close button, for a panel floating over the page.             |
 | `closeOnEscape` | `boolean`                 | `false`   | Escape closes it too; its close button moves to its inner edge. |
 | `headingLevel`  | `number`                  | `3`       | Its first headings: one below the heading over it.              |
+| `download`      | `boolean`                 | `true`    | The downloads in About; `false` leaves them out.                |
 | `as`            | element type              | `"aside"` | The element to render.                                          |
 | `children`      | `ReactNode`               | —         | `Tab`s: sections of your own, in place of the defaults.         |
 | `className`     | `string`                  | —         | Added to `clover-panel`.                                        |
@@ -76,11 +77,12 @@ The panel's first section, and a part of its own: the resource's summary, metada
 required statement, rights, homepage, see also, downloads and address. For a Canvas shown
 on its own, it starts with the Manifest the Canvas is part of.
 
-| Prop            | Type      | Default | Description                                              |
-| --------------- | --------- | ------- | -------------------------------------------------------- |
-| `canvasSummary` | `boolean` | `false` | The current Canvas's summary too, before the resource's. |
-| `headingLevel`  | `number`  | `3`     | Its titles: Rights, Homepage and the rest.               |
-| `className`     | `string`  | —       | Added to `clover-about`.                                 |
+| Prop            | Type      | Default | Description                                                 |
+| --------------- | --------- | ------- | ----------------------------------------------------------- |
+| `canvasSummary` | `boolean` | `false` | The current Canvas's summary too, before the resource's.    |
+| `download`      | `boolean` | `true`  | The downloads, Download's links, in a section of their own. |
+| `headingLevel`  | `number`  | `3`     | Its titles: Rights, Homepage and the rest.                  |
+| `className`     | `string`  | —       | Added to `clover-about`.                                    |
 
 ## Examples
 

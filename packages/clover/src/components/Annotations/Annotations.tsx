@@ -1,11 +1,5 @@
-import React, {
-  forwardRef,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { useUniqueId } from "../../ui/useUniqueId";
 
 import { EntryBodies } from "./EntryBodies";
 import {
@@ -210,7 +204,7 @@ function AnnotationGroup({
   onHighlight: (id: string | null) => void;
   onVisible: (visible: boolean) => void;
 }) {
-  const id = useId();
+  const id = useUniqueId();
   // Headings in an entry's Markdown sit under the set's own, or at its level without one.
   const headingLevel = title.text ? setLevel + 1 : setLevel;
   return (
@@ -451,7 +445,7 @@ const AnnotationLayers = forwardRef<
   },
   ref,
 ) {
-  const id = useId();
+  const id = useUniqueId();
   const canvases = useCloverSelector(
     (state) => selectSequence(state.manifest).canvases,
   ) as Array<{ id: string; label?: unknown }>;

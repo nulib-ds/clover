@@ -15,6 +15,7 @@ import { gzipSync } from "node:zlib";
 import { transformSync } from "esbuild";
 
 import { bundleAsConsumer, gzipSize } from "./consumer-bundle.mjs";
+import { elementGzip } from "./element-size.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = resolve(root, "dist");
@@ -145,6 +146,9 @@ export async function measure() {
     sizes[key] = size;
     rows.push([name, key, size]);
   }
+  // `<clover-viewer>`, built standalone: what a page loads up front, styles and all.
+  sizes.webComponentsGzip = elementGzip();
+  rows.push(["<clover-viewer>", "webComponentsGzip", sizes.webComponentsGzip]);
   return { sizes, rows, pages };
 }
 

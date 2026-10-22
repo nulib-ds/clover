@@ -1,10 +1,5 @@
-import React, {
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useUniqueId } from "./useUniqueId";
 
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
 import { useRootLanguage } from "../react/language";
@@ -34,7 +29,7 @@ export function ReadMore({ children }: { children: React.ReactElement }) {
   // Outside a Root (a Summary on its own), the button reads the page's language itself.
   const own = useRootLanguage();
   const ref = useRef<HTMLElement>(null);
-  const fallbackId = useId();
+  const fallbackId = useUniqueId();
   const [open, setOpen] = useState(false);
   const [cut, setCut] = useState(false);
   const child = React.Children.only(children);

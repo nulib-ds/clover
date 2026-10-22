@@ -1,12 +1,13 @@
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useRef } from "react";
+import { useUniqueId } from "./useUniqueId";
 
 /** The popups open now, each with a way to close it. */
 const opened = new Map<string, { current: () => void }>();
 
 /**
  * Clover's popups open one at a time: the Canvas's menus (annotations, Choice, an
- * animation's frames) and its information, the playback controls' menus, the Download
- * list. Opening one closes whichever other is open, anywhere on the page, as a menu bar
+ * animation's frames) and its information, and the playback controls' menus. Opening
+ * one closes whichever other is open, anywhere on the page, as a menu bar
  * does, and however it was opened: a key opens a popup without the press outside that
  * closes a menu.
  *
@@ -20,7 +21,7 @@ const opened = new Map<string, { current: () => void }>();
  * ```
  */
 export function useOneOpen(open: boolean, close: () => void) {
-  const id = useId();
+  const id = useUniqueId();
   const latest = useRef(close);
   latest.current = close;
   useEffect(() => {

@@ -1,4 +1,5 @@
-import React, { useId } from "react";
+import React from "react";
+import { useUniqueId } from "./useUniqueId";
 
 import { langWithin } from "../i18n/config";
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
@@ -23,7 +24,7 @@ export function useContainerName(
   props: { "aria-label"?: string; "aria-labelledby"?: string };
   node: React.ReactNode;
 } {
-  const id = useId();
+  const id = useUniqueId();
   const { hostLanguage: host } = useCloverTranslation(undefined, hostLanguage);
   if (named) return { props: {}, node: null };
   const other = langWithin(lang, host);

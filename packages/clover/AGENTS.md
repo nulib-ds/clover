@@ -1034,7 +1034,18 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     press of play. Once open, the toggle is the × in the top right. Safari may refuse
     the deferred `play()`; it is swallowed, leaving the transport ready.
 - **Web component** (`src/web-components/`): `element.tsx` defines `<clover-viewer>`
-  with React APIs and is tested with React; `index.ts` (the build entry) hands it the
+  with React APIs and is tested under Preact, as it ships (`vitest.preact.config.mjs`,
+  the build's aliases from `build/preact.mjs`, DOM Testing Library rather than React's;
+  the package's own project leaves those tests out). Under Preact, `useId` starts again
+  in each root, so every id Clover makes comes from `useUniqueId` (`ui/useUniqueId.ts`,
+  exported for parts of your own), which each element prefixes with its own number
+  (`IdPrefixContext`); never call `useId` itself. Preact also empties an attribute
+  React removes, and `lang=""` says the language is unknown (WCAG 3.1.2), so the
+  element removes it (`watchLanguages`). A property set before the element is defined
+  (its script loads async) is taken in `connectedCallback`; `"false"` is read in any
+  case, and `items` warns of a layout it doesn't know. The package's `sideEffects`
+  names `dist/web-components/**`, so `import "@nulib/clover/web-components"` defines
+  it in any bundler. `index.ts` (the build entry) hands it the
   stylesheet, MapLibre's worker (`?worker&url`) and a lazy MapLibre stylesheet. The
   stylesheet comes from `virtual:clover-styles`, a plugin in
   `build/web-components.config.mjs` that reads `src/styles/clover.css` in order and cuts
@@ -1047,10 +1058,14 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   fell from 3 to 1). A stylesheet only media or a map needs goes in `DEFERRED`, listed
   with its kind in `clover.css`; the plugin throws if a kind's sheets are not adjacent.
   `build/web-components.config.mjs`
-  aliases React to Preact (`preact/compat`, `/client`, `/jsx-runtime`) and keeps
+  aliases React to Preact (`build/preact.mjs`), strips each chunk's whitespace, which
+  Vite leaves in an ES library (`minifyWhitespace`, about 16 kB gzipped), and keeps
   `base: "./"`: an absolute base wrote the worker as `/assets/…`, which failed from any
   path but the site root. `build/web-components.test.mjs` asserts Preact not React,
-  MapLibre and hls.js deferred, the worker relative, and the up-front size. The element
+  the entry kept by a bundler, MapLibre and hls.js deferred, the worker relative, and
+  the up-front size (`build/element-size.mjs`), held to its budget and recorded in
+  `sizes.json` (`webComponentsGzip`), from which Get Started states it. CI builds the
+  package and runs these (`npm run test:build`). The element
   renders into its light DOM and injects Clover's stylesheet once, first in `<head>`.
 - **Renderers** (`components/Content/renderers.ts`): `renderers` on `Root` go into the
   context (kept while `sameRenderers`, so an inline array does not change the context

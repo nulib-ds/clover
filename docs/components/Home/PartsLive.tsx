@@ -1157,10 +1157,11 @@ function More() {
 
 /**
  * "Why Clover"'s Coverage story, read on the viewer's other side: a Cookbook recipe in a
- * Root of its own, read by the same Content and Annotations, outlined with their names,
- * and the recipe named at the head, so it is plain what is being read. An illustration as
- * the page scrolls, so it is inert: focus and assistive technology stay with the viewer
- * itself, which turns back the moment focus comes to it.
+ * Root of its own (0032, a Collection; Mat, 2026-10-21), read by the same Label, Content,
+ * Metadata and Collection, all but Metadata outlined with their names (Mat, 2026-10-21),
+ * and the recipe named at the head, so it is plain what is being read. An illustration as the page scrolls, so it is inert:
+ * focus and assistive technology stay with the viewer itself, which turns back the moment
+ * focus comes to it.
  */
 const RecipeFace = React.memo(function RecipeFace({
   recipe,
@@ -1177,12 +1178,17 @@ const RecipeFace = React.memo(function RecipeFace({
     >
       <p className={styles.recipeName}>{recipe.name}</p>
       <Clover.Root iiifContent={recipe.url} className={styles.recipeRoot}>
-        <Clover.Label as="p" className={styles.recipeLabel} />
+        <Region name="Label" data-on data-part="label">
+          <Clover.Label as="p" className={styles.recipeLabel} />
+        </Region>
         <Region name="Content" data-on data-part="content">
           <Clover.Content controls={false} style={{ height }} />
         </Region>
-        <Region name="Annotations" data-on data-part="annotations">
-          <Clover.Annotations headingLevel={4} className={styles.recipeNotes} />
+        <Region name="Metadata" data-part="metadata">
+          <Clover.Metadata className={styles.recipeNotes} />
+        </Region>
+        <Region name="Collection" data-on data-part="collection">
+          <Clover.Collection headingLevel={4} className={styles.recipeNotes} />
         </Region>
       </Clover.Root>
     </section>
@@ -1264,7 +1270,7 @@ const LAYOUTS: Clover.ItemsLayout[] = ["carousel", "list", "grid"];
  * The recipe side's Content height, its own: tied to the viewer's code, every change
  * there redrew the recipe's viewer too, unseen.
  */
-const RECIPE_HEIGHT = 280;
+const RECIPE_HEIGHT = 220;
 
 /** The custom property that sizes Items' pictures in a layout (`Items.css`). */
 const itemsSizeProperty = (layout: Clover.ItemsLayout) =>

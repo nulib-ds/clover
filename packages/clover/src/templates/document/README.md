@@ -46,7 +46,7 @@ import "@nulib/clover/templates.css";
 | `defaultSidebarOpen` | open on wide screen          | Whether the page thumbnails start shown.                        |
 | `defaultPanelOpen`   | `false`                      | Whether the information panel starts open.                      |
 | `panelLayout`        | `"accordion"`                | The panel's sections as stacked boxes, or `"tabs"`.             |
-| `download`           | `true`                       | A Download button, when the Manifest or page has a `rendering`. |
+| `download`           | `true`                       | Download's links in the toolbar, where there is a `rendering`.  |
 | `headingLevel`       | `2`                          | The title's level; the panel's sections are a level below.      |
 | `storageKey`         | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.  |
 | …                    |                              | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`… |

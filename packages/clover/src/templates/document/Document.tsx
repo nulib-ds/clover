@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import * as Clover from "../../parts";
 import type { PanelLayout, RootProps } from "../../parts";
@@ -18,11 +18,11 @@ export type DocumentProps = Omit<RootProps, "children"> & {
    * Default's), stacked boxes each opened by its heading, or `"tabs"`.
    */
   panelLayout?: PanelLayout;
-  /** A Download button in the toolbar, listing the Manifest's and the page's `rendering`. Default `true`. */
+  /** The downloads in the toolbar, as links: the page's and the Manifest's `rendering`. Default `true`. */
   download?: boolean;
   /**
    * The title's heading level, to fit the outline of the page around the layout (under
-   * an `h2`, 3). The panel's sections, and the Download menu's groups, are a level below
+   * an `h2`, 3). The panel's sections, and the downloads' groups, are a level below
    * it. Default 2.
    */
   headingLevel?: number;
@@ -55,7 +55,7 @@ export function Document({
   // Past h6 the title is no heading, and names the Viewer instead (`Clover.titled`).
   const title = Clover.titled(
     headingLevel,
-    `${useId().replace(/:/g, "")}-title`,
+    `${Clover.useUniqueId().replace(/:/g, "")}-title`,
   );
   return (
     <Clover.Root
@@ -119,7 +119,7 @@ function DocumentLayout({
    * names its own list.
    */
   const sidebarLang = langOf("templateSidebar");
-  const id = useId().replace(/:/g, "");
+  const id = Clover.useUniqueId().replace(/:/g, "");
   const navigation = Clover.useNavigation();
   const [sidebar, setSidebar] = useState(
     () =>

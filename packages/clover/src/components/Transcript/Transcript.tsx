@@ -1,12 +1,12 @@
 import React, {
   forwardRef,
   useEffect,
-  useId,
   useMemo,
   useRef,
   useState,
   useSyncExternalStore,
 } from "react";
+import { useUniqueId } from "../../ui/useUniqueId";
 import { createPortal } from "react-dom";
 
 import {
@@ -152,7 +152,7 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
       if (item) bringIntoView(item, "nearest");
     }, [active, follow, element]);
 
-    const id = useId();
+    const id = useUniqueId();
     const actions = useSectionActions();
     // The row is named for what it picks among: caption files, or transcripts of any kind.
     const nameKey = tracks.every((each) => each.kind === "captions")

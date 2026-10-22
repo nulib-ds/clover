@@ -2,11 +2,11 @@ import React, {
   createContext,
   useContext,
   useEffect,
-  useId,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
+import { useUniqueId } from "./useUniqueId";
 
 import { titleTag } from "./heading";
 import { Tip } from "./Tip";
@@ -97,7 +97,7 @@ export function Sections({
   headingLevel = 3,
   className,
 }: SectionsProps) {
-  const id = useId();
+  const id = useUniqueId();
   const name = useContainerName(label ?? "", labelLang, label === undefined);
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
   const [own, setOwn] = useState<string | null>(

@@ -1,11 +1,5 @@
-import React, {
-  forwardRef,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { useUniqueId } from "../../ui/useUniqueId";
 
 import { DEFAULT_STYLE_URL, applyDefaultBasemap } from "./basemap";
 import {
@@ -228,7 +222,7 @@ function MapView({
   ...rest
 }: ViewProps) {
   const { t } = useCloverTranslation();
-  const aboutId = useId();
+  const aboutId = useUniqueId();
   // Outside a Root, the map reads the page's language itself, for its strings to mark.
   const root = useRootLanguage(forwardedRef, rest.lang);
   const { langOf } = root;

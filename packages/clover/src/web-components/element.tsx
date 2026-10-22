@@ -7,6 +7,7 @@ import { Default } from "../templates/default/Default";
 import { setMapWorkerUrl } from "../core/map-config";
 import type { IIIFContent } from "../core/load";
 import { initCloverI18n } from "../i18n/config";
+import { IdPrefixContext } from "../ui/useUniqueId";
 
 /**
  * `<clover-viewer>`: Clover's Viewer as a custom element, for a page with no React of its
@@ -18,8 +19,9 @@ import { initCloverI18n } from "../i18n/config";
  * Attributes: `iiif-content`, `canvas-id` (the Canvas to open on), `manifest-id`,
  * `language` (the language to read IIIF text in), `search-query`, `heading-level` (the
  * title's, 2 or more, to fit the page's outline), and `items`, `header`, `panel`,
- * `download` (`"false"` turns one off; `items` also takes `carousel`, `list` or `grid`).
- * The `iiifContent` property takes an object too. Events: `canvaschange`,
+ * `download` (`"false"`, in any case, turns one off; `items` also takes `carousel`,
+ * `list` or `grid`, and warns of anything else). The `iiifContent` property takes an
+ * object too, set before the element is defined or after. Events: `canvaschange`,
  * `manifestchange`, `contentstatechange`, each with its value in `detail`.
  *
  * Clover's own strings follow the page's `<html lang>`, then the reader's browser, as in
@@ -62,8 +64,15 @@ const STRINGS = {
   "search-query": "searchQuery",
 } as const;
 const SWITCHES = ["header", "panel", "download"] as const;
+const LAYOUTS = ["carousel", "list", "grid"] as const;
+
+/** `"false"` as an author might write it: any case, spaces around it. */
+const isOff = (value: string | null) => value?.trim().toLowerCase() === "false";
 
 const injected = new WeakMap<Document, Set<string>>();
+
+/** Elements made so far: each one's ids start with its own number. */
+let made = 0;
 
 /**
  * Put a stylesheet in the document once: first in `<head>`, so the page's own CSS comes
@@ -143,8 +152,14 @@ export function defineCloverViewer(assets: ElementAssets): void {
     static initCloverI18n = initCloverI18n;
 
     private root: ReactRoot | null = null;
+    /*
+     * Preact's `useId` starts again in each root, so without it two viewers on a page
+     * would make the same ids, and one's labels would name the other's controls.
+     */
+    private readonly idPrefix = `clover-viewer-${++made}-`;
     private content: IIIFContent | null = null;
     private observer: MutationObserver | null = null;
+    private languages: MutationObserver | null = null;
 
     /** The content to show: a URL, or a IIIF object (which an attribute cannot carry). */
     get iiifContent(): IIIFContent | null {
@@ -156,11 +171,19 @@ export function defineCloverViewer(assets: ElementAssets): void {
     }
 
     connectedCallback() {
+      // Set before the element was defined (its script loads async), the value sits on
+      // the element itself and hides the setter: take it through the setter instead.
+      if (Object.prototype.hasOwnProperty.call(this, "iiifContent")) {
+        const early = (this as { iiifContent: IIIFContent | null }).iiifContent;
+        delete (this as { iiifContent?: unknown }).iiifContent;
+        this.content = early;
+      }
       const doc = this.ownerDocument;
       runs.forEach((run) => {
         if (run.css !== undefined) inject(doc, run.key, run.css, earlier(run));
       });
       this.watchForDeferred();
+      this.watchLanguages();
       this.root ??= createRoot(this);
       this.update();
     }
@@ -171,6 +194,8 @@ export function defineCloverViewer(assets: ElementAssets): void {
         if (this.isConnected) return;
         this.observer?.disconnect();
         this.observer = null;
+        this.languages?.disconnect();
+        this.languages = null;
         this.root?.unmount();
         this.root = null;
       });
@@ -206,6 +231,27 @@ export function defineCloverViewer(assets: ElementAssets): void {
       });
     }
 
+    /*
+     * Where Clover drops a `lang` (its string now in the page's language), React removes
+     * the attribute, but Preact empties it, and `lang=""` says the language is unknown
+     * (WCAG 3.1.2). Removed as it appears.
+     */
+    private watchLanguages() {
+      if (this.languages) return;
+      this.languages = new MutationObserver((records) => {
+        for (const { target } of records) {
+          const element = target as Element;
+          if (element.getAttribute("lang") === "")
+            element.removeAttribute("lang");
+        }
+      });
+      this.languages.observe(this, {
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["lang"],
+      });
+    }
+
     private emit(type: string, detail: unknown) {
       this.dispatchEvent(new CustomEvent(type, { detail, bubbles: true }));
     }
@@ -219,27 +265,40 @@ export function defineCloverViewer(assets: ElementAssets): void {
         if (value) props[prop] = value;
       }
       const items = this.getAttribute("items");
-      if (items) props.items = items === "false" ? false : items;
+      if (isOff(items)) props.items = false;
+      else if (items) {
+        const layout = items.trim().toLowerCase();
+        if ((LAYOUTS as readonly string[]).includes(layout))
+          props.items = layout;
+        else
+          console.warn(
+            `<clover-viewer>: items="${items}" is not ${LAYOUTS.join(", ")} or false; showing the carousel.`,
+          );
+      }
       const level = Number(this.getAttribute("heading-level"));
       // Past 6 the titles name what they head instead (`ui/heading.ts`).
       if (Number.isInteger(level) && level >= 2) props.headingLevel = level;
       for (const name of SWITCHES) {
-        if (this.getAttribute(name) === "false") props[name] = false;
+        if (isOff(this.getAttribute(name))) props[name] = false;
       }
       this.root.render(
-        <Viewer
-          {...(props as Partial<ViewerProps>)}
-          // Up front: the element is one build, and always draws Default.
-          template={Default}
-          iiifContent={content}
-          onCanvasChange={(canvasId) => this.emit("canvaschange", { canvasId })}
-          onManifestChange={(manifestId) =>
-            this.emit("manifestchange", { manifestId })
-          }
-          onContentStateChange={(state) =>
-            this.emit("contentstatechange", state)
-          }
-        />,
+        <IdPrefixContext.Provider value={this.idPrefix}>
+          <Viewer
+            {...(props as Partial<ViewerProps>)}
+            // Up front: the element is one build, and always draws Default.
+            template={Default}
+            iiifContent={content}
+            onCanvasChange={(canvasId) =>
+              this.emit("canvaschange", { canvasId })
+            }
+            onManifestChange={(manifestId) =>
+              this.emit("manifestchange", { manifestId })
+            }
+            onContentStateChange={(state) =>
+              this.emit("contentstatechange", state)
+            }
+          />
+        </IdPrefixContext.Provider>,
       );
     }
   }

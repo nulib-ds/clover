@@ -1,8 +1,9 @@
-import { build as esbuild } from "esbuild";
+import { build as esbuild, transform } from "esbuild";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
+import { preactAliases } from "./preact.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -95,6 +96,27 @@ function cloverStyles() {
 }
 
 /**
+ * Each chunk without its whitespace. Vite minifies an ES library's names and syntax but
+ * leaves its whitespace, so a consumer's bundler can still read its annotations. The
+ * element is loaded as it is, not bundled again, so it goes too.
+ */
+function minifyWhitespace() {
+  return {
+    name: "minify-whitespace",
+    renderChunk: {
+      order: "post",
+      async handler(code) {
+        const { code: minified } = await transform(code, {
+          minifyWhitespace: true,
+          logLevel: "warning",
+        });
+        return { code: minified, map: null };
+      },
+    },
+  };
+}
+
+/**
  * `<clover-viewer>`, standalone: Preact stands in for React (about 4 kB instead of 45),
  * everything else bundled, lazy parts kept as chunks beside `index.mjs`. As 3.x builds
  * its web components. Run by `npm run build:web-components`, after the main build.
@@ -105,15 +127,8 @@ export default defineConfig({
   // Relative: emitted files (MapLibre's worker) resolve against the module's own URL, so
   // the element works from any path or CDN, not only from the site root.
   base: "./",
-  resolve: {
-    alias: [
-      { find: /^react-dom\/client$/, replacement: "preact/compat/client" },
-      { find: /^react-dom$/, replacement: "preact/compat" },
-      { find: /^react\/jsx-runtime$/, replacement: "preact/jsx-runtime" },
-      { find: /^react$/, replacement: "preact/compat" },
-    ],
-  },
-  plugins: [cloverStyles()],
+  resolve: { alias: preactAliases },
+  plugins: [cloverStyles(), minifyWhitespace()],
   esbuild: { jsx: "automatic", jsxImportSource: "preact" },
   json: { stringify: true },
   define: { "process.env.NODE_ENV": '"production"' },

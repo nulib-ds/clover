@@ -4,6 +4,7 @@ description: "What Clover is and how to start, in React or with the web componen
 ---
 
 import { Callout } from "nextra/components";
+import { loads } from "docs/lib/figures";
 
 # Get Started
 
@@ -95,22 +96,25 @@ it works from any CDN path. On a page with modules, load
 
 ### Attributes
 
-| Attribute           | What it does                                                         |
-| ------------------- | -------------------------------------------------------------------- |
-| `iiif-content`      | What to show: a URL, or a content state.                             |
-| `canvas-id`         | The Canvas to open on.                                               |
-| `manifest-id`       | In a Collection, the Manifest to show.                               |
-| `language`          | The language to read IIIF text in.                                   |
-| `search-query`      | A Content Search to run as the Manifest opens.                       |
-| `items`             | `carousel` (default), `list`, `grid`, or `false` for no thumbnails.  |
-| `header`            | `false` removes the thumbnail and title over the stage.              |
-| `heading-level`     | The title's level, `2` (default) or more, to fit the page's outline. |
-| `panel`, `download` | `false` removes the information panel or the Download button.        |
+| Attribute       | What it does                                                         |
+| --------------- | -------------------------------------------------------------------- |
+| `iiif-content`  | What to show: a URL, or a content state.                             |
+| `canvas-id`     | The Canvas to open on.                                               |
+| `manifest-id`   | In a Collection, the Manifest to show.                               |
+| `language`      | The language to read IIIF text in.                                   |
+| `search-query`  | A Content Search to run as the Manifest opens.                       |
+| `items`         | `carousel` (default), `list`, `grid`, or `false` for no thumbnails.  |
+| `header`        | `false` removes the thumbnail and title over the stage.              |
+| `heading-level` | The title's level, `2` (default) or more, to fit the page's outline. |
+| `panel`         | `false` removes the information panel.                               |
+| `download`      | `false` leaves the downloads out of the panel's About.               |
 
-With `header="false"` there is no title, and the panel's sections take `heading-level`
-themselves.
+`false` is read in any case. An `items` value not in the list shows the carousel, with a
+warning in the console. With `header="false"` there is no title, and the panel's sections
+take `heading-level` themselves.
 
-The `iiifContent` property takes a IIIF object as well, which an attribute cannot carry:
+The `iiifContent` property takes a IIIF object as well, which an attribute cannot carry,
+set before the element's script has loaded or after:
 
 ```js
 document.querySelector("clover-viewer").iiifContent = manifestJson;
@@ -151,8 +155,8 @@ viewer.addEventListener("canvaschange", (event) => {
 
 ### What it loads
 
-About 90 kB gzip up front: the Viewer in its Default template, Preact and the stylesheet (3.x's element loads about
-530 kB). Everything else waits until it is needed: video streaming (hls.js), the sanitizer,
+{loads.element} kB gzipped up front: the Viewer in its Default template, Preact and the
+stylesheet, as the package's build measures it (3.x's element loads about 530 kB). Everything else waits until it is needed: video streaming (hls.js), the sanitizer,
 an animation's player, and the map — MapLibre, its worker and its stylesheet load the first
 time a map is shown.
 

@@ -42,10 +42,10 @@ unless they say otherwise.
   `@layer clover`.
 - It has a fixed attribute table, one object property (`iiifContent`), and three bubbling
   events (`canvaschange`, `manifestchange`, `contentstatechange`).
-- It is built with React aliased to Preact (`build/web-components.config.mjs`). It has a
-  104 kB budget and measures 103.3 kB.
+- It is built with React aliased to Preact (`build/web-components.config.mjs`). It
+  measures 86.7 kB gzip up front, against an 86.8 kB budget (103.3 kB before phase 0).
 
-Bugs to fix first, whatever else follows:
+Bugs to fix first, whatever else follows (all fixed in phase 0, October 21, 2026):
 
 1. **`import "@nulib/clover/web-components"` can define nothing.** The package marks
    itself side-effect-free (`package.json` `sideEffects: ["*.css"]`), so a bundler may
@@ -64,6 +64,17 @@ Bugs to fix first, whatever else follows:
    ships, and the size budget isn't enforced in CI either.
 8. **The minified bundle keeps its whitespace.** Vite's ES library output leaves it in;
    stripping it saves about 18 kB.
+
+How each was fixed: `sideEffects` names `dist/web-components/**`, and a build test bundles
+the import with esbuild (1). `download` passes through `Default` and `Panel` to `About`
+(2). `sizes.json` records `webComponentsGzip`, which Get Started states (3). Every id comes
+from `useUniqueId`, which each element prefixes, and ESLint forbids `useId` in the package
+(4). `connectedCallback` takes a property set early (5). `"false"` is read in any case,
+and `items` warns of a layout it doesn't know (6). The element's tests run under Preact,
+and CI builds the package and runs `test:build` (7). A `renderChunk` step strips each
+chunk's whitespace: 16.6 kB gzip (8). The Preact tests found a ninth: Preact empties a
+`lang` that React removes, so after a language change the element marked its words
+`lang=""`, the language unknown (WCAG 3.1.2). The element removes those now.
 
 ## Architecture
 

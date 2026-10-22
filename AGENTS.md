@@ -172,8 +172,9 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     the part it names (`data-point`, or `viewer` for the frame); `data-lit` on that part
     and on the tiles crossing the middle; Accessible (`data-turn`) shows the viewer's
     inspector (`AccessibilityTree.tsx`: WCAG checks measured on the viewer, then an ARIA
-    snapshot with tab stops) and Coverage (`data-recipe`) a Cookbook recipe (0261, a
-    polygon annotation), each crossfading with the viewer (no flip), inert, and given
+    snapshot with tab stops) and Coverage (`data-recipe`) a Cookbook recipe (0032, a
+    Collection, read by Label, Content, Metadata and Collection, all outlined but Metadata;
+    Mat, 2026-10-21), each crossfading with the viewer (no flip), inert, and given
     up when focus comes to the viewer (2.4.7); Seamless (`data-brand`) previews Northwestern
     purple without keeping it, on what is in view as it begins (the navbar, the viewer,
     the stories and their line, the tiles and chips on screen; `previewPageTheme`'s
@@ -405,7 +406,9 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
 - The package builds to `packages/clover/dist/`; the site's static assets are in `public/`.
 - Tests are colocated near code as `*.test.ts|tsx`: the package's, and the docs' own
   helpers in `docs/lib/` (the root `vitest.config.mjs`), run together through
-  `vitest.workspace.mjs`.
+  `vitest.workspace.mjs`, with `<clover-viewer>`'s under Preact, as it ships
+  (`packages/clover/vitest.preact.config.mjs`). CI also builds the package and runs
+  `npm run test:build`, the build's own checks and budgets.
 
 ## Nextra 4
 

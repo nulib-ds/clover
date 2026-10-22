@@ -453,16 +453,21 @@ describe("templates", () => {
     ).toBeInTheDocument();
   });
 
-  it("Document: the Download menu's groups a level under the title", async () => {
+  it("Document: the downloads in the toolbar, as links, their groups a level under the title", async () => {
     render(<Templates.Document iiifContent={renderingJson} headingLevel={4} />);
     await screen.findByRole("heading", { level: 4 });
     const toolbar = document.querySelector<HTMLElement>(
       ".clover-template-document-toolbar",
     )!;
-    fireEvent.click(within(toolbar).getByRole("button", { name: "Download" }));
     expect(
       within(toolbar).getByRole("heading", { level: 5, name: "All pages" }),
     ).toBeInTheDocument();
+    expect(
+      within(toolbar).getByRole("link", { name: /PDF version/ }),
+    ).toBeInTheDocument();
+    expect(
+      within(toolbar).queryByRole("button", { name: "Download" }),
+    ).toBeNull();
   });
 
   it("Document: a title that would be past h6 names what it heads, never an h6 beside its own", async () => {

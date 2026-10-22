@@ -49,6 +49,15 @@ export default tseslint.config(
       "no-restricted-imports": [
         "error",
         {
+          // Preact starts `useId` again in each `<clover-viewer>`; `useUniqueId` doesn't.
+          paths: [
+            {
+              name: "react",
+              importNames: ["useId"],
+              message:
+                "Use useUniqueId (src/ui/useUniqueId.ts): ids stay unique across <clover-viewer>s.",
+            },
+          ],
           patterns: [
             {
               group: [

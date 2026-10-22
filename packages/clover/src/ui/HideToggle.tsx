@@ -1,4 +1,5 @@
-import React, { useId } from "react";
+import React from "react";
+import { useUniqueId } from "./useUniqueId";
 
 import { Tip } from "./Tip";
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
@@ -22,7 +23,7 @@ export function HideToggle({
   of?: string;
 }) {
   const { t, langOf } = useCloverTranslation();
-  const id = useId();
+  const id = useUniqueId();
   const key = of ? "annotationsHideTip" : "annotationsHide";
   return (
     <label className="clover-hide">

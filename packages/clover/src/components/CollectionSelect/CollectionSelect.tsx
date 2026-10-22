@@ -1,4 +1,5 @@
-import React, { forwardRef, useEffect, useId, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
+import { useUniqueId } from "../../ui/useUniqueId";
 
 import { itemsOfCollection } from "../../core/items";
 import { localize } from "../../core/value";
@@ -50,7 +51,7 @@ export const CollectionSelect = forwardRef<HTMLElement, CollectionSelectProps>(
     const { clover, language } = useClover("CollectionSelect");
     const collection = useCloverSelector((state) => state.collection);
     const shown = useCloverSelector((state) => state.manifest?.id ?? "");
-    const id = useId();
+    const id = useUniqueId();
     // The choice holds while its Manifest loads, rather than snapping back.
     const [pending, setPending] = useState<string | null>(null);
     useEffect(() => setPending(null), [shown, collection]);

@@ -12,6 +12,23 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`download` on `About`, `Panel` and `Default`.** `false` leaves the downloads out of
+  About, as `Document`'s `download` leaves them out of its toolbar. On `<clover-viewer>`,
+  `download="false"` passes it, and so does what Get Started said: it did nothing, since
+  `Default` has no Download of its own.
+
+  ```jsx
+  <Viewer iiifContent={url} template={Default} download={false} />
+  ```
+
+- **`Clover.useUniqueId()`, for a part of your own.** An id unique on the page across
+  Clover's roots, React's or `<clover-viewer>`'s, which Clover's parts now use where they
+  used React's `useId`. Use it for an id your part's labels or `aria-controls` point at.
+
+  ```jsx
+  const id = Clover.useUniqueId();
+  ```
+
 - **`Clover.titled(level, id)`, for a layout of your own.** A title at a heading level
   and the group it heads: to `h6`, the heading (`as`); past it, a `p` with `id`, and
   `role="group"` with `aria-labelledby` for the element round what it heads, as Clover's
@@ -246,8 +263,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   classic `<script>` from a CDN). Built on its own with Preact standing in for React.
   Attributes `iiif-content`, `canvas-id`, `manifest-id`, `language`, `search-query`,
   `items`, `header`, `panel`, `download`; an `iiifContent` property for objects; events
-  `canvaschange`, `manifestchange`, `contentstatechange`. Light DOM, as 3.x's. About
-  96 kB gzip up front (3.x's element: about 530 kB); MapLibre, its worker and its
+  `canvaschange`, `manifestchange`, `contentstatechange`. Light DOM, as 3.x's. 86.7 kB
+  gzip up front (3.x's element: about 530 kB); MapLibre, its worker and its
   stylesheet load only with a map. Its stylesheet is injected in runs, in the order
   `styles.css` gives them, as `<style data-clover="clover-1">` to `"clover-3"`; the
   rules only video, sound, an animation or a map need (`data-clover="media"`, `"map"`)
@@ -265,10 +282,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **`Clover.Download`**, as 3.x's Viewer offers it: the `rendering` of the Canvases in
   view ("This page") and of the Manifest ("All pages") — a PDF, a text, a full-size file —
-  as links behind one button, opening towards the side with room. It is in `Document`'s
-  toolbar (`download={false}` removes it, 3.x's `showDownload`); `Default` lists the same
-  links in the `Panel`'s About instead. It renders nothing when there is
-  nothing to download.
+  as links, each with its format. It is in `Document`'s toolbar, and `Default` lists the
+  same links in the `Panel`'s About; in either, `download={false}` leaves them out (3.x's
+  `showDownload`). It renders nothing when there is nothing to download.
 - **Renderers of your own** (3.x's `customDisplays`): `renderers` on `Root` (or one
   `Content`) draws the views it claims — by Canvas id, painted body `format`, or a `match`
   test — with your component instead of `Canvas`. It gets the view's `canvases`, their
@@ -1019,7 +1035,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   in a `.clover-read-more` box with its button, and an empty one renders nothing.
 
 - **Popups open one at a time.** The Canvas's information and its menus (annotations,
-  Choice, an animation's frames), the playback controls' menus and `Download`'s list:
+  Choice, an animation's frames) and the playback controls' menus:
   opening one closes whichever other is open, anywhere on the page, however it was
   opened. A key opens one without the press outside that closes a menu, so the
   information box and the annotations menu could both be open, one over the other. Each
@@ -1484,6 +1500,24 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **`Clover.Download` is its links, not a button that opens them.** Wherever it is, it
+  shows "This page" and "All pages", each with its links, as About's section always has;
+  `Document`'s toolbar lays them in a row. Its `children`, the button's text, is gone,
+  and so are `.clover-download-button` and `.clover-download-panel`, with the
+  `data-open` and `data-align` on `.clover-download`. Drop the `children`, and restyle
+  the groups (`.clover-download-groups`, `-group`, `-title`, `-list`, `-link`) instead.
+
+  ```diff
+  - <Clover.Download>Download the text</Clover.Download>
+  + <Clover.Download />
+  ```
+
+- **`<clover-viewer>` loads 86.7 kB gzip up front, down from 103.3 kB.** Vite leaves an
+  ES library's whitespace in, for a bundler to read its annotations; the element is
+  loaded as built, so each of its chunks is now stripped of it. Its budget is 86.8 kB,
+  and `sizes.json` records it (`webComponentsGzip`). The parts' ids (see
+  `useUniqueId`) put `Default`'s budget up to 66.7 kB and `Gallery`'s to 58.5 kB.
+
 - **No heading past `h6`: a title that would be an `h7` names what it heads instead.**
   Every part capped its headings at 6, so under a page's `h3` or deeper a template's
   deepest titles were drawn as `h6`, siblings of the heading they belong under: in
@@ -1537,6 +1571,22 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   children) is now clipped to it, so draw it on the entry itself.
 
 ### Fixed
+
+- **`import "@nulib/clover/web-components"` defines `<clover-viewer>` in any bundler.**
+  The package's `sideEffects` named only its CSS, so a bundler could drop an import made
+  for its effect, and esbuild did. It names `dist/web-components/**` too.
+- **Two `<clover-viewer>`s on one page make ids of their own.** Preact, which draws the
+  element, starts `useId` again in each root, so the second viewer's labels,
+  `aria-controls` and `for` named the first's controls (WCAG 1.3.1, 4.1.2). Each element
+  now prefixes its ids with its own number.
+- **`<clover-viewer>` takes an `iiifContent` set before it is defined.** Its script loads
+  async, so a page could set the property first, and the value hid the element's own.
+- **`<clover-viewer>` reads `"false"` in any case, and checks `items`.** `FALSE` or
+  `" false "` turns a part off. An `items` that is not `carousel`, `list`, `grid` or
+  `false` shows the carousel, with a warning in the console, rather than passing on.
+- **`<clover-viewer>` never marks its words `lang=""`.** Where Clover drops a `lang`
+  after the language changes, React removes the attribute but Preact empties it, and
+  `lang=""` says the language is unknown (WCAG 3.1.2). The element removes it.
 
 - **The Lightbox's title keeps its look at any level.** It was styled by tag
   (`.clover-template-lightbox-header :is(h2, h3, h4, h5, h6)`); it is now

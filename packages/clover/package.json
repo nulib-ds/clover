@@ -4,7 +4,8 @@
   "description": "Composable IIIF components for React, and its Viewer as a web component: Clover 4.x, in development.",
   "license": "MIT",
   "sideEffects": [
-    "*.css"
+    "*.css",
+    "./dist/web-components/**"
   ],
   "exports": {
     ".": {
@@ -33,7 +34,7 @@
     "clean": "rimraf dist",
     "build": "npm run clean && vite build && node build/styles.mjs && npm run build:types && npm run build:web-components && npm run build:sizes",
     "test": "vitest",
-    "test:ci": "vitest run",
+    "test:ci": "vitest run && vitest run --config vitest.preact.config.mjs",
     "test:build": "node --test build/*.test.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build:types": "dts-bundle-generator --project tsconfig.json --out-file dist/index.d.mts src/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/templates/index.d.mts src/templates/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/map/index.d.mts src/map/index.ts --no-check",

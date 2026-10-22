@@ -26,8 +26,8 @@ export {
 export const kB = (bytes: number) => (bytes / 1000).toFixed(1);
 
 /**
- * What a reader's browser loads, in kB gzipped, for a Canvas and for the Viewer with its
- * Default template: each a thing that draws. Never the Viewer before its template, which
+ * What a reader's browser loads, in kB gzipped, for a Canvas, for the Viewer with its
+ * Default template, and for `<clover-viewer>`: each a thing that draws. Never the Viewer before its template, which
  * draws nothing on its own (Mat, 2026-10-21).
  */
 export const loads = {
@@ -35,6 +35,8 @@ export const loads = {
   canvas: kB(sizes.canvasInitialGzip),
   /** The Viewer with its Default template. */
   defaultTemplate: kB(sizes.defaultTemplateGzip),
+  /** `<clover-viewer>`: the Viewer in its Default template, Preact and the stylesheet. */
+  element: kB(sizes.webComponentsGzip),
 };
 
 const recipes = cookbookSections.flatMap((section) => section.recipes);

@@ -1,4 +1,5 @@
-import React, { useId } from "react";
+import React from "react";
+import { useUniqueId } from "../../ui/useUniqueId";
 
 import { isLoneCanvas } from "../../core/load";
 import { localize } from "../../core/value";
@@ -23,7 +24,7 @@ export default function PartOfManifest({
 }) {
   const { t, langOf } = useCloverTranslation();
   const { clover, language } = useClover("About");
-  const id = useId();
+  const id = useUniqueId();
   const parts = ([] as Array<Record<string, any>>)
     .concat(manifest.partOf ?? [])
     .filter((part) => part?.id && (!part.type || part.type === "Manifest"));

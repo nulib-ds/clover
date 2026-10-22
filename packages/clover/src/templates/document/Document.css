@@ -32,6 +32,33 @@
   border-bottom: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
 }
 
+/*
+ * Its downloads, links on the toolbar's row (Mat, 2026-10-21): each group's title, then
+ * its links, a line of their own where there is no room beside the title.
+ */
+.clover-template-document-toolbar .clover-download-groups {
+  flex-direction: row;
+  flex-wrap: wrap;
+  column-gap: var(--clover-space-m);
+}
+
+.clover-template-document-toolbar .clover-download-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--clover-space-s);
+}
+
+.clover-template-document-toolbar .clover-download-title {
+  margin: 0;
+}
+
+.clover-template-document-toolbar .clover-download-list {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--clover-space-s);
+}
+
 /* The whole title, wrapped: zoomed, on a phone or spaced out it is never cut short. */
 .clover-template-document-title {
   flex: 1 1 6rem;

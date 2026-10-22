@@ -163,10 +163,10 @@ button.clover-canvas-button[data-button="reset"]:is(:hover, :focus-visible)
 }
 
 /*
- * Text buttons: Download's button and Search's. The label is `m` from the rounded ends
- * and `xs` from the top and bottom; an icon beside it, `xs` from the text.
+ * Text buttons: Search's. The label is `m` from the rounded ends and `xs` from the top
+ * and bottom; an icon beside it, `xs` from the text.
  */
-:is(button.clover-download-button, button.clover-content-search-submit) {
+button.clover-content-search-submit {
   display: inline-flex;
   align-items: center;
   gap: var(--clover-space-xs);
@@ -179,11 +179,7 @@ button.clover-canvas-button[data-button="reset"]:is(:hover, :focus-visible)
   transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
 }
 
-:is(button.clover-download-button, button.clover-content-search-submit):is(
-    :hover,
-    :focus-visible
-  ):not(:disabled),
-button.clover-download-button[aria-expanded="true"] {
+button.clover-content-search-submit:is(:hover, :focus-visible):not(:disabled) {
   border-color: var(--clover-color-accent, #0065c3);
   background-color: var(--clover-color-accent, #0065c3);
   /* On the accent, the round controls' glyph color: kept 4.5:1 from it in either mode. */

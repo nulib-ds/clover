@@ -78,9 +78,10 @@ const stories: Story[] = [
     point: "viewer",
     turn: true,
     title: "Made for everyone.",
-    body: "Built on WAI-ARIA's patterns, part by part. Every control works from the keyboard, with a name for screen readers. Text reflows and resizes. Focus stays in sight. Motion only when the reader wants it.",
+    body: "Clover is designed with every person in mind. It aims for a high level of accessibility, with WAI-ARIA patterns that screen readers understand, colors that meet contrast rules, and controls that work from the keyboard alone.",
     figures: [
-      { value: "2.2 AA", caption: "the WCAG level every part is held to" },
+      // Mat's call, 2026-10-21, knowing ACCESSIBILITY.md's open items: close them to keep it true.
+      { value: "2.2 AA", caption: "WCAG level compliant" },
     ],
   },
   {
@@ -107,7 +108,7 @@ const stories: Story[] = [
     figures: [
       {
         value: String(partCount),
-        caption: "IIIF-focused components to compose with",
+        caption: "IIIF-focused components",
       },
     ],
     composer: true,
@@ -136,9 +137,16 @@ const stories: Story[] = [
   },
   {
     label: "Coverage",
-    // Cookbook 0261, a polygon annotation, read by the same Content and Annotations.
-    point: "annotations",
-    recipe: { slug: "0261-non-rectangular-commenting" },
+    /*
+     * Cookbook 0032, a Collection, read by the same Label, Content, Metadata and
+     * Collection (Mat, 2026-10-21), the line drawn to the Collection.
+     */
+    point: "collection",
+    recipe: {
+      slug: "0032-collection",
+      resource:
+        "https://iiif.io/api/cookbook/recipe/0032-collection/collection.json",
+    },
     title: "Reads the Cookbook.",
     body: (
       <>
@@ -147,12 +155,12 @@ const stories: Story[] = [
         <Link href="/docs/cookbook">Open each one in the Viewer</Link>.
       </>
     ),
+    // What Clover handles, with no total and no count in part (Mat, 2026-10-21).
     figures: [
       {
         value: String(cookbook.handled),
-        caption: `of ${cookbook.recipes} IIIF Cookbook recipes, handled`,
+        caption: "IIIF Cookbook recipes handled",
       },
-      { value: String(cookbook.inPart), caption: "more, in part" },
     ],
   },
 ];

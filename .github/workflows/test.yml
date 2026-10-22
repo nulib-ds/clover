@@ -36,3 +36,11 @@ jobs:
 
       - name: Run tests
         run: npm run test:ci
+
+      # The package as consumers get it: its entries, what each loads and when, and
+      # `<clover-viewer>` built with Preact, each held to its budget (`build/*.test.mjs`).
+      - name: Build the package
+        run: npm run build
+
+      - name: Check the build
+        run: npm run test:build

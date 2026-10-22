@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import * as Clover from "../../parts";
 import type { PanelLayout, ItemsLayout, RootProps } from "../../parts";
@@ -43,6 +37,8 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    * stacked boxes each opened by its heading, or `"tabs"`.
    */
   panelLayout?: PanelLayout;
+  /** The downloads in the panel's About, as links. Default `true`. */
+  download?: boolean;
   /** The thumbnails under the stage: a layout, or `false` for none. Default `carousel`. */
   items?: Exclude<ItemsLayout, "pager"> | false;
   /**
@@ -78,6 +74,7 @@ export function Default({
   panel = true,
   defaultPanelOpen,
   panelLayout = "accordion",
+  download = true,
   items = "carousel",
   storageKey = "clover-template-default",
   fill = false,
@@ -93,7 +90,7 @@ export function Default({
   const [choice, setChoice] = useState<boolean | undefined>(defaultPanelOpen);
   const open = choice ?? beside;
   const setOpen = (value: boolean) => setChoice(value);
-  const baseId = useId().replace(/:/g, "");
+  const baseId = Clover.useUniqueId().replace(/:/g, "");
   const panelId = `${baseId}-panel`;
   // Past h6 the title is no heading, and names the Viewer instead (`Clover.titled`).
   const title = Clover.titled(headingLevel, `${baseId}-title`);
@@ -248,6 +245,7 @@ export function Default({
             <Clover.Panel
               ref={panelRef}
               layout={panelLayout}
+              download={download}
               // With no title over them, the sections take its place in the outline.
               headingLevel={header ? below(headingLevel) : headingLevel}
               // Docked, the toggle closes it; over the stage, it carries its own close.

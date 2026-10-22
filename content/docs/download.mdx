@@ -1,6 +1,6 @@
 ---
 title: Download
-description: "The rendering of the page in view and of the Manifest, a PDF, a text or a full-size file, as links behind one button."
+description: "The rendering of the page in view and of the Manifest, a PDF, a text or a full-size file, as links in two groups."
 ---
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
@@ -10,7 +10,7 @@ import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
 
 <div className="docs-lede">
   What there is to download, such as a PDF, a text or a full-size image, as
-  links behind one button.
+  links: for this page, and for all of them.
 </div>
 
 <Example>
@@ -33,15 +33,14 @@ import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
 ## API Reference
 
 Inside a `Root`, it lists the `rendering` of the Canvases in view, under "This page", and
-of the Manifest, under "All pages", as links behind one button. With neither, it renders
-nothing. Its other props go to the `div` around the button and its list; it takes no `as`
-or `ref`.
+of the Manifest, under "All pages", as links, each with its format. With neither, it
+renders nothing. Its other props go to the `div` around its groups; it takes no `as` or
+`ref`.
 
-| Prop           | Type        | Default                  | Description                                             |
-| -------------- | ----------- | ------------------------ | ------------------------------------------------------- |
-| `children`     | `ReactNode` | `"Download"`, translated | What the button says.                                   |
-| `headingLevel` | `number`    | `3`                      | The groups' headings: one below the heading above them. |
-| `className`    | `string`    | —                        | Added to `clover-download`.                             |
+| Prop           | Type     | Default | Description                                             |
+| -------------- | -------- | ------- | ------------------------------------------------------- |
+| `headingLevel` | `number` | `3`     | The groups' headings: one below the heading above them. |
+| `className`    | `string` | —       | Added to `clover-download`.                             |
 
 ## Examples
 
@@ -64,29 +63,10 @@ the heading it sits under, here `4` under an `h3`.
 
 </Example>
 
-### Button text
-
-Give the button words of your own as its children, with a `lang` where they are not in
-the page's language.
-
-<Example>
-<PartDemo
-  part="Download"
-  resource="page-transcript"
-  content
-  props={{ children: "Download the text", headingLevel: 4 }}
-/>
-
-```jsx
-<Clover.Download>Download the text</Clover.Download>
-```
-
-</Example>
-
 ### In the templates
 
-`Document` puts it in its toolbar, and `download={false}` leaves it out. `Default` lists
-the same links in its Panel's About, with no button.
+`Document` puts its links in its toolbar, and `Default` lists them in its Panel's About.
+In either, `download={false}` leaves them out.
 
 <ViewerExample
   resource="https://nulib-ds.github.io/clover/mocks/page-transcript/manifest.json"
@@ -102,9 +82,9 @@ the same links in its Panel's About, with no button.
 
 </ViewerExample>
 
-### Without the button
+### One resource's rendering
 
-For one resource's `rendering` as a plain list of links, use
+For one resource's `rendering` alone, as a plain list of links, use
 [`Rendering`](/docs/primitives/rendering).
 
 <Example>
@@ -125,5 +105,5 @@ For one resource's `rendering` as a plain list of links, use
 
 [Clover 3.x › Viewer](/docs/3.x/viewer#api-reference)
 
-- `options.showDownload` is `Document`'s `download`.
+- `options.showDownload` is the templates' `download`, `Document`'s and `Default`'s.
 - In a layout of your own, place `Download` where you want it.

@@ -1,4 +1,5 @@
-import React, { useId } from "react";
+import React from "react";
+import { useUniqueId } from "../../ui/useUniqueId";
 
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import Button from "../../ui/Button";
@@ -28,7 +29,7 @@ export function PanelToggle({
   controls,
 }: PanelToggleProps) {
   const { t, langOf } = useCloverTranslation();
-  const id = useId().replace(/:/g, "");
+  const id = useUniqueId().replace(/:/g, "");
   return (
     <Button
       id={`panel-${id}`}

@@ -1,4 +1,5 @@
-import React, { useEffect, useId, useRef, useState } from "react";
+import React from "react";
+import { useUniqueId } from "../../ui/useUniqueId";
 
 import { selectVisibleCanvases } from "../../core/selectors";
 import { type LanguageMapLike, localize } from "../../core/value";
@@ -6,12 +7,9 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
 import { titleTag } from "../../ui/heading";
-import { useOneOpen } from "../../ui/useOneOpen";
 
 export interface DownloadProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "children"> {
-  /** What the button says. Default: a translated "Download". */
-  children?: React.ReactNode;
   /**
    * The level of its groups' titles ("This page", "All pages"), a level under the
    * heading it sits beneath. Default 3.
@@ -88,7 +86,7 @@ export function DownloadGroups({
   headingLevel = 3,
 }: DownloadGroupsProps) {
   const { t, langOf } = useCloverTranslation();
-  const id = useId();
+  const id = useUniqueId();
   // Past 6 not a heading (`ui/heading.ts`): each group is named by it either way.
   const Heading = titleTag(headingLevel) as "h3";
   const list = (titleKey: string, items: Rendering[], key: string) =>
@@ -135,92 +133,22 @@ export function DownloadGroups({
   );
 }
 
-/** About as wide as the panel opens (its `min-width`, 14rem, with a margin). */
-const PANEL_WIDTH = 256;
-
 /**
  * Downloads, as 3.x's Viewer offers them: the `rendering` of the Canvases in view ("This
  * page") and of the Manifest ("All pages") — a PDF, a text, a high-resolution file —
- * behind one button, each a link. Escape, a press outside, focus moving out of it or
- * another popup opening (`useOneOpen`) closes it. Renders nothing when there is nothing to
- * download.
+ * each a link, as Homepage lists a resource's pages (Mat, 2026-10-21: links, not a
+ * button that opens them). Renders nothing when there is nothing to download.
  */
 export function Download({
   className,
-  children,
   headingLevel = 3,
-  onBlur,
-  onKeyDown,
   ...rest
 }: DownloadProps) {
-  const { t, langOf } = useCloverTranslation();
   const { page, all } = useDownloads();
-  const [open, setOpen] = useState(false);
-  useOneOpen(open, () => setOpen(false));
-  // Which way the panel opens: towards the side with room, measured as it opens.
-  const [align, setAlign] = useState<"start" | "end">("end");
-  const id = useId();
-  const root = useRef<HTMLDivElement>(null);
-  const button = useRef<HTMLButtonElement>(null);
-
-  // A press outside closes it.
-  useEffect(() => {
-    if (!open) return;
-    const away = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) setOpen(false);
-    };
-    document.addEventListener("pointerdown", away);
-    return () => document.removeEventListener("pointerdown", away);
-  }, [open]);
-
   if (!page.length && !all.length) return null;
-
   return (
-    <div
-      {...rest}
-      ref={root}
-      className={join("clover-download", className)}
-      data-open={open}
-      data-align={align}
-      onKeyDown={(event) => {
-        // A host's own handler runs too, first; Escape still closes the list.
-        onKeyDown?.(event);
-        if (event.key !== "Escape" || !open) return;
-        // Taken, so a host's modal `<dialog>` or floating panel around it stays open.
-        event.preventDefault();
-        event.stopPropagation();
-        setOpen(false);
-        button.current?.focus();
-      }}
-      onBlur={(event) => {
-        onBlur?.(event);
-        // Focus moving out (Tab on) closes it and stays where it went, so the panel never
-        // covers what is focused. No next target (the window lost focus) keeps it open.
-        const next = event.relatedTarget as Node | null;
-        if (open && next && !root.current?.contains(next)) setOpen(false);
-      }}
-    >
-      <button
-        ref={button}
-        type="button"
-        className="clover-download-button"
-        aria-expanded={open}
-        aria-controls={`${id}-panel`}
-        lang={children == null ? langOf("download") : undefined}
-        onClick={() => {
-          const rect = button.current?.getBoundingClientRect();
-          if (rect && typeof window !== "undefined") {
-            const room = window.innerWidth - rect.left;
-            setAlign(room >= PANEL_WIDTH ? "start" : "end");
-          }
-          setOpen(!open);
-        }}
-      >
-        {children ?? t("download")}
-      </button>
-      <div id={`${id}-panel`} className="clover-download-panel" hidden={!open}>
-        <DownloadGroups page={page} all={all} headingLevel={headingLevel} />
-      </div>
+    <div {...rest} className={join("clover-download", className)}>
+      <DownloadGroups page={page} all={all} headingLevel={headingLevel} />
     </div>
   );
 }

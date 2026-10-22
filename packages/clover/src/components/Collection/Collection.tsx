@@ -1,4 +1,5 @@
-import React, { forwardRef, useEffect, useId } from "react";
+import React, { forwardRef, useEffect } from "react";
+import { useUniqueId } from "../../ui/useUniqueId";
 
 import { Items } from "../Items/Items";
 import { Label } from "../Label/Label";
@@ -31,7 +32,7 @@ export const Collection = forwardRef<HTMLDivElement, CollectionProps>(
   function Collection({ headingLevel = 3, className, ...rest }, ref) {
     const { clover } = useClover("Collection");
     const { t, langOf } = useCloverTranslation();
-    const id = useId();
+    const id = useUniqueId();
     const collection = useCloverSelector((state) => state.collection);
     const partOf = useCloverSelector((state) =>
       partOfCollection(state.manifest),

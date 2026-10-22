@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import React from "react";
 
 import bookJson from "../../fixtures/iiif-cookbook/0009-book-1.json";
@@ -29,18 +29,13 @@ const withPage = {
 };
 
 describe("Download", () => {
-  it("lists the page's and the Manifest's renderings, as links, behind one button", async () => {
+  it("lists the page's and the Manifest's renderings as links, with no button", async () => {
     render(
       <Clover.Root iiifContent={withPage}>
         <Clover.Download />
       </Clover.Root>,
     );
-    const button = await screen.findByRole("button", { name: "Download" });
-    expect(button).toHaveAttribute("aria-expanded", "false");
-    fireEvent.click(button);
-    expect(button).toHaveAttribute("aria-expanded", "true");
-
-    const page = screen.getByRole("region", { name: "This page" });
+    const page = await screen.findByRole("region", { name: "This page" });
     expect(
       within(page).getByRole("link", { name: /Full-size image/ }),
     ).toHaveAttribute("href", "https://example.org/page-1.jpg");
@@ -52,6 +47,7 @@ describe("Download", () => {
     );
     expect(pdf).toHaveTextContent("(application/pdf)");
     expect(pdf).toHaveAttribute("target", "_blank");
+    expect(screen.queryByRole("button")).toBeNull();
   });
 
   it("titles its groups at headingLevel, h3 by default", async () => {
@@ -60,9 +56,8 @@ describe("Download", () => {
         <Clover.Download />
       </Clover.Root>,
     );
-    fireEvent.click(await screen.findByRole("button", { name: "Download" }));
     expect(
-      screen.getByRole("heading", { level: 3, name: "This page" }),
+      await screen.findByRole("heading", { level: 3, name: "This page" }),
     ).toBeInTheDocument();
     unmount();
 
@@ -71,81 +66,35 @@ describe("Download", () => {
         <Clover.Download headingLevel={5} />
       </Clover.Root>,
     );
-    fireEvent.click(await screen.findByRole("button", { name: "Download" }));
     expect(
-      screen.getByRole("heading", { level: 5, name: "This page" }),
+      await screen.findByRole("heading", { level: 5, name: "This page" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 5, name: "All pages" }),
     ).toBeInTheDocument();
   });
 
-  it("closes on Escape, handing focus back, and on a press outside", async () => {
-    render(
+  it("takes a host's class and attributes on its own element", async () => {
+    const { container } = render(
       <Clover.Root iiifContent={renderingJson}>
-        <p>Elsewhere</p>
-        <Clover.Download />
+        <Clover.Download className="mine" data-x="1" />
       </Clover.Root>,
     );
-    const button = await screen.findByRole("button", { name: "Download" });
-    fireEvent.click(button);
-    const kept = fireEvent.keyDown(
-      screen.getByRole("link", { name: /PDF version/ }),
-      { key: "Escape" },
-    );
-    expect(kept).toBe(false);
-    expect(button).toHaveAttribute("aria-expanded", "false");
-    expect(button).toHaveFocus();
-
-    fireEvent.click(button);
-    fireEvent.pointerDown(screen.getByText("Elsewhere"));
-    expect(button).toHaveAttribute("aria-expanded", "false");
-  });
-
-  it("runs a host's own key handler and still closes on Escape", async () => {
-    const onKeyDown = vi.fn();
-    render(
-      <Clover.Root iiifContent={renderingJson}>
-        <Clover.Download onKeyDown={onKeyDown} />
-      </Clover.Root>,
-    );
-    const button = await screen.findByRole("button", { name: "Download" });
-    fireEvent.click(button);
-    fireEvent.keyDown(screen.getByRole("link", { name: /PDF version/ }), {
-      key: "Escape",
-    });
-    expect(onKeyDown).toHaveBeenCalledTimes(1);
-    expect(button).toHaveAttribute("aria-expanded", "false");
-  });
-
-  it("closes as focus moves out of it, leaving focus where it went", async () => {
-    render(
-      <Clover.Root iiifContent={renderingJson}>
-        <Clover.Download />
-        <button type="button">After</button>
-      </Clover.Root>,
-    );
-    const button = await screen.findByRole("button", { name: "Download" });
-    fireEvent.click(button);
-    const link = screen.getByRole("link", { name: /PDF version/ });
-    act(() => link.focus());
-    // Within it, it stays open.
-    expect(button).toHaveAttribute("aria-expanded", "true");
-    const after = screen.getByRole("button", { name: "After" });
-    act(() => after.focus());
-    expect(button).toHaveAttribute("aria-expanded", "false");
-    expect(after).toHaveFocus();
+    await screen.findByRole("link", { name: /PDF version/ });
+    const part = container.querySelector(".clover-download");
+    expect(part).toHaveClass("mine");
+    expect(part).toHaveAttribute("data-x", "1");
   });
 
   it("renders nothing with nothing to download", async () => {
-    render(
+    const { container } = render(
       <Clover.Root iiifContent={bookJson}>
         <Clover.Label as="h1" />
         <Clover.Download />
       </Clover.Root>,
     );
     await screen.findByRole("heading");
-    expect(screen.queryByRole("button", { name: "Download" })).toBeNull();
+    expect(container.querySelector(".clover-download")).toBeNull();
   });
 
   it("lists the same downloads in About, under a Download heading", async () => {
@@ -168,7 +117,5 @@ describe("Download", () => {
       "href",
       "https://fixtures.iiif.io/other/UCLA/kabuki_ezukushi_rtl.pdf",
     );
-    // About has no button of its own: the links are listed, not behind Download's.
-    expect(screen.queryByRole("button", { name: "Download" })).toBeNull();
   });
 });

@@ -1,4 +1,5 @@
-import React, { Suspense, lazy, useId, useRef } from "react";
+import React, { Suspense, lazy, useRef } from "react";
+import { useUniqueId } from "../../ui/useUniqueId";
 
 import { isLoneCanvas } from "../../core/load";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
@@ -24,6 +25,8 @@ export interface AboutProps extends React.HTMLAttributes<HTMLElement> {
    * heading, and names its section instead (`ui/heading.ts`).
    */
   headingLevel?: number;
+  /** List the downloads, Download's links, in a section of their own. Default `true`. */
+  download?: boolean;
 }
 
 /*
@@ -43,6 +46,7 @@ const PartOfManifest = lazy(() => import("./PartOfManifest"));
 export function About({
   canvasSummary = false,
   headingLevel = 3,
+  download = true,
   className,
   ...rest
 }: AboutProps) {
@@ -59,7 +63,7 @@ export function About({
    * About itself, never lost to the page (WCAG 2.4.3).
    */
   const root = useRef<HTMLDivElement>(null);
-  const id = useId();
+  const id = useUniqueId();
   const onOpened = () => {
     const about = root.current;
     const heading = about
@@ -120,7 +124,7 @@ export function About({
       {section("aboutSeeAlso", hasAny("seeAlso"), <SeeAlso />)}
       {section(
         "download",
-        downloads.page.length + downloads.all.length > 0,
+        download && downloads.page.length + downloads.all.length > 0,
         <DownloadGroups
           page={downloads.page}
           all={downloads.all}

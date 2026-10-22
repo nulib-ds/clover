@@ -32,16 +32,17 @@ the Manifest starts to load, and nothing drawn on the server. Its styles are in
 `styles.css`, so it needs no `templates.css`. To have it up front and drawn on the server,
 pass it: `template={Default}`, from `@nulib/clover/templates`.
 
-| Prop               | Default                     | What it does                                                    |
-| ------------------ | --------------------------- | --------------------------------------------------------------- |
-| `header`           | `true`                      | The thumbnail and title over the stage.                         |
-| `headingLevel`     | `2`                         | The title's level; the panel's sections are a level below.      |
-| `panel`            | `true`                      | The information panel and its toggle.                           |
-| `defaultPanelOpen` | —                           | Whether the panel starts open. Unset: open when it fits beside. |
-| `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.             |
-| `items`            | `"carousel"`                | The thumbnails: `"carousel"`, `"list"`, `"grid"`, or `false`.   |
-| `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.      |
-| …                  |                             | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`… |
+| Prop               | Default                     | What it does                                                      |
+| ------------------ | --------------------------- | ----------------------------------------------------------------- |
+| `header`           | `true`                      | The thumbnail and title over the stage.                           |
+| `headingLevel`     | `2`                         | The title's level; the panel's sections are a level below.        |
+| `panel`            | `true`                      | The information panel and its toggle.                             |
+| `download`         | `true`                      | The downloads in the panel's About, where there is a `rendering`. |
+| `defaultPanelOpen` | —                           | Whether the panel starts open. Unset: open when it fits beside.   |
+| `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.               |
+| `items`            | `"carousel"`                | The thumbnails: `"carousel"`, `"list"`, `"grid"`, or `false`.     |
+| `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.        |
+| …                  |                             | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`…   |
 
 Size the stage with `--clover-content-height` (default `min(65vh, 40rem)`).
 

@@ -1,11 +1,12 @@
 {
-  "canvasInitialGzip": 37943,
+  "canvasInitialGzip": 37975,
   "viewerShellGzip": 928,
-  "defaultTemplateGzip": 66453,
-  "documentTemplateGzip": 69169,
-  "galleryTemplateGzip": 58331,
-  "mapInitialGzip": 18011,
+  "defaultTemplateGzip": 66680,
+  "documentTemplateGzip": 69060,
+  "galleryTemplateGzip": 58482,
+  "mapInitialGzip": 18025,
   "mapOnDemandGzip": 289655,
-  "stylesGzip": 11990,
-  "templatesStylesGzip": 2005
+  "stylesGzip": 11989,
+  "templatesStylesGzip": 2052,
+  "webComponentsGzip": 86712
 }

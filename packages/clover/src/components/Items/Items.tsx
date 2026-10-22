@@ -1,11 +1,5 @@
-import React, {
-  forwardRef,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { useUniqueId } from "../../ui/useUniqueId";
 
 import { ItemFigure } from "./Item";
 import { ItemsPager, type Steps } from "./Pager";
@@ -394,7 +388,7 @@ function ItemsView({
   ...rest
 }: ItemsViewProps) {
   const { t } = useCloverTranslation();
-  const id = useId();
+  const id = useUniqueId();
   // Outside a Root, Items reads the page's language itself, for its strings to mark.
   const root = useRootLanguage(forwardedRef, rest.lang);
   const { langOf } = root;

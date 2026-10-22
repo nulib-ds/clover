@@ -1,4 +1,4 @@
-import React, { useId, useState } from "react";
+import React, { useState } from "react";
 
 import * as Clover from "../../parts";
 import type { RootProps } from "../../parts";
@@ -33,7 +33,7 @@ export function Gallery({
   // Past h6 the title is no heading, and names the Viewer instead (`Clover.titled`).
   const title = Clover.titled(
     headingLevel,
-    `${useId().replace(/:/g, "")}-title`,
+    `${Clover.useUniqueId().replace(/:/g, "")}-title`,
   );
   return (
     <Clover.Root

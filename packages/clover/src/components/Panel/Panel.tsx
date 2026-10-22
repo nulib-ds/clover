@@ -116,6 +116,8 @@ export interface PanelProps
   headingLevel?: number;
   /** The element to render. Default `aside`. */
   as?: React.ElementType;
+  /** Whether the default About lists the downloads (`About`'s `download`). Default `true`. */
+  download?: boolean;
   /**
    * `Clover.Tab`s. Without any, the panel has the tabs Clover has data for: About,
    * Contents when the Manifest has Ranges, Search when it has a Content Search service, a
@@ -149,6 +151,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
     closeOnEscape = false,
     headingLevel = 3,
     as: Tag = "aside",
+    download = true,
     className,
     children,
     onKeyDown,
@@ -211,7 +214,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
         {
           value: "about",
           label: tabLabel("informationPanelTabsAbout"),
-          content: <About headingLevel={inner} />,
+          content: <About headingLevel={inner} download={download} />,
         },
         ...(hasCollection
           ? [
