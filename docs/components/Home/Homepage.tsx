@@ -16,7 +16,7 @@ import {
 } from "docs/components/CookbookRecipes/progress4";
 import { partCount } from "docs/components/Home/counts";
 import { FULL_WIDTH } from "docs/lib/full-width";
-import { BrandPicker } from "docs/components/Home/BrandPicker";
+import { BrandCode, BrandControls } from "docs/components/Home/BrandPicker";
 import { SectionIntro } from "docs/components/Home/SectionIntro";
 import sizes from "../../../packages/clover/build/sizes.json";
 
@@ -89,9 +89,10 @@ interface Story {
    */
   composer?: boolean;
   /**
-   * Whether the site's Font family and Color are drawn under its words, setting
-   * the whole site, with the CSS a page would write (`BrandPicker.tsx`); as the story
-   * passes, the site shows another brand a while (`data-brand`, `PartsLive.tsx`).
+   * Whether the site's Font family and Color take the column its figures would, setting
+   * the whole site, its figures under its words instead, then the CSS a page would write
+   * (`BrandPicker.tsx`; Mat, 2026-10-21); as the story passes, the site shows another
+   * brand a while (`data-brand`, `PartsLive.tsx`).
    */
   brand?: boolean;
 }
@@ -109,14 +110,18 @@ const stories: Story[] = [
     ],
   },
   {
-    label: "Yours",
-    // The whole viewer, its right edge: all of it takes the page's brand.
-    point: "viewer",
+    label: "Seamless",
+    /*
+     * The thumbnails, their Next as under the pointer, its name showing: the brand's color
+     * on a control, where it shows plainest (Mat, 2026-10-21; `PartsLive.tsx`).
+     */
+    point: "items",
     brand: true,
     title: "Inherits your brand.",
     body: "No font of its own. No base size. Clover takes yours. Its colors are CSS custom properties, so your brand is one line away.",
     figures: [
       { value: "1rem", caption: "yours, the size every space steps from" },
+      { value: "CSS", caption: "variables for simple styling" },
     ],
   },
   {
@@ -190,15 +195,13 @@ const stories: Story[] = [
  * Unlayered, these outweigh Nextra's utilities, which are in cascade layers.
  */
 const HOMEPAGE_CHROME = `${FULL_WIDTH}
-.nextra-navbar > nav, .site-subheader > p, footer.site-footer,
-[class~="x:pb-[env(safe-area-inset-bottom)]"] > div:first-child {
+.nextra-navbar > nav, .site-subheader > p, footer.site-footer {
   max-width: calc(1300px + 4rem);
   padding-left: max(env(safe-area-inset-left), 2rem);
   padding-right: max(env(safe-area-inset-right), 2rem);
 }
 @media (max-width: 640px) {
-  .nextra-navbar > nav, .site-subheader > p, footer.site-footer,
-  [class~="x:pb-[env(safe-area-inset-bottom)]"] > div:first-child {
+  .nextra-navbar > nav, .site-subheader > p, footer.site-footer {
     max-width: calc(1300px + 2rem);
     padding-left: max(env(safe-area-inset-left), 1rem);
     padding-right: max(env(safe-area-inset-right), 1rem);
@@ -249,28 +252,8 @@ const Homepage: React.FC = () => {
            * the page's order, the figure after them; only how they are laid out turns.
            */}
           <div className={styles.stories}>
-            {stories.map((story, index) => (
-              <article
-                className={styles.story}
-                key={story.label}
-                data-point={story.point}
-                data-turn={story.turn || undefined}
-                data-compose={story.composer || undefined}
-                data-brand={story.brand || undefined}
-                {...(story.recipe && recipeData(story.recipe))}
-                data-side={index % 2 ? "start" : "end"}
-                // Black first, so Accessible rides in it (Mat, 2026-10-20).
-                data-tone={index % 2 ? "page" : "code"}
-              >
-                <div className={styles.storyText}>
-                  <p className={styles.storyLabel}>{story.label}</p>
-                  <h3 className={styles.storyTitle}>{story.title}</h3>
-                  <p className={styles.storyBody}>{story.body}</p>
-                  {story.brand && <BrandPicker />}
-                </div>
-                {story.composer && (
-                  <div className={styles.storyComposer} data-composer="" />
-                )}
+            {stories.map((story, index) => {
+              const figures = (
                 <div className={styles.storyFigures}>
                   {story.figures.map((figure) => (
                     <p className={styles.figure} key={figure.caption}>
@@ -292,8 +275,44 @@ const Homepage: React.FC = () => {
                     </p>
                   ))}
                 </div>
-              </article>
-            ))}
+              );
+              return (
+                <article
+                  className={styles.story}
+                  key={story.label}
+                  data-point={story.point}
+                  data-turn={story.turn || undefined}
+                  data-compose={story.composer || undefined}
+                  data-brand={story.brand || undefined}
+                  {...(story.recipe && recipeData(story.recipe))}
+                  data-side={index % 2 ? "start" : "end"}
+                  // Black first, so Accessible rides in it (Mat, 2026-10-20).
+                  data-tone={index % 2 ? "page" : "code"}
+                >
+                  <div className={styles.storyText}>
+                    <p className={styles.storyLabel}>{story.label}</p>
+                    <h3 className={styles.storyTitle}>{story.title}</h3>
+                    <p className={styles.storyBody}>{story.body}</p>
+                    {story.brand && figures}
+                  </div>
+                  {story.composer && (
+                    <div className={styles.storyComposer} data-composer="" />
+                  )}
+                  {/*
+                   * Seamless's controls where the others' figures are, its code under its
+                   * words, after them in the page's order, as what they write.
+                   */}
+                  {story.brand ? (
+                    <>
+                      <BrandControls />
+                      <BrandCode />
+                    </>
+                  ) : (
+                    figures
+                  )}
+                </article>
+              );
+            })}
           </div>
 
           {/*

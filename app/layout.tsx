@@ -102,7 +102,12 @@ export default async function RootLayout({
           }
           pageMap={await getPageMap()}
           docsRepositoryBase="https://github.com/nulib-ds/clover/tree/main"
-          darkMode
+          /*
+           * Nextra's appearance switch off, in the sidebar's foot, the phone's menu and the
+           * band over the footer: the site's one is in the footer's links, on every page
+           * (`ThemeSwitch.tsx`; Mat, 2026-10-21). Light and dark still work as before.
+           */
+          darkMode={false}
           nextThemes={{ defaultTheme: "light" }}
           /*
            * Off: Nextra 4's "Copy page" menu is new to the site and has not been checked

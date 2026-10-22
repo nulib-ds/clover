@@ -160,7 +160,7 @@
 
 /*
  * The accent and its steps, on the root and on an element a theme is previewed within
- * (`data-page-theme`, `page-theme.ts`: the Yours story's, which sets its accent on what is
+ * (`data-page-theme`, `page-theme.ts`: the Seamless story's, which sets its accent on what is
  * in view rather than on the root, sparing the page a restyle of every element mid-scroll;
  * Mat, 2026-10-21). Mixed again there from the accent set on it. Light values: no preview
  * is shown on a dark page. Never the font here, which a preview leaves as it is.

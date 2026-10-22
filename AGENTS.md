@@ -150,7 +150,7 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     Layouts). No boxes, no figure, no code. The parts follow the playground: `Homepage` holds the resource the playground reports
     (`onResourceChange`) and hands it down, and the section's chips put another of the
     playground's resources on its stage (`pickResource`).
-  - After the parts, "Why Clover" tells five stories, one at a time: Accessible, Yours,
+  - After the parts, "Why Clover" tells five stories, one at a time: Accessible, Seamless,
     Composable, Light, Coverage, on the code editor's black and the page's ground in
     turn, black first (Mat, 2026-10-20). Set apart from the parts by size, not colors of
     its own; its accent is `--accent-9` itself, never a shade or a fill: the hero's marker stroke under every figure, the figures themselves in the text's color (black on the page's ground; on black, white, `--code-bright`, never the editor's tinted text; Mat, 2026-10-20 and 2026-10-21). Its
@@ -167,13 +167,16 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     inspector (`AccessibilityTree.tsx`: WCAG checks measured on the viewer, then an ARIA
     snapshot with tab stops) and Coverage (`data-recipe`) a Cookbook recipe (0261, a
     polygon annotation), each crossfading with the viewer (no flip), inert, and given
-    up when focus comes to the viewer (2.4.7); Yours (`data-brand`) previews Northwestern
+    up when focus comes to the viewer (2.4.7); Seamless (`data-brand`) previews Northwestern
     purple without keeping it, on what is in view as it begins (the navbar, the viewer,
     the stories and their line, the tiles and chips on screen; `previewPageTheme`'s
     elements, marked `data-page-theme` so the accent's steps mix again there,
     `tokens.css`), which looks site-wide and spares the page a restyle of every element
     (about 2,400, 15ms) mid-scroll (Mat, 2026-10-21) (never the font, which would shift
-    the layout; not on a dark page, where it would fail 1.4.3); Composable (`data-compose`) has the
+    the layout; not on a dark page, where it would fail 1.4.3); it points at the
+    thumbnails (`items`), whose Next shows meanwhile as the pointer would find it, in the
+    accent with its name showing (`data-hovered`, shown only, nothing focused or pressed;
+    Mat, 2026-10-21); Composable (`data-compose`) has the
     example viewer's own code editor (a portal into `data-composer`) change the layout
     Mat set (Content first at 400, then Label, Summary, Items larger), the code
     crossfading with its new lines lit at a fixed 15 lines, the viewer fading out and in
@@ -183,9 +186,13 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     looked for each frame), and the page's foot ends the last story too, its line fading
     (`data-gone`), still drawn to it, and its change undone. Where the viewer is held, a
     story's figure strokes draw as its line reaches it too (`data-drawn`), and elsewhere
-    as it scrolls in. Yours has the site's Font family and Color (`BrandPicker.tsx`), which set the
-    whole site and are remembered (`page-theme.ts`); the navbar has no settings of its
-    own (its gear was removed on 2026-10-20), appearance being in the footer.
+    as it scrolls in. Seamless has the site's Font family and Color (`BrandPicker.tsx`),
+    which set the whole site and are remembered (`page-theme.ts`), in the column the other
+    stories give their figures, and under its words its figures, smaller and side by
+    side, then the CSS a page would write (Mat, 2026-10-21): `1rem` and `CSS` ("variables
+    for simple styling"), a word, never a count (Mat, 2026-10-21). The navbar has no
+    settings of its own (its gear was removed on 2026-10-20), appearance being in the
+    footer.
   - Scrolling there stays smooth (Mat, 2026-10-20: "everything should VERY SMOOTH"; and
     2026-10-21: "really dial in the smoothness"). Keep it so: nothing the scroll drives
     re-renders React (lights are `data-lit`, written by `StoryLines`; the rest are a
@@ -205,8 +212,8 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     `channel: "chrome"`), since Playwright's bundled Chromium is slower to restyle, and
     on a production build (`next dev`'s React is several times slower at each story's
     change), by wheel (as a trackpad scrolls) at Mat's size too, about 1876 × 1960:
-    there, on October 21, 2026, main-thread tasks were 1.7ms at the median, the Yours
-    restyle 6ms, and the only long frames the headless browser's own software raster.
+    there, on October 21, 2026, main-thread tasks were 1.7ms at the median, the Seamless
+    story's restyle 6ms, and the only long frames the headless browser's own software raster.
   - That section is one `Root` for that resource. On the left its parts make a small
     viewer, held in view (by its foot, once taller than the window), and held so that
     at the page's end its foot meets the npm block's (Install's, where the grid ends;
@@ -278,7 +285,11 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     "more" linking to the repository's contributors; the two across 61.8% of the
     footer's width (all of it on a phone). No history, and no titles. Under it, `3xl`
     away, that it is MIT licensed and fully open source, the holder as `LICENSE` names
-    it: Northwestern University Libraries, from 2026. Keep each fact the record's.
+    it: Northwestern University Libraries, from 2026, and the site's links, with the
+    appearance after them (Light, Dark or System, `ThemeSwitch.tsx`, Nextra's `Select`) on
+    every page (Mat, 2026-10-21). Nextra's own switch is off (`darkMode={false}`), so
+    none is in the sidebar's foot (its Collapse button kept at the end), the phone's menu
+    or a band over the footer. Keep each fact the record's.
   - The wordmark (`docs/components/Logo.tsx`, the navbar's and the footer's) is the text's
     color, the hero's stroke always under it (Mat, 2026-10-21: no longer drawn on hover),
     sized and set in `em` of the wordmark's height as the marks are (`--wordmark-height`),

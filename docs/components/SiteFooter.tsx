@@ -1,13 +1,14 @@
 import Link from "next/link";
 import React from "react";
 import Logo from "docs/components/Logo";
+import { ThemeSwitch } from "docs/components/ThemeSwitch";
 
 /**
  * The site's footer, inside Nextra's (`app/layout.tsx`): what Clover is, in the homepage
  * hero's words; whose project it is, who developed it and who contributed, in Mat's
- * words, its "more" linking to everyone the repository records; and its license (Mat,
- * 2026-10-20 and 2026-10-21). Every fact is the record's: the license and its holder
- * from `LICENSE`. Styled in `layout.css`.
+ * words, its "more" linking to everyone the repository records; and its license, with
+ * the site's links and its appearance (Mat, 2026-10-20 and 2026-10-21). Every fact is
+ * the record's: the license and its holder from `LICENSE`. Styled in `layout.css`.
  */
 export function SiteFooter() {
   return (
@@ -28,10 +29,10 @@ export function SiteFooter() {
           <a href="https://www.library.northwestern.edu/">
             Northwestern University Libraries
           </a>
-          . Clover was developed by Mat Jordan, Adam Arling, and others at
-          Northwestern University Libraries. With community contributions from
-          others at Princeton University, UNC Chapel Hill, University of
-          Pennsylvania, Cogapp, and{" "}
+          . Clover was developed by Mat Jordan, Adam Arling, and others in
+          Academic Innovation at Northwestern University Libraries. With
+          community contributions from folks at Princeton University, UNC Chapel
+          Hill, University of Pennsylvania, Cogapp, and{" "}
           <a href="https://github.com/nulib-ds/clover/graphs/contributors">
             more
           </a>
@@ -43,19 +44,23 @@ export function SiteFooter() {
           MIT licensed, and fully open source. © 2026 Northwestern University
           Libraries.
         </p>
-        <ul>
-          <li>
-            <a href="https://github.com/nulib-ds/clover">Source on GitHub</a>
-          </li>
-          <li>
-            <a href="https://github.com/nulib-ds/clover/blob/main/LICENSE">
-              License
-            </a>
-          </li>
-          <li>
-            <Link href="/docs/3.x">Clover 3.x</Link>
-          </li>
-        </ul>
+        <div className="site-footer-links">
+          <ul>
+            <li>
+              <a href="https://github.com/nulib-ds/clover">Source on GitHub</a>
+            </li>
+            <li>
+              <a href="https://github.com/nulib-ds/clover/blob/main/LICENSE">
+                License
+              </a>
+            </li>
+            <li>
+              <Link href="/docs/3.x">Clover 3.x</Link>
+            </li>
+          </ul>
+          {/* After the links, not among them: a control, not a page. */}
+          <ThemeSwitch />
+        </div>
       </div>
     </>
   );

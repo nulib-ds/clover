@@ -582,7 +582,7 @@ function Exploded({
    * is put back, unless the reader has changed the code meanwhile.
    */
   /*
-   * As the Yours story passes (`onBrandStory`), the whole site shows another color a
+   * As the Seamless story passes (`onBrandStory`), the whole site shows another color a
    * while: Northwestern purple, a preset of the site's, shown but not kept
    * (`previewPageTheme`), and put back as the story goes, unless the reader chose
    * meanwhile. Never the font, which would reflow the page under the reader (Mat,
@@ -590,7 +590,10 @@ function Exploded({
    * ground would fall below the contrast its text needs (WCAG 1.4.3). Shown on what is
    * in view as it begins (the navbar, the viewer, the stories and their line, the tiles
    * and chips on screen), which looks the same as the whole page and spares it a restyle
-   * of every element mid-scroll (Mat, 2026-10-21: smooth).
+   * of every element mid-scroll (Mat, 2026-10-21: smooth). Meanwhile the viewer's
+   * thumbnails show their Next as the pointer would find it (`data-hovered`,
+   * `Parts.module.css`): in the accent, its name showing, so the color is plain to see
+   * (Mat, 2026-10-21). Only shown: nothing is focused or pressed.
    */
   const [branding, setBranding] = useState(false);
   useEffect(() => {
@@ -625,6 +628,11 @@ function Exploded({
       },
       within,
     );
+    const next = node?.querySelector<HTMLElement>(
+      '[data-part="items"] button.clover-items-scroll-next:not([aria-disabled="true"])',
+    );
+    next?.setAttribute("data-hovered", "");
+    return () => next?.removeAttribute("data-hovered");
   }, [branding]);
   useEffect(() => () => endPageThemePreview(), []);
 

@@ -176,7 +176,7 @@ const subscribePageTheme = (listener: () => void) => {
 };
 
 /*
- * A theme shown without being kept: the homepage's Yours story shows one as it passes
+ * A theme shown without being kept: the homepage's Seamless story shows one as it passes
  * (`PartsLive.tsx`). It is applied and announced as a choice is, so the settings show
  * it, but never stored. Ending it puts back what is stored, unless a choice was made
  * meanwhile, which keeps what is shown and ends it.

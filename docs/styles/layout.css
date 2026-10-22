@@ -126,6 +126,14 @@
 }
 
 /*
+ * The sidebar's foot holds its Collapse button alone, the appearance switch being in the
+ * footer (`ThemeSwitch.tsx`; Mat, 2026-10-21): kept at the end, where it sat beside it.
+ */
+.nextra-sidebar > div:last-child > button[aria-expanded="true"] {
+  margin-inline-start: auto;
+}
+
+/*
  * Nextra hides a closed sidebar folder, and the sidebar after "Hide sidebar", by height or
  * width and opacity alone. Their links stayed in the tab order, taking focus unseen, so
  * they are hidden as well. Visibility turns once the fade ends, so closing still animates.
@@ -260,9 +268,9 @@ html:not(.dark) .nextra-callout :not(pre) > code {
  * The footer (`docs/components/SiteFooter.tsx`), in the site's own materials: the
  * page's white (`--color-background`, as the navbar's), set off by white space alone, no
  * line over it (Mat, 2026-10-21), the page's text and muted text, links in the text accent and underlined (WCAG 1.4.1), spaces on the
- * golden scale. Nextra draws the band and its row of switches (appearance); these take
- * them over, matched by Nextra's own classes, whole (its utilities are layered, so these
- * outrank them).
+ * golden scale. Nextra draws the band round it; these take it over, matched by Nextra's
+ * own classes, whole (its utilities are layered, so these outrank them). Its appearance
+ * switch is the site's own, in its row of links (`ThemeSwitch.tsx`).
  */
 [class~="x:pb-[env(safe-area-inset-bottom)]"] {
   background-color: var(--color-background);
@@ -270,12 +278,6 @@ html:not(.dark) .nextra-callout :not(pre) > code {
 
 [class~="x:pb-[env(safe-area-inset-bottom)]"] > hr {
   display: none;
-}
-
-/* Its appearance switch as the sidebar's is drawn: 1rem, in the sidebar's color. */
-[class~="x:pb-[env(safe-area-inset-bottom)]"] > div > button {
-  color: var(--nav-text);
-  font-size: 1rem;
 }
 
 /* The sidebar's size and color (`--nav-text`; Mat, 2026-10-21). */
@@ -455,4 +457,21 @@ main:has(> .docs-lede) > h3 {
 /* Each link's line 24px at the least, so the links stand 24px apart (WCAG 2.5.8). */
 .site-footer-legal li {
   min-block-size: 24px;
+}
+
+/* The links, then the appearance after Clover 3.x (`ThemeSwitch.tsx`; Mat, 2026-10-21). */
+.site-footer-links {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.382rem 1.618rem;
+}
+
+/* Nextra's switch, 28px tall, at the links' size and in the footer's text color. */
+.site-footer .site-footer-theme {
+  align-items: center;
+  color: var(--nav-text);
+  display: flex;
+  font-size: 1rem;
+  gap: 0.5rem;
 }

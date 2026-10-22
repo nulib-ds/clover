@@ -321,20 +321,45 @@
 }
 
 /*
- * The Yours story's Font family and Color (`BrandPicker.tsx`), which set the whole site,
- * with the CSS a page would write under them. The controls'
- * edges 3:1 against the page (WCAG 1.4.11), as the playground's are.
+ * The Seamless story (`BrandPicker.tsx`; Mat, 2026-10-21): its Font family and Color,
+ * which set the whole site, in the column the other stories give their figures, and in
+ * the words' column its figures, under its words, then the CSS a page would write. The
+ * controls span both, so they sit level with the middle of the two. Their edges are 3:1
+ * against the page (WCAG 1.4.11), as the playground's are.
  */
-.brand {
-  display: grid;
-  gap: 1.618rem;
-  margin-top: 1.618rem;
+.story[data-brand] {
+  grid-template-areas:
+    "words controls"
+    "code controls";
+  row-gap: 1.618rem;
 }
 
+.story[data-brand][data-side="start"] {
+  grid-template-areas:
+    "controls words"
+    "controls code";
+}
+
+.story[data-brand] > .storyText {
+  grid-area: words;
+}
+
+.story[data-brand] > .brandControls {
+  grid-area: controls;
+}
+
+.story[data-brand] > .brandCode {
+  grid-area: code;
+  margin: 0;
+  min-width: 0;
+}
+
+/* Stacked in their column; side by side where the story is one column with room. */
 .brandControls {
+  align-items: start;
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem 1.618rem;
+  gap: 1.618rem;
 }
 
 .brandControl {
@@ -535,6 +560,21 @@
   line-height: 1.4;
 }
 
+/*
+ * Figures under a story's words (Seamless's): side by side, each its share of the
+ * column, and smaller than a figure in a column of its own (Mat, 2026-10-21).
+ */
+.storyText > .storyFigures {
+  gap: 1.618rem;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  margin-top: 1.618rem;
+}
+
+/* After the rule for several figures, and as specific, so it holds for two. */
+.story .storyText > .storyFigures .figureValue {
+  font-size: clamp(2.236rem, 6cqi, 3.236rem);
+}
+
 /* A narrow column: the words, then the figure under them. */
 @container (max-width: 36rem) {
   .story,
@@ -544,6 +584,15 @@
 
   .story[data-side="start"] .storyFigures {
     order: 0;
+  }
+
+  /* Seamless: its words, then its controls, then the code they write. */
+  .story[data-brand],
+  .story[data-brand][data-side="start"] {
+    grid-template-areas:
+      "words"
+      "controls"
+      "code";
   }
 }
 

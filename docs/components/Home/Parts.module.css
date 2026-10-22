@@ -925,6 +925,23 @@
   z-index: 6;
 }
 
+/*
+ * The Seamless story's Next (`PartsLive`'s `data-hovered`): as the pointer finds it, in the
+ * accent, which the story shows in another color, its name showing at once. The fill
+ * switches rather than eases, so nothing is redrawn frame by frame mid-scroll; the name
+ * fades, by opacity.
+ */
+.viewer :global(button.clover-items-scroll-next[data-hovered]) {
+  background-color: var(--clover-color-accent, #0065c3);
+  transition: none;
+}
+
+.viewer :global(button.clover-items-scroll-next[data-hovered] > .clover-tip) {
+  opacity: 1;
+  transition-delay: 0s;
+  visibility: visible;
+}
+
 .region:is([data-on], [data-lit]) > .regionName {
   opacity: 1;
   transform: none;
