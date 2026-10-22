@@ -1162,14 +1162,14 @@ describe("a lone media Canvas", () => {
     render(
       <Canvas canvases={video.items as any}>
         <button type="button" data-button="panel">
-          More Information
+          More information
         </button>
       </Canvas>,
     );
     await transport();
     const cluster = screen.getByTestId("clover-canvas-controls");
     expect(cluster).toContainElement(
-      screen.getByRole("button", { name: "More Information" }),
+      screen.getByRole("button", { name: "More information" }),
     );
     expect(screen.queryByRole("button", { name: "Zoom in" })).toBeNull();
   });

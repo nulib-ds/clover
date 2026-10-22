@@ -1,4 +1,19 @@
 import type { ElementDocs, ElementSpec } from "../spec";
+import {
+  panel,
+  panelDocs,
+  panelToggle,
+  panelToggleDocs,
+  split,
+  splitDocs,
+  splitHandle,
+  splitHandleDocs,
+  splitPane,
+  splitPaneDocs,
+  tab,
+  tabDocs,
+} from "./containers";
+import { canvas, canvasDocs } from "./canvas";
 import { content, contentDocs } from "./content";
 import { items, itemsDocs } from "./items";
 import { label, labelDocs } from "./label";
@@ -88,6 +103,13 @@ const ALL: [ElementSpec, ElementDocs][] = [
   [transcript, transcriptDocs],
   [download, downloadDocs],
   [map, mapDocs],
+  [panel, panelDocs],
+  [tab, tabDocs],
+  [panelToggle, panelToggleDocs],
+  [split, splitDocs],
+  [splitPane, splitPaneDocs],
+  [splitHandle, splitHandleDocs],
+  [canvas, canvasDocs],
 ];
 
 /** Every element Clover defines. */
@@ -121,6 +143,13 @@ export const SPECS: readonly ElementSpec[] = [
   transcript,
   download,
   map,
+  panel,
+  tab,
+  panelToggle,
+  split,
+  splitPane,
+  splitHandle,
+  canvas,
 ];
 
 /** What the types and the manifest say of each, by tag. Never loaded by a page. */

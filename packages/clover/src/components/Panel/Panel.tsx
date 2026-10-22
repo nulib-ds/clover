@@ -21,6 +21,7 @@ import {
   type SectionsLayout,
   Sections,
 } from "../../ui/Sections";
+import { useContainerName } from "../../ui/useContainerName";
 
 /*
  * The map, and MapLibre with it, load only when a Manifest with places or georeferences
@@ -162,6 +163,17 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
   useClover("Panel");
   const element = useRef<HTMLElement | null>(null);
   const { t, langOf } = useCloverTranslation();
+  /*
+   * Its landmark named as its sections are, so a list of landmarks tells it from another
+   * (the Document template's thumbnails, "Items"). A name the host gives it stands; an
+   * element that is no landmark takes none, as ARIA forbids naming a generic one.
+   */
+  const name = useContainerName(
+    t("informationPanelTabs"),
+    langOf("informationPanelTabs"),
+    Boolean(rest["aria-label"] || rest["aria-labelledby"]) ||
+      !(["aside", "section", "nav"].includes(Tag as string) || rest.role),
+  );
   // A tab's name, marked where it is not in the page's language (WCAG 3.1.2).
   const tabLabel = (key: string) => {
     const lang = langOf(key);
@@ -292,6 +304,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
       data-layout={layout}
       data-closable={onClose ? "" : undefined}
       data-floating={closeOnEscape ? "" : undefined}
+      {...name.props}
       onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
         onKeyDown?.(event);
         if (
@@ -306,6 +319,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
       }}
       {...rest}
     >
+      {name.node}
       {onClose && (
         <button
           type="button"

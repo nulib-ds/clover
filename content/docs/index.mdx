@@ -1,12 +1,12 @@
 ---
-title: Get Started
+title: Get started
 description: "What Clover is and how to start, in React or with the web component: the Viewer and the parts it is built from, installing it, what each import holds, and coming from Clover 3.x."
 ---
 
 import { Callout } from "nextra/components";
 import { loads } from "docs/lib/figures";
 
-# Get Started
+# Get started
 
 Clover builds interfaces for IIIF content in React or as a web component: a Manifest, a
 Collection, a Canvas or a content state, read through the IIIF Presentation API. It is
@@ -27,7 +27,7 @@ Clover is used two ways.
   ```
 
 - **The parts** it is built from, for a layout of your own. Each reads from the nearest
-  `Root`, wherever it sits in your markup: see [Composing Layouts](/docs/composing).
+  `Root`, wherever it sits in your markup: see [Composing layouts](/docs/composing).
 
   ```jsx
   import * as Clover from "@nulib/clover";
@@ -89,22 +89,40 @@ template, a static site, an exhibit page. It is built on its own, with
 it works from any CDN path. On a page with modules, load
 `web-components/index.mjs` with `<script type="module">` instead.
 
+It shows the Viewer in any of its [templates](/docs/viewer#templates): Default unless
+`template` names another, which loads the first time one is shown, its styles with it.
+
+```html
+<clover-viewer
+  template="document"
+  iiif-content="https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json"
+></clover-viewer>
+```
+
 ### Attributes
 
-| Attribute       | What it does                                                         |
-| --------------- | -------------------------------------------------------------------- |
-| `iiif-content`  | What to show: a URL, or a content state.                             |
-| `canvas-id`     | The Canvas to open on.                                               |
-| `manifest-id`   | In a Collection, the Manifest to open first.                         |
-| `language`      | The language to read IIIF text in.                                   |
-| `search-query`  | A Content Search to run as the Manifest opens.                       |
-| `items`         | `carousel` (default), `list`, `grid`, or `false` for no thumbnails.  |
-| `header`        | `false` removes the thumbnail and title over the stage.              |
-| `heading-level` | The title's level, `2` (default) or more, to fit the page's outline. |
-| `panel`         | `false` removes the information panel.                               |
-| `download`      | `false` leaves the downloads out of the panel's About.               |
+| Attribute       | What it does                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| `template`      | `default` (the default), `document` or `gallery`.                                                       |
+| `iiif-content`  | What to show: a URL, or a content state.                                                                |
+| `canvas-id`     | The Canvas to open on.                                                                                  |
+| `manifest-id`   | In a Collection, the Manifest to open first.                                                            |
+| `language`      | The language to read IIIF text in.                                                                      |
+| `search-query`  | A Content Search to run as the Manifest opens.                                                          |
+| `heading-level` | The title's level, `2` (default) or more, to fit the page's outline.                                    |
+| `items`         | Default: `carousel` (default), `list`, `grid`, or `false` for no thumbnails.                            |
+| `header`        | Default: `false` removes the thumbnail and title over the stage.                                        |
+| `panel`         | Default: `false` removes the information panel.                                                         |
+| `fill`          | Default: as tall as the box it is in, the stage taking what the header and the thumbnails leave.        |
+| `download`      | Default and Document: `false` leaves the downloads out of the panel's About.                            |
+| `panel-open`    | Default and Document: whether the information panel starts open.                                        |
+| `panel-layout`  | Default and Document: the panel's sections as stacked boxes, `accordion` (default), or `tabs`.          |
+| `storage-key`   | Default and Document: where the widths the reader gives the panes are remembered; `false` forgets them. |
+| `sidebar-open`  | Document: whether the page thumbnails start shown, as they do on a wide screen.                         |
+| `size`          | Gallery: the size of a cell in the grid, `10rem` by default.                                            |
 
-`false` is read in any case. An `items` value not in the list shows the carousel, with a
+A template takes its own attributes and ignores another's: `size` does nothing in
+Default. `false` is read in any case. An `items` value not in the list shows the carousel, with a
 warning in the console. With `header="false"` there is no title, and the panel's sections
 take `heading-level` themselves.
 
@@ -173,17 +191,21 @@ page's own markup between them stays as written.
 </clover-root>
 ```
 
-| Elements                                                                                                                                                                                                                             | What they draw                                                                         | Attributes                                                                                                                                                                                               |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<clover-root>`                                                                                                                                                                                                                      | Nothing of its own: it loads what it is given, and its parts read where the reader is. | `iiif-content` (or the `iiifContent` property), `canvas-id` and `manifest-id` (where it opens; changed later, they move the reader), `language`, `search-query`, `annotations`.                          |
-| `<clover-content>`                                                                                                                                                                                                                   | The view, on a stage as tall as `--clover-content-height` (60vh) or its own `style`.   | `controls` and `navigator` (`false` turns one off).                                                                                                                                                      |
-| `<clover-items>`                                                                                                                                                                                                                     | Thumbnails of the views, or of the Collection's members.                               | `layout` (`carousel`, `list`, `grid` or `pager`), `of`, `navigation`, `thumbnail-size`; alone, `iiif-content`, `header`, `heading-level`.                                                                |
-| `<clover-previous>`, `<clover-position>`, `<clover-next>`                                                                                                                                                                            | Stepping through the views, and where the reader is.                                   | `of` (`views` or `members`).                                                                                                                                                                             |
-| `<clover-status>`                                                                                                                                                                                                                    | What the root is doing: loading, or why it failed.                                     | `loading="false"`, where the stage shows its own.                                                                                                                                                        |
-| `<clover-label>`, `<clover-thumbnail>`, `<clover-summary>`, `<clover-metadata>`, `<clover-required-statement>`, `<clover-rights>`, `<clover-homepage>`, `<clover-see-also>`, `<clover-rendering>`, `<clover-part-of>`, `<clover-id>` | One IIIF property each, of the Manifest or the Canvas in view.                         | `of` (`manifest` or `canvas`); `value`, its own as text, a URL or JSON, which alone, outside a root, it shows; `as` on a label (a heading, `h1` to `h6`) and a summary; `size` and `alt` on a thumbnail. |
-| `<clover-value>`                                                                                                                                                                                                                     | Any language map, as text, HTML or Markdown.                                           | `value`, `format`, `heading-level`, `as`.                                                                                                                                                                |
-| `<clover-about>`, `<clover-annotations>`, `<clover-collection>`, `<clover-collection-select>`, `<clover-contents>`, `<clover-search>`, `<clover-transcript>`, `<clover-download>`                                                    | The information panel's sections, each on its own.                                     | `heading-level` (one under the heading they sit beneath), and each its own.                                                                                                                              |
-| `<clover-map>`                                                                                                                                                                                                                       | The root's places and georeferenced images; alone, those of its `iiif-content`.        | `overlay`, `overlay-opacity`, `style-url`, `scroll-zoom`.                                                                                                                                                |
+| Elements                                                                                                                                                                                                                             | What they draw                                                                                                         | Attributes                                                                                                                                                                                               |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<clover-root>`                                                                                                                                                                                                                      | Nothing of its own: it loads what it is given, and its parts read where the reader is.                                 | `iiif-content` (or the `iiifContent` property), `canvas-id` and `manifest-id` (where it opens; changed later, they move the reader), `language`, `search-query`, `annotations`.                          |
+| `<clover-content>`                                                                                                                                                                                                                   | The view, on a stage as tall as `--clover-content-height` (60vh) or its own `style`.                                   | `controls` and `navigator` (`false` turns one off).                                                                                                                                                      |
+| `<clover-canvas>`                                                                                                                                                                                                                    | Clover's renderer for images, video and sound: alone, what it is given; in a root, its view.                           | `iiif-content`, `src` and `tiled`, `controls`, `navigator`, and [more](#alone).                                                                                                                          |
+| `<clover-items>`                                                                                                                                                                                                                     | Thumbnails of the views, or of the Collection's members.                                                               | `layout` (`carousel`, `list`, `grid` or `pager`), `of`, `navigation`, `thumbnail-size`; alone, `iiif-content`, `header`, `heading-level`.                                                                |
+| `<clover-previous>`, `<clover-position>`, `<clover-next>`                                                                                                                                                                            | Stepping through the views, and where the reader is.                                                                   | `of` (`views` or `members`).                                                                                                                                                                             |
+| `<clover-status>`                                                                                                                                                                                                                    | What the root is doing: loading, or why it failed.                                                                     | `loading="false"`, where the stage shows its own.                                                                                                                                                        |
+| `<clover-label>`, `<clover-thumbnail>`, `<clover-summary>`, `<clover-metadata>`, `<clover-required-statement>`, `<clover-rights>`, `<clover-homepage>`, `<clover-see-also>`, `<clover-rendering>`, `<clover-part-of>`, `<clover-id>` | One IIIF property each, of the Manifest or the Canvas in view.                                                         | `of` (`manifest` or `canvas`); `value`, its own as text, a URL or JSON, which alone, outside a root, it shows; `as` on a label (a heading, `h1` to `h6`) and a summary; `size` and `alt` on a thumbnail. |
+| `<clover-value>`                                                                                                                                                                                                                     | Any language map, as text, HTML or Markdown.                                                                           | `value`, `format`, `heading-level`, `as`.                                                                                                                                                                |
+| `<clover-about>`, `<clover-annotations>`, `<clover-collection>`, `<clover-collection-select>`, `<clover-contents>`, `<clover-search>`, `<clover-transcript>`, `<clover-download>`                                                    | The information panel's sections, each on its own.                                                                     | `heading-level` (one under the heading they sit beneath), and each its own.                                                                                                                              |
+| `<clover-map>`                                                                                                                                                                                                                       | The root's places and georeferenced images; alone, those of its `iiif-content`.                                        | `overlay`, `overlay-opacity`, `style-url`, `scroll-zoom`.                                                                                                                                                |
+| `<clover-panel>`, `<clover-tab>`                                                                                                                                                                                                     | The information panel, in tabs or stacked boxes: the sections Clover has data for, or `<clover-tab>`s of your own.     | `layout`, `value`, `heading-level`, `closable`; a tab's `value` and `label` (or a `slot="label"` child).                                                                                                 |
+| `<clover-panel-toggle>`                                                                                                                                                                                                              | A button that shows and hides the panel, or anything, by its id; in a `<clover-content>`, one of the stage's controls. | `controls`.                                                                                                                                                                                              |
+| `<clover-split>`, `<clover-split-pane>`, `<clover-split-handle>`                                                                                                                                                                     | Panes side by side, and the bars between them, which the reader drags, clicks or moves by keyboard.                    | The split's `storage-key`; a pane's `size`, `min`, `max` and `name`.                                                                                                                                     |
 
 Every attribute, property and event is in the manifest, below. A part of a root draws
 nothing outside one, and says so in the console. `<clover-root>` sends the same events as
@@ -191,7 +213,95 @@ nothing outside one, and says so in the console. `<clover-root>` sends the same 
 or a place is chosen (cancel it, with `preventDefault`, to keep a link from being
 followed), and `<clover-collection-select>` sends `clover-change`. Give an element no
 `aria-label` or `role`: it is a box no reader is told of, and Clover names what it draws
-itself; a landmark of the page's own around an element names it otherwise.
+itself; a landmark of the page's own around an element names it otherwise. The one
+exception is a Split's handle, which is the separator itself: name it with `aria-label`
+where "Resize panels" is not the right word.
+
+### Containers
+
+A layout as the Default template's, written in HTML: the stage with the panel's toggle
+among its controls, a bar the reader can move, and the information panel beside it, with
+tabs of your own.
+
+```html
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json"
+>
+  <clover-split storage-key="my-layout" style="height: 80vh">
+    <clover-split-pane min="16rem">
+      <clover-label as="h2"></clover-label>
+      <clover-content style="height: 60vh">
+        <clover-panel-toggle controls="panel-pane"></clover-panel-toggle>
+      </clover-content>
+      <clover-items></clover-items>
+    </clover-split-pane>
+    <clover-split-handle></clover-split-handle>
+    <clover-split-pane id="panel-pane" size="24rem" min="14rem">
+      <clover-panel>
+        <clover-tab value="about" label="About">
+          <clover-about heading-level="3"></clover-about>
+        </clover-tab>
+        <clover-tab value="notes">
+          <span slot="label">Notes <em>(2)</em></span>
+          <p>Our own notes on this book.</p>
+        </clover-tab>
+      </clover-panel>
+    </clover-split-pane>
+  </clover-split>
+</clover-root>
+```
+
+- **The panel** has the sections Clover has data for, or one tab for each `<clover-tab>`
+  in it, in their order. A tab's content stays where you wrote it until its section first
+  opens, and then moves there. Its label is its `label`, or a copy of its `slot="label"`
+  child, for markup. `value` is the tab it opens on, and changing it shows another; the
+  reader's choice sends `clover-value-change`. With `closable`, it has a close button,
+  which sends `clover-close` (cancel it to keep the panel shown) and hides what its toggle
+  shows.
+- **The toggle** shows its target while the target is not `hidden`, so write `hidden` on
+  the panel to start it shut, and hide or show it yourself whenever you like: the toggle
+  follows. Each press sends `clover-open-change`; cancel it to leave the panel as it is.
+- **The Split's** elements are the panes and the bars themselves, as `Split` lays them
+  out in React: one pane beside each handle has a `size`, and the other takes what is
+  left. A handle beside a pane you hide is hidden with it.
+- **Slots.** `<clover-status>` shows your own words while the root loads
+  (`slot="loading"`) and if it fails (`slot="error"`), as copies, so give them no ids.
+- **Functions.** `renderValue` on `<clover-metadata>`, `renderEntry` on
+  `<clover-annotations>` and `renderItem` on `<clover-items>` are properties that take a
+  function returning a node or text: Clover shows it where it would draw its own.
+
+### Alone
+
+Three elements need no root. `<clover-canvas>` draws what it is given: a IIIF resource by
+URL (a Manifest gives its first Canvas), an image by `src` (with `tiled`, a IIIF Image
+service), or Canvases as its `canvases` property. `<clover-items>` lists a Collection's
+members, or a Manifest's views, as links. `<clover-map>` maps the places of what it is
+given.
+
+```html
+<clover-canvas
+  iiif-content="https://iiif.io/api/cookbook/recipe/0005-image-service/manifest.json"
+  style="height: 60vh"
+></clover-canvas>
+
+<clover-items
+  iiif-content="https://iiif.io/api/cookbook/recipe/0032-collection/collection.json"
+  heading-level="3"
+></clover-items>
+
+<clover-map
+  iiif-content="https://iiif.io/api/cookbook/recipe/0240-navPlace-on-canvases/manifest.json"
+></clover-map>
+```
+
+`<clover-canvas>` takes `controls` and `navigator` as `<clover-content>` does, `label`
+(the name of an image given by `src`), `placeholder` (`false` opens a Canvas past its
+placeholder), `viewing-direction` (how a spread is laid out) and `animate-annotations`.
+It sends `clover-annotation-select` and `clover-annotation-active` (`{ id }`),
+`clover-caption-change` (`{ caption }`) and `clover-ended`. Inside a `<clover-root>`,
+given nothing, it shows the root's view; place
+[`<clover-content>`](/docs/canvas#canvas-or-content) there instead, which adds a height
+and the loading mark.
 
 ### Types and the manifest
 
@@ -207,8 +317,9 @@ The script is {loads.elementsEntry} kB gzipped: it defines every element and dra
 An element's code loads the first time one is on the page, with Preact and the
 stylesheet, so a page loads only the elements it uses: {loads.element} kB with a
 `<clover-viewer>`, the Viewer in its Default template among it (3.x's element loads about
-530 kB), and {loads.labels} kB for a `<clover-root>` and its `<clover-label>`s, as the
-package's build measures them. Everything else waits until it is needed: video streaming
+530 kB), {loads.documentElement} kB with one in Document, {loads.canvasElement} kB for a
+`<clover-canvas>` alone, and {loads.labels} kB for a `<clover-root>` and its
+`<clover-label>`s, as the package's build measures them. Everything else waits until it is needed: video streaming
 (hls.js), the sanitizer, an animation's player, and the map — MapLibre, its worker and its
 stylesheet load the first time a map is shown.
 

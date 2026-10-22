@@ -28,7 +28,7 @@ const meta: MetaRecord = {
       layout: "full",
       sidebar: false,
     },
-    title: "Prefetched Content",
+    title: "Prefetched content",
   },
 };
 

@@ -47,6 +47,9 @@ function checkDocs(spec, docs) {
     ...Object.keys(spec.attributes).filter((name) => !docs.attributes[name]),
     ...(spec.properties ?? []).filter((name) => !docs.properties?.[name]),
     ...Object.keys(spec.events ?? {}).filter((name) => !docs.events?.[name]),
+    ...(spec.slots ?? [])
+      .filter((name) => !docs.slots?.[name])
+      .map((name) => `slot ${name}`),
   ];
   if (missing.length) {
     throw new Error(`${spec.tag}: no docs for ${missing.join(", ")}`);
@@ -85,6 +88,10 @@ export function manifestOf(SPECS, DOCS) {
         name,
         type: { text: `CustomEvent<${docs.events[name].detail}>` },
         description: docs.events[name].description,
+      })),
+      slots: (spec.slots ?? []).map((name) => ({
+        name,
+        description: docs.slots[name].description,
       })),
     };
   });

@@ -40,6 +40,10 @@ export const loads = {
   elementsEntry: kB(sizes.elementsEntryGzip),
   /** A page of `<clover-root>` and `<clover-label>` alone, with the stylesheet. */
   labels: kB(sizes.labelPageGzip),
+  /** A page with a `<clover-canvas>` alone, once it draws: its renderer loads then. */
+  canvasElement: kB(sizes.canvasElementGzip),
+  /** A page with a `<clover-viewer template="document">`: the template and its styles too. */
+  documentElement: kB(sizes.documentElementGzip),
 };
 
 const recipes = cookbookSections.flatMap((section) => section.recipes);

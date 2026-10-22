@@ -1,10 +1,11 @@
 import type { ElementDocs, ElementSpec } from "../spec";
 
-/** `<clover-viewer>`: the Viewer, in its Default template. */
+/** `<clover-viewer>`: the Viewer, in one of its templates, Default unless it names another. */
 export const viewer: ElementSpec = {
   tag: "clover-viewer",
   kind: "alone",
   attributes: {
+    template: { prop: "template", type: ["default", "document", "gallery"] },
     "iiif-content": { prop: "iiifContent", type: "string" },
     "canvas-id": { prop: "defaultCanvasId", type: "string" },
     // Where it opens, not held there: a reader moves on through the Collection.
@@ -17,6 +18,13 @@ export const viewer: ElementSpec = {
     header: { prop: "header", type: "boolean" },
     panel: { prop: "panel", type: "boolean" },
     download: { prop: "download", type: "boolean" },
+    // The templates' own (`templates/`): each one's, where it has it.
+    "panel-open": { prop: "defaultPanelOpen", type: "boolean" },
+    "panel-layout": { prop: "panelLayout", type: ["accordion", "tabs"] },
+    "sidebar-open": { prop: "defaultSidebarOpen", type: "boolean" },
+    "storage-key": { prop: "storageKey", type: "string" },
+    fill: { prop: "fill", type: "boolean" },
+    size: { prop: "size", type: "string" },
   },
   properties: ["iiifContent"],
   events: {
@@ -39,8 +47,13 @@ export const viewer: ElementSpec = {
 export const viewerDocs: ElementDocs = {
   name: "CloverViewerElement",
   description:
-    "Clover's Viewer in its Default template: the title over the stage, the thumbnails under it, and the information panel beside them.",
+    "Clover's Viewer, in one of its templates: Default (the title over the stage, the thumbnails under it, the information panel beside them), Document (a PDF reader's pages, thumbnails beside them) or Gallery (a grid, each item opening in a lightbox). Each template loads when used, its styles with it.",
   attributes: {
+    template: {
+      description:
+        "The layout: default, document or gallery. Default's comes with the element; another loads the first time one is shown.",
+      default: "default",
+    },
     "iiif-content": {
       description: "What to show: a URL, or a content state.",
     },
@@ -60,20 +73,48 @@ export const viewerDocs: ElementDocs = {
     },
     items: {
       description:
-        'The thumbnails: carousel, list or grid, or "false" for none.',
+        'Default: the thumbnails, as a carousel, list or grid, or "false" for none.',
       default: "carousel",
     },
     header: {
-      description: '"false" leaves out the thumbnail and title over the stage.',
+      description:
+        'Default: "false" leaves out the thumbnail and title over the stage.',
       default: "true",
     },
     panel: {
-      description: '"false" leaves out the information panel.',
+      description: 'Default: "false" leaves out the information panel.',
       default: "true",
     },
     download: {
-      description: '"false" leaves the downloads out of the panel\'s About.',
+      description:
+        'Default and Document: "false" leaves the downloads out of the panel\'s About.',
       default: "true",
+    },
+    "panel-open": {
+      description:
+        "Default and Document: whether the information panel starts open. Default's opens where it has room; Document's starts shut.",
+    },
+    "panel-layout": {
+      description:
+        "Default and Document: the panel's sections as stacked boxes, each opened by its heading, or as tabs.",
+      default: "accordion",
+    },
+    "sidebar-open": {
+      description:
+        "Document: whether the page thumbnails start shown. Shown on a wide screen, by default.",
+    },
+    "storage-key": {
+      description:
+        'Default and Document: where the width the reader gives a pane is remembered (localStorage); "false" forgets it.',
+    },
+    fill: {
+      description:
+        "Default: as tall as the box it is in, the stage taking what the header and the thumbnails leave.",
+      default: "false",
+    },
+    size: {
+      description: "Gallery: the size of a cell in the grid.",
+      default: "10rem",
     },
   },
   properties: {

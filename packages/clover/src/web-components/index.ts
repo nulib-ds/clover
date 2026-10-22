@@ -29,9 +29,9 @@ import type { ElementAssets, StyleRun } from "./styles";
 import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 
 /*
- * The runs of the stylesheet that only media and maps need, each fetched as what needs it
- * draws: the Canvas marks a recording, a video or an animation before its player loads,
- * so the two load side by side.
+ * The runs of the stylesheet that only media, maps and the templates need, each fetched
+ * as what needs it draws: the Canvas marks a recording, a video or an animation before its
+ * player loads, and a viewer names its template, so the two load side by side.
  */
 const DEFERRED: Record<string, Omit<StyleRun, "key">> = {
   media: {
@@ -43,6 +43,14 @@ const DEFERRED: Record<string, Omit<StyleRun, "key">> = {
     when: ".clover-geomap",
     load: () =>
       import("virtual:clover-styles/map").then((module) => module.default),
+  },
+  // A `<clover-viewer>` in Document or Gallery asks for it, beside its template's code.
+  templates: {
+    when: 'clover-viewer:is([template="document" i], [template="gallery" i])',
+    load: () =>
+      import("virtual:clover-styles/templates").then(
+        (module) => module.default,
+      ),
   },
 };
 

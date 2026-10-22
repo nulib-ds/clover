@@ -76,7 +76,7 @@ const EarlierVersion = () => (
     This page documents <strong>Clover 3.x</strong>,{" "}
     <code>@samvera/clover-iiif</code>, the earlier version of Clover, kept here
     for reference. These docs lead with Clover 4:{" "}
-    <Link href="/docs">Get Started</Link>.
+    <Link href="/docs">Get started</Link>.
   </Callout>
 );
 

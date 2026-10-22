@@ -258,7 +258,7 @@ for (const across of [1280, 1000])
     test.skip(isMobile, "on a phone the panes slide over the page: no bars");
     await page.setViewportSize({ width: across, height: 800 });
     await open(page, "scene=document&");
-    await page.getByRole("button", { name: "More Information" }).click();
+    await page.getByRole("button", { name: "More information" }).click();
     const sidebar = page.locator(".clover-template-document-sidebar");
     const main = page.locator(".clover-template-document-main");
     const panel = page.locator(".clover-template-document-panel");

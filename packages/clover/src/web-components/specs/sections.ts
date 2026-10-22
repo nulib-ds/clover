@@ -29,6 +29,7 @@ export const status: ElementSpec = {
   kind: "part",
   needsRoot: true,
   attributes: { loading: { prop: "loading", type: ["false"] } },
+  slots: ["loading", "error"],
 };
 export const statusDocs: ElementDocs = {
   name: "CloverStatusElement",
@@ -38,6 +39,16 @@ export const statusDocs: ElementDocs = {
     loading: {
       description:
         '"false" shows no loading mark and only announces it, for a layout whose stage shows its own.',
+    },
+  },
+  slots: {
+    loading: {
+      description:
+        "What it shows and announces while loading, in place of the mark: words, as a copy (a span; give it no ids).",
+    },
+    error: {
+      description:
+        "What it shows, as an alert, if loading failed, in place of Clover's words: as a copy (give it no ids).",
     },
   },
 };
@@ -150,6 +161,7 @@ export const annotations: ElementSpec = {
     scope: { prop: "scope", type: ["view", "all"] },
     ...headingLevel,
   },
+  properties: ["renderEntry"],
 };
 export const annotationsDocs: ElementDocs = {
   name: "CloverAnnotationsElement",
@@ -161,6 +173,13 @@ export const annotationsDocs: ElementDocs = {
       default: "all",
     },
     ...headingLevelDocs("its layers' titles"),
+  },
+  properties: {
+    renderEntry: {
+      type: "((entry: { id: string; canvasId: string; annotation: Record<string, unknown> }) => Node | string | null | undefined) | null",
+      description:
+        "Your own drawing of an annotation's content: a node or text, in place of its bodies. A new node each time.",
+    },
   },
 };
 

@@ -174,6 +174,12 @@ every rule below.
 
 ## Split
 
+- The handle's logic is `components/Split/splitting.ts`, apart from React: lengths, the
+  sizes stored, the panes beside a handle and their limits, a click's steps, the keys,
+  and the press that is a click or a drag (`handleGestures`), shared by `SplitHandle` and
+  `<clover-split-handle>`, so the two behave as one. Its state is closed over, never an
+  object's fields: as a class, its names survived minifying and cost every page with a
+  Split 0.15 kB more.
 - `Clover.Split`, `SplitPane`, `SplitHandle` (`components/Split/`): one sized pane beside
   each handle (`size`, `min`, `max`), the other takes the rest. Sizes are border boxes
   (`box-sizing: border-box`), as a drag measures them. The handle finds its panes by DOM
@@ -269,7 +275,7 @@ every rule below.
   focus; Mat, 2026-10-16: no light state while open), holding a glyph of a list of
   thumbnails (its pictures filled while open) and `Position` (`text-xs`, keeping no room
   for its widest: nothing sits after the toggle), no thumbnail. Its name starts with its
-  Tip's words ("Show Items"), then the place. Open, it sits on the thumbnails' spine
+  Tip's words ("Show items"), then the place. Open, it sits on the thumbnails' spine
   (below), over them but for its far rounded end, which hangs over the page (Mat: the
   bar where that end's curve begins; its start's, the other way round, was tried
   first), so the thumbnails keep their pane's whole height; shut, it sits
@@ -301,6 +307,11 @@ every rule below.
   (Mat). A floating one (`Default` on a phone, `Document`) also takes focus when it
   opens. Any new layout with a panel does the same. `shared/Lightbox.tsx` is a native `<dialog>`; jsdom lacks
   `showModal()`, so tests polyfill it.
+- **The panel's landmark** (`Panel`'s `aside`) is named "Information panel"
+  (`informationPanelTabs`, as its tabs are), through `useContainerName`, so a list of
+  landmarks tells it from another (`Document`'s thumbnails, "Items"). A name the host
+  gives it stands, and rendered `as` an element that is no landmark it takes none: ARIA
+  forbids naming a generic one.
 
 ## Build and test
 
@@ -1061,8 +1072,45 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     props (`elements/part.tsx`); only an element that needs more of its element (the
     root, the stage's box, the viewer) has a module in `elements/`.
   - **Parity** (`specs/specs.test.ts`): every part `parts.ts` exports has an element, or
-    a reason why not yet (`LATER`: the containers, phase 4; `Canvas`, phase 5) or not at
-    all (`NEVER`: `Tip`, `ReadMore`). A new part fails it until it has either.
+    a reason why not yet (`LATER`, empty since phase 5) or not at all (`NEVER`: `Tip`,
+    `ReadMore`). A new part fails it until it has either, and an element's slots, like
+    its attributes, fail it without docs.
+  - **The containers** (phase 4, `specs/containers.ts`). `<clover-panel>` (`elements/
+panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
+    `elements/nodes.tsx`, one observer on the element, the same value until what is read
+    changes), and draws a `Tab` for each; a tab's own nodes move into its section when the
+    section first opens (`Moved`: the page's nodes, never copies, and back when it goes),
+    and a `slot="label"` child is copied into the tab (`Copy`). `<clover-tab>` is a
+    `config` element: defined (for its attributes, the types and the manifest), never
+    hosted, loading nothing. `value` opens a tab and moves to another when it changes, the
+    element module holding the choice. `closable`'s close hides what a control's
+    `aria-controls` names around the panel, else the panel, unless `clover-close` is
+    canceled: a base element's handler returns whether its event was let be.
+    `<clover-panel-toggle>` (`elements/toggle.tsx`): its target is open while it is not
+    `hidden`, so the page's `hidden` starts it shut and any change by the page is
+    followed; in a `<clover-content>` the stage draws it among its controls (the toggle's
+    own element draws nothing there), elsewhere it draws its own button. The Split's three
+    are `native` (`elements/split.tsx`): the elements are the boxes, taking the classes,
+    attributes and inline styles `Split` gives its own, so a handle's panes are its
+    siblings, and the handle runs `components/Split/splitting.ts`, as `SplitHandle` does.
+    A handle hides with the pane it sizes, and comes back with it, never from a `hidden`
+    of the page's. ARIA on a `native` element is the page's to give, unwarned.
+  - **Standalone, and the templates** (phase 5). `<clover-canvas>` (`specs/canvas.ts`)
+    is a part drawn as it is (`part()`, `components/Canvas/index`): alone, what it is
+    given; in a root, given nothing, the root's view, as `Canvas` is. Its renderer
+    (`LoadedCanvas`) loads when it draws. `onAnnotationLink` is no event of it: given,
+    it stops the Canvas showing a link itself. `<clover-viewer template>`
+    (`elements/viewer.tsx`) has Default with the element and Document and Gallery each
+    `lazy`, loaded the first time one is shown (a `Suspense` with no fallback). `ONLY`
+    lists the props only some templates take, by the templates that do: each is handed
+    its own and none of another's, which it would pass on to its root's element as an
+    attribute. `storage-key="false"` is `storageKey={false}`.
+  - **Slots and function properties.** A spec's `slots` are children it reads by their
+    `slot`, shown as copies kept in step (`<clover-status>`'s `loading` and `error`);
+    hidden where written (`ELEMENT_CSS`), so assistive technology reads one. A function
+    property a page gives returns a node or text, which `withNodes` (`elements/nodes.tsx`)
+    hands the part as what it draws: `renderValue` (`undefined` keeps Clover's),
+    `renderEntry`, `renderItem` (`part(load, name, nodes)` in `define.ts`).
   - A part that reads its root's state (`needsRoot` in its spec) draws nothing outside a
     `<clover-root>`, and the registry says so in the console, once. `aria-label`,
     `aria-labelledby` or `role` on an element is warned of too (`warnOfAria` in
@@ -1108,24 +1156,30 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     back `[context, status, rest]`, so every name is written once (every page with a
     `Root` loads it; split naively, it cost `Default` 0.1 kB more).
   - Display (`ELEMENT_CSS` in `base.ts`, `style[data-clover="elements"]`, in
-    `@layer clover`): `<clover-root>`, `<clover-items>` and `<clover-viewer>` are
-    blocks; `<clover-content>` is the stage's box, its height from
-    `--clover-content-height` (default `60vh`) or its own `style`, the stage filling it;
-    `<clover-label>` is `display: contents`, so what it draws (a heading, or text in a
-    sentence) sits in the page as if written there. Never let an attribute name a tag
+    `@layer clover`): `<clover-root>`, `<clover-items>`, `<clover-viewer>` and
+    `<clover-panel>` are blocks and `<clover-split>` a row; `<clover-content>` and
+    `<clover-canvas>` are the stage's box, its height from `--clover-content-height` (default `60vh`) or its own
+    `style`, the stage filling it; `<clover-label>` and `<clover-panel-toggle>` are
+    `display: contents`, so what they draw sits in the page as if written there; a tab and
+    a status's slots are not shown where written. Every rule is `:not([hidden])`: an
+    author's style beats the browser's `[hidden]`, and `<clover-items hidden>` showed. Never let an attribute name a tag
     freely (`as` on `<clover-label>` is a list: `script` would write one).
   - **Styles** come from the document's registry (`styles.ts`): the stylesheet's runs
     (`virtual:clover-styles`, a plugin in `build/web-components.config.mjs` that reads
     `src/styles/clover.css` in order and cuts it into `clover-1`, `media`, `clover-2`,
     `map`, `clover-3`) load with the first element and go in once, first in `<head>`;
-    the `media` and `map` runs (`DEFERRED` in `index.ts`: a
+    the `media`, `map` and `templates` runs (`DEFERRED` in `index.ts`: a
     `.clover-canvas[data-media]` or `[data-animated]`, drawn before the player's own
-    code, and `.clover-geomap`) load when an element holds what they style, one observer
+    code; `.clover-geomap`; a `<clover-viewer>` naming Document or Gallery, matched on
+    the element itself as well as within it, `look()` in `styles.ts`) load when an
+    element holds what they style, one observer
     watching every root and every element drawn by itself, and each goes after the
     nearest earlier run, so every rule keeps its place in one `clover` layer. Never
     sublayers: a later sublayer beats an earlier one's more specific rule. A stylesheet
     only media or a map needs goes in `DEFERRED`, listed with its kind in `clover.css`;
-    the plugin throws if a kind's sheets are not adjacent.
+    the plugin throws if a kind's sheets are not adjacent. The `templates` run is
+    `src/templates/templates.css`'s sheets, Document's and Gallery's, which the config
+    appends; Default's are in `clover.css`, so they come with the element.
   - **The build** (`build/web-components.config.mjs`) aliases React to Preact
     (`build/preact.mjs`), strips each chunk's whitespace, which Vite leaves in an ES
     library (`minifyWhitespace`), puts what every page with an element loads in one
@@ -1141,10 +1195,18 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   - **Sizes** (`build/element-size.mjs`, from the chunk map): each page in `PAGES`, the
     files it loads gzipped one by one, recorded in `sizes.json` and held to
     `size-budget.json`: the entry, a `<clover-viewer>` (`webComponentsGzip`, which Get
-    Started states), labels alone and the four parts. Loading per element has a price
+    started states), labels alone and the four parts. Loading per element has a price
     that grows with the elements: Rollup cuts the code the parts share by which elements
-    reach it, so a `<clover-viewer>` page loads 31 files, 102.3 kB gzipped one by one
-    against 94.2 kB as one (2026-10-22, 29 elements; Brotli the same). A second shared
+    reach it, so a `<clover-viewer>` page loads 39 files, 106.3 kB gzipped one by one
+    against 96.3 kB as one (2026-10-22, 36 elements: `<clover-canvas>` shares the
+    Canvas with the stage and the viewer; 36 files and 104.5 kB at 35, 31 and 102.3 kB at 29: the
+    containers share Panel, Split and the toggle with Default, so those came in chunks of
+    their own; Brotli the same). A layout of the containers, as Default's, loads 103.7 kB
+    (`layoutPageGzip`), 105.1 kB since phase 5. A `<clover-viewer>` in Document loads
+    112.6 kB (`documentElementGzip`, its template and the `templates` run, named by
+    their keys in the chunk map, which `pageFiles` takes beside tags), and a
+    `<clover-canvas>` alone, once it draws, 75.6 kB (`canvasElementGzip`, `LoadedCanvas`
+    with it). A second shared
     chunk for the light parts, and `experimentalMinChunkSize` at 1, 3 and 8 kB, were each
     tried and made the entry or the pages larger.
   - **The stylesheet loads whole**, with the first element: a page of labels loads
@@ -1152,14 +1214,19 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     graph, since the families (`ui/Button.css`, `ui/Tip.css`) list their members' rules,
     which their members never import; splitting it needs a table of each element's
     sheets, checked by eye for each part. Not done yet. `build/web-components.test.mjs`
-    asserts Preact not React, that a page of labels loads no Canvas or template,
+    asserts Preact not React, that a page of labels loads no Canvas or template and a
+    Canvas alone no template (the template known by its class, quoted, as its code
+    writes it: the stylesheet has it as a selector, and the entry's spec names its props),
     MapLibre and hls.js deferred, the worker relative, the types and the manifest the
     specs', and each budget. CI builds the package and runs these.
   - Tested under Preact, as it ships (`vitest.preact.config.mjs`, the build's aliases,
     DOM Testing Library rather than React's; the package's own project leaves these
-    out): `elements/viewer.test.tsx`, `elements/elements.test.tsx`, and
-    `elements/upgrade.test.tsx` (a page of its own, for elements defined in any order).
-    `e2e/elements` is a page of them, served over the source as the element build makes
+    out): `elements/viewer.test.tsx`, `elements/elements.test.tsx`,
+    `elements/containers.test.tsx`, `elements/standalone.test.tsx` (a Canvas, Items and
+    a Map alone, and the templates), and `elements/upgrade.test.tsx` (a page of its own,
+    for elements defined in any order).
+    `e2e/elements` is a page of them (two roots, a layout of the containers, and the
+    standalone elements and templates), served over the source as the element build makes
     them, by `e2e/vite.elements.config.mjs` (port 4323; `?many=N` adds N roots and
     times them).
 - **Renderers** (`components/Content/renderers.ts`): `renderers` on `Root` go into the

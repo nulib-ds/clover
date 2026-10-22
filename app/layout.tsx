@@ -65,7 +65,7 @@ export default async function RootLayout({
         backgroundColor={{ light: "#ffffff", dark: "#111113" }}
       >
         {/*
-         * The reader's choice of code, React or Web Components, on the root before the
+         * The reader's choice of code, React or Web components, on the root before the
          * page paints (`docs/lib/code-flavor.ts`), so its CSS shows the chosen one from
          * the start.
          */}
@@ -84,7 +84,7 @@ export default async function RootLayout({
           navbar={
             <>
               {/*
-               * After the search, the switch for the docs' code, React or Web Components
+               * After the search, the switch for the docs' code, React or Web components
                * (Mat, 2026-10-21), then the repository's link, drawn as Nextra draws its
                * own, which it would put first.
                */}
@@ -118,6 +118,8 @@ export default async function RootLayout({
           copyPageButton={false}
           // No previous and next page links at a page's foot (Mat, 2026-10-21).
           navigation={false}
+          // In sentence case, as every heading is (DESIGN.md §8); Nextra's is "On This Page".
+          toc={{ title: "On this page" }}
           lastUpdated={<NoLastUpdated />}
           sidebar={{
             /*

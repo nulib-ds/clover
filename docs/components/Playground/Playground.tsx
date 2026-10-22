@@ -27,6 +27,8 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import styles from "docs/components/Playground/Playground.module.css";
 import home from "docs/components/Home/Home.module.css";
+import intro from "docs/components/Home/SectionIntro.module.css";
+import { Swoosh } from "docs/components/Home/Swoosh";
 import { useRouter } from "docs/lib/router";
 
 /**
@@ -369,16 +371,17 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
          * hero's stroke, drawn in as they come into view.
          */}
         <div className={styles.choice}>
-          <h2 className={styles.choiceTitle}>
+          {/* The sections' own title and note, so the two read as one voice (Mat, 2026-10-22). */}
+          <h2 className={intro.title}>
             Use a template{" "}
             <span className={styles.nowrap}>
               or build{" "}
-              <span className={`${home.mark} ${home.markOnScroll}`}>
+              <Swoosh className={`${home.mark} ${home.markOnScroll}`}>
                 your own.
-              </span>
+              </Swoosh>
             </span>
           </h2>
-          <p className={styles.choiceLine}>
+          <p className={intro.note}>
             Start with a{" "}
             <span
               className={styles.layoutPicker}
@@ -471,18 +474,18 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
             <span id="pg-layout">template</span> or build your own layout.
           </p>
           {/*
-           * Two ways on (Mat, 2026-10-21): Get Started, the way in, and the Viewer's own
+           * Two ways on (Mat, 2026-10-21): Get started, the way in, and the Viewer's own
            * docs, its templates among them.
            */}
           <div className={styles.choiceActions}>
             <Link href="/docs" className="cta-solid">
-              Get Started
+              Get started
               <span className="cta-arrow" aria-hidden="true">
                 →
               </span>
             </Link>
             <Link href="/docs/viewer" className="cta-outline">
-              Viewer Documentation
+              Viewer documentation
               <span className="cta-arrow" aria-hidden="true">
                 →
               </span>

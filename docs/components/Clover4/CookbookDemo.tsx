@@ -44,7 +44,7 @@ const renderViewer = (resource: string) => (
 );
 
 /**
- * The Cookbook Recipes page: every IIIF Cookbook recipe to open in the Viewer, which
+ * The Cookbook recipes page: every IIIF Cookbook recipe to open in the Viewer, which
  * slides in over the page. Each recipe is listed whether Clover 4 handles it yet or not;
  * how far it does is on the unlisted progress page. The homepage is the demo, with its
  * own field for any resource, so this page has none.

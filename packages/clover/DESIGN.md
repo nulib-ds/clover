@@ -1,7 +1,7 @@
-# Design: space, type and selectors
+# Design: space, type, selectors and words
 
-How `@nulib/clover` sizes everything it draws, and how its stylesheet is written. This is
-a rule, not a guideline. `src/styles/scale.test.ts` enforces the parts a test can check;
+How `@nulib/clover` sizes everything it draws, how its stylesheet is written, and how its
+words are cased. This is a rule, not a guideline. `src/styles/scale.test.ts` enforces the parts a test can check;
 the rest is review.
 
 The aim is natural whitespace. Space between things should say how closely they belong
@@ -354,3 +354,33 @@ does it faster.
   sight inline and adds the popover, so the name never shows twice.
 - **For a control of your own:** give it the `aria-label` (and `aria-keyshortcuts`), and
   put `<Clover.Tip label={label} shortcut={shortcut} />` inside it, last.
+
+## 8. Words in sentence case
+
+Every name, button, menu item, tab, heading, title and link Clover shows is in sentence
+case: a capital opens it, and inside it marks a proper name, nothing else. "More
+information", "View all", "No results", "Show items", "Hide annotations", "Zoom in". The
+docs site keeps the same rule for its menus, calls to action and headings (Mat,
+2026-10-22; root `AGENTS.md`). `src/i18n/locales/locales.test.ts` enforces it for
+Clover's English; the rest is review.
+
+Sentence case reads as one person speaking to another, and it leaves a capital to mean
+something: "Open the full Manifest" names a IIIF resource, where "Show items" asks no
+reader to know a part's name.
+
+- **Proper names keep their capitals**, as their owners write them: Clover; IIIF, its
+  resource types (`Collection`, `Manifest`, `Canvas`, `Range`) and its specifications
+  (the Image API, Content Search, Content State); the IIIF Cookbook; keys (Escape, Shift,
+  Space, a letter); acronyms; people, places, institutions, products and languages.
+- **A part's name only where the words name the part.** The docs' headings "In the
+  Viewer" and "Outside a Root" name components. Clover's own interface speaks to a reader, who
+  knows no part's name: "Show items", "Hide annotations".
+- **Text from a resource is shown as written.** A label, a summary, a metadata line: never
+  recased, in either direction. No Clover style sets words in capitals
+  (`text-transform`), so a screen reader, a copy and a page without the stylesheet read
+  what is shown.
+- **Each language keeps its own conventions.** A translation follows its language's case,
+  never English's: the shipped languages use sentence case too, and German would
+  capitalize its nouns.
+- **A string with a new proper name** adds it to `PROPER_NAMES` in the locales test, which
+  lists IIIF's resource types, keys and acronyms.

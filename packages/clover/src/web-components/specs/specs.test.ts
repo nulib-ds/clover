@@ -7,15 +7,7 @@ import * as parts from "../../parts";
 import { DOCS, SPECS } from ".";
 
 /** Parts whose elements are planned, by the phase that brings them. */
-const LATER: Record<string, string> = {
-  Panel: "phase 4, the containers",
-  Tab: "phase 4, the containers",
-  PanelToggle: "phase 4, the containers",
-  Split: "phase 4, the containers",
-  SplitPane: "phase 4, the containers",
-  SplitHandle: "phase 4, the containers",
-  Canvas: "phase 5, standalone",
-};
+const LATER: Record<string, string> = {};
 
 /** Parts that stay inside the others, never elements of their own. */
 const NEVER: Record<string, string> = {
@@ -47,7 +39,7 @@ describe("Parity between the parts and the elements", () => {
     }
   });
 
-  it("describes every element's attributes, properties and events", () => {
+  it("describes every element's attributes, properties, events and slots", () => {
     const docs = DOCS();
     for (const spec of SPECS) {
       const doc = docs[spec.tag];
@@ -66,6 +58,12 @@ describe("Parity between the parts and the elements", () => {
       }
       for (const name of Object.keys(spec.events ?? {})) {
         expect(doc.events?.[name]?.detail, `${spec.tag} ${name}`).toBeTruthy();
+      }
+      for (const name of spec.slots ?? []) {
+        expect(
+          doc.slots?.[name]?.description,
+          `${spec.tag} slot ${name}`,
+        ).toBeTruthy();
       }
     }
   });

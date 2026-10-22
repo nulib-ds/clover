@@ -1,15 +1,18 @@
 {
   "canvasInitialGzip": 38000,
   "viewerShellGzip": 1200,
-  "defaultTemplateGzip": 66800,
-  "documentTemplateGzip": 69200,
+  "defaultTemplateGzip": 67000,
+  "documentTemplateGzip": 69400,
   "galleryTemplateGzip": 58600,
   "stylesGzip": 12000,
   "templatesStylesGzip": 2100,
   "mapInitialGzip": 18100,
   "mapOnDemandGzip": 300000,
-  "webComponentsGzip": 102400,
-  "labelPageGzip": 39000,
-  "elementsEntryGzip": 4700,
-  "composedPageGzip": 87400
+  "webComponentsGzip": 106300,
+  "labelPageGzip": 39900,
+  "elementsEntryGzip": 5600,
+  "composedPageGzip": 91600,
+  "layoutPageGzip": 105200,
+  "canvasElementGzip": 75700,
+  "documentElementGzip": 112700
 }

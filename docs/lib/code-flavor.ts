@@ -20,7 +20,7 @@ export const CODE_FLAVORS: {
   short?: string;
 }[] = [
   { value: "react", label: "React" },
-  { value: "web-components", label: "Web Components", short: "Web" },
+  { value: "web-components", label: "Web components", short: "Web" },
 ];
 
 const DEFAULT: CodeFlavor = "react";

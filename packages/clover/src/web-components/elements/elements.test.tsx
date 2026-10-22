@@ -491,6 +491,9 @@ describe("Clover's elements", () => {
       'style[data-clover="elements"]',
     )!.textContent!;
     expect(css).toMatch(/^@layer clover\{/);
-    expect(css).toContain("clover-label{display:contents}");
+    // A label is no box of its own, and one the page hides stays hidden.
+    expect(css).toMatch(
+      /:is\(clover-label,[^)]*\):not\(\[hidden\]\)\{display:contents\}/,
+    );
   });
 });

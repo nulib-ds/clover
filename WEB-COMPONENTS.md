@@ -51,9 +51,9 @@ Bugs to fix first, whatever else follows (all fixed in phase 0, October 21, 2026
 1. **`import "@nulib/clover/web-components"` can define nothing.** The package marks
    itself side-effect-free (`package.json` `sideEffects: ["*.css"]`), so a bundler may
    drop the import. esbuild does.
-2. **`download="false"` does nothing.** Default has no Download, but Get Started promises
+2. **`download="false"` does nothing.** Default has no Download, but Get started promises
    it.
-3. **Get Started says "about 90 kB".** The build measures 103.3 kB, and the element's size
+3. **Get started says "about 90 kB".** The build measures 103.3 kB, and the element's size
    isn't in `sizes.json` for the docs to state.
 4. **Two viewers on one page share ids.** Preact's `useId` restarts in each root, which
    breaks `aria-controls`, `aria-labelledby` and `htmlFor`.
@@ -68,7 +68,7 @@ Bugs to fix first, whatever else follows (all fixed in phase 0, October 21, 2026
 
 How each was fixed: `sideEffects` names `dist/web-components/**`, and a build test bundles
 the import with esbuild (1). `download` passes through `Default` and `Panel` to `About`
-(2). `sizes.json` records `webComponentsGzip`, which Get Started states (3). Every id comes
+(2). `sizes.json` records `webComponentsGzip`, which Get started states (3). Every id comes
 from `useUniqueId`, which each element prefixes, and ESLint forbids `useId` in the package
 (4). `connectedCallback` takes a property set early (5). `"false"` is read in any case,
 and `items` warns of a layout it doesn't know (6). The element's tests run under Preact,
@@ -190,7 +190,7 @@ The parts that need more than their props:
   (`custom-elements.json`) generated from each element's spec. The manifest gives editors
   completion and is the source of the docs' attribute tables. It is published with the
   site, for agents.
-- **The CDN loader** reports a failed load instead of failing silently. Get Started says
+- **The CDN loader** reports a failed load instead of failing silently. Get started says
   what a CDN needs (CORS).
 - **Sizes.** Each element's up-front size and a few compositions go in `sizes.json`, with
   budgets in `size-budget.json`. `test:build` runs in CI.
@@ -217,7 +217,7 @@ The parts that need more than their props:
 
 ### Built (2026-10-21)
 
-- **The header's switch**, React | Web Components (`docs/components/CodeSwitch.tsx`,
+- **The header's switch**, React | Web components (`docs/components/CodeSwitch.tsx`,
   `docs/lib/code-flavor.ts`). React is the default. The choice is stored, kept in step
   across tabs, and set on the root as `data-code` before the page paints. An example
   holds its code in both, each marked `data-code-flavor`, and CSS shows the chosen one.
@@ -226,7 +226,7 @@ The parts that need more than their props:
 
 - **Example frames.**
   - `Example`, `ViewerExample` and `OptionsExample` hold both flavors in the page's HTML,
-    each labeled "React" or "Web Components".
+    each labeled "React" or "Web components".
   - CSS shows the chosen one, never the `hidden` attribute, so the Markdown copies keep
     both. `OptionsExample` moves from `hidden` to CSS too: today the Markdown loses seven of
     its eleven code blocks.
@@ -247,11 +247,11 @@ The parts that need more than their props:
     the transformer handles. 13 pass objects or arrays, which need JSON attributes or
     properties. 2 are React code. Of the 27 Viewer examples, 19 work with today's element.
 - **Until an element exists**, its examples show React with one line for those who chose
-  Web Components: "Not yet a web component, shown in React."
-- **API tables.** In Web Components mode, a part's page shows its element's attributes,
+  Web components: "Not yet a web component, shown in React."
+- **API tables.** In Web components mode, a part's page shows its element's attributes,
   properties and events, generated from the manifest.
-- **Get Started** installs and loads both flavors and lists the elements. **Composing
-  Layouts** shows every composition in both. Its hooks become `root.clover` and the
+- **Get started** installs and loads both flavors and lists the elements. **Composing
+  layouts** shows every composition in both. Its hooks become `root.clover` and the
   events.
 - **The homepage's code editor** writes HTML too. Its syntax lives in four builders in
   `PartsLive.tsx` (`element`, `head`, `partLines`, `tail`), and its live values ride on
@@ -291,7 +291,7 @@ Each is a change of its own, shippable, with its CHANGELOG entries and AGENTS.md
 6. **Parts of your own**: `root.clover`, the exported selectors, the events, and
    renderers and control buttons without React.
 7. **The docs' flavors**, from phase 2 on, as each element lands: the frames, the
-   transformer, the API tables, Get Started, Composing Layouts, the homepage's editor, and
+   transformer, the API tables, Get started, Composing layouts, the homepage's editor, and
    what agents read.
 8. **Release**: renamed events on `<clover-viewer>`, budgets, docs claims.
 
@@ -440,7 +440,7 @@ Begun and done October 22, 2026: the parts that read their root's state.
 - [x] Parity: every exported part has an element or a reason (`specs/specs.test.ts`).
 - [x] A part of a root draws nothing outside one, and says so; ARIA on an element is
       warned of.
-- [x] Tests, the build in Chrome, Get Started, the changelog, AGENTS.md.
+- [x] Tests, the build in Chrome, Get started, the changelog, AGENTS.md.
 
 ### What phase 3 found (October 22, 2026)
 
@@ -463,6 +463,96 @@ Begun and done October 22, 2026: the parts that read their root's state.
 - **For phase 4**: the containers (Panel and Tab, the Content's controls, the Split's
   three, Status's slots) and render props as function properties (`renderValue`,
   `renderEntry`, `renderItem`).
+
+## Phase 4 progress
+
+Begun and done October 22, 2026: the containers.
+
+- [x] The Split's logic apart from React (`components/Split/splitting.ts`): limits, the
+      click's steps, keys, the drag and the double click's guard, shared by `SplitHandle`
+      and the elements.
+- [x] `<clover-split>`, `<clover-split-pane>`, `<clover-split-handle>`: the elements are
+      the boxes, so nothing comes between a pane and its handle.
+- [x] `<clover-panel>` and `<clover-tab value label>`: each tab's content moved into its
+      section when the section first opens; a `slot="label"` child shown as a copy.
+- [x] `<clover-panel-toggle controls>`: in `<clover-content>`, drawn in the cluster;
+      elsewhere, its own button; open while its target is not `hidden`.
+- [x] `<clover-status>`'s slots, `loading` and `error`.
+- [x] Function properties: Metadata's `renderValue`, Annotations' `renderEntry`, Items'
+      `renderItem`, each returning a DOM node or text.
+- [x] Parity, specs and the manifest (slots), tests under Preact, a page in Chrome by
+      keyboard and the accessibility tree, sizes, Get started, the changelog, AGENTS.md.
+
+### What phase 4 found (October 22, 2026)
+
+- **A layout as Default's works in HTML** (`e2e/elements`, "A layout of containers"): the
+  stage with the toggle among its controls, a handle the keys move and the page
+  remembers, the panel's tabs with a label's markup copied and a tab's content moved into
+  its section, the toggle hiding the pane and the handle going with it. Chrome's
+  accessibility tree reads as the React composition's (a separator named "Resize
+  panels", a complementary panel with its tablist), and axe finds nothing at WCAG 2.2 A
+  or AA. At 320px the page's own CSS stacks the panes, as Default floats its panel on a
+  phone: two panes' minimums never fit beside each other there.
+- **The toggle's state is its target's `hidden`**, not an attribute of the toggle's own,
+  as this plan first had it: a panel written `hidden` starts shut before any code loads,
+  with nothing to flash, and a page that shows or hides it itself is followed.
+- **What the page writes in a container is moved, or copied**: a tab's content moves (the
+  page's own nodes, with their listeners, back into the tab when the panel lets them go),
+  and a label's or a status's slot is copied, kept in step, the slot hidden where it is
+  written so a screen reader meets it once.
+- **The Split's logic is one now**, shared by React's handle and the element. As a class
+  it cost every page with a Split 0.3 kB, its names surviving minifying; held in a
+  closure, 0.15 kB, which `Default` and `Document` pay.
+- **A bug, fixed**: the elements' display rules beat the browser's `[hidden]`, as an
+  author's styles do, so `<clover-items hidden>` showed. Each is `:not([hidden])` now.
+- **Size.** The script is 5.2 kB (4.6 before): six elements more, slots, function
+  properties. A `<clover-viewer>` page loads 104.5 kB in 36 files (102.3 kB in 31): the
+  containers share Panel, Split and the toggle with Default, so those came in chunks of
+  their own, gzipped apart (95.3 kB as one). A layout of the containers loads 103.7 kB.
+  The budgets are raised to these. The case for `<clover-viewer>`'s own entry, built whole
+  for pages that use only it (about 90 kB), grows with each phase.
+- **For phase 5**: the standalone parts (`<clover-canvas>`, `<clover-items
+iiif-content>`, `<clover-map>`) and `<clover-viewer template>` for all three templates.
+
+## Phase 5 progress
+
+Begun October 22, 2026: standalone, and the templates. Work may stop at a session's limit;
+resume from this list.
+
+- [x] `<clover-canvas>`: the Canvas, alone (`iiif-content`, `src`, `canvases`) or, inside
+      a `<clover-root>`, its view.
+- [x] `<clover-items>` and `<clover-map>` alone, tested as they ship.
+- [x] `<clover-viewer template="default | document | gallery">`: each loaded when used,
+      with the templates' stylesheet loaded beside it; the templates' own attributes.
+- [x] Parity (`Canvas` off the later list), specs and docs, tests under Preact, a page in
+      Chrome, sizes, Get started, the changelog, AGENTS.md.
+
+### What phase 5 found (October 22, 2026)
+
+1. **A Canvas of its own costs every viewer page.** `<clover-canvas>` shares the Canvas
+   with the stage and the viewer, so Rollup cut that code into more chunks: a
+   `<clover-viewer>` page went from 36 files and 104.5 kB to 39 files and 106.3 kB
+   gzipped apart, against 96.3 kB as one. The case for giving the viewer one whole entry
+   grows with each phase: 10.0 kB now. A Canvas alone loads 75.6 kB once it draws, and a
+   viewer in Document 112.6 kB, its template and styles with it.
+2. **A template passes on what it does not know.** Each hands unknown props to its root's
+   element, so `size` on Default would have landed as an HTML attribute. `ONLY` in
+   `elements/viewer.tsx` hands each template its own attributes and none of another's.
+3. **The templates' styles are a deferred run.** Document's and Gallery's sheets
+   (`src/templates/templates.css`) load with the first `<clover-viewer>` that names one.
+   The registry's `when` now matches the watched element itself, not only what it holds.
+4. **A build check's marker went stale.** The viewer's spec now names its templates'
+   props, so `defaultPanelOpen`, the string that marked "the template has loaded", was in
+   the entry every page loads. The check reads the template's class as its code writes
+   it, quoted, which the stylesheet never does, and now covers a Canvas alone too.
+5. **The Panel's landmark had no name**, in React too. Open in Document, it was a second
+   complementary landmark beside "Items". It is named "Information panel" now, as its
+   tabs are: 52 B on a viewer page, and three budgets 0.1 kB higher.
+6. **In Chrome** (`e2e/elements`'s new section): 27 tab stops in the page's order, each
+   with a visible ring; the accessibility tree as written; axe at 0 violations, with the
+   panel and the lightbox open too; nothing scrolling across at 320px. Gallery's lightbox
+   opens with Enter and gives focus back on Escape. The first screenshots were gray: a
+   stage draws only once it comes near the window, as it should.
 
 ## Decisions for Mat
 

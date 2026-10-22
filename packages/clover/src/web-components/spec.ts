@@ -41,9 +41,11 @@ export interface ElementSpec {
   tag: string;
   /**
    * `root` provides for the parts inside it. A `part` is drawn inside its nearest root, or
-   * by itself outside one. One `alone` is always drawn by itself, wherever it is.
+   * by itself outside one. One `alone` is always drawn by itself, wherever it is. A
+   * `config` element draws nothing and loads nothing: the element around it reads it (a
+   * panel its tabs).
    */
-  kind: "root" | "part" | "alone";
+  kind: "root" | "part" | "alone" | "config";
   /**
    * A part that reads its root's state and has nothing to show without one: outside a
    * `<clover-root>` it draws nothing, and says so in the console.
@@ -55,6 +57,16 @@ export interface ElementSpec {
   properties?: readonly string[];
   /** Events by name, each sent when the part calls its callback. */
   events?: Record<string, EventSpec>;
+  /**
+   * The names of the children it reads by their `slot` (`<span slot="label">`), shown as a
+   * copy where the part draws them.
+   */
+  slots?: readonly string[];
+  /**
+   * The element is the part's own box (a pane, a handle): its role and its name are on
+   * the element itself, so ARIA on it is the page's to give.
+   */
+  native?: boolean;
 }
 
 /** What the types and the manifest say of an element. Never loaded by a page. */
@@ -67,4 +79,6 @@ export interface ElementDocs {
   properties?: Record<string, { type: string; description: string }>;
   /** Each event's `detail` as a TypeScript type, and when it is sent. */
   events?: Record<string, { detail: string; description: string }>;
+  /** What each slot holds. */
+  slots?: Record<string, { description: string }>;
 }

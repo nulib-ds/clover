@@ -151,7 +151,7 @@ export async function serveIIIF(page: Page): Promise<Request[]> {
  */
 export async function openPanel(page: Page, isMobile: boolean) {
   if (!isMobile) return;
-  await page.getByRole("button", { name: "More Information" }).click();
+  await page.getByRole("button", { name: "More information" }).click();
 }
 
 /** A content state as a link carries it: base64url of the URI-encoded JSON. */

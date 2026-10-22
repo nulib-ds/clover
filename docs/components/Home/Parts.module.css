@@ -1094,7 +1094,7 @@
     box-shadow 160ms ease;
 }
 
-/* "And more." across the tiles, its space above from the tiles' gap and its own. */
+/* "IIIF building blocks." across the tiles, its space above from the tiles' gap and its own. */
 .more {
   grid-column: 1 / -1;
 }

@@ -30,6 +30,7 @@ const propertyDocs = (
   description: string,
   value: { type: string; description: string },
   attributes: ElementDocs["attributes"] = {},
+  properties: ElementDocs["properties"] = {},
 ): ElementDocs => ({
   name,
   description,
@@ -45,6 +46,7 @@ const propertyDocs = (
       type: `${value.type} | null`,
       description: `${value.description}, instead of the root's.`,
     },
+    ...properties,
   },
 });
 
@@ -62,13 +64,25 @@ export const summaryDocs = /* @__PURE__ */ propertyDocs(
   { as: { description: "The element to draw.", default: "p" } },
 );
 
-export const metadata = property("clover-metadata");
+// A function property, `renderValue`: a value drawn the page's way (`elements/nodes.tsx`).
+export const metadata: ElementSpec = {
+  ...property("clover-metadata"),
+  properties: ["value", "renderValue"],
+};
 export const metadataDocs = /* @__PURE__ */ propertyDocs(
   "CloverMetadataElement",
   "The metadata, as a description list of labels and their values.",
   {
     type: "Array<{ label: Record<string, string[]>; value: Record<string, string[]> }>",
     description: "Metadata",
+  },
+  {},
+  {
+    renderValue: {
+      type: "((item: { label: Record<string, string[]>; value: Record<string, string[]> }) => Node | string | null | undefined) | null",
+      description:
+        "Your own drawing of a value: a node or text to show in its place, or undefined for Clover's. A new node each time.",
+    },
   },
 );
 

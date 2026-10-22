@@ -791,7 +791,7 @@ function Exploded({
   }, [disarmList]);
   const shown = useMemo(() => parts.filter((part) => part.present), [parts]);
   const missing = useMemo(() => parts.filter((part) => !part.present), [parts]);
-  // The first tile past the viewer's own parts: "And more." goes over it, the Collection
+  // The first tile past the viewer's own parts: "IIIF building blocks." goes over it, the Collection
   // among those under it (Mat, 2026-10-21).
   const firstMore = shown.find(
     (part) =>
@@ -1149,8 +1149,9 @@ function More() {
     <SectionIntro
       as="h3"
       className={styles.more}
-      title="And more."
-      note={`${partCount} IIIF-focused building blocks. Every one yours to compose.`}
+      // Named for what they are, as LEGO's pieces are, and how they go together (Mat, 2026-10-22).
+      title="IIIF building blocks."
+      note={`${partCount} pieces that snap together any way you like, each one made for IIIF.`}
       cta={{ href: "/docs/content", label: "See them all" }}
     />
   );

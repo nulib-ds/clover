@@ -52,12 +52,21 @@ test("Preact draws them, not React", () => {
 test("a page loads only the elements it uses", () => {
   // The script defines every element and draws none: no Preact until one connects.
   assert.ok(!/\.__H\b|\.__k\b/.test(pageSource([])));
-  // A page of labels never loads a Canvas (its renderer), or the Viewer's template.
+  /*
+   * A page of labels never loads a Canvas (its renderer), or the Viewer's template; a
+   * Canvas alone, once it draws (its renderer loads then), not the template. The template
+   * is known by its class as its code writes it, quoted: the stylesheet, which every page
+   * loads, has it as a selector, and the entry's spec names its props.
+   */
   const CANVAS = "webglcontextlost";
-  const TEMPLATE = "defaultPanelOpen";
+  const TEMPLATE = '"clover-template-default"';
   const labels = pageSource(LABELS);
   assert.ok(!labels.includes(CANVAS) && !labels.includes(TEMPLATE));
   assert.ok(pageSource(FOUR).includes(CANVAS));
+  const canvas = pageSource(
+    PAGES.find(([, key]) => key === "canvasElementGzip")[2],
+  );
+  assert.ok(canvas.includes(CANVAS) && !canvas.includes(TEMPLATE));
   assert.ok(pageSource(VIEWER).includes(TEMPLATE));
 });
 

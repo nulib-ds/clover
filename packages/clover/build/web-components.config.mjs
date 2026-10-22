@@ -17,8 +17,9 @@ const DEFERRED = {
 };
 
 /**
- * The element's stylesheet, `virtual:clover-styles`, without what only media and maps
- * need: `virtual:clover-styles/media` and `/map`, which load with them. One list still
+ * The element's stylesheet, `virtual:clover-styles`, without what only media, maps and
+ * the Document and Gallery templates need: `virtual:clover-styles/media`, `/map` and
+ * `/templates`, which load with them. One list still
  * states the order, `src/styles/clover.css`, and the stylesheet comes in its runs, in
  * that order: `clover-1`, `media`, `clover-2`, `map`, `clover-3`. The element puts each
  * deferred run in its place among them, so its rules keep their place in the one
@@ -46,6 +47,20 @@ function cloverStyles() {
   for (const run of runs) {
     run.key = run.kind === "clover" ? `clover-${++shown}` : run.kind;
   }
+  /*
+   * The Document and Gallery templates' stylesheet, `templates.css`, after Clover's own,
+   * as an app loads `@nulib/clover/templates.css` after `styles.css`: deferred too, for a
+   * `<clover-viewer>` in one of them.
+   */
+  runs.push({
+    kind: "templates",
+    key: "templates",
+    sheets: [
+      ...readFileSync(resolve(root, "src/templates/templates.css"), "utf8").matchAll(
+        /^@import\s+"([^"]+)";/gm,
+      ),
+    ].map((match) => `../templates/${match[1].replace(/^\.\//, "")}`),
+  });
   for (const name of Object.keys(DEFERRED)) {
     const found = runs.filter((run) => run.kind === name);
     const listed = found.flatMap((run) => run.sheets);

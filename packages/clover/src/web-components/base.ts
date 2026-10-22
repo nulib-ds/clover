@@ -10,15 +10,20 @@ export type LoadPart = () => Promise<React.ComponentType<HostedProps>>;
 
 /*
  * How the elements are shown, before Clover's own styles: a root and the boxes a layout
- * places are blocks, and the stage takes its height from `--clover-content-height`, as
- * `Content` does, so `style="height: 60vh"` on it sizes it too. A label is no box of its
- * own: what it draws (a heading, or text in a sentence) sits in the page as if written
- * there. In `@layer clover`, so any rule of the page's wins.
+ * places are blocks, the Split a row, and the stage (`<clover-content>`, or a
+ * `<clover-canvas>`) takes its height from `--clover-content-height`, as `Content` does,
+ * so `style="height: 60vh"` on it sizes it too. A label, and a panel's toggle outside a stage, are no box of their own: what they
+ * draw sits in the page as if written there. What an element only reads (a tab, a slot's
+ * children) is not shown where it is written. Each leaves an element `hidden` hidden, as
+ * the browser's own rule does, which an author's rule beats. In `@layer clover`, so any
+ * rule of the page's wins.
  */
 const ELEMENT_CSS =
-  "@layer clover{clover-root,clover-items,clover-viewer{display:block}" +
-  "clover-content{display:block;height:var(--clover-content-height,60vh)}" +
-  "clover-label{display:contents}}";
+  "@layer clover{:is(clover-root,clover-items,clover-viewer,clover-panel):not([hidden]){display:block}" +
+  ":is(clover-content,clover-canvas):not([hidden]){display:block;height:var(--clover-content-height,60vh)}" +
+  "clover-split:not([hidden]){display:flex}" +
+  ":is(clover-label,clover-panel-toggle):not([hidden]){display:contents}" +
+  "clover-tab,clover-status>[slot]{display:none}}";
 
 /**
  * The host (Preact, and the one tree that draws every element on the page), loaded the
@@ -80,16 +85,38 @@ const sameProps = (a: Record<string, unknown>, b: Record<string, unknown>) => {
 };
 
 /**
+ * An element that only says something to the element around it (a panel's tab): its
+ * attributes are its, and it loads and draws nothing. Its display rule goes in with the
+ * others, so it is not shown where it is written.
+ */
+function defineConfig(spec: ElementSpec, assets: ElementAssets) {
+  class CloverConfigElement extends HTMLElement {
+    static get observedAttributes() {
+      return Object.keys(spec.attributes);
+    }
+
+    readonly kind = spec.kind;
+
+    connectedCallback() {
+      stylesFor(this.ownerDocument, assets).inject("elements", ELEMENT_CSS);
+    }
+  }
+  customElements.define(spec.tag, CloverConfigElement);
+}
+
+/**
  * Define an element (once) from its spec: drawn by the page's host, with what `load`
  * gives, the first time one connects.
  */
 export function defineElement(
   spec: ElementSpec,
-  load: LoadPart,
+  load: LoadPart | undefined,
   assets: ElementAssets,
 ) {
   if (typeof customElements === "undefined") return;
   if (customElements.get(spec.tag)) return;
+  if (spec.kind === "config" || !load) return defineConfig(spec, assets);
+  const kind = spec.kind;
   const properties = spec.properties ?? [];
   const events = Object.entries(spec.events ?? {});
   let Drawn: React.ComponentType<HostedProps> | null = null;
@@ -109,7 +136,7 @@ export function defineElement(
     /** Set Clover's interface language, or add strings, for every element on the page. */
     static initCloverI18n = initCloverI18n;
 
-    readonly kind = spec.kind;
+    readonly kind = kind;
     readonly needsRoot = Boolean(spec.needsRoot);
     /** Props set as properties: each wins over its attribute. */
     readonly values: Record<string, unknown> = {};
@@ -117,8 +144,11 @@ export function defineElement(
     private readonly listeners = new Set<() => void>();
     /** What has been warned of, so a value is warned of once. */
     private readonly warned = new Set<string>();
-    /** The part's callbacks, each sending its event from the element. */
-    private readonly handlers: Record<string, (...args: unknown[]) => void> =
+    /**
+     * The part's callbacks, each sending its event from the element, and saying whether
+     * the page let it be (false where it canceled it).
+     */
+    private readonly handlers: Record<string, (...args: unknown[]) => boolean> =
       Object.fromEntries(
         events.map(([type, event]) => [
           event.prop,
@@ -135,12 +165,14 @@ export function defineElement(
               composed: true,
               cancelable: Boolean(event.cancelable),
             });
-            if (!this.dispatchEvent(sent) && event.cancelable) {
+            const allowed = this.dispatchEvent(sent);
+            if (!allowed && event.cancelable) {
               const last = args[args.length - 1] as {
                 preventDefault?: () => void;
               };
               last?.preventDefault?.();
             }
+            return allowed;
           },
         ]),
       );
@@ -207,9 +239,11 @@ export function defineElement(
      * The element is a box of the page's, with no role: a name or a role given to it
      * names nothing a reader is told of, and a name on it is not allowed (ARIA 1.2,
      * generic). Clover names what it draws itself; the page's own landmark around an
-     * element can name it otherwise.
+     * element can name it otherwise. An element that is the part's own box (a Split's
+     * handle) is the page's to name.
      */
     private warnOfAria() {
+      if (spec.native) return;
       for (const name of ["aria-label", "aria-labelledby", "role"]) {
         if (!this.hasAttribute(name) || this.warned.has(name)) continue;
         this.warned.add(name);

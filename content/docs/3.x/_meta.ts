@@ -5,7 +5,7 @@ const meta: MetaRecord = {
   composing: "Composing",
   "--components": {
     type: "separator",
-    title: "IIIF Components",
+    title: "IIIF components",
   },
   image: "Image",
   map: "Map",
@@ -17,7 +17,7 @@ const meta: MetaRecord = {
   viewer: "Viewer",
   "--primitives": {
     type: "separator",
-    title: "IIIF Primitives",
+    title: "IIIF primitives",
   },
   homepage: "Homepage",
   label: "Label",

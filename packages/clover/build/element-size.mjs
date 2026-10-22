@@ -60,7 +60,8 @@ export function pageFiles(tags = [], dir = ELEMENT_DIR) {
   if (tags.length) {
     // What the first element to connect loads, whichever it is.
     [sharedKey(map), STYLES].forEach(visit);
-    tags.forEach((tag) => visit(elementKey(map, tag)));
+    // An element by its tag; or a module by its key (a template, a deferred run).
+    tags.forEach((tag) => visit(map[tag] ? tag : elementKey(map, tag)));
   }
   return files;
 }
@@ -88,5 +89,37 @@ export const PAGES = [
     "The four parts",
     "composedPageGzip",
     ["clover-root", "clover-label", "clover-content", "clover-items"],
+  ],
+  // A layout as Default's, of elements: the stage and its toggle beside the panel.
+  [
+    "A layout of containers",
+    "layoutPageGzip",
+    [
+      "clover-root",
+      "clover-label",
+      "clover-content",
+      "clover-panel-toggle",
+      "clover-items",
+      "clover-split",
+      "clover-split-pane",
+      "clover-split-handle",
+      "clover-panel",
+    ],
+  ],
+  // A Canvas alone, as it loads what it is given (`LoadedCanvas`, on demand).
+  [
+    "A <clover-canvas> alone",
+    "canvasElementGzip",
+    ["clover-canvas", "src/components/Canvas/LoadedCanvas.tsx"],
+  ],
+  // A viewer in Document: its template and the templates' styles, as each loads.
+  [
+    "A <clover-viewer> in Document",
+    "documentElementGzip",
+    [
+      "clover-viewer",
+      "src/templates/document/Document.tsx",
+      "virtual:clover-styles/templates",
+    ],
   ],
 ];

@@ -3,7 +3,7 @@
   font-size: 1.47rem;
   font-weight: 400;
   line-height: 1.6;
-  border-radius: 6px;
+  border-radius: var(--radius-4);
   color: #fff;
   background: linear-gradient(
     130deg,

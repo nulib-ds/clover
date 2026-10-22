@@ -114,7 +114,7 @@ test("the thumbnails' toggle sits on their spine while they show, its far end ov
   page,
 }) => {
   await open(page);
-  const toggle = page.getByRole("button", { name: /^Show Items/ });
+  const toggle = page.getByRole("button", { name: /^Show items/ });
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
   const where = () =>
     page.evaluate(() => {
@@ -287,7 +287,7 @@ test("a thumbnail, PageDown and PageUp bring their sheets; a reader's scroll tak
   await open(page);
   // Where the thumbnails start hidden (a narrow page), their toggle shows them.
   const showItems = async () => {
-    const show = page.getByRole("button", { name: "Show Items" });
+    const show = page.getByRole("button", { name: "Show items" });
     if ((await show.getAttribute("aria-expanded")) !== "true")
       await show.click();
   };

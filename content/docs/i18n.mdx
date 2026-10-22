@@ -10,7 +10,7 @@ import { LanguagesDemo } from "docs/components/Clover4/LanguagesDemo";
 Clover translates its own words: the names of its controls, its messages, and what it
 announces. IIIF text (a label, a summary, metadata) is the resource's own, in the
 languages it has, and Clover chooses among them as
-[Composing Layouts](/docs/composing#languages) describes.
+[Composing layouts](/docs/composing#languages) describes.
 
 Clover has its own translator, well under 1 kB gzipped, with no translation library to
 install. Its strings are kept the way i18next keeps them, so `initCloverI18n` calls from
@@ -111,7 +111,7 @@ English page, or a string that fell back to English), the element that shows it,
 named by it, carries its language as `lang`, so a screen reader pronounces it correctly
 (WCAG 3.1.2). The page's language is the nearest `lang` around the `Root`, or one you give
 the `Root`. A part of your own does the same with `useT` and `useLangOf`, as
-[Languages](/docs/composing#languages) in Composing Layouts shows.
+[Languages](/docs/composing#languages) in Composing layouts shows.
 
 ## Adding a language to Clover
 

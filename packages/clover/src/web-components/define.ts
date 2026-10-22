@@ -5,15 +5,28 @@ import type { ElementAssets } from "./styles";
 
 /**
  * A part drawn as it is: its module, and `drawn`, which loads beside it. Each part's
- * module is its own chunk, so a page loads only the parts it holds.
+ * module is its own chunk, so a page loads only the parts it holds. `nodes` names its
+ * props a page gives as functions that return a node (`renderValue`).
  */
 const part =
-  (load: () => Promise<Record<string, unknown>>, name: string): LoadPart =>
+  (
+    load: () => Promise<Record<string, unknown>>,
+    name: string,
+    nodes?: readonly string[],
+  ): LoadPart =>
   () =>
     Promise.all([load(), import("./elements/part")]).then(
       ([module, { drawn }]) =>
-        drawn(module[name] as Parameters<typeof drawn>[0]),
+        drawn(module[name] as Parameters<typeof drawn>[0], nodes),
     );
+
+/** One of the Split's three, from their module. */
+const splitPart =
+  (
+    name: "SplitElement" | "SplitPaneElement" | "SplitHandleElement",
+  ): LoadPart =>
+  () =>
+    import("./elements/split").then((module) => module[name]);
 
 const primitive = (name: string) =>
   part(() => import("../components/Primitives/Primitives"), name);
@@ -35,10 +48,15 @@ const LOADERS: Record<string, LoadPart> = {
   "clover-position": pager("Position"),
   "clover-previous": pager("Previous"),
   "clover-next": pager("Next"),
-  "clover-status": part(() => import("../components/Status/Status"), "Status"),
+  "clover-status": () =>
+    import("./elements/status").then((module) => module.StatusElement),
   "clover-thumbnail": primitive("Thumbnail"),
   "clover-summary": primitive("Summary"),
-  "clover-metadata": primitive("Metadata"),
+  "clover-metadata": part(
+    () => import("../components/Primitives/Primitives"),
+    "Metadata",
+    ["renderValue"],
+  ),
   "clover-required-statement": primitive("RequiredStatement"),
   "clover-rights": primitive("Rights"),
   "clover-homepage": primitive("Homepage"),
@@ -51,6 +69,7 @@ const LOADERS: Record<string, LoadPart> = {
   "clover-annotations": part(
     () => import("../components/Annotations/Annotations"),
     "Annotations",
+    ["renderEntry"],
   ),
   "clover-collection": part(
     () => import("../components/Collection/Collection"),
@@ -74,6 +93,16 @@ const LOADERS: Record<string, LoadPart> = {
     "Download",
   ),
   "clover-map": part(() => import("../components/Map/Map"), "CloverMap"),
+  "clover-panel": () =>
+    import("./elements/panel").then((module) => module.PanelElement),
+  "clover-panel-toggle": () =>
+    import("./elements/toggle").then((module) => module.PanelToggleElement),
+  "clover-split": splitPart("SplitElement"),
+  "clover-split-pane": splitPart("SplitPaneElement"),
+  "clover-split-handle": splitPart("SplitHandleElement"),
+  // Alone, what it is given; in a root, the root's view, as `Canvas` is.
+  "clover-canvas": part(() => import("../components/Canvas/index"), "default"),
+  // `<clover-tab>` loads nothing: its panel reads it (a `config` element).
 };
 
 /**

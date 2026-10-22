@@ -264,7 +264,7 @@ describe("Items standalone", () => {
     );
     expect(screen.getByRole("heading", { name: "Shelf" })).toBeInTheDocument();
     expect(screen.getByText("Two books")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "View All" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "View all" })).toHaveAttribute(
       "href",
       "https://example.org/shelf",
     );

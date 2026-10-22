@@ -17,7 +17,7 @@ async function open(page: Page) {
   await serveIIIF(page);
   await page.goto(LANGUAGES);
   // On a phone the panel is over the stage, and opened by its toggle.
-  const panel = page.getByRole("button", { name: "More Information" });
+  const panel = page.getByRole("button", { name: "More information" });
   if ((await panel.getAttribute("aria-expanded")) !== "true")
     await panel.click();
   await page.getByRole("button", { name: "Transcript" }).click();
@@ -128,7 +128,7 @@ test("a transcript as plain text shows in its paragraphs, read as the file is en
 }) => {
   await serveIIIF(page);
   await page.goto("/?content=https://fixtures.test/0017-transcription-av.json");
-  const panel = page.getByRole("button", { name: "More Information" });
+  const panel = page.getByRole("button", { name: "More information" });
   if ((await panel.getAttribute("aria-expanded")) !== "true")
     await panel.click();
   await page.getByRole("button", { name: "Transcript" }).click();
@@ -149,7 +149,7 @@ test("a film's captions and its transcript share the row, the transcript as TXT 
   await page.goto(
     "/?content=https://nulib-ds.github.io/clover/mocks/transcripts/manifest.json",
   );
-  const panel = page.getByRole("button", { name: "More Information" });
+  const panel = page.getByRole("button", { name: "More information" });
   if ((await panel.getAttribute("aria-expanded")) !== "true")
     await panel.click();
   await page.getByRole("button", { name: "Transcript" }).click();
@@ -176,7 +176,7 @@ test("an image's transcript shows for the page in view, in its language, and fol
   await page.goto(
     "/?content=https://nulib-ds.github.io/clover/mocks/page-transcript/manifest.json",
   );
-  const panel = page.getByRole("button", { name: "More Information" });
+  const panel = page.getByRole("button", { name: "More information" });
   if ((await panel.getAttribute("aria-expanded")) !== "true")
     await panel.click();
   await page.getByRole("button", { name: "Transcript" }).click();

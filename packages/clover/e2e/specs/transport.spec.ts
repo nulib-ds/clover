@@ -426,7 +426,7 @@ test.describe("transport", () => {
       );
       await expect(box).toHaveAttribute("data-open", "false");
       await expect(
-        page.getByRole("button", { name: "More Information" }),
+        page.getByRole("button", { name: "More information" }),
       ).toHaveAttribute("aria-expanded", "false");
     });
   }

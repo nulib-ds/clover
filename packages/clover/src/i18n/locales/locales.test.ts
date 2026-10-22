@@ -26,6 +26,34 @@ it("loads every locale file, under its own name", () => {
 });
 
 /**
+ * The proper names Clover's English uses, which keep their capitals inside a sentence
+ * (DESIGN.md §8): IIIF's resource types, keys by their names, and acronyms. A string
+ * that needs another proper name adds it here.
+ */
+const PROPER_NAMES = [
+  /^(?:Collection|Manifest|Canvas|Range)(?:e?s)?$/,
+  /^(?:Shift\+)?(?:[A-Z]|Escape|Shift|Space|Enter|Tab|Home|End)$/,
+  /^[A-Z0-9]{2,}$/,
+];
+
+it("writes English in sentence case: a capital opens a sentence or a proper name", () => {
+  const capitalized = Object.entries(english).flatMap(([key, value]) => {
+    const text = value.replace(/\{\{\w+\}\}/g, "x");
+    return [...text.matchAll(/(?<![\w’'+-])[A-Z][\w’'+-]*/g)]
+      .filter((match) => {
+        const before = text.slice(0, match.index ?? 0).trimEnd();
+        return (
+          before !== "" &&
+          !/[.!?:(“"‘]$/.test(before) &&
+          !PROPER_NAMES.some((name) => name.test(match[0]))
+        );
+      })
+      .map((match) => `${key}: ${match[0]}`);
+  });
+  expect(capitalized).toEqual([]);
+});
+
+/**
  * Values that are rightly the same as English: format strings, and words the language
  * spells the same way.
  */

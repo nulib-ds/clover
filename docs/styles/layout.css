@@ -292,7 +292,7 @@ footer.site-footer {
 /* A part's demo on its own (`PartDemo`): a hairline box. In an example's frame, the frame's. */
 .docs-part-demo {
   border: 1px solid var(--gray-6);
-  border-radius: var(--radius-3);
+  border-radius: var(--radius-4);
   margin: 1.5rem 0 2rem;
   padding: 1rem;
 }
@@ -599,4 +599,16 @@ main:has(> .docs-lede) > h3 {
   display: flex;
   font-size: 1rem;
   gap: 0.5rem;
+}
+
+/*
+ * One radius for every card, container, call to action and code block on the site,
+ * `--radius-4` (Mat, 2026-10-22: "keep consistency"): Nextra's code blocks, callouts and
+ * search field take it too. What sits inside them keeps a smaller step, so the corners
+ * nest; pills stay pills.
+ */
+pre[class~="x:rounded-md"],
+.nextra-callout[class~="x:rounded-lg"],
+input[type="search"][class~="x:rounded-lg"] {
+  border-radius: var(--radius-4);
 }

@@ -63,7 +63,7 @@ deadline.
     `map`) shows the 4.x page, which links to its 3.x version.
   - How to compose a layout (`Root`, the parts, the property parts, the information
     panel's `Tab`s, `Split`, hooks, renderers, styles) lives on one page,
-    `content/docs/composing.mdx` ("Composing Layouts", under Templates). The Viewer page
+    `content/docs/composing.mdx` ("Composing layouts", under Templates). The Viewer page
     covers what the Viewer handles and links there; add composition material there, not
     to the Viewer page.
   - Every part the homepage shows has a page under "Components" (Mat, 2026-10-20):
@@ -72,7 +72,7 @@ deadline.
     (`content/docs/primitives/`, an overview and a page per property part: Label,
     Thumbnail, Summary, Metadata, RequiredStatement, Rights, Homepage, SeeAlso,
     Rendering, PartOf, Id, Value). Each reads as Radix Themes' component pages do (Mat,
-    2026-10-21): a lede (`docs-lede`), one example at the top, "API Reference" (what it
+    2026-10-21): a lede (`docs-lede`), one example at the top, "API reference" (what it
     reads and renders, then one table per component, Prop, Type, Default and Description,
     from the source), "Examples" (an `###` each: one sentence and an `<Example>`, the demo
     with its code attached, `ViewerDocs.tsx`), and "Previous versions" where 3.x had it:
@@ -93,13 +93,13 @@ deadline.
     scannable (the catalog's About is long), each `headingLevel` one
     below the heading it sits under. `canvas.mdx` says when to place `Content` rather
     than `Canvas`.
-  - Use Clover: Get Started (`/docs`, which holds the web component, `<clover-viewer>`,
+  - Use Clover: Get started (`/docs`, which holds the web component, `<clover-viewer>`,
     in its own section), Viewer (`/docs/viewer`, the templates on it: their old page,
-    `/docs/viewer/templates`, forwards to `#templates`), Composing Layouts, Cookbook
-    Recipes.
+    `/docs/viewer/templates`, forwards to `#templates`), Composing layouts, Cookbook
+    recipes.
   - The Viewer page reads as Radix Themes' component pages do (Mat, 2026-10-21): the
     title and a lede (`docs-lede`), one example at the top (the template, switched
-    by a large segmented control, its code following), then "API Reference" (the
+    by a large segmented control, its code following), then "API reference" (the
     Viewer's props, then each template's: Prop, Type, Default, Description), then
     "Examples", an `h3` each with one sentence, a live example and its code. Its
     examples are `ViewerExample` and `OptionsExample` (`docs/components/Clover4/
@@ -150,8 +150,8 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     words under the stories' stroke), then one sentence in the summary's size, "Start with a [Default ▾]
     template or build your own layout.", the dropdown in it naming the template on the
     stage (as wide as the longest name, so the sentence holds still), and under it two
-    calls to action (Mat, 2026-10-21): Get Started (`/docs`, the solid one) and Viewer
-    Documentation (`/docs/viewer`); the navbar has no link to the docs. No boxes, no figure, no code. The parts follow the playground: `Homepage` holds the resource the playground reports
+    calls to action (Mat, 2026-10-21): Get started (`/docs`, the solid one) and Viewer
+    documentation (`/docs/viewer`); the navbar has no link to the docs. No boxes, no figure, no code. The parts follow the playground: `Homepage` holds the resource the playground reports
     (`onResourceChange`) and hands it down, and the section's chips put another of the
     playground's resources on its stage (`pickResource`).
   - After the parts, "Why Clover" tells five stories, one at a time: Accessible, Seamless,
@@ -178,9 +178,9 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     `build/sizes.mjs`, through `docs/lib/sizes.ts`; `data-weighed` on the viewer; in words
     for assistive technology in the story), its one figure the Viewer's, "Viewer (Default
     template)" (Mat, 2026-10-22); Accessible (`data-turn`) shows the viewer's
-    inspector (`AccessibilityTree.tsx`: WCAG checks measured on the viewer, by topic in
-    the order Mat set, names and ARIA, the keyboard, targets, contrast and text size,
-    captions, language, motion, each with its mark, then an ARIA snapshot with tab stops,
+    inspector (`AccessibilityTree.tsx`: WCAG checks measured on the viewer (names and
+    ARIA, the keyboard, targets, contrast and text size, captions, language, motion),
+    each with its mark, in the standard's order (1.1.1, 1.2.2…), then an ARIA snapshot with tab stops,
     the card as tall as both need where the window has room under the held viewer,
     focus anywhere in the viewer's column giving it up; Mat, 2026-10-22) and Coverage (`data-recipe`) a Cookbook recipe (0032, a
     Collection, read by Label, Content, Metadata and Collection, all outlined but Metadata;
@@ -207,11 +207,12 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     looked for each frame), and the page's foot ends the last story too, its line fading
     (`data-gone`), still drawn to it, and its change undone. Where the viewer is held, a
     story's figure strokes draw as its line reaches it too (`data-drawn`), and elsewhere
-    as it scrolls in. Seamless has the site's Font family and Color (`BrandPicker.tsx`),
+    once they come into view past a point; every stroke draws once and stays drawn until
+    the page loads again, never by the scroll's own position (`Swoosh.tsx`; Mat, 2026-10-22). Seamless has the site's Font family and Color (`BrandPicker.tsx`),
     which set the whole site and are remembered (`page-theme.ts`), in the column the other
     stories give their figures, and under its words its figures, smaller and side by
-    side, then the CSS a page would write (Mat, 2026-10-21): `1rem` and `CSS` ("variables
-    for simple styling"), a word, never a count (Mat, 2026-10-21). The navbar's one
+    side, then the CSS a page would write (Mat, 2026-10-21): `1rem` ("Inherited sizing") and `CSS` ("Variables for
+    styling"), a word, never a count (Mat, 2026-10-21). The navbar's one
     control is the code switch (below); it has no settings (its gear was removed on
     2026-10-20), appearance being in the footer, and no Documentation link (Mat,
     2026-10-21: hidden in `layout.css`, as hiding the docs' folder in `_meta.ts` empties
@@ -297,11 +298,13 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
   - The homepage's three sections after the playground open alike, with `SectionIntro`
     (`docs/components/Home/SectionIntro.tsx`): no rule over it and room round it (Mat,
     2026-10-21), a title ending in a period under the hero's stroke, one short note (`--text-lede`, as the hero's sentence and the choice's), and one call to action (`cta-solid` or `cta-outline`,
-    `tokens.css`). And more (the parts counted, "See them all"; the Collection's tile the first under it, and Annotations beside Contents; Mat,
-    2026-10-21), Why Clover ("Read the
-    docs"; its note the five stories in brief, a short sentence each, in their order) and Install ("Install is easy.", "Get started"), the last in the gap after Coverage, beside the
+    `tokens.css`). "IIIF building blocks." (its note the parts counted, pieces that snap together, each made for IIIF, "See them all"; Mat, 2026-10-22; the Collection's tile the first under it, and Annotations beside Contents; Mat,
+    2026-10-21), Why Clover (titled "Thoughtful and flexible.", Mat, 2026-10-22; "Read the
+    docs"; its note one conversational sentence of why, the full spectrum of user experience,
+    every visitor, layout and IIIF resource, never "intention", a colon, or the title's words, never the stories in brief, which would say them twice; Mat, 2026-10-22) and Install ("Install is easy.", "Get started"), the last in the gap after Coverage, beside the
     held viewer, the grid ending with its npm block (its Copy drawn as the example viewer's
-    editor's is, `.installCopy`; Mat, 2026-10-22), and a few rem under it, no more
+    editor's is, `.installCopy`; the block beside its button, `SectionIntro`'s `beside`, as
+    tall as it, and under it where the column is narrow; Mat, 2026-10-22), and a few rem under it, no more
     (`4.236rem`, the page's own; Nextra's empty room under the article hidden on full
     pages, `full-width.ts`), before the footer (Mat, 2026-10-21).
   - The footer (`docs/components/SiteFooter.tsx`, inside Nextra's `Footer`, styled in
@@ -332,8 +335,15 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     never a fade or a fill. Every stroke on the site is one shape,
     `--swoosh` (`tokens.css`), set one way (Mat, 2026-10-21): 0.42em tall, its ink from
     0.1em to 0.25em under the letters' foot, a little off them, crossing only what
-    descends. The marks (`.mark::after`), the figures (on `.figureMark`, inline, so they
-    sit as the marks do) and the wordmark keep that; measure a new one against them.
+    descends. The hero's mark (`.mark::after`), the marks and figures drawn as they come into view
+    (on `.figureMark`, inline, so they sit as the marks do: `Swoosh.tsx`'s spans) and the
+    wordmark keep that; measure a new one against them. A stroke draws from one end to
+    the other, as a pen draws it, never stretched (Mat, 2026-10-22): a window slides
+    open over ink that slides back as far, both transforms, so it holds still.
+  - Every card, container, call to action and code block on the site has one radius,
+    `--radius-4` (12px), Nextra's code blocks, callouts and search field too
+    (`layout.css`); what sits inside one takes a smaller step (`--radius-2`, `--radius-3`),
+    so the corners nest, and pills stay pills (Mat, 2026-10-22: "keep consistency").
   - Headers are solid, never frosted or translucent: the navbar (`docs/styles/layout.css`
     overrides Nextra's blur) and the playground's bar. From 48rem wide, on a screen at
     least 36rem tall (not a phone, where with the navbar it would take too much height),
@@ -345,7 +355,7 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     `useStuck` sets the page's `scroll-padding-top` to the navbar and the bar, measured,
     so a control that takes focus in the stage comes into view below the bar (WCAG
     2.4.11).
-  - The navbar holds the docs' code switch, React or Web Components (Mat, 2026-10-21;
+  - The navbar holds the docs' code switch, React or Web components (Mat, 2026-10-21;
     React by default; `docs/components/CodeSwitch.tsx`), after the search and before the
     repository's link: a pair of native radios, one tab stop, named "Code examples", drawn
     as the Transcript's EN | TXT is (pills, no frame, small semibold text, muted until
@@ -359,10 +369,21 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     it reads "React | Web", the rest of the name still read (2.5.3); under 360px the
     repository's icon gives way (the footer links the source), so the header fits at
     320px (1.4.10).
+  - Menus, calls to action, headings, titles, tabs and labels are in sentence case, on
+    the site as in Clover (`packages/clover/DESIGN.md` §8; Mat, 2026-10-22): "Get
+    started", "Composing layouts", "API reference", "Viewer documentation", "On this page"
+    (Nextra's table of contents, `toc` in `app/layout.tsx`). Proper names keep their
+    capitals: Clover's components and templates where the words name them ("In the
+    Viewer"), IIIF, its resource types and specifications (Content Search), the IIIF
+    Cookbook, React, people, places and institutions. Words from elsewhere stay as
+    written: a resource's label, a Cookbook recipe's title, the Digital Collections
+    mock's copy of that site. No style sets a heading, menu item or call to action in
+    capitals; the stories' one-word mono labels (`.storyLabel`) are type, not headings.
+    The 3.x pages keep the earlier version's own headings; their menu follows the rule.
   - Titles and share cards are `pageMetadata` (`docs/lib/site.ts`), the root layout's
     `metadata` and each page's `generateMetadata` (`app/[[...mdxPath]]/page.tsx`): the
     homepage's title is "Clover IIIF – A viewer as distinctive as your collections" and the site's
-    description says what Clover is, plainly, in Get Started's words, in React or as a web
+    description says what Clover is, plainly, in Get started's words, in React or as a web
     component (Mat, 2026-10-21: so an agent or a search result can tell; every
     description of Clover, the READMEs' and the packages' too, names both, and only what
     each does today). The hero's headline and line are written once (`homeHeadline`,
@@ -597,6 +618,9 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   `HostLanguageContext.Provider`.
 - IIIF text carries the `lang` that `localize` gives it. Text in `none` carries no `lang`
   and takes the page's.
+- Clover's English is in sentence case (`packages/clover/DESIGN.md` §8), which
+  `locales.test.ts` checks; a string with a proper name the test does not know adds it
+  to `PROPER_NAMES` there.
 - A key added to `en.json` lands in every locale, translated, in the same change:
   `packages/clover/src/i18n/locales/locales.test.ts` fails otherwise. A word a language
   spells as English does (fr "Collection", "Pause") goes on that test's

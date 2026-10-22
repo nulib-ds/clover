@@ -192,7 +192,7 @@
 .field {
   align-items: center;
   border: 1px solid var(--pg-edge);
-  border-radius: var(--radius-3);
+  border-radius: var(--radius-4);
   box-shadow: var(--pg-lift);
   display: flex;
   gap: var(--clover-space-xs, 0.382rem);
@@ -211,7 +211,7 @@
  * the field, it is a tab on the field's top edge instead.
  */
 .fieldGroup {
-  border-radius: var(--radius-3);
+  border-radius: var(--radius-4);
   box-shadow: var(--pg-lift);
   display: flex;
 }
@@ -224,7 +224,7 @@
   align-items: center;
   border: 1px solid var(--pg-edge);
   border-inline-end: 0;
-  border-radius: var(--radius-3) 0 0 var(--radius-3);
+  border-radius: var(--radius-4) 0 0 var(--radius-4);
   color: var(--gray-11);
   display: flex;
   flex: none;
@@ -237,7 +237,7 @@
 .fieldGroup .field,
 .fieldGroup .field:focus-within {
   border-inline-start: 0;
-  border-radius: 0 var(--radius-3) var(--radius-3) 0;
+  border-radius: 0 var(--radius-4) var(--radius-4) 0;
   box-shadow: none;
   flex: 1 1 auto;
   min-width: 0;
@@ -252,7 +252,7 @@
     align-self: flex-start;
     border-block-end: 0;
     border-inline-end: 1px solid var(--pg-edge);
-    border-radius: var(--radius-3) var(--radius-3) 0 0;
+    border-radius: var(--radius-4) var(--radius-4) 0 0;
     height: auto;
     line-height: 1.2;
     padding-block: var(--clover-space-xs, 0.382rem);
@@ -261,7 +261,7 @@
   .fieldGroup .field,
   .fieldGroup .field:focus-within {
     border-inline-start: 1px solid var(--pg-edge);
-    border-radius: 0 var(--radius-3) var(--radius-3) var(--radius-3);
+    border-radius: 0 var(--radius-4) var(--radius-4) var(--radius-4);
   }
 
   /* Open, beside the field, at its height rather than the tab's and the field's. */
@@ -337,7 +337,7 @@
 .openButton {
   background: var(--accent-9);
   border: 0;
-  border-radius: var(--radius-3);
+  border-radius: var(--radius-4);
   color: var(--accent-contrast);
   cursor: pointer;
   flex: none;
@@ -548,23 +548,18 @@
  * off the stage and the parts: a short headline, one sentence with the template named
  * in it by its menu, and the two actions under it.
  */
+/*
+ * Its title and its sentence are a section intro's (`SectionIntro.module.css`), the same
+ * size, leading and room between them (1rem), and its buttons as far under them (1.618rem).
+ */
 .choice {
   align-items: center;
   display: flex;
   flex-direction: column;
+  gap: 1rem;
   margin: clamp(4.236rem, 9vw, 6.854rem) auto clamp(2.618rem, 6vw, 4.236rem);
   max-width: 44rem;
   text-align: center;
-}
-
-/* The size of the stories' titles ("Why Clover"'s cards) at the same widths. */
-.choiceTitle {
-  color: var(--gray-12);
-  font-size: clamp(1.618rem, 2.45vw, 2.618rem);
-  font-weight: var(--weight-bold);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  margin: 0 0 var(--clover-space-m, 1rem);
 }
 
 /* Where it must break, it breaks after "template". */
@@ -572,16 +567,9 @@
   white-space: nowrap;
 }
 
-.choiceLine {
-  color: var(--gray-11);
-  font-size: var(--text-lede);
-  line-height: 1.5;
-  margin: 0 0 var(--clover-space-xl, 2.618rem);
-  text-wrap: balance;
-}
-
 .choiceActions {
   display: flex;
+  margin-top: 0.618rem;
   flex-wrap: wrap;
   gap: var(--clover-space-m, 1rem);
   justify-content: center;
@@ -603,7 +591,7 @@
   align-items: center;
   background: transparent;
   border: 1px solid var(--pg-edge);
-  border-radius: var(--radius-3);
+  border-radius: var(--radius-4);
   color: var(--gray-12);
   cursor: pointer;
   display: inline-flex;

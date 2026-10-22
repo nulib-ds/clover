@@ -9,7 +9,7 @@ import { useCloverTranslation } from "../i18n/useCloverTranslation";
  * while the page is hidden, drawn as an eye, struck through while hidden. Its popover
  * says "Hide", as a control's names it. Its name is that word and what it hides, the
  * page's label (`of`), so no two read alike beside several pages (WCAG 2.4.6, 2.5.3);
- * "Hide Annotations" for a page without one. As small as a transcript's language codes,
+ * "Hide annotations" for a page without one. As small as a transcript's language codes,
  * and as large a target (WCAG 2.5.8). Styles are `ui/HideToggle.css`.
  */
 export function HideToggle({

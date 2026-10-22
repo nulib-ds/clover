@@ -3,10 +3,10 @@ import styles from "docs/components/Home/Parts.module.css";
 
 /**
  * The example viewer's other side, as an inspector would show it: WCAG 2.2 checks Clover
- * is held to, each measured on the viewer as it is turned over, by topic in the order Mat
- * set (2026-10-22): names and ARIA, the keyboard, targets, contrast and text size,
- * captions, language, motion. Under them, what assistive technology is given, as an ARIA
- * snapshot (role, name, state) with each control's tab stop. Shown while "Why Clover"'s Accessible story
+ * is held to, each measured on the viewer as it is turned over (names and ARIA, the
+ * keyboard, targets, contrast and text size, captions, language, motion), listed in the
+ * standard's order (Mat, 2026-10-22: 1.1.1, 1.2.2…). Under them, what assistive technology
+ * is given, as an ARIA snapshot (role, name, state) with each control's tab stop. Shown while "Why Clover"'s Accessible story
  * is at the middle of the window (`StoryLines.tsx`). A glimpse for the reader, not an
  * audit (Mat, 2026-10-20: "this is marketing language"): roles come from the markup the
  * plain way (its `role`, else its element), long lists are cut short, and what runs past
@@ -328,6 +328,16 @@ const LIVE =
 /** Clover's text sizes, every one its text takes (`styles/scale.css`). */
 const TEXT_SIZES = ["xs", "s", "m", "l"].map((step) => `--clover-text-${step}`);
 
+/** Two success criteria in the standard's order: by principle, guideline, then number. */
+const byCriterion = (a: string, b: string) => {
+  const [x, y] = [a, b].map((id) => id.split(".").map(Number));
+  for (let index = 0; index < Math.max(x.length, y.length); index++) {
+    const difference = (x[index] ?? 0) - (y[index] ?? 0);
+    if (difference) return difference;
+  }
+  return 0;
+};
+
 const plural = (count: number, one: string, many = `${one}s`) =>
   `${count} ${count === 1 ? one : many}`;
 
@@ -552,7 +562,7 @@ function checksOf(
   const ratio = (value: number) => `${value.toFixed(1)}:1`;
   const ordered = inReadingOrder(stops, rtl);
 
-  return [
+  const checks: Check[] = [
     {
       id: "4.1.2",
       name: "Name, role, value",
@@ -692,6 +702,8 @@ function checksOf(
       passes: moving === 0,
     },
   ];
+  // In the standard's order, by its numbers: 1.4.3 before 1.4.11.
+  return checks.sort((a, b) => byCriterion(a.id, b.id));
 }
 
 const short = (text: string) =>

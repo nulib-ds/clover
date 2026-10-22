@@ -157,8 +157,11 @@ export class StyleRegistry {
 
   private look() {
     for (const sheet of [...this.waiting]) {
+      // In an element, or the element itself (a viewer naming its template).
       const needed = [...this.watched].some(
-        (element) => element.isConnected && element.querySelector(sheet.when),
+        (element) =>
+          element.isConnected &&
+          (element.matches(sheet.when) || element.querySelector(sheet.when)),
       );
       if (!needed) continue;
       this.waiting.splice(this.waiting.indexOf(sheet), 1);

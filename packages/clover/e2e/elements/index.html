@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Clover elements</title>
+    <link rel="icon" href="data:," />
     <style>
       body {
         margin: 0 auto;
@@ -14,6 +15,34 @@
       .layout {
         display: grid;
         gap: 1rem;
+      }
+      /* The containers' layout: the split as tall as a stage, the panel's pane scrolling. */
+      .containers clover-split {
+        height: 70vh;
+      }
+      .containers clover-split-pane {
+        overflow: auto;
+      }
+      .standalone {
+        display: grid;
+        gap: 1rem;
+      }
+      .standalone > clover-canvas {
+        height: 40vh;
+      }
+      /*
+       * A phone's width holds neither pane's minimum beside the other: the page stacks
+       * them, as Default floats its panel there, and drops the bar, which only resizes
+       * side by side (WCAG 1.4.10).
+       */
+      @media (max-width: 40rem) {
+        .containers clover-split {
+          flex-direction: column;
+          height: auto;
+        }
+        .containers clover-split-handle {
+          display: none;
+        }
       }
     </style>
   </head>
@@ -42,6 +71,86 @@
         <clover-content></clover-content>
         <clover-items layout="grid"></clover-items>
       </clover-root>
+      <section class="containers" aria-labelledby="containers-title">
+        <h2 id="containers-title">A layout of containers</h2>
+        <p>
+          The stage, its toggle among its controls, a handle, and the
+          information panel beside it, as Default lays them out, in the page's
+          own markup.
+        </p>
+        <clover-root
+          iiif-content="https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json"
+        >
+          <clover-split storage-key="clover-elements-layout">
+            <clover-split-pane min="16rem">
+              <clover-label as="h3"></clover-label>
+              <clover-status loading="false"></clover-status>
+              <clover-content style="height: 40vh">
+                <clover-panel-toggle
+                  controls="panel-pane"
+                ></clover-panel-toggle>
+              </clover-content>
+              <clover-items></clover-items>
+            </clover-split-pane>
+            <clover-split-handle
+              aria-controls="panel-pane"
+            ></clover-split-handle>
+            <clover-split-pane
+              id="panel-pane"
+              name="panel"
+              size="22rem"
+              min="14rem"
+            >
+              <clover-panel>
+                <clover-tab value="about" label="About">
+                  <clover-about heading-level="4"></clover-about>
+                </clover-tab>
+                <clover-tab value="contents" label="Contents">
+                  <clover-contents></clover-contents>
+                </clover-tab>
+                <clover-tab value="notes">
+                  <span slot="label">Notes <em>(1)</em></span>
+                  <p>
+                    A note of the page's own, moved here when this tab first
+                    opens.
+                  </p>
+                </clover-tab>
+              </clover-panel>
+            </clover-split-pane>
+          </clover-split>
+        </clover-root>
+      </section>
+      <section class="standalone" aria-labelledby="standalone-title">
+        <h2 id="standalone-title">Alone, and the templates</h2>
+        <p>
+          A Canvas, a Collection's members and a map, each on its own with no
+          root, then the Viewer in Document and in Gallery.
+        </p>
+        <h3>A Canvas alone</h3>
+        <clover-canvas
+          iiif-content="https://iiif.io/api/cookbook/recipe/0005-image-service/manifest.json"
+        ></clover-canvas>
+        <h3>A Collection's members</h3>
+        <clover-items
+          heading-level="4"
+          iiif-content="https://iiif.io/api/cookbook/recipe/0032-collection/collection.json"
+        ></clover-items>
+        <h3>Places, on a map</h3>
+        <clover-map
+          iiif-content="https://iiif.io/api/cookbook/recipe/0240-navPlace-on-canvases/manifest.json"
+        ></clover-map>
+        <clover-viewer
+          template="document"
+          heading-level="3"
+          iiif-content="https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json"
+        ></clover-viewer>
+        <clover-viewer
+          template="gallery"
+          size="10rem"
+          heading-level="3"
+          iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+        ></clover-viewer>
+      </section>
     </main>
     <script type="module" src="./main.ts"></script>
   </body>

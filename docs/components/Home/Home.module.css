@@ -67,19 +67,16 @@
   z-index: 0;
 }
 
+/*
+ * The stroke: the hero's is `.mark::after`, drawn as the page loads; one drawn as its
+ * words come into view is `Swoosh`'s spans (`.stroke`, its window and its ink), in the
+ * same box, as the same ink.
+ */
 .mark::after,
-.story .figureMark::after {
-  /* Faint where the pen comes down, the full accent where it lifts. */
-  background: linear-gradient(
-    to right,
-    color-mix(in srgb, var(--accent-9) 30%, transparent),
-    var(--accent-9)
-  );
+.stroke {
   bottom: -0.1em;
-  content: "";
   height: 0.42em;
   left: -0.04em;
-  mask: var(--swoosh) center / 100% 100% no-repeat;
   position: absolute;
   right: -0.06em;
   /*
@@ -91,8 +88,35 @@
   z-index: -1;
 }
 
+/* Faint where the pen comes down, the full accent where it lifts. */
+.mark::after,
+.strokeInk {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--accent-9) 30%, transparent),
+    var(--accent-9)
+  );
+  mask: var(--swoosh) center / 100% 100% no-repeat;
+}
+
 .mark::after {
   animation: mark-draw 700ms cubic-bezier(0.65, 0, 0.35, 1) 300ms both;
+  content: "";
+}
+
+/* A mark `Swoosh` draws has its stroke in spans instead. */
+.markOnScroll::after {
+  content: none;
+}
+
+.strokeWindow,
+.strokeInk {
+  inset: 0;
+  position: absolute;
+}
+
+.strokeWindow {
+  overflow: hidden;
 }
 
 @keyframes mark-draw {
@@ -105,22 +129,49 @@
 }
 
 /*
- * The marker drawn in as it scrolls into view rather than as the page loads (the
- * playground's cards, `Playground.tsx`), by scale from its left end, which the compositor
- * runs. Where scroll timelines are missing, it draws as the hero's does.
+ * A stroke drawn once its words come into view past a point, rather than as the page
+ * loads (the sections' titles, the playground's choice, the stories' figures): `Swoosh`
+ * marks them `data-drawn`, once, and it stays drawn until the page loads again (Mat,
+ * 2026-10-22: never by the scroll's own position). Drawn from one end to the other, as a
+ * pen draws it, never stretched (Mat, 2026-10-22): its window slides open from the left
+ * end while its ink slides back as far, so the ink holds still as it is uncovered. Both
+ * are transforms, which the compositor runs; a clip-path is redrawn on the main thread.
  */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .markOnScroll {
-      view-timeline-name: --mark;
-    }
+@media (prefers-reduced-motion: no-preference) {
+  .strokeWindow {
+    translate: -100% 0;
+  }
 
-    .markOnScroll::after {
-      animation: figure-draw linear both;
-      animation-range: entry 70% cover 40%;
-      animation-timeline: --mark;
-      transform-origin: left center;
-    }
+  .strokeInk {
+    translate: 100% 0;
+  }
+
+  [data-drawn] > .stroke > .strokeWindow {
+    animation: stroke-open 700ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+
+  [data-drawn] > .stroke .strokeInk {
+    animation: stroke-hold 700ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+}
+
+@keyframes stroke-open {
+  from {
+    translate: -100% 0;
+  }
+
+  to {
+    translate: 0 0;
+  }
+}
+
+@keyframes stroke-hold {
+  from {
+    translate: 100% 0;
+  }
+
+  to {
+    translate: 0 0;
   }
 }
 
@@ -275,6 +326,8 @@
   line-height: 1.55;
   margin: 0;
   max-width: 34rem;
+  /* No last line of one word ("away."). */
+  text-wrap: pretty;
 }
 
 .storyBody a {
@@ -294,7 +347,7 @@
  */
 .storyCode {
   background: var(--code-background);
-  border-radius: var(--radius-3);
+  border-radius: var(--radius-4);
   color: var(--code-text);
   font-family: var(--font-mono);
   font-size: var(--clover-text-s, 0.854rem);
@@ -381,7 +434,7 @@
   background: var(--color-background);
   border: 1px solid
     color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
-  border-radius: var(--radius-3);
+  border-radius: var(--radius-4);
   color: var(--gray-12);
   font: inherit;
   min-height: 2.25rem;
@@ -561,6 +614,19 @@
 }
 
 /*
+ * Muted under its figure (Mat, 2026-10-22), as the hero's sentence is, yet past 4.5:1
+ * (WCAG 1.4.3): the page's muted text on its ground (5.9:1 on white, 9:1 on the dark
+ * ground), and on black the faint text its label is in (6.1:1).
+ */
+.story[data-tone="page"] .figureCaption {
+  color: var(--gray-11);
+}
+
+.story[data-tone="code"] .figureCaption {
+  color: var(--code-faint);
+}
+
+/*
  * Figures under a story's words (Seamless's): side by side, each its share of the
  * column, and smaller than a figure in a column of its own (Mat, 2026-10-21).
  */
@@ -608,22 +674,6 @@
       animation-range: entry 0% cover 25%;
       animation-timeline: view();
     }
-
-    /* The marker under a figure on black draws in as the figure comes into view. */
-    .story .figureValue {
-      view-timeline-name: --figure;
-    }
-
-    /*
-     * Drawn by scale, from its left end, not by clip-path: a scale runs on the compositor
-     * as the page scrolls, where a clip would be redrawn on the main thread every frame.
-     */
-    .story .figureMark::after {
-      animation: figure-draw linear both;
-      animation-range: entry 40% cover 45%;
-      animation-timeline: --figure;
-      transform-origin: left center;
-    }
   }
 }
 
@@ -633,24 +683,17 @@
  * the line marks the story `data-drawn` as it reaches it.
  */
 @media (min-width: 64.0625rem) and (prefers-reduced-motion: no-preference) {
-  .story .figureMark::after {
+  .story .figureMark[data-drawn] .strokeWindow,
+  .story .figureMark[data-drawn] .strokeInk {
     animation: none;
-    scale: 0 1;
-    transform-origin: left center;
   }
 
-  .story[data-drawn] .figureMark::after {
-    animation: figure-draw 700ms cubic-bezier(0.65, 0, 0.35, 1) both;
-  }
-}
-
-@keyframes figure-draw {
-  from {
-    scale: 0 1;
+  .story[data-drawn] .figureMark .strokeWindow {
+    animation: stroke-open 700ms cubic-bezier(0.65, 0, 0.35, 1) both;
   }
 
-  to {
-    scale: 1 1;
+  .story[data-drawn] .figureMark .strokeInk {
+    animation: stroke-hold 700ms cubic-bezier(0.65, 0, 0.35, 1) both;
   }
 }
 
@@ -669,16 +712,21 @@
 /* ── Install panel ────────────────────────────────────────────────────────── */
 
 /* The command, as the code editor shows code: Prism's Material colors on black. */
+/*
+ * As tall as the button beside it (Mat, 2026-10-22): the call to action's padding and one
+ * line of the same size of type (`cta-solid`, `tokens.css`).
+ */
 .install {
   align-items: center;
   background: var(--code-background);
+  block-size: calc(2 * 0.625rem + 1lh);
   border-radius: var(--radius-4);
   color: var(--code-text);
   display: flex;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   gap: 1rem;
-  padding: 0.618rem 0.618rem 0.618rem 1.618rem;
+  padding: 0 0.618rem 0 1.618rem;
 }
 
 .installCode {
@@ -686,7 +734,7 @@
   margin: 0;
   min-width: 0;
   overflow-x: auto;
-  padding: 0.382rem 0;
+  padding: 0;
 }
 
 /*

@@ -14,7 +14,7 @@ export const items: ElementSpec = {
     "thumbnail-size": { prop: "thumbnailSize", type: "number", min: 1 },
     language: { prop: "language", type: "string" },
   },
-  properties: ["iiifContent", "items", "request"],
+  properties: ["iiifContent", "items", "request", "renderItem"],
   events: {
     "clover-select": { prop: "onSelect", detail: ["item"], cancelable: true },
   },
@@ -74,6 +74,11 @@ export const itemsDocs: ElementDocs = {
       type: "{ credentials?: RequestCredentials; headers?: Record<string, string>; fetch?: typeof fetch } | null",
       description:
         "Alone: credentials, headers and a fetch of your own. In a root, the root's are used.",
+    },
+    renderItem: {
+      type: "((item: { id: string; label?: string | Record<string, string[]>; summary?: string | Record<string, string[]>; href?: string }, state: { selected: boolean }) => Node | string | null | undefined) | null",
+      description:
+        "Your own figure for an item, in place of its thumbnail and label: a node or text, which names the item. A new node each time.",
     },
   },
   events: {

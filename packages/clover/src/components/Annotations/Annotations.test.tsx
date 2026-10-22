@@ -164,7 +164,7 @@ describe("Annotations", () => {
     await renderWithStage();
     expect(document.getElementById(annotationId)).not.toBeNull();
     // A checkbox drawn as an eye, its popover the one word.
-    const hide = screen.getByRole("checkbox", { name: "Hide Annotations" });
+    const hide = screen.getByRole("checkbox", { name: "Hide annotations" });
     expect(hide).not.toBeChecked();
     expect(hide.closest("label")).toHaveClass("clover-hide");
     expect(
@@ -537,7 +537,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
      * toggle named "Hide" and its layer's label, which follows it in the header.
      */
     const boxes = [
-      screen.getByRole("checkbox", { name: "Hide Annotations" }),
+      screen.getByRole("checkbox", { name: "Hide annotations" }),
       screen.getByRole("checkbox", { name: "Hide Comments" }),
     ];
     expect(

@@ -12,13 +12,73 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`<clover-canvas>`, and `<clover-viewer>` in every template.** `<clover-canvas>` is
+  Clover's renderer as an element. Alone, it draws what it is given: a IIIF resource by
+  `iiif-content` (a Manifest gives its first Canvas), an image by `src` (with `tiled`, a
+  IIIF Image service), or Canvases as its `canvases` property; inside a `<clover-root>`,
+  given nothing, the root's view. It takes `label`, `controls`, `navigator`,
+  `placeholder`, `viewing-direction` and `animate-annotations`, and sends
+  `clover-annotation-select`, `clover-annotation-active`, `clover-caption-change` and
+  `clover-ended`. `<clover-viewer template="document">` or `"gallery"` shows that
+  template, which loads the first time one is shown, its styles beside it (Default's
+  come with the element), with each template's own attributes: `panel-open`,
+  `panel-layout` and `storage-key` (Default and Document; `"false"` forgets the widths),
+  `fill` (Default), `sidebar-open` (Document) and `size` (Gallery). A template ignores
+  another's.
+
+  ```html
+  <clover-viewer
+    template="gallery"
+    size="12rem"
+    iiif-content="…"
+  ></clover-viewer>
+  <clover-canvas iiif-content="…" style="height: 60vh"></clover-canvas>
+  ```
+
+- **The containers as elements**: `<clover-panel>` and its `<clover-tab>`s,
+  `<clover-panel-toggle>`, and the Split's `<clover-split>`, `<clover-split-pane>` and
+  `<clover-split-handle>`, so a layout as `Default`'s is written in HTML too. The panel
+  has the sections Clover has data for, or a tab for each `<clover-tab value label>` in
+  it, in their order; a tab's content moves into its section when the section first
+  opens, and a `slot="label"` child gives its label markup. `value` is the tab it opens
+  on (changed later, it shows that tab), the reader's choice sends
+  `clover-value-change`, and `closable` gives it a close button, which sends
+  `clover-close` (cancelable) and hides what its toggle shows. A `<clover-panel-toggle
+controls="id">` in a `<clover-content>` is one of the stage's controls; elsewhere, a
+  button of its own. Its target is open while it is not `hidden` (write `hidden` on the
+  panel to start it shut), and each press sends `clover-open-change` (cancelable). The
+  Split's elements are the panes and bars themselves, with `Split`'s sizes, storage,
+  clicks, drags and keys (`storage-key`; a pane's `size`, `min`, `max`, `name`); a
+  handle is named "Resize panels", or by its own `aria-label`, and hides with the pane it
+  sizes.
+
+  ```html
+  <clover-split storage-key="my-layout">
+    <clover-split-pane min="16rem">
+      <clover-content>
+        <clover-panel-toggle controls="panel-pane"></clover-panel-toggle>
+      </clover-content>
+    </clover-split-pane>
+    <clover-split-handle></clover-split-handle>
+    <clover-split-pane id="panel-pane" size="24rem" min="14rem">
+      <clover-panel></clover-panel>
+    </clover-split-pane>
+  </clover-split>
+  ```
+
+- **Slots and function properties on the elements.** `<clover-status>` shows a
+  `slot="loading"` child while its root loads and a `slot="error"` child if it fails, in
+  place of Clover's words, as copies kept in step. `renderValue` on `<clover-metadata>`,
+  `renderEntry` on `<clover-annotations>` and `renderItem` on `<clover-items>` take a
+  function that returns a node or text, as the React parts take one that returns an
+  element. The manifest lists each element's slots.
 - **Types and a Custom Elements Manifest for the web components.** The module declares
   every element in `HTMLElementTagNameMap` and every event, so
   `document.querySelector("clover-root")` is typed, and
   `@nulib/clover/web-components/custom-elements.json` (the package's `customElements`)
   gives each element's attributes, properties and events to editors and tools. Both are
   written from the elements' own specs.
-- **Parts as elements, a preview,** from `@nulib/clover/web-components`, which defines
+- **Parts as elements,** from `@nulib/clover/web-components`, which defines
   them beside `<clover-viewer>`: `<clover-root>`, `<clover-content>`, `<clover-items>`,
   `<clover-previous>`, `<clover-position>`, `<clover-next>`, `<clover-status>`; a
   property each, `<clover-label>`, `<clover-thumbnail>`, `<clover-summary>`,
@@ -38,8 +98,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   outside one and says so in the console, as it does of an `aria-label` or `role` put
   on an element, a box no reader is told of. Data an attribute can
   carry is a URL or JSON in it (`annotations` on a root, `label` on a label), and
-  anything else a property. The attributes are on Get Started; they may change before
-  4.0.
+  anything else a property. The attributes are on Get started.
   The elements add `style[data-clover="elements"]`, their display rules, in
   `@layer clover`.
 
@@ -62,7 +121,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **`download` on `About`, `Panel` and `Default`.** `false` leaves the downloads out of
   About, as `Document`'s `download` leaves them out of its toolbar. On `<clover-viewer>`,
-  `download="false"` passes it, and so does what Get Started said: it did nothing, since
+  `download="false"` passes it, and so does what Get started said: it did nothing, since
   `Default` has no Download of its own.
 
   ```jsx
@@ -390,7 +449,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     checked while hidden, the eye struck through), then a heading only when its
     AnnotationPage has a `label` of its own: the `Panel`'s Annotations section
     names the rest. The toggle's popover says "Hide" (`annotationsHideTip`); its name is
-    that and the set's label, or "Hide Annotations" (`annotationsHide`) for a set without
+    that and the set's label, or "Hide annotations" (`annotationsHide`) for a set without
     one. It takes the set's annotations off the Canvas only: the list, and the Canvas's
     annotations menu, keep them. HTML bodies are
     sanitized; image bodies (Cookbook 0377) show as images. Caption files are left to the
@@ -773,7 +832,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     The page thumbnails' toggle is a pill drawn as the round controls are (the control's
     dark fill and light glyph, the accent under the pointer or focused): the glyph of a
     list of thumbnails, its pictures filled while they show, and `Position` ("3 / 17",
-    `text-xs`). It reads "Show Items" and then the place ("Item 3 of 17"), and their
+    `text-xs`). It reads "Show items" and then the place ("Item 3 of 17"), and their
     pane "Items": what they list need not be pages. While they show, it sits on the bar
     between them and the page, over them but for its far rounded end, which hangs over
     the page, so the thumbnails have their pane's whole height; put away, over the
@@ -1550,17 +1609,33 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **Clover's English is in sentence case** (`DESIGN.md` §8), as its other names and
+  menus already were, and its other languages: "More information"
+  (`informationPanelToggle`), "View all" (`commonViewAll`), "No results"
+  (`contentSearchResultsNone`), "Show items" (`templateSidebarToggle`) and "Hide
+  annotations" (`annotationsHide`). A test or script that finds one of these by its
+  words needs the new ones. Strings you give `initCloverI18n` keep theirs.
+
+  ```diff
+  - screen.getByRole("button", { name: "More Information" });
+  + screen.getByRole("button", { name: "More information" });
+  ```
+
 - **`@nulib/clover/web-components` loads only the elements a page uses.** The script is
-  4.6 kB gzip and defines every element; an element's code, Preact (in one chunk with
+  5.5 kB gzip and defines every element; an element's code, Preact (in one chunk with
   Clover's core) and the stylesheet load the first time one is on the page. A page with
-  a `<clover-viewer>` loads 102.3 kB, up from 86.7 kB: its code now comes in chunks the
-  other elements share, gzipped apart (94.2 kB as one). A page of `<clover-root>` and
-  `<clover-label>` loads 38.9 kB, and of the root, the label, the stage and the items
-  87.3 kB. `sizes.json` records each (`elementsEntryGzip`, `webComponentsGzip`,
-  `labelPageGzip`, `composedPageGzip`), held to budgets of 4.7, 102.4, 39.0 and
-  87.4 kB. `Root` now shares what it holds with
-  `<clover-root>`, which put `Default`'s budget up to 66.8 kB and `Gallery`'s to
-  58.6 kB, 0.1 kB each.
+  a `<clover-viewer>` loads 106.3 kB, up from 86.7 kB: its code now comes in chunks the
+  other elements share, 39 files gzipped apart (96.3 kB as one). In Document it loads
+  112.6 kB, the template and its styles with it. A page of `<clover-root>` and
+  `<clover-label>` loads 39.8 kB; of the root, the label, the stage and the items 91.5
+  kB; a layout of the containers, as `Default`'s, 105.1 kB; and a `<clover-canvas>`
+  alone, once it draws, 75.6 kB. `sizes.json` records each (`elementsEntryGzip`,
+  `webComponentsGzip`, `documentElementGzip`, `labelPageGzip`, `composedPageGzip`,
+  `layoutPageGzip`, `canvasElementGzip`), held to budgets of 5.6, 106.3, 112.7, 39.9,
+  91.6, 105.2 and 75.7 kB. `Root` now shares what it holds with `<clover-root>`, and
+  `SplitHandle` its logic with `<clover-split-handle>` (`components/Split/splitting.ts`),
+  which put `Default`'s budget up to 67.0 kB, `Document`'s to 69.4 kB and `Gallery`'s to
+  58.6 kB, 0.1 to 0.2 kB each.
 - **`<clover-viewer>`'s events are named `clover-` and what happened**, as every
   element's are, and bubble out of a shadow root too (`composed`). It also sends
   `clover-status-change`.
@@ -1650,6 +1725,16 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **The information panel's landmark is named "Information panel"**
+  (`informationPanelTabs`, as its tabs are), so a list of landmarks tells it from
+  another, as the Document template's thumbnails ("Items"). An `aria-label` or
+  `aria-labelledby` you give `Panel` names it instead; rendered `as` an element that is
+  no landmark (a `div`), it takes no name. It adds under 0.1 kB to a page with a panel.
+
+- **An element the page hides stays hidden.** The elements' display rules (a root or
+  `<clover-items>` a block, `<clover-label>` no box of its own) are author styles, which
+  beat the browser's own `[hidden] { display: none }`, so `<clover-items hidden>` showed.
+  Each rule now leaves a `hidden` element alone.
 - **`<clover-viewer manifest-id>` lets the reader move through the Collection.** It set
   `manifestId`, which leaves every choice of member to the page, and a page that did not
   answer `manifestchange` left the reader on that member, the choice doing nothing. It is

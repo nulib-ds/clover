@@ -183,6 +183,33 @@ describe("Panel", () => {
     ).toBeInTheDocument();
   });
 
+  it("names its landmark as the panel, unless the host names it or it is none", async () => {
+    const { rerender } = render(
+      <Clover.Root iiifContent={manifest}>
+        <Clover.Panel />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByRole("complementary", { name: "Information panel" }),
+    ).toBeInTheDocument();
+    rerender(
+      <Clover.Root iiifContent={manifest}>
+        <Clover.Panel aria-label="Notes and details" />
+      </Clover.Root>,
+    );
+    expect(
+      screen.getByRole("complementary", { name: "Notes and details" }),
+    ).toBeInTheDocument();
+    rerender(
+      <Clover.Root iiifContent={manifest}>
+        <Clover.Panel as="div" />
+      </Clover.Root>,
+    );
+    expect(document.querySelector(".clover-panel")).not.toHaveAttribute(
+      "aria-label",
+    );
+  });
+
   it("puts About's headings a level under its own in the accordion", async () => {
     render(
       <Clover.Root iiifContent={manifest}>
@@ -445,8 +472,8 @@ describe("Viewer panel", () => {
   it("toggles the panel from the spine while open, and from the Canvas's controls once closed", async () => {
     render(<Clover.Viewer iiifContent={manifest} items={false} />);
     const toggle = () =>
-      screen.getByRole("button", { name: "More Information" });
-    await screen.findByRole("button", { name: "More Information" });
+      screen.getByRole("button", { name: "More information" });
+    await screen.findByRole("button", { name: "More information" });
     const panel = document.getElementById(
       toggle().getAttribute("aria-controls")!,
     )!;

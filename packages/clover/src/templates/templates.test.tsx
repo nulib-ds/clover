@@ -79,7 +79,7 @@ describe("templates", () => {
     ).toBeNull();
     // Open, it sits on the bar between them; closed, among the Canvas's controls.
     const toggle = () =>
-      screen.getByRole("button", { name: "More Information" });
+      screen.getByRole("button", { name: "More information" });
     expect(toggle().closest(".clover-template-default-spine")).not.toBeNull();
     fireEvent.click(toggle());
     expect(panel).not.toBeVisible();
@@ -127,7 +127,7 @@ describe("templates", () => {
       document.querySelector(".clover-template-default-header"),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "More Information" }),
+      screen.queryByRole("button", { name: "More information" }),
     ).not.toBeInTheDocument();
     expect(document.querySelector(".clover-panel")).not.toBeInTheDocument();
   });
@@ -211,7 +211,7 @@ describe("templates", () => {
     // In the frame after: the toggle has moved, from the spine to the stage's controls.
     await waitFor(() =>
       expect(
-        screen.getByRole("button", { name: "More Information" }),
+        screen.getByRole("button", { name: "More information" }),
       ).toHaveFocus(),
     );
     width.mockRestore();
@@ -229,7 +229,7 @@ describe("templates", () => {
     afterEach(() => width.mockRestore());
 
     const toggle = () =>
-      screen.getByRole("button", { name: "More Information" });
+      screen.getByRole("button", { name: "More information" });
     const panel = () =>
       document.querySelector<HTMLElement>(".clover-template-default-panel")!;
 
@@ -308,7 +308,7 @@ describe("templates", () => {
     await screen.findByRole("heading", {
       name: "Still image from an opera performance at Indiana University",
     });
-    expect(screen.queryByRole("button", { name: /^Show Items/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Show items/ })).toBeNull();
     expect(screen.queryByRole("complementary", { name: "Items" })).toBeNull();
     expect(screen.queryByRole("separator")).toBeNull();
     expect(
@@ -368,7 +368,7 @@ describe("templates", () => {
     ).toBeInTheDocument();
     const sidebar = screen.getByRole("complementary", { name: "Items" });
     // Their toggle: on the spine while they show, out of their pane, which is theirs whole.
-    const toggle = () => screen.getByRole("button", { name: /^Show Items/ });
+    const toggle = () => screen.getByRole("button", { name: /^Show items/ });
     expect(toggle()).toHaveAttribute("aria-expanded", "true");
     expect(
       toggle().closest(".clover-template-document-spine[data-for='sidebar']"),
@@ -401,7 +401,7 @@ describe("templates", () => {
     const panel = document.querySelector<HTMLElement>(
       ".clover-template-document-panel",
     )!;
-    const info = () => screen.getByRole("button", { name: "More Information" });
+    const info = () => screen.getByRole("button", { name: "More information" });
     expect(panel).toHaveAttribute("hidden");
     expect(screen.getAllByRole("separator")).toHaveLength(1);
     fireEvent.click(info());
@@ -521,7 +521,7 @@ describe("templates", () => {
         ".clover-template-document-panel",
       )!;
       const info = () =>
-        screen.getByRole("button", { name: "More Information" });
+        screen.getByRole("button", { name: "More information" });
       fireEvent.click(info());
       await waitFor(() => expect(panel).toHaveAttribute("data-open", "true"));
       // Over the page there is no bar for it, only the thumbnails'.
@@ -550,7 +550,7 @@ describe("templates", () => {
       const panel = document.querySelector<HTMLElement>(
         ".clover-template-document-panel",
       )!;
-      fireEvent.click(screen.getByRole("button", { name: "More Information" }));
+      fireEvent.click(screen.getByRole("button", { name: "More information" }));
       await waitFor(() => expect(panel).toHaveAttribute("data-open", "true"));
       // Tabbing back from the panel reaches the thumbnails it covers.
       const sidebar = screen.getByRole("complementary", { name: "Items" });
@@ -580,7 +580,7 @@ describe("templates", () => {
       expect(sidebar).toHaveAttribute("hidden");
       await waitFor(() =>
         expect(
-          screen.getByRole("button", { name: /^Show Items/ }),
+          screen.getByRole("button", { name: /^Show items/ }),
         ).toHaveFocus(),
       );
       matchMedia.mockRestore();

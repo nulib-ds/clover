@@ -19,7 +19,7 @@ describe("the docs' code choice", () => {
     expect(root.dataset.code).toBeUndefined();
   });
 
-  it("puts a stored choice of Web Components on the root before the page paints", () => {
+  it("puts a stored choice of Web components on the root before the page paints", () => {
     localStorage.setItem(CODE_FLAVOR_KEY, "web-components");
     new Function(CODE_FLAVOR_SCRIPT)();
     expect(root.dataset.code).toBe("web-components");
@@ -31,7 +31,7 @@ describe("the docs' code choice", () => {
     expect(root.dataset.code).toBeUndefined();
   });
 
-  it("sets and remembers Web Components, and React clears both", () => {
+  it("sets and remembers Web components, and React clears both", () => {
     setCodeFlavor("web-components");
     expect(root.dataset.code).toBe("web-components");
     expect(localStorage.getItem(CODE_FLAVOR_KEY)).toBe("web-components");

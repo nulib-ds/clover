@@ -72,7 +72,7 @@
 .segmented {
   border: 1px solid
     color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
-  border-radius: var(--radius-3);
+  border-radius: var(--radius-4);
   display: inline-flex;
   flex-wrap: wrap;
   gap: var(--clover-space-2xs, 0.236rem);

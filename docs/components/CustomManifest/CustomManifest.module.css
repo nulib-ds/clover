@@ -7,7 +7,7 @@
 .input {
   appearance: none;
   background: var(--gray-3);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-4);
   display: block;
   font-size: 1rem;
   line-height: 1.25;
@@ -79,7 +79,7 @@
 .submit {
   background: var(--accent-9);
   border: 0;
-  border-radius: var(--radius-3);
+  border-radius: var(--radius-4);
   color: var(--accent-contrast);
   cursor: pointer;
   flex: none;

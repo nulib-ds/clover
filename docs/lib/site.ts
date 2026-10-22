@@ -19,7 +19,7 @@ export const homeTagline =
 /* The homepage's title, and any page's without one of its own: the name and the headline. */
 export const homeTitle = `${siteTitle} – ${homeHeadline.replace(/\.$/, "")}`;
 
-/** What Clover does and its two ways, plainly, in the Get Started page's words. */
+/** What Clover does and its two ways, plainly, in the Get started page's words. */
 const whatItDoes =
   "builds interfaces for IIIF content in React or as a web component: a ready-made Viewer with templates, or parts to compose your own. Accessible, composable and light.";
 
@@ -33,7 +33,7 @@ export const siteDescription = `Clover ${whatItDoes}`;
 export const homeDescription = `${homeTagline} It ${whatItDoes}`;
 
 /*
- * What Clover is, at more length, in the Get Started page's words
+ * What Clover is, at more length, in the Get started page's words
  * (`content/docs/index.mdx`): for agents and search engines, `llms.txt` and the
  * homepage's structured data (`docs/lib/agents.ts`).
  */

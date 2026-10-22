@@ -62,7 +62,7 @@ export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
  *   highlights its entry: one highlight, shared through the Root, with no timers.
  * - Each set is headed by its AnnotationPage's own label, when it has one, after a toggle
  *   that hides its annotations from the Canvas (`HideToggle`: an eye, "Hide" and the
- *   page's label, or "Hide Annotations" for a page without one).
+ *   page's label, or "Hide annotations" for a page without one).
  */
 export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
   function Annotations(

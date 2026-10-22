@@ -15,6 +15,7 @@ import { FULL_WIDTH } from "docs/lib/full-width";
 import { BrandCode, BrandControls } from "docs/components/Home/BrandPicker";
 import { InstallCommand } from "docs/components/Home/InstallCommand";
 import { SectionIntro } from "docs/components/Home/SectionIntro";
+import { Swoosh } from "docs/components/Home/Swoosh";
 
 /*
  * Every figure here is the code's own, never a claim, from `docs/lib/figures.ts`, which
@@ -84,10 +85,10 @@ const stories: Story[] = [
     point: "viewer",
     turn: true,
     title: "Made for everyone.",
-    body: "Clover is designed with every person in mind. It aims for a high level of accessibility, with WAI-ARIA patterns that screen readers understand, colors that meet contrast rules, and controls that work from the keyboard alone.",
+    body: "With all people in mind, Clover sets a high bar for accessibility. Screen readers understand its WAI-ARIA patterns, its colors meet contrast rules, and its controls work from the keyboard alone.",
     figures: [
       // Mat's call, 2026-10-21, knowing ACCESSIBILITY.md's open items: close them to keep it true.
-      { value: "2.2 AA", caption: "WCAG level compliant" },
+      { value: "2.2 AA", caption: "Built to WCAG compliance" },
     ],
   },
   {
@@ -99,10 +100,10 @@ const stories: Story[] = [
     point: "items",
     brand: true,
     title: "Inherits your brand.",
-    body: "No font of its own. No base size. Clover takes yours. Its colors are CSS custom properties, so your brand is one line away.",
+    body: "Clover doesn’t bring a font or a base size of its own. It takes on yours, and its colors are CSS custom properties, so your brand is a few lines away.",
     figures: [
-      { value: "1rem", caption: "yours, the size every space steps from" },
-      { value: "CSS", caption: "variables for simple styling" },
+      { value: "1rem", caption: "Inherited sizing" },
+      { value: "CSS", caption: "Variables for styling" },
     ],
   },
   {
@@ -110,7 +111,8 @@ const stories: Story[] = [
     // A layout of parts: the whole viewer, every part of it outlined.
     point: "viewer",
     title: "Compose your own.",
-    body: "Every template is built from the same components you see here, so yours can be too.",
+    // Composing first, the templates after it, made the same way (Mat, 2026-10-22).
+    body: "Arrange the components you see here into a layout that shapes your vision. Clover’s ready-to-go templates are built the same way.",
     figures: [
       {
         value: String(partCount),
@@ -232,9 +234,9 @@ const Homepage: React.FC<{
           onTry={(key) => playground.current?.pickResource(key)}
         >
           <SectionIntro
-            title="Why Clover."
-            // The five stories in brief, a sentence each, in their order (Mat, 2026-10-21).
-            note="Accessible to everyone. Seamless with your brand. Composable from parts. Quick to load. Checked against the Cookbook."
+            title="Thoughtful and flexible."
+            // One sentence of why, never the title's words or the stories' again (Mat, 2026-10-22).
+            note="Clover is designed with the full spectrum of user experience in mind, for every visitor, every layout and every IIIF resource."
             cta={{ href: "/docs", label: "Read the docs" }}
           />
 
@@ -249,8 +251,8 @@ const Homepage: React.FC<{
                   {story.figures.map((figure) => (
                     <p className={styles.figure} key={figure.caption}>
                       <span className={styles.figureValue}>
-                        {/* The stroke under it, set as every mark's is (`.mark`). */}
-                        <span className={styles.figureMark}>
+                        {/* The stroke under it, set as every mark's is (`.mark`), drawn once. */}
+                        <Swoosh className={styles.figureMark}>
                           {figure.value}
                           {figure.unit && (
                             <span className={styles.figureUnit}>
@@ -258,7 +260,7 @@ const Homepage: React.FC<{
                               {figure.unit}
                             </span>
                           )}
-                        </span>
+                        </Swoosh>
                       </span>{" "}
                       <span className={styles.figureCaption}>
                         {figure.caption}
@@ -326,10 +328,10 @@ const Homepage: React.FC<{
            */}
           <SectionIntro
             title="Install is easy."
-            note="One package holds it all: the React parts and the web components."
+            note="Use it in React or as a web component, and you’re up and running in seconds."
             cta={{ href: "/docs", label: "Get started", primary: true }}
+            beside={<InstallCommand />}
           />
-          <InstallCommand />
         </Parts>
       </div>
     </div>

@@ -8,12 +8,12 @@ import {
 } from "docs/lib/code-flavor";
 
 /**
- * The header's switch for the docs' code, React or Web Components (Mat, 2026-10-21;
+ * The header's switch for the docs' code, React or Web components (Mat, 2026-10-21;
  * React by default; `docs/lib/code-flavor.ts`). A pair of radio buttons, named for what
  * they set: one stop in the tab order, the arrow keys moving between them, as in any
  * radio group. Drawn as the Viewer page's segmented control is (`layout.css`), the chosen
  * one shown from the page's root (`data-code`, set before the page paints), so a reader
- * who chose Web Components never sees React chosen first.
+ * who chose Web components never sees React chosen first.
  */
 export function CodeSwitch() {
   const name = useId();

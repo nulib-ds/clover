@@ -1,7 +1,7 @@
 /* A bordered panel for the examples, so they read as one group apart from the field above. */
 .container {
   border: 1px solid rgba(128, 128, 128, 0.25);
-  border-radius: var(--radius-3);
+  border-radius: var(--radius-4);
   margin: 1.5rem 0 0;
   padding: 2rem;
 }
@@ -25,7 +25,7 @@
 .card {
   background: none;
   border: 0;
-  border-radius: var(--radius-3);
+  border-radius: var(--radius-4);
   color: inherit;
   cursor: pointer;
   display: flex;

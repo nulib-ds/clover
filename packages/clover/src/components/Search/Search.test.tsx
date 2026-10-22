@@ -118,7 +118,7 @@ describe("Search", () => {
     const field = await screen.findByRole("searchbox");
     fireEvent.change(field, { target: { value: "none" } });
     fireEvent.submit(field);
-    expect(await screen.findByText("No Results")).toBeInTheDocument();
+    expect(await screen.findByText("No results")).toBeInTheDocument();
     fireEvent.change(field, { target: { value: "boom" } });
     fireEvent.submit(field);
     expect(

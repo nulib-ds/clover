@@ -27,7 +27,7 @@ const MOVES: [RegExp, string][] = [
   [/^\/docs\/viewer\/(.+)$/, "/docs/3.x/viewer/$1"],
   // The component's page, from when the Panel was the InformationPanel.
   [/^\/docs\/information-panel$/, "/docs/panel"],
-  // Pages folded into others: the templates under the Viewer, the element into Get Started.
+  // Pages folded into others: the templates under the Viewer, the element into Get started.
   [/^\/docs\/templates$/, "/docs/viewer#templates"],
   [/^\/docs\/web-component$/, "/docs#web-component"],
 ];
