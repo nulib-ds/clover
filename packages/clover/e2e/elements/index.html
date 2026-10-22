@@ -6,7 +6,40 @@
     <title>Clover elements</title>
     <link rel="icon" href="data:," />
     <style>
+      /* Light or dark, as the reader's system is: the page's own text in the system's colors. */
+      :root {
+        color-scheme: light dark;
+      }
+      /*
+       * Clover's colors in a dark mode are the page's to set ("Colors and contrast" in
+       * Composing layouts): its text, the ground it sits on, their steps between, and a
+       * lighter accent for text. Here the system's own, mixed only from each other.
+       */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --clover-color-primary: CanvasText;
+          --clover-color-primary-muted: color-mix(
+            in srgb,
+            CanvasText 85%,
+            Canvas
+          );
+          --clover-color-secondary: Canvas;
+          --clover-color-secondary-muted: color-mix(
+            in srgb,
+            CanvasText 12%,
+            Canvas
+          );
+          --clover-color-secondary-alt: color-mix(
+            in srgb,
+            CanvasText 30%,
+            Canvas
+          );
+          --clover-color-accent-text: LinkText;
+        }
+      }
       body {
+        background: Canvas;
+        color: CanvasText;
         margin: 0 auto;
         padding: 1rem;
         max-width: 60rem;
@@ -29,6 +62,20 @@
       }
       .standalone > clover-canvas {
         height: 40vh;
+      }
+      .own {
+        display: grid;
+        gap: 1rem;
+      }
+      /* A view the page draws: its words, centered on the stage. */
+      .own-renderer {
+        align-items: center;
+        box-sizing: border-box;
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        margin: 0;
+        padding: 1rem;
       }
       /*
        * A phone's width holds neither pane's minimum beside the other: the page stacks
@@ -150,6 +197,46 @@
           heading-level="3"
           iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
         ></clover-viewer>
+      </section>
+      <section class="own" aria-labelledby="own-title">
+        <h2 id="own-title">Parts of your own</h2>
+        <p>
+          The root's Clover read by the page's own script, a control replaced by
+          a button of the page's, another button of its own among the stage's
+          controls, and one view drawn by a renderer of the page's.
+        </p>
+        <clover-root
+          id="own-root"
+          iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+        >
+          <clover-label as="h3"></clover-label>
+          <clover-content id="own-stage" style="height: 40vh">
+            <button
+              type="button"
+              id="own-copy"
+              class="clover-canvas-button"
+              aria-label="Copy a link to this view"
+            >
+              <svg
+                aria-hidden="true"
+                focusable="false"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"
+                />
+              </svg>
+              <clover-tip label="Copy a link to this view"></clover-tip>
+            </button>
+          </clover-content>
+          <p id="own-where" aria-live="polite"></p>
+          <button type="button" id="own-next">Next view</button>
+        </clover-root>
       </section>
     </main>
     <script type="module" src="./main.ts"></script>

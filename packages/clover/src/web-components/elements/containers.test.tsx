@@ -246,6 +246,27 @@ describe("The Split, as elements", () => {
   const sizeOf = (pane: HTMLElement) =>
     pane.style.getPropertyValue("--clover-split-size");
 
+  it("says where its bar is as soon as it is drawn, whichever element draws first", async () => {
+    // The pane it sizes comes after the handle has drawn and measured, as in a browser.
+    document.body.innerHTML = `
+      <clover-split>
+        <clover-split-pane min="16rem">Stage</clover-split-pane>
+        <clover-split-handle></clover-split-handle>
+      </clover-split>`;
+    const handle = await within(document.body).findByRole("separator", {
+      name: "Resize panels",
+    });
+    const pane = document.createElement("clover-split-pane");
+    pane.setAttribute("name", "panel");
+    pane.setAttribute("size", "24rem");
+    pane.textContent = "Panel";
+    document.querySelector("clover-split")!.append(pane);
+    // Before any key: a separator that takes focus has a value (WCAG 4.1.2).
+    await waitFor(() => expect(handle).toHaveAttribute("aria-valuenow"));
+    expect(handle).toHaveAttribute("aria-valuemin");
+    expect(handle).toHaveAttribute("aria-valuemax");
+  });
+
   it("lays its panes side by side, and moves the bar by keys, clicks and drags, remembering it", async () => {
     const panel = layout();
     const handle = await within(document.body).findByRole("separator", {

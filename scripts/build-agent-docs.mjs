@@ -52,8 +52,26 @@ const isChrome = (node) =>
   node.properties?.ariaHidden === "true" ||
   classes(node).includes("subheading-anchor");
 
+/* Each of an example's flavors, named over its code: "React", "Web components". */
+const FLAVORS = { react: "React", "web-components": "Web components" };
+const labelOf = (flavor) => ({
+  type: "element",
+  tagName: "p",
+  properties: {},
+  children: [
+    {
+      type: "element",
+      tagName: "strong",
+      properties: {},
+      children: [{ type: "text", value: FLAVORS[flavor] }],
+    },
+  ],
+});
+
 function clean(node) {
   if (!node.children) return;
+  const flavor = node.properties?.dataCodeFlavor;
+  if (FLAVORS[flavor]) node.children.unshift(labelOf(flavor));
   // React's markers (`<!--$-->`) and other comments are not the page's words.
   node.children = node.children.filter(
     (child) =>

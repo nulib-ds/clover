@@ -24,14 +24,27 @@ export function useOneOpen(open: boolean, close: () => void) {
   const id = useUniqueId();
   const latest = useRef(close);
   latest.current = close;
-  useEffect(() => {
-    if (!open) return;
-    for (const [other, closeOther] of [...opened]) {
-      if (other !== id) closeOther.current();
-    }
-    opened.set(id, latest);
-    return () => {
-      opened.delete(id);
-    };
-  }, [open, id]);
+  useEffect(() => (open ? join(id, latest) : undefined), [open, id]);
 }
+
+/** One popup opened: every other closed, and it held until the release it returns. */
+function join(id: string, close: { current: () => void }) {
+  for (const [other, closeOther] of [...opened]) {
+    if (other !== id) closeOther.current();
+  }
+  opened.set(id, close);
+  return () => {
+    opened.delete(id);
+  };
+}
+
+let own = 0;
+
+/**
+ * `useOneOpen` without React, for a page's script (`root.clover.oneOpen`): call it as a
+ * popup of your own opens, with the way to close it, and call what it returns as it
+ * closes. Opening it closes whichever of Clover's is open, and one of Clover's opening
+ * closes it.
+ */
+export const openOne = (close: () => void) =>
+  join(`page-${(own += 1)}`, { current: close });

@@ -6,7 +6,8 @@
 export const CODE_FLAVOR_KEY = "clover-docs-code";
 
 /**
- * Run in the page's head, before it paints: the stored choice, if it is not the default,
- * on the root. Anything else stored is ignored.
+ * Run in the page's head, before it paints: the address's choice (`?code=web-components`
+ * or `?code=react`, for an agent or a link, never stored), else the stored one, on the
+ * root when it is not the default. Anything else is ignored.
  */
-export const CODE_FLAVOR_SCRIPT = `try{var c=localStorage.getItem(${JSON.stringify(CODE_FLAVOR_KEY)});if(c==="web-components")document.documentElement.dataset.code=c}catch(e){}`;
+export const CODE_FLAVOR_SCRIPT = `try{var q=new URLSearchParams(location.search).get("code"),c=q==="react"||q==="web-components"?q:localStorage.getItem(${JSON.stringify(CODE_FLAVOR_KEY)});if(c==="web-components")document.documentElement.dataset.code=c}catch(e){}`;

@@ -1,0 +1,115 @@
+import { createContext } from "react";
+
+import { selectAnnotationSets } from "../../core/annotation-sets";
+import type { Clover, CloverState } from "../../core/clover";
+import {
+  selectPosition,
+  selectSequence,
+  selectVisibleCanvases,
+} from "../../core/selectors";
+import { type LanguageMapLike, localize } from "../../core/value";
+import { CLOVER_I18N_NAMESPACE, cloverI18n } from "../../i18n/config";
+import { openOne } from "../../ui/useOneOpen";
+
+/**
+ * `root.clover`: what a part of your own reads in React, for a page's script. It is the
+ * root's Clover itself, as `useClover()` hands a React part (its store, actions and
+ * channels), with each of Clover's hooks as a method of the same name (`useNavigation()`
+ * is `navigation()`), the state and a way to hear of it, and the root's language.
+ *
+ *   const { clover } = document.querySelector("clover-root");
+ *   clover.subscribe(() => (where.textContent = clover.navigation().position + 1));
+ *   clover.next();
+ */
+export type CloverApi = Clover & ReturnType<typeof own>;
+
+function own(
+  clover: Clover,
+  language: () => string | undefined,
+  hostLanguage: () => string | undefined,
+) {
+  const state = () => clover.store.get();
+  return {
+    /** The state, now: what every part draws from. */
+    get state(): CloverState {
+      return state();
+    },
+    /** Hear of every change of the state, as a part re-renders; returns the way to stop. */
+    subscribe(listener: (state: CloverState) => void) {
+      return clover.store.subscribe(() => listener(state()));
+    },
+    /** The language the root reads IIIF text in, where it is given one. */
+    get language() {
+      return language();
+    },
+    // Clover's hooks, each as a method (`hooks.ts`), reading the state now.
+    status() {
+      const { status, error } = state();
+      return { status, error };
+    },
+    manifest() {
+      return state().manifest;
+    },
+    sequence() {
+      return selectSequence(state().manifest);
+    },
+    visibleCanvases() {
+      return selectVisibleCanvases(state().manifest, state().canvasId);
+    },
+    activeCanvas() {
+      const { manifest, canvasId } = state();
+      return (
+        selectSequence(manifest).canvases.find(
+          (canvas) => canvas.id === canvasId,
+        ) ?? null
+      );
+    },
+    navigation() {
+      const { manifest, canvasId } = state();
+      const position = selectPosition(manifest, canvasId);
+      const total = selectSequence(manifest).views.length;
+      return {
+        position,
+        total,
+        hasPrevious: position > 0,
+        hasNext: position + 1 < total,
+        previous: () => clover.previous(),
+        next: () => clover.next(),
+        first: () => clover.first(),
+        last: () => clover.last(),
+        goTo: (canvasId: string) => clover.goTo(canvasId),
+      };
+    },
+    annotationSets() {
+      return selectAnnotationSets(state().manifest, state().addedSets);
+    },
+    localize(value: LanguageMapLike) {
+      return localize(value, language());
+    },
+    t(key: string, values?: Record<string, unknown>) {
+      return cloverI18n.t(key, values, CLOVER_I18N_NAMESPACE);
+    },
+    langOf(key: string) {
+      return cloverI18n.langOf(key, hostLanguage(), CLOVER_I18N_NAMESPACE);
+    },
+    /** A popup of the page's joined to Clover's, which open one at a time (`useOneOpen`). */
+    oneOpen(close: () => void) {
+      return openOne(close);
+    },
+  };
+}
+
+/** The API of a root's Clover: its own, over the Clover it inherits everything else from. */
+export function cloverApi(
+  clover: Clover,
+  language: () => string | undefined,
+  hostLanguage: () => string | undefined,
+): CloverApi {
+  return Object.defineProperties(
+    Object.create(clover),
+    Object.getOwnPropertyDescriptors(own(clover, language, hostLanguage)),
+  ) as CloverApi;
+}
+
+/** The nearest root's API, for what the host draws inside it (a renderer of the page's). */
+export const CloverApiContext = createContext<CloverApi | null>(null);

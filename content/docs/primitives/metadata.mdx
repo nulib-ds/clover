@@ -5,6 +5,7 @@ description: The metadata of the resource, or of the current Canvas, as a descri
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Metadata
 
@@ -30,12 +31,16 @@ Reads `metadata` from the Root's resource and renders a description list, each l
 `dt` and each value a `dd`. A value may be IIIF's [HTML](/docs/primitives#html). It
 renders nothing while there is no metadata. Its other props go to the `dl`.
 
+<ApiReference elements="clover-metadata">
+
 | Prop          | Type                     | Default      | Description                                                      |
 | ------------- | ------------------------ | ------------ | ---------------------------------------------------------------- |
 | `of`          | `"manifest" \| "canvas"` | `"manifest"` | Whose metadata: the resource's, or the Canvas the reader is on.  |
 | `value`       | `{ label, value }[]`     | —            | Pairs to show instead of the Root's. Outside a `Root`, the ones. |
 | `renderValue` | `(item) => ReactNode`    | —            | A value of your own; Clover's where it returns `undefined`.      |
 | `className`   | `string`                 | —            | Added to `clover-metadata`.                                      |
+
+</ApiReference>
 
 ## Examples
 
@@ -118,6 +123,25 @@ function renderValue(item) {
 }
 
 <Clover.Metadata renderValue={renderValue} />;
+```
+
+```html twin
+<clover-metadata></clover-metadata>
+
+<script type="module">
+  document.querySelector("clover-metadata").renderValue = (item) => {
+    if (item.label.none?.[0] !== "Subject") return undefined;
+    const subjects = document.createDocumentFragment();
+    (item.value.none ?? []).forEach((subject, index) => {
+      if (index > 0) subjects.append(", ");
+      const link = document.createElement("a");
+      link.href = `/search?subject=${encodeURIComponent(subject)}`;
+      link.textContent = subject;
+      subjects.append(link);
+    });
+    return subjects;
+  };
+</script>
 ```
 
 ## Previous versions

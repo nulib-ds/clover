@@ -5,6 +5,7 @@ description: Any IIIF language map you hold, in the reader's language, read stri
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Value
 
@@ -37,6 +38,8 @@ Shows `value` in the reader's language, read by its `format`, and renders a `spa
 HTML is sanitized to what IIIF allows. It reads nothing from the Root's resource, renders
 nothing while there is no text, and its other props go to its element.
 
+<ApiReference elements="clover-value">
+
 | Prop           | Type                     | Default     | Description                                                   |
 | -------------- | ------------------------ | ----------- | ------------------------------------------------------------- |
 | `value`        | language map or `string` | —           | The text, as IIIF gives it: `{ en: ["…"] }`.                  |
@@ -44,6 +47,8 @@ nothing while there is no text, and its other props go to its element.
 | `headingLevel` | `number`                 | `3`         | With Markdown, its first heading's level.                     |
 | `as`           | element type             | `"span"`    | The element to render: a `div` for paragraphs and lists.      |
 | `className`    | `string`                 | —           | Added to `clover-value`.                                      |
+
+</ApiReference>
 
 ## Examples
 
@@ -111,6 +116,27 @@ Issued in 1896 by the **White Sewing Machine Company**.
   headingLevel={4}
   as="div"
 />;
+```
+
+```html twin
+<clover-value format="text/markdown" heading-level="4" as="div"></clover-value>
+
+<script type="module">
+  document.querySelector("clover-value").value = {
+    en: [
+      `# The White bicycles
+
+Issued in 1896 by the **White Sewing Machine Company**.
+
+## Plates
+
+- Thulstrup
+- Mente
+- Veenfliet
+- Clarke`,
+    ],
+  };
+</script>
 ```
 
 </Example>

@@ -69,6 +69,16 @@ function MyLayout(props) {
 <Viewer iiifContent={url} template={MyLayout} />;
 ```
 
+```html twin
+<!-- A layout of your own is the markup itself: a root and its parts. -->
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-content></clover-content>
+  <clover-items layout="pager"></clover-items>
+</clover-root>
+```
+
 ## `Root`
 
 | Prop                   | Type                              | Description                                                                        |
@@ -174,6 +184,12 @@ open.
 </Clover.ReadMore>
 ```
 
+```html twin
+<clover-read-more>
+  <p class="my-note">…</p>
+</clover-read-more>
+```
+
 ## The information panel
 
 `Panel` shows About, and each other section the content has something for:
@@ -251,6 +267,25 @@ function PageCount() {
 }
 ```
 
+```html twin
+<span id="page-count"></span>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const count = document.getElementById("page-count");
+  const show = () => {
+    const { position, total } = root.clover.navigation();
+    count.textContent = `${position + 1} / ${total}`;
+  };
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
 `useClover()` gives `{ clover }`, the Root's state and actions (`clover.goTo(canvasId)`,
 `clover.next()`, `clover.search(query)` and the rest), for parts that act rather than
 read.
@@ -275,6 +310,15 @@ function MyLayout({ url, headingLevel }) {
 }
 ```
 
+```html twin
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-label as="h2"></clover-label>
+  <clover-content></clover-content>
+</clover-root>
+```
+
 ### Controls of your own
 
 Every control Clover draws as an icon alone names itself in a popover on hover and on
@@ -292,6 +336,17 @@ there is and moves in from the edge.
 </button>
 ```
 
+```html twin
+<button type="button" id="bookmark" aria-label="Bookmark">
+  <svg aria-hidden="true">…</svg>
+  <clover-tip label="Bookmark"></clover-tip>
+</button>
+
+<script type="module">
+  document.getElementById("bookmark").addEventListener("click", save);
+</script>
+```
+
 Clover's popups open one at a time: the Canvas's information and its menus
 (annotations, Choice, an animation's frames), the playback controls' menus and
 Download's list. Opening one closes whichever other is open, however it was opened. A
@@ -301,6 +356,21 @@ close it:
 ```jsx
 const [open, setOpen] = useState(false);
 Clover.useOneOpen(open, () => setOpen(false));
+```
+
+```html twin
+<script type="module">
+  const root = document.querySelector("clover-root");
+  let release = null;
+  const close = () => {
+    menu.hidden = true;
+    release?.();
+  };
+  const open = () => {
+    menu.hidden = false;
+    release = root.clover.oneOpen(close);
+  };
+</script>
 ```
 
 ## Languages
@@ -353,6 +423,28 @@ const langOf = Clover.useLangOf();
 </button>;
 ```
 
+```html twin
+<button type="button" id="close">
+  <svg aria-hidden="true">…</svg>
+  <clover-tip></clover-tip>
+</button>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const close = document.getElementById("close");
+  const start = () => {
+    const label = root.clover.t("commonClose");
+    const lang = root.clover.langOf("commonClose");
+    close.setAttribute("aria-label", label);
+    close.querySelector("clover-tip").setAttribute("label", label);
+    if (lang) close.lang = lang;
+    else close.removeAttribute("lang");
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
 ## Renderers of your own
 
 Give `Root` (or one `Content`) `renderers`, and a view they claim is drawn by your
@@ -372,6 +464,28 @@ function ModelViewer({ bodies }) {
 >
   <Clover.Content />
 </Clover.Root>;
+```
+
+```html twin
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/manifest.json"
+>
+  <clover-content></clover-content>
+</clover-root>
+
+<script type="module">
+  document.querySelector("clover-root").renderers = [
+    {
+      format: ["model/gltf-binary"],
+      render(container, { bodies }) {
+        const model = document.createElement("model-viewer");
+        model.setAttribute("src", bodies[0].id);
+        model.setAttribute("camera-controls", "");
+        container.append(model);
+      },
+    },
+  ];
+</script>
 ```
 
 A renderer gets the view's `canvases`, their painting `bodies` (a `Choice` as its first

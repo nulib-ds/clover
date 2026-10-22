@@ -31,8 +31,16 @@ const BULLET = /^\s*[-*+]\s+/;
 const NUMBER = /^\s*(\d+)[.)]\s+/;
 const HEADING = /^(#{1,6})\s+(\S.*?)(?:\s+#+)?\s*$/;
 
-/** The groups past h6, numbered on the page so each heading's id is its own. */
-let groups = 0;
+/**
+ * The groups past h6, numbered on the page so each heading's id is its own: counted on
+ * the page's global, so every copy of Clover on the page (React's, the elements' entries)
+ * counts together, and no two ids meet (WCAG 4.1.2).
+ */
+const GROUPS = Symbol.for("clover.markdown.groups");
+const nextGroup = () => {
+  const page = globalThis as unknown as Record<symbol, number | undefined>;
+  return (page[GROUPS] = (page[GROUPS] ?? 0) + 1);
+};
 
 // A quote too, so no text (a link's address) can end the attribute it is written into.
 const escape = (text: string) =>
@@ -192,7 +200,7 @@ export function markdownToHtml(
       if (level <= 6) {
         html.push(`<p role="heading" aria-level="${level}">${text}</p>`);
       } else {
-        const id = `clover-md-${++groups}`;
+        const id = `clover-md-${nextGroup()}`;
         open.push(block.depth);
         html.push(
           `<div role="group" aria-labelledby="${id}"><p id="${id}">${text}</p>`,

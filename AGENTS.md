@@ -93,10 +93,10 @@ deadline.
     scannable (the catalog's About is long), each `headingLevel` one
     below the heading it sits under. `canvas.mdx` says when to place `Content` rather
     than `Canvas`.
-  - Use Clover: Get started (`/docs`, which holds the web component, `<clover-viewer>`,
-    in its own section), Viewer (`/docs/viewer`, the templates on it: their old page,
-    `/docs/viewer/templates`, forwards to `#templates`), Composing layouts, Cookbook
-    recipes.
+  - Use Clover: Get started (`/docs`, which holds the web components, `<clover-viewer>`
+    and the parts, in a section of their own, `#web-component`), Viewer (`/docs/viewer`,
+    the templates on it: their old page, `/docs/viewer/templates`, forwards to
+    `#templates`), Composing layouts, Cookbook recipes.
   - The Viewer page reads as Radix Themes' component pages do (Mat, 2026-10-21): the
     title and a lede (`docs-lede`), one example at the top (the template, switched
     by a large segmented control, its code following), then "API reference" (the
@@ -139,7 +139,7 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     released").
   - The homepage (`docs/components/Home/`) opens with its headline, "A viewer as distinctive /
     as your collections." (two lines, its stroke under "distinctive") (`Hero.tsx`, the page's `h1`), and one sentence, on one line where it fits
-    (Mat, 2026-10-20; his rewording, 2026-10-22: one verb, no commas, IIIF given a role and never a tack-on): "Design a user experience rooted in IIIF with Clover." It has two halves: the templates live under it
+    (Mat, 2026-10-20; his rewording, 2026-10-22: one verb, no commas, IIIF given a role and never a tack-on): "Design a user experience rooted in IIIF with Clover." After it, `s` away, in its own size, family and gray, "Documentation →", a link to Get started (Mat, 2026-10-22; `.subtitleLink`), underlined, which marks it as a link where its color does not (WCAG 1.4.1), its arrow smaller and out of the underline. It has two halves: the templates live under it
     (`docs/components/Playground/`), and below them the same resource shown one IIIF
     property at a time by the components the templates are made of (`Parts.tsx` and
     `PartsLive.tsx`), with no heading of its own in sight. Each half has one hidden, for
@@ -266,8 +266,10 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
   - The playground shows how far one Viewer stretches: any layout with any kind of
     resource. Two pickers, each changing the stage without the other. Over it, centered,
     the resource (`ResourceField.tsx`): one field, its label, "Select…" (named "Select a IIIF resource": the ellipsis hidden, the rest visually hidden, WCAG 2.5.3; Mat, 2026-10-22), joined to its start with no line between them (2026-10-22) (Mat,
-    2026-10-20; a tab on its top edge on a phone; its `<label>`), for the
-    address or content state of the reader's own, with ours listed under it (`resources`
+    2026-10-20; a tab on its top edge on a phone; its `<label>`), Open inside it at its end
+    (Mat, 2026-10-22), 2px inside its edge on every side, whole pixels so its gaps round
+    alike, for the address or content state of the reader's own, with ours listed under it,
+    the list as wide as the whole select (its label, the field and Open; Mat, 2026-10-22) (`resources`
     in `playground-config.ts`: a catalog, a print, a Collection, a photo, a map, a film, a
     recording…), each by its thumbnail, its own label, and a few words on one thing it has
     that the others do not (`description`: concise, only what the resource has). The
@@ -313,9 +315,9 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     the sidebar's size (1rem) and black (`--nav-text`), but who made it and the legal line
     muted (`--gray-11`: 5.9:1 on white, 9:1 on the dark ground; Mat, 2026-10-21): the wordmark,
     then what Clover is in the homepage hero's words, a sentence a line (the headline's
-    in bold, a step up, `1.618rem`; the sentence at `--text-lede`, muted as the hero's is), then one paragraph in
-    Mat's words, whose project Clover is (the Academic Innovation team at Northwestern
-    University Libraries), since when (2021) and at which version ("version 4.x"), and how widely it is used and built on, a
+    in bold, a step up, `1.618rem`, balanced where it takes two lines, Mat, 2026-10-22; the sentence at `--text-lede`, muted as the hero's is), then one paragraph in
+    Mat's words, whose project Clover is (Academic Innovation at Northwestern University
+    Libraries; Mat, 2026-10-22), since when (2021) and at which version ("version 4.x"), and how widely it is used and built on, a
     variety of implementations and the institutions that contributed, never a person
     (Mat, 2026-10-21: people are credited elsewhere; its maturity shown, never claimed),
     its "more" linking to the repository's contributors; the two across 61.8% of the
@@ -380,6 +382,28 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     mock's copy of that site. No style sets a heading, menu item or call to action in
     capitals; the stories' one-word mono labels (`.storyLabel`) are type, not headings.
     The 3.x pages keep the earlier version's own headings; their menu follows the rule.
+  - Every Clover 4 page holds its examples in both flavors (WEB-COMPONENTS.md, phase 7).
+    Each `jsx or `tsx fence gets its "Web components" twin as the page compiles
+    (`docs/lib/code-flavors.mjs`, run by `docs/lib/mdx-code-flavors-loader.cjs`, a loader
+    before Nextra's in `next.config.mjs`, as Turbopack takes no plugin functions):
+    `jsx-to-html.mjs` turns the JSX into the elements' HTML through their specs, `{url}`
+    the frame's resource (`example-urls.mjs`) or else the Cookbook's book, and the two are
+    boxed `data-code-flavor`, which `layout.css` shows by the reader's choice. A fence HTML
+    cannot say (hooks, state, functions) gets its twin written by hand, `html twin right
+after it, or stays React's, shown in both; `jsx react shows to React's readers alone
+    (a stylesheet's import). Write a new example so it turns, or give it its twin. After
+    changing those helpers, restart `npm run dev`: Node keeps the modules the loader
+    first loaded. A component's "API reference" wraps its React tables in
+    `<ApiReference elements="clover-…">` (`docs/components/Clover4/ApiReference.tsx`),
+    which draws its elements' tables from their specs, with the page's own Markdown
+    components, in the other flavor. `OptionsExample` shows its chosen value's code by
+    CSS (`data-shown`), so the Markdown keeps every value's. `?code=web-components` (or
+    `react`) on an address chooses the flavor before the page paints, never stored; the
+    homepage's editor writes HTML in that flavor (its lines as many, its values as live);
+    the Markdown labels each flavor ("React", "Web components") and keeps each fence's
+    language (`mdx-components.tsx`'s `code`), as `llms.txt` says; and the elements'
+    manifest is published at `/custom-elements.json` (`app/custom-elements.json/route.ts`,
+    from the package's build).
   - Titles and share cards are `pageMetadata` (`docs/lib/site.ts`), the root layout's
     `metadata` and each page's `generateMetadata` (`app/[[...mdxPath]]/page.tsx`): the
     homepage's title is "Clover IIIF – A viewer as distinctive as your collections" and the site's
@@ -448,9 +472,12 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
 - The package builds to `packages/clover/dist/`; the site's static assets are in `public/`.
 - Tests are colocated near code as `*.test.ts|tsx`: the package's, and the docs' own
   helpers in `docs/lib/` (the root `vitest.config.mjs`), run together through
-  `vitest.workspace.mjs`, with the web components' under Preact, as they ship
-  (`packages/clover/vitest.preact.config.mjs`). CI also builds the package and runs
-  `npm run test:build`, the build's own checks and budgets.
+  `vitest.workspace.mjs`, with the package's again on React 18
+  (`packages/clover/vitest.react18.config.mjs`, its React installed in
+  `packages/clover/e2e/react18`; the root's React is 19, the docs') and the web
+  components' under Preact, as they ship (`packages/clover/vitest.preact.config.mjs`).
+  CI also builds the package and runs `npm run test:build`, the build's own checks and
+  budgets. The end-to-end suite runs locally only (`npm run e2e`).
 
 ## Nextra 4
 

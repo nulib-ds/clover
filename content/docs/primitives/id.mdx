@@ -5,6 +5,7 @@ description: A IIIF resource's id, its own address, as a link.
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Id
 
@@ -28,11 +29,15 @@ a Manifest, that is where its IIIF JSON is. The link is underlined, and a long a
 wraps rather than pushing the page sideways. It renders nothing while there is none, and
 its other props go to the `a`.
 
+<ApiReference elements="clover-id">
+
 | Prop        | Type                     | Default      | Description                                                 |
 | ----------- | ------------------------ | ------------ | ----------------------------------------------------------- |
 | `of`        | `"manifest" \| "canvas"` | `"manifest"` | Whose `id`: the resource's, or the Canvas the reader is on. |
 | `value`     | `string`                 | —            | An address to show instead of the Root's.                   |
 | `className` | `string`                 | —            | Added to `clover-id`.                                       |
+
+</ApiReference>
 
 ## Examples
 

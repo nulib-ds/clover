@@ -14,16 +14,16 @@ export type LoadPart = () => Promise<React.ComponentType<HostedProps>>;
  * `<clover-canvas>`) takes its height from `--clover-content-height`, as `Content` does,
  * so `style="height: 60vh"` on it sizes it too. A label, and a panel's toggle outside a stage, are no box of their own: what they
  * draw sits in the page as if written there. What an element only reads (a tab, a slot's
- * children) is not shown where it is written. Each leaves an element `hidden` hidden, as
+ * children), or draws elsewhere (a tip, in its button), is not shown where it is written. Each leaves an element `hidden` hidden, as
  * the browser's own rule does, which an author's rule beats. In `@layer clover`, so any
  * rule of the page's wins.
  */
 const ELEMENT_CSS =
-  "@layer clover{:is(clover-root,clover-items,clover-viewer,clover-panel):not([hidden]){display:block}" +
+  "@layer clover{:is(clover-root,clover-items,clover-viewer,clover-panel,clover-read-more):not([hidden]){display:block}" +
   ":is(clover-content,clover-canvas):not([hidden]){display:block;height:var(--clover-content-height,60vh)}" +
   "clover-split:not([hidden]){display:flex}" +
   ":is(clover-label,clover-panel-toggle):not([hidden]){display:contents}" +
-  "clover-tab,clover-status>[slot]{display:none}}";
+  "clover-tab,clover-tip,clover-status>[slot]{display:none}}";
 
 /**
  * The host (Preact, and the one tree that draws every element on the page), loaded the
@@ -140,10 +140,12 @@ export function defineElement(
     readonly needsRoot = Boolean(spec.needsRoot);
     /** Props set as properties: each wins over its attribute. */
     readonly values: Record<string, unknown> = {};
+    /** What its events keep (`keeps`): a Canvas's handle, a root's API. */
+    readonly kept: Record<string, unknown> = {};
     private props: Record<string, unknown> = {};
     private readonly listeners = new Set<() => void>();
     /** What has been warned of, so a value is warned of once. */
-    private readonly warned = new Set<string>();
+    readonly warned = new Set<string>();
     /**
      * The part's callbacks, each sending its event from the element, and saying whether
      * the page let it be (false where it canceled it).
@@ -153,16 +155,22 @@ export function defineElement(
         events.map(([type, event]) => [
           event.prop,
           (...args: unknown[]) => {
+            // What it keeps goes with its part (null when the part lets it go): no event.
+            if (event.keeps) {
+              this.kept[event.keeps] = args[0] ?? null;
+              if (args[0] == null) return true;
+            }
             const detail =
               event.detail === "first"
                 ? args[0]
                 : Object.fromEntries(
                     event.detail.map((name, index) => [name, args[index]]),
                   );
+            // One that keeps something is the element's own, and stays there.
             const sent = new CustomEvent(type, {
               detail,
-              bubbles: true,
-              composed: true,
+              bubbles: !event.keeps,
+              composed: !event.keeps,
               cancelable: Boolean(event.cancelable),
             });
             const allowed = this.dispatchEvent(sent);
@@ -287,6 +295,19 @@ export function defineElement(
         if (value == null) delete this.values[name];
         else this.values[name] = value;
         this.update();
+      },
+    });
+  }
+
+  // What its events keep, read-only: null until there.
+  for (const [, event] of events) {
+    if (!event.keeps) continue;
+    const name = event.keeps;
+    Object.defineProperty(CloverElement.prototype, name, {
+      configurable: true,
+      enumerable: true,
+      get(this: CloverElement) {
+        return this.kept[name] ?? null;
       },
     });
   }

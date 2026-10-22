@@ -1,4 +1,12 @@
-import type { ElementDocs, ElementSpec } from "../spec";
+import type { ElementDocs, ElementSpec, MethodDocs } from "../spec";
+
+/**
+ * The stage's own: the Canvas's handle (`CanvasHandle`, what `onReady` hands a React host),
+ * kept as `handle` and sent with `clover-ready` once its view is laid out.
+ */
+export const READY = {
+  "clover-ready": { prop: "onReady", detail: ["handle"], keeps: "handle" },
+} as const;
 
 /**
  * `<clover-canvas>`: Clover's renderer for images, video and sound. Alone, it draws what
@@ -28,12 +36,164 @@ export const canvas: ElementSpec = {
     },
     "animate-annotations": { prop: "animateAnnotations", type: "boolean" },
   },
-  properties: ["iiifContent", "canvases", "src", "annotations", "options"],
+  properties: [
+    "iiifContent",
+    "canvases",
+    "src",
+    "annotations",
+    "options",
+    "controlButtons",
+    "controls",
+  ],
   events: {
+    ...READY,
     "clover-annotation-select": { prop: "onAnnotationSelect", detail: ["id"] },
     "clover-annotation-active": { prop: "onAnnotationActive", detail: ["id"] },
     "clover-caption-change": { prop: "onCaptionChange", detail: ["caption"] },
     "clover-ended": { prop: "onEnded", detail: [] },
+  },
+};
+
+const RECT = "CloverRect";
+const POINT = "CloverPoint";
+const LATER = ["immediate?", "boolean"] as const;
+
+/** The handle's methods, as the types declare `CloverCanvasHandle`. Never loaded by a page. */
+export const handleMethodDocs: MethodDocs = {
+  home: {
+    parameters: [LATER],
+    returns: "void",
+    description: "Fit the whole view again, as Reset does.",
+  },
+  zoomBy: {
+    parameters: [
+      ["factor", "number"],
+      ["at?", POINT],
+      ["animate?", "boolean"],
+    ],
+    returns: "void",
+    description:
+      "Zoom by a factor (2 in, 0.5 out), about a point on the screen if given.",
+  },
+  panBy: {
+    parameters: [
+      ["dx", "number"],
+      ["dy", "number"],
+      ["animate?", "boolean"],
+    ],
+    returns: "void",
+    description: "Move the view, in screen pixels.",
+  },
+  rotateBy: {
+    parameters: [["degrees", "number"]],
+    returns: "void",
+    description: "Turn the view by an angle, clockwise.",
+  },
+  setRotation: {
+    parameters: [["degrees", "number"], LATER],
+    returns: "void",
+    description: "Turn the view to an angle, clockwise.",
+  },
+  getRotation: {
+    parameters: [],
+    returns: "number",
+    description: "The view's angle, in degrees clockwise.",
+  },
+  fitBounds: {
+    parameters: [["bounds", RECT], LATER],
+    returns: "void",
+    description: "Frame a rectangle, in world units.",
+  },
+  fitItemRect: {
+    parameters: [["index", "number"], ["rect", RECT], LATER],
+    returns: "void",
+    description:
+      "Frame a rectangle in one image's own coordinates, by its place among those shown.",
+  },
+  fitCanvasRect: {
+    parameters: [["canvasId", "string"], ["rect", RECT], LATER],
+    returns: "boolean",
+    description:
+      "Frame a region of a Canvas shown, in its own coordinates (an xywh): false before it is laid out.",
+  },
+  zoomToAnnotation: {
+    parameters: [["id", "string"]],
+    returns: "boolean",
+    description:
+      "Frame an annotation's hotspot and focus it, as picking it does: false while it has none.",
+  },
+  getBounds: {
+    parameters: [],
+    returns: RECT,
+    description: "The visible rectangle, in world units.",
+  },
+  getHomeBounds: {
+    parameters: [],
+    returns: `${RECT} | null`,
+    description: "What home fits: the whole view, in world units.",
+  },
+  getCamera: {
+    parameters: [],
+    returns: "CloverCamera",
+    description: "The camera: where it looks, its zoom and its turn.",
+  },
+  getCanvasRegion: {
+    parameters: [],
+    returns: `{ canvasId: string; rect: ${RECT} } | null`,
+    description:
+      "The visible part of the Canvas filling most of the view, in its own coordinates: what a share link records.",
+  },
+  itemRectToWorld: {
+    parameters: [
+      ["index", "number"],
+      ["rect", RECT],
+    ],
+    returns: `${RECT} | null`,
+    description: "A rectangle in one image's own coordinates, in world units.",
+  },
+  worldToScreenPoint: {
+    parameters: [["point", POINT]],
+    returns: POINT,
+    description: "A point in world units, on the screen.",
+  },
+  screenToWorldPoint: {
+    parameters: [["point", POINT]],
+    returns: POINT,
+    description: "A point on the screen, in world units.",
+  },
+  on: {
+    parameters: [
+      ["event", '"open" | "viewport" | "change" | "error" | "backend" | "tap"'],
+      ["listener", "(detail?: unknown) => void"],
+    ],
+    returns: "() => void",
+    description:
+      "Hear the renderer (viewport: the camera moved; change: new images); returns the way to stop.",
+  },
+};
+
+/** The handle, as a property, and the event that brings it. */
+export const handleDocs = {
+  property: {
+    type: "CloverCanvasHandle | null",
+    readonly: true,
+    description:
+      "The Canvas's handle once its view is laid out (clover-ready), as onReady hands it in React: the camera and its coordinates (handle.zoomBy(2), handle.home()). Null before.",
+  },
+  event: {
+    detail: "{ handle: CloverCanvasHandle }",
+    description:
+      "The view is laid out and fitted: its handle is here, and works from now on.",
+  },
+  controls: {
+    type: "boolean | { zoom?: boolean; fullPage?: boolean; rotation?: boolean; reset?: boolean; annotations?: boolean; information?: boolean; [option: string]: unknown } | null",
+    description:
+      "Which of the stage's controls it shows, as Canvas's controls takes it: false for none, or some ({ rotation: false }), in place of the attribute.",
+  },
+  controlButtons: {
+    type: "CloverControlButtons | null",
+    description:
+      "The stage's controls, each replaced by a button you make: a function given the control's name, label and Clover's icon, returning the button. Clover keeps it named, keyed and in its state, presses the control with it, and adds its popover.",
   },
 };
 
@@ -84,6 +244,9 @@ export const canvasDocs: ElementDocs = {
     },
   },
   properties: {
+    handle: handleDocs.property,
+    controlButtons: handleDocs.controlButtons,
+    controls: handleDocs.controls,
     iiifContent: {
       type: "string | Record<string, unknown> | null",
       description: "What to load and draw, as a URL or a IIIF resource.",
@@ -109,6 +272,7 @@ export const canvasDocs: ElementDocs = {
     },
   },
   events: {
+    "clover-ready": handleDocs.event,
     "clover-annotation-select": {
       detail: "{ id: string | null }",
       description:

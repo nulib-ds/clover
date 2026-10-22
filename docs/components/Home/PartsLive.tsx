@@ -25,6 +25,7 @@ import { AccessibilityTree } from "docs/components/Home/AccessibilityTree";
 import { SectionIntro } from "docs/components/Home/SectionIntro";
 import { partCount } from "docs/components/Home/counts";
 import { partLoads } from "docs/lib/sizes";
+import { useCodeFlavor } from "docs/lib/code-flavor";
 import { useRecipeContent } from "docs/components/Home/recipeThumbnails";
 import { endPageThemePreview, previewPageTheme } from "docs/lib/page-theme";
 
@@ -1351,6 +1352,18 @@ const element = (name: string, attrs: Token[][] = []): Token[] => [
   punct(" />"),
 ];
 
+/** A part's element, `<clover-name a="b"></clover-name>`, on one line: the editor's HTML. */
+const elementTag = (name: string) =>
+  `clover-${name.replace(/[A-Z]/g, (letter, at) => `${at ? "-" : ""}${letter.toLowerCase()}`)}`;
+const htmlElement = (name: string, attrs: Token[][] = []): Token[] => [
+  punct("<"),
+  tag(elementTag(name)),
+  ...attrs.flatMap((tokens) => [plain(" "), ...tokens]),
+  punct("></"),
+  tag(elementTag(name)),
+  punct(">"),
+];
+
 /** A part moved from one place in the order to another. */
 const moved = <T,>(list: T[], from: number, to: number) => {
   const next = [...list];
@@ -1399,6 +1412,11 @@ const ViewerCode = React.memo(function ViewerCode({
 }) {
   const set = (change: Partial<ViewValues>) =>
     onView((values) => ({ ...values, ...change }));
+  /*
+   * The code in the reader's choice (the header's switch, `code-flavor.ts`): React, or
+   * the same layout as Clover's elements, its values as live, a part's lines as many.
+   */
+  const html = useCodeFlavor() === "web-components";
   const hint = useId();
   const pickedName = useId();
   /*
@@ -1540,7 +1558,122 @@ const ViewerCode = React.memo(function ViewerCode({
     setSaid(`${PART_NAMES[key]}, ${to + 1} of ${order.length}`);
   };
 
-  const partLines = (key: ViewerPart): Line[] => {
+  const partLines = (key: ViewerPart): Line[] =>
+    html ? htmlLines(key) : jsxLines(key);
+
+  // Each part as Clover's elements write it: what `jsxLines` writes, in HTML.
+  const htmlLines = (key: ViewerPart): Line[] => {
+    switch (key) {
+      case "thumbnail":
+        return [
+          {
+            depth: 1,
+            tokens: htmlElement("Thumbnail", [
+              [attr("alt"), punct("="), str('""')],
+              [attr("size"), punct("="), str('"128"')],
+            ]),
+          },
+        ];
+      case "label":
+        return [
+          {
+            depth: 1,
+            tokens: htmlElement("Label", [
+              [attr("as"), punct("="), str('"h3"')],
+            ]),
+          },
+        ];
+      case "content":
+        return [
+          { depth: 1, tokens: [punct("<"), tag("clover-content")] },
+          {
+            depth: 2,
+            tokens: [
+              attr("controls"),
+              punct('="'),
+              {
+                text: String(view.controls),
+                control: (
+                  <Switch
+                    label="Content controls"
+                    value={view.controls}
+                    onChange={(controls) => set({ controls })}
+                  />
+                ),
+              },
+              punct('"'),
+            ],
+          },
+          {
+            depth: 2,
+            tokens: [
+              attr("style"),
+              punct('="'),
+              property("height"),
+              punct(": "),
+              {
+                text: String(view.height),
+                control: (
+                  <Scrub
+                    label="Content height, in pixels"
+                    min={120}
+                    max={480}
+                    value={view.height}
+                    onChange={(height) => set({ height })}
+                  />
+                ),
+              },
+              plain("px"),
+              punct('">'),
+            ],
+          },
+          {
+            depth: 1,
+            tokens: [punct("</"), tag("clover-content"), punct(">")],
+          },
+        ];
+      case "items": {
+        const layout: Token[] = [
+          attr("layout"),
+          punct('="'),
+          {
+            text: view.layout,
+            control: (
+              <Choice
+                label="Items layout"
+                options={LAYOUTS}
+                value={view.layout}
+                onChange={(next) => set({ layout: next })}
+              />
+            ),
+          },
+          punct('"'),
+        ];
+        if (!view.itemsSize)
+          return [{ depth: 1, tokens: htmlElement("Items", [layout]) }];
+        return [
+          { depth: 1, tokens: [punct("<"), tag("clover-items")] },
+          { depth: 2, tokens: layout },
+          {
+            depth: 2,
+            tokens: [
+              attr("style"),
+              punct('="'),
+              property(itemsSizeProperty(view.layout)),
+              punct(": "),
+              plain(view.itemsSize),
+              punct('">'),
+            ],
+          },
+          { depth: 1, tokens: [punct("</"), tag("clover-items"), punct(">")] },
+        ];
+      }
+      default:
+        return [{ depth: 1, tokens: htmlElement(PART_NAMES[key]) }];
+    }
+  };
+
+  const jsxLines = (key: ViewerPart): Line[] => {
     switch (key) {
       case "thumbnail":
         return [
@@ -1645,7 +1778,41 @@ const ViewerCode = React.memo(function ViewerCode({
     }
   };
 
-  const head: Line[] = [
+  // The package's import, as one module script, keeps the HTML within the rows it has.
+  const htmlHead: Line[] = [
+    {
+      depth: 0,
+      tokens: [
+        punct("<"),
+        tag("script"),
+        plain(" "),
+        attr("type"),
+        punct("="),
+        str('"module"'),
+        punct(">"),
+        keyword("import"),
+        plain(" "),
+        str('"@nulib/clover/web-components"'),
+        punct(";</"),
+        tag("script"),
+        punct(">"),
+      ],
+    },
+    { depth: 0, tokens: [] },
+    {
+      depth: 0,
+      tokens: [
+        punct("<"),
+        tag("clover-root"),
+        plain(" "),
+        attr("iiif-content"),
+        punct("="),
+        str(JSON.stringify(resource)),
+        punct(">"),
+      ],
+    },
+  ];
+  const jsxHead: Line[] = [
     {
       depth: 0,
       tokens: [
@@ -1682,8 +1849,16 @@ const ViewerCode = React.memo(function ViewerCode({
       ],
     },
   ];
+  const head = html ? htmlHead : jsxHead;
   const tail: Line[] = [
-    { depth: 0, tokens: [punct("</"), tag("Clover.Root"), punct(">")] },
+    {
+      depth: 0,
+      tokens: [
+        punct("</"),
+        tag(html ? "clover-root" : "Clover.Root"),
+        punct(">"),
+      ],
+    },
   ];
   const parts = order.map((key) => ({ key, lines: partLines(key) }));
   const text = [...head, ...parts.flatMap((part) => part.lines), ...tail]
@@ -1771,7 +1946,7 @@ const ViewerCode = React.memo(function ViewerCode({
       <div className={styles.editorInner}>
         <div className={styles.editorFrame}>
           <div className={styles.editorHead}>
-            <span>JSX</span>
+            <span>{html ? "HTML" : "JSX"}</span>
             {picked && (
               <div
                 role="group"

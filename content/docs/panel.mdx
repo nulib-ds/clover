@@ -5,6 +5,7 @@ description: What a IIIF resource says about itself, in sections as tabs or an a
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Panel
 
@@ -33,6 +34,8 @@ your own: one always open, each loaded the first time it opens. Its tabs and acc
 follow WAI-ARIA's patterns. It is as tall as its sections; to scroll it, give the element
 around it a height and `overflow-y: auto`, as the templates do. Its other props, and its
 `ref`, go to its element.
+
+<ApiReference elements="clover-panel clover-tab clover-panel-toggle clover-about">
 
 ### Panel
 
@@ -83,6 +86,8 @@ on its own, it starts with the Manifest the Canvas is part of.
 | `download`      | `boolean` | `true`  | The downloads, Download's links, in a section of their own. |
 | `headingLevel`  | `number`  | `3`     | Its titles: Rights, Homepage and the rest.                  |
 | `className`     | `string`  | —       | Added to `clover-about`.                                    |
+
+</ApiReference>
 
 ## Examples
 
@@ -176,6 +181,32 @@ function PageNotes({ notes }) {
 </Clover.Panel>;
 ```
 
+```html twin
+<clover-panel>
+  <clover-tab value="about" label="About">
+    <clover-about></clover-about>
+  </clover-tab>
+  <clover-tab value="notes" label="Notes">
+    <p id="page-notes"></p>
+  </clover-tab>
+</clover-panel>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("page-notes");
+  const show = () => {
+    const canvas = root.clover.activeCanvas();
+    shown.textContent = notes[canvas?.id] ?? "No notes for this page.";
+  };
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
 ### Showing and hiding it
 
 `PanelToggle` shows and hides it: name the panel in its `controls`, and hide the panel with
@@ -198,6 +229,18 @@ function Layout({ url }) {
     </Clover.Root>
   );
 }
+```
+
+```html twin
+<!-- The toggle follows the panel's own hidden: write hidden on it to start it shut. -->
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-content>
+    <clover-panel-toggle controls="panel"></clover-panel-toggle>
+  </clover-content>
+  <clover-panel id="panel"></clover-panel>
+</clover-root>
 ```
 
 ## Previous versions

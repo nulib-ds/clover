@@ -1,7 +1,7 @@
 {
   "name": "clover",
   "private": true,
-  "description": "Clover: @nulib/clover, composable IIIF components and viewer, in React or as a web component, and its documentation site.",
+  "description": "Clover: @nulib/clover, composable IIIF components and viewer, in React or as web components, and its documentation site.",
   "workspaces": [
     "packages/clover"
   ],

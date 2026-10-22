@@ -5,6 +5,7 @@ description: The required statement of the resource, or of the current Canvas, s
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # RequiredStatement
 
@@ -30,11 +31,15 @@ Reads `requiredStatement` from the Root's resource and renders its label and val
 [`Metadata`](/docs/primitives/metadata) renders a pair, in a description list. It renders
 nothing while there is none. Its other props go to the `dl`.
 
+<ApiReference elements="clover-required-statement">
+
 | Prop        | Type                     | Default      | Description                                                           |
 | ----------- | ------------------------ | ------------ | --------------------------------------------------------------------- |
 | `of`        | `"manifest" \| "canvas"` | `"manifest"` | Whose statement: the resource's, or the Canvas the reader is on.      |
 | `value`     | `{ label, value }`       | —            | A statement to show instead of the Root's. Outside a `Root`, the one. |
 | `className` | `string`                 | —            | Added to `clover-required-statement`.                                 |
+
+</ApiReference>
 
 ## Examples
 

@@ -107,6 +107,20 @@ describe("markdownToHtml", () => {
     expect(html).not.toContain(again.match(/id="(clover-md-\d+)"/)![1] + '"');
   });
 
+  it("numbers its groups with every other copy of Clover on the page (WCAG 4.1.2)", async () => {
+    // Two copies, each new, as a page with React's Clover and the elements' has.
+    vi.resetModules();
+    const one = await import("./markdown");
+    vi.resetModules();
+    const two = await import("./markdown");
+    expect(two.markdownToHtml).not.toBe(one.markdownToHtml);
+    const ids = [one, two].map(
+      ({ markdownToHtml: write }) =>
+        write("# A", { headingLevel: 7 }).match(/id="(clover-md-\d+)"/)![1],
+    );
+    expect(ids[0]).not.toBe(ids[1]);
+  });
+
   it("keeps its groups past 6 through the Markdown sanitizer", () => {
     const html = markdownToHtml("# Notes\n\nText.", { headingLevel: 7 });
     const parse = (markup: string) => {

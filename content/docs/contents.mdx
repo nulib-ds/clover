@@ -5,6 +5,7 @@ description: A Manifest's table of contents from its Ranges, the entry the reade
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Contents
 
@@ -33,11 +34,15 @@ its time, and the entry the reader is in is `aria-current`. It renders nothing w
 Ranges. Its other props, and its `ref`, go to its element. For the view itself, see
 [`Content`](/docs/content).
 
+<ApiReference elements="clover-contents">
+
 | Prop         | Type         | Default      | Description                                       |
 | ------------ | ------------ | ------------ | ------------------------------------------------- |
 | `as`         | element type | `"nav"`      | The element to render.                            |
 | `aria-label` | `string`     | `"Contents"` | Its name. Give each its own where a page has two. |
 | `className`  | `string`     | —            | Added to `clover-contents`.                       |
+
+</ApiReference>
 
 ## Examples
 

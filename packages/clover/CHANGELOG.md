@@ -12,6 +12,63 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`@nulib/clover/web-components/viewer`: `<clover-viewer>` alone, built whole.** A page
+  that shows a Viewer and nothing else of Clover's can load this entry instead of the one
+  for every element: 90.7 kB gzip in four files, where the other loads 107.3 kB in 39 for
+  the same page, its code cut into the chunks the elements share. Load one entry on a
+  page, not both: each brings its own copy of Clover. `index.umd.js` loads it from a
+  classic script, as the main entry's does; `sizes.json` records it
+  (`viewerEntryGzip`), held to 90.8 kB.
+
+  ```html
+  <script src=".../web-components/viewer/index.umd.js"></script>
+  <clover-viewer
+    iiif-content="https://example.org/manifest.json"
+  ></clover-viewer>
+  ```
+
+- **`<clover-read-more>`, `oneOpen` and more of React's on the elements.** Every part
+  `@nulib/clover` exports is now an element too: `<clover-read-more>` gives text of your
+  own (its one child, clamped by your CSS) the "Read more" `ReadMore` gives, and
+  `root.clover.oneOpen(close)` joins a popup of yours to Clover's, which open one at a
+  time, as `useOneOpen` does (it returns what to call as yours closes). `controls` is a
+  property of `<clover-content>` and `<clover-canvas>` too, for the object Canvas takes
+  (`{ rotation: false }`), and `<clover-viewer>` takes `annotations` (an attribute, or a
+  property) and `request`, as the Viewer does.
+
+  ```html
+  <clover-read-more>
+    <p class="my-note">…</p>
+  </clover-read-more>
+  ```
+
+- **Parts of your own, as elements.** A page's script reads a `<clover-root>` as a React
+  part reads its `Root` with Clover's hooks: once the root has loaded, `root.clover` is its
+  Clover (sent with `clover-ready`), each hook a method of the same name
+  (`useNavigation()` is `navigation()`), with `state` and `subscribe`, the actions, the
+  channels, and `localize`, `t` and `langOf`. `<clover-canvas>` and `<clover-content>`
+  keep their Canvas's handle as `handle` once the view is laid out, as `onReady` hands it
+  in React, and send `clover-ready` too; a `clover-ready` does not bubble. `renderers` on
+  a `<clover-root>`, `<clover-content>` or `<clover-viewer>` draws views of your own
+  without React: each claims views by `canvasId`, `format` or `match`, and
+  `render(container, view)` draws one, returning what undoes it. `controlButtons` on a
+  `<clover-content>` or `<clover-canvas>` replaces a control with a button you make,
+  which Clover names, keys, wires and gives its popover; a `<button>` in a
+  `<clover-content>` is one of its controls; and `<clover-tip label keys>`, in a button
+  of yours, shows Clover's popover, as `<Clover.Tip>` does. `<clover-content>` also takes
+  `placeholder`, `animate-annotations`, `options` and the Canvas's events. The types
+  declare `CloverRootApi`, `CloverCanvasHandle`, `CloverRenderer` and
+  `CloverControlButtons`.
+
+  ```js
+  root.addEventListener("clover-ready", () => {
+    root.clover.subscribe(() => {
+      const { position, total } = root.clover.navigation();
+      where.textContent = `View ${position + 1} of ${total}`;
+    });
+  });
+  ```
+
 - **`<clover-canvas>`, and `<clover-viewer>` in every template.** `<clover-canvas>` is
   Clover's renderer as an element. Alone, it draws what it is given: a IIIF resource by
   `iiif-content` (a Manifest gives its first Canvas), an image by `src` (with `tiled`, a
@@ -1622,20 +1679,23 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   ```
 
 - **`@nulib/clover/web-components` loads only the elements a page uses.** The script is
-  5.5 kB gzip and defines every element; an element's code, Preact (in one chunk with
+  5.8 kB gzip and defines every element; an element's code, Preact (in one chunk with
   Clover's core) and the stylesheet load the first time one is on the page. A page with
-  a `<clover-viewer>` loads 106.3 kB, up from 86.7 kB: its code now comes in chunks the
-  other elements share, 39 files gzipped apart (96.3 kB as one). In Document it loads
-  112.6 kB, the template and its styles with it. A page of `<clover-root>` and
-  `<clover-label>` loads 39.8 kB; of the root, the label, the stage and the items 91.5
-  kB; a layout of the containers, as `Default`'s, 105.1 kB; and a `<clover-canvas>`
-  alone, once it draws, 75.6 kB. `sizes.json` records each (`elementsEntryGzip`,
-  `webComponentsGzip`, `documentElementGzip`, `labelPageGzip`, `composedPageGzip`,
-  `layoutPageGzip`, `canvasElementGzip`), held to budgets of 5.6, 106.3, 112.7, 39.9,
-  91.6, 105.2 and 75.7 kB. `Root` now shares what it holds with `<clover-root>`, and
-  `SplitHandle` its logic with `<clover-split-handle>` (`components/Split/splitting.ts`),
-  which put `Default`'s budget up to 67.0 kB, `Document`'s to 69.4 kB and `Gallery`'s to
-  58.6 kB, 0.1 to 0.2 kB each.
+  a `<clover-viewer>` loads 107.3 kB, up from 86.7 kB: its code now comes in chunks the
+  other elements share, 39 files gzipped apart (97.3 kB as one). In Document it loads
+  113.7 kB, the template and its styles with it. A page of `<clover-root>` and
+  `<clover-label>` loads 40.8 kB; of the root, the label, the stage and the items 92.8
+  kB; a layout of the containers, as `Default`'s, 106.5 kB; and a `<clover-canvas>`
+  alone, once it draws, 76.6 kB. The adapters for a page's own renderers and control
+  buttons load only on a page that gives them. `sizes.json` records each
+  (`elementsEntryGzip`, `webComponentsGzip`, `documentElementGzip`, `labelPageGzip`,
+  `composedPageGzip`, `layoutPageGzip`, `canvasElementGzip`), held to budgets of 5.9,
+  107.3, 113.7, 40.9, 92.9, 106.5 and 76.7 kB. `Root` now shares what it holds with
+  `<clover-root>`, `SplitHandle` its logic with `<clover-split-handle>`
+  (`components/Split/splitting.ts`), and `ReadMore` and `useOneOpen` theirs with the
+  elements (`useReadMore`, `openOne`), which put `Default`'s budget up to 67.1 kB,
+  `Document`'s to 69.4 kB, `Gallery`'s to 58.7 kB and a Canvas's to 38.1 kB, under 0.1
+  kB each.
 - **`<clover-viewer>`'s events are named `clover-` and what happened**, as every
   element's are, and bubble out of a shadow root too (`composed`). It also sends
   `clover-status-change`.
@@ -1725,6 +1785,26 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
 
 ### Fixed
 
+- **Two copies of Clover on one page keep their ids apart.** A page with React's Clover
+  and the elements', or with both of the elements' entries (`@nulib/clover/web-components`
+  and `/web-components/viewer`), has two copies, and three of Clover's counts started
+  again in each: the elements' (`clover-1-…`), a Canvas's for its controls
+  (`zoomIn-clover-canvas-1`) and Markdown's for its groups past h6 (`clover-md-1`). A
+  control or a description could name the other copy's element (WCAG 4.1.2). Every copy
+  of the elements counts the page's elements together now; a Canvas's controls take
+  their ids from `useUniqueId`, as every other part's do, so they carry an element's
+  prefix; and Markdown's groups are counted on the page. The second copy of the elements
+  says in the console that Clover is loaded twice: load one entry, as each keeps its own
+  language and popups. A Canvas's control ids change shape with it
+  (`zoomIn-clover-canvas-` and an id of React's): find a control by its `data-button`,
+  or give the Canvas an `instanceId` for ids of your own. React's pages are a few bytes
+  smaller; a page of elements loads under 0.1 kB more, which put the budgets of a page of
+  labels up to 40.9 kB, of the four parts to 92.9 kB, of a `<clover-canvas>` alone to
+  76.7 kB and of the Viewer's own entry to 90.8 kB.
+- **`<clover-split-handle>` says where its bar is from the start.** Drawn before the
+  pane it sizes was marked (each element draws in its own order), it measured nothing
+  and had no `aria-valuenow` until the reader moved it (WCAG 4.1.2). It measures again
+  when a pane in its split is marked.
 - **The information panel's landmark is named "Information panel"**
   (`informationPanelTabs`, as its tabs are), so a list of landmarks tells it from
   another, as the Document template's thumbnails ("Items"). An `aria-label` or

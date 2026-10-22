@@ -14,8 +14,9 @@ export const root: ElementSpec = {
     "annotation-pages": { prop: "annotationPages", type: ["view", "all"] },
     lang: { prop: "lang", type: "string" },
   },
-  properties: ["iiifContent", "annotations", "request"],
+  properties: ["iiifContent", "annotations", "request", "renderers"],
   events: {
+    "clover-ready": { prop: "onReady", detail: ["clover"], keeps: "clover" },
     "clover-canvas-change": { prop: "onCanvasChange", detail: ["canvasId"] },
     "clover-manifest-change": {
       prop: "onManifestChange",
@@ -72,6 +73,17 @@ export const rootDocs: ElementDocs = {
     },
   },
   properties: {
+    clover: {
+      type: "CloverRootApi | null",
+      readonly: true,
+      description:
+        "Its Clover, for a part of your own, once it has loaded (clover-ready): what React's hooks read, as methods of the same name (navigation(), visibleCanvases()…), its state and subscribe, its actions and channels, and its language. Null before.",
+    },
+    renderers: {
+      type: "CloverRenderer[] | null",
+      description:
+        "Renderers of yours, for every clover-content in it: each claims views (canvasId, format or match) and draws one into a box of its own (render), returning what undoes it.",
+    },
     iiifContent: {
       type: "string | Record<string, unknown> | null",
       description:
@@ -89,6 +101,11 @@ export const rootDocs: ElementDocs = {
     },
   },
   events: {
+    "clover-ready": {
+      detail: "{ clover: CloverRootApi }",
+      description:
+        "It has loaded what it was given: its Clover is there (clover), for a part of your own.",
+    },
     "clover-canvas-change": {
       detail: "{ canvasId: string }",
       description: "The reader moved to a Canvas.",

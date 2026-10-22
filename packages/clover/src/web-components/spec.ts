@@ -35,6 +35,13 @@ export interface EventSpec {
    * callback last (a link's, say).
    */
   cancelable?: boolean;
+  /**
+   * The element keeps the callback's first argument as this read-only property (a
+   * Canvas's `handle`, a root's `clover`), so a page that listens late still reaches it.
+   * Such an event is the element's own (`clover-ready`), so it does not bubble, as `load`
+   * does not: a root's listener never hears the stage inside it.
+   */
+  keeps?: string;
 }
 
 export interface ElementSpec {
@@ -69,14 +76,27 @@ export interface ElementSpec {
   native?: boolean;
 }
 
+/** A method's parameters (`["at?", "CloverPoint"]`), what it returns, and what it does. */
+export type MethodDocs = Record<
+  string,
+  {
+    parameters: ReadonlyArray<readonly [string, string]>;
+    returns: string;
+    description: string;
+  }
+>;
+
 /** What the types and the manifest say of an element. Never loaded by a page. */
 export interface ElementDocs {
   /** Its class's name in the types. */
   name: string;
   description: string;
   attributes: Record<string, { description: string; default?: string }>;
-  /** Each property's TypeScript type, and what it is. */
-  properties?: Record<string, { type: string; description: string }>;
+  /** Each property's TypeScript type, and what it is; a kept one is `readonly`. */
+  properties?: Record<
+    string,
+    { type: string; description: string; readonly?: boolean }
+  >;
   /** Each event's `detail` as a TypeScript type, and when it is sent. */
   events?: Record<string, { detail: string; description: string }>;
   /** What each slot holds. */

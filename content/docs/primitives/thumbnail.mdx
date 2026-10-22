@@ -5,6 +5,7 @@ description: A small picture of the resource, or of the current Canvas, as an im
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Thumbnail
 
@@ -28,6 +29,8 @@ import { Example } from "docs/components/Clover4/ViewerDocs";
 Reads `thumbnail` from the Root's resource and renders an `img`, its `alt` the resource's
 label. It renders nothing while there is no picture. Its other props go to the `img`.
 
+<ApiReference elements="clover-thumbnail">
+
 | Prop        | Type                     | Default              | Description                                                        |
 | ----------- | ------------------------ | -------------------- | ------------------------------------------------------------------ |
 | `of`        | `"manifest" \| "canvas"` | `"manifest"`         | Whose thumbnail: the resource's, or the Canvas the reader is on.   |
@@ -35,6 +38,8 @@ label. It renders nothing while there is no picture. Its other props go to the `
 | `size`      | `number`                 | `400`                | Pixels asked for on the longer side, and the `img`'s `width`.      |
 | `alt`       | `string`                 | The resource's label | The picture's text alternative.                                    |
 | `className` | `string`                 | —                    | Added to `clover-thumbnail`.                                       |
+
+</ApiReference>
 
 ## Examples
 

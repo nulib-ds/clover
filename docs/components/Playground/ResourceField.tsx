@@ -498,6 +498,10 @@ export default function ResourceField({
                   <path d="m6 9 6 6 6-6" />
                 </svg>
               </button>
+              {/* Open, inside the field at its end (Mat, 2026-10-22). */}
+              <button className={styles.openButton} type="submit">
+                Open
+              </button>
             </div>
           </div>
 
@@ -551,9 +555,6 @@ export default function ResourceField({
             ))}
           </ul>
         </div>
-        <button className={styles.openButton} type="submit">
-          Open
-        </button>
       </div>
       {error && (
         <p className={styles.error} id={errorId} role="alert">

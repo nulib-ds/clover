@@ -141,12 +141,10 @@
 }
 
 /*
- * The resource: a field for an address, ours in a list under it. Its label beside it, as
- * the template's is beside its button (`xs` from it), then the field and Open, the list
- * under both; where the row has no room for the label, it wraps over them. A message
- * takes a line of its own under them. Spaces on Clover's own golden-ratio scale
- * (`--clover-space-*`, the package's DESIGN.md), so the pickers step as the Viewer under
- * them does.
+ * The resource: a field for an address, ours in a list under it, its label joined to its
+ * start and Open inside it at its end. A message takes a line of its own under it. Spaces
+ * on Clover's own golden-ratio scale (`--clover-space-*`, the package's DESIGN.md), so the
+ * pickers step as the Viewer under them does.
  */
 .resourcePicker {
   align-items: center;
@@ -174,7 +172,7 @@
   }
 }
 
-/* The list hangs from the row, so it is as wide as the field and Open together. */
+/* The list hangs from the row, so it is as wide as the field, its label and Open and all. */
 .resourceRow {
   display: flex;
   flex: 1 1 18rem;
@@ -197,8 +195,7 @@
   display: flex;
   gap: var(--clover-space-xs, 0.382rem);
   height: 2.5rem;
-  padding-inline: var(--clover-space-xs, 0.382rem)
-    var(--clover-space-2xs, 0.236rem);
+  padding-inline: var(--clover-space-xs, 0.382rem) 2px;
 }
 
 .field:focus-within {
@@ -216,7 +213,8 @@
   display: flex;
 }
 
-.fieldGroup:focus-within {
+/* Its ring while the field is focused, not while Open is: Open draws its own. */
+.fieldGroup:has(.fieldInput:focus) {
   box-shadow: var(--focus-ring), var(--pg-lift);
 }
 
@@ -262,12 +260,6 @@
   .fieldGroup .field:focus-within {
     border-inline-start: 1px solid var(--pg-edge);
     border-radius: 0 var(--radius-4) var(--radius-4) var(--radius-4);
-  }
-
-  /* Open, beside the field, at its height rather than the tab's and the field's. */
-  .resourceRow > .openButton {
-    align-self: flex-end;
-    height: 2.5rem;
   }
 }
 
@@ -333,17 +325,23 @@
   rotate: 180deg;
 }
 
-/* Open: the primary action, the accent's fill, as tall as the field. */
+/*
+ * Open: the primary action, the accent's fill, inside the field at its end (Mat,
+ * 2026-10-22), 2px inside its edge on every side. Whole pixels, so its edges round alike
+ * wherever the field falls: at `3xs` (2.336px) one gap drew a pixel wider than the other.
+ * Its corners a step smaller, so they nest.
+ */
 .openButton {
   background: var(--accent-9);
   border: 0;
-  border-radius: var(--radius-4);
+  border-radius: var(--radius-3);
   color: var(--accent-contrast);
   cursor: pointer;
   flex: none;
   font: inherit;
   font-size: var(--text-sm);
-  padding: 0 var(--clover-space-m, 1rem);
+  height: calc(100% - 4px);
+  padding: 0 var(--clover-space-s, 0.618rem);
   transition: background-color 120ms ease;
 }
 
@@ -357,7 +355,10 @@
 }
 
 /* Ours, under the field: a row each, scrolling within on a short screen. */
-/* As wide as the field and Open at rest, and no wider while the field runs wide. */
+/*
+ * As wide as the whole select at rest, its label, the field and Open (Mat, 2026-10-22),
+ * and no wider while the field runs wide.
+ */
 .resourceList {
   background: var(--color-background);
   border-radius: var(--radius-4);
@@ -371,7 +372,7 @@
   left: 0;
   list-style: none;
   margin: 0;
-  max-width: 36rem;
+  max-width: 40rem;
   max-height: min(32rem, 55vh);
   overflow-y: auto;
   padding: var(--clover-space-xs, 0.382rem);

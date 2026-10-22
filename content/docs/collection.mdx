@@ -5,6 +5,7 @@ description: The Collection a Manifest is in, described and its members listed, 
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Collection
 
@@ -32,6 +33,8 @@ import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
 
 ## API reference
 
+<ApiReference elements="clover-collection clover-collection-select">
+
 ### Collection
 
 Inside a `Root`, it shows the Collection the Manifest was opened from, or else the first
@@ -56,6 +59,8 @@ back. It renders nothing without a Collection of two or more. Its other props, a
 | ----------- | ---------------------- | ------- | ----------------------------------------------------- |
 | `onChange`  | `(id: string) => void` | —       | A member was chosen: its `id`, before the Root moves. |
 | `className` | `string`               | —       | Added to `clover-collection-select`.                  |
+
+</ApiReference>
 
 ## Examples
 

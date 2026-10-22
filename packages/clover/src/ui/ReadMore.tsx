@@ -30,21 +30,52 @@ export function ReadMore({ children }: { children: React.ReactElement }) {
   const own = useRootLanguage();
   const ref = useRef<HTMLElement>(null);
   const fallbackId = useUniqueId();
-  const [open, setOpen] = useState(false);
-  const [cut, setCut] = useState(false);
   const child = React.Children.only(children);
   const id = (child.props as { id?: string }).id ?? fallbackId;
+  const { open, cut, toggle } = useReadMore(ref);
 
+  return (
+    <div className="clover-read-more">
+      {React.cloneElement(
+        child as React.ReactElement<Record<string, unknown>>,
+        {
+          ref,
+          id,
+          "data-read-more": open ? "open" : "",
+        },
+      )}
+      {(cut || open) && (
+        <button
+          type="button"
+          className="clover-read-more-button"
+          aria-expanded={open}
+          aria-controls={id}
+          onClick={toggle}
+          ref={own.ref}
+          lang={own.langOf(open ? "readLess" : "readMore")}
+        >
+          {open ? t("readLess") : t("readMore")}
+        </button>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Whether a clamped element's text runs past its box, and whether the reader opened it:
+ * ReadMore's measuring, for `ReadMore` and `<clover-read-more>` alike. Measured after
+ * every render (its text may have changed), whenever it is resized, and when the page's
+ * styles or fonts change: a reader's text spacing, or a web font arriving, can lengthen
+ * text whose clamped box stays the same size.
+ */
+export function useReadMore(ref: React.RefObject<HTMLElement | null>) {
+  const [open, setOpen] = useState(false);
+  const [cut, setCut] = useState(false);
   // Cut short when what it holds is taller than the box its clamp leaves it.
   const measure = () => {
     const node = ref.current;
     if (node && !open) setCut(node.scrollHeight > node.clientHeight + 1);
   };
-  /*
-   * After every render (its text may have changed), whenever it is resized, and when the
-   * page's styles or fonts change: a reader's text spacing, or a web font arriving, can
-   * lengthen text whose clamped box stays the same size.
-   */
   useIsomorphicLayoutEffect(measure);
   useEffect(() => {
     const node = ref.current;
@@ -83,31 +114,6 @@ export function ReadMore({ children }: { children: React.ReactElement }) {
     };
     // `measure` reads the latest `open` through its closure, renewed with each render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
-
-  return (
-    <div className="clover-read-more">
-      {React.cloneElement(
-        child as React.ReactElement<Record<string, unknown>>,
-        {
-          ref,
-          id,
-          "data-read-more": open ? "open" : "",
-        },
-      )}
-      {(cut || open) && (
-        <button
-          type="button"
-          className="clover-read-more-button"
-          aria-expanded={open}
-          aria-controls={id}
-          onClick={() => setOpen((value) => !value)}
-          ref={own.ref}
-          lang={own.langOf(open ? "readLess" : "readMore")}
-        >
-          {open ? t("readLess") : t("readMore")}
-        </button>
-      )}
-    </div>
-  );
+  }, [open, ref.current]);
+  return { open, cut, toggle: () => setOpen((value) => !value) };
 }

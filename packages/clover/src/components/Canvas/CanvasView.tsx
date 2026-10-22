@@ -46,6 +46,7 @@ import { useLoaded } from "../../hooks/useLoaded";
 import { ErrorBoundary } from "../../ui/ErrorBoundary";
 import { Loading } from "../../ui/Loading";
 import { SHORTCUTS, forwardShortcut } from "../../ui/Tip";
+import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { join } from "../../lib/classnames";
 import { localize } from "../../core/value";
@@ -78,8 +79,6 @@ const ALL_CONTROLS: Required<CanvasControlsConfig> = {
   annotations: true,
   information: true,
 };
-
-let instances = 0;
 
 /**
  * The keys the viewport answers to while focused, as `aria-keyshortcuts` spells them,
@@ -223,10 +222,14 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
    * `info.json` or tiles, and no video, sound or captions (nor the media code itself).
    */
   const nearViewport = useNearViewport(wrapperElement);
-  // A stable id per mounted instance, for control ids; never a new one per render.
-  const [instance] = useState(
-    () => instanceId ?? `clover-canvas-${++instances}`,
-  );
+  /*
+   * A stable id per mounted instance, for control ids; never a new one per render. One of
+   * Clover's (`useUniqueId`), never a count of this module's: a page with two copies of
+   * Clover (React's and the elements', or both of the elements' entries) counted twice
+   * from 1, and their controls' ids met (WCAG 4.1.2).
+   */
+  const made = useUniqueId();
+  const [instance] = useState(() => instanceId ?? `clover-canvas-${made}`);
   const controlsConfig: Required<CanvasControlsConfig> | null =
     controls === false
       ? null

@@ -9,11 +9,8 @@ import { DOCS, SPECS } from ".";
 /** Parts whose elements are planned, by the phase that brings them. */
 const LATER: Record<string, string> = {};
 
-/** Parts that stay inside the others, never elements of their own. */
-const NEVER: Record<string, string> = {
-  Tip: "a control's popover, inside the parts",
-  ReadMore: "inside Summary, which is an element",
-};
+/** Parts that stay inside the others, never elements of their own: none since phase 7. */
+const NEVER: Record<string, string> = {};
 
 const kebab = (name: string) =>
   name.replace(

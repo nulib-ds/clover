@@ -5,6 +5,7 @@ description: A IIIF resource's rendering, the other formats it comes in, such as
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Rendering
 
@@ -31,11 +32,15 @@ by its label or else its address, with its `format` after it. It renders nothing
 there is none, and its other props go to the `ul`. [`Download`](/docs/download) lists the
 view's and the resource's together, in two groups.
 
+<ApiReference elements="clover-rendering">
+
 | Prop        | Type                      | Default      | Description                                                        |
 | ----------- | ------------------------- | ------------ | ------------------------------------------------------------------ |
 | `of`        | `"manifest" \| "canvas"`  | `"manifest"` | Whose `rendering`: the resource's, or the Canvas the reader is on. |
 | `value`     | `{ id, label, format }[]` | —            | Formats to show instead of the Root's, as IIIF gives them.         |
 | `className` | `string`                  | —            | Added to `clover-rendering`.                                       |
+
+</ApiReference>
 
 ## Examples
 

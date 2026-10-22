@@ -19,6 +19,7 @@ import audioJson from "../../fixtures/iiif-cookbook/0002-mvm-audio.json";
 import hotspotJson from "../../fixtures/iiif-cookbook/0022-linking-with-a-hotspot.json";
 import fullCanvasJson from "../../fixtures/iiif-cookbook/0266-full-canvas-annotation.json";
 import { initCloverI18n } from "../../i18n";
+import { IdPrefixContext } from "../../ui/useUniqueId";
 import { CanvasRenderer } from "../../lib/renderer";
 import { Root } from "../Root/Root";
 import { stubViewport } from "./testing/viewport";
@@ -323,6 +324,25 @@ describe("Canvas", () => {
     );
     expect(viewport).toHaveAccessibleDescription(
       "Use the arrow keys to pan, with Shift for larger steps, plus and minus to zoom, 0 to reset the view, and R or Shift+R to rotate.",
+    );
+  });
+
+  it("makes its controls' ids as Clover makes every id, so two copies of Clover on a page never share one (WCAG 4.1.2)", () => {
+    // An element's prefix, as each of the elements' hosts gives it.
+    render(
+      <IdPrefixContext.Provider value="clover-7-">
+        <Canvas src="https://example.org/a.jpg" label="A letter" />
+      </IdPrefixContext.Provider>,
+    );
+    const viewport = screen.getByRole("img", { name: "A letter" });
+    const keys = viewport
+      .getAttribute("aria-describedby")!
+      .split(" ")
+      .find((id) => id.startsWith("keys-"));
+    expect(keys).toMatch(/^keys-clover-canvas-clover-7-/);
+    expect(document.getElementById(keys!)).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Zoom in" }).id).toMatch(
+      /^zoomIn-clover-canvas-clover-7-/,
     );
   });
 

@@ -328,7 +328,7 @@ const Homepage: React.FC<{
            */}
           <SectionIntro
             title="Install is easy."
-            note="Use it in React or as a web component, and you’re up and running in seconds."
+            note="Use it in React or as web components, and you’re up and running in seconds."
             cta={{ href: "/docs", label: "Get started", primary: true }}
             beside={<InstallCommand />}
           />

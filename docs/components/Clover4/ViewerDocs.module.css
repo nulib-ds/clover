@@ -158,3 +158,8 @@
     padding-inline: var(--clover-space-xs, 0.382rem);
   }
 }
+
+/* A switching example's code: the chosen value's only (`data-shown`, `OptionsExample`). */
+.code > [data-option]:not([data-shown]) {
+  display: none;
+}

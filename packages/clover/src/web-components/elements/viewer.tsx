@@ -1,8 +1,9 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useMemo } from "react";
 
 import { Viewer, type ViewerProps } from "../../components/Viewer/Viewer";
 import { Default } from "../../templates/default/Default";
 import type { HostedProps } from "../host";
+import { loadRenderers, useLoaded } from "./later";
 
 /*
  * The templates a viewer names: Default with the element, as most pages use it; Document
@@ -54,6 +55,13 @@ export function ViewerElement({ props }: HostedProps) {
       ([name]) => name !== "template" && (ONLY[name]?.includes(named) ?? true),
     ),
   );
+  const rendering = useLoaded(loadRenderers, Boolean(props.renderers));
+  const renderers = useMemo(
+    () => rendering?.toRenderers(props.renderers),
+    [rendering, props.renderers],
+  );
+  if (props.renderers && !rendering) return null;
+  given.renderers = renderers;
   if (typeof given.storageKey === "string")
     given.storageKey =
       given.storageKey.trim().toLowerCase() === "false"

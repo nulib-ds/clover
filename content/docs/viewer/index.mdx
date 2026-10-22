@@ -8,6 +8,7 @@ import {
   OptionsExample,
   ViewerExample,
 } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Viewer
 
@@ -72,6 +73,8 @@ import "@nulib/clover/templates.css";
 `Viewer` is the package's default export. It draws its `template`, and hands every other
 prop to it: the template's own, below, and those of [`Root`](/docs/composing#root), which
 every template is built on.
+
+<ApiReference elements="clover-viewer">
 
 ### Viewer
 
@@ -153,6 +156,8 @@ page through.
 | -------------- | -------- | ------- | ----------------------------------------------------- |
 | `size`         | `string` | `10rem` | A cell's width (sets `--clover-items-size`).          |
 | `headingLevel` | `number` | `2`     | The title's level; the lightbox's title is one below. |
+
+</ApiReference>
 
 ## Examples
 
@@ -355,6 +360,31 @@ const state = {
 <Viewer iiifContent={encodeContentState(state)} />;
 ```
 
+```html twin
+<clover-viewer></clover-viewer>
+
+<script type="module">
+  document.querySelector("clover-viewer").iiifContent = {
+    type: "Annotation",
+    motivation: ["contentState"],
+    target: {
+      type: "SpecificResource",
+      source: {
+        id: "https://nulib-ds.github.io/clover/mocks/paged/canvas/5",
+        type: "Canvas",
+        partOf: [
+          {
+            id: "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+            type: "Manifest",
+          },
+        ],
+      },
+      selector: { type: "FragmentSelector", value: "xywh=2705,66,1419,1518" },
+    },
+  };
+</script>
+```
+
 </ViewerExample>
 
 `onContentStateChange` hands you a content state whenever the reader settles: the Canvas
@@ -367,6 +397,20 @@ and region, or the moment in a recording, they are at. Put it in a link to share
     history.replaceState(null, "", `?iiif-content=${encoded}`)
   }
 />
+```
+
+```html twin
+<clover-viewer
+  iiif-content="https://nulib-ds.github.io/clover/mocks/paged/manifest.json"
+></clover-viewer>
+
+<script type="module">
+  document
+    .querySelector("clover-viewer")
+    .addEventListener("clover-content-state-change", ({ detail }) =>
+      history.replaceState(null, "", `?iiif-content=${detail.encoded}`),
+    );
+</script>
 ```
 
 ### Annotations
@@ -387,6 +431,13 @@ Use `annotations` to show pages of your own beside the Manifest's.
 
 ```jsx
 <Viewer iiifContent={url} annotations={annotationPageUrl} />
+```
+
+```html twin
+<clover-viewer
+  iiif-content="https://nulib-ds.github.io/clover/mocks/paged/manifest.json"
+  annotations="https://example.org/annotation-page.json"
+></clover-viewer>
 ```
 
 ### Content Search
@@ -462,6 +513,19 @@ Use `request` for every request the Viewer makes: the Manifest, annotation pages
     headers: { Authorization: `Bearer ${token}` },
   }}
 />
+```
+
+```html twin
+<clover-viewer
+  iiif-content="https://nulib-ds.github.io/clover/mocks/paged/manifest.json"
+></clover-viewer>
+
+<script type="module">
+  document.querySelector("clover-viewer").request = {
+    credentials: "include",
+    headers: { Authorization: `Bearer ${token}` },
+  };
+</script>
 ```
 
 A `<video>` element cannot send headers, so plain video and sound get only the

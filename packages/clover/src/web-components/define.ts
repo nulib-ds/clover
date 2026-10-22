@@ -101,7 +101,12 @@ const LOADERS: Record<string, LoadPart> = {
   "clover-split-pane": splitPart("SplitPaneElement"),
   "clover-split-handle": splitPart("SplitHandleElement"),
   // Alone, what it is given; in a root, the root's view, as `Canvas` is.
-  "clover-canvas": part(() => import("../components/Canvas/index"), "default"),
+  "clover-canvas": () =>
+    import("./elements/canvas").then((module) => module.CanvasElement),
+  "clover-tip": () =>
+    import("./elements/tip").then((module) => module.TipElement),
+  "clover-read-more": () =>
+    import("./elements/read-more").then((module) => module.ReadMoreElement),
   // `<clover-tab>` loads nothing: its panel reads it (a `config` element).
 };
 

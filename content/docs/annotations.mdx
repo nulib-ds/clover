@@ -5,6 +5,7 @@ description: Every annotation of a IIIF resource, by layer and by Canvas, to rea
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Annotations
 
@@ -40,6 +41,8 @@ none, it renders nothing. Pressing one finds it on the Canvas, and the eye befor
 hides the layer there; in a box that scrolls, the Canvases in view come to its top as the
 reader moves. Its other props, and its `ref`, go to its element.
 
+<ApiReference elements="clover-annotations">
+
 | Prop           | Type                                    | Default | Description                                                         |
 | -------------- | --------------------------------------- | ------- | ------------------------------------------------------------------- |
 | `scope`        | `"view" \| "all"`                       | `"all"` | Every Canvas's annotations, all fetched as it shows, or the view's. |
@@ -47,6 +50,8 @@ reader moves. Its other props, and its `ref`, go to its element.
 | `headingLevel` | `number`                                | `3`     | Its first headings: one below the heading over it.                  |
 | `as`           | element type                            | `"div"` | The element to render.                                              |
 | `className`    | `string`                                | —       | Added to `clover-annotations`.                                      |
+
+</ApiReference>
 
 ## Examples
 
@@ -85,6 +90,16 @@ its annotations are listed with the Manifest's.
 </Clover.Root>
 ```
 
+```html twin
+<clover-root
+  iiif-content="https://nulib-ds.github.io/clover/mocks/paged/manifest.json"
+  annotations="https://example.org/annotation-page.json"
+>
+  <clover-content></clover-content>
+  <clover-annotations></clover-annotations>
+</clover-root>
+```
+
 ### Your own rendering
 
 Use `renderEntry` to draw an entry's content yourself, from its read `bodies` or the
@@ -102,6 +117,23 @@ const renderEntry = (entry) =>
     ));
 
 <Clover.Annotations renderEntry={renderEntry} />;
+```
+
+```html twin
+<clover-annotations></clover-annotations>
+
+<script type="module">
+  document.querySelector("clover-annotations").renderEntry = (entry) => {
+    const bodies = document.createDocumentFragment();
+    for (const body of entry.bodies.filter((each) => each.value)) {
+      const paragraph = document.createElement("p");
+      if (body.language) paragraph.lang = body.language;
+      paragraph.textContent = body.value;
+      bodies.append(paragraph);
+    }
+    return bodies;
+  };
+</script>
 ```
 
 ## Previous versions

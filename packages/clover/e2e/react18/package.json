@@ -1,0 +1,9 @@
+{
+  "name": "clover-e2e-react18",
+  "private": true,
+  "description": "React 18 for @nulib/clover's tests: the end-to-end harness (../vite.config.mjs) and the unit tests' React 18 project (../../vitest.react18.config.mjs), each with React aliased here.",
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}

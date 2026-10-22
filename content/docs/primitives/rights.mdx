@@ -6,6 +6,7 @@ description: The rights of the resource, or of the current Canvas, as a link to 
 import { Fragment } from "react";
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Rights
 
@@ -30,11 +31,15 @@ import { Example } from "docs/components/Clover4/ViewerDocs";
 Reads `rights` from the Root's resource and renders a link to it, the address as its
 text. It renders nothing while there is none. Its other props go to the `a`.
 
+<ApiReference elements="clover-rights">
+
 | Prop        | Type                     | Default      | Description                                                          |
 | ----------- | ------------------------ | ------------ | -------------------------------------------------------------------- |
 | `of`        | `"manifest" \| "canvas"` | `"manifest"` | Whose rights: the resource's, or the Canvas the reader is on.        |
 | `value`     | `string`                 | —            | An address to link instead of the Root's. Outside a `Root`, the one. |
 | `className` | `string`                 | —            | Added to `clover-rights`.                                            |
+
+</ApiReference>
 
 ## Examples
 

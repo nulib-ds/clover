@@ -28,8 +28,11 @@ const DEFAULT: CodeFlavor = "react";
 const isFlavor = (value: unknown): value is CodeFlavor =>
   value === "react" || value === "web-components";
 
-const readStored = (): CodeFlavor => {
+/** The address's choice (`?code=`, never stored), else the stored one, as the head script reads them. */
+const readChosen = (): CodeFlavor => {
   try {
+    const asked = new URLSearchParams(location.search).get("code");
+    if (isFlavor(asked)) return asked;
     const value = localStorage.getItem(KEY);
     return isFlavor(value) ? value : DEFAULT;
   } catch {
@@ -46,7 +49,7 @@ let current: CodeFlavor | null = null;
 const listeners = new Set<() => void>();
 
 const getCodeFlavor = (): CodeFlavor =>
-  (current ??= typeof window === "undefined" ? DEFAULT : readStored());
+  (current ??= typeof window === "undefined" ? DEFAULT : readChosen());
 
 const subscribe = (listener: () => void) => {
   listeners.add(listener);

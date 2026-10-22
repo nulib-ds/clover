@@ -118,6 +118,44 @@ export function Moved({
   return <div ref={box} style={{ display: "contents" }} />;
 }
 
+/**
+ * The children of the page's that `picks` chooses (a stage's own buttons), moved to right
+ * after a hidden mark where the part draws this, so they sit among the part's own nodes
+ * there as its children (the cluster's controls, which fade together), and back where
+ * they were when the part lets them go. Those the page adds later follow.
+ */
+export function Placed({
+  from,
+  picks,
+}: {
+  from: Element;
+  picks: (node: Node) => boolean;
+}) {
+  const mark = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const at = mark.current;
+    if (!at) return;
+    let placed: ChildNode[] = [];
+    const place = () => {
+      const nodes = [...from.childNodes].filter(picks);
+      if (!nodes.length) return;
+      // After the last still there: the page may have taken one away.
+      placed = placed.filter((node) => node.parentNode === at.parentNode);
+      (placed.at(-1) ?? at).after(...nodes);
+      placed.push(...nodes);
+    };
+    place();
+    const observer = new MutationObserver(place);
+    observer.observe(from, { childList: true });
+    return () => {
+      observer.disconnect();
+      for (const node of placed)
+        if (node.parentNode === at.parentNode) from.append(node);
+    };
+  }, [from, picks]);
+  return <span ref={mark} hidden />;
+}
+
 /** What a function of the page's drew, a node or text, where the part draws it. */
 function Drawn({ value }: { value: unknown }) {
   const box = useRef<HTMLSpanElement>(null);

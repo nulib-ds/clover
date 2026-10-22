@@ -26,6 +26,25 @@ const withNextra = nextra({
   },
 });
 
+/*
+ * Each React example on Clover 4's pages with its "Web components" twin beside it, made as
+ * the page compiles (`docs/lib/code-flavors.mjs`): a loader before Nextra's, by its path,
+ * as Turbopack takes loaders. Last in a rule's list, it runs first, on the page as written.
+ */
+const flavors = {
+  loader: path.join(root, "docs/lib/mdx-code-flavors-loader.cjs"),
+  options: {},
+};
+
+/** Nextra's rule for Markdown pages, under webpack, with the twins' loader at its end. */
+function webpack(config) {
+  for (const rule of config.module.rules)
+    if (String(rule.test).includes("mdx"))
+      for (const branch of rule.oneOf ?? [rule])
+        if (Array.isArray(branch.use)) branch.use.push(flavors);
+  return config;
+}
+
 /* The mocks with a live copy for `npm run dev` (see /docs/mocks). */
 const liveMocks = () => fs.readdirSync(path.join(root, "pages/api/mocks"));
 
@@ -38,7 +57,8 @@ export default function config(phase) {
    */
   const basePath = isDev ? "" : (process.env.DOCS_BASE_PATH ?? "/clover");
 
-  return withNextra({
+  const config = withNextra({
+    webpack,
     basePath,
     // For the components that build addresses under it (`docs/lib/router.ts`).
     env: { NEXT_PUBLIC_BASE_PATH: basePath },
@@ -66,4 +86,8 @@ export default function config(phase) {
       }),
     }),
   });
+  // Under Turbopack, the same loader at the end of Nextra's rule for Markdown pages.
+  const pages = config.turbopack?.rules?.["*.{md,mdx}"];
+  if (pages) pages.loaders = [...pages.loaders, flavors];
+  return config;
 }

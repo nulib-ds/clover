@@ -5,6 +5,7 @@ description: A IIIF resource's seeAlso, the machine-readable descriptions of it 
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # SeeAlso
 
@@ -30,11 +31,15 @@ Reads `seeAlso` from the Root's resource and renders a `ul`: a link to each desc
 named by its label or else its address, with its `format` after it. It renders nothing
 while there is none, and its other props go to the `ul`.
 
+<ApiReference elements="clover-see-also">
+
 | Prop        | Type                      | Default      | Description                                                      |
 | ----------- | ------------------------- | ------------ | ---------------------------------------------------------------- |
 | `of`        | `"manifest" \| "canvas"`  | `"manifest"` | Whose `seeAlso`: the resource's, or the Canvas the reader is on. |
 | `value`     | `{ id, label, format }[]` | —            | Descriptions to show instead of the Root's, as IIIF gives them.  |
 | `className` | `string`                  | —            | Added to `clover-see-also`.                                      |
+
+</ApiReference>
 
 ## Examples
 

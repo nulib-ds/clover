@@ -1,9 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * @nulib/clover end to end, on Chromium, WebKit and Firefox (React 18), on WebKit at
- * iPhone size and Chromium at an Android phone's (Pixel 7), both with touch, and on
- * Chromium with React 19 (`e2e/react19`, its own install): `npm run e2e -w @nulib/clover`.
+ * @nulib/clover end to end, on Chromium, WebKit and Firefox (React 18, `e2e/react18`, its
+ * own install), on WebKit at iPhone size and Chromium at an Android phone's (Pixel 7),
+ * both with touch, and on Chromium with React 19 (`e2e/react19`, its own install too):
+ * `npm run e2e -w @nulib/clover`.
  * The harness is served by Vite over the package's source; every IIIF resource and image
  * is served from disk by routing (`specs/fixtures.ts`), so nothing reaches the network.
  */

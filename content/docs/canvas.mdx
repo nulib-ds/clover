@@ -7,6 +7,7 @@ import CanvasHandleDemo from "docs/components/Canvas/CanvasHandleDemo";
 import CanvasRecipe from "docs/components/Canvas/CanvasRecipe";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import CloverCanvas from "docs/components/DynamicImports/Canvas";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Canvas
 
@@ -36,6 +37,8 @@ view. It fills its parent, so give the parent a height.
 
 It is experimental: its API may change in any release. A plain wheel scrolls the page,
 unless `options.gestures.scrollToZoom` is on.
+
+<ApiReference elements="clover-canvas">
 
 | Prop                     | Type                                                                       | Default                            | Description                                                                                                                     |
 | ------------------------ | -------------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -74,6 +77,8 @@ unless `options.gestures.scrollToZoom` is on.
 | `instanceId`             | `string`                                                                   | —                                  | A stable id; a new one remounts the renderer.                                                                                   |
 | `className`              | `string`                                                                   | —                                  | Added to `clover-canvas`, on its `figure`.                                                                                      |
 | `children`               | `ReactNode`                                                                | —                                  | Your own controls, after Clover's.                                                                                              |
+
+</ApiReference>
 
 ## Examples
 
@@ -123,6 +128,16 @@ const views = Clover.groupViews(
   canvases={views[view].map((index) => manifest.items[index])}
   label={manifest.label}
 />;
+```
+
+```html twin
+<!-- A view of a Manifest: its first Canvas alone, or any view within a root. -->
+<clover-root
+  iiif-content="https://nulib-ds.github.io/clover/mocks/paged/manifest.json"
+  canvas-id="https://nulib-ds.github.io/clover/mocks/paged/canvas/5"
+>
+  <clover-canvas></clover-canvas>
+</clover-root>
 ```
 
 </Example>
@@ -182,6 +197,26 @@ const canvas = useRef(null);
   onViewportChange={(bounds) => setRegion(bounds)}
 />
 <button onClick={() => canvas.current.zoomBy(2)}>Zoom in</button>
+```
+
+```html twin
+<clover-canvas
+  id="picture"
+  src="https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen"
+  tiled
+  label="Göttingen's market square"
+></clover-canvas>
+<button type="button" id="zoom">Zoom in</button>
+
+<script type="module">
+  const canvas = document.getElementById("picture");
+  canvas.addEventListener("clover-ready", ({ detail: { handle } }) => {
+    handle.on("viewport", () => setRegion(handle.getBounds()));
+  });
+  document
+    .getElementById("zoom")
+    .addEventListener("click", () => canvas.handle?.zoomBy(2));
+</script>
 ```
 
 </Example>

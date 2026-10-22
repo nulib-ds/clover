@@ -151,7 +151,7 @@ gallery">`, each loaded when used, rather than rebuilt from elements. A template
 | A callback                        | An event, `clover-<name>`, bubbling and composed, cancelable where React's can be prevented |
 | A render prop (`renderItem`, …)   | A function property returning a node                                                        |
 | A React component (`renderers`)   | A framework-neutral contract, `(container, props) => cleanup`                               |
-| The imperative handle (`onReady`) | Methods on the element                                                                      |
+| The imperative handle (`onReady`) | `handle` on the element, kept from `clover-ready`                                           |
 | Hooks, for parts of your own      | `root.clover`: the store, actions, channels and language, with the selectors exported       |
 
 Properties set before an element upgrades are taken on connect. Booleans are HTML boolean
@@ -169,6 +169,7 @@ elements, not both.
 | 1     | `clover-root`, `clover-label`, `clover-content`, `clover-items`                                                                                                                                                                                                                                                                                                                                                                                         |
 | 3     | `clover-thumbnail`, `clover-summary`, `clover-metadata`, `clover-required-statement`, `clover-rights`, `clover-homepage`, `clover-see-also`, `clover-rendering`, `clover-part-of`, `clover-id`, `clover-value`, `clover-status`, `clover-position`, `clover-next`, `clover-previous`, `clover-download`, `clover-search`, `clover-contents`, `clover-transcript`, `clover-annotations`, `clover-collection`, `clover-collection-select`, `clover-about` |
 | 4     | `clover-panel`, `clover-tab`, `clover-panel-toggle`, `clover-split`, `clover-split-pane`, `clover-split-handle`                                                                                                                                                                                                                                                                                                                                         |
+| 6     | `clover-tip`                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | 5     | `clover-canvas`, `clover-map`, `clover-viewer` with `template`                                                                                                                                                                                                                                                                                                                                                                                          |
 
 The parts that need more than their props:
@@ -176,7 +177,8 @@ The parts that need more than their props:
 - **Metadata's `renderValue`, Annotations' `renderEntry` and Items' `renderItem`** are
   function properties.
 - **Status's `loading` and `error`** are slots.
-- **Tip and ReadMore** stay inside the parts. Neither is an element.
+- **ReadMore** stays inside Summary. **Tip** is `<clover-tip>` since phase 6: a page's own
+  control has `<Clover.Tip>` in React, and its elements needed the same.
 
 ## Build, packaging and size
 
@@ -185,6 +187,9 @@ The parts that need more than their props:
   `<clover-label>`s never loads a Canvas. One shared chunk holds Preact, the core and the
   host. Every element comes from one build, so the singletons are shared: the translator,
   the WebGL context budget, `useOneOpen` and the Tip's listeners.
+  `@nulib/clover/web-components/viewer` (phase 8) defines `<clover-viewer>` alone, built
+  whole, for a page that shows a Viewer and nothing else: a page loads one entry or the
+  other.
 - **`sideEffects`** names the web-components entry, so the import is kept.
 - **Types.** `HTMLElementTagNameMap` for every element, and a Custom Elements Manifest
   (`custom-elements.json`) generated from each element's spec. The manifest gives editors
@@ -554,14 +559,178 @@ resume from this list.
    opens with Enter and gives focus back on Escape. The first screenshots were gray: a
    stage draws only once it comes near the window, as it should.
 
+## Phase 6 progress
+
+Begun October 22, 2026: parts of your own. Mat (2026-10-22): go on through phases 7 and 8
+with the recommendations, asking only where his input is needed. Work may stop at a
+session's limit; resume from this list.
+
+- [x] `root.clover`: React's hooks as methods (`useNavigation()` is `navigation()`),
+      `subscribe`, the store's actions, its channels and the language, once the root has
+      loaded; `clover-ready` when it is there.
+- [x] The Canvas's handle on `<clover-canvas>` and `<clover-content>`: `clover-ready`
+      with it, and its methods on the element (`zoomBy`, `home`, …).
+- [x] Renderers without React: `{ format | canvasId | match, render(container, view) }`,
+      on `<clover-root>` and `<clover-content>`.
+- [x] Control buttons without React: a replacement is a function returning the page's
+      own button, which Clover wires; a page's own buttons in `<clover-content>` join the
+      cluster, each with the popover Clover's have.
+- [x] Specs, types and the manifest (methods), tests under Preact, a page in Chrome,
+      sizes, Get started, the changelog, AGENTS.md.
+
+### What phase 6 found (October 22, 2026)
+
+1. **The handle, not methods.** Forwarding the handle's 18 methods onto the element cost
+   every page 0.25 kB in the entry, for a second way to the handle React does not have.
+   The element keeps the handle as `handle` (`stage.handle.zoomBy(2)`), as `onReady`
+   hands it to a React host.
+2. **A ready event must not bubble.** The stage inside a root sends its own
+   `clover-ready`, and the test page's script, listening on the root, read the stage's
+   detail as the root's and threw. Each element's `clover-ready` is its own now, as
+   `load` is: one name, and a root's listener hears only the root.
+3. **A control of the page's must be one of the cluster's own children.** The cluster's
+   `> *` rules fade each control with the chrome and take its clicks while it is away.
+   In a box of `display: contents` a button inherits the clicks rule but not the fade:
+   shown, and unpressable. The page's buttons go right after a hidden mark Clover draws
+   among its controls, as a React host's children sit.
+4. **A Tip of its own.** React's parts of your own have `<Clover.Tip>`; the elements had
+   nothing for a page's own control, which `DESIGN.md` §7 calls an accessibility boon.
+   `<clover-tip>` draws it into its button, since Tip takes its parent for its control.
+5. **Adapters only where used.** The renderers' and control buttons' adapters (1.3 kB
+   gzip alone) load on a page that gives them, and what needs one waits for it, so the
+   stage never shows Clover's controls and then the page's. The root's API (0.6 kB) is in
+   the shared chunk: it is the phase. A viewer page went from 106.3 to 107.1 kB (97.1 kB
+   as one), a page of labels from 39.8 to 40.6, the entry from 5.5 to 5.8. React's pages
+   did not change.
+6. **The types are the page's own.** `index.d.mts` declares `CloverRootApi`,
+   `CloverCanvasHandle` (from the handle's methods' docs), `CloverRenderer` and
+   `CloverControlButtons` structurally (`build/web-components-api.d.ts`), importing
+   nothing of React's, so a page of elements needs no React types.
+7. **In Chrome** (`e2e/elements`, "Parts of your own"): the page's script follows the
+   root; the page's zoom in zooms; its copy button sits after Clover's controls with its
+   popover, follows the stage onto a renderer's view and back; the renderer draws its view
+   and lets it go. axe at 0 violations on both views; nine tab stops in order; nothing
+   scrolling across at 320px.
+8. **A phase 4 failure, found in a dark mode.** Checked in the preview's dark mode (the
+   test page given Clover's tokens for one, from the system's colors, as "Colors and
+   contrast" asks of a dark page), axe found the containers' `<clover-split-handle>`
+   with no `aria-valuenow`: it had measured before the pane it sizes was marked, each
+   element drawing in its own order, and nothing measured again. It does now, when a
+   pane is marked (4.1.2), and a test reproduces the order. The page is at 0 violations
+   in light and dark. axe takes a page that paints no ground as white: the test page
+   paints its own (`Canvas`), or a dark mode's contrast reads as failing.
+
+## Phase 7 progress
+
+Begun October 22, 2026: the docs in both flavors. Resume from this list.
+
+- [x] The transformer (`docs/lib/jsx-to-html.mjs`, tested): JSX to the elements' HTML
+      through their specs; what HTML cannot say comes back with its reason.
+- [x] Twins as each page compiles (`docs/lib/code-flavors.mjs`, run by
+      `mdx-code-flavors-loader.cjs` before Nextra's loader, under Turbopack and webpack):
+      each React fence and its twin marked `data-code-flavor`, `{url}` the frame's
+      resource (`example-urls.mjs`), a hand-written twin as ```html twin.
+- [x] `OptionsExample` by CSS (`data-shown`), so the Markdown keeps every option; code
+      keeps its language as a class (`mdx-components.tsx`).
+- [x] API tables from the specs in web-components mode (`ApiReference`, 24 pages).
+- [x] For agents: `?code=`, `llms.txt`, the manifest at `/custom-elements.json`, the
+      Markdown's flavors labeled.
+- [x] Twins by hand for the examples HTML cannot say (hooks, state, functions), above
+      all Composing layouts' (`root.clover` and the events).
+- [x] `<clover-read-more>`: React's parts of your own have ReadMore.
+- [x] The homepage's code editor in HTML too.
+- [x] Checks in the preview and Chrome, the changelog, AGENTS.md, what phase 7 found.
+
+### What phase 7 found (October 22, 2026)
+
+1. **Twins at compile time, by a loader.** A remark plugin is a function, and Nextra
+   hands its options to Turbopack, which takes none. A loader named by its path, placed
+   before Nextra's for Markdown pages, gives each React fence its twin under Turbopack
+   and webpack alike, and nothing is written twice in the pages. Node keeps the
+   loader's modules: a change to them shows once `npm run dev` restarts.
+2. **Most examples turn as written.** Of the 143 JSX fences on Clover 4's pages, 112
+   turn as written; most of the rest are hooks, state and functions, now each with a
+   twin by hand (`root.clover`, the events, `render(container)`), and a few stay React's.
+   Sibling elements with nothing around them needed reading as a fragment; React's
+   `defaultX` is the element's `x`, as an attribute is both where it opens and what
+   moves it later.
+3. **The transformer finds the gaps.** It refuses a prop an element has neither an
+   attribute nor a property for, and so found what the elements lacked: `controls` as
+   an object (now a property), `<clover-viewer>`'s `annotations` and `request`, and
+   React's helpers for parts of your own that had no element: `ReadMore` (now
+   `<clover-read-more>`, its measuring shared as `useReadMore`) and `useOneOpen` (now
+   `root.clover.oneOpen`, shared as `openOne`). Every exported part is an element now
+   (`NEVER` is empty). React's pages paid under 0.1 kB for the sharing.
+4. **The API tables come from the specs.** In the web-components flavor a component's
+   page draws its elements' attributes, properties, events and slots (`ApiReference`,
+   with the page's own Markdown components), from the specs the types and the manifest
+   are written from.
+5. **What agents read holds both.** `?code=` chooses a flavor without storing it, which
+   the switch's own hook reads too; the Markdown labels each flavor and keeps each
+   fence's language, which Nextra's `code` had dropped; the manifest is published at
+   `/custom-elements.json`.
+6. **Checked** in the preview and in Chrome: the Items, Composing layouts, Viewer, Panel
+   and Get started pages and the homepage at 0 axe violations in light and dark, in the
+   web-components flavor, with no duplicate ids. The homepage's editor writes HTML with
+   its values as live and its lines as many, so the Composable story keeps its 15.
+
+## Phase 8 progress
+
+Begun October 22, 2026: the release. Resume from this list.
+
+- [x] `<clover-viewer>`'s events renamed (in phase 2, with the changelog's migration),
+      and nothing left using the old names outside the 3.x pages and the records.
+- [x] Budgets: every page in `PAGES` held to `size-budget.json`, in CI (`test:build`),
+      the Viewer's own entry among them.
+- [x] `@nulib/clover/web-components/viewer`: `<clover-viewer>` alone, built whole.
+- [x] Two copies on one page: no id made twice (the elements', a Canvas's controls',
+      Markdown's), and a warning.
+- [x] Docs claims: Clover described as web components, not one; 3.x's element measured.
+- [x] Checks, the changelog, AGENTS.md, what phase 8 found.
+
+### What phase 8 found (October 22, 2026)
+
+1. **The events were renamed in phase 2**, as the decisions table recommended, before
+   any release. Nothing uses the old names now outside the 3.x pages and the records of
+   the change.
+2. **A page with a Viewer alone loads less from an entry of its own.** Loading per
+   element costs a page of one `<clover-viewer>` 39 files, 107.3 kB gzipped one by one
+   (97.3 kB as one). Its own entry, built whole, loads four, 90.7 kB: a sixth less and
+   35 requests fewer, for what most pages without React will do. It is opt-in:
+   `@nulib/clover/web-components` stays the entry for every element, and Get started
+   offers the other for a page with a Viewer alone. Its cost is the package's: 0.8 MB
+   more of gzipped files to install (1.1 to 1.9 MB), most of it MapLibre and hls.js,
+   which no page loads unless it shows a map or a stream. Taken on the recommendation
+   (Mat, 2026-10-22: "go with recommendations").
+3. **Two copies of Clover on one page met in their ids.** A page with both entries, or
+   with React's Clover beside the elements', has two copies, and three counts started
+   again in each: the elements' (`clover-1-…`), a Canvas's for its controls
+   (`zoomIn-clover-canvas-1`, a count of its module's, never `useUniqueId`) and
+   Markdown's for its groups past h6. In Chrome, with both entries, seven control ids
+   showed twice and the viewport's description named two elements (4.1.2). Every copy of
+   the elements counts in one count kept on the document now, a Canvas's controls take
+   `useUniqueId`'s ids (React's pages a few bytes smaller for it), and Markdown counts on
+   the page's global. The second copy of the elements says in the console that Clover is
+   loaded twice; each keeps its own translator and popups, so Get started still says to
+   load one. Checked again in Chrome: no id twice, and every `aria` reference names one
+   element.
+4. **Descriptions still said "a web component"**, from when `<clover-viewer>` was the
+   only one: the README, both packages' descriptions, the site's descriptions and
+   structured data (`docs/lib/site.ts`), Get started and the homepage's Install. They
+   say "web components" now, and Get started's section is "Web components", keeping its
+   id (`#web-component`) for the links to it.
+5. **3.x's element is measured.** Get started compared Clover 4's element with a figure
+   written in for 3.x's, "about 530 kB". The docs' build measures it now, from the
+   release the 3.x pages document (`docs/lib/earlier-size.ts`): 563 kB.
+
 ## Decisions for Mat
 
-| Decision                        | Recommended                                                         | Instead                                                              |
-| ------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| The elements' runtime           | Preact, as today: small, and one tree keeps its ids unique          | React, the same runtime as the React parts, about 40 kB more         |
-| One tree, or a root per element | One tree per page, parts portaled                                   | A root per element: simpler, but no shared context and duplicate ids |
-| Light or shadow DOM             | Light                                                               | Shadow: isolation, but the page's CSS and `aria` references break    |
-| Event names                     | `clover-<name>`, composed (renames `<clover-viewer>`'s, unreleased) | Keep the unprefixed names                                            |
-| Objects in HTML                 | Properties, and JSON attributes for data                            | Properties only                                                      |
-| Entry points                    | `@nulib/clover/web-components` for all, with lazy per-element code  | One entry per element, imported one by one                           |
-| The docs' web-component code    | Generated, with hand-written twins where it can't be                | All hand-written, with a test for drift                              |
+| Decision                        | Recommended                                                                                                                   | Instead                                                              |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| The elements' runtime           | Preact, as today: small, and one tree keeps its ids unique                                                                    | React, the same runtime as the React parts, about 40 kB more         |
+| One tree, or a root per element | One tree per page, parts portaled                                                                                             | A root per element: simpler, but no shared context and duplicate ids |
+| Light or shadow DOM             | Light                                                                                                                         | Shadow: isolation, but the page's CSS and `aria` references break    |
+| Event names                     | `clover-<name>`, composed (renames `<clover-viewer>`'s, unreleased)                                                           | Keep the unprefixed names                                            |
+| Objects in HTML                 | Properties, and JSON attributes for data                                                                                      | Properties only                                                      |
+| Entry points                    | `@nulib/clover/web-components` for all, with lazy per-element code, and `/web-components/viewer` for a Viewer alone (phase 8) | One entry per element, imported one by one                           |
+| The docs' web-component code    | Generated, with hand-written twins where it can't be                                                                          | All hand-written, with a test for drift                              |

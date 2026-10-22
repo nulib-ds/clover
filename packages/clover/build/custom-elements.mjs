@@ -10,7 +10,7 @@
  * - `dist/web-components/custom-elements.json`: the manifest (schema 2.0.0), for editors,
  *   the docs and agents.
  */
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
@@ -30,8 +30,10 @@ export async function readSpecs() {
     logLevel: "silent",
   });
   const code = Buffer.from(outputFiles[0].text).toString("base64");
-  const { SPECS, DOCS } = await import(`data:text/javascript;base64,${code}`);
-  return { SPECS, DOCS: typeof DOCS === "function" ? DOCS() : DOCS };
+  const { SPECS, DOCS, HANDLE } = await import(
+    `data:text/javascript;base64,${code}`
+  );
+  return { SPECS, DOCS: typeof DOCS === "function" ? DOCS() : DOCS, HANDLE };
 }
 
 /** An attribute's type, as the manifest and the docs write it. */
@@ -40,12 +42,20 @@ function attributeType(type) {
   return type === "data" ? "string" : type;
 }
 
+/** What an element's events keep, as read-only properties (`keeps`): its handle, its API. */
+const keptOf = (spec) =>
+  Object.values(spec.events ?? {})
+    .map((event) => event.keeps)
+    .filter(Boolean);
+
 /** Every doc an element needs, present: a spec without one fails the build. */
 function checkDocs(spec, docs) {
   if (!docs) throw new Error(`${spec.tag} has no docs`);
   const missing = [
     ...Object.keys(spec.attributes).filter((name) => !docs.attributes[name]),
-    ...(spec.properties ?? []).filter((name) => !docs.properties?.[name]),
+    ...[...(spec.properties ?? []), ...keptOf(spec)].filter(
+      (name) => !docs.properties?.[name],
+    ),
     ...Object.keys(spec.events ?? {}).filter((name) => !docs.events?.[name]),
     ...(spec.slots ?? [])
       .filter((name) => !docs.slots?.[name])
@@ -78,11 +88,12 @@ export function manifestOf(SPECS, DOCS) {
           ? { fieldName: attribute.prop }
           : {}),
       })),
-      members: (spec.properties ?? []).map((name) => ({
+      members: [...keptOf(spec), ...(spec.properties ?? [])].map((name) => ({
         kind: "field",
         name,
         type: { text: docs.properties[name].type },
         description: docs.properties[name].description,
+        ...(docs.properties[name].readonly ? { readonly: true } : {}),
       })),
       events: Object.keys(spec.events ?? {}).map((name) => ({
         name,
@@ -116,7 +127,44 @@ export function manifestOf(SPECS, DOCS) {
 const comment = (text, indent = "") =>
   `${indent}/** ${text.replace(/\*\//g, "* /")} */\n`;
 
-export function typesOf(SPECS, DOCS) {
+/** A method as the types declare it: `zoomBy(factor: number, at?: CloverPoint): void`. */
+const signature = (name, { parameters, returns }) =>
+  `${name}(${parameters.map(([given, type]) => `${given}: ${type}`).join(", ")}): ${returns}`;
+
+/** The types the API is written in (`web-components-api.d.ts`), its own comment dropped. */
+const API = readFileSync(
+  resolve(root, "build/web-components-api.d.ts"),
+  "utf8",
+).replace(/^\/\*[\s\S]*?\*\/\n\n/, "");
+
+/** The Canvas's handle, from its methods' docs (`HANDLE`, `specs/canvas.ts`). */
+function handleOf(methods) {
+  let text =
+    comment(
+      "The Canvas's handle (onReady in React): the camera and its coordinates. The stage's elements keep it as handle.",
+    ) +
+    "export interface CloverCanvasHandle {\n" +
+    '  readonly backendKind: "webgl2" | "canvas2d" | "none";\n' +
+    comment(
+      "Whether the view is at home, fitted whole: false once the reader zooms, pans or turns it.",
+      "  ",
+    ) +
+    "  readonly atHome: boolean;\n";
+  for (const [name, method] of Object.entries(methods)) {
+    text += comment(method.description, "  ");
+    text += `  ${signature(name, method)};\n`;
+  }
+  return `${text}}\n`;
+}
+
+/** The viewer entry's types: what it exports, and the elements' declarations with them. */
+export const VIEWER_TYPES =
+  "/*\n * @nulib/clover/web-components/viewer: `<clover-viewer>` alone, built whole. Its types\n" +
+  " * are the elements' (`../index.d.mts`), whose declarations come with them.\n */\n\n" +
+  'export { initCloverI18n } from "../index.mjs";\n' +
+  'export type { CloverI18nOptions, CloverViewerElement } from "../index.mjs";\n';
+
+export function typesOf(SPECS, DOCS, HANDLE = {}) {
   const events = new Map();
   let text =
     "/*\n * @nulib/clover/web-components: Clover's elements, for pages without React. Written\n" +
@@ -144,11 +192,18 @@ export function typesOf(SPECS, DOCS) {
     comment(
       "Define Clover's elements: done for you on import; for a build of your own with its own assets.",
     ) +
-    "export declare function defineCloverElements(assets: unknown, tags?: readonly string[]): void;\n";
+    "export declare function defineCloverElements(assets: unknown, tags?: readonly string[]): void;\n\n" +
+    API +
+    "\n" +
+    handleOf(HANDLE);
   for (const spec of SPECS) {
     const docs = DOCS[spec.tag];
     text += "\n" + comment(docs.description);
     text += `export interface ${docs.name} extends HTMLElement {\n`;
+    for (const name of keptOf(spec)) {
+      text += comment(docs.properties[name].description, "  ");
+      text += `  readonly ${name}: ${docs.properties[name].type};\n`;
+    }
     for (const name of spec.properties ?? []) {
       text += comment(docs.properties[name].description, "  ");
       text += `  ${name}: ${docs.properties[name].type};\n`;
@@ -174,11 +229,13 @@ export function typesOf(SPECS, DOCS) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const { SPECS, DOCS } = await readSpecs();
+  const { SPECS, DOCS, HANDLE } = await readSpecs();
   writeFileSync(
     resolve(out, "custom-elements.json"),
     `${JSON.stringify(manifestOf(SPECS, DOCS), null, 2)}\n`,
   );
-  writeFileSync(resolve(out, "index.d.mts"), typesOf(SPECS, DOCS));
+  writeFileSync(resolve(out, "index.d.mts"), typesOf(SPECS, DOCS, HANDLE));
+  // `@nulib/clover/web-components/viewer`: the Viewer's element alone, typed as above.
+  writeFileSync(resolve(out, "viewer/index.d.mts"), VIEWER_TYPES);
   console.log(`custom-elements.json and index.d.mts: ${SPECS.length} elements`);
 }

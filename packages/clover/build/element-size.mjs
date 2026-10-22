@@ -66,6 +66,50 @@ export function pageFiles(tags = [], dir = ELEMENT_DIR) {
   return files;
 }
 
+/** Where `@nulib/clover/web-components/viewer`, `<clover-viewer>` built whole, is. */
+export const VIEWER_DIR = join(root, "dist/web-components/viewer");
+
+/**
+ * What a page with only a `<clover-viewer>` loads from `@nulib/clover/web-components/
+ * viewer`: the entry and what it imports, and the host and the stylesheet that load as
+ * the viewer connects, from wherever they are imported. Its lazy parts are left out, as
+ * a page's are.
+ */
+export function viewerEntryFiles(dir = VIEWER_DIR) {
+  const map = readMap(dir);
+  const keys = new Set();
+  const files = new Set();
+  const visit = (key) => {
+    const chunk = map[key];
+    if (!chunk || keys.has(key)) return;
+    keys.add(key);
+    files.add(chunk.file);
+    (chunk.imports ?? []).forEach(visit);
+  };
+  visit(Object.keys(map).find((key) => map[key].isEntry));
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const key of [...keys])
+      for (const later of map[key].dynamicImports ?? [])
+        if (
+          !keys.has(later) &&
+          (later.endsWith("web-components/host.tsx") || later === STYLES)
+        ) {
+          visit(later);
+          grew = true;
+        }
+  }
+  return files;
+}
+
+/** Those files, in bytes gzipped one by one. */
+export const viewerEntryGzip = (dir = VIEWER_DIR) =>
+  [...viewerEntryFiles(dir)].reduce(
+    (sum, file) =>
+      sum + gzipSync(readFileSync(join(dir, file)), { level: 9 }).length,
+    0,
+  );
+
 /** Those files' source, read. */
 export const pageSource = (tags, dir = ELEMENT_DIR) =>
   [...pageFiles(tags, dir)]

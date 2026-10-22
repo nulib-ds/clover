@@ -15,7 +15,8 @@ import { useRouter } from "docs/lib/router";
  * these only plain data, so a resource is named by its key in `playground-config.ts`
  * and the Viewer's props are plain values. The code under an example is the page's own
  * Markdown, passed as children; where an example switches a prop, each value's code is a
- * child marked `data-option`, and only the one chosen shows.
+ * child marked `data-option`, and only the one chosen shows. Each fence also has its "Web
+ * components" twin beside it, made as the page compiles (`docs/lib/code-flavors.mjs`).
  */
 
 type TemplateName = "Default" | "Document" | "Gallery";
@@ -327,12 +328,18 @@ export function OptionsExample({
         <Live key={nameOf(value)} {...live} {...shown} />
       </div>
       <div className={styles.code}>
+        {/*
+         * The chosen value's code shows; the others are hidden by CSS, not `hidden`, so the
+         * page's Markdown keeps every value's code (`data-shown`, `ViewerDocs.module.css`).
+         */}
         {React.Children.map(children, (child) =>
-          React.isValidElement<{ "data-option"?: string; hidden?: boolean }>(
-            child,
-          ) && child.props["data-option"] !== undefined
+          React.isValidElement<{
+            "data-option"?: string;
+            "data-shown"?: string;
+          }>(child) && child.props["data-option"] !== undefined
             ? React.cloneElement(child, {
-                hidden: child.props["data-option"] !== nameOf(value),
+                "data-shown":
+                  child.props["data-option"] === nameOf(value) ? "" : undefined,
               })
             : child,
         )}

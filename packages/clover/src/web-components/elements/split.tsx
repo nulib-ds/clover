@@ -260,11 +260,19 @@ export function SplitHandleElement({ hosted }: HostedProps) {
       }
     };
     follow();
-    const shown = new MutationObserver(follow);
+    /*
+     * A pane marked sized after the handle first measured (each element's effects run in
+     * its own portal, in any order) is measured then: a separator always says where it is
+     * (WCAG 4.1.2).
+     */
+    const shown = new MutationObserver(() => {
+      follow();
+      update();
+    });
     shown.observe(split, {
       attributes: true,
       subtree: true,
-      attributeFilter: ["hidden"],
+      attributeFilter: ["hidden", "data-sized"],
     });
 
     const gestures = handleGestures(

@@ -24,6 +24,10 @@
       "types": "./dist/web-components/index.d.mts",
       "import": "./dist/web-components/index.mjs"
     },
+    "./web-components/viewer": {
+      "types": "./dist/web-components/viewer/index.d.mts",
+      "import": "./dist/web-components/viewer/index.mjs"
+    },
     "./web-components/custom-elements.json": "./dist/web-components/custom-elements.json",
     "./styles.css": "./dist/styles.css",
     "./templates.css": "./dist/templates.css",
@@ -43,7 +47,7 @@
     "test:build": "node --test build/*.test.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build:types": "dts-bundle-generator --project tsconfig.json --out-file dist/index.d.mts src/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/templates/index.d.mts src/templates/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/map/index.d.mts src/map/index.ts --no-check",
-    "build:web-components": "vite build --config build/web-components.config.mjs && cp build/web-components-loader.js dist/web-components/index.umd.js && node build/custom-elements.mjs",
+    "build:web-components": "vite build --config build/web-components.config.mjs && cp build/web-components-loader.js dist/web-components/index.umd.js && vite build --config build/web-components-viewer.config.mjs && cp build/web-components-loader.js dist/web-components/viewer/index.umd.js && node build/custom-elements.mjs",
     "build:sizes": "node build/sizes.mjs",
     "e2e": "playwright test --config=e2e/playwright.config.ts"
   },

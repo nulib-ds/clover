@@ -18,6 +18,9 @@ import {
   PAGES,
   pageFiles,
   pageGzip,
+  VIEWER_DIR,
+  viewerEntryFiles,
+  viewerEntryGzip,
   pageSource,
 } from "./element-size.mjs";
 
@@ -88,6 +91,26 @@ test("MapLibre and hls.js load only on demand; the worker is found from any path
   assert.ok(!/["']\/assets\//.test(pageSource(VIEWER)));
 });
 
+test("the Viewer's own entry is built whole, and a page with it alone loads less", (t) => {
+  for (const file of ["index.mjs", "index.umd.js", "index.d.mts"])
+    assert.ok(existsSync(join(VIEWER_DIR, file)), `viewer/${file} must be built`);
+  const files = [...viewerEntryFiles()];
+  const source = files
+    .map((file) => readFileSync(join(VIEWER_DIR, file), "utf8"))
+    .join("\n");
+  assert.ok(/"clover-viewer"/.test(source), "it defines <clover-viewer>");
+  assert.ok(!/react-dom\.production|scheduler\.production/.test(source));
+  // Whole: a few files, not the shared entry's dozens, and fewer bytes for it.
+  assert.ok(files.length <= 6, `${files.length} files`);
+  const whole = viewerEntryGzip();
+  const shared = pageGzip(["clover-viewer"]);
+  t.diagnostic(
+    `<clover-viewer>, its own entry: ${(whole / 1000).toFixed(1)} kB gzip in ${files.length} files (shared entry ${(shared / 1000).toFixed(1)} kB; budget ${(budget.viewerEntryGzip / 1000).toFixed(1)} kB)`,
+  );
+  assert.ok(whole < shared);
+  assert.ok(whole <= budget.viewerEntryGzip, `${whole} B gzip, over budget`);
+});
+
 test("what each page loads stays within budget", (t) => {
   for (const [name, key, tags] of PAGES) {
     const size = pageGzip(tags);
@@ -98,33 +121,38 @@ test("what each page loads stays within budget", (t) => {
   }
 });
 
-test('a bundler keeps `import "@nulib/clover/web-components"`, which defines the elements', async () => {
-  // The package is side-effect free but for its CSS and this entry (`sideEffects`), so
+test('a bundler keeps `import "@nulib/clover/web-components"`, which defines the elements, and the Viewer\'s own entry', async () => {
+  // The package is side-effect free but for its CSS and these entries (`sideEffects`), so
   // an import for its effect alone, as Get Started shows, must survive tree-shaking.
-  const { outputFiles } = await build({
-    stdin: {
-      contents: 'import "@nulib/clover/web-components";',
-      resolveDir: resolve(root, "../.."),
-    },
-    bundle: true,
-    format: "esm",
-    write: false,
-    logLevel: "silent",
-  });
-  assert.match(outputFiles[0].text, /customElements\.define\(/);
-  assert.match(outputFiles[0].text, /"clover-viewer"/);
+  for (const entry of ["web-components", "web-components/viewer"]) {
+    const { outputFiles } = await build({
+      stdin: {
+        contents: `import "@nulib/clover/${entry}";`,
+        resolveDir: resolve(root, "../.."),
+      },
+      bundle: true,
+      format: "esm",
+      write: false,
+      logLevel: "silent",
+    });
+    assert.match(outputFiles[0].text, /customElements\.define\(/, entry);
+    assert.match(outputFiles[0].text, /"clover-viewer"/, entry);
+  }
 });
 
 test("the types and the manifest are the specs', every element, attribute and event", async () => {
-  const { SPECS, DOCS } = await readSpecs();
+  const { SPECS, DOCS, HANDLE } = await readSpecs();
   const written = JSON.parse(
     readFileSync(join(dir, "custom-elements.json"), "utf8"),
   );
   assert.deepEqual(written, manifestOf(SPECS, DOCS));
-  assert.equal(
-    readFileSync(join(dir, "index.d.mts"), "utf8"),
-    typesOf(SPECS, DOCS),
-  );
+  const types = readFileSync(join(dir, "index.d.mts"), "utf8");
+  assert.equal(types, typesOf(SPECS, DOCS, HANDLE));
+  // What a page's script reaches is typed too: the root's API, the Canvas's handle.
+  assert.match(types, /export interface CloverRootApi \{/);
+  assert.match(types, /export interface CloverCanvasHandle \{[^}]*zoomBy\(/);
+  assert.match(types, /readonly clover: CloverRootApi \| null;/);
+  assert.match(types, /readonly handle: CloverCanvasHandle \| null;/);
   const declared = written.modules[0].declarations;
   for (const spec of SPECS) {
     const declaration = declared.find((each) => each.tagName === spec.tag);
@@ -138,7 +166,6 @@ test("the types and the manifest are the specs', every element, attribute and ev
       Object.keys(spec.events ?? {}),
     );
   }
-  const types = readFileSync(join(dir, "index.d.mts"), "utf8");
   for (const spec of SPECS) {
     assert.match(types, new RegExp(`"${spec.tag}": ${DOCS[spec.tag].name};`));
   }

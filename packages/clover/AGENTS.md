@@ -318,8 +318,15 @@ every rule below.
 - `npm run build -w @nulib/clover` builds `dist/` (Vite with three entries: the parts,
   `templates/index` and `map/index`; then `build/styles.mjs` for `styles.css` and
   `templates.css`, then `dts-bundle-generator` for each entry's `.d.mts`). The root `npm run build` runs it.
-- `npm run test -w @nulib/clover`, or the root `npm test`, which runs both Vitest
-  projects (`vitest.workspace.mjs`).
+- `npm run test -w @nulib/clover`, or the root `npm test`, which runs every Vitest
+  project (`vitest.workspace.mjs`): the docs', the package's, the package's again on
+  React 18 (`vitest.react18.config.mjs`), and the web components' under Preact. The
+  root's React is 19, the docs'; React 18, which the peers still name, is
+  `e2e/react18`'s install, shared with the end-to-end harness, every import of React
+  aliased to it, Testing Library's too (its ES module build, inlined, as its CommonJS
+  build requires the root's React, and two Reacts break every hook). CI installs it
+  (`.github/workflows/test.yml`); a checkout without it runs the rest, and says so.
+  `src/react.test.tsx` checks each project runs the React it names (`provide`).
 - `npm run test:build -w @nulib/clover` checks the built package, so build first.
   `build/bundle.test.mjs` checks the emitted graph (three entries, only package source,
   externals within dependencies and peers, a forbidden list, lazy modules) and the size a
@@ -355,11 +362,17 @@ every rule below.
   `timing`.
   `timing` runs the timed specs (`TIMED` in the config) in Chromium once every other project
   has finished, alone: run alongside four other browsers they measured the machine.
-  `react19` runs Chromium against a second server on port 4322. That server aliases React
-  to `e2e/react19/node_modules`, which is its own install, so run `npm ci` there once.
-  Since the docs moved to Next 16 the root's React is 19 too, so the unit tests and the
-  main e2e projects run on 19 and nothing runs on React 18, which the package still
-  supports; pointing the second harness at React 18 would test it again.
+  The harness never runs the root's React, which is the docs' (19, for Next 16): each
+  server aliases React to an install of its own (`harness(react, port)` in
+  `e2e/vite.config.mjs`). The main projects run React 18, from `e2e/react18` (port
+  4321), and `react19` runs Chromium on React 19, from `e2e/react19` (a second server, on
+  port 4322). Run `npm ci` in both once; the config says which is missing. The unit
+  tests' React 18 project uses `e2e/react18` too. Keep the package's peers in step: a
+  React it supports is a React a project runs.
+  `react.spec.ts` checks that each project runs the React it says. When the root's React
+  moved to 19, the projects meant for React 18 ran 19, and only that spec said so, as CI
+  runs no end-to-end tests (`.github/workflows/test.yml`); fixed 2026-10-22, with
+  `e2e/react18`.
 - The harness picks a scene by query:
   `?scene=viewer|items|document|gallery|composed|map|panel` (`document` and `gallery` are
   the Viewer with that template; `map` is a Root's Map on the style its spec routes;
@@ -1072,8 +1085,8 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     props (`elements/part.tsx`); only an element that needs more of its element (the
     root, the stage's box, the viewer) has a module in `elements/`.
   - **Parity** (`specs/specs.test.ts`): every part `parts.ts` exports has an element, or
-    a reason why not yet (`LATER`, empty since phase 5) or not at all (`NEVER`: `Tip`,
-    `ReadMore`). A new part fails it until it has either, and an element's slots, like
+    a reason why not yet (`LATER`, empty since phase 5) or not at all (`NEVER`, empty
+    since phase 7: `Tip` is `<clover-tip>`, `ReadMore` `<clover-read-more>`). A new part fails it until it has either, and an element's slots, like
     its attributes, fail it without docs.
   - **The containers** (phase 4, `specs/containers.ts`). `<clover-panel>` (`elements/
 panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
@@ -1095,9 +1108,9 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     siblings, and the handle runs `components/Split/splitting.ts`, as `SplitHandle` does.
     A handle hides with the pane it sizes, and comes back with it, never from a `hidden`
     of the page's. ARIA on a `native` element is the page's to give, unwarned.
-  - **Standalone, and the templates** (phase 5). `<clover-canvas>` (`specs/canvas.ts`)
-    is a part drawn as it is (`part()`, `components/Canvas/index`): alone, what it is
-    given; in a root, given nothing, the root's view, as `Canvas` is. Its renderer
+  - **Standalone, and the templates** (phase 5). `<clover-canvas>` (`specs/canvas.ts`,
+    `elements/canvas.tsx`): alone, what it is given; in a root, given nothing, the root's
+    view, as `Canvas` is. Its renderer
     (`LoadedCanvas`) loads when it draws. `onAnnotationLink` is no event of it: given,
     it stops the Canvas showing a link itself. `<clover-viewer template>`
     (`elements/viewer.tsx`) has Default with the element and Document and Gallery each
@@ -1105,6 +1118,40 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     lists the props only some templates take, by the templates that do: each is handed
     its own and none of another's, which it would pass on to its root's element as an
     attribute. `storage-key="false"` is `storageKey={false}`.
+  - **Parts of your own** (phase 6). `root.clover` (`elements/api.ts`) is the root's
+    Clover itself, through its prototype, as `useClover()` hands a React part (store,
+    actions, channels, getters live), with each of Clover's hooks as a method of the same
+    name (`navigation()`, `visibleCanvases()`), `state`, `subscribe`, `language`,
+    `localize`, `t` and `langOf`. An event's `keeps` (`spec.ts`) makes the element keep
+    its callback's first argument as a read-only property: the root's `clover` (its
+    module calls `onReady(api)`, and `onReady(null)` when it goes) and the stage's
+    `handle` (`onReady` of `Canvas` and `Content`, let go with the stage, `useHandle`).
+    Such an event (`clover-ready`) does not bubble, as `load` does not: the stage's ran
+    into its root's listener. The handle's methods are not forwarded onto the element: a
+    second way React does not have, at 0.25 kB in the entry. A page's renderers
+    (`elements/renderers.tsx`, `{ canvasId, format, match, render(container, view) }`)
+    and control buttons (`elements/controls.tsx`, a function returning the page's button)
+    are adapted to React's, one component per page object (WeakMaps), and load only on
+    a page that gives them (`elements/later.ts`), what needs them waiting, so nothing is
+    drawn one way and then another. The page's button goes in the cluster right after a
+    hidden mark Clover draws there, as do a `<clover-content>`'s own `<button>`s
+    (`Placed`, `elements/nodes.tsx`): the cluster's `> *` rules fade each control and
+    take its clicks while hidden, and a box of `display: contents` would pass on the
+    clicks rule but not the fade. Clover keeps the button's name, keys and state on it,
+    presses the control with it, portals its icon (live, the full screen's turns) into a
+    box the page places, and its popover into the button, last. `<clover-tip>`
+    (`elements/tip.tsx`) portals `Tip` into its parent, since Tip takes its parent for its
+    control; the element shows nothing (`ELEMENT_CSS`). `class="clover-canvas-button"`
+    gives a page's button Clover's control look, in React too.
+  - **React's helpers on the elements** (phase 7). `<clover-read-more>`
+    (`elements/read-more.tsx`) runs `ReadMore`'s measuring (`useReadMore`, shared, as
+    `ReadMore` cannot clone the page's node) on its first child, marking it and drawing
+    the button after it. `root.clover.oneOpen(close)` is `useOneOpen` without React
+    (`openOne`, shared): call it as a popup of the page's opens; it returns what to call
+    as it closes. `controls` is a property of the stage's elements too (Canvas's object
+    form), and `<clover-viewer>` takes `annotations` and `request`. The docs' transformer
+    (`docs/lib/jsx-to-html.mjs`) refuses a React prop an element has no attribute or
+    property for: run it over the docs after adding a prop, to find such gaps.
   - **Slots and function properties.** A spec's `slots` are children it reads by their
     `slot`, shown as copies kept in step (`<clover-status>`'s `loading` and `error`);
     hidden where written (`ELEMENT_CSS`), so assistive technology reads one. A function
@@ -1139,8 +1186,12 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
   - Ids: each element prefixes its own (`clover-<n>-`, `IdPrefixContext`). One tree does
     not make them unique: Preact counts `useId` afresh in each root and each portal, so
     never call `useId` itself (ESLint forbids it; `useUniqueId`, exported for parts of
-    your own). Each element has an error boundary inside its portal (so it catches its
-    effects too): with one tree, an error left to rise takes every element down.
+    your own). Never count ids in a module either: a page with two copies of Clover
+    counts twice from 1, as a Canvas's control ids did (`clover-canvas-1`). They are
+    `useUniqueId`'s now; what makes ids outside React (Markdown's groups,
+    `core/markdown.ts`) counts on the page's global (`Symbol.for`). Each element has an
+    error boundary inside its portal (so it catches its effects too): with one tree, an
+    error left to rise takes every element down.
   - Preact empties an attribute React removes, and `lang=""` says the language is
     unknown (WCAG 3.1.2): the host's one observer removes it wherever it draws (inside a
     part, or a root's live region), never in the page's own markup.
@@ -1192,20 +1243,47 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     measuring. `index.umd.js` loads the module from beside itself and says in the
     console when it cannot. The package's `sideEffects` names `dist/web-components/**`,
     so `import "@nulib/clover/web-components"` defines the elements in any bundler.
+  - **The Viewer's own entry** (phase 8; `@nulib/clover/web-components/viewer`,
+    `src/web-components/viewer.ts`) defines `<clover-viewer>` alone, for a page that
+    shows a Viewer and nothing else of Clover's. `build/web-components-viewer.config.mjs`
+    builds it after the main element build (which empties `dist/web-components`), into
+    `dist/web-components/viewer/`: the elements' config, with no chunk shared with other
+    elements, and its lazy parts (the other templates, the media, the map, the locales)
+    still lazy. Such a page loads four files, 90.7 kB gzip, where the main entry loads
+    107.3 kB in 39 (`viewerEntryGzip`, `viewerEntryFiles` in `element-size.mjs`, held to
+    `size-budget.json`; 2026-10-22). Its loader is the main entry's, copied
+    (`viewer/index.umd.js`), and its types `<clover-viewer>`'s alone (`viewer/index.d.mts`,
+    written by `custom-elements.mjs`). It shares the main entry's page assets
+    (`page-assets.ts`: the deferred style runs and the map's worker), a module never named
+    `assets.ts`, since TypeScript then takes `assets.d.ts`, the virtual modules'
+    declarations, as its own. Its files add 0.8 MB to the package's gzipped files (1.1 to
+    1.9 MB), most of it the copies of MapLibre and hls.js, which a page loads only for a
+    map or a stream.
+  - **Two copies on a page.** Each entry brings its own copy of Clover, so a page loads
+    one. A page that loads both has two hosts, each with its own translator, popups and
+    style registry; the first to define a tag keeps it (`defineElement`). Their ids must
+    still never meet (WCAG 4.1.2), nor those of a page with React's Clover beside the
+    elements': every copy counts the page's elements in one count kept on the document
+    (`Symbol.for("clover.elements")`, `hostOf` in `host.tsx`), and the second host says
+    in the console that Clover is loaded twice (`host.test.tsx`). Checked in Chrome with
+    both entries on one page: no id twice, every `aria` reference one element's.
   - **Sizes** (`build/element-size.mjs`, from the chunk map): each page in `PAGES`, the
     files it loads gzipped one by one, recorded in `sizes.json` and held to
     `size-budget.json`: the entry, a `<clover-viewer>` (`webComponentsGzip`, which Get
     started states), labels alone and the four parts. Loading per element has a price
     that grows with the elements: Rollup cuts the code the parts share by which elements
-    reach it, so a `<clover-viewer>` page loads 39 files, 106.3 kB gzipped one by one
-    against 96.3 kB as one (2026-10-22, 36 elements: `<clover-canvas>` shares the
-    Canvas with the stage and the viewer; 36 files and 104.5 kB at 35, 31 and 102.3 kB at 29: the
+    reach it, so a `<clover-viewer>` page loads 39 files, 107.3 kB gzipped one by one
+    against 97.3 kB as one (2026-10-22, 38 elements, with `<clover-read-more>` since
+    phase 7 and the page's one count of its elements since phase 8; 107.1 kB and 97.1 kB
+    at 37, the root's API among the shared chunk since phase 6; 106.3 kB before it, 36
+    elements: `<clover-canvas>` shares the Canvas with the stage and the viewer; 36 files
+    and 104.5 kB at 35, 31 and 102.3 kB at 29: the
     containers share Panel, Split and the toggle with Default, so those came in chunks of
     their own; Brotli the same). A layout of the containers, as Default's, loads 103.7 kB
-    (`layoutPageGzip`), 105.1 kB since phase 5. A `<clover-viewer>` in Document loads
-    112.6 kB (`documentElementGzip`, its template and the `templates` run, named by
+    (`layoutPageGzip`), 106.3 kB since phase 6. A `<clover-viewer>` in Document loads
+    113.5 kB (`documentElementGzip`, its template and the `templates` run, named by
     their keys in the chunk map, which `pageFiles` takes beside tags), and a
-    `<clover-canvas>` alone, once it draws, 75.6 kB (`canvasElementGzip`, `LoadedCanvas`
+    `<clover-canvas>` alone, once it draws, 76.5 kB (`canvasElementGzip`, `LoadedCanvas`
     with it). A second shared
     chunk for the light parts, and `experimentalMinChunkSize` at 1, 3 and 8 kB, were each
     tried and made the entry or the pages larger.
@@ -1223,10 +1301,10 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     DOM Testing Library rather than React's; the package's own project leaves these
     out): `elements/viewer.test.tsx`, `elements/elements.test.tsx`,
     `elements/containers.test.tsx`, `elements/standalone.test.tsx` (a Canvas, Items and
-    a Map alone, and the templates), and `elements/upgrade.test.tsx` (a page of its own,
-    for elements defined in any order).
-    `e2e/elements` is a page of them (two roots, a layout of the containers, and the
-    standalone elements and templates), served over the source as the element build makes
+    a Map alone, and the templates), `elements/own.test.tsx` (parts of your own), and
+    `elements/upgrade.test.tsx` (a page of its own, for elements defined in any order).
+    `e2e/elements` is a page of them (two roots, a layout of the containers, the
+    standalone elements and templates, and parts of your own), served over the source as the element build makes
     them, by `e2e/vite.elements.config.mjs` (port 4323; `?many=N` adds N roots and
     times them).
 - **Renderers** (`components/Content/renderers.ts`): `renderers` on `Root` go into the

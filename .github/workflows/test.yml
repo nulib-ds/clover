@@ -31,6 +31,11 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
+      # React 18, which the package still supports, for its tests' second run (the root's
+      # React is 19, the docs'): an install of its own (`vitest.workspace.mjs`).
+      - name: Install React 18
+        run: npm ci --prefix packages/clover/e2e/react18 --no-audit --no-fund
+
       - name: Typecheck
         run: npm run typecheck
 

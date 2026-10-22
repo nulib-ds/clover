@@ -29,7 +29,7 @@ export function SiteFooter() {
           <span>{homeHeadline}</span> <span>{homeTagline}</span>
         </p>
         <p>
-          Clover is a project of the Academic Innovation team at{" "}
+          Clover is a project of Academic Innovation at{" "}
           <a href="https://www.library.northwestern.edu/">
             Northwestern University Libraries
           </a>

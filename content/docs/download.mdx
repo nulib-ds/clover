@@ -5,6 +5,7 @@ description: "The rendering of the page in view and of the Manifest, a PDF, a te
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Download
 
@@ -37,10 +38,14 @@ of the Manifest, under "All pages", as links, each with its format. With neither
 renders nothing. Its other props go to the `div` around its groups; it takes no `as` or
 `ref`.
 
+<ApiReference elements="clover-download">
+
 | Prop           | Type     | Default | Description                                             |
 | -------------- | -------- | ------- | ------------------------------------------------------- |
 | `headingLevel` | `number` | `3`     | The groups' headings: one below the heading above them. |
 | `className`    | `string` | —       | Added to `clover-download`.                             |
+
+</ApiReference>
 
 ## Examples
 

@@ -12,6 +12,7 @@ export const viewer: ElementSpec = {
     "manifest-id": { prop: "defaultManifestId", type: "string" },
     language: { prop: "language", type: "string" },
     "search-query": { prop: "searchQuery", type: "string" },
+    annotations: { prop: "annotations", type: "data" },
     // Past 6 the titles name what they head instead (`ui/heading.ts`).
     "heading-level": { prop: "headingLevel", type: "number", min: 2 },
     items: { prop: "items", type: ["carousel", "list", "grid", "false"] },
@@ -26,7 +27,7 @@ export const viewer: ElementSpec = {
     fill: { prop: "fill", type: "boolean" },
     size: { prop: "size", type: "string" },
   },
-  properties: ["iiifContent"],
+  properties: ["iiifContent", "annotations", "request", "renderers"],
   events: {
     "clover-canvas-change": { prop: "onCanvasChange", detail: ["canvasId"] },
     "clover-manifest-change": {
@@ -65,6 +66,10 @@ export const viewerDocs: ElementDocs = {
     language: { description: "The language to read IIIF text in." },
     "search-query": {
       description: "A Content Search to run as the Manifest opens.",
+    },
+    annotations: {
+      description:
+        "Annotations to show beside the Manifest's own: a URL, or JSON (a list of URLs, or an AnnotationPage).",
     },
     "heading-level": {
       description:
@@ -118,6 +123,21 @@ export const viewerDocs: ElementDocs = {
     },
   },
   properties: {
+    annotations: {
+      type: "string | Record<string, unknown> | Array<string | Record<string, unknown>> | null",
+      description:
+        "Annotations to show beside the Manifest's own, as URLs or objects.",
+    },
+    request: {
+      type: "{ credentials?: RequestCredentials; headers?: Record<string, string>; fetch?: typeof fetch } | null",
+      description:
+        "Credentials, headers and a fetch of your own, for every request.",
+    },
+    renderers: {
+      type: "CloverRenderer[] | null",
+      description:
+        "Renderers of yours, for its stage: each claims views (canvasId, format or match) and draws one into a box of its own (render), returning what undoes it.",
+    },
     iiifContent: {
       type: "string | Record<string, unknown> | null",
       description:

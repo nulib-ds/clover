@@ -14,6 +14,9 @@ import {
   tabDocs,
 } from "./containers";
 import { canvas, canvasDocs } from "./canvas";
+
+/** The Canvas's handle's methods, for its type (`build/custom-elements.mjs`). */
+export { handleMethodDocs as HANDLE } from "./canvas";
 import { content, contentDocs } from "./content";
 import { items, itemsDocs } from "./items";
 import { label, labelDocs } from "./label";
@@ -70,6 +73,8 @@ import {
   transcript,
   transcriptDocs,
 } from "./sections";
+import { readMore, readMoreDocs } from "./read-more";
+import { tip, tipDocs } from "./tip";
 import { viewer, viewerDocs } from "./viewer";
 
 /** Every element Clover defines, with its docs, in the order the manifest lists them. */
@@ -110,6 +115,8 @@ const ALL: [ElementSpec, ElementDocs][] = [
   [splitPane, splitPaneDocs],
   [splitHandle, splitHandleDocs],
   [canvas, canvasDocs],
+  [tip, tipDocs],
+  [readMore, readMoreDocs],
 ];
 
 /** Every element Clover defines. */
@@ -150,6 +157,8 @@ export const SPECS: readonly ElementSpec[] = [
   splitPane,
   splitHandle,
   canvas,
+  tip,
+  readMore,
 ];
 
 /** What the types and the manifest say of each, by tag. Never loaded by a page. */

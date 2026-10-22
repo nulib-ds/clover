@@ -14,5 +14,7 @@ export default defineProject({
     exclude: ["src/web-components/**", "**/node_modules/**"],
     setupFiles: ["./src/setupTests.ts"],
     pool: "forks",
+    // The React this project runs, the root's (the docs', 19): `src/react.test.tsx`.
+    provide: { react: "19" },
   },
 });

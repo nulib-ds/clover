@@ -5,6 +5,7 @@ description: "The words of the recording or page in view: its captions as text, 
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Transcript
 
@@ -42,11 +43,15 @@ with a choice where there are several, and renders nothing where there is neithe
 `Default` and `Document` show it in their [Panel](/docs/panel). Its other props, and its
 `ref`, go to its element.
 
+<ApiReference elements="clover-transcript">
+
 | Prop        | Type         | Default | Description                                         |
 | ----------- | ------------ | ------- | --------------------------------------------------- |
 | `follow`    | `boolean`    | `true`  | Keep the cue playing in view while the media plays. |
 | `as`        | element type | `"div"` | The element to render, such as a `section`.         |
 | `className` | `string`     | —       | Added to `clover-transcript`.                       |
+
+</ApiReference>
 
 ## Examples
 
@@ -75,6 +80,17 @@ keyboard can reach, as here (WCAG 2.1.1).
   tabIndex={0}
   style={{ maxHeight: "20rem", overflowY: "auto" }}
 />
+```
+
+```html twin
+<!-- The element is a box no reader is told of: the page's own region names and scrolls it. -->
+<section
+  aria-label="Transcript"
+  tabindex="0"
+  style="max-height: 20rem; overflow-y: auto"
+>
+  <clover-transcript></clover-transcript>
+</section>
 ```
 
 </Example>

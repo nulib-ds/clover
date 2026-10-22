@@ -533,12 +533,14 @@ main:has(> .docs-lede) > h3 {
   }
 }
 
+/* The headline, balanced where it takes two lines (Mat, 2026-10-22). */
 .site-footer-lede > span:first-child {
   font-size: 1.618rem;
   font-weight: var(--weight-bold);
   letter-spacing: -0.02em;
   line-height: 1.2;
   margin-bottom: 0.382rem;
+  text-wrap: balance;
 }
 
 /* The sentence muted under the headline, as the hero's is (`--gray-11`, 5.9:1 and 9:1). */

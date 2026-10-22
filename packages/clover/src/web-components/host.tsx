@@ -69,10 +69,12 @@ export class Registry {
   private readonly entries = new Map<HTMLElement, Entry>();
   private readonly lists = new Map<ListKey, Entry[]>();
   private readonly listeners = new Map<ListKey, Set<() => void>>();
-  private made = 0;
   private readonly languages = new LanguageWatch((element) =>
     this.entries.has(element),
   );
+
+  /** `count`: the page's, which every copy of Clover's elements on it counts in. */
+  constructor(private readonly count: { made: number }) {}
 
   /** A list, the same array until it changes. */
   list(key: ListKey): Entry[] {
@@ -100,7 +102,7 @@ export class Registry {
         : null;
     const entry = this.entries.get(hosted.element);
     if (entry && entry.root === root) return;
-    const next = { hosted, key: entry?.key ?? ++this.made, root };
+    const next = { hosted, key: entry?.key ?? ++this.count.made, root };
     this.entries.set(hosted.element, next);
     if (entry)
       this.change(listOf(entry), (list) => list.filter((e) => e !== entry));
@@ -283,11 +285,21 @@ class Boundary extends Component<
 
 const hosts = new WeakMap<Document, Registry>();
 
+/**
+ * The count of the page's elements, kept on its document for every copy of Clover's
+ * elements there: a page that loads both entries, `web-components` and
+ * `web-components/viewer`, has two hosts, whose ids (`clover-<n>-`) must never meet.
+ */
+const COUNT = Symbol.for("clover.elements");
+
 /** The page's host, made the first time a Clover element connects to it. */
 export function hostOf(doc: Document): Registry {
   let registry = hosts.get(doc);
   if (!registry) {
-    registry = new Registry();
+    const page = doc as unknown as Record<symbol, { made: number } | undefined>;
+    if (page[COUNT])
+      console.warn("Clover is loaded twice on this page: load one entry.");
+    registry = new Registry((page[COUNT] ??= { made: 0 }));
     hosts.set(doc, registry);
     createRoot(doc.createElement("div")).render(<Host registry={registry} />);
   }

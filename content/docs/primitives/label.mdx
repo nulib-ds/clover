@@ -5,6 +5,7 @@ description: The resource's label, or the current Canvas's, in the reader's lang
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Label
 
@@ -28,12 +29,16 @@ import { Example } from "docs/components/Clover4/ViewerDocs";
 Reads `label` from the Root's resource, as plain text, and renders a `span`. It renders
 nothing while there is no label. Its other props, and its `ref`, go to its element.
 
+<ApiReference elements="clover-label">
+
 | Prop        | Type                     | Default      | Description                                                       |
 | ----------- | ------------------------ | ------------ | ----------------------------------------------------------------- |
 | `of`        | `"manifest" \| "canvas"` | `"manifest"` | Whose label: the resource's, or the Canvas the reader is on.      |
 | `label`     | language map or `string` | —            | A label to show instead of the Root's. Outside a `Root`, the one. |
 | `as`        | element type             | `"span"`     | The element to render: a heading, a paragraph, any other.         |
 | `className` | `string`                 | —            | Added to `clover-label`.                                          |
+
+</ApiReference>
 
 ## Examples
 

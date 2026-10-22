@@ -5,6 +5,7 @@ description: The Root's current view, drawn by Canvas or by a renderer of your o
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Content
 
@@ -35,12 +36,16 @@ While the Root loads, it is `aria-busy` and shows Clover's loading mark along it
 edge; `<Clover.Status loading={false} />` announces it. The table of contents is
 [`Contents`](/docs/contents).
 
+<ApiReference elements="clover-content">
+
 | Prop        | Type                  | Default    | Description                                                |
 | ----------- | --------------------- | ---------- | ---------------------------------------------------------- |
 | `renderers` | `ContentRenderer[]`   | The Root's | Components of yours that draw the views they claim.        |
 | `style`     | `React.CSSProperties` | —          | On its box, merged over its inline `height`.               |
 | `className` | `string`              | —          | Added to `clover-content`.                                 |
 | `children`  | `ReactNode`           | —          | Controls after Clover's own, or the renderer's `children`. |
+
+</ApiReference>
 
 ## Examples
 
@@ -108,6 +113,13 @@ over a placeholder, or a lone recording. Name each one as Clover's are named
 </Clover.Content>
 ```
 
+```html twin
+<!-- The toggle shows the panel while the panel is not hidden: hide it to start it shut. -->
+<clover-content>
+  <clover-panel-toggle controls="panel"></clover-panel-toggle>
+</clover-content>
+```
+
 ### Renderers of your own
 
 Give `renderers` to `Content`, or to the `Root` for every `Content` in it, and a view that
@@ -118,6 +130,23 @@ one claims, by Canvas id, painting `format` or a `match` test, is drawn by your 
 const renderers = [{ format: ["model/gltf-binary"], component: ModelViewer }];
 
 <Clover.Content renderers={renderers} />;
+```
+
+```html twin
+<clover-content></clover-content>
+
+<script type="module">
+  document.querySelector("clover-content").renderers = [
+    {
+      format: ["model/gltf-binary"],
+      render(container, { bodies }) {
+        const model = document.createElement("model-viewer");
+        model.setAttribute("src", bodies[0].id);
+        container.append(model);
+      },
+    },
+  ];
+</script>
 ```
 
 ## Previous versions

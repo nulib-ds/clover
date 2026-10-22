@@ -21,7 +21,7 @@ export const homeTitle = `${siteTitle} – ${homeHeadline.replace(/\.$/, "")}`;
 
 /** What Clover does and its two ways, plainly, in the Get started page's words. */
 const whatItDoes =
-  "builds interfaces for IIIF content in React or as a web component: a ready-made Viewer with templates, or parts to compose your own. Accessible, composable and light.";
+  "builds interfaces for IIIF content in React or as web components: a ready-made Viewer with templates, or parts to compose your own. Accessible, composable and light.";
 
 /*
  * The site's description, for any page without one of its own: what Clover is, plainly
@@ -38,7 +38,7 @@ export const homeDescription = `${homeTagline} It ${whatItDoes}`;
  * homepage's structured data (`docs/lib/agents.ts`).
  */
 export const aboutClover =
-  "Clover builds interfaces for IIIF content in React or as a web component: a Manifest, a Collection, a Canvas or a content state, read through the IIIF Presentation API, versions 2, 3 and 4. Use the ready-made Viewer with one of its templates, or compose a layout of your own from the parts it is built from; on a page without React, the Viewer is a web component. It is accessible, composable and light, and it draws images, video and sound with a renderer of its own.";
+  "Clover builds interfaces for IIIF content in React or as web components: a Manifest, a Collection, a Canvas or a content state, read through the IIIF Presentation API, versions 2, 3 and 4. Use the ready-made Viewer with one of its templates, or compose a layout of your own from the parts it is built from; on a page without React, the Viewer and its parts are web components. It is accessible, composable and light, and it draws images, video and sound with a renderer of its own.";
 
 /*
  * Every page's share card picture: the cover of the White Sewing Machine Company's 1896
@@ -245,7 +245,7 @@ export function homeStructuredData({
           "IIIF Presentation API",
           "IIIF viewer",
           "React",
-          "web component",
+          "web components",
           "accessibility",
           "WCAG 2.2",
         ],
@@ -254,7 +254,7 @@ export function homeStructuredData({
           name: siteTitle,
           applicationCategory: "DeveloperApplication",
           operatingSystem: "Any, in a web browser",
-          softwareRequirements: `React ${react}, or none for the web component`,
+          softwareRequirements: `React ${react}, or none for the web components`,
           featureList: features,
         },
       },

@@ -15,7 +15,7 @@ import { gzipSync } from "node:zlib";
 import { transformSync } from "esbuild";
 
 import { bundleAsConsumer, gzipSize } from "./consumer-bundle.mjs";
-import { PAGES, pageGzip } from "./element-size.mjs";
+import { PAGES, pageGzip, viewerEntryGzip } from "./element-size.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = resolve(root, "dist");
@@ -160,6 +160,9 @@ export async function measure() {
     sizes[key] = pageGzip(tags);
     rows.push([name, key, sizes[key]]);
   }
+  // `@nulib/clover/web-components/viewer`: a page with a Viewer alone, built whole.
+  sizes.viewerEntryGzip = viewerEntryGzip();
+  rows.push(["<clover-viewer>, its own entry", "viewerEntryGzip", sizes.viewerEntryGzip]);
   const { size: rootAlone } = await initialGzip("Root");
   sizes.parts = {};
   for (const part of PARTS) {

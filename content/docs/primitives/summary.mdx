@@ -5,6 +5,7 @@ description: The summary of the resource, or of the current Canvas, cut to five 
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Summary
 
@@ -30,12 +31,16 @@ Reads `summary` from the Root's resource, as plain text or IIIF's
 Read more button under it. It renders nothing while there is no summary. Its other props
 go to its element.
 
+<ApiReference elements="clover-summary">
+
 | Prop        | Type                     | Default      | Description                                                         |
 | ----------- | ------------------------ | ------------ | ------------------------------------------------------------------- |
 | `of`        | `"manifest" \| "canvas"` | `"manifest"` | Whose summary: the resource's, or the Canvas the reader is on.      |
 | `value`     | language map or `string` | —            | A summary to show instead of the Root's. Outside a `Root`, the one. |
 | `as`        | element type             | `"p"`        | The element to render.                                              |
 | `className` | `string`                 | —            | Added to `clover-summary`.                                          |
+
+</ApiReference>
 
 ## Examples
 
@@ -83,6 +88,12 @@ CSS while it is not `data-read-more="open"`.
 <Clover.ReadMore>
   <p className="my-note">{note}</p>
 </Clover.ReadMore>
+```
+
+```html twin
+<clover-read-more>
+  <p class="my-note">…</p>
+</clover-read-more>
 ```
 
 ```css

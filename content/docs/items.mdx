@@ -6,6 +6,7 @@ description: A sequence and where the reader is in it, as thumbnails in a carous
 import { CollectionItemsDemo } from "docs/components/Clover4/Demos";
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
 
 # Items
 
@@ -32,6 +33,8 @@ Inside a `Root`, it lists the resource's views (a spread is one item), and selec
 goes there: a listbox whose selection follows focus and the arrow keys. On its own, it
 lists a Collection's members as links.
 
+<ApiReference elements="clover-items">
+
 | Prop            | Type                                        | Default                         | Description                                                  |
 | --------------- | ------------------------------------------- | ------------------------------- | ------------------------------------------------------------ |
 | `layout`        | `"carousel" \| "list" \| "grid" \| "pager"` | `"carousel"`                    | Thumbnails in a row, a column or a grid, or one at a time.   |
@@ -46,6 +49,8 @@ lists a Collection's members as links.
 | `renderItem`    | `(item, { selected }) => ReactNode`         | —                               | Your own item in place of the figure.                        |
 | `request`       | `{ credentials, headers, fetch }`           | The Root's                      | On its own: for every request.                               |
 | `language`      | `string`                                    | The reader's                    | On its own: the language to read IIIF text in.               |
+
+</ApiReference>
 
 ## Examples
 
