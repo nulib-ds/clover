@@ -723,6 +723,51 @@ Begun October 22, 2026: the release. Resume from this list.
    written in for 3.x's, "about 530 kB". The docs' build measures it now, from the
    release the 3.x pages document (`docs/lib/earlier-size.ts`): 563 kB.
 
+## Per-part CSS
+
+Begun October 22, 2026 (Mat: "start per-part CSS for the elements"), the deferral left
+from phase 3: a page of labels loaded the whole stylesheet, 10 kB of CSS it mostly did not
+use.
+
+- [x] Each sheet a module, imported beside the modules that draw what it styles
+      (`build/clover-sheets.mjs`, `OWNERS`), registering with the document's registry in
+      its place in the stylesheet's order (`addSheet`, `data-clover-index`).
+- [x] The light parts' sheets apart, in `shared`; the rest in one `styles` chunk, as a few
+      runs; media's, maps' and the other templates' with their code. The watcher for the
+      deferred runs is gone.
+- [x] Each element checked alone against the whole stylesheet (`e2e/check-sheets.mjs`).
+- [x] Sizes, budgets, the build's checks and the elements' tests, the changelog,
+      AGENTS.md.
+
+### What it found (October 22, 2026)
+
+1. **Small sheets compress badly apart.** Each sheet in its owner's chunk made a page of
+   labels 10 kB lighter and a viewer's 4 kB heavier: thirty sheets gzip to 19.1 kB apart
+   and to 10.1 kB as one. So most sheets still load together, in one chunk, as runs
+   between the light parts' sheets, which load apart: a page of labels loads 31.2 kB, from
+   40.8; a viewer's 107.5 kB, from 107.3; the Viewer's own entry, which keeps no sheet
+   apart, 90.6 kB, from 90.8; the entry 5.3 kB, from 5.8.
+2. **Owners are what draws a class, not what finds it.** A sheet's classes are written by
+   the modules that draw them and by modules that only look for them (`closest`,
+   `querySelector`); only the first own it. A rule that needs an ancestor's class too
+   needs only the rarer owner, so `Default.css` loads with Default, never with every
+   Items. Thirteen sheets have owners beyond their own module, some found only by
+   reading the rules: the renderer's overlay layer, on every Canvas, is styled in the
+   hotspots' sheet.
+3. **A rule in another part's sheet costs that part's page.** `.clover-link-format`, which
+   only Primitives draws, was in `Panel.css`, so a page of property parts loaded all four
+   runs, 46.5 kB. Beside the links that write it, the page is 36.8 kB.
+4. **Rollup puts a manual chunk's unclaimed dependencies in it.** The host's sheet imports
+   the registry, so the registry moved into `shared`, and the entry, which needs the
+   registry, loaded `shared` up front: 29.3 kB for a page with no element drawn. The
+   entry's own modules now have a chunk of their own (`index`).
+5. **Nothing watches the page for styles now.** Media's, maps' and the other templates'
+   sheets come with their lazy code, as the elements' tests show for Document's.
+6. **Checked**: 30 pages, each element alone or in a natural group, at rest and with every
+   disclosure and tab opened, in light and dark. Adding the whole stylesheet changed no
+   node's computed style. jsdom cannot read some of the stylesheet's selectors, so the
+   elements' tests take each sheet's key and place without its CSS.
+
 ## Decisions for Mat
 
 | Decision                        | Recommended                                                                                                                   | Instead                                                              |

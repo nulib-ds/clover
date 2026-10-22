@@ -8,12 +8,12 @@
   "templatesStylesGzip": 2100,
   "mapInitialGzip": 18100,
   "mapOnDemandGzip": 300000,
-  "webComponentsGzip": 107300,
-  "labelPageGzip": 40900,
-  "elementsEntryGzip": 5900,
-  "composedPageGzip": 92900,
-  "layoutPageGzip": 106500,
-  "canvasElementGzip": 76700,
-  "documentElementGzip": 113700,
-  "viewerEntryGzip": 90800
+  "webComponentsGzip": 107500,
+  "labelPageGzip": 31200,
+  "elementsEntryGzip": 5400,
+  "composedPageGzip": 93000,
+  "layoutPageGzip": 106700,
+  "canvasElementGzip": 76800,
+  "documentElementGzip": 113600,
+  "viewerEntryGzip": 90600
 }

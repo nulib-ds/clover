@@ -2,6 +2,12 @@
 // esbuild, which reads the elements' specs, runs in Node, not jsdom.
 import { withCodeFlavors } from "./code-flavors.mjs";
 
+/*
+ * The first twin reads the elements' specs, through esbuild: some seconds while the other
+ * projects run beside it (the package's tests run twice, on React 19 and 18).
+ */
+vi.setConfig({ testTimeout: 20_000 });
+
 describe("A page's examples in both flavors", () => {
   it("puts each React fence beside its twin, the frame's resource for {url}", async () => {
     const page = [

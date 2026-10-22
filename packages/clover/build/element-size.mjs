@@ -1,9 +1,10 @@
 /**
  * What a page loads for Clover's elements, measured from the built files: the entry, which
- * defines every element as a stub, and, once one connects, the host, the stylesheet and
- * each connected element's code, every chunk each of those imports statically, gzipped.
- * Lazy chunks past those (MapLibre, hls.js, a panel's sections, the media and map styles)
- * are left out. The build's chunk map (`.vite/manifest.json`, `build.manifest` in
+ * defines every element as a stub, and, once one connects, the host and each connected
+ * element's code, every chunk each of those imports statically, gzipped: Clover's
+ * stylesheet with them, each sheet in the chunk of the code that draws what it styles
+ * (`clover-sheets.mjs`). Lazy chunks past those (MapLibre, hls.js, a panel's sections,
+ * media and maps, each with its styles) are left out. The build's chunk map (`.vite/manifest.json`, `build.manifest` in
  * `web-components.config.mjs`) says which chunk holds what.
  * `web-components.test.mjs` holds each page to its budget, and `sizes.mjs` records them
  * for the docs.
@@ -17,7 +18,6 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const ELEMENT_DIR = join(root, "dist/web-components");
 
 const ENTRY = "src/web-components/index.ts";
-const STYLES = "virtual:clover-styles";
 
 /**
  * The chunk every page with an element loads (`sharedChunk` in
@@ -45,7 +45,7 @@ function elementKey(map, tag) {
 
 /**
  * The files a page loads, with the given elements on it: the entry and what it imports,
- * and once one connects, the host, the stylesheet and each element's chunk, with theirs.
+ * and once one connects, the host and each element's chunk, with theirs and their sheets.
  */
 export function pageFiles(tags = [], dir = ELEMENT_DIR) {
   const map = readMap(dir);
@@ -59,7 +59,7 @@ export function pageFiles(tags = [], dir = ELEMENT_DIR) {
   visit(ENTRY);
   if (tags.length) {
     // What the first element to connect loads, whichever it is.
-    [sharedKey(map), STYLES].forEach(visit);
+    visit(sharedKey(map));
     // An element by its tag; or a module by its key (a template, a deferred run).
     tags.forEach((tag) => visit(map[tag] ? tag : elementKey(map, tag)));
   }
@@ -71,8 +71,8 @@ export const VIEWER_DIR = join(root, "dist/web-components/viewer");
 
 /**
  * What a page with only a `<clover-viewer>` loads from `@nulib/clover/web-components/
- * viewer`: the entry and what it imports, and the host and the stylesheet that load as
- * the viewer connects, from wherever they are imported. Its lazy parts are left out, as
+ * viewer`: the entry and what it imports, and the host that loads as the viewer connects,
+ * with what it imports, the sheets among them. Its lazy parts are left out, as
  * a page's are.
  */
 export function viewerEntryFiles(dir = VIEWER_DIR) {
@@ -93,7 +93,7 @@ export function viewerEntryFiles(dir = VIEWER_DIR) {
       for (const later of map[key].dynamicImports ?? [])
         if (
           !keys.has(later) &&
-          (later.endsWith("web-components/host.tsx") || later === STYLES)
+          later.endsWith("web-components/host.tsx")
         ) {
           visit(later);
           grew = true;
@@ -156,14 +156,10 @@ export const PAGES = [
     "canvasElementGzip",
     ["clover-canvas", "src/components/Canvas/LoadedCanvas.tsx"],
   ],
-  // A viewer in Document: its template and the templates' styles, as each loads.
+  // A viewer in Document: its template, its styles with it.
   [
     "A <clover-viewer> in Document",
     "documentElementGzip",
-    [
-      "clover-viewer",
-      "src/templates/document/Document.tsx",
-      "virtual:clover-styles/templates",
-    ],
+    ["clover-viewer", "src/templates/document/Document.tsx"],
   ],
 ];

@@ -1,54 +1,56 @@
-/** A run of Clover's stylesheet: its CSS, or, for one only some pages need, its loader. */
+/** A stylesheet handed to the elements whole: its key, and its CSS. */
 export interface StyleRun {
   key: string;
-  css?: string;
-  /** Fetched the first time an element holds a match for `when`. */
-  load?: () => Promise<string>;
-  /** A selector for what needs the run, in an attribute selector if drawn before it. */
-  when?: string;
+  css: string;
 }
 
 export interface ElementAssets {
   /**
-   * Clover's stylesheet, injected once per document: whole, or in its runs, in order, or
-   * a loader for them, called the first time an element connects. A run with `load` is
-   * put in its place among them once it arrives, so its rules keep their place in the
-   * cascade.
+   * Stylesheets injected once per document, first, before Clover's own sheets: whole, or
+   * in runs, in order, or a loader for them, called the first time an element connects.
+   * The build hands none: each of Clover's sheets loads with the code that draws what it
+   * styles, and registers itself (`addSheet`). A test hands its own.
    */
-  styles: string | StyleRun[] | (() => Promise<StyleRun[]>);
-  /** MapLibre's stylesheet, injected the first time a map shows. */
-  mapStyles?: () => Promise<string>;
+  styles?: string | StyleRun[] | (() => Promise<StyleRun[]>);
   /** Where MapLibre's worker is served from (the build emits it beside the element). */
   mapWorkerUrl?: string;
 }
 
-interface Deferred {
-  key: string;
-  load: () => Promise<string>;
-  when: string;
-  after: string[];
+/** Clover's sheets as their code has brought them, by key: each one's place, and CSS. */
+const sheets = new Map<string, { index: number; css: string }>();
+
+/** Every document's registry, each given every sheet. */
+const live = new Set<StyleRegistry>();
+
+/**
+ * One of Clover's sheets, brought by the code that draws what it styles: the elements'
+ * build imports it beside that code (`build/clover-sheets.mjs`), so it is in the page
+ * before anything the code draws. It goes into every document with a registry, in its
+ * place in the cascade (`index`, its place in `src/styles/clover.css`'s order), and into
+ * any document's made later.
+ */
+export function addSheet(index: number, key: string, css: string) {
+  if (sheets.has(key)) return;
+  sheets.set(key, { index, css });
+  for (const registry of live) registry.place(key, index, css);
 }
 
 /**
- * Clover's styles in one document, whichever elements it holds: each run injected once,
- * in order, and the runs only media and maps need loaded the first time an element holds
- * what they style, watched by one observer for the whole document.
+ * Clover's styles in one document, whichever elements it holds: each sheet injected once,
+ * as the code that needs it arrives, and kept in the stylesheet's order, so every rule
+ * keeps its place in the one `clover` layer. (Not sublayers: a later sublayer would beat
+ * an earlier one's more specific rule.)
  */
 export class StyleRegistry {
-  /** Resolves once the stylesheet's runs are in the document. */
+  /** Resolves once the stylesheets handed in whole are in the document. */
   readonly ready: Promise<void>;
   private readonly injected = new Set<string>();
-  private waiting: Deferred[] = [];
-  private marks: string[] = [];
-  private observer: MutationObserver | null = null;
-  private readonly watched = new Set<Element>();
-  private known = false;
 
   constructor(
     private readonly doc: Document,
     assets: ElementAssets,
   ) {
-    const styles = assets.styles;
+    const styles = assets.styles ?? [];
     this.ready = (
       typeof styles === "function"
         ? styles()
@@ -57,68 +59,32 @@ export class StyleRegistry {
               ? [{ key: "clover", css: styles }]
               : styles,
           )
-    ).then((runs) => this.start(runs, assets));
-  }
-
-  private start(runs: StyleRun[], assets: ElementAssets) {
-    /** The runs before one, nearest first: where it goes once it arrives. */
-    const earlier = (run: StyleRun) =>
-      runs
-        .slice(0, runs.indexOf(run))
-        .reverse()
-        .map(({ key }) => key);
-    runs.forEach((run) => {
-      if (run.css !== undefined) this.inject(run.key, run.css, earlier(run));
-    });
-    this.waiting = [
-      ...runs.flatMap((run) =>
-        run.load && run.when
-          ? [
-              {
-                key: run.key,
-                load: run.load,
-                when: run.when,
-                after: earlier(run),
-              },
-            ]
-          : [],
-      ),
-      ...(assets.mapStyles
-        ? [
-            {
-              key: "maplibre",
-              load: assets.mapStyles,
-              when: ".clover-geomap",
-              after: [],
-            },
-          ]
-        : []),
-    ];
-    // What is drawn before a run's own code: the attributes its `when` names.
-    this.marks = [
-      ...new Set(
-        this.waiting.flatMap(({ when }) =>
-          [...when.matchAll(/\[([\w-]+)/g)].map((match) => match[1]),
+    ).then((runs) => {
+      // In order, each after the one before it, the first first in `<head>`.
+      runs.forEach((run, at) =>
+        this.inject(
+          run.key,
+          run.css,
+          runs
+            .slice(0, at)
+            .reverse()
+            .map(({ key }) => key),
         ),
-      ),
-    ];
-    this.known = true;
-    // What connected while the runs were on their way.
-    [...this.watched].forEach((element) => this.observe(element));
-    this.look();
+      );
+    });
+    live.add(this);
+    sheets.forEach(({ index, css }, key) => this.place(key, index, css));
   }
 
   /**
    * Put a stylesheet in the document once: first in `<head>`, so the page's own CSS comes
-   * after it, or right after the first of `after` (Clover's earlier runs, nearest first)
+   * after it, or right after the first of `after` (Clover's earlier styles, nearest first)
    * that is there.
    */
   inject(key: string, css: string, after: string[] = []) {
     if (this.injected.has(key)) return;
     this.injected.add(key);
-    const style = this.doc.createElement("style");
-    style.dataset.clover = key;
-    style.textContent = css;
+    const style = this.style(key, css);
     const before = after
       .map((earlier) =>
         this.doc.head.querySelector(`style[data-clover="${earlier}"]`),
@@ -128,49 +94,39 @@ export class StyleRegistry {
     else this.doc.head.prepend(style);
   }
 
-  /** Watch an element for what the deferred runs style, until every one has loaded. */
-  watch(element: Element) {
-    if (this.watched.has(element)) return;
-    if (this.known && !this.waiting.length) return;
-    this.watched.add(element);
-    if (!this.known) return;
-    this.observe(element);
-    this.look();
+  /**
+   * One of Clover's sheets, in its place among them: after the nearest earlier one in the
+   * document, or else before the nearest later one, or else after Clover's other styles,
+   * first in `<head>`, so the page's own CSS comes after it.
+   */
+  place(key: string, index: number, css: string) {
+    if (this.injected.has(key)) return;
+    this.injected.add(key);
+    const style = this.style(key, css);
+    style.dataset.cloverIndex = String(index);
+    const placed = [
+      ...this.doc.head.querySelectorAll<HTMLStyleElement>(
+        "style[data-clover-index]",
+      ),
+    ];
+    const earlier = placed
+      .filter((each) => Number(each.dataset.cloverIndex) < index)
+      .at(-1);
+    const later = placed.find(
+      (each) => Number(each.dataset.cloverIndex) > index,
+    );
+    const ours = this.doc.head.querySelectorAll("style[data-clover]");
+    if (earlier) earlier.after(style);
+    else if (later) later.before(style);
+    else if (ours.length) ours[ours.length - 1].after(style);
+    else this.doc.head.prepend(style);
   }
 
-  /** Stop watching an element that has left the page. */
-  unwatch(element: Element) {
-    this.watched.delete(element);
-  }
-
-  private observe(element: Element) {
-    if (!this.waiting.length) return;
-    this.observer ??= new MutationObserver(() => this.look());
-    this.observer.observe(element, {
-      childList: true,
-      subtree: true,
-      ...(this.marks.length
-        ? { attributes: true, attributeFilter: this.marks }
-        : {}),
-    });
-  }
-
-  private look() {
-    for (const sheet of [...this.waiting]) {
-      // In an element, or the element itself (a viewer naming its template).
-      const needed = [...this.watched].some(
-        (element) =>
-          element.isConnected &&
-          (element.matches(sheet.when) || element.querySelector(sheet.when)),
-      );
-      if (!needed) continue;
-      this.waiting.splice(this.waiting.indexOf(sheet), 1);
-      void sheet.load().then((css) => this.inject(sheet.key, css, sheet.after));
-    }
-    if (!this.waiting.length) {
-      this.observer?.disconnect();
-      this.watched.clear();
-    }
+  private style(key: string, css: string) {
+    const style = this.doc.createElement("style");
+    style.dataset.clover = key;
+    style.textContent = css;
+    return style;
   }
 }
 

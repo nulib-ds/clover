@@ -29,8 +29,6 @@ vi.mock("../../lib/renderer", async (importOriginal) => ({
 }));
 
 let viewport: ReturnType<typeof stubViewport>;
-/** The stylesheet in runs, as the build hands it: the middle one only for a map. */
-const loadMapRun = vi.fn(async () => ".clover-geomap{}");
 type CloverViewer = HTMLElement & { iiifContent: unknown };
 /** Made, and given its content, before the element is defined: a script loaded late. */
 let early: CloverViewer;
@@ -38,11 +36,7 @@ beforeAll(() => {
   early = document.createElement("clover-viewer") as CloverViewer;
   early.iiifContent = bookJson;
   defineCloverElements({
-    styles: [
-      { key: "clover-1", css: ".clover-root{}" },
-      { key: "map", when: ".clover-geomap", load: loadMapRun },
-      { key: "clover-2", css: ".clover-status{}" },
-    ],
+    styles: [{ key: "clover-1", css: ".clover-root{}" }],
   });
 });
 beforeEach(() => {
@@ -87,25 +81,40 @@ describe("<clover-viewer>", () => {
     ).toHaveLength(1);
   });
 
-  it("loads a run only some pages need when what needs it draws, in its place", async () => {
+  it("loads each of Clover's sheets with the code that draws what it styles, in their order", async () => {
     const element = mount();
     await drawn(element);
-    // The stylesheet's runs, in order (the elements' own display rules aside).
-    const order = () =>
-      [...document.head.querySelectorAll("style[data-clover]")]
-        .map((style) => (style as HTMLElement).dataset.clover)
-        .filter((key) => key !== "elements");
-    expect(order()).toEqual(["clover-1", "clover-2"]);
-    expect(loadMapRun).not.toHaveBeenCalled();
-
-    const map = document.createElement("div");
-    map.className = "clover-geomap";
-    element.querySelector(".clover-root")!.append(map);
-    await Promise.resolve();
-    await waitFor(() =>
-      expect(order()).toEqual(["clover-1", "map", "clover-2"]),
+    const sheets = () => [
+      ...document.head.querySelectorAll<HTMLElement>(
+        "style[data-clover-index]",
+      ),
+    ];
+    const keys = sheets().map((style) => style.dataset.clover);
+    // Every element's scale, a part's own sheet, and the runs the rest ride in.
+    expect(keys).toEqual(
+      expect.arrayContaining(["styles/scale", "components/Label/Label"]),
     );
-    expect(loadMapRun).toHaveBeenCalledTimes(1);
+    expect(keys.some((key) => key!.startsWith("styles-"))).toBe(true);
+    // Nothing it does not draw: no map, no media, no other template.
+    for (const absent of [
+      "maplibre",
+      "components/Map/Map",
+      "components/Canvas/media/Transport",
+      "templates/document/Document",
+    ])
+      expect(keys).not.toContain(absent);
+    // In the stylesheet's order, after what was handed in whole.
+    const indexes = sheets().map((style) => Number(style.dataset.cloverIndex));
+    expect(indexes).toEqual([...indexes].sort((a, b) => a - b));
+    expect(
+      document.head
+        .querySelector('style[data-clover="clover-1"]')!
+        .compareDocumentPosition(sheets()[0]) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    // Each once, however many viewers.
+    await drawn(mount());
+    expect(sheets()).toHaveLength(keys.length);
   });
 
   it("maps attributes to the Viewer's props, `false`, in any case, turning a part off", async () => {

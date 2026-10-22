@@ -12,6 +12,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
 
+import { SHEETS } from "./clover-sheets.mjs";
 import { manifestOf, readSpecs, typesOf } from "./custom-elements.mjs";
 import {
   ELEMENT_DIR as dir,
@@ -58,8 +59,8 @@ test("a page loads only the elements it uses", () => {
   /*
    * A page of labels never loads a Canvas (its renderer), or the Viewer's template; a
    * Canvas alone, once it draws (its renderer loads then), not the template. The template
-   * is known by its class as its code writes it, quoted: the stylesheet, which every page
-   * loads, has it as a selector, and the entry's spec names its props.
+   * is known by its class as its code writes it, quoted: its stylesheet has it as a
+   * selector, and the entry's spec names its props.
    */
   const CANVAS = "webglcontextlost";
   const TEMPLATE = '"clover-template-default"';
@@ -71,6 +72,52 @@ test("a page loads only the elements it uses", () => {
   );
   assert.ok(canvas.includes(CANVAS) && !canvas.includes(TEMPLATE));
   assert.ok(pageSource(VIEWER).includes(TEMPLATE));
+});
+
+test("a page loads the sheets of what it draws, and most of the stylesheet with the first part that draws any of it", () => {
+  // The sheets a page's files register, by key (`addSheet`, `clover-sheets.mjs`).
+  const sheetsOf = (tags) => {
+    const source = pageSource(tags);
+    return [
+      ...SHEETS.map(({ key }) => key),
+      ...["styles-1", "styles-2", "styles-3", "styles-4"],
+    ].filter((key) => source.includes(`"${key}"`));
+  };
+  // A page of labels: the light parts' sheets, which every page loads, and no run.
+  const labels = sheetsOf(LABELS);
+  assert.deepEqual(labels, [
+    "styles/scale",
+    "ui/ReadMore",
+    "components/Primitives/Primitives",
+    "components/Label/Label",
+    "components/Status/Status",
+  ]);
+  // A viewer: the runs too, its template among them; never what media, maps or the other
+  // templates bring, which load as those draw.
+  const viewer = sheetsOf(VIEWER);
+  for (const run of ["styles-1", "styles-2", "styles-3", "styles-4"])
+    assert.ok(viewer.includes(run), `a viewer's page must load ${run}`);
+  for (const lazy of [
+    "maplibre",
+    "components/Map/Map",
+    "components/Canvas/media/MediaStage",
+    "components/Canvas/media/Transport",
+    "templates/document/Document",
+    "templates/gallery/Gallery",
+  ])
+    assert.ok(!viewer.includes(lazy), `${lazy} must load as it draws`);
+  // Each lazy sheet rides with its code, in a chunk a page loads only for it.
+  const files = readdirSync(dir).filter((file) => file.endsWith(".mjs"));
+  const holding = (key) =>
+    files.filter((file) =>
+      readFileSync(join(dir, file), "utf8").includes(`"${key}"`),
+    );
+  assert.ok(holding("maplibre").some((file) => file.startsWith("MapView-")));
+  assert.ok(
+    holding("templates/document/Document").some((file) =>
+      file.startsWith("Document-"),
+    ),
+  );
 });
 
 test("MapLibre and hls.js load only on demand; the worker is found from any path", () => {
@@ -93,7 +140,10 @@ test("MapLibre and hls.js load only on demand; the worker is found from any path
 
 test("the Viewer's own entry is built whole, and a page with it alone loads less", (t) => {
   for (const file of ["index.mjs", "index.umd.js", "index.d.mts"])
-    assert.ok(existsSync(join(VIEWER_DIR, file)), `viewer/${file} must be built`);
+    assert.ok(
+      existsSync(join(VIEWER_DIR, file)),
+      `viewer/${file} must be built`,
+    );
   const files = [...viewerEntryFiles()];
   const source = files
     .map((file) => readFileSync(join(VIEWER_DIR, file), "utf8"))

@@ -77,20 +77,10 @@ vi.mock("maplibre-gl", () => ({
   setWorkerUrl: vi.fn(),
 }));
 
-const TEMPLATES_RUN = ".clover-template-document{}";
-const loadTemplates = vi.fn(async () => TEMPLATES_RUN);
-
 let viewport: ReturnType<typeof stubViewport>;
 beforeAll(() =>
   defineCloverElements({
-    styles: [
-      { key: "clover-1", css: ".clover-root{}" },
-      {
-        key: "templates",
-        when: 'clover-viewer:is([template="document" i], [template="gallery" i])',
-        load: loadTemplates,
-      },
-    ],
+    styles: [{ key: "clover-1", css: ".clover-root{}" }],
   }),
 );
 beforeEach(() => {
@@ -197,7 +187,12 @@ describe("<clover-viewer template>", () => {
     return element;
   };
 
-  it("draws the template it names, its stylesheet loading beside it, after Clover's", async () => {
+  it("draws the template it names, its stylesheet with it, after Clover's own", async () => {
+    const sheet = () =>
+      document.head.querySelector<HTMLElement>(
+        'style[data-clover="templates/document/Document"]',
+      );
+    expect(sheet()).toBeNull();
     const element = viewer({ template: "document" });
     await waitFor(
       () =>
@@ -206,14 +201,15 @@ describe("<clover-viewer template>", () => {
         ).not.toBeNull(),
       { timeout: 4000 },
     );
-    expect(loadTemplates).toHaveBeenCalledTimes(1);
-    await waitFor(() =>
-      expect(
-        [...document.head.querySelectorAll("style[data-clover]")]
-          .map((style) => (style as HTMLElement).dataset.clover)
-          .filter((key) => key !== "elements"),
-      ).toEqual(["clover-1", "templates"]),
-    );
+    // Brought by the template's code, after Clover's own sheets, as `templates.css` is.
+    const sheets = [
+      ...document.head.querySelectorAll<HTMLElement>(
+        "style[data-clover-index]",
+      ),
+    ];
+    expect(sheets.at(-1)).toBe(sheet());
+    const indexes = sheets.map((style) => Number(style.dataset.cloverIndex));
+    expect(indexes).toEqual([...indexes].sort((a, b) => a - b));
   });
 
   it("hands a template its own attributes, and none of another's", async () => {

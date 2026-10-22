@@ -296,8 +296,3 @@ button.clover-about-open:focus-visible {
   font-size: inherit;
   font-weight: 500;
 }
-
-.clover-link-format {
-  color: var(--clover-color-primary-muted, #26292b);
-  font-size: var(--clover-text-s);
-}

@@ -1167,7 +1167,7 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     `clover-canvas-change`), bubbling and composed, their `detail` the callback's
     arguments by name (or its first as it is); a cancelable one, canceled by the page,
     prevents the default of the event the part handed the callback last (Items' link).
-  - **Lazy stubs.** `index.ts` (the entry, about 3.5 kB) defines every element from its
+  - **Lazy stubs.** `index.ts` (the entry, 5.3 kB) defines every element from its
     spec (`base.ts`, `define.ts`): attributes and properties are read at once, a
     property set before the element was defined (its script loads async) is taken in
     `connectedCallback`, and only once one connects do its code, the host and the
@@ -1215,22 +1215,38 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     a status's slots are not shown where written. Every rule is `:not([hidden])`: an
     author's style beats the browser's `[hidden]`, and `<clover-items hidden>` showed. Never let an attribute name a tag
     freely (`as` on `<clover-label>` is a list: `script` would write one).
-  - **Styles** come from the document's registry (`styles.ts`): the stylesheet's runs
-    (`virtual:clover-styles`, a plugin in `build/web-components.config.mjs` that reads
-    `src/styles/clover.css` in order and cuts it into `clover-1`, `media`, `clover-2`,
-    `map`, `clover-3`) load with the first element and go in once, first in `<head>`;
-    the `media`, `map` and `templates` runs (`DEFERRED` in `index.ts`: a
-    `.clover-canvas[data-media]` or `[data-animated]`, drawn before the player's own
-    code; `.clover-geomap`; a `<clover-viewer>` naming Document or Gallery, matched on
-    the element itself as well as within it, `look()` in `styles.ts`) load when an
-    element holds what they style, one observer
-    watching every root and every element drawn by itself, and each goes after the
-    nearest earlier run, so every rule keeps its place in one `clover` layer. Never
-    sublayers: a later sublayer beats an earlier one's more specific rule. A stylesheet
-    only media or a map needs goes in `DEFERRED`, listed with its kind in `clover.css`;
-    the plugin throws if a kind's sheets are not adjacent. The `templates` run is
-    `src/templates/templates.css`'s sheets, Document's and Gallery's, which the config
-    appends; Default's are in `clover.css`, so they come with the element.
+  - **Styles, by part** (`build/clover-sheets.mjs`). Each sheet of the stylesheet
+    (`src/styles/clover.css`'s list, then `src/templates/templates.css`'s, MapLibre's
+    first) is a module the elements' build imports beside the modules that draw what it
+    styles (`OWNERS`; a sheet not named there is its own module's, `Items.css` with
+    `Items.tsx`). It rides in their chunk and registers with the document's registry
+    (`addSheet`, `styles.ts`) before anything they draw, and the registry puts it in its
+    place by its index in that order (`data-clover-index`), first in `<head>`, so every
+    rule keeps its place in the one `clover` layer. Never sublayers: a later sublayer
+    beats an earlier one's more specific rule.
+    - Where they ride: the light parts' sheets (`APART`: the scale, Label, Primitives,
+      ReadMore, Status) in `shared`, so a page of labels or of properties loads only
+      those; media's, maps' and the other templates' (`LAZY`) in their lazy code's
+      chunks, so they load as those draw; every other sheet in one `styles` chunk, as a
+      few runs (`styles-1`…, the sheets between two that load apart, each run one string,
+      minified as one), with the first part that draws any of them. Thirty small sheets
+      gzip to 19.1 kB apart and to 10.1 kB as one: a sheet in each owner's chunk cost a
+      viewer's page 4 kB. `web-components/viewer` builds with `whole`, no sheet apart.
+    - Owners: a module that only queries a class (`closest(".clover-tip")`) is none; a
+      rule that needs an ancestor's class too needs only the rarer owner (`Default.css`,
+      Default's alone, never Items'). The build throws on a sheet with no owner or an
+      owner that does not exist. A rule goes in the sheet of what it styles:
+      `.clover-link-format` was in `Panel.css`, and a page of property parts loaded the
+      panel's runs for it.
+    - Check a new part or sheet with `e2e/check-sheets.mjs`: each element alone, its
+      nodes' computed styles with its own sheets and with the whole stylesheet, at rest
+      and opened, light and `--dark`. A node that changes is a module missing from
+      `OWNERS`. On October 22, 2026, 30 pages, none changed.
+    - The `shared` chunk never takes what the entry holds (the `index` manual chunk):
+      Rollup pulls a manual chunk's unclaimed dependencies into it, so the registry, which
+      the host's sheet imports, came into `shared`, and the entry loaded it up front.
+    - The tests build with `rules: false`: each sheet's key and place with no CSS, which
+      jsdom's selector engine cannot read.
   - **The build** (`build/web-components.config.mjs`) aliases React to Preact
     (`build/preact.mjs`), strips each chunk's whitespace, which Vite leaves in an ES
     library (`minifyWhitespace`), puts what every page with an element loads in one
@@ -1272,9 +1288,10 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     `size-budget.json`: the entry, a `<clover-viewer>` (`webComponentsGzip`, which Get
     started states), labels alone and the four parts. Loading per element has a price
     that grows with the elements: Rollup cuts the code the parts share by which elements
-    reach it, so a `<clover-viewer>` page loads 39 files, 107.3 kB gzipped one by one
-    against 97.3 kB as one (2026-10-22, 38 elements, with `<clover-read-more>` since
-    phase 7 and the page's one count of its elements since phase 8; 107.1 kB and 97.1 kB
+    reach it, so a `<clover-viewer>` page loads 39 files, 107.5 kB gzipped one by one
+    against 97.6 kB as one (2026-10-22, its sheets by part; 107.3 kB and 97.3 kB with the
+    stylesheet whole, 38 elements, with `<clover-read-more>` since phase 7 and the page's
+    one count of its elements since phase 8; 107.1 kB and 97.1 kB
     at 37, the root's API among the shared chunk since phase 6; 106.3 kB before it, 36
     elements: `<clover-canvas>` shares the Canvas with the stage and the viewer; 36 files
     and 104.5 kB at 35, 31 and 102.3 kB at 29: the
@@ -1287,16 +1304,14 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     with it). A second shared
     chunk for the light parts, and `experimentalMinChunkSize` at 1, 3 and 8 kB, were each
     tried and made the entry or the pages larger.
-  - **The stylesheet loads whole**, with the first element: a page of labels loads
-    10 kB of CSS it mostly does not use. Each part's CSS cannot be found from its module
-    graph, since the families (`ui/Button.css`, `ui/Tip.css`) list their members' rules,
-    which their members never import; splitting it needs a table of each element's
-    sheets, checked by eye for each part. Not done yet. `build/web-components.test.mjs`
-    asserts Preact not React, that a page of labels loads no Canvas or template and a
-    Canvas alone no template (the template known by its class, quoted, as its code
-    writes it: the stylesheet has it as a selector, and the entry's spec names its props),
-    MapLibre and hls.js deferred, the worker relative, the types and the manifest the
-    specs', and each budget. CI builds the package and runs these.
+  - `build/web-components.test.mjs` asserts Preact not React, that a page of labels
+    loads no Canvas or template and a Canvas alone no template (the template known by
+    its class, quoted, as its code writes it: its stylesheet has it as a selector, and
+    the entry's spec names its props), the sheets each page loads (a page of labels the
+    light parts' alone, no run; a viewer the runs, never media's, maps' or the other
+    templates', which ride with their code), MapLibre and hls.js deferred, the worker
+    relative, the types and the manifest the specs', and each budget. CI builds the
+    package and runs these.
   - Tested under Preact, as it ships (`vitest.preact.config.mjs`, the build's aliases,
     DOM Testing Library rather than React's; the package's own project leaves these
     out): `elements/viewer.test.tsx`, `elements/elements.test.tsx`,

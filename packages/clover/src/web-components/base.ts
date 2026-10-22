@@ -219,11 +219,10 @@ export function defineElement(
       this.warnOfAria();
       const styles = stylesFor(this.ownerDocument, assets);
       styles.inject("elements", ELEMENT_CSS);
-      // What a root holds is watched with it; anything drawn by itself is watched itself.
-      const alone =
-        this.kind !== "part" || !this.parentElement?.closest("clover-root");
-      if (alone) styles.watch(this);
-      // Drawn once its code, the host and the stylesheet are here, if still on the page.
+      /*
+       * Drawn once its code and the host are here, if still on the page. Its sheets came
+       * with its code (`addSheet`), so they are in before it draws.
+       */
       void Promise.all([ready(), styles.ready]).then(() => {
         if (this.isConnected)
           hostModule!.hostOf(this.ownerDocument).connect(this);
@@ -234,7 +233,6 @@ export function defineElement(
       // Moved within the page, it connects again at once; only a removal lets it go.
       queueMicrotask(() => {
         if (this.isConnected) return;
-        stylesFor(this.ownerDocument, assets).unwatch(this);
         hostModule?.hostOf(this.ownerDocument).disconnect(this);
       });
     }

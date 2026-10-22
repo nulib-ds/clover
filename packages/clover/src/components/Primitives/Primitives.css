@@ -79,3 +79,13 @@ a:is(.clover-id, .clover-rights) {
   text-decoration-line: underline;
   text-underline-offset: var(--clover-space-3xs);
 }
+
+/*
+ * A link's format after it, "(application/pdf)", quieter than the link. Here with the
+ * links that write it, so it loads with them (it was in Panel.css, which made a page of
+ * property parts load the panel's sheets for it).
+ */
+.clover-link-format {
+  color: var(--clover-color-primary-muted, #26292b);
+  font-size: var(--clover-text-s);
+}

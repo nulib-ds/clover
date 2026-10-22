@@ -404,8 +404,8 @@ gives each element's attributes, properties and events to editors and tools.
 ### What it loads
 
 The script is {loads.elementsEntry} kB gzipped: it defines every element and draws none.
-An element's code loads the first time one is on the page, with Preact and the
-stylesheet, so a page loads only the elements it uses: {loads.element} kB with a
+An element's code loads the first time one is on the page, with Preact and the styles of
+what it draws, so a page loads only the elements it uses, and their styles: {loads.element} kB with a
 `<clover-viewer>`, the Viewer in its Default template among it (3.x's element loads
 {earlierElement} kB), {loads.documentElement} kB with one in Document, {loads.canvasElement} kB for a
 `<clover-canvas>` alone, and {loads.labels} kB for a `<clover-root>` and its
@@ -414,8 +414,8 @@ stylesheet, so a page loads only the elements it uses: {loads.element} kB with a
 stylesheet load the first time a map is shown.
 
 The element renders into its own children, with no shadow root, so the page's CSS still
-reaches it, as 3.x's does. Clover's stylesheet is added to the document once, first in
-`<head>`, so the page's own rules win.
+reaches it, as 3.x's does. Clover's styles are added to the document once each, first in
+`<head>` and in the stylesheet's order, so the page's own rules win.
 
 ## Coming from Clover 3.x
 

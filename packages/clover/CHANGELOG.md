@@ -14,11 +14,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **`@nulib/clover/web-components/viewer`: `<clover-viewer>` alone, built whole.** A page
   that shows a Viewer and nothing else of Clover's can load this entry instead of the one
-  for every element: 90.7 kB gzip in four files, where the other loads 107.3 kB in 39 for
+  for every element: 90.6 kB gzip in four files, where the other loads 107.5 kB in 39 for
   the same page, its code cut into the chunks the elements share. Load one entry on a
   page, not both: each brings its own copy of Clover. `index.umd.js` loads it from a
   classic script, as the main entry's does; `sizes.json` records it
-  (`viewerEntryGzip`), held to 90.8 kB.
+  (`viewerEntryGzip`), held to 90.6 kB.
 
   ```html
   <script src=".../web-components/viewer/index.umd.js"></script>
@@ -430,14 +430,16 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   `clover-canvas-change`, `clover-manifest-change`, `clover-status-change`,
   `clover-content-state-change`. Light DOM, as 3.x's. A page with one loads 95.4 kB gzip
   (3.x's element: about 530 kB); MapLibre, its worker and its stylesheet load only with
-  a map. Its stylesheet is injected in runs, in the order
-  `styles.css` gives them, as `<style data-clover="clover-1">` to `"clover-3"`; the
-  rules only video, sound, an animation or a map need (`data-clover="media"`, `"map"`)
-  load as one draws, each put in its place among the runs, so the cascade is the
-  stylesheet's. Where a page looked for `style[data-clover="clover"]`, look for
-  `style[data-clover]`, which finds them all (MapLibre's, `"maplibre"`, too).
-  `defineCloverElements`' `styles` takes the whole stylesheet, its runs, or a loader
-  for them.
+  a map. Its stylesheet loads by part, each sheet with the code that draws what it
+  styles: a page of labels loads only theirs, and most sheets load together, as a few
+  runs, with the first part that draws any of them, since they compress best as one.
+  Video, sound, an animation, a map and the other templates bring theirs as they draw.
+  Each is a `<style data-clover>` in `<head>`, keyed by its sheet (`"ui/ReadMore"`), a run
+  (`"styles-1"`) or MapLibre's (`"maplibre"`), with its place in `styles.css`'s order
+  (`data-clover-index`), which keeps the cascade the stylesheet's. Where a page looked for
+  `style[data-clover="clover"]`, look for `style[data-clover]`, which finds them all.
+  `defineCloverElements`' `styles`, optional, takes a stylesheet handed in whole, or a
+  loader for it, injected before Clover's own sheets.
 
   ```html
   <script src=".../web-components/index.umd.js"></script>
@@ -1666,6 +1668,10 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
 
 ### Changed
 
+- **`.clover-link-format`**, the format after a link ("(application/pdf)"), is in
+  `Primitives.css`, beside the links that write it, not `Panel.css`: it comes earlier in
+  `styles.css`, which changes nothing it styles, and a page of elements' property parts
+  no longer loads the panel's sheets for it.
 - **Clover's English is in sentence case** (`DESIGN.md` §8), as its other names and
   menus already were, and its other languages: "More information"
   (`informationPanelToggle`), "View all" (`commonViewAll`), "No results"
@@ -1679,18 +1685,18 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   ```
 
 - **`@nulib/clover/web-components` loads only the elements a page uses.** The script is
-  5.8 kB gzip and defines every element; an element's code, Preact (in one chunk with
-  Clover's core) and the stylesheet load the first time one is on the page. A page with
-  a `<clover-viewer>` loads 107.3 kB, up from 86.7 kB: its code now comes in chunks the
-  other elements share, 39 files gzipped apart (97.3 kB as one). In Document it loads
-  113.7 kB, the template and its styles with it. A page of `<clover-root>` and
-  `<clover-label>` loads 40.8 kB; of the root, the label, the stage and the items 92.8
-  kB; a layout of the containers, as `Default`'s, 106.5 kB; and a `<clover-canvas>`
-  alone, once it draws, 76.6 kB. The adapters for a page's own renderers and control
+  5.3 kB gzip and defines every element; an element's code, Preact (in one chunk with
+  Clover's core) and its sheets load the first time one is on the page. A page with a
+  `<clover-viewer>` loads 107.5 kB, up from 86.7 kB: its code now comes in chunks the
+  other elements share, 39 files gzipped apart. In Document it loads 113.6 kB, the
+  template and its styles with it. A page of `<clover-root>` and `<clover-label>` loads
+  31.2 kB, with only the light parts' sheets; of the root, the label, the stage and the
+  items 92.9 kB; a layout of the containers, as `Default`'s, 106.6 kB; and a
+  `<clover-canvas>` alone, once it draws, 76.7 kB. The adapters for a page's own renderers and control
   buttons load only on a page that gives them. `sizes.json` records each
   (`elementsEntryGzip`, `webComponentsGzip`, `documentElementGzip`, `labelPageGzip`,
-  `composedPageGzip`, `layoutPageGzip`, `canvasElementGzip`), held to budgets of 5.9,
-  107.3, 113.7, 40.9, 92.9, 106.5 and 76.7 kB. `Root` now shares what it holds with
+  `composedPageGzip`, `layoutPageGzip`, `canvasElementGzip`), held to budgets of 5.4,
+  107.5, 113.6, 31.2, 93.0, 106.7 and 76.8 kB. `Root` now shares what it holds with
   `<clover-root>`, `SplitHandle` its logic with `<clover-split-handle>`
   (`components/Split/splitting.ts`), and `ReadMore` and `useOneOpen` theirs with the
   elements (`useReadMore`, `openOne`), which put `Default`'s budget up to 67.1 kB,
@@ -1798,9 +1804,7 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   language and popups. A Canvas's control ids change shape with it
   (`zoomIn-clover-canvas-` and an id of React's): find a control by its `data-button`,
   or give the Canvas an `instanceId` for ids of your own. React's pages are a few bytes
-  smaller; a page of elements loads under 0.1 kB more, which put the budgets of a page of
-  labels up to 40.9 kB, of the four parts to 92.9 kB, of a `<clover-canvas>` alone to
-  76.7 kB and of the Viewer's own entry to 90.8 kB.
+  smaller; a page of elements loads under 0.1 kB more.
 - **`<clover-split-handle>` says where its bar is from the start.** Drawn before the
   pane it sizes was marked (each element draws in its own order), it measured nothing
   and had no `aria-valuenow` until the reader moved it (WCAG 4.1.2). It measures again
