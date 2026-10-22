@@ -28,6 +28,9 @@ jobs:
         with:
           # When triggered by workflow_run, check out the tested commit.
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          # The whole history: each page's last change is its file's last commit
+          # (`docs/lib/last-changed.ts`, for the sitemap and the pages' metadata).
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

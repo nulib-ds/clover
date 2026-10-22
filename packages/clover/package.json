@@ -1,7 +1,7 @@
 {
   "name": "@nulib/clover",
   "private": true,
-  "description": "Composable IIIF components for the web: Clover 4.x, in development.",
+  "description": "Composable IIIF components for React, and its Viewer as a web component: Clover 4.x, in development.",
   "license": "MIT",
   "sideEffects": [
     "*.css"

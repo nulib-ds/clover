@@ -156,9 +156,9 @@ page through.
 
 ### Templates
 
-Pass a template from `@nulib/clover/templates` as `template`. The Viewer itself is a shell
-of under 1 kB, so a page ships only the template it passes, and the parts that template
-uses: a Gallery carries no information panel.
+Pass a template from `@nulib/clover/templates` as `template`. A page loads only the
+template it passes, and the parts that template uses: a Gallery loads no information
+panel.
 
 Given none, the Viewer loads `Default` the first time it draws, as a chunk of its own: one
 request before the Manifest loads, and nothing drawn on the server. To have it up front,

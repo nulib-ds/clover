@@ -118,6 +118,17 @@
  * (1.4.11), so it shows where to type and press. The text's gray, lightened toward the
  * page.
  */
+/* Out of sight, still read: the section's heading. */
+.visuallyHidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
 .section {
   --pg-edge: color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
   /* The stage's close, soft gray shadow, which the field shares. */

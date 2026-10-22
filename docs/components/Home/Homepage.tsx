@@ -10,27 +10,15 @@ import Parts from "docs/components/Home/Parts";
 import styles from "docs/components/Home/Home.module.css";
 import { cookbookSections } from "docs/components/CookbookRecipes/cookbookSections";
 import { resourceFor } from "docs/components/CookbookRecipes/cookbookCatalog";
-import {
-  CHECKED,
-  progressFor,
-} from "docs/components/CookbookRecipes/progress4";
-import { partCount } from "docs/components/Home/counts";
+import { cookbook, loads, partCount } from "docs/lib/figures";
 import { FULL_WIDTH } from "docs/lib/full-width";
 import { BrandCode, BrandControls } from "docs/components/Home/BrandPicker";
 import { SectionIntro } from "docs/components/Home/SectionIntro";
-import sizes from "../../../packages/clover/build/sizes.json";
 
 /*
- * Every figure here is the code's own, never a claim. The sizes are measured: what a
- * consumer ships, gzipped, as the package's build records it
- * (`packages/clover/build/sizes.json`, from `build/sizes.mjs`). `npm run build:docs`
- * builds the package first, so the published page shows the sizes of the commit it was
- * built from; `npm run dev` shows the last recorded. The components are the docs'
- * Components menu (`counts.ts`), and the Cookbook's
- * count the progress record (`progress4.ts`).
+ * Every figure here is the code's own, never a claim, from `docs/lib/figures.ts`, which
+ * what agents read states too (`llms.txt`, the structured data).
  */
-/* A size in kB, to the tenth (Mat, 2026-10-20), as `npm run test:build` reports it. */
-const kB = (bytes: number) => (bytes / 1000).toFixed(1);
 /** A recipe's Manifest and its name, by number and title, for the viewer to read it. */
 const recipeData = ({
   slug,
@@ -47,20 +35,6 @@ const recipeData = ({
     "data-recipe-name": `IIIF Cookbook ${slug.slice(0, 4)}: ${recipe?.title ?? slug}`,
   };
 };
-
-const recipes = cookbookSections.flatMap((section) => section.recipes);
-const handled = recipes.filter(
-  (recipe) => progressFor(recipe.slug).status === "yes",
-).length;
-const inPart = recipes.filter(
-  (recipe) => progressFor(recipe.slug).status === "partial",
-).length;
-const checked = new Date(`${CHECKED}T12:00:00Z`).toLocaleDateString("en-US", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "UTC",
-});
 
 interface Story {
   label: string;
@@ -139,26 +113,24 @@ const stories: Story[] = [
     composer: true,
   },
   {
-    label: "Light",
+    label: "Lightweight",
     // The Canvas, whose renderer is Clover's own.
     point: "content",
-    title: "Ships only what you draw.",
-    body: "A page carries its template and the parts it uses. Nothing more. Maps, video streaming, and the sanitizer load the first time they're needed. And a renderer of its own replaces OpenSeadragon.",
+    // What a reader's browser loads, never "ships" (Mat, 2026-10-21: jargon).
+    title: "Minimal load for users.",
+    // The page's weight and its screen kept for the collection, not code (Mat, 2026-10-21).
+    body: "Every part of Clover is built with intention and shared across its templates, so a page reserves its weight and the screen for rich cultural heritage material, not bloated code.",
+    // Only what draws something: a Viewer before its template draws nothing (Mat, 2026-10-21).
     figures: [
       {
-        value: kB(sizes.viewerShellGzip),
+        value: loads.canvas,
         unit: "kB",
-        caption: "the Viewer, before its template",
+        caption: "Canvas for resource viewing",
       },
       {
-        value: kB(sizes.canvasInitialGzip),
+        value: loads.defaultTemplate,
         unit: "kB",
-        caption: "a Canvas: images, video, and sound",
-      },
-      {
-        value: kB(sizes.defaultTemplateGzip),
-        unit: "kB",
-        caption: "the Viewer with its Default template",
+        caption: "Viewer with Default template",
       },
     ],
   },
@@ -171,16 +143,16 @@ const stories: Story[] = [
     body: (
       <>
         Clover 4 is checked against every recipe in the IIIF Cookbook, from a
-        single image to annotations on film. Last checked {checked}.{" "}
+        single image to annotations on film. Last checked {cookbook.checked}.{" "}
         <Link href="/docs/cookbook">Open each one in the Viewer</Link>.
       </>
     ),
     figures: [
       {
-        value: String(handled),
-        caption: `of ${recipes.length} IIIF Cookbook recipes, handled`,
+        value: String(cookbook.handled),
+        caption: `of ${cookbook.recipes} IIIF Cookbook recipes, handled`,
       },
-      { value: String(inPart), caption: "more, in part" },
+      { value: String(cookbook.inPart), caption: "more, in part" },
     ],
   },
 ];
@@ -219,7 +191,10 @@ const HOMEPAGE_CHROME = `${FULL_WIDTH}
  * Two halves: the templates, live, as the hero (`<Playground/>`), and below them the same
  * resource taken apart into the parts they are made of (`<Parts/>`), following it.
  */
-const Homepage: React.FC = () => {
+const Homepage: React.FC<{
+  /** The parts, listed, drawn on the server (`PartsIndex.tsx`), for `Parts`. */
+  partsIndex?: React.ReactNode;
+}> = ({ partsIndex }) => {
   const playground = useRef<PlaygroundHandle>(null);
   const [resource, setResource] = useState<string | null>(null);
   return (
@@ -227,7 +202,8 @@ const Homepage: React.FC = () => {
       <style>{HOMEPAGE_CHROME}</style>
       <Hero />
 
-      <main className={styles.shell}>
+      {/* A `div`: Nextra's layout already holds the page in its one `main`. */}
+      <div className={styles.shell}>
         <Playground
           ref={playground}
           onResourceChange={(next) => setResource(next)}
@@ -238,12 +214,14 @@ const Homepage: React.FC = () => {
          * while its stories pass and is drawn to from each (`Parts.tsx`).
          */}
         <Parts
+          index={partsIndex}
           resource={resource}
           onTry={(key) => playground.current?.pickResource(key)}
         >
           <SectionIntro
             title="Why Clover."
-            note="Reads IIIF Presentation 2, 3, and 4. From the parts up."
+            // The five stories in brief, a sentence each, in their order (Mat, 2026-10-21).
+            note="Accessible to everyone. Seamless with your brand. Composable from parts. Quick to load. Checked against the Cookbook."
             cta={{ href: "/docs", label: "Read the docs" }}
           />
 
@@ -333,7 +311,7 @@ const Homepage: React.FC = () => {
             <code>npm install @nulib/clover</code>
           </pre>
         </Parts>
-      </main>
+      </div>
     </div>
   );
 };

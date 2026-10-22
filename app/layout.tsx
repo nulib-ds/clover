@@ -17,10 +17,13 @@ import "docs/styles/tokens.css";
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Banner, Head } from "nextra/components";
+import { Anchor, Banner, Head } from "nextra/components";
+import { GitHubIcon } from "nextra/icons";
 import { getPageMap } from "nextra/page-map";
 import { Footer, Layout, Navbar } from "nextra-theme-docs";
 import { SiteFooter } from "docs/components/SiteFooter";
+import { CodeSwitch } from "docs/components/CodeSwitch";
+import { CODE_FLAVOR_SCRIPT } from "docs/lib/code-flavor-script";
 import { NoLastUpdated } from "docs/components/NoLastUpdated";
 import React from "react";
 
@@ -61,7 +64,14 @@ export default async function RootLayout({
          * under every part.
          */
         backgroundColor={{ light: "#ffffff", dark: "#111113" }}
-      />
+      >
+        {/*
+         * The reader's choice of code, React or Web Components, on the root before the
+         * page paints (`docs/lib/code-flavor.ts`), so its CSS shows the chosen one from
+         * the start.
+         */}
+        <script dangerouslySetInnerHTML={{ __html: CODE_FLAVOR_SCRIPT }} />
+      </Head>
       <body>
         <Layout
           /*
@@ -84,14 +94,22 @@ export default async function RootLayout({
            * project Clover is, which is not held: it follows the navbar's sticky box rather
            * than sitting in it, so it scrolls away with the page. No settings of its own
            * (Mat, 2026-10-20): font and color are chosen on the homepage, in "Why
-           * Clover", and appearance in the footer.
+           * Clover", and appearance in the footer; its one control is the docs' code
+           * switch (Mat, 2026-10-21). No Documentation link either (`layout.css`).
            */
           navbar={
             <>
-              <Navbar
-                logo={<Logo />}
-                projectLink="https://github.com/nulib-ds/clover"
-              />
+              {/*
+               * After the search, the switch for the docs' code, React or Web Components
+               * (Mat, 2026-10-21), then the repository's link, drawn as Nextra draws its
+               * own, which it would put first.
+               */}
+              <Navbar logo={<Logo />}>
+                <CodeSwitch />
+                <Anchor href="https://github.com/nulib-ds/clover">
+                  <GitHubIcon height="24" aria-label="Project repository" />
+                </Anchor>
+              </Navbar>
               <Subheader />
             </>
           }

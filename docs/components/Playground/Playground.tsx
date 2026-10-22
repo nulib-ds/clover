@@ -325,10 +325,18 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
 
     return (
       <section
-        aria-label="Try the templates"
+        aria-labelledby="playground-title"
         className={styles.section}
         id="playground"
       >
+        {/*
+         * Its heading, for the page's outline and for finding it by headings, hidden, as
+         * the stage needs no title over it (the parts' is too, `Parts.tsx`); the Viewer's
+         * title one below it.
+         */}
+        <h2 className={styles.visuallyHidden} id="playground-title">
+          Try the templates
+        </h2>
         {/* The bar is held only as far as the stage reaches, and leaves with it. */}
         <div>
           <div className={styles.bar} ref={barRef}>
@@ -347,6 +355,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
                 key={`${active}-${resource}`}
                 template={spec.name as "Default"}
                 iiifContent={resource}
+                headingLevel={3}
               />
             )}
           </div>
@@ -461,15 +470,19 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
             </span>{" "}
             <span id="pg-layout">template</span> or build your own layout.
           </p>
+          {/*
+           * Two ways on (Mat, 2026-10-21): Get Started, the way in, and the Viewer's own
+           * docs, its templates among them.
+           */}
           <div className={styles.choiceActions}>
-            <Link href="/docs/viewer#templates" className="cta-outline">
-              Templates
+            <Link href="/docs" className="cta-solid">
+              Get Started
               <span className="cta-arrow" aria-hidden="true">
                 →
               </span>
             </Link>
-            <Link href="/docs/composing" className="cta-solid">
-              Build a layout
+            <Link href="/docs/viewer" className="cta-outline">
+              Viewer Documentation
               <span className="cta-arrow" aria-hidden="true">
                 →
               </span>

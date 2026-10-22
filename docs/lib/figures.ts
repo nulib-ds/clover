@@ -1,0 +1,56 @@
+import { cookbookSections } from "docs/components/CookbookRecipes/cookbookSections";
+import {
+  CHECKED,
+  progressFor,
+} from "docs/components/CookbookRecipes/progress4";
+import sizes from "../../packages/clover/build/sizes.json";
+
+/*
+ * The figures the site states about Clover, in one place, each the code's own (AGENTS.md:
+ * never write a figure into the copy), for the homepage's stories and for what agents
+ * read (`docs/lib/agents.ts`: `llms.txt`, the homepage's structured data), so the two
+ * never disagree. The sizes are measured: what a consumer ships, gzipped, as the
+ * package's build records it (`packages/clover/build/sizes.json`, from `build/sizes.mjs`).
+ * `npm run build:docs` builds the package first, so the published site states the sizes
+ * of the commit it was built from; `npm run dev` the last recorded. The parts are the
+ * docs' Components menu (`counts.ts`), and the Cookbook's figures its progress record
+ * (`progress4.ts`).
+ */
+export {
+  componentCount,
+  partCount,
+  primitiveCount,
+} from "docs/components/Home/counts";
+
+/* A size in kB, to the tenth (Mat, 2026-10-20), as `npm run test:build` reports it. */
+export const kB = (bytes: number) => (bytes / 1000).toFixed(1);
+
+/**
+ * What a reader's browser loads, in kB gzipped, for a Canvas and for the Viewer with its
+ * Default template: each a thing that draws. Never the Viewer before its template, which
+ * draws nothing on its own (Mat, 2026-10-21).
+ */
+export const loads = {
+  /** A Canvas: images, video, and sound. */
+  canvas: kB(sizes.canvasInitialGzip),
+  /** The Viewer with its Default template. */
+  defaultTemplate: kB(sizes.defaultTemplateGzip),
+};
+
+const recipes = cookbookSections.flatMap((section) => section.recipes);
+
+/** The IIIF Cookbook: its recipes, how many Clover 4 handles, and when that was checked. */
+export const cookbook = {
+  recipes: recipes.length,
+  handled: recipes.filter((recipe) => progressFor(recipe.slug).status === "yes")
+    .length,
+  inPart: recipes.filter(
+    (recipe) => progressFor(recipe.slug).status === "partial",
+  ).length,
+  checked: new Date(`${CHECKED}T12:00:00Z`).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }),
+};

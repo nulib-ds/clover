@@ -27,8 +27,13 @@ const Parts: React.FC<{
   resource: string | null;
   /** Put one of the playground's resources on its stage, by key. */
   onTry: (key: string) => void;
+  /**
+   * The parts, listed (`PartsIndex.tsx`, drawn on the server): out of sight until the live
+   * parts take its place, for a reader without the page's scripts.
+   */
+  index?: React.ReactNode;
   children?: React.ReactNode;
-}> = ({ resource, onTry, children }) => {
+}> = ({ resource, onTry, index, children }) => {
   // A chip's resource remounts the parts, chip and all, so focus moves here first.
   const heading = useRef<HTMLHeadingElement>(null);
   const tryResource = (key: string) => {
@@ -38,8 +43,8 @@ const Parts: React.FC<{
   return (
     <section className={styles.section}>
       {/*
-       * `#parts` for links to the section. Its call to action, "Build a layout", is over
-       * it, under the playground's stage, beside the template picker.
+       * `#parts` for links to the section. The calls to action over it, under the
+       * playground's stage, lead to the docs.
        */}
       <h2
         ref={heading}
@@ -53,7 +58,14 @@ const Parts: React.FC<{
         {resource ? (
           <PartsLive resource={resource} onTry={tryResource} />
         ) : (
-          <div className={styles.placeholder} aria-hidden="true" />
+          <div className={styles.placeholder}>
+            {/* Out of the site's search, which finds each part on its own page. */}
+            {index && (
+              <div className={styles.visuallyHidden} data-pagefind-ignore="">
+                {index}
+              </div>
+            )}
+          </div>
         )}
         {children && <div className={styles.after}>{children}</div>}
       </div>

@@ -36,7 +36,7 @@ deadline.
     a description saying what it documents, schema.org data (`version: "3.x"`,
     `creativeWorkStatus: "Superseded"`), and in the site's search a "(3.x)" title, a
     `version` filter and half the weight of Clover 4's pages (`app/[[...mdxPath]]/page.tsx`,
-    `docs/lib/site.ts`). `public/llms.txt` tells agents the same. A new 3.x page gets all
+    `docs/lib/site.ts`). `llms.txt` (`docs/lib/agents.ts`) tells agents the same. A new 3.x page gets all
     of it from its place under `content/docs/3.x/`.
   - 3.x's source is not in this repository: it is `samvera-labs/clover-iiif`. The 3.x
     pages' live examples import the published `@samvera/clover-iiif` (a devDependency,
@@ -140,25 +140,32 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     (Mat, 2026-10-20): "Design the user experience that you imagine for your IIIF resources." It has two halves: the templates live under it
     (`docs/components/Playground/`), and below them the same resource shown one IIIF
     property at a time by the components the templates are made of (`Parts.tsx` and
-    `PartsLive.tsx`), with no heading of its own. Between the two, under the playground's
+    `PartsLive.tsx`), with no heading of its own in sight. Each half has one hidden, for
+    the page's outline (Mat, 2026-10-21): the playground's `h2`, "Try the templates", over
+    its Viewer's title (`headingLevel` 3), and the parts' `h2`, "Parts". Between the two, under the playground's
     stage, is the choice, one thing, centered and floating on the page with room all
     round (Mat, 2026-10-20): a headline, "Use a template or build your own." (its last
     words under the stories' stroke), then one sentence in the summary's size, "Start with a [Default ▾]
     template or build your own layout.", the dropdown in it naming the template on the
     stage (as wide as the longest name, so the sentence holds still), and under it two
-    calls to action, Templates (the templates' page) and Build a layout (Composing
-    Layouts). No boxes, no figure, no code. The parts follow the playground: `Homepage` holds the resource the playground reports
+    calls to action (Mat, 2026-10-21): Get Started (`/docs`, the solid one) and Viewer
+    Documentation (`/docs/viewer`); the navbar has no link to the docs. No boxes, no figure, no code. The parts follow the playground: `Homepage` holds the resource the playground reports
     (`onResourceChange`) and hands it down, and the section's chips put another of the
     playground's resources on its stage (`pickResource`).
   - After the parts, "Why Clover" tells five stories, one at a time: Accessible, Seamless,
-    Composable, Light, Coverage, on the code editor's black and the page's ground in
+    Composable, Lightweight, Coverage, on the code editor's black and the page's ground in
     turn, black first (Mat, 2026-10-20). Set apart from the parts by size, not colors of
     its own; its accent is `--accent-9` itself, never a shade or a fill: the hero's marker stroke under every figure, the figures themselves in the text's color (black on the page's ground; on black, white, `--code-bright`, never the editor's tinted text; Mat, 2026-10-20 and 2026-10-21). Its
-    words are Apple-style marketing: short sentences, titles too, each ending in a period,
-    US English, every claim one Clover keeps. Every figure is the code's own: sizes from
+    words are Apple-style marketing, by way of Strunk and White: plain and conversational,
+    as one person speaking to another, never terse bursts (Mat, 2026-10-21); titles short, each ending in a period,
+    US English, every claim one Clover keeps. A size is what a reader's browser loads,
+    never what a page "ships" (jargon; Mat, 2026-10-21), and only for what draws something:
+    no figure for the Viewer before its template. OpenSeadragon goes unmentioned in Clover
+    4's copy (Mat, 2026-10-21). Every figure is the code's own: sizes from
     `sizes.json` (measured by the package's build), the parts counted from the
-    Components menu (`counts.ts`), the Cookbook's counts and date from `progress4.ts`.
-    Never write a figure into the copy.
+    Components menu (`counts.ts`), the Cookbook's counts and date from `progress4.ts`,
+    all through `docs/lib/figures.ts`, which what agents read shares (`llms.txt`, the
+    structured data), so the two never disagree. Never write a figure into the copy.
   - It sits in the parts' grid, beside the held example viewer (`Homepage` passes it to
     `Parts` as children; the Root draws no box). `StoryLines.tsx` drives it from the
     scroll, only where the viewer is held: one 3px line from the story at the middle to
@@ -190,9 +197,11 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     which set the whole site and are remembered (`page-theme.ts`), in the column the other
     stories give their figures, and under its words its figures, smaller and side by
     side, then the CSS a page would write (Mat, 2026-10-21): `1rem` and `CSS` ("variables
-    for simple styling"), a word, never a count (Mat, 2026-10-21). The navbar has no
-    settings of its own (its gear was removed on 2026-10-20), appearance being in the
-    footer.
+    for simple styling"), a word, never a count (Mat, 2026-10-21). The navbar's one
+    control is the code switch (below); it has no settings (its gear was removed on
+    2026-10-20), appearance being in the footer, and no Documentation link (Mat,
+    2026-10-21: hidden in `layout.css`, as hiding the docs' folder in `_meta.ts` empties
+    their sidebar).
   - Scrolling there stays smooth (Mat, 2026-10-20: "everything should VERY SMOOTH"; and
     2026-10-21: "really dial in the smoothness"). Keep it so: nothing the scroll drives
     re-renders React (lights are `data-lit`, written by `StoryLines`; the rest are a
@@ -232,7 +241,8 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     Escape lets it go. Escape also puts away a part's name tag in the viewer (1.4.13), and
     focus landing on a part of the held viewer above the window lets it go until focus
     leaves (2.4.11). Every target in it is 24px or inline in the code (2.5.8). On the right each
-    part is a tile, live, named as it is written (`<Clover.Label />`), with what it reads
+    part is a tile, live, an `article` named by its heading (never a `section`: as regions,
+    the page's landmarks ran to dozens), named as it is written (`<Clover.Label />`), with what it reads
     (a property; for `Content`, the Canvas) and a fact from the resource (a count, a size,
     a name). Pointing at a tile outlines the part in the viewer. A part the resource gives
     nothing to is a chip at the end, naming what it would read and the playground resource
@@ -255,6 +265,10 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     which only the parts' chips use). It is a WAI-ARIA editable combobox: typing narrows the
     list, Down and Up open and move through it, Enter opens the one marked or what is
     typed, Escape closes the list and then puts the field back; focus stays in the field.
+    On a touch screen a press lists ours and brings no keyboard (`inputMode="none"` while
+    it shows one of ours; Mat, 2026-10-21), nor selects the label as a mouse's press does;
+    "View your own" brings the keyboard, for an address, by focusing the field again
+    within the press.
     Its edge, and the Template button's, is 3:1 (`--pg-edge`): controls only, while the
     stage and the parts' tiles keep their hairlines (Mat, 2026-10-16; the tiles at 3:1
     was tried and put back). Under the stage, in the choice's sentence, the template's
@@ -271,21 +285,26 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     2026-10-21), a title ending in a period under the hero's stroke, one short note (`--text-lede`, as the hero's sentence and the choice's), and one call to action (`cta-solid` or `cta-outline`,
     `tokens.css`). And more (the parts counted, "See them all"; the Collection's tile the first under it, and Annotations beside Contents; Mat,
     2026-10-21), Why Clover ("Read the
-    docs") and Install ("Get started"), the last in the gap after Coverage, beside the
+    docs"; its note the five stories in brief, a short sentence each, in their order) and Install ("Get started"), the last in the gap after Coverage, beside the
     held viewer, the grid ending with its npm block, and a few rem under it, no more
     (`4.236rem`, the page's own; Nextra's empty room under the article hidden on full
     pages, `full-width.ts`), before the footer (Mat, 2026-10-21).
   - The footer (`docs/components/SiteFooter.tsx`, inside Nextra's `Footer`, styled in
     `layout.css`; Mat, 2026-10-20 and 2026-10-21) is one column on the page's white
     (`--color-background`), set off by white space alone, no line over it, its text at
-    the sidebar's size and black (`--nav-text`, 1rem), the legal line too: the wordmark,
+    the sidebar's size (1rem) and black (`--nav-text`), but who made it and the legal line
+    muted (`--gray-11`: 5.9:1 on white, 9:1 on the dark ground; Mat, 2026-10-21): the wordmark,
     then what Clover is in the homepage hero's words, a sentence a line (the headline's
-    in bold, a step up, `1.618rem`; the sentence at `--text-lede`), then one paragraph in
-    Mat's words, whose project Clover is, who developed it and who contributed, its
-    "more" linking to the repository's contributors; the two across 61.8% of the
+    in bold, a step up, `1.618rem`; the sentence at `--text-lede`, muted as the hero's is), then one paragraph in
+    Mat's words, whose project Clover is (the Academic Innovation team at Northwestern
+    University Libraries), since when (2021) and at which version ("version 4.x"), and how widely it is used and built on, a
+    variety of implementations and the institutions that contributed, never a person
+    (Mat, 2026-10-21: people are credited elsewhere; its maturity shown, never claimed),
+    its "more" linking to the repository's contributors; the two across 61.8% of the
     footer's width (all of it on a phone). No history, and no titles. Under it, `3xl`
     away, that it is MIT licensed and fully open source, the holder as `LICENSE` names
-    it: Northwestern University Libraries, from 2026, and the site's links, with the
+    it: Northwestern University Libraries, from 2026, and the site's links (Source code
+    and License; never the earlier version, Mat, 2026-10-21), with the
     appearance after them (Light, Dark or System, `ThemeSwitch.tsx`, Nextra's `Select`) on
     every page (Mat, 2026-10-21). Nextra's own switch is off (`darkMode={false}`), so
     none is in the sidebar's foot (its Collapse button kept at the end), the phone's menu
@@ -309,17 +328,35 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     `useStuck` sets the page's `scroll-padding-top` to the navbar and the bar, measured,
     so a control that takes focus in the stage comes into view below the bar (WCAG
     2.4.11).
+  - The navbar holds the docs' code switch, React or Web Components (Mat, 2026-10-21;
+    React by default; `docs/components/CodeSwitch.tsx`), after the search and before the
+    repository's link: a pair of native radios, one tab stop, named "Code examples", drawn
+    as the Transcript's EN | TXT is (pills, no frame, small semibold text, muted until
+    chosen), the chosen one in the Viewer's controls' dark fill (light on a dark page),
+    never the accent at rest (it drew the eye from the page), the accent under the pointer
+    or focused. The choice is the reader's (`docs/lib/code-flavor.ts`): stored, in step
+    across tabs, and set on the root as `data-code` before the page paints
+    (`code-flavor-script.ts`, in the root layout's head), so CSS shows an example's code in
+    the chosen flavor (`data-code-flavor`, `layout.css`) with no flash and no re-render;
+    both flavors stay in the HTML, for agents and pages read without scripts. On a phone
+    it reads "React | Web", the rest of the name still read (2.5.3); under 360px the
+    repository's icon gives way (the footer links the source), so the header fits at
+    320px (1.4.10).
   - Titles and share cards are `pageMetadata` (`docs/lib/site.ts`), the root layout's
     `metadata` and each page's `generateMetadata` (`app/[[...mdxPath]]/page.tsx`): the
     homepage's title is "Clover IIIF – A viewer as distinctive as your collections" and the site's
-    description the hero's sentence and what the field does; a page
+    description says what Clover is, plainly, in Get Started's words, in React or as a web
+    component (Mat, 2026-10-21: so an agent or a search result can tell; the hero is the
+    brand's; every description of Clover, the READMEs' and the packages' too, names both,
+    and only what each does today); a page
     takes its `title` (front matter, else its first `h1`, Nextra's rule) and its
-    `description`. Every page's card picture is a 1200 × 630 band of
+    `description`. Give every page a `description`: agents read it in `llms.txt`, the
+    parts' list and the Markdown. Every page's card picture is a 1200 × 630 band of
     the White catalog's cover, cut by Northwestern's IIIF Image server and linked from
     there, never copied into `public/` (Mat, 2026-10-16: the record's attribution does
     not permit further distribution of its images).
   - Under the navbar on every page, a small acknowledgment in the corner, on the page's
-    ground with no band of its own (Mat, 2026-10-20), in the sidebar's black (2026-10-21),
+    ground with no band of its own (Mat, 2026-10-20), muted (`--gray-11`, 2026-10-21),
     says Clover is a project of
     Northwestern University Libraries, linking the Libraries'
     site (`docs/components/Subheader.tsx`, styled in `docs/styles/layout.css`). It is
@@ -336,6 +373,30 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     import `@iiif/helpers` (through `docs/lib/iiif-content`, say). It is an ESM external
     there, which makes the importing module async, and the homepage's import of it is
     then undefined ("Element type is invalid").
+  - A page has one `main`, Nextra's: the homepage's shell and the test mocks' pages are
+    `div`s inside it.
+  - What agents and crawlers read (Mat, 2026-10-21) is built with the site, from what it
+    already holds (`docs/lib/agents.ts`: the docs' menu, each page's front matter, and
+    `figures.ts`), and, the site being a static export on GitHub Pages, each is a file:
+    `llms.txt` (`app/llms.txt/route.ts`; what Clover is, at a glance with its figures,
+    then the docs as their menu lists them, each linked to its Markdown, 3.x under
+    "Optional"), `sitemap.xml` (`app/sitemap.ts`, every page but the unlisted and
+    `/test/`, with its file's last commit's time, from Git, `docs/lib/last-changed.ts`, as
+    the pages' `dateModified` is: Nextra's own `timestamp` was not always the file's, and
+    the deploy fetches the whole history for it) and `robots.txt` (`app/robots.ts`; Pages reads
+    one only at a host's root, so it counts on a domain of the site's own). After
+    Pagefind, `scripts/build-agent-docs.mjs` writes each of the sitemap's pages as
+    Markdown beside its HTML (`/docs/items.md`, converted from the built page, its
+    examples' code and tables included, front matter giving its title, description,
+    address and version) and `llms-full.txt` (Clover 4's pages, in `llms.txt`'s order),
+    and fails the build if `llms.txt` links to a page it could not write. Each page's
+    head links its Markdown (`alternate`, `text/markdown`; the homepage's is `llms.txt`).
+    The homepage's structured data is Clover itself (`homeData`: the site, its publisher,
+    and the software, its features its parts' descriptions), and its HTML lists the
+    parts (`PartsIndex.tsx`, drawn on the server into the parts' placeholder, out of
+    sight and out of search) until the live parts take its place, for a reader without
+    the page's scripts. Agent-facing words say what Clover does as released
+    (`npm install @nulib/clover`; Mat, 2026-10-21: "assume my product will be live").
   - `/test/…` (`content/test/`) holds unlisted mocks of host pages, for trying Clover 4
     where it is meant to live: raw layout, no docs navbar or footer, out of search.
     `/test/dc-item` is a Digital Collections item page (`docs/components/DcItemMock/`),
@@ -382,8 +443,10 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
   the table is wider than the page, is a focusable region named for its section (WCAG
   2.1.1). Nextra's code blocks are focusable themselves.
 - Search is Pagefind: `postbuild:docs` indexes the built HTML (`.next/server/app`) into
-  `out/_pagefind`. In `npm run dev` search answers only after a build. Front matter
-  `searchable: false` keeps a page out.
+  `out/_pagefind`, then writes the pages' Markdown (`scripts/build-agent-docs.mjs`). In
+  `npm run dev` search answers only after a build, and the Markdown is not there; `llms.txt`,
+  the sitemap and `robots.txt` are. Front matter `searchable: false` keeps a page out of
+  search, the sitemap and the Markdown.
 - Nextra 4.6.1 needs Zod 4.3 (4.4 and later reject its Layout's props, "expected
   nonoptional … at children"): `overrides` in `package.json` hold Nextra's own Zod at
   4.3.6. Drop them with a Nextra release past 4.6.1.

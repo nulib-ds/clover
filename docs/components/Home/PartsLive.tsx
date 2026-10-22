@@ -492,7 +492,8 @@ function Exploded({
         // Beside Contents, the list beside the list (Mat, 2026-10-21).
         span: 3,
         href: DOCS.Annotations,
-        body: <Clover.Annotations className={styles.scroll} />,
+        // Its pages' titles one below the tile's.
+        body: <Clover.Annotations headingLevel={4} className={styles.scroll} />,
       },
       {
         key: "contents",
@@ -1099,7 +1100,11 @@ const pointerTo = (
   onPointerLeave: () => onPoint(null),
 });
 
-/** A part on its own: drawn again only when it, or whether it is pointed at, changes. */
+/**
+ * A part on its own: drawn again only when it, or whether it is pointed at, changes. An
+ * `article`, named by its heading, not a `section`: a region each, the page's landmarks
+ * would run to dozens, where its heading already finds it (Mat, 2026-10-21).
+ */
 const Tile = React.memo(function Tile({
   part,
   on,
@@ -1110,7 +1115,7 @@ const Tile = React.memo(function Tile({
   onPoint: (key: PartKey | null) => void;
 }) {
   return (
-    <section
+    <article
       aria-labelledby={`part-${part.key}`}
       className={styles.tile}
       data-span={part.span}
@@ -1129,7 +1134,7 @@ const Tile = React.memo(function Tile({
         {part.fact && <span className={styles.fact}>{part.fact}</span>}
       </header>
       <div className={styles.tileBody}>{part.body}</div>
-    </section>
+    </article>
   );
 });
 
@@ -1177,7 +1182,7 @@ const RecipeFace = React.memo(function RecipeFace({
           <Clover.Content controls={false} style={{ height }} />
         </Region>
         <Region name="Annotations" data-on data-part="annotations">
-          <Clover.Annotations className={styles.recipeNotes} />
+          <Clover.Annotations headingLevel={4} className={styles.recipeNotes} />
         </Region>
       </Clover.Root>
     </section>

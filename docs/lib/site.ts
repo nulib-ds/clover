@@ -14,12 +14,20 @@ export const siteTitle = "Clover IIIF";
 export const homeTitle = `${siteTitle} – A viewer as distinctive as your collections`;
 
 /*
- * The site's description, for the homepage and any page without one of its own: the
- * hero's sentence, then what the field under it does, which keeps "Manifest" and
- * "Collection" for search.
+ * The site's description, for the homepage and any page without one of its own: what
+ * Clover is and its two ways, plainly, in the Get Started page's words (Mat, 2026-10-21:
+ * so an agent or a search result can tell what it is), the hero being the brand's.
  */
 export const siteDescription =
-  "Design the user experience that you imagine for your IIIF resources. View any IIIF Manifest or Collection.";
+  "Clover builds interfaces for IIIF content in React or as a web component: a ready-made Viewer with templates, or parts to compose your own. Accessible, composable and light.";
+
+/*
+ * What Clover is, at more length, in the Get Started page's words
+ * (`content/docs/index.mdx`): for agents and search engines, `llms.txt` and the
+ * homepage's structured data (`docs/lib/agents.ts`).
+ */
+export const aboutClover =
+  "Clover builds interfaces for IIIF content in React or as a web component: a Manifest, a Collection, a Canvas or a content state, read through the IIIF Presentation API, versions 2, 3 and 4. Use the ready-made Viewer with one of its templates, or compose a layout of your own from the parts it is built from; on a page without React, the Viewer is a web component. It is accessible, composable and light, and it draws images, video and sound with a renderer of its own.";
 
 /*
  * Every page's share card picture: the cover of the White Sewing Machine Company's 1896
@@ -45,6 +53,14 @@ export const siteUrl = (
   process.env.NEXT_PUBLIC_SITE_URL || "https://nulib-ds.github.io/clover"
 ).replace(/\/+$/, "");
 
+/*
+ * A page as Markdown, for agents: its address with `.md` added, which
+ * `scripts/build-agent-docs.mjs` writes after the build; the homepage's is `llms.txt`,
+ * what the site is for an agent.
+ */
+export const markdownUrl = (route: string) =>
+  route === "/" ? `${siteUrl}/llms.txt` : `${siteUrl}${route}.md`;
+
 /**
  * A page's title, description, canonical link and share cards. A page with a `title` in
  * its front matter is "Title – Clover IIIF"; one without takes the homepage's title, and
@@ -56,12 +72,15 @@ export function pageMetadata({
   description,
   route,
   modified,
+  markdown = false,
 }: {
   title?: string;
   description?: string;
   route: string;
   /** When the page last changed (ISO 8601), its last commit's time. */
   modified?: string;
+  /** Whether the page has a Markdown copy (`markdownUrl`), linked for agents. */
+  markdown?: boolean;
 }): Metadata {
   const fullTitle = title ? `${title} – ${siteTitle}` : homeTitle;
   const text = description || siteDescription;
@@ -69,7 +88,10 @@ export function pageMetadata({
   return {
     title: { absolute: fullTitle },
     description: text,
-    alternates: { canonical },
+    alternates: {
+      canonical,
+      ...(markdown && { types: { "text/markdown": markdownUrl(route) } }),
+    },
     openGraph: {
       // A page with a date of its own is an article to Open Graph (`article:modified_time`).
       ...(modified
@@ -151,8 +173,77 @@ export function structuredData({
       : {
           "@type": "SoftwareSourceCode",
           name: "@nulib/clover",
-          version: "4 (in development)",
+          version: "4",
           codeRepository: "https://github.com/nulib-ds/clover",
         },
+  };
+}
+
+/**
+ * The homepage's structured data (schema.org, as JSON-LD): the site, who publishes it,
+ * and Clover itself, what it is (`aboutClover`) and what it does (`features`: its parts,
+ * each in its page's words), for search engines and the agents that read it.
+ */
+export function homeStructuredData({
+  features,
+  react,
+}: {
+  features: string[];
+  /** The React it runs with, as its package asks for it (`peerDependencies`). */
+  react: string;
+}) {
+  const publisher = {
+    "@type": "Organization",
+    "@id": `${siteUrl}#publisher`,
+    name: "Northwestern University Libraries",
+    url: "https://www.library.northwestern.edu/",
+  };
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      publisher,
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}#website`,
+        name: siteTitle,
+        url: siteUrl,
+        description: siteDescription,
+        inLanguage: "en",
+        publisher: { "@id": publisher["@id"] },
+      },
+      {
+        "@type": "SoftwareSourceCode",
+        "@id": `${siteUrl}#software`,
+        name: siteTitle,
+        alternateName: "@nulib/clover",
+        description: aboutClover,
+        url: siteUrl,
+        version: "4",
+        codeRepository: "https://github.com/nulib-ds/clover",
+        programmingLanguage: "TypeScript",
+        runtimePlatform: ["React", "Web Components"],
+        license: "https://github.com/nulib-ds/clover/blob/main/LICENSE",
+        copyrightHolder: { "@id": publisher["@id"] },
+        copyrightYear: 2026,
+        publisher: { "@id": publisher["@id"] },
+        keywords: [
+          "IIIF",
+          "IIIF Presentation API",
+          "IIIF viewer",
+          "React",
+          "web component",
+          "accessibility",
+          "WCAG 2.2",
+        ],
+        targetProduct: {
+          "@type": "SoftwareApplication",
+          name: siteTitle,
+          applicationCategory: "DeveloperApplication",
+          operatingSystem: "Any, in a web browser",
+          softwareRequirements: `React ${react}, or none for the web component`,
+          featureList: features,
+        },
+      },
+    ],
   };
 }

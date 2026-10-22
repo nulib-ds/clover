@@ -182,7 +182,8 @@ const DcItemMock: React.FC = () => {
         </div>
       </header>
 
-      <main>
+      {/* A `div`, where the host's page has its `main`: Nextra's layout holds this one. */}
+      <div>
         {/* An alert, so a screen reader announces a failed load. */}
         {error && (
           <p className={styles.contained} role="alert">
@@ -317,7 +318,7 @@ const DcItemMock: React.FC = () => {
             </section>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 };

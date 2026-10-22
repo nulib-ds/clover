@@ -251,6 +251,8 @@ export default function ResourceField({
   const [active, setActive] = useState<string | null>(null);
   const [error, setError] = useState<string>();
   const inputRef = useRef<HTMLInputElement>(null);
+  /* How the field was last pressed: a touch keeps its label unselected. */
+  const pointer = useRef<string>("");
 
   const query = filter.trim().toLowerCase();
   // Narrowed by what is typed, among the resources: one's own is already being entered.
@@ -299,8 +301,21 @@ export default function ResourceField({
     close();
     setFilter("");
     setError(undefined);
-    // "View your own" empties the field for an address; focus is already in it.
-    if (choice.key === NEW) return setDraft("");
+    /*
+     * "View your own" empties the field for an address; focus is already in it. A phone's
+     * keyboard was kept away while ours were listed (`inputMode`); it comes up now, an
+     * address to type, by focusing the field again within this press (Mat, 2026-10-21).
+     */
+    if (choice.key === NEW) {
+      setDraft("");
+      const input = inputRef.current;
+      if (input) {
+        input.inputMode = "url";
+        input.blur();
+        input.focus();
+      }
+      return;
+    }
     setDraft(null);
     if (choice.content) onOwn(choice.content);
     else onPick(choice.key);
@@ -411,7 +426,12 @@ export default function ResourceField({
                 className={styles.fieldInput}
                 enterKeyHint="go"
                 id={inputId}
-                inputMode="url"
+                /*
+                 * No on-screen keyboard while the field shows one of ours (Mat, 2026-10-21):
+                 * a press lists them, and "View your own" brings the keyboard for an address.
+                 * A keyboard of keys types and moves as ever.
+                 */
+                inputMode={draft === null ? "none" : "url"}
                 // The label's language, while the field shows a label in another.
                 lang={draft === null ? shown.lang : undefined}
                 onChange={(event) => {
@@ -422,10 +442,17 @@ export default function ResourceField({
                   setActive(null);
                 }}
                 onClick={(event) => {
-                  // Untouched, a press selects the label, so a paste replaces it, and lists ours.
+                  /*
+                   * Untouched, a press lists ours, and, by mouse, selects the label, so a
+                   * paste replaces it; by touch, it leaves it, or the phone's selection
+                   * handles would come up over it.
+                   */
                   if (draft !== null) return;
-                  event.currentTarget.select();
+                  if (pointer.current !== "touch") event.currentTarget.select();
                   if (!expanded) show(null);
+                }}
+                onPointerDown={(event) => {
+                  pointer.current = event.pointerType;
                 }}
                 onKeyDown={onKeyDown}
                 placeholder="https://"

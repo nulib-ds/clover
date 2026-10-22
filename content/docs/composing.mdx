@@ -1,5 +1,6 @@
 ---
 title: Composing Layouts
+description: "A layout of your own from Clover's parts: the Root, the parts and the property parts, the information panel, panes side by side, parts of your own, languages, renderers and styles."
 ---
 
 import { Callout } from "nextra/components";
@@ -20,7 +21,7 @@ parts placed in it.
 ## A layout of your own
 
 The parts are named exports. `import * as Clover` gives them dot notation, and they
-tree-shake: a page ships only the parts it renders. Here the title, position and buttons
+tree-shake: a page loads only the parts it renders. Here the title, position and buttons
 sit beside the stage.
 
 ```jsx

@@ -4,6 +4,8 @@ import { Callout } from "nextra/components";
 import { generateStaticParamsFor, importPage } from "nextra/pages";
 import React from "react";
 
+import { homeData } from "docs/lib/agents";
+import { lastChanged } from "docs/lib/last-changed";
 import {
   earlierDescription,
   earlierTitle,
@@ -25,11 +27,12 @@ type Props = { params: Promise<{ mdxPath?: string[] }> };
 const routeOf = (mdxPath?: string[]) => `/${(mdxPath ?? []).join("/")}`;
 
 /*
- * When the page last changed, its last commit's time (Nextra's `timestamp`): for crawlers
- * and agents, in the page's structured data and Open Graph, as no line on the page says it.
+ * When the page last changed, its file's last commit's time (`last-changed.ts`): for
+ * crawlers and agents, in the page's structured data and Open Graph, as no line on the
+ * page says it.
  */
-const modifiedOf = (timestamp?: number) =>
-  timestamp ? new Date(timestamp).toISOString() : undefined;
+const modifiedOf = (metadata: { filePath?: string }) =>
+  lastChanged(metadata.filePath);
 
 /*
  * A page from `content/`, or the not-found page for a path that is none (in `next dev`,
@@ -58,7 +61,9 @@ export async function generateMetadata(props: Props) {
       ? earlierDescription(metadata.description ?? undefined)
       : (metadata.description ?? undefined),
     route,
-    modified: route === "/" ? undefined : modifiedOf(metadata.timestamp),
+    modified: route === "/" ? undefined : modifiedOf(metadata),
+    // Linked as Markdown, as `scripts/build-agent-docs.mjs` writes it: all but the unlisted.
+    markdown: (metadata as { searchable?: unknown }).searchable !== false,
   });
 }
 
@@ -88,25 +93,27 @@ export default async function Page(props: Props) {
   const route = routeOf(params.mdxPath);
   const earlier = isEarlierVersion(route);
   const title = earlier ? earlierTitle(metadata.title) : metadata.title;
-  const data = structuredData({
-    title,
-    description: earlier
-      ? earlierDescription(metadata.description ?? undefined)
-      : (metadata.description ?? siteDescription),
-    route,
-    modified: modifiedOf(metadata.timestamp),
-  });
+  // The homepage's is Clover itself, the site and its publisher; any other page's, an article.
+  const data =
+    route === "/"
+      ? await homeData()
+      : structuredData({
+          title,
+          description: earlier
+            ? earlierDescription(metadata.description ?? undefined)
+            : (metadata.description ?? siteDescription),
+          route,
+          modified: modifiedOf(metadata),
+        });
   return (
     <Wrapper toc={toc} metadata={metadata} sourceCode={sourceCode}>
-      {route !== "/" && (
-        <script
-          type="application/ld+json"
-          // JSON, with `<` escaped so no value can close the script.
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(data).replace(/</g, "\\u003c"),
-          }}
-        />
-      )}
+      <script
+        type="application/ld+json"
+        // JSON, with `<` escaped so no value can close the script.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(data).replace(/</g, "\\u003c"),
+        }}
+      />
       {earlier ? (
         /*
          * For the site's search (Pagefind): a result's title says "(3.x)", the version is

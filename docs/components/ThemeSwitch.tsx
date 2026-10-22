@@ -13,8 +13,8 @@ const OPTIONS = [
 ];
 
 /**
- * The site's appearance, Light, Dark or System, in the footer's row of links after
- * Clover 3.x, on every page (Mat, 2026-10-21). Nextra's own switch, drawn as Nextra draws
+ * The site's appearance, Light, Dark or System, in the footer's row of links, after them,
+ * on every page (Mat, 2026-10-21). Nextra's own switch, drawn as Nextra draws
  * it (its `Select`, a listbox), here rather than in the sidebar's foot, the phone's menu
  * and a band over the footer, where the layout turns Nextra's off (`darkMode={false}`,
  * `app/layout.tsx`). Until the page hydrates it shows Light, as Nextra's does.

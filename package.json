@@ -1,14 +1,14 @@
 {
   "name": "clover",
   "private": true,
-  "description": "Clover: @nulib/clover, composable IIIF components and viewer, and its documentation site.",
+  "description": "Clover: @nulib/clover, composable IIIF components and viewer, in React or as a web component, and its documentation site.",
   "workspaces": [
     "packages/clover"
   ],
   "scripts": {
     "build": "npm run build -w @nulib/clover",
     "build:docs": "next build",
-    "postbuild:docs": "pagefind --site .next/server/app --output-path out/_pagefind",
+    "postbuild:docs": "pagefind --site .next/server/app --output-path out/_pagefind && node scripts/build-agent-docs.mjs",
     "build:mocks": "vite-node scripts/build-mocks.mjs",
     "build:maplibre-worker": "node ./scripts/build-maplibre-worker.mjs",
     "prebuild:docs": "npm run build:maplibre-worker && npm run build",
@@ -57,8 +57,12 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "16.4.2",
     "eslint-config-prettier": "^10.1.8",
+    "hast-util-from-html": "^2.0.3",
+    "hast-util-to-mdast": "^10.1.2",
     "jsdom": "^24.1.3",
     "maplibre-gl": "^6.6.0",
+    "mdast-util-gfm": "^3.1.0",
+    "mdast-util-to-markdown": "^2.2.0",
     "next": "^16.4.2",
     "nextra": "^4.6.1",
     "nextra-theme-docs": "^4.6.1",

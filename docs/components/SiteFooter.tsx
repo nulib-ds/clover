@@ -3,12 +3,18 @@ import React from "react";
 import Logo from "docs/components/Logo";
 import { ThemeSwitch } from "docs/components/ThemeSwitch";
 
+/* When Clover's development began, and the version these docs are for (Mat, 2026-10-21). */
+const SINCE = 2021;
+const VERSION = "version 4.x";
+
 /**
  * The site's footer, inside Nextra's (`app/layout.tsx`): what Clover is, in the homepage
- * hero's words; whose project it is, who developed it and who contributed, in Mat's
- * words, its "more" linking to everyone the repository records; and its license, with
- * the site's links and its appearance (Mat, 2026-10-20 and 2026-10-21). Every fact is
- * the record's: the license and its holder from `LICENSE`. Styled in `layout.css`.
+ * hero's words; whose project it is, since when, and how widely it is used and built on,
+ * by institution and not by person, who are credited elsewhere, its maturity shown, not
+ * claimed (Mat, 2026-10-21), its "more" linking to everyone the repository records; and
+ * its license, with the site's links and its appearance (Mat, 2026-10-20 and
+ * 2026-10-21). Every fact is the record's: the license and its holder from `LICENSE`.
+ * Styled in `layout.css`.
  */
 export function SiteFooter() {
   return (
@@ -25,14 +31,14 @@ export function SiteFooter() {
           </span>
         </p>
         <p>
-          A project of{" "}
+          Clover is a project of the Academic Innovation team at{" "}
           <a href="https://www.library.northwestern.edu/">
             Northwestern University Libraries
           </a>
-          . Clover was developed by Mat Jordan, Adam Arling, and others in
-          Academic Innovation at Northwestern University Libraries. With
-          community contributions from folks at Princeton University, UNC Chapel
-          Hill, University of Pennsylvania, Cogapp, and{" "}
+          . In development since {SINCE}, now at {VERSION}, it is used in a
+          variety of implementations, with contributions from folks at Princeton
+          University, UNC Chapel Hill, the University of Pennsylvania, Cogapp,
+          and{" "}
           <a href="https://github.com/nulib-ds/clover/graphs/contributors">
             more
           </a>
@@ -47,15 +53,12 @@ export function SiteFooter() {
         <div className="site-footer-links">
           <ul>
             <li>
-              <a href="https://github.com/nulib-ds/clover">Source on GitHub</a>
+              <a href="https://github.com/nulib-ds/clover">Source code</a>
             </li>
             <li>
               <a href="https://github.com/nulib-ds/clover/blob/main/LICENSE">
                 License
               </a>
-            </li>
-            <li>
-              <Link href="/docs/3.x">Clover 3.x</Link>
             </li>
           </ul>
           {/* After the links, not among them: a control, not a page. */}

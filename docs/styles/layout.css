@@ -34,7 +34,8 @@
   padding-block: 0.618rem 0;
   padding-left: max(env(safe-area-inset-left), 1.5rem);
   padding-right: max(env(safe-area-inset-right), 1.5rem);
-  color: var(--nav-text);
+  /* Muted (Mat, 2026-10-21): 5.9:1 on white, 9:1 on the dark ground (WCAG 1.4.3). */
+  color: var(--gray-11);
   /* Small, as an acknowledgment is: under the docs' floor (Mat, 2026-10-16). */
   font-size: 0.875rem;
   line-height: 1.5;
@@ -375,6 +376,136 @@ main:has(> .docs-lede) > h3 {
 }
 
 /*
+ * The header's switch for the docs' code, React or Web Components (`CodeSwitch.tsx`),
+ * drawn as the Transcript's EN | TXT is (`Transcript.css`; Mat, 2026-10-21): pills with
+ * no frame round them, the text small and semibold, muted until chosen. The chosen one in
+ * the Viewer's controls' dark fill, its text white, not the accent (Mat, 2026-10-21: the
+ * accent drew the eye from the page), and light on a dark page, where the dark would
+ * vanish (16:1 against the page and for its text; WCAG 1.4.11, 1.4.3); under the pointer
+ * or focused, the accent, as the controls and the Transcript's take it. No change of
+ * weight, so the header never shifts. Each label holds its native radio, transparent and
+ * over the whole of it, so a press anywhere on it chooses it. Which is chosen comes from
+ * the page's root (`data-code`, set before the page paints), so it is right before the
+ * page hydrates. 28px tall (2.5.8).
+ */
+.code-switch {
+  display: inline-flex;
+  flex: none;
+  gap: 0.236rem;
+}
+
+.code-switch-option {
+  align-items: center;
+  border-radius: var(--clover-radius-pill, 2rem);
+  color: var(--gray-11);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  min-height: 1.75rem;
+  padding: 0 0.618rem;
+  position: relative;
+  white-space: nowrap;
+}
+
+.code-switch-option > input {
+  appearance: none;
+  border-radius: inherit;
+  cursor: inherit;
+  inset: 0;
+  margin: 0;
+  position: absolute;
+}
+
+:root:not([data-code="web-components"])
+  .code-switch-option[data-option="react"],
+:root[data-code="web-components"]
+  .code-switch-option[data-option="web-components"] {
+  background: var(--clover-color-control, #1a1d1e);
+  color: var(--clover-color-control-glyph, #fff);
+}
+
+:root.dark:not([data-code="web-components"])
+  .code-switch-option[data-option="react"],
+:root.dark[data-code="web-components"]
+  .code-switch-option[data-option="web-components"] {
+  background: var(--gray-12);
+  color: var(--color-background);
+}
+
+/* Under the pointer, or focused, the accent, chosen or not, as the controls take it. */
+:root .code-switch > .code-switch-option[data-option]:hover,
+:root
+  .code-switch
+  > .code-switch-option[data-option]:has(> input:focus-visible) {
+  background: var(--accent-9);
+  color: var(--accent-contrast);
+}
+
+/* Focused, ringed besides, off its edge (2.4.7), as the Transcript's is. */
+.code-switch-option:has(> input:focus-visible) {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+/*
+ * On a phone, "Web" for Web Components, the rest of its name out of sight but still
+ * read, so the header keeps its wordmark and its menu; narrower still, at 320px, the
+ * repository's icon gives way, the footer linking the source, so nothing scrolls sideways
+ * (WCAG 1.4.10).
+ */
+@media (max-width: 47.9375rem) {
+  .code-switch-more {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+}
+
+@media (max-width: 22.4375rem) {
+  .nextra-navbar nav > a[href="https://github.com/nulib-ds/clover"]
+  {
+    display: none;
+  }
+}
+
+/* Where colors are forced, the chosen one in the system's highlight, as the Transcript's. */
+@media (forced-colors: active) {
+  :root:not([data-code="web-components"])
+    .code-switch-option[data-option="react"],
+  :root[data-code="web-components"]
+    .code-switch-option[data-option="web-components"] {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}
+
+/*
+ * The docs' code in the reader's choice (`code-flavor.ts`): an example with both holds
+ * both, each marked, and only the chosen one shows. Both stay in the page, for agents and
+ * for a page read without its scripts. An example in React alone is not marked, so it
+ * shows whichever is chosen, with a note for those who chose Web Components.
+ */
+:root[data-code="web-components"] [data-code-flavor="react"],
+:root:not([data-code="web-components"]) [data-code-flavor="web-components"] {
+  display: none;
+}
+
+/*
+ * No Documentation link in the navbar (Mat, 2026-10-21): the homepage links the docs from
+ * its calls to action, under the playground, and every docs page has the docs' own menu.
+ * Hidden here, not in `_meta.ts`, where hiding the docs' folder empties their sidebar; the
+ * phone's menu keeps it.
+ */
+.nextra-navbar nav > div[class~="x:overflow-x-auto"] {
+  display: none;
+}
+
+/*
  * The navbar's link home draws the hero's stroke under the wordmark on hover and focus
  * (`Logo.tsx`), so it never fades as Nextra's links do.
  */
@@ -430,8 +561,22 @@ main:has(> .docs-lede) > h3 {
   margin-bottom: 0.382rem;
 }
 
+/* The sentence muted under the headline, as the hero's is (`--gray-11`, 5.9:1 and 9:1). */
+.site-footer-lede > span:last-child {
+  color: var(--gray-11);
+}
+
+/*
+ * Who made it, and the license, muted (Mat, 2026-10-21): `--gray-11`, 5.9:1 on white and
+ * 9:1 on the dark ground (WCAG 1.4.3); their links keep the link color, underlined (1.4.1).
+ */
 .site-footer .site-footer-lede + p {
+  color: var(--gray-11);
   margin-top: 1rem;
+}
+
+.site-footer .site-footer-legal p {
+  color: var(--gray-11);
 }
 
 .site-footer-legal {

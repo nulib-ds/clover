@@ -1,14 +1,16 @@
 ---
 title: Get Started
+description: "What Clover is and how to start, in React or with the web component: the Viewer and the parts it is built from, installing it, what each import holds, and coming from Clover 3.x."
 ---
 
 import { Callout } from "nextra/components";
 
 # Get Started
 
-Clover builds interfaces for IIIF content in React: a Manifest, a Collection, a Canvas or
-a content state, read through the IIIF Presentation API. It is accessible, composable and
-light, and it draws images, video and sound with a renderer of its own.
+Clover builds interfaces for IIIF content in React or as a web component: a Manifest, a
+Collection, a Canvas or a content state, read through the IIIF Presentation API. It is
+accessible, composable and light, and it draws images, video and sound with a renderer of
+its own.
 
 Clover is used two ways.
 
@@ -37,8 +39,8 @@ Clover is used two ways.
   </Clover.Root>;
   ```
 
-The Viewer is a shell of under 1 kB, so a page ships only the template it uses, and the
-parts tree-shake: a page that never draws an information panel never carries one.
+A page loads only the template it uses, and the parts tree-shake: a page that never draws
+an information panel never loads one.
 
 ## Install
 
@@ -60,7 +62,7 @@ import "@nulib/clover/styles.css";
 Clover takes its type and its sizes from your page: it sets no font, and every space is
 a step from your `1rem`.
 
-## What it ships
+## Imports
 
 | Import                         | What it is                                                                                     |
 | ------------------------------ | ---------------------------------------------------------------------------------------------- |
@@ -160,17 +162,17 @@ reaches it, as 3.x's does. Clover's stylesheet is added to the document once, fi
 
 ## Coming from Clover 3.x
 
-| Clover 3.x                       | Clover 4                                                                   |
-| -------------------------------- | -------------------------------------------------------------------------- |
-| `Viewer`                         | `Viewer`, in its `Default` template                                        |
-| `Slider`                         | [`Items`](/docs/items)                                                     |
-| `Image`                          | [`Canvas`](/docs/canvas), Clover's own renderer, in place of OpenSeadragon |
-| `Scroll`                         | Not in Clover 4 yet; see [Scroll in 3.x](/docs/3.x/scroll)                 |
-| `Map`                            | [`Map`](/docs/map), on MapLibre                                            |
-| Primitives (`Label`, `Summary`…) | Parts of the same names, reading from the nearest `Root`                   |
-| `options`                        | Props on the parts, and CSS custom properties                              |
-| Information panel                | [`Panel`](/docs/panel)                                                     |
-| Information panel plugins        | `Clover.Tab`, and hooks such as `useActiveCanvas`                          |
-| `customDisplays`                 | `renderers`                                                                |
+| Clover 3.x                       | Clover 4                                                   |
+| -------------------------------- | ---------------------------------------------------------- |
+| `Viewer`                         | `Viewer`, in its `Default` template                        |
+| `Slider`                         | [`Items`](/docs/items)                                     |
+| `Image`                          | [`Canvas`](/docs/canvas), Clover's own renderer            |
+| `Scroll`                         | Not in Clover 4 yet; see [Scroll in 3.x](/docs/3.x/scroll) |
+| `Map`                            | [`Map`](/docs/map), on MapLibre                            |
+| Primitives (`Label`, `Summary`…) | Parts of the same names, reading from the nearest `Root`   |
+| `options`                        | Props on the parts, and CSS custom properties              |
+| Information panel                | [`Panel`](/docs/panel)                                     |
+| Information panel plugins        | `Clover.Tab`, and hooks such as `useActiveCanvas`          |
+| `customDisplays`                 | `renderers`                                                |
 
 The [Clover 3.x](/docs/3.x) docs are kept beside these.
