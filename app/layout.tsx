@@ -16,8 +16,7 @@ import "docs/styles/layout.css";
 import "docs/styles/tokens.css";
 
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Anchor, Banner, Head } from "nextra/components";
+import { Anchor, Head } from "nextra/components";
 import { GitHubIcon } from "nextra/icons";
 import { getPageMap } from "nextra/page-map";
 import { Footer, Layout, Navbar } from "nextra-theme-docs";
@@ -74,21 +73,6 @@ export default async function RootLayout({
       </Head>
       <body>
         <Layout
-          /*
-           * The docs lead with Clover 4, which is not released yet; the banner says so once,
-           * for every page, rather than a callout on each. Retire it (or change its key, so
-           * readers who dismissed it see the next) when 4.0 ships: a stale banner costs more
-           * attention than it earns.
-           */
-          banner={
-            <Banner storageKey="clover-4-in-development">
-              Clover 4 is in development and not on npm yet. The released Clover
-              is 3.x:{" "}
-              <Link href="/docs/3.x" style={{ textDecoration: "underline" }}>
-                Clover 3.x docs
-              </Link>
-            </Banner>
-          }
           /*
            * Nextra's navbar, held at the top as ever, and under it the line saying whose
            * project Clover is, which is not held: it follows the navbar's sticky box rather

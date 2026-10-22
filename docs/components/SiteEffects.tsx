@@ -75,29 +75,5 @@ export default function SiteEffects() {
     return () => document.removeEventListener("keydown", keepSlash);
   }, []);
 
-  /*
-   * Whether Nextra's banner shows (it hides a dismissed one with `x:hidden`), as
-   * `data-banner` on `<html>`, for the phone's scroll padding (`layout.css`). An attribute
-   * rather than `html:has(.nextra-banner…)`: a `:has()` on the root can make a browser
-   * restyle the whole document whenever anything is added to the page.
-   */
-  useEffect(() => {
-    const banner = document.querySelector(".nextra-banner");
-    const root = document.documentElement;
-    if (!banner) return;
-    const mark = () =>
-      root.toggleAttribute(
-        "data-banner",
-        !banner.classList.contains("x:hidden"),
-      );
-    mark();
-    const observer = new MutationObserver(mark);
-    observer.observe(banner, { attributes: true, attributeFilter: ["class"] });
-    return () => {
-      observer.disconnect();
-      root.removeAttribute("data-banner");
-    };
-  }, []);
-
   return null;
 }

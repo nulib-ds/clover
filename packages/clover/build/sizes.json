@@ -1,12 +1,23 @@
 {
   "canvasInitialGzip": 37975,
-  "viewerShellGzip": 928,
-  "defaultTemplateGzip": 66680,
-  "documentTemplateGzip": 69060,
-  "galleryTemplateGzip": 58482,
-  "mapInitialGzip": 18025,
+  "viewerShellGzip": 927,
+  "defaultTemplateGzip": 66764,
+  "documentTemplateGzip": 69119,
+  "galleryTemplateGzip": 58549,
+  "mapInitialGzip": 18041,
   "mapOnDemandGzip": 289655,
   "stylesGzip": 11989,
   "templatesStylesGzip": 2052,
-  "webComponentsGzip": 86712
+  "elementsEntryGzip": 4634,
+  "webComponentsGzip": 102260,
+  "labelPageGzip": 38875,
+  "composedPageGzip": 87293,
+  "parts": {
+    "Thumbnail": 2147,
+    "Label": 425,
+    "Content": 35002,
+    "Items": 9696,
+    "Summary": 1651,
+    "Metadata": 1246
+  }
 }

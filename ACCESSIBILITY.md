@@ -70,7 +70,7 @@ On October 21, 2026, Mat chose a text accent, `--clover-color-accent-text`, over
 
 ## Docs
 
-Of 81 verified docs findings, 59 are fixed (17 serious, 28 moderate, 14 minor) and 22 remain (6 serious, 9 moderate, 7 minor). The site moved to Nextra 4 on October 20, 2026 (Mat: upgrade rather than patch 2.13.4); every fix below was checked again on its markup, and axe-core (WCAG 2.2 A and AA rules) on every page in light and dark found nothing the Nextra 2 site did not have.
+Of 81 verified docs findings, 60 are fixed (18 serious, 28 moderate, 14 minor) and 21 remain (5 serious, 9 moderate, 7 minor). The site moved to Nextra 4 on October 20, 2026 (Mat: upgrade rather than patch 2.13.4); every fix below was checked again on its markup, and axe-core (WCAG 2.2 A and AA rules) on every page in light and dark found nothing the Nextra 2 site did not have.
 
 Mat, October 16, 2026: the docs plan below waits until 4.x is being readied for release, and is done then, before it ships. The Example Viewer's editor was fixed at once, before it first shipped.
 
@@ -93,6 +93,7 @@ Mat, October 16, 2026: the docs plan below waits until 4.x is being readied for 
 - Code blocks and tables that scroll reach the keyboard: Nextra 4 makes code blocks focusable, and a Markdown table scrolls in a box that is a focusable region, named for its section, while it overflows (`docs/components/ScrollTable.tsx`). Below 768px the code's word-wrap button is always shown, under the code, covering nothing (2.1.1, 1.4.13; D16, D96).
 - Every 3.x page has a title of its own, ending in "(3.x)" (2.4.2; D43).
 - The page settings' hex field is gone with the gear that held it (Mat, October 20, 2026): font and color are now chosen in the homepage's "Why Clover", from presets alone, and appearance in the footer (3.3.1; D74).
+- The site banner is gone (Mat, October 22, 2026: the site writes of Clover 4 as released), and with it the text and the 3.x link it cut off on a phone (1.4.10; D9).
 
 ### Plan
 
@@ -100,7 +101,7 @@ Mat, October 16, 2026: the docs plan below waits until 4.x is being readied for 
 
 2. **Modal Viewer panel** (2.4.3). Tab leaves the full-window demo panel for page links hidden behind it. Open the panel as a `<dialog>` with `showModal()`. If nothing opened it, focus the IIIF field on close. `CookbookViewerPanel.tsx`. M. (D10)
 
-3. **Reflow** (1.4.10, 1.4.12). On phones the banner cuts off its 3.x link, recipe tables and Content State's columns crush, and tile names clip. Let the banner wrap and stop pinning it below 768px, then remove D34's scroll padding. Stack the table actions, and let the columns and `.tileName` wrap. `layout.css`, `CookbookCoverageTable.module.css`, `content-state.mdx`, `Parts.module.css`. S. (D9, D11, D71, D84)
+3. **Reflow** (1.4.10, 1.4.12). On phones recipe tables and Content State's columns crush, and tile names clip. Stack the table actions, and let the columns and `.tileName` wrap. `CookbookCoverageTable.module.css`, `content-state.mdx`, `Parts.module.css`. S. (D11, D71, D84)
 
 4. **Field edges** (1.4.11). The Content State textareas have edges of 1.2:1. Add a 3:1 boundary step (the accent text, D1, is fixed). `tokens.css`. S. (D83)
 
@@ -137,7 +138,6 @@ The audit's ids, cited by the plans, and N for those found since. Most severe fi
 
 | Id  | Criterion                              | Severity | Finding                                                                                                        | Where                                                                                                                                         |
 | --- | -------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| D9  | 1.4.10 Reflow                          | serious  | The site banner cuts off its text and its 'Clover 3.x docs' link                                               | `app/layout.tsx`, `node_modules/nextra-theme-docs/dist/index.js:385` …                                                                        |
 | D10 | 2.4.3 Focus Order                      | serious  | The demo's full-window Viewer panel is not modal, so focus moves to page chrome hidden under it                | `docs/components/CookbookRecipes/CookbookViewerPanel.tsx:68`, `docs/components/CookbookRecipes/CookbookViewerPanel.tsx:94` …                  |
 | D11 | 1.4.10 Reflow                          | serious  | The Cookbook recipe tables crush and overlap their titles at phone widths and under text spacing               | `docs/components/CookbookRecipes/CookbookCoverageTable.module.css:1`, `docs/components/CookbookRecipes/CookbookCoverageTable.module.css:18` … |
 | D14 | 2.1.1 Keyboard                         | serious  | Picking coordinates in the 3.x Map demo works only with a pointer                                              | `docs/components/Map/CoordinatePickingDemo.tsx:26`, `docs/components/Map/CoordinatePickingDemo.tsx:40` …                                      |

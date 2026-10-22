@@ -3,7 +3,7 @@ import {
   CHECKED,
   progressFor,
 } from "docs/components/CookbookRecipes/progress4";
-import sizes from "../../packages/clover/build/sizes.json";
+import { kB, partLoads, sizes } from "docs/lib/sizes";
 
 /*
  * The figures the site states about Clover, in one place, each the code's own (AGENTS.md:
@@ -22,21 +22,24 @@ export {
   primitiveCount,
 } from "docs/components/Home/counts";
 
-/* A size in kB, to the tenth (Mat, 2026-10-20), as `npm run test:build` reports it. */
-export const kB = (bytes: number) => (bytes / 1000).toFixed(1);
+export { kB, partLoads };
 
 /**
  * What a reader's browser loads, in kB gzipped, for a Canvas, for the Viewer with its
- * Default template, and for `<clover-viewer>`: each a thing that draws. Never the Viewer before its template, which
- * draws nothing on its own (Mat, 2026-10-21).
+ * Default template, and for pages of web components: each a thing that draws, never the
+ * Viewer before its template, which draws nothing on its own (Mat, 2026-10-21).
  */
 export const loads = {
   /** A Canvas: images, video, and sound. */
   canvas: kB(sizes.canvasInitialGzip),
   /** The Viewer with its Default template. */
   defaultTemplate: kB(sizes.defaultTemplateGzip),
-  /** `<clover-viewer>`: the Viewer in its Default template, Preact and the stylesheet. */
+  /** A page with a `<clover-viewer>`: the Viewer in its Default template, Preact and the stylesheet. */
   element: kB(sizes.webComponentsGzip),
+  /** The web components' script itself: every element defined, none drawn yet. */
+  elementsEntry: kB(sizes.elementsEntryGzip),
+  /** A page of `<clover-root>` and `<clover-label>` alone, with the stylesheet. */
+  labels: kB(sizes.labelPageGzip),
 };
 
 const recipes = cookbookSections.flatMap((section) => section.recipes);

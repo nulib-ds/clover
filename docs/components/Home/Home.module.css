@@ -670,14 +670,61 @@
 
 /* The command, as the code editor shows code: Prism's Material colors on black. */
 .install {
+  align-items: center;
   background: var(--code-background);
   border-radius: var(--radius-4);
   color: var(--code-text);
+  display: flex;
   font-family: var(--font-mono);
   font-size: var(--text-sm);
+  gap: 1rem;
+  padding: 0.618rem 0.618rem 0.618rem 1.618rem;
+}
+
+.installCode {
+  flex: 1;
   margin: 0;
+  min-width: 0;
   overflow-x: auto;
-  padding: 1rem 1.618rem;
+  padding: 0.382rem 0;
+}
+
+/*
+ * The example viewer's editor's Copy, the same (Mat, 2026-10-22; `.editorHead` and `.copy`
+ * in Parts.module.css): the code's faint text at the head's size, the code's own under
+ * the pointer. Change one, and change the other.
+ */
+.installCopy {
+  background: none;
+  border: 0;
+  border-radius: var(--radius-2);
+  color: var(--code-faint);
+  cursor: pointer;
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  min-block-size: 24px;
+  min-inline-size: 24px;
+  padding: 0.236rem 0.382rem;
+}
+
+.installCopy:hover {
+  color: var(--code-text);
+}
+
+.installCopy:focus-visible {
+  outline: 2px solid var(--accent-9);
+}
+
+/* Read, not seen: the install's status, and the parts' figures in words. */
+.visuallyHidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
 }
 
 :global(.dark) .install {

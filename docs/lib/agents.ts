@@ -16,6 +16,8 @@ import {
 } from "docs/lib/figures";
 import {
   aboutClover,
+  homeHeadline,
+  homeTagline,
   homeStructuredData,
   isEarlierVersion,
   markdownUrl,
@@ -215,6 +217,8 @@ export async function llmsTxt() {
     `# ${siteTitle}`,
     "",
     `> ${aboutClover}`,
+    "",
+    `${homeHeadline} ${homeTagline}`,
     "",
     `These docs are for Clover 4, \`${name}\`: \`npm install ${name}\`. Clover 3.x, \`@samvera/clover-iiif\`, is the earlier version, and its docs under ${siteUrl}/docs/3.x are kept for reference only: do not take its API or behavior as Clover 4's. Every page below is Markdown at its address with \`.md\` added, and all of Clover 4's are in one file, ${siteUrl}/llms-full.txt.`,
     "",

@@ -291,6 +291,60 @@ describe("Clover.Root and its parts", () => {
     );
   });
 
+  it("opens a Collection at defaultManifestId, and lets the reader move on from it", async () => {
+    const BOOK = bookJson.id;
+    const LETTER = "https://example.org/letter";
+    const letter = {
+      ...bookJson,
+      id: LETTER,
+      label: { en: ["A letter"] },
+      items: [bookJson.items[0]],
+    };
+    const shelf = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/shelf",
+      type: "Collection",
+      label: { en: ["Shelf"] },
+      items: [
+        { id: BOOK, type: "Manifest", label: { en: ["The book"] } },
+        { id: LETTER, type: "Manifest", label: { en: ["A letter"] } },
+      ],
+    };
+    const fetch = vi.fn(
+      async (url: string) =>
+        new Response(JSON.stringify(url === LETTER ? letter : bookJson), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+    );
+    const moved = vi.fn();
+    let clover: ReturnType<typeof useClover>["clover"] | undefined;
+    function Probe() {
+      clover = useClover().clover;
+      return null;
+    }
+    render(
+      <Clover.Root
+        iiifContent={shelf}
+        defaultManifestId={LETTER}
+        onManifestChange={moved}
+        request={{ fetch }}
+      >
+        <Probe />
+        <Clover.Label as="h1" />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByRole("heading", { name: "A letter" }),
+    ).toBeInTheDocument();
+    // Not held there, as `manifestId` would hold it: the reader's choice is made.
+    act(() => void clover!.goToManifest(BOOK));
+    expect(
+      await screen.findByRole("heading", { name: "Simple Manifest - Book" }),
+    ).toBeInTheDocument();
+    expect(moved).toHaveBeenCalledWith(BOOK);
+  });
+
   it("keeps one status region, so each load is announced as a change to it (WCAG 4.1.3)", async () => {
     const BOOK = bookJson.id;
     const LETTER = "https://example.org/letter";

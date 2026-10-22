@@ -24,6 +24,8 @@ import { StoryLines } from "docs/components/Home/StoryLines";
 import { AccessibilityTree } from "docs/components/Home/AccessibilityTree";
 import { SectionIntro } from "docs/components/Home/SectionIntro";
 import { partCount } from "docs/components/Home/counts";
+import { partLoads } from "docs/lib/sizes";
+import { useRecipeContent } from "docs/components/Home/recipeThumbnails";
 import { endPageThemePreview, previewPageTheme } from "docs/lib/page-theme";
 
 /**
@@ -220,7 +222,8 @@ function Exploded({
   const viewer = useRef<HTMLElement>(null);
   /*
    * Turned over to its accessibility tree while a story asks (`data-turn`), unless focus
-   * is in it: then its face stays up, so what is focused is seen (WCAG 2.4.7).
+   * is in it, or under it at its code control, which the tree, taller, covers: then its
+   * face stays up, so what is focused is seen (WCAG 2.4.7, 2.4.11).
    */
   const [turned, setTurned] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -950,20 +953,18 @@ function Exploded({
       <div
         ref={assembled}
         className={styles.assembled}
-        onFocus={reveal}
-        onBlur={hold}
+        data-code={(code && !slot) || undefined}
+        onFocus={(event) => {
+          setFocused(true);
+          reveal(event);
+        }}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+            setFocused(false);
+          hold(event);
+        }}
       >
-        <div
-          className={styles.flip}
-          data-face={face}
-          onFocus={() => setFocused(true)}
-          onBlur={(event) => {
-            if (
-              !event.currentTarget.contains(event.relatedTarget as Node | null)
-            )
-              setFocused(false);
-          }}
-        >
+        <div className={styles.flip} data-face={face}>
           {/* Named for assistive technology; on screen the viewer speaks for itself. */}
           <section
             ref={viewer}
@@ -1159,9 +1160,10 @@ function More() {
  * "Why Clover"'s Coverage story, read on the viewer's other side: a Cookbook recipe in a
  * Root of its own (0032, a Collection; Mat, 2026-10-21), read by the same Label, Content,
  * Metadata and Collection, all but Metadata outlined with their names (Mat, 2026-10-21),
- * and the recipe named at the head, so it is plain what is being read. An illustration as the page scrolls, so it is inert:
- * focus and assistive technology stay with the viewer itself, which turns back the moment
- * focus comes to it.
+ * and the recipe named at the head, so it is plain what is being read. Its members are
+ * given thumbnails from their own images, for this example only (`recipeThumbnails.ts`).
+ * An illustration as the page scrolls, so it is inert: focus and assistive technology
+ * stay with the viewer itself, which turns back the moment focus comes to it.
  */
 const RecipeFace = React.memo(function RecipeFace({
   recipe,
@@ -1170,6 +1172,8 @@ const RecipeFace = React.memo(function RecipeFace({
   recipe: { url: string; name: string };
   height: number;
 }) {
+  // The Collection, its members' thumbnails added; drawn once it is read.
+  const content = useRecipeContent(recipe.url);
   return (
     <section
       className={`${styles.viewer} ${styles.recipeFace}`}
@@ -1177,20 +1181,30 @@ const RecipeFace = React.memo(function RecipeFace({
       inert
     >
       <p className={styles.recipeName}>{recipe.name}</p>
-      <Clover.Root iiifContent={recipe.url} className={styles.recipeRoot}>
-        <Region name="Label" data-on data-part="label">
-          <Clover.Label as="p" className={styles.recipeLabel} />
-        </Region>
-        <Region name="Content" data-on data-part="content">
-          <Clover.Content controls={false} style={{ height }} />
-        </Region>
-        <Region name="Metadata" data-part="metadata">
-          <Clover.Metadata className={styles.recipeNotes} />
-        </Region>
-        <Region name="Collection" data-on data-part="collection">
-          <Clover.Collection headingLevel={4} className={styles.recipeNotes} />
-        </Region>
-      </Clover.Root>
+      {content && (
+        <Clover.Root iiifContent={content} className={styles.recipeRoot}>
+          <Region name="Label" data-on data-part="label">
+            <Clover.Label as="p" className={styles.recipeLabel} />
+          </Region>
+          <Region name="Content" data-on data-part="content">
+            <Clover.Content controls={false} style={{ height }} />
+          </Region>
+          <Region name="Metadata" data-part="metadata">
+            <Clover.Metadata className={styles.recipeNotes} />
+          </Region>
+          <Region
+            name="Collection"
+            className={styles.recipeInset}
+            data-on
+            data-part="collection"
+          >
+            <Clover.Collection
+              headingLevel={4}
+              className={styles.recipeNotes}
+            />
+          </Region>
+        </Clover.Root>
+      )}
     </section>
   );
 });
@@ -1217,6 +1231,13 @@ function Region({
     >
       <span className={styles.regionName} aria-hidden="true">
         {name}
+        {/* What it adds to a page, shown while the Lightweight story is up (`data-weighed`). */}
+        {name in partLoads && (
+          <span className={styles.regionSize}>
+            {" "}
+            {partLoads[name as keyof typeof partLoads]} kB
+          </span>
+        )}
       </span>
       {children}
     </div>

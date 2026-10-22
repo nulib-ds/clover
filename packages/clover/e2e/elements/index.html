@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clover elements</title>
+    <style>
+      body {
+        margin: 0 auto;
+        padding: 1rem;
+        max-width: 60rem;
+        font-family: system-ui, sans-serif;
+      }
+      .layout {
+        display: grid;
+        gap: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Clover elements</h1>
+      <p>
+        Two roots, each composed of parts in the page's own markup. The page's
+        text stays as written between them.
+      </p>
+      <clover-root
+        class="layout"
+        iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+      >
+        <clover-label as="h2"></clover-label>
+        <p>A paragraph of the page's own, inside the first root.</p>
+        <clover-content style="height: 40vh"></clover-content>
+        <p>Now showing <clover-label of="canvas"></clover-label>.</p>
+        <clover-items></clover-items>
+      </clover-root>
+      <clover-root
+        class="layout"
+        iiif-content="https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json"
+      >
+        <clover-label as="h2"></clover-label>
+        <clover-content></clover-content>
+        <clover-items layout="grid"></clover-items>
+      </clover-root>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import React from "react";
 import Logo from "docs/components/Logo";
 import { ThemeSwitch } from "docs/components/ThemeSwitch";
+import { homeHeadline, homeTagline } from "docs/lib/site";
 
 /* When Clover's development began, and the version these docs are for (Mat, 2026-10-21). */
 const SINCE = 2021;
@@ -25,20 +26,17 @@ export function SiteFooter() {
         </Link>
         {/* The homepage hero's words, at their size there, a sentence a line. */}
         <p className="site-footer-lede">
-          <span>A viewer as distinctive as your collections.</span>{" "}
-          <span>
-            Design the user experience that you imagine for your IIIF resources.
-          </span>
+          <span>{homeHeadline}</span> <span>{homeTagline}</span>
         </p>
         <p>
           Clover is a project of the Academic Innovation team at{" "}
           <a href="https://www.library.northwestern.edu/">
             Northwestern University Libraries
           </a>
-          . In development since {SINCE}, now at {VERSION}, it is used in a
-          variety of implementations, with contributions from folks at Princeton
-          University, UNC Chapel Hill, the University of Pennsylvania, Cogapp,
-          and{" "}
+          . Developed since {SINCE}, now at {VERSION}, it is used in a variety
+          of implementations, with contributions from folks at Princeton
+          University, Texas A&amp;M University, UNC Chapel Hill, the University
+          of Pennsylvania, Cogapp, and{" "}
           <a href="https://github.com/nulib-ds/clover/graphs/contributors">
             more
           </a>
@@ -54,6 +52,12 @@ export function SiteFooter() {
           <ul>
             <li>
               <a href="https://github.com/nulib-ds/clover">Source code</a>
+            </li>
+            {/* Clover's channel on IIIF's Slack (Mat, 2026-10-22). */}
+            <li>
+              <a href="https://iiif.slack.com/archives/C090ZBQCL77">
+                #clover-iiif on Slack
+              </a>
             </li>
             <li>
               <a href="https://github.com/nulib-ds/clover/blob/main/LICENSE">

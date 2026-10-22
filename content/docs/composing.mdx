@@ -82,6 +82,7 @@ function MyLayout(props) {
 | `language`             | `string`                          | The language to read IIIF text in. The page's, then the reader's, by default.      |
 | `annotations`          | URL, object or list               | AnnotationPages or AnnotationCollections to show beside the Manifest's own.        |
 | `manifestId`           | `string`                          | In a Collection, the member to show, controlled.                                   |
+| `defaultManifestId`    | `string`                          | In a Collection, the member to open first.                                         |
 | `onManifestChange`     | `(manifestId) => void`            | In a Collection, the reader moved, or asks to move, to another member.             |
 | `searchQuery`          | `string`                          | A Content Search to run once the Manifest is shown, and whenever it changes.       |
 | `onContentStateChange` | `({ json, encoded }) => void`     | Where the reader is, as a content state, each time it settles.                     |

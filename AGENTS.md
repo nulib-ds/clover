@@ -133,11 +133,13 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     unlisted (hidden in the sidebar, out of search): each recipe's status in 4.x beside
     3.x, and what is missing. Its data is `docs/components/CookbookRecipes/progress4.ts`;
     when a recipe starts working, or stops, record it there with the date.
-  - The site banner (`app/layout.tsx`) says Clover 4 is in development. Retire it, or
-    change its `storageKey`, when 4.0 ships.
+  - The site writes of Clover 4 as released (Mat, 2026-10-22: "assume we are live
+    already"): it has no banner, and nothing a reader or an agent meets says Clover 4 is
+    unreleased or still to come ("in development", "not on npm yet", "until Clover 4 is
+    released").
   - The homepage (`docs/components/Home/`) opens with its headline, "A viewer as distinctive /
     as your collections." (two lines, its stroke under "distinctive") (`Hero.tsx`, the page's `h1`), and one sentence, on one line where it fits
-    (Mat, 2026-10-20): "Design the user experience that you imagine for your IIIF resources." It has two halves: the templates live under it
+    (Mat, 2026-10-20; his rewording, 2026-10-22: one verb, no commas, IIIF given a role and never a tack-on): "Design a user experience rooted in IIIF with Clover." It has two halves: the templates live under it
     (`docs/components/Playground/`), and below them the same resource shown one IIIF
     property at a time by the components the templates are made of (`Parts.tsx` and
     `PartsLive.tsx`), with no heading of its own in sight. Each half has one hidden, for
@@ -170,11 +172,22 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     `Parts` as children; the Root draws no box). `StoryLines.tsx` drives it from the
     scroll, only where the viewer is held: one 3px line from the story at the middle to
     the part it names (`data-point`, or `viewer` for the frame); `data-lit` on that part
-    and on the tiles crossing the middle; Accessible (`data-turn`) shows the viewer's
-    inspector (`AccessibilityTree.tsx`: WCAG checks measured on the viewer, then an ARIA
-    snapshot with tab stops) and Coverage (`data-recipe`) a Cookbook recipe (0032, a
+    and on the tiles crossing the middle; Lightweight (`data-weigh`) draws its line to
+    the viewer's middle and lights every part it shows, each tag giving, after the
+    part's name, what it adds to a page with a `Root` (`sizes.json`'s `parts`, measured by
+    `build/sizes.mjs`, through `docs/lib/sizes.ts`; `data-weighed` on the viewer; in words
+    for assistive technology in the story), its one figure the Viewer's, "Viewer (Default
+    template)" (Mat, 2026-10-22); Accessible (`data-turn`) shows the viewer's
+    inspector (`AccessibilityTree.tsx`: WCAG checks measured on the viewer, by topic in
+    the order Mat set, names and ARIA, the keyboard, targets, contrast and text size,
+    captions, language, motion, each with its mark, then an ARIA snapshot with tab stops,
+    the card as tall as both need where the window has room under the held viewer,
+    focus anywhere in the viewer's column giving it up; Mat, 2026-10-22) and Coverage (`data-recipe`) a Cookbook recipe (0032, a
     Collection, read by Label, Content, Metadata and Collection, all outlined but Metadata;
-    Mat, 2026-10-21), each crossfading with the viewer (no flip), inert, and given
+    Mat, 2026-10-21; for this example alone, the Collection held in from its outline, its
+    address on one line, and its members given thumbnails from their own images at a size
+    each `info.json` prescribes, its `sizes` else a level of its tiles,
+    `recipeThumbnails.ts`; Mat, 2026-10-22), each crossfading with the viewer (no flip), inert, and given
     up when focus comes to the viewer (2.4.7); Seamless (`data-brand`) previews Northwestern
     purple without keeping it, on what is in view as it begins (the navbar, the viewer,
     the stories and their line, the tiles and chips on screen; `previewPageTheme`'s
@@ -216,7 +229,7 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     `clip-path`, which the main thread redraws every frame); the recipe and the
     inspector's snapshot load while the page is idle, never mid-scroll; a change of the
     viewer renders as a React transition; no `:has()` on the page's root or its
-    ancestors (attributes instead: `data-bar-stuck`, `data-banner`, and
+    ancestors (attributes instead: `data-bar-stuck` and
     `docs/lib/full-width.ts`'s rules); no view transitions (their snapshot costs frames).
     Measure with a scroll in a current Chrome (`npx playwright` with
     `channel: "chrome"`), since Playwright's bundled Chromium is slower to restyle, and
@@ -251,7 +264,7 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     made-up figures or copy. Golden-ratio spaces, hairline edges, no gray fills.
   - The playground shows how far one Viewer stretches: any layout with any kind of
     resource. Two pickers, each changing the stage without the other. Over it, centered,
-    the resource (`ResourceField.tsx`): one field, its label, "Select an item", joined to its start outside its edge (Mat,
+    the resource (`ResourceField.tsx`): one field, its label, "Select…" (named "Select a IIIF resource": the ellipsis hidden, the rest visually hidden, WCAG 2.5.3; Mat, 2026-10-22), joined to its start with no line between them (2026-10-22) (Mat,
     2026-10-20; a tab on its top edge on a phone; its `<label>`), for the
     address or content state of the reader's own, with ours listed under it (`resources`
     in `playground-config.ts`: a catalog, a print, a Collection, a photo, a map, a film, a
@@ -286,8 +299,9 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     2026-10-21), a title ending in a period under the hero's stroke, one short note (`--text-lede`, as the hero's sentence and the choice's), and one call to action (`cta-solid` or `cta-outline`,
     `tokens.css`). And more (the parts counted, "See them all"; the Collection's tile the first under it, and Annotations beside Contents; Mat,
     2026-10-21), Why Clover ("Read the
-    docs"; its note the five stories in brief, a short sentence each, in their order) and Install ("Get started"), the last in the gap after Coverage, beside the
-    held viewer, the grid ending with its npm block, and a few rem under it, no more
+    docs"; its note the five stories in brief, a short sentence each, in their order) and Install ("Install is easy.", "Get started"), the last in the gap after Coverage, beside the
+    held viewer, the grid ending with its npm block (its Copy drawn as the example viewer's
+    editor's is, `.installCopy`; Mat, 2026-10-22), and a few rem under it, no more
     (`4.236rem`, the page's own; Nextra's empty room under the article hidden on full
     pages, `full-width.ts`), before the footer (Mat, 2026-10-21).
   - The footer (`docs/components/SiteFooter.tsx`, inside Nextra's `Footer`, styled in
@@ -304,8 +318,10 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     its "more" linking to the repository's contributors; the two across 61.8% of the
     footer's width (all of it on a phone). No history, and no titles. Under it, `3xl`
     away, that it is MIT licensed and fully open source, the holder as `LICENSE` names
-    it: Northwestern University Libraries, from 2026, and the site's links (Source code
-    and License; never the earlier version, Mat, 2026-10-21), with the
+    it: Northwestern University Libraries, from 2026, and the site's links (Source code,
+    `#clover-iiif` on IIIF's Slack, `https://iiif.slack.com/archives/C090ZBQCL77`, Mat,
+    2026-10-22, and License;
+    never the earlier version, Mat, 2026-10-21), with the
     appearance after them (Light, Dark or System, `ThemeSwitch.tsx`, Nextra's `Select`) on
     every page (Mat, 2026-10-21). Nextra's own switch is off (`darkMode={false}`), so
     none is in the sidebar's foot (its Collapse button kept at the end), the phone's menu
@@ -347,9 +363,14 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     `metadata` and each page's `generateMetadata` (`app/[[...mdxPath]]/page.tsx`): the
     homepage's title is "Clover IIIF – A viewer as distinctive as your collections" and the site's
     description says what Clover is, plainly, in Get Started's words, in React or as a web
-    component (Mat, 2026-10-21: so an agent or a search result can tell; the hero is the
-    brand's; every description of Clover, the READMEs' and the packages' too, names both,
-    and only what each does today); a page
+    component (Mat, 2026-10-21: so an agent or a search result can tell; every
+    description of Clover, the READMEs' and the packages' too, names both, and only what
+    each does today). The hero's headline and line are written once (`homeHeadline`,
+    `homeTagline` in `site.ts`), for the hero and the footer, and carried wherever the
+    brand speaks (Mat, 2026-10-22): the homepage's description and share text open with
+    the line, then say what Clover is, as plainly (`homeDescription`); its structured
+    data gives them as `headline` and `alternativeHeadline`; `llms.txt` (and so
+    `llms-full.txt`) and the README carry both. A page
     takes its `title` (front matter, else its first `h1`, Nextra's rule) and its
     `description`. Give every page a `description`: agents read it in `llms.txt`, the
     parts' list and the Markdown. Every page's card picture is a 1200 × 630 band of
@@ -406,7 +427,7 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
 - The package builds to `packages/clover/dist/`; the site's static assets are in `public/`.
 - Tests are colocated near code as `*.test.ts|tsx`: the package's, and the docs' own
   helpers in `docs/lib/` (the root `vitest.config.mjs`), run together through
-  `vitest.workspace.mjs`, with `<clover-viewer>`'s under Preact, as it ships
+  `vitest.workspace.mjs`, with the web components' under Preact, as they ship
   (`packages/clover/vitest.preact.config.mjs`). CI also builds the package and runs
   `npm run test:build`, the build's own checks and budgets.
 

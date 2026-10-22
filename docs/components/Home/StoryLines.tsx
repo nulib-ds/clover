@@ -29,8 +29,10 @@ const SEEK = 1200;
  *
  * A story's own change starts as its line is drawn, and holds as long as the line does
  * (Mat, 2026-10-21: in sync): one with `data-turn` turns the viewer to its accessibility
- * tree (`onTurn`), one with `data-recipe` to its recipe (`onRecipe`), and one with
- * `data-compose` or `data-brand` makes its change (`onCompose`, `onBrandStory`). Each is
+ * tree (`onTurn`), one with `data-recipe` to its recipe (`onRecipe`), one with
+ * `data-compose` or `data-brand` makes its change (`onCompose`, `onBrandStory`), and one
+ * with `data-weigh` lights every part the viewer shows, its tag giving what the part adds
+ * to a page (`data-weighed` on the viewer, written here). Each is
  * undone only `BAND` past where it began. A story the line has reached is marked
  * `data-drawn`, for good, so its figure's stroke draws then too (`Home.module.css`). Only
  * where the viewer is held beside the stories; elsewhere nothing is drawn, lit or turned.
@@ -81,6 +83,7 @@ export const StoryLines = React.memo(function StoryLines({
       reading: false,
       composing: false,
       branding: false,
+      weighing: false,
     };
     let litKey = "";
     let frame = 0;
@@ -138,6 +141,9 @@ export const StoryLines = React.memo(function StoryLines({
         reading: onRecipe,
         composing: onCompose,
         branding: onBrandStory,
+        // On the viewer itself, not through React's state: its tags show it (`.regionSize`).
+        weighing: (weighing: boolean) =>
+          viewer.current?.toggleAttribute("data-weighed", weighing),
       })[name](on);
     };
 
@@ -197,10 +203,18 @@ export const StoryLines = React.memo(function StoryLines({
           })
           .map((tile) => tile.dataset.tile ?? ""),
       );
-      light(
-        new Set([...crossing, ...(point && !whole ? [point] : [])]),
-        crossing,
-      );
+      // A story that weighs the parts lights every one the viewer shows, for its tag.
+      const pointed = story?.hasAttribute("data-weigh")
+        ? [
+            ...(viewer.current?.querySelectorAll<HTMLElement>("[data-part]") ??
+              []),
+          ]
+            .filter((part) => part.offsetHeight > 0)
+            .map((part) => part.dataset.part ?? "")
+        : point && !whole
+          ? [point]
+          : [];
+      light(new Set([...crossing, ...pointed]), crossing);
 
       if (story !== current) {
         current = story;
@@ -215,6 +229,7 @@ export const StoryLines = React.memo(function StoryLines({
       set("reading", Boolean(story?.dataset.recipe));
       set("composing", Boolean(story?.hasAttribute("data-compose")));
       set("branding", Boolean(story?.hasAttribute("data-brand")));
+      set("weighing", Boolean(story?.hasAttribute("data-weigh")));
 
       // Every story the line has reached (past the last, all), its figure's stroke drawn
       // as the line reached it.

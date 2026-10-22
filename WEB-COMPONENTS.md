@@ -42,8 +42,9 @@ unless they say otherwise.
   `@layer clover`.
 - It has a fixed attribute table, one object property (`iiifContent`), and three bubbling
   events (`canvaschange`, `manifestchange`, `contentstatechange`).
-- It is built with React aliased to Preact (`build/web-components.config.mjs`). It
-  measures 86.7 kB gzip up front, against an 86.8 kB budget (103.3 kB before phase 0).
+- It is built with React aliased to Preact (`build/web-components.config.mjs`). The
+  entry measures 89.1 kB gzip up front with phase 1's elements, against an 89.2 kB budget
+  (86.7 kB after phase 0, 103.3 kB before).
 
 Bugs to fix first, whatever else follows (all fixed in phase 0, October 21, 2026):
 
@@ -84,7 +85,8 @@ Each element owning a Preact root breaks four things:
 
 - **Context.** A part reads its Root through React context, which can't cross render
   roots.
-- **Ids.** Preact restarts its id counter in each root.
+- **Ids.** Preact restarts its id counter in each root (and, phase 1 found, in each
+  portal).
 - **Children.** Rendering into an element wipes the page's children in it.
 - **Containers.** The Split and the Panel's tabs rely on context and DOM structure across
   parts.
@@ -102,8 +104,10 @@ So the elements share one tree:
   - the page's markup inside it stays as written.
 - **Part elements** (`<clover-label>`, `<clover-items>`, …) find their nearest
   `<clover-root>`. The host renders each one's part with `createPortal` into the element,
-  inside that root's provider. Every context works, and ids are unique across every root
-  on the page.
+  inside that root's provider. Every context works. Each element prefixes its own ids:
+  one tree does not make them unique, as Preact counts `useId` afresh in each portal.
+- **A boundary per element.** With one tree, an error left to rise would take every
+  element on the page down, so each element catches its own, inside its portal.
 - **Standalone elements** (`<clover-canvas iiif-content>`, `<clover-items iiif-content>`,
   `<clover-map>`) and `<clover-viewer>` are portaled from the host directly.
 
@@ -172,7 +176,6 @@ The parts that need more than their props:
 - **Metadata's `renderValue`, Annotations' `renderEntry` and Items' `renderItem`** are
   function properties.
 - **Status's `loading` and `error`** are slots.
-- **Download's button content** is the element's children.
 - **Tip and ReadMore** stay inside the parts. Neither is an element.
 
 ## Build, packaging and size
@@ -291,6 +294,175 @@ Each is a change of its own, shippable, with its CHANGELOG entries and AGENTS.md
    transformer, the API tables, Get Started, Composing Layouts, the homepage's editor, and
    what agents read.
 8. **Release**: renamed events on `<clover-viewer>`, budgets, docs claims.
+
+## Phase 1 progress
+
+Begun October 21, 2026, on the three recommended defaults: Preact, one tree per page with
+parts portaled, light DOM. Event names, objects in HTML and entry points wait for
+phases 2 and 8. Work may stop at a session's limit; resume from this list.
+
+- [x] `Root.tsx` split: `useRootState` (the store, its effects, the context) and
+      `Announcer`, apart from its frame. React's `Root` unchanged.
+- [x] The host (`web-components/host.tsx`): one per document, a registry of elements, a
+      provider per `<clover-root>`, a portal per part, an error boundary per element.
+- [x] The style registry (`web-components/styles.ts`): one per document, shared with
+      `<clover-viewer>`, with the elements' own display rules.
+- [x] The base element (`web-components/base.ts`): connect and move, properties set early,
+      attributes read.
+- [x] `<clover-root>`, `<clover-label>`, `<clover-content>`, `<clover-items>`
+      (`web-components/elements/`, a module each).
+- [x] Tests under Preact for each thing phase 1 must prove (`elements.test.tsx`,
+      `upgrade.test.tsx`).
+- [x] A page in a real browser, checked by keyboard and against the accessibility tree
+      (`e2e/elements`, served by `e2e/vite.elements.config.mjs`).
+- [x] The size of a page with only labels (`labelPageGzip` in `sizes.json`).
+- [x] Go or no go, with what was found: below.
+
+### What phase 1 found (October 22, 2026)
+
+- **The page's markup stays.** A portal adds to an element and leaves the page's nodes
+  where they were, the same nodes, in tests and in Chrome.
+- **Every context works through the portals.** A label in one element follows the items
+  in another; the root's live region announces the move; each root reads the page's
+  language where it sits, and Clover's words are marked where it differs.
+- **One tree did not make ids unique.** Preact counts `useId` afresh in each portal unless
+  the tree's root has used one first, so two `<clover-items>` both made `clover-P0-0`.
+  Each element now prefixes its ids (`clover-<n>-`), as `<clover-viewer>` does.
+- **One tree needs a boundary per element**, or one part's error takes every element on
+  the page down. It is inside the portal, so it catches the part's effects too.
+- **Moves and upgrade order work.** A root moved keeps the reader's place without
+  reloading; a part moved into another root reads that one; parts defined before their
+  root wait for it; a property set before an element is defined is taken.
+- **Display.** Roots and items are blocks; `<clover-content>` is the stage's box, sized
+  by `--clover-content-height` or its own `style`; `<clover-label>` is
+  `display: contents`, so a heading or a word in a sentence sits as if written there. The
+  page's CSS wins: a root given `display: grid` lays out its parts. Nothing overflows at
+  320px.
+- **Styles go in once**, from one registry per document, shared with `<clover-viewer>`,
+  with one observer for the runs only media and maps need.
+- **The keyboard and the accessibility tree match the React composition**: the Canvas's
+  controls, its viewport, the listbox as one tab stop, then Next; an arrow key moves the
+  stage and a label in another element.
+- **It stays quick.** Only an element whose props change re-renders (tested). In headless
+  Chrome on the dev server, 1,200 elements in 200 roots draw in 77 ms, and 3,000 in
+  234 ms with one long task of 59 ms.
+- **Size.** A page of `<clover-root>` and `<clover-label>` alone loads 22.4 kB of script
+  gzipped; React's `Root` and `Label` are 12.5 kB, React aside, so Preact and the host are
+  about 10 kB. With `<clover-items>` it is 32.2 kB, and all four 66.2 kB, about Default's
+  66.8 kB. Most of a label's page is Preact and Clover's core: `createClover` brings
+  annotation sets, content state and search to every root, even one that shows a label.
+  The entry, which defines every element at once, grows 2.4 kB (86.7 to 89.1 kB) until
+  phase 2's lazy stubs.
+- **`Root`'s split costs React pages 0.1 kB** (Default, Gallery), with each prop's name
+  written once: `useRootState` takes `Root`'s props whole and returns
+  `[context, status, rest]`.
+- **A bug in today's element**: `<clover-viewer manifest-id>` held the reader on one
+  member of a Collection unless the page answered `manifestchange`. It opens there now
+  (`defaultManifestId`, new on `Root`), and the reader moves on.
+- **For phase 2**: lazy stubs, so a page loads only the elements it uses; whether the core
+  can load annotations, content state and search only when a part needs them; the
+  registry indexed by root (it scans every element on each change, which is fine at
+  3,000); which attributes an element passes to its part (an author's `aria-label` on
+  `<clover-items>` names a generic element, not the list); and the event names.
+- jsdom cannot read `@layer`, so the element tests log "Could not parse CSS stylesheet".
+  It is harmless.
+
+**Recommendation: go.** The architecture holds, with the two corrections above (ids and
+a boundary per element) now part of it. Next is phase 2, the element framework.
+
+## Phase 2 progress
+
+Begun October 22, 2026. Taken, on the recommendations: events are `clover-` and the
+callback's name in kebab case (`onCanvasChange` is `clover-canvas-change`), bubbling and
+composed, which renames `<clover-viewer>`'s now, before any release; data an attribute
+can carry is a URL or JSON in it, and anything else a property; one entry defines every
+element, each a small stub that loads its code the first time one connects.
+
+- [x] The spec: each element's attributes, properties and events in one table, with
+      their descriptions and types beside it for the manifest, never shipped.
+- [x] The base element from the spec: events dispatched from the part's callbacks,
+      `data` attributes, and its code, the host and the stylesheet loaded on first
+      connect.
+- [x] `<clover-viewer>` on the host, as an element that always draws alone, its events
+      renamed.
+- [x] The host's registry indexed by root, and `lang=""` removed wherever the host
+      draws (Preact's, as `<clover-viewer>` had it).
+- [x] Types (`HTMLElementTagNameMap`, the events) and the Custom Elements Manifest,
+      generated from the spec.
+- [x] Packaging: the entry's exports, its types and the manifest; the CDN loader saying
+      when it fails.
+- [x] Sizes and budgets per page: the entry, a `<clover-viewer>`, labels alone, the four
+      parts.
+- [x] Tests, a real browser, docs, the changelog, AGENTS.md.
+
+### What phase 2 found (October 22, 2026)
+
+- **A page loads only the elements it uses.** The script is 3.5 kB gzipped and defines
+  every element; an element's code, the host and the stylesheet load the first time one
+  is on the page. A page of `<clover-root>` and `<clover-label>` loads 37.7 kB, the four
+  parts 83.2 kB, and a `<clover-viewer>` 95.4 kB, all with the stylesheet, which is
+  10.2 kB of each.
+- **Splitting has a price, which the viewer pays.** Its page was 89.1 kB in phase 1's one
+  chunk, and is 91.4 kB as one stream now (the host, the specs and the stubs), but
+  95.4 kB in its 13 files, each gzipped apart. Left to Rollup, the shared code came in a
+  score of small chunks, which cost the viewer page 7 kB; one shared chunk (Preact, the
+  core, the host and `<clover-root>`, which every page with an element loads) halved
+  that, and Rollup's `experimentalMinChunkSize` made every page larger.
+- **Elements draw as their code arrives**, the stage last (it brings the Canvas). Their
+  display rules go in before any code loads, so the page does not move.
+- **Phase 1's parts left `lang=""`** after a language change, as `<clover-viewer>` had;
+  the host now removes it wherever it draws, for every element (tested, and checked in
+  Chrome on the build).
+- **`<clover-viewer>` is on the host**, drawn by itself even inside a root, its events
+  renamed (`clover-canvas-change`…) and its tests unchanged otherwise.
+- **The types and the manifest come from the specs**, and the build fails on an
+  attribute, property or event without docs. The docs' API tables can read them in
+  phase 7.
+- **For phase 3**: the stylesheet is still whole, so a page of labels loads 10 kB of CSS
+  it mostly does not use: each part's CSS could load with its code. The core's question
+  stands (phase 1): whether annotations, content state and search can load only when a
+  part needs them. And which attributes pass to a part (an author's `aria-label` on an
+  element names a generic element, not the part).
+
+## Phase 3 progress
+
+Begun and done October 22, 2026: the parts that read their root's state.
+
+- [x] Specs and docs for the property parts (`<clover-thumbnail>`, `<clover-summary>`,
+      `<clover-metadata>`, `<clover-required-statement>`, `<clover-rights>`,
+      `<clover-homepage>`, `<clover-see-also>`, `<clover-rendering>`, `<clover-part-of>`,
+      `<clover-id>`, `<clover-value>`), each with `of` and a `value` of its own.
+- [x] `<clover-status>`, `<clover-previous>`, `<clover-position>`, `<clover-next>`.
+- [x] The panel's sections, each on its own: `<clover-about>`, `<clover-annotations>`,
+      `<clover-collection>`, `<clover-collection-select>`, `<clover-contents>`,
+      `<clover-search>`, `<clover-transcript>`, `<clover-download>`; and `<clover-map>`.
+- [x] A part drawn as it is needs no module of its own (`part()` in `define.ts`).
+- [x] Parity: every exported part has an element or a reason (`specs/specs.test.ts`).
+- [x] A part of a root draws nothing outside one, and says so; ARIA on an element is
+      warned of.
+- [x] Tests, the build in Chrome, Get Started, the changelog, AGENTS.md.
+
+### What phase 3 found (October 22, 2026)
+
+- **Every new part works as an element** from the built files in Chrome: the outline
+  holds at the levels given, ids are unique, no `lang=""` is left, the keyboard follows
+  the page, and nothing overflows at 320px.
+- **Loading per element costs the viewer more as elements are added.** Rollup cuts the
+  code the parts share by which elements reach it, so a `<clover-viewer>` page now loads
+  31 files: 102.3 kB gzipped one by one, 94.2 kB as one (Brotli the same). A second
+  shared chunk for the light parts, and merging small chunks at 1, 3 and 8 kB, each made
+  the entry or the pages larger. A page of labels is 38.9 kB, of the four parts 87.3 kB.
+  Mat's call: keep it, or give `<clover-viewer>` an entry of its own, built whole, for
+  pages that use only it (about 90 kB; a page using both would load two copies of
+  Preact and the core).
+- **Each part's CSS cannot be found from its modules**: the families' stylesheets list
+  their members' rules (`ui/Button.css` holds Items' arrows), and the members never
+  import them. Splitting the stylesheet needs a table per element, checked by eye.
+- **Markdown in `<clover-value>`** draws a `<p>` inside its default `span`, as `Value`
+  does in React; `as="div"` suits Markdown.
+- **For phase 4**: the containers (Panel and Tab, the Content's controls, the Split's
+  three, Status's slots) and render props as function properties (`renderValue`,
+  `renderEntry`, `renderItem`).
 
 ## Decisions for Mat
 

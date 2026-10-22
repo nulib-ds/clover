@@ -50,8 +50,7 @@
 
 /*
  * Nextra's focus ring is pale (its primary-200, 1.5:1 to 2.4:1), so it takes the text
- * accent, which holds 3:1 in both themes, behind a gap of the page's color. The banner
- * is near-black, so its ring is its text's.
+ * accent, which holds 3:1 in both themes, behind a gap of the page's color.
  */
 :root:root
   :is(
@@ -63,12 +62,6 @@
   ):focus-visible {
   --tw-ring-color: var(--accent-11);
   --tw-ring-offset-color: var(--color-background);
-}
-
-:root:root
-  .nextra-banner
-  :is(a, button, [tabindex]:not([tabindex="-1"])):focus-visible {
-  --tw-ring-color: currentColor;
 }
 
 /*
@@ -160,19 +153,6 @@
 
   .nextra-mobile-nav[class*="translate3d(0,-100%,0)"] {
     transition-property: transform, visibility;
-  }
-}
-
-/*
- * Below 768px the banner stays pinned above the navbar, but Nextra's scroll padding
- * reserves only the navbar, so a link brought into view could sit wholly under it. While
- * the banner shows (`data-banner`, written by `SiteEffects.tsx`), the padding covers both.
- */
-@media not all and (min-width: 768px) {
-  html[data-banner] {
-    scroll-padding-top: calc(
-      var(--nextra-navbar-height) + var(--nextra-banner-height)
-    );
   }
 }
 

@@ -12,6 +12,54 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Types and a Custom Elements Manifest for the web components.** The module declares
+  every element in `HTMLElementTagNameMap` and every event, so
+  `document.querySelector("clover-root")` is typed, and
+  `@nulib/clover/web-components/custom-elements.json` (the package's `customElements`)
+  gives each element's attributes, properties and events to editors and tools. Both are
+  written from the elements' own specs.
+- **Parts as elements, a preview,** from `@nulib/clover/web-components`, which defines
+  them beside `<clover-viewer>`: `<clover-root>`, `<clover-content>`, `<clover-items>`,
+  `<clover-previous>`, `<clover-position>`, `<clover-next>`, `<clover-status>`; a
+  property each, `<clover-label>`, `<clover-thumbnail>`, `<clover-summary>`,
+  `<clover-metadata>`, `<clover-required-statement>`, `<clover-rights>`,
+  `<clover-homepage>`, `<clover-see-also>`, `<clover-rendering>`, `<clover-part-of>`,
+  `<clover-id>` and `<clover-value>`; the panel's sections, each on its own,
+  `<clover-about>`, `<clover-annotations>`, `<clover-collection>`,
+  `<clover-collection-select>`, `<clover-contents>`, `<clover-search>`,
+  `<clover-transcript>` and `<clover-download>`; and `<clover-map>`. They compose in a page's own HTML as the parts do in JSX: each
+  draws its part into itself, inside the nearest `<clover-root>`, and the page's markup
+  around and between them stays as written. One render tree serves every element on the
+  page, so they share their root's state wherever they sit in it, and each element's ids
+  are its own. `canvas-id` and `manifest-id` on a root say where it opens, and move the
+  reader when changed; it sends `<clover-viewer>`'s events, `<clover-items>` and
+  `<clover-map>` send `clover-select` (cancel it to keep a link from being followed), and
+  `<clover-collection-select>` sends `clover-change`. A part of a root draws nothing
+  outside one and says so in the console, as it does of an `aria-label` or `role` put
+  on an element, a box no reader is told of. Data an attribute can
+  carry is a URL or JSON in it (`annotations` on a root, `label` on a label), and
+  anything else a property. The attributes are on Get Started; they may change before
+  4.0.
+  The elements add `style[data-clover="elements"]`, their display rules, in
+  `@layer clover`.
+
+  ```html
+  <clover-root iiif-content="https://example.org/manifest.json">
+    <clover-label as="h2"></clover-label>
+    <clover-content style="height: 60vh"></clover-content>
+    <clover-items></clover-items>
+  </clover-root>
+  ```
+
+- **`defaultManifestId` on `Root`, and so on the Viewer and every template:** in a
+  Collection, the member to open first, as `defaultCanvasId` is the Canvas to start on.
+  The reader moves on from it; `manifestId` still holds them there, for a host that
+  moves them itself.
+
+  ```jsx
+  <Viewer iiifContent={collection} defaultManifestId={letter} />
+  ```
+
 - **`download` on `About`, `Panel` and `Default`.** `false` leaves the downloads out of
   About, as `Document`'s `download` leaves them out of its toolbar. On `<clover-viewer>`,
   `download="false"` passes it, and so does what Get Started said: it did nothing, since
@@ -263,15 +311,17 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   classic `<script>` from a CDN). Built on its own with Preact standing in for React.
   Attributes `iiif-content`, `canvas-id`, `manifest-id`, `language`, `search-query`,
   `items`, `header`, `panel`, `download`; an `iiifContent` property for objects; events
-  `canvaschange`, `manifestchange`, `contentstatechange`. Light DOM, as 3.x's. 86.7 kB
-  gzip up front (3.x's element: about 530 kB); MapLibre, its worker and its
-  stylesheet load only with a map. Its stylesheet is injected in runs, in the order
+  `clover-canvas-change`, `clover-manifest-change`, `clover-status-change`,
+  `clover-content-state-change`. Light DOM, as 3.x's. A page with one loads 95.4 kB gzip
+  (3.x's element: about 530 kB); MapLibre, its worker and its stylesheet load only with
+  a map. Its stylesheet is injected in runs, in the order
   `styles.css` gives them, as `<style data-clover="clover-1">` to `"clover-3"`; the
   rules only video, sound, an animation or a map need (`data-clover="media"`, `"map"`)
   load as one draws, each put in its place among the runs, so the cascade is the
   stylesheet's. Where a page looked for `style[data-clover="clover"]`, look for
   `style[data-clover]`, which finds them all (MapLibre's, `"maplibre"`, too).
-  `defineCloverViewer`'s `styles` takes the whole stylesheet or its runs.
+  `defineCloverElements`' `styles` takes the whole stylesheet, its runs, or a loader
+  for them.
 
   ```html
   <script src=".../web-components/index.umd.js"></script>
@@ -1500,6 +1550,35 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **`@nulib/clover/web-components` loads only the elements a page uses.** The script is
+  4.6 kB gzip and defines every element; an element's code, Preact (in one chunk with
+  Clover's core) and the stylesheet load the first time one is on the page. A page with
+  a `<clover-viewer>` loads 102.3 kB, up from 86.7 kB: its code now comes in chunks the
+  other elements share, gzipped apart (94.2 kB as one). A page of `<clover-root>` and
+  `<clover-label>` loads 38.9 kB, and of the root, the label, the stage and the items
+  87.3 kB. `sizes.json` records each (`elementsEntryGzip`, `webComponentsGzip`,
+  `labelPageGzip`, `composedPageGzip`), held to budgets of 4.7, 102.4, 39.0 and
+  87.4 kB. `Root` now shares what it holds with
+  `<clover-root>`, which put `Default`'s budget up to 66.8 kB and `Gallery`'s to
+  58.6 kB, 0.1 kB each.
+- **`<clover-viewer>`'s events are named `clover-` and what happened**, as every
+  element's are, and bubble out of a shadow root too (`composed`). It also sends
+  `clover-status-change`.
+
+  ```diff
+  - viewer.addEventListener("canvaschange", show);
+  + viewer.addEventListener("clover-canvas-change", show);
+  ```
+
+  `manifestchange` is `clover-manifest-change`, and `contentstatechange`
+  `clover-content-state-change`.
+
+- **`defineCloverViewer` is gone:** `defineCloverElements` defines every element, and the
+  module calls it on import. **`initCloverI18n`** from the module now returns a promise:
+  it loads Clover's translator the first time it is called.
+- **`<clover-viewer>` is drawn by the page's one host**, as the other elements are: its
+  ids start `clover-<n>-` (they were `clover-viewer-<n>-`).
+
 - **`Clover.Download` is its links, not a button that opens them.** Wherever it is, it
   shows "This page" and "All pages", each with its links, as About's section always has;
   `Document`'s toolbar lays them in a row. Its `children`, the button's text, is gone,
@@ -1512,11 +1591,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   + <Clover.Download />
   ```
 
-- **`<clover-viewer>` loads 86.7 kB gzip up front, down from 103.3 kB.** Vite leaves an
-  ES library's whitespace in, for a bundler to read its annotations; the element is
-  loaded as built, so each of its chunks is now stripped of it. Its budget is 86.8 kB,
-  and `sizes.json` records it (`webComponentsGzip`). The parts' ids (see
-  `useUniqueId`) put `Default`'s budget up to 66.7 kB and `Gallery`'s to 58.5 kB.
+- **The web components' chunks are stripped of their whitespace.** Vite leaves an ES
+  library's whitespace in, for a bundler to read its annotations; the elements are
+  loaded as built, so it goes: 16.6 kB gzip on a `<clover-viewer>` page. The parts' ids
+  (see `useUniqueId`) put `Default`'s budget up to 66.7 kB and `Gallery`'s to 58.5 kB.
 
 - **No heading past `h6`: a title that would be an `h7` names what it heads instead.**
   Every part capped its headings at 6, so under a page's `h3` or deeper a template's
@@ -1572,6 +1650,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **`<clover-viewer manifest-id>` lets the reader move through the Collection.** It set
+  `manifestId`, which leaves every choice of member to the page, and a page that did not
+  answer `manifestchange` left the reader on that member, the choice doing nothing. It is
+  `defaultManifestId` now: where the Viewer opens.
 - **`import "@nulib/clover/web-components"` defines `<clover-viewer>` in any bundler.**
   The package's `sideEffects` named only its CSS, so a bundler could drop an import made
   for its effect, and esbuild did. It names `dist/web-components/**` too.
@@ -1584,9 +1666,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **`<clover-viewer>` reads `"false"` in any case, and checks `items`.** `FALSE` or
   `" false "` turns a part off. An `items` that is not `carousel`, `list`, `grid` or
   `false` shows the carousel, with a warning in the console, rather than passing on.
-- **`<clover-viewer>` never marks its words `lang=""`.** Where Clover drops a `lang`
+- **Clover's elements never mark their words `lang=""`.** Where Clover drops a `lang`
   after the language changes, React removes the attribute but Preact empties it, and
-  `lang=""` says the language is unknown (WCAG 3.1.2). The element removes it.
+  `lang=""` says the language is unknown (WCAG 3.1.2). The page's host removes it
+  wherever it draws, never from the page's own markup.
 
 - **The Lightbox's title keeps its look at any level.** It was styled by tag
   (`.clover-template-lightbox-header :is(h2, h3, h4, h5, h6)`); it is now

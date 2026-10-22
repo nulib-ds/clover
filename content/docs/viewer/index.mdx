@@ -83,6 +83,7 @@ every template is built on.
 | `defaultCanvasId`      | `string`                             | —                    | The Canvas to start on. A content state or the Manifest's `start` still wins.      |
 | `onCanvasChange`       | `(canvasId: string) => void`         | —                    | The reader moved to a Canvas.                                                      |
 | `manifestId`           | `string`                             | —                    | In a Collection, the Manifest to show, controlled, with `onManifestChange`.        |
+| `defaultManifestId`    | `string`                             | —                    | In a Collection, the Manifest to open first.                                       |
 | `onManifestChange`     | `(manifestId: string) => void`       | —                    | In a Collection, the reader moved, or asks to move, to a Manifest.                 |
 | `searchQuery`          | `string`                             | —                    | A Content Search query, run once the Manifest shows and whenever it changes.       |
 | `annotations`          | `string \| object \| array`          | —                    | Annotation pages or collections to show beside the Manifest's own.                 |

@@ -1,5 +1,6 @@
 import React from "react";
 import styles from "docs/components/Home/Home.module.css";
+import { homeTagline } from "docs/lib/site";
 
 /**
  * The hero: the page's headline, and the sentence that says what Clover does.
@@ -18,9 +19,7 @@ const Hero: React.FC = () => (
         </span>{" "}
         <span className={styles.line}>as your collections.</span>
       </h1>
-      <p className={styles.subtitle}>
-        Design the user experience that you imagine for your IIIF resources.
-      </p>
+      <p className={styles.subtitle}>{homeTagline}</p>
     </div>
   </header>
 );

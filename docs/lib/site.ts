@@ -8,18 +8,29 @@ import type { Metadata } from "next";
 export const siteTitle = "Clover IIIF";
 
 /*
- * The homepage's title, and any page's without one of its own: the site's name and the
- * hero's headline (`docs/components/Home/Hero.tsx`).
+ * The hero's headline and the line under it (`docs/components/Home/Hero.tsx`), the brand's
+ * words, written once: the hero and the footer show them, and the homepage's title,
+ * description and structured data and `llms.txt` carry them (Mat, 2026-10-22).
  */
-export const homeTitle = `${siteTitle} – A viewer as distinctive as your collections`;
+export const homeHeadline = "A viewer as distinctive as your collections.";
+export const homeTagline =
+  "Design a user experience rooted in IIIF with Clover.";
+
+/* The homepage's title, and any page's without one of its own: the name and the headline. */
+export const homeTitle = `${siteTitle} – ${homeHeadline.replace(/\.$/, "")}`;
+
+/** What Clover does and its two ways, plainly, in the Get Started page's words. */
+const whatItDoes =
+  "builds interfaces for IIIF content in React or as a web component: a ready-made Viewer with templates, or parts to compose your own. Accessible, composable and light.";
 
 /*
- * The site's description, for the homepage and any page without one of its own: what
- * Clover is and its two ways, plainly, in the Get Started page's words (Mat, 2026-10-21:
- * so an agent or a search result can tell what it is), the hero being the brand's.
+ * The site's description, for any page without one of its own: what Clover is, plainly
+ * (Mat, 2026-10-21: so an agent or a search result can tell what it is).
  */
-export const siteDescription =
-  "Clover builds interfaces for IIIF content in React or as a web component: a ready-made Viewer with templates, or parts to compose your own. Accessible, composable and light.";
+export const siteDescription = `Clover ${whatItDoes}`;
+
+/* The homepage's: the hero's line, then what Clover is, as plainly. */
+export const homeDescription = `${homeTagline} It ${whatItDoes}`;
 
 /*
  * What Clover is, at more length, in the Get Started page's words
@@ -83,7 +94,8 @@ export function pageMetadata({
   markdown?: boolean;
 }): Metadata {
   const fullTitle = title ? `${title} – ${siteTitle}` : homeTitle;
-  const text = description || siteDescription;
+  const text =
+    description || (route === "/" ? homeDescription : siteDescription);
   const canonical = `${siteUrl}${route === "/" ? "" : route}`;
   return {
     title: { absolute: fullTitle },
@@ -111,7 +123,7 @@ export function pageMetadata({
 
 /*
  * Clover 3.x, `@samvera/clover-iiif`, is the earlier version: its docs are kept under
- * `/docs/3.x/` for reference (and it is the one on npm until Clover 4 is released). Every
+ * `/docs/3.x/` for reference. Every
  * page there says so to a reader, to search engines (its description and structured
  * data) and to the site's own search (its results are titled "(3.x)" and rank below
  * Clover 4's): see `app/[[...mdxPath]]/page.tsx`.
@@ -207,7 +219,9 @@ export function homeStructuredData({
         "@id": `${siteUrl}#website`,
         name: siteTitle,
         url: siteUrl,
-        description: siteDescription,
+        headline: homeHeadline,
+        alternativeHeadline: homeTagline,
+        description: homeDescription,
         inLanguage: "en",
         publisher: { "@id": publisher["@id"] },
       },

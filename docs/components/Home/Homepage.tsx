@@ -10,9 +10,10 @@ import Parts from "docs/components/Home/Parts";
 import styles from "docs/components/Home/Home.module.css";
 import { cookbookSections } from "docs/components/CookbookRecipes/cookbookSections";
 import { resourceFor } from "docs/components/CookbookRecipes/cookbookCatalog";
-import { cookbook, loads, partCount } from "docs/lib/figures";
+import { cookbook, loads, partCount, partLoads } from "docs/lib/figures";
 import { FULL_WIDTH } from "docs/lib/full-width";
 import { BrandCode, BrandControls } from "docs/components/Home/BrandPicker";
+import { InstallCommand } from "docs/components/Home/InstallCommand";
 import { SectionIntro } from "docs/components/Home/SectionIntro";
 
 /*
@@ -44,6 +45,11 @@ interface Story {
    * the middle of the window (`StoryLines.tsx`).
    */
   point: string;
+  /**
+   * Whether every part the viewer shows is lit meanwhile, its tag giving what the part
+   * adds to a page after its name (`data-weigh`, `StoryLines.tsx`).
+   */
+  weigh?: boolean;
   /** Whether the viewer turns over to its accessibility tree for it (`data-turn`). */
   turn?: boolean;
   /**
@@ -115,23 +121,22 @@ const stories: Story[] = [
   },
   {
     label: "Lightweight",
-    // The Canvas, whose renderer is Clover's own.
-    point: "content",
+    // One line, to the viewer's middle, and every part's tag with what it adds (Mat, 2026-10-22).
+    point: "viewer",
+    weigh: true,
     // What a reader's browser loads, never "ships" (Mat, 2026-10-21: jargon).
     title: "Minimal load for users.",
-    // The page's weight and its screen kept for the collection, not code (Mat, 2026-10-21).
-    body: "Every part of Clover is built with intention and shared across its templates, so a page reserves its weight and the screen for rich cultural heritage material, not bloated code.",
-    // Only what draws something: a Viewer before its template draws nothing (Mat, 2026-10-21).
+    // Their weight and screen kept for the collection, not code (Mat, 2026-10-21; "your projects", 2026-10-22).
+    body: "Every part of Clover is built with intention and shared across its templates, so your projects can reserve their weight and the screen for rich cultural heritage material, not bloated code.",
+    /*
+     * Only what draws something: a Viewer before its template draws nothing (Mat,
+     * 2026-10-21). The parts have their own figures, on their tags (Mat, 2026-10-22).
+     */
     figures: [
-      {
-        value: loads.canvas,
-        unit: "kB",
-        caption: "Canvas for resource viewing",
-      },
       {
         value: loads.defaultTemplate,
         unit: "kB",
-        caption: "Viewer with Default template",
+        caption: "Viewer (Default template)",
       },
     ],
   },
@@ -193,8 +198,8 @@ const HOMEPAGE_CHROME = `${FULL_WIDTH}
  * The homepage, for Clover 4.
  *
  * Rendered from a thin `content/index.mdx` shell, so it sits in Nextra's layout, with its
- * navbar, search, theme toggle and banner. Its `_meta.ts` entry turns the sidebar and the
- * rest off (`layout: "full"`), and `Home.module.css` lets it span the window.
+ * navbar and search. Its `_meta.ts` entry turns the sidebar and the rest off
+ * (`layout: "full"`), and `Home.module.css` lets it span the window.
  *
  * Two halves: the templates, live, as the hero (`<Playground/>`), and below them the same
  * resource taken apart into the parts they are made of (`<Parts/>`), following it.
@@ -267,6 +272,7 @@ const Homepage: React.FC<{
                   className={styles.story}
                   key={story.label}
                   data-point={story.point}
+                  data-weigh={story.weigh || undefined}
                   data-turn={story.turn || undefined}
                   data-compose={story.composer || undefined}
                   data-brand={story.brand || undefined}
@@ -279,6 +285,19 @@ const Homepage: React.FC<{
                     <p className={styles.storyLabel}>{story.label}</p>
                     <h3 className={styles.storyTitle}>{story.title}</h3>
                     <p className={styles.storyBody}>{story.body}</p>
+                    {/*
+                     * The parts' figures, which their tags show beside the viewer (hidden
+                     * from assistive technology there, as the tags are), in words.
+                     */}
+                    {story.weigh && (
+                      <p className={styles.visuallyHidden}>
+                        {`What each part adds to a page with a Root, gzipped: ${Object.entries(
+                          partLoads,
+                        )
+                          .map(([part, size]) => `${part} ${size} kB`)
+                          .join(", ")}.`}
+                      </p>
+                    )}
                     {story.brand && figures}
                   </div>
                   {story.composer && (
@@ -306,18 +325,11 @@ const Homepage: React.FC<{
            * viewer needs to stay held while Coverage reads its recipe, put to use.
            */}
           <SectionIntro
-            title="Install."
-            note={
-              <>
-                Clover 4 is in development, not yet on npm. Today&rsquo;s
-                release is <Link href="/docs/3.x">Clover 3.x</Link>.
-              </>
-            }
+            title="Install is easy."
+            note="One package holds it all: the React parts and the web components."
             cta={{ href: "/docs", label: "Get started", primary: true }}
           />
-          <pre className={styles.install}>
-            <code>npm install @nulib/clover</code>
-          </pre>
+          <InstallCommand />
         </Parts>
       </div>
     </div>

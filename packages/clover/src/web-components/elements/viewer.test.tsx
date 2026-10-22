@@ -4,14 +4,14 @@
  */
 import { fireEvent, waitFor, within } from "@testing-library/dom";
 
-import { defineCloverViewer } from "./element";
-import bookJson from "../fixtures/iiif-cookbook/0009-book-1.json";
-import renderingJson from "../fixtures/iiif-cookbook/0046-rendering.json";
-import { stubViewport } from "../components/Canvas/testing/viewport";
-import { initCloverI18n } from "../i18n";
+import { defineCloverElements } from "../define";
+import bookJson from "../../fixtures/iiif-cookbook/0009-book-1.json";
+import renderingJson from "../../fixtures/iiif-cookbook/0046-rendering.json";
+import { stubViewport } from "../../components/Canvas/testing/viewport";
+import { initCloverI18n } from "../../i18n";
 
-vi.mock("../lib/renderer", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../lib/renderer")>()),
+vi.mock("../../lib/renderer", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../lib/renderer")>()),
   CanvasRenderer: vi.fn().mockImplementation(() => ({
     host: document.createElement("div"),
     setImages: vi.fn().mockResolvedValue(undefined),
@@ -37,7 +37,7 @@ let early: CloverViewer;
 beforeAll(() => {
   early = document.createElement("clover-viewer") as CloverViewer;
   early.iiifContent = bookJson;
-  defineCloverViewer({
+  defineCloverElements({
     styles: [
       { key: "clover-1", css: ".clover-root{}" },
       { key: "map", when: ".clover-geomap", load: loadMapRun },
@@ -90,10 +90,11 @@ describe("<clover-viewer>", () => {
   it("loads a run only some pages need when what needs it draws, in its place", async () => {
     const element = mount();
     await drawn(element);
+    // The stylesheet's runs, in order (the elements' own display rules aside).
     const order = () =>
-      [...document.head.querySelectorAll("style[data-clover]")].map(
-        (style) => (style as HTMLElement).dataset.clover,
-      );
+      [...document.head.querySelectorAll("style[data-clover]")]
+        .map((style) => (style as HTMLElement).dataset.clover)
+        .filter((key) => key !== "elements");
     expect(order()).toEqual(["clover-1", "clover-2"]);
     expect(loadMapRun).not.toHaveBeenCalled();
 
@@ -149,6 +150,42 @@ describe("<clover-viewer>", () => {
       expect.stringContaining('items="slider"'),
     );
     warn.mockRestore();
+  });
+
+  // As `defaultManifestId`, which lets the reader move on (`Root.test.tsx`).
+  it("opens a Collection at manifest-id", async () => {
+    const LETTER = "https://example.org/letter";
+    const letter = {
+      ...bookJson,
+      id: LETTER,
+      label: { en: ["A letter"] },
+      items: [bookJson.items[0]],
+    };
+    const shelf = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/shelf",
+      type: "Collection",
+      label: { en: ["Shelf"] },
+      items: [
+        { id: bookJson.id, type: "Manifest", label: { en: ["The book"] } },
+        { id: LETTER, type: "Manifest", label: { en: ["A letter"] } },
+      ],
+    };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async (url: string) =>
+          new Response(JSON.stringify(url === LETTER ? letter : bookJson), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+      ),
+    );
+    const element = mount({ "manifest-id": LETTER }, shelf);
+    expect(
+      await within(element).findByRole("heading", { name: "A letter" }),
+    ).toBeInTheDocument();
+    vi.unstubAllGlobals();
   });
 
   it("takes a property set before the element was defined", async () => {
@@ -219,7 +256,7 @@ describe("<clover-viewer>", () => {
   it("tells the page where the reader moves, as events", async () => {
     const element = mount();
     const moved = vi.fn();
-    element.addEventListener("canvaschange", (event) =>
+    element.addEventListener("clover-canvas-change", (event) =>
       moved((event as CustomEvent).detail),
     );
     fireEvent.click(

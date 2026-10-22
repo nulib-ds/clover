@@ -1,7 +1,6 @@
 /*
- * The whole window, over the site's banner and navigation bar (Nextra's are z-index 20):
- * the banner scrolls away on a wide screen and sticks on a phone, so no top offset would
- * clear it everywhere. Back, or Escape, closes it.
+ * The whole window, over the site's navigation bar (Nextra's is z-index 20). Back, or
+ * Escape, closes it.
  */
 .panel {
   background: var(--clover-color-secondary, #ffffff);

@@ -402,8 +402,14 @@ export default function ResourceField({
            * words shown (2.5.3).
            */}
           <div className={styles.fieldGroup}>
+            {/*
+             * "Select…" to see, "Select a IIIF resource" to hear: the name starts with
+             * what shows, so a voice saying "Select" finds it (WCAG 2.5.3), and the
+             * ellipsis is not read (Mat, 2026-10-22).
+             */}
             <label className={styles.fieldLabel} htmlFor={inputId}>
-              Select an item
+              Select<span aria-hidden="true">…</span>
+              <span className={styles.visuallyHidden}> a IIIF resource</span>
             </label>
             <div className={styles.field}>
               <Picture

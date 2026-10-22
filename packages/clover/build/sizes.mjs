@@ -15,7 +15,7 @@ import { gzipSync } from "node:zlib";
 import { transformSync } from "esbuild";
 
 import { bundleAsConsumer, gzipSize } from "./consumer-bundle.mjs";
-import { elementGzip } from "./element-size.mjs";
+import { PAGES, pageGzip } from "./element-size.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = resolve(root, "dist");
@@ -119,15 +119,23 @@ const BUNDLES = [
   ],
 ];
 
+/*
+ * What each part of the homepage's example viewer adds to a page that has a `Root`, for
+ * its Lightweight story's tags (Mat, 2026-10-22): the page with `Root` and the part, less
+ * the page with `Root` alone, up front. Not budgeted on their own: the templates that use
+ * them are. Recorded as `parts` in `sizes.json`.
+ */
+const PARTS = ["Thumbnail", "Label", "Content", "Items", "Summary", "Metadata"];
+
 const STYLES = [
   ["styles.css", "stylesGzip", "styles.css"],
   ["templates.css", "templatesStylesGzip", "templates.css"],
 ];
 
 /**
- * Every size, in bytes gzipped: `sizes` by budget key, `rows` as `[name, key, size]` for
- * a table, and `pages`, each template's page split into the Viewer, its parts and its
- * own code.
+ * Every size, in bytes gzipped: `sizes` by budget key (and `parts`, each part's share),
+ * `rows` as `[name, key, size]` for a table, and `pages`, each template's page split
+ * into the Viewer, its parts and its own code.
  */
 export async function measure() {
   const sizes = {};
@@ -146,9 +154,21 @@ export async function measure() {
     sizes[key] = size;
     rows.push([name, key, size]);
   }
-  // `<clover-viewer>`, built standalone: what a page loads up front, styles and all.
-  sizes.webComponentsGzip = elementGzip();
-  rows.push(["<clover-viewer>", "webComponentsGzip", sizes.webComponentsGzip]);
+  // `@nulib/clover/web-components`: what a page loads with only some elements on it, the
+  // stylesheet's eager runs included (`build/element-size.mjs`).
+  for (const [name, key, tags] of PAGES) {
+    sizes[key] = pageGzip(tags);
+    rows.push([name, key, sizes[key]]);
+  }
+  const { size: rootAlone } = await initialGzip("Root");
+  sizes.parts = {};
+  for (const part of PARTS) {
+    const { size } = await initialGzip(`Root, ${part}`);
+    // Two builds chunk apart: one that says a part adds nothing is wrong, not light.
+    if (size <= rootAlone)
+      throw new Error(`${part} measured ${size - rootAlone} B over Root alone`);
+    sizes.parts[part] = size - rootAlone;
+  }
   return { sizes, rows, pages };
 }
 
@@ -160,5 +180,8 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   writeFileSync(SIZES_FILE, `${JSON.stringify(sizes, null, 2)}\n`);
   for (const [name, , size] of rows) {
     console.log(`${name.padEnd(22)} ${(size / 1000).toFixed(1)} kB gzip`);
+  }
+  for (const [part, size] of Object.entries(sizes.parts)) {
+    console.log(`${`+ ${part}`.padEnd(22)} ${(size / 1000).toFixed(1)} kB gzip`);
   }
 }

@@ -16,7 +16,8 @@
 
 .text {
   display: grid;
-  gap: 0.382rem;
+  /* The title clear of its note (Mat, 2026-10-22). */
+  gap: 1rem;
   min-width: 0;
 }
 

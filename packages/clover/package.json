@@ -1,7 +1,7 @@
 {
   "name": "@nulib/clover",
   "private": true,
-  "description": "Composable IIIF components for React, and its Viewer as a web component: Clover 4.x, in development.",
+  "description": "Composable IIIF components, for React and as web components: Clover 4.x.",
   "license": "MIT",
   "sideEffects": [
     "*.css",
@@ -20,12 +20,17 @@
       "types": "./dist/map/index.d.mts",
       "import": "./dist/map/index.mjs"
     },
-    "./web-components": "./dist/web-components/index.mjs",
+    "./web-components": {
+      "types": "./dist/web-components/index.d.mts",
+      "import": "./dist/web-components/index.mjs"
+    },
+    "./web-components/custom-elements.json": "./dist/web-components/custom-elements.json",
     "./styles.css": "./dist/styles.css",
     "./templates.css": "./dist/templates.css",
     "./package.json": "./package.json"
   },
   "module": "./dist/index.mjs",
+  "customElements": "./dist/web-components/custom-elements.json",
   "types": "./dist/index.d.mts",
   "files": [
     "dist"
@@ -38,7 +43,7 @@
     "test:build": "node --test build/*.test.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build:types": "dts-bundle-generator --project tsconfig.json --out-file dist/index.d.mts src/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/templates/index.d.mts src/templates/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/map/index.d.mts src/map/index.ts --no-check",
-    "build:web-components": "vite build --config build/web-components.config.mjs && cp build/web-components-loader.js dist/web-components/index.umd.js",
+    "build:web-components": "vite build --config build/web-components.config.mjs && cp build/web-components-loader.js dist/web-components/index.umd.js && node build/custom-elements.mjs",
     "build:sizes": "node build/sizes.mjs",
     "e2e": "playwright test --config=e2e/playwright.config.ts"
   },

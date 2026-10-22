@@ -7,7 +7,7 @@ import { preactAliases } from "./preact.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-/** Stylesheets only some pages need, injected with what they style (`element.tsx`). */
+/** Stylesheets only some pages need, injected with what they style (`src/web-components/styles.ts`). */
 const DEFERRED = {
   media: [
     "../components/Canvas/media/MediaStage.css",
@@ -96,6 +96,32 @@ function cloverStyles() {
 }
 
 /**
+ * One chunk for what every page with an element loads (the plan's "one shared chunk holds
+ * Preact, the core and the host"): what the host and `<clover-root>` import, statically,
+ * and nothing loaded on demand. Left to Rollup, it came in a score of small chunks, each
+ * gzipped apart, which cost a `<clover-viewer>` page 7 kB.
+ */
+function sharedChunk() {
+  let shared = null;
+  return (id, { getModuleInfo }) => {
+    if (!shared) {
+      shared = new Set();
+      const visit = (moduleId) => {
+        if (shared.has(moduleId)) return;
+        const info = getModuleInfo(moduleId);
+        if (!info) return;
+        shared.add(moduleId);
+        info.importedIds.forEach(visit);
+      };
+      ["src/web-components/host.tsx", "src/web-components/elements/root.tsx"]
+        .map((path) => resolve(root, path))
+        .forEach(visit);
+    }
+    return shared.has(id) ? "shared" : undefined;
+  };
+}
+
+/**
  * Each chunk without its whitespace. Vite minifies an ES library's names and syntax but
  * leaves its whitespace, so a consumer's bundler can still read its annotations. The
  * element is loaded as it is, not bundled again, so it goes too.
@@ -138,6 +164,9 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false,
     minify: "esbuild",
+    // Which chunk holds each element's code, for measuring a page of some of them
+    // (`build/element-size.mjs`).
+    manifest: true,
     lib: {
       entry: resolve(root, "src/web-components/index.ts"),
       formats: ["es"],
@@ -145,7 +174,10 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [],
-      output: { chunkFileNames: "[name]-[hash].mjs" },
+      output: {
+        chunkFileNames: "[name]-[hash].mjs",
+        manualChunks: sharedChunk(),
+      },
     },
   },
 });

@@ -319,6 +319,10 @@ every rule below.
   total is exact; gzip does not add up module by module, so it is split by each group's
   share of the minified code. Do not derive these by subtracting separate builds: Rollup
   chunks each build differently, enough to make a difference negative.
+- The one difference recorded is what it means: the homepage's part figures (`parts` in
+  `sizes.json`, its Lightweight story's tags; Mat, 2026-10-22), what adding a part to a
+  page with a `Root` adds up front, a build of `Root` and the part less one of `Root`
+  alone. `build/sizes.mjs` fails rather than record one that is not positive.
 - The sizes are measured as a Vite app builds for production (`build/consumer-bundle.mjs`:
   Rollup, minified, React external), not with esbuild. Through the package entry,
   esbuild's code splitting counts a module as reachable by its re-export alone, even
@@ -770,6 +774,9 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `load`s a nested Collection, which then replaces `collection` (there is no way back up
   yet). With a controlled `manifestId` it only asks (`onManifestChange`), and `Root`
   hands the id back through `syncManifest`, as `canvasId` does with `syncCanvas`.
+  `defaultManifestId` only opens a member first, and the reader moves on from it: an
+  element maps an attribute to it, never to `manifestId`, which held the reader on one
+  member of a page that did not answer `clover-manifest-change`.
   `isShown()` treats the Collection just entered as shown, so a host naming it does not
   reload it in a loop. `CollectionSelect` commits a keyboard step only on Enter. Escape
   and blur take the step back, because a Manifest loaded after focus has moved on could
@@ -1033,40 +1040,128 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     YouTube"). Opening passes `autoPlay` to the media stage, because that press was a
     press of play. Once open, the toggle is the × in the top right. Safari may refuse
     the deferred `play()`; it is swallowed, leaving the transport ready.
-- **Web component** (`src/web-components/`): `element.tsx` defines `<clover-viewer>`
-  with React APIs and is tested under Preact, as it ships (`vitest.preact.config.mjs`,
-  the build's aliases from `build/preact.mjs`, DOM Testing Library rather than React's;
-  the package's own project leaves those tests out). Under Preact, `useId` starts again
-  in each root, so every id Clover makes comes from `useUniqueId` (`ui/useUniqueId.ts`,
-  exported for parts of your own), which each element prefixes with its own number
-  (`IdPrefixContext`); never call `useId` itself. Preact also empties an attribute
-  React removes, and `lang=""` says the language is unknown (WCAG 3.1.2), so the
-  element removes it (`watchLanguages`). A property set before the element is defined
-  (its script loads async) is taken in `connectedCallback`; `"false"` is read in any
-  case, and `items` warns of a layout it doesn't know. The package's `sideEffects`
-  names `dist/web-components/**`, so `import "@nulib/clover/web-components"` defines
-  it in any bundler. `index.ts` (the build entry) hands it the
-  stylesheet, MapLibre's worker (`?worker&url`) and a lazy MapLibre stylesheet. The
-  stylesheet comes from `virtual:clover-styles`, a plugin in
-  `build/web-components.config.mjs` that reads `src/styles/clover.css` in order and cuts
-  it into runs: `clover-1`, `media`, `clover-2`, `map`, `clover-3`. The `media` and
-  `map` runs (`DEFERRED` there) load when the element holds what they style (`DEFERRED`
-  in `index.ts`: a `.clover-canvas[data-media]` or `[data-animated]`, drawn before the
-  player's own code, and `.clover-geomap`), and `inject` puts each after the nearest
-  earlier run, so every rule keeps its place in one `clover` layer. Never sublayers: a
-  later sublayer beats an earlier one's more specific rule (the controls' `z-index`
-  fell from 3 to 1). A stylesheet only media or a map needs goes in `DEFERRED`, listed
-  with its kind in `clover.css`; the plugin throws if a kind's sheets are not adjacent.
-  `build/web-components.config.mjs`
-  aliases React to Preact (`build/preact.mjs`), strips each chunk's whitespace, which
-  Vite leaves in an ES library (`minifyWhitespace`, about 16 kB gzipped), and keeps
-  `base: "./"`: an absolute base wrote the worker as `/assets/…`, which failed from any
-  path but the site root. `build/web-components.test.mjs` asserts Preact not React,
-  the entry kept by a bundler, MapLibre and hls.js deferred, the worker relative, and
-  the up-front size (`build/element-size.mjs`), held to its budget and recorded in
-  `sizes.json` (`webComponentsGzip`), from which Get Started states it. CI builds the
-  package and runs these (`npm run test:build`). The element
-  renders into its light DOM and injects Clover's stylesheet once, first in `<head>`.
+- **Web components** (`src/web-components/`, `@nulib/clover/web-components`;
+  `WEB-COMPONENTS.md` holds the plan, its phases and what each found). Every element is
+  `<clover-viewer>` or a part's, drawn by the React parts themselves under Preact.
+  - **One table per element** (`specs/<name>.ts`, `spec.ts`): its attributes (each the
+    prop it sets and how it is read: `string`, `number` with a `min`, `boolean` HTML's
+    way with `"false"` in any case turning it off, `data` as a URL or JSON, or a list of
+    words in any case, `"false"` among them turning the prop off), the properties it takes
+    (what an attribute cannot carry) and its events (each a part's callback). Its docs
+    (descriptions, TypeScript types, defaults) are a second export beside it, which no
+    page loads; `build/custom-elements.mjs` writes the types (`index.d.mts`:
+    `HTMLElementTagNameMap`, `GlobalEventHandlersEventMap`) and the Custom Elements
+    Manifest (`custom-elements.json`, the package's `customElements`) from both, and
+    fails the build on an attribute, property or event without docs. Keep the docs out
+    of a page's script: a separate export beside the spec, or a builder's call marked
+    `/* @__PURE__ */` (`specs/primitives.ts`); `DOCS()` collects them for the build. An
+    event two elements send with details of their own (`clover-select`, Items' and the
+    Map's) is typed as either. A new element is a spec and its docs (`specs/`) and a
+    loader in `define.ts`: `part(load, name)` draws a part as it is, with the element's
+    props (`elements/part.tsx`); only an element that needs more of its element (the
+    root, the stage's box, the viewer) has a module in `elements/`.
+  - **Parity** (`specs/specs.test.ts`): every part `parts.ts` exports has an element, or
+    a reason why not yet (`LATER`: the containers, phase 4; `Canvas`, phase 5) or not at
+    all (`NEVER`: `Tip`, `ReadMore`). A new part fails it until it has either.
+  - A part that reads its root's state (`needsRoot` in its spec) draws nothing outside a
+    `<clover-root>`, and the registry says so in the console, once. `aria-label`,
+    `aria-labelledby` or `role` on an element is warned of too (`warnOfAria` in
+    `base.ts`): the element is a box no reader is told of, and a name on a generic
+    element is not allowed (ARIA 1.2). Clover names what it draws itself.
+  - **Events** are `clover-` and the callback's name in kebab case (`onCanvasChange` is
+    `clover-canvas-change`), bubbling and composed, their `detail` the callback's
+    arguments by name (or its first as it is); a cancelable one, canceled by the page,
+    prevents the default of the event the part handed the callback last (Items' link).
+  - **Lazy stubs.** `index.ts` (the entry, about 3.5 kB) defines every element from its
+    spec (`base.ts`, `define.ts`): attributes and properties are read at once, a
+    property set before the element was defined (its script loads async) is taken in
+    `connectedCallback`, and only once one connects do its code, the host and the
+    stylesheet load, once for the page, so a page loads only the elements it uses.
+    Elements draw as their code arrives (the stage's last, with the Canvas); the
+    elements' own display rules are in place before any code loads, so nothing moves. A
+    move is told apart from a removal by a microtask. `initCloverI18n` (the export and
+    every class's static) loads the translator on first call (`i18n.ts`).
+  - **One host per document** (`host.tsx`): a Preact tree rendered into an element the
+    page never holds, and a registry of the elements on the page, indexed by root so an
+    element's coming re-renders only its own list. Each `<clover-root>` is a provider in
+    it (`elements/root.tsx`); each part is drawn into its own element by a portal inside
+    its nearest root's provider, so every context reaches it, and a portal adds to an
+    element, never replacing what the page wrote in it. A part waits for a root defined
+    after it. `<clover-viewer>` is `alone`: drawn by itself even inside a root.
+  - Ids: each element prefixes its own (`clover-<n>-`, `IdPrefixContext`). One tree does
+    not make them unique: Preact counts `useId` afresh in each root and each portal, so
+    never call `useId` itself (ESLint forbids it; `useUniqueId`, exported for parts of
+    your own). Each element has an error boundary inside its portal (so it catches its
+    effects too): with one tree, an error left to rise takes every element down.
+  - Preact empties an attribute React removes, and `lang=""` says the language is
+    unknown (WCAG 3.1.2): the host's one observer removes it wherever it draws (inside a
+    part, or a root's live region), never in the page's own markup.
+  - Only an element whose props change re-renders (`useSyncExternalStore` on it;
+    `elements.test.tsx` counts draws). 1,200 elements drew in 77 ms (`e2e/elements?many=200`,
+    headless Chrome, the dev server; 2026-10-22).
+  - `<clover-root>` has no wrapper: it takes `class="clover-root"` and `data-status`
+    itself, and its live region (`Announcer`) goes last inside it. It reads the page's
+    language where it sits, or its own `lang`. `canvas-id` and `manifest-id` say where
+    it opens (`defaultCanvasId`, `defaultManifestId`) and move the reader when changed
+    later (`useMoveTo`). `useRootState` (`components/Root/useRootState.ts`) is what `Root`
+    holds apart from its element, shared with it: it takes `Root`'s props whole and hands
+    back `[context, status, rest]`, so every name is written once (every page with a
+    `Root` loads it; split naively, it cost `Default` 0.1 kB more).
+  - Display (`ELEMENT_CSS` in `base.ts`, `style[data-clover="elements"]`, in
+    `@layer clover`): `<clover-root>`, `<clover-items>` and `<clover-viewer>` are
+    blocks; `<clover-content>` is the stage's box, its height from
+    `--clover-content-height` (default `60vh`) or its own `style`, the stage filling it;
+    `<clover-label>` is `display: contents`, so what it draws (a heading, or text in a
+    sentence) sits in the page as if written there. Never let an attribute name a tag
+    freely (`as` on `<clover-label>` is a list: `script` would write one).
+  - **Styles** come from the document's registry (`styles.ts`): the stylesheet's runs
+    (`virtual:clover-styles`, a plugin in `build/web-components.config.mjs` that reads
+    `src/styles/clover.css` in order and cuts it into `clover-1`, `media`, `clover-2`,
+    `map`, `clover-3`) load with the first element and go in once, first in `<head>`;
+    the `media` and `map` runs (`DEFERRED` in `index.ts`: a
+    `.clover-canvas[data-media]` or `[data-animated]`, drawn before the player's own
+    code, and `.clover-geomap`) load when an element holds what they style, one observer
+    watching every root and every element drawn by itself, and each goes after the
+    nearest earlier run, so every rule keeps its place in one `clover` layer. Never
+    sublayers: a later sublayer beats an earlier one's more specific rule. A stylesheet
+    only media or a map needs goes in `DEFERRED`, listed with its kind in `clover.css`;
+    the plugin throws if a kind's sheets are not adjacent.
+  - **The build** (`build/web-components.config.mjs`) aliases React to Preact
+    (`build/preact.mjs`), strips each chunk's whitespace, which Vite leaves in an ES
+    library (`minifyWhitespace`), puts what every page with an element loads in one
+    `shared` chunk (`sharedChunk`: Preact, the core, the host and `<clover-root>`, all
+    the host and the root import statically, nothing loaded on demand; left to Rollup it
+    came in a score of small chunks, gzipped apart, which cost a `<clover-viewer>` page
+    7 kB; Rollup's `experimentalMinChunkSize` made every page larger), keeps
+    `base: "./"` (an absolute base wrote the worker as `/assets/…`, which failed from any
+    path but the site root), and writes a chunk map (`.vite/manifest.json`) for
+    measuring. `index.umd.js` loads the module from beside itself and says in the
+    console when it cannot. The package's `sideEffects` names `dist/web-components/**`,
+    so `import "@nulib/clover/web-components"` defines the elements in any bundler.
+  - **Sizes** (`build/element-size.mjs`, from the chunk map): each page in `PAGES`, the
+    files it loads gzipped one by one, recorded in `sizes.json` and held to
+    `size-budget.json`: the entry, a `<clover-viewer>` (`webComponentsGzip`, which Get
+    Started states), labels alone and the four parts. Loading per element has a price
+    that grows with the elements: Rollup cuts the code the parts share by which elements
+    reach it, so a `<clover-viewer>` page loads 31 files, 102.3 kB gzipped one by one
+    against 94.2 kB as one (2026-10-22, 29 elements; Brotli the same). A second shared
+    chunk for the light parts, and `experimentalMinChunkSize` at 1, 3 and 8 kB, were each
+    tried and made the entry or the pages larger.
+  - **The stylesheet loads whole**, with the first element: a page of labels loads
+    10 kB of CSS it mostly does not use. Each part's CSS cannot be found from its module
+    graph, since the families (`ui/Button.css`, `ui/Tip.css`) list their members' rules,
+    which their members never import; splitting it needs a table of each element's
+    sheets, checked by eye for each part. Not done yet. `build/web-components.test.mjs`
+    asserts Preact not React, that a page of labels loads no Canvas or template,
+    MapLibre and hls.js deferred, the worker relative, the types and the manifest the
+    specs', and each budget. CI builds the package and runs these.
+  - Tested under Preact, as it ships (`vitest.preact.config.mjs`, the build's aliases,
+    DOM Testing Library rather than React's; the package's own project leaves these
+    out): `elements/viewer.test.tsx`, `elements/elements.test.tsx`, and
+    `elements/upgrade.test.tsx` (a page of its own, for elements defined in any order).
+    `e2e/elements` is a page of them, served over the source as the element build makes
+    them, by `e2e/vite.elements.config.mjs` (port 4323; `?many=N` adds N roots and
+    times them).
 - **Renderers** (`components/Content/renderers.ts`): `renderers` on `Root` go into the
   context (kept while `sameRenderers`, so an inline array does not change the context
   value), and every `Content` asks `pickRenderer` with the view's Canvases and

@@ -69,6 +69,14 @@
  * `PartsLive` writes both.
  */
 .assembled {
+  /* Where it is held, which the inspector reads too (`.viewerBack`). */
+  --assembled-top: min(
+    max(
+      calc(var(--nextra-navbar-height, 4rem) + 1.618rem),
+      calc(100vh - var(--assembled-height, 0px) - var(--assembled-end, 100vh))
+    ),
+    calc(100vh - var(--assembled-height, 0px) - 1.618rem)
+  );
   display: grid;
   gap: 1rem;
   grid-column: 1;
@@ -76,13 +84,7 @@
   /* Its column, never wider: the title, kept to one line, would otherwise widen it. */
   grid-template-columns: minmax(0, 1fr);
   position: sticky;
-  top: min(
-    max(
-      calc(var(--nextra-navbar-height, 4rem) + 1.618rem),
-      calc(100vh - var(--assembled-height, 0px) - var(--assembled-end, 100vh))
-    ),
-    calc(100vh - var(--assembled-height, 0px) - 1.618rem)
-  );
+  top: var(--assembled-top);
 }
 
 @media (max-width: 64rem) {
@@ -290,7 +292,10 @@
   padding: 0.382rem 0.618rem 0.382rem 1rem;
 }
 
-/* Its buttons: Copy, and Move up and Move down for a picked part. At least 24px each. */
+/*
+ * Its buttons: Copy, and Move up and Move down for a picked part. At least 24px each. The
+ * Install block's Copy is drawn the same (`.installCopy`, Home.module.css).
+ */
 .copy {
   background: none;
   border: 0;
@@ -734,6 +739,20 @@
   visibility: hidden;
 }
 
+/*
+ * The inspector as tall as its checks and its whole tree need (Mat, 2026-10-22): never
+ * shorter than the viewer, and longer, over the code control and the empty column under
+ * it, as far as the window has room below where the viewer is held; not while the code
+ * is open, which it would cover. Focus anywhere in the column gives it up (`PartsLive`),
+ * so it never covers what is focused (WCAG 2.4.11).
+ */
+.assembled:not([data-code]) > .flip > [data-face-of].viewerBack {
+  bottom: auto;
+  max-height: max(100%, calc(100vh - var(--assembled-top, 0px) - 1.618rem));
+  min-height: 100%;
+  z-index: 1;
+}
+
 .flip:is([data-face="back"], [data-face="recipe"]) > [data-face-of="front"] {
   opacity: 0;
   pointer-events: none;
@@ -791,6 +810,22 @@
 
 .recipeNotes {
   min-width: 0;
+}
+
+/*
+ * The recipe's Collection, held in from its outline (Mat, 2026-10-22), so a member's
+ * outline, chosen or focused, never touches it.
+ */
+.recipeInset {
+  padding: 0.382rem;
+}
+
+/* Its address on one line, cut short with an ellipsis (Mat, 2026-10-22). */
+.recipeInset :global(.clover-id) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .recipeLabel {
@@ -919,6 +954,8 @@
   position: absolute;
   top: -0.618rem;
   transform: translateY(0.236rem);
+  /* One line, however narrow its part (the Thumbnail's, with its size). */
+  white-space: nowrap;
   transition:
     opacity 160ms ease,
     transform 160ms ease;
@@ -945,6 +982,18 @@
 .region:is([data-on], [data-lit]) > .regionName {
   opacity: 1;
   transform: none;
+}
+
+/*
+ * What the part adds to a page, after its name (Mat, 2026-10-22), only while the
+ * Lightweight story is up (`StoryLines`' `data-weighed`), its figures the build's.
+ */
+.regionSize {
+  display: none;
+}
+
+.viewer[data-weighed] .regionSize {
+  display: inline;
 }
 
 /* The Label's tag at its end, clear of the Thumbnail's beside it when both are lit. */

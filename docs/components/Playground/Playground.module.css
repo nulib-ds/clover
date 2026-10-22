@@ -206,8 +206,8 @@
 }
 
 /*
- * The field with its label joined to its start: one box, lifted as the field is, its
- * parts sharing an edge at 3:1. The label has no fill. On a phone, where it would crowd
+ * The field with its label joined to its start: one box, lifted as the field is, edged
+ * at 3:1 all round with no line between the two (Mat, 2026-10-22). The label has no fill. On a phone, where it would crowd
  * the field, it is a tab on the field's top edge instead.
  */
 .fieldGroup {
@@ -236,6 +236,7 @@
 
 .fieldGroup .field,
 .fieldGroup .field:focus-within {
+  border-inline-start: 0;
   border-radius: 0 var(--radius-3) var(--radius-3) 0;
   box-shadow: none;
   flex: 1 1 auto;
@@ -259,6 +260,7 @@
 
   .fieldGroup .field,
   .fieldGroup .field:focus-within {
+    border-inline-start: 1px solid var(--pg-edge);
     border-radius: 0 var(--radius-3) var(--radius-3) var(--radius-3);
   }
 
