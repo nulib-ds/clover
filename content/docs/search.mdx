@@ -8,7 +8,13 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
 import { LivePart } from "docs/components/Clover4/LiveExample";
 
+<div className="docs-title-row">
+
 # Search
+
+<PartHead part="Search" />
+
+</div>
 
 <div className="docs-lede">
   IIIF Content Search of the Manifest: a field, then the hits by Canvas, with
@@ -21,7 +27,6 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
   props={{ headingLevel: 2 }}
   body
   knobs={[{ prop: "searchQuery", on: "root", value: "Moskau" }]}
-  head={<PartHead part="Search" />}
 />
 
 ## API reference

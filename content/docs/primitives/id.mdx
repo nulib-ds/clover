@@ -9,14 +9,19 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
 import { LivePart } from "docs/components/Clover4/LiveExample";
 
+<div className="docs-title-row">
+
 # Id
+
+<PartHead part="Id" />
+
+</div>
 
 <div className="docs-lede">The resource's own address, as a link.</div>
 
 <LivePart
   part="Id"
   knobs={[{ prop: "of", value: "manifest", options: ["manifest", "canvas"] }]}
-  head={<PartHead part="Id" />}
 />
 
 ## API reference

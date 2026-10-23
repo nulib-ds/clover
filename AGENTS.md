@@ -107,19 +107,21 @@ deadline.
     scannable (the catalog's About is long), each `headingLevel` one
     below the heading it sits under. `canvas.mdx` says when to place `Body` rather
     than `Canvas`.
-  - A component page's head (Mat, 2026-10-22): no breadcrumb (`reference()`), and its
-    title set as the homepage's section titles are, the hero's stroke under its words
-    (`mdx-components.tsx`'s `h1` puts them in a `docs-title` box; `layout.css` keys the
-    look on a page with a lede and no breadcrumb). Its examples are on a card lifted as
-    the homepage's example viewer is (`--card-shadow`): the demo, then its code, then, on
-    the first, its head (`Example`'s `head`, `<PartHead part="…" />`,
-    `docs/components/Clover4/PartHead.tsx`): the part's name as the reader's flavor writes
-    it, bold, in the text accent, and under it, set as the homepage's figures are, what
-    the part adds to a page with a `Root` (or, for `Canvas`, `Map` and `Value`, which
-    their pages show alone, what a page with it alone loads), each flavor's own (`parts`,
-    `partsAlone`, `elementParts`, `elementPartsAlone` in `sizes.json`, through
-    `docs/lib/sizes.ts`), centered, what was measured in words for assistive technology. A
-    new part gets its size measured (`PARTS` in `build/sizes.mjs`) and its head.
+  - A component page's head (Mat, 2026-10-22): no breadcrumb (`reference()`), its title
+    set as the homepage's section titles are, with no stroke under it (`layout.css` keys
+    the look on a page with a lede and no breadcrumb), and opposite it, on one line
+    (`<div className="docs-title-row">` round the `#` title and `<PartHead part="…" />`,
+    `docs/components/Clover4/PartHead.tsx`), the part's name as the reader's flavor writes
+    it, in the code's face and the text accent, bold, and beside it, on a badge white on
+    the accent, as a solid call to action is (`.cta-solid`), its corners the containers'
+    (`--radius-4`), what the part adds to a page with a `Root` (or, for `Canvas`, `Map`
+    and `Value`, which their pages show alone, what a page with it alone loads), each
+    flavor's own (`parts`, `partsAlone`, `elementParts`, `elementPartsAlone` in
+    `sizes.json`, through `docs/lib/sizes.ts`), what was measured in words for assistive
+    technology. Where the line is too narrow, the two go under the title, and the badge
+    under the name. A new part gets its size measured (`PARTS` in `build/sizes.mjs`) and
+    its head. Its examples are on a card lifted as the homepage's example viewer is
+    (`--card-shadow`): the demo, then its code.
   - Every code block on the site is drawn as the homepage's editor is (`CodeBlock`,
     `docs/components/CodeBlock.tsx`, through `mdx-components.tsx`'s `pre`, styled in
     `docs/styles/code.css`; Mat, 2026-10-22): its language over it (the fence's, kept as
@@ -468,11 +470,13 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     the White catalog's cover, cut by Northwestern's IIIF Image server and linked from
     there, never copied into `public/` (Mat, 2026-10-16: the record's attribution does
     not permit further distribution of its images).
-  - Under the navbar on every page, a small acknowledgment in the corner, on the page's
+  - Under the navbar on the homepage alone (Mat, 2026-10-22: not on interior pages, whose
+    footer says it), a small acknowledgment in the corner, on the page's
     ground with no band of its own (Mat, 2026-10-20), muted (`--gray-11`, 2026-10-21),
     says Clover is a project of
     Northwestern University Libraries, linking the Libraries'
-    site (`docs/components/Subheader.tsx`, styled in `docs/styles/layout.css`). It is
+    site (`docs/components/Subheader.tsx`, by `usePathname`, so the static export holds
+    it in the homepage's HTML only; styled in `docs/styles/layout.css`). It is
     aligned to the end of the navbar's content. It is not held (Mat, 2026-10-16):
     the root layout's `navbar` renders it after Nextra's `Navbar`, outside the navbar's
     sticky box, so it scrolls away with the page.

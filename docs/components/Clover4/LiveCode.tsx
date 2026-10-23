@@ -294,20 +294,18 @@ function Demo({
 }
 
 /**
- * A component page's first example (`LiveExample.tsx`'s `LivePart`): the demo, its live
- * code under it, then the page's head (`PartHead`), on the examples' card (`Example`).
- * A knob read only as the part mounts draws the demo again.
+ * A component page's first example (`LiveExample.tsx`'s `LivePart`): the demo and its
+ * live code under it, on the examples' card (`Example`). A knob read only as the part
+ * mounts draws the demo again.
  */
 export function LiveFrame({
   tree,
   knobs,
   demo,
-  head,
 }: {
   tree: CodeTree;
   knobs: Knob[];
   demo: LiveDemo;
-  head?: React.ReactNode;
 }) {
   const [values, setValues] = useState(() => initialValues(knobs));
   const set = (id: string, value: Plain) =>
@@ -325,7 +323,6 @@ export function LiveFrame({
       <div className={styles.code}>
         <LiveCode tree={tree} knobs={knobs} values={values} onChange={set} />
       </div>
-      {head && <div className={styles.bar}>{head}</div>}
     </figure>
   );
 }

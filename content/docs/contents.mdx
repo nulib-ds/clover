@@ -8,14 +8,20 @@ import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
 
+<div className="docs-title-row">
+
 # Contents
+
+<PartHead part="Contents" />
+
+</div>
 
 <div className="docs-lede">
   A Manifest's table of contents, from its Ranges, with the entry the reader is
   in marked.
 </div>
 
-<Example head={<PartHead part="Contents" />}>
+<Example>
 <PartDemo part="Contents" body />
 
 ```jsx {3}

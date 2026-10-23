@@ -9,7 +9,13 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
 import { LivePart } from "docs/components/Clover4/LiveExample";
 
+<div className="docs-title-row">
+
 # Thumbnail
+
+<PartHead part="Thumbnail" />
+
+</div>
 
 <div className="docs-lede">
   A small picture of the resource, or of the current Canvas, named by its label.
@@ -21,7 +27,6 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
     { prop: "size", value: 200, min: 80, max: 400, step: 40 },
     { prop: "of", value: "manifest", options: ["manifest", "canvas"] },
   ]}
-  head={<PartHead part="Thumbnail" />}
 />
 
 ## API reference

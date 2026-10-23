@@ -477,7 +477,7 @@ export function LiveTemplates({
  * demo (a `PartDemo`, say), the rest its code, as the Components pages write them.
  *
  * ```mdx
- * <Example head={<PartHead part="Label" />}>
+ * <Example>
  * <PartDemo part="Label" />
  *
  * ```jsx
@@ -489,12 +489,9 @@ export function LiveTemplates({
  */
 export function Example({
   children,
-  head,
   editor,
 }: {
   children: React.ReactNode;
-  /** A foot under the demo and its code: a component page's head (`PartHead`). */
-  head?: React.ReactNode;
   editor?: Editor;
 }) {
   const [demo, ...code] = React.Children.toArray(children).filter(
@@ -504,7 +501,6 @@ export function Example({
     <figure className={styles.example}>
       <div className={styles.preview}>{demo}</div>
       {code.length > 0 && <CodeArea editor={editor}>{code}</CodeArea>}
-      {head && <div className={styles.bar}>{head}</div>}
     </figure>
   );
 }

@@ -335,25 +335,6 @@ nav.nextra-toc:empty {
 }
 
 /*
- * A component page's head, at the foot of its first example, under its code
- * (`PartHead.tsx`, `ViewerDocs.module.css`'s `.bar`; Mat, 2026-10-22): the part's name as
- * the homepage's tiles name theirs, and under it its size, set as the homepage's figures
- * are (`Home.module.css`'s `.figure`), bold, tight, its unit half its size and lowercase,
- * the two centered.
- */
-.docs-part-head {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  gap: var(--clover-space-2xs, 0.236rem);
-  text-align: center;
-}
-
-.docs-part-head > p {
-  margin: 0;
-}
-
-/*
  * A component page is one with a lede and no breadcrumb (`reference()`,
  * `content/docs/_meta.ts`). White space under its head (Mat, 2026-10-22: "white space is
  * king"): the example under the lede (its margin, which the lede's own takes in) well
@@ -364,32 +345,82 @@ main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > .docs-lede {
 }
 
 /*
- * Named as the homepage's tiles name their parts (`Parts.module.css`'s `.tileName`), in
- * the code's face and the text accent, but bold and at the page's size (Mat, 2026-10-22).
+ * A component page's title and its part's badge on one line (Mat, 2026-10-22): the badge
+ * opposite the title, and under it where the line is too narrow for both (WCAG 1.4.10).
+ */
+.docs-title-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clover-space-s, 0.618rem) var(--clover-space-l, 1.618rem);
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.docs-title-row > h1 {
+  margin: 0;
+}
+
+/*
+ * The part's name and its size side by side (`PartHead.tsx`; Mat, 2026-10-22). Narrower
+ * than the two, on a phone (`<clover-required-statement>`), the size goes under the name,
+ * and a name longer than the line breaks, so the page never scrolls sideways (WCAG 1.4.10,
+ * 1.4.12).
+ */
+.docs-part-head {
+  align-items: baseline;
+  display: inline-flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: var(--clover-space-2xs, 0.236rem) var(--clover-space-s, 0.618rem);
+  margin: 0;
+  max-width: 100%;
+}
+
+/*
+ * Named as the homepage's tiles name their parts (`Parts.module.css`'s `.tileName`), in the
+ * code's face and the text accent, on the page's ground, bold, a notch under the page's
+ * size, as the badge's figure is (Mat, 2026-10-22).
  */
 .docs-part-head-name {
   color: var(--accent-11);
   font-family: var(--font-mono);
-  font-size: 1rem;
+  font-size: var(--text-sm);
   font-weight: var(--weight-bold);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * The size on a badge, white on the accent, as a solid call to action is (`.cta-solid`):
+ * 5:1 on the site's blue, and 4.5:1 or more on every accent the Color picker offers
+ * (`accentPresets`). Its corners are the site's containers' (`--radius-4`), as the
+ * example's card under it is.
+ */
+.docs-part-badge {
+  background: var(--accent-9);
+  border-radius: var(--radius-4);
+  color: var(--accent-contrast);
+  line-height: 1.5;
+  padding: var(--clover-space-2xs, 0.236rem) var(--clover-space-s, 0.618rem);
   white-space: nowrap;
 }
 
+/* Its size, set as the homepage's figures are (`Home.module.css`'s `.figure`): bold, tight. */
 .docs-part-head-value {
-  color: var(--gray-12);
-  font-size: var(--text-xl);
+  font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
   font-weight: var(--weight-bold);
-  letter-spacing: -0.04em;
-  line-height: 0.95;
+  letter-spacing: -0.02em;
+  line-height: 1;
   white-space: nowrap;
 }
 
-/* Shown lowercase, its text still "kB", as a screen reader and a copy read it. */
+/* Smaller, and shown lowercase, its text still "kB", as a screen reader and a copy read it. */
 .docs-part-head-unit {
-  font-size: 0.5em;
+  font-size: 0.75em;
   letter-spacing: -0.02em;
-  margin-inline-start: -0.12em;
+  margin-inline-start: 0.06em;
   text-transform: lowercase;
 }
 
@@ -404,61 +435,22 @@ main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > .docs-lede {
   width: 1px;
 }
 
-/* The title set as the homepage's sections' are (`SectionIntro.module.css`'s `.title`). */
-main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > h1 {
-  font-size: clamp(1.618rem, 3vw, 2.618rem);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+/* Where colors are forced, its edge shows in their place of its fill. */
+@media (forced-colors: active) {
+  .docs-part-badge {
+    outline: 1px solid CanvasText;
+  }
 }
 
 /*
- * The title's words under the hero's stroke, on a page with a head (Mat, 2026-10-22), set
- * as the hero's is (`Home.module.css`'s `.mark`) on the words' own box (`docs-title`,
- * `mdx-components.tsx`): one shape (`--swoosh`), 0.42em tall, a little off the letters'
- * foot, behind them, rising 1.5°, faint where the pen comes down, and drawn from one end
- * to the other as the page loads, as the hero's is.
+ * The title set as the homepage's sections' are (`SectionIntro.module.css`'s `.title`),
+ * with no stroke under it (Mat, 2026-10-22).
  */
-main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > h1 > .docs-title {
-  isolation: isolate;
-  position: relative;
-  z-index: 0;
-}
-
-main:not(.nextra-breadcrumb ~ main):has(> .docs-lede)
-  > h1
-  > .docs-title::after {
-  background: linear-gradient(
-    to right,
-    color-mix(in srgb, var(--accent-9) 30%, transparent),
-    var(--accent-9)
-  );
-  bottom: -0.1em;
-  content: "";
-  height: 0.42em;
-  left: -0.04em;
-  mask: var(--swoosh) center / 100% 100% no-repeat;
-  position: absolute;
-  right: -0.06em;
-  rotate: 1.5deg;
-  z-index: -1;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  main:not(.nextra-breadcrumb ~ main):has(> .docs-lede)
-    > h1
-    > .docs-title::after {
-    animation: docs-title-draw 700ms cubic-bezier(0.65, 0, 0.35, 1) 300ms both;
-  }
-}
-
-@keyframes docs-title-draw {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-
-  to {
-    clip-path: inset(0 0 0 0);
-  }
+main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > h1,
+main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > .docs-title-row > h1 {
+  font-size: clamp(1.618rem, 3vw, 2.618rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 main:has(> .docs-lede) > :is(p, ul, ol) {

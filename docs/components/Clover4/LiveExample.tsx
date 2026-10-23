@@ -36,7 +36,6 @@ import { SPECS } from "../../../packages/clover/src/web-components/specs";
  *     { prop: "controls", value: true },
  *     { prop: "style.height", value: 320, min: 160, max: 560 },
  *   ]}
- *   head={<PartHead part="Body" />}
  * />
  * ```
  *
@@ -145,8 +144,6 @@ interface LivePartProps {
   alone?: boolean;
   /** React's imports, where the code is a whole module (`Map`'s own import). */
   imports?: string[];
-  /** The page's head, under the code (`PartHead`). */
-  head?: React.ReactNode;
 }
 
 export function LivePart({
@@ -159,7 +156,6 @@ export function LivePart({
   box,
   alone = false,
   imports,
-  head,
 }: LivePartProps) {
   const tag = elementTag(part);
   const named = knobs.map((knob) => ({
@@ -230,7 +226,7 @@ export function LivePart({
     body,
     box,
   };
-  return <LiveFrame tree={tree} knobs={named} demo={demo} head={head} />;
+  return <LiveFrame tree={tree} knobs={named} demo={demo} />;
 }
 
 /**

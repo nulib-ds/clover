@@ -9,7 +9,13 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
 import { LivePart } from "docs/components/Clover4/LiveExample";
 
+<div className="docs-title-row">
+
 # Transcript
+
+<PartHead part="Transcript" />
+
+</div>
 
 <div className="docs-lede">
   The words of the recording or page in view: its captions as text, the cue
@@ -27,7 +33,6 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
     style: { maxHeight: "20rem", overflowY: "auto" },
   }}
   knobs={[{ prop: "follow", value: true }]}
-  head={<PartHead part="Transcript" />}
 />
 
 ## API reference
