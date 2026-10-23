@@ -1,7 +1,7 @@
 /*
  * The information panel: its sections (`ui/Sections.css`), as tabs or stacked boxes, the
  * region's inset (`--clover-inset`) inside its edges. The page's own text size and line height. Its height follows the
- * stage's (`--clover-content-height`) beside it in the Viewer; elsewhere it is as tall
+ * stage's (`--clover-body-height`) beside it in the Viewer; elsewhere it is as tall
  * as its content.
  */
 .clover-panel {

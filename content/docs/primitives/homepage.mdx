@@ -6,6 +6,7 @@ description: A IIIF resource's homepage, the web pages about it, as a list of li
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Homepage
 
@@ -13,10 +14,10 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   The web pages about the resource, as a list of links.
 </div>
 
-<Example>
+<Example head={<PartHead part="Homepage" />}>
 <PartDemo part="Homepage" />
 
-```jsx
+```jsx {2}
 <Clover.Root iiifContent={url}>
   <Clover.Homepage />
 </Clover.Root>
@@ -50,7 +51,7 @@ Wikimedia Commons and in the National Archives Catalog.
 <Example>
 <PartDemo part="Homepage" resource="footage" />
 
-```jsx
+```jsx {2}
 <Clover.Root iiifContent="https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/manifest.json">
   <Clover.Homepage />
 </Clover.Root>

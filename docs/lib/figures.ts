@@ -3,7 +3,13 @@ import {
   CHECKED,
   progressFor,
 } from "docs/components/CookbookRecipes/progress4";
-import { kB, partLoads, sizes } from "docs/lib/sizes";
+import {
+  elementLoads,
+  kB,
+  partLoads,
+  sizes,
+  viewerParts,
+} from "docs/lib/sizes";
 
 /*
  * The figures the site states about Clover, in one place, each the code's own (AGENTS.md:
@@ -22,7 +28,7 @@ export {
   primitiveCount,
 } from "docs/components/Home/counts";
 
-export { kB, partLoads };
+export { elementLoads, kB, partLoads, viewerParts };
 
 /**
  * What a reader's browser loads, in kB gzipped, for a Canvas, for the Viewer with its

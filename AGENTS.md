@@ -67,7 +67,7 @@ deadline.
     covers what the Viewer handles and links there; add composition material there, not
     to the Viewer page.
   - Every part the homepage shows has a page under "Components" (Mat, 2026-10-20):
-    Content, Canvas, Items, Panel, the Panel's sections (Annotations, Collection with
+    Body, Canvas, Items, Panel, the Panel's sections (Annotations, Collection with
     CollectionSelect, Contents, Search, Transcript), Download and Map, then Primitives
     (`content/docs/primitives/`, an overview and a page per property part: Label,
     Thumbnail, Summary, Metadata, RequiredStatement, Rights, Homepage, SeeAlso,
@@ -80,7 +80,7 @@ deadline.
     tables, and no table of contents (`reference()` in `content/docs/_meta.ts`), so the
     examples have the width. Live examples are
     `<PartDemo part="…" />` (`docs/components/Clover4/PartDemo.tsx`): the part named, its
-    props plain values, in a `Root` over a mock (`resource`), with a `Content` above it
+    props plain values, in a `Root` over a mock (`resource`), with a `Body` above it
     (`content`) where it follows the view; several parts in the one `Root` (`parts`, on
     a line with `row`); a tall part in a box that scrolls (`box`), as the templates
     scroll the Panel, the box in the example's code too. The homepage's tiles link to these pages
@@ -91,8 +91,39 @@ deadline.
     `options.informationPanel`; Composing keeps a short section with the `Tab` example
     and links there. Its demos are each in a 24rem box (`box`), so the page stays
     scannable (the catalog's About is long), each `headingLevel` one
-    below the heading it sits under. `canvas.mdx` says when to place `Content` rather
+    below the heading it sits under. `canvas.mdx` says when to place `Body` rather
     than `Canvas`.
+  - A component page's head (Mat, 2026-10-22): no breadcrumb (`reference()`), and its
+    title set as the homepage's section titles are, the hero's stroke under its words
+    (`mdx-components.tsx`'s `h1` puts them in a `docs-title` box; `layout.css` keys the
+    look on a page with a lede and no breadcrumb). Its examples are on a card lifted as
+    the homepage's example viewer is (`--card-shadow`): the demo, then its code, then, on
+    the first, its head (`Example`'s `head`, `<PartHead part="…" />`,
+    `docs/components/Clover4/PartHead.tsx`): the part's name as the reader's flavor writes
+    it, bold, in the text accent, and under it, set as the homepage's figures are, what
+    the part adds to a page with a `Root` (or, for `Canvas`, `Map` and `Value`, which
+    their pages show alone, what a page with it alone loads), each flavor's own (`parts`,
+    `partsAlone`, `elementParts`, `elementPartsAlone` in `sizes.json`, through
+    `docs/lib/sizes.ts`), centered, what was measured in words for assistive technology. A
+    new part gets its size measured (`PARTS` in `build/sizes.mjs`) and its head.
+  - Every code block on the site is drawn as the homepage's editor is (`CodeBlock`,
+    `docs/components/CodeBlock.tsx`, through `mdx-components.tsx`'s `pre`, styled in
+    `docs/styles/code.css`; Mat, 2026-10-22): its language over it (the fence's, kept as
+    `data-lang`), Copy, its lines numbered and wrapped, in the editor's colors: a third
+    theme Nextra's highlighter colors every token with (`--shiki-editor`,
+    `docs/lib/code-theme.mjs`, `next.config.mjs`), each color a token (`--editor-*`,
+    `tokens.css`). It is light on a light page and dark on a dark one, or as an example
+    sets it (`editor="dark"`, `CodeArea` in `ViewerDocs.tsx`); the homepage's editor stays
+    dark. Light, its colors are Material's light theme's, darkened only as far as 4.5:1
+    needs (`--code-light-*`, 5.1:1 on white); in both its tags are the text accent. A
+    command (a fence in `bash`, `sh`, `shell`, `zsh` or `console`) is drawn as the homepage's
+    install is instead (`docs-terminal`): one block on the editor's black, Copy at its end.
+    A fence's marked lines (`{3}` after its language) are what it is about, lit as the
+    homepage's editor lights a part pointed at, one rounded block tinted with the accent
+    (`--editor-mark`: its 24% dark, 8% light, where 24% would take the text under 4.5:1);
+    every line keeps its colors (dimming the rest would take them under 4.5:1), and the
+    twin marks the same element's lines (`twinLines`, `code-flavors.mjs`). Mark a part's
+    own lines where an example's code holds a `Root` or other parts round it.
   - Use Clover: Get started (`/docs`, which holds the web components, `<clover-viewer>`
     and the parts, in a section of their own, `#web-component`), Viewer (`/docs/viewer`,
     the templates on it: their old page, `/docs/viewer/templates`, forwards to
@@ -110,14 +141,10 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     with little room at its sides, its code attached under it. The page has no table of
     contents, so the examples have the width; its prose keeps a reading measure, and
     its sections more room (`layout.css`).
-  - Under Viewer, the Default template's page (`/docs/viewer/default`; Mat, 2026-10-21,
-    an experiment he may drop) walks through Default region by region: a live example,
-    its regions where it lays them out (`DefaultAnatomy.tsx`, an ordered list in reading
-    order), each region with its real code, its styles, what it does for accessibility,
-    how to copy it, and its full source. Every quote is `SourceFile`
-    (`docs/components/SourceFile.tsx`): the package's file, or a stretch of it from one
-    line to another, read and highlighted as the page is built, so a quote that no
-    longer matches fails the build rather than going stale.
+  - The Default template's walk-through (`/docs/viewer/default`, region by region, its code
+    quoted from the package by `SourceFile`) was taken down on 2026-10-22 (Mat: kept in
+    Git's history, to become the example in a guide to making templates); its address
+    forwards to the Viewer's templates.
   - A Viewer or standalone `Items` on a docs page takes the `headingLevel` one below the
     heading it sits under (`docs/components/Clover4/Demos.tsx`: 3 under an `h2`, 4 under
     an `h3`), so the page's outline stays true. Move a demo, and check its level. The DC
@@ -183,7 +210,7 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     each with its mark, in the standard's order (1.1.1, 1.2.2…), then an ARIA snapshot with tab stops,
     the card as tall as both need where the window has room under the held viewer,
     focus anywhere in the viewer's column giving it up; Mat, 2026-10-22) and Coverage (`data-recipe`) a Cookbook recipe (0032, a
-    Collection, read by Label, Content, Metadata and Collection, all outlined but Metadata;
+    Collection, read by Label, Body, Metadata and Collection, all outlined but Metadata;
     Mat, 2026-10-21; for this example alone, the Collection held in from its outline, its
     address on one line, and its members given thumbnails from their own images at a size
     each `info.json` prescribes, its `sizes` else a level of its tiles,
@@ -199,7 +226,7 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     accent with its name showing (`data-hovered`, shown only, nothing focused or pressed;
     Mat, 2026-10-21); Composable (`data-compose`) has the
     example viewer's own code editor (a portal into `data-composer`) change the layout
-    Mat set (Content first at 400, then Label, Summary, Items larger), the code
+    Mat set (Body first at 400, then Label, Summary, Items larger), the code
     crossfading with its new lines lit at a fixed 15 lines, the viewer fading out and in
     around it, and puts it back after. Each change starts with its story's line (Mat,
     2026-10-21: in sync) and waits `BAND` past its edge before undoing; the line draws in
@@ -247,7 +274,7 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     its parts in the order its code gives them. The code control under it opens that code
     below, as an editor (Prism's Material colors on black, `--code-*` in
     `docs/styles/tokens.css`): its `Root` and parts as written. Its values are live
-    (Content's `height` a number to type, step or drag, its `controls` a switch, Items'
+    (Body's `height` a number to type, step or drag, its `controls` a switch, Items'
     `layout` a menu), each part's lines drag into another order (by mouse anywhere on
     them, by touch from the grip, by keyboard with the grip's arrow keys), and the viewer
     follows, so the code is always what it shows; a part's lines outline the part as its
@@ -258,7 +285,7 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     leaves (2.4.11). Every target in it is 24px or inline in the code (2.5.8). On the right each
     part is a tile, live, an `article` named by its heading (never a `section`: as regions,
     the page's landmarks ran to dozens), named as it is written (`<Clover.Label />`), with what it reads
-    (a property; for `Content`, the Canvas) and a fact from the resource (a count, a size,
+    (a property; for `Body`, the Canvas) and a fact from the resource (a count, a size,
     a name). Pointing at a tile outlines the part in the viewer. A part the resource gives
     nothing to is a chip at the end, naming what it would read and the playground resource
     that has it (`SHOWN_IN`). Every value shown is the resource's own: no illustrations,
@@ -344,8 +371,11 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     open over ink that slides back as far, both transforms, so it holds still.
   - Every card, container, call to action and code block on the site has one radius,
     `--radius-4` (12px), Nextra's code blocks, callouts and search field too
-    (`layout.css`); what sits inside one takes a smaller step (`--radius-2`, `--radius-3`),
-    so the corners nest, and pills stay pills (Mat, 2026-10-22: "keep consistency").
+    (`layout.css`); what sits inside one takes a smaller step (`--radius-2`,
+    `--radius-3`), so the corners nest, and pills stay pills (Mat, 2026-10-22: "keep
+    consistency"). Every card lifted off the page has one shadow, `--card-shadow` (a
+    hairline edge and a soft gray shadow, `--card-lift` on its own), the same on the
+    homepage and in the docs (Mat, 2026-10-22).
   - Headers are solid, never frosted or translucent: the navbar (`docs/styles/layout.css`
     overrides Nextra's blur) and the playground's bar. From 48rem wide, on a screen at
     least 36rem tall (not a phone, where with the navbar it would take too much height),
@@ -393,7 +423,8 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
 after it, or stays React's, shown in both; `jsx react shows to React's readers alone
     (a stylesheet's import). Write a new example so it turns, or give it its twin. After
     changing those helpers, restart `npm run dev`: Node keeps the modules the loader
-    first loaded. A component's "API reference" wraps its React tables in
+    first loaded. A page compiled between the change and the restart keeps what the old ones
+    made (Turbopack caches it against the new files): clear `.next/dev` as you restart. A component's "API reference" wraps its React tables in
     `<ApiReference elements="clover-…">` (`docs/components/Clover4/ApiReference.tsx`),
     which draws its elements' tables from their specs, with the page's own Markdown
     components, in the other flavor. `OptionsExample` shows its chosen value's code by

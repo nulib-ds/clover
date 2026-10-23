@@ -9,7 +9,7 @@
  * header and thumbnails); the strip's titles and position, within its header, `s`.
  */
 .clover-template-default {
-  --clover-content-height: min(65vh, 40rem);
+  --clover-body-height: min(65vh, 40rem);
   display: flex;
   flex-direction: column;
   color: var(--clover-color-primary, #1a1d1e);
@@ -17,12 +17,12 @@
 
 /*
  * `fill`: as tall as the box it sits in, and the stage takes what the header and the strip
- * leave (flex, rather than `--clover-content-height`), so the layout never runs below it.
+ * leave (flex, rather than `--clover-body-height`), so the layout never runs below it.
  * Never a stage under 16rem, the width it keeps beside the panel: in a box too short for
  * that, the layout grows past the box, for the box to scroll.
  */
 .clover-template-default[data-fill] {
-  --clover-content-height: auto;
+  --clover-body-height: auto;
   height: 100%;
   min-height: min-content;
 }

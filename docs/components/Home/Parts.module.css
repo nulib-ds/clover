@@ -536,7 +536,7 @@
   outline-offset: 2px;
 }
 
-/* Content's height: a number field, three digits wide, without the spin buttons. */
+/* Body's height: a number field, three digits wide, without the spin buttons. */
 .scrub {
   -moz-appearance: textfield;
   appearance: textfield;
@@ -580,10 +580,7 @@
 .viewer {
   background: var(--color-background);
   border-radius: var(--radius-4);
-  box-shadow:
-    0 0 0 1px var(--gray-6),
-    0 1px 2px rgb(0 0 0 / 0.04),
-    0 6px 24px rgb(0 0 0 / 0.06);
+  box-shadow: var(--card-shadow);
   align-items: center;
   display: flex;
   flex-wrap: wrap;
@@ -609,10 +606,7 @@
 .viewerBack {
   background: var(--color-background);
   border-radius: var(--radius-4);
-  box-shadow:
-    0 0 0 1px var(--gray-6),
-    0 1px 2px rgb(0 0 0 / 0.04),
-    0 6px 24px rgb(0 0 0 / 0.06);
+  box-shadow: var(--card-shadow);
   color: var(--gray-12);
   display: flex;
   flex-direction: column;
@@ -620,12 +614,6 @@
   font-size: 0.75rem;
   line-height: 1.618;
   overflow: hidden;
-}
-
-:global(.dark) .viewerBack {
-  box-shadow:
-    0 0 0 1px var(--gray-6),
-    0 6px 24px rgb(0 0 0 / 0.4);
 }
 
 .backHead {
@@ -781,7 +769,7 @@
 }
 
 /*
- * The recipe's face: the viewer's frame, the recipe named at its head, and its Content
+ * The recipe's face: the viewer's frame, the recipe named at its head, and its Body
  * and Items outlined with their names, as the parts that read it.
  */
 .recipeFace {
@@ -835,13 +823,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* As the stage's, on a dark page. */
-:global(.dark) .viewer {
-  box-shadow:
-    0 0 0 1px var(--gray-6),
-    0 6px 24px rgb(0 0 0 / 0.4);
 }
 
 /*
@@ -1195,7 +1176,7 @@
 }
 
 .stage {
-  --clover-content-height: 26rem;
+  --clover-body-height: 26rem;
   border-radius: var(--radius-3);
   overflow: hidden;
 }

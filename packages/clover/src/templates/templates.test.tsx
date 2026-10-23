@@ -331,7 +331,7 @@ describe("templates", () => {
     ).toBeInTheDocument();
     expect(within(dialog).getByText(/Item 2 of 3/)).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
-    expect(dialog.querySelector(".clover-content")).toBeNull();
+    expect(dialog.querySelector(".clover-body")).toBeNull();
   });
 
   it("Gallery: the title at headingLevel, the lightbox's a level under it", async () => {

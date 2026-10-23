@@ -17,7 +17,7 @@ import type { ContentStateOutput } from "../../core/content-state";
 import type { IIIFContent } from "../../core/load";
 import { type CloverRequest, requestKey } from "../../core/request";
 import type { CloverContextValue } from "../../react/context";
-import { type ContentRenderer, sameRenderers } from "../Content/renderers";
+import { type BodyRenderer, sameRenderers } from "../Body/renderers";
 
 /** What a Root is given about its content: every prop but its element's. */
 export interface RootStateOptions {
@@ -32,7 +32,7 @@ export interface RootStateOptions {
   searchQuery?: string;
   request?: CloverRequest;
   language?: string;
-  renderers?: ContentRenderer[];
+  renderers?: BodyRenderer[];
   annotations?: AnnotationsInput;
   annotationPages?: "view" | "all";
   onContentStateChange?: (state: ContentStateOutput) => void;

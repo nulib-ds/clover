@@ -118,7 +118,7 @@ export const panelToggle: ElementSpec = {
 export const panelToggleDocs: ElementDocs = {
   name: "CloverPanelToggleElement",
   description:
-    "A button that shows and hides an element, the information panel's or any, by its id: open while it is not hidden. In a clover-content, it is one of the stage's controls; elsewhere, a button where it is.",
+    "A button that shows and hides an element, the information panel's or any, by its id: open while it is not hidden. In a clover-body, it is one of the stage's controls; elsewhere, a button where it is.",
   attributes: {
     controls: {
       description: "The id of what it shows and hides.",

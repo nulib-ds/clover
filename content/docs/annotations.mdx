@@ -6,6 +6,7 @@ description: Every annotation of a IIIF resource, by layer and by Canvas, to rea
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Annotations
 
@@ -14,19 +15,19 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   Canvas, and to hide from it.
 </div>
 
-<Example>
+<Example head={<PartHead part="Annotations" />}>
 <PartDemo
   part="Annotations"
   props={{
     headingLevel: 2,
     style: { maxHeight: "20rem", overflowY: "auto" },
   }}
-  content
+  body
 />
 
-```jsx
+```jsx {3}
 <Clover.Root iiifContent={url}>
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Annotations />
 </Clover.Root>
 ```
@@ -66,12 +67,12 @@ follow the defendants through the film, in two layers; its captions are the
   part="Annotations"
   resource="footage"
   props={{ headingLevel: 4 }}
-  content
+  body
 />
 
-```jsx
+```jsx {3}
 <Clover.Root iiifContent="https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/manifest.json">
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Annotations />
 </Clover.Root>
 ```
@@ -85,7 +86,7 @@ its annotations are listed with the Manifest's.
 
 ```jsx
 <Clover.Root iiifContent={url} annotations={annotationPageUrl}>
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Annotations />
 </Clover.Root>
 ```
@@ -95,7 +96,7 @@ its annotations are listed with the Manifest's.
   iiif-content="https://nulib-ds.github.io/clover/mocks/paged/manifest.json"
   annotations="https://example.org/annotation-page.json"
 >
-  <clover-content></clover-content>
+  <clover-body></clover-body>
   <clover-annotations></clover-annotations>
 </clover-root>
 ```

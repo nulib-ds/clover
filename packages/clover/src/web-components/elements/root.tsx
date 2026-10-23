@@ -21,7 +21,7 @@ import { loadRenderers, useLoaded } from "./later";
  * parts are its descendants, wherever the page puts them.
  *
  *   <clover-root iiif-content="https://example.org/manifest.json">
- *     <clover-content></clover-content>
+ *     <clover-body></clover-body>
  *     <clover-label as="h2"></clover-label>
  *   </clover-root>
  */

@@ -179,7 +179,7 @@ interface LiveProps {
   props?: Record<string, Plain>;
   /** Open at a region of a Canvas, by its place in the Manifest, as a content state. */
   place?: { canvas: number; xywh: string };
-  /** The stage's height (`--clover-content-height`). */
+  /** The stage's height (`--clover-body-height`). */
   height?: string;
   /** A box of this height for the Viewer to `fill`. */
   box?: string;
@@ -235,7 +235,7 @@ function Live({
           headingLevel={headingLevel}
           // On the Viewer's own root, where each template sets its default.
           style={{
-            ["--clover-content-height" as string]: height,
+            ["--clover-body-height" as string]: height,
             // Document is as tall as its pages' column: the stage and its toolbar.
             ["--clover-template-document-height" as string]: `calc(${height} + 4rem)`,
           }}
@@ -248,17 +248,43 @@ function Live({
   );
 }
 
+/**
+ * The editor an example's code is drawn in: light or dark whatever the page's mode. Left
+ * out, it follows the page's (`--editor-*`, `tokens.css`).
+ */
+type Editor = "light" | "dark";
+
+/**
+ * An example's code, under its demo: its blocks drawn as every code block on the site is
+ * (`CodeBlock`, through `mdx-components.tsx`), each with its own Copy, in the editor that
+ * follows the page's mode, or the one the example sets (`data-editor`).
+ */
+function CodeArea({
+  children,
+  editor,
+}: {
+  children: React.ReactNode;
+  editor?: Editor;
+}) {
+  return (
+    <div className={styles.code} data-editor={editor}>
+      {children}
+    </div>
+  );
+}
+
 /** An example's frame: the live Viewer, and its code attached under it. */
 export function ViewerExample({
   children,
+  editor,
   ...live
-}: LiveProps & { children?: React.ReactNode }) {
+}: LiveProps & { children?: React.ReactNode; editor?: Editor }) {
   return (
     <figure className={styles.example}>
       <div className={styles.preview}>
         <Live {...live} />
       </div>
-      {children && <div className={styles.code}>{children}</div>}
+      {children && <CodeArea editor={editor}>{children}</CodeArea>}
     </figure>
   );
 }
@@ -279,6 +305,7 @@ export function OptionsExample({
   labels,
   lead,
   children,
+  editor,
   ...live
 }: LiveProps & {
   /** The prop it switches: `template`, the box's `width`, or another the Viewer takes. */
@@ -290,6 +317,7 @@ export function OptionsExample({
   labels?: string[];
   lead?: boolean;
   children?: React.ReactNode;
+  editor?: Editor;
 }) {
   const id = useId();
   const [value, setValue] = useState<Plain>(options[0]);
@@ -327,7 +355,7 @@ export function OptionsExample({
       <div className={styles.preview}>
         <Live key={nameOf(value)} {...live} {...shown} />
       </div>
-      <div className={styles.code}>
+      <CodeArea editor={editor}>
         {/*
          * The chosen value's code shows; the others are hidden by CSS, not `hidden`, so the
          * page's Markdown keeps every value's code (`data-shown`, `ViewerDocs.module.css`).
@@ -343,7 +371,7 @@ export function OptionsExample({
               })
             : child,
         )}
-      </div>
+      </CodeArea>
     </figure>
   );
 }
@@ -353,7 +381,7 @@ export function OptionsExample({
  * demo (a `PartDemo`, say), the rest its code, as the Components pages write them.
  *
  * ```mdx
- * <Example>
+ * <Example head={<PartHead part="Label" />}>
  * <PartDemo part="Label" />
  *
  * ```jsx
@@ -363,14 +391,24 @@ export function OptionsExample({
  * </Example>
  * ```
  */
-export function Example({ children }: { children: React.ReactNode }) {
+export function Example({
+  children,
+  head,
+  editor,
+}: {
+  children: React.ReactNode;
+  /** A foot under the demo and its code: a component page's head (`PartHead`). */
+  head?: React.ReactNode;
+  editor?: Editor;
+}) {
   const [demo, ...code] = React.Children.toArray(children).filter(
     (child) => !(typeof child === "string" && !child.trim()),
   );
   return (
     <figure className={styles.example}>
       <div className={styles.preview}>{demo}</div>
-      {code.length > 0 && <div className={styles.code}>{code}</div>}
+      {code.length > 0 && <CodeArea editor={editor}>{code}</CodeArea>}
+      {head && <div className={styles.bar}>{head}</div>}
     </figure>
   );
 }

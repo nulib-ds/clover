@@ -267,17 +267,8 @@
 /* The playground's edge and shadow (`Parts.module.css`'s small viewer has them too). */
 .story[data-tone="page"] {
   background: var(--color-background);
-  box-shadow:
-    0 0 0 1px var(--gray-6),
-    0 1px 2px rgb(0 0 0 / 0.04),
-    0 6px 24px rgb(0 0 0 / 0.06);
+  box-shadow: var(--card-shadow);
   color: var(--gray-12);
-}
-
-:global(.dark) .story[data-tone="page"] {
-  box-shadow:
-    0 0 0 1px var(--gray-6),
-    0 6px 24px rgb(0 0 0 / 0.4);
 }
 
 /* The code editor's black, its words in white (`--code-*`, `tokens.css`). */
@@ -634,9 +625,11 @@
   font-size: clamp(2.5rem, 9cqi, 4.5rem);
 }
 
+/* Its lines balanced where it wraps (Mat, 2026-10-22). */
 .figureCaption {
   font-size: var(--text-md);
   line-height: 1.4;
+  text-wrap: balance;
 }
 
 /*

@@ -10,16 +10,24 @@ describe("An example's JSX as Clover's elements", () => {
     expect(
       turn(`<Clover.Root iiifContent={url}>
   <Clover.Label as="h2" />
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Items layout="grid" thumbnailSize={200} />
 </Clover.Root>`),
     ).toEqual({
       html: `<clover-root iiif-content="${URL}">
   <clover-label as="h2"></clover-label>
-  <clover-content></clover-content>
+  <clover-body></clover-body>
   <clover-items layout="grid" thumbnail-size="200"></clover-items>
 </clover-root>`,
     });
+  });
+
+  it("leaves out the semicolon that ends the markup as a statement", () => {
+    expect(
+      turn(`import Viewer from "@nulib/clover";
+
+<Viewer iiifContent={url} />;`).html,
+    ).not.toMatch(/;\s*$/);
   });
 
   it("turns the Viewer, its template and the package's imports into one module script", () => {
@@ -41,10 +49,10 @@ import "@nulib/clover/styles.css";
   it("writes a style object as CSS text, numbers in pixels as React writes them", () => {
     expect(
       turn(
-        `<Clover.Content style={{ maxHeight: "20rem", "--clover-content-height": "50vh", width: 300, opacity: 0.5 }} />`,
+        `<Clover.Body style={{ maxHeight: "20rem", "--clover-body-height": "50vh", width: 300, opacity: 0.5 }} />`,
       ).html,
     ).toBe(
-      `<clover-content style="max-height: 20rem; --clover-content-height: 50vh; width: 300px; opacity: 0.5"></clover-content>`,
+      `<clover-body style="max-height: 20rem; --clover-body-height: 50vh; width: 300px; opacity: 0.5"></clover-body>`,
     );
   });
 
@@ -56,18 +64,18 @@ import "@nulib/clover/styles.css";
     ).toBe(
       `<clover-metadata value='[{"label":{"en":["Date"]},"value":{"en":["1896"]}}]'></clover-metadata>`,
     );
-    expect(turn(`<Clover.Content controls={false} navigator />`).html).toBe(
-      `<clover-content controls="false" navigator></clover-content>`,
+    expect(turn(`<Clover.Body controls={false} navigator />`).html).toBe(
+      `<clover-body controls="false" navigator></clover-body>`,
     );
   });
 
   it("sets what a property takes from a script, after the markup", () => {
     expect(
       turn(
-        `<Clover.Root iiifContent={url} request={{ credentials: "include" }}><Clover.Content /></Clover.Root>`,
+        `<Clover.Root iiifContent={url} request={{ credentials: "include" }}><Clover.Body /></Clover.Root>`,
       ).html,
     ).toBe(`<clover-root iiif-content="${URL}">
-  <clover-content></clover-content>
+  <clover-body></clover-body>
 </clover-root>
 
 <script type="module">
@@ -105,7 +113,7 @@ import "@nulib/clover/styles.css";
     expect(
       turn(`<Clover.Items onSelect={(item) => go(item)} />`).reason,
     ).toMatch(/onSelect, a function/);
-    expect(turn(`<Clover.Content renderers={renderers} />`).reason).toMatch(
+    expect(turn(`<Clover.Body renderers={renderers} />`).reason).toMatch(
       /not a plain value/,
     );
     expect(

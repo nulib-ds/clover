@@ -82,7 +82,7 @@ export const rootDocs: ElementDocs = {
     renderers: {
       type: "CloverRenderer[] | null",
       description:
-        "Renderers of yours, for every clover-content in it: each claims views (canvasId, format or match) and draws one into a box of its own (render), returning what undoes it.",
+        "Renderers of yours, for every clover-body in it: each claims views (canvasId, format or match) and draws one into a box of its own (render), returning what undoes it.",
     },
     iiifContent: {
       type: "string | Record<string, unknown> | null",

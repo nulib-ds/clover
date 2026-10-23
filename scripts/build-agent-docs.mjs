@@ -71,7 +71,15 @@ const labelOf = (flavor) => ({
 function clean(node) {
   if (!node.children) return;
   const flavor = node.properties?.dataCodeFlavor;
-  if (FLAVORS[flavor]) node.children.unshift(labelOf(flavor));
+  // A name in prose (`code-flavors.mjs`): React's as written, then web components' after it.
+  if (node.tagName === "span" && FLAVORS[flavor]) {
+    if (flavor === "web-components")
+      node.children = [
+        { type: "text", value: " (web components: " },
+        ...node.children,
+        { type: "text", value: ")" },
+      ];
+  } else if (FLAVORS[flavor]) node.children.unshift(labelOf(flavor));
   // React's markers (`<!--$-->`) and other comments are not the page's words.
   node.children = node.children.filter(
     (child) =>

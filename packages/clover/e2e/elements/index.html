@@ -106,7 +106,7 @@
       >
         <clover-label as="h2"></clover-label>
         <p>A paragraph of the page's own, inside the first root.</p>
-        <clover-content style="height: 40vh"></clover-content>
+        <clover-body style="height: 40vh"></clover-body>
         <p>Now showing <clover-label of="canvas"></clover-label>.</p>
         <clover-items></clover-items>
       </clover-root>
@@ -115,7 +115,7 @@
         iiif-content="https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json"
       >
         <clover-label as="h2"></clover-label>
-        <clover-content></clover-content>
+        <clover-body></clover-body>
         <clover-items layout="grid"></clover-items>
       </clover-root>
       <section class="containers" aria-labelledby="containers-title">
@@ -132,11 +132,11 @@
             <clover-split-pane min="16rem">
               <clover-label as="h3"></clover-label>
               <clover-status loading="false"></clover-status>
-              <clover-content style="height: 40vh">
+              <clover-body style="height: 40vh">
                 <clover-panel-toggle
                   controls="panel-pane"
                 ></clover-panel-toggle>
-              </clover-content>
+              </clover-body>
               <clover-items></clover-items>
             </clover-split-pane>
             <clover-split-handle
@@ -210,7 +210,7 @@
           iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
         >
           <clover-label as="h3"></clover-label>
-          <clover-content id="own-stage" style="height: 40vh">
+          <clover-body id="own-stage" style="height: 40vh">
             <button
               type="button"
               id="own-copy"
@@ -233,7 +233,7 @@
               </svg>
               <clover-tip label="Copy a link to this view"></clover-tip>
             </button>
-          </clover-content>
+          </clover-body>
           <p id="own-where" aria-live="polite"></p>
           <button type="button" id="own-next">Next view</button>
         </clover-root>

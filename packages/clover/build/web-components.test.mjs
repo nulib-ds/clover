@@ -31,7 +31,7 @@ const budget = JSON.parse(
 );
 const VIEWER = ["clover-viewer"];
 const LABELS = ["clover-root", "clover-label"];
-const FOUR = ["clover-root", "clover-label", "clover-content", "clover-items"];
+const FOUR = ["clover-root", "clover-label", "clover-body", "clover-items"];
 
 test("the elements are built, with a classic-script loader beside them", () => {
   assert.ok(existsSync(join(dir, "index.mjs")), "run npm run build first");

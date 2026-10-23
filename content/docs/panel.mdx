@@ -6,6 +6,7 @@ description: What a IIIF resource says about itself, in sections as tabs or an a
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Panel
 
@@ -13,12 +14,12 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   What the resource says about itself, in sections: tabs or an accordion.
 </div>
 
-<Example>
-<PartDemo part="Panel" props={{ headingLevel: 2 }} content box="24rem" />
+<Example head={<PartHead part="Panel" />}>
+<PartDemo part="Panel" props={{ headingLevel: 2 }} body box="24rem" />
 
-```jsx
+```jsx {4}
 <Clover.Root iiifContent={url}>
-  <Clover.Content />
+  <Clover.Body />
   <div style={{ height: "24rem", overflowY: "auto" }}>
     <Clover.Panel />
   </div>
@@ -65,7 +66,7 @@ One section of a `Panel`: a tab, or a heading in an accordion. It renders nothin
 
 ### PanelToggle
 
-A round button that shows and hides the panel. As a child of `Content`, it sits among the
+A round button that shows and hides the panel. As a child of `Body`, it sits among the
 Canvas's controls.
 
 | Prop           | Type                      | Default  | Description                            |
@@ -103,13 +104,13 @@ This newspaper has a Content Search service, and its OCR as annotations.
   part="Panel"
   resource="search"
   props={{ headingLevel: 4 }}
-  content
+  body
   box="24rem"
 />
 
-```jsx
+```jsx {4}
 <Clover.Root iiifContent="https://nulib-ds.github.io/clover/mocks/content-search/manifest.json">
-  <Clover.Content />
+  <Clover.Body />
   <div style={{ height: "24rem", overflowY: "auto" }}>
     <Clover.Panel />
   </div>
@@ -128,7 +129,7 @@ sight, at its top and its foot.
 <PartDemo
   part="Panel"
   props={{ layout: "accordion", headingLevel: 4 }}
-  content
+  body
   box="24rem"
 />
 
@@ -149,7 +150,7 @@ control it. The default sections are `about`, `collection`, `contents`, `search`
   part="Panel"
   resource="footage"
   props={{ defaultValue: "contents", headingLevel: 4 }}
-  content
+  body
   box="24rem"
 />
 
@@ -218,13 +219,13 @@ function Layout({ url }) {
   const [open, setOpen] = React.useState(true);
   return (
     <Clover.Root iiifContent={url}>
-      <Clover.Content>
+      <Clover.Body>
         <Clover.PanelToggle
           open={open}
           onOpenChange={setOpen}
           controls="panel"
         />
-      </Clover.Content>
+      </Clover.Body>
       <Clover.Panel id="panel" hidden={!open} />
     </Clover.Root>
   );
@@ -236,9 +237,9 @@ function Layout({ url }) {
 <clover-root
   iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
 >
-  <clover-content>
+  <clover-body>
     <clover-panel-toggle controls="panel"></clover-panel-toggle>
-  </clover-content>
+  </clover-body>
   <clover-panel id="panel"></clover-panel>
 </clover-root>
 ```

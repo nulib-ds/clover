@@ -198,7 +198,7 @@ export const glance = () => {
     `Quick to load: a page loads its template and the parts it uses, nothing more. A Canvas (images, video and sound) is ${loads.canvas} kB gzipped, and the Viewer with its Default template ${loads.defaultTemplate} kB; maps, video streaming and the sanitizer load the first time they are needed.`,
     `Checked against every recipe in the IIIF Cookbook: ${cookbook.handled} of ${cookbook.recipes} handled, and ${cookbook.inPart} more in part (last checked ${cookbook.checked}).`,
     `Its interface speaks ${listed(shippedLanguages())}, choosing the page's language first.`,
-    `For a page without React, the Viewer and the parts are web components too, from \`${name}/web-components\`: \`<clover-viewer>\`, or \`<clover-root>\` with its parts (\`<clover-label>\`, \`<clover-content>\`…) in markup of your own. A page with a Viewer alone can load it whole, from \`${name}/web-components/viewer\` (${loads.viewerEntry} kB, rather than ${loads.element} kB). Their attributes, properties and events are in the Custom Elements Manifest, ${siteUrl}/custom-elements.json.`,
+    `For a page without React, the Viewer and the parts are web components too, from \`${name}/web-components\`: \`<clover-viewer>\`, or \`<clover-root>\` with its parts (\`<clover-label>\`, \`<clover-body>\`…) in markup of your own. A page with a Viewer alone can load it whole, from \`${name}/web-components/viewer\` (${loads.viewerEntry} kB, rather than ${loads.element} kB). Their attributes, properties and events are in the Custom Elements Manifest, ${siteUrl}/custom-elements.json.`,
     `MIT licensed, a project of Northwestern University Libraries. Source: https://github.com/nulib-ds/clover (the package is \`packages/clover\`).`,
   ];
 };

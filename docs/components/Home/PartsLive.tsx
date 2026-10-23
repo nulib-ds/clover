@@ -24,7 +24,8 @@ import { StoryLines } from "docs/components/Home/StoryLines";
 import { AccessibilityTree } from "docs/components/Home/AccessibilityTree";
 import { SectionIntro } from "docs/components/Home/SectionIntro";
 import { partCount } from "docs/components/Home/counts";
-import { partLoads } from "docs/lib/sizes";
+import { elementLoads, partLoads } from "docs/lib/sizes";
+import { Flavored, PartName, elementTag } from "docs/components/Flavored";
 import { useCodeFlavor } from "docs/lib/code-flavor";
 import { useRecipeContent } from "docs/components/Home/recipeThumbnails";
 import { endPageThemePreview, previewPageTheme } from "docs/lib/page-theme";
@@ -52,7 +53,7 @@ type Json = Record<string, any>;
 type PartKey =
   | "label"
   | "thumbnail"
-  | "content"
+  | "body"
   | "items"
   | "summary"
   | "metadata"
@@ -156,7 +157,7 @@ const SHOWN_IN: Partial<Record<PartKey, string>> = {
 const DOCS: Record<string, string> = {
   Label: "/docs/primitives/label",
   Thumbnail: "/docs/primitives/thumbnail",
-  Content: "/docs/content",
+  Body: "/docs/body",
   Items: "/docs/items",
   Summary: "/docs/primitives/summary",
   Metadata: "/docs/primitives/metadata",
@@ -178,7 +179,7 @@ interface PartSpec {
   key: PartKey;
   /** The component, as it is written: `Clover.Label`. */
   name: string;
-  /** What it reads: a property, or for `Content` the Canvas it draws. */
+  /** What it reads: a property, or for `Body` the Canvas it draws. */
   reads: string;
   href: string;
   /** What the resource has there, if anything: a count, a size, a name. */
@@ -367,8 +368,8 @@ function Exploded({
         body: <Clover.Thumbnail alt="" size={400} className={styles.thumb} />,
       },
       {
-        key: "content",
-        name: "Content",
+        key: "body",
+        name: "Body",
         reads: "Canvas",
         fact: [
           first(active?.label),
@@ -381,8 +382,8 @@ function Exploded({
         present: true,
         span: 6,
         tall: true,
-        href: DOCS.Content,
-        body: <Clover.Content className={styles.stage} />,
+        href: DOCS.Body,
+        body: <Clover.Body className={styles.stage} />,
       },
       {
         key: "items",
@@ -580,7 +581,7 @@ function Exploded({
 
   /*
    * As the Composable story passes (`onCompose`), its code makes a change of its own, to
-   * the layout Mat set in it (2026-10-20): Content first and taller, then the Label and
+   * the layout Mat set in it (2026-10-20): Body first and taller, then the Label and
    * Summary, then Items with larger pictures; the Thumbnail and Metadata out. Nothing is
    * lit for it: the code crossfades to the new (`change`), its new lines lit a moment, and
    * the viewer follows; a part lights as its code is pointed at. When the story goes, it
@@ -692,7 +693,7 @@ function Exploded({
   useEffect(() => {
     if (composing && !scripted.current && manifest) {
       const before = view;
-      const lead: ViewerPart[] = ["content", "label", "summary", "items"];
+      const lead: ViewerPart[] = ["body", "label", "summary", "items"];
       const after: ViewValues = {
         ...view,
         height: 400,
@@ -800,7 +801,7 @@ function Exploded({
         [
           "label",
           "thumbnail",
-          "content",
+          "body",
           "items",
           "summary",
           "metadata",
@@ -814,7 +815,7 @@ function Exploded({
         (key) =>
           key === "thumbnail" ||
           key === "label" ||
-          key === "content" ||
+          key === "body" ||
           shown.some((part) => part.key === key),
       ),
     [view.order, shown],
@@ -832,12 +833,9 @@ function Exploded({
     () => <Clover.Label as="h3" className={styles.viewerTitle} />,
     [],
   );
-  const contentPart = useMemo(
+  const bodyPart = useMemo(
     () => (
-      <Clover.Content
-        controls={view.controls}
-        style={{ height: view.height }}
-      />
+      <Clover.Body controls={view.controls} style={{ height: view.height }} />
     ),
     [view.controls, view.height],
   );
@@ -912,9 +910,9 @@ function Exploded({
         {labelPart}
       </Region>
     ),
-    content: (
-      <Region key="content" name="Content" {...region("content")}>
-        {contentPart}
+    body: (
+      <Region key="body" name="Body" {...region("body")}>
+        {bodyPart}
       </Region>
     ),
     items: (
@@ -1062,7 +1060,7 @@ function Exploded({
               return (
                 <li key={part.key} className={styles.chip}>
                   <Link href={part.href} className={styles.chipName}>
-                    {`<Clover.${part.name} />`}
+                    <PartName name={part.name} />
                   </Link>
                   <span className={styles.reads}>{part.reads}</span>
                   {name && (
@@ -1130,7 +1128,9 @@ const Tile = React.memo(function Tile({
     >
       <header className={styles.tileHead}>
         <h3 id={`part-${part.key}`} className={styles.tileName}>
-          <Link href={part.href}>{`<Clover.${part.name} />`}</Link>
+          <Link href={part.href}>
+            <PartName name={part.name} />
+          </Link>
         </h3>
         <span className={styles.reads}>{part.reads}</span>
         {part.fact && <span className={styles.fact}>{part.fact}</span>}
@@ -1153,14 +1153,14 @@ function More() {
       // Named for what they are, as LEGO's pieces are, and how they go together (Mat, 2026-10-22).
       title="IIIF building blocks."
       note={`${partCount} pieces that snap together any way you like, each one made for IIIF.`}
-      cta={{ href: "/docs/content", label: "See them all" }}
+      cta={{ href: "/docs/body", label: "See them all" }}
     />
   );
 }
 
 /**
  * "Why Clover"'s Coverage story, read on the viewer's other side: a Cookbook recipe in a
- * Root of its own (0032, a Collection; Mat, 2026-10-21), read by the same Label, Content,
+ * Root of its own (0032, a Collection; Mat, 2026-10-21), read by the same Label, Body,
  * Metadata and Collection, all but Metadata outlined with their names (Mat, 2026-10-21),
  * and the recipe named at the head, so it is plain what is being read. Its members are
  * given thumbnails from their own images, for this example only (`recipeThumbnails.ts`).
@@ -1188,8 +1188,8 @@ const RecipeFace = React.memo(function RecipeFace({
           <Region name="Label" data-on data-part="label">
             <Clover.Label as="p" className={styles.recipeLabel} />
           </Region>
-          <Region name="Content" data-on data-part="content">
-            <Clover.Content controls={false} style={{ height }} />
+          <Region name="Body" data-on data-part="body">
+            <Clover.Body controls={false} style={{ height }} />
           </Region>
           <Region name="Metadata" data-part="metadata">
             <Clover.Metadata className={styles.recipeNotes} />
@@ -1237,7 +1237,10 @@ function Region({
         {name in partLoads && (
           <span className={styles.regionSize}>
             {" "}
-            {partLoads[name as keyof typeof partLoads]} kB
+            <Flavored
+              react={`${partLoads[name as keyof typeof partLoads]} kB`}
+              webComponents={`${elementLoads[name as keyof typeof elementLoads]} kB`}
+            />
           </span>
         )}
       </span>
@@ -1250,7 +1253,7 @@ function Region({
 type ViewerPart =
   | "thumbnail"
   | "label"
-  | "content"
+  | "body"
   | "items"
   | "summary"
   | "metadata";
@@ -1258,7 +1261,7 @@ type ViewerPart =
 const PART_NAMES: Record<ViewerPart, string> = {
   thumbnail: "Thumbnail",
   label: "Label",
-  content: "Content",
+  body: "Body",
   items: "Items",
   summary: "Summary",
   metadata: "Metadata",
@@ -1266,9 +1269,9 @@ const PART_NAMES: Record<ViewerPart, string> = {
 
 /** The values the example viewer's code lets a reader change, as they start. */
 interface ViewValues {
-  /** Content's height, in pixels. */
+  /** Body's height, in pixels. */
   height: number;
-  /** Content's control cluster. */
+  /** Body's control cluster. */
   controls: boolean;
   layout: Clover.ItemsLayout;
   /**
@@ -1284,13 +1287,13 @@ const VIEW_DEFAULTS: ViewValues = {
   height: 240,
   controls: true,
   layout: "carousel",
-  order: ["thumbnail", "label", "content", "items", "summary", "metadata"],
+  order: ["thumbnail", "label", "body", "items", "summary", "metadata"],
 };
 
 const LAYOUTS: Clover.ItemsLayout[] = ["carousel", "list", "grid"];
 
 /*
- * The recipe side's Content height, its own: tied to the viewer's code, every change
+ * The recipe side's Body height, its own: tied to the viewer's code, every change
  * there redrew the recipe's viewer too, unseen.
  */
 const RECIPE_HEIGHT = 220;
@@ -1353,8 +1356,6 @@ const element = (name: string, attrs: Token[][] = []): Token[] => [
 ];
 
 /** A part's element, `<clover-name a="b"></clover-name>`, on one line: the editor's HTML. */
-const elementTag = (name: string) =>
-  `clover-${name.replace(/[A-Z]/g, (letter, at) => `${at ? "-" : ""}${letter.toLowerCase()}`)}`;
 const htmlElement = (name: string, attrs: Token[][] = []): Token[] => [
   punct("<"),
   tag(elementTag(name)),
@@ -1375,7 +1376,7 @@ const moved = <T,>(list: T[], from: number, to: number) => {
 /**
  * The code behind the example viewer, as an editor under it: its Root and the parts in
  * it, in order, as they are written, without the class names and outlines that dress it
- * for this page. Its values are live (drag Content's height, switch its controls, pick
+ * for this page. Its values are live (drag Body's height, switch its controls, pick
  * Items' layout), and each part's lines can be dragged into another order (by mouse
  * anywhere on them, by touch from the grip, by keyboard with the grip's arrow keys). The
  * viewer follows, so the code is always what it shows. A part's lines outline the part in
@@ -1583,9 +1584,9 @@ const ViewerCode = React.memo(function ViewerCode({
             ]),
           },
         ];
-      case "content":
+      case "body":
         return [
-          { depth: 1, tokens: [punct("<"), tag("clover-content")] },
+          { depth: 1, tokens: [punct("<"), tag("clover-body")] },
           {
             depth: 2,
             tokens: [
@@ -1595,7 +1596,7 @@ const ViewerCode = React.memo(function ViewerCode({
                 text: String(view.controls),
                 control: (
                   <Switch
-                    label="Content controls"
+                    label="Body controls"
                     value={view.controls}
                     onChange={(controls) => set({ controls })}
                   />
@@ -1615,7 +1616,7 @@ const ViewerCode = React.memo(function ViewerCode({
                 text: String(view.height),
                 control: (
                   <Scrub
-                    label="Content height, in pixels"
+                    label="Body height, in pixels"
                     min={120}
                     max={480}
                     value={view.height}
@@ -1629,15 +1630,16 @@ const ViewerCode = React.memo(function ViewerCode({
           },
           {
             depth: 1,
-            tokens: [punct("</"), tag("clover-content"), punct(">")],
+            tokens: [punct("</"), tag("clover-body"), punct(">")],
           },
         ];
       case "items": {
         const layout: Token[] = [
           attr("layout"),
-          punct('="'),
+          // The menu shows its value quoted, `"carousel"`, as the attribute writes it.
+          punct("="),
           {
-            text: view.layout,
+            text: `"${view.layout}"`,
             control: (
               <Choice
                 label="Items layout"
@@ -1647,7 +1649,6 @@ const ViewerCode = React.memo(function ViewerCode({
               />
             ),
           },
-          punct('"'),
         ];
         if (!view.itemsSize)
           return [{ depth: 1, tokens: htmlElement("Items", [layout]) }];
@@ -1692,9 +1693,9 @@ const ViewerCode = React.memo(function ViewerCode({
             tokens: element("Label", [[attr("as"), punct("="), str('"h3"')]]),
           },
         ];
-      case "content":
+      case "body":
         return [
-          { depth: 1, tokens: [punct("<"), tag("Clover.Content")] },
+          { depth: 1, tokens: [punct("<"), tag("Clover.Body")] },
           {
             depth: 2,
             tokens: [
@@ -1704,7 +1705,7 @@ const ViewerCode = React.memo(function ViewerCode({
                 text: String(view.controls),
                 control: (
                   <Switch
-                    label="Content controls"
+                    label="Body controls"
                     value={view.controls}
                     onChange={(controls) => set({ controls })}
                   />
@@ -1724,7 +1725,7 @@ const ViewerCode = React.memo(function ViewerCode({
                 text: String(view.height),
                 control: (
                   <Scrub
-                    label="Content height, in pixels"
+                    label="Body height, in pixels"
                     min={120}
                     max={480}
                     value={view.height}

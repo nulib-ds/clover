@@ -1,10 +1,6 @@
 import React, { useMemo } from "react";
 
-import {
-  type ContentRenderer,
-  paintingBodies,
-  pickRenderer,
-} from "./renderers";
+import { type BodyRenderer, paintingBodies, pickRenderer } from "./renderers";
 import ConnectedCanvas from "../Canvas/Connected";
 import type { CloverCanvasProps } from "../Canvas/Canvas.types";
 import { join } from "../../lib/classnames";
@@ -12,14 +8,14 @@ import { useClover, useCloverSelector } from "../../react/context";
 import { useVisibleCanvases } from "../../react/hooks";
 import { Loading } from "../../ui/Loading";
 
-export type ContentProps = Omit<
+export type BodyProps = Omit<
   CloverCanvasProps,
   "canvases" | "body" | "src" | "isTiledImage" | "viewingDirection"
 > & {
   /** Props for the wrapping element, which sizes the stage. */
   style?: React.CSSProperties;
   /** Renderers for this stage only; the Root's (`renderers` on `Root`) otherwise. */
-  renderers?: ContentRenderer[];
+  renderers?: BodyRenderer[];
 };
 
 /**
@@ -29,21 +25,21 @@ export type ContentProps = Omit<
  * too. Children become controls in the cluster, or are handed to the renderer.
  *
  * The stage needs a height to draw into. It is set inline, so it holds without the
- * stylesheet, through `--clover-content-height` (default `60vh`): set that property to
+ * stylesheet, through `--clover-body-height` (default `60vh`): set that property to
  * size it, `100%` to fill a sized parent.
  *
  * While the Root loads (the first Manifest, or the next one chosen) the stage is busy and
  * shows Clover's loading mark, a line along its top edge, over what it still shows; it
  * keeps its size and its background, so nothing moves.
  */
-export function Content({
+export function Body({
   className,
   style,
   renderers,
   children,
   ...canvas
-}: ContentProps) {
-  const root = useClover("Content");
+}: BodyProps) {
+  const root = useClover("Body");
   const canvases = useVisibleCanvases();
   const bodies = useMemo(() => paintingBodies(canvases), [canvases]);
   const renderer = pickRenderer(renderers ?? root.renderers, {
@@ -55,11 +51,11 @@ export function Content({
   return (
     <div
       aria-busy={busy}
-      className={join("clover-content", className)}
+      className={join("clover-body", className)}
       data-renderer={Renderer ? "custom" : "canvas"}
       style={{
         position: "relative",
-        height: "var(--clover-content-height, 60vh)",
+        height: "var(--clover-body-height, 60vh)",
         ...style,
       }}
     >

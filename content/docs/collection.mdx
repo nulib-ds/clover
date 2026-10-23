@@ -6,6 +6,7 @@ description: The Collection a Manifest is in, described and its members listed, 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Collection
 
@@ -14,17 +15,17 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   them.
 </div>
 
-<Example>
+<Example head={<PartHead part="Collection" />}>
 <PartDemo
   part="Collection"
   resource="collection"
   props={{ headingLevel: 2 }}
-  content
+  body
 />
 
-```jsx
+```jsx {3}
 <Clover.Root iiifContent={url}>
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Collection />
 </Clover.Root>
 ```
@@ -76,12 +77,12 @@ Northwestern's bicycle catalogs, in a box that scrolls.
     headingLevel: 4,
     style: { maxHeight: "24rem", overflowY: "auto" },
   }}
-  content
+  body
 />
 
-```jsx
+```jsx {3}
 <Clover.Root iiifContent="https://nulib-ds.github.io/clover/mocks/paged/manifest.json">
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Collection style={{ maxHeight: "24rem", overflowY: "auto" }} />
 </Clover.Root>
 ```
@@ -93,11 +94,11 @@ Northwestern's bicycle catalogs, in a box that scrolls.
 Use `CollectionSelect` for a menu of the members, to move between them.
 
 <Example>
-<PartDemo part="CollectionSelect" resource="collection" content />
+<PartDemo part="CollectionSelect" resource="collection" body />
 
-```jsx
+```jsx {3}
 <Clover.Root iiifContent="https://api.dc.library.northwestern.edu/api/v2/collections/c373ecd2-2c45-45f2-9f9e-52dc244870bd?as=iiif">
-  <Clover.Content />
+  <Clover.Body />
   <Clover.CollectionSelect />
 </Clover.Root>
 ```

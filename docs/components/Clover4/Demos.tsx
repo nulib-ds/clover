@@ -42,7 +42,7 @@ export function MapDemo({
 const Composed = dynamic(
   () =>
     import("@nulib/clover").then(
-      ({ Root, Label, Content, Previous, Next, Position }) => {
+      ({ Root, Label, Body, Previous, Next, Position }) => {
         function ComposedLayout({ iiifContent }: { iiifContent: string }) {
           return (
             <Root
@@ -55,7 +55,7 @@ const Composed = dynamic(
                 alignItems: "start",
               }}
             >
-              <Content style={{ height: 420 }} />
+              <Body style={{ height: 420 }} />
               <aside style={{ display: "grid", gap: "0.75rem" }}>
                 <Label as="h3" style={{ margin: 0 }} />
                 <Label of="canvas" style={{ color: "var(--gray-11)" }} />

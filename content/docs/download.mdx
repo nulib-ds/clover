@@ -6,6 +6,7 @@ description: "The rendering of the page in view and of the Manifest, a PDF, a te
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Download
 
@@ -14,17 +15,17 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   links: for this page, and for all of them.
 </div>
 
-<Example>
+<Example head={<PartHead part="Download" />}>
 <PartDemo
   part="Download"
   resource="page-transcript"
-  content
+  body
   props={{ headingLevel: 2 }}
 />
 
-```jsx
+```jsx {3}
 <Clover.Root iiifContent={url}>
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Download />
 </Clover.Root>
 ```
@@ -58,7 +59,7 @@ the heading it sits under, here `4` under an `h3`.
 <PartDemo
   part="Download"
   resource="page-transcript"
-  content
+  body
   props={{ headingLevel: 4 }}
 />
 
@@ -96,7 +97,7 @@ For one resource's `rendering` alone, as a plain list of links, use
 <PartDemo
   part="Rendering"
   resource="page-transcript"
-  content
+  body
   props={{ of: "canvas" }}
 />
 

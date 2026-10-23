@@ -19,7 +19,7 @@
   flex-direction: column;
   gap: var(--clover-space-m);
   padding: var(--clover-inset);
-  --clover-content-height: min(70vh, 48rem);
+  --clover-body-height: min(70vh, 48rem);
 }
 
 .clover-template-lightbox-header {

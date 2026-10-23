@@ -257,7 +257,7 @@ every rule below.
   active one, the previous going up, and brings it to the top. A press on a muted sheet,
   a thumbnail, PageUp/PageDown or a link bring theirs; a reader's own wheel, touch or
   scrollbar press lets a scroll of ours go. Sheets not active are muted (`opacity`; Mat
-  may try golden-ratio sizing). The one live `Content` (`Sheets` renders it, the
+  may try golden-ratio sizing). The one live `Body` (`Sheets` renders it, the
   template's controls as its children) sits on the active sheet, exactly over its still
   (the Canvas's home fit, the same inset), moved there by `top`, never remounted (Mat: a
   turn simply swaps the content). It and its controls stay hidden (`data-moved`,
@@ -337,10 +337,13 @@ every rule below.
   total is exact; gzip does not add up module by module, so it is split by each group's
   share of the minified code. Do not derive these by subtracting separate builds: Rollup
   chunks each build differently, enough to make a difference negative.
-- The one difference recorded is what it means: the homepage's part figures (`parts` in
-  `sizes.json`, its Lightweight story's tags; Mat, 2026-10-22), what adding a part to a
-  page with a `Root` adds up front, a build of `Root` and the part less one of `Root`
-  alone. `build/sizes.mjs` fails rather than record one that is not positive.
+- The one difference recorded is what it means: the part figures (`parts` in
+  `sizes.json`, the homepage's Lightweight story's tags and each part's docs page; Mat,
+  2026-10-22), what adding a part to a page with a `Root` adds up front, a build of
+  `Root` and the part less one of `Root` alone, for every part (`PARTS`), and the same as
+  elements (`elementParts`). `build/sizes.mjs` fails rather than record one that is not
+  positive. The parts a docs page shows with no `Root` (`Canvas`, `Map`, `Value`) are
+  recorded as what a page with each alone loads (`partsAlone`, `elementPartsAlone`).
 - The sizes are measured as a Vite app builds for production (`build/consumer-bundle.mjs`:
   Rollup, minified, React external), not with esbuild. Through the package entry,
   esbuild's code splitting counts a module as reachable by its re-export alone, even
@@ -477,7 +480,7 @@ every rule below.
   ready, with the `role="alert"` box beside it on failure. Search's status is visually
   hidden while empty, never `display: none`. Many screen readers do not announce a
   region inserted with its message already inside it.
-- `Content` imports the connected Canvas (`Canvas/Connected.tsx`) directly. `Canvas`
+- `Body` imports the connected Canvas (`Canvas/Connected.tsx`) directly. `Canvas`
   loads it lazily, so a standalone Canvas does not carry it.
 - **Measuring size.** `initialGzip` starts from the output whose `entryPoint` is the stdin
   `sourcefile` (`entry.mjs`), never "the first output with an entryPoint": esbuild marks
@@ -1101,7 +1104,7 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     canceled: a base element's handler returns whether its event was let be.
     `<clover-panel-toggle>` (`elements/toggle.tsx`): its target is open while it is not
     `hidden`, so the page's `hidden` starts it shut and any change by the page is
-    followed; in a `<clover-content>` the stage draws it among its controls (the toggle's
+    followed; in a `<clover-body>` the stage draws it among its controls (the toggle's
     own element draws nothing there), elsewhere it draws its own button. The Split's three
     are `native` (`elements/split.tsx`): the elements are the boxes, taking the classes,
     attributes and inline styles `Split` gives its own, so a handle's panes are its
@@ -1125,7 +1128,7 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     `localize`, `t` and `langOf`. An event's `keeps` (`spec.ts`) makes the element keep
     its callback's first argument as a read-only property: the root's `clover` (its
     module calls `onReady(api)`, and `onReady(null)` when it goes) and the stage's
-    `handle` (`onReady` of `Canvas` and `Content`, let go with the stage, `useHandle`).
+    `handle` (`onReady` of `Canvas` and `Body`, let go with the stage, `useHandle`).
     Such an event (`clover-ready`) does not bubble, as `load` does not: the stage's ran
     into its root's listener. The handle's methods are not forwarded onto the element: a
     second way React does not have, at 0.25 kB in the entry. A page's renderers
@@ -1134,7 +1137,7 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     are adapted to React's, one component per page object (WeakMaps), and load only on
     a page that gives them (`elements/later.ts`), what needs them waiting, so nothing is
     drawn one way and then another. The page's button goes in the cluster right after a
-    hidden mark Clover draws there, as do a `<clover-content>`'s own `<button>`s
+    hidden mark Clover draws there, as do a `<clover-body>`'s own `<button>`s
     (`Placed`, `elements/nodes.tsx`): the cluster's `> *` rules fade each control and
     take its clicks while hidden, and a box of `display: contents` would pass on the
     clicks rule but not the fade. Clover keeps the button's name, keys and state on it,
@@ -1208,8 +1211,8 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     `Root` loads it; split naively, it cost `Default` 0.1 kB more).
   - Display (`ELEMENT_CSS` in `base.ts`, `style[data-clover="elements"]`, in
     `@layer clover`): `<clover-root>`, `<clover-items>`, `<clover-viewer>` and
-    `<clover-panel>` are blocks and `<clover-split>` a row; `<clover-content>` and
-    `<clover-canvas>` are the stage's box, its height from `--clover-content-height` (default `60vh`) or its own
+    `<clover-panel>` are blocks and `<clover-split>` a row; `<clover-body>` and
+    `<clover-canvas>` are the stage's box, its height from `--clover-body-height` (default `60vh`) or its own
     `style`, the stage filling it; `<clover-label>` and `<clover-panel-toggle>` are
     `display: contents`, so what they draw sits in the page as if written there; a tab and
     a status's slots are not shown where written. Every rule is `:not([hidden])`: an
@@ -1322,9 +1325,9 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     standalone elements and templates, and parts of your own), served over the source as the element build makes
     them, by `e2e/vite.elements.config.mjs` (port 4323; `?many=N` adds N roots and
     times them).
-- **Renderers** (`components/Content/renderers.ts`): `renderers` on `Root` go into the
+- **Renderers** (`components/Body/renderers.ts`): `renderers` on `Root` go into the
   context (kept while `sameRenderers`, so an inline array does not change the context
-  value), and every `Content` asks `pickRenderer` with the view's Canvases and
+  value), and every `Body` asks `pickRenderer` with the view's Canvases and
   `paintingBodies`. A claimed view is the host's component, not `ConnectedCanvas`. Keep
   this the one override point: templates and the Viewer reach it through `Root`, never a
   prop of their own.

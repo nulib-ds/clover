@@ -15,7 +15,12 @@ import { gzipSync } from "node:zlib";
 import { transformSync } from "esbuild";
 
 import { bundleAsConsumer, gzipSize } from "./consumer-bundle.mjs";
-import { PAGES, pageGzip, viewerEntryGzip } from "./element-size.mjs";
+import {
+  PAGES,
+  elementAdds,
+  pageGzip,
+  viewerEntryGzip,
+} from "./element-size.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = resolve(root, "dist");
@@ -120,12 +125,44 @@ const BUNDLES = [
 ];
 
 /*
- * What each part of the homepage's example viewer adds to a page that has a `Root`, for
- * its Lightweight story's tags (Mat, 2026-10-22): the page with `Root` and the part, less
- * the page with `Root` alone, up front. Not budgeted on their own: the templates that use
- * them are. Recorded as `parts` in `sizes.json`.
+ * What each part adds to a page that has a `Root`, for the homepage's Lightweight story's
+ * tags and each part's page in the docs (Mat, 2026-10-22): the page with `Root` and the
+ * part, less the page with `Root` alone, up front. Not budgeted on their own: the
+ * templates that use them are. Recorded as `parts` in `sizes.json`.
  */
-const PARTS = ["Thumbnail", "Label", "Content", "Items", "Summary", "Metadata"];
+const PARTS = [
+  "Thumbnail",
+  "Label",
+  "Body",
+  "Items",
+  "Summary",
+  "Metadata",
+  "Panel",
+  "Annotations",
+  "Collection",
+  "Contents",
+  "Search",
+  "Transcript",
+  "Download",
+  "RequiredStatement",
+  "Rights",
+  "Homepage",
+  "SeeAlso",
+  "Rendering",
+  "PartOf",
+  "Id",
+];
+
+/*
+ * The parts a page holds with no `Root` (their docs' examples do): what a page with the
+ * part alone loads, up front. `Canvas` and `Map` are already measured so (`BUNDLES`);
+ * `Value` is measured here. Recorded as `partsAlone`, and as elements `elementPartsAlone`.
+ */
+const ALONE = [
+  ["Canvas", "canvasInitialGzip", "canvasElementGzip"],
+  ["Map", "mapInitialGzip", null],
+  ["Value", null, null],
+];
 
 const STYLES = [
   ["styles.css", "stylesGzip", "styles.css"],
@@ -162,7 +199,11 @@ export async function measure() {
   }
   // `@nulib/clover/web-components/viewer`: a page with a Viewer alone, built whole.
   sizes.viewerEntryGzip = viewerEntryGzip();
-  rows.push(["<clover-viewer>, its own entry", "viewerEntryGzip", sizes.viewerEntryGzip]);
+  rows.push([
+    "<clover-viewer>, its own entry",
+    "viewerEntryGzip",
+    sizes.viewerEntryGzip,
+  ]);
   const { size: rootAlone } = await initialGzip("Root");
   sizes.parts = {};
   for (const part of PARTS) {
@@ -171,6 +212,30 @@ export async function measure() {
     if (size <= rootAlone)
       throw new Error(`${part} measured ${size - rootAlone} B over Root alone`);
     sizes.parts[part] = size - rootAlone;
+  }
+  /*
+   * The same parts as elements: what each adds to a page with a `<clover-root>`, its
+   * sheets with it (`elementAdds`), for the story's tags when the reader chose web
+   * components (Mat, 2026-10-22). Recorded as `elementParts`.
+   */
+  sizes.elementParts = {};
+  for (const part of PARTS) {
+    const tag = `clover-${part.replace(/[A-Z]/g, (letter, at) => `${at ? "-" : ""}${letter.toLowerCase()}`)}`;
+    const size = elementAdds(tag);
+    if (size <= 0)
+      throw new Error(`<${tag}> measured ${size} B over <clover-root> alone`);
+    sizes.elementParts[part] = size;
+  }
+  sizes.partsAlone = {};
+  sizes.elementPartsAlone = {};
+  for (const [part, reactKey, elementKey] of ALONE) {
+    const tag = `clover-${part.toLowerCase()}`;
+    sizes.partsAlone[part] = reactKey
+      ? sizes[reactKey]
+      : (await initialGzip(part)).size;
+    sizes.elementPartsAlone[part] = elementKey
+      ? sizes[elementKey]
+      : pageGzip([tag]);
   }
   return { sizes, rows, pages };
 }
@@ -185,6 +250,19 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.log(`${name.padEnd(22)} ${(size / 1000).toFixed(1)} kB gzip`);
   }
   for (const [part, size] of Object.entries(sizes.parts)) {
-    console.log(`${`+ ${part}`.padEnd(22)} ${(size / 1000).toFixed(1)} kB gzip`);
+    console.log(
+      `${`+ ${part}`.padEnd(22)} ${(size / 1000).toFixed(1)} kB gzip`,
+    );
+  }
+  for (const [part, size] of Object.entries(sizes.elementParts)) {
+    console.log(
+      `${`+ <clover-…> ${part}`.padEnd(22)} ${(size / 1000).toFixed(1)} kB gzip`,
+    );
+  }
+  for (const [part, size] of Object.entries(sizes.partsAlone)) {
+    const element = sizes.elementPartsAlone[part];
+    console.log(
+      `${`${part} alone`.padEnd(22)} ${(size / 1000).toFixed(1)} kB gzip, element ${(element / 1000).toFixed(1)} kB`,
+    );
   }
 }

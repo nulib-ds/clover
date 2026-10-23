@@ -66,7 +66,7 @@ async function renderWithStage(
 ) {
   render(
     <Clover.Root iiifContent={imageJson}>
-      <Clover.Content />
+      <Clover.Body />
       {children}
     </Clover.Root>,
   );
@@ -102,7 +102,7 @@ describe("Annotations", () => {
     };
     render(
       <Clover.Root iiifContent={hotspotJson}>
-        <Clover.Content />
+        <Clover.Body />
         <Clover.Annotations scope="view" />
         <Spy />
       </Clover.Root>,
@@ -437,7 +437,7 @@ describe("content state", () => {
         iiifContent={imageJson}
         onContentStateChange={onContentStateChange}
       >
-        <Clover.Content />
+        <Clover.Body />
       </Clover.Root>,
     );
     await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());

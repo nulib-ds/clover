@@ -6,6 +6,7 @@ description: "The words of the recording or page in view: its captions as text, 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Transcript
 
@@ -14,11 +15,11 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   playing marked, or its transcript as plain text.
 </div>
 
-<Example>
+<Example head={<PartHead part="Transcript" />}>
 <PartDemo
   part="Transcript"
   resource="transcripts"
-  content
+  body
   props={{
     as: "section",
     "aria-label": "Transcript",
@@ -27,9 +28,9 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   }}
 />
 
-```jsx
+```jsx {3}
 <Clover.Root iiifContent={url}>
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Transcript />
 </Clover.Root>
 ```
@@ -64,7 +65,7 @@ keyboard can reach, as here (WCAG 2.1.1).
 <PartDemo
   part="Transcript"
   resource="footage"
-  content
+  body
   props={{
     as: "section",
     "aria-label": "Transcript",
@@ -103,7 +104,7 @@ Of an image, it shows what is written on it: here, a newspaper page's OCR, in Ge
 <PartDemo
   part="Transcript"
   resource="page-transcript"
-  content
+  body
   props={{
     as: "section",
     "aria-label": "Transcript",
@@ -112,9 +113,9 @@ Of an image, it shows what is written on it: here, a newspaper page's OCR, in Ge
   }}
 />
 
-```jsx
+```jsx {3}
 <Clover.Root iiifContent="https://nulib-ds.github.io/clover/mocks/page-transcript/manifest.json">
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Transcript />
 </Clover.Root>
 ```
@@ -130,7 +131,7 @@ marked.
 <PartDemo
   part="Transcript"
   resource="transcripts"
-  content
+  body
   props={{
     follow: false,
     as: "section",

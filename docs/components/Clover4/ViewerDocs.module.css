@@ -1,30 +1,22 @@
 /*
- * The Viewer page's examples, as Radix Themes frames its components' (Mat, 2026-10-21):
- * a hairline box on the page's ground, the live Viewer in it with little room at its
- * sides, so it has the width to lay out as it would on a page, and its code attached
- * under it. Spaces on the golden scale; no fills but the code's own.
+ * The docs' examples (Radix Themes' component pages were the model; Mat, 2026-10-21): the
+ * live demo, its code under it, on a card lifted as the homepage's example viewer is
+ * (`--card-shadow`, `tokens.css`; Mat, 2026-10-22): a hairline and a soft gray shadow, the
+ * containers' corners and room inside on the golden scale. No fills but the code's own.
  */
 .example {
-  border: 1px solid var(--gray-6);
+  background: var(--color-background);
   border-radius: var(--radius-4);
+  box-shadow: var(--card-shadow);
   margin: var(--clover-space-l, 1.618rem) 0 var(--clover-space-xl, 2.618rem);
-}
-
-.preview {
-  padding: var(--clover-space-l, 1.618rem) var(--clover-space-s, 0.618rem);
-}
-
-@media (min-width: 48rem) {
-  .preview {
-    padding-inline: var(--clover-space-m, 1rem);
-  }
+  padding: var(--clover-space-l, 1.618rem);
 }
 
 .live {
   display: block;
 }
 
-/* A part's demo, or another of the docs' demos, gives its own box and margins to the frame. */
+/* A part's demo, or another of the docs' demos, gives its own box and margins to the example. */
 .preview > :global(.docs-part-demo),
 .preview > div[style*="margin"] {
   border: 0;
@@ -32,19 +24,24 @@
   padding: 0;
 }
 
-/* The code, under a hairline, its block's own margin and corners given up to the box. */
+/*
+ * A foot under the demo and its code (`PartHead`; Mat, 2026-10-22): the part's name and
+ * size, centered, with room over them and no hairline.
+ */
+.bar {
+  padding-top: var(--clover-space-l, 1.618rem);
+}
+
+/*
+ * The code under the demo (`CodeBlock`, `docs/styles/code.css`, as every code block on the
+ * site is), its corners a step in from the outline's.
+ */
 .code {
-  border-top: 1px solid var(--gray-6);
+  margin-top: var(--clover-space-m, 1rem);
 }
 
-.code :global(.nextra-code),
-.code pre {
-  margin: 0;
-}
-
-.code pre {
-  border: 0;
-  border-radius: 0 0 var(--radius-4) var(--radius-4);
+.code :global(.docs-code.docs-code) pre {
+  border-radius: var(--radius-3);
 }
 
 /* ── A switch over the Viewer: the prop's values, one pressed ───────────────── */

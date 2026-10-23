@@ -173,7 +173,7 @@ export function jsxToHtml(code, { specs, url = DEFAULT_URL } = {}) {
 
 /*
  * Markup after the imports, read as one fragment: sibling elements with nothing around
- * them (`<Clover.Content />` then `<Clover.Id />`) are no statement JSX can parse.
+ * them (`<Clover.Body />` then `<Clover.Id />`) are no statement JSX can parse.
  */
 function siblings(code) {
   const head = ts.createSourceFile(
@@ -185,7 +185,8 @@ function siblings(code) {
   );
   const imports = head.statements.filter(ts.isImportDeclaration);
   const end = imports.length ? imports.at(-1).end : 0;
-  const rest = code.slice(end);
+  // The markup, without the semicolon that ends it as a statement (`<Viewer />;`).
+  const rest = code.slice(end).replace(/;\s*$/, "");
   if (!rest.trim().startsWith("<")) return code;
   return `${code.slice(0, end)}\n<>\n${rest}\n</>;\n`;
 }

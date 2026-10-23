@@ -11,7 +11,7 @@ export interface StatusProps {
   /**
    * Shown while loading. Default: Clover's loading mark (three pulsing dots), announced
    * as a translated "Loading…". `false` shows nothing and only announces it, for a
-   * layout whose stage shows its own loading (`Content` does), so nothing moves.
+   * layout whose stage shows its own loading (`Body` does), so nothing moves.
    */
   loading?: React.ReactNode;
   /** Shown when loading failed. Default: a translated message and the error's own. */

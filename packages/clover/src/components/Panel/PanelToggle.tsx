@@ -14,12 +14,12 @@ export interface PanelToggleProps {
 
 /**
  * A button that shows and hides an `Panel`. It is styled as a Canvas control,
- * so it sits in the cluster when given to `Clover.Content` as a child:
+ * so it sits in the cluster when given to `Clover.Body` as a child:
  *
  * ```jsx
- * <Clover.Content>
+ * <Clover.Body>
  *   <Clover.PanelToggle open={open} onOpenChange={setOpen} controls="panel" />
- * </Clover.Content>
+ * </Clover.Body>
  * <Clover.Panel id="panel" hidden={!open} />
  * ```
  */

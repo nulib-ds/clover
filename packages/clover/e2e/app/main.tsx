@@ -81,7 +81,7 @@ function Scene() {
       return (
         <Clover.Root iiifContent={content} request={request}>
           <Clover.Label as="h1" />
-          <Clover.Content
+          <Clover.Body
             style={{ height: "60vh" }}
             navigator={params.get("navigator") === "1"}
             options={
@@ -100,7 +100,7 @@ function Scene() {
           <Clover.Label as="h1" />
           <Clover.CollectionSelect />
           <Clover.Status loading={false} />
-          <Clover.Content style={{ height: "60vh" }} />
+          <Clover.Body style={{ height: "60vh" }} />
           <button type="button">After the Canvas</button>
         </Clover.Root>
       );

@@ -12,7 +12,7 @@
 }
 
 .screen > :global(.clover-template-default) {
-  --clover-content-height: auto;
+  --clover-body-height: auto;
   flex: 1;
   min-height: 0;
 }

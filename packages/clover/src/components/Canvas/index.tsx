@@ -7,7 +7,7 @@ import { useOptionalClover } from "../../react/context";
 
 /*
  * Connected mode is loaded only when a Canvas finds itself in a Root, so a standalone
- * Canvas does not carry it. `Clover.Content` imports it directly, so in a Viewer it is
+ * Canvas does not carry it. `Clover.Body` imports it directly, so in a Viewer it is
  * already in the bundle and this resolves at once.
  */
 const ConnectedCanvas = lazy(() => import("./Connected"));

@@ -60,7 +60,7 @@ const model = {
   ],
 };
 
-function ModelViewer({ bodies, children }: Clover.ContentRendererProps) {
+function ModelViewer({ bodies, children }: Clover.BodyRendererProps) {
   const { total } = Clover.useNavigation();
   return (
     <div data-testid="model" data-total={total}>
@@ -77,16 +77,16 @@ beforeEach(() => {
 });
 afterEach(() => viewport.restore());
 
-describe("Content renderers", () => {
+describe("Body renderers", () => {
   it("draw a view by its painting format, with its bodies, children and Clover's hooks", async () => {
     render(
       <Clover.Root
         iiifContent={model}
         renderers={[{ format: ["model/gltf-binary"], component: ModelViewer }]}
       >
-        <Clover.Content>
+        <Clover.Body>
           <button type="button">A control</button>
-        </Clover.Content>
+        </Clover.Body>
       </Clover.Root>,
     );
     const drawn = await screen.findByTestId("model");
@@ -95,7 +95,7 @@ describe("Content renderers", () => {
     expect(
       screen.getByRole("button", { name: "A control" }),
     ).toBeInTheDocument();
-    expect(document.querySelector(".clover-content")).toHaveAttribute(
+    expect(document.querySelector(".clover-body")).toHaveAttribute(
       "data-renderer",
       "custom",
     );
@@ -109,7 +109,7 @@ describe("Content renderers", () => {
           { canvasId: [bookJson.items[0].id], component: ModelViewer },
         ]}
       >
-        <Clover.Content />
+        <Clover.Body />
       </Clover.Root>,
     );
     expect(await screen.findByTestId("model")).toBeInTheDocument();
@@ -125,13 +125,13 @@ describe("Content renderers", () => {
           },
         ]}
       >
-        <Clover.Content />
+        <Clover.Body />
       </Clover.Root>,
     );
     expect(await screen.findByTestId("model")).toBeInTheDocument();
   });
 
-  it("leave every other view to the Canvas; a Content's own list wins", async () => {
+  it("leave every other view to the Canvas; a Body's own list wins", async () => {
     render(
       <Clover.Root
         iiifContent={bookJson}
@@ -139,11 +139,11 @@ describe("Content renderers", () => {
           { canvasId: [bookJson.items[0].id], component: ModelViewer },
         ]}
       >
-        <Clover.Content renderers={[]} />
+        <Clover.Body renderers={[]} />
       </Clover.Root>,
     );
     await waitFor(() =>
-      expect(document.querySelector(".clover-content")).toHaveAttribute(
+      expect(document.querySelector(".clover-body")).toHaveAttribute(
         "data-renderer",
         "canvas",
       ),
@@ -153,7 +153,7 @@ describe("Content renderers", () => {
 
   it("are not remounted when a host passes an equal list inline on each render", async () => {
     const mounts = vi.fn();
-    function Counted(props: Clover.ContentRendererProps) {
+    function Counted(props: Clover.BodyRendererProps) {
       useEffect(() => mounts(), []);
       return <ModelViewer {...props} />;
     }
@@ -164,7 +164,7 @@ describe("Content renderers", () => {
           data-tick={tick}
           renderers={[{ format: ["model/gltf-binary"], component: Counted }]}
         >
-          <Clover.Content />
+          <Clover.Body />
         </Clover.Root>
       );
     }

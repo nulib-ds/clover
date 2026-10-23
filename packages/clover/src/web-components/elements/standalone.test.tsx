@@ -122,7 +122,7 @@ describe("A Canvas, as an element", () => {
     expect(view.closest("figure")).toHaveClass("clover-canvas");
   });
 
-  it("shows its root's view inside a clover-root, as Content does", async () => {
+  it("shows its root's view inside a clover-root, as Body does", async () => {
     const root = document.createElement("clover-root") as HTMLElement & {
       iiifContent: unknown;
     };

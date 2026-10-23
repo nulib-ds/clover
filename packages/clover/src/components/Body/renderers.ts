@@ -4,12 +4,12 @@ import { bodiesOf } from "../../core/annotations";
 import type { Container } from "../../core/presentation";
 
 /**
- * Renderers of your own for some views, drawn by `Content` in place of `Canvas`: a 3D
+ * Renderers of your own for some views, drawn by `Body` in place of `Canvas`: a 3D
  * model, a PDF, a map, anything a Canvas paints that Clover does not draw, or draws
  * differently than you want. The successor to 3.x's `customDisplays`.
  */
 
-export interface ContentRendererProps {
+export interface BodyRendererProps {
   /** The view's Canvases, in Presentation 4: one, or two for a spread. */
   canvases: Container[];
   /**
@@ -17,22 +17,22 @@ export interface ContentRendererProps {
    * `SpecificResource` as its `source`, Presentation 4's groups as their items.
    */
   bodies: Array<Record<string, any>>;
-  /** `Content`'s children (its controls), to place if the renderer wants them. */
+  /** `Body`'s children (its controls), to place if the renderer wants them. */
   children?: React.ReactNode;
 }
 
-export interface ContentRenderer {
+export interface BodyRenderer {
   /** Draws a view showing one of these Canvases… */
   canvasId?: string[];
   /** …or painting a body of one of these formats (`model/gltf-binary`, `application/pdf`)… */
   format?: string[];
   /** …or any view this says yes to. */
-  match?: (view: Omit<ContentRendererProps, "children">) => boolean;
+  match?: (view: Omit<BodyRendererProps, "children">) => boolean;
   /**
    * What draws it. It renders inside the Root, so Clover's hooks work in it
    * (`useActiveCanvas`, `useNavigation`, `useClover`…), as 3.x's `hooks` prop gave.
    */
-  component: React.ComponentType<ContentRendererProps>;
+  component: React.ComponentType<BodyRendererProps>;
 }
 
 const asArray = (value: unknown): unknown[] =>
@@ -68,9 +68,9 @@ export function paintingBodies(
 
 /** The first renderer that draws this view, or null for `Canvas` to draw it. */
 export function pickRenderer(
-  renderers: ContentRenderer[] | undefined,
-  view: Omit<ContentRendererProps, "children">,
-): ContentRenderer | null {
+  renderers: BodyRenderer[] | undefined,
+  view: Omit<BodyRendererProps, "children">,
+): BodyRenderer | null {
   if (!renderers?.length || !view.canvases.length) return null;
   const ids = view.canvases.map((canvas) => canvas.id);
   const formats = view.bodies.map((body) => body?.format).filter(Boolean);
@@ -86,8 +86,8 @@ export function pickRenderer(
 
 /** Whether two lists of renderers are the same, item by item: what an inline array is. */
 export function sameRenderers(
-  a: ContentRenderer[] | undefined,
-  b: ContentRenderer[] | undefined,
+  a: BodyRenderer[] | undefined,
+  b: BodyRenderer[] | undefined,
 ): boolean {
   if (a === b) return true;
   if (!a || !b || a.length !== b.length) return false;

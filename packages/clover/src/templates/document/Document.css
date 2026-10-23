@@ -307,7 +307,7 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 
 /* The live Canvas, laid exactly over its sheet (`Sheets`): its picture on the still. */
 .clover-template-document-live {
-  --clover-content-height: 100%;
+  --clover-body-height: 100%;
   position: absolute;
   inset-inline: 0;
   top: 0;

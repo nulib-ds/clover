@@ -1,6 +1,6 @@
 /*
  * @nulib/clover/web-components: `<clover-viewer>`, and the parts to compose a layout of
- * your own (`<clover-root>`, `<clover-label>`, `<clover-content>`, `<clover-items>`),
+ * your own (`<clover-root>`, `<clover-label>`, `<clover-body>`, `<clover-items>`),
  * built standalone with Preact standing in for React (`build/web-components.config.mjs`),
  * for pages without React. Load it as a module, or with `index.umd.js` from a classic
  * `<script>` (a CDN):
@@ -10,7 +10,7 @@
  *
  *   <clover-root iiif-content="https://example.org/manifest.json">
  *     <clover-label as="h2"></clover-label>
- *     <clover-content></clover-content>
+ *     <clover-body></clover-body>
  *     <clover-items></clover-items>
  *   </clover-root>
  *

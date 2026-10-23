@@ -13,7 +13,7 @@ import { useMock } from "docs/lib/useMock";
  *
  * ```mdx
  * <PartDemo part="Summary" resource="paged" />
- * <PartDemo part="Label" props={{ of: "canvas", as: "p" }} content />
+ * <PartDemo part="Label" props={{ of: "canvas", as: "p" }} body />
  * <PartDemo parts={[{ part: "Thumbnail" }, { part: "Label" }]} row />
  * ```
  */
@@ -51,7 +51,7 @@ const PARTS = [
   "Annotations",
   "Collection",
   "CollectionSelect",
-  "Content",
+  "Body",
   "Contents",
   "Download",
   "Homepage",
@@ -100,9 +100,9 @@ interface PartDemoProps {
   box?: string;
   /** The mock it reads. Default `paged`. */
   resource?: PartDemoResource;
-  /** A `Content` above it, for a part that follows the view (`of="canvas"`, a pager). */
-  content?: boolean;
-  /** The Content's height, in px. Default 320. */
+  /** A `Body` above it, for a part that follows the view (`of="canvas"`, a pager). */
+  body?: boolean;
+  /** The Body's height, in px. Default 320. */
   height?: number;
 }
 
@@ -115,7 +115,7 @@ const Live = dynamic(
         box,
         iiifContent,
         request,
-        content,
+        body,
         height,
       }: {
         shown: Shown[];
@@ -123,7 +123,7 @@ const Live = dynamic(
         box?: string;
         iiifContent: string;
         request?: { fetch: typeof fetch };
-        content: boolean;
+        body: boolean;
         height: number;
       }) {
         const parts = shown.map(({ part, props }, index) => {
@@ -147,7 +147,7 @@ const Live = dynamic(
                 : { display: "grid", gap: "1rem" }
             }
           >
-            {content && <clover.Content style={{ height }} />}
+            {body && <clover.Body style={{ height }} />}
             {box ? (
               <div style={{ height: box, overflowY: "auto" }}>{parts}</div>
             ) : (
@@ -168,7 +168,7 @@ export function PartDemo({
   row = false,
   box,
   resource = "paged",
-  content = false,
+  body = false,
   height = 320,
 }: PartDemoProps) {
   const address = RESOURCES[resource];
@@ -199,7 +199,7 @@ export function PartDemo({
           box={box}
           iiifContent={url}
           request={request ?? undefined}
-          content={content}
+          body={body}
           height={height}
         />
       )}

@@ -7,12 +7,12 @@
 // Parts
 export { Root } from "./components/Root/Root";
 export type { RootProps } from "./components/Root/Root";
-export { Content } from "./components/Content/Content";
-export type { ContentProps } from "./components/Content/Content";
+export { Body } from "./components/Body/Body";
+export type { BodyProps } from "./components/Body/Body";
 export type {
-  ContentRenderer,
-  ContentRendererProps,
-} from "./components/Content/renderers";
+  BodyRenderer,
+  BodyRendererProps,
+} from "./components/Body/renderers";
 export { Label } from "./components/Label/Label";
 export type { LabelProps } from "./components/Label/Label";
 export { Items } from "./components/Items/Items";

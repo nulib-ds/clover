@@ -8,7 +8,7 @@ in the header, React by default.
 
 ```html
 <clover-root iiif-content="https://example.org/manifest.json">
-  <clover-content style="height: 60vh"></clover-content>
+  <clover-body style="height: 60vh"></clover-body>
   <clover-label as="h2"></clover-label>
   <clover-items layout="grid"></clover-items>
 </clover-root>
@@ -129,9 +129,9 @@ the page.
   watches them for changes. It renders `<Panel>` with a `<Tab>` for each, and moves each
   tab's own content into its section when the section first opens. Tab labels take an
   attribute, or a `slot="label"` child for markup.
-- **The Content's controls.** `<clover-content>` reads a `<clover-panel-toggle
+- **The Body's controls.** `<clover-body>` reads a `<clover-panel-toggle
 controls="…">` child as configuration and renders the `PanelToggle` itself, in the
-  cluster, where the Content's CSS and child count expect it. The open state lives in the
+  cluster, where the Body's CSS and child count expect it. The open state lives in the
   element, which shows and hides its target by id.
 - **Split.** `<clover-split>`, `<clover-split-pane>` and `<clover-split-handle>` are
   native: the Split's logic (sizes, storage, pointer and keys) runs on the hosts
@@ -166,7 +166,7 @@ elements, not both.
 
 | Phase | Elements                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | `clover-root`, `clover-label`, `clover-content`, `clover-items`                                                                                                                                                                                                                                                                                                                                                                                         |
+| 1     | `clover-root`, `clover-label`, `clover-body`, `clover-items`                                                                                                                                                                                                                                                                                                                                                                                            |
 | 3     | `clover-thumbnail`, `clover-summary`, `clover-metadata`, `clover-required-statement`, `clover-rights`, `clover-homepage`, `clover-see-also`, `clover-rendering`, `clover-part-of`, `clover-id`, `clover-value`, `clover-status`, `clover-position`, `clover-next`, `clover-previous`, `clover-download`, `clover-search`, `clover-contents`, `clover-transcript`, `clover-annotations`, `clover-collection`, `clover-collection-select`, `clover-about` |
 | 4     | `clover-panel`, `clover-tab`, `clover-panel-toggle`, `clover-split`, `clover-split-pane`, `clover-split-handle`                                                                                                                                                                                                                                                                                                                                         |
 | 6     | `clover-tip`                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -271,7 +271,7 @@ The parts that need more than their props:
 Each is a change of its own, shippable, with its CHANGELOG entries and AGENTS.md rules.
 
 0. **Fix today's element**: the eight bugs above. Small, and worth it whatever follows.
-1. **Spike**: the host, `<clover-root>`, `<clover-label>`, `<clover-content>` and
+1. **Spike**: the host, `<clover-root>`, `<clover-label>`, `<clover-body>` and
    `<clover-items>`. It must prove:
    - the page's children are kept;
    - every context works;
@@ -289,7 +289,7 @@ Each is a change of its own, shippable, with its CHANGELOG entries and AGENTS.md
 3. **The parts that read only the store**: the primitives, Status, the pager's parts,
    Download, Search, Contents, Transcript, Annotations, Collection and CollectionSelect,
    About, and the connected Map.
-4. **The containers**: Panel and Tab, the Content's controls, the Split's three, Status's
+4. **The containers**: Panel and Tab, the Body's controls, the Split's three, Status's
    slots, and render props as function properties.
 5. **Standalone, and the templates**: `<clover-canvas>`, the standalone `<clover-items>`,
    `<clover-map>`, and `<clover-viewer template>` for all three.
@@ -314,7 +314,7 @@ phases 2 and 8. Work may stop at a session's limit; resume from this list.
       `<clover-viewer>`, with the elements' own display rules.
 - [x] The base element (`web-components/base.ts`): connect and move, properties set early,
       attributes read.
-- [x] `<clover-root>`, `<clover-label>`, `<clover-content>`, `<clover-items>`
+- [x] `<clover-root>`, `<clover-label>`, `<clover-body>`, `<clover-items>`
       (`web-components/elements/`, a module each).
 - [x] Tests under Preact for each thing phase 1 must prove (`elements.test.tsx`,
       `upgrade.test.tsx`).
@@ -338,8 +338,8 @@ phases 2 and 8. Work may stop at a session's limit; resume from this list.
 - **Moves and upgrade order work.** A root moved keeps the reader's place without
   reloading; a part moved into another root reads that one; parts defined before their
   root wait for it; a property set before an element is defined is taken.
-- **Display.** Roots and items are blocks; `<clover-content>` is the stage's box, sized
-  by `--clover-content-height` or its own `style`; `<clover-label>` is
+- **Display.** Roots and items are blocks; `<clover-body>` is the stage's box, sized
+  by `--clover-body-height` or its own `style`; `<clover-label>` is
   `display: contents`, so a heading or a word in a sentence sits as if written there. The
   page's CSS wins: a root given `display: grid` lays out its parts. Nothing overflows at
   320px.
@@ -465,7 +465,7 @@ Begun and done October 22, 2026: the parts that read their root's state.
   import them. Splitting the stylesheet needs a table per element, checked by eye.
 - **Markdown in `<clover-value>`** draws a `<p>` inside its default `span`, as `Value`
   does in React; `as="div"` suits Markdown.
-- **For phase 4**: the containers (Panel and Tab, the Content's controls, the Split's
+- **For phase 4**: the containers (Panel and Tab, the Body's controls, the Split's
   three, Status's slots) and render props as function properties (`renderValue`,
   `renderEntry`, `renderItem`).
 
@@ -480,7 +480,7 @@ Begun and done October 22, 2026: the containers.
       the boxes, so nothing comes between a pane and its handle.
 - [x] `<clover-panel>` and `<clover-tab value label>`: each tab's content moved into its
       section when the section first opens; a `slot="label"` child shown as a copy.
-- [x] `<clover-panel-toggle controls>`: in `<clover-content>`, drawn in the cluster;
+- [x] `<clover-panel-toggle controls>`: in `<clover-body>`, drawn in the cluster;
       elsewhere, its own button; open while its target is not `hidden`.
 - [x] `<clover-status>`'s slots, `loading` and `error`.
 - [x] Function properties: Metadata's `renderValue`, Annotations' `renderEntry`, Items'
@@ -568,12 +568,12 @@ session's limit; resume from this list.
 - [x] `root.clover`: React's hooks as methods (`useNavigation()` is `navigation()`),
       `subscribe`, the store's actions, its channels and the language, once the root has
       loaded; `clover-ready` when it is there.
-- [x] The Canvas's handle on `<clover-canvas>` and `<clover-content>`: `clover-ready`
+- [x] The Canvas's handle on `<clover-canvas>` and `<clover-body>`: `clover-ready`
       with it, and its methods on the element (`zoomBy`, `home`, …).
 - [x] Renderers without React: `{ format | canvasId | match, render(container, view) }`,
-      on `<clover-root>` and `<clover-content>`.
+      on `<clover-root>` and `<clover-body>`.
 - [x] Control buttons without React: a replacement is a function returning the page's
-      own button, which Clover wires; a page's own buttons in `<clover-content>` join the
+      own button, which Clover wires; a page's own buttons in `<clover-body>` join the
       cluster, each with the popover Clover's have.
 - [x] Specs, types and the manifest (methods), tests under Preact, a page in Chrome,
       sizes, Get started, the changelog, AGENTS.md.

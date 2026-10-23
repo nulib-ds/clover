@@ -17,7 +17,7 @@ import { canvas, canvasDocs } from "./canvas";
 
 /** The Canvas's handle's methods, for its type (`build/custom-elements.mjs`). */
 export { handleMethodDocs as HANDLE } from "./canvas";
-import { content, contentDocs } from "./content";
+import { body, bodyDocs } from "./body";
 import { items, itemsDocs } from "./items";
 import { label, labelDocs } from "./label";
 import {
@@ -81,7 +81,7 @@ import { viewer, viewerDocs } from "./viewer";
 const ALL: [ElementSpec, ElementDocs][] = [
   [viewer, viewerDocs],
   [root, rootDocs],
-  [content, contentDocs],
+  [body, bodyDocs],
   [label, labelDocs],
   [items, itemsDocs],
   [position, positionDocs],
@@ -123,7 +123,7 @@ const ALL: [ElementSpec, ElementDocs][] = [
 export const SPECS: readonly ElementSpec[] = [
   viewer,
   root,
-  content,
+  body,
   label,
   items,
   position,

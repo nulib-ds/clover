@@ -13,6 +13,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import "docs/styles/fonts.css";
 import "docs/styles/layout.css";
+import "docs/styles/code.css";
 import "docs/styles/tokens.css";
 
 import type { Metadata } from "next";

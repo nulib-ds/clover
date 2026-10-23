@@ -61,7 +61,7 @@ export type SplitProps = React.HTMLAttributes<HTMLElement> & {
  *
  * ```jsx
  * <Clover.Split>
- *   <Clover.SplitPane min="16rem"><Clover.Content /></Clover.SplitPane>
+ *   <Clover.SplitPane min="16rem"><Clover.Body /></Clover.SplitPane>
  *   <Clover.SplitHandle />
  *   <Clover.SplitPane size="24rem" min="14rem"><Clover.Panel /></Clover.SplitPane>
  * </Clover.Split>

@@ -9,7 +9,7 @@ import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { join } from "../../lib/classnames";
 import { CloverContext } from "../../react/context";
 import { useRootLanguage } from "../../react/language";
-import type { ContentRenderer } from "../Content/renderers";
+import type { BodyRenderer } from "../Body/renderers";
 import { Announcer } from "./Announcer";
 import { useRootState } from "./useRootState";
 
@@ -47,9 +47,9 @@ export interface RootProps
   language?: string;
   /**
    * Renderers of your own for some views — by Canvas id, painting format, or a test —
-   * drawn by every `Content` inside in place of `Canvas` (3.x's `customDisplays`).
+   * drawn by every `Body` inside in place of `Canvas` (3.x's `customDisplays`).
    */
-  renderers?: ContentRenderer[];
+  renderers?: BodyRenderer[];
   /**
    * Annotations to show beside the Manifest's own: an AnnotationPage or
    * AnnotationCollection (or a list of them), as URLs or objects.
@@ -72,7 +72,7 @@ export interface RootProps
 
 /**
  * The root of any Clover composition. It loads `iiifContent`, holds where the reader is,
- * and gives every part inside it the same state. Render parts — `Clover.Content`,
+ * and gives every part inside it the same state. Render parts — `Clover.Body`,
  * `Clover.Label`, `Clover.Items` — anywhere within it, in any layout.
  */
 export const Root = forwardRef<HTMLElement, RootProps>(function Root(

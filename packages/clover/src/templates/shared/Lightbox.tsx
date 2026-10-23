@@ -89,7 +89,7 @@ export function Lightbox({
               <Clover.Tip label={t("commonClose")} />
             </button>
           </header>
-          <Clover.Content className="clover-template-lightbox-stage" />
+          <Clover.Body className="clover-template-lightbox-stage" />
           <Clover.Items layout="pager" />
         </div>
       )}

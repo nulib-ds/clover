@@ -1,13 +1,13 @@
 import React, { useContext, useLayoutEffect, useRef } from "react";
 
 import type {
-  ContentRenderer,
-  ContentRendererProps,
-} from "../../components/Content/renderers";
+  BodyRenderer,
+  BodyRendererProps,
+} from "../../components/Body/renderers";
 import { type CloverApi, CloverApiContext } from "./api";
 
 /**
- * A renderer of the page's, without React: what it claims, as `ContentRenderer` says it
+ * A renderer of the page's, without React: what it claims, as `BodyRenderer` says it
  * (`canvasId`, `format`, `match`), and `render`, which draws the view into a box of its
  * own and returns what undoes it. `view.clover` is the root's API, as `root.clover` is.
  *
@@ -22,10 +22,10 @@ import { type CloverApi, CloverApiContext } from "./api";
 export interface PageRenderer {
   canvasId?: string[];
   format?: string[];
-  match?: ContentRenderer["match"];
+  match?: BodyRenderer["match"];
   render: (
     container: HTMLElement,
-    view: Omit<ContentRendererProps, "children"> & { clover: CloverApi | null },
+    view: Omit<BodyRendererProps, "children"> & { clover: CloverApi | null },
   ) => void | (() => void);
 }
 
@@ -33,9 +33,9 @@ export interface PageRenderer {
  * Each of the page's renderers as the one React renderer, for as long as the page keeps
  * it: the same component each time, so the Root's `sameRenderers` sees no change.
  */
-const ADAPTED = new WeakMap<PageRenderer, ContentRenderer>();
+const ADAPTED = new WeakMap<PageRenderer, BodyRenderer>();
 
-function adapted(renderer: PageRenderer): ContentRenderer {
+function adapted(renderer: PageRenderer): BodyRenderer {
   let known = ADAPTED.get(renderer);
   if (!known) {
     const { render } = renderer;
@@ -50,8 +50,8 @@ function adapted(renderer: PageRenderer): ContentRenderer {
   return known;
 }
 
-/** The page's renderers, as `Root` and `Content` take them; undefined for none. */
-export function toRenderers(value: unknown): ContentRenderer[] | undefined {
+/** The page's renderers, as `Root` and `Body` take them; undefined for none. */
+export function toRenderers(value: unknown): BodyRenderer[] | undefined {
   if (!Array.isArray(value)) return undefined;
   return value
     .filter(
@@ -73,7 +73,7 @@ function Rendered({
   canvases,
   bodies,
   children,
-}: ContentRendererProps & { render: PageRenderer["render"] }) {
+}: BodyRendererProps & { render: PageRenderer["render"] }) {
   const box = useRef<HTMLDivElement>(null);
   const clover = useContext(CloverApiContext);
   useLayoutEffect(() => {
@@ -89,7 +89,7 @@ function Rendered({
     <>
       <div
         ref={box}
-        className="clover-content-renderer"
+        className="clover-body-renderer"
         style={{ position: "absolute", inset: 0 }}
       />
       {children && <div className="clover-canvas-controls">{children}</div>}

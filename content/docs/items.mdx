@@ -7,6 +7,7 @@ import { CollectionItemsDemo } from "docs/components/Clover4/Demos";
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Items
 
@@ -15,12 +16,12 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   a grid, or one item at a time.
 </div>
 
-<Example>
-<PartDemo part="Items" content />
+<Example head={<PartHead part="Items" />}>
+<PartDemo part="Items" body />
 
-```jsx
+```jsx {3}
 <Clover.Root iiifContent={url}>
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Items />
 </Clover.Root>
 ```
@@ -59,7 +60,7 @@ lists a Collection's members as links.
 Use `layout="grid"` for thumbnails that wrap into rows.
 
 <Example>
-<PartDemo part="Items" props={{ layout: "grid" }} content />
+<PartDemo part="Items" props={{ layout: "grid" }} body />
 
 ```jsx
 <Clover.Items layout="grid" />
@@ -72,7 +73,7 @@ Use `layout="grid"` for thumbnails that wrap into rows.
 Use `layout="list"` for a column, each item's title beside its picture.
 
 <Example>
-<PartDemo part="Items" props={{ layout: "list" }} content />
+<PartDemo part="Items" props={{ layout: "list" }} body />
 
 ```jsx
 <Clover.Items layout="list" />
@@ -86,7 +87,7 @@ Use `layout="pager"` for the count with Previous and Next, and no thumbnails. It
 spread at a time through a paged book.
 
 <Example>
-<PartDemo part="Items" props={{ layout: "pager" }} content />
+<PartDemo part="Items" props={{ layout: "pager" }} body />
 
 ```jsx
 <Clover.Items layout="pager" />
@@ -104,7 +105,7 @@ between them (`1rem`).
 <PartDemo
   part="Items"
   props={{ style: { "--clover-items-height": "5rem" } }}
-  content
+  body
 />
 
 ```jsx

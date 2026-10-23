@@ -94,7 +94,7 @@ export function LanguagesDemo() {
           iiifContent={url}
           // Under the page's "Languages Clover ships" h2.
           headingLevel={3}
-          style={{ ["--clover-content-height" as string]: "420px" }}
+          style={{ ["--clover-body-height" as string]: "420px" }}
         />
       )}
     </div>

@@ -41,8 +41,8 @@ const LOADERS: Record<string, LoadPart> = {
     import("./elements/root").then((module) => module.RootElement),
   "clover-label": () =>
     import("./elements/label").then((module) => module.LabelElement),
-  "clover-content": () =>
-    import("./elements/content").then((module) => module.ContentElement),
+  "clover-body": () =>
+    import("./elements/body").then((module) => module.BodyElement),
   "clover-items": () =>
     import("./elements/items").then((module) => module.ItemsElement),
   "clover-position": pager("Position"),

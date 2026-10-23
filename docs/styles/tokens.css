@@ -123,6 +123,16 @@
   --shadow-4: 0 8px 24px -8px #1c202420, 0 2px 6px -2px #1c202414;
 
   /*
+   * A card lifted off the page (Mat, 2026-10-22: one look for all of them): the
+   * playground's stage, the homepage's example viewer and its other side, the stories on
+   * the page's ground, the docs' examples. A hairline edge (`--card-shadow`), then a
+   * close, soft gray shadow (`--card-lift`, which the playground's field shares); on a dark
+   * page the edge does the lifting and the shadow only deepens it.
+   */
+  --card-lift: 0 1px 2px rgb(0 0 0 / 0.04), 0 6px 24px rgb(0 0 0 / 0.06);
+  --card-shadow: 0 0 0 1px var(--gray-6), var(--card-lift);
+
+  /*
    * Focus ring, used consistently on every interactive surface: the text accent, so it
    * holds 3:1 against the page in both themes and under every accent preset.
    */
@@ -156,6 +166,90 @@
   --code-punctuation: #89ddff;
   --code-number: #f78c6c;
   --code-property: #82aaff;
+
+  /*
+   * The same, light (Mat, 2026-10-22: vibrant, as Material's own light theme is): Material
+   * Lighter's colors, each darkened, its hue and chroma kept, only as far as 4.5:1 needs,
+   * on white and on a marked line's tint (`--editor-mark`): 5.1:1 and 4.6:1.
+   */
+  --code-light-keyword: #7848fa;
+  --code-light-string: #55780f;
+  --code-light-attr: #9b6100;
+  --code-light-punctuation: #007a81;
+  --code-light-number: #c53f15;
+  --code-light-property: #4e6ea3;
+}
+
+/*
+ * The editor as the docs' examples show their code (`ViewerDocs.module.css`; Mat,
+ * 2026-10-22): light on a light page and dark on a dark one, or as an example sets it
+ * (`data-editor`). Dark, it is the homepage's editor (`--code-*`), which stays dark. Light,
+ * its ground white, its text and faint text the editor's tint at a dark lightness, and
+ * Material's light theme's colors (`--code-light-*`), 5.1:1 on white (WCAG 1.4.3); its edge
+ * a hairline of its text. In both, its tags are the text accent, mixed as the page's is in
+ * that mode (Mat, 2026-10-22), which holds 4.5:1 under every accent.
+ */
+:root,
+[data-editor="light"] {
+  --editor-background: var(--code-bright);
+  --editor-text: oklch(from var(--code-text) 0.25 c h);
+  --editor-faint: oklch(from var(--code-text) 0.5 c h);
+  --editor-rule: color-mix(in srgb, var(--editor-text) 14%, transparent);
+  --editor-edge: var(--editor-rule);
+  /*
+   * A marked line's tint, the homepage editor's pointed-at part's (`.codeBlock[data-on]`),
+   * lighter on white, where its 24% would take the text under 4.5:1.
+   */
+  --editor-mark: color-mix(in srgb, var(--accent-9) 8%, transparent);
+  --editor-keyword: var(--code-light-keyword);
+  --editor-string: var(--code-light-string);
+  /* Its tags in the text accent, as the page's is (Mat, 2026-10-22). */
+  --editor-tag: color-mix(in oklab, var(--accent-9) 82%, #000);
+  --editor-attr: var(--code-light-attr);
+  --editor-punctuation: var(--code-light-punctuation);
+  --editor-number: var(--code-light-number);
+  --editor-property: var(--code-light-property);
+}
+
+/* Dark: the homepage's editor, a hairline round it where the page is dark too. */
+.dark,
+[data-editor="dark"] {
+  --editor-background: var(--code-background);
+  --editor-text: var(--code-text);
+  --editor-faint: var(--code-faint);
+  --editor-rule: var(--code-rule);
+  --editor-edge: transparent;
+  --editor-mark: color-mix(in srgb, var(--accent-9) 24%, transparent);
+  --editor-keyword: var(--code-keyword);
+  --editor-string: var(--code-string);
+  --editor-tag: color-mix(in oklab, var(--accent-9) 62%, #fff);
+  --editor-attr: var(--code-attr);
+  --editor-punctuation: var(--code-punctuation);
+  --editor-number: var(--code-number);
+  --editor-property: var(--code-property);
+}
+
+.dark,
+.dark [data-editor="dark"] {
+  --editor-edge: var(--gray-6);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) {
+    --editor-background: var(--code-background);
+    --editor-text: var(--code-text);
+    --editor-faint: var(--code-faint);
+    --editor-rule: var(--code-rule);
+    --editor-edge: var(--gray-6);
+    --editor-mark: color-mix(in srgb, var(--accent-9) 24%, transparent);
+    --editor-keyword: var(--code-keyword);
+    --editor-string: var(--code-string);
+    --editor-tag: color-mix(in oklab, var(--accent-9) 62%, #fff);
+    --editor-attr: var(--code-attr);
+    --editor-punctuation: var(--code-punctuation);
+    --editor-number: var(--code-number);
+    --editor-property: var(--code-property);
+  }
 }
 
 /*
@@ -218,6 +312,7 @@
 
   --shadow-2: 0 1px 2px #00000040, 0 1px 3px #00000030;
   --shadow-4: 0 8px 24px -8px #00000060, 0 2px 6px -2px #00000040;
+  --card-lift: 0 6px 24px rgb(0 0 0 / 0.4);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -243,6 +338,7 @@
     --surface: var(--gray-3);
     --surface-raised: var(--gray-4);
     --surface-sunken: var(--gray-2);
+    --card-lift: 0 6px 24px rgb(0 0 0 / 0.4);
   }
 }
 

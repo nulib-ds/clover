@@ -8,6 +8,7 @@ import CanvasRecipe from "docs/components/Canvas/CanvasRecipe";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import CloverCanvas from "docs/components/DynamicImports/Canvas";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Canvas
 
@@ -16,7 +17,7 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   and zoom surface.
 </div>
 
-<Example>
+<Example head={<PartHead part="Canvas" />}>
 <div style={{ height: 420 }}>
   <CloverCanvas iiifContent="https://nulib-ds.github.io/clover/mocks/standalone-canvas/canvas.json" />
 </div>
@@ -221,15 +222,15 @@ const canvas = useRef(null);
 
 </Example>
 
-### Canvas or Content
+### Canvas or Body
 
-In a layout, place [`Content`](/docs/content) rather than `Canvas`: it draws the Root's
+In a layout, place [`Body`](/docs/body) rather than `Canvas`: it draws the Root's
 view with this Canvas, and adds a height, your renderers, and the loading mark while the
 Root loads. A `Canvas` alone in a `Root` shows the same view, without them.
 
 ```jsx
 <Clover.Root iiifContent={url}>
-  <Clover.Content />
+  <Clover.Body />
 </Clover.Root>
 ```
 

@@ -32,7 +32,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   own (its one child, clamped by your CSS) the "Read more" `ReadMore` gives, and
   `root.clover.oneOpen(close)` joins a popup of yours to Clover's, which open one at a
   time, as `useOneOpen` does (it returns what to call as yours closes). `controls` is a
-  property of `<clover-content>` and `<clover-canvas>` too, for the object Canvas takes
+  property of `<clover-body>` and `<clover-canvas>` too, for the object Canvas takes
   (`{ rotation: false }`), and `<clover-viewer>` takes `annotations` (an attribute, or a
   property) and `request`, as the Viewer does.
 
@@ -46,16 +46,16 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   part reads its `Root` with Clover's hooks: once the root has loaded, `root.clover` is its
   Clover (sent with `clover-ready`), each hook a method of the same name
   (`useNavigation()` is `navigation()`), with `state` and `subscribe`, the actions, the
-  channels, and `localize`, `t` and `langOf`. `<clover-canvas>` and `<clover-content>`
+  channels, and `localize`, `t` and `langOf`. `<clover-canvas>` and `<clover-body>`
   keep their Canvas's handle as `handle` once the view is laid out, as `onReady` hands it
   in React, and send `clover-ready` too; a `clover-ready` does not bubble. `renderers` on
-  a `<clover-root>`, `<clover-content>` or `<clover-viewer>` draws views of your own
+  a `<clover-root>`, `<clover-body>` or `<clover-viewer>` draws views of your own
   without React: each claims views by `canvasId`, `format` or `match`, and
   `render(container, view)` draws one, returning what undoes it. `controlButtons` on a
-  `<clover-content>` or `<clover-canvas>` replaces a control with a button you make,
+  `<clover-body>` or `<clover-canvas>` replaces a control with a button you make,
   which Clover names, keys, wires and gives its popover; a `<button>` in a
-  `<clover-content>` is one of its controls; and `<clover-tip label keys>`, in a button
-  of yours, shows Clover's popover, as `<Clover.Tip>` does. `<clover-content>` also takes
+  `<clover-body>` is one of its controls; and `<clover-tip label keys>`, in a button
+  of yours, shows Clover's popover, as `<Clover.Tip>` does. `<clover-body>` also takes
   `placeholder`, `animate-annotations`, `options` and the Canvas's events. The types
   declare `CloverRootApi`, `CloverCanvasHandle`, `CloverRenderer` and
   `CloverControlButtons`.
@@ -101,7 +101,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   on (changed later, it shows that tab), the reader's choice sends
   `clover-value-change`, and `closable` gives it a close button, which sends
   `clover-close` (cancelable) and hides what its toggle shows. A `<clover-panel-toggle
-controls="id">` in a `<clover-content>` is one of the stage's controls; elsewhere, a
+controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, a
   button of its own. Its target is open while it is not `hidden` (write `hidden` on the
   panel to start it shut), and each press sends `clover-open-change` (cancelable). The
   Split's elements are the panes and bars themselves, with `Split`'s sizes, storage,
@@ -112,9 +112,9 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   ```html
   <clover-split storage-key="my-layout">
     <clover-split-pane min="16rem">
-      <clover-content>
+      <clover-body>
         <clover-panel-toggle controls="panel-pane"></clover-panel-toggle>
-      </clover-content>
+      </clover-body>
     </clover-split-pane>
     <clover-split-handle></clover-split-handle>
     <clover-split-pane id="panel-pane" size="24rem" min="14rem">
@@ -136,7 +136,7 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   gives each element's attributes, properties and events to editors and tools. Both are
   written from the elements' own specs.
 - **Parts as elements,** from `@nulib/clover/web-components`, which defines
-  them beside `<clover-viewer>`: `<clover-root>`, `<clover-content>`, `<clover-items>`,
+  them beside `<clover-viewer>`: `<clover-root>`, `<clover-body>`, `<clover-items>`,
   `<clover-previous>`, `<clover-position>`, `<clover-next>`, `<clover-status>`; a
   property each, `<clover-label>`, `<clover-thumbnail>`, `<clover-summary>`,
   `<clover-metadata>`, `<clover-required-statement>`, `<clover-rights>`,
@@ -162,7 +162,7 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   ```html
   <clover-root iiif-content="https://example.org/manifest.json">
     <clover-label as="h2"></clover-label>
-    <clover-content style="height: 60vh"></clover-content>
+    <clover-body style="height: 60vh"></clover-body>
     <clover-items></clover-items>
   </clover-root>
   ```
@@ -258,7 +258,7 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
 
 - **`Clover.Root` and its parts.** `Root` loads `iiifContent` and holds where the reader
   is; parts read from the nearest `Root`, wherever they sit in your markup.
-  - `Content` draws the current view (a page, a spread, a video or sound) with `Canvas`.
+  - `Body` draws the current view (a page, a spread, a video or sound) with `Canvas`.
   - `Label` shows the Manifest's label, or the current Canvas's with `of="canvas"`, in the
     reader's language and marked with `lang`. Its lines are balanced, so a long title
     breaks into lines of about one length (`.clover-label` sets `text-wrap: balance`; set
@@ -276,10 +276,10 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   - `Status` shows loading and errors: loading as Clover's loading mark, a 3px line
     in the accent drawn from start to end, fading in as it goes, announced as "Loading…" (your own `loading` is shown
     and announced as it is). `loading={false}` only announces it, for a layout whose
-    `Content` shows it; `Default` and `Document` place it so, and a load no longer moves
+    `Body` shows it; `Default` and `Document` place it so, and a load no longer moves
     the page.
   - **Loading, without anything moving.** While the Root loads (the first Manifest, or
-    one chosen from a Collection), `Content` is `aria-busy` and shows the loading mark
+    one chosen from a Collection), `Body` is `aria-busy` and shows the loading mark
     along its top edge, over the Canvas, taking no room. A Canvas does the same while its
     images load: at first, after it is opened from its placeholder, and after a move to
     another view. The Canvas keeps its size and its background; the mark waits a quarter
@@ -294,7 +294,7 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   ```jsx
   <Clover.Root iiifContent={url}>
     <Clover.Label as="h1" />
-    <Clover.Content />
+    <Clover.Body />
     <Clover.Items layout="pager" />
   </Clover.Root>
   ```
@@ -408,13 +408,13 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   its header, beside the title. Its Download section lists what `Clover.Download` does: the `rendering`
   of the page in view ("This page") and of the Manifest ("All pages").
 - **`Clover.PanelToggle`**, which shows and hides the `Panel`. Given to
-  `Clover.Content` as a child, it sits in the Canvas's controls. The controls still fade
+  `Clover.Body` as a child, it sits in the Canvas's controls. The controls still fade
   while the panel is open: only a menu open over the Canvas holds them on screen.
 
   ```jsx
-  <Clover.Content>
+  <Clover.Body>
     <Clover.PanelToggle open={open} onOpenChange={setOpen} controls="panel" />
-  </Clover.Content>
+  </Clover.Body>
   <Clover.Panel
     id="panel"
     hidden={!open}
@@ -454,9 +454,9 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   same links in the `Panel`'s About; in either, `download={false}` leaves them out (3.x's
   `showDownload`). It renders nothing when there is nothing to download.
 - **Renderers of your own** (3.x's `customDisplays`): `renderers` on `Root` (or one
-  `Content`) draws the views it claims — by Canvas id, painted body `format`, or a `match`
+  `Body`) draws the views it claims — by Canvas id, painted body `format`, or a `match`
   test — with your component instead of `Canvas`. It gets the view's `canvases`, their
-  painting `bodies` and `Content`'s children, and can call Clover's hooks. The Viewer and
+  painting `bodies` and `Body`'s children, and can call Clover's hooks. The Viewer and
   templates pass it through to their `Root`. An inline list is kept while it says the
   same, so it never re-renders the parts.
 
@@ -524,7 +524,7 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
     A recording opened so is not played, as a press of its play button would.
   - A pick is framed in one cut, once its view is drawn: on another Canvas, the move
     comes first (the spread fitted, none of its hotspots laid over the last view while
-    it loads), then the annotation. `animateAnnotations` on the Canvas (or `Content`)
+    it loads), then the annotation. `animateAnnotations` on the Canvas (or `Body`)
     glides there instead, as the camera eases elsewhere; reduced motion cuts either way.
     The handle's `zoomToAnnotation` and a hotspot's click follow the same choice. Before,
     every pick glided, and one on another Canvas glided over the last view, then jumped.
@@ -627,7 +627,7 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
     To keep the glide:
 
     ```jsx
-    <Clover.Content animateAnnotations />
+    <Clover.Body animateAnnotations />
     ```
 
   - The reader lets go of a pick with a click or tap on the Canvas off every hotspot,
@@ -821,7 +821,7 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
     onManifestChange={setId}
   >
     <Clover.CollectionSelect />
-    <Clover.Content />
+    <Clover.Body />
   </Clover.Root>
   ```
 
@@ -838,7 +838,7 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
     in the box it sits in, as tall as that box, the Canvas taking what the title and
     `Items` leave (never under 16rem; a shorter box scrolls), for a box of a set height,
     the window under a page's own header say; without it, the Canvas is
-    `--clover-content-height` tall:
+    `--clover-body-height` tall:
 
     ```jsx
     <div style={{ height: "calc(100dvh - 4rem)" }}>
@@ -996,7 +996,7 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
 
   ```jsx
   <Clover.Root iiifContent={manifestUrl}>
-    <Clover.Content />
+    <Clover.Body />
     <Clover.Items layout="grid" />
   </Clover.Root>
 
@@ -1263,7 +1263,7 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   ```jsx
   <Clover.Split storageKey="my-layout">
     <Clover.SplitPane min="16rem">
-      <Clover.Content />
+      <Clover.Body />
     </Clover.SplitPane>
     <Clover.SplitHandle />
     <Clover.SplitPane size="24rem" min="14rem">
@@ -1668,6 +1668,17 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
 
 ### Changed
 
+- **`Content` is `Body`** (Mat, 2026-10-22), ahead of the containers it will draw
+  besides Canvas (Presentation 4's Scene and Timeline): `Clover.Body` and `<clover-body>`,
+  its class `clover-body`, its height `--clover-body-height`, its renderers' types
+  `BodyRenderer` and `BodyRendererProps`. What it does is unchanged; the Document page's budget
+  goes up 0.1 kB (113.7), as the new name gzips 5 bytes larger there. Rename as you upgrade:
+
+  ```diff
+  - <Clover.Content style={{ "--clover-content-height": "24rem" }} />
+  + <Clover.Body style={{ "--clover-body-height": "24rem" }} />
+  ```
+
 - **`.clover-link-format`**, the format after a link ("(application/pdf)"), is in
   `Primitives.css`, beside the links that write it, not `Panel.css`: it comes earlier in
   `styles.css`, which changes nothing it styles, and a page of elements' property parts
@@ -1696,7 +1707,7 @@ controls="id">` in a `<clover-content>` is one of the stage's controls; elsewher
   buttons load only on a page that gives them. `sizes.json` records each
   (`elementsEntryGzip`, `webComponentsGzip`, `documentElementGzip`, `labelPageGzip`,
   `composedPageGzip`, `layoutPageGzip`, `canvasElementGzip`), held to budgets of 5.4,
-  107.5, 113.6, 31.2, 93.0, 106.7 and 76.8 kB. `Root` now shares what it holds with
+  107.5, 113.7, 31.2, 93.0, 106.7 and 76.8 kB. `Root` now shares what it holds with
   `<clover-root>`, `SplitHandle` its logic with `<clover-split-handle>`
   (`components/Split/splitting.ts`), and `ReadMore` and `useOneOpen` theirs with the
   elements (`useReadMore`, `openOne`), which put `Default`'s budget up to 67.1 kB,

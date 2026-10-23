@@ -163,12 +163,12 @@ describe("Renderers of the page's", () => {
       container.textContent = view.canvases[0].id;
       return undo;
     });
-    const { root, ready } = rootOf("<clover-content></clover-content>");
+    const { root, ready } = rootOf("<clover-body></clover-body>");
     root.renderers = [{ match: () => true, render }];
     document.body.append(root);
     await ready;
     const box = await waitFor(() => {
-      const found = root.querySelector(".clover-content-renderer");
+      const found = root.querySelector(".clover-body-renderer");
       expect(found?.textContent).toBe(bookJson.items[0].id);
       return found!;
     });
@@ -183,7 +183,7 @@ describe("Renderers of the page's", () => {
 
   it("leave a view they do not claim to the Canvas", async () => {
     const render = vi.fn();
-    const { root, ready } = rootOf("<clover-content></clover-content>");
+    const { root, ready } = rootOf("<clover-body></clover-body>");
     root.renderers = [{ format: ["model/gltf-binary"], render }];
     document.body.append(root);
     await ready;
@@ -194,8 +194,8 @@ describe("Renderers of the page's", () => {
 
 describe("The stage's controls, the page's own", () => {
   it("take a button of the page's for one of Clover's, named, keyed and pressed as Clover's", async () => {
-    const { root, ready } = rootOf("<clover-content></clover-content>");
-    const content = root.querySelector("clover-content") as HTMLElement & {
+    const { root, ready } = rootOf("<clover-body></clover-body>");
+    const content = root.querySelector("clover-body") as HTMLElement & {
       controlButtons: unknown;
     };
     const told = vi.fn();
@@ -238,7 +238,7 @@ describe("The stage's controls, the page's own", () => {
 
   it("place the page's own buttons among them, after Clover's, keeping their listeners", async () => {
     const { root, ready } = rootOf(
-      `<clover-content><button type="button" aria-label="Share">S<clover-tip label="Share" keys="S"></clover-tip></button></clover-content>`,
+      `<clover-body><button type="button" aria-label="Share">S<clover-tip label="Share" keys="S"></clover-tip></button></clover-body>`,
     );
     const share = root.querySelector("button") as HTMLButtonElement;
     const pressed = vi.fn();
@@ -324,9 +324,9 @@ describe("The Canvas's handle, on the stage's elements", () => {
     });
   });
 
-  it("is kept by <clover-content>, inside its root", async () => {
-    const { root, ready } = rootOf("<clover-content></clover-content>");
-    const content = root.querySelector("clover-content") as HTMLElement & {
+  it("is kept by <clover-body>, inside its root", async () => {
+    const { root, ready } = rootOf("<clover-body></clover-body>");
+    const content = root.querySelector("clover-body") as HTMLElement & {
       handle: any;
     };
     const opened = new Promise<CustomEvent>((resolve) =>

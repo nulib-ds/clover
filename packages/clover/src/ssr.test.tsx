@@ -17,17 +17,17 @@ describe("server rendering", () => {
     expect(typeof document).toBe("undefined");
   });
 
-  it("renders a Root with Label, Items and Content from object content", () => {
+  it("renders a Root with Label, Items and Body from object content", () => {
     const html = renderToString(
       <Clover.Root iiifContent={bookJson}>
         <Clover.Label as="h1" />
-        <Clover.Content />
+        <Clover.Body />
         <Clover.Items />
         <Clover.Panel />
       </Clover.Root>,
     );
     expect(html).toContain("clover-root");
-    expect(html).toContain("clover-content");
+    expect(html).toContain("clover-body");
   });
 
   it("renders the Viewer in every template, and the Map", () => {

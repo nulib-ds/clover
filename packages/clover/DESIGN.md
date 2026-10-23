@@ -274,7 +274,7 @@ The stylesheet's size is part of the design.
 
 Some values are not space between things, and stay as they are:
 
-- **Dimensions**: stage heights (`--clover-content-height`), panel widths and their
+- **Dimensions**: stage heights (`--clover-body-height`), panel widths and their
   bounds, thumbnail heights, menu widths, and a target's minimum size (24px, in CSS px
   as WCAG 2.5.8 measures it, such as the link lists' `min-block-size`). Use the scale
   where a dimension is really a space; the navigator, for example, is a golden

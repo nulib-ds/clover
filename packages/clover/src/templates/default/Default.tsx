@@ -50,7 +50,7 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    * Fill the box it sits in: as tall as that box, the stage taking what the header and
    * the strip leave, so nothing runs below it. For a box of a set height, the window
    * under a page's own header say. Default `false`: the stage is
-   * `--clover-content-height` tall, and the layout as tall as it needs.
+   * `--clover-body-height` tall, and the layout as tall as it needs.
    */
   fill?: boolean;
 };
@@ -65,7 +65,7 @@ export type DefaultProps = Omit<RootProps, "children"> & {
  * between it and the rest shares the width (drag it, or use the arrow keys on it). Where there is no room for both
  * (a phone), the panel slides over the stage instead, and a strip of the page stays
  * uncovered: a click there, Escape or the panel's close button puts it away. Size it with
- * `--clover-content-height`.
+ * `--clover-body-height`.
  */
 export function Default({
   className,
@@ -212,9 +212,9 @@ export function Default({
           )}
           {/* Its stage shows the loading; announced here, nothing moves. */}
           <Clover.Status loading={false} />
-          <Clover.Content className="clover-template-default-stage">
+          <Clover.Body className="clover-template-default-stage">
             {panel && !docked && toggle}
-          </Clover.Content>
+          </Clover.Body>
           <div className="clover-template-default-rail">
             <div className="clover-template-default-rail-header">
               <ViewTitles />

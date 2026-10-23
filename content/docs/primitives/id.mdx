@@ -6,15 +6,16 @@ description: A IIIF resource's id, its own address, as a link.
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Id
 
 <div className="docs-lede">The resource's own address, as a link.</div>
 
-<Example>
+<Example head={<PartHead part="Id" />}>
 <PartDemo part="Id" />
 
-```jsx
+```jsx {2}
 <Clover.Root iiifContent={url}>
   <Clover.Id />
 </Clover.Root>
@@ -46,10 +47,10 @@ its other props go to the `a`.
 Use `of="canvas"` for the address of the Canvas in view. It changes as the reader moves.
 
 <Example>
-<PartDemo part="Id" props={{ of: "canvas" }} content />
+<PartDemo part="Id" props={{ of: "canvas" }} body />
 
 ```jsx
-<Clover.Content />
+<Clover.Body />
 <Clover.Id of="canvas" />
 ```
 

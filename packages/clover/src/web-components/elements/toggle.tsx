@@ -75,9 +75,9 @@ export function Toggle({ element }: { element: HTMLElement }) {
 
 /**
  * `<clover-panel-toggle>` (`specs/containers.ts`): a button where it is; in a
- * `<clover-content>`, one of the stage's controls, which the stage draws (`content.tsx`).
+ * `<clover-body>`, one of the stage's controls, which the stage draws (`content.tsx`).
  */
 export function PanelToggleElement({ hosted }: HostedProps) {
-  if (hosted.element.parentElement?.localName === "clover-content") return null;
+  if (hosted.element.parentElement?.localName === "clover-body") return null;
   return <Toggle element={hosted.element} />;
 }

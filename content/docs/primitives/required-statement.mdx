@@ -6,6 +6,7 @@ description: The required statement of the resource, or of the current Canvas, s
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # RequiredStatement
 
@@ -14,10 +15,10 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   shown with it, such as an attribution.
 </div>
 
-<Example>
+<Example head={<PartHead part="RequiredStatement" />}>
 <PartDemo part="RequiredStatement" />
 
-```jsx
+```jsx {2}
 <Clover.Root iiifContent={url}>
   <Clover.RequiredStatement />
 </Clover.Root>
@@ -43,15 +44,15 @@ nothing while there is none. Its other props go to the `dl`.
 
 ## Examples
 
-### With the Content
+### With the Body
 
-Show it with what it is about: here, under the Content.
+Show it with what it is about: here, under the Body.
 
 <Example>
-<PartDemo part="RequiredStatement" content />
+<PartDemo part="RequiredStatement" body />
 
 ```jsx
-<Clover.Content />
+<Clover.Body />
 <Clover.RequiredStatement />
 ```
 

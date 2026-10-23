@@ -16,7 +16,12 @@ const helpers = pathToFileURL(path.join(__dirname, "code-flavors.mjs")).href;
  * What the twins are made with: a page compiles again when one changes. Node keeps the
  * modules it first loaded, so a change to them shows once `npm run dev` restarts.
  */
-const HELPERS = ["code-flavors.mjs", "jsx-to-html.mjs", "example-urls.mjs"];
+const HELPERS = [
+  "code-flavors.mjs",
+  "jsx-to-html.mjs",
+  "example-urls.mjs",
+  "inline-names.mjs",
+];
 
 module.exports = function codeFlavorsLoader(source) {
   const callback = this.async();

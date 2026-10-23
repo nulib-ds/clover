@@ -6,6 +6,7 @@ description: The summary of the resource, or of the current Canvas, cut to five 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Summary
 
@@ -13,10 +14,10 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   The resource's summary, or the current Canvas's, cut short with Read more.
 </div>
 
-<Example>
+<Example head={<PartHead part="Summary" />}>
 <PartDemo part="Summary" />
 
-```jsx
+```jsx {2}
 <Clover.Root iiifContent={url}>
   <Clover.Summary />
 </Clover.Root>
@@ -67,12 +68,12 @@ Use `of="canvas"` for the summary of the Canvas in view, as this photogravure's 
   part="Summary"
   props={{ of: "canvas" }}
   resource="tagging"
-  content
+  body
 />
 
-```jsx
+```jsx {3}
 <Clover.Root iiifContent="https://nulib-ds.github.io/clover/mocks/tagging/manifest.json">
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Summary of="canvas" />
 </Clover.Root>
 ```

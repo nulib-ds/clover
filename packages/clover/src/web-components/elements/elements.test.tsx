@@ -141,7 +141,7 @@ describe("Clover's elements", () => {
     const element = root(`
       <p class="intro">From the collection</p>
       <clover-label as="h2"></clover-label>
-      <clover-content style="height: 300px"><span class="mine">Mine</span></clover-content>
+      <clover-body style="height: 300px"><span class="mine">Mine</span></clover-body>
       <clover-items></clover-items>
     `);
     const intro = element.querySelector(".intro")!;
@@ -154,11 +154,11 @@ describe("Clover's elements", () => {
     // The page's own nodes, the same nodes, where the page put them.
     expect(element.querySelector(".intro")).toBe(intro);
     expect(element.firstElementChild).toBe(intro);
-    expect(element.querySelector("clover-content > .mine")).toBe(mine);
+    expect(element.querySelector("clover-body > .mine")).toBe(mine);
     // Each element draws as its own code arrives: the stage's comes with the Canvas.
     await waitFor(() =>
       expect(
-        element.querySelector("clover-content > .clover-content"),
+        element.querySelector("clover-body > .clover-body"),
       ).not.toBeNull(),
     );
     // Its views: the book's five pages, the middle ones in spreads.
@@ -176,7 +176,7 @@ describe("Clover's elements", () => {
   it("gives every part its root's context: one place, shared", async () => {
     const element = root(`
       <clover-label of="canvas" as="p"></clover-label>
-      <clover-content></clover-content>
+      <clover-body></clover-body>
       <clover-items></clover-items>
     `);
     const label = element.querySelector("clover-label")!;
@@ -204,10 +204,10 @@ describe("Clover's elements", () => {
 
   it("makes ids unique across two roots, each naming only its own", async () => {
     const one = root(
-      `<clover-content></clover-content><clover-items></clover-items>`,
+      `<clover-body></clover-body><clover-items></clover-items>`,
     );
     const two = root(
-      `<clover-content></clover-content><clover-items></clover-items>`,
+      `<clover-body></clover-body><clover-items></clover-items>`,
       tocJson,
     );
     await within(one).findAllByRole("option");
@@ -278,7 +278,7 @@ describe("Clover's elements", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     document.body.innerHTML = `
       <clover-label label="A label of my own" as="h3"></clover-label>
-      <clover-content></clover-content>
+      <clover-body></clover-body>
     `;
     expect(
       await within(document.body).findByRole("heading", {
@@ -291,7 +291,7 @@ describe("Clover's elements", () => {
         expect.stringContaining("put it inside one"),
       ),
     );
-    expect(document.querySelector("clover-content")!.childElementCount).toBe(0);
+    expect(document.querySelector("clover-body")!.childElementCount).toBe(0);
     warn.mockRestore();
   });
 

@@ -8,9 +8,13 @@ import type { MetaRecord } from "nextra";
  */
 /*
  * The Components pages read as Radix Themes' component pages do (Mat, 2026-10-21): no
- * table of contents, so their examples have the page's width.
+ * table of contents, so their examples have the page's width, and no breadcrumb over
+ * their title (Mat, 2026-10-22), whose look keys on its absence (`layout.css`).
  */
-const reference = (title: string) => ({ title, theme: { toc: false } });
+const reference = (title: string) => ({
+  title,
+  theme: { toc: false, breadcrumb: false },
+});
 
 const meta: MetaRecord = {
   "--viewer": {
@@ -36,7 +40,7 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Components",
   },
-  content: reference("Content"),
+  body: reference("Body"),
   canvas: reference("Canvas"),
   items: reference("Items"),
   panel: reference("Panel"),

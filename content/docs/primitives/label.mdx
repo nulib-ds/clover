@@ -6,6 +6,7 @@ description: The resource's label, or the current Canvas's, in the reader's lang
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Label
 
@@ -13,10 +14,10 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   The resource's label, or the current Canvas's, in the reader's language.
 </div>
 
-<Example>
+<Example head={<PartHead part="Label" />}>
 <PartDemo part="Label" props={{ as: "p" }} />
 
-```jsx
+```jsx {2}
 <Clover.Root iiifContent={url}>
   <Clover.Label />
 </Clover.Root>
@@ -61,10 +62,10 @@ Use `as` to make it a heading, at the level that fits your page's outline: here,
 Use `of="canvas"` for the label of the Canvas in view. It changes as the reader moves.
 
 <Example>
-<PartDemo part="Label" props={{ of: "canvas", as: "p" }} content />
+<PartDemo part="Label" props={{ of: "canvas", as: "p" }} body />
 
 ```jsx
-<Clover.Content />
+<Clover.Body />
 <Clover.Label of="canvas" as="p" />
 ```
 
@@ -78,7 +79,7 @@ in as `lang`, so it is read aloud in that language. This newspaper's label is Ge
 <Example>
 <PartDemo part="Label" props={{ as: "p" }} resource="search" />
 
-```jsx
+```jsx {2}
 <Clover.Root iiifContent="https://nulib-ds.github.io/clover/mocks/content-search/manifest.json">
   <Clover.Label as="p" />
 </Clover.Root>

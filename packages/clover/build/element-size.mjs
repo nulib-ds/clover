@@ -44,6 +44,41 @@ function elementKey(map, tag) {
 }
 
 /**
+ * The modules an element's loader imports, as `src/web-components/define.ts` writes them,
+ * for the elements drawn through a part's own module rather than one of their own
+ * (`primitive("Summary")`, `pager("Next")`, `part(() => import(...), ...)`), so a page of
+ * them is measured by what it loads. Read from the loaders, so it never drifts from them.
+ */
+const LOADED = (() => {
+  const define = readFileSync(
+    join(root, "src/web-components/define.ts"),
+    "utf8",
+  );
+  const from = define.indexOf("const LOADERS");
+  const block = define.slice(from, define.indexOf("\n};", from));
+  const part = "src/web-components/elements/part.tsx";
+  const keys = [...block.matchAll(/"(clover-[a-z-]+)":/g)];
+  const loaded = {};
+  keys.forEach((key, at) => {
+    // An entry runs to the next one's key.
+    const body = block.slice(key.index + key[0].length, keys[at + 1]?.index);
+    const imported = body.match(/import\("\.\.\/(components\/[^"]+)"\)/);
+    if (/^\s*primitive\(/.test(body))
+      loaded[key[1]] = ["src/components/Primitives/Primitives.tsx", part];
+    else if (/^\s*pager\(/.test(body))
+      loaded[key[1]] = ["src/components/Items/Pager.tsx", part];
+    else if (/^\s*splitPart\(/.test(body))
+      loaded[key[1]] = ["src/web-components/elements/split.tsx"];
+    else if (imported) loaded[key[1]] = [`src/${imported[1]}.tsx`, part];
+  });
+  return loaded;
+})();
+
+/** The chunks a page loads for an element: its loader's modules, else its own chunk. */
+const keysOf = (map, tag) =>
+  map[tag] ? [tag] : (LOADED[tag] ?? [elementKey(map, tag)]);
+
+/**
  * The files a page loads, with the given elements on it: the entry and what it imports,
  * and once one connects, the host and each element's chunk, with theirs and their sheets.
  */
@@ -61,7 +96,7 @@ export function pageFiles(tags = [], dir = ELEMENT_DIR) {
     // What the first element to connect loads, whichever it is.
     visit(sharedKey(map));
     // An element by its tag; or a module by its key (a template, a deferred run).
-    tags.forEach((tag) => visit(map[tag] ? tag : elementKey(map, tag)));
+    tags.forEach((tag) => keysOf(map, tag).forEach(visit));
   }
   return files;
 }
@@ -91,10 +126,7 @@ export function viewerEntryFiles(dir = VIEWER_DIR) {
     grew = false;
     for (const key of [...keys])
       for (const later of map[key].dynamicImports ?? [])
-        if (
-          !keys.has(later) &&
-          later.endsWith("web-components/host.tsx")
-        ) {
+        if (!keys.has(later) && later.endsWith("web-components/host.tsx")) {
           visit(later);
           grew = true;
         }
@@ -109,6 +141,13 @@ export const viewerEntryGzip = (dir = VIEWER_DIR) =>
       sum + gzipSync(readFileSync(join(dir, file)), { level: 9 }).length,
     0,
   );
+
+/**
+ * What an element adds to a page with a `<clover-root>`, in bytes gzipped: the page with
+ * both, less the root's alone, up front, as `parts` measures React's (`build/sizes.mjs`).
+ */
+export const elementAdds = (tag, dir = ELEMENT_DIR) =>
+  pageGzip(["clover-root", tag], dir) - pageGzip(["clover-root"], dir);
 
 /** Those files' source, read. */
 export const pageSource = (tags, dir = ELEMENT_DIR) =>
@@ -132,7 +171,7 @@ export const PAGES = [
   [
     "The four parts",
     "composedPageGzip",
-    ["clover-root", "clover-label", "clover-content", "clover-items"],
+    ["clover-root", "clover-label", "clover-body", "clover-items"],
   ],
   // A layout as Default's, of elements: the stage and its toggle beside the panel.
   [
@@ -141,7 +180,7 @@ export const PAGES = [
     [
       "clover-root",
       "clover-label",
-      "clover-content",
+      "clover-body",
       "clover-panel-toggle",
       "clover-items",
       "clover-split",

@@ -1,9 +1,9 @@
 import type { ElementDocs, ElementSpec } from "../spec";
 import { READY, canvasDocs, handleDocs } from "./canvas";
 
-/** `<clover-content>`: the root's view, drawn. */
-export const content: ElementSpec = {
-  tag: "clover-content",
+/** `<clover-body>`: the root's view, drawn. */
+export const body: ElementSpec = {
+  tag: "clover-body",
   kind: "part",
   needsRoot: true,
   attributes: {
@@ -21,10 +21,10 @@ export const content: ElementSpec = {
   },
 };
 
-export const contentDocs: ElementDocs = {
-  name: "CloverContentElement",
+export const bodyDocs: ElementDocs = {
+  name: "CloverBodyElement",
   description:
-    "The view of the clover-root it is in, drawn as Content draws it: images, video and sound, or a renderer of yours. It is the stage's box, its height from --clover-content-height (60vh by default) or its own style. A clover-panel-toggle, and a button of yours, in it are among its controls.",
+    "The view of the clover-root it is in, drawn as Body draws it: images, video and sound, or a renderer of yours. It is the stage's box, its height from --clover-body-height (60vh by default) or its own style. A clover-panel-toggle, and a button of yours, in it are among its controls.",
   attributes: {
     controls: {
       description: '"false" leaves out the controls over the stage.',

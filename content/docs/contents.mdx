@@ -6,6 +6,7 @@ description: A Manifest's table of contents from its Ranges, the entry the reade
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Contents
 
@@ -14,12 +15,12 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   in marked.
 </div>
 
-<Example>
-<PartDemo part="Contents" content />
+<Example head={<PartHead part="Contents" />}>
+<PartDemo part="Contents" body />
 
-```jsx
+```jsx {3}
 <Clover.Root iiifContent={url}>
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Contents />
 </Clover.Root>
 ```
@@ -32,7 +33,7 @@ Inside a `Root`, it lists the Manifest's Ranges (`structures`), nested as they n
 `nav` named "Contents": choosing an entry goes to its Canvas, framed to its region or at
 its time, and the entry the reader is in is `aria-current`. It renders nothing without
 Ranges. Its other props, and its `ref`, go to its element. For the view itself, see
-[`Content`](/docs/content).
+[`Body`](/docs/body).
 
 <ApiReference elements="clover-contents">
 
@@ -52,11 +53,11 @@ On a video or sound, Ranges that name a time are chapters, on the seek bar too. 
 follows playback, and pointing at either marks the other.
 
 <Example>
-<PartDemo part="Contents" resource="footage" content />
+<PartDemo part="Contents" resource="footage" body />
 
-```jsx
+```jsx {3}
 <Clover.Root iiifContent="https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/manifest.json">
-  <Clover.Content />
+  <Clover.Body />
   <Clover.Contents />
 </Clover.Root>
 ```

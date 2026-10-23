@@ -22,7 +22,7 @@ import * as Clover from "../../parts";
  * Sheets that are not active are muted (`Document.css`).
  *
  * Each sheet is a still, its pictures at about the stage's size. The one live `Canvas`
- * (`Content`, holding `children`: zoom, hotspots, media) sits on the active sheet, drawn
+ * (`Body`, holding `children`: zoom, hotspots, media) sits on the active sheet, drawn
  * exactly over its still; zoomed into, that sheet grows to the stage's height. Moved to another, it stays out of sight, its controls away, until that sheet is
  * in place at the top and the Canvas has drawn it; then it shows, and its controls slide
  * in.
@@ -428,12 +428,12 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
           </div>
         ))}
         <div ref={live} className="clover-template-document-live">
-          <Clover.Content
+          <Clover.Body
             className="clover-template-document-content"
             onReady={setHandle}
           >
             {children}
-          </Clover.Content>
+          </Clover.Body>
         </div>
       </div>
     </div>

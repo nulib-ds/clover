@@ -1,0 +1,261 @@
+/*
+ * Every code block on the site (`CodeBlock.tsx`, through `mdx-components.tsx`'s `pre`; Mat,
+ * 2026-10-22). Code is drawn as the homepage's editor is (`Parts.module.css`'s
+ * `.editorFrame`), in the editor's colors (`--shiki-editor`, `docs/lib/code-theme.mjs`;
+ * `--editor-*` in `tokens.css`: light on a light page, dark on a dark one, or as an example
+ * sets it, `data-editor`), its head naming its language, its lines numbered and wrapped,
+ * each wrap hung a step in, so no line runs out of sight. A command is drawn as the
+ * homepage's install is (`Home.module.css`'s `.install`): one block on the editor's black.
+ * Nextra's own rules here sit in no layer, so these are doubled where they meet them.
+ */
+.docs-code,
+.docs-terminal {
+  position: relative;
+}
+
+/* The block takes the place of Nextra's in the page's flow, and its room over it. */
+.docs-code:not(:first-child),
+.docs-terminal:not(:first-child) {
+  margin-top: 1.25em;
+}
+
+.docs-code .nextra-code,
+.docs-code pre,
+.docs-terminal .nextra-code,
+.docs-terminal pre {
+  margin: 0;
+}
+
+/* Nextra's word-wrap button goes: the code wraps always. */
+.docs-code pre > div:first-child,
+.docs-terminal pre > div:first-child {
+  display: none;
+}
+
+.docs-code.docs-code pre {
+  background: var(--editor-background);
+  border: 0;
+  border-radius: var(--radius-4);
+  color: var(--editor-text);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.618;
+  overflow-wrap: anywhere;
+  padding: 0 0 var(--clover-space-s, 0.618rem);
+  white-space: pre-wrap;
+}
+
+/*
+ * Nextra's ring at rest gives way to the editor's edge, a hairline drawn inside where its
+ * ground is near the page's (light on light, dark on dark).
+ */
+.docs-code.docs-code pre:not(:focus-visible) {
+  box-shadow: inset 0 0 0 1px var(--editor-edge);
+}
+
+/* Focused (it scrolls, so it takes focus), a ring of the editor's text: 13:1 or more. */
+.docs-code.docs-code pre:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--editor-text);
+}
+
+/* Its head: the language, as the editor names its own, and room at its end for Copy. */
+.docs-code pre::before {
+  border-bottom: 1px solid var(--editor-rule);
+  color: var(--editor-faint);
+  content: attr(data-lang);
+  display: block;
+  font-size: 0.75rem;
+  line-height: 24px;
+  margin-bottom: var(--clover-space-s, 0.618rem);
+  min-height: 24px;
+  padding: 0.382rem 0.618rem 0.382rem 1rem;
+  text-transform: uppercase;
+}
+
+/* Its lines are blocks; the line breaks between them are not lines of their own. */
+.docs-code.docs-code pre code.nextra-code {
+  counter-reset: line;
+  display: block;
+  font-size: inherit;
+  white-space: normal;
+}
+
+/*
+ * Each line, its number before it, under the head's name, and its wraps hung a step in
+ * from its start, as the editor's are (`.lineNumber`, `.lineText`).
+ */
+.docs-code.docs-code pre code.nextra-code > span {
+  display: block;
+  margin-inline: 0.382rem;
+  padding: 0 0.618rem 0 calc(0.236rem + 2ch + 0.618rem + 2ch);
+  position: relative;
+  text-indent: -2ch;
+  white-space: pre-wrap;
+}
+
+.docs-code pre code.nextra-code > span::before {
+  color: var(--editor-faint);
+  content: counter(line);
+  counter-increment: line;
+  left: 0.236rem;
+  position: absolute;
+  text-align: end;
+  text-indent: 0;
+  user-select: none;
+  width: 2ch;
+}
+
+.docs-code.docs-code pre code.nextra-code span {
+  background: none;
+  color: var(--shiki-editor, var(--editor-text));
+}
+
+/*
+ * Where a fence marks lines (```jsx {3}; Mat, 2026-10-22), they are the ones it is about,
+ * lit as the homepage's editor lights a part pointed at (`.codeBlock[data-on]`): one
+ * block, its corners rounded, tinted with the accent (`--editor-mark`). Every line keeps
+ * its colors (Mat, 2026-10-22): the others are not dimmed, which would take them under
+ * 4.5:1 (WCAG 1.4.3).
+ */
+.docs-code.docs-code pre code.nextra-code > span[data-highlighted-line] {
+  background: var(--editor-mark);
+  box-shadow: none;
+}
+
+.docs-code.docs-code
+  pre
+  code.nextra-code
+  > span:not([data-highlighted-line])
+  + span[data-highlighted-line],
+.docs-code.docs-code
+  pre
+  code.nextra-code
+  > span[data-highlighted-line]:first-child {
+  border-start-end-radius: var(--radius-2);
+  border-start-start-radius: var(--radius-2);
+}
+
+.docs-code.docs-code
+  pre
+  code.nextra-code
+  > span[data-highlighted-line]:not(:has(+ span[data-highlighted-line])) {
+  border-end-end-radius: var(--radius-2);
+  border-end-start-radius: var(--radius-2);
+}
+
+/*
+ * A command, as the homepage's install is: the editor's black whatever the page's mode,
+ * its text the editor's own, plain, and Copy at its end. On a dark page, a hairline round
+ * it, drawn inside.
+ */
+.docs-terminal {
+  align-items: center;
+  background: var(--code-background);
+  border-radius: var(--radius-4);
+  color: var(--code-text);
+  display: flex;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  gap: 1rem;
+  padding: 0.625rem 0.618rem 0.625rem 1.618rem;
+}
+
+.dark .docs-terminal {
+  box-shadow: inset 0 0 0 1px var(--gray-6);
+}
+
+.docs-terminal .nextra-code {
+  flex: 1;
+  min-width: 0;
+}
+
+.docs-terminal.docs-terminal pre {
+  background: none;
+  border: 0;
+  border-radius: var(--radius-2);
+  color: inherit;
+  font-size: inherit;
+  line-height: 1.618;
+  overflow-x: auto;
+  padding: 0;
+}
+
+.docs-terminal.docs-terminal pre:not(:focus-visible) {
+  box-shadow: none;
+}
+
+.docs-terminal.docs-terminal pre:focus-visible {
+  box-shadow: none;
+  outline: 2px solid var(--code-text);
+  outline-offset: 2px;
+}
+
+.docs-terminal.docs-terminal pre code.nextra-code {
+  font-size: inherit;
+}
+
+.docs-terminal.docs-terminal pre code.nextra-code > span {
+  padding: 0;
+}
+
+.docs-terminal.docs-terminal pre code.nextra-code span {
+  background: none;
+  color: var(--code-text);
+}
+
+/*
+ * Copy, drawn as the editor's and the install's are (`.copy`, `.installCopy`): the faint
+ * text at the head's size, the text's own under the pointer. In code, in its head's row
+ * at its end; in a command, after it.
+ */
+.docs-code-copy {
+  background: none;
+  border: 0;
+  border-radius: var(--radius-2);
+  color: var(--editor-faint);
+  cursor: pointer;
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  min-block-size: 24px;
+  min-inline-size: 24px;
+  padding: 0.236rem 0.382rem;
+}
+
+.docs-code > .docs-code-copy {
+  position: absolute;
+  right: 0.382rem;
+  top: 0.382rem;
+}
+
+.docs-code-copy:hover {
+  color: var(--editor-text);
+}
+
+.docs-code-copy:focus-visible {
+  outline: 2px solid var(--editor-text);
+}
+
+.docs-terminal > .docs-code-copy {
+  color: var(--code-faint);
+}
+
+.docs-terminal > .docs-code-copy:hover {
+  color: var(--code-text);
+}
+
+.docs-terminal > .docs-code-copy:focus-visible {
+  outline-color: var(--code-text);
+}
+
+/* What Copy did, read, not shown. */
+.docs-code-status {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}

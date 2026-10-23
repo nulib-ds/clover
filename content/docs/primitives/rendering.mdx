@@ -6,6 +6,7 @@ description: A IIIF resource's rendering, the other formats it comes in, such as
 import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
 
 # Rendering
 
@@ -14,10 +15,10 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   list of links.
 </div>
 
-<Example>
+<Example head={<PartHead part="Rendering" />}>
 <PartDemo part="Rendering" resource="transcripts" props={{ of: "canvas" }} />
 
-```jsx
+```jsx {2}
 <Clover.Root iiifContent={url}>
   <Clover.Rendering of="canvas" />
 </Clover.Root>
@@ -46,7 +47,7 @@ view's and the resource's together, in two groups.
 
 ### The current Canvas
 
-Beside a `Content`, `of="canvas"` lists the formats of the Canvas in view, and changes as
+Beside a `Body`, `of="canvas"` lists the formats of the Canvas in view, and changes as
 the reader moves. Each page of this newspaper links its own text.
 
 <Example>
@@ -54,11 +55,11 @@ the reader moves. Each page of this newspaper links its own text.
   part="Rendering"
   resource="page-transcript"
   props={{ of: "canvas" }}
-  content
+  body
 />
 
 ```jsx
-<Clover.Content />
+<Clover.Body />
 <Clover.Rendering of="canvas" />
 ```
 

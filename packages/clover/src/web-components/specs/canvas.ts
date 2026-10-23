@@ -200,7 +200,7 @@ export const handleDocs = {
 export const canvasDocs: ElementDocs = {
   name: "CloverCanvasElement",
   description:
-    "Clover's renderer for images, video and sound. Alone, it draws what it is given: a IIIF resource by URL (a Manifest gives its first Canvas), image URLs, or Canvases as a property. Inside a clover-root, given nothing, the root's view. As tall as --clover-content-height (60vh) or its own style.",
+    "Clover's renderer for images, video and sound. Alone, it draws what it is given: a IIIF resource by URL (a Manifest gives its first Canvas), image URLs, or Canvases as a property. Inside a clover-root, given nothing, the root's view. As tall as --clover-body-height (60vh) or its own style.",
   attributes: {
     "iiif-content": {
       description:

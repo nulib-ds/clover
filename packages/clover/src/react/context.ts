@@ -1,6 +1,6 @@
 import { createContext, useContext, useRef, useSyncExternalStore } from "react";
 
-import type { ContentRenderer } from "../components/Content/renderers";
+import type { BodyRenderer } from "../components/Body/renderers";
 import type { Clover, CloverState } from "../core/clover";
 
 /**
@@ -11,8 +11,8 @@ import type { Clover, CloverState } from "../core/clover";
 export interface CloverContextValue {
   clover: Clover;
   language?: string;
-  /** Renderers of the host's own, for `Content` to draw some views with. */
-  renderers?: ContentRenderer[];
+  /** Renderers of the host's own, for `Body` to draw some views with. */
+  renderers?: BodyRenderer[];
 }
 
 export const CloverContext = createContext<CloverContextValue | null>(null);

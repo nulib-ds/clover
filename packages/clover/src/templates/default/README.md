@@ -44,7 +44,7 @@ pass it: `template={Default}`, from `@nulib/clover/templates`.
 | `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.        |
 | …                  |                             | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`…   |
 
-Size the stage with `--clover-content-height` (default `min(65vh, 40rem)`).
+Size the stage with `--clover-body-height` (default `min(65vh, 40rem)`).
 
 The title is an `h2`, the panel's section headings `h3`s, and the headings inside them
 `h4`s. On a page where the Viewer sits under an `h2` of its own, pass `headingLevel={3}`

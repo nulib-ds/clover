@@ -38,7 +38,7 @@
 }
 
 /* One at a time: while the stage waits on the Root, its Canvas's own mark stays away. */
-.clover-content:has(> .clover-loading) .clover-canvas .clover-loading {
+.clover-body:has(> .clover-loading) .clover-canvas .clover-loading {
   display: none;
 }
 

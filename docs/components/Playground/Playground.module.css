@@ -131,13 +131,8 @@
 
 .section {
   --pg-edge: color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
-  /* The stage's close, soft gray shadow, which the field shares. */
-  --pg-lift: 0 1px 2px rgb(0 0 0 / 0.04), 0 6px 24px rgb(0 0 0 / 0.06);
-}
-
-/* On a dark page an edge does the lifting; the shadow only deepens it. */
-:global(.dark) .section {
-  --pg-lift: 0 6px 24px rgb(0 0 0 / 0.4);
+  /* The stage's close, soft gray shadow, which the field shares (`tokens.css`). */
+  --pg-lift: var(--card-lift);
 }
 
 /*
@@ -492,9 +487,7 @@
   background: var(--color-background);
   border-radius: var(--radius-4);
   /* A hairline edge, then a close, soft gray shadow, just lifting the frame off the page. */
-  box-shadow:
-    0 0 0 1px var(--gray-6),
-    var(--pg-lift);
+  box-shadow: var(--card-shadow);
   height: var(--pg-stage-height);
   overflow: auto;
   position: relative;
@@ -506,7 +499,7 @@
  * which has no strip).
  */
 .stage :global(.clover-template-default) {
-  --clover-content-height: auto;
+  --clover-body-height: auto;
   height: 100%;
 }
 

@@ -10,7 +10,16 @@ import Parts from "docs/components/Home/Parts";
 import styles from "docs/components/Home/Home.module.css";
 import { cookbookSections } from "docs/components/CookbookRecipes/cookbookSections";
 import { resourceFor } from "docs/components/CookbookRecipes/cookbookCatalog";
-import { cookbook, loads, partCount, partLoads } from "docs/lib/figures";
+import { Flavored, elementTag } from "docs/components/Flavored";
+import type { CodeFlavor } from "docs/lib/code-flavor";
+import {
+  cookbook,
+  elementLoads,
+  loads,
+  partCount,
+  partLoads,
+  viewerParts,
+} from "docs/lib/figures";
 import { FULL_WIDTH } from "docs/lib/full-width";
 import { BrandCode, BrandControls } from "docs/components/Home/BrandPicker";
 import { InstallCommand } from "docs/components/Home/InstallCommand";
@@ -62,7 +71,16 @@ interface Story {
   title: string;
   body: React.ReactNode;
   /** A figure, and its unit (`kB`), which is set smaller than it. */
-  figures: { value: string; unit?: string; caption: string }[];
+  /**
+   * Its figures: each for both of the docs' flavors, or for one (`flavor`), shown when the
+   * reader chose it (the header's switch), as a story's sizes are each technology's own.
+   */
+  figures: {
+    value: string;
+    unit?: string;
+    caption: string;
+    flavor?: CodeFlavor;
+  }[];
   /**
    * Whether the example viewer's code is shown across the story's foot, the composer
    * itself, moved here where the viewer is held (`PartsLive.tsx`), which makes a change
@@ -138,14 +156,22 @@ const stories: Story[] = [
       {
         value: loads.defaultTemplate,
         unit: "kB",
-        caption: "Viewer (Default template)",
+        caption: "Viewer (Default template) in React",
+        flavor: "react",
+      },
+      // A page with a Viewer alone, from the Viewer's own entry (`web-components/viewer`).
+      {
+        value: loads.viewerEntry,
+        unit: "kB",
+        caption: "Viewer (Default template) as a web component",
+        flavor: "web-components",
       },
     ],
   },
   {
     label: "Coverage",
     /*
-     * Cookbook 0032, a Collection, read by the same Label, Content, Metadata and
+     * Cookbook 0032, a Collection, read by the same Label, Body, Metadata and
      * Collection (Mat, 2026-10-21), the line drawn to the Collection.
      */
     point: "collection",
@@ -249,7 +275,11 @@ const Homepage: React.FC<{
               const figures = (
                 <div className={styles.storyFigures}>
                   {story.figures.map((figure) => (
-                    <p className={styles.figure} key={figure.caption}>
+                    <p
+                      className={styles.figure}
+                      key={figure.caption}
+                      data-code-flavor={figure.flavor}
+                    >
                       <span className={styles.figureValue}>
                         {/* The stroke under it, set as every mark's is (`.mark`), drawn once. */}
                         <Swoosh className={styles.figureMark}>
@@ -293,11 +323,17 @@ const Homepage: React.FC<{
                      */}
                     {story.weigh && (
                       <p className={styles.visuallyHidden}>
-                        {`What each part adds to a page with a Root, gzipped: ${Object.entries(
-                          partLoads,
-                        )
-                          .map(([part, size]) => `${part} ${size} kB`)
-                          .join(", ")}.`}
+                        <Flavored
+                          react={`What each part adds to a page with a Root, gzipped: ${viewerParts
+                            .map((part) => `${part} ${partLoads[part]} kB`)
+                            .join(", ")}.`}
+                          webComponents={`What each element adds to a page with a <clover-root>, its styles with it, gzipped: ${viewerParts
+                            .map(
+                              (part) =>
+                                `<${elementTag(part)}> ${elementLoads[part]} kB`,
+                            )
+                            .join(", ")}.`}
+                        />
                       </p>
                     )}
                     {story.brand && figures}

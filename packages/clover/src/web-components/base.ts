@@ -10,8 +10,8 @@ export type LoadPart = () => Promise<React.ComponentType<HostedProps>>;
 
 /*
  * How the elements are shown, before Clover's own styles: a root and the boxes a layout
- * places are blocks, the Split a row, and the stage (`<clover-content>`, or a
- * `<clover-canvas>`) takes its height from `--clover-content-height`, as `Content` does,
+ * places are blocks, the Split a row, and the stage (`<clover-body>`, or a
+ * `<clover-canvas>`) takes its height from `--clover-body-height`, as `Body` does,
  * so `style="height: 60vh"` on it sizes it too. A label, and a panel's toggle outside a stage, are no box of their own: what they
  * draw sits in the page as if written there. What an element only reads (a tab, a slot's
  * children), or draws elsewhere (a tip, in its button), is not shown where it is written. Each leaves an element `hidden` hidden, as
@@ -20,7 +20,7 @@ export type LoadPart = () => Promise<React.ComponentType<HostedProps>>;
  */
 const ELEMENT_CSS =
   "@layer clover{:is(clover-root,clover-items,clover-viewer,clover-panel,clover-read-more):not([hidden]){display:block}" +
-  ":is(clover-content,clover-canvas):not([hidden]){display:block;height:var(--clover-content-height,60vh)}" +
+  ":is(clover-body,clover-canvas):not([hidden]){display:block;height:var(--clover-body-height,60vh)}" +
   "clover-split:not([hidden]){display:flex}" +
   ":is(clover-label,clover-panel-toggle):not([hidden]){display:contents}" +
   "clover-tab,clover-tip,clover-status>[slot]{display:none}}";

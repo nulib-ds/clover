@@ -69,7 +69,7 @@ describe("Clover.Root and its parts", () => {
     render(
       <Clover.Root iiifContent={bookJson}>
         <Clover.Label as="h1" />
-        <Clover.Content />
+        <Clover.Body />
         <Clover.Items layout="pager" />
       </Clover.Root>,
     );
@@ -135,7 +135,7 @@ describe("Clover.Root and its parts", () => {
   it("steps by view, a spread at a time, and announces where it went", async () => {
     render(
       <Clover.Root iiifContent={bookJson}>
-        <Clover.Content />
+        <Clover.Body />
         <Clover.Items layout="pager" />
       </Clover.Root>,
     );
@@ -234,7 +234,7 @@ describe("Clover.Root and its parts", () => {
     );
     render(
       <Clover.Root iiifContent={encoded} request={{ fetch }}>
-        <Clover.Content />
+        <Clover.Body />
       </Clover.Root>,
     );
     await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
@@ -257,7 +257,7 @@ describe("Clover.Root and its parts", () => {
     render(
       <Clover.Root iiifContent={bookJson}>
         <Spy />
-        <Clover.Content />
+        <Clover.Body />
       </Clover.Root>,
     );
     await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
@@ -418,14 +418,14 @@ describe("Clover.Root and its parts", () => {
     render(
       <Clover.Root iiifContent={bookJson}>
         <Clover.Status loading={false} />
-        <Clover.Content />
+        <Clover.Body />
       </Clover.Root>,
     );
     const status = screen.getByText("Loading…").closest('[role="status"]');
     expect(status).toHaveStyle({ position: "absolute" });
     expect(status?.querySelector(".clover-loading")).toBeNull();
     // The stage is busy, with the mark in its middle, until the Manifest is in.
-    const stage = document.querySelector(".clover-content")!;
+    const stage = document.querySelector(".clover-body")!;
     expect(stage).toHaveAttribute("aria-busy", "true");
     expect(stage.querySelector(":scope > .clover-loading")).not.toBeNull();
     await screen.findByTestId("clover-canvas");

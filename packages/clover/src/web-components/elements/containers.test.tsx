@@ -119,9 +119,9 @@ describe("The panel and its tabs, as elements", () => {
 });
 
 describe("The panel's toggle, as an element", () => {
-  it("is one of the stage's controls in a clover-content, showing and hiding its target", async () => {
+  it("is one of the stage's controls in a clover-body, showing and hiding its target", async () => {
     const element = root(
-      `<clover-content><clover-panel-toggle controls="info"></clover-panel-toggle></clover-content>
+      `<clover-body><clover-panel-toggle controls="info"></clover-panel-toggle></clover-body>
        <clover-panel id="info"></clover-panel>`,
       bookJson,
     );

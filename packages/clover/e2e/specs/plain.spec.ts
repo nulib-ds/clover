@@ -17,7 +17,7 @@ test("without the stylesheet, the Viewer still lays out usably", async ({
   ).toBeVisible();
   expect(await page.locator("style[data-vite-dev-id]").count()).toBe(0);
 
-  const stage = page.locator(".clover-content");
+  const stage = page.locator(".clover-body");
   const box = await stage.boundingBox();
   expect(box!.height).toBeGreaterThan(200);
 

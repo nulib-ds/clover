@@ -334,6 +334,133 @@ nav.nextra-toc:empty {
   margin: 0;
 }
 
+/*
+ * A component page's head, at the foot of its first example, under its code
+ * (`PartHead.tsx`, `ViewerDocs.module.css`'s `.bar`; Mat, 2026-10-22): the part's name as
+ * the homepage's tiles name theirs, and under it its size, set as the homepage's figures
+ * are (`Home.module.css`'s `.figure`), bold, tight, its unit half its size and lowercase,
+ * the two centered.
+ */
+.docs-part-head {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-2xs, 0.236rem);
+  text-align: center;
+}
+
+.docs-part-head > p {
+  margin: 0;
+}
+
+/*
+ * A component page is one with a lede and no breadcrumb (`reference()`,
+ * `content/docs/_meta.ts`). White space under its head (Mat, 2026-10-22: "white space is
+ * king"): the example under the lede (its margin, which the lede's own takes in) well
+ * clear of it.
+ */
+main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > .docs-lede {
+  margin-bottom: var(--clover-space-xl, 2.618rem);
+}
+
+/*
+ * Named as the homepage's tiles name their parts (`Parts.module.css`'s `.tileName`), in
+ * the code's face and the text accent, but bold and at the page's size (Mat, 2026-10-22).
+ */
+.docs-part-head-name {
+  color: var(--accent-11);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: var(--weight-bold);
+  white-space: nowrap;
+}
+
+.docs-part-head-value {
+  color: var(--gray-12);
+  font-size: var(--text-xl);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  white-space: nowrap;
+}
+
+/* Shown lowercase, its text still "kB", as a screen reader and a copy read it. */
+.docs-part-head-unit {
+  font-size: 0.5em;
+  letter-spacing: -0.02em;
+  margin-inline-start: -0.12em;
+  text-transform: lowercase;
+}
+
+/* What the size measures, read, not shown (Mat, 2026-10-22). */
+.docs-part-head-caption {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+/* The title set as the homepage's sections' are (`SectionIntro.module.css`'s `.title`). */
+main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > h1 {
+  font-size: clamp(1.618rem, 3vw, 2.618rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/*
+ * The title's words under the hero's stroke, on a page with a head (Mat, 2026-10-22), set
+ * as the hero's is (`Home.module.css`'s `.mark`) on the words' own box (`docs-title`,
+ * `mdx-components.tsx`): one shape (`--swoosh`), 0.42em tall, a little off the letters'
+ * foot, behind them, rising 1.5°, faint where the pen comes down, and drawn from one end
+ * to the other as the page loads, as the hero's is.
+ */
+main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > h1 > .docs-title {
+  isolation: isolate;
+  position: relative;
+  z-index: 0;
+}
+
+main:not(.nextra-breadcrumb ~ main):has(> .docs-lede)
+  > h1
+  > .docs-title::after {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--accent-9) 30%, transparent),
+    var(--accent-9)
+  );
+  bottom: -0.1em;
+  content: "";
+  height: 0.42em;
+  left: -0.04em;
+  mask: var(--swoosh) center / 100% 100% no-repeat;
+  position: absolute;
+  right: -0.06em;
+  rotate: 1.5deg;
+  z-index: -1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  main:not(.nextra-breadcrumb ~ main):has(> .docs-lede)
+    > h1
+    > .docs-title::after {
+    animation: docs-title-draw 700ms cubic-bezier(0.65, 0, 0.35, 1) 300ms both;
+  }
+}
+
+@keyframes docs-title-draw {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
 main:has(> .docs-lede) > :is(p, ul, ol) {
   max-width: 44rem;
 }

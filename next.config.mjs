@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants.js";
 import nextra from "nextra";
+import { editorTheme } from "./docs/lib/code-theme.mjs";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 
@@ -21,7 +22,15 @@ const withNextra = nextra({
      * not: an orange at 3.5:1, and dark comments at 4.4:1.
      */
     rehypePrettyCodeOptions: {
-      theme: { light: "github-light-default", dark: "github-dark-default" },
+      /*
+       * And the homepage editor's, which the examples' code is drawn in (`editor`,
+       * `docs/lib/code-theme.mjs`; Mat, 2026-10-22).
+       */
+      theme: {
+        light: "github-light-default",
+        dark: "github-dark-default",
+        editor: editorTheme,
+      },
     },
   },
 });

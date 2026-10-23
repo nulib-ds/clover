@@ -91,6 +91,18 @@ itself. Two ways to search any query:
   />;
   ```
 
+  ```html twin
+  <script type="module">
+    import { mockFetch } from "docs/mocks/content-search/index.mjs";
+
+    document.querySelector("clover-viewer").request = { fetch: mockFetch() };
+  </script>
+
+  <clover-viewer
+    iiif-content="https://nulib-ds.github.io/clover/mocks/content-search/manifest.json"
+  ></clover-viewer>
+  ```
+
 <Callout type="info">
   Clover 3.x's older newspaper mock (`/manifest/content-search/`) is unchanged.
   Its live service, `/api/fixtures/content-search/1`, works in `npm run dev`

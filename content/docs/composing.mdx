@@ -29,7 +29,7 @@ import * as Clover from "@nulib/clover";
 import "@nulib/clover/styles.css";
 
 <Clover.Root iiifContent={url} className="my-layout">
-  <Clover.Content />
+  <Clover.Body />
   <aside>
     <Clover.Label as="h3" />
     <Clover.Label of="canvas" />
@@ -60,7 +60,7 @@ import Viewer, * as Clover from "@nulib/clover";
 function MyLayout(props) {
   return (
     <Clover.Root {...props}>
-      <Clover.Content />
+      <Clover.Body />
       <Clover.Items layout="pager" />
     </Clover.Root>
   );
@@ -74,7 +74,7 @@ function MyLayout(props) {
 <clover-root
   iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
 >
-  <clover-content></clover-content>
+  <clover-body></clover-body>
   <clover-items layout="pager"></clover-items>
 </clover-root>
 ```
@@ -105,28 +105,28 @@ template, and the Viewer, takes these props and hands them to its `Root`.
 
 ## Parts
 
-| Part                                               | What it renders                                                                                                                                                                                                                     |
-| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Root`                                             | Loads the content and holds where the reader is. Renders a `div` (or `as`), and announces moves.                                                                                                                                    |
-| [`Content`](/docs/content)                         | The current view, drawn by `Canvas`: a page, a spread, a video or sound. Children join its controls. While it loads, Clover's loading mark runs along its top edge; nothing moves.                                                  |
-| [`Label`](/docs/primitives/label)                  | The Manifest's label, or the current Canvas's with `of="canvas"`, in the reader's language.                                                                                                                                         |
-| [`Previous`, `Next`](/docs/items#one-at-a-time)    | Round arrow controls that move a view at a time (a spread, in a paged book), as Items' arrows do, or with `of="members"` a Collection's Manifest. Each names itself on hover and focus, and shows disabled at an end.               |
-| [`Position`](/docs/items#one-at-a-time)            | "2 / 5", counted in views (or members); "Item 2 of 5" to assistive technology, in the reader's language. Its room is its widest count's.                                                                                            |
-| `Status`                                           | Loading, as Clover's loading mark (announced "Loading…"), or what went wrong. Once loaded, its status region stays, empty and hidden, so the next load is announced. `loading={false}` only announces it, where `Content` shows it. |
-| [`Items`](/docs/items)                             | Thumbnails of the views, as a carousel, list or grid, or `layout="pager"`: `Position`, `Previous` and `Next` in a `nav`. See [Items](/docs/items).                                                                                  |
-| [`Panel`](/docs/panel)                             | The resource's information in sections, as tabs or an accordion: the ones it has data for, or `Tab`s of your own. See [Panel](/docs/panel).                                                                                         |
-| [`Tab`](/docs/panel#sections-of-your-own)          | One tab of the panel: `value`, `label`, and what it shows. Your own components go here.                                                                                                                                             |
-| [`About`](/docs/panel#sections)                    | Everything the Manifest says about itself, as 3.x's About tab shows it.                                                                                                                                                             |
-| [`PanelToggle`](/docs/panel#showing-and-hiding-it) | Shows and hides the panel. As a child of `Content`, it sits with the Canvas's controls.                                                                                                                                             |
-| [`Annotations`](/docs/annotations)                 | The view's annotations by set: content to read, a button to find each on the Canvas, and an eye before each set's label that hides its annotations on the Canvas (shared with the Canvas's annotations menu).                       |
-| [`Download`](/docs/download)                       | The `rendering` of the page in view and of the Manifest (a PDF, say), as links in two groups.                                                                                                                                       |
-| [`Transcript`](/docs/transcript)                   | The view's captions as text: the current cue marked as it plays, a press seeking there.                                                                                                                                             |
-| [`Contents`](/docs/contents)                       | The table of contents from the Manifest's Ranges, the entry the reader is in marked. Hovering an entry draws its chapter out on the Canvas's seek bar, and the chapter under the pointer there marks its entry.                     |
-| [`Search`](/docs/search)                           | IIIF Content Search (1 or 2): a field, then the hits by page with the words around them.                                                                                                                                            |
-| [`Collection`](/docs/collection)                   | The Collection the Manifest is in: its label, summary, members, homepage and address, as the `Panel`'s Collection section shows it. Fetched when it first shows. `headingLevel` sets its headings (default 3).                      |
-| [`CollectionSelect`](/docs/collection)             | In a Collection, a menu of its members; choosing one shows it. By keyboard, the arrows move through the members and Enter opens one; Escape, or leaving the menu, takes the step back.                                              |
-| [`Canvas`](/docs/canvas)                           | The renderer itself. Inside a `Root` it shows the current view; see [Canvas](/docs/canvas).                                                                                                                                         |
-| `Tip`                                              | A control's popover: its name and its key, on hover and focus. See [below](#controls-of-your-own).                                                                                                                                  |
+| Part                                               | What it renders                                                                                                                                                                                                                  |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Root`                                             | Loads the content and holds where the reader is. Renders a `div` (or `as`), and announces moves.                                                                                                                                 |
+| [`Body`](/docs/body)                               | The current view, drawn by `Canvas`: a page, a spread, a video or sound. Children join its controls. While it loads, Clover's loading mark runs along its top edge; nothing moves.                                               |
+| [`Label`](/docs/primitives/label)                  | The Manifest's label, or the current Canvas's with `of="canvas"`, in the reader's language.                                                                                                                                      |
+| [`Previous`, `Next`](/docs/items#one-at-a-time)    | Round arrow controls that move a view at a time (a spread, in a paged book), as Items' arrows do, or with `of="members"` a Collection's Manifest. Each names itself on hover and focus, and shows disabled at an end.            |
+| [`Position`](/docs/items#one-at-a-time)            | "2 / 5", counted in views (or members); "Item 2 of 5" to assistive technology, in the reader's language. Its room is its widest count's.                                                                                         |
+| `Status`                                           | Loading, as Clover's loading mark (announced "Loading…"), or what went wrong. Once loaded, its status region stays, empty and hidden, so the next load is announced. `loading={false}` only announces it, where `Body` shows it. |
+| [`Items`](/docs/items)                             | Thumbnails of the views, as a carousel, list or grid, or `layout="pager"`: `Position`, `Previous` and `Next` in a `nav`. See [Items](/docs/items).                                                                               |
+| [`Panel`](/docs/panel)                             | The resource's information in sections, as tabs or an accordion: the ones it has data for, or `Tab`s of your own. See [Panel](/docs/panel).                                                                                      |
+| [`Tab`](/docs/panel#sections-of-your-own)          | One tab of the panel: `value`, `label`, and what it shows. Your own components go here.                                                                                                                                          |
+| [`About`](/docs/panel#sections)                    | Everything the Manifest says about itself, as 3.x's About tab shows it.                                                                                                                                                          |
+| [`PanelToggle`](/docs/panel#showing-and-hiding-it) | Shows and hides the panel. As a child of `Body`, it sits with the Canvas's controls.                                                                                                                                             |
+| [`Annotations`](/docs/annotations)                 | The view's annotations by set: content to read, a button to find each on the Canvas, and an eye before each set's label that hides its annotations on the Canvas (shared with the Canvas's annotations menu).                    |
+| [`Download`](/docs/download)                       | The `rendering` of the page in view and of the Manifest (a PDF, say), as links in two groups.                                                                                                                                    |
+| [`Transcript`](/docs/transcript)                   | The view's captions as text: the current cue marked as it plays, a press seeking there.                                                                                                                                          |
+| [`Contents`](/docs/contents)                       | The table of contents from the Manifest's Ranges, the entry the reader is in marked. Hovering an entry draws its chapter out on the Canvas's seek bar, and the chapter under the pointer there marks its entry.                  |
+| [`Search`](/docs/search)                           | IIIF Content Search (1 or 2): a field, then the hits by page with the words around them.                                                                                                                                         |
+| [`Collection`](/docs/collection)                   | The Collection the Manifest is in: its label, summary, members, homepage and address, as the `Panel`'s Collection section shows it. Fetched when it first shows. `headingLevel` sets its headings (default 3).                   |
+| [`CollectionSelect`](/docs/collection)             | In a Collection, a menu of its members; choosing one shows it. By keyboard, the arrows move through the members and Enter opens one; Escape, or leaving the menu, takes the step back.                                           |
+| [`Canvas`](/docs/canvas)                           | The renderer itself. Inside a `Root` it shows the current view; see [Canvas](/docs/canvas).                                                                                                                                      |
+| `Tip`                                              | A control's popover: its name and its key, on hover and focus. See [below](#controls-of-your-own).                                                                                                                               |
 
 Parts that have nothing to show render nothing: `Items` and its pager for a single view,
 `Label` with no label.
@@ -210,7 +210,7 @@ too, in a `Tab` or anywhere in the layout, and so does a part of your own.
 </Clover.Panel>
 ```
 
-`PanelToggle` shows and hides it; as a child of `Content`, it sits with the Canvas's
+`PanelToggle` shows and hides it; as a child of `Body`, it sits with the Canvas's
 controls. [Panel](/docs/panel) has its layouts, the sections and
 when each shows, headings, closing a panel that floats over the page, and its props.
 
@@ -230,7 +230,7 @@ ties it to any part.
 <Clover.Root iiifContent={url}>
   <Clover.Split storageKey="my-layout">
     <Clover.SplitPane min="16rem">
-      <Clover.Content />
+      <Clover.Body />
     </Clover.SplitPane>
     <Clover.SplitHandle />
     <Clover.SplitPane size="24rem" min="14rem">
@@ -304,7 +304,7 @@ function MyLayout({ url, headingLevel }) {
   return (
     <Clover.Root iiifContent={url} {...title.group}>
       <Clover.Label as={title.as} {...title.title} />
-      <Clover.Content />
+      <Clover.Body />
     </Clover.Root>
   );
 }
@@ -315,7 +315,7 @@ function MyLayout({ url, headingLevel }) {
   iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
 >
   <clover-label as="h2"></clover-label>
-  <clover-content></clover-content>
+  <clover-body></clover-body>
 </clover-root>
 ```
 
@@ -447,7 +447,7 @@ const langOf = Clover.useLangOf();
 
 ## Renderers of your own
 
-Give `Root` (or one `Content`) `renderers`, and a view they claim is drawn by your
+Give `Root` (or one `Body`) `renderers`, and a view they claim is drawn by your
 component instead of the Canvas: a 3D model, a PDF, anything Clover does not draw. Claim a
 view by its Canvas id, by a painted body's `format`, or with a `match` test. The first
 renderer that claims a view draws it. This is 3.x's `customDisplays`.
@@ -462,7 +462,7 @@ function ModelViewer({ bodies }) {
   iiifContent={url}
   renderers={[{ format: ["model/gltf-binary"], component: ModelViewer }]}
 >
-  <Clover.Content />
+  <Clover.Body />
 </Clover.Root>;
 ```
 
@@ -470,7 +470,7 @@ function ModelViewer({ bodies }) {
 <clover-root
   iiif-content="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/manifest.json"
 >
-  <clover-content></clover-content>
+  <clover-body></clover-body>
 </clover-root>
 
 <script type="module">
@@ -489,7 +489,7 @@ function ModelViewer({ bodies }) {
 ```
 
 A renderer gets the view's `canvases`, their painting `bodies` (a `Choice` as its first
-item, a `SpecificResource` as its source) and `Content`'s `children`. The Viewer and every
+item, a `SpecificResource` as its source) and `Body`'s `children`. The Viewer and every
 template pass `renderers` through to their `Root`.
 
 | 3.x `customDisplays`         | 4.x `renderers`                                     |
@@ -508,11 +508,11 @@ Import `@nulib/clover/styles.css` once. Its rules sit in `@layer clover`, so you
 CSS wins without a fight over specificity. Without it, every part still renders a plain,
 usable layout.
 
-The stage takes its height from `--clover-content-height` (default `60vh`):
+The stage takes its height from `--clover-body-height` (default `60vh`):
 
 ```css
 .my-layout {
-  --clover-content-height: 70vh;
+  --clover-body-height: 70vh;
 }
 ```
 

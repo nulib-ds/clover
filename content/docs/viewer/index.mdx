@@ -95,7 +95,7 @@ every template is built on.
 | `onStatusChange`       | `(status, error) => void`            | —                    | The resource is `"loading"`, `"ready"`, or met an `"error"`.                       |
 | `request`              | `{ credentials, headers, fetch }`    | —                    | Credentials, headers and a `fetch` of your own, for every request.                 |
 | `language`             | `string`                             | The reader's         | The language to read IIIF text in.                                                 |
-| `renderers`            | `ContentRenderer[]`                  | —                    | Components of your own for views Clover does not draw.                             |
+| `renderers`            | `BodyRenderer[]`                     | —                    | Components of your own for views Clover does not draw.                             |
 
 `iiifContent` can be:
 
@@ -178,9 +178,8 @@ import { Default } from "@nulib/clover/templates";
 ```
 
 Every template is built only from parts `@nulib/clover` exports. To change one, copy its
-source, in `packages/clover/src/templates/`, into your app: the
-[Default template](/docs/viewer/default) walks through the Viewer's own, region by
-region. To start from nothing, see [Composing layouts](/docs/composing).
+source, in `packages/clover/src/templates/`, into your app. To start from nothing, see
+[Composing layouts](/docs/composing).
 
 ### Panel layout
 
@@ -539,11 +538,11 @@ your own. See [Renderers of your own](/docs/composing#renderers-of-your-own).
 ### Styles
 
 Import `@nulib/clover/styles.css` once, and `@nulib/clover/templates.css` for Document
-and Gallery. Size the stage with `--clover-content-height`.
+and Gallery. Size the stage with `--clover-body-height`.
 
 ```css
 .catalog {
-  --clover-content-height: 32rem;
+  --clover-body-height: 32rem;
 }
 ```
 

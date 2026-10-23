@@ -674,7 +674,7 @@ describe("Canvas media", () => {
   it("takes chapters from the Manifest's Ranges, each in its language", async () => {
     render(
       <Clover.Root iiifContent={operaJson}>
-        <Clover.Content />
+        <Clover.Body />
       </Clover.Root>,
     );
     const title = await screen.findByText(
@@ -821,7 +821,7 @@ describe("Canvas media", () => {
       };
       render(
         <Clover.Root iiifContent={poetryJson}>
-          <Clover.Content />
+          <Clover.Body />
           <Clover.Annotations scope="view" />
           <Spy />
         </Clover.Root>,
@@ -947,7 +947,7 @@ describe("Canvas media", () => {
       };
       render(
         <Clover.Root iiifContent={hessJson}>
-          <Clover.Content />
+          <Clover.Body />
           <Clover.Annotations scope="view" />
           <Spy />
         </Clover.Root>,
@@ -1040,7 +1040,7 @@ describe("Canvas media", () => {
       };
       render(
         <Clover.Root iiifContent={hessJson}>
-          <Clover.Content />
+          <Clover.Body />
           <Clover.Annotations scope="view" />
           <Spy />
         </Clover.Root>,
