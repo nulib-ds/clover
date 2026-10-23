@@ -25,6 +25,7 @@ import { AccessibilityTree } from "docs/components/Home/AccessibilityTree";
 import { SectionIntro } from "docs/components/Home/SectionIntro";
 import { partCount } from "docs/components/Home/counts";
 import { elementLoads, partLoads } from "docs/lib/sizes";
+import { Choice, Scrub, Switch } from "docs/components/CodeValues";
 import { Flavored, PartName, elementTag } from "docs/components/Flavored";
 import { useCodeFlavor } from "docs/lib/code-flavor";
 import { useRecipeContent } from "docs/components/Home/recipeThumbnails";
@@ -1599,6 +1600,7 @@ const ViewerCode = React.memo(function ViewerCode({
                     label="Body controls"
                     value={view.controls}
                     onChange={(controls) => set({ controls })}
+                    className={`${styles.value} ${styles.tokenNumber}`}
                   />
                 ),
               },
@@ -1621,6 +1623,7 @@ const ViewerCode = React.memo(function ViewerCode({
                     max={480}
                     value={view.height}
                     onChange={(height) => set({ height })}
+                    className={`${styles.value} ${styles.scrub} ${styles.tokenNumber}`}
                   />
                 ),
               },
@@ -1646,6 +1649,7 @@ const ViewerCode = React.memo(function ViewerCode({
                 options={LAYOUTS}
                 value={view.layout}
                 onChange={(next) => set({ layout: next })}
+                className={`${styles.value} ${styles.choice} ${styles.tokenString}`}
               />
             ),
           },
@@ -1708,6 +1712,7 @@ const ViewerCode = React.memo(function ViewerCode({
                     label="Body controls"
                     value={view.controls}
                     onChange={(controls) => set({ controls })}
+                    className={`${styles.value} ${styles.tokenNumber}`}
                   />
                 ),
               },
@@ -1730,6 +1735,7 @@ const ViewerCode = React.memo(function ViewerCode({
                     max={480}
                     value={view.height}
                     onChange={(height) => set({ height })}
+                    className={`${styles.value} ${styles.scrub} ${styles.tokenNumber}`}
                   />
                 ),
               },
@@ -1750,6 +1756,7 @@ const ViewerCode = React.memo(function ViewerCode({
                 options={LAYOUTS}
                 value={view.layout}
                 onChange={(next) => set({ layout: next })}
+                className={`${styles.value} ${styles.choice} ${styles.tokenString}`}
               />
             ),
           },
@@ -2117,149 +2124,6 @@ const ViewerCode = React.memo(function ViewerCode({
     </div>
   );
 });
-
-/**
- * A number to type, step with the arrow keys (Shift for tens), or drag sideways a pixel a
- * pixel: a press that does not drag puts the caret in it (WCAG 2.5.7). Out of its range,
- * what is typed comes back within it when the field is left.
- */
-function Scrub({
-  label,
-  min,
-  max,
-  value,
-  onChange,
-}: {
-  label: string;
-  min: number;
-  max: number;
-  value: number;
-  onChange: (value: number) => void;
-}) {
-  const from = useRef<{ x: number; value: number; moved: boolean } | null>(
-    null,
-  );
-  const [dragging, setDragging] = useState(false);
-  // What is typed, until it is a number in range or the field is left.
-  const [draft, setDraft] = useState<string | null>(null);
-  const clamp = (next: number) =>
-    Math.min(max, Math.max(min, Math.round(next)));
-  const stop = (event: React.PointerEvent<HTMLInputElement>) => {
-    const pressed = from.current;
-    from.current = null;
-    setDragging(false);
-    if (pressed && !pressed.moved) {
-      event.currentTarget.focus();
-      event.currentTarget.select();
-    }
-  };
-  return (
-    <input
-      type="number"
-      inputMode="numeric"
-      aria-label={label}
-      min={min}
-      max={max}
-      step={1}
-      value={draft ?? value}
-      className={`${styles.value} ${styles.scrub} ${styles.tokenNumber}`}
-      data-dragging={dragging || undefined}
-      onChange={(event) => {
-        const typed = event.target.value;
-        setDraft(typed);
-        const next = Number(typed);
-        if (typed !== "" && next >= min && next <= max) onChange(clamp(next));
-      }}
-      onBlur={() => {
-        if (draft !== null && draft !== "") onChange(clamp(Number(draft)));
-        setDraft(null);
-      }}
-      onPointerDown={(event) => {
-        if (event.button !== 0) return;
-        // Not focused yet: a press that drags scrubs, one that does not types.
-        if (document.activeElement === event.currentTarget) return;
-        event.preventDefault();
-        event.currentTarget.setPointerCapture(event.pointerId);
-        from.current = { x: event.clientX, value, moved: false };
-      }}
-      onPointerMove={(event) => {
-        const pressed = from.current;
-        if (!pressed) return;
-        const dx = event.clientX - pressed.x;
-        if (!pressed.moved && Math.abs(dx) < 3) return;
-        pressed.moved = true;
-        setDragging(true);
-        onChange(clamp(pressed.value + dx));
-      }}
-      onPointerUp={stop}
-      onPointerCancel={stop}
-      onKeyDown={(event) => {
-        if (event.key === "Enter") {
-          const next = Number(event.currentTarget.value);
-          if (event.currentTarget.value !== "") onChange(clamp(next));
-          setDraft(null);
-          return;
-        }
-        const by =
-          event.key === "ArrowUp" ? 1 : event.key === "ArrowDown" ? -1 : 0;
-        if (!by || !event.shiftKey) return;
-        event.preventDefault();
-        setDraft(null);
-        onChange(clamp(value + by * 10));
-      }}
-    />
-  );
-}
-
-/** `true` or `false`, pressed to switch. */
-function Switch({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: boolean;
-  onChange: (value: boolean) => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={value}
-      aria-label={label}
-      className={`${styles.value} ${styles.tokenNumber}`}
-      onClick={() => onChange(!value)}
-    >
-      {String(value)}
-    </button>
-  );
-}
-
-/** One of a few strings, picked from a menu. */
-function Choice<T extends string>({
-  label,
-  options,
-  value,
-  onChange,
-}: {
-  label: string;
-  options: T[];
-  value: T;
-  onChange: (value: T) => void;
-}) {
-  return (
-    <select
-      aria-label={label}
-      className={`${styles.value} ${styles.choice} ${styles.tokenString}`}
-      value={value}
-      onChange={(event) => onChange(event.target.value as T)}
-    >
-      {options.map((option) => (
-        <option key={option} value={option}>{`"${option}"`}</option>
-      ))}
-    </select>
-  );
-}
 
 /** The map's part, once MapLibre's worker is set: loaded only for a resource with places. */
 function MapTile() {

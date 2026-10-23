@@ -70,6 +70,20 @@ const labelOf = (flavor) => ({
 
 function clean(node) {
   if (!node.children) return;
+  // A live example's code (`LiveCode.tsx`): its text as it opens, without its controls.
+  const live = node.properties?.dataLiveCode;
+  if (node.tagName === "pre" && typeof live === "string") {
+    const language = node.properties?.dataLang;
+    node.children = [
+      {
+        type: "element",
+        tagName: "code",
+        properties: language ? { className: [`language-${language}`] } : {},
+        children: [{ type: "text", value: live }],
+      },
+    ];
+    return;
+  }
   const flavor = node.properties?.dataCodeFlavor;
   // A name in prose (`code-flavors.mjs`): React's as written, then web components' after it.
   if (node.tagName === "span" && FLAVORS[flavor]) {

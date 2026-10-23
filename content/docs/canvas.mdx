@@ -9,6 +9,7 @@ import { Example } from "docs/components/Clover4/ViewerDocs";
 import CloverCanvas from "docs/components/DynamicImports/Canvas";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
+import { LivePart } from "docs/components/Clover4/LiveExample";
 
 # Canvas
 
@@ -17,18 +18,23 @@ import { PartHead } from "docs/components/Clover4/PartHead";
   and zoom surface.
 </div>
 
-<Example head={<PartHead part="Canvas" />}>
-<div style={{ height: 420 }}>
-  <CloverCanvas iiifContent="https://nulib-ds.github.io/clover/mocks/standalone-canvas/canvas.json" />
-</div>
-
-```jsx
-<div style={{ height: 420 }}>
-  <Clover.Canvas iiifContent={url} />
-</div>
-```
-
-</Example>
+<LivePart
+  part="Canvas"
+  resource="standalone-canvas"
+  knobs={[
+    {
+      prop: "style.height",
+      on: "box",
+      value: 420,
+      min: 240,
+      max: 640,
+      label: "Height of the box round Canvas, in pixels",
+    },
+    { prop: "placeholder", value: true },
+    { prop: "controls", value: true },
+  ]}
+  head={<PartHead part="Canvas" />}
+/>
 
 ## API reference
 

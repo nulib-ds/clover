@@ -3,10 +3,10 @@ title: Search
 description: "IIIF Content Search of the Root's Manifest, version 1 or 2: a field, then the hits by Canvas with the words around them, drawn on the Canvas."
 ---
 
-import { PartDemo } from "docs/components/Clover4/PartDemo";
-import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
+import { ViewerExample } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
+import { LivePart } from "docs/components/Clover4/LiveExample";
 
 # Search
 
@@ -15,17 +15,14 @@ import { PartHead } from "docs/components/Clover4/PartHead";
   the words around them.
 </div>
 
-<Example head={<PartHead part="Search" />}>
-<PartDemo part="Search" resource="search" props={{ headingLevel: 2 }} body />
-
-```jsx {3}
-<Clover.Root iiifContent={url}>
-  <Clover.Body />
-  <Clover.Search />
-</Clover.Root>
-```
-
-</Example>
+<LivePart
+  part="Search"
+  resource="search"
+  props={{ headingLevel: 2 }}
+  body
+  knobs={[{ prop: "searchQuery", on: "root", value: "Moskau" }]}
+  head={<PartHead part="Search" />}
+/>
 
 ## API reference
 

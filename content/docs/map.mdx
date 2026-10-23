@@ -7,6 +7,7 @@ import { MapDemo } from "docs/components/Clover4/Demos";
 import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
+import { LivePart } from "docs/components/Clover4/LiveExample";
 
 # Map
 
@@ -15,18 +16,26 @@ import { PartHead } from "docs/components/Clover4/PartHead";
   laid over the ground.
 </div>
 
-<Example head={<PartHead part="Map" />}>
-<MapDemo mock="navplace/manifest.json" />
-
-```jsx
-import { Map } from "@nulib/clover/map";
-import "@nulib/clover/styles.css";
-import "maplibre-gl/dist/maplibre-gl.css";
-
-<Map iiifContent="https://nulib-ds.github.io/clover/mocks/navplace/manifest.json" />;
-```
-
-</Example>
+<LivePart
+  part="Map"
+  resource="navplace"
+  imports={[
+    'import { Map } from "@nulib/clover/map";',
+    'import "@nulib/clover/styles.css";',
+    'import "maplibre-gl/dist/maplibre-gl.css";',
+  ]}
+  knobs={[
+    {
+      prop: "style.--clover-map-height",
+      value: 420,
+      format: "{}px",
+      min: 240,
+      max: 640,
+    },
+    { prop: "scrollZoom", value: false },
+  ]}
+  head={<PartHead part="Map" />}
+/>
 
 ## API reference
 

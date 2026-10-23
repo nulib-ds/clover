@@ -2,7 +2,7 @@
  * The address each example's resource has, for the "Web components" code of an example
  * (`remark-code-flavors.mjs`): an HTML attribute takes the address itself, where the React
  * code says `{url}`. Read from where the examples get them, as written there: a part
- * demo's `resource` (`RESOURCES` in `docs/components/Clover4/PartDemo.tsx`) and a Viewer
+ * demo's `resource` (`RESOURCES` in `docs/lib/part-demo-resources.ts`) and a Viewer
  * example's (`resources` in `docs/components/Playground/playground-config.ts`). A mock is
  * the published site's (`/mocks/…`). Plain JavaScript, run by `next.config.mjs`.
  */
@@ -65,7 +65,7 @@ const text = (node) =>
 /** A part demo's resources: `RESOURCES`, key to mock path or address. */
 export function partDemoUrls() {
   const object = declared(
-    parse("docs/components/Clover4/PartDemo.tsx"),
+    parse("docs/lib/part-demo-resources.ts"),
     "RESOURCES",
   );
   const urls = new Map();

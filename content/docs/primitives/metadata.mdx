@@ -7,6 +7,7 @@ import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
+import { LivePart } from "docs/components/Clover4/LiveExample";
 
 # Metadata
 
@@ -15,16 +16,21 @@ import { PartHead } from "docs/components/Clover4/PartHead";
   values.
 </div>
 
-<Example head={<PartHead part="Metadata" />}>
-<PartDemo part="Metadata" />
-
-```jsx {2}
-<Clover.Root iiifContent={url}>
-  <Clover.Metadata />
-</Clover.Root>
-```
-
-</Example>
+<LivePart
+  part="Metadata"
+  shown={{ style: { display: "grid" } }}
+  knobs={[
+    {
+      prop: "style.gridTemplateColumns",
+      value: 2,
+      format: "repeat({}, minmax(0, 1fr))",
+      min: 1,
+      max: 4,
+      label: "Metadata columns",
+    },
+  ]}
+  head={<PartHead part="Metadata" />}
+/>
 
 ## API reference
 

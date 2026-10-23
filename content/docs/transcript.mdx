@@ -7,6 +7,7 @@ import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
+import { LivePart } from "docs/components/Clover4/LiveExample";
 
 # Transcript
 
@@ -15,8 +16,7 @@ import { PartHead } from "docs/components/Clover4/PartHead";
   playing marked, or its transcript as plain text.
 </div>
 
-<Example head={<PartHead part="Transcript" />}>
-<PartDemo
+<LivePart
   part="Transcript"
   resource="transcripts"
   body
@@ -26,16 +26,9 @@ import { PartHead } from "docs/components/Clover4/PartHead";
     tabIndex: 0,
     style: { maxHeight: "20rem", overflowY: "auto" },
   }}
+  knobs={[{ prop: "follow", value: true }]}
+  head={<PartHead part="Transcript" />}
 />
-
-```jsx {3}
-<Clover.Root iiifContent={url}>
-  <Clover.Body />
-  <Clover.Transcript />
-</Clover.Root>
-```
-
-</Example>
 
 ## API reference
 

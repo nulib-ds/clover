@@ -3,7 +3,15 @@
 import dynamic from "next/dynamic";
 import React, { useEffect, useId, useRef, useState } from "react";
 import { encodeContentState } from "docs/components/Clover4/Demos";
+import { LiveCode } from "docs/components/Clover4/LiveCode";
 import styles from "docs/components/Clover4/ViewerDocs.module.css";
+import {
+  type CodeTree,
+  type Knob,
+  initialValues,
+  knobProps,
+  remountKey,
+} from "docs/lib/live-code";
 import { resources } from "docs/components/Playground/playground-config";
 import { loadMapWorker } from "docs/lib/map-worker";
 import { useRouter } from "docs/lib/router";
@@ -19,7 +27,7 @@ import { useRouter } from "docs/lib/router";
  * components" twin beside it, made as the page compiles (`docs/lib/code-flavors.mjs`).
  */
 
-type TemplateName = "Default" | "Document" | "Gallery";
+export type TemplateName = "Default" | "Document" | "Gallery";
 type Plain = string | number | boolean;
 
 /** The newspaper with a Content Search service, Clover's mock: none of the homepage's has one. */
@@ -371,6 +379,94 @@ export function OptionsExample({
               })
             : child,
         )}
+      </CodeArea>
+    </figure>
+  );
+}
+
+/** A template's live code: its knobs, and its code's elements (`LiveExample.tsx`). */
+export interface LiveTemplate {
+  name: TemplateName;
+  knobs: Knob[];
+  tree: CodeTree;
+}
+
+/**
+ * The Viewer page's first example, live (Mat, 2026-10-22): the template, switched by the
+ * large control over the Viewer, as `OptionsExample`'s `lead`, and under it that
+ * template's code, its knobs live (`LiveCode`), each template keeping its own values as
+ * the reader switches. A knob read only as the Viewer mounts draws it again.
+ */
+export function LiveTemplates({
+  options,
+  editor,
+  ...live
+}: Omit<LiveProps, "template" | "props"> & {
+  options: LiveTemplate[];
+  editor?: Editor;
+}) {
+  const id = useId();
+  const [chosen, setChosen] = useState(options[0].name);
+  const [values, setValues] = useState(() =>
+    Object.fromEntries(
+      options.map((option) => [option.name, initialValues(option.knobs)]),
+    ),
+  );
+  const option = options.find((each) => each.name === chosen) ?? options[0];
+  const current = values[option.name];
+  const set = (name: TemplateName) => (knob: string, value: Plain) =>
+    setValues((all) => ({ ...all, [name]: { ...all[name], [knob]: value } }));
+  return (
+    <figure className={styles.example} data-lead>
+      <div className={styles.switchBar}>
+        <span className={styles.switchLabel} id={`${id}-label`}>
+          Template
+        </span>
+        <div
+          role="group"
+          aria-labelledby={`${id}-label`}
+          className={styles.segmented}
+        >
+          {options.map(({ name }) => (
+            <button
+              key={name}
+              type="button"
+              aria-pressed={name === option.name}
+              className={styles.segment}
+              onClick={() => setChosen(name)}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className={styles.preview}>
+        <Live
+          key={`${option.name}|${remountKey(option.knobs, current)}`}
+          {...live}
+          template={option.name}
+          props={knobProps(option.knobs, current) as Record<string, Plain>}
+        />
+      </div>
+      <CodeArea editor={editor}>
+        {/*
+         * Every template's code, the chosen one's shown by CSS (`data-shown`), as
+         * `OptionsExample` keeps each value's, so the page's Markdown holds them all.
+         */}
+        {options.map((each) => (
+          <div
+            key={each.name}
+            data-option={each.name}
+            data-shown={each.name === option.name ? "" : undefined}
+          >
+            <LiveCode
+              tree={each.tree}
+              knobs={each.knobs}
+              values={values[each.name]}
+              onChange={set(each.name)}
+            />
+          </div>
+        ))}
       </CodeArea>
     </figure>
   );

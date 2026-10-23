@@ -83,7 +83,21 @@ deadline.
     props plain values, in a `Root` over a mock (`resource`), with a `Body` above it
     (`content`) where it follows the view; several parts in the one `Root` (`parts`, on
     a line with `row`); a tall part in a box that scrolls (`box`), as the templates
-    scroll the Panel, the box in the example's code too. The homepage's tiles link to these pages
+    scroll the Panel, the box in the example's code too. The example at the top is live,
+    as the homepage's editor is (Mat, 2026-10-22): `<LivePart part="…" knobs={…} />`
+    (`docs/components/Clover4/LiveExample.tsx`) names one to three knobs, props whose
+    change the demo shows at once (a layout, a size, a switch), as plain data, and the
+    reader changes them in its code, both flavors, the demo following (`LiveCode.tsx`,
+    its controls `docs/components/CodeValues.tsx`, shared with the homepage's editor; the
+    code written by `docs/lib/live-code.ts`). Each prop is written under the attribute
+    its element's spec reads it from (one it has none for fails the build), and the
+    page's Markdown takes the code as it opens (`data-live-code`,
+    `scripts/build-agent-docs.mjs`). A page whose part has no such prop keeps its static
+    example: Annotations (its `scope` shows nothing on the catalog's cover), Collection,
+    Contents, Download and the property parts but Label, Thumbnail, Summary, Metadata, Id
+    and Value. Body opens on the newspaper (`page-transcript`), as the catalog's cover is
+    a placeholder, which shows no controls; Canvas offers `placeholder` for the same
+    reason. The homepage's tiles link to these pages
     (`DOCS` in `docs/components/Home/PartsLive.tsx`); a new part gets a page and a link.
     `content/docs/panel.mdx` holds the Panel's layouts and keys, its default sections
     and when each shows, `Tab`s, headings, showing and closing it, the open section, its
@@ -130,7 +144,8 @@ deadline.
     `#templates`), Composing layouts, Cookbook recipes.
   - The Viewer page reads as Radix Themes' component pages do (Mat, 2026-10-21): the
     title and a lede (`docs-lede`), one example at the top (the template, switched
-    by a large segmented control, its code following), then "API reference" (the
+    by a large segmented control, its code following, live: each template's own knobs,
+    `LiveViewerExample`, kept as the reader switches; Mat, 2026-10-22), then "API reference" (the
     Viewer's props, then each template's: Prop, Type, Default, Description), then
     "Examples", an `h3` each with one sentence, a live example and its code. Its
     examples are `ViewerExample` and `OptionsExample` (`docs/components/Clover4/

@@ -1,0 +1,78 @@
+/*
+ * A live example's values (`LiveCode.tsx`), drawn as the homepage's editor draws its own
+ * (`Parts.module.css`'s `.value`): in their run's color, underlined with dashes, faintly
+ * lit under the pointer, here in the docs' editor's colors (`--editor-*`, `tokens.css`),
+ * light on a light page and dark on a dark one. They sit inline in the code, as text does
+ * (WCAG 2.5.8's inline exception), and are focused by a ring of the editor's text, as its
+ * Copy is (13:1 or more).
+ */
+.value {
+  background: none;
+  border: 0;
+  border-bottom: 1px dashed currentColor;
+  border-radius: 0;
+  cursor: pointer;
+  font: inherit;
+  line-height: inherit;
+  margin: 0;
+  padding: 0;
+  text-indent: 0;
+  vertical-align: baseline;
+}
+
+.value:hover,
+.value[data-dragging] {
+  background-color: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.value:focus-visible {
+  outline: 2px solid var(--editor-text);
+  outline-offset: 2px;
+}
+
+.number {
+  color: var(--editor-number);
+}
+
+.string {
+  color: var(--editor-string);
+}
+
+/* A number: as wide as its value (`LiveCode.tsx`), without the spin buttons. */
+.scrub {
+  -moz-appearance: textfield;
+  appearance: textfield;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.scrub:focus {
+  cursor: text;
+}
+
+.scrub::-webkit-inner-spin-button,
+.scrub::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.choice {
+  appearance: none;
+  field-sizing: content;
+}
+
+.choice option {
+  background: var(--gray-1);
+  color: var(--gray-12);
+}
+
+.text {
+  cursor: text;
+  min-width: 1ch;
+}
+
+@media (forced-colors: active) {
+  .value {
+    border-bottom-color: CanvasText;
+  }
+}

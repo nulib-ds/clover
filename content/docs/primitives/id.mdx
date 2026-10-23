@@ -7,21 +7,17 @@ import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
+import { LivePart } from "docs/components/Clover4/LiveExample";
 
 # Id
 
 <div className="docs-lede">The resource's own address, as a link.</div>
 
-<Example head={<PartHead part="Id" />}>
-<PartDemo part="Id" />
-
-```jsx {2}
-<Clover.Root iiifContent={url}>
-  <Clover.Id />
-</Clover.Root>
-```
-
-</Example>
+<LivePart
+  part="Id"
+  knobs={[{ prop: "of", value: "manifest", options: ["manifest", "canvas"] }]}
+  head={<PartHead part="Id" />}
+/>
 
 ## API reference
 

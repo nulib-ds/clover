@@ -7,6 +7,7 @@ import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
+import { LivePart } from "docs/components/Clover4/LiveExample";
 
 # Panel
 
@@ -14,19 +15,22 @@ import { PartHead } from "docs/components/Clover4/PartHead";
   What the resource says about itself, in sections: tabs or an accordion.
 </div>
 
-<Example head={<PartHead part="Panel" />}>
-<PartDemo part="Panel" props={{ headingLevel: 2 }} body box="24rem" />
-
-```jsx {4}
-<Clover.Root iiifContent={url}>
-  <Clover.Body />
-  <div style={{ height: "24rem", overflowY: "auto" }}>
-    <Clover.Panel />
-  </div>
-</Clover.Root>
-```
-
-</Example>
+<LivePart
+  part="Panel"
+  props={{ headingLevel: 2 }}
+  body
+  box="24rem"
+  knobs={[
+    { prop: "layout", value: "tabs", options: ["tabs", "accordion"] },
+    {
+      prop: "defaultValue",
+      value: "about",
+      options: ["about", "contents", "annotations"],
+      remount: true,
+    },
+  ]}
+  head={<PartHead part="Panel" />}
+/>
 
 ## API reference
 

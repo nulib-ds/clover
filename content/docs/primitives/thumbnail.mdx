@@ -7,6 +7,7 @@ import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
+import { LivePart } from "docs/components/Clover4/LiveExample";
 
 # Thumbnail
 
@@ -14,16 +15,14 @@ import { PartHead } from "docs/components/Clover4/PartHead";
   A small picture of the resource, or of the current Canvas, named by its label.
 </div>
 
-<Example head={<PartHead part="Thumbnail" />}>
-<PartDemo part="Thumbnail" props={{ size: 200 }} />
-
-```jsx {2}
-<Clover.Root iiifContent={url}>
-  <Clover.Thumbnail size={200} />
-</Clover.Root>
-```
-
-</Example>
+<LivePart
+  part="Thumbnail"
+  knobs={[
+    { prop: "size", value: 200, min: 80, max: 400, step: 40 },
+    { prop: "of", value: "manifest", options: ["manifest", "canvas"] },
+  ]}
+  head={<PartHead part="Thumbnail" />}
+/>
 
 ## API reference
 

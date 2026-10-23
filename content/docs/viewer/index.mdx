@@ -9,6 +9,7 @@ import {
   ViewerExample,
 } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { LiveViewerExample } from "docs/components/Clover4/LiveExample";
 
 # Viewer
 
@@ -17,56 +18,36 @@ import { ApiReference } from "docs/components/Clover4/ApiReference";
   template.
 </div>
 
-<OptionsExample
-  lead
-  prop="template"
-  label="Template"
-  options={["Default", "Document", "Gallery"]}
+<LiveViewerExample
   resource="catalog"
   headingLevel={2}
   height="26rem"
->
-<div data-option="Default">
-
-```jsx
-import Viewer from "@nulib/clover";
-import "@nulib/clover/styles.css";
-
-<Viewer iiifContent="https://nulib-ds.github.io/clover/mocks/paged/manifest.json" />;
-```
-
-</div>
-<div data-option="Document">
-
-```jsx
-import Viewer from "@nulib/clover";
-import { Document } from "@nulib/clover/templates";
-import "@nulib/clover/styles.css";
-import "@nulib/clover/templates.css";
-
-<Viewer
-  iiifContent="https://nulib-ds.github.io/clover/mocks/paged/manifest.json"
-  template={Document}
-/>;
-```
-
-</div>
-<div data-option="Gallery">
-
-```jsx
-import Viewer from "@nulib/clover";
-import { Gallery } from "@nulib/clover/templates";
-import "@nulib/clover/styles.css";
-import "@nulib/clover/templates.css";
-
-<Viewer
-  iiifContent="https://nulib-ds.github.io/clover/mocks/paged/manifest.json"
-  template={Gallery}
-/>;
-```
-
-</div>
-</OptionsExample>
+  templates={{
+    Default: [
+      {
+        prop: "items",
+        value: "carousel",
+        options: ["carousel", "list", "grid", false],
+      },
+      {
+        prop: "panelLayout",
+        value: "accordion",
+        options: ["accordion", "tabs"],
+      },
+      { prop: "header", value: true },
+    ],
+    Document: [
+      { prop: "defaultSidebarOpen", value: true, remount: true },
+      { prop: "defaultPanelOpen", value: false, remount: true },
+      {
+        prop: "panelLayout",
+        value: "accordion",
+        options: ["accordion", "tabs"],
+      },
+    ],
+    Gallery: [{ prop: "size", value: 10, format: "{}rem", min: 6, max: 20 }],
+  }}
+/>
 
 ## API reference
 

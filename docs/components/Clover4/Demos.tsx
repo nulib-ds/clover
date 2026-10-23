@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type React from "react";
 import { useMapWorker } from "docs/lib/map-worker";
 import { useMock } from "docs/lib/useMock";
 
@@ -20,9 +21,12 @@ const StandaloneMap = dynamic(
 export function MapDemo({
   iiifContent,
   mock,
+  props,
 }: {
   iiifContent?: string;
   mock?: string;
+  /** The Map's props, plain values; a style is laid over its height. */
+  props?: Record<string, unknown> & { style?: React.CSSProperties };
 }) {
   const mockUrl = useMock(mock ?? "");
   const content = mock ? mockUrl : iiifContent;
@@ -31,8 +35,12 @@ export function MapDemo({
     <div style={{ margin: "1.5rem 0 2rem" }}>
       {content && ready && (
         <StandaloneMap
+          {...props}
           iiifContent={content}
-          style={{ ["--clover-map-height" as string]: "420px" }}
+          style={{
+            ["--clover-map-height" as string]: "420px",
+            ...props?.style,
+          }}
         />
       )}
     </div>

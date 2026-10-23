@@ -7,6 +7,7 @@ import { PartDemo } from "docs/components/Clover4/PartDemo";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
+import { LivePart } from "docs/components/Clover4/LiveExample";
 
 # Body
 
@@ -15,16 +16,16 @@ import { PartHead } from "docs/components/Clover4/PartHead";
   audio, video or a 3D object. Wraps the Canvas, Timeline and Scene components.
 </div>
 
-<Example head={<PartHead part="Body" />}>
-<PartDemo part="Body" />
-
-```jsx {2}
-<Clover.Root iiifContent={url}>
-  <Clover.Body />
-</Clover.Root>
-```
-
-</Example>
+<LivePart
+  part="Body"
+  resource="page-transcript"
+  knobs={[
+    { prop: "controls", value: true },
+    { prop: "navigator", value: false },
+    { prop: "style.height", value: 320, min: 160, max: 560 },
+  ]}
+  head={<PartHead part="Body" />}
+/>
 
 ## API reference
 
