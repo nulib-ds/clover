@@ -87,6 +87,17 @@ const manifest = Clover.useManifest();
 const entries = Clover.tableOfContents(manifest);
 ```
 
+```html twin
+<script type="module">
+  const root = document.querySelector("clover-root");
+  root.addEventListener("clover-ready", () => {
+    root.clover.subscribe(() => {
+      const entries = root.clover.contents();
+    });
+  });
+</script>
+```
+
 ## Previous versions
 
 [Clover 3.x › Viewer](/docs/3.x/viewer#information-panel)

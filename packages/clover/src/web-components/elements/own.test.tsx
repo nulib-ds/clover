@@ -7,8 +7,10 @@ import { fireEvent, waitFor, within } from "@testing-library/dom";
 
 import { defineCloverElements } from "../define";
 import bookJson from "../../fixtures/iiif-cookbook/0009-book-1.json";
+import tocJson from "../../fixtures/iiif-cookbook/0024-book-4-toc.json";
 import { stubViewport } from "../../components/Canvas/testing/viewport";
 import { initCloverI18n } from "../../i18n";
+import { tableOfContents } from "../../core/ranges";
 
 type Listener = (detail?: unknown) => void;
 
@@ -132,6 +134,24 @@ describe("root.clover", () => {
     clover.previous();
     expect(heard).not.toHaveBeenCalled();
     expect(clover.navigation().position).toBe(0);
+  });
+
+  it("gives the Manifest's table of contents, as tableOfContents gives React's", async () => {
+    const root = document.createElement("clover-root") as Root;
+    const ready = new Promise((resolve) =>
+      root.addEventListener("clover-ready", resolve),
+    );
+    root.iiifContent = tocJson;
+    document.body.append(root);
+    await ready;
+    const { clover } = root;
+    await waitFor(() => expect(clover.status().status).toBe("ready"));
+    expect(clover.contents()).toEqual(tableOfContents(clover.manifest()));
+    expect(clover.contents().length).toBeGreaterThan(0);
+    expect(clover.contents()[0]).toMatchObject({
+      canvasId: expect.any(String),
+      children: expect.any(Array),
+    });
   });
 
   it("reads language maps and Clover's own words as the root does", async () => {

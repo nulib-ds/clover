@@ -9,11 +9,11 @@
   "mapInitialGzip": 18100,
   "mapOnDemandGzip": 300000,
   "webComponentsGzip": 107500,
-  "labelPageGzip": 31200,
+  "labelPageGzip": 32100,
   "elementsEntryGzip": 5400,
   "composedPageGzip": 93000,
   "layoutPageGzip": 106700,
-  "canvasElementGzip": 76800,
+  "canvasElementGzip": 77700,
   "documentElementGzip": 113700,
   "viewerEntryGzip": 90600
 }

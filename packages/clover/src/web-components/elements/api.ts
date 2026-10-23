@@ -2,6 +2,7 @@ import { createContext } from "react";
 
 import { selectAnnotationSets } from "../../core/annotation-sets";
 import type { Clover, CloverState } from "../../core/clover";
+import { tableOfContents } from "../../core/ranges";
 import {
   selectPosition,
   selectSequence,
@@ -82,6 +83,14 @@ function own(
     },
     annotationSets() {
       return selectAnnotationSets(state().manifest, state().addedSets);
+    },
+    /**
+     * The Manifest's table of contents (Mat, 2026-10-22), the entries React's
+     * `tableOfContents` gives and `Contents` draws: each its `label`, the `canvasId` it
+     * goes to, its `time` or `region`, and its `children`. None before the Manifest loads.
+     */
+    contents() {
+      return tableOfContents(state().manifest);
     },
     localize(value: LanguageMapLike) {
       return localize(value, language());

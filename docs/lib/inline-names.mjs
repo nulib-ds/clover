@@ -26,6 +26,11 @@ const HOOKS = {
   useOneOpen: "root.clover.oneOpen()",
 };
 
+/** React's helpers that `root.clover` has a method for. */
+const HELPERS = {
+  tableOfContents: "root.clover.contents()",
+};
+
 /** The elements' words, read once from their specs. */
 export function namesOf(specs) {
   const tags = new Map();
@@ -61,9 +66,11 @@ export function webNameOf(text, names) {
     if (turned.html && !turned.html.includes("\n")) return turned.html;
     return null;
   }
-  // A hook.
+  // A hook, or a helper the root has a method for.
   const hook = value.match(/^(use[A-Z]\w*)(\(\))?$/);
   if (hook && HOOKS[hook[1]]) return HOOKS[hook[1]];
+  const helper = value.match(/^([a-z]\w*)(\([^)]*\))?$/);
+  if (helper && HELPERS[helper[1]]) return HELPERS[helper[1]];
   // A prop or a callback, alone or with a plain value.
   const prop = value.match(
     /^([a-z][A-Za-z]*)(?:=(?:\{(true|false|-?\d+(?:\.\d+)?)\}|"([^"]*)"))?$/,

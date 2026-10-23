@@ -12,6 +12,26 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`root.clover.contents()`: the table of contents, for a page's script.** The same
+  entries React's `tableOfContents` gives and `Contents` draws (each its `label`, the
+  `canvasId` it goes to, its `time` or `region`, and its `children`), so a web components
+  page can draw a table of contents of its own:
+
+  ```html
+  <script type="module">
+    const root = document.querySelector("clover-root");
+    root.addEventListener("clover-ready", () => {
+      root.clover.subscribe(() => {
+        const entries = root.clover.contents();
+      });
+    });
+  </script>
+  ```
+
+  The root carries the table of contents' code now, which a page with only labels, or a
+  `<clover-canvas>` alone, did not load: 0.9 kB more on each (budgets 32.1 and 77.7 kB),
+  and a little less on the pages that draw `Contents`, which shared it later.
+
 - **`@nulib/clover/web-components/viewer`: `<clover-viewer>` alone, built whole.** A page
   that shows a Viewer and nothing else of Clover's can load this entry instead of the one
   for every element: 90.6 kB gzip in four files, where the other loads 107.5 kB in 39 for
@@ -1707,7 +1727,7 @@ controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, 
   buttons load only on a page that gives them. `sizes.json` records each
   (`elementsEntryGzip`, `webComponentsGzip`, `documentElementGzip`, `labelPageGzip`,
   `composedPageGzip`, `layoutPageGzip`, `canvasElementGzip`), held to budgets of 5.4,
-  107.5, 113.7, 31.2, 93.0, 106.7 and 76.8 kB. `Root` now shares what it holds with
+  107.5, 113.7, 32.1, 93.0, 106.7 and 77.7 kB. `Root` now shares what it holds with
   `<clover-root>`, `SplitHandle` its logic with `<clover-split-handle>`
   (`components/Split/splitting.ts`), and `ReadMore` and `useOneOpen` theirs with the
   elements (`useReadMore`, `openOne`), which put `Default`'s budget up to 67.1 kB,

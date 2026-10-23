@@ -38,6 +38,7 @@ describe("Clover's names in prose, as web components write them", () => {
       "root.clover.navigation()",
     );
     expect(webNameOf("useClover()", names)).toBe("root.clover");
+    expect(webNameOf("tableOfContents", names)).toBe("root.clover.contents()");
     expect(webNameOf('<Clover.Items layout="pager" />', names)).toBe(
       '<clover-items layout="pager"></clover-items>',
     );

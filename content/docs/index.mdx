@@ -322,7 +322,8 @@ and the loading mark.
 A script of the page's reads a root as a React part reads one with Clover's hooks. Once
 the root has loaded, `root.clover` is its Clover, and `clover-ready` says so. Each hook is
 a method of the same name (`useNavigation()` is `navigation()`, `useVisibleCanvases()` is
-`visibleCanvases()`), with `state` and `subscribe`, the actions (`next()`, `goTo(id)`,
+`visibleCanvases()`), with the table of contents (`contents()`, as `tableOfContents` gives
+React's), `state` and `subscribe`, the actions (`next()`, `goTo(id)`,
 `search(query)`…), the channels (`viewport`, `media`…), and `localize`, `t` and `langOf`
 for the root's language.
 

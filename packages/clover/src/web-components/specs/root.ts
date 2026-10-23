@@ -77,7 +77,7 @@ export const rootDocs: ElementDocs = {
       type: "CloverRootApi | null",
       readonly: true,
       description:
-        "Its Clover, for a part of your own, once it has loaded (clover-ready): what React's hooks read, as methods of the same name (navigation(), visibleCanvases()…), its state and subscribe, its actions and channels, and its language. Null before.",
+        "Its Clover, for a part of your own, once it has loaded (clover-ready): what React's hooks read, as methods of the same name (navigation(), visibleCanvases()…), the table of contents (contents()), its state and subscribe, its actions and channels, and its language. Null before.",
     },
     renderers: {
       type: "CloverRenderer[] | null",
