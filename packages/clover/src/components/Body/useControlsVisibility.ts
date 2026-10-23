@@ -25,7 +25,6 @@ const PRESS_FOCUS_MS = 1000;
 const FADING_CONTROLS = [
   ":scope > .clover-canvas-controls > *",
   ":scope > .clover-canvas-navigator",
-  ":scope > .clover-scene-navigation :is(button, .clover-scene-rotate-disc)",
   ":scope > .clover-canvas-media > .clover-canvas-transport > *",
 ].join(", ");
 

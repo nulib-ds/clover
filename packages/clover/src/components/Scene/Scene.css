@@ -51,9 +51,13 @@
  * The scrim, as a Canvas's (`Canvas.css`), but rising from the Body's foot, where the
  * Scene's controls sit (Mat, 2026-10-23: "like with canvas … a gradient fade"): a dark
  * wash as tall as the pad and its inset, which comes and goes with the controls, so they
- * read over a bright model.
+ * read over a bright ground. Drawn by the viewport under its drawing, whose ground is
+ * clear, so it shades the ground and never the models (Mat, 2026-10-23: "model should
+ * render above the scrim").
  */
-.clover-scene > .clover-canvas-scrim {
+.clover-scene:has(> .clover-scene-navigation)
+  > .clover-canvas-viewport::before {
+  position: absolute;
   inset: auto 0 0;
   height: calc(
     3 * var(--clover-control) + 2 * var(--clover-space-s) + 2 *
@@ -65,6 +69,10 @@
     rgb(0 0 0 / 20%) 45%,
     rgb(0 0 0 / 0%)
   );
+  opacity: var(--clover-controls-shown);
+  transition: opacity var(--clover-controls-timing);
+  pointer-events: none;
+  content: "";
 }
 
 /* A small Body (`data-compact`, from the Scene's size), smaller cells, 24px or more. */

@@ -674,7 +674,6 @@ function SceneBody({
           isolation: "isolate",
         }}
       >
-        {config && <div className="clover-canvas-scrim" aria-hidden="true" />}
         <ExitFullscreen hidden={!isFullscreen} />
         {(captioned.length > 0 || React.Children.count(children) > 0) && (
           <ControlCluster controls={() => []} controlButtons={controlButtons}>

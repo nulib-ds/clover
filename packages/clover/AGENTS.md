@@ -940,11 +940,12 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   and goes with the rest of the controls (Mat, 2026-10-23: "not visible by default"),
   tucking down, over the scrim, here rising from the Body's foot as tall as the pad and
   its inset (Mat: "like with canvas … a gradient fade"); resting on one of its buttons or
-  the disc holds them, and a press where they sit faded shows them (`FADING_CONTROLS`); it
-  takes no gesture or callout of a phone's, and on a small Body (`data-compact` on the
-  corner, under 32rem by 24rem) its cells shrink, never under 24px. The arrows turn the
-  models on the focused viewport. Its strings are `sceneModel`, `sceneRoleDescription`,
-  `sceneKeys`, `sceneRotateUp`, `sceneRotateDown`, `sceneRotate` and `sceneResetView`.
+  the disc holds them, and a tap where they sit faded shows them as a tap on the picture
+  does (they are not in `FADING_CONTROLS`, which Canvas's bundle carries); it takes no
+  gesture or callout of a phone's, and on a small Body (`data-compact` on the corner,
+  under 32rem by 24rem) its cells shrink, never under 24px. The arrows turn the models on
+  the focused viewport. Its strings are `sceneModel`, `sceneRoleDescription`, `sceneKeys`,
+  `sceneRotateUp`, `sceneRotateDown`, `sceneRotate` and `sceneResetView`.
 - Elements: `<clover-timeline>` and `<clover-scene>`
   (`web-components/specs/timeline-scene.ts`), drawn by `part()`, the Body's box in
   `ELEMENT_CSS`. `Scene.css` rides with the Scene's lazy code (`LAZY` and `OWNERS` in
