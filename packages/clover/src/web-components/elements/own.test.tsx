@@ -1,7 +1,8 @@
 /*
  * Parts of your own, as elements (phase 6 of WEB-COMPONENTS.md), under Preact as they
- * ship: `root.clover`, the page's renderers, its control buttons and its own buttons on
- * the stage, `<clover-tip>`, and the Canvas's handle on the stage's elements.
+ * ship: `root.clover`, the page's renderers, its control buttons and its own buttons in
+ * the Body, `<clover-tip>`, and the Canvas's handle on `<clover-canvas>` and
+ * `<clover-body>`.
  */
 import { fireEvent, waitFor, within } from "@testing-library/dom";
 
@@ -14,7 +15,7 @@ import { tableOfContents } from "../../core/ranges";
 
 type Listener = (detail?: unknown) => void;
 
-/** Every renderer the stage makes, standing in for WebGL; each opens once given images. */
+/** Every renderer a Canvas makes, standing in for WebGL; each opens once given images. */
 const made = vi.hoisted(() => [] as Array<Record<string, any>>);
 vi.mock("../../lib/renderer", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../lib/renderer")>()),
@@ -212,7 +213,7 @@ describe("Renderers of the page's", () => {
   });
 });
 
-describe("The stage's controls, the page's own", () => {
+describe("The Body's controls, the page's own", () => {
   it("take a button of the page's for one of Clover's, named, keyed and pressed as Clover's", async () => {
     const { root, ready } = rootOf("<clover-body></clover-body>");
     const content = root.querySelector("clover-body") as HTMLElement & {
@@ -319,7 +320,7 @@ describe("<clover-read-more>", () => {
   });
 });
 
-describe("The Canvas's handle, on the stage's elements", () => {
+describe("The Canvas's handle, on <clover-canvas> and <clover-body>", () => {
   it("is kept by <clover-canvas> once its view is laid out, as onReady hands it in React", async () => {
     const canvas = document.createElement("clover-canvas") as HTMLElement & {
       handle: any;
@@ -360,7 +361,7 @@ describe("The Canvas's handle, on the stage's elements", () => {
     await ready;
     const event = await opened;
     expect(event.detail.handle).toBe(content.handle);
-    // Each element's ready is its own: the root never hears the stage's.
+    // Each element's ready is its own: the root never hears the Body's.
     expect(event.bubbles).toBe(false);
     expect(heardByRoot).toHaveBeenCalledTimes(1);
     expect(heardByRoot.mock.calls[0][0].detail.clover).toBe(root.clover);

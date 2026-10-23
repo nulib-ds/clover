@@ -119,20 +119,20 @@ describe("The panel and its tabs, as elements", () => {
 });
 
 describe("The panel's toggle, as an element", () => {
-  it("is one of the stage's controls in a clover-body, showing and hiding its target", async () => {
+  it("is one of the Body's controls in a clover-body, showing and hiding its target", async () => {
     const element = root(
       `<clover-body><clover-panel-toggle controls="info"></clover-panel-toggle></clover-body>
        <clover-panel id="info"></clover-panel>`,
       bookJson,
     );
     const info = document.getElementById("info")!;
-    // The stage's code loads first, the Canvas with it.
+    // The Body's code loads first, the Canvas with it.
     const toggle = await within(element).findByRole(
       "button",
       { name: "More information" },
       { timeout: 4000 },
     );
-    // Drawn by the stage, in its cluster, not where the page wrote the element.
+    // Drawn by the Body, in its cluster, not where the page wrote the element.
     expect(toggle.closest(".clover-canvas")).not.toBeNull();
     expect(toggle.closest("clover-panel-toggle")).toBeNull();
     expect(toggle).toHaveAttribute("aria-controls", "info");
@@ -237,7 +237,7 @@ describe("The Split, as elements", () => {
   const layout = (handle = "<clover-split-handle></clover-split-handle>") => {
     document.body.innerHTML = `
       <clover-split storage-key="layout">
-        <clover-split-pane min="16rem">Stage</clover-split-pane>
+        <clover-split-pane min="16rem">Body</clover-split-pane>
         ${handle}
         <clover-split-pane name="panel" size="24rem" min="14rem">Panel</clover-split-pane>
       </clover-split>`;
@@ -250,7 +250,7 @@ describe("The Split, as elements", () => {
     // The pane it sizes comes after the handle has drawn and measured, as in a browser.
     document.body.innerHTML = `
       <clover-split>
-        <clover-split-pane min="16rem">Stage</clover-split-pane>
+        <clover-split-pane min="16rem">Body</clover-split-pane>
         <clover-split-handle></clover-split-handle>
       </clover-split>`;
     const handle = await within(document.body).findByRole("separator", {
@@ -286,7 +286,7 @@ describe("The Split, as elements", () => {
     await waitFor(() => expect(sizeOf(panel)).toBe("336px"));
     fireEvent.keyDown(handle, { key: "Home" });
     await waitFor(() => expect(sizeOf(panel)).toBe("224px"));
-    // End leaves the stage its minimum (1000 − the bar − 16rem).
+    // End leaves the Body its minimum (1000 − the bar − 16rem).
     fireEvent.keyDown(handle, { key: "End" });
     await waitFor(() => expect(sizeOf(panel)).toBe("741px"));
     expect(handle).toHaveAttribute("aria-valuenow", "74");

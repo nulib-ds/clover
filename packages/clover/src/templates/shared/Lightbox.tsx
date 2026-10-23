@@ -11,9 +11,9 @@ export interface LightboxProps {
 }
 
 /**
- * The current Canvas in a modal `<dialog>`: its label, the stage, and the pager (with the
+ * The current Canvas in a modal `<dialog>`: its label, the Body, and the pager (with the
  * position). A native dialog keeps focus inside, closes on Escape, and returns focus to
- * whatever opened it. The stage mounts only while open, so it is sized when drawn.
+ * whatever opened it. The Body mounts only while open, so it is sized when drawn.
  */
 export function Lightbox({
   open,
@@ -52,7 +52,7 @@ export function Lightbox({
       }}
     >
       {open && (
-        <div className="clover-template-lightbox-body">
+        <div className="clover-template-lightbox-content">
           <header className="clover-template-lightbox-header">
             {/* Past h6 no heading; the dialog is named by it either way. */}
             <Clover.Label
@@ -89,7 +89,7 @@ export function Lightbox({
               <Clover.Tip label={t("commonClose")} />
             </button>
           </header>
-          <Clover.Body className="clover-template-lightbox-stage" />
+          <Clover.Body className="clover-template-lightbox-body" />
           <Clover.Items layout="pager" />
         </div>
       )}

@@ -25,7 +25,8 @@ export const progress4: Record<string, Progress> = {
   "0001-mvm-image": yes,
   "0002-mvm-audio": yes,
   "0003-mvm-video": yes,
-  "0608-mvm-3d": no("3D (glTF) is not drawn; it belongs to a future Scene"),
+  // 2026-10-23: drawn by Scene, its glTF model lit and framed by default.
+  "0608-mvm-3d": yes,
   "0004-canvas-size": yes,
   "0005-image-service": yes,
   "0006-text-language": yes,

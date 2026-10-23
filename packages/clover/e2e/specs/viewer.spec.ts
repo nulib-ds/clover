@@ -42,16 +42,16 @@ test.describe("Viewer", () => {
     );
     const opacity = () => zoom.evaluate((el) => getComputedStyle(el).opacity);
 
-    const stage = await page.locator(".clover-canvas").boundingBox();
+    const figure = await page.locator(".clover-canvas").boundingBox();
     await page.mouse.move(
-      stage!.x + stage!.width / 2,
-      stage!.y + stage!.height / 2,
+      figure!.x + figure!.width / 2,
+      figure!.y + figure!.height / 2,
     );
     await expect.poll(opacity).toBe("1");
     // Away from the Canvas: it lingers a second, then fades, panel open or not.
     await page.mouse.move(
-      stage!.x + stage!.width / 2,
-      stage!.y + stage!.height + 200,
+      figure!.x + figure!.width / 2,
+      figure!.y + figure!.height + 200,
     );
     await expect.poll(opacity, { timeout: 5000 }).toBe("0");
     expect(await toggle.evaluate((el) => getComputedStyle(el).opacity)).toBe(
@@ -73,10 +73,10 @@ test.describe("Viewer", () => {
       '.clover-canvas-controls > [data-button="zoom-in"]',
     );
     const opacity = () => zoom.evaluate((el) => getComputedStyle(el).opacity);
-    const stage = await page.locator(".clover-canvas").boundingBox();
+    const figure = await page.locator(".clover-canvas").boundingBox();
     await page.mouse.move(
-      stage!.x + stage!.width / 2,
-      stage!.y + stage!.height / 2,
+      figure!.x + figure!.width / 2,
+      figure!.y + figure!.height / 2,
     );
     await expect.poll(opacity).toBe("1");
 
@@ -87,10 +87,10 @@ test.describe("Viewer", () => {
     expect(await opacity()).toBe("1");
     await expect(zoom.locator(".clover-tip")).toBeVisible();
 
-    // Back on the picture, the chrome fades as before.
+    // Back on the picture, the controls fade as before.
     await page.mouse.move(
-      stage!.x + stage!.width / 2,
-      stage!.y + stage!.height / 2,
+      figure!.x + figure!.width / 2,
+      figure!.y + figure!.height / 2,
     );
     await expect.poll(opacity, { timeout: 5000 }).toBe("0");
   });

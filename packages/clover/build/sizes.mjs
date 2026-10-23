@@ -51,8 +51,10 @@ async function initialGzip(
     );
   if (!onDemand) return { size: sum(initial), bundle };
   const later = new Set();
+  // Never back through what the page loaded up front, and on to everything it loads later.
   const reach = (fileName) => {
-    if (later.has(fileName) || !chunks.has(fileName)) return;
+    if (later.has(fileName) || !chunks.has(fileName) || initial.has(fileName))
+      return;
     later.add(fileName);
     const chunk = chunks.get(fileName);
     [...chunk.imports, ...chunk.dynamicImports].forEach(reach);
@@ -99,6 +101,24 @@ const gzip = (file) => gzipSync(readFileSync(file), { level: 9 }).length;
 /** What is measured: `[name, budget key, exports, entry, options]`. */
 const BUNDLES = [
   ["Canvas initial JS", "canvasInitialGzip", "Canvas"],
+  // Presentation 4's Timeline and Scene, each on a page by itself.
+  ["Timeline initial JS", "timelineInitialGzip", "Timeline"],
+  ["Scene initial JS", "sceneInitialGzip", "Scene"],
+  // What a Scene loads when it first draws: its drawing, three.js with it, or Clover's own.
+  [
+    "three.js, on a Scene",
+    "sceneOnDemandGzip",
+    "Scene",
+    "index.mjs",
+    { onDemand: /\/components\/Scene\/engine\.mjs$/ },
+  ],
+  [
+    "Clover's 3D, on a Scene",
+    "sceneCloverOnDemandGzip",
+    "Scene",
+    "index.mjs",
+    { onDemand: /\/components\/Scene\/cloverEngine\.mjs$/ },
+  ],
   // `import Viewer from "@nulib/clover"`: a shell. `<Viewer />` loads Default later.
   ["Viewer shell", "viewerShellGzip", "default"],
   // `<Viewer template={X} />`: the shell, the template, and the parts it uses.
@@ -155,11 +175,14 @@ const PARTS = [
 
 /*
  * The parts a page holds with no `Root` (their docs' examples do): what a page with the
- * part alone loads, up front. `Canvas` and `Map` are already measured so (`BUNDLES`);
- * `Value` is measured here. Recorded as `partsAlone`, and as elements `elementPartsAlone`.
+ * part alone loads, up front. `Canvas`, `Timeline`, `Scene` and `Map` are already measured
+ * so (`BUNDLES`); `Value` is measured here. Recorded as `partsAlone`, and as elements
+ * `elementPartsAlone`.
  */
 const ALONE = [
   ["Canvas", "canvasInitialGzip", "canvasElementGzip"],
+  ["Timeline", "timelineInitialGzip", null],
+  ["Scene", "sceneInitialGzip", null],
   ["Map", "mapInitialGzip", null],
   ["Value", null, null],
 ];

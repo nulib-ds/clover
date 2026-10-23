@@ -1,0 +1,252 @@
+{
+  "@context": "http://iiif.io/api/presentation/4/context.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/esu-shrine/manifest.json",
+  "type": "Manifest",
+  "label": {
+    "en": [
+      "Esu Shrine"
+    ]
+  },
+  "summary": {
+    "en": [
+      "An altar piece sculpture of Esu, Yoruba, of the 20th century, collected in Ibadan, Oyo State, Nigeria, in 2012: a 3D model by Northwestern University's Material History Lab."
+    ]
+  },
+  "metadata": [
+    {
+      "label": {
+        "en": [
+          "Catalog Number"
+        ]
+      },
+      "value": {
+        "en": [
+          "IBD12-AD-2-1"
+        ]
+      }
+    },
+    {
+      "label": {
+        "en": [
+          "Collection Location"
+        ]
+      },
+      "value": {
+        "en": [
+          "Northwestern University"
+        ]
+      }
+    },
+    {
+      "label": {
+        "en": [
+          "Year Collected"
+        ]
+      },
+      "value": {
+        "en": [
+          "2012"
+        ]
+      }
+    },
+    {
+      "label": {
+        "en": [
+          "Object Type"
+        ]
+      },
+      "value": {
+        "en": [
+          "Altar Piece Sculpture of Esu"
+        ]
+      }
+    },
+    {
+      "label": {
+        "en": [
+          "Country"
+        ]
+      },
+      "value": {
+        "en": [
+          "Nigeria"
+        ]
+      }
+    },
+    {
+      "label": {
+        "en": [
+          "Region"
+        ]
+      },
+      "value": {
+        "en": [
+          "Oyo State"
+        ]
+      }
+    },
+    {
+      "label": {
+        "en": [
+          "Place"
+        ]
+      },
+      "value": {
+        "en": [
+          "Ibadan"
+        ]
+      }
+    },
+    {
+      "label": {
+        "en": [
+          "Culture"
+        ]
+      },
+      "value": {
+        "en": [
+          "Yoruba"
+        ]
+      }
+    },
+    {
+      "label": {
+        "en": [
+          "Time Period"
+        ]
+      },
+      "value": {
+        "en": [
+          "20th century"
+        ]
+      }
+    },
+    {
+      "label": {
+        "en": [
+          "Material(s)"
+        ]
+      },
+      "value": {
+        "en": [
+          "Wood; Vegetal pigment; Cowry; Brass; Clamshell; Cotton textile; Leather; Animal horn; Animal bone; Aluminum(?); Iron/brass chain(?); Flat plastic(?) beads"
+        ]
+      }
+    },
+    {
+      "label": {
+        "en": [
+          "Height"
+        ]
+      },
+      "value": {
+        "en": [
+          "22 in."
+        ]
+      }
+    },
+    {
+      "label": {
+        "en": [
+          "Width"
+        ]
+      },
+      "value": {
+        "en": [
+          "8 in."
+        ]
+      }
+    },
+    {
+      "label": {
+        "en": [
+          "Length"
+        ]
+      },
+      "value": {
+        "en": [
+          "8 in."
+        ]
+      }
+    }
+  ],
+  "requiredStatement": {
+    "label": {
+      "en": [
+        "Attribution"
+      ]
+    },
+    "value": {
+      "en": [
+        "© 2025 Northwestern University"
+      ]
+    }
+  },
+  "homepage": [
+    {
+      "id": "https://sites.northwestern.edu/materialhistorylab/collection/IBD12-AD-2-1/",
+      "type": "Text",
+      "label": {
+        "en": [
+          "Esu Shrine, Material History Lab, Northwestern University"
+        ]
+      },
+      "format": "text/html"
+    }
+  ],
+  "thumbnail": [
+    {
+      "id": "https://sites.northwestern.edu/materialhistorylab/files/2025/10/DSC_4700-602x1024.jpg",
+      "type": "Image",
+      "format": "image/jpeg",
+      "width": 602,
+      "height": 1024
+    }
+  ],
+  "items": [
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/esu-shrine/scene/1",
+      "type": "Scene",
+      "label": {
+        "en": [
+          "Esu Shrine"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/esu-shrine/scene/1/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/esu-shrine/scene/1/page/1",
+              "type": "Annotation",
+              "motivation": [
+                "painting"
+              ],
+              "body": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://nulib-ds.github.io/clover/mocks/esu-shrine/model.glb",
+                  "type": "Model",
+                  "format": "model/gltf-binary"
+                },
+                "transform": [
+                  {
+                    "type": "RotateTransform",
+                    "x": 0,
+                    "y": -39.52263429999999,
+                    "z": 0
+                  }
+                ]
+              },
+              "target": {
+                "id": "https://nulib-ds.github.io/clover/mocks/esu-shrine/scene/1",
+                "type": "Scene"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

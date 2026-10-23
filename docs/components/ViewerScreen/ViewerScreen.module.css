@@ -1,5 +1,5 @@
 /*
- * The screen, whole, and the Viewer filling it: its stage takes what the header and the
+ * The screen, whole, and the Viewer filling it: its Body takes what the header and the
  * strip leave, as the playground's does.
  */
 .screen {
@@ -17,12 +17,12 @@
   min-height: 0;
 }
 
-.screen :global(.clover-template-default-body) {
+.screen :global(.clover-template-default-panes) {
   flex: 1;
   min-height: 0;
 }
 
-.screen :global(.clover-template-default-stage) {
+.screen :global(.clover-template-default-body) {
   flex: 1 1 0;
   min-height: 0;
 }

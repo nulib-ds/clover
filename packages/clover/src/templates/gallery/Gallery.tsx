@@ -19,7 +19,7 @@ const below = (level: number) => level + 1;
 
 /**
  * A grid of the Manifest's views — a spread is one cell — that opens one in a lightbox
- * with the stage and the pager. Escape, the close button, or a press outside closes it,
+ * with the Body and the pager. Escape, the close button, or a press outside closes it,
  * and focus returns to the cell.
  */
 export function Gallery({

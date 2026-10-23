@@ -7,9 +7,12 @@ import { Callout } from "nextra/components";
 
 # Mocks
 
-IIIF resources Clover publishes for testing a viewer against: complete, valid, and stable
-at their URLs. Each is generated from one source in `docs/mocks/`, so the published files,
-the live service in `npm run dev`, and the docs' own demos always agree.
+<div className="docs-lede">
+  IIIF resources Clover publishes for testing a viewer against: complete, valid,
+  and stable at their URLs. Each is generated from one source in `docs/mocks/`,
+  so the published files, the live service in `npm run dev`, and the docs' own
+  demos always agree.
+</div>
 
 Use them from any viewer, test suite or prototype. Publish a new mock the same way when
 it is complex enough to reuse: a generator in `docs/mocks/<name>/`, its files written to
@@ -468,6 +471,44 @@ on its own. Its generator is `docs/mocks/standalone-canvas/index.mjs`, and the C
 fetched is `docs/mocks/standalone-canvas/source.json`: to bring it up to date, fetch the
 published file into `source.json` again and run `npm run build:mocks`.
 
+## Esu Shrine: a 3D model
+
+Northwestern University's Material History Lab's scan of an Esu shrine, an altar piece
+sculpture of Esu collected in Ibadan, Oyo State, Nigeria, in 2012 (catalog number
+IBD12-AD-2-1), as a Presentation 4 Manifest of one Scene. The Lab publishes no IIIF for
+it: [its object page](https://sites.northwestern.edu/materialhistorylab/collection/IBD12-AD-2-1/)
+shows the model in Smithsonian Voyager, from a Voyager scene that names the model, a GLB.
+The Manifest has:
+
+- its label, its metadata and its homepage from the object page as published on October
+  23, 2026: its title, and its Object Data word for word (Catalog Number, Collection
+  Location, Year Collected, Object Type, Country, Region, Place, Culture, Time Period,
+  Material(s), Height, Width, Length);
+- a summary written from those fields, as the page has none;
+- its attribution the Voyager scene's copyright, "© 2025 Northwestern University";
+- its thumbnail the first of the object page's photographs of the shrine, as the page
+  links it (602 by 1024 pixels), linked, never copied: the Voyager scene's renderings of
+  the model show its editor's guides, a box drawn round it;
+- one Scene painting the model at its origin, turned −39.52° about its upright axis (a
+  `RotateTransform`), so a viewer's default camera, which looks from the front, opens on
+  the view the Lab's Voyager scene opens on, and no camera or light, which the viewer
+  provides;
+- the model, the Lab's GLB (`esushrine_11.17.glb` there; 34.5 MB, glTF binary), kept
+  beside the Manifest as `model.glb`, as it came: the Lab's server sends no CORS headers,
+  so a viewer on another site could not fetch it from there.
+
+| Resource | Published (static)                                                                                    | Live (`npm run dev`)                  |
+| -------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| Manifest | [`/mocks/esu-shrine/manifest.json`](https://nulib-ds.github.io/clover/mocks/esu-shrine/manifest.json) | `/api/mocks/esu-shrine/manifest.json` |
+| Model    | [`/mocks/esu-shrine/model.glb`](https://nulib-ds.github.io/clover/mocks/esu-shrine/model.glb)         | `/api/mocks/esu-shrine/model.glb`     |
+
+The homepage's playground shows it as Model. Its generator is
+`docs/mocks/esu-shrine/index.mjs`, and the Voyager scene as fetched is
+`docs/mocks/esu-shrine/source.json`: to bring it up to date, fetch
+`https://materialhistorylab.mtiapp.northwestern.edu/voyager/scenes/IBD12-AD-2-1/voyager-scene/scene.svx.json`
+into `source.json` again, delete `public/mocks/esu-shrine/model.glb`, and run
+`npm run build:mocks`, which fetches the model from the Lab when it is missing.
+
 ### Rights
 
 The newspaper's scans and text, in the Content Search and Page transcript mocks, are the
@@ -486,5 +527,8 @@ Library, and keep their attribution. _Lunchroom Manners_, its captions and its t
 are the IIIF Cookbook's fixtures, as recipes 0219 and 0253 publish them. Borghi's map is
 in the public domain in the United States (No Copyright – United States); its record and
 image are Northwestern University Libraries', from the Charles Deering McCormick Library
-of Special Collections, and keep their attribution. The mocks'
+of Special Collections, and keep their attribution. The Esu shrine's model and its
+photograph are Northwestern University's, from its Material History Lab: the model
+(© 2025 Northwestern University) kept here as the Lab serves it, the photograph (on a
+page © 2026 Northwestern University) linked from there, never copied. The mocks'
 structure is Clover's, under its license.

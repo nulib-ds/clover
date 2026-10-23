@@ -41,12 +41,12 @@ const FORBIDDEN = [
 
 /** Modules that must load only on demand: reachable by dynamic import, never statically. */
 const LAZY_MODULES = [
-  "/components/Canvas/media/MediaStage.tsx",
-  "/components/Canvas/CaptionDetails.tsx",
+  "/components/Canvas/media/MediaBody.tsx",
+  "/components/Body/CaptionDetails.tsx",
   "/core/sanitize.ts",
   "/core/svg-shape.ts",
   "/components/Canvas/FrameAnimation.tsx",
-  "/components/Canvas/panClearOfChrome.ts",
+  "/components/Canvas/panClearOfControls.ts",
   // Hotspots and the Canvas's menus, for a Canvas with annotations or a Choice.
   "/components/Canvas/Annotations.tsx",
   "/components/Canvas/AnnotationMenu.tsx",
@@ -57,6 +57,15 @@ const LAZY_MODULES = [
   "/core/annotations-content.ts",
   // A standalone Canvas loading its own (`iiifContent`).
   "/components/Canvas/LoadedCanvas.tsx",
+  // Presentation 4's Timeline and Scene, in a Root (and `Body`) or loading their own;
+  // and the Scene's 3D drawing, three.js with it.
+  "/components/Timeline/Connected.tsx",
+  "/components/Scene/Connected.tsx",
+  "/components/Scene/Loaded.tsx",
+  "/components/Scene/engine.ts",
+  // Clover's own glTF renderer, the Scene's other drawing.
+  "/components/Scene/cloverEngine.ts",
+  "/lib/gltf/renderer.ts",
   // The upgrader's fix for fragmented targets, loaded with the upgrader.
   "/core/keep-fragments.ts",
   // About's "Part of", for a Canvas shown on its own.
@@ -66,8 +75,14 @@ const LAZY_MODULES = [
     (lng) => `/i18n/locales/${lng}.json`,
   ),
 ];
-/** Packages imported only on demand: media streaming, sanitizing, upgrading old IIIF. */
-const LAZY_PACKAGES = ["hls.js", "dompurify", "@iiif/parser", "maplibre-gl"];
+/** Packages imported only on demand: media streaming, sanitizing, upgrading old IIIF, maps, 3D. */
+const LAZY_PACKAGES = [
+  "hls.js",
+  "dompurify",
+  "@iiif/parser",
+  "maplibre-gl",
+  "three",
+];
 
 const packageName = (id) =>
   id.startsWith("@") ? id.split("/").slice(0, 2).join("/") : id.split("/")[0];
@@ -133,7 +148,7 @@ test("three entries, only package source, externals within dependencies and peer
   }
 });
 
-test("media, caption details, hotspots, the Canvas's menus, the navigator, languages, the sanitizer, hls.js and the upgrader load only on demand", async () => {
+test("media, caption details, hotspots, the Canvas's menus, the navigator, languages, the sanitizer, hls.js, the upgrader, the Timeline's and Scene's views and three.js load only on demand", async () => {
   const chunks = await emitted();
   const initial = closure(chunks, "index.mjs");
   const reachable = closure(chunks, "index.mjs", true);

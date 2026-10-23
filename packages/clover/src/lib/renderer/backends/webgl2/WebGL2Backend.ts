@@ -133,8 +133,8 @@ export class WebGL2Backend implements Backend {
       height: command.height,
     };
 
-    // Unit quad → crop rect in source pixels → stage CSS pixels → clip space. A bleed
-    // stretches the quad, not the texture coordinates.
+    // Unit quad → crop rect in source pixels → the Body's CSS pixels → clip space. A
+    // bleed stretches the quad, not the texture coordinates.
     const bleed = bleedInSourcePixels(command, this.pixelRatio);
     const quad = compose(
       command.transform,

@@ -7,10 +7,12 @@ import { LanguagesDemo } from "docs/components/Clover4/LanguagesDemo";
 
 # i18n
 
-Clover translates its own words: the names of its controls, its messages, and what it
-announces. IIIF text (a label, a summary, metadata) is the resource's own, in the
-languages it has, and Clover chooses among them as
-[Composing layouts](/docs/composing#languages) describes.
+<div className="docs-lede">
+  Clover translates its own words: the names of its controls, its messages, and
+  what it announces. IIIF text (a label, a summary, metadata) is the resource's
+  own, in the languages it has, and Clover chooses among them as [Composing
+  layouts](/docs/composing#languages) describes.
+</div>
 
 Clover has its own translator, well under 1 kB gzipped, with no translation library to
 install. Its strings are kept the way i18next keeps them, so `initCloverI18n` calls from
@@ -38,14 +40,17 @@ another language carries that language's `lang`.
 
 ## How Clover chooses
 
-Clover speaks the language of the page around it:
+Clover speaks the language of the page around it. To find it, Clover looks in this
+order:
 
-1. the language set with `initCloverI18n({ lng })`;
-2. else the page's `<html lang>`;
-3. else the first of the browser's languages that Clover ships;
-4. then, string by string, the `fallbackLng` you give, and English last.
+1. First, it checks for a language you set yourself, with `initCloverI18n({ lng })`.
+2. Then, it reads the page it is on, for the language in its `<html lang>`.
+3. Then, it looks at the reader's browser, and takes the first of their languages that
+   Clover ships.
+4. Last, for any string the language it chose does not have, it uses the `fallbackLng`
+   you give, and then English.
 
-A regional tag tries its base language too: `pt-BR`, then `pt`.
+A regional tag tries its base language too, so `pt-BR` falls back to `pt`.
 
 ## Setting a language
 

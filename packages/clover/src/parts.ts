@@ -79,6 +79,10 @@ export { PanelToggle } from "./components/Panel/PanelToggle";
 export type { PanelToggleProps } from "./components/Panel/PanelToggle";
 export type { StatusProps } from "./components/Status/Status";
 export { default as Canvas } from "./components/Canvas";
+export { Timeline } from "./components/Timeline/Timeline";
+export type { TimelineProps } from "./components/Timeline/Timeline";
+export { Scene } from "./components/Scene/Scene";
+export type { SceneControlsConfig, SceneProps } from "./components/Scene/Scene";
 export type {
   CanvasHandle,
   CloverCanvasOptions,
@@ -136,7 +140,8 @@ export type {
   Collection as Presentation4Collection,
   Container,
   Manifest,
-  Timeline,
+  Scene as Presentation4Scene,
+  Timeline as Presentation4Timeline,
 } from "./core/presentation";
 export type { IIIFContent } from "./core/load";
 export type { CloverRequest } from "./core/request";

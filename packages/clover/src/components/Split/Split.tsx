@@ -56,7 +56,7 @@ export type SplitProps = React.HTMLAttributes<HTMLElement> & {
 /**
  * Panes side by side, divided by handles the reader drags (or moves by keyboard) to share
  * the width between them. One pane beside each handle is given a `size`; the other takes
- * what is left. Not tied to any part: split the stage from the information panel, or
+ * what is left. Not tied to any part: split the Body from the information panel, or
  * anything from anything.
  *
  * ```jsx

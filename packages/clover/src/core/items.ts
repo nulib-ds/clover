@@ -17,7 +17,7 @@ export interface ItemPart {
   resource: unknown;
   /** Seconds, for video and sound. */
   duration?: number;
-  /** What it mostly paints: `Image`, `Video` or `Sound`. */
+  /** What it mostly paints: `Image`, `Video`, `Audio` (`Sound` in Presentation 3) or `Model`. */
   media?: string;
 }
 

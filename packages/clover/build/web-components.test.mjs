@@ -100,7 +100,7 @@ test("a page loads the sheets of what it draws, and most of the stylesheet with 
   for (const lazy of [
     "maplibre",
     "components/Map/Map",
-    "components/Canvas/media/MediaStage",
+    "components/Canvas/media/MediaBody",
     "components/Canvas/media/Transport",
     "templates/document/Document",
     "templates/gallery/Gallery",

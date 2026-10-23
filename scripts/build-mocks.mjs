@@ -4,7 +4,7 @@
  * after changing a generator, and commit the output: the files are served as they are
  * by the docs site, at https://nulib-ds.github.io/clover/mocks/.
  */
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -51,6 +51,12 @@ import {
   PUBLIC_BASE as STANDALONE_CANVAS_BASE,
   canvas as standaloneCanvas,
 } from "../docs/mocks/standalone-canvas/index.mjs";
+import {
+  PUBLIC_BASE as ESU_SHRINE_BASE,
+  LAB_MODEL as ESU_SHRINE_LAB_MODEL,
+  MODEL_FILE as ESU_SHRINE_MODEL,
+  manifest as esuShrineManifest,
+} from "../docs/mocks/esu-shrine/index.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "public/mocks/content-search");
@@ -177,3 +183,21 @@ writeFileSync(
   `${JSON.stringify(standaloneCanvas(STANDALONE_CANVAS_BASE), null, 2)}\n`,
 );
 console.log("standalone-canvas: canvas.json");
+
+// The Esu shrine's 3D model: a Manifest of one Scene, and the Lab's GLB beside it, which
+// the Lab's server will not let another site fetch. Fetched from the Lab when it is not
+// here yet (34.5 MB), and kept as it came: delete it to fetch it again.
+const esuShrine = join(root, "public/mocks/esu-shrine");
+mkdirSync(esuShrine, { recursive: true });
+writeFileSync(
+  join(esuShrine, "manifest.json"),
+  `${JSON.stringify(esuShrineManifest(ESU_SHRINE_BASE), null, 2)}\n`,
+);
+const esuShrineModel = join(esuShrine, ESU_SHRINE_MODEL);
+if (!existsSync(esuShrineModel)) {
+  const response = await fetch(ESU_SHRINE_LAB_MODEL);
+  if (!response.ok)
+    throw new Error(`${ESU_SHRINE_LAB_MODEL} answered ${response.status}`);
+  writeFileSync(esuShrineModel, Buffer.from(await response.arrayBuffer()));
+}
+console.log(`esu-shrine: manifest.json, ${ESU_SHRINE_MODEL}`);

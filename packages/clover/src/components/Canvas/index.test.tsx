@@ -366,7 +366,7 @@ describe("Canvas", () => {
     expect(viewport).not.toHaveAttribute("aria-roledescription");
     expect(viewport).not.toHaveAttribute("aria-keyshortcuts");
     expect(viewport).not.toHaveAttribute("aria-describedby");
-    // No grab hand, and nothing panned clear of the chrome.
+    // No grab hand, and nothing panned clear of the controls.
     expect(screen.getByTestId("clover-canvas")).toHaveAttribute(
       "data-navigable",
       "false",
@@ -898,7 +898,7 @@ describe("Canvas", () => {
       act(() => listeners.open());
       expect(mark()).toBeNull();
       expect(viewport()).toHaveAttribute("aria-busy", "false");
-      // Moving on: loading again, over the stage as it is, until the next view draws.
+      // Moving on: loading again, over the Body as it is, until the next view draws.
       renderer.isOpen = true;
       rerender(<Canvas canvases={[pages[1]]} />);
       expect(mark()).not.toBeNull();
@@ -1382,7 +1382,7 @@ describe("Canvas", () => {
       expect(
         await screen.findByTestId("clover-canvas-media", {}, { timeout: 5000 }),
       ).toBeInTheDocument();
-      // Playback starts in an effect once the element exists, which can trail the stage.
+      // Playback starts in an effect once the element exists, which can trail the Body.
       await vi.waitFor(() => expect(play).toHaveBeenCalled());
       // The toggle is the close control in the top right now, named for the player.
       const close = screen.getByRole("button", { name: "Close player" });
@@ -1516,36 +1516,36 @@ describe("Canvas", () => {
     });
   });
 
-  describe("chrome", () => {
+  describe("controls that come and go", () => {
     afterEach(() => vi.useRealTimers());
 
-    it("shows on pointer activity and fades after the hide delay", () => {
+    it("show on pointer activity and fade after the hide delay", () => {
       vi.useFakeTimers();
       render(<Canvas src="a.jpg" options={{ hideDelay: 500 }} />);
       const canvas = screen.getByTestId("clover-canvas");
-      expect(canvas).toHaveAttribute("data-chrome", "hidden");
+      expect(canvas).toHaveAttribute("data-controls", "hidden");
 
       fireEvent.pointerMove(canvas);
-      expect(canvas).toHaveAttribute("data-chrome", "visible");
+      expect(canvas).toHaveAttribute("data-controls", "visible");
       act(() => {
         vi.advanceTimersByTime(600);
       });
-      expect(canvas).toHaveAttribute("data-chrome", "hidden");
+      expect(canvas).toHaveAttribute("data-controls", "hidden");
     });
 
-    it("hides a second after a mouse leaves", () => {
+    it("hide a second after a mouse leaves", () => {
       vi.useFakeTimers();
       render(<Canvas src="a.jpg" />);
       const canvas = screen.getByTestId("clover-canvas");
       fireEvent.pointerMove(canvas);
       fireEvent.pointerLeave(canvas, { pointerType: "mouse" });
-      expect(canvas).toHaveAttribute("data-chrome", "visible");
+      expect(canvas).toHaveAttribute("data-controls", "visible");
       act(() => void vi.advanceTimersByTime(1000));
-      expect(canvas).toHaveAttribute("data-chrome", "hidden");
+      expect(canvas).toHaveAttribute("data-controls", "hidden");
       vi.useRealTimers();
     });
 
-    it("shows under a finger on a tap on the picture, and hides on the next, never on a timer", () => {
+    it("show under a finger on a tap on the picture, and hide on the next, never on a timer", () => {
       vi.useFakeTimers();
       render(<Canvas src="a.jpg" options={{ hideDelay: 500 }} />);
       const canvas = screen.getByTestId("clover-canvas");
@@ -1565,12 +1565,12 @@ describe("Canvas", () => {
 
       tap();
       act(() => void vi.advanceTimersByTime(300));
-      expect(canvas).toHaveAttribute("data-chrome", "visible");
+      expect(canvas).toHaveAttribute("data-controls", "visible");
       act(() => void vi.advanceTimersByTime(60_000));
-      expect(canvas).toHaveAttribute("data-chrome", "visible");
+      expect(canvas).toHaveAttribute("data-controls", "visible");
       tap();
       act(() => void vi.advanceTimersByTime(300));
-      expect(canvas).toHaveAttribute("data-chrome", "hidden");
+      expect(canvas).toHaveAttribute("data-controls", "hidden");
     });
   });
 });

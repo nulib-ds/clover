@@ -124,7 +124,7 @@ describe("CanvasRenderer", () => {
       width: 8949,
       height: 5709,
     });
-    // Landscape image in a 4:3 stage: the width fits exactly.
+    // Landscape image in a 4:3 Body: the width fits exactly.
     const bounds = renderer.getBounds();
     expect(bounds.x).toBeCloseTo(0, 6);
     expect(bounds.width).toBeCloseTo(8949, 6);
@@ -159,7 +159,7 @@ describe("CanvasRenderer", () => {
   it("keeps its host's padding clear at home, as the placeholder does", async () => {
     mockedLoad.mockResolvedValue(bitmap(1000, 500));
     const el = host();
-    // Uneven, to show the picture centers in what is left, not in the stage.
+    // Uneven, to show the picture centers in what is left, not in the Body.
     el.style.padding = "16px 16px 16px 48px";
     const renderer = new CanvasRenderer(el, { animationTime: 0 });
     await renderer.setImages([{ id: "a", url: "a.jpg" }]);
@@ -194,7 +194,7 @@ describe("CanvasRenderer", () => {
     await renderer.setImages([{ id: "a", url: "a.jpg" }]);
     expect(renderer.atMaxZoom()).toBe(false);
 
-    // At home 0.6 (the stage's 600px over the image's 1000), at most 1.1.
+    // At home 0.6 (the Body's 600px over the image's 1000), at most 1.1.
     renderer.zoomBy(1.5, undefined, false);
     expect(renderer.atMaxZoom()).toBe(false);
     renderer.zoomBy(1000);
@@ -325,7 +325,7 @@ describe("CanvasRenderer", () => {
 
     await frames(4);
     const urls = mockedLoad.mock.calls.map(([url]) => url);
-    // 800px wide stage at 1x: scale factor 4, all four of its tiles.
+    // 800px wide Body at 1x: scale factor 4, all four of its tiles.
     expect(urls.filter((u) => /\/512,512\/0\//.test(u))).toHaveLength(1);
     expect(
       urls.filter((u) => /,\d+\/0\/default/.test(u)).length,

@@ -38,11 +38,11 @@ const find = (tree, test) => {
 };
 
 /*
- * What a page shows for a reader, not its chrome: the controls (buttons, the tabs' list,
- * whose panels each keep a heading of their tab's name, every panel kept though only one
- * shows), heading anchors, icons, scripts and what is hidden.
+ * What a page shows for a reader, not the page's frame: the controls (buttons, the tabs'
+ * list, whose panels each keep a heading of their tab's name, every panel kept though only
+ * one shows), heading anchors, icons, scripts and what is hidden.
  */
-const isChrome = (node) =>
+const isFrame = (node) =>
   ["script", "style", "svg", "button", "noscript", "template"].includes(
     node.tagName,
   ) ||
@@ -97,8 +97,7 @@ function clean(node) {
   // React's markers (`<!--$-->`) and other comments are not the page's words.
   node.children = node.children.filter(
     (child) =>
-      child.type !== "comment" &&
-      (child.type !== "element" || !isChrome(child)),
+      child.type !== "comment" && (child.type !== "element" || !isFrame(child)),
   );
   // A callout is a quotation, without its icon.
   if (classes(node).includes("nextra-callout")) {

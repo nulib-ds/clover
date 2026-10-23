@@ -55,7 +55,8 @@ const MASKS =
 
 /**
  * One of each kind of thing a page might show: a catalog of pages, a print with its words
- * tagged, a Collection, then still, placed and timed. Every template opens each of them.
+ * tagged, a Collection, then still, placed, in 3D and timed. Every template opens each of
+ * them.
  */
 export const resources: PlaygroundResource[] = [
   // The White Sewing Machine Company's 1896 bicycle catalog, from Northwestern's
@@ -121,6 +122,19 @@ export const resources: PlaygroundResource[] = [
     map: true,
     thumbnail:
       "https://iiif.dc.library.northwestern.edu/iiif/3/2fb1e81a-9e24-420c-b224-0bfd6a279baf/full/!300,300/0/default.jpg",
+  },
+  // Northwestern's Material History Lab's scan of an Esu shrine (a mock): a Presentation 4
+  // Scene painting its glTF model, which the Viewer draws in 3D, turned to the Lab's view.
+  {
+    key: "model",
+    name: "Model",
+    title: "Esu Shrine",
+    description: "Sculpture in 3D",
+    resource: "esu-shrine/manifest.json",
+    mock: true,
+    // The Lab's own square of its first photograph of the shrine, as its page shows it.
+    thumbnail:
+      "https://sites.northwestern.edu/materialhistorylab/files/2025/10/DSC_4700-265x265.jpg",
   },
   {
     key: "film",
@@ -208,7 +222,7 @@ export const accentPresets = [
 ];
 
 /**
- * Hue and saturation of a hex color, for Nextra's chrome.
+ * Hue and saturation of a hex color, for Nextra's frame.
  *
  * Nextra builds its primary color as
  * `hsl(var(--nextra-primary-hue) var(--nextra-primary-saturation) <L>%)`, taking hue

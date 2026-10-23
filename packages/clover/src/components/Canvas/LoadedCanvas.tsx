@@ -4,13 +4,13 @@ import type { CanvasAnnotation } from "./Annotations";
 import type { CloverCanvasProps } from "./Canvas.types";
 import CanvasView from "./CanvasView";
 import type { IIIFCanvas } from "./layout";
-import { CanvasPending } from "./Pending";
+import { CanvasPending } from "../Body/Pending";
+import { BodyAlert } from "../Body/BodyAlert";
 import { loadAnnotationSets } from "../../core/annotation-collection";
 import { type AnnotationSet, readPage } from "../../core/annotation-sets";
 import type { AnnotationLink } from "../../core/link";
 import { type Loaded, loadContent } from "../../core/load";
 import type { CloverRequest } from "../../core/request";
-import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 
 type View =
   | { state: "loading" }
@@ -22,7 +22,8 @@ type View =
  * A Canvas that loads what it draws (`iiifContent`), outside any `Root`, read as a Root
  * reads its content (`loadContent`): a Canvas, a Manifest (the Canvas a `start` or content
  * state names, or its first), a Collection (its first Manifest's), a content state, or
- * annotations given as the content. It draws the Canvas's own annotations (embedded or
+ * annotations given as the content. A `Timeline` loads through it too (`of`), taking a
+ * Manifest's first Timeline; a Scene is never a Canvas's to draw. It draws the Canvas's own annotations (embedded or
  * referenced, and a content state's note), unless the host gives its own, and follows a
  * linking annotation (Cookbook 0022) to another of the Manifest's Canvases, or to the
  * Manifest its target is `partOf`, unless the host takes `onAnnotationLink`.
@@ -35,9 +36,12 @@ type View =
 export default function LoadedCanvas({
   iiifContent,
   onAnnotationLink,
+  of,
   ...props
-}: CloverCanvasProps) {
-  const { t, langOf } = useCloverTranslation();
+}: CloverCanvasProps & {
+  /** Only containers of this type: a `Timeline`'s. Any a Canvas draws, by default. */
+  of?: "Canvas" | "Timeline";
+}) {
   const [view, setView] = useState<View>({ state: "loading" });
   const request = props.options?.request;
   // An object is known by its `id`, as a Root's content is: a new one alike does not reload.
@@ -63,10 +67,12 @@ export default function LoadedCanvas({
       const content = await loadContent(link?.manifestId ?? iiifContent!, {
         request,
       });
-      const canvases = (content.manifest.items ?? []) as IIIFCanvas[];
+      const canvases = ((content.manifest.items ?? []) as IIIFCanvas[]).filter(
+        (each) => (of ? each.type === of : each.type !== "Scene"),
+      );
       const wanted = link?.canvasId ?? content.target?.canvasId;
       const canvas = canvases.find((each) => each.id === wanted) ?? canvases[0];
-      if (!canvas) throw new Error("It has no Canvas to show.");
+      if (!canvas) throw new Error(`It has no ${of ?? "Canvas"} to show.`);
       if (live) setView({ state: "ready", content, canvas });
     })().catch((error) => {
       if (live)
@@ -80,7 +86,7 @@ export default function LoadedCanvas({
     };
     // `key` stands in for the content, whose identity may change on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, link?.manifestId, link?.canvasId, request]);
+  }, [key, link?.manifestId, link?.canvasId, request, of]);
 
   // The Canvas's own annotations, once it shows: they never hold it back.
   const ready = view.state === "ready" ? view : null;
@@ -136,13 +142,7 @@ export default function LoadedCanvas({
   if (view.state === "error")
     return (
       <CanvasPending>
-        <div className="clover-status" data-status="error" role="alert">
-          <p lang={langOf("statusError")}>{t("statusError")}</p>
-          {/* The error's own words: English, as the browser and Clover write them. */}
-          <p className="clover-status-detail" lang="en">
-            {view.error.message}
-          </p>
-        </div>
+        <BodyAlert error={view.error} />
       </CanvasPending>
     );
   return <CanvasPending />;

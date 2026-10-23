@@ -139,9 +139,9 @@ function DocumentLayout({
    * there is room for both, as Default's does; where there is not, it slides over the
    * page, takes focus, and closes on its own button or Escape.
    */
-  const body = useRef<HTMLElement>(null);
+  const panes = useRef<HTMLElement>(null);
   const beside = useWideEnough(
-    body,
+    panes,
     BESIDE_REM + (showSidebar ? SIDEBAR_REM : 0),
   );
   const over = !beside;
@@ -282,11 +282,11 @@ function DocumentLayout({
         />
         {download && <Clover.Download headingLevel={below(headingLevel)} />}
       </header>
-      {/* Its stage shows the loading; announced here, nothing moves. */}
+      {/* The Body shows the loading; announced here, nothing moves. */}
       <Clover.Status loading={false} />
       <Clover.Split
-        ref={body}
-        className="clover-template-document-body"
+        ref={panes}
+        className="clover-template-document-panes"
         data-sidebar={showSidebar ? "open" : "closed"}
         data-panel={over ? "over" : "beside"}
         storageKey={storageKey || undefined}

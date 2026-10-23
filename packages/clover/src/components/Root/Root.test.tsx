@@ -65,7 +65,7 @@ const shownCanvases = () =>
   );
 
 describe("Clover.Root and its parts", () => {
-  it("loads content and shares it: label, stage and pager", async () => {
+  it("loads content and shares it: label, Body and pager", async () => {
     render(
       <Clover.Root iiifContent={bookJson}>
         <Clover.Label as="h1" />
@@ -414,7 +414,7 @@ describe("Clover.Root and its parts", () => {
     expect(region).toBeEmptyDOMElement();
   });
 
-  it("only announces loading, with loading={false}, where the stage shows it", async () => {
+  it("only announces loading, with loading={false}, where the Body shows it", async () => {
     render(
       <Clover.Root iiifContent={bookJson}>
         <Clover.Status loading={false} />
@@ -424,13 +424,15 @@ describe("Clover.Root and its parts", () => {
     const status = screen.getByText("Loading…").closest('[role="status"]');
     expect(status).toHaveStyle({ position: "absolute" });
     expect(status?.querySelector(".clover-loading")).toBeNull();
-    // The stage is busy, with the mark in its middle, until the Manifest is in.
-    const stage = document.querySelector(".clover-body")!;
-    expect(stage).toHaveAttribute("aria-busy", "true");
-    expect(stage.querySelector(":scope > .clover-loading")).not.toBeNull();
+    // The Body is busy, with the mark in its middle, until the Manifest is in.
+    const bodyElement = document.querySelector(".clover-body")!;
+    expect(bodyElement).toHaveAttribute("aria-busy", "true");
+    expect(
+      bodyElement.querySelector(":scope > .clover-loading"),
+    ).not.toBeNull();
     await screen.findByTestId("clover-canvas");
-    expect(stage).toHaveAttribute("aria-busy", "false");
-    expect(stage.querySelector(":scope > .clover-loading")).toBeNull();
+    expect(bodyElement).toHaveAttribute("aria-busy", "false");
+    expect(bodyElement.querySelector(":scope > .clover-loading")).toBeNull();
   });
 
   it("assembles the ready-made Viewer from the same parts", async () => {

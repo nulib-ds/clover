@@ -95,7 +95,7 @@ test("a pinch zooms the Canvas in, and back out", async ({ page }) => {
   await expect.poll(() => area(page)).toBeGreaterThan(before * 0.8);
 });
 
-test("the transport's bar wraps onto two rows, every control on the stage", async ({
+test("the transport's bar wraps onto two rows, every control in the Body", async ({
   page,
 }) => {
   await serveIIIF(page);
@@ -121,7 +121,7 @@ test("the transport's bar wraps onto two rows, every control on the stage", asyn
     );
     return {
       rows: rows.size,
-      // The time and chapter over the buttons, and nothing off the stage.
+      // The time and chapter over the buttons, and nothing outside the Body.
       inside: shown.every((child) => {
         const b = child.getBoundingClientRect();
         return b.left >= figure.left - 0.5 && b.right <= figure.right + 0.5;

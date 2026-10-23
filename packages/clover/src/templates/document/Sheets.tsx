@@ -9,23 +9,24 @@ import React, {
 import * as Clover from "../../parts";
 
 /**
- * Document's stage, as a PDF reader's continuous view: every view down one column, a
- * spread to a sheet, each fitted whole and as tall as the stage less a strip, so the top
- * of the next always shows under it. The reader scrolls through them as through a page:
+ * Document's column, as a PDF reader's continuous view: every view down it, a spread to
+ * a sheet, each fitted whole and as tall as the column less a strip, so the top of the
+ * next always shows under it. The reader scrolls through them as through a page:
  * wheel, trackpad, touch, scrollbar, PageUp and PageDown.
  *
- * The top of the stage is the one place a sheet is active. Where the scroll comes to
+ * The top of the column is the one place a sheet is active. Where the scroll comes to
  * rest, a sheet is brought there: the next one once the active sheet has been scrolled a
  * quarter of its height on (`THRESHOLD`), the previous once a quarter of it is in sight,
  * and otherwise the active one back into place. A press on another sheet brings it
  * there too, and so does choosing a view elsewhere (the thumbnails, the pager, a key).
  * Sheets that are not active are muted (`Document.css`).
  *
- * Each sheet is a still, its pictures at about the stage's size. The one live `Canvas`
- * (`Body`, holding `children`: zoom, hotspots, media) sits on the active sheet, drawn
- * exactly over its still; zoomed into, that sheet grows to the stage's height. Moved to another, it stays out of sight, its controls away, until that sheet is
- * in place at the top and the Canvas has drawn it; then it shows, and its controls slide
- * in.
+ * Each sheet is a still, its pictures at about the column's size. The one live `Canvas`
+ * (the `Clover.Body`, holding `children`: zoom, hotspots, media) sits on the active
+ * sheet, drawn exactly over its still; zoomed into, that sheet grows to the column's
+ * height. Moved
+ * to another, it stays out of sight, its controls away, until that sheet is in place at
+ * the top and the Canvas has drawn it; then it shows, and its controls slide in.
  */
 
 /** A still's longer side, in pixels: sharp across most screens. */
@@ -56,8 +57,8 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
   const { clover } = Clover.useClover("Document");
   const sequence = Clover.useSequence();
   const navigation = Clover.useNavigation();
-  const stage = useRef<HTMLDivElement>(null);
   const column = useRef<HTMLDivElement>(null);
+  const sheetsBox = useRef<HTMLDivElement>(null);
   const live = useRef<HTMLDivElement>(null);
 
   /* A spread's pages side by side, as the Canvas lays them: the book's way round. */
@@ -83,7 +84,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
   const position = Math.max(0, navigation.position);
   const latest = useRef({ sheets, position });
   latest.current = { sheets, position };
-  /* A view this stage made current itself, so the change need not bring it again. */
+  /* A view made current here, so the change need not bring it again. */
   const followed = useRef<number | null>(null);
   /* The sheet a scroll of ours is bringing to the top; the reader's own input lets it go. */
   const aiming = useRef<number | null>(null);
@@ -95,11 +96,11 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
   const quiet = useRef(false);
 
   const sheetAt = (index: number) =>
-    column.current?.children[index] as HTMLElement | undefined;
+    sheetsBox.current?.children[index] as HTMLElement | undefined;
 
   /* Where a sheet is at the top: its own top, or as far as the column scrolls. */
   const placeOf = (index: number) => {
-    const element = stage.current;
+    const element = column.current;
     const sheet = sheetAt(index);
     if (!element || !sheet || sheet === live.current) return 0;
     return Math.min(
@@ -124,11 +125,11 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
 
   /*
    * The active sheet back at the top, at once and as no reader's scroll: when the sheets
-   * change size (the stage resized, the panel opened beside it, a sheet grown by zoom).
+   * change size (the column resized, the panel opened beside it, a sheet grown by zoom).
    * Never while a scroll is running or on its way.
    */
   function pin() {
-    const element = stage.current;
+    const element = column.current;
     if (
       !element ||
       element.hasAttribute("data-scrolling") ||
@@ -151,8 +152,8 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
       place();
       pin();
     });
+    if (sheetsBox.current) resized.observe(sheetsBox.current);
     if (column.current) resized.observe(column.current);
-    if (stage.current) resized.observe(stage.current);
     return () => resized.disconnect();
     // `place` and `pin` read only refs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -162,7 +163,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
   const hold = () => {
     stopReveal.current();
     for (const [element, name] of [
-      [stage.current, "data-scrolling"],
+      [column.current, "data-scrolling"],
       [live.current, "data-moved"],
     ] as const)
       if (element && !element.hasAttribute(name))
@@ -174,7 +175,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
    * fails, or takes too long), the Canvas shows and its controls slide in.
    */
   const reveal = () => {
-    const element = stage.current;
+    const element = column.current;
     const layer = live.current;
     if (!element || !layer) return;
     stopReveal.current();
@@ -216,7 +217,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
 
   /* A sheet to the top: smoothly, or at once for less motion or a new document. */
   const bring = (index: number, instantly = false) => {
-    const element = stage.current;
+    const element = column.current;
     if (!element) return;
     const top = placeOf(index);
     if (Math.abs(element.scrollTop - top) <= 1) return reveal();
@@ -229,7 +230,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
   };
 
   /*
-   * A new current view. Made so by this stage, it is already on its way to the top;
+   * A new current view. Made so here, it is already on its way to the top;
    * chosen elsewhere (the thumbnails, the pager, a key, a press on its sheet, a link, a
    * new document), its sheet is brought there.
    */
@@ -250,7 +251,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
 
   /* The reader's scroll: where it is going, and where it comes to rest. */
   useEffect(() => {
-    const element = stage.current;
+    const element = column.current;
     if (!element) return;
     let frame = 0;
     let rest: ReturnType<typeof setTimeout> | undefined;
@@ -368,7 +369,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
 
   /*
    * Zoomed into, moved or turned (the Canvas no longer at home): the active sheet grows to
-   * the stage's whole height, pushing the others down, and the Canvas takes every drag,
+   * the column's whole height, pushing the others down, and the Canvas takes every drag,
    * to move about the page, where at home a finger scrolls the column (`data-zoomed`,
    * `Document.css`). The renderer's own `atHome`, which a resize keeps, so the sheet
    * growing never reads as zooming out. Home again, or another view, and it is a sheet
@@ -376,7 +377,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
    */
   const [handle, setHandle] = useState<Clover.CanvasHandle | null>(null);
   function zoom(zoomed: boolean) {
-    const element = stage.current;
+    const element = column.current;
     if (!element || element.hasAttribute("data-zoomed") === zoomed) return;
     element.toggleAttribute("data-zoomed", zoomed);
     // Grown, it can reach the top even at the column's end: it goes there at once.
@@ -391,8 +392,8 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
 
   return (
     <div
-      ref={stage}
-      className="clover-template-document-stage"
+      ref={column}
+      className="clover-template-document-column"
       onKeyDown={(event) => {
         // A sheet at a time, as a reader's PageUp and PageDown turn a page.
         if (event.defaultPrevented || event.altKey || event.ctrlKey) return;
@@ -404,7 +405,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
       }}
     >
       <div
-        ref={column}
+        ref={sheetsBox}
         className="clover-template-document-sheets"
         data-single={sheets.length < 2 || undefined}
       >
@@ -429,7 +430,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
         ))}
         <div ref={live} className="clover-template-document-live">
           <Clover.Body
-            className="clover-template-document-content"
+            className="clover-template-document-body"
             onReady={setHandle}
           >
             {children}
@@ -440,7 +441,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
   );
 }
 
-/** A Canvas's still: its picture at about the stage's size, or an empty page until then. */
+/** A Canvas's still: its picture at about the column's size, or an empty page until then. */
 function Still({ canvas }: { canvas: Canvas }) {
   const { clover } = Clover.useClover("Document");
   const source = useMemo(

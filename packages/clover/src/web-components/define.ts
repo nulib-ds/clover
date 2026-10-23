@@ -103,6 +103,12 @@ const LOADERS: Record<string, LoadPart> = {
   // Alone, what it is given; in a root, the root's view, as `Canvas` is.
   "clover-canvas": () =>
     import("./elements/canvas").then((module) => module.CanvasElement),
+  // Presentation 4's other containers: alone, what each is given; in a root, its view.
+  "clover-timeline": part(
+    () => import("../components/Timeline/Timeline"),
+    "Timeline",
+  ),
+  "clover-scene": part(() => import("../components/Scene/Scene"), "Scene"),
   "clover-tip": () =>
     import("./elements/tip").then((module) => module.TipElement),
   "clover-read-more": () =>

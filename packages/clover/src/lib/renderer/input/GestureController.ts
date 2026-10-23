@@ -1,6 +1,15 @@
+import {
+  DOUBLE_TAP_SLOP,
+  TAP_MS,
+  TAP_SLOP,
+  isDirect,
+  isHovering,
+  isInteractive,
+  scrollsWithin,
+} from "../../pointer";
 import type { Point } from "../math/affine";
 
-/** What gestures drive. Screen coordinates are CSS pixels relative to the stage. */
+/** What gestures drive. Screen coordinates are CSS pixels relative to the Body. */
 export interface GestureTarget {
   /** Move the content by `dx, dy` (drag semantics). */
   panBy(dx: number, dy: number, animate: boolean): void;
@@ -41,7 +50,7 @@ export interface GestureOptions {
   /**
    * The reader may move the camera at all: drag, pinch, wheel, double-click and keys.
    * Off, the view stays where the host puts it and only taps are reported (a lone video
-   * or sound, always fitted to the stage).
+   * or sound, always fitted to the Body).
    */
   navigable: boolean;
 }
@@ -54,12 +63,6 @@ export const DEFAULT_GESTURES: GestureOptions = {
   navigable: true,
 };
 
-/** How far a press may move, in CSS pixels, and still be a tap. */
-export const TAP_SLOP = 5;
-/** How long a tap may take, and the most time between the two of a double tap. */
-export const TAP_MS = 300;
-/** How far apart the two taps of a double tap may land. */
-export const DOUBLE_TAP_SLOP = TAP_SLOP * 4;
 const CLICK_ZOOM = 2;
 const KEY_ZOOM = 1.5;
 const KEY_PAN_FRACTION = 0.1;
@@ -76,10 +79,11 @@ interface Sample {
 }
 
 /**
- * Pointer, wheel and keyboard input on the stage, turned into camera intents.
+ * Pointer, wheel and keyboard input on the Body, turned into camera intents.
  *
- * Pointer events cover mouse, pen and touch alike. The stage sets `touch-action: none`
- * so the browser hands pinch and drag over rather than scrolling or zooming the page.
+ * Pointer events cover mouse, pen and touch alike. The Body's viewport sets
+ * `touch-action: none` so the browser hands pinch and drag over rather than scrolling or
+ * zooming the page.
  */
 export class GestureController {
   private pointers = new Map<number, Point>();
@@ -89,7 +93,7 @@ export class GestureController {
   private pinch: { distance: number; mid: Point } | null = null;
   private lastTap: Sample | null = null;
   private lastPointerType = "";
-  /** A pen has hovered over the stage, so pens here are pointed as a mouse is. */
+  /** A pen has hovered over the Body, so pens here are pointed as a mouse is. */
   private penHovers = false;
 
   constructor(
@@ -129,7 +133,7 @@ export class GestureController {
   private onPointerDown = (event: PointerEvent) => {
     this.lastPointerType = event.pointerType;
     if (event.pointerType === "mouse" && event.button !== 0) return;
-    // Controls and overlays inside the stage handle their own clicks.
+    // Controls and overlays inside the Body handle their own clicks.
     if (isInteractive(event.target, this.element)) return;
 
     this.element.setPointerCapture?.(event.pointerId);
@@ -227,8 +231,8 @@ export class GestureController {
       if (isDirect(event.pointerType, this.penHovers)) {
         /*
          * A finger, or a pen that does not hover, follows OpenSeadragon's touch defaults:
-         * a single tap does nothing here (it shows or hides the chrome,
-         * `useChromeVisibility`) and a double tap zooms in, unless the host has turned
+         * a single tap does nothing here (it shows or hides the controls,
+         * `useControlsVisibility`) and a double tap zooms in, unless the host has turned
          * both click zooms off. A pen that hovers clicks as a mouse does.
          */
         const last = this.lastTap;
@@ -291,7 +295,7 @@ export class GestureController {
     const pinch = event.ctrlKey;
     if (!this.options.navigable) return;
     if (!pinch && !this.options.scrollToZoom) return;
-    // A box in the stage that scrolls that way (a long hotspot note) scrolls, not zooms.
+    // A box in the Body that scrolls that way (a long hotspot note) scrolls, not zooms.
     if (!pinch && scrollsWithin(event.target, this.element, event.deltaY))
       return;
     event.preventDefault();
@@ -357,63 +361,4 @@ function normalizeWheel(event: WheelEvent): number {
   if (event.deltaMode === 1) return event.deltaY * 16;
   if (event.deltaMode === 2) return event.deltaY * 400;
   return event.deltaY;
-}
-
-/**
- * A finger, or a pen: pointers pressed on the screen itself, with no hover to rely on. A
- * pen that has been seen to hover (`hovers`, from `isHovering`) is pointed as a mouse is.
- */
-export function isDirect(
-  pointerType: string | undefined,
-  hovers = false,
-): boolean {
-  return pointerType === "touch" || (pointerType === "pen" && !hovers);
-}
-
-/** A pen moving over the screen without touching it, as a desktop tablet's does. */
-export function isHovering(event: PointerEvent): boolean {
-  return event.pointerType === "pen" && event.buttons === 0;
-}
-
-/** Whether a box between `target` and `stage` can scroll further down (or up). */
-export function scrollsWithin(
-  target: EventTarget | null,
-  stage: HTMLElement,
-  deltaY: number,
-): boolean {
-  for (
-    let node = target as HTMLElement | null;
-    node && node !== stage;
-    node = node.parentElement
-  ) {
-    // Room that way: below for a wheel down, above for one up.
-    const room =
-      deltaY > 0
-        ? node.scrollHeight - node.clientHeight - node.scrollTop
-        : node.scrollTop;
-    if (room >= 1 && /auto|scroll/.test(getComputedStyle(node).overflowY))
-      return true;
-  }
-  return false;
-}
-
-/** A control, link or overlay within `stage` that handles its own presses. */
-export function isInteractive(
-  target: EventTarget | null,
-  stage: HTMLElement,
-): boolean {
-  let node = target as HTMLElement | null;
-  while (node && node !== stage) {
-    if (
-      node instanceof HTMLButtonElement ||
-      node instanceof HTMLAnchorElement ||
-      node instanceof HTMLInputElement ||
-      node instanceof HTMLSelectElement ||
-      node.dataset?.cloverCanvasInteractive !== undefined
-    ) {
-      return true;
-    }
-    node = node.parentElement;
-  }
-  return false;
 }

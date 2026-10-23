@@ -1,0 +1,256 @@
+/*
+ * Scene: a IIIF Presentation 4 Scene in 3D, on Canvas's Body. Its figure
+ * is a `clover-canvas` too, so the Body's ground, controls, caption, focus ring
+ * and full screen are Canvas's (`Canvas.css`); this sheet has only what a Scene adds.
+ */
+
+/*
+ * The Scene's controls, in the Body's lower right, inset as the cluster is in its top
+ * right (Mat, 2026-10-23): zoom and full screen in a row (`.clover-scene-tools`), and the
+ * rotate pad (`RotatePad.tsx`), the row ending in the pad's empty corner, `s` left of its
+ * down arrow ("place them to left of the down arrow"). They come and go with the rest of
+ * the controls (Mat, 2026-10-23: "not visible by default"), as Canvas's do (`Canvas.css`):
+ * shown on pointer activity or keyboard focus, tucking down as they leave, and resting
+ * on one holds them. Only the buttons and the disc take a press, so a drag between them
+ * turns the model; a press held on one turns on, so the corner takes no gesture of the
+ * page's and no callout of a phone's.
+ */
+.clover-scene > .clover-scene-navigation {
+  position: absolute;
+  right: var(--clover-canvas-controls-inset);
+  bottom: var(--clover-canvas-controls-inset);
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  pointer-events: none;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+  opacity: var(--clover-controls-shown);
+  translate: 0
+    calc((1 - var(--clover-controls-shown)) * var(--clover-controls-tuck));
+  transition: all var(--clover-controls-timing);
+}
+
+/* Faded, they take no press, as the cluster's controls do. */
+.clover-scene-navigation :is(button, .clover-scene-rotate-disc) {
+  pointer-events: var(--clover-controls-events);
+}
+
+/* Resting on one of them holds the controls, as resting on the cluster does. */
+.clover-scene:has(
+  > .clover-scene-navigation :is(button, .clover-scene-rotate-disc):hover
+) {
+  --clover-controls-shown: 1;
+  --clover-controls-events: auto;
+  --clover-controls-timing: var(--clover-controls-enter);
+}
+
+/*
+ * The scrim, as a Canvas's (`Canvas.css`), but rising from the Body's foot, where the
+ * Scene's controls sit (Mat, 2026-10-23: "like with canvas … a gradient fade"): a dark
+ * wash as tall as the pad and its inset, which comes and goes with the controls, so they
+ * read over a bright model.
+ */
+.clover-scene > .clover-canvas-scrim {
+  inset: auto 0 0;
+  height: calc(
+    3 * var(--clover-control) + 2 * var(--clover-space-s) + 2 *
+      var(--clover-canvas-controls-inset)
+  );
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 45%),
+    rgb(0 0 0 / 20%) 45%,
+    rgb(0 0 0 / 0%)
+  );
+}
+
+/* A small Body (`data-compact`, from the Scene's size), smaller cells, 24px or more. */
+.clover-scene > .clover-scene-navigation[data-compact] {
+  --clover-control: max(1.5rem, 24px);
+}
+
+.clover-scene-tools {
+  display: flex;
+  gap: var(--clover-space-s);
+  margin-inline-end: calc(-1 * var(--clover-control));
+}
+
+/*
+ * The pad: three controls across, `s` apart as the cluster's are, each way to turn in
+ * the cell on its side and the way home in the last corner, the cells the controls' own
+ * buttons, so they take the accent under the pointer as the cluster's do. Under them,
+ * at its center, the disc: the handle a drag on turns the models (Mat, 2026-10-23: "the
+ * button is the disk"), a ball in the controls' fill lit by the accent (below), a globe
+ * on it that turns with the view. Its rim divides the gap between its center's control
+ * room and full screen, across the pad's corner, at the golden ratio (Mat, 2026-10-23):
+ * 0.618 of the way out from half a control, 0.756 controls and 0.874 gaps from the
+ * center, ½c + 0.618 × (√2 × (c + s) − c).
+ */
+.clover-scene-rotate {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, var(--clover-control));
+  grid-template-rows: repeat(3, var(--clover-control));
+  gap: var(--clover-space-s);
+  --clover-scene-rotate-rim: calc(
+    0.756 * var(--clover-control) + 0.874 * var(--clover-space-s)
+  );
+}
+
+.clover-scene-rotate-disc {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(2 * var(--clover-scene-rotate-rim));
+  height: calc(2 * var(--clover-scene-rotate-rim));
+  translate: -50% -50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  /*
+   * A dark shade of the accent, black mixed in sRGB, which keeps the accent's hue and
+   * saturation and lowers only its brightness (Mat, 2026-10-23: "saturation and hue
+   * should match"); the arrows round it stay the controls' fill, so the two never run
+   * together.
+   */
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 35%,
+    #000
+  );
+  /*
+   * A sphere by shading alone (Mat, 2026-10-23: "more obviously a sphere … css
+   * tricks"): a glint high on its left, where the light falls, its face darkening toward
+   * its edge as a ball's falls away (black again, so the hue holds), a shadow inside its
+   * lower right, a rim of the accent on its upper left, and a soft shadow cast beneath
+   * it. The globe's lines lie on its face.
+   */
+  background-image:
+    radial-gradient(
+      circle at 33% 27%,
+      color-mix(in srgb, var(--clover-color-accent, #0065c3) 55%, #fff),
+      transparent 18%
+    ),
+    radial-gradient(circle at 40% 35%, transparent 30%, rgb(0 0 0 / 55%) 100%);
+  box-shadow:
+    inset -0.236rem -0.382rem 0.618rem rgb(0 0 0 / 40%),
+    inset 0.146rem 0.236rem 0.382rem
+      color-mix(in srgb, var(--clover-color-accent, #0065c3) 50%, transparent),
+    0 0.236rem 0.618rem rgb(0 0 0 / 25%);
+  color: var(--clover-color-control-glyph, #fff);
+  cursor: grab;
+  isolation: isolate;
+}
+
+.clover-scene-rotate-disc:active {
+  cursor: grabbing;
+}
+
+/*
+ * A ball, not a wash (Mat, 2026-10-23: "less muddy … a hint of accent"): solid, a dark
+ * shade of the accent, nothing of the ground showing through, lit from its upper left by
+ * the accent itself, a hint at rest and whole while it is pointed at or held,
+ * while a control of the pad has keyboard focus, and while the view turns, by any means
+ * (`data-turning`, from the Scene). An opacity, so it fades as the controls do.
+ */
+.clover-scene-rotate-disc::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 35% 30%,
+    var(--clover-color-accent, #0065c3),
+    transparent 70%
+  );
+  opacity: 0.35;
+  transition: opacity 200ms ease;
+  content: "";
+}
+
+.clover-scene-rotate-disc:is(:hover, :active)::before,
+.clover-scene-rotate:has(:focus-visible) .clover-scene-rotate-disc::before,
+.clover-scene-navigation[data-turning] .clover-scene-rotate-disc::before {
+  opacity: 1;
+}
+
+@media (forced-colors: active) {
+  .clover-scene-rotate-disc {
+    border: 1px solid CanvasText;
+  }
+}
+
+/*
+ * Its globe shows where the view is (`Orientation`), its lines across the whole ball,
+ * fading toward its rim, where the arrows sit over it, so no line meets them stark
+ * (Mat, 2026-10-23).
+ */
+.clover-scene-rotate-disc svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  stroke: currentColor;
+  -webkit-mask-image: radial-gradient(
+    circle closest-side,
+    #000 45%,
+    transparent 90%
+  );
+  mask-image: radial-gradient(circle closest-side, #000 45%, transparent 90%);
+}
+
+.clover-scene-rotate-cell {
+  position: relative;
+  z-index: 1;
+  display: flex;
+}
+
+.clover-scene-rotate-cell[data-place="up"] {
+  grid-area: 1 / 2;
+}
+
+.clover-scene-rotate-cell[data-place="left"] {
+  grid-area: 2 / 1;
+}
+
+.clover-scene-rotate-cell[data-place="corner"] {
+  grid-area: 3 / 3;
+}
+
+.clover-scene-rotate-cell[data-place="right"] {
+  grid-area: 2 / 3;
+}
+
+.clover-scene-rotate-cell[data-place="down"] {
+  grid-area: 3 / 2;
+}
+
+/*
+ * Its carets point the way each turns, so none takes the cluster's (`Button.css`):
+ * rotate left's mirror, the nudges on hover. The way home is Canvas's reset (Mat,
+ * 2026-10-23), its glyph and its nudge.
+ */
+.clover-scene
+  .clover-scene-navigation
+  .clover-scene-rotate-cell:not([data-place="corner"])
+  button.clover-canvas-button
+  svg {
+  scale: none;
+  rotate: none;
+}
+
+/*
+ * What could not be drawn, said over the Body's foot, clear of the controls at its top,
+ * on the Body's own ground so it reads over whatever is under it.
+ */
+.clover-scene > .clover-scene-error {
+  position: absolute;
+  inset: auto var(--clover-canvas-controls-inset)
+    var(--clover-canvas-controls-inset);
+  z-index: 2;
+  background-color: var(--clover-color-secondary, #fff);
+  border-radius: var(--clover-radius, 3px);
+}

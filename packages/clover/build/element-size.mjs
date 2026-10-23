@@ -173,7 +173,7 @@ export const PAGES = [
     "composedPageGzip",
     ["clover-root", "clover-label", "clover-body", "clover-items"],
   ],
-  // A layout as Default's, of elements: the stage and its toggle beside the panel.
+  // A layout as Default's, of elements: the Body and its toggle beside the panel.
   [
     "A layout of containers",
     "layoutPageGzip",

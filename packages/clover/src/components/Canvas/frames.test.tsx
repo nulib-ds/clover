@@ -124,7 +124,7 @@ describe("useAnimation", () => {
     expect(once.result.current.playing).toBe(false);
   });
 
-  it("holds a frame not yet loaded, rather than blink to an empty stage", () => {
+  it("holds a frame not yet loaded, rather than blink to an empty Body", () => {
     const frames = animationFrames(stereo());
     let loaded = false;
     const { result } = renderHook(() =>
@@ -248,7 +248,7 @@ describe("FrameControls", () => {
 
 describe("FrameAnimation", () => {
   it("puts its bar in the media layer, as a video's, and gives the Canvas its height", () => {
-    // jsdom lays nothing out: the bar is as tall as two rows of a narrow stage.
+    // jsdom lays nothing out: the bar is as tall as two rows of a narrow Body.
     const height = vi
       .spyOn(HTMLElement.prototype, "offsetHeight", "get")
       .mockReturnValue(59);
@@ -267,7 +267,7 @@ describe("FrameAnimation", () => {
       </figure>,
     );
     const layer = screen.getByTestId("clover-canvas-frames").parentElement;
-    // It fades with the chrome and sizes its menu against the stage, as a video's does.
+    // It fades with the controls and sizes its menu against the Body, as a video's does.
     expect(layer).toHaveClass("clover-canvas-media");
     expect(layer).toHaveAttribute("data-kind", "frames");
     // What clears the bar (captions, the information box) clears both its rows.

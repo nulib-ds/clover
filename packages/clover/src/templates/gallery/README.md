@@ -1,7 +1,7 @@
 # Gallery
 
 A grid of a Manifest's views (a spread is one cell) that opens one in a lightbox: its
-label and position, the stage to pan and zoom, and the pager to move on. The lightbox is
+label and position, the Body to pan and zoom, and the pager to move on. The lightbox is
 a native `<dialog>`: focus stays inside it, Escape or a press outside closes it, and
 focus returns to the cell.
 

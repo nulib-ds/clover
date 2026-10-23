@@ -193,7 +193,7 @@ const DcItemMock: React.FC = () => {
 
         {work && (
           <div className={styles.viewer}>
-            {/* As Digital Collections has it: no title over the stage, no information panel. */}
+            {/* As Digital Collections has it: no title over the Body, no information panel. */}
             <Viewer
               key={id}
               iiifContent={work.iiif_manifest}

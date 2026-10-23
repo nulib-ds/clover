@@ -68,7 +68,7 @@ export function Tip({
   shortcut?: Shortcut;
   /**
    * It may run longer than the room it is kept in (a hotspot's note, kept inside the
-   * stage): capped there, it scrolls (`scrollNote` in `Canvas/Annotations.tsx`). It never takes focus, which a scroller
+   * Body): capped there, it scrolls (`scrollNote` in `Canvas/Annotations.tsx`). It never takes focus, which a scroller
    * might, hidden as it is from assistive technology: a press on it focuses its control.
    */
   scrolls?: boolean;
@@ -123,7 +123,7 @@ export function Tip({
 
 /*
  * A popover is placed by its family (`ui/Tip.css`), and then kept inside what clips it:
- * the stage, a scrolling panel, the window. Each time it shows (the pointer comes to its
+ * the Body, a scrolling panel, the window. Each time it shows (the pointer comes to its
  * control, or focus does), it is measured as it is then, after any zoom, text spacing or
  * longer language, and wraps to the room there is and moves in from the edge, `xs` clear
  * (WCAG 1.4.10, 1.4.12).

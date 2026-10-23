@@ -28,6 +28,16 @@ export const RESOURCES = {
    */
   collection:
     "https://api.dc.library.northwestern.edu/api/v2/collections/c373ecd2-2c45-45f2-9f9e-52dc244870bd?as=iiif",
+  /**
+   * The IIIF Cookbook's recipe 0002 in Presentation 4 (not a mock): one Timeline, its sound
+   * an `Audio` body, for `Timeline`.
+   */
+  audio: "https://iiif.io/api/cookbook/recipe/0002-mvm-audio/v4/manifest.json",
+  /**
+   * The IIIF Cookbook's recipe 0608 in Presentation 4 (not a mock): one Scene painting a
+   * glTF model at its origin, for `Scene`.
+   */
+  model: "https://iiif.io/api/cookbook/recipe/0608-mvm-3d/v4/manifest.json",
 } as const;
 
 export type PartDemoResource = keyof typeof RESOURCES;

@@ -1,4 +1,8 @@
-import { bodiesOf, parseAnnotationTarget } from "../../core/annotations";
+import {
+  bodiesOf,
+  isSound,
+  parseAnnotationTarget,
+} from "../../core/annotations";
 import type { Rect, SceneImage } from "../../lib/renderer";
 import { findImageServiceId } from "../../lib/renderer";
 import { type ViewingDirection, resolveDirection } from "../../core/sequence";
@@ -321,8 +325,10 @@ export function paintedImages(
 }
 
 /**
- * The video or sound a Canvas paints. A `Choice` of sources (two qualities, say) plays
- * the selected one. Only the first is played: one Canvas, one media element.
+ * The video or sound a Canvas or Timeline paints: `Video`, and `Audio` (Presentation 4's
+ * name) or `Sound` (Presentation 3's, which the upgrader keeps). A `Choice` of sources (two
+ * qualities, say) plays the selected one. Only the first is played: one Canvas, one media
+ * element.
  */
 export function paintedMedia(
   canvas: IIIFCanvas,
@@ -331,7 +337,7 @@ export function paintedMedia(
   const media: PaintedMedia[] = [];
   eachPainted(canvas, selections, (resolved, target) => {
     const type = resolved.body.type;
-    if (type !== "Video" && type !== "Sound") return;
+    if (type !== "Video" && !isSound(type)) return;
     media.push({
       kind: type === "Video" ? "video" : "audio",
       body: resolved.body,
@@ -479,7 +485,7 @@ export function resolveBody(
       ? { ...inner, region: selector?.region ?? inner.region }
       : null;
   }
-  if (body.type !== "Image" && body.type !== "Video" && body.type !== "Sound") {
+  if (body.type !== "Image" && body.type !== "Video" && !isSound(body.type)) {
     return null;
   }
   return {
@@ -610,7 +616,7 @@ function posterFor(canvas: IIIFCanvas): string | undefined {
 
 /**
  * A Canvas's placeholder, as one still image: its placeholder Canvas's first painted
- * image, asked of its image service at a size that fills a stage, or else its `id`.
+ * image, asked of its image service at a size that fills a Body, or else its `id`.
  * Shown fitted before the Canvas itself is opened, and as a video's poster frame.
  */
 export function placeholderStill(

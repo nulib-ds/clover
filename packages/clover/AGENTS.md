@@ -17,6 +17,11 @@ every rule below.
 
 ## Package rules
 
+- **Vocabulary** (Mat, 2026-10-23), as the root `AGENTS.md` sets it: the Body, never
+  "stage"; the controls, never "chrome" (`--clover-controls-*`, `data-controls`,
+  `components/Body/`, `useControlsVisibility`, `MediaBody`); a template's `-body` class on
+  its `Clover.Body` alone, `-panes` on its `Split`, and Document's scrolling pages its
+  column (`.clover-template-document-column`).
 - **Relative imports only.** Nothing in `src/` imports `src/...`, `docs/...` or
   `@samvera/clover-iiif`; ESLint forbids it. The Vite build throws on any bare import that
   is not a declared dependency or peer, so OpenSeadragon, Radix and the like cannot slip
@@ -51,11 +56,11 @@ every rule below.
   spacing, and on any font family.
 - **Plain-layout scaffolding.** Every part must still lay out plainly without the
   stylesheet: semantic HTML in reading order, SVG icons with `width`/`height`
-  attributes, and the few functional styles inline (stage position and height, track
-  overflow, visually hidden text, `hidden` on closed popovers). Everything visual goes in
-  the stylesheet. The Canvas's figure, viewport, surface and DOM layers set their geometry
-  inline. Without it, WebKit grows the canvas without bound. `e2e/specs/plain.spec.ts`
-  checks this layout in every engine.
+  attributes, and the few functional styles inline (the Body's position and height,
+  track overflow, visually hidden text, `hidden` on closed popovers). Everything visual
+  goes in the stylesheet. The Canvas's figure, viewport, surface and DOM layers set their
+  geometry inline. Without it, WebKit grows the canvas without bound.
+  `e2e/specs/plain.spec.ts` checks this layout in every engine.
 - **Full screen** is offered only where `isFullscreenSupported()` says an element can have
   it. Read it with `useFullscreenSupported()`, which assumes support on the server, so
   hydration matches. Where elements cannot go full screen (iPhone), a video goes to the
@@ -158,7 +163,7 @@ every rule below.
   the Canvas's controls to the viewport. A new key the viewport does not handle would make
   a popover lie.
 - Placement is by family in `ui/Tip.css`. A new row of controls that sits at the top of a
-  stage, or at a row's end, needs its selector there.
+  Body, or at a row's end, needs its selector there.
 - Placement listens once per document, in capture, beside Escape's listener (`useTips`):
   `pointerenter` and `focus` on a control measure its child `.clover-tip` against its
   clipping ancestors and write `--clover-tip-room` / `--clover-tip-shift` inline. A
@@ -245,12 +250,13 @@ every rule below.
   the pages down one scrolling column, the panel sliding out right), `Gallery` (grid and lightbox).
   A `Text` template (3.x's Scroll: an article per Canvas, its text by language) was
   removed for now, to settle these three first; it is in the history.
-- `Document`'s stage is `document/Sheets.tsx` (Mat, 2026-10-16: less friction, a flow
-  like Preview's continuous PDF view; it replaced `usePaging`, a page per wheel gesture).
-  Every view is a sheet down one natively scrolling column, a still of its pictures
-  (`stillSource`, the painted image at about 1600px, not the small `thumbnail`), each at
-  most the stage less `2 × --clover-inset` tall, so the next one's picture shows under
-  the one at rest. No CSS snap: the top of the stage is the one place a sheet is active
+- `Document` draws its views in `document/Sheets.tsx` (Mat, 2026-10-16: less friction, a
+  flow like Preview's continuous PDF view; it replaced `usePaging`, a page per wheel
+  gesture). Every view is a sheet down one natively scrolling column
+  (`.clover-template-document-column`), a still of its pictures (`stillSource`, the
+  painted image at about 1600px, not the small `thumbnail`), each at most the column
+  less `2 × --clover-inset` tall, so the next one's picture shows under the one at rest.
+  No CSS snap: the top of the column is the one place a sheet is active
   (Mat, 2026-10-16), and `Sheets` decides where the scroll rests (`SETTLE_MS`, 200, quiet;
   never while a finger or the scrollbar holds it): past `THRESHOLD` (a quarter of the
   way to the next place, from where it last rested) the next sheet, short of it the
@@ -261,11 +267,11 @@ every rule below.
   template's controls as its children) sits on the active sheet, exactly over its still
   (the Canvas's home fit, the same inset), moved there by `top`, never remounted (Mat: a
   turn simply swaps the content). It and its controls stay hidden (`data-moved`,
-  `data-scrolling`; controls through `--clover-chrome-shown`) until the sheet is in
+  `data-scrolling`; controls through `--clover-controls-shown`) until the sheet is in
   place and the Canvas has drawn it (`data-status` not `loading`, or its placeholder,
   or `REVEAL_MS`), unless focus is in it. Zoomed, moved or turned (the handle's
   `atHome`, which a resize keeps, so growing never reads as zooming out), the active
-  sheet fills the stage (`data-zoomed`), the others dissolve, and the Canvas takes every
+  sheet fills the column (`data-zoomed`), the others dissolve, and the Canvas takes every
   drag; another view or home puts it back. A resize keeps the active sheet at the top
   (`pin`). It relies on the Canvas leaving a plain wheel alone (`scrollToZoom: false`),
   so the wheel scrolls the column; at home a finger does too (`touch-action: pan-y`).
@@ -303,7 +309,7 @@ every rule below.
   a panel floating over the page gets `onClose` (a close button, and focus handed back to
   the `aria-controls` control) and `closeOnEscape`, which also puts the button at the
   panel's inner edge (`data-floating`: the start, for a panel over the end of the page).
-  A docked panel (`Default`'s, beside the stage) gets no `onClose`: its toggle closes it
+  A docked panel (`Default`'s, beside the Body) gets no `onClose`: its toggle closes it
   (Mat). A floating one (`Default` on a phone, `Document`) also takes focus when it
   opens. Any new layout with a panel does the same. `shared/Lightbox.tsx` is a native `<dialog>`; jsdom lacks
   `showModal()`, so tests polyfill it.
@@ -400,9 +406,9 @@ every rule below.
   - Timings are checked in Chromium only.
   - On macOS every engine opens a select's own list on an arrow key, which the page does
     not see, so `collection.spec.ts`'s arrow-key specs run on Linux and Windows only.
-- `specs/transport.spec.ts` (Chromium only) checks the transport's reflow at 320px and on
-  640 × 360, 320 × 256 and 320 × 180 stages: the end controls stay together, and the
-  menus, the frames menu, the information box and the captions stay on the stage. It
+- `specs/transport.spec.ts` (Chromium only) checks the transport's reflow at 320px and in
+  a Body of 640 × 360, 320 × 256 and 320 × 180: the end controls stay together, and the
+  menus, the frames menu, the information box and the captions stay in the Body. It
   also checks the on-state mark and the sliders in forced colors, and the tracks a real
   video adds.
 - `specs/hotspots.spec.ts` serves its own Manifest of hotspots: nested, under the
@@ -423,13 +429,14 @@ every rule below.
   TalkBack) needs a device or the Android emulator.
 - On a device or the iOS Simulator, Safari loads the harness at `localhost:4321` with a real
   Manifest URL in `&content=`. `&debug=1` adds a fixed readout of the video element, the
-  chrome and the pointer events that reached the page, because there is no console to
+  controls and the pointer events that reached the page, because there is no console to
   read. The page mutes every `play()`. In the Simulator, drive the page with real touches
   (`touch_path`, `touch2_path`): the plain `tap` sends a click but no pointer events, so
-  the chrome never shows.
-- An open disclosure in the Canvas holds its chrome on screen (`:has([aria-expanded="true"])`),
-  except the panel toggle (`data-button="panel"`), whose panel sits beside the Canvas. Exclude
-  any new toggle whose target is outside the Canvas in the same way.
+  the controls never show.
+- An open disclosure in the Canvas holds its controls on screen
+  (`:has([aria-expanded="true"])`), except the panel toggle (`data-button="panel"`),
+  whose panel sits beside the Canvas. Exclude any new toggle whose target is outside the
+  Canvas in the same way.
 - `src/ssr.test.tsx` runs in Vitest's node environment (`renderToString`).
   `setupTests.ts` skips its DOM stand-ins when there is no `window`. It also gives jsdom a
   desktop's `document.fullscreenEnabled`, which tests of iPhone behavior turn off, and
@@ -442,8 +449,11 @@ every rule below.
   request settings) and `core/presentation.ts` upgrades it with
   `upgradeToPresentation4()`. Every part and `Canvas` read P4 only (`placeholderContainer`,
   `accompanyingContainer`, `Timeline` for sound, `motivation` arrays, `{ id, type }`
-  targets). Never add a P2/P3 branch to a part; upgrade at the boundary instead. Scenes
-  are skipped by `selectSequence` until the `Scene` component exists.
+  targets). Never add a P2/P3 branch to a part; upgrade at the boundary instead.
+  `selectSequence` holds Canvases, Timelines and Scenes, each drawn by its own part
+  (below, "Timeline and Scene"). Sound's body is `Audio` in Presentation 4 and `Sound`
+  as the upgrader keeps Presentation 3's: test it with `isSound` (`core/annotations.ts`),
+  never one name.
 - `createClover()` (`core/clover.ts`) is one Root's state: a small store (`core/store.ts`)
   holding only `status`, `error`, `manifest`, `collection`, `canvasId` and `target`.
   Per-frame and per-tick values (viewport, media element) go through channels, never the
@@ -481,7 +491,12 @@ every rule below.
   hidden while empty, never `display: none`. Many screen readers do not announce a
   region inserted with its message already inside it.
 - `Body` imports the connected Canvas (`Canvas/Connected.tsx`) directly. `Canvas`
-  loads it lazily, so a standalone Canvas does not carry it.
+  loads it lazily, so a standalone Canvas does not carry it. A Timeline or Scene view
+  `Body` hands to its part's connected module (`Timeline/Connected.tsx`,
+  `Scene/Connected.tsx`), each `React.lazy`, its fallback the loading mark: routing them
+  costs a template 0.2–0.3 kB, the least two lazy references and a type check take
+  (measured 2026-10-23; a static Timeline route measured 29 B more). A host's renderer
+  (`renderers`) still goes first.
 - **Measuring size.** `initialGzip` starts from the output whose `entryPoint` is the stdin
   `sourcefile` (`entry.mjs`), never "the first output with an entryPoint": esbuild marks
   every lazy chunk an entry point too, and which comes first depends on the graph.
@@ -544,7 +559,7 @@ every rule below.
   hotspot on top would be an unseen target. A point masks nothing; its marker is opaque.
   The active one always wins over a tracked one (Mat, 2026-10-19): none is raised over
   it, and a tracked one is never raised over the active.
-- **Letting go of a pick** (Mat, 2026-10-19). A tap or click on the stage off every
+- **Letting go of a pick** (Mat, 2026-10-19). A tap or click on the Body off every
   hotspot first asks the renderer's `dismiss()` (`setDismiss`, set by `CanvasView` to
   `releaseAnnotation`); if there was a pick it is let go and the tap does nothing more
   (no zoom, no `tap` event). Escape in the figure does the same (WCAG 2.1.1), after the
@@ -578,7 +593,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   (Mat: only while paused). For Play, the transport fades by its parts (its
   `::before` scrim, which carries every scrim, sound's too; its seek area; each of its
   bar's children), never its box, so the one child can stay. A large paused play button
-  in the middle, shown while the chrome was away, was tried and removed (Mat: it came
+  in the middle, shown while the controls were away, was tried and removed (Mat: it came
   and went). Captions tell their state
   by the glyph, outlined or filled (`CaptionsIcon` `on`), not the transport's bar.
 - **What an annotation leads to, carries and covers** (Mat, 2026-10-19; Cookbook 0022,
@@ -601,7 +616,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     and `showLink` is apart in `core/show-link.ts`: either eager put 0.25 kB on the
     Viewer's first load.
   - A `#t=` annotation is a `TimedAnnotation` (`timeAnnotations`, in the hotspot chunk):
-    `MediaStage` shows it among the caption cues while its stretch plays (a moment, three
+    `MediaBody` shows it among the caption cues while its stretch plays (a moment, three
     seconds), the menu lists it by its start, and a pick seeks (`sought`), never plays.
     Each cue carries its own `lang`, not the captions box. `CanvasAnnotation.pageLabel`
     (its AnnotationPage's) labels its cue and groups the menu.
@@ -721,7 +736,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   so a layout with a pager and no strip carries none of the strip. A step is a selection,
   as the carousel's arrows' are (`followFocus`, else `onActivate` for members). Position
   keeps its widest count's room (`.clover-pager-room`, `hidden` without the stylesheet),
-  so nothing beside it moves. Its gap is the Canvas cluster's `s`, so a pager over a stage
+  so nothing beside it moves. Its gap is the Canvas cluster's `s`, so a pager over a Body
   lines up with the controls; don't override it in a template.
   A step with nowhere to go shows disabled, never hidden (Mat, 2026-10-16): faded, taking
   no pointer, whole again while focused. One rule in `ui/Button.css` covers the pager's,
@@ -824,12 +839,128 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   (`components/Root/Root.test.tsx`): the connected Canvas adds its own `change`
   listener, which the single-listener mock in the Canvas tests would overwrite.
 
+## Timeline and Scene
+
+Presentation 4's other containers (2026-10-23), documented on `content/docs/timeline.mdx` and `scene.mdx`, which say what each plays or draws, how it reads for assistive technology, what it loads and what is next.
+
+- **The Body** (`components/Body/`) holds what Canvas, Timeline and Scene share: how the
+  controls come and go (`useControlsVisibility`), loading near the window
+  (`useNearViewport`), the information caption (`Caption`, `CaptionDetails`), the
+  pending box (`Pending`), the alert for what will not load (`BodyAlert`, a module of
+  its own, or Rollup puts it on every Canvas page) and the glyphs. Pointer helpers are
+  `lib/pointer.ts`, shared with the 2D renderer's gestures. Timeline's and Scene's
+  figures are each a `clover-canvas` too (`clover-canvas clover-timeline`,
+  `clover-canvas clover-scene`), so `Canvas.css`'s rules for the Body (the controls and
+  their reveal, scrim, focus ring, full screen, `getCloverRoot`) are theirs; a neutral
+  name waits for Canvas's renaming.
+- **Timeline** (`components/Timeline/`) is Canvas's view for a Timeline:
+  `Timeline.tsx` renders `CanvasView` with the Timeline as its one Canvas (no
+  navigator), `Connected.tsx` renders the connected Canvas for a Root's Timeline view
+  and nothing for another, and `iiifContent` goes to `LoadedCanvas` with `of="Timeline"`
+  (a Manifest's first Timeline). So every audio recipe that played on Canvas plays the
+  same (0002, 0014, 0103, 0434). A sound with no picture, nor a placeholder showing,
+  names itself in the Body over the transport (`CanvasView`,
+  `.clover-canvas-sound-label` in `Canvas.css`; Mat, 2026-10-23: "label these"): for
+  the eye alone, `aria-hidden`, as the viewport is named by the same words, and only
+  where it has a name of its own. A lighter view of its own, without the 2D renderer, is
+  deferred. A switch of kind (a Canvas view to a Timeline view) remounts the part in the
+  Body.
+- **Scene** (`components/Scene/`): `models.ts` reads a Scene's painting annotations into
+  `SceneModel`s (a `Model` body, a `Choice`'s first, a `SpecificResource`'s `source` and
+  `transform`s in order; the target's `PointSelector`), memoized on the Scene, pure.
+  `orbit.ts` is the camera, pure: home in front (`+z`, toward `-z`), a little above,
+  fitting the bounding sphere of the models' box, a box of their points as placed
+  (`lib/gltf/bounds.ts`, three.js's `setFromObject(…, true)`), never of their own boxes
+  turned, which bound far more (a scan's node turned 86° drew 28% smaller); every move (drag, pinch, key, control) goes through
+  `turned`/`zoomed`. `gestures.ts` is the viewport's pointers (a plain wheel stays the
+  page's, as on Canvas). `engine.ts` is the only module that imports three.js (its
+  `WebGLRenderer`, `GLTFLoader` and `RoomEnvironment` for default light), `import()`ed
+  by `SceneView` once a Scene with `engine="three"` is near the window: never import
+  three.js anywhere else,
+  and keep `bundle.test.mjs`'s `LAZY_PACKAGES` and `LAZY_MODULES` saying so. It draws on
+  demand (a frame per change, coalesced; a resize draws at once), never in a loop.
+- **Clover's own glTF renderer** (`lib/gltf/`, framework-free as `lib/renderer/` is, and
+  no part of it: Canvas stays 2D) is the Scene's drawing by default (Mat, 2026-10-23:
+  "engine is clover by default; three.js is an optional engine", lazy):
+  `components/Scene/cloverEngine.ts`, the same `SceneEngine` (`drawing.ts`) as
+  three.js's `engine.ts`, which only `engine="three"` loads. `three` stays a dependency,
+  not an optional peer: a consumer's bundler resolves the engine's `import("three")` at
+  build time, so a missing optional peer would fail every consumer's build. `load.ts` reads GLB and glTF JSON (buffers and images by
+  address or data URI, fetched with the request's settings; images by
+  `createImageBitmap`, unflipped), refusing a required extension it does not draw
+  (`EXTENSIONS`), one load shared by the Scenes that ask for a model at once (Chrome fails
+  one of two downloads at once of a file too large for its cache,
+  `ERR_CACHE_WRITE_FAILURE`; the e2e harness's compare page draws three.js's side after
+  Clover's for it); `mat4.ts` is its math (column-major, P4's turns x then y then z);
+  `renderer.ts` uploads each buffer view once per target and each primitive as a VAO over
+  them as stored, and draws with one program (`shaders.ts`: flags for what a primitive
+  has, a white pixel for a missing texture). Its light is a fixed neutral room (sky,
+  ground, three lights, three lamps for glossy reflections) and three.js's neutral tone
+  mapping, its constants tuned against three.js's room on 0608: change them only by
+  rendering both (`?scene=compare` in the e2e harness, `&model=` for another glTF).
+- A Scene takes its WebGL context through Canvas's ration (`claimContext` in
+  `lib/renderer/backends/contexts.ts`): released while out of view when another needs
+  one, taken back (the models loaded again, the camera kept) when it returns; a lost
+  context is an alert, never the browser's broken picture.
+- Its controls (Mat, 2026-10-23: the rotate controls "not intuitive … a compound control
+  larger than existing controls … in the lower right", drawn from other 3D viewers and
+  maps): all in the Body's lower right (`.clover-scene-navigation`; the top right keeps
+  the `i` and a host's own): zoom and full screen in a row (`.clover-scene-tools`), its
+  last button in the pad's empty corner, `s` left of the down arrow, and the rotate pad,
+  `RotatePad.tsx`, a group named `sceneRotate`, three controls across, each way to turn in
+  the cell on its side, `s` apart as the cluster's are, its glyph Clover's caret (`Caret`,
+  the pager's chevron) pointing its way, round a disc that is a handle to drag
+  (`.clover-scene-rotate-disc`; Mat, 2026-10-23: "something you can hold onto and drag …
+  the button is the disk"): a drag on it turns the models as one on the Scene does,
+  measured against the Scene's height (`span`), and a pinch zooms; a pointer's
+  convenience, hidden from assistive technology as Canvas's navigator is, the arrows and
+  keys doing all it does. It is a solid ball, a dark shade of the accent (35% of it, black
+  mixed in sRGB, which keeps the accent's hue and saturation and lowers only its
+  brightness; Mat, 2026-10-23: "saturation and hue should match"), so the arrows in the
+  controls' fill stand clear of it, shaded as a sphere by CSS alone (a glint high on its
+  left, its face darkening toward its edge, inner shadows and a cast one; Mat, 2026-10-23:
+  "less muddy … a hint of accent … more obviously a sphere"), lit from its upper left by
+  the accent (`::before`, an opacity), 35% at rest and whole while it is pointed at or
+  held, while a pad control has keyboard focus, and while the view turns by any means
+  (`data-turning` on the corner, set by the Scene's `turn` for 400ms), its glyph a globe
+  across the whole ball that turns with the view (`Orientation`, the svg the disc's size:
+  an equator as flat as the view is level, a meridian as open as the models are turned,
+  each drawn as two halves, the far side's at 30%, and a dot at their front, solid facing
+  the reader, faint turned away; the whole fading toward the rim under a CSS mask, so no
+  line meets the arrows stark; Mat, 2026-10-23), written by hand on each draw
+  (`showOrientation`, no render); its rim divides the gap between its center's control
+  room and full screen, across the pad's corner, at the golden ratio
+  (`--clover-scene-rotate-rim`, 0.756 controls and 0.874 gaps out). In the pad's last
+  corner, `s` right of the down arrow, Reset view (`sceneResetView`), Canvas's reset, its
+  glyph and its nudge (Mat, 2026-10-23). Only the buttons and the disc take a press. Its
+  cells are the controls' own buttons (`renderControl`, shared with the cluster), so
+  `controlButtons` replaces any of them; `Scene.css` undoes `Button.css`'s rotate-left
+  mirror and hover nudges for them. A press turns a step (45°, 15° tilt); held 400ms it
+  turns on until let go (no click after), a held Enter a step a press. The corner comes
+  and goes with the rest of the controls (Mat, 2026-10-23: "not visible by default"),
+  tucking down, over the scrim, here rising from the Body's foot as tall as the pad and
+  its inset (Mat: "like with canvas … a gradient fade"); resting on one of its buttons or
+  the disc holds them, and a press where they sit faded shows them (`FADING_CONTROLS`); it
+  takes no gesture or callout of a phone's, and on a small Body (`data-compact` on the
+  corner, under 32rem by 24rem) its cells shrink, never under 24px. The arrows turn the
+  models on the focused viewport. Its strings are `sceneModel`, `sceneRoleDescription`,
+  `sceneKeys`, `sceneRotateUp`, `sceneRotateDown`, `sceneRotate` and `sceneResetView`.
+- Elements: `<clover-timeline>` and `<clover-scene>`
+  (`web-components/specs/timeline-scene.ts`), drawn by `part()`, the Body's box in
+  `ELEMENT_CSS`. `Scene.css` rides with the Scene's lazy code (`LAZY` and `OWNERS` in
+  `build/clover-sheets.mjs`).
+- Sizes: `timelineInitialGzip`, `sceneInitialGzip`, `sceneOnDemandGzip` (three.js and
+  the engine, what a Scene loads when it first draws) and `sceneCloverOnDemandGzip`
+  (Clover's own drawing, the same) in `sizes.mjs` and the budgets.
+  Fixtures: the Cookbook's Presentation 4 recipes 0002 and 0608
+  (`0002-mvm-audio-v4.json`, `0608-mvm-3d-v4.json`); the Scene's tests mock `./engine`.
+
 ## Canvas
 
 - `Canvas` (`src/components/Canvas/`, exported as `Canvas`) is Clover's own **2D**
   renderer. It replaces OpenSeadragon (images) and Vidstack (A/V), which 4.x does not use. It is
-  2D only. 3D (IIIF Presentation 4 Scenes) is reserved for a future, separate `Scene`
-  component, so do not add 3D abstractions such as 4×4 matrices or perspective cameras.
+  2D only. 3D (IIIF Presentation 4 Scenes) is `Scene`'s, a separate component (below),
+  so do not add 3D abstractions such as 4×4 matrices or perspective cameras.
 - The renderer core is framework-free in `src/lib/renderer/`. `CanvasRenderer` owns the
   camera (`camera/`), frame loop (`loop/`), input (`input/`), loading (`io/`) and painters
   (`backends/`). The React component is a thin host.
@@ -873,13 +1004,13 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   root AGENTS.md's i18n section. `useClusterReach` (`src/ui/useClusterReach.ts`) writes
   how far the cluster's controls reach, `--clover-canvas-controls-width` and `-height`,
   on `.clover-canvas`, so the information box and the menus clear every row however the
-  cluster wraps, and sets `data-popups="beside"` where a short stage leaves them under
+  cluster wraps, and sets `data-popups="beside"` where a short Body leaves them under
   `BELOW_MIN` (112px) below it and `BESIDE_MIN` (128px) beside it (`ControlMenu.css`
   then hangs them from the top, beside the cluster). It measures the controls, not the
   cluster's box, which the pinned panel toggle's room is part of; the box itself takes
   no presses.
 - **Rows at every size, never a column** (Mat, 2026-10-20: a column wrapped onto columns
-  on a short phone stage, jumbled, the panel toggle mid-pack). The cluster is a row at
+  in a short Body on a phone, jumbled, the panel toggle mid-pack). The cluster is a row at
   the top end that wraps onto more rows, each right-aligned, in DOM order (WCAG 1.3.2,
   2.4.3). The panel toggle is out of the row (`position: absolute` at the cluster's top
   end, `padding-right` keeping its room; twice that with a placeholder's toggle beside
@@ -900,24 +1031,24 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   - For hosts, `src/core/sequence.ts` (`groupViews`) groups a Manifest into views by
     `behavior`. It is the only sequence implementation. `paged` must match
     `@iiif/helpers`' `getManifestSequence`.
-- Chrome follows the Player for a mouse, or a pen that hovers (`isHovering`: a pen
-  `pointermove` with `buttons === 0`). `useChromeVisibility` sets `data-chrome="visible"`
-  on its activity and hides it after `hideDelay`. A finger, or a pen not yet seen to
-  hover (`isDirect(pointerType, hovers)`), gets no timer (WCAG 2.2.1). A tap on the
-  picture (the viewport) toggles the chrome after `TAP_MS`, so the second tap of a
-  double tap is left alone, and a tap elsewhere only shows it. A press on the picture
-  where faded chrome sits (`FADING_CHROME`: the cluster's children, the navigator, the
-  transport's children) is held in the capture phase on the figure: it shows the
-  chrome, and neither its pointer events nor its click (within `TAP_MS`) reach the
-  picture or a hotspot. Focus that arrives more than `PRESS_FOCUS_MS` after any press on
-  the page (the keyboard's, a screen reader's) shows the chrome and holds it, overriding
-  every timer, until focus leaves or a press comes. CSS also shows the chrome on
-  keyboard focus (`:has(:focus-visible)`), which is required. The media transport uses
-  the same hook. `GestureController` and the hook each track pen hover on their own;
-  keep the two rules alike. Do not bring back a timer for touch or pen. `Choice`
-  selection is Canvas-level state (`findChoices` / `ChoiceSelections` in `layout.ts`),
-  not the host's.
-- Video and sound live in `src/components/Canvas/media/`. `MediaStage` is `React.lazy`,
+- The controls follow the Player for a mouse, or a pen that hovers (`isHovering`: a pen
+  `pointermove` with `buttons === 0`). `useControlsVisibility` sets
+  `data-controls="visible"` on its activity and hides them after `hideDelay`. A finger,
+  or a pen not yet seen to hover (`isDirect(pointerType, hovers)`), gets no timer
+  (WCAG 2.2.1). A tap on the picture (the viewport) toggles the controls after `TAP_MS`,
+  so the second tap of a double tap is left alone, and a tap elsewhere only shows them.
+  A press on the picture where faded controls sit (`FADING_CONTROLS`: the cluster's
+  children, the navigator, the transport's children) is held in the capture phase on
+  the figure: it shows the controls, and neither its pointer events nor its click
+  (within `TAP_MS`) reach the picture or a hotspot. Focus that arrives more than
+  `PRESS_FOCUS_MS` after any press on the page (the keyboard's, a screen reader's) shows
+  the controls and holds them, overriding every timer, until focus leaves or a press
+  comes. CSS also shows the controls on keyboard focus (`:has(:focus-visible)`), which
+  is required. The media transport uses the same hook. `GestureController` and the hook
+  each track pen hover on their own; keep the two rules alike. Do not bring back a timer
+  for touch or pen. `Choice` selection is Canvas-level state (`findChoices` /
+  `ChoiceSelections` in `layout.ts`), not the host's.
+- Video and sound live in `src/components/Canvas/media/`. `MediaBody` is `React.lazy`,
   so its code loads only when a Canvas paints media. Its CSS is in `styles.css` with
   the rest.
   - `useMediaElement` makes the `<video>` imperatively. The renderer moves it into its
@@ -949,7 +1080,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     Simulator starts no picture in picture on Home, so check that on a device.
     Tests use `Canvas/testing/textTracks.ts`, whose `add()` makes `hidden` tracks, as
     `addTextTrack` does.
-  - `MediaStage` is not keyed by the media: the transport stays mounted from one
+  - `MediaBody` is not keyed by the media: the transport stays mounted from one
     recording to the next, so focus stays on it (WCAG 2.4.3). Per-recording state is
     keyed by `media.id` or `media.src` inside the hooks (the caption choice, the CORS
     fallback). Never put a `key` back on it. If the focused control goes with the
@@ -960,12 +1091,12 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     and `@vidstack/react` are on the build's forbidden list.
   - With media, `clickToZoom` is off, and a mouse click or a hovering pen's (renderer
     `"tap"`) plays and pauses. A finger's tap, or a pen's that has not hovered, only
-    toggles the chrome.
+    toggles the controls.
   - The chapter under the pointer on the seek bar (`Transport.tsx`, Mat 2026-10-20) is
     state that changes only as the pointer crosses into another chapter, never per
     move: its stretch drawn out (`.clover-canvas-transport-chapter-span`) and a `Tip`
     over the stretch's middle (`--clover-transport-preview`), keyed by chapter so it
-    measures itself into the stage each time; keyboard focus on the bar shows the one
+    measures itself into the Body each time; keyboard focus on the bar shows the one
     playing, and `aria-valuetext` names it. The Tip's Escape finds it through
     `controlOf`, which takes any element holding a focused input and its popover, not
     only a label. In a `Root`, `clover.chapter` (a Range's id) is one highlight between
@@ -976,15 +1107,15 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     measured from the popover alone, never the cues, whose glide would skew it), and the
     captions' foot is the larger of their usual room and that, `2xs` clear. Escape's
     `data-tip-hidden` on the seek area puts it back to 0 in CSS.
-  - The transport and the caption cues sit `--clover-canvas-chrome-inset` in from the
-    stage's sides and foot, as the cluster does (Mat, 2026-10-19), never a step of their
-    own; below 28rem of stage width the bar's controls go `xs` apart so 320px keeps two
-    rows. The sliders have no edge: the scrim, at least 60% black up to the seek bar,
+  - The transport and the caption cues sit `--clover-canvas-controls-inset` in from the
+    Body's sides and foot, as the cluster does (Mat, 2026-10-19), never a step of their
+    own; below 28rem of the Body's width the bar's controls go `xs` apart so 320px keeps
+    two rows. The sliders have no edge: the scrim, at least 60% black up to the seek bar,
     keeps them at 3:1 (WCAG 1.4.11), so never thin it there.
   - The bar wraps instead of clipping (WCAG 1.4.10). `.clover-canvas-media` is a size
     container (`container-type: size`; it is `inset: 0`, so containing its height
-    changes nothing), and size rules for the transport read the stage, never the window:
-    no `@media` width queries. Below 28rem of stage width (37.5rem with a Chapters
+    changes nothing), and size rules for the transport read the Body, never the window:
+    no `@media` width queries. Below 28rem of the Body's width (37.5rem with a Chapters
     menu), `.clover-canvas-transport-status` (the time and the chapter) takes its own row
     over the buttons. Chapters, Captions and Full screen sit in one
     `.clover-canvas-transport-end`, which never wraps inside itself and is pushed to the
@@ -994,15 +1125,15 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     row. `TransportMenu` places its menu when it opens and on resize: it measures the
     room above its button (`--clover-transport-menu-above`) and shifts the menu along to
     stay inside the bar's inset (`--clover-transport-menu-shift`), never wider than the
-    stage less the inset. The menu closes when focus moves to an element outside it, but
+    Body less the inset. The menu closes when focus moves to an element outside it, but
     not when focus goes nowhere (Chrome blurs to the page on a press of an option's
     label). While a menu is open or a control has keyboard focus, the transport sits
     over the captions; `Canvas.css` changes that `z-index` at once, never through the
-    chrome's transition. The volume slider renders only where the page can set the
+    controls' transition. The volume slider renders only where the page can set the
     volume (`canSetVolume()`; iOS cannot).
   - An animation's frames bar renders inside a `.clover-canvas-media[data-kind="frames"]`
-    layer, so it fades with the chrome and its menu is sized against the stage
-    (`container-type: size`, `100cqb`).
+    layer, so it fades with the rest of the controls and its menu is sized against the
+    Body (`container-type: size`, `100cqb`).
   - A lone media Canvas (`canvases.length === 1`) is always fitted: `navigable: false`
     on the gestures, `fit: true` on every `setImages`, and the world is the video's rect
     at its intrinsic aspect (`containAspect`). It has no top cluster, scrim or
@@ -1013,9 +1144,9 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   - Navigability is one value in `CanvasView`:
     `navigable = !mediaOnly && options.gestures.navigable !== false`. It gates
     `CAMERA_KEYS` and the role description on the viewport, `data-navigable` on the
-    figure (grab cursor, `panClearOfChrome`), and the `navigable` that `MediaStage`
-    passes to `setGestures`. Never let the media stage turn a host's `navigable: false`
-    back on.
+    figure (grab cursor, `panClearOfControls`), and the `navigable` that `MediaBody`
+    passes to `setGestures`. Never let `MediaBody` turn a host's
+    `navigable: false` back on.
   - One pointer can always zoom out (WCAG 2.5.1): `GestureController.zoomIn` goes home
     at `atMaxZoom()` on a click, a double click or a double tap. A touch double tap zooms
     only with `clickToZoom || dblClickToZoom`.
@@ -1023,10 +1154,10 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     inline, so without the stylesheet the controls in the flow still sit above it (WCAG
     2.5.8). Anything placed in the figure to lie beneath the viewport (the iPhone
     `texture` video) goes first, at `z-index: -1`.
-  - The transport fades with the rest of the chrome, through the single reveal rule
+  - The transport fades with the rest of the controls, through the single reveal rule
     in `Canvas.css`, all but its Play while paused, which never fades (above). Do not add
     "stay visible while paused" or other overrides beyond that one. The
-    reveal is `data-chrome` (from `useChromeVisibility`: a mouse's activity, lingering
+    reveal is `data-controls` (from `useControlsVisibility`: a mouse's activity, lingering
     `LEAVE_DELAY` after leave or blur; a finger's tap on the picture; focus no press
     brought), `:has(:focus-visible)`, an open menu, or a control, the navigator or the
     transport under a resting pointer (`:hover`, Play's aside), so a control never fades,
@@ -1037,9 +1168,9 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   opens `Caption.tsx`, the figure's `<figcaption>`, which must stay its last child.
   - The caption hangs below the cluster's last row, right-aligned, as the Choice and
     annotations menus do. Its z-index is below the cluster's, so zoom and the other
-    controls stay usable while it is open. On a short stage (`data-popups="beside"`)
+    controls stay usable while it is open. In a short Body (`data-popups="beside"`)
     it sits beside the cluster, from the top.
-  - It is content, not a menu: it does not fade with the chrome or close on an outside
+  - It is content, not a menu: it does not fade with the controls or close on an outside
     press. It closes from its ×, the `i` control, or Escape anywhere in the figure, and
     stays open as the host moves between Canvases that have information. Escape inside
     the caption hands focus back to the `i` control; from elsewhere (CanvasView's
@@ -1054,7 +1185,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   (`placeholderStill()` in `layout.ts`) fitted and centered with container units, and a
   toggle in the top right (the Viewer's magnifier, then a ×).
   - Until it is opened, it holds back everything else: `setImages`, pan and zoom,
-    hotspots, `Choice` and the media stage. Two controls stay beside the toggle: the `i`
+    hotspots, `Choice` and `MediaBody`. Two controls stay beside the toggle: the `i`
     control, and the annotations menu (Mat, 2026-10-19), which lists the annotations as
     the planned layout places them (`listedAnnotations`, nothing drawn). A pick from it
     is `held` (not framed), opens the placeholder through the pending pick, and is framed
@@ -1062,9 +1193,9 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   - Each new set of `canvases` starts from its placeholder again (`openedFor` keyed by
     `canvasKey`). Reopening re-frames the Canvas (`fit`), as the Viewer remounts OSD.
   - The still lingers, inert, until the renderer's `open` event. `open` fires once the
-    coarsest tiles are decoded, so opening never flashes an empty stage.
+    coarsest tiles are decoded, so opening never flashes an empty Body.
   - For video and sound, the toggle is a 4rem play button in the center ("think
-    YouTube"). Opening passes `autoPlay` to the media stage, because that press was a
+    YouTube"). Opening passes `autoPlay` to `MediaBody`, because that press was a
     press of play. Once open, the toggle is the × in the top right. Safari may refuse
     the deferred `play()`; it is swallowed, leaving the transport ready.
 - **Web components** (`src/web-components/`, `@nulib/clover/web-components`;
@@ -1086,7 +1217,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     Map's) is typed as either. A new element is a spec and its docs (`specs/`) and a
     loader in `define.ts`: `part(load, name)` draws a part as it is, with the element's
     props (`elements/part.tsx`); only an element that needs more of its element (the
-    root, the stage's box, the viewer) has a module in `elements/`.
+    root, the Body's box, the viewer) has a module in `elements/`.
   - **Parity** (`specs/specs.test.ts`): every part `parts.ts` exports has an element, or
     a reason why not yet (`LATER`, empty since phase 5) or not at all (`NEVER`, empty
     since phase 7: `Tip` is `<clover-tip>`, `ReadMore` `<clover-read-more>`). A new part fails it until it has either, and an element's slots, like
@@ -1104,7 +1235,7 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     canceled: a base element's handler returns whether its event was let be.
     `<clover-panel-toggle>` (`elements/toggle.tsx`): its target is open while it is not
     `hidden`, so the page's `hidden` starts it shut and any change by the page is
-    followed; in a `<clover-body>` the stage draws it among its controls (the toggle's
+    followed; in a `<clover-body>` the Body draws it among its controls (the toggle's
     own element draws nothing there), elsewhere it draws its own button. The Split's three
     are `native` (`elements/split.tsx`): the elements are the boxes, taking the classes,
     attributes and inline styles `Split` gives its own, so a handle's panes are its
@@ -1127,9 +1258,9 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     name (`navigation()`, `visibleCanvases()`), `state`, `subscribe`, `language`,
     `localize`, `t` and `langOf`. An event's `keeps` (`spec.ts`) makes the element keep
     its callback's first argument as a read-only property: the root's `clover` (its
-    module calls `onReady(api)`, and `onReady(null)` when it goes) and the stage's
-    `handle` (`onReady` of `Canvas` and `Body`, let go with the stage, `useHandle`).
-    Such an event (`clover-ready`) does not bubble, as `load` does not: the stage's ran
+    module calls `onReady(api)`, and `onReady(null)` when it goes) and the Body's
+    `handle` (`onReady` of `Canvas` and `Body`, let go with the Body, `useHandle`).
+    Such an event (`clover-ready`) does not bubble, as `load` does not: the Body's ran
     into its root's listener. The handle's methods are not forwarded onto the element: a
     second way React does not have, at 0.25 kB in the entry. A page's renderers
     (`elements/renderers.tsx`, `{ canvasId, format, match, render(container, view) }`)
@@ -1151,8 +1282,9 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     `ReadMore` cannot clone the page's node) on its first child, marking it and drawing
     the button after it. `root.clover.oneOpen(close)` is `useOneOpen` without React
     (`openOne`, shared): call it as a popup of the page's opens; it returns what to call
-    as it closes. `controls` is a property of the stage's elements too (Canvas's object
-    form), and `<clover-viewer>` takes `annotations` and `request`. The docs' transformer
+    as it closes. `controls` is a property of `<clover-body>`, `<clover-canvas>`,
+    `<clover-timeline>` and `<clover-scene>` too (Canvas's object form), and
+    `<clover-viewer>` takes `annotations` and `request`. The docs' transformer
     (`docs/lib/jsx-to-html.mjs`) refuses a React prop an element has no attribute or
     property for: run it over the docs after adding a prop, to find such gaps.
   - **Slots and function properties.** A spec's `slots` are children it reads by their
@@ -1175,7 +1307,7 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     property set before the element was defined (its script loads async) is taken in
     `connectedCallback`, and only once one connects do its code, the host and the
     stylesheet load, once for the page, so a page loads only the elements it uses.
-    Elements draw as their code arrives (the stage's last, with the Canvas); the
+    Elements draw as their code arrives (the Body's last, with the Canvas); the
     elements' own display rules are in place before any code loads, so nothing moves. A
     move is told apart from a removal by a microtask. `initCloverI18n` (the export and
     every class's static) loads the translator on first call (`i18n.ts`).
@@ -1212,8 +1344,8 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
   - Display (`ELEMENT_CSS` in `base.ts`, `style[data-clover="elements"]`, in
     `@layer clover`): `<clover-root>`, `<clover-items>`, `<clover-viewer>` and
     `<clover-panel>` are blocks and `<clover-split>` a row; `<clover-body>` and
-    `<clover-canvas>` are the stage's box, its height from `--clover-body-height` (default `60vh`) or its own
-    `style`, the stage filling it; `<clover-label>` and `<clover-panel-toggle>` are
+    `<clover-canvas>` are the box the Body fills, its height from `--clover-body-height`
+    (default `60vh`) or its own `style`; `<clover-label>` and `<clover-panel-toggle>` are
     `display: contents`, so what they draw sits in the page as if written there; a tab and
     a status's slots are not shown where written. Every rule is `:not([hidden])`: an
     author's style beats the browser's `[hidden]`, and `<clover-items hidden>` showed. Never let an attribute name a tag
@@ -1296,7 +1428,7 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     stylesheet whole, 38 elements, with `<clover-read-more>` since phase 7 and the page's
     one count of its elements since phase 8; 107.1 kB and 97.1 kB
     at 37, the root's API among the shared chunk since phase 6; 106.3 kB before it, 36
-    elements: `<clover-canvas>` shares the Canvas with the stage and the viewer; 36 files
+    elements: `<clover-canvas>` shares the Canvas with the Body and the viewer; 36 files
     and 104.5 kB at 35, 31 and 102.3 kB at 29: the
     containers share Panel, Split and the toggle with Default, so those came in chunks of
     their own; Brotli the same). A layout of the containers, as Default's, loads 103.7 kB
@@ -1337,7 +1469,7 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
   `FrameAnimation.tsx`, lazy: its clock calls `renderer.setHidden(ids)`, which flips draw
   flags only (no preparing, no `change`, no re-placed hotspots). Do not play frames by
   changing `setImages` input: each call prepares items again and a 100 ms frame never
-  settles (a blank stage). `SceneImage.hidden` is not part of `sameSpec`; `planFrame`
+  settles (a blank Body). `SceneImage.hidden` is not part of `sameSpec`; `planFrame`
   keeps a hidden item's tiles coming but draws nothing of it. The clock waits on
   `renderer.isReady(id)` (the coarsest level loaded) before showing a frame. Frames read
   as a timeline (until the next start; the last until `duration`). A Manifest's
@@ -1360,14 +1492,14 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
   draw. The navigator (`overlays/Navigator.ts`) loads in `attachNavigator`, the latest
   call winning. Tests reach them with the `open()` / `loaded()` helpers in
   `Canvas/index.test.tsx`.
-- A hotspot's note is a `Tip` with `scrolls`: capped at the stage's height, it scrolls
+- A hotspot's note is a `Tip` with `scrolls`: capped at the Body's height, it scrolls
   (WCAG 1.4.10), by wheel or touch over it and, from the hotspot's keys, by `scrollNote`
   in `Canvas/Annotations.tsx` (kept there, out of the Tip every Canvas loads). A scroller
   cuts what passes its edge, so its gap to the hotspot is a clear border in its own box,
   not `::before`; mind both when moving it. It has `tabindex="-1"` and a
   press on it focuses its hotspot, because a scroller may otherwise take focus (Chrome's
   focusable scrollers) and it is `aria-hidden`. `GestureController` leaves the wheel to
-  any box in the stage that can scroll that way (`scrollsWithin`).
+  any box in the Body that can scroll that way (`scrollsWithin`).
 - Hotspots render in the annotations' given order, which is the Tab and reading order
   (WCAG 2.4.3); never sort the DOM by size. A hotspot's name is its `Tip` (the same
   string as its `aria-label`, its number when it has no text), never a `<label>` in the
@@ -1380,21 +1512,21 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
   - Never raise a twin (same region) over the active hotspot. The pointer would land on
     the twin, which then raises the first, so the two flip on every move. That breaks
     the popover's hover delay and the shared highlight.
-- `panClearOfChrome.ts` (WCAG 2.4.11) is lazy:
+- `panClearOfControls.ts` (WCAG 2.4.11) is lazy:
   - It loads on a hotspot's first focus, and runs on the Tab keyup while that hotspot
     still has focus.
   - It imports nothing at run time, and is listed in `bundle.test.mjs` `LAZY_MODULES`.
     Keep it that way: inline it costs about 0.7 kB gzip on every Canvas.
-  - A piece of chrome cuts the clear area only once the hotspot is beside it on the
-    other axis. This is rechecked after each cut, so a hotspot that is already clear
-    never moves. Add any new chrome over the stage to its `CHROME` list.
+  - A piece of the controls cuts the clear area only once the hotspot is beside it on
+    the other axis. This is rechecked after each cut, so a hotspot that is already clear
+    never moves. Add any new control over the Body to its `CONTROLS` list.
 - While the view is upright, the overlay layer places each element's edges and size on
   whole device pixels (`snap` in `OverlayLayer.position`, Mat 2026-10-20). Placed between
   pixels, a hotspot's hairlines were shared by two, and tracked ones gliding over a film
   pulsed, each at its own speed. Keep it; a turned view is left unsnapped.
 - While the view is upright, the overlay layer writes `--clover-overlay-x`,
   `--clover-overlay-top`, `--clover-overlay-bottom` and `data-overlay-room` on each
-  pinned element. A hotspot's Tip uses them to clamp itself into the stage with
+  pinned element. A hotspot's Tip uses them to clamp itself into the Body with
   `cqw`/`cqh` (the layer is a size container).
 - Round controls are a solid dark fill with white glyphs (`--clover-color-control`,
   `--clover-color-control-glyph`, defaults `#1a1d1e` and `#fff`), in light and dark mode
@@ -1408,7 +1540,7 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
   Cookbook recipes the tests use are in `src/fixtures/iiif-cookbook/`, as published
   (mostly Presentation 3). Tests read them through `p4()` (`src/fixtures/presentation4.ts`),
   as Clover reads the web.
-- Loading is lazy: `useNearViewport` holds back `setImages` and the media stage until the
+- Loading is lazy: `useNearViewport` holds back `setImages` and `MediaBody` until the
   Canvas is within half a screen of view, once, and never unloads. Tests install
   `stubViewport()` (`Canvas/testing/viewport.ts`), since the suite's IntersectionObserver
   mock never reports.

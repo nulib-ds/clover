@@ -20,7 +20,7 @@ import { parseAnnotationTarget } from "./annotations";
 export type { ViewingDirection };
 
 export interface Sequence {
-  /** The Canvases and Timelines Clover can show, in order. */
+  /** The Canvases, Timelines and Scenes Clover can show, in order. */
   canvases: Container[];
   views: View[];
   direction: ViewingDirection;
@@ -36,8 +36,11 @@ export function selectSequence(manifest: Manifest | null): Sequence {
     const canvases = (
       (manifest.items ?? []) as Array<{ type?: string }>
     ).filter(
-      // Scenes are drawn by a future `Scene`, not by `Canvas`.
-      (item) => item?.type === "Canvas" || item?.type === "Timeline",
+      // `Body` draws each with its own part: `Canvas`, `Timeline` or `Scene`.
+      (item) =>
+        item?.type === "Canvas" ||
+        item?.type === "Timeline" ||
+        item?.type === "Scene",
     ) as Container[];
     sequence = {
       canvases,

@@ -37,6 +37,64 @@ export interface ControlClusterProps {
 }
 
 /**
+ * A control, or a consumer's in its place when one is configured (`controlButtons`). The
+ * replacement owns the element, so it is handed props to spread rather than being told
+ * what to render: the accessible name has to survive whatever markup the consumer
+ * chooses. The cluster's, and a Scene's rotate pad's (`Scene/RotatePad.tsx`).
+ */
+export function renderControl(
+  {
+    key,
+    id,
+    label,
+    glyph,
+    onClick,
+    expanded,
+    controls,
+    shortcut,
+    lang,
+  }: ControlSpec,
+  controlButtons?: ControlButtons,
+) {
+  const Custom = controlButtons?.[key];
+  if (Custom)
+    return (
+      <Custom
+        key={key}
+        buttonProps={{
+          id,
+          type: "button",
+          "aria-label": label,
+          ...(lang && { lang }),
+          ...(shortcut && { "aria-keyshortcuts": shortcut.keys }),
+          onClick,
+          ...(expanded !== undefined && {
+            "aria-expanded": expanded,
+            "aria-controls": controls,
+          }),
+        }}
+        icon={<ControlIcon label={label}>{glyph}</ControlIcon>}
+        label={label}
+        tip={<Tip label={label} shortcut={shortcut} />}
+      />
+    );
+  return (
+    <Button
+      key={key}
+      id={id}
+      label={label}
+      onClick={onClick}
+      expanded={expanded}
+      controls={controls}
+      shortcut={shortcut}
+      lang={lang}
+    >
+      {glyph}
+    </Button>
+  );
+}
+
+/**
  * The zoom, full-screen, rotate and reset cluster over a Canvas: its markup, its layout
  * hooks, and the `controlButtons` replacement contract — and nothing else. Presentational:
  * the host hands it click handlers.
@@ -55,62 +113,8 @@ const ControlCluster: React.FC<ControlClusterProps> = ({
    */
   const [element, setElement] = useState<HTMLDivElement | null>(null);
   const isFullscreen = useWithinFullscreen(element);
-  // How far it reaches, wrapped on a small stage, for the popups it opens to clear.
+  // How far it reaches, wrapped on a small Body, for the popups it opens to clear.
   useClusterReach(element);
-
-  /**
-   * Renders a consumer's control in place of the default when one is configured.
-   * The replacement owns the element, so it is handed props to spread rather than
-   * being told what to render: the accessible name has to survive whatever markup the consumer chooses.
-   */
-  function renderControl({
-    key,
-    id,
-    label,
-    glyph,
-    onClick,
-    expanded,
-    controls,
-    shortcut,
-    lang,
-  }: ControlSpec) {
-    const Custom = controlButtons?.[key];
-    if (Custom)
-      return (
-        <Custom
-          key={key}
-          buttonProps={{
-            id,
-            type: "button",
-            "aria-label": label,
-            ...(lang && { lang }),
-            ...(shortcut && { "aria-keyshortcuts": shortcut.keys }),
-            onClick,
-            ...(expanded !== undefined && {
-              "aria-expanded": expanded,
-              "aria-controls": controls,
-            }),
-          }}
-          icon={<ControlIcon label={label}>{glyph}</ControlIcon>}
-          label={label}
-          tip={<Tip label={label} shortcut={shortcut} />}
-        />
-      );
-    return (
-      <Button
-        key={key}
-        id={id}
-        label={label}
-        onClick={onClick}
-        expanded={expanded}
-        controls={controls}
-        shortcut={shortcut}
-        lang={lang}
-      >
-        {glyph}
-      </Button>
-    );
-  }
 
   return (
     <div
@@ -120,7 +124,9 @@ const ControlCluster: React.FC<ControlClusterProps> = ({
       data-testid="clover-canvas-controls"
       ref={setElement}
     >
-      {controls(isFullscreen).map(renderControl)}
+      {controls(isFullscreen).map((spec) =>
+        renderControl(spec, controlButtons),
+      )}
       {children}
     </div>
   );

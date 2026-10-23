@@ -83,7 +83,9 @@ function fencesOf(tree) {
  * Each name in code in the page's prose: not in a heading, React's own API tables, a box
  * already one flavor's, or a page's section for web components (`## Web components`, to
  * the next `##`), whose names are theirs already: there `iiifContent` is the element's
- * property, not the prop.
+ * property, not the prop. Nor in a box both flavors share (`data-code-flavor="both"`):
+ * words that only look like a prop, an attribute's values (`timeline`, `scene`), stay
+ * as written there, and both flavors show them.
  */
 function namesIn(tree) {
   const found = [];

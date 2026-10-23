@@ -73,26 +73,26 @@ function usePressOutside(
 }
 
 /**
- * Marks the bar `data-stuck` while it is held under the navbar with the stage passing
- * beneath it: from when the stage's top goes under the bar's foot until the bar, let go
- * where the stage ends, has gone up under the navbar. Its stylesheet holds the bar only
- * where the screen has room for it; elsewhere the stage never reaches under it.
+ * Marks the bar `data-stuck` while it is held under the navbar with the Viewer passing
+ * beneath it: from when the Viewer's top goes under the bar's foot until the bar, let go
+ * where the Viewer ends, has gone up under the navbar. Its stylesheet holds the bar only
+ * where the screen has room for it; elsewhere the Viewer never reaches under it.
  *
  * Read from the two boxes once a frame while the page scrolls, and written to the bar
- * itself rather than to state, so holding and letting go never re-render the stage.
+ * itself rather than to state, so holding and letting go never re-render the Viewer.
  *
  * While the bar can be held, the page's scroll padding reserves it as well as the navbar,
- * measured, so a control in the stage that takes focus, by Tab or from a script, is
+ * measured, so a control in the Viewer that takes focus, by Tab or from a script, is
  * brought into view below the bar rather than under it (WCAG 2.4.11). Its height is
  * measured again whenever it changes (a message under the field).
  */
 function useStuck(
   bar: React.RefObject<HTMLElement | null>,
-  stage: React.RefObject<HTMLElement | null>,
+  viewer: React.RefObject<HTMLElement | null>,
 ) {
   useEffect(() => {
     const node = bar.current;
-    const under = stage.current;
+    const under = viewer.current;
     if (!node || !under) return;
     let frame = 0;
     // The line the bar is held at, the navbar's foot: 0 where the bar is not sticky.
@@ -127,32 +127,33 @@ function useStuck(
       root.style.scrollPaddingTop = "";
       root.removeAttribute("data-bar-stuck");
     };
-  }, [bar, stage]);
+  }, [bar, viewer]);
 }
 
 /**
  * The homepage's hero: any template beside any resource, live.
  *
- * Two pickers, one either side of the stage, each changing it and leaving the other as it
- * was, so the same resource can be seen in each layout, and each layout with every kind
- * of resource. Over the stage, the resource: one field for the address of the reader's
- * own, with ours listed under it by thumbnail (`ResourceField`). Under it, the template, by
- * name, in a dropdown of native radios (arrow keys and one tab stop), beside the way to a
- * layout of one's own: the item above in another template, or built from the parts below.
+ * Two pickers, one either side of the Viewer, each changing it and leaving the other as
+ * it was, so the same resource can be seen in each layout, and each layout with every
+ * kind of resource. Over the Viewer, the resource: one field for the address of the
+ * reader's own, with ours listed under it by thumbnail (`ResourceField`). Under it, the
+ * template, by name, in a dropdown of native radios (arrow keys and one tab stop), beside
+ * the way to a layout of one's own: the item above in another template, or built from
+ * the parts below.
  *
- * The stage keeps one height for every template, scrolling within when a template is
+ * The Viewer keeps one height for every template, scrolling within when a template is
  * taller, so switching never moves the page. Each template is shown with its own
  * defaults: the point is the range, not the knobs.
  */
 export interface PlaygroundProps {
   /**
-   * The resource on the stage, whenever it changes: its address (or content state) and
+   * The resource in the Viewer, whenever it changes: its address (or content state) and
    * its key (`"own"` for the reader's own). The parts below the playground follow it.
    */
   onResourceChange?: (resource: string, key: string) => void;
 }
 
-/** For the page around the playground: put one of its resources on the stage. */
+/** For the page around the playground: open one of its resources in the Viewer. */
 export interface PlaygroundHandle {
   pickResource: (key: string) => void;
 }
@@ -173,7 +174,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
      * in the share link, and a link that names one sets it. The link reads the chosen
      * accent, as stored, when it is written, and is rewritten when a choice is made, not
      * re-rendering the playground: a preview of a color, shown as "Why Clover" passes,
-     * never reaches the link, and never redraws the stage.
+     * never reaches the link, and never redraws the Viewer.
      */
 
     const spec = templateSpecs[active];
@@ -199,7 +200,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
     const mapReady = useMapWorker(Boolean(entry?.map));
     const ready = Boolean(resource) && (!entry?.map || mapReady);
 
-    // The page hears of each resource once it can open, as the stage opens it.
+    // The page hears of each resource once it can open, as the Viewer opens it.
     const heard = useRef(onResourceChange);
     heard.current = onResourceChange;
     useEffect(() => {
@@ -299,14 +300,14 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
     };
 
     /*
-     * The templates: a button naming the one on the stage, opening a list of the four.
-     * Arrow keys move through them and the stage follows; a press on one, Enter or Escape
+     * The templates: a button naming the Viewer's, opening a list of the four. Arrow
+     * keys move through them and the Viewer follows; a press on one, Enter or Escape
      * closes them, and so does a press outside or focus moving away.
      */
     const [layoutOpen, setLayoutOpen] = useState(false);
     const layoutRef = useRef<HTMLSpanElement>(null);
     const barRef = useRef<HTMLDivElement>(null);
-    const stageRef = useRef<HTMLDivElement>(null);
+    const viewerRef = useRef<HTMLDivElement>(null);
     const layoutTriggerRef = useRef<HTMLButtonElement>(null);
     const layoutMenuRef = useRef<HTMLSpanElement>(null);
     /* Whether the menu's last input was a press rather than a key. */
@@ -317,7 +318,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
     }, []);
     const dismissLayout = useCallback(() => closeLayout(false), [closeLayout]);
     usePressOutside(layoutRef, layoutOpen, dismissLayout);
-    useStuck(barRef, stageRef);
+    useStuck(barRef, viewerRef);
     useEffect(() => {
       if (layoutOpen)
         layoutMenuRef.current
@@ -333,13 +334,13 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
       >
         {/*
          * Its heading, for the page's outline and for finding it by headings, hidden, as
-         * the stage needs no title over it (the parts' is too, `Parts.tsx`); the Viewer's
-         * title one below it.
+         * the playground's Viewer needs no title over it (the parts' is too, `Parts.tsx`);
+         * the Viewer's own title one below it.
          */}
         <h2 className={styles.visuallyHidden} id="playground-title">
           Try the templates
         </h2>
-        {/* The bar is held only as far as the stage reaches, and leaves with it. */}
+        {/* The bar is held only as far as the Viewer reaches, and leaves with it. */}
         <div>
           <div className={styles.bar} ref={barRef}>
             <ResourceField
@@ -351,7 +352,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
           </div>
 
           {/* No font and no color here: Clover takes both from the page. */}
-          <div className={styles.stage} data-template={active} ref={stageRef}>
+          <div className={styles.viewer} data-template={active} ref={viewerRef}>
             {ready && (
               <TemplateViewer
                 key={`${active}-${resource}`}
@@ -366,9 +367,9 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
         {/*
          * Between the playground and the parts, the two ways to use Clover, centered
          * (Mat, 2026-10-20): a short headline, then one sentence with both, a template
-         * named in it by the stage's own menu, or a layout of one's own from the parts;
-         * under it, where to read about each. The headline's last words marked with the
-         * hero's stroke, drawn in as they come into view.
+         * named in it by the Viewer's template menu, or a layout of one's own from the
+         * parts; under it, where to read about each. The headline's last words marked
+         * with the hero's stroke, drawn in as they come into view.
          */}
         <div className={styles.choice}>
           {/* The sections' own title and note, so the two read as one voice (Mat, 2026-10-22). */}

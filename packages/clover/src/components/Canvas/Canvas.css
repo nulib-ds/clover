@@ -7,29 +7,29 @@
  */
 .clover-canvas {
   /*
-   * The space kept clear round the picture at home: none, so it fills the stage edge to
+   * The space kept clear round the picture at home: none, so it fills the Body edge to
    * edge, as 3.x's viewer does. The viewport takes it as padding, which the renderer
    * reads to fit its home view, and the placeholder takes the same, so the still hands
    * over without a jump. Set it (`var(--clover-inset)`, say) to keep a margin round it.
    */
   --clover-canvas-inset: 0px;
   /*
-   * How far the chrome (the controls, a still's toggle, the navigator) sits in from the
-   * stage's edges: the region's inset, so it lines up with what is round the stage, a
+   * How far the controls (the cluster, a still's toggle, the navigator) sit in from the
+   * Body's edges: the region's inset, so they line up with what is round the Body, a
    * header's title or a strip's position.
    */
-  --clover-canvas-chrome-inset: var(--clover-inset);
+  --clover-canvas-controls-inset: var(--clover-inset);
   /*
-   * Chrome moves as one (see Chrome, below): leaving, it accelerates away, tucked
-   * `--clover-chrome-tuck` toward its edge; coming back, it springs out, a touch past
-   * and back. Hidden to start: the state each piece of chrome reads.
+   * The controls move as one (see Controls, below): leaving, they accelerate away,
+   * tucked `--clover-controls-tuck` toward their edges; coming back, they spring out, a
+   * touch past and back. Hidden to start: the state each of them reads.
    */
-  --clover-chrome-leave: 180ms cubic-bezier(0.4, 0, 1, 1);
-  --clover-chrome-enter: 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  --clover-chrome-tuck: var(--clover-space-s);
-  --clover-chrome-shown: 0;
-  --clover-chrome-events: none;
-  --clover-chrome-timing: var(--clover-chrome-leave);
+  --clover-controls-leave: 180ms cubic-bezier(0.4, 0, 1, 1);
+  --clover-controls-enter: 340ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --clover-controls-tuck: var(--clover-space-s);
+  --clover-controls-shown: 0;
+  --clover-controls-events: none;
+  --clover-controls-timing: var(--clover-controls-leave);
   position: relative;
   /* A <figure>, whose caption is the Canvases' information: no browser margins. */
   margin: 0;
@@ -58,7 +58,7 @@
 
 .clover-canvas[data-fullscreen="true"] > .clover-canvas-navigator {
   top: calc(
-    var(--clover-canvas-chrome-inset) + var(--clover-control) +
+    var(--clover-canvas-controls-inset) + var(--clover-control) +
       var(--clover-space-s)
   );
 }
@@ -112,6 +112,31 @@
 }
 
 /*
+ * Sound with no picture names itself in its Body (`CanvasView`; Mat, 2026-10-23), in the
+ * room over its transport, which `--clover-transport-room` keeps clear: on the Body's
+ * ground, over the viewport and under the controls. The viewport is named by the same
+ * words, so this is for the eye alone (`aria-hidden`).
+ */
+.clover-canvas-sound-label {
+  position: absolute;
+  inset: 0 0 var(--clover-transport-room, 0) 0;
+  z-index: -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
+  padding: var(--clover-inset);
+  overflow: hidden;
+  color: var(--clover-color-primary, #1a1d1e);
+  font-size: var(--clover-text-l);
+  line-height: 1.3;
+  text-align: center;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
+
+/*
  * A DOM item is a crop box carrying the camera transform, with its element offset inside
  * it. Both transform about their own top-left corner, matching the renderer's math.
  */
@@ -134,24 +159,24 @@
   -webkit-user-drag: none;
 }
 
-/* ============================= Chrome ============================== */
+/* ============================ Controls ============================= */
 
 /*
- * The controls, the navigator, a video or sound's transport and a scrim behind them come
- * and go together, as the Player's control bar does: shown on pointer activity
- * (`data-chrome="visible"`, from `useChromeVisibility`), faded after a pause or when the
- * pointer leaves. They also stay while keyboard focus (`:focus-visible`) is anywhere in
- * the Canvas — the image, a hotspot, a control — since chrome that vanishes under the
- * keyboard fails WCAG 2.2, and while a menu is open.
+ * The controls (the cluster, the navigator, a video or sound's transport and a scrim
+ * behind them) come and go together, as the Player's control bar does: shown on pointer
+ * activity (`data-controls="visible"`, from `useControlsVisibility`), faded after a pause
+ * or when the pointer leaves. They also stay while keyboard focus (`:focus-visible`) is
+ * anywhere in the Canvas — the image, a hotspot, a control — since controls that vanish
+ * under the keyboard fail WCAG 2.2, and while a menu is open.
  *
  * Keyboard focus rather than any focus: a click on the picture focuses it too, and a
  * video clicked to play would otherwise keep its bar over the picture until blurred.
  *
  * A menu is any open disclosure in the Canvas except the information panel's toggle,
- * whose panel is beside the Canvas, not over it: while the panel is open, the chrome
- * still fades.
+ * whose panel is beside the Canvas, not over it: while the panel is open, the controls
+ * still fade.
  *
- * The scrim is a dark wash from the top edge, where the controls sit, so their pale
+ * The scrim is a dark wash from the top edge, where the cluster sits, so its pale
  * buttons read over a bright picture without darkening it while they are away.
  */
 .clover-canvas-scrim {
@@ -166,12 +191,12 @@
     rgb(0 0 0 / 20%) 45%,
     rgb(0 0 0 / 0%)
   );
-  opacity: var(--clover-chrome-shown);
-  transition: opacity var(--clover-chrome-timing);
+  opacity: var(--clover-controls-shown);
+  transition: opacity var(--clover-controls-timing);
 }
 
 /*
- * The controls are the top layer, over the popups they open (2, `ControlMenu.css`), so
+ * The cluster is the top layer, over the popups it opens (2, `ControlMenu.css`), so
  * a control's Tip is never covered by one: each control is a layer of its own (it fades
  * and tucks), so its Tip can rise no higher than the control does. The cluster's own box
  * takes no press, only its controls (below): between them, and where Chromium sizes a
@@ -183,11 +208,11 @@
 }
 
 /*
- * The information panel's toggle never fades: the panel is beside the picture, not
- * chrome over it, and a reader who cannot see the toggle cannot find the panel. It keeps
- * the corner at every size (Mat, 2026-10-19): out of the row, pinned to the cluster's top
- * end, with its room kept there, so however the other controls wrap onto rows beside
- * it, it stays top right.
+ * The information panel's toggle never fades: the panel is beside the picture, not over
+ * it as the controls are, and a reader who cannot see the toggle cannot find the panel.
+ * It keeps the corner at every size (Mat, 2026-10-19): out of the row, pinned to the
+ * cluster's top end, with its room kept there, so however the other controls wrap onto
+ * rows beside it, it stays top right.
  */
 .clover-canvas > .clover-canvas-controls:has(> [data-button="panel"]) {
   padding-right: calc(var(--clover-control) + var(--clover-space-s));
@@ -197,8 +222,8 @@
   position: absolute;
   top: 0;
   right: 0;
-  --clover-chrome-shown: 1;
-  --clover-chrome-events: auto;
+  --clover-controls-shown: 1;
+  --clover-controls-events: auto;
 }
 
 /*
@@ -213,20 +238,20 @@
   > .clover-canvas-controls
   > :is([data-button="information"], [data-button="annotations"]),
 .clover-canvas-transport-bar > [data-button="play"] {
-  --clover-chrome-shown: 1;
-  --clover-chrome-events: auto;
+  --clover-controls-shown: 1;
+  --clover-controls-events: auto;
 }
 
 /*
- * Shown while the pointer is active over the Canvas, rests on a piece of chrome,
- * keyboard focus is inside it, or a menu is open: decided here, once, for every piece of
- * chrome. A control under a resting pointer stays, Tip and all (WCAG 1.4.13), so a
- * press never falls through to the picture. Faded chrome takes no pointer, so it cannot
- * be hovered back; the panel's toggle, the `i`, the annotations control and a paused
+ * Shown while the pointer is active over the Canvas, rests on one of the controls,
+ * keyboard focus is inside it, or a menu is open: decided here, once, for every one of
+ * them. A control under a resting pointer stays, Tip and all (WCAG 1.4.13), so a press
+ * never falls through to the picture. Faded controls take no pointer, so they cannot be
+ * hovered back; the panel's toggle, the `i`, the annotations control and a paused
  * recording's Play never fade, so they hold nothing.
  */
 .clover-canvas:is(
-  [data-chrome="visible"],
+  [data-controls="visible"],
   :has(:focus-visible, [aria-expanded="true"]:not([data-button="panel"])),
   :has(
     > .clover-canvas-controls
@@ -240,19 +265,19 @@
     .clover-canvas-transport-bar > :not([data-button="play"]):hover
   )
 ) {
-  --clover-chrome-shown: 1;
-  --clover-chrome-events: auto;
-  --clover-chrome-timing: var(--clover-chrome-enter);
+  --clover-controls-shown: 1;
+  --clover-controls-events: auto;
+  --clover-controls-timing: var(--clover-controls-enter);
 }
 
 /*
- * Every piece of chrome reads it: faded and tucked toward its edge (up from the top,
- * `--clover-chrome-edge: 1` for down from the bottom) until shown. Each control fades,
+ * Every one of the controls reads it: faded and tucked toward its edge (up from the top,
+ * `--clover-controls-edge: 1` for down from the bottom) until shown. Each control fades,
  * not the cluster, so one can stay, and a faded one keeps its room (nothing beside it
  * moves). A video or sound's transport, or an animation's frames (`Transport.css`), and
- * the captions (`MediaStage.css`) read the same state, in the media layer: its scrim, its
- * seek bar and each piece of its bar, so its Play can stay. A placeholder's toggle never fades: open, it
- * is the way back to the still, so it stays in sight.
+ * the captions (`MediaBody.css`) read the same state, in the media layer: its scrim, its
+ * seek bar and each piece of its bar, so its Play can stay. A placeholder's toggle never
+ * fades: open, it is the way back to the still, so it stays in sight.
  */
 .clover-canvas > .clover-canvas-controls > *,
 .clover-canvas > .clover-canvas-navigator,
@@ -266,15 +291,15 @@
   > .clover-canvas-transport
   > .clover-canvas-transport-bar
   > * {
-  opacity: var(--clover-chrome-shown);
+  opacity: var(--clover-controls-shown);
   translate: 0
     calc(
-      (1 - var(--clover-chrome-shown)) * var(--clover-chrome-edge, -1) *
-        var(--clover-chrome-tuck)
+      (1 - var(--clover-controls-shown)) * var(--clover-controls-edge, -1) *
+        var(--clover-controls-tuck)
     );
   /* A layer raised (the transport over the captions) is raised at once, not by steps. */
   transition:
-    all var(--clover-chrome-timing),
+    all var(--clover-controls-timing),
     z-index 0s;
 }
 
@@ -283,31 +308,34 @@
 .clover-canvas > .clover-canvas-navigator,
 .clover-canvas-transport > .clover-canvas-transport-seek-area,
 .clover-canvas-transport-bar > * {
-  pointer-events: var(--clover-chrome-events);
+  pointer-events: var(--clover-controls-events);
 }
 
-/* Still appears and disappears — hiding it outright would leave no way back — unanimated. */
+/*
+ * The controls still appear and disappear — hiding them outright would leave no way
+ * back — unanimated.
+ */
 @media (prefers-reduced-motion: reduce) {
   .clover-canvas {
-    --clover-chrome-leave: 0s;
-    --clover-chrome-enter: 0s;
-    --clover-chrome-tuck: 0px;
+    --clover-controls-leave: 0s;
+    --clover-controls-enter: 0s;
+    --clover-controls-tuck: 0px;
   }
 }
 
 /* ============================ Navigator ============================ */
 
 /*
- * The overview: small, and shown with the controls (see Chrome, above), so it never sits
- * on the picture otherwise. It is a pointer convenience —
- * the keyboard and the zoom controls reach everything it does — so it is hidden from
- * assistive technology rather than given a role.
+ * The overview: small, and shown with the rest of the controls (see Controls, above), so
+ * it never sits on the picture otherwise. It is a pointer convenience — the keyboard and
+ * the zoom controls reach everything it does — so it is hidden from assistive technology
+ * rather than given a role.
  */
 .clover-canvas-navigator {
   position: absolute;
   z-index: 2;
-  top: var(--clover-canvas-chrome-inset);
-  left: var(--clover-canvas-chrome-inset);
+  top: var(--clover-canvas-controls-inset);
+  left: var(--clover-canvas-controls-inset);
   /* A golden rectangle on the scale: 2xl + xl by 2xl. */
   width: calc(var(--clover-space-2xl) + var(--clover-space-xl));
   height: var(--clover-space-2xl);

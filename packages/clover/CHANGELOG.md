@@ -12,6 +12,65 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`Timeline` and `Scene`, Presentation 4's other containers.** `Body` draws a Timeline
+  view with `Timeline` and a Scene view with `Scene`, each loaded the first time such a
+  view shows, so the Viewer's templates play sound and draw 3D with no prop; a renderer of
+  yours (`renderers`) still goes first. Both work alone too, and as elements,
+  `<clover-timeline>` and `<clover-scene>`:
+
+  ```jsx
+  <Clover.Timeline iiifContent="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/v4/manifest.json" />
+  <Clover.Scene iiifContent="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/v4/manifest.json" />
+  ```
+
+  - `Timeline` plays a Timeline (sound) in Canvas's view, with its transport, captions,
+    chapters, annotations on its time and its accompanying or placeholder Canvas: what
+    Canvas gave sound before, so a page of sound loads what a Canvas alone does (38.1 kB
+    gzip). A Presentation 3 Canvas of sound alone upgrades to a Timeline, so it plays
+    with it too. Sound with no picture, nor a placeholder showing, shows its label in the
+    Body, which was blank (`.clover-canvas-sound-label`, hidden from assistive
+    technology, as the Body is named by the same words).
+  - `Scene` draws a Scene's glTF models (`model/gltf-binary`, `model/gltf+json`), each at
+    its target's `PointSelector`, after its transforms, lit as a neutral room lights them
+    and framed by a default camera, as Cookbook 0608 asks. A drag turns them and a pinch
+    zooms; so do its controls and its keys on the focused view (the arrows, R, Shift+R,
+    plus, minus, 0). Its controls are in the Body's lower right
+    (`.clover-scene-navigation`), over a shade rising from its foot, coming and going as
+    Canvas's do: zoom and full screen in a row, ending beside a pad that turns them
+    (`.clover-scene-rotate`, a group named "Rotate"): at its center a disc to drag, as the
+    view is dragged (`.clover-scene-rotate-disc`, a ball shaded as a sphere and lit by the
+    accent, more while it is pointed at, held, or the view turns, a globe across it that
+    turns with the models and shows where their front is), round it each way on the side
+    it turns toward, Clover's caret pointing its way, a press a step and held to keep
+    turning, and in its last corner Reset view, as Canvas's. The top right keeps the `i`
+    and a host's own controls. `controlButtons` replaces any of its buttons as it does the
+    cluster's. It loads 15.6 kB gzip up front, and its drawing the first time a Scene
+    comes near the window. It takes its WebGL context in turn with the page's Canvases.
+  - `three` is a dependency, imported only by the drawing `engine="three"` loads.
+  - Its drawing is Clover's own WebGL2 glTF renderer (`lib/gltf/`), as Canvas draws
+    images: 8.0 kB gzip, loaded when a Scene first comes near the window. It draws glTF
+    2.0's core, unlit materials and a material's IOR and specular; a model that requires
+    anything else (Draco, Meshopt, KTX2) says so in an alert. Scenes showing one model at
+    once share one download of it, and the camera frames the model's points as placed,
+    not its boxes turned. **`engine="three"`**
+    (`<clover-scene engine="three">`) draws with three.js instead, 158.3 kB loaded only
+    for a Scene that asks for it, for compressed models, animations and glTF's material
+    extensions.
+
+    ```jsx
+    <Clover.Scene iiifContent={url} engine="three" />
+    ```
+
+  - Budgets: `timelineInitialGzip` 38.2, `sceneInitialGzip` 14.4, `sceneOnDemandGzip`
+    160 and `sceneCloverOnDemandGzip` 8.3 kB; and, for the label a sound with no picture
+    shows, `webComponentsGzip` 108.8 (`<clover-viewer>` 108,533 B), `canvasElementGzip`
+    79.3 (`<clover-canvas>` alone, 79,061 B) and `documentElementGzip` 114.9 kB (114,636
+    B).
+
+- **Sound's Presentation 4 body, `Audio`, plays**, as Presentation 3's `Sound` did. The
+  Cookbook's recipes in Presentation 4 paint `Audio`; until now a Canvas or Timeline
+  painting one showed nothing.
+
 - **`root.clover.contents()`: the table of contents, for a page's script.** The same
   entries React's `tableOfContents` gives and `Contents` draws (each its `label`, the
   `canvasId` it goes to, its `time` or `region`, and its `children`), so a web components
@@ -121,7 +180,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   on (changed later, it shows that tab), the reader's choice sends
   `clover-value-change`, and `closable` gives it a close button, which sends
   `clover-close` (cancelable) and hides what its toggle shows. A `<clover-panel-toggle
-controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, a
+controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   button of its own. Its target is open while it is not `hidden` (write `hidden` on the
   panel to start it shut), and each press sends `clover-open-change` (cancelable). The
   Split's elements are the panes and bars themselves, with `Split`'s sizes, storage,
@@ -894,10 +953,10 @@ controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, 
     `Items` down the left (the Manifest's Canvases as page thumbnails), and the
     pages down one column, as a PDF reader's continuous view: a sheet for each view (a
     spread is one), fitted whole on the gray ground with `--clover-inset` round it, and
-    at most the stage less twice the inset tall, so the top of the next always shows
+    at most the column less twice the inset tall, so the top of the next always shows
     under the one at rest. The column scrolls as any page does (wheel, trackpad, a
     finger, the scrollbar), and at either end the web page scrolls on. The top of the
-    stage is the one place a sheet is active: where the scroll rests, the next sheet is
+    column is the one place a sheet is active: where the scroll rests, the next sheet is
     brought there once the active one has been scrolled a quarter of its height on, the
     previous once a quarter of it is in sight, and otherwise the active one settles back.
     A press on a sheet, a thumbnail, and PageUp and PageDown bring theirs. Sheets not
@@ -905,7 +964,7 @@ controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, 
     its pictures; the one Canvas, with its zoom, annotations and media, lies over the
     active sheet's still, and shows, its controls sliding in, only once that sheet is in
     place and drawn; while the column scrolls the controls slide away. Zoomed in or out,
-    or moved, the active sheet fills the stage, pushing the others down, and they
+    or moved, the active sheet fills the column, pushing the others down, and they
     dissolve, until the Canvas is home again or another sheet comes in. A finger scrolls
     the column until then; after, it moves about the page. Pinch and Ctrl-wheel zoom.
     The page thumbnails' toggle is a pill drawn as the round controls are (the control's
@@ -1148,7 +1207,7 @@ controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, 
   header and `Items`), what is within a part 0.618rem, and a metadata label 0.382rem
   over its value (was 0.236rem). The Canvas's controls, its placeholder's toggle and its
   navigator sit the region's inset in from the Canvas's edges
-  (`--clover-canvas-chrome-inset`, `--clover-inset` by default), so they line up with
+  (`--clover-canvas-controls-inset`, `--clover-inset` by default), so they line up with
   the header's title and `Position` over `Items`; they were 1rem in. The playback
   controls for video and sound are unchanged.
   - At home, a Canvas fills the space it is given edge to edge, and its placeholder the
@@ -1299,11 +1358,11 @@ controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, 
   150ms, the rest 200ms, on a curve that popped on the way out); now they share one and
   move as one. Captions rise and fall with the playback controls, by `translate` rather
   than `bottom`.
-  - Whether they show is decided once, on `.clover-canvas`: `--clover-chrome-shown` (0
-    or 1), `--clover-chrome-events` and `--clover-chrome-timing`, which each of them
-    reads. Set `--clover-chrome-enter`, `--clover-chrome-leave` or `--clover-chrome-tuck`
-    there to change the motion. With reduced motion, the controls still come and go,
-    without moving.
+  - Whether they show is decided once, on `.clover-canvas`: `--clover-controls-shown` (0
+    or 1), `--clover-controls-events` and `--clover-controls-timing`, which each of them
+    reads. Set `--clover-controls-enter`, `--clover-controls-leave` or
+    `--clover-controls-tuck` there to change the motion. With reduced motion, the
+    controls still come and go, without moving.
   - The navigator hides by `opacity` and `pointer-events`, as the controls do, no longer
     by `visibility`.
 - **The `Panel`'s toggle, `PanelToggle`, never fades.** The Canvas's other
@@ -1382,10 +1441,10 @@ controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, 
     `controls={{ annotations: false }}` hides it.
   - **One place for what the controls open.** The information box (below) and the menus
     (annotations, Choice) hang `s` below the Canvas's controls, lined up with their end
-    (`--clover-canvas-chrome-inset`), no wider than 22rem or taller than the Canvas leaves
-    room for, with one look; on a short stage, beside the controls. The information box
-    had hung at its own distance, 1rem in from the edge, out of line with the menus. The
-    menus are now the Canvas's own children, as the box is, not the controls': a
+    (`--clover-canvas-controls-inset`), no wider than 22rem or taller than the Canvas
+    leaves room for, with one look; in a short Body, beside the controls. The information
+    box had hung at its own distance, 1rem in from the edge, out of line with the menus.
+    The menus are now the Canvas's own children, as the box is, not the controls': a
     stylesheet that reached them through `.clover-canvas-controls .clover-canvas-menu`
     selects `.clover-canvas > .clover-canvas-menu` instead.
   - **A caption of Canvas information.** When a shown Canvas has a `summary` or
@@ -1469,9 +1528,9 @@ controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, 
       video and sound alike (sound's own softer scrim is gone). A focused thumb keeps its
       ring.
     - **Inset as the image controls are.** The playback controls and the caption cues
-      sit in from the stage's sides and foot by `--clover-canvas-chrome-inset` (`l` by
+      sit in from the Body's sides and foot by `--clover-canvas-controls-inset` (`l` by
       default), as the Canvas's other controls do, rather than `m`; set that property to
-      move them all together. On a stage narrower than 28rem the bar's controls are `xs`
+      move them all together. In a Body narrower than 28rem the bar's controls are `xs`
       apart rather than `s`, so they keep to two rows at 320px.
     - **`navigable` gesture option.** `options.gestures.navigable: false` holds the
       camera still for any Canvas.
@@ -1607,7 +1666,7 @@ controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, 
   MapLibre (lowered from 20.0 to 17.3), the stylesheet 10.4 (10.6), `templates.css` 1.9
   (2.1; at 1,916 B it had passed its 1.9 unnoticed, the test stopping at the first page
   over) and `<clover-viewer>` 95.7 (95.9). Scrolling a hotspot's note longer than the
-  stage then brought `<clover-viewer>` to 95.9 kB (95,934 B), 34 B over that, and its
+  Body then brought `<clover-viewer>` to 95.9 kB (95,934 B), 34 B over that, and its
   budget was set to 96.1. Items' pager, which replaced the `Pager` part (stepping a
   Collection's members, and a count that keeps its widest room), then added about
   0.4 kB to each template: the budgets were set to the Viewer with `Default` 62.0 kB
@@ -1688,6 +1747,56 @@ controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, 
 
 ### Changed
 
+- **Named for the components (Mat, 2026-10-23): the Body and its controls.** What was
+  "the stage" is the Body, and what came and went over it, "the chrome", is the
+  controls, in the CSS, the attributes and the templates' classes as in the docs. Rename
+  what your CSS or scripts name:
+
+  | Before                                                                                     | Now                                    |
+  | ------------------------------------------------------------------------------------------ | -------------------------------------- |
+  | `--clover-chrome-*` (`-shown`, `-events`, `-timing`, `-enter`, `-leave`, `-tuck`, `-edge`) | `--clover-controls-*`                  |
+  | `--clover-canvas-chrome-inset`                                                             | `--clover-canvas-controls-inset`       |
+  | `data-chrome="visible"` / `"hidden"`                                                       | `data-controls="visible"` / `"hidden"` |
+  | `.clover-template-default-stage` (its `Body`)                                              | `.clover-template-default-body`        |
+  | `.clover-template-default-body` (its `Split`)                                              | `.clover-template-default-panes`       |
+  | `.clover-template-document-stage` (the pages' scrolling column)                            | `.clover-template-document-column`     |
+  | `.clover-template-document-content` (its `Body`)                                           | `.clover-template-document-body`       |
+  | `.clover-template-document-body` (its `Split`)                                             | `.clover-template-document-panes`      |
+  | `.clover-template-lightbox-stage` (its `Body`)                                             | `.clover-template-lightbox-body`       |
+  | `.clover-template-lightbox-body` (its dialog's content)                                    | `.clover-template-lightbox-content`    |
+
+  Each template's `-body` class is now on its `Clover.Body` alone. The order matters
+  where you rename by search: the old `-body` classes first, then `-stage` and
+  `-content`.
+
+  ```diff
+  - .clover-template-default-stage { --clover-chrome-timing: 0s; }
+  + .clover-template-default-body { --clover-controls-timing: 0s; }
+  ```
+
+- **Scenes are in the sequence.** `useSequence().canvases`, `Items` and the pager count a
+  Manifest's Scenes with its Canvases and Timelines (before, they were left out); a part
+  of your own that reads `canvases` meets `type: "Scene"`, which has no `width` or
+  `height`. `Body`'s `data-renderer` is `canvas`, `timeline`, `scene` or `custom`.
+- **The Presentation 4 types are `Presentation4Timeline` and `Presentation4Scene`**, as
+  `Presentation4Canvas` is: `Timeline` and `Scene` are the parts now.
+
+  ```diff
+  - import type { Timeline } from "@nulib/clover";
+  + import type { Presentation4Timeline } from "@nulib/clover";
+  ```
+
+- **`ControlButtons` takes `rotateUp` and `rotateDown`**, a Scene's.
+- **Budgets for routing Timeline and Scene and their strings**: the templates' up front
+  0.2–0.3 kB more (Default 67.4, Document 69.7, Gallery 59.0 kB), the Map's 0.1 (18.2, the
+  strings every page carries), `styles.css` 12.1. The elements' pages 1.1–1.3 kB more, as
+  the Body's code that Canvas and Scene share is a chunk of its own there:
+  `<clover-viewer>` 108.5, labels alone 32.4, the four parts 94.0, a layout of the
+  containers 107.7, `<clover-canvas>` alone 79.0, Document 114.6, the Viewer's own entry
+  91.0 and the entry 5.5 kB. Scene's controls in their corner (the rotate pad and its
+  disc, its two strings, zoom and full screen beside it) take Scene's up front to 15.7 kB, `styles.css` to 12.65, the four parts' page to 94.1 and a layout of the containers to
+  107.8.
+
 - **`Content` is `Body`** (Mat, 2026-10-22), ahead of the containers it will draw
   besides Canvas (Presentation 4's Scene and Timeline): `Clover.Body` and `<clover-body>`,
   its class `clover-body`, its height `--clover-body-height`, its renderers' types
@@ -1721,7 +1830,7 @@ controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, 
   `<clover-viewer>` loads 107.5 kB, up from 86.7 kB: its code now comes in chunks the
   other elements share, 39 files gzipped apart. In Document it loads 113.6 kB, the
   template and its styles with it. A page of `<clover-root>` and `<clover-label>` loads
-  31.2 kB, with only the light parts' sheets; of the root, the label, the stage and the
+  31.2 kB, with only the light parts' sheets; of the root, the label, the Body and the
   items 92.9 kB; a layout of the containers, as `Default`'s, 106.6 kB; and a
   `<clover-canvas>` alone, once it draws, 76.7 kB. The adapters for a page's own renderers and control
   buttons load only on a page that gives them. `sizes.json` records each
@@ -1941,7 +2050,7 @@ controls="id">` in a `<clover-body>` is one of the stage's controls; elsewhere, 
 - **A transport menu's long options no longer overlap.** In a list taller than its room
   (the Chapters menu with long titles), each option shrank to one line's height and its
   words ran over the next; options now keep their height and the list scrolls. The
-  Chapters menu is as wide as the Captions menu with its codes (16rem, within the stage),
+  Chapters menu is as wide as the Captions menu with its codes (16rem, within the Body),
   so a title of a few words takes a line or two.
 - **A Canvas never shows the browser's picture of a lost WebGL context** (Chrome's face in
   a box). Browsers cap a page's WebGL contexts (about 16 on desktop, 8 on Android) and
@@ -1983,12 +2092,12 @@ are in the repository's `ACCESSIBILITY.md`.
   - Under a finger, or a pen that does not hover, the controls, navigator and transport
     no longer hide on a timer. A tap on the picture shows them and the next tap hides
     them; a double tap zooms and leaves them as they were. `hideDelay` now applies only
-    to a mouse and a pen that hovers. If you relied on touch chrome fading by itself, it
-    no longer does.
-  - A press where faded chrome sits only shows the chrome: neither the press nor its
-    click reaches the picture or a hotspot beneath.
-  - Focus that no press brought (the keyboard's, a screen reader's) shows the chrome and
-    holds it until focus leaves.
+    to a mouse and a pen that hovers. If you relied on the controls fading by themselves
+    under touch, they no longer do.
+  - A press where faded controls sit only shows them: neither the press nor its click
+    reaches the picture or a hotspot beneath.
+  - Focus that no press brought (the keyboard's, a screen reader's) shows the controls
+    and holds them until focus leaves.
   - A pen that does not hover works as a finger: a single tap no longer zooms or plays
     and pauses, and a double tap zooms. A touch double tap no longer zooms when
     `clickToZoom` and `dblClickToZoom` are both off.
@@ -2009,15 +2118,15 @@ are in the repository's `ACCESSIBILITY.md`.
     ```
 
   - The information box and the Canvas's menus sit below every row of the controls,
-    however the controls wrap. On a stage too short to leave them room to read there
+    however the controls wrap. In a Body too short to leave them room to read there
     (under about 7rem), and with room beside the controls, they sit beside them from
     the top instead, with no minimum width: the Canvas says so with
     `data-popups="beside"`. The Canvas writes `--clover-canvas-controls-width` and
     `--clover-canvas-controls-height` inline on `.clover-canvas` for them. The controls'
     own box takes no presses; only the controls do.
-  - **The controls on a narrow stage** (a phone) are rows, never a column: the row at
+  - **The controls in a narrow Body** (a phone) are rows, never a column: the row at
     the top end wraps onto more rows below, each at the end, read and reached in the
-    order they show. A column used to wrap onto more columns on a short stage, out of
+    order they show. A column used to wrap onto more columns in a short Body, out of
     order, with the panel's toggle among them. The panel's toggle now keeps the top
     right corner at every size, out of the row (pinned to the cluster's top end, the
     room for it kept), with a placeholder's toggle beside it. A stylesheet that relied
@@ -2037,14 +2146,14 @@ are in the repository's `ACCESSIBILITY.md`.
     hotspots off their regions.
   - A hotspot's name is now a `Tip`, not a `<label>`. It shows on hover after a moment
     and at once on keyboard focus, takes the pointer, hides on Escape, wraps, and stays
-    inside the stage, over the hotspot where neither side has room. Move your rules:
+    inside the Body, over the hotspot where neither side has room. Move your rules:
 
     ```css
     /* before */ .clover-canvas-annotation label { … }
     /* after  */ .clover-canvas-annotation > .clover-tip { … }
     ```
 
-  - A hotspot's note taller than the stage is capped inside it and scrolls: by wheel or
+  - A hotspot's note taller than the Body is capped inside it and scrolls: by wheel or
     touch over it, and by the arrows, the page keys, Home and End from its hotspot. Where
     `scrollToZoom` is on, the wheel over a note that can scroll scrolls it rather than
     zooming. The gap between hotspot and note is now a clear `--clover-space-xs` border
@@ -2077,7 +2186,8 @@ are in the repository's `ACCESSIBILITY.md`.
     `aria-disabled` there, not `disabled`. A selector or test for `:disabled` on them
     should use `[aria-disabled="true"]`.
   - An animation's frames bar sits in a `.clover-canvas-media[data-kind="frames"]` layer,
-    as a video's transport does: it fades with the chrome, and its menu fits the stage.
+    as a video's transport does: it fades with the rest of the controls, and its menu
+    fits the Body.
     Rules on `.clover-canvas > .clover-canvas-transport[data-kind="frames"]` should
     target `.clover-canvas-media > .clover-canvas-transport`.
   - The Gallery's lightbox is named by the Canvas's label, else the Manifest's.
@@ -2103,8 +2213,8 @@ are in the repository's `ACCESSIBILITY.md`.
     "IT"), in a column of its own (`.clover-canvas-transport-code`), so a reader who
     cannot read a track's name can still tell its language; the menu is a little wider
     with them (16rem).
-  - The transport bar wraps rather than running off a narrow stage. Under 28rem of stage
-    width (37.5rem with chapters), the time and chapter take a row above the buttons.
+  - The transport bar wraps rather than running off a narrow Body. In a Body under 28rem
+    wide (37.5rem with chapters), the time and chapter take a row above the buttons.
     They sit in a new `.clover-canvas-transport-status`, and
     `.clover-canvas-transport-spacer` is gone. Retarget rules on the spacer, or on
     `.clover-canvas-transport-bar > .clover-canvas-transport-chapter`, to
@@ -2118,16 +2228,16 @@ are in the repository's `ACCESSIBILITY.md`.
     override `--clover-transport-room`, use
     `var(--clover-transport-bar-height, var(--clover-control))` for the bar.
   - `.clover-canvas-media` is now `container-type: size`, so the menus and captions are
-    sized to the stage. The Captions and Chapters menus place themselves when they open
-    and on resize: no taller than the room above their button, no wider than the stage,
+    sized to the Body. The Captions and Chapters menus place themselves when they open
+    and on resize: no taller than the room above their button, no wider than the Body,
     and moved along to stay inside the bar's inset. They write
-    `--clover-transport-menu-above` and `--clover-transport-menu-shift` inline. On a
-    stage too short to clear the transport, the information box and the Canvas's menus
+    `--clover-transport-menu-above` and `--clover-transport-menu-shift` inline. In a
+    Body too short to clear the transport, the information box and the Canvas's menus
     may cover it.
-  - The volume slider no longer hides below a 575px window. It narrows on a narrow
-    stage, and is left out only where a page cannot set the volume (iOS).
-  - The media stage stays mounted from one recording to the next (auto-advance), so
-    focus stays on the transport. If the focused control goes with the recording
+  - The volume slider no longer hides below a 575px window. It narrows in a narrow
+    Body, and is left out only where a page cannot set the volume (iOS).
+  - The player stays mounted from one recording to the next (auto-advance), so focus
+    stays on the transport. If the focused control goes with the recording
     (Captions, Chapters, Full screen), Play/Pause takes focus. A `texture` recording
     whose CORS request fails falls back to `dom` for that recording only.
   - While one of its controls has keyboard focus, the transport sits above the captions,
@@ -2331,7 +2441,7 @@ are in the repository's `ACCESSIBILITY.md`.
   - A `Tip` dismissed with Escape fades (`opacity: 0`) and takes no pointer, so a click
     where it was reaches what it covered. It shows again when the pointer next enters
     its control, or when focus leaves and comes back.
-  - Each time a Tip shows, it is measured against what clips it (the stage, a scrolling
+  - Each time a Tip shows, it is measured against what clips it (the Body, a scrolling
     panel, the window). One that would pass an edge wraps to the room there is and
     moves in, `xs` clear. `.clover-tip` is now `width: max-content` and wraps, and sets
     `transform: translateX(var(--clover-tip-shift, 0px))`; Clover writes

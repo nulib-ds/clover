@@ -488,7 +488,7 @@ describe("Viewer panel", () => {
     await waitFor(() => expect(toggle()).toHaveFocus());
     expect(panel).not.toBeVisible();
 
-    // Docked beside the stage, it has no close button of its own: the toggle closes it.
+    // Docked beside the Body, it has no close button of its own: the toggle closes it.
     expect(
       within(panel).queryByRole("button", { name: "Close information panel" }),
     ).toBeNull();

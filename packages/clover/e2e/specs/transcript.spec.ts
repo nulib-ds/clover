@@ -16,7 +16,7 @@ const SPACING = `* { line-height: 1.5 !important; letter-spacing: 0.12em !import
 async function open(page: Page) {
   await serveIIIF(page);
   await page.goto(LANGUAGES);
-  // On a phone the panel is over the stage, and opened by its toggle.
+  // On a phone the panel is over the Body, and opened by its toggle.
   const panel = page.getByRole("button", { name: "More information" });
   if ((await panel.getAttribute("aria-expanded")) !== "true")
     await panel.click();

@@ -4,9 +4,9 @@ import { serveIIIF } from "./fixtures";
 
 /*
  * WCAG 1.4.10 and 1.4.12: a control's popover (`ui/Tip.tsx`) is the only visible name
- * of an icon, so none is cut off by the stage, at any width, with a reader's own text
+ * of an icon, so none is cut off by the Body, at any width, with a reader's own text
  * spacing. Text spacing widens each by about a quarter, which pushed the ends of a wrapped
- * cluster row past the stage at 600 and 768 CSS px.
+ * cluster row past the Body at 600 and 768 CSS px.
  */
 
 /** WCAG 1.4.12's spacing, as its Understanding document's bookmarklet sets it. */
@@ -27,7 +27,7 @@ interface Box {
 }
 
 /*
- * The popover of each control on the stage, measured as it shows on keyboard focus. (By
+ * The popover of each control in the Body, measured as it shows on keyboard focus. (By
  * pointer, a wrapped row's popovers hang over the row under it; the unit tests cover the
  * pointer's way in, `ui/Tip.test.tsx`.)
  */
@@ -58,7 +58,7 @@ async function tipsOver(page: Page) {
   return seen;
 }
 
-async function stageOf(page: Page): Promise<Box> {
+async function bodyBoxOf(page: Page): Promise<Box> {
   return page
     .locator(".clover-canvas")
     .first()
@@ -70,7 +70,7 @@ async function stageOf(page: Page): Promise<Box> {
 
 for (const spaced of [false, true]) {
   for (const width of [1280, 768, 600, 375, 320]) {
-    test(`popovers stay inside the stage at ${width} CSS px${spaced ? ", text spaced" : ""}`, async ({
+    test(`popovers stay inside the Body at ${width} CSS px${spaced ? ", text spaced" : ""}`, async ({
       page,
       isMobile,
     }) => {
@@ -83,12 +83,12 @@ for (const spaced of [false, true]) {
         "data-status",
         "ready",
       );
-      const stage = await stageOf(page);
+      const bodyBox = await bodyBoxOf(page);
       const tips = await tipsOver(page);
       expect(tips.length).toBeGreaterThan(3);
       for (const { name, tip, cut } of tips) {
-        expect(tip.left, name).toBeGreaterThanOrEqual(stage.left);
-        expect(tip.right, name).toBeLessThanOrEqual(stage.right);
+        expect(tip.left, name).toBeGreaterThanOrEqual(bodyBox.left);
+        expect(tip.right, name).toBeLessThanOrEqual(bodyBox.right);
         expect(cut, name).toBe(false);
       }
     });
@@ -96,10 +96,10 @@ for (const spaced of [false, true]) {
 }
 
 /*
- * A name too long for the room wraps, rather than running past the stage: here the
- * stage is narrowed until no name fits on one line beside the controls.
+ * A name too long for the room wraps, rather than running past the Body: here the
+ * Body is narrowed until no name fits on one line beside the controls.
  */
-test("a popover wider than its room wraps inside the stage", async ({
+test("a popover wider than its room wraps inside the Body", async ({
   page,
   isMobile,
 }) => {
@@ -114,12 +114,12 @@ test("a popover wider than its room wraps inside the stage", async ({
     "data-status",
     "ready",
   );
-  const stage = await stageOf(page);
+  const bodyBox = await bodyBoxOf(page);
   const tips = await tipsOver(page);
   let wrapped = 0;
   for (const { name, tip, cut } of tips) {
-    expect(tip.left, name).toBeGreaterThanOrEqual(stage.left);
-    expect(tip.right, name).toBeLessThanOrEqual(stage.right);
+    expect(tip.left, name).toBeGreaterThanOrEqual(bodyBox.left);
+    expect(tip.right, name).toBeLessThanOrEqual(bodyBox.right);
     expect(cut, name).toBe(false);
     if (tip.bottom - tip.top > 60) wrapped++;
   }

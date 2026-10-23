@@ -6,7 +6,7 @@
  * Space steps down by adjacency: the more closely two things belong together, the
  * smaller the step between them. A container's inset is one step larger than the gap
  * between the things it holds (a region is `l` inside, its parts `m` apart; a cluster
- * sits `m` in from the stage edge, its buttons `s` apart).
+ * sits `m` in from the Body's edge, its buttons `s` apart).
  *
  * Text is the page's 1rem plus or minus a space step: the golden cuts around the page's
  * size, `3xs` and `2xs` either side. These four and the page's own size are the only
@@ -33,7 +33,7 @@
   --clover-control: calc(1rem + 2 * var(--clover-space-s));
   /*
    * A region's inset, from its edge to its content: a layout's header and thumbnail
-   * strip, the information panel, the picture on the stage at home. Everything inside a
+   * strip, the information panel, the picture in the Body at home. Everything inside a
    * region steps down from it, a step a level: its parts `m` apart, what is within a part
    * `s`, a label over its value `xs`.
    */

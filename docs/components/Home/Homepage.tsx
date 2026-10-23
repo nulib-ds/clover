@@ -199,7 +199,7 @@ const stories: Story[] = [
 ];
 
 /*
- * Nextra's chrome, as the homepage needs it, in rules drawn with the page and gone with it
+ * Nextra's frame, as the homepage needs it, in rules drawn with the page and gone with it
  * (a `<style>` it renders, no `:has()` on the page's ancestors, `full-width.ts`).
  *
  * The page spans the window (`FULL_WIDTH`, `docs/lib/full-width.ts`). And the navbar's
@@ -207,7 +207,7 @@ const stories: Story[] = [
  * padding, `Home.module.css`) at every width, rather than with the docs' wider layout.
  * Unlayered, these outweigh Nextra's utilities, which are in cascade layers.
  */
-const HOMEPAGE_CHROME = `${FULL_WIDTH}
+const HOMEPAGE_LAYOUT = `${FULL_WIDTH}
 .nextra-navbar > nav, .site-subheader > p, footer.site-footer {
   max-width: calc(1300px + 4rem);
   padding-left: max(env(safe-area-inset-left), 2rem);
@@ -240,7 +240,7 @@ const Homepage: React.FC<{
   const [resource, setResource] = useState<string | null>(null);
   return (
     <div className={styles.page}>
-      <style>{HOMEPAGE_CHROME}</style>
+      <style>{HOMEPAGE_LAYOUT}</style>
       <Hero />
 
       {/* A `div`: Nextra's layout already holds the page in its one `main`. */}

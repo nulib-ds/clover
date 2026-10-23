@@ -4,7 +4,7 @@ import { serveIIIF } from "./fixtures";
 
 /*
  * Annotation hotspots on a landscape Canvas, as a reader meets them: in the order given,
- * nested, under the controls, and near the stage's edges.
+ * nested, under the controls, and near the Body's edges.
  */
 const MANIFEST = "https://fixtures.test/hotspots.json";
 const CANVAS = "https://fixtures.test/hotspots/canvas/1";
@@ -154,7 +154,7 @@ const inside = (inner: Box, outer: Box) =>
   inner.x + inner.width <= outer.x + outer.width + 0.5 &&
   inner.y + inner.height <= outer.y + outer.height + 0.5;
 
-const stageOf = async (page: Page) =>
+const bodyBoxOf = async (page: Page) =>
   (await page.locator(".clover-canvas-overlays").boundingBox())!;
 
 test.describe("Hotspots", () => {
@@ -186,7 +186,7 @@ test.describe("Hotspots", () => {
     await open(page, [["The page", "xywh=0,0,2000,1000"]]);
     const viewport = page.getByTestId("clover-canvas-viewport");
     const controls = page.locator(".clover-canvas-controls > *");
-    // Once the chrome, shown by the focus, has come to rest.
+    // Once the controls, shown by the focus, have come to rest.
     await viewport.focus();
     await settled(controls.first());
     const picture = (await hotspot(page, "The page").boundingBox())!;
@@ -242,11 +242,11 @@ test.describe("Hotspots", () => {
     const box = (await under.boundingBox())!;
     for (const control of await controls.all())
       expect(overlaps(box, (await control.boundingBox())!)).toBe(false);
-    expect(inside(box, await stageOf(page))).toBe(true);
+    expect(inside(box, await bodyBoxOf(page))).toBe(true);
   });
 
-  // Not moved for chrome elsewhere on the stage: the open caption at its end, here.
-  test("one reached by Tab clear of the chrome leaves the view where it is", async ({
+  // Not moved for controls elsewhere in the Body: the open caption at its end, here.
+  test("one reached by Tab clear of the controls leaves the view where it is", async ({
     page,
   }) => {
     await open(
@@ -257,7 +257,7 @@ test.describe("Hotspots", () => {
       ],
       { summary: { en: ["A wide page, with notes down its left."] } },
     );
-    // From the keyboard: the chrome it is in shows for the focus.
+    // From the keyboard: the controls it is among show for the focus.
     await page.getByRole("button", { name: "About" }).focus();
     await page.keyboard.press("Enter");
     await expect(page.locator(".clover-canvas-caption")).toHaveAttribute(
@@ -265,7 +265,7 @@ test.describe("Hotspots", () => {
       "true",
     );
     await page.getByTestId("clover-canvas-viewport").focus();
-    const chrome = page.locator(
+    const controls = page.locator(
       ".clover-canvas-caption, .clover-canvas-controls > *",
     );
     let clear = 0;
@@ -276,7 +276,7 @@ test.describe("Hotspots", () => {
       // On a phone the caption, beside the cluster's column, covers the first.
       const covered = (
         await Promise.all(
-          (await chrome.all()).map((piece) => piece.boundingBox()),
+          (await controls.all()).map((piece) => piece.boundingBox()),
         )
       ).some((box) => box && overlaps(before, box));
       await page.keyboard.press("Tab");
@@ -446,14 +446,14 @@ test.describe("Hotspots", () => {
   });
 
   /*
-   * WCAG 1.4.10: at 320 CSS px a popover wraps, no wider than the stage, and stays inside
+   * WCAG 1.4.10: at 320 CSS px a popover wraps, no wider than the Body, and stays inside
    * it, on the side of its hotspot with more room: below a hotspot in the top half, above
    * one in the bottom.
    */
-  test("keep their popover inside a narrow stage", async ({ page }) => {
+  test("keep their popover inside a narrow Body", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
     await open(page);
-    const stage = await stageOf(page);
+    const bodyBox = await bodyBoxOf(page);
     await page.getByTestId("clover-canvas-viewport").focus();
     for (const [name] of NOTES) {
       await page.keyboard.press("Tab");
@@ -463,12 +463,12 @@ test.describe("Hotspots", () => {
       const tip = tipOf(spot);
       await expect.poll(seen(tip)).toBe(true);
       const box = (await tip.boundingBox())!;
-      expect(inside(box, stage), name).toBe(true);
+      expect(inside(box, bodyBox), name).toBe(true);
       const own = (await spot.boundingBox())!;
-      const above = own.y + own.height / 2 > stage.y + stage.height / 2;
+      const above = own.y + own.height / 2 > bodyBox.y + bodyBox.height / 2;
       const room = above
-        ? own.y - stage.y
-        : stage.y + stage.height - (own.y + own.height);
+        ? own.y - bodyBox.y
+        : bodyBox.y + bodyBox.height - (own.y + own.height);
       // Off the hotspot, where it fits there: what shows of it, inside its clear edge.
       if (box.height + 16 > room) continue;
       const edge = await tip.evaluate((node) => {
@@ -490,10 +490,10 @@ test.describe("Hotspots", () => {
   });
 
   /*
-   * WCAG 1.4.10 at 400%: 1280 × 1024 is 320 × 256, a stage 154px tall. A long note fits
-   * neither above its hotspot nor below, so it moves over it, inside the stage.
+   * WCAG 1.4.10 at 400%: 1280 × 1024 is 320 × 256, a Body 154px tall. A long note fits
+   * neither above its hotspot nor below, so it moves over it, inside the Body.
    */
-  test("keep a long note inside a short stage", async ({ page }) => {
+  test("keep a long note inside a short Body", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 256 });
     const note =
       "A long note, as a cataloguer writes one: the plate was printed from a " +
@@ -501,22 +501,22 @@ test.describe("Hotspots", () => {
       "picture, was trimmed when the volume was rebound, so only its first line " +
       "survives here, in pencil, in a later hand that no one has yet identified.";
     await open(page, [[note, "xywh=900,450,200,100"]]);
-    const stage = await stageOf(page);
+    const bodyBox = await bodyBoxOf(page);
     await page.getByTestId("clover-canvas-viewport").focus();
     await page.keyboard.press("Tab");
     const spot = hotspot(page, note);
     await expect(spot).toBeFocused();
     const tip = tipOf(spot);
     await expect.poll(seen(tip)).toBe(true);
-    expect(inside((await tip.boundingBox())!, stage)).toBe(true);
+    expect(inside((await tip.boundingBox())!, bodyBox)).toBe(true);
   });
 
   /*
-   * WCAG 1.4.10: a note taller than the whole stage is capped inside it and scrolls, by
+   * WCAG 1.4.10: a note taller than the whole Body is capped inside it and scrolls, by
    * the keys from its hotspot, by wheel over it; the pointer crosses onto it, and a press
    * on it leaves focus on its hotspot, as it is hidden from assistive technology.
    */
-  test("scroll a note taller than the stage, inside it", async ({
+  test("scroll a note taller than the Body, inside it", async ({
     page,
     isMobile,
   }) => {
@@ -528,14 +528,14 @@ test.describe("Hotspots", () => {
         "in 1907, retouched by hand, its caption trimmed when the volume was rebound.",
     ).join(" ");
     await open(page, [[note, "xywh=900,450,200,100"]]);
-    const stage = await stageOf(page);
+    const bodyBox = await bodyBoxOf(page);
     await page.getByTestId("clover-canvas-viewport").focus();
     await page.keyboard.press("Tab");
     const spot = hotspot(page, note);
     await expect(spot).toBeFocused();
     const tip = tipOf(spot);
     await expect.poll(seen(tip)).toBe(true);
-    expect(inside((await tip.boundingBox())!, stage)).toBe(true);
+    expect(inside((await tip.boundingBox())!, bodyBox)).toBe(true);
     const scroll = () =>
       tip.evaluate((node) => ({
         top: node.scrollTop,
@@ -573,10 +573,10 @@ test.describe("Hotspots", () => {
   });
 
   /*
-   * A hotspot as tall as the stage, or a column nearly so: no side has room for its
+   * A hotspot as tall as the Body, or a column nearly so: no side has room for its
    * popover, which moves over it, to its edge in sight, by hover and by focus.
    */
-  test("keep the popover of one as tall as the stage inside it", async ({
+  test("keep the popover of one as tall as the Body inside it", async ({
     page,
     isMobile,
   }) => {
@@ -585,9 +585,9 @@ test.describe("Hotspots", () => {
       ["A tall column", "xywh=1500,20,200,950"],
     ];
     await open(page, notes);
-    const stage = await stageOf(page);
+    const bodyBox = await bodyBoxOf(page);
     if (!isMobile) {
-      // At home, where the page fills the stage's height.
+      // At home, where the page fills the Body's height.
       for (const [name, x] of [
         ["The whole page", 0.1],
         ["A tall column", 0.5],
@@ -596,7 +596,7 @@ test.describe("Hotspots", () => {
         const box = (await spot.boundingBox())!;
         await page.mouse.move(box.x + box.width * x, box.y + box.height / 3);
         await expect.poll(seen(tipOf(spot))).toBe(true);
-        expect(inside((await tipOf(spot).boundingBox())!, stage), name).toBe(
+        expect(inside((await tipOf(spot).boundingBox())!, bodyBox), name).toBe(
           true,
         );
       }
@@ -609,7 +609,7 @@ test.describe("Hotspots", () => {
       await expect(spot).toBeFocused();
       await settled(spot);
       await expect.poll(seen(tipOf(spot))).toBe(true);
-      expect(inside((await tipOf(spot).boundingBox())!, stage), name).toBe(
+      expect(inside((await tipOf(spot).boundingBox())!, bodyBox), name).toBe(
         true,
       );
     }
@@ -682,7 +682,7 @@ test.describe("Hotspots", () => {
     await settled(spot);
     const width = () => spot.evaluate((element) => element.style.width);
     const before = await width();
-    // A click on the stage's bare corner, off the hotspot.
+    // A click on the Body's bare corner, off the hotspot.
     const box = (await viewport.boundingBox())!;
     const corner = { x: box.x + 8, y: box.y + box.height - 8 };
     await page.mouse.click(corner.x, corner.y);

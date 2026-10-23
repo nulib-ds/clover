@@ -4,7 +4,7 @@
  * (`ControlMenu.css`), so the reader can zoom and pan while it is open; this file holds
  * its insides, and its slide.
  *
- * It is content, not chrome: it does not fade with the controls.
+ * It is content, not one of the controls: it does not fade with them.
  *
  * On the scale: `m` inside. Within, a Canvas's label, summary and metadata are `s` apart;
  * Canvases, `m`.

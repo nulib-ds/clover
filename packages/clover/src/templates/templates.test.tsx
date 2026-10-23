@@ -55,7 +55,7 @@ describe("templates", () => {
     }
   });
 
-  it("Default: title, stage, strip with position and arrows, and the panel", async () => {
+  it("Default: title, Body, strip with position and arrows, and the panel", async () => {
     render(<Templates.Default iiifContent={bookJson} />);
     expect(
       await screen.findByRole("heading", { name: "Simple Manifest - Book" }),
@@ -70,7 +70,7 @@ describe("templates", () => {
       "true",
     );
 
-    // Beside the stage, the toggle closes the panel; it has no close button of its own.
+    // Beside the Body, the toggle closes the panel; it has no close button of its own.
     const panel = document.querySelector(".clover-template-default-panel")!;
     expect(
       within(panel as HTMLElement).queryByRole("button", {
@@ -87,7 +87,7 @@ describe("templates", () => {
     expect(toggle().closest(".clover-canvas-controls")).not.toBeNull();
   });
 
-  // `fill` lays it out in the box it is given; without it, the stage keeps its height.
+  // `fill` lays it out in the box it is given; without it, the Body keeps its height.
   it("Default: fill marks the layout to fill its box, and is off by default", async () => {
     const { rerender, container } = render(
       <Templates.Default iiifContent={bookJson} />,
@@ -185,14 +185,14 @@ describe("templates", () => {
 
   it("Default: narrowing under the open panel hands focus in it to its toggle", async () => {
     // jsdom lays nothing out: the layout measures wide, then phone-wide (zoomed in, say).
-    const bodies: Array<() => void> = [];
+    const panes: Array<() => void> = [];
     vi.stubGlobal(
       "ResizeObserver",
       class {
         constructor(private callback: () => void) {}
         observe(node: Element) {
-          if (node.classList.contains("clover-template-default-body"))
-            bodies.push(this.callback);
+          if (node.classList.contains("clover-template-default-panes"))
+            panes.push(this.callback);
         }
         disconnect() {}
       },
@@ -204,11 +204,11 @@ describe("templates", () => {
     await screen.findByRole("heading", { name: "Simple Manifest - Book" });
     screen.getByRole("button", { name: "About" }).focus();
     width.mockReturnValue(390);
-    act(() => bodies.forEach((measure) => measure()));
+    act(() => panes.forEach((measure) => measure()));
     expect(
       document.querySelector(".clover-template-default-panel"),
     ).toHaveAttribute("hidden");
-    // In the frame after: the toggle has moved, from the spine to the stage's controls.
+    // In the frame after: the toggle has moved, from the spine to the Body's controls.
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: "More information" }),
@@ -218,7 +218,7 @@ describe("templates", () => {
     vi.unstubAllGlobals();
   });
 
-  describe("Default, with no room for the panel beside the stage", () => {
+  describe("Default, with no room for the panel beside the Body", () => {
     // jsdom lays nothing out: a phone-wide layout, as the template measures it.
     let width: ReturnType<typeof vi.spyOn>;
     beforeEach(() => {
@@ -233,11 +233,11 @@ describe("templates", () => {
     const panel = () =>
       document.querySelector<HTMLElement>(".clover-template-default-panel")!;
 
-    it("never stacks: it starts closed, then slides over the stage when asked", async () => {
+    it("never stacks: it starts closed, then slides over the Body when asked", async () => {
       render(<Templates.Default iiifContent={bookJson} />);
       await screen.findByRole("heading", { name: "Simple Manifest - Book" });
-      const body = document.querySelector(".clover-template-default-body");
-      expect(body).toHaveAttribute("data-panel", "over");
+      const panes = document.querySelector(".clover-template-default-panes");
+      expect(panes).toHaveAttribute("data-panel", "over");
       expect(panel()).not.toBeVisible();
       expect(toggle()).toHaveAttribute("aria-expanded", "false");
 
@@ -296,7 +296,7 @@ describe("templates", () => {
       expect(option).toHaveFocus();
     });
 
-    it("starts open over the stage only when the host asks", async () => {
+    it("starts open over the Body only when the host asks", async () => {
       render(<Templates.Default iiifContent={bookJson} defaultPanelOpen />);
       await screen.findByRole("heading", { name: "Simple Manifest - Book" });
       expect(panel()).toBeVisible();
@@ -312,7 +312,7 @@ describe("templates", () => {
     expect(screen.queryByRole("complementary", { name: "Items" })).toBeNull();
     expect(screen.queryByRole("separator")).toBeNull();
     expect(
-      document.querySelector(".clover-template-document-body"),
+      document.querySelector(".clover-template-document-panes"),
     ).toHaveAttribute("data-sidebar", "closed");
   });
 
@@ -378,15 +378,15 @@ describe("templates", () => {
 
     // A still sheet for each view, the cover and two spreads, hidden from assistive
     // technology: the live Canvas and the thumbnails are the way to each page.
-    const stage = document.querySelector<HTMLElement>(
-      ".clover-template-document-stage",
+    const column = document.querySelector<HTMLElement>(
+      ".clover-template-document-column",
     )!;
-    const sheets = stage.querySelectorAll(".clover-template-document-sheet");
+    const sheets = column.querySelectorAll(".clover-template-document-sheet");
     expect(sheets).toHaveLength(3);
     expect(sheets[1]).toHaveAttribute("aria-hidden", "true");
     expect(sheets[1].querySelectorAll("img, span")).toHaveLength(2);
-    const canvas = stage.querySelector('[data-testid="clover-canvas"]');
-    fireEvent.keyDown(stage, { key: "PageDown" });
+    const canvas = column.querySelector('[data-testid="clover-canvas"]');
+    fireEvent.keyDown(column, { key: "PageDown" });
     // The second view current, its thumbnail selected.
     await waitFor(() =>
       expect(within(sidebar).getAllByRole("option")[1]).toHaveAttribute(
@@ -395,7 +395,7 @@ describe("templates", () => {
       ),
     );
     // The one Canvas shows the next view: nothing remounted.
-    expect(stage.querySelector('[data-testid="clover-canvas"]')).toBe(canvas);
+    expect(column.querySelector('[data-testid="clover-canvas"]')).toBe(canvas);
 
     // With room for both, the panel sits beside the page, a bar between them.
     const panel = document.querySelector<HTMLElement>(

@@ -1,0 +1,195 @@
+---
+title: Scene
+description: "Clover's 3D view for IIIF Presentation 4 Scenes: glTF models, lit and framed, turned and zoomed by pointer, key or control, on its own or in a Root."
+---
+
+import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
+import CloverScene from "docs/components/DynamicImports/Scene";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
+import { LivePart } from "docs/components/Clover4/LiveExample";
+import { Measured } from "docs/components/Clover4/Measured";
+
+<div className="docs-title-row">
+
+# Scene
+
+<PartHead part="Scene" />
+
+</div>
+
+<div className="docs-lede">
+  3D, as Presentation 4 shapes it: a Scene's glTF models, lit, framed and turned
+  in your hands.
+</div>
+
+<LivePart
+  part="Scene"
+  resource="model"
+  knobs={[
+    {
+      prop: "style.height",
+      on: "box",
+      value: 420,
+      min: 240,
+      max: 640,
+      label: "Height of the box round Scene, in pixels",
+    },
+    { prop: "controls", value: true },
+  ]}
+/>
+
+## API reference
+
+Draws the Presentation 4 Scene you hand it, or loads one itself (`iiifContent`: a Manifest
+gives its first Scene). Inside a `Root`, given nothing, it draws the Root's view when that
+is a Scene; [`Body`](/docs/body) draws a Scene view with it, unless a renderer of yours
+claims it. It fills its parent, so give the parent a height.
+
+What draws the models, Clover's own renderer (or three.js, `engine="three"`), loads the
+first time a Scene comes near the window.
+
+A drag turns the models and a pinch zooms. The controls sit together in the lower right,
+over a soft shade, and show while the pointer moves over the view or keyboard focus is in
+it: zoom and full screen in a row, then the rotate pad. Drag the pad's disc to turn the
+models as you would drag the view; the globe on it turns with them and shows where their
+front is. Each arrow turns them the way it points, a step for a press, or on and on while
+you hold it, and Reset view, in the pad's corner, brings them home. With the view focused,
+the arrow keys turn the models (with Shift, further), R and Shift+R turn them right and
+left, plus and minus zoom, and 0 resets. A plain wheel scrolls the page.
+
+<ApiReference elements="clover-scene">
+
+| Prop             | Type                                                          | Default                     | Description                                                               |
+| ---------------- | ------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------- |
+| `scene`          | `object`                                                      | The Root's view             | A Presentation 4 Scene to draw; `toPresentation4()` upgrades older ones.  |
+| `iiifContent`    | `string \| object`                                            | —                           | A Scene to load and draw, or a Manifest's first: URL or JSON.             |
+| `label`          | language map or `string`                                      | The Scene's label           | The view's accessible name.                                               |
+| `language`       | `string`                                                      | The reader's, or the Root's | The language to read its label, summary and metadata in.                  |
+| `controls`       | `boolean \| { zoom, fullPage, rotation, reset, information }` | `true`                      | All of Clover's controls, none, or all but those set `false`.             |
+| `controlButtons` | `object`                                                      | —                           | Components of your own for any control, as Canvas takes them.             |
+| `options`        | `{ request?, hideDelay? }`                                    | —                           | Credentials and headers for the Scene and its models; the controls' fade. |
+| `engine`         | `"clover" \| "three"`                                         | `"clover"`                  | Clover's own WebGL2 renderer, or three.js for what it does not draw yet.  |
+| `className`      | `string`                                                      | —                           | Added to `clover-canvas clover-scene`, on its `figure`.                   |
+| `children`       | `ReactNode`                                                   | —                           | Your own controls, after Clover's.                                        |
+
+</ApiReference>
+
+## Examples
+
+### In a Viewer
+
+The Viewer draws a Manifest's Scenes with it, as it draws its Canvases with Canvas.
+
+<ViewerExample
+  resource="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/v4/manifest.json"
+  height="24rem"
+  headingLevel={4}
+>
+
+```jsx
+<Viewer iiifContent="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/v4/manifest.json" />
+```
+
+</ViewerExample>
+
+### Customizing engine
+
+Clover draws a Scene with its own engine, `clover`, by default, for its size. Each engine
+loads the first time a Scene comes near the window:
+
+- `engine="clover"`, Clover's own WebGL2 renderer: <Measured size="sceneCloverOnDemandGzip" /> gzipped.
+- `engine="three"`, three.js: <Measured size="sceneOnDemandGzip" /> gzipped, for what
+  Clover's does not draw yet: compressed models, animations, glTF's material extensions.
+
+Choose three.js for what Clover's engine does not draw yet: compressed models (Draco,
+Meshopt, KTX2), skins, morph targets, animations, sparse accessors, a second set of
+texture coordinates, and glTF's material extensions beyond unlit, such as clearcoat,
+transmission and sheen. Clover's engine says which of these a model needs, in an alert,
+rather than drawing it wrong.
+
+Both of these are a Scene with the same model, seen from the same camera; only their
+`engine` differs.
+
+<Example>
+<div className="docs-compare">
+  <figure>
+    <figcaption>Scene with <code>clover</code> as engine.</figcaption>
+    <div>
+      <CloverScene iiifContent="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/v4/manifest.json" label="Scene with clover as engine" />
+    </div>
+  </figure>
+  <figure>
+    <figcaption>Scene with <code>three</code> as engine.</figcaption>
+    <div>
+      <CloverScene iiifContent="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/v4/manifest.json" engine="three" label="Scene with three as engine" />
+    </div>
+  </figure>
+</div>
+
+```jsx
+<Clover.Scene
+  iiifContent="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/v4/manifest.json"
+  engine="clover"
+/>
+<Clover.Scene
+  iiifContent="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/v4/manifest.json"
+  engine="three"
+/>
+```
+
+</Example>
+
+### Scene or Body
+
+In a layout, place [`Body`](/docs/body). It handles every container the IIIF Presentation
+API defines, a Canvas, a Timeline or a Scene, so as your reader moves from one view to the
+next, it switches between Canvas, Timeline and Scene on the fly. It adds a height, your
+renderers and the loading mark too.
+
+```jsx
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/v4/manifest.json">
+  <Clover.Body />
+</Clover.Root>
+```
+
+## Formats
+
+Scene draws glTF 2.0, the open format for 3D on the web that the IIIF Cookbook's Scenes
+paint, as binary (`.glb`, `model/gltf-binary`) or JSON (`.gltf`, `model/gltf+json`), with
+its materials (metal and roughness), textures and node hierarchies. A model in any other
+format shows an alert saying why, never a broken view.
+
+The IIIF Cookbook's [0608, Simplest Manifest: 3D](https://iiif.io/api/cookbook/recipe/0608-mvm-3d/)
+draws as it asks: one model at the Scene's origin, lit and framed by Clover, since the
+Scene names no camera or light. Models placed by a `PointSelector` on their target, and
+turned, scaled and moved by the transforms on their `SpecificResource`, in order, are
+drawn too.
+
+## Accessibility
+
+The view is announced as a rotatable 3D model, named by the Scene's label, and its
+description lists its keys. Everything a drag or a pinch does, a key or a button does
+too, so the models turn and zoom without a pointer.
+
+The controls are named buttons, each with its key in its popover and at least 24px across,
+in the order up, left, right, down, Reset view; on a small view they shrink, but never
+under 24px. The pad's disc is a convenience for a mouse or a finger, so screen readers
+skip it: its arrows and the view's keys do everything it does. The controls stay on screen
+while keyboard focus is in them. Nothing moves on its own, and a model that cannot be
+drawn is explained in an alert.
+
+## Size
+
+A page with a Scene alone loads the figure beside the title up front: the Body, its
+controls and the reading of the Scene. Its drawing loads only when a Scene comes near the
+window. A Viewer's templates load neither until a Scene shows: the Default template is
+
+<Measured size="defaultTemplateGzip" />.
+
+## What's next
+
+- A Scene's own cameras and lights, which Presentation 4 can name.
+- Annotations in 3D: comments and links on a point of a model, and their list.
+- Scenes within Scenes, sound in a Scene, and models' animations.
+- Panning, and a camera position kept in a share link.

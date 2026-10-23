@@ -111,7 +111,7 @@ interface Details {
 /**
  * What the reader's own resources name at their root: each Manifest's or Collection's own
  * `label` and `thumbnail`, never one of its Canvases' or members'. One request for each,
- * which the stage makes too; nothing where it names none, or cannot be read.
+ * which the Viewer makes too; nothing where it names none, or cannot be read.
  */
 function useDetails(contents: string[]) {
   const [details, setDetails] = useState<Record<string, Details>>({});
@@ -156,9 +156,9 @@ const PROBLEM =
   "Enter the web address of a IIIF Manifest or Collection, starting with https://, or choose one of ours";
 
 export interface ResourceFieldProps {
-  /** The resource on the stage: one of ours, by key, or `OWN`. */
+  /** The resource in the Viewer: one of ours, by key, or `OWN`. */
   current: string;
-  /** The reader's own address or content state, when it is on the stage. */
+  /** The reader's own address or content state, when it is in the Viewer. */
   own: string;
   /** One of ours was chosen, by key. */
   onPick: (key: string) => void;
@@ -173,13 +173,13 @@ export interface ResourceFieldProps {
  * own join the list as they open them, next, so they can switch between theirs and ours.
  *
  * An editable combobox (WAI-ARIA's pattern, with list autocomplete). The field shows the
- * label of the resource on the stage: for the reader's own, its root `label`, or its
- * address until that is read. Typing narrows the list
- * to the resources whose label or line holds what is typed, and an address matches none, so the
- * list goes away. Down and Up open it on the one on the stage, and move through
- * it; Enter opens the one marked, or else what is typed; Escape closes the list, and then
- * puts back what the stage shows. A press on the field or its chevron opens it too.
- * Focus stays in the field throughout.
+ * label of the resource in the Viewer: for the reader's own, its root `label`, or its
+ * address until that is read. Typing narrows the list to the resources whose label or
+ * line holds what is typed, and an address matches none, so the list goes away. Down and
+ * Up open it on the one in the Viewer, and move through it; Enter opens the one marked,
+ * or else what is typed; Escape closes the list, and then puts back what the Viewer
+ * shows. A press on the field or its chevron opens it too. Focus stays in the field
+ * throughout.
  */
 export default function ResourceField({
   current,
@@ -263,7 +263,7 @@ export default function ResourceField({
     : choices;
   const expanded = open && options.length > 0;
 
-  // Another resource on the stage, from here, the page or a link, puts its name back.
+  // Another resource in the Viewer, from here, the page or a link, puts its name back.
   useEffect(() => {
     setDraft(null);
     setFilter("");
@@ -279,7 +279,7 @@ export default function ResourceField({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
-  /** Opens the whole list, marking the one on the stage, or else the first or last. */
+  /** Opens the whole list, marking the one in the Viewer, or else the first or last. */
   const show = (from: "first" | "last" | null) => {
     setFilter("");
     setOpen(true);

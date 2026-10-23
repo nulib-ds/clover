@@ -84,37 +84,6 @@ function first(map: unknown): string | undefined {
   return undefined;
 }
 
-/** A rights statement's or license's short name: `…/vocab/InC/1.0/` is "InC 1.0". */
-function rightsName(uri: unknown): string | undefined {
-  if (typeof uri !== "string") return undefined;
-  try {
-    return new URL(uri).pathname.split("/").filter(Boolean).slice(-2).join(" ");
-  } catch {
-    return uri;
-  }
-}
-
-/** What a Canvas paints first: `Image`, `Video` or `Sound`. */
-function paints(canvas: Json | null): string | undefined {
-  for (const page of asArray(canvas?.items)) {
-    for (const annotation of asArray(page?.items)) {
-      let body = asArray(annotation?.body)[0];
-      if (body?.type === "Choice") body = asArray(body.items)[0];
-      if (body?.type === "SpecificResource") body = body.source;
-      if (body?.type) return body.type;
-    }
-  }
-  return undefined;
-}
-
-/** A Canvas's painting annotations that target a time: an animation's frames. */
-const framesOf = (canvas: Json | null) =>
-  asArray(canvas?.items)
-    .flatMap((page) => asArray(page?.items))
-    .filter((annotation) =>
-      /#t=/.test(String(annotation?.target?.id ?? annotation?.target ?? "")),
-    ).length;
-
 /** Captions on any Canvas: what `Transcript` reads. */
 const hasCaptions = (canvases: Json[]) =>
   canvases.some((canvas) =>
@@ -180,11 +149,9 @@ interface PartSpec {
   key: PartKey;
   /** The component, as it is written: `Clover.Label`. */
   name: string;
-  /** What it reads: a property, or for `Body` the Canvas it draws. */
+  /** What it reads: a property, or for `Body` the containers it draws. */
   reads: string;
   href: string;
-  /** What the resource has there, if anything: a count, a size, a name. */
-  fact?: string;
   /** Whether the resource gives it anything to show. */
   present: boolean;
   /** Its share of the grid's six columns, and whether it runs tall. */
@@ -215,8 +182,7 @@ function Exploded({
   onTry: (key: string) => void;
 }) {
   const manifest = Clover.useManifest() as Json | null;
-  const { canvases, views, direction } = Clover.useSequence();
-  const active = Clover.useActiveCanvas() as Json | null;
+  const { canvases, views } = Clover.useSequence();
   const sets = Clover.useAnnotationSets();
   const collection = Clover.useCloverSelector(
     (state) => state.collection,
@@ -333,19 +299,8 @@ function Exploded({
     const notes = entries.filter(
       (entry) => !entry.motivation.includes("georeferencing"),
     );
-    const motivations = [
-      ...new Set(notes.flatMap((entry) => entry.motivation)),
-    ].join(", ");
     const places = placesOf(manifest, all);
-    const frames = framesOf(active);
-    const size =
-      active?.width && active?.height
-        ? `${active.width} × ${active.height}`
-        : undefined;
     const partOf = first(asArray(manifest.partOf)[0]?.label);
-    const members = asArray(collection?.items).length;
-    const count = (n: number, one: string, many = `${one}s`) =>
-      `${n} ${n === 1 ? one : many}`;
     // Items moves between views, so a single view gives it nothing.
     const several = views.length > 1;
 
@@ -371,33 +326,19 @@ function Exploded({
       {
         key: "body",
         name: "Body",
-        reads: "Canvas",
-        fact: [
-          first(active?.label),
-          size,
-          paints(active),
-          frames > 1 ? count(frames, "frame") : undefined,
-        ]
-          .filter(Boolean)
-          .join(" · "),
+        reads: "Canvas, Scene, or Timeline",
         present: true,
         span: 6,
         tall: true,
         href: DOCS.Body,
-        body: <Clover.Body className={styles.stage} />,
+        body: <Clover.Body className={styles.body} />,
       },
       {
         key: "items",
         name: "Items",
-        // The Canvases, grouped into views by `behavior`, laid out by `viewingDirection`.
-        reads: "items, behavior, viewingDirection",
-        fact: [
-          count(views.length, "view"),
-          [...new Set(asArray(manifest.behavior))].join(", "),
-          direction,
-        ]
-          .filter(Boolean)
-          .join(" · "),
+        // Its `items`, in views by `behavior`, laid out by `viewingDirection`; named by
+        // the first alone (Mat, 2026-10-23: "just items").
+        reads: "items",
         present: several,
         span: 6,
         href: DOCS.Items,
@@ -416,7 +357,6 @@ function Exploded({
         key: "metadata",
         name: "Metadata",
         reads: "metadata",
-        fact: count(asArray(manifest.metadata).length, "field"),
         present: asArray(manifest.metadata).length > 0,
         span: 6,
         href: DOCS.Metadata,
@@ -426,7 +366,6 @@ function Exploded({
         key: "partOf",
         name: "Collection",
         reads: "partOf",
-        fact: collection ? count(members, "member") : undefined,
         present: Boolean(partOf || collection),
         span: 6,
         href: DOCS.Collection,
@@ -451,7 +390,6 @@ function Exploded({
         key: "seeAlso",
         name: "SeeAlso",
         reads: "seeAlso",
-        fact: count(asArray(manifest.seeAlso).length, "link"),
         present: asArray(manifest.seeAlso).length > 0,
         span: 3,
         href: DOCS.SeeAlso,
@@ -461,7 +399,6 @@ function Exploded({
         key: "id",
         name: "Id",
         reads: "id",
-        fact: manifest.type,
         present: true,
         span: 3,
         href: DOCS.Id,
@@ -471,7 +408,6 @@ function Exploded({
         key: "rights",
         name: "Rights",
         reads: "rights",
-        fact: rightsName(manifest.rights),
         present: Boolean(manifest.rights),
         span: 3,
         href: DOCS.Rights,
@@ -481,7 +417,6 @@ function Exploded({
         key: "requiredStatement",
         name: "RequiredStatement",
         reads: "requiredStatement",
-        fact: first(manifest.requiredStatement?.label),
         present: Boolean(first(manifest.requiredStatement?.value)),
         span: 6,
         href: DOCS.RequiredStatement,
@@ -491,9 +426,6 @@ function Exploded({
         key: "annotations",
         name: "Annotations",
         reads: "annotations",
-        fact: [count(notes.length, "annotation"), motivations]
-          .filter(Boolean)
-          .join(" · "),
         present: notes.length > 0,
         // Beside Contents, the list beside the list (Mat, 2026-10-21).
         span: 3,
@@ -505,7 +437,6 @@ function Exploded({
         key: "contents",
         name: "Contents",
         reads: "structures",
-        fact: count(asArray(manifest.structures).length, "range"),
         present: asArray(manifest.structures).length > 0,
         span: 3,
         href: DOCS.Contents,
@@ -515,12 +446,6 @@ function Exploded({
         key: "map",
         name: "Map",
         reads: "navPlace",
-        fact: [
-          places ? count(places, "place") : undefined,
-          georeferences ? count(georeferences, "georeference") : undefined,
-        ]
-          .filter(Boolean)
-          .join(" · "),
         present: places > 0 || georeferences > 0,
         span: 6,
         tall: true,
@@ -557,7 +482,7 @@ function Exploded({
         body: <Clover.Download />,
       },
     ];
-  }, [manifest, canvases, views, direction, active, sets, collection]);
+  }, [manifest, canvases, views, sets, collection]);
 
   /*
    * Where the viewer is held beside the stories, its code moves to the Composable story
@@ -1127,6 +1052,11 @@ const Tile = React.memo(function Tile({
       onFocus={() => onPoint(part.key)}
       onBlur={() => onPoint(null)}
     >
+      {/*
+       * Its head is the link to the part's page, an arrow at its end saying so; pointed at
+       * or focused, the name underlines and the arrow steps forward (`Parts.module.css`;
+       * Mat, 2026-10-23).
+       */}
       <header className={styles.tileHead}>
         <h3 id={`part-${part.key}`} className={styles.tileName}>
           <Link href={part.href}>
@@ -1134,7 +1064,9 @@ const Tile = React.memo(function Tile({
           </Link>
         </h3>
         <span className={styles.reads}>{part.reads}</span>
-        {part.fact && <span className={styles.fact}>{part.fact}</span>}
+        <span className={styles.tileArrow} aria-hidden="true">
+          →
+        </span>
       </header>
       <div className={styles.tileBody}>{part.body}</div>
     </article>

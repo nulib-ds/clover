@@ -7,53 +7,54 @@ import {
   isDirect,
   isHovering,
   isInteractive,
-} from "../../lib/renderer/input/GestureController";
+} from "../../lib/pointer";
 
 /** The Player's default (`options.player.hideDelay`). */
 export const DEFAULT_HIDE_DELAY = 2000;
 
-/** How long chrome lingers once the pointer, or keyboard focus, leaves the viewer. */
+/** How long the controls linger once the pointer, or keyboard focus, leaves the viewer. */
 export const LEAVE_DELAY = 1000;
 
 /** Focus this soon after a press or a lift, anywhere on the page, is the pointer's. */
 const PRESS_FOCUS_MS = 1000;
 
 /**
- * The chrome that fades and, faded, takes no pointer, so a press where it sits would
- * fall through to the picture beneath. (The cluster round the controls takes its own.)
+ * The controls that fade and, faded, take no pointer, so a press where one sits would
+ * fall through to the picture beneath. (The control cluster takes its own.)
  */
-const FADING_CHROME = [
+const FADING_CONTROLS = [
   ":scope > .clover-canvas-controls > *",
   ":scope > .clover-canvas-navigator",
+  ":scope > .clover-scene-navigation :is(button, .clover-scene-rotate-disc)",
   ":scope > .clover-canvas-media > .clover-canvas-transport > *",
 ].join(", ");
 
 /**
- * Whether a viewer's chrome — its controls, navigator and the scrim behind them — is
- * showing, as the Player's control bar decides it.
+ * Whether a viewer's controls — its control cluster, navigator and the scrim behind
+ * them — are showing, as the Player's control bar decides it.
  *
- * A mouse, or a pen that hovers, shows it on any activity over `element` (a move, a
- * press); it hides again after `hideDelay` milliseconds without any, or a second after
- * the pointer (or focus) leaves. CSS holds it while the pointer rests on a piece of
- * chrome, and while keyboard focus is inside (`:has(:focus-visible)`).
+ * A mouse, or a pen that hovers, shows them on any activity over `element` (a move, a
+ * press); they hide again after `hideDelay` milliseconds without any, or a second after
+ * the pointer (or focus) leaves. CSS holds them while the pointer rests on one of them,
+ * and while keyboard focus is inside (`:has(:focus-visible)`).
  *
- * A finger, or a pen that does not hover, has no hover to hold the chrome, so no timer
- * hides it (WCAG 2.2.1): a tap on the `picture` shows it, and the next hides it. A tap
- * waits out the double tap's window first, so a double tap, which zooms, leaves the
- * chrome as it was. A tap elsewhere that is not on a control (where a faded control
- * sits, say) only shows it, and the control it reveals does not take that tap. A drag or
- * a pinch leaves the chrome alone.
+ * A finger, or a pen that does not hover, has no hover to hold the controls, so no timer
+ * hides them (WCAG 2.2.1): a tap on the `picture` shows them, and the next hides them. A
+ * tap waits out the double tap's window first, so a double tap, which zooms, leaves the
+ * controls as they were. A tap elsewhere that is not on a control (where a faded control
+ * sits, say) only shows them, and the control it reveals does not take that tap. A drag
+ * or a pinch leaves the controls alone.
  *
- * A press on the picture where faded chrome sits (the navigator, the transport) only
- * shows the chrome, from any pointer: nothing beneath, a hotspot included, sees the press
- * or its click. Focus that comes inside other than from a press (the keyboard's, or a
- * screen reader's, which may not match `:focus-visible`) shows the chrome and holds it
- * until focus leaves or a pointer takes over, so no control fades under focus. Leaving,
- * focus lets it linger for the same second.
+ * A press on the picture where a faded control sits (the navigator, the transport) only
+ * shows the controls, from any pointer: nothing beneath, a hotspot included, sees the
+ * press or its click. Focus that comes inside other than from a press (the keyboard's, or
+ * a screen reader's, which may not match `:focus-visible`) shows the controls and holds
+ * them until focus leaves or a pointer takes over, so no control fades under focus.
+ * Leaving, focus lets them linger for the same second.
  *
  * Shared by the image controls and the media transport: the same reveal, the same delay.
  */
-export function useChromeVisibility(
+export function useControlsVisibility(
   element: HTMLElement | null,
   hideDelay = DEFAULT_HIDE_DELAY,
   picture?: RefObject<HTMLElement | null>,
@@ -73,7 +74,9 @@ export function useChromeVisibility(
     let penHovers = false;
     /** When a pointer last pressed or lifted anywhere on the page. */
     let pressedAt = -Infinity;
-    /** A press kept from the picture beneath faded chrome, and the click it would make. */
+    /**
+     * A press kept from the picture beneath a faded control, and the click it would make.
+     */
     let held: number | null = null;
     let swallowClick = false;
     let clickTimer: ReturnType<typeof setTimeout> | undefined;
@@ -84,7 +87,7 @@ export function useChromeVisibility(
       y: number;
       target: EventTarget | null;
     } | null = null;
-    /** A tap, waiting to show the chrome (or toggle it, on the picture). */
+    /** A tap, waiting to show the controls (or toggle them, on the picture). */
     let tap: {
       x: number;
       y: number;
@@ -96,7 +99,7 @@ export function useChromeVisibility(
       shown = value;
       setVisible(value);
     };
-    // Focus held inside keeps the chrome, whatever a timer says.
+    // Focus held inside keeps the controls, whatever a timer says.
     const hide = () => {
       if (!focusHeld) set(false);
     };
@@ -170,11 +173,13 @@ export function useChromeVisibility(
       if (event.type !== "pointerup") return;
       // A control (a button, a hotspot) takes its own press.
       if (isInteractive(target, element)) return;
-      const stage = picture?.current;
+      const pictureElement = picture?.current;
       const onPicture = Boolean(
-        stage && target instanceof Node && stage.contains(target),
+        pictureElement &&
+          target instanceof Node &&
+          pictureElement.contains(target),
       );
-      // The second tap of a double tap zooms, and the chrome stays as it was.
+      // The second tap of a double tap zooms, and the controls stay as they were.
       if (
         onPicture &&
         tap?.onPicture &&
@@ -187,13 +192,14 @@ export function useChromeVisibility(
       // Elsewhere, it only shows.
       later({ x: event.clientX, y: event.clientY, onPicture });
     };
-    /** The press lands on the picture where a piece of faded chrome sits over it. */
-    const underFadedChrome = (event: PointerEvent) => {
-      const stage = picture?.current;
+    /** The press lands on the picture where a faded control sits over it. */
+    const underFadedControls = (event: PointerEvent) => {
+      const pictureElement = picture?.current;
       const target = event.target as Node | null;
-      // The picture lies beneath all the chrome: chrome that showed would take it.
-      if (!stage || !target || !stage.contains(target)) return false;
-      return Array.from(element.querySelectorAll(FADING_CHROME)).some(
+      // The picture lies beneath all the controls: a control that showed would take it.
+      if (!pictureElement || !target || !pictureElement.contains(target))
+        return false;
+      return Array.from(element.querySelectorAll(FADING_CONTROLS)).some(
         (piece) => {
           const box = piece.getBoundingClientRect();
           return (
@@ -208,16 +214,16 @@ export function useChromeVisibility(
       );
     };
     /*
-     * A press on the picture where faded chrome sits is the chrome's, as a press on a
-     * faded control is the cluster's: it shows the chrome, and the picture and any
-     * hotspot beneath never see it, nor the click it makes.
+     * A press on the picture where a faded control sits belongs to the controls, as a
+     * press on a faded control belongs to the cluster: it shows the controls, and the
+     * picture and any hotspot beneath never see it, nor the click it makes.
      */
     const hold = (event: PointerEvent) => {
       if (event.type === "pointerdown") {
         if (held !== null) return;
         clearTimeout(clickTimer);
         swallowClick = false;
-        if (!underFadedChrome(event)) return;
+        if (!underFadedControls(event)) return;
         held = event.pointerId;
         swallowClick = true;
         if (direct(event)) {
@@ -249,7 +255,7 @@ export function useChromeVisibility(
     // Timed by the clock: some engines count a focus event's `timeStamp` from elsewhere.
     const pressed = (event: PointerEvent) => {
       pressedAt = Date.now();
-      // A press hands the chrome back to the pointer.
+      // A press hands the controls back to the pointer.
       if (event.type === "pointerdown") focusHeld = false;
     };
     const focus = () => {
@@ -267,7 +273,7 @@ export function useChromeVisibility(
       // Only focus leaving the viewer altogether, not moving between its controls.
       if (element.contains(event.relatedTarget as Node | null)) return;
       focusHeld = false;
-      // Only chrome that is showing lingers; a mouse-focused, faded viewer stays faded.
+      // Only controls that are showing linger; a mouse-focused, faded viewer stays faded.
       if (shown || keyboard) linger();
     };
 

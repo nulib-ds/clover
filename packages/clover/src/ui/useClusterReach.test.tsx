@@ -38,7 +38,7 @@ beforeEach(() => {
 
 afterEach(() => vi.restoreAllMocks());
 
-function Stage({
+function Figure({
   width,
   controls,
   height = 600,
@@ -46,9 +46,9 @@ function Stage({
 }: {
   width: number;
   controls: Array<{ left: number; top: number; hidden?: boolean }>;
-  /** The stage's height. */
+  /** The Body's height. */
   height?: number;
-  /** Where the cluster sits in the stage. */
+  /** Where the cluster sits in the Body. */
   at?: { left: number; top: number };
 }) {
   const [cluster, setCluster] = useState<HTMLDivElement | null>(null);
@@ -85,7 +85,7 @@ const reach = (canvas: HTMLElement) => ({
 describe("useClusterReach", () => {
   it("measures from its controls, not its box, which may be wider", () => {
     const { getByTestId } = render(
-      <Stage
+      <Figure
         width={81}
         controls={[
           { left: 45, top: 0 },
@@ -101,7 +101,7 @@ describe("useClusterReach", () => {
 
   it("measures the rows it wraps onto, and leaves out a hidden control", () => {
     const { getByTestId, unmount } = render(
-      <Stage
+      <Figure
         width={81}
         controls={[
           { left: 45, top: 0 },
@@ -117,22 +117,22 @@ describe("useClusterReach", () => {
     expect(reach(canvas)).toEqual({ width: "", height: "" });
   });
 
-  // A short stage: below the controls, a popup would have nothing to show.
-  it("puts its popups beside it on a short stage, where there is room", () => {
+  // A short Body: below the controls, a popup would have nothing to show.
+  it("puts its popups beside it in a short Body, where there is room", () => {
     const one = [{ left: 0, top: 0 }];
-    const short = render(<Stage width={36} controls={one} height={117} />);
+    const short = render(<Figure width={36} controls={one} height={117} />);
     expect(short.getByTestId("canvas")).toHaveAttribute(
       "data-popups",
       "beside",
     );
     short.unmount();
     // Tall: below it.
-    const tall = render(<Stage width={36} controls={one} />);
+    const tall = render(<Figure width={36} controls={one} />);
     expect(tall.getByTestId("canvas")).not.toHaveAttribute("data-popups");
     tall.unmount();
     // Short, but the controls fill the width: below it still.
     const full = render(
-      <Stage
+      <Figure
         width={36}
         controls={one}
         height={117}

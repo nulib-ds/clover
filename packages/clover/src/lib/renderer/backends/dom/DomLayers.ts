@@ -11,7 +11,7 @@ export interface DomLayerItem {
   element: HTMLImageElement | HTMLVideoElement;
   width: number;
   height: number;
-  /** Source pixels → stage CSS pixels: the same transform the GPU path is given. */
+  /** Source pixels → the Body's CSS pixels: the same transform the GPU path is given. */
   transform: Affine;
   crop?: Rect;
   opacity: number;

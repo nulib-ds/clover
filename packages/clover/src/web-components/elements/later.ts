@@ -34,7 +34,7 @@ export function useLoaded<T>(
   return module;
 }
 
-/** The stage's handle, let go when the stage is: the element keeps none of a gone view. */
+/** The Body's handle, let go when the Body is: the element keeps none of a gone view. */
 export function useHandle(onReady: unknown) {
   useLayoutEffect(
     () => () => (onReady as ((handle: null) => void) | undefined)?.(null),

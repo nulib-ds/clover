@@ -3,9 +3,9 @@
  * `text-s` on the page's dark color, `xs` from the control. Above it by default; below a
  * control along the top of what it sits on; beside the cluster when the cluster is a
  * column; at either end of a row, lined up with the control's outer edge so it stays
- * inside the stage; and toward the middle of the stage from a hotspot.
+ * inside the Body; and toward the middle of the Body from a hotspot.
  *
- * Then, each time it shows, `ui/Tip.tsx` measures it against what clips it (the stage, a
+ * Then, each time it shows, `ui/Tip.tsx` measures it against what clips it (the Body, a
  * scrolling panel, the window): where it would pass an edge, it wraps to the room there
  * is (`--clover-tip-room`) and moves inward along the row (`--clover-tip-shift`), `xs`
  * clear. So a name widened by a reader's text spacing, zoom or a longer language is never
@@ -173,15 +173,15 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
 
 /*
  * A hotspot's (`Canvas/Annotations.tsx`): its annotation's text, which may run long, so
- * it wraps, no wider than the stage. It hangs on the side of the hotspot with more room,
- * and is kept inside the stage, `xs` from its edges, across and down: where that side has
- * too little room (a hotspot as tall as the stage, or zoomed into), it moves over the
+ * it wraps, no wider than the Body. It hangs on the side of the hotspot with more room,
+ * and is kept inside the Body, `xs` from its edges, across and down: where that side has
+ * too little room (a hotspot as tall as the Body, or zoomed into), it moves over the
  * hotspot, to its edge in sight. The renderer's overlay layer, which pins each hotspot,
  * writes where it is: `--clover-overlay-x`, its center; `--clover-overlay-top` and
  * `-bottom`, its edges; and `data-overlay-room`, the side. Without them, while the view
  * is turned, it hangs below, centered.
  *
- * Taller than the stage, it is capped there and scrolls (WCAG 1.4.10): by wheel or touch
+ * Taller than the Body, it is capped there and scrolls (WCAG 1.4.10): by wheel or touch
  * over it, and by the arrows, the page keys, Home and End from its hotspot. A scroller
  * cuts what passes its edge, so the gap to the hotspot is bridged inside its own box: an
  * `xs` border on the hotspot's side, clear (`background-clip`), rather than `::before`.

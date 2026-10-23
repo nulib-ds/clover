@@ -271,7 +271,8 @@ export async function loadContent(
       return { manifest, collection, target, annotation };
     }
     case "Canvas":
-    case "Timeline": {
+    case "Timeline":
+    case "Scene": {
       /*
        * A Canvas, given itself, is what is shown, not the Manifest it is `partOf`: a
        * Manifest of one, saying what the Canvas says of itself (its label, summary,

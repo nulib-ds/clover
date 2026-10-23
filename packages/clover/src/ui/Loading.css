@@ -3,8 +3,8 @@
  * to the end, fading in from nothing to full as it goes, then again. It waits a moment
  * before it shows, so a load that is quick never flashes it.
  *
- * Over a stage (`data-overlay`) it runs along the top edge, above the picture and its
- * still, taking no room and catching no presses; the stage's own background is left as
+ * Over a Body (`data-overlay`) it runs along the top edge, above the picture and its
+ * still, taking no room and catching no presses; the Body's own background is left as
  * it is. In a status line, it is a line of its own.
  */
 .clover-loading {
@@ -37,7 +37,7 @@
   pointer-events: none;
 }
 
-/* One at a time: while the stage waits on the Root, its Canvas's own mark stays away. */
+/* One at a time: while the Body waits on the Root, its Canvas's own mark stays away. */
 .clover-body:has(> .clover-loading) .clover-canvas .clover-loading {
   display: none;
 }

@@ -7,10 +7,10 @@
  * declared nowhere, since the scrim is dark in every theme.
  */
 /*
- * On the scale: in from the stage's sides and bottom by the chrome's inset
- * (`--clover-canvas-chrome-inset`, `l` by default), as the image controls are, with `xl`
- * of scrim above; the seek row `xs` over the bar (they are one control); the bar's
- * controls `s` apart, as the cluster's are (`xs` on a narrow stage, below).
+ * On the scale: in from the Body's sides and bottom by the controls' inset
+ * (`--clover-canvas-controls-inset`, `l` by default), as the image controls are, with
+ * `xl` of scrim above; the seek row `xs` over the bar (they are one control); the bar's
+ * controls `s` apart, as the cluster's are (`xs` on a narrow Body, below).
  * `--clover-transport-room` is what that takes up, and `m` clear of it, for anything that
  * has to clear it (captions, the caption box). The bar is one control high, or as high as
  * the transport measures it (`--clover-transport-bar-height`, `useBarHeight`) once it
@@ -20,7 +20,7 @@
   --clover-transport-room: calc(
     var(--clover-transport-bar-height, var(--clover-control)) +
       var(--clover-space-l) + var(--clover-space-xs) +
-      var(--clover-canvas-chrome-inset) + var(--clover-space-m)
+      var(--clover-canvas-controls-inset) + var(--clover-space-m)
   );
 }
 
@@ -30,29 +30,29 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  padding: var(--clover-space-xl) var(--clover-canvas-chrome-inset)
-    var(--clover-canvas-chrome-inset);
-  /* Chrome, shown with the rest (`Canvas.css`): it tucks down, toward its edge. */
-  --clover-chrome-edge: 1;
+  padding: var(--clover-space-xl) var(--clover-canvas-controls-inset)
+    var(--clover-canvas-controls-inset);
+  /* Controls, shown with the rest (`Canvas.css`): they tuck down, toward their edge. */
+  --clover-controls-edge: 1;
   user-select: none;
   /*
-   * The room a menu has above its button, on the bar's last row: the stage
+   * The room a menu has above its button, on the bar's last row: the Body
    * (`.clover-canvas-media` is its size container), less the bar's inset, the button,
-   * the gap to the menu, and `xs` clear of the top. A menu taller than the stage leaves
+   * the gap to the menu, and `xs` clear of the top. A menu taller than the Body leaves
    * would run off its top, where nothing scrolls to it (WCAG 1.4.10). The Captions and
    * Chapters menus measure it where their button is (`TransportMenu`).
    */
   --clover-transport-menu-room: calc(
-    100cqb - var(--clover-canvas-chrome-inset) - var(--clover-control) -
+    100cqb - var(--clover-canvas-controls-inset) - var(--clover-control) -
       var(--clover-space-s) - var(--clover-space-xs)
   );
 }
 
 /*
- * The scrim behind the bar, on a layer of its own under the controls, so it fades with
- * the chrome while Play stays (`Canvas.css`). At least 60% black up to the seek bar's
+ * The scrim behind the bar, on a layer of its own under the bar's controls, so it fades
+ * with the rest while Play stays (`Canvas.css`). At least 60% black up to the seek bar's
  * top (the transport's `xl` of padding above it is where it fades out), over a picture
- * or sound's light stage alike: the sliders have no edge of their own, and over the
+ * or sound's light Body alike: the sliders have no edge of their own, and over the
  * lightest picture this keeps their rails and thumbs at 3:1 (WCAG 1.4.11; below).
  */
 .clover-canvas-transport::before {
@@ -70,7 +70,7 @@
 }
 
 /*
- * Over the captions, which may run down over the bar on a short stage, while a menu is
+ * Over the captions, which may run down over the bar on a short Body, while a menu is
  * open, keyboard focus is in the bar, or the pointer is on the seek bar: a cue must never
  * hide the focused control, its ring or its Tip (WCAG 2.4.7, 2.4.11), nor the chapter the
  * pointer is on (WCAG 1.4.13).
@@ -86,7 +86,7 @@
 /*
  * One row while it fits: the controls and the time hold their size, and the chapter's
  * title gives way to them, with an ellipsis. Where they would not fit, they wrap rather
- * than run off the stage (WCAG 1.4.10); a narrow stage has its own two rows (below).
+ * than run off the Body (WCAG 1.4.10); a narrow Body has its own two rows (below).
  */
 .clover-canvas-transport-bar {
   display: flex;
@@ -126,7 +126,7 @@
 }
 
 /*
- * On a narrow stage, where it is (the time and chapter) has a row of its own under the
+ * On a narrow Body, where it is (the time and chapter) has a row of its own under the
  * seek bar, and the controls go below it, those at the end at its end, or a row lower
  * where they do not fit beside the others. Narrow is the width every control needs on
  * one row, with text spacing (WCAG 1.4.12): more with chapters, whose title wants room
@@ -236,8 +236,8 @@ button.clover-canvas-transport-button[aria-pressed="true"]::after {
 }
 
 /*
- * Shorter on a narrow stage, and the controls a step closer (`xs`), so they keep to one
- * row under the time if they can, inside the chrome's inset.
+ * Shorter on a narrow Body, and the bar's controls a step closer (`xs`), so they keep to
+ * one row under the time if they can, inside the controls' inset.
  */
 @container (max-width: 28rem) {
   .clover-canvas-transport input.clover-canvas-transport-volume {
@@ -374,7 +374,7 @@ button.clover-canvas-transport-time:focus-visible {
 
 /*
  * Up from its button, at its end. Placed on opening (`TransportMenu`): no taller than the
- * room above the button (`--clover-transport-menu-above`, from the stage's top), and moved
+ * room above the button (`--clover-transport-menu-above`, from the Body's top), and moved
  * along (`--clover-transport-menu-shift`) to lie within the bar's inset, wherever the bar
  * has wrapped the button (WCAG 1.4.10).
  */
@@ -385,8 +385,8 @@ button.clover-canvas-transport-time:focus-visible {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  min-width: min(11rem, 100cqi - 2 * var(--clover-canvas-chrome-inset));
-  max-width: calc(100cqi - 2 * var(--clover-canvas-chrome-inset));
+  min-width: min(11rem, 100cqi - 2 * var(--clover-canvas-controls-inset));
+  max-width: calc(100cqi - 2 * var(--clover-canvas-controls-inset));
   max-height: min(
     16rem,
     var(--clover-transport-menu-room),
@@ -461,7 +461,7 @@ button.clover-canvas-transport-time:focus-visible {
 .clover-canvas-transport-options:has(.clover-canvas-transport-code),
 .clover-canvas-transport-menu:has([data-button="chapters"])
   .clover-canvas-transport-options {
-  min-width: min(16rem, 100cqi - 2 * var(--clover-canvas-chrome-inset));
+  min-width: min(16rem, 100cqi - 2 * var(--clover-canvas-controls-inset));
 }
 
 /* The row is the control; the radio stays for keyboard and screen reader only. */

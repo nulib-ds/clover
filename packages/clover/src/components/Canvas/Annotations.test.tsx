@@ -6,7 +6,7 @@ import {
   maskUnder,
   placeAnnotations,
 } from "./Annotations";
-import { panClearOfChrome } from "./panClearOfChrome";
+import { panClearOfControls } from "./panClearOfControls";
 import { readSvgShape } from "../../core/svg-shape";
 import { selectAnnotationSets } from "../../core/annotation-sets";
 import pointJson from "../../fixtures/iiif-cookbook/0135-annotating-point-in-canvas.json";
@@ -507,7 +507,7 @@ describe("a hotspot's popover", () => {
 });
 
 /*
- * WCAG 2.4.11: a hotspot reached by Tab is panned clear of the chrome over the stage.
+ * WCAG 2.4.11: a hotspot reached by Tab is panned clear of the controls over the Body.
  * The camera is a stand-in whose screen is its world, so a pan's target is the screen
  * point the view's center goes to.
  */
@@ -525,8 +525,8 @@ describe("a hotspot reached by Tab", () => {
       y: top,
     }) as DOMRect;
 
-  /** A 1000 × 600 stage, its chrome, and one hotspot at `at`. */
-  const setup = async (at: Box, chrome: Record<string, Box> = {}) => {
+  /** A 1000 × 600 Body, its controls, and one hotspot at `at`. */
+  const setup = async (at: Box, controls: Record<string, Box> = {}) => {
     const panTo = vi.fn();
     const placed = placeAnnotations(
       [annotation("a", `${canvas}#xywh=0,0,10,10`)],
@@ -535,7 +535,7 @@ describe("a hotspot reached by Tab", () => {
     const figure = document.createElement("figure");
     figure.className = "clover-canvas";
     document.body.appendChild(figure);
-    for (const [className, box] of Object.entries(chrome)) {
+    for (const [className, box] of Object.entries(controls)) {
       const piece = document.createElement("div");
       piece.className = className;
       if (className === "clover-canvas-caption") piece.dataset.open = "true";
@@ -561,13 +561,13 @@ describe("a hotspot reached by Tab", () => {
   };
   /** As a Tab to it does, at once: the hotspot loads it with its first focus. */
   const tab = ({ button, renderer }: Awaited<ReturnType<typeof setup>>) =>
-    panClearOfChrome(renderer, button);
+    panClearOfControls(renderer, button);
   // The cluster along the top, at its end, as on a desktop.
   const cluster = {
     "clover-canvas-controls": { left: 700, top: 16, width: 284, height: 36 },
   };
 
-  it("leaves the view alone when it is clear of the chrome already", async () => {
+  it("leaves the view alone when it is clear of the controls already", async () => {
     const hotspot = await setup(
       { left: 100, top: 300, width: 40, height: 20 },
       cluster,
@@ -673,7 +673,7 @@ describe("a hotspot reached by Tab", () => {
     expect(hotspot.panTo).toHaveBeenCalledWith({ x: 740, y: 420 });
   });
 
-  it("centers one larger than the part clear of the chrome", async () => {
+  it("centers one larger than the part clear of the controls", async () => {
     const hotspot = await setup(
       { left: 0, top: 0, width: 1000, height: 100 },
       cluster,
@@ -711,7 +711,7 @@ describe("a hotspot reached by Tab", () => {
     button.focus();
     fireEvent.keyUp(button, { key: "Enter" });
     // Once what pans it has loaded, had it been asked.
-    await import("./panClearOfChrome");
+    await import("./panClearOfControls");
     await new Promise((resolve) => setTimeout(resolve));
     expect(panTo).not.toHaveBeenCalled();
   });

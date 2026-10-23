@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { IIIFCanvas } from "./layout";
+import type { IIIFCanvas } from "../Canvas/layout";
 import { readBodies } from "../../core/annotation-bodies";
 import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";

@@ -24,10 +24,10 @@ export const body: ElementSpec = {
 export const bodyDocs: ElementDocs = {
   name: "CloverBodyElement",
   description:
-    "The view of the clover-root it is in, drawn as Body draws it: images, video and sound, or a renderer of yours. It is the stage's box, its height from --clover-body-height (60vh by default) or its own style. A clover-panel-toggle, and a button of yours, in it are among its controls.",
+    "The view of the clover-root it is in, drawn as Body draws it: images, video and sound, or a renderer of yours. It is the Body's box, its height from --clover-body-height (60vh by default) or its own style. A clover-panel-toggle, and a button of yours, in it are among its controls.",
   attributes: {
     controls: {
-      description: '"false" leaves out the controls over the stage.',
+      description: '"false" leaves out the controls over the Body.',
       default: "true",
     },
     navigator: {
@@ -45,7 +45,7 @@ export const bodyDocs: ElementDocs = {
     renderers: {
       type: "CloverRenderer[] | null",
       description:
-        "Renderers of yours for this stage only, in place of the root's: each claims views (canvasId, format or match) and draws one into a box of its own (render).",
+        "Renderers of yours for this Body only, in place of the root's: each claims views (canvasId, format or match) and draws one into a box of its own (render).",
     },
   },
   events: {

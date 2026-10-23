@@ -37,7 +37,7 @@ export function useManifest(): Manifest | null {
   return useCloverSelector((state) => state.manifest);
 }
 
-/** The Canvases and Timelines, their grouping into views, and the reading direction. */
+/** The Canvases, Timelines and Scenes, their grouping into views, and the reading direction. */
 export function useSequence(): Sequence {
   return useCloverSelector((state) => selectSequence(state.manifest));
 }

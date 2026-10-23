@@ -62,10 +62,46 @@ deadline.
     again, and add its old URL there. A 3.x page whose name 4.x now uses (`viewer`,
     `map`) shows the 4.x page, which links to its 3.x version.
   - How to compose a layout (`Root`, the parts, the property parts, the information
-    panel's `Tab`s, `Split`, hooks, renderers, styles) lives on one page,
-    `content/docs/composing.mdx` ("Composing layouts", under Templates). The Viewer page
-    covers what the Viewer handles and links there; add composition material there, not
-    to the Viewer page.
+    panel's `Tab`s, `Split`, hooks, renderers) lives on one page,
+    `content/docs/composing.mdx` ("Composing layouts", "Composing" in the menu). The
+    Viewer page covers what the Viewer handles and links there; add composition material
+    there, not to the Viewer page. Its first example is live, on the examples' card
+    (`ComposeExample.tsx`; Mat, 2026-10-23): a `Root` with `Body` and an aside of parts,
+    its code under it in both flavors, each part's lines moved by its grip (dragged, its
+    arrow keys, or pressed and then Move up or Move down, Escape letting go; WCAG 2.5.7),
+    the title's element and the other Label's `of` picked in the code, the demo
+    following. How to style one is the page after it,
+    `content/docs/styling.mdx` ("Styling"; Mat, 2026-10-23): the stylesheets and their
+    layer, how every size steps from the page's `1rem` (the scale, text, the control, the
+    inset), colors, classes and states, lists in Markdown text, then colors and contrast
+    told simply for a person (a checklist of native checkboxes, `Checklist.tsx`, its
+    items strings with their code in backticks, as MDX would make children a paragraph a
+    label cannot hold; then "Do" and "Don't") before every pair in full, kept for audits
+    and agents, and last "Variables", a glossary of every custom property a page sets,
+    with its default and where to set it (never those Clover sets as it runs). A new
+    property a page may set gets its row there. Composing keeps a short Styles section linking there.
+  - Every docs page reads as the Components pages do (Mat, 2026-10-23: "remove breadcrumbs
+    EVERYWHERE", "remove sidebars everywhere. style like the Components pages"): no
+    breadcrumb and no table of contents (the `docs` folder's `theme` in
+    `content/_meta.ts`, which carries to every page in it), the components' title, a lede
+    (`docs-lede`) where a page opens by saying what it is (Get started, Composing,
+    Styling, i18n, Mocks), and their spacing (`layout.css`, keyed on
+    `.nextra-sidebar ~ article`, any page beside the sidebar). Prose, lists, tables, code
+    and examples all reach one right edge, the page's width (Mat, 2026-10-23: no reading
+    measure; a table spans it too); the lede's lines are a little looser than Nextra's
+    fixed 1.75rem gives its size (`max(1.4em, 1.75rem)`; Mat, 2026-10-23: "just a tad");
+    running text is the reader's `1rem`, inherited (Nextra sets the root to `1rem`), and
+    no font size in the docs' CSS is in pixels, as Clover's are not; it is black, white on
+    a dark page (`--nav-text`; Mat, 2026-10-23), the lede and the tables' heads muted.
+    Inline code keeps Nextra's own look (Mat, 2026-10-23), its text the running text's. A
+    table's groups' names (`scope="rowgroup"`) are a step up from its head, in the text's
+    color. The sidebar's list has more room as the window widens (`--docs-room-start`,
+    `--docs-room-top`, on `:root`), and the page beside it the same room over it, so their
+    tops always match (Mat, 2026-10-23); the open sidebar widens by what its list gains,
+    which keeps the width Nextra pins on it. Its Collapse button is drawn as Clover's
+    `PanelToggle` (round, the controls' fill and glyph, the accent under the pointer or
+    focused, its glyph mirrored for a panel on the left, a mask that forced colors paint;
+    Mat, 2026-10-23).
   - Every part the homepage shows has a page under "Components" (Mat, 2026-10-20):
     Body, Canvas, Items, Panel, the Panel's sections (Annotations, Collection with
     CollectionSelect, Contents, Search, Transcript), Download and Map, then Primitives
@@ -77,8 +113,8 @@ deadline.
     from the source), "Examples" (an `###` each: one sentence and an `<Example>`, the demo
     with its code attached, `ViewerDocs.tsx`), and "Previous versions" where 3.x had it:
     a link and a few words of direction, never a mapping of the differences. No other
-    tables, and no table of contents (`reference()` in `content/docs/_meta.ts`), so the
-    examples have the width. Live examples are
+    tables, and no table of contents (none on any docs page), so the examples have the
+    width. Live examples are
     `<PartDemo part="…" />` (`docs/components/Clover4/PartDemo.tsx`): the part named, its
     props plain values, in a `Root` over a mock (`resource`), with a `Body` above it
     (`content`) where it follows the view; several parts in the one `Root` (`parts`, on
@@ -107,12 +143,33 @@ deadline.
     scannable (the catalog's About is long), each `headingLevel` one
     below the heading it sits under. `canvas.mdx` says when to place `Body` rather
     than `Canvas`.
-  - A component page's head (Mat, 2026-10-22): no breadcrumb (`reference()`), its title
-    set as the homepage's section titles are, with no stroke under it (`layout.css` keys
-    the look on a page with a lede and no breadcrumb), and opposite it, on one line
+  - Timeline and Scene (2026-10-23) have pages under Components after Canvas
+    (`timeline.mdx`, `scene.mdx`), built as the others are, and after their examples what
+    a reader of those parts needs besides: Formats (what plays or draws, and the
+    Cookbook's recipes that do), Accessibility (written for the person reading the page,
+    in plain sentences, never notes or criteria lists; Mat, 2026-10-23), Size, and a short
+    "What's next", hints of what is planned. They are official: nothing on them calls them
+    a prototype or experimental (Mat, 2026-10-23). They are on no homepage tile (Body's
+    covers them), so `DOCS` has no entry for them. A part Body draws with (`BODY_PARTS` in
+    `LiveExample.tsx` and `LiveCode.tsx`: Canvas, Timeline, Scene) shows alone in a
+    `LivePart`, loading its `iiifContent`; their resources are the Cookbook's Presentation
+    4 recipes 0002 and 0608 (`audio`, `model` in `part-demo-resources.ts`, addresses, not
+    mocks). A size in a page's prose is `<Measured size="…" />`
+    (`docs/components/Clover4/Measured.tsx`), the build's own figure. Scene's "Customizing
+    engine" says Clover's own engine is the default for its size, giving both engines'
+    (Mat, 2026-10-23), and shows the two side by side: demos side by side are figures in a
+    `.docs-compare` row, each captioned over it ("Scene with `clover` as engine."), a name
+    in a caption drawn as a part head's is, in the accent, its view's accessible name the
+    caption's words (WCAG 2.5.3). "Scene or Body" says Body handles every container the
+    Presentation API defines, switching between Canvas, Timeline and Scene as the reader
+    moves (Mat, 2026-10-23).
+  - A component page's head (Mat, 2026-10-22): no breadcrumb (none on any docs page), its
+    title set as the homepage's section titles are, with no stroke under it (`layout.css`,
+    as every docs page's is), and opposite it, on one line
     (`<div className="docs-title-row">` round the `#` title and `<PartHead part="…" />`,
     `docs/components/Clover4/PartHead.tsx`), the part's name as the reader's flavor writes
-    it, in the code's face and the text accent, bold, and beside it, on a badge white on
+    it, as the homepage's tiles name theirs (`.tileName`: the code's face at 0.875rem,
+    medium, the text accent; Mat, 2026-10-23), and beside it, on a badge white on
     the accent, as a solid call to action is (`.cta-solid`), its corners the containers'
     (`--radius-4`), what the part adds to a page with a `Root` (or, for `Canvas`, `Map`
     and `Value`, which their pages show alone, what a page with it alone loads), each
@@ -143,21 +200,27 @@ deadline.
   - Use Clover: Get started (`/docs`, which holds the web components, `<clover-viewer>`
     and the parts, in a section of their own, `#web-component`), Viewer (`/docs/viewer`,
     the templates on it: their old page, `/docs/viewer/templates`, forwards to
-    `#templates`), Composing layouts, Cookbook recipes.
-  - The Viewer page reads as Radix Themes' component pages do (Mat, 2026-10-21): the
-    title and a lede (`docs-lede`), one example at the top (the template, switched
-    by a large segmented control, its code following, live: each template's own knobs,
-    `LiveViewerExample`, kept as the reader switches; Mat, 2026-10-22), then "API reference" (the
-    Viewer's props, then each template's: Prop, Type, Default, Description), then
-    "Examples", an `h3` each with one sentence, a live example and its code. Its
-    examples are `ViewerExample` and `OptionsExample` (`docs/components/Clover4/
-ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
-    `playground-config.ts`, never a Cookbook recipe; the one exception is Content
-    Search, the newspaper mock, as none of those has a search service), mounted only
-    near the window (a browser keeps only so many WebGL contexts), in a hairline frame
-    with little room at its sides, its code attached under it. The page has no table of
-    contents, so the examples have the width; its prose keeps a reading measure, and
-    its sections more room (`layout.css`).
+    `#templates`), Composing, Styling, IIIF Cookbook (the menu's names, short, for the
+    pages titled "Composing layouts" and "Cookbook recipes"; Mat, 2026-10-23).
+  - The Viewer page reads as Radix Themes' component pages do (Mat, 2026-10-21): the title
+    and a lede (`docs-lede`), one example at the top (the Viewer, its code under it, live:
+    each template's own knobs, `LiveViewerExample`, kept as the reader switches; Mat,
+    2026-10-22; and under the code the template's switch, drawn as the navbar's code
+    switch, radios with the chosen one `data-checked`, the code naming the template, even
+    `template={Default}`, as a choice too, each moving the other, focus kept on the code's
+    choice as its template's code replaces it; Mat, 2026-10-23; and `wide`: an example may
+    reach past the page's column into the room a wide window adds at its sides,
+    `--docs-bleed`, never by default, Mat, 2026-10-23), then "API reference" (the Viewer's
+    props, then each template's: Prop, Type, Default, Description), then "Examples", an
+    `h3` each with one sentence, a live example and its code. Its examples are
+    `ViewerExample` and `OptionsExample` (`docs/components/Clover4/ ViewerDocs.tsx`): a
+    Viewer over one of the homepage's resources (`resources` in `playground-config.ts`,
+    never a Cookbook recipe; the one exception is Content Search, the newspaper mock, as
+    none of those has a search service), mounted only near the window (a browser keeps
+    only so many WebGL contexts), in a hairline frame with little room at its sides, its
+    code attached under it. The page has no table of contents, so its prose, tables and
+    examples have the width, to one right edge (Mat, 2026-10-23), and its sections more
+    room (`layout.css`).
   - The Default template's walk-through (`/docs/viewer/default`, region by region, its code
     quoted from the package by `SourceFile`) was taken down on 2026-10-22 (Mat: kept in
     Git's history, to become the example in a guide to making templates); its address
@@ -169,8 +232,9 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
   - The homepage is Clover 4's demo (Mat, 2026-10-20): its playground opens what
     `?iiif-content=` names. iiif.io's recipe pages link to
     `…/docs/viewer/demo?iiif-content=<manifest>`, the demo's old address, which the 404
-    table forwards to the homepage with its query: never drop that forward. Cookbook
-    Recipes (`/docs/cookbook`, last under Use Clover) lists every IIIF Cookbook recipe to
+    table forwards to the homepage with its query: never drop that forward. IIIF
+    Cookbook (`/docs/cookbook`, its page titled "Cookbook recipes", last under Use Clover)
+    lists every IIIF Cookbook recipe to
     open in the Viewer, which slides in over the page, handled or not
     (`docs/components/Clover4/CookbookDemo.tsx`); it has no field of its own, as the
     homepage has one. `/docs/viewer/progress` is
@@ -189,15 +253,15 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     `PartsLive.tsx`), with no heading of its own in sight. Each half has one hidden, for
     the page's outline (Mat, 2026-10-21): the playground's `h2`, "Try the templates", over
     its Viewer's title (`headingLevel` 3), and the parts' `h2`, "Parts". Between the two, under the playground's
-    stage, is the choice, one thing, centered and floating on the page with room all
+    Viewer, is the choice, one thing, centered and floating on the page with room all
     round (Mat, 2026-10-20): a headline, "Use a template or build your own." (its last
     words under the stories' stroke), then one sentence in the summary's size, "Start with a [Default ▾]
-    template or build your own layout.", the dropdown in it naming the template on the
-    stage (as wide as the longest name, so the sentence holds still), and under it two
+    template or build your own layout.", the dropdown in it naming the Viewer's template
+    (as wide as the longest name, so the sentence holds still), and under it two
     calls to action (Mat, 2026-10-21): Get started (`/docs`, the solid one) and Viewer
     documentation (`/docs/viewer`); the navbar has no link to the docs. No boxes, no figure, no code. The parts follow the playground: `Homepage` holds the resource the playground reports
     (`onResourceChange`) and hands it down, and the section's chips put another of the
-    playground's resources on its stage (`pickResource`).
+    playground's resources in its Viewer (`pickResource`).
   - After the parts, "Why Clover" tells five stories, one at a time: Accessible, Seamless,
     Composable, Lightweight, Coverage, on the code editor's black and the page's ground in
     turn, black first (Mat, 2026-10-20). Set apart from the parts by size, not colors of
@@ -302,27 +366,37 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     leaves (2.4.11). Every target in it is 24px or inline in the code (2.5.8). On the right each
     part is a tile, live, an `article` named by its heading (never a `section`: as regions,
     the page's landmarks ran to dozens), named as it is written (`<Clover.Label />`), with what it reads
-    (a property; for `Body`, the Canvas) and a fact from the resource (a count, a size,
-    a name). Pointing at a tile outlines the part in the viewer. A part the resource gives
+    (a property, `items` alone for Items; for `Body`, "Canvas, Scene, or Timeline", what it
+    is for, kept on purpose before a `Scene` draws; Mat, 2026-10-23), and nothing more: no fact from the resource
+    beside them (Mat, 2026-10-23). Pointing at a tile outlines the part in the viewer.
+    A tile's head is the link to the part's page, its name's, an arrow in its top right
+    corner, muted, saying so: the same place from the corner on every tile, 1rem in from
+    its edge and on its name's line, however the words wrap; pointed at or focused
+    (`data-on`), its name underlines and its arrow takes the accent and steps forward (a
+    transform), as its edge takes the accent (Mat, 2026-10-23: obvious and light; an accent
+    band across the head was tried and found too heavy). Focused, its ring is the page's
+    controls' (the accent, 2px). Where the tiles are under 47.5rem wide (a container
+    query), the third and the two thirds beside it share their row in halves, as a third
+    is then too narrow for a name, which never breaks, and its arrow. A part the resource gives
     nothing to is a chip at the end, naming what it would read and the playground resource
     that has it (`SHOWN_IN`). Every value shown is the resource's own: no illustrations,
     made-up figures or copy. Golden-ratio spaces, hairline edges, no gray fills.
   - The playground shows how far one Viewer stretches: any layout with any kind of
-    resource. Two pickers, each changing the stage without the other. Over it, centered,
+    resource. Two pickers, each changing the Viewer without the other. Over it, centered,
     the resource (`ResourceField.tsx`): one field, its label, "Select…" (named "Select a IIIF resource": the ellipsis hidden, the rest visually hidden, WCAG 2.5.3; Mat, 2026-10-22), joined to its start with no line between them (2026-10-22) (Mat,
     2026-10-20; a tab on its top edge on a phone; its `<label>`), Open inside it at its end
     (Mat, 2026-10-22), 2px inside its edge on every side, whole pixels so its gaps round
     alike, for the address or content state of the reader's own, with ours listed under it,
     the list as wide as the whole select (its label, the field and Open; Mat, 2026-10-22) (`resources`
-    in `playground-config.ts`: a catalog, a print, a Collection, a photo, a map, a film, a
-    recording…), each by its thumbnail, its own label, and a few words on one thing it has
+    in `playground-config.ts`: a catalog, a print, a Collection, a photo, a map, a model
+    in 3D, a film, a recording…), each by its thumbnail, its own label, and a few words on one thing it has
     that the others do not (`description`: concise, only what the resource has). The
     list's first item, always, is "View your own" (a dashed slot with a plus, as the old
     "Your own" tile was), which empties the field for an address. Each of the reader's
     own joins the list as they open it, after that, by its root `label` and
     `thumbnail` (never a Canvas's or member's) over its address, so they can switch
     between theirs and ours; held in memory only, never stored, gone with the page. The
-    field shows the label of the one on the stage, never our word for its kind (`name`,
+    field shows the label of the one in the Viewer, never our word for its kind (`name`,
     which only the parts' chips use). It is a WAI-ARIA editable combobox: typing narrows the
     list, Down and Up open and move through it, Enter opens the one marked or what is
     typed, Escape closes the list and then puts the field back; focus stays in the field.
@@ -331,13 +405,13 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     "View your own" brings the keyboard, for an address, by focusing the field again
     within the press.
     Its edge, and the Template button's, is 3:1 (`--pg-edge`): controls only, while the
-    stage and the parts' tiles keep their hairlines (Mat, 2026-10-16; the tiles at 3:1
-    was tried and put back). Under the stage, in the choice's sentence, the template's
+    Viewer and the parts' tiles keep their hairlines (Mat, 2026-10-16; the tiles at 3:1
+    was tried and put back). Under the Viewer, in the choice's sentence, the template's
     dropdown listing the templates by name (named "Default template", its visible name
     first, WCAG 2.5.3). No drawings of the layouts, no
     fills of light gray, spaces on Clover's golden-ratio scale. Each template shows with its own defaults: no props, no generated code (a
     Customize drawer with both was removed on purpose). The section is wider than the
-    reading sections but held off the screen's edges; the stage keeps one height for
+    reading sections but held off the screen's edges; the Viewer keeps one height for
     every pairing, with a hairline edge and a small, soft gray shadow (never the accent).
     Keep the playground itself about layout and UX: names and those few words, no
     marketing lines; the marketing is in the choice under it and in Why Clover.
@@ -373,7 +447,8 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     never the earlier version, Mat, 2026-10-21), with the
     appearance after them (Light, Dark or System, `ThemeSwitch.tsx`, Nextra's `Select`) on
     every page (Mat, 2026-10-21). Nextra's own switch is off (`darkMode={false}`), so
-    none is in the sidebar's foot (its Collapse button kept at the end), the phone's menu
+    none is in the sidebar's foot (its Collapse button at its start, the sidebar open or
+    collapsed, with no rule over it; Mat, 2026-10-23), the phone's menu
     or a band over the footer. Keep each fact the record's.
   - The wordmark (`docs/components/Logo.tsx`, the navbar's and the footer's) is the text's
     color, the hero's stroke always under it (Mat, 2026-10-21: no longer drawn on hover),
@@ -396,14 +471,14 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
   - Headers are solid, never frosted or translucent: the navbar (`docs/styles/layout.css`
     overrides Nextra's blur) and the playground's bar. From 48rem wide, on a screen at
     least 36rem tall (not a phone, where with the navbar it would take too much height),
-    it holds under the navbar as its lower half: while the stage passes under, the
-    navbar's edge moves to the bar's foot, the field runs the playground's width, and the
-    bar's foot rides on the stage's as the two leave (they share a box, so the template
-    row under the stage is never under it). `useStuck` writes `data-stuck` to the bar
-    directly, not to state, so this never re-renders the stage. While the bar can hold,
-    `useStuck` sets the page's `scroll-padding-top` to the navbar and the bar, measured,
-    so a control that takes focus in the stage comes into view below the bar (WCAG
-    2.4.11).
+    it holds under the navbar as its lower half: while the playground's Viewer passes
+    under, the navbar's edge moves to the bar's foot, the field runs the playground's
+    width, and the bar's foot rides on the Viewer's as the two leave (they share a box,
+    so the template row under the Viewer is never under it). `useStuck` writes
+    `data-stuck` to the bar directly, not to state, so this never re-renders the Viewer.
+    While the bar can hold, `useStuck` sets the page's `scroll-padding-top` to the navbar
+    and the bar, measured, so a control that takes focus in the Viewer comes into view
+    below the bar (WCAG 2.4.11).
   - The navbar holds the docs' code switch, React or Web components (Mat, 2026-10-21;
     React by default; `docs/components/CodeSwitch.tsx`), after the search and before the
     repository's link: a pair of native radios, one tab stop, named "Code examples", drawn
@@ -438,7 +513,10 @@ ViewerDocs.tsx`): a Viewer over one of the homepage's resources (`resources` in
     boxed `data-code-flavor`, which `layout.css` shows by the reader's choice. A fence HTML
     cannot say (hooks, state, functions) gets its twin written by hand, `html twin right
 after it, or stays React's, shown in both; `jsx react shows to React's readers alone
-    (a stylesheet's import). Write a new example so it turns, or give it its twin. After
+    (a stylesheet's import). Write a new example so it turns, or give it its twin. Words
+    in prose that only look like a prop (an attribute's values, `timeline`, `scene`) go in
+    `<span data-code-flavor="both">`, which the turning skips and both flavors show (Mat,
+    2026-10-23: values bare, never quoted). After
     changing those helpers, restart `npm run dev`: Node keeps the modules the loader
     first loaded. A page compiled between the change and the restart keeps what the old ones
     made (Turbopack caches it against the new files): clear `.next/dev` as you restart. A component's "API reference" wraps its React tables in
@@ -597,6 +675,14 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
 - Formatting: Prettier (semicolons enabled). Use `npm run prettier:fix` to format.
 - Linting: ESLint with `next/core-web-vitals` and `@typescript-eslint` rules.
 - Naming: React components in PascalCase, files `*.tsx`; utilities in camelCase `*.ts`.
+- Vocabulary (Mat, 2026-10-23: "normalize our language around our defined components"):
+  name a thing by the component that draws it, in docs, comments, code and class names
+  alike. The box a view is drawn in is the Body, never "stage"; what comes and goes over
+  it (the control cluster, the transport, the scrim) are the controls, plural, never
+  "chrome", which is the browser's word alone; the playground's box is the Viewer, and
+  Document's scrolling pages are its column. A template's `-body` class sits on its
+  `Clover.Body` alone (`-panes` on its `Split`). Where `body` would meet a IIIF
+  annotation's body, take a fuller name (`bodyBox`, `figure`).
 - Paths: TS path aliases enabled via `vite-tsconfig-paths`.
 
 ## Testing Guidelines
@@ -763,7 +849,19 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   same words as a plain-text transcript (the Canvas's `rendering`), and chapters titled
   with the archive's description (static, and live in `npm run dev` under
   `pages/api/mocks/rudolf-hess-nuremberg/`, since its captions and transcript are its
-  own). It is the playground's Footage. The package's tests use copies of
+  own). It is the playground's Footage; `esu-shrine`, Northwestern's Material History
+  Lab's scan of an Esu shrine (IBD12-AD-2-1), which the Lab publishes in Smithsonian
+  Voyager and not as IIIF, as a Presentation 4 Manifest of one Scene (Mat, 2026-10-23):
+  its label, metadata and homepage from the Lab's object page word for word, its
+  thumbnail the page's first photograph (the Voyager scene's renderings show its editor's
+  box round the model), and its GLB painted at the origin, turned about its upright axis
+  to the Voyager scene's opening view, written from that scene as fetched
+  (`source.json`). The Lab's server sends no CORS headers, so the model (34.5 MB,
+  © 2025 Northwestern University) is kept beside the Manifest, `model.glb`, as it came
+  (Mat, 2026-10-23: "download the model so we don't have to worry about cors"):
+  `npm run build:mocks` fetches it from the Lab only when it is missing, and the live
+  copy (`pages/api/mocks/esu-shrine/`) serves that file. The photograph is linked, never
+  copied. It is the playground's Model. The package's tests use copies of
   `page-transcript`, `paged`, `rudolf-hess-nuremberg` and `transcripts`, in
   `packages/clover/src/fixtures/mocks/<name>/`.
 

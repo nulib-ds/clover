@@ -14,6 +14,7 @@ import {
   tabDocs,
 } from "./containers";
 import { canvas, canvasDocs } from "./canvas";
+import { scene, sceneDocs, timeline, timelineDocs } from "./timeline-scene";
 
 /** The Canvas's handle's methods, for its type (`build/custom-elements.mjs`). */
 export { handleMethodDocs as HANDLE } from "./canvas";
@@ -115,6 +116,8 @@ const ALL: [ElementSpec, ElementDocs][] = [
   [splitPane, splitPaneDocs],
   [splitHandle, splitHandleDocs],
   [canvas, canvasDocs],
+  [timeline, timelineDocs],
+  [scene, sceneDocs],
   [tip, tipDocs],
   [readMore, readMoreDocs],
 ];
@@ -157,6 +160,8 @@ export const SPECS: readonly ElementSpec[] = [
   splitPane,
   splitHandle,
   canvas,
+  timeline,
+  scene,
   tip,
   readMore,
 ];

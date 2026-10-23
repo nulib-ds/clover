@@ -44,7 +44,7 @@ describe("GestureController", () => {
     expect(factor).toBeGreaterThan(1);
   });
 
-  it("leaves the wheel to a box in the stage that scrolls that way", () => {
+  it("leaves the wheel to a box in the Body that scrolls that way", () => {
     const { element, target } = setup({
       ...DEFAULT_GESTURES,
       scrollToZoom: true,
@@ -63,7 +63,7 @@ describe("GestureController", () => {
     note.dispatchEvent(down);
     expect(down.defaultPrevented).toBe(false);
     expect(target.zoomBy).not.toHaveBeenCalled();
-    // Nothing more above it: the wheel up zooms, as anywhere else on the stage.
+    // Nothing more above it: the wheel up zooms, as anywhere else in the Body.
     const up = new WheelEvent("wheel", {
       deltaY: -100,
       bubbles: true,

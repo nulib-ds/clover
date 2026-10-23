@@ -1,46 +1,27 @@
 ---
 title: Composing layouts
-description: "A layout of your own from Clover's parts: the Root, the parts and the property parts, the information panel, panes side by side, parts of your own, languages, renderers and styles."
+description: "A layout of your own from Clover's parts: the Root, the parts and the property parts, the information panel, panes side by side, parts of your own, languages and renderers."
 ---
 
-import { Callout } from "nextra/components";
-import { ComposedDemo } from "docs/components/Clover4/Demos";
+import { ComposeExample } from "docs/components/Clover4/ComposeExample";
 
 # Composing layouts
 
-Every template is a composition of Clover's parts, and so is a layout of your own. A
-`Root` loads the content and holds where the reader is. Every part inside it reads from
-the nearest `Root`, wherever it sits in your markup, so a layout is your own HTML with
-parts placed in it.
-
-<Callout type="info">
-  Composing with Clover 3.x, `@samvera/clover-iiif`? See [Clover 3.x ›
-  Composing](/docs/3.x/composing).
-</Callout>
+<div className="docs-lede">
+  Every template is a composition of Clover's parts, and so is a layout of your
+  own. A `Root` loads the content and holds where the reader is. Every part
+  inside it reads from the nearest `Root`, wherever it sits in your markup, so a
+  layout is your own HTML with parts placed in it.
+</div>
 
 ## A layout of your own
 
 The parts are named exports. `import * as Clover` gives them dot notation, and they
 tree-shake: a page loads only the parts it renders. Here the title, position and buttons
-sit beside the stage.
+sit beside the Body. The code is live: move the aside's parts, or change what a Label
+reads, and the layout follows.
 
-```jsx
-import * as Clover from "@nulib/clover";
-import "@nulib/clover/styles.css";
-
-<Clover.Root iiifContent={url} className="my-layout">
-  <Clover.Body />
-  <aside>
-    <Clover.Label as="h3" />
-    <Clover.Label of="canvas" />
-    <Clover.Position />
-    <Clover.Previous />
-    <Clover.Next />
-  </aside>
-</Clover.Root>;
-```
-
-<ComposedDemo />
+<ComposeExample />
 
 ## Start from a template
 
@@ -326,7 +307,7 @@ keyboard focus, with its keyboard shortcut when it has one. Give a control of yo
 the same: its name as `aria-label`, its key (if it has one) as `aria-keyshortcuts`, and
 `Tip` inside it, last, with the same words. Tip is hidden from assistive technology,
 which reads the control's own name, and hides on Escape. Each time it shows, it is kept
-inside whatever clips it (the stage, a scrolling panel, the window): it wraps to the room
+inside whatever clips it (the Body, a scrolling panel, the window): it wraps to the room
 there is and moves in from the edge.
 
 ```jsx
@@ -448,9 +429,10 @@ const langOf = Clover.useLangOf();
 ## Renderers of your own
 
 Give `Root` (or one `Body`) `renderers`, and a view they claim is drawn by your
-component instead of the Canvas: a 3D model, a PDF, anything Clover does not draw. Claim a
-view by its Canvas id, by a painted body's `format`, or with a `match` test. The first
-renderer that claims a view draws it. This is 3.x's `customDisplays`.
+component instead of Clover's own (Canvas, Timeline or Scene): a PDF, a 3D model drawn
+your way, anything Clover does not draw, or draws otherwise than you want. Claim a view by
+its Canvas id, by a painted body's `format`, or with a `match` test. The first renderer
+that claims a view draws it. This is 3.x's `customDisplays`.
 
 ```jsx
 function ModelViewer({ bodies }) {
@@ -504,113 +486,6 @@ template pass `renderers` through to their `Root`.
 
 ## Styles
 
-Import `@nulib/clover/styles.css` once. Its rules sit in `@layer clover`, so your own
-CSS wins without a fight over specificity. Without it, every part still renders a plain,
-usable layout.
-
-The stage takes its height from `--clover-body-height` (default `60vh`):
-
-```css
-.my-layout {
-  --clover-body-height: 70vh;
-}
-```
-
-Every region keeps `--clover-inset` (default `1.618rem`, the scale's `l`) between its
-edge and its content: the header and thumbnail strip, the information panel, the picture
-on the stage at home. Inside a region, each level is a step less: its parts `1rem` apart,
-what is within a part `0.618rem`. Set it once for a tighter or roomier layout:
-
-```css
-.my-layout {
-  --clover-inset: var(--clover-space-m);
-}
-```
-
-The picture fills its stage edge to edge at home; `--clover-canvas-inset` keeps a margin
-round it instead. The Canvas's controls sit `--clover-canvas-chrome-inset` in from its
-edges, the region's inset by default, so they line up with what is round the stage.
-
-Clover sets no font and steps every space from your `1rem`, so a layout reads at your
-page's type and size. Its colors are custom properties (`--clover-color-accent` and
-the rest): set one on any ancestor and it cascades. The round controls have two of their
-own, a dark fill (`--clover-color-control`) and white glyphs
-(`--clover-color-control-glyph`), and keep them in a dark mode: they sit over a Canvas's
-images, so they do not swap with the page's text and background colors. Text in the
-accent (links, Read more, the selected item's label) is `--clover-color-accent-text`,
-the accent itself unless you set it: a dark mode can keep the accent for rings and fills
-and give its text a lighter one. Each part names itself with one
-`clover-*` class on its root and states what it is doing in `data-*` attributes
-(`data-media` on a Canvas playing video or sound, `data-layout` on the panel's sections),
-for your own CSS to select.
-
-Since your CSS wins, a reset that takes the markers off every list
-(`ul, ol { list-style: none; padding: 0 }`, as Tailwind's and many themes' do) takes
-them off a Markdown body's lists too: its bullets, its indent, and the numbers its author
-gave. Safari's VoiceOver then stops reading them as lists. Put them back for Clover's
-text:
-
-```css
-:is(.clover-annotations-body, .clover-value) ul {
-  list-style: disc;
-  padding-inline-start: var(--clover-space-l);
-}
-
-:is(.clover-annotations-body, .clover-value) ol {
-  list-style: decimal;
-  padding-inline-start: var(--clover-space-l);
-}
-```
-
-### Colors and contrast
-
-Clover's default colors meet WCAG 2.2 AA (open gaps are listed in
-[ACCESSIBILITY.md](https://github.com/nulib-ds/clover/blob/main/ACCESSIBILITY.md)); the
-colors a page sets are the page's to keep accessible. These are the pairs Clover draws,
-the ratio each needs, and what the defaults measure. Names drop `--clover-color-`.
-
-| Pair                                                 | Where Clover draws it                                                                                                                                                                                                                                                                                   | Needs                              | WCAG          | Default |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ------------- | ------- |
-| `primary` on `secondary`                             | Text in the panel, menus, popups and fields, and the reverse in tips; Items' focus ring                                                                                                                                                                                                                 | 4.5:1                              | 1.4.3         | 16.96:1 |
-| `primary-muted` on `secondary`                       | Quieter text: descriptions, formats, legends, status; the edges of fields and text buttons; a split's grip                                                                                                                                                                                              | 4.5:1                              | 1.4.3, 1.4.11 | 14.64:1 |
-| `primary` or `primary-muted` on `secondary-muted`    | Text on a row or menu option under the pointer; the map's message on its empty ground; a split's grip beside Document's page                                                                                                                                                                            | 4.5:1                              | 1.4.3, 1.4.11 | 11.93:1 |
-| `primary` 65% into `secondary`                       | The search field's placeholder                                                                                                                                                                                                                                                                          | 4.5:1                              | 1.4.3         | 5.28:1  |
-| `accent-text` on `secondary`                         | Links, Read more, the selected item's label                                                                                                                                                                                                                                                             | 4.5:1                              | 1.4.3         | 5.75:1  |
-| `accent` against `secondary`                         | Focus rings, the selected item's ring, the edge of the current tab and row; the line under the open accordion heading                                                                                                                                                                                   | 3:1                                | 1.4.11        | 5.75:1  |
-| `accent` at half strength against `secondary`        | Under the pointer: an item's ring, and the line under a closed accordion heading                                                                                                                                                                                                                        | None: a preview; the press decides | 1.4.11        | 2.24:1  |
-| `control-glyph` on `control`                         | The round controls' glyphs; Exit full screen's label                                                                                                                                                                                                                                                    | 4.5:1                              | 1.4.3, 1.4.11 | 16.96:1 |
-| `control-glyph` on `accent`                          | A round control under the pointer or focused; a text button's label and the lightbox's close, under the pointer, focused or open; the Transcript's chosen file; the eye that hides annotations, under the pointer                                                                                       | 4.5:1                              | 1.4.3, 1.4.11 | 5.75:1  |
-| `secondary-muted` against `secondary`                | Hairlines between regions; fills under the pointer                                                                                                                                                                                                                                                      | None: they mark nothing            | 1.4.11        | 1.23:1  |
-| `secondary-alt` at half strength against `secondary` | The bar between split panes, beside its grip; the line under a closed accordion heading, beside its chevron                                                                                                                                                                                             | None: the grip or chevron marks it | 1.4.11        | 1.28:1  |
-| `primary` beside `secondary`, over a picture         | The Canvas's hotspots: their two-tone outline at rest, and the edges either side of the accent when active or focused; the Canvas's and the map's focus rings, either side of the accent; Items' focus: inside its ring, a `secondary` ring and a `primary` one, side by side over the thumbnail's edge | 9:1 between them                   | 1.4.11        | 16.96:1 |
-
-Text needs 4.5:1 (1.4.3); large text, 24px or 18.66px bold, needs 3:1, but Clover's
-labels and links run at the page's body size or smaller. Rings, edges and glyphs that
-show a control or its state need 3:1 (1.4.11). Color is never the only sign (1.4.1). A
-ratio is not rounded up: 4.49:1 fails.
-
-- **Measure against what is behind.** Most parts paint no ground of their own: the panel
-  beside the stage and Items sit on the page. Set `--clover-color-secondary` to the
-  page's background, or measure against the page's.
-- **Check the accent as text.** `accent-text` (the accent, unless you set it) draws
-  links and labels, so it needs 4.5:1 against `secondary`, not 3:1, and against
-  `secondary-muted` too.
-- **Keep `control` and `control-glyph` 4.5:1 apart.** The round controls sit over any
-  picture, so their fill is the only ground a glyph can count on, and Exit full screen
-  writes its name there. Under the pointer or focused, the fill turns the accent: check
-  the glyph on that too.
-- **Check a dark mode on its own.** Ratios do not carry over, so measure every pair again
-  with the dark values. An accent light enough to read on a dark `secondary` is too light
-  under a white `control-glyph`: no one accent passes both on a dark page, so set
-  `accent-text` lighter for text and keep the accent for the fills.
-- **Over a picture, two tones 9:1 apart.** A picture has no one color to measure
-  against. At 9:1 between two tones, one of them keeps 3:1 against any picture (WCAG
-  technique C40). So over a picture Clover draws with `primary` and `secondary` side by
-  side: the Canvas's and the map's focus rings, a dark edge and a light band either side
-  of the accent; the hotspots' outlines; and Items' focus inside the thumbnail. Keep
-  those two 9:1 apart.
-- **Never let the accent alone mark a state.** Keep a second sign beside it, as Clover
-  does: the selected item's label and the current Range turn bold, the words a search
-  matched are bold on their tint, the item in focus has a second ring, `secondary` and
-  `primary` side by side, inside the thumbnail's edge, and a closed accordion heading is
-  underlined, with a chevron. Restyle a state, and keep its second sign.
+Clover's stylesheets, the custom properties a layout sets (the Body's height, the
+insets, the colors), the classes and states to select, and the color pairs to keep
+accessible are on [Styling](/docs/styling).

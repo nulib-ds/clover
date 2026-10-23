@@ -167,7 +167,7 @@ export interface CloverRootApi {
 
 /**
  * A renderer of yours, without React: the views it claims, and `render`, which draws one
- * into a box filling the stage and returns what undoes it.
+ * into a box filling the Body and returns what undoes it.
  */
 export interface CloverRenderer {
   /** Views showing one of these Canvases… */
@@ -186,7 +186,7 @@ export interface CloverRenderer {
   ): void | (() => void);
 }
 
-/** What the function for one of the stage's controls is told. */
+/** What the function for one of the Body's controls is told. */
 export interface CloverControl {
   name: keyof CloverControlButtons;
   /** Its name, as its `aria-label` says it. */
@@ -195,7 +195,7 @@ export interface CloverControl {
   icon: HTMLElement;
 }
 
-/** The stage's controls, each replaced by a button you make. */
+/** The Body's controls, each replaced by a button you make. */
 export interface CloverControlButtons {
   zoomIn?: (control: CloverControl) => Element;
   zoomOut?: (control: CloverControl) => Element;

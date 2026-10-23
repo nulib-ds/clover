@@ -2,6 +2,7 @@ import type {
   Canvas,
   Collection,
   Manifest,
+  Scene,
   Timeline,
 } from "@iiif/parser/presentation-4/types";
 
@@ -14,10 +15,13 @@ import type {
  * the first resource that needs it arrives.
  */
 
-export type { Canvas, Collection, Manifest, Timeline };
+export type { Canvas, Collection, Manifest, Scene, Timeline };
 
-/** A IIIF resource Clover can show directly: a Manifest's or Collection's item. */
-export type Container = Canvas | Timeline;
+/**
+ * A IIIF resource Clover can show directly, a Manifest's item: a Canvas (`Canvas`), a
+ * Timeline (`Timeline`, sound) or a Scene (`Scene`, 3D).
+ */
+export type Container = Canvas | Timeline | Scene;
 
 const PRESENTATION_4 = /iiif\.io\/api\/presentation\/4\/context\.json/;
 
@@ -44,7 +48,7 @@ export function preloadUpgrader() {
 }
 
 /**
- * `resource` as Presentation 4: a Manifest, Collection, Canvas or Timeline from any
+ * `resource` as Presentation 4: a Manifest, Collection, Canvas, Timeline or Scene from any
  * supported version. Presentation 4 input is returned as it is.
  */
 export async function toPresentation4<T = Manifest | Collection | Container>(

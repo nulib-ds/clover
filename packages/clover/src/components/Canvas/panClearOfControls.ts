@@ -1,13 +1,13 @@
 import type { CanvasRenderer } from "../../lib/renderer";
 
 /*
- * Keeping a hotspot reached by Tab clear of the Canvas's chrome (WCAG 2.4.11). Its own
+ * Keeping a hotspot reached by Tab clear of the Canvas's controls (WCAG 2.4.11). Its own
  * module, loaded once a hotspot takes focus (`Annotations.tsx`): only the keyboard needs
  * it, and it imports nothing, so its chunk shares nothing (1 kB).
  */
 
-/** The Canvas's own chrome over the stage, which a hotspot reached by Tab is kept clear of. */
-const CHROME = [
+/** The Canvas's own controls over the Body, which a hotspot reached by Tab is kept clear of. */
+const CONTROLS = [
   ".clover-canvas-controls",
   ".clover-canvas-navigator",
   ".clover-canvas-transport",
@@ -21,16 +21,16 @@ const CHROME = [
 const overlap = (a: number, b: number, c: number, d: number) => a < d && c < b;
 
 /**
- * Pan, no further than needed, so the focused hotspot sits in the part of the stage clear
- * of the chrome (WCAG 2.4.11): the stage less each piece of chrome beside the hotspot, cut
- * away from the edge it hangs on (the cluster from the top, its column on a phone from
- * the side, the transport from the bottom). A piece cuts only once the hotspot is beside
- * it, where cutting by another has moved it: the cluster only above a hotspot under it.
- * So one clear of the chrome stays where it is, and one larger than its part is centered
- * in it. An open caption may leave too little; Escape closes it without moving focus
- * (`CanvasView`).
+ * Pan, no further than needed, so the focused hotspot sits in the part of the Body clear
+ * of the controls (WCAG 2.4.11): the Body less each of the controls beside the hotspot,
+ * cut away from the edge it hangs on (the cluster from the top, its column on a phone
+ * from the side, the transport from the bottom). A piece cuts only once the hotspot is
+ * beside it, where cutting by another has moved it: the cluster only above a hotspot
+ * under it. So one clear of the controls stays where it is, and one larger than its part
+ * is centered in it. An open caption may leave too little; Escape closes it without
+ * moving focus (`CanvasView`).
  */
-export function panClearOfChrome(
+export function panClearOfControls(
   renderer: CanvasRenderer,
   hotspot: HTMLElement,
 ) {
@@ -39,20 +39,20 @@ export function panClearOfChrome(
   // A Canvas the reader cannot move (a lone video or sound, or one the host holds still)
   // has no way to pan back.
   if (figure?.getAttribute("data-navigable") === "false") return;
-  const stage = layer.getBoundingClientRect();
-  if (!stage.width || !stage.height) return;
+  const bodyRect = layer.getBoundingClientRect();
+  if (!bodyRect.width || !bodyRect.height) return;
   const clear = {
-    top: stage.top,
-    right: stage.right,
-    bottom: stage.bottom,
-    left: stage.left,
+    top: bodyRect.top,
+    right: bodyRect.right,
+    bottom: bodyRect.bottom,
+    left: bodyRect.left,
   };
-  // Each piece of chrome over the stage, and the edge it hangs on: the nearest.
+  // Each of the controls over the Body, and the edge it hangs on: the nearest.
   let pieces = Array.from(
-    figure?.querySelectorAll<HTMLElement>(CHROME) ?? [],
+    figure?.querySelectorAll<HTMLElement>(CONTROLS) ?? [],
   ).flatMap((piece) => {
     if (piece.closest(".clover-canvas") !== figure) return [];
-    // Where it comes to rest: chrome shown by the focus may still be sliding in.
+    // Where it comes to rest: controls shown by the focus may still be sliding in.
     const [tx = 0, ty = 0] = (getComputedStyle(piece).translate || "")
       .split(" ")
       .map((length) => parseFloat(length) || 0);
@@ -64,15 +64,15 @@ export function panClearOfChrome(
     if (
       !moving.width ||
       !moving.height ||
-      !overlap(left, right, stage.left, stage.right) ||
-      !overlap(top, bottom, stage.top, stage.bottom)
+      !overlap(left, right, bodyRect.left, bodyRect.right) ||
+      !overlap(top, bottom, bodyRect.top, bodyRect.bottom)
     )
       return [];
     const sides = [
-      ["top", bottom - stage.top],
-      ["bottom", stage.bottom - top],
-      ["left", right - stage.left],
-      ["right", stage.right - left],
+      ["top", bottom - bodyRect.top],
+      ["bottom", bodyRect.bottom - top],
+      ["left", right - bodyRect.left],
+      ["right", bodyRect.right - left],
     ] as const;
     const [side] = sides.reduce((least, cut) =>
       cut[1] < least[1] ? cut : least,

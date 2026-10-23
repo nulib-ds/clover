@@ -61,7 +61,7 @@ beforeEach(() => {
 });
 afterEach(() => viewport.restore());
 
-async function renderWithStage(
+async function renderWithBody(
   children: React.ReactNode = <Clover.Annotations scope="view" />,
 ) {
   render(
@@ -76,7 +76,7 @@ async function renderWithStage(
 
 describe("Annotations", () => {
   it("lists the view's annotations by set, image and text bodies alike", async () => {
-    await renderWithStage();
+    await renderWithBody();
     const list = screen.getByRole("list");
     const [entry] = within(list).getAllByRole("listitem");
     expect(entry.querySelector("img")).toHaveAttribute(
@@ -118,7 +118,7 @@ describe("Annotations", () => {
   });
 
   it("frames a picked annotation on the Canvas, and marks it picked", async () => {
-    await renderWithStage();
+    await renderWithBody();
     fireEvent.click(screen.getByRole("button", { name: /Find on the image/ }));
     expect(renderer.fitAnnotation).toHaveBeenCalledWith(
       {
@@ -144,7 +144,7 @@ describe("Annotations", () => {
   });
 
   it("shares one highlight between the list and the hotspots, with no timers", async () => {
-    await renderWithStage();
+    await renderWithBody();
     const entry = screen.getByRole("listitem");
     fireEvent.mouseEnter(entry);
     expect(document.getElementById(annotationId)).toHaveAttribute(
@@ -161,7 +161,7 @@ describe("Annotations", () => {
   });
 
   it("hides a set's annotations from the Canvas with its eye", async () => {
-    await renderWithStage();
+    await renderWithBody();
     expect(document.getElementById(annotationId)).not.toBeNull();
     // A checkbox drawn as an eye, its popover the one word.
     const hide = screen.getByRole("checkbox", { name: "Hide annotations" });

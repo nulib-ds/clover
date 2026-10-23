@@ -1,6 +1,6 @@
 /*
  * The Viewer in the slide-in panel, filling it (`fill`): its box is the panel's body,
- * which scrolls only in a window too short for the stage's least height.
+ * which scrolls only in a window too short for the Body's least height.
  */
 .viewer {
   height: 100%;

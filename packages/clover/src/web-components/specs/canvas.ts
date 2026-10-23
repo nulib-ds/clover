@@ -1,7 +1,7 @@
 import type { ElementDocs, ElementSpec, MethodDocs } from "../spec";
 
 /**
- * The stage's own: the Canvas's handle (`CanvasHandle`, what `onReady` hands a React host),
+ * The Body's own: the Canvas's handle (`CanvasHandle`, what `onReady` hands a React host),
  * kept as `handle` and sent with `clover-ready` once its view is laid out.
  */
 export const READY = {
@@ -188,12 +188,12 @@ export const handleDocs = {
   controls: {
     type: "boolean | { zoom?: boolean; fullPage?: boolean; rotation?: boolean; reset?: boolean; annotations?: boolean; information?: boolean; [option: string]: unknown } | null",
     description:
-      "Which of the stage's controls it shows, as Canvas's controls takes it: false for none, or some ({ rotation: false }), in place of the attribute.",
+      "Which of the Body's controls it shows, as Canvas's controls takes it: false for none, or some ({ rotation: false }), in place of the attribute.",
   },
   controlButtons: {
     type: "CloverControlButtons | null",
     description:
-      "The stage's controls, each replaced by a button you make: a function given the control's name, label and Clover's icon, returning the button. Clover keeps it named, keyed and in its state, presses the control with it, and adds its popover.",
+      "The Body's controls, each replaced by a button you make: a function given the control's name, label and Clover's icon, returning the button. Clover keeps it named, keyed and in its state, presses the control with it, and adds its popover.",
   },
 };
 
@@ -220,7 +220,7 @@ export const canvasDocs: ElementDocs = {
     },
     language: { description: "The language to read IIIF text in." },
     controls: {
-      description: '"false" leaves out the controls over the stage.',
+      description: '"false" leaves out the controls over the Body.',
       default: "true",
     },
     navigator: {
@@ -276,7 +276,7 @@ export const canvasDocs: ElementDocs = {
     "clover-annotation-select": {
       detail: "{ id: string | null }",
       description:
-        "The reader picked an annotation, on the stage or in its menu; null when they let it go.",
+        "The reader picked an annotation, on the Body or in its menu; null when they let it go.",
     },
     "clover-annotation-active": {
       detail: "{ id: string | null }",

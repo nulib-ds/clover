@@ -9,6 +9,7 @@ import {
   type CodeTree,
   type Knob,
   initialValues,
+  knobId,
   knobProps,
   remountKey,
 } from "docs/lib/live-code";
@@ -187,7 +188,7 @@ interface LiveProps {
   props?: Record<string, Plain>;
   /** Open at a region of a Canvas, by its place in the Manifest, as a content state. */
   place?: { canvas: number; xywh: string };
-  /** The stage's height (`--clover-body-height`). */
+  /** The Body's height (`--clover-body-height`). */
   height?: string;
   /** A box of this height for the Viewer to `fill`. */
   box?: string;
@@ -244,7 +245,7 @@ function Live({
           // On the Viewer's own root, where each template sets its default.
           style={{
             ["--clover-body-height" as string]: height,
-            // Document is as tall as its pages' column: the stage and its toolbar.
+            // Document is as tall as its pages' column: the Body and its toolbar.
             ["--clover-template-document-height" as string]: `calc(${height} + 4rem)`,
           }}
           {...(request ? { request } : undefined)}
@@ -285,10 +286,15 @@ function CodeArea({
 export function ViewerExample({
   children,
   editor,
+  wide,
   ...live
-}: LiveProps & { children?: React.ReactNode; editor?: Editor }) {
+}: LiveProps & {
+  children?: React.ReactNode;
+  editor?: Editor;
+  wide?: boolean;
+}) {
   return (
-    <figure className={styles.example}>
+    <figure className={styles.example} data-wide={wide || undefined}>
       <div className={styles.preview}>
         <Live {...live} />
       </div>
@@ -314,6 +320,7 @@ export function OptionsExample({
   lead,
   children,
   editor,
+  wide,
   ...live
 }: LiveProps & {
   /** The prop it switches: `template`, the box's `width`, or another the Viewer takes. */
@@ -326,6 +333,8 @@ export function OptionsExample({
   lead?: boolean;
   children?: React.ReactNode;
   editor?: Editor;
+  /** Wider than the page's column, where the window has room (`data-wide`). */
+  wide?: boolean;
 }) {
   const id = useId();
   const [value, setValue] = useState<Plain>(options[0]);
@@ -337,7 +346,11 @@ export function OptionsExample({
         ? { width: String(value) }
         : { props: { ...live.props, [prop]: value } };
   return (
-    <figure className={styles.example} data-lead={lead || undefined}>
+    <figure
+      className={styles.example}
+      data-lead={lead || undefined}
+      data-wide={wide || undefined}
+    >
       <div className={styles.switchBar}>
         <span className={styles.switchLabel} id={`${id}-label`}>
           {label}
@@ -392,20 +405,28 @@ export interface LiveTemplate {
 }
 
 /**
- * The Viewer page's first example, live (Mat, 2026-10-22): the template, switched by the
- * large control over the Viewer, as `OptionsExample`'s `lead`, and under it that
+ * The Viewer page's first example, live (Mat, 2026-10-22): the Viewer, under it the
  * template's code, its knobs live (`LiveCode`), each template keeping its own values as
- * the reader switches. A knob read only as the Viewer mounts draws it again.
+ * the reader switches, and under the code the switch (Mat, 2026-10-23: "bring it below
+ * the JSX … toggle adjusts the code and vice versa … match … React/WC toggle in header"):
+ * radios drawn as the navbar's code switch (`CodeSwitch.tsx`), and the template in the
+ * code a choice too (a knob `on: "code"`), each moving the other. A pick in the code
+ * shows the new template's code, so focus moves to the same choice there. A knob read
+ * only as the Viewer mounts draws it again.
  */
 export function LiveTemplates({
   options,
   editor,
+  wide,
   ...live
 }: Omit<LiveProps, "template" | "props"> & {
   options: LiveTemplate[];
   editor?: Editor;
+  /** Wider than the page's column, where the window has room (`data-wide`). */
+  wide?: boolean;
 }) {
   const id = useId();
+  const figure = useRef<HTMLElement>(null);
   const [chosen, setChosen] = useState(options[0].name);
   const [values, setValues] = useState(() =>
     Object.fromEntries(
@@ -414,32 +435,33 @@ export function LiveTemplates({
   );
   const option = options.find((each) => each.name === chosen) ?? options[0];
   const current = values[option.name];
-  const set = (name: TemplateName) => (knob: string, value: Plain) =>
+  // The template's own knob, written in the code alone (`LiveExample.tsx`).
+  const templateKnob = option.knobs.find((knob) => knob.on === "code");
+  const picked = useRef(false);
+  useEffect(() => {
+    if (!picked.current) return;
+    picked.current = false;
+    const choices = figure.current?.querySelectorAll<HTMLSelectElement>(
+      `[data-option="${chosen}"] select[aria-label="${templateKnob?.label}"]`,
+    );
+    // The reader's flavor's, the one shown.
+    [...(choices ?? [])].find((choice) => choice.offsetParent)?.focus();
+  }, [chosen, templateKnob]);
+  const set = (name: TemplateName) => (knob: string, value: Plain) => {
+    if (templateKnob && knob === knobId(templateKnob)) {
+      picked.current = true;
+      setChosen(value as TemplateName);
+      return;
+    }
     setValues((all) => ({ ...all, [name]: { ...all[name], [knob]: value } }));
+  };
   return (
-    <figure className={styles.example} data-lead>
-      <div className={styles.switchBar}>
-        <span className={styles.switchLabel} id={`${id}-label`}>
-          Template
-        </span>
-        <div
-          role="group"
-          aria-labelledby={`${id}-label`}
-          className={styles.segmented}
-        >
-          {options.map(({ name }) => (
-            <button
-              key={name}
-              type="button"
-              aria-pressed={name === option.name}
-              className={styles.segment}
-              onClick={() => setChosen(name)}
-            >
-              {name}
-            </button>
-          ))}
-        </div>
-      </div>
+    <figure
+      ref={figure}
+      className={styles.example}
+      data-lead
+      data-wide={wide || undefined}
+    >
       <div className={styles.preview}>
         <Live
           key={`${option.name}|${remountKey(option.knobs, current)}`}
@@ -468,6 +490,34 @@ export function LiveTemplates({
           </div>
         ))}
       </CodeArea>
+      <div className={styles.switchUnder}>
+        <span className={styles.switchUnderLabel} id={`${id}-label`}>
+          Template
+        </span>
+        <div
+          className="code-switch"
+          role="radiogroup"
+          aria-labelledby={`${id}-label`}
+        >
+          {options.map(({ name }) => (
+            <label
+              key={name}
+              className="code-switch-option"
+              data-option={name}
+              data-checked={name === option.name || undefined}
+            >
+              <input
+                type="radio"
+                name={`${id}-template`}
+                value={name}
+                checked={name === option.name}
+                onChange={() => setChosen(name)}
+              />
+              <span>{name}</span>
+            </label>
+          ))}
+        </div>
+      </div>
     </figure>
   );
 }
@@ -490,15 +540,18 @@ export function LiveTemplates({
 export function Example({
   children,
   editor,
+  wide,
 }: {
   children: React.ReactNode;
   editor?: Editor;
+  /** Wider than the page's column, where the window has room (`data-wide`). */
+  wide?: boolean;
 }) {
   const [demo, ...code] = React.Children.toArray(children).filter(
     (child) => !(typeof child === "string" && !child.trim()),
   );
   return (
-    <figure className={styles.example}>
+    <figure className={styles.example} data-wide={wide || undefined}>
       <div className={styles.preview}>{demo}</div>
       {code.length > 0 && <CodeArea editor={editor}>{code}</CodeArea>}
     </figure>

@@ -4,7 +4,7 @@
  * of Nextra's sticky navbar when linked to via `#playground`.
  *
  * Wider than the reading sections below it (1300px), but held off the edges of a wide
- * screen, with room round it for the stage's shadow.
+ * screen, with room round it for the Viewer's shadow.
  */
 .section {
   color: var(--gray-12);
@@ -12,13 +12,13 @@
   max-width: 92rem;
   scroll-margin-top: 5rem;
   /*
-   * The stage's one height, for every template and resource, so switching either never
-   * moves the page. When the bar is held, the stage fills the screen under it: the
+   * The Viewer's one height, for every template and resource, so switching either never
+   * moves the page. When the bar is held, the Viewer fills the screen under it: the
    * screen less the navbar, the bar (3.736rem: the field, and its padding), the
-   * space under the bar and room for the stage's shadow. A template taller than it (a
+   * space under the bar and room for the Viewer's shadow. A template taller than it (a
    * Gallery) scrolls inside.
    */
-  --pg-stage-height: clamp(
+  --pg-viewer-height: clamp(
     36rem,
     calc(
       100vh - var(--nextra-navbar-height, 4rem) - 3.736rem - 2rem - 1.618rem
@@ -29,7 +29,7 @@
 
 /* ── The bar: the resource ──────────────────────────────────────────────── */
 
-/* The resource's field, centered over the stage, `xl` over it as the template is under it. */
+/* The resource's field, centered over the Viewer, `xl` over it as the template is under it. */
 .bar {
   display: flex;
   justify-content: center;
@@ -38,12 +38,12 @@
 
 /*
  * From a tablet's width, on a screen tall enough to spare it, the bar holds under the
- * navbar while the stage scrolls past, so another resource is always a press away. Not
+ * navbar while the Viewer scrolls past, so another resource is always a press away. Not
  * on a phone, or a short screen, where with the navbar it would take too much of the
  * height. Its padding keeps the field off the navbar, and is taken back from the space
  * above and below it, so nothing moves at rest. The rest of the space below it is the
- * stage's, and it is held only within the box it shares with the stage, so the bar's
- * foot meets the stage's as the stage leaves, and the two go up together. While it can
+ * Viewer's, and it is held only within the box it shares with the Viewer, so the bar's
+ * foot meets the Viewer's as the Viewer leaves, and the two go up together. While it can
  * be held, the page's scroll padding reserves it (`useStuck`), so focus never lands
  * under it.
  */
@@ -56,7 +56,7 @@
     z-index: 10;
   }
 
-  .stage {
+  .viewer {
     margin-top: calc(var(--clover-space-xl, 2.618rem) - 0.618rem);
   }
 
@@ -76,9 +76,9 @@
   }
 
   /*
-   * With the stage passing under it (`data-stuck`), the bar is the navbar's lower half:
+   * With the Viewer passing under it (`data-stuck`), the bar is the navbar's lower half:
    * it takes the navbar's edge, which leaves the navbar's foot for the bar's, so the two
-   * read as one header, with one edge, where the stage goes under. The edge hands back
+   * read as one header, with one edge, where the Viewer goes under. The edge hands back
    * as the bar goes up under the navbar.
    */
   .bar[data-stuck]::before {
@@ -131,7 +131,7 @@
 
 .section {
   --pg-edge: color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
-  /* The stage's close, soft gray shadow, which the field shares (`tokens.css`). */
+  /* The Viewer's close, soft gray shadow, which the field shares (`tokens.css`). */
   --pg-lift: var(--card-lift);
 }
 
@@ -156,7 +156,7 @@
   flex-basis: 100%;
 }
 
-/* Held under the navbar, the field runs the playground's width, as the stage does. */
+/* Held under the navbar, the field runs the playground's width, as the Viewer does. */
 .bar[data-stuck] .resourcePicker {
   max-width: 100%;
 }
@@ -181,7 +181,7 @@
   min-width: 0;
 }
 
-/* The thumbnail of the resource on the stage, its label or address, and the list's chevron. */
+/* The thumbnail of the resource in the Viewer, its label or address, and the list's chevron. */
 .field {
   align-items: center;
   border: 1px solid var(--pg-edge);
@@ -383,7 +383,7 @@
 
 /*
  * A resource: its thumbnail, its own label, and what it holds under it. Marked as the thumbnails of
- * Items are: a ring round the picture for the one on the stage, with its name in the text
+ * Items are: a ring round the picture for the one in the Viewer, with its name in the text
  * accent and a check, so more than color tells it; the one the arrow keys reach, an
  * inner ring in the text accent.
  */
@@ -477,18 +477,18 @@
   margin: 0;
 }
 
-/* ── The stage ──────────────────────────────────────────────────────────── */
+/* ── The Viewer ─────────────────────────────────────────────────────────── */
 
 /*
  * A frame of one height, the edge of the box an implementer would give Clover. Each
  * template is fitted to it: Default and Document fill it, and Gallery scrolls within it.
  */
-.stage {
+.viewer {
   background: var(--color-background);
   border-radius: var(--radius-4);
   /* A hairline edge, then a close, soft gray shadow, just lifting the frame off the page. */
   box-shadow: var(--card-shadow);
-  height: var(--pg-stage-height);
+  height: var(--pg-viewer-height);
   overflow: auto;
   position: relative;
 }
@@ -498,48 +498,48 @@
  * height its header and thumbnail strip leave (all of it, for a resource of one view,
  * which has no strip).
  */
-.stage :global(.clover-template-default) {
+.viewer :global(.clover-template-default) {
   --clover-body-height: auto;
   height: 100%;
 }
 
-.stage :global(.clover-template-default-body) {
+.viewer :global(.clover-template-default-panes) {
   flex: 1;
   min-height: 0;
 }
 
-.stage :global(.clover-template-default-stage) {
+.viewer :global(.clover-template-default-body) {
   flex: 1 1 0;
   min-height: 0;
 }
 
-.stage :global(.clover-template-document) {
+.viewer :global(.clover-template-document) {
   --clover-template-document-height: 100%;
   border: 0;
   border-radius: 0;
 }
 
-.stage :global(.clover-template-gallery) {
+.viewer :global(.clover-template-gallery) {
   padding: 1.25rem 1.5rem 1.5rem;
 }
 
 @media (max-width: 640px) {
-  .stage :global(.clover-template-gallery) {
+  .viewer :global(.clover-template-gallery) {
     padding-inline: 1rem;
   }
 }
 
-/* ── Under the stage: a template, or a layout of one's own ──────────────── */
+/* ── Under the Viewer: a template, or a layout of one's own ─────────────── */
 
 /*
- * The two ways to use Clover, under the stage, as cards in "Why Clover"'s manner (Mat,
- * 2026-10-20): the page's ground with the stage's hairline and soft gray shadow, and the
+ * The two ways to use Clover, under the Viewer, as cards in "Why Clover"'s manner (Mat,
+ * 2026-10-20): the page's ground with the Viewer's hairline and soft gray shadow, and the
  * code editor's black; a label, a title with the hero's stroke under its key words, a
  * sentence, and the way on. Side by side, one above the other on a phone.
  */
 /*
  * The two ways to use Clover, centered on the page's ground (Mat, 2026-10-20), held well
- * off the stage and the parts: a short headline, one sentence with the template named
+ * off the Viewer and the parts: a short headline, one sentence with the template named
  * in it by its menu, and the two actions under it.
  */
 /*
@@ -577,7 +577,7 @@
 }
 
 /*
- * The template on the stage, in the sentence's own type, and a chevron that turns while
+ * The Viewer's template, in the sentence's own type, and a chevron that turns while
  * open. No fill: a hairline edge, at 3:1 as the field's, tinted with the accent under the
  * pointer and while open.
  */

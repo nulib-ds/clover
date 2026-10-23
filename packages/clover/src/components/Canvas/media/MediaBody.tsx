@@ -16,7 +16,7 @@ const SKIP_SECONDS = 10;
 /** A moment's annotation (`#t=` with no end) shows this long, to read a few words. */
 const MOMENT_SECONDS = 3;
 
-export interface MediaStageProps {
+export interface MediaBodyProps {
   media: MediaPlacement;
   presentation: "dom" | "texture";
   request?: CloverRequest;
@@ -78,7 +78,7 @@ export interface MediaStageProps {
  * - Sound plays through the same element and transport, over the Canvas's accompanying
  *   or placeholder image when it has one.
  */
-const MediaStage: React.FC<MediaStageProps> = ({
+const MediaBody: React.FC<MediaBodyProps> = ({
   media,
   presentation,
   request,
@@ -151,7 +151,7 @@ const MediaStage: React.FC<MediaStageProps> = ({
   const { play, toggle, toggleMute, skip } = controller;
 
   /*
-   * A browser that will not play without a fresh gesture (Safari, once the stage has
+   * A browser that will not play without a fresh gesture (Safari, once the Body has
    * loaded) leaves it paused, its transport ready; `play` swallows the refusal.
    */
   useEffect(() => {
@@ -303,4 +303,4 @@ const MediaStage: React.FC<MediaStageProps> = ({
   );
 };
 
-export default MediaStage;
+export default MediaBody;

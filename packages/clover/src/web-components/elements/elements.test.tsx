@@ -155,7 +155,7 @@ describe("Clover's elements", () => {
     expect(element.querySelector(".intro")).toBe(intro);
     expect(element.firstElementChild).toBe(intro);
     expect(element.querySelector("clover-body > .mine")).toBe(mine);
-    // Each element draws as its own code arrives: the stage's comes with the Canvas.
+    // Each element draws as its own code arrives: the Body's comes with the Canvas.
     await waitFor(() =>
       expect(
         element.querySelector("clover-body > .clover-body"),

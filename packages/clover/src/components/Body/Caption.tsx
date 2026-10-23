@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
 
 import { Close } from "./glyphs";
-import type { IIIFCanvas } from "./layout";
+import type { IIIFCanvas } from "../Canvas/layout";
 import Button from "../../ui/Button";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { localize } from "../../core/value";

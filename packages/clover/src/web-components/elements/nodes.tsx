@@ -7,7 +7,7 @@ import React, {
 
 /*
  * What a container element reads of the page's markup inside it (a panel's tabs, a
- * status's slots, a stage's toggle), and how the page's own nodes are shown where the part
+ * status's slots, a Body's toggle), and how the page's own nodes are shown where the part
  * draws them: copied (a slot), moved (a tab's content), or handed back by a function of the
  * page's (`renderItem`).
  */
@@ -119,7 +119,7 @@ export function Moved({
 }
 
 /**
- * The children of the page's that `picks` chooses (a stage's own buttons), moved to right
+ * The children of the page's that `picks` chooses (a Body's own buttons), moved to right
  * after a hidden mark where the part draws this, so they sit among the part's own nodes
  * there as its children (the cluster's controls, which fade together), and back where
  * they were when the part lets them go. Those the page adds later follow.

@@ -576,7 +576,7 @@
   width: 1px;
 }
 
-/* The playground stage's edge and shadow, so the two read as the same viewer. */
+/* The edge and shadow of the playground's Viewer, so the two read as the same viewer. */
 .viewer {
   background: var(--color-background);
   border-radius: var(--radius-4);
@@ -871,7 +871,7 @@
 /*
  * Items' region holds the room Items keeps round each picture for its ring
  * (`--clover-items-ring-room`, 4px), which Items lets out past its edges: so the strip
- * meets the stage's edges, and the region's outline keeps clear of the rings, as every
+ * meets the Body's edges, and the region's outline keeps clear of the rings, as every
  * other part's keeps clear of its part.
  */
 .viewer > .regionItems {
@@ -1055,6 +1055,7 @@
 /* ── The parts ────────────────────────────────────────────────────────────── */
 
 .tiles {
+  container-type: inline-size;
   display: grid;
   gap: 1.618rem;
   grid-auto-flow: row dense;
@@ -1097,9 +1098,13 @@
   box-shadow: 0 0 0 1px var(--accent-9);
 }
 
-/* Narrow: half-width tiles at most, then one a row. */
-@media (max-width: 48rem) {
-  .tile[data-span="2"] {
+/*
+ * Narrow (the tiles' own width, beside the held viewer or on a small screen): a third is
+ * too narrow for a part's name, which never breaks (`<Clover.Thumbnail />`), and its
+ * arrow beside it, so the third and the two thirds beside it share the row in halves.
+ */
+@container (max-width: 47.5rem) {
+  .tile:is([data-span="2"], [data-span="4"]) {
     grid-column: span 3;
   }
 }
@@ -1110,11 +1115,22 @@
   }
 }
 
+/*
+ * A tile's head: its name, what it reads, and at its end an arrow, which says the tile
+ * leads to the part's page (Mat, 2026-10-23: obvious, and light). The whole head is the
+ * link, its name's (`.tileName a::after`). Pointed at or focused (`data-on`: the
+ * pointer's own moves, never the page scrolling under it, `pointerTo`), its name is
+ * underlined and its arrow takes the accent and steps forward, by a transform alone, as the
+ * tile's edge takes the accent.
+ */
 .tileHead {
   align-items: baseline;
   display: flex;
   flex-wrap: wrap;
   gap: 0.382rem 0.618rem;
+  /* Room for the arrow, which holds its corner however the words wrap. */
+  padding-inline-end: 0.618rem;
+  position: relative;
 }
 
 /* The part's name, whole: the line breaks between the name and what it reads, never inside it. */
@@ -1129,10 +1145,26 @@
 .tileName a {
   color: var(--accent-11);
   text-decoration: none;
+  text-underline-offset: 0.2em;
 }
 
-.tileName a:hover {
+/* The name's link answers anywhere on the head: what it reads, the arrow. */
+.tileName a::after {
+  content: "";
+  inset: 0;
+  position: absolute;
+}
+
+.tileName a:hover,
+.tile[data-on] .tileName a {
   text-decoration: underline;
+}
+
+/* Focused, the ring the page's other controls take (`.value`): the accent, 5:1 on white. */
+.tileName a:focus-visible {
+  border-radius: var(--radius-2);
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
 }
 
 .reads {
@@ -1141,11 +1173,33 @@
   font-size: 0.8125rem;
 }
 
-.fact {
+/*
+ * Drawn only, in the muted text's gray (5.9:1 on white, well over 1.4.11's 3:1): a press on
+ * it is the link's, which runs under it. It keeps the card's top right, the same place
+ * from its corner on every tile, 1rem in from its edge (into its padding, so a narrow
+ * tile's name, which never breaks, still fits beside it), centered on the name's first
+ * line, at the name's size, however the words under it wrap (Mat, 2026-10-23).
+ */
+.tileArrow {
   color: var(--gray-11);
-  font-size: 0.8125rem;
-  font-variant-numeric: tabular-nums;
-  margin-left: auto;
+  font-size: 0.875rem;
+  inset-block-start: 0;
+  inset-inline-end: calc(1rem - 1.618rem);
+  line-height: 1.5;
+  pointer-events: none;
+  position: absolute;
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.tile[data-on] .tileArrow {
+  color: var(--accent-11);
+  transform: translateX(0.236rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tileArrow {
+    transition: none;
+  }
 }
 
 .tileBody {
@@ -1175,7 +1229,7 @@
   width: auto;
 }
 
-.stage {
+.body {
   --clover-body-height: 26rem;
   border-radius: var(--radius-3);
   overflow: hidden;
@@ -1250,7 +1304,7 @@
 
 /*
  * Laid out as a list or a grid (from its code), its pictures smaller, and scrolling in a
- * box the stage's height at most, so the viewer stays in the window.
+ * box 15rem tall at most, so the viewer stays in the window.
  */
 .viewerStrip:not([data-layout="carousel"]) {
   --clover-items-size: 6.854rem;

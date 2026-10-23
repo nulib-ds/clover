@@ -13,6 +13,9 @@ import { useRouter } from "docs/lib/router";
  * the docs around it, its height the screen's (`100dvh`, so it follows a browser bar that
  * comes and goes). `?r=<key>` opens one of the playground's resources (`book`, `map`,
  * `film`…), `?iiif-content=<url>` any other; the playground's Collection otherwise.
+ * `?rem=<px>` sets the screen's root size, and so the Viewer's `1rem`, as a message from
+ * a page of the same site does (`{ type: "clover-rem", px }`): Styling's calculator frames
+ * it to show a change of `1rem` in one Viewer, the page around it left as it is.
  */
 const Viewer = dynamic(
   () =>
@@ -43,6 +46,22 @@ const ViewerScreen: React.FC = () => {
     // Any resource may have places, so the map's worker is set before it opens.
     loadMapWorker().then(() => setResource(address));
   }, [router.isReady, router.query, router.basePath]);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    const root = document.documentElement;
+    const size = (px: unknown) => {
+      if (typeof px === "number" && px >= 1 && px <= 100)
+        root.style.fontSize = `${px}px`;
+    };
+    size(Number(router.query.rem));
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== location.origin) return;
+      if (event.data?.type === "clover-rem") size(event.data.px);
+    };
+    addEventListener("message", onMessage);
+    return () => removeEventListener("message", onMessage);
+  }, [router.isReady, router.query.rem]);
 
   return (
     <div className={styles.screen}>

@@ -2,7 +2,8 @@
  * The end-to-end harness: one scene of @nulib/clover, chosen by the query string, over
  * the package's source.
  *
- *   ?scene=viewer|items|document|gallery|composed|collection|map|panel   what to render (default
+ *   ?scene=viewer|items|document|gallery|composed|collection|map|panel|timeline|scene
+ *                                          what to render (default
  *                                          viewer, in its Default template; document
  *                                          and gallery are the Viewer in those
  *                                          templates); `composed` publishes the viewport
@@ -13,7 +14,13 @@
  *                                          site's own sections, long named and full of
  *                                          links, in a narrow scrolling pane;
  *                                          `collection` is a Root's title, its
- *                                          CollectionSelect, its Status and the Canvas
+ *                                          CollectionSelect, its Status and the Canvas;
+ *                                          `timeline` and `scene` are a Timeline and a
+ *                                          Scene alone, loading the content themselves;
+ *                                          `compare` is the Scene twice, drawn by
+ *                                          three.js and by Clover's own renderer
+ *   &engine=clover|three                   (scene) what draws the Scene's models
+ *   &model=<glTF url>                      (scene, compare) a Scene of this one model
  *   &presentation=texture                  (composed) draw video into the canvas
  *   &navigator=1                           (composed) show the Canvas's navigator
  *   &content=<url or content state>        its iiifContent
@@ -21,7 +28,7 @@
  *   &headers=1                             send `X-Clover: e2e` and credentials
  *   &panel=tabs|accordion                  the information panel's sections as tabs or boxes
  *   &debug=1                               a fixed readout of the media element and the
- *                                          chrome, for devices with no console at hand
+ *                                          controls, for devices with no console at hand
  */
 import React from "react";
 import { createRoot } from "react-dom/client";
@@ -40,6 +47,29 @@ const content =
 const panelLayout = (["tabs", "accordion"] as const).find(
   (layout) => layout === params.get("panel"),
 );
+/** A Scene of one model, at its origin, for `&model=`. */
+const modelScene = (src: string) => ({
+  id: `${src}#scene`,
+  type: "Scene",
+  label: { none: [src.split("/").pop() ?? src] },
+  items: [
+    {
+      id: `${src}#page`,
+      type: "AnnotationPage",
+      items: [
+        {
+          id: `${src}#painting`,
+          type: "Annotation",
+          motivation: ["painting"],
+          body: { id: src, type: "Model" },
+          target: { id: `${src}#scene`, type: "Scene" },
+        },
+      ],
+    },
+  ],
+});
+const model = params.get("model");
+const engine = params.get("engine") === "three" ? "three" : "clover";
 const request =
   params.get("headers") === "1"
     ? { headers: { "X-Clover": "e2e" }, credentials: "include" as const }
@@ -64,6 +94,53 @@ function ViewportProbe() {
     [clover],
   );
   return null;
+}
+
+/**
+ * The Scene twice, drawn by three.js and by Clover's own renderer, three.js once Clover's
+ * has its models: two downloads at once of a model Chrome cannot cache fail one of them
+ * (`ERR_CACHE_WRITE_FAILURE`), and only Clover's loads share one.
+ */
+function Compare() {
+  const [cloverDone, setCloverDone] = React.useState(false);
+  const clover = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const host = clover.current;
+    if (!host) return;
+    const check = () => {
+      const status = host
+        .querySelector("[data-testid='clover-scene']")
+        ?.getAttribute("data-status");
+      if (status && status !== "loading") setCloverDone(true);
+    };
+    const watch = new MutationObserver(check);
+    watch.observe(host, { attributes: true, childList: true, subtree: true });
+    check();
+    return () => watch.disconnect();
+  }, []);
+  return (
+    <div style={{ display: "flex", gap: "1rem", height: "70vh" }}>
+      {(["three", "clover"] as const).map((each) => (
+        <figure key={each} style={{ flex: 1, margin: 0 }}>
+          <figcaption>{each === "three" ? "three.js" : "Clover"}</figcaption>
+          <div
+            ref={each === "clover" ? clover : undefined}
+            style={{ height: "calc(100% - 2rem)" }}
+          >
+            {(each === "clover" || cloverDone) && (
+              <Clover.Scene
+                {...(model
+                  ? { scene: modelScene(model) }
+                  : { iiifContent: content })}
+                options={{ request }}
+                engine={each}
+              />
+            )}
+          </div>
+        </figure>
+      ))}
+    </div>
+  );
 }
 
 function Scene() {
@@ -139,6 +216,26 @@ function Scene() {
           <button type="button">After the panel</button>
         </Clover.Root>
       );
+    case "timeline":
+      return (
+        <div style={{ height: "60vh" }}>
+          <Clover.Timeline iiifContent={content} options={{ request }} />
+        </div>
+      );
+    case "scene":
+      return (
+        <div style={{ height: "60vh" }}>
+          <Clover.Scene
+            {...(model
+              ? { scene: modelScene(model) }
+              : { iiifContent: content })}
+            options={{ request }}
+            engine={engine}
+          />
+        </div>
+      );
+    case "compare":
+      return <Compare />;
     case "gallery":
       return (
         <Viewer
@@ -167,11 +264,11 @@ function Scene() {
   }
 }
 
-/** Media and chrome state, as text, every half second: read off a device's screen. */
+/** Media and controls state, as text, every half second: read off a device's screen. */
 function DebugReadout() {
   const [text, setText] = React.useState("");
   React.useEffect(() => {
-    // Events, not samples: a tap's chrome may come and go between two readings.
+    // Events, not samples: a tap's controls may come and go between two readings.
     const seen = {
       down: 0,
       target: "-",
@@ -210,13 +307,13 @@ function DebugReadout() {
     document.addEventListener("pointerdown", onDown, true);
     const observer = new MutationObserver((records) => {
       for (const record of records) {
-        if ((record.target as HTMLElement).dataset.chrome === "visible")
+        if ((record.target as HTMLElement).dataset.controls === "visible")
           seen.visible++;
       }
     });
     observer.observe(document.body, {
       attributes: true,
-      attributeFilter: ["data-chrome"],
+      attributeFilter: ["data-controls"],
       subtree: true,
     });
     const timer = setInterval(() => {
@@ -225,13 +322,13 @@ function DebugReadout() {
       const transport = document.querySelector(".clover-canvas-transport");
       setText(
         [
-          `chrome=${canvas?.dataset.chrome ?? "-"} status=${canvas?.dataset.status ?? "-"}`,
+          `controls=${canvas?.dataset.controls ?? "-"} status=${canvas?.dataset.status ?? "-"}`,
           `transport=${transport ? getComputedStyle(transport).opacity : "none"}`,
           video
             ? `video ready=${video.readyState} net=${video.networkState} paused=${video.paused} muted=${video.muted} t=${video.currentTime.toFixed(1)} ${video.videoWidth}x${video.videoHeight} err=${video.error?.code ?? "-"} src=${(video.currentSrc || video.src).slice(0, 40)}`
             : "video none",
           `click=${seen.clicks} on ${seen.clicked} · media ${seen.media.join(",") || "-"}`,
-          `pointerdown=${seen.down} (${[...seen.types].join(",")}) on ${seen.target} · chrome shown ${seen.visible}×`,
+          `pointerdown=${seen.down} (${[...seen.types].join(",")}) on ${seen.target} · controls shown ${seen.visible}×`,
           `fullscreenEnabled=${String((document as any).fullscreenEnabled)} webkitEnter=${typeof (video as any)?.webkitEnterFullscreen}`,
         ].join("\n"),
       );

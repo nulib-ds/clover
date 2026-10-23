@@ -25,7 +25,7 @@ const PartsLive = dynamic(() => import("docs/components/Home/PartsLive"), {
 const Parts: React.FC<{
   /** The playground's resource: an address or a content state. */
   resource: string | null;
-  /** Put one of the playground's resources on its stage, by key. */
+  /** Open one of the playground's resources in its Viewer, by key. */
   onTry: (key: string) => void;
   /**
    * The parts, listed (`PartsIndex.tsx`, drawn on the server): out of sight until the live
@@ -44,7 +44,7 @@ const Parts: React.FC<{
     <section className={styles.section}>
       {/*
        * `#parts` for links to the section. The calls to action over it, under the
-       * playground's stage, lead to the docs.
+       * playground's Viewer, lead to the docs.
        */}
       <h2
         ref={heading}

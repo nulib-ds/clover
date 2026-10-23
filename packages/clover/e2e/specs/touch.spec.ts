@@ -3,9 +3,9 @@ import { type Page, expect, test } from "@playwright/test";
 import { serveIIIF } from "./fixtures";
 
 /*
- * The Canvas's chrome under a finger, in a browser that turns touches into pointer
- * events itself. With no hover to hold it, no timer hides it (WCAG 2.2.1): a tap on the
- * picture shows the controls, and the next hides them.
+ * The Canvas's controls under a finger, in a browser that turns touches into pointer
+ * events itself. With no hover to hold them, no timer hides them (WCAG 2.2.1): a tap on
+ * the picture shows them, and the next hides them.
  */
 test.use({ hasTouch: true });
 
@@ -38,23 +38,23 @@ test("a tap on the picture shows the controls until the next tap, however long t
   const picture = await open(page);
   const canvas = page.locator(".clover-canvas");
   const zoomIn = page.getByRole("button", { name: "Zoom in" });
-  await expect(canvas).toHaveAttribute("data-chrome", "hidden");
+  await expect(canvas).toHaveAttribute("data-controls", "hidden");
 
   await page.touchscreen.tap(picture.x, picture.y);
-  await expect(canvas).toHaveAttribute("data-chrome", "visible");
+  await expect(canvas).toHaveAttribute("data-controls", "visible");
 
   // Well past a mouse's two seconds, the controls are still there to tap.
   await page.waitForTimeout(3000);
-  await expect(canvas).toHaveAttribute("data-chrome", "visible");
+  await expect(canvas).toHaveAttribute("data-controls", "visible");
   await expect(zoomIn).toHaveCSS("opacity", "1");
   const before = (await area(page))!;
   await zoomIn.tap();
   // Less of the Canvas shows (clipped to the Canvas, so not a quarter as much).
   await expect.poll(() => area(page)).toBeLessThan(before * 0.9);
-  await expect(canvas).toHaveAttribute("data-chrome", "visible");
+  await expect(canvas).toHaveAttribute("data-controls", "visible");
 
   await page.touchscreen.tap(picture.x, picture.y);
-  await expect(canvas).toHaveAttribute("data-chrome", "hidden");
+  await expect(canvas).toHaveAttribute("data-controls", "hidden");
 });
 
 test("a tap where a faded control sits shows the controls, and zooms nothing", async ({
@@ -68,13 +68,13 @@ test("a tap where a faded control sits shows the controls, and zooms nothing", a
     .boundingBox())!;
 
   await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
-  await expect(canvas).toHaveAttribute("data-chrome", "visible");
+  await expect(canvas).toHaveAttribute("data-controls", "visible");
   await page.waitForTimeout(500);
   expect((await area(page))! / before).toBeCloseTo(1, 3);
 });
 
 /**
- * A Canvas of the stage's shape, so at home it fills the stage, and one note on its top
+ * A Canvas of the Body's shape, so at home it fills the Body, and one note on its top
  * left quarter, under the navigator.
  */
 const NOTED = "https://fixtures.test/noted.json";
@@ -139,11 +139,11 @@ const notedOf = (width: number, height: number) => ({
   ],
 });
 
-test("a tap where the faded navigator sits over a hotspot shows the chrome, and leaves the hotspot alone", async ({
+test("a tap where the faded navigator sits over a hotspot shows the controls, and leaves the hotspot alone", async ({
   page,
 }) => {
   await serveIIIF(page);
-  // The stage is 60vh tall and (nearly) the page's width.
+  // The Body is 60vh tall and (nearly) the page's width.
   const screen = page.viewportSize()!;
   const noted = notedOf(
     3000,
@@ -163,7 +163,7 @@ test("a tap where the faded navigator sits over a hotspot shows the chrome, and 
   await expect.poll(() => area(page)).not.toBeNull();
   const hotspot = page.getByRole("button", { name: "A corner", exact: true });
   await expect(hotspot).toBeAttached();
-  await expect(canvas).toHaveAttribute("data-chrome", "hidden");
+  await expect(canvas).toHaveAttribute("data-controls", "hidden");
 
   const box = (await page.locator(".clover-canvas-navigator").boundingBox())!;
   const at = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
@@ -178,12 +178,12 @@ test("a tap where the faded navigator sits over a hotspot shows the chrome, and 
   const before = (await area(page))!;
 
   await page.touchscreen.tap(at.x, at.y);
-  await expect(canvas).toHaveAttribute("data-chrome", "visible");
+  await expect(canvas).toHaveAttribute("data-controls", "visible");
   await page.waitForTimeout(500);
   await expect(hotspot).not.toHaveAttribute("aria-current", "true");
   expect((await area(page))! / before).toBeCloseTo(1, 3);
 
-  // Clear of the chrome, the hotspot takes its own tap.
+  // Clear of the controls, the hotspot takes its own tap.
   const spot = (await hotspot.boundingBox())!;
   await page.touchscreen.tap(
     spot.x + spot.width * 0.75,

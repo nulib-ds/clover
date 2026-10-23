@@ -32,7 +32,7 @@ interface TransportProps {
   /** The caption track showing, or -1 for none. */
   activeCaption: number;
   onCaptionChange: (index: number) => void;
-  /** Offer full screen at the end of the bar (a lone media Canvas has no other chrome). */
+  /** Offer full screen at the end of the bar (a lone media Canvas has no other controls). */
   fullscreen?: boolean;
   isFullscreen?: boolean;
   /** The video, which goes full screen in the system player where the root cannot. */
@@ -81,18 +81,18 @@ function canSetVolume(): boolean {
 
 /**
  * Places an open menu from where its button is, whichever row of the bar it wrapped
- * onto: no taller than the stage leaves above the button, and moved along, if it must
- * be, to lie within the transport's inset from the stage's sides (WCAG 1.4.10). What
- * nothing scrolls to, off the stage, cannot be read.
+ * onto: no taller than the Body leaves above the button, and moved along, if it must
+ * be, to lie within the transport's inset from the Body's sides (WCAG 1.4.10). What
+ * nothing scrolls to, off the Body, cannot be read.
  */
 function placeMenu(
   options: HTMLElement,
   wrapper: HTMLElement,
   transport: HTMLElement,
-  stage: HTMLElement,
+  bodyBox: HTMLElement,
 ) {
-  const room = stage.getBoundingClientRect();
-  // At rest: the transport stands on the stage's foot, and tucks (`Canvas.css`) with
+  const room = bodyBox.getBoundingClientRect();
+  // At rest: the transport stands on the Body's foot, and tucks (`Canvas.css`) with
   // its button, so the distance between them holds while it moves.
   const above =
     room.height -
@@ -183,18 +183,18 @@ function TransportMenu({
       document.removeEventListener("keydown", close, true);
     };
   }, [open]);
-  // Placed before it paints, and again as the stage, the bar or its options (a track
+  // Placed before it paints, and again as the Body, the bar or its options (a track
   // the media adds) change size.
   useLayoutEffect(() => {
     const options = list.current;
     const wrapper = menu.current;
     const transport = wrapper?.closest<HTMLElement>(".clover-canvas-transport");
-    const stage = wrapper?.closest<HTMLElement>(".clover-canvas-media");
-    if (!open || !options || !wrapper || !transport || !stage) return;
-    const place = () => placeMenu(options, wrapper, transport, stage);
+    const bodyBox = wrapper?.closest<HTMLElement>(".clover-canvas-media");
+    if (!open || !options || !wrapper || !transport || !bodyBox) return;
+    const place = () => placeMenu(options, wrapper, transport, bodyBox);
     place();
     const observer = new ResizeObserver(place);
-    observer.observe(stage);
+    observer.observe(bodyBox);
     observer.observe(transport);
     observer.observe(options);
     return () => observer.disconnect();
@@ -203,7 +203,7 @@ function TransportMenu({
     <div
       className="clover-canvas-transport-menu"
       ref={menu}
-      // Open over the stage, it would cover the control focus moves on to (WCAG
+      // Open over the Body, it would cover the control focus moves on to (WCAG
       // 2.4.11), so it closes, leaving focus there. Focus that goes nowhere (a press on
       // the menu's own text, another window) leaves it open.
       onBlur={(event) => {
@@ -382,7 +382,7 @@ const Transport: React.FC<TransportProps> = ({
   /*
    * While the popover shows, the caption cues stay above it: how far its top is from the
    * figure's foot, `--clover-transport-preview-top`, which the captions keep their foot
-   * over (`MediaStage.css`). Taken from the popover alone, so a cue's own glide never
+   * over (`MediaBody.css`). Taken from the popover alone, so a cue's own glide never
    * skews it; measured as it shows, and again if it wraps.
    */
   const seekArea = useRef<HTMLDivElement>(null);
@@ -532,7 +532,7 @@ const Transport: React.FC<TransportProps> = ({
           />
         )}
         {previewed >= 0 && duration > 0 && (
-          // Made anew for each chapter, so it measures itself into the stage each time.
+          // Made anew for each chapter, so it measures itself into the Body each time.
           <Tip
             key={previewed}
             label={`${formatTime(chapters[previewed].start)} ${chapters[previewed].label}`}
@@ -542,7 +542,7 @@ const Transport: React.FC<TransportProps> = ({
       </div>
 
       {/*
-       * One row while it fits. On a narrow stage, two: the time and chapter over the
+       * One row while it fits. On a narrow Body, two: the time and chapter over the
        * buttons (`Transport.css`), so none is cut off (WCAG 1.4.10).
        */}
       <div className="clover-canvas-transport-bar" ref={bar}>

@@ -22,51 +22,51 @@
  * their end, no wider or taller than the Canvas leaves room for. Each is the Canvas's own
  * child, under the controls in the stacking order (`Canvas.css`), so a control's Tip
  * always shows over it, and the controls stay usable while it is open. Below all of
- * them: a narrow stage wraps the cluster onto more rows, which it measures
+ * them: a narrow Body wraps the cluster onto more rows, which it measures
  * (`--clover-canvas-controls-height`, `ui/useClusterReach.ts`).
  */
 .clover-canvas > :is(.clover-canvas-caption, .clover-canvas-menu) {
   --top: calc(
-    var(--clover-canvas-chrome-inset) +
+    var(--clover-canvas-controls-inset) +
       var(--clover-canvas-controls-height, var(--clover-control)) +
       var(--clover-space-s)
   );
   top: var(--top);
-  right: var(--clover-canvas-chrome-inset);
-  max-width: min(22rem, calc(100% - 2 * var(--clover-canvas-chrome-inset)));
-  max-height: calc(100% - var(--top) - var(--clover-canvas-chrome-inset));
+  right: var(--clover-canvas-controls-inset);
+  max-width: min(22rem, calc(100% - 2 * var(--clover-canvas-controls-inset)));
+  max-height: calc(100% - var(--top) - var(--clover-canvas-controls-inset));
 }
 
 /*
- * Clear of a video or sound's playback controls, which stay reachable below. On a stage
+ * Clear of a video or sound's playback controls, which stay reachable below. On a Body
  * too short for that to leave a box worth reading, it may cover them, as far as the
- * stage's inset, and closes to give them back (WCAG 1.4.10).
+ * Body's inset, and closes to give them back (WCAG 1.4.10).
  */
 .clover-canvas[data-media] > :is(.clover-canvas-caption, .clover-canvas-menu) {
   max-height: max(
     calc(100% - var(--top) - var(--clover-transport-room)),
     min(
       2 * var(--clover-space-2xl),
-      calc(100% - var(--top) - var(--clover-canvas-chrome-inset))
+      calc(100% - var(--top) - var(--clover-canvas-controls-inset))
     )
   );
 }
 
 /*
- * On a short stage, where below the controls would leave one too little to read
+ * On a short Body, where below the controls would leave one too little to read
  * (`data-popups="beside"`, `ui/useClusterReach.ts`), it sits beside them instead, from the
- * top, as wide as is left between them and the stage's start, rather than over a control
+ * top, as wide as is left between them and the Body's start, rather than over a control
  * (WCAG 2.5.8); below the way out of full screen when full screen.
  */
 .clover-canvas[data-popups="beside"]
   > :is(.clover-canvas-caption, .clover-canvas-menu) {
-  --top: var(--clover-canvas-chrome-inset);
+  --top: var(--clover-canvas-controls-inset);
   right: calc(
-    var(--clover-canvas-chrome-inset) +
+    var(--clover-canvas-controls-inset) +
       var(--clover-canvas-controls-width, var(--clover-control)) +
       var(--clover-space-s)
   );
-  left: var(--clover-canvas-chrome-inset);
+  left: var(--clover-canvas-controls-inset);
   min-width: 0;
   max-width: none;
 }
@@ -74,7 +74,7 @@
 .clover-canvas[data-popups="beside"][data-fullscreen="true"]
   > :is(.clover-canvas-caption, .clover-canvas-menu) {
   --top: calc(
-    var(--clover-canvas-chrome-inset) + var(--clover-control) +
+    var(--clover-canvas-controls-inset) + var(--clover-control) +
       var(--clover-space-s)
   );
 }

@@ -7,12 +7,12 @@ import { useFocusOnOpen, useSlide, useWideEnough } from "../shared/useSlide";
 import { useFollowFocus } from "../shared/useFollowFocus";
 import { useSpine } from "../shared/useSpine";
 
-/** The narrowest the stage and the panel may be dragged, side by side. */
-const STAGE_MIN = "16rem";
+/** The narrowest the Body and the panel may be dragged, side by side. */
+const BODY_MIN = "16rem";
 const PANEL_MIN = "14rem";
 /**
  * The room both need beside each other: their minimums and the bar between them. Any
- * narrower (a phone) and the panel slides over the stage instead.
+ * narrower (a phone) and the panel slides over the Body instead.
  */
 const BESIDE_REM = 16 + 14 + 1;
 
@@ -20,7 +20,7 @@ const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export type DefaultProps = Omit<RootProps, "children"> & {
-  /** The header over the stage: the resource's thumbnail and title. Default `true`. */
+  /** The header over the Body: the resource's thumbnail and title. Default `true`. */
   header?: boolean;
   /**
    * The title's heading level, to fit the outline of the page around the layout (under
@@ -28,9 +28,9 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    * taking the title's place. Default 2.
    */
   headingLevel?: number;
-  /** The information panel beside the stage, with its toggle. Default `true`. */
+  /** The information panel beside the Body, with its toggle. Default `true`. */
   panel?: boolean;
-  /** Whether the panel starts open. Default: open when it has room beside the stage. */
+  /** Whether the panel starts open. Default: open when it has room beside the Body. */
   defaultPanelOpen?: boolean;
   /**
    * How the information panel lays out its sections: `"accordion"` (the default),
@@ -39,7 +39,7 @@ export type DefaultProps = Omit<RootProps, "children"> & {
   panelLayout?: PanelLayout;
   /** The downloads in the panel's About, as links. Default `true`. */
   download?: boolean;
-  /** The thumbnails under the stage: a layout, or `false` for none. Default `carousel`. */
+  /** The thumbnails under the Body: a layout, or `false` for none. Default `carousel`. */
   items?: Exclude<ItemsLayout, "pager"> | false;
   /**
    * Where the panel's width is remembered once the reader drags its bar
@@ -47,9 +47,9 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    */
   storageKey?: string | false;
   /**
-   * Fill the box it sits in: as tall as that box, the stage taking what the header and
+   * Fill the box it sits in: as tall as that box, the Body taking what the header and
    * the strip leave, so nothing runs below it. For a box of a set height, the window
-   * under a page's own header say. Default `false`: the stage is
+   * under a page's own header say. Default `false`: the Body is
    * `--clover-body-height` tall, and the layout as tall as it needs.
    */
   fill?: boolean;
@@ -59,11 +59,11 @@ export type DefaultProps = Omit<RootProps, "children"> & {
  * The Viewer's own layout, drawn when no `template` is given: Clover 3.x's Viewer, built
  * from 4.x parts. Copy this file to start a layout of your own.
  *
- * The title and its actions over the stage, and under the stage the thumbnail strip,
+ * The title and its actions over the Body, and under the Body the thumbnail strip,
  * headed by the position and a pair of arrows; the information panel to the right of all
  * three, the layout's full height. The panel has its own space, as in 3.x, and a bar
  * between it and the rest shares the width (drag it, or use the arrow keys on it). Where there is no room for both
- * (a phone), the panel slides over the stage instead, and a strip of the page stays
+ * (a phone), the panel slides over the Body instead, and a strip of the page stays
  * uncovered: a click there, Escape or the panel's close button puts it away. Size it with
  * `--clover-body-height`.
  */
@@ -80,12 +80,12 @@ export function Default({
   fill = false,
   ...root
 }: DefaultProps) {
-  const body = useRef<HTMLElement>(null);
+  const panes = useRef<HTMLElement>(null);
   const panelRef = useRef<HTMLElement>(null);
-  const beside = useWideEnough(body, BESIDE_REM);
+  const beside = useWideEnough(panes, BESIDE_REM);
   /*
    * The reader's choice (or the host's, to start with); until one is made the panel is
-   * open when it has room beside the stage, and closed when it would cover it.
+   * open when it has room beside the Body, and closed when it would cover it.
    */
   const [choice, setChoice] = useState<boolean | undefined>(defaultPanelOpen);
   const open = choice ?? beside;
@@ -96,10 +96,10 @@ export function Default({
   const title = Clover.titled(headingLevel, `${baseId}-title`);
   const pane = useRef<HTMLElement>(null);
   /*
-   * The panel's toggle sits on the spine, the bar between stage and panel, while the
-   * panel is open beside the stage, and among the stage's controls otherwise. So a press
-   * moves it, and focus on it, or in the panel as the panel goes (never left on what is
-   * hidden), follows it to its new place once drawn.
+   * The panel's toggle sits on the spine, the bar between the Body and the panel, while
+   * the panel is open beside the Body, and among the Body's controls otherwise. So a
+   * press moves it, and focus on it, or in the panel as the panel goes (never left on
+   * what is hidden), follows it to its new place once drawn.
    */
   const followFocus = useFollowFocus();
   const follow = () =>
@@ -130,7 +130,7 @@ export function Default({
     spine,
     () =>
       spine.current?.parentElement?.querySelector<HTMLElement>(
-        ".clover-template-default-stage",
+        ".clover-template-default-body",
       ),
     docked,
   );
@@ -138,17 +138,17 @@ export function Default({
     <Clover.PanelToggle
       open={open}
       onOpenChange={(next) => {
-        // Beside the stage it moves; over it, the panel takes focus as it opens.
+        // Beside the Body it moves; over it, the panel takes focus as it opens.
         if (!over) follow();
         setOpen(next);
       }}
       controls={panelId}
     />
   );
-  // Only over the stage does it slide: beside it, it simply shows and hides.
+  // Only over the Body does it slide: beside it, it simply shows and hides.
   const slide = useSlide(over && open);
   useFocusOnOpen(panelRef, over && slide.mounted);
-  // Over the stage, it can be dragged back off the way it came, as an app's drawer can.
+  // Over the Body, it can be dragged back off the way it came, as an app's drawer can.
   const scrim = useRef<HTMLDivElement>(null);
   useDragToClose(pane, {
     enabled: over && slide.open,
@@ -170,8 +170,8 @@ export function Default({
       {...root}
     >
       <Clover.Split
-        ref={body}
-        className="clover-template-default-body"
+        ref={panes}
+        className="clover-template-default-panes"
         data-panel={over ? "over" : "beside"}
         data-panel-open={panel && open}
         storageKey={storageKey || undefined}
@@ -193,7 +193,7 @@ export function Default({
         <Clover.SplitPane
           className="clover-template-default-main"
           // A minimum only while the Panel is docked beside it: over it, none.
-          min={over ? undefined : STAGE_MIN}
+          min={over ? undefined : BODY_MIN}
         >
           {header && (
             <header className="clover-template-default-header">
@@ -210,9 +210,9 @@ export function Default({
               />
             </header>
           )}
-          {/* Its stage shows the loading; announced here, nothing moves. */}
+          {/* The Body shows the loading; announced here, nothing moves. */}
           <Clover.Status loading={false} />
-          <Clover.Body className="clover-template-default-stage">
+          <Clover.Body className="clover-template-default-body">
             {panel && !docked && toggle}
           </Clover.Body>
           <div className="clover-template-default-rail">
@@ -224,7 +224,7 @@ export function Default({
           </div>
         </Clover.SplitPane>
         {docked && <Clover.SplitHandle aria-controls={panelId} />}
-        {/* Open beside the stage, its toggle on the spine, right after the bar. */}
+        {/* Open beside the Body, its toggle on the spine, right after the bar. */}
         {docked && (
           <div ref={spine} className="clover-template-default-spine">
             {toggle}
@@ -248,14 +248,14 @@ export function Default({
               download={download}
               // With no title over them, the sections take its place in the outline.
               headingLevel={header ? below(headingLevel) : headingLevel}
-              // Docked, the toggle closes it; over the stage, it carries its own close.
+              // Docked, the toggle closes it; over the Body, it carries its own close.
               onClose={over ? () => setOpen(false) : undefined}
               closeOnEscape={over}
             />
           </Clover.SplitPane>
         )}
         {panel && over && slide.mounted && (
-          // The uncovered strip, and the stage under the panel: a click puts it away.
+          // The uncovered strip, and the Body under the panel: a click puts it away.
           // A press on it takes no focus, so focus in the panel is still there to hand
           // back to the toggle, never left to fall to the page (WCAG 2.4.3).
           <div

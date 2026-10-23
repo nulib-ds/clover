@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import type { ItemModel, ItemPart } from "../../core/items";
+import { isSound } from "../../core/annotations";
 import type { CloverRequest } from "../../core/request";
 import { resolveThumbnail, thumbnailSource } from "../../core/thumbnail";
 import { localize } from "../../core/value";
@@ -102,7 +103,7 @@ function Picture({
           : ({ "--clover-items-ratio": ratio } as React.CSSProperties)
       }
     >
-      {!src && none && part.media === "Sound" && <Speaker />}
+      {!src && none && isSound(part.media) && <Speaker />}
       {src && (
         <img
           src={src}

@@ -9,7 +9,7 @@ describe("OverlayLayer", () => {
   });
 
   /*
-   * What a hotspot shows beside itself (its popover) is kept inside the stage from its
+   * What a hotspot shows beside itself (its popover) is kept inside the Body from its
    * center across, its edges, and the side of it with more room.
    */
   describe("each overlay's place in the layer", () => {
@@ -25,7 +25,7 @@ describe("OverlayLayer", () => {
 
     it("is its center across, its edges, and the side with more room", () => {
       const { layer, element } = setup();
-      // The camera's center on the stage's: world (400, 300) at screen (400, 300).
+      // The camera's center on the Body's: world (400, 300) at screen (400, 300).
       layer.position({ x: 400, y: 300, zoom: 1, rotation: 0 }, viewport);
       expect(value(element, "x")).toBe("125px");
       expect(value(element, "top")).toBe("400px");
@@ -77,7 +77,7 @@ describe("OverlayLayer", () => {
       expect(element.style.transform).toBe("translate(100.5px, 400px)");
       expect(element.style.width).toBe("50.5px");
       expect(element.style.height).toBe("20px");
-      // Its popover keeps within the stage from the edges as drawn.
+      // Its popover keeps within the Body from the edges as drawn.
       expect(element.style.getPropertyValue("--clover-overlay-top")).toBe(
         "400px",
       );

@@ -4,14 +4,14 @@ import React, { useRef, useState } from "react";
 import {
   DEFAULT_HIDE_DELAY,
   LEAVE_DELAY,
-  useChromeVisibility,
-} from "./useChromeVisibility";
-import { TAP_MS } from "../../lib/renderer/input/GestureController";
+  useControlsVisibility,
+} from "./useControlsVisibility";
+import { TAP_MS } from "../../lib/pointer";
 
 function Probe() {
   const [element, setElement] = useState<HTMLDivElement | null>(null);
   const picture = useRef<HTMLDivElement>(null);
-  const visible = useChromeVisibility(element, undefined, picture);
+  const visible = useControlsVisibility(element, undefined, picture);
   return (
     <div data-testid="probe" data-visible={visible} ref={setElement}>
       <button type="button">Inside</button>
@@ -99,7 +99,7 @@ const wait = (ms: number) => act(() => void vi.advanceTimersByTime(ms));
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
-describe("useChromeVisibility", () => {
+describe("useControlsVisibility", () => {
   it("shows on pointer activity and fades after the hide delay", () => {
     const { getByTestId } = render(<Probe />);
     const probe = getByTestId("probe");
@@ -137,7 +137,7 @@ describe("useChromeVisibility", () => {
     expect(probe).toHaveAttribute("data-visible", "false");
   });
 
-  it("does not flash faded chrome back when a mouse-focused viewer blurs", () => {
+  it("does not flash faded controls back when a mouse-focused viewer blurs", () => {
     const { getByTestId, getByRole } = render(<Probe />);
     const probe = getByTestId("probe");
     const inside = getByRole("button", { name: "Inside" });
@@ -150,8 +150,9 @@ describe("useChromeVisibility", () => {
   });
 
   /*
-   * A screen reader may move focus without `:focus-visible`, so the CSS that holds the
-   * chrome for the keyboard cannot be relied on: focus from anything but a press shows it.
+   * A screen reader may move focus without `:focus-visible`, so the CSS that holds
+   * the controls for the keyboard cannot be relied on: focus from anything but a
+   * press shows them.
    */
   it("shows for focus that no press brought, and holds it until focus leaves", () => {
     const { getByTestId, getByRole } = render(<Probe />);
@@ -194,7 +195,7 @@ describe("useChromeVisibility", () => {
     wait(DEFAULT_HIDE_DELAY);
     expect(probe).toHaveAttribute("data-visible", "false");
 
-    // Its tap on the picture is a mouse's press: it shows the chrome, on the timer.
+    // Its tap on the picture is a mouse's press: it shows the controls, on the timer.
     tap(picture, { pointerType: "pen" });
     expect(probe).toHaveAttribute("data-visible", "true");
     wait(DEFAULT_HIDE_DELAY);
@@ -202,9 +203,9 @@ describe("useChromeVisibility", () => {
   });
 
   describe.each(["touch", "pen", "mouse"])(
-    "a %s press on the picture where faded chrome sits",
+    "a %s press on the picture where faded controls sit",
     (pointerType) => {
-      it("only shows the chrome: the hotspot beneath sees neither the press nor its click", () => {
+      it("only shows the controls: the hotspot beneath sees neither the press nor its click", () => {
         const { getByTestId, getByRole } = render(<Probe />);
         const probe = getByTestId("probe");
         navigatorAt(probe);
@@ -223,7 +224,7 @@ describe("useChromeVisibility", () => {
         wait(TAP_MS);
         expect(probe).toHaveAttribute("data-visible", "true");
 
-        // Clear of the faded chrome, the hotspot takes its own press.
+        // Clear of the faded controls, the hotspot takes its own press.
         press(hotspot, "pointerdown", { pointerType, x: 80 });
         press(hotspot, "pointerup", { pointerType, x: 80 });
         click(hotspot);
@@ -268,7 +269,7 @@ describe("useChromeVisibility", () => {
       expect(probe).toHaveAttribute("data-visible", "false");
     });
 
-    it("leaves the chrome as it was on a double tap, which zooms", () => {
+    it("leaves the controls as they were on a double tap, which zooms", () => {
       const { getByTestId } = render(<Probe />);
       const probe = getByTestId("probe");
       const picture = getByTestId("picture");
@@ -330,7 +331,7 @@ describe("useChromeVisibility", () => {
       expect(probe).toHaveAttribute("data-visible", "false");
     });
 
-    it("stops a mouse's timer, so the chrome a mouse showed stays under a finger", () => {
+    it("stops a mouse's timer, so the controls a mouse showed stay under a finger", () => {
       const { getByTestId } = render(<Probe />);
       const probe = getByTestId("probe");
       act(() => void probe.dispatchEvent(mouse("pointermove")));

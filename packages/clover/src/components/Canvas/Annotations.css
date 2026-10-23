@@ -17,7 +17,7 @@
   pointer-events: none;
   /*
    * Its own stacking layer, so the hotspots' depths never rise over the viewport's
-   * focus ring or the chrome; and the box their popovers keep within.
+   * focus ring or the controls; and the box their popovers keep within.
    */
   isolation: isolate;
   container-type: size;

@@ -231,7 +231,7 @@ describe("<clover-viewer>", () => {
     }
   });
 
-  it("header=false leaves out the title over the stage", async () => {
+  it("header=false leaves out the title over the Body", async () => {
     const element = mount({ header: "false" });
     // The strip still draws, so the Manifest has loaded.
     await within(element).findByRole("button", { name: "Next" });

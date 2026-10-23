@@ -32,7 +32,7 @@ export interface ViewportSize {
   height: number;
 }
 
-/** World → screen (CSS pixels, origin top-left of the stage). */
+/** World → screen (CSS pixels, origin top-left of the Body). */
 export function worldToScreen(
   camera: CameraState,
   viewport: ViewportSize,

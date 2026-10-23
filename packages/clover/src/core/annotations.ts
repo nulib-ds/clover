@@ -113,6 +113,12 @@ function readTarget(target: Target): ParsedAnnotationTarget {
   return source;
 }
 
+/**
+ * Sound's body type: `Audio` in Presentation 4, `Sound` as Presentation 3 named it. Here,
+ * with the core every page loads, so Canvas and Items share it without a file of its own.
+ */
+export const isSound = (type: unknown) => type === "Audio" || type === "Sound";
+
 /** An annotation's bodies, with Presentation 4's groups unwrapped. */
 export function bodiesOf(
   annotation: Record<string, any>,

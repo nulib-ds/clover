@@ -1,6 +1,6 @@
 /*
- * Default, the Viewer's own layout: Clover 3.x's Viewer. Title and actions over the stage;
- * the thumbnail strip under the stage, headed by the view's page titles and the position;
+ * Default, the Viewer's own layout: Clover 3.x's Viewer. Title and actions over the Body;
+ * the thumbnail strip under the Body, headed by the view's page titles and the position;
  * the information panel to the right of all three, the layout's full height.
  *
  * On the scale: the header, the strip, the panel and the picture are regions, each
@@ -16,9 +16,9 @@
 }
 
 /*
- * `fill`: as tall as the box it sits in, and the stage takes what the header and the strip
+ * `fill`: as tall as the box it sits in, and the Body takes what the header and the strip
  * leave (flex, rather than `--clover-body-height`), so the layout never runs below it.
- * Never a stage under 16rem, the width it keeps beside the panel: in a box too short for
+ * Never a Body under 16rem, the width it keeps beside the panel: in a box too short for
  * that, the layout grows past the box, for the box to scroll.
  */
 .clover-template-default[data-fill] {
@@ -27,11 +27,11 @@
   min-height: min-content;
 }
 
-.clover-template-default[data-fill] > .clover-template-default-body {
+.clover-template-default[data-fill] > .clover-template-default-panes {
   flex: 1 1 auto;
 }
 
-.clover-template-default[data-fill] .clover-template-default-stage {
+.clover-template-default[data-fill] .clover-template-default-body {
   flex: 1 1 0;
   min-height: 16rem;
 }
@@ -63,8 +63,8 @@
   font-weight: 400;
 }
 
-/* A `Clover.Split`: the main pane (header, stage, strip), the bar, and the panel's pane. */
-.clover-template-default-body {
+/* A `Clover.Split`: the main pane (header, Body, strip), the bar, and the panel's pane. */
+.clover-template-default-panes {
   position: relative;
 }
 
@@ -90,15 +90,15 @@
 }
 
 /*
- * Over the stage, when there is not: it slides in from the end, never wider than the
+ * Over the Body, when there is not: it slides in from the end, never wider than the
  * layout less a strip, so some of the page stays in sight and a click there closes it.
  */
 /* The panel waits off the end while it slides: never a sideways scroll for the page. */
-.clover-template-default-body[data-panel="over"] {
+.clover-template-default-panes[data-panel="over"] {
   overflow: clip;
 }
 
-.clover-template-default-body[data-panel="over"]
+.clover-template-default-panes[data-panel="over"]
   > .clover-template-default-panel {
   position: absolute;
   inset-block: 0;
@@ -129,7 +129,7 @@
   transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.clover-template-default-body[data-panel="over"]
+.clover-template-default-panes[data-panel="over"]
   > .clover-template-default-panel:dir(rtl) {
   transform: translateX(-100%);
   background-position:
@@ -137,7 +137,7 @@
     0 0;
 }
 
-.clover-template-default-body[data-panel="over"]
+.clover-template-default-panes[data-panel="over"]
   > .clover-template-default-panel[data-open="true"] {
   transform: none;
 }
@@ -157,7 +157,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .clover-template-default-body[data-panel="over"]
+  .clover-template-default-panes[data-panel="over"]
     > .clover-template-default-panel,
   .clover-template-default-scrim {
     transition: none;
@@ -165,7 +165,7 @@
 }
 
 /*
- * The strip under the stage, as 3.x's: its header carries the view's titles and "2 / 9".
+ * The strip under the Body, as 3.x's: its header carries the view's titles and "2 / 9".
  * A region of its own, as the header is: the inset inside all round, its header `m` over
  * the thumbnails.
  */
@@ -177,7 +177,7 @@
 }
 
 /*
- * The thumbnails run on past the strip's end padding to the pane's edge, as the stage
+ * The thumbnails run on past the strip's end padding to the pane's edge, as the Body
  * does, so a thumbnail cut there reads as more to come rather than a margin.
  */
 .clover-template-default-rail > .clover-items {
@@ -191,7 +191,7 @@
 
 /*
  * The strip's arrows line up with what is above them. The left one sits `s` past the
- * line the titles start on, the strip's own edge; the right one under the stage's
+ * line the titles start on, the strip's own edge; the right one under the Body's
  * controls, the inset in from the pane's edge, as the cluster is. In a right-to-left book they
  * swap: Next on the left, Previous on the right.
  */
@@ -250,8 +250,8 @@
 }
 
 /*
- * Open beside the stage, the panel's toggle sits on the bar between them, its spine
- * (`useSpine`), centered on it and level with the stage's controls (their chrome inset,
+ * Open beside the Body, the panel's toggle sits on the bar between them, its spine
+ * (`useSpine`), centered on it and level with the Body's controls (their inset,
  * `--clover-inset`, down).
  */
 .clover-template-default-spine {

@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 
 import type { CanvasControlsConfig } from "./Canvas.types";
 import type { ListedAnnotation } from "./Annotations";
-import { Comment, Information } from "./glyphs";
+import { Comment, Information } from "../Body/glyphs";
 import Button from "../../ui/Button";
 import type { ChoiceGroup, ChoiceSelections } from "./layout";
 import ControlCluster, { type ControlSpec } from "../../ui/ControlCluster";

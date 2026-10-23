@@ -201,7 +201,7 @@ export function FrameControls({
           }
         />
       </div>
-      {/* On a narrow stage, which frame shows wraps below the buttons. */}
+      {/* On a narrow Body, which frame shows wraps below the buttons. */}
       <div className="clover-canvas-transport-bar" ref={bar}>
         <button
           type="button"
@@ -391,8 +391,8 @@ export default function FrameAnimation({
     renderer.setHidden(byFrame.flat().filter((id) => !shown.has(id)));
   }, [renderer, byFrame, animation.frame, sceneVersion]);
   /*
-   * In the media layer, as a video's transport is: it fades with the chrome, and sizes
-   * its menu against the stage (`MediaStage.css`).
+   * In the media layer, as a video's transport is: it fades with the rest of the
+   * controls, and sizes its menu against the Body (`MediaBody.css`).
    */
   return (
     <div className="clover-canvas-media" data-kind="frames">

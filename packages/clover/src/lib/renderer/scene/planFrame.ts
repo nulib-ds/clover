@@ -21,7 +21,7 @@ export interface PlannedDraw {
   item: SceneItem;
   url: string;
   image: LoadedImage;
-  /** Source pixels → stage CSS pixels. */
+  /** Source pixels → the Body's CSS pixels. */
   transform: Affine;
   /** The part of the source inside the item's clip, in source pixels. */
   crop: Rect;

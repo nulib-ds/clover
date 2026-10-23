@@ -1,0 +1,307 @@
+---
+title: Styling
+description: "How to style Clover's parts: its stylesheets and their layer, sizes that step from your page's 1rem, its colors and the pairs to keep accessible, the classes and states to select, and every custom property a page can set."
+---
+
+import { Checklist } from "docs/components/Checklist";
+import { ScaleCalculator } from "docs/components/ScaleCalculator";
+
+# Styling
+
+<div className="docs-lede">
+  Clover's parts bring their own styles and take the rest from your page. Change
+  them with your own CSS, which wins over Clover's, and with the custom
+  properties listed under [Variables](#variables).
+</div>
+
+## Stylesheets
+
+Import `@nulib/clover/styles.css` once, and `@nulib/clover/templates.css` for Document
+and Gallery. Their rules sit in `@layer clover`, so your own CSS wins without a fight
+over specificity. Without them, every part still renders a plain, usable layout.
+
+```jsx react
+import "@nulib/clover/styles.css";
+```
+
+The web components carry their styles: each element adds its own to the document once,
+first in `<head>`, so your rules still win, and the custom properties below reach the
+elements as they reach the React parts.
+
+## Font sizes and spacing
+
+Clover sets no font and no font size. Every size it draws, a space, a line of text, a
+control, is a step from your page's `1rem`: the root's font size, 16px unless your page
+or your reader's browser sets another. Change it, and all of Clover changes with it, in
+proportion:
+
+```css
+html {
+  font-size: 112.5%;
+}
+```
+
+Clover is built on the [golden ratio](https://en.wikipedia.org/wiki/Golden_ratio). Rather
+than fixed steps of 5, 10 or 20 pixels, each space is φ, about 1.618, times the one before
+it, all of them from your `1rem`. The same scale sets the margins, the paddings, the gaps
+and the sizes of text, so the more closely two things belong together, the closer they
+sit, and the order of what matters reads at a glance. Each step is a custom property you
+can set, and everything that takes it follows.
+
+Here is everything of Clover's that your page's `1rem` sizes. Type, step or drag `1rem`
+where the table gives it, and every size follows, and the Viewer over it too:
+
+<ScaleCalculator />
+
+Which step a space takes follows how closely the things on either side of it belong
+together. A region, such as the header and thumbnail strip, the information panel, or the
+picture in the Body at home, keeps `--clover-inset` (`l`) between its edge and its
+content. Inside it, each level is a step less: its parts `m` apart, what is within a
+part `s`, and a label over its value `xs`.
+
+Text keeps your page's size, or takes one of four a small step either side of it:
+`--clover-text-xs` (0.764rem) for a badge, `--clover-text-s` (0.854rem) for secondary
+text, `--clover-text-m` (1.146rem) for a section's heading, and `--clover-text-l`
+(1.236rem) for a layout's title. Every round control is `--clover-control`, a 1rem icon
+with `s` all round it (2.236rem).
+
+So one property makes a layout tighter or roomier, and the rest follows:
+
+```css
+.my-layout {
+  --clover-inset: var(--clover-space-m);
+}
+```
+
+The Body takes its height from `--clover-body-height` (`60vh`, or its template's own):
+
+```css
+.my-layout {
+  --clover-body-height: 70vh;
+}
+```
+
+The picture fills the Body edge to edge at home; `--clover-canvas-inset` keeps a margin
+round it instead. The Canvas's controls sit `--clover-canvas-controls-inset` in from its
+edges, the region's inset by default, so they line up with what is round the Body.
+
+## Colors
+
+Clover's colors are custom properties (`--clover-color-accent` and the rest): set one on
+any ancestor and it cascades.
+
+```css
+.my-layout {
+  --clover-color-accent: #4e2a84;
+  --clover-color-secondary: #fafafa;
+}
+```
+
+The round controls have two colors of their own, a dark fill (`--clover-color-control`)
+and white glyphs (`--clover-color-control-glyph`), and keep them in a dark mode: they sit
+over a Canvas's images, so they do not swap with the page's text and background colors.
+Text in the accent (links, Read more, the selected item's label) is
+`--clover-color-accent-text`, the accent itself unless you set it: a dark mode can keep
+the accent for rings and fills and give its text a lighter one.
+
+## Classes and states
+
+A part is one of the components a layout is built from: the `Body` that draws the view,
+the `Items` that list the views, a `Label`, the `Panel`, and the rest
+([Composing](/docs/composing)). Each names itself with one `clover-*` class on its root
+and says what it is doing in `data-*` attributes, for your own CSS to select. A few:
+
+| Part   | Class           | State           | Values                                                                       |
+| ------ | --------------- | --------------- | ---------------------------------------------------------------------------- |
+| Body   | `clover-body`   | `data-renderer` | <span data-code-flavor="both">`canvas`, `timeline`, `scene`, `custom`</span> |
+| Canvas | `clover-canvas` | `data-media`    | `video`, `audio`; none for a picture                                         |
+| Items  | `clover-items`  | `data-layout`   | `carousel`, `list`, `grid`, `pager`                                          |
+| Panel  | `clover-panel`  | `data-layout`   | `tabs`, `accordion`                                                          |
+
+```css
+.clover-items[data-layout="grid"] {
+  --clover-items-size: 12rem;
+}
+```
+
+## Lists in Markdown text
+
+Since your CSS wins, a reset that takes the markers off every list
+(`ul, ol { list-style: none; padding: 0 }`, as Tailwind's and many themes' do) takes
+them off a Markdown body's lists too: its bullets, its indent, and the numbers its author
+gave. Safari's VoiceOver then stops reading them as lists. Put them back for Clover's
+text:
+
+```css
+:is(.clover-annotations-body, .clover-value) ul {
+  list-style: disc;
+  padding-inline-start: var(--clover-space-l);
+}
+
+:is(.clover-annotations-body, .clover-value) ol {
+  list-style: decimal;
+  padding-inline-start: var(--clover-space-l);
+}
+```
+
+## Colors and contrast
+
+Clover's default colors meet WCAG 2.2 AA (open gaps are listed in
+[ACCESSIBILITY.md](https://github.com/nulib-ds/clover/blob/main/ACCESSIBILITY.md)). The
+colors you set are yours to keep accessible: tick through these when you set them, and
+again with a dark mode's. Names drop `--clover-color-`.
+
+<Checklist
+  items={[
+    "Text is 4.5:1 on its ground: `primary`, `primary-muted` and `accent-text` on `secondary`, and on `secondary-muted`.",
+    "The search field’s placeholder, `primary` 65% into `secondary`, is 4.5:1 on `secondary`.",
+    "Rings, and the marks that show a state, are 3:1: `accent` against `secondary`.",
+    "The round controls’ glyphs are 4.5:1 on their fill: `control-glyph` on `control`, and on `accent`, which fills them under the pointer.",
+    "Over a picture, `primary` and `secondary` are 9:1 apart, so one of the two keeps 3:1 against any picture.",
+    "A dark mode passes every check above with its own values.",
+  ]}
+/>
+
+### Do
+
+- Set `--clover-color-secondary` to your page's background. Most parts paint no ground of
+  their own, so Clover's text sits on your page.
+- Size your page in `rem` or `%`, never in pixels on its root, so your reader's own text
+  size reaches Clover too.
+- Give a dark mode a lighter `accent-text` for links and labels, and keep the accent for
+  rings and fills.
+- Keep a second sign beside the accent when you restyle a state, as Clover does: a bold
+  label, an underline, a second ring.
+- Measure what your page really shows, and never round a ratio up: 4.49:1 fails.
+
+### Don't
+
+- Don't let the accent alone mark a state: color is never the only sign (WCAG 1.4.1).
+- Don't swap `control` and `control-glyph` for a dark mode. The round controls sit over
+  pictures, and keep a dark fill and white glyphs in both.
+- Don't take the markers off Clover's lists with a reset, or
+  [put them back](#lists-in-markdown-text).
+- Don't bring back the Body's motion for a reader who prefers less: Clover turns it off
+  for them, and a rule of yours outside `@media (prefers-reduced-motion: no-preference)`
+  would turn it on again.
+- Don't set a `--clover-*` property that [Variables](#variables) does not list: Clover
+  sets those itself as it runs, to hold its state.
+
+### Every pair
+
+The pairs Clover draws, where it draws them, the ratio each needs, and what the defaults
+measure. Text needs 4.5:1 (1.4.3); rings, edges and glyphs that show a control or its
+state need 3:1 (1.4.11).
+
+| Pair                                                 | Where Clover draws it                                                                                                                                                                                                                                                                                   | Needs                              | WCAG          | Default |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ------------- | ------- |
+| `primary` on `secondary`                             | Text in the panel, menus, popups and fields, and the reverse in tips; Items' focus ring                                                                                                                                                                                                                 | 4.5:1                              | 1.4.3         | 16.96:1 |
+| `primary-muted` on `secondary`                       | Quieter text: descriptions, formats, legends, status; the edges of fields and text buttons; a split's grip                                                                                                                                                                                              | 4.5:1                              | 1.4.3, 1.4.11 | 14.64:1 |
+| `primary` or `primary-muted` on `secondary-muted`    | Text on a row or menu option under the pointer; the map's message on its empty ground; a split's grip beside Document's page                                                                                                                                                                            | 4.5:1                              | 1.4.3, 1.4.11 | 11.93:1 |
+| `primary` 65% into `secondary`                       | The search field's placeholder                                                                                                                                                                                                                                                                          | 4.5:1                              | 1.4.3         | 5.28:1  |
+| `accent-text` on `secondary`                         | Links, Read more, the selected item's label                                                                                                                                                                                                                                                             | 4.5:1                              | 1.4.3         | 5.75:1  |
+| `accent` against `secondary`                         | Focus rings, the selected item's ring, the edge of the current tab and row; the line under the open accordion heading                                                                                                                                                                                   | 3:1                                | 1.4.11        | 5.75:1  |
+| `accent` at half strength against `secondary`        | Under the pointer: an item's ring, and the line under a closed accordion heading                                                                                                                                                                                                                        | None: a preview; the press decides | 1.4.11        | 2.24:1  |
+| `control-glyph` on `control`                         | The round controls' glyphs; Exit full screen's label                                                                                                                                                                                                                                                    | 4.5:1                              | 1.4.3, 1.4.11 | 16.96:1 |
+| `control-glyph` on `accent`                          | A round control under the pointer or focused; a text button's label and the lightbox's close, under the pointer, focused or open; the Transcript's chosen file; the eye that hides annotations, under the pointer                                                                                       | 4.5:1                              | 1.4.3, 1.4.11 | 5.75:1  |
+| `secondary-muted` against `secondary`                | Hairlines between regions; fills under the pointer                                                                                                                                                                                                                                                      | None: they mark nothing            | 1.4.11        | 1.23:1  |
+| `secondary-alt` at half strength against `secondary` | The bar between split panes, beside its grip; the line under a closed accordion heading, beside its chevron                                                                                                                                                                                             | None: the grip or chevron marks it | 1.4.11        | 1.28:1  |
+| `primary` beside `secondary`, over a picture         | The Canvas's hotspots: their two-tone outline at rest, and the edges either side of the accent when active or focused; the Canvas's and the map's focus rings, either side of the accent; Items' focus: inside its ring, a `secondary` ring and a `primary` one, side by side over the thumbnail's edge | 9:1 between them                   | 1.4.11        | 16.96:1 |
+
+## Variables
+
+Every custom property a page can set, with its default. Set the colors, the media
+player's, the sizes and spaces, and the shapes on any ancestor: they cascade. Set those a
+part declares for itself on its class, where your CSS still wins over Clover's layer:
+`.clover-canvas` for the Body's, `.clover-items` for Items'.
+
+### Colors
+
+| Variable                         | Default    | What it colors                                                                                 |
+| -------------------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
+| `--clover-color-primary`         | `#1a1d1e`  | Text, and the dark tone of a two-tone ring over a picture                                      |
+| `--clover-color-primary-muted`   | `#26292b`  | Quieter text (descriptions, formats, status) and the edges of fields                           |
+| `--clover-color-secondary`       | `#fff`     | The ground under Clover's text: the panel, menus, popups and fields                            |
+| `--clover-color-secondary-muted` | `#e6e8eb`  | Hairlines between regions, and fills under the pointer                                         |
+| `--clover-color-secondary-alt`   | `#c1c8cd`  | The bar between split panes, and a closed accordion heading's line                             |
+| `--clover-color-accent`          | `#0065c3`  | Focus rings, the selected item, the current tab and row, and a round control under the pointer |
+| `--clover-color-accent-text`     | the accent | Text in the accent: links, Read more, the selected item's label                                |
+| `--clover-color-control`         | `#1a1d1e`  | The round controls' fill, on a light page and a dark one                                       |
+| `--clover-color-control-glyph`   | `#fff`     | The round controls' glyphs, and Exit full screen's label                                       |
+
+### The media player
+
+On the transport's dark scrim, in every theme.
+
+| Variable                          | Default                  | What it colors                                          |
+| --------------------------------- | ------------------------ | ------------------------------------------------------- |
+| `--clover-player-text`            | `#fff`                   | The transport's text and menus, and its sliders' thumbs |
+| `--clover-player-track`           | `rgb(255 255 255 / 65%)` | The seek and volume sliders' tracks                     |
+| `--clover-player-track-shadow`    | `none`                   | A shadow under those tracks                             |
+| `--clover-player-menu-surface`    | `#151718`                | The Captions and Chapters menus' ground                 |
+| `--clover-player-menu-hover`      | `#26292b`                | A menu's option under the pointer                       |
+| `--clover-player-caption-surface` | `rgb(0 0 0 / 85%)`       | The box behind captions                                 |
+| `--clover-player-caption-text`    | `#fff`                   | The captions' text                                      |
+| `--clover-player-caption-edge`    | `none`                   | An edge round the captions' letters (a `text-shadow`)   |
+
+### Sizes and spaces
+
+| Variable             | Default                                  | What it sizes                                                      |
+| -------------------- | ---------------------------------------- | ------------------------------------------------------------------ |
+| `--clover-space-3xs` | `0.146rem`                               | The scale's smallest step, φ⁻⁴ of `1rem`                           |
+| `--clover-space-2xs` | `0.236rem`                               | φ⁻³ of `1rem`                                                      |
+| `--clover-space-xs`  | `0.382rem`                               | φ⁻²: a label over its value                                        |
+| `--clover-space-s`   | `0.618rem`                               | φ⁻¹: what is within a part                                         |
+| `--clover-space-m`   | `1rem`                                   | Your `1rem`: parts within a region                                 |
+| `--clover-space-l`   | `1.618rem`                               | φ: a region's inset                                                |
+| `--clover-space-xl`  | `2.618rem`                               | φ²                                                                 |
+| `--clover-space-2xl` | `4.236rem`                               | φ³, the scale's largest step                                       |
+| `--clover-text-xs`   | `0.764rem`                               | A badge: a duration on a thumbnail                                 |
+| `--clover-text-s`    | `0.854rem`                               | Secondary text: times, formats, captions under thumbnails, legends |
+| `--clover-text-m`    | `1.146rem`                               | A section's heading: the information panel's accordion             |
+| `--clover-text-l`    | `1.236rem`                               | A title: a layout's, Items', the lightbox's, an error's headline   |
+| `--clover-control`   | `calc(1rem + 2 * var(--clover-space-s))` | Every round control's width and height (2.236rem)                  |
+| `--clover-inset`     | `var(--clover-space-l)`                  | A region's inset, from its edge to its content                     |
+
+### Shape and motion
+
+| Variable               | Default                                   | What it sets                                                                |
+| ---------------------- | ----------------------------------------- | --------------------------------------------------------------------------- |
+| `--clover-radius`      | `3px` (`6px` for the Body's menus)        | The corners of Clover's boxes: tips, menus, the panel, the Body, thumbnails |
+| `--clover-radius-pill` | `2rem`                                    | The corners of the round controls and of pills                              |
+| `--clover-transition`  | `all 200ms cubic-bezier(0.16, 1, 0.3, 1)` | How a control changes under the pointer and in focus                        |
+
+### The Body
+
+On `.clover-canvas`, but for `--clover-body-height`, which Body reads from anything
+round it. Clover sets the controls' durations to `0s` for a reader who prefers reduced
+motion: set yours inside `@media (prefers-reduced-motion: no-preference)`.
+
+| Variable                         | Default                                                              | What it sets                                      |
+| -------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------- |
+| `--clover-body-height`           | `60vh` (Default `min(65vh, 40rem)`, the lightbox `min(70vh, 48rem)`) | The Body's height                                 |
+| `--clover-canvas-inset`          | `0px` (Document: `var(--clover-inset)`)                              | A margin round the picture at home                |
+| `--clover-canvas-controls-inset` | `var(--clover-inset)`                                                | How far the controls sit in from the Body's edges |
+| `--clover-controls-leave`        | `180ms cubic-bezier(0.4, 0, 1, 1)`                                   | How the controls leave when the reader is idle    |
+| `--clover-controls-enter`        | `340ms cubic-bezier(0.34, 1.56, 0.64, 1)`                            | How they come back                                |
+| `--clover-controls-tuck`         | `var(--clover-space-s)`                                              | How far they tuck toward their edge as they leave |
+
+### Items, Summary and Map
+
+Items' are set on `.clover-items`; the Summary's and the Map's on them or on anything
+round them.
+
+| Variable                 | Default                 | What it sets                                  |
+| ------------------------ | ----------------------- | --------------------------------------------- |
+| `--clover-items-height`  | `8rem`                  | A carousel's picture height                   |
+| `--clover-items-size`    | `10rem`                 | A grid's cell (the Gallery's `size` sets it)  |
+| `--clover-items-gap`     | `var(--clover-space-m)` | The space between items                       |
+| `--clover-items-lines`   | `3`                     | The lines of an item's label before it is cut |
+| `--clover-summary-lines` | `5`                     | The lines of a Summary before Read more       |
+| `--clover-map-height`    | `24rem`                 | The Map's height                              |
+
+### Templates
+
+| Variable                            | Default            | What it sets                                             |
+| ----------------------------------- | ------------------ | -------------------------------------------------------- |
+| `--clover-template-document-height` | `min(85vh, 56rem)` | Document's height, set on the template (its `className`) |

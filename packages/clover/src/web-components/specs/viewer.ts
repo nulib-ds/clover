@@ -48,7 +48,7 @@ export const viewer: ElementSpec = {
 export const viewerDocs: ElementDocs = {
   name: "CloverViewerElement",
   description:
-    "Clover's Viewer, in one of its templates: Default (the title over the stage, the thumbnails under it, the information panel beside them), Document (a PDF reader's pages, thumbnails beside them) or Gallery (a grid, each item opening in a lightbox). Each template loads when used, its styles with it.",
+    "Clover's Viewer, in one of its templates: Default (the title over the Body, the thumbnails under it, the information panel beside them), Document (a PDF reader's pages, thumbnails beside them) or Gallery (a grid, each item opening in a lightbox). Each template loads when used, its styles with it.",
   attributes: {
     template: {
       description:
@@ -83,7 +83,7 @@ export const viewerDocs: ElementDocs = {
     },
     header: {
       description:
-        'Default: "false" leaves out the thumbnail and title over the stage.',
+        'Default: "false" leaves out the thumbnail and title over the Body.',
       default: "true",
     },
     panel: {
@@ -114,7 +114,7 @@ export const viewerDocs: ElementDocs = {
     },
     fill: {
       description:
-        "Default: as tall as the box it is in, the stage taking what the header and the thumbnails leave.",
+        "Default: as tall as the box it is in, the Body taking what the header and the thumbnails leave.",
       default: "false",
     },
     size: {
@@ -136,7 +136,7 @@ export const viewerDocs: ElementDocs = {
     renderers: {
       type: "CloverRenderer[] | null",
       description:
-        "Renderers of yours, for its stage: each claims views (canvasId, format or match) and draws one into a box of its own (render), returning what undoes it.",
+        "Renderers of yours, for its Body: each claims views (canvasId, format or match) and draws one into a box of its own (render), returning what undoes it.",
     },
     iiifContent: {
       type: "string | Record<string, unknown> | null",

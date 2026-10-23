@@ -475,9 +475,9 @@ const Annotations: React.FC<AnnotationsProps> = ({
   );
 };
 
-/** What keeps a hotspot reached by Tab clear of the chrome, loaded with the first focus. */
-let panning: Promise<typeof import("./panClearOfChrome")> | undefined;
-const loadPanning = () => (panning ??= import("./panClearOfChrome"));
+/** What keeps a hotspot reached by Tab clear of the controls, loaded with the first focus. */
+let panning: Promise<typeof import("./panClearOfControls")> | undefined;
+const loadPanning = () => (panning ??= import("./panClearOfControls"));
 
 const AnnotationButton: React.FC<{
   entry: PlacedAnnotation;
@@ -581,19 +581,19 @@ const AnnotationButton: React.FC<{
         onActivate(entry.id);
         void loadPanning();
       }}
-      // A hotspot reached by Tab is brought clear of the chrome (the Tab's keyup comes
+      // A hotspot reached by Tab is brought clear of the controls (the Tab's keyup comes
       // to the hotspot it focused), unless focus has moved on meanwhile. A click or
       // `zoomToAnnotation` frames it anyway.
       onKeyUp={(event) => {
         if (event.key !== "Tab") return;
         const hotspot = event.currentTarget;
-        void loadPanning().then(({ panClearOfChrome }) => {
+        void loadPanning().then(({ panClearOfControls }) => {
           if (document.activeElement === hotspot)
-            panClearOfChrome(renderer, hotspot);
+            panClearOfControls(renderer, hotspot);
         });
       }}
       onBlur={() => onActivate(null)}
-      // A note longer than the stage scrolls, by the keys that scroll a box (WCAG 1.4.10).
+      // A note longer than the Body scrolls, by the keys that scroll a box (WCAG 1.4.10).
       onKeyDown={scrollNote}
       onClick={(event) => {
         event.stopPropagation();
@@ -831,9 +831,10 @@ const SCROLL_KEYS: Record<string, (tip: HTMLElement) => number> = {
 };
 
 /**
- * From its hotspot, the keys that scroll a note longer than the stage (its `Tip`, which
- * `scrolls`), as they would a scrolling box: the arrows, the page keys, Home and End. Returns whether the key was
- * taken, which it is only while there is more to scroll that way.
+ * From its hotspot, the keys that scroll a note longer than the Body (its `Tip`, which
+ * `scrolls`), as they would a scrolling box: the arrows, the page keys, Home and End.
+ * Returns whether the key was taken, which it is only while there is more to scroll
+ * that way.
  */
 export function scrollNote(event: React.KeyboardEvent<HTMLElement>): boolean {
   const tip = event.currentTarget.querySelector<HTMLElement>(

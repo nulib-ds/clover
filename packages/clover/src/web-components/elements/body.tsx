@@ -8,25 +8,25 @@ import { Toggle } from "./toggle";
 
 const FILL = { height: "100%" };
 
-/** The stage's `<clover-panel-toggle>`, which it draws among its controls. */
+/** The Body's `<clover-panel-toggle>`, which it draws among its controls. */
 const toggleOf = (element: Element) =>
   ([...element.children].find(
     (child) => child.localName === "clover-panel-toggle",
   ) as HTMLElement | undefined) ?? null;
 
-/** A button the page wrote in the stage: one of its controls, after Clover's. */
+/** A button the page wrote in the Body: one of its controls, after Clover's. */
 const isButton = (node: Node) =>
   node instanceof HTMLElement && node.localName === "button";
 
 /**
  * `<clover-body>` (`specs/body.ts`): the root's view, drawn, as `Body` draws it.
- * The element is the stage's box: it takes its height from `--clover-body-height`
- * (default `60vh`), or from its own `style`, and the stage fills it. A
+ * The element is the Body's box: it takes its height from `--clover-body-height`
+ * (default `60vh`), or from its own `style`, and what it draws fills it. A
  * `<clover-panel-toggle>` in it is one of its controls, in the cluster, where `Body`
  * places a child, and so is each `<button>` of the page's, after it, as a React host's
  * children are. Its controls can be the page's own (`controlButtons`), and its views
  * drawn by the page's renderers (`renderers`): each adapter loads only for a page that
- * gives them, and the stage waits for it.
+ * gives them, and the Body waits for it.
  */
 export function BodyElement({ hosted, props }: HostedProps) {
   const toggle = useWatched(

@@ -82,7 +82,7 @@ afterEach(() => {
 function Layout({ storageKey }: { storageKey?: string }) {
   return (
     <Split storageKey={storageKey}>
-      <SplitPane min="16rem">Stage</SplitPane>
+      <SplitPane min="16rem">Body</SplitPane>
       <SplitHandle />
       <SplitPane name="panel" size="24rem" min="14rem" data-testid="panel">
         Panel
@@ -98,7 +98,7 @@ describe("Split", () => {
   it("holds each pane's minimum in the layout, not only under a handle", () => {
     render(
       <Split>
-        <SplitPane min="16rem">Stage</SplitPane>
+        <SplitPane min="16rem">Body</SplitPane>
         <SplitHandle />
         <SplitPane size="24rem" min="14rem">
           Panel
@@ -107,7 +107,7 @@ describe("Split", () => {
       </Split>,
     );
     // The sized pane gives way, down to its minimum, before the other does.
-    expect(screen.getByText("Stage").style.minWidth).toBe("16rem");
+    expect(screen.getByText("Body").style.minWidth).toBe("16rem");
     expect(screen.getByText("Panel").style.minWidth).toBe("14rem");
     // Without one it can still shrink past its content.
     expect(parseFloat(screen.getByText("Rest").style.minWidth)).toBe(0);
@@ -131,7 +131,7 @@ describe("Split", () => {
     expect(size()).toBe("400px");
     fireEvent.keyDown(handle, { key: "ArrowRight", shiftKey: true });
     expect(size()).toBe("336px");
-    // Home is its own minimum; End leaves the stage its minimum (1000 − the bar − 16rem).
+    // Home is its own minimum; End leaves the Body its minimum (1000 − the bar − 16rem).
     fireEvent.keyDown(handle, { key: "Home" });
     expect(size()).toBe("224px");
     fireEvent.keyDown(handle, { key: "End" });
@@ -144,7 +144,7 @@ describe("Split", () => {
   it("steps by a click or a tap through its narrowest, its own size and its widest (WCAG 2.5.7)", async () => {
     render(<Layout />);
     const handle = screen.getByRole("separator");
-    // From its own size, wider: the stage keeps its minimum (1000 − the bar − 16rem).
+    // From its own size, wider: the Body keeps its minimum (1000 − the bar − 16rem).
     fireEvent.click(handle);
     expect(size()).toBe("741px");
     await waitFor(() => expect(handle).toHaveAttribute("aria-valuenow", "74"));
@@ -270,12 +270,12 @@ describe("Split", () => {
 
   it("lets go the second click of a double click, which lands where the bar was", () => {
     vi.useFakeTimers();
-    const onStage = vi.fn();
+    const onBody = vi.fn();
     render(
       <Split>
         <SplitPane min="16rem">
-          <button type="button" onClick={onStage} onPointerDown={onStage}>
-            Stage
+          <button type="button" onClick={onBody} onPointerDown={onBody}>
+            Body
           </button>
         </SplitPane>
         <SplitHandle />
@@ -285,7 +285,7 @@ describe("Split", () => {
       </Split>,
     );
     const handle = screen.getByRole("separator");
-    const stage = screen.getByRole("button", { name: "Stage" });
+    const bodyButton = screen.getByRole("button", { name: "Body" });
     const at = (clientX: number) => ({
       clientX,
       clientY: 300,
@@ -297,25 +297,25 @@ describe("Split", () => {
       fireEvent.pointerUp(target, at(clientX));
       fireEvent.click(target, at(clientX));
     };
-    // The step moves the bar from under the pointer: the stage is there now.
+    // The step moves the bar from under the pointer: the Body is there now.
     click(handle, 616);
     expect(size()).toBe("741px");
-    click(stage, 617);
-    fireEvent.dblClick(stage, at(617));
-    expect(onStage).not.toHaveBeenCalled();
+    click(bodyButton, 617);
+    fireEvent.dblClick(bodyButton, at(617));
+    expect(onBody).not.toHaveBeenCalled();
     expect(size()).toBe("741px");
 
-    // Once a double click's time has passed, a click there is the stage's.
+    // Once a double click's time has passed, a click there is the Body's.
     vi.advanceTimersByTime(500);
-    click(stage, 617);
-    expect(onStage).toHaveBeenCalled();
+    click(bodyButton, 617);
+    expect(onBody).toHaveBeenCalled();
 
     // So it is as soon as the pointer moves away.
-    onStage.mockClear();
+    onBody.mockClear();
     click(handle, 616);
     fireEvent.pointerMove(document.body, at(660));
-    click(stage, 660);
-    expect(onStage).toHaveBeenCalled();
+    click(bodyButton, 660);
+    expect(onBody).toHaveBeenCalled();
 
     // And a second click on the bar itself is a step of its own.
     click(handle, 616);
@@ -340,7 +340,7 @@ describe("Split", () => {
     const onClick = vi.fn((event: React.MouseEvent) => event.preventDefault());
     render(
       <Split>
-        <SplitPane min="16rem">Stage</SplitPane>
+        <SplitPane min="16rem">Body</SplitPane>
         <SplitHandle onClick={onClick} />
         <SplitPane size="24rem" min="14rem" data-testid="panel">
           Panel
@@ -364,7 +364,7 @@ describe("Split", () => {
   it("names its popover as it is named, when given a name of its own", () => {
     render(
       <Split>
-        <SplitPane>Stage</SplitPane>
+        <SplitPane>Body</SplitPane>
         <SplitHandle aria-label="Resize the thumbnails" />
         <SplitPane size="13rem">Thumbnails</SplitPane>
       </Split>,

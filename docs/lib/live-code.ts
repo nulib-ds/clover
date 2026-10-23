@@ -12,8 +12,12 @@
 
 export type Plain = string | number | boolean;
 
-/** Where a knob's prop is written: on the part, on the `Root` round it, or on its box. */
-export type KnobOn = "part" | "root" | "box";
+/**
+ * Where a knob's prop is written: on the part, on the `Root` round it, or on its box; or
+ * in the code alone, its value read by the example itself (the Viewer's template, which
+ * picks the code shown).
+ */
+export type KnobOn = "part" | "root" | "box" | "code";
 
 /** A value in an example's code that the reader can change. */
 export interface Knob {
@@ -120,7 +124,10 @@ export interface CodeAttr {
   knob?: string;
   /** The example's resource: `{url}` in React, or, where the code imports, its address. */
   url?: boolean;
-  /** A template, by its name in React (`Document`); HTML gives its word (`document`). */
+  /**
+   * A template, by its name in React (`Document`); HTML gives its word (`document`).
+   * With a `knob`, the reader picks it in the code, the knob's options its names.
+   */
   template?: string;
   /** A style: its properties. */
   style?: CodeStyle[];
@@ -136,6 +143,11 @@ export interface CodeNode {
   children?: CodeNode[];
   /** The lines the example is about, marked as a fence's `{2}` marks them. */
   mark?: boolean;
+  /**
+   * A part the reader can move to another place among its siblings: every line it
+   * writes carries it (`Line.part`), so its lines move together (`ComposeExample.tsx`).
+   */
+  key?: string;
 }
 
 export interface CodeTree {
@@ -168,11 +180,15 @@ export interface Token {
   choices?: string[];
 }
 
-/** A line of code: its depth, its runs, and whether it is one the example is about. */
+/**
+ * A line of code: its depth, its runs, whether it is one the example is about, and the
+ * movable part that wrote it, if any (`CodeNode.key`).
+ */
 export interface Line {
   depth: number;
   tokens: Token[];
   mark?: boolean;
+  part?: string;
 }
 
 const run =
@@ -400,6 +416,39 @@ function attrLines(
       ? [[name, punct("="), str(JSON.stringify(context.url))]]
       : [[name, punct("={"), plain("url"), punct("}")]];
   }
+  if (attribute.template && attribute.knob) {
+    /*
+     * A template the reader picks in the code (the Viewer's first example): React
+     * names its component, `{Document}`, HTML its word, `"document"`, each option
+     * written as that place writes it.
+     */
+    const knob = knobOf(context, attribute.knob);
+    const value = String(context.values[attribute.knob] ?? attribute.template);
+    const options = (knob?.options ?? [value]).map(String);
+    if (html) {
+      const word = (option: string) => `"${option.toLowerCase()}"`;
+      return [
+        [
+          name,
+          punct("="),
+          {
+            kind: "string",
+            text: word(value),
+            knob: attribute.knob,
+            choices: options.map(word),
+          },
+        ],
+      ];
+    }
+    return [
+      [
+        name,
+        punct("={"),
+        { text: value, knob: attribute.knob, choices: options },
+        punct("}"),
+      ],
+    ];
+  }
   if (attribute.template) {
     if (html)
       return [[name, punct("="), str(`"${attribute.template.toLowerCase()}"`)]];
@@ -473,11 +522,18 @@ function nodeLines(
   flavor: Flavor,
   lines: Line[],
   mark = false,
+  part?: string,
 ) {
   const html = flavor === "html";
   const marked = mark || node.mark;
+  const own = node.key ?? part;
   const push = (at: number, tokens: Token[]) =>
-    lines.push({ depth: at, tokens, ...(marked ? { mark: true } : {}) });
+    lines.push({
+      depth: at,
+      tokens,
+      ...(marked ? { mark: true } : {}),
+      ...(own ? { part: own } : {}),
+    });
   const name = html ? node.html : node.jsx;
   const attrs = node.attrs.filter((each) => written(each, context));
   const children = node.children ?? [];
@@ -526,7 +582,7 @@ function nodeLines(
       push(depth, [punct("</"), tag(name), punct(">")]);
   }
   children.forEach((child) =>
-    nodeLines(child, depth + 1, context, flavor, lines, marked),
+    nodeLines(child, depth + 1, context, flavor, lines, marked, own),
   );
   if (children.length) push(depth, [punct("</"), tag(name), punct(">")]);
 }

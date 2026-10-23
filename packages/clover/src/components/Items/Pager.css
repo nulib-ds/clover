@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* The Canvas's controls' gap, so a pager over a stage lines up with them. */
+  /* The Canvas's controls' gap, so a pager over a Body lines up with them. */
   gap: var(--clover-space-s);
   padding-block: var(--clover-space-s);
 }

@@ -17,7 +17,7 @@ import type {
   TimedAnnotation,
 } from "./Annotations";
 import { useSvgReader } from "./useSvgReader";
-import Caption, { captionLabelId, hasInformation } from "./Caption";
+import Caption, { captionLabelId, hasInformation } from "../Body/Caption";
 import type {
   CanvasControlsConfig,
   CanvasHandle,
@@ -39,8 +39,8 @@ import {
   resolveDirection,
 } from "./layout";
 import ExitFullscreen from "../../ui/ExitFullscreen";
-import { useChromeVisibility } from "./useChromeVisibility";
-import { useNearViewport } from "./useNearViewport";
+import { useControlsVisibility } from "../Body/useControlsVisibility";
+import { useNearViewport } from "../Body/useNearViewport";
 import useFullscreen from "../../hooks/useFullscreen";
 import { useLoaded } from "../../hooks/useLoaded";
 import { ErrorBoundary } from "../../ui/ErrorBoundary";
@@ -64,7 +64,7 @@ import { type Rect, union } from "../../lib/renderer/math/rect";
 type CanvasStatus = "loading" | "ready" | "error";
 
 /** Video and sound: only fetched when a Canvas paints them. */
-const MediaStage = lazy(() => import("./media/MediaStage"));
+const MediaBody = lazy(() => import("./media/MediaBody"));
 /** The hotspots, and the placing of them, loaded for a Canvas with annotations. */
 const loadHotspots = () => import("./Annotations");
 const NO_COMMENTS: Map<string, CanvasAnnotation["annotation"][]> = new Map();
@@ -83,7 +83,7 @@ const ALL_CONTROLS: Required<CanvasControlsConfig> = {
 /**
  * The keys the viewport answers to while focused, as `aria-keyshortcuts` spells them,
  * and the string that says them in words: the camera's (`GestureController`) and
- * media's (`MediaStage`).
+ * media's (`MediaBody`).
  */
 const CAMERA_KEYS = {
   description: "canvasKeysImage",
@@ -119,12 +119,12 @@ const CanvasView: React.FC<CloverCanvasProps> = (props) => {
   if (!hasSource) return null;
   return (
     <ErrorBoundary>
-      <CanvasStage {...props} />
+      <CanvasBody {...props} />
     </ErrorBoundary>
   );
 };
 
-const CanvasStage: React.FC<CloverCanvasProps> = ({
+const CanvasBody: React.FC<CloverCanvasProps> = ({
   manifestId,
   canvases,
   viewingDirection,
@@ -212,7 +212,7 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
   // Controls and navigator show on a mouse's activity and fade after a pause, as the
   // Player's bar does; under a finger, or a pen that does not hover, a tap on the
   // picture shows and hides them. Focus that no press brought holds them.
-  const chromeVisible = useChromeVisibility(
+  const controlsVisible = useControlsVisibility(
     wrapperElement,
     options?.hideDelay,
     hostRef,
@@ -324,16 +324,16 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
     [body, src, isTiledImage],
   );
   /*
-   * The first painted video or sound, if any. Its element is made by the (lazy) media
-   * stage; a video is then placed in the scene like any image, while sound has no picture
-   * of its own and is never placed.
+   * The first painted video or sound, if any. Its element is made by the (lazy)
+   * `MediaBody`; a video is then placed in the scene like any image, while sound has no
+   * picture of its own and is never placed.
    */
   const media = scene?.media[0] ?? null;
   const presentation = options?.media?.presentation ?? "dom";
   const [mediaElement, setMediaElement] = useState<HTMLVideoElement | null>(
     null,
   );
-  // What the media stage settled on: `dom` if `texture` was asked of media without CORS.
+  // What `MediaBody` settled on: `dom` if `texture` was asked of media without CORS.
   const [presented, setPresented] = useState(presentation);
   const onMediaElementRef = useRef(onMediaElement);
   onMediaElementRef.current = onMediaElement;
@@ -348,7 +348,7 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
   const baseImages = scene ? scene.images : bodyImages;
   /*
    * A lone video or sound Canvas is a player, not a picture to explore: it is always
-   * fitted to the stage, the camera stays put, and only full screen is offered from the
+   * fitted to the Body, the camera stays put, and only full screen is offered from the
    * control cluster.
    */
   const mediaOnly = Boolean(media) && canvases?.length === 1;
@@ -384,7 +384,7 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
   const showPlaceholder =
     stills.length > 0 && (media ? mediaOpenedFor !== canvasKey : !imagesOpen);
   /*
-   * A lone media Canvas carries all its chrome in the transport at the bottom: full
+   * A lone media Canvas carries all its controls in the transport at the bottom: full
    * screen moves there, and the top cluster (and the scrim behind it) is shown only for a
    * `Choice` to pick from or information to read. Over a placeholder, only information.
    */
@@ -460,7 +460,7 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
         : baseImages,
     [baseImages, media, mediaElement, presented, videoPlacement],
   );
-  // A lone video is framed by the video itself, so it fills the stage.
+  // A lone video is framed by the video itself, so it fills the Body.
   const world =
     mediaOnly && media?.kind === "video" && videoSize && videoPlacement
       ? videoPlacement
@@ -915,7 +915,7 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
   }, [manifestId]);
 
   /*
-   * Loading, shown: images on their way to a stage in view, not behind a still. A Canvas
+   * Loading, shown: images on their way to a Body in view, not behind a still. A Canvas
    * that paints none (sound alone) has nothing to wait for, so never says so.
    */
   const loading =
@@ -933,7 +933,7 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
         data-status={status}
         data-has-navigator={showNavigator}
         data-fullscreen={isFullscreen}
-        data-chrome={chromeVisible ? "visible" : "hidden"}
+        data-controls={controlsVisible ? "visible" : "hidden"}
         data-media={media?.kind}
         data-animated={animated ? "" : undefined}
         data-navigable={navigable}
@@ -972,7 +972,7 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
           forwardShortcut(event, hostRef.current);
         }}
         /*
-         * Geometry inline: the stage fills its box with or without the stylesheet. Its
+         * Geometry inline: the Body fills its box with or without the stylesheet. Its
          * own stacking context, so the viewport can lie beneath everything else in it.
          */
         style={{
@@ -1026,7 +1026,7 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
           ref={hostRef}
           className="clover-canvas-viewport"
           /*
-           * Geometry inline, so the stage holds its size without the stylesheet. Beneath
+           * Geometry inline, so the Body holds its size without the stylesheet. Beneath
            * the rest of the figure, so without it the controls, laid out in the flow
            * over the picture, still take their presses (WCAG 2.5.8).
            */
@@ -1052,6 +1052,23 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
           tabIndex={0}
         />
         {viewportName.node}
+        {/*
+         * Sound with no picture of its own, nor one shown for it, names itself in its
+         * empty Body (Mat, 2026-10-23: "label these"), for the eye alone: the viewport
+         * already carries the name.
+         */}
+        {media?.kind === "audio" &&
+          baseImages.length === 0 &&
+          !showPlaceholder &&
+          ownName?.text && (
+            <p
+              className="clover-canvas-sound-label"
+              aria-hidden="true"
+              lang={ownName.lang || undefined}
+            >
+              {ownName.text}
+            </p>
+          )}
         {viewportKeys.length > 0 && (
           <span id={keysId} style={visuallyHidden}>
             {viewportKeys.map(({ description }, index) => (
@@ -1081,7 +1098,7 @@ const CanvasStage: React.FC<CloverCanvasProps> = ({
              * Not keyed by the media: from one recording to the next (auto-advance), the
              * transport stays, and so does the keyboard focus on it (WCAG 2.4.3).
              */}
-            <MediaStage
+            <MediaBody
               media={media}
               presentation={presentation}
               request={options?.request}

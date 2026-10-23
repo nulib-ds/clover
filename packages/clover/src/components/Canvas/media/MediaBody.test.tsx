@@ -323,7 +323,7 @@ describe("Canvas media", () => {
       { id: "range/1", label: "Opening", start: 0, end: 10 },
       { id: "range/2", label: "Lunch", start: 10, end: 20 },
     ];
-    const stage = (highlightedChapter?: string) => (
+    const canvas = (highlightedChapter?: string) => (
       <Canvas
         canvases={video.items as any}
         onMediaElement={onMediaElement}
@@ -332,7 +332,7 @@ describe("Canvas media", () => {
         onChapterHighlight={onChapterHighlight}
       />
     );
-    const { container, rerender } = render(stage());
+    const { container, rerender } = render(canvas());
     await transport();
     const element = onMediaElement.mock.calls.at(-1)?.[0] as HTMLVideoElement;
     Object.defineProperty(element, "duration", {
@@ -379,7 +379,7 @@ describe("Canvas media", () => {
       "0:00 / 0:20, Opening",
     );
 
-    rerender(stage("range/1"));
+    rerender(canvas("range/1"));
     expect(stretch()!.style.left).toBe("0%");
     expect(stretch()!.style.width).toBe("50%");
     expect(area.querySelector(".clover-tip")).toBeNull();
@@ -1079,7 +1079,7 @@ describe("Canvas media", () => {
     );
     expect(screen.queryByTestId("clover-viewer-player-waveform")).toBeNull();
     expect(screen.queryByTestId("clover-canvas-navigator")).toBeNull();
-    // No picture of its own: the scene stays empty, on the 16:9 stage.
+    // No picture of its own: the scene stays empty, in its 16:9 frame.
     expect(renderer.setImages).toHaveBeenLastCalledWith([], {
       world: { x: 0, y: 0, width: 1600, height: 900 },
       // Always fitted: a lone sound Canvas never moves.
@@ -1097,7 +1097,7 @@ describe("Canvas media", () => {
     expect(screen.queryByTestId("clover-canvas-navigator")).toBeNull();
   });
 
-  it("does not load the media stage for a Canvas of images", () => {
+  it("does not load the media player for a Canvas of images", () => {
     render(<Canvas src="https://example.org/a.jpg" />);
     expect(screen.queryByTestId("clover-canvas-media")).toBeNull();
     expect(screen.getByTestId("clover-canvas")).not.toHaveAttribute(
@@ -1140,7 +1140,7 @@ describe("lazy loading", () => {
 });
 
 describe("a lone media Canvas", () => {
-  it("is a player: full screen in the transport, no top chrome, the camera held", async () => {
+  it("is a player: full screen in the transport, no controls at the top, the camera held", async () => {
     render(<Canvas canvases={video.items as any} />);
     await transport();
     // No top cluster or scrim: full screen is in the transport, at the bottom.

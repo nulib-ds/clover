@@ -16,6 +16,15 @@
   display: block;
 }
 
+/*
+ * An example asked to be wide (`wide`, `data-wide`; Mat, 2026-10-23: "extend beyond
+ * their container … default is they don't"): out past the page's column into the room
+ * a wide window adds at its sides (`--docs-bleed`, `layout.css`), none where it adds none.
+ */
+.example[data-wide] {
+  margin-inline: calc(-1 * var(--docs-bleed, 0px));
+}
+
 /* A part's demo, or another of the docs' demos, gives its own box and margins to the example. */
 .preview > :global(.docs-part-demo),
 .preview > div[style*="margin"] {
@@ -34,6 +43,23 @@
 
 .code :global(.docs-code.docs-code) pre {
   border-radius: var(--radius-3);
+}
+
+/*
+ * The Viewer's template, under its code (`LiveTemplates`; Mat, 2026-10-23): its name,
+ * then the navbar's switch (`.code-switch`, `layout.css`).
+ */
+.switchUnder {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clover-space-xs, 0.382rem) var(--clover-space-s, 0.618rem);
+  margin-top: var(--clover-space-m, 1rem);
+}
+
+.switchUnderLabel {
+  color: var(--gray-11);
+  font-size: var(--text-sm);
 }
 
 /* ── A switch over the Viewer: the prop's values, one pressed ───────────────── */

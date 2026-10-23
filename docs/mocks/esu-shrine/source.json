@@ -1,0 +1,802 @@
+{
+  "asset": {
+    "type": "application/si-dpo-3d.document+json",
+    "version": "1.0",
+    "generator": "Voyager",
+    "copyright": "© 2025 Northwestern University"
+  },
+  "scene": 0,
+  "scenes": [{ "units": "mm", "nodes": [0, 1, 5], "meta": 0, "setup": 0 }],
+  "nodes": [
+    {
+      "translation": [35.0919457, 26.833572, 31.5161996],
+      "rotation": [-0.1060617, 0.3359486, 0.0381037, 0.9351137],
+      "name": "Camera",
+      "camera": 0
+    },
+    {
+      "rotation": [0, 0.3381026, 0, 0.9411093],
+      "name": "Lights",
+      "children": [2, 3, 4]
+    },
+    {
+      "translation": [-16.844877, 18.4428237, 31.0612602],
+      "rotation": [0.4829741, -0.1070728, 0.1880998, 0.8484633],
+      "scale": [6.6430614, 6.6430614, 6.6430614],
+      "name": "Shadow Caster #1",
+      "light": 0
+    },
+    {
+      "translation": [30.3536761, 17.9451101, 18.5827038],
+      "rotation": [0.3546969, 0.163893, -0.3861077, 0.8356136],
+      "scale": [6.6430614, 6.6430614, 6.6430614],
+      "name": "Shadow Caster #2",
+      "light": 1
+    },
+    { "name": "Environment", "light": 2 },
+    { "name": "IBD12-AD-2-1", "model": 0 }
+  ],
+  "cameras": [
+    {
+      "type": "perspective",
+      "perspective": { "yfov": 52, "znear": 0.3321531, "zfar": 333.0089336 },
+      "autoNearFar": true
+    }
+  ],
+  "lights": [
+    {
+      "enabled": false,
+      "color": [1, 0.95, 0.9],
+      "intensity": 0.01,
+      "type": "directional",
+      "shadowEnabled": true,
+      "shadowSize": 66.4306136,
+      "shadowIntensity": 50
+    },
+    {
+      "enabled": false,
+      "color": [0.9, 0.95, 1],
+      "intensity": 0.01,
+      "type": "directional",
+      "shadowEnabled": true,
+      "shadowSize": 66.4306136,
+      "shadowIntensity": 60
+    },
+    { "enabled": true, "intensity": 1, "type": "environment" }
+  ],
+  "models": [
+    {
+      "units": "cm",
+      "boundingBox": {
+        "min": [-1.5044871, -0.4407466, -0.8623396],
+        "max": [0.9976611, 3.7427745, 0.6962198]
+      },
+      "derivatives": [
+        {
+          "usage": "Web3D",
+          "quality": "Highest",
+          "assets": [
+            {
+              "uri": "esushrine_11.17.glb",
+              "type": "Model",
+              "mimeType": "model/gltf-binary"
+            }
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "id": "5CugJEsCBIxX",
+          "titles": { "EN": "Cowry Shells" },
+          "leads": { "EN": "Moneta annulus from the Indian Ocean" },
+          "viewId": "QjE9sF",
+          "style": "Extended",
+          "position": [-0.7340635, 1.3539181, 0.4279442],
+          "direction": [-0.525674, 0.1886829, 0.8294972],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "rPmdpwUNWEOQ",
+          "titles": { "EN": "Wooden Comb" },
+          "leads": { "EN": "" },
+          "viewId": "i4QIgG",
+          "position": [-0.0103723, 0.663171, -0.6333412],
+          "direction": [0.0880549, 0.4286597, -0.8991647],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "5orSlu3tx6eY",
+          "titles": { "EN": "Beads" },
+          "leads": { "EN": "Flat beads" },
+          "viewId": "H2rBz9",
+          "style": "Extended",
+          "position": [-0.5186366, 1.0474238, -0.6154741],
+          "direction": [-0.0174732, 0.1848859, -0.9826046],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "c6wlR0HwNYmO",
+          "titles": { "EN": "Metal Adornment" },
+          "leads": { "EN": "Set of 8 metal rings" },
+          "viewId": "hbKvjx",
+          "style": "Extended",
+          "position": [-0.5386465, 2.2407587, -0.4370038],
+          "direction": [-0.3994863, 0.4032273, -0.8232972],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "9Fcdb481wI31",
+          "titles": { "EN": "Shell" },
+          "leads": { "EN": "" },
+          "viewId": "eODOtg",
+          "position": [-0.0356669, 1.6849842, 0.3575868],
+          "direction": [0.486636, 0.7405732, 0.4633968],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "23gkVOCyfeJh",
+          "titles": { "EN": "Metal Chain" },
+          "leads": { "EN": "" },
+          "viewId": "CpPlxA",
+          "position": [-0.7293842, 1.2873343, -0.3604318],
+          "direction": [-0.9473393, 0.2704685, -0.17145],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "82bQ0xUc2nov",
+          "titles": { "EN": "Animal Horn" },
+          "leads": { "EN": "Horn tied with fabric" },
+          "viewId": "3nDjoe",
+          "style": "Extended",
+          "position": [0.3877154, 0.4005333, 0.6216686],
+          "direction": [-0.5603264, -0.4123924, 0.7183082],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "B2PpobrKw6rv",
+          "titles": { "EN": "Leather Strips" },
+          "leads": { "EN": "" },
+          "viewId": "v8mmik",
+          "position": [-1.0183613, 0.1926861, 0.0383818],
+          "direction": [-0.8001054, -0.2183333, 0.5587145],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "ZioqXw91VsiO",
+          "titles": { "EN": "Animal Bone" },
+          "leads": { "EN": "Bone tied to leather strap with cotton fabric." },
+          "viewId": "x2Pk0A",
+          "style": "Extended",
+          "position": [-0.9827548, 1.158382, 0.1777877],
+          "direction": [-0.9175533, 0.0230646, 0.3969433],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "OtlHAiWlheWR",
+          "titles": { "EN": "Animal Bone" },
+          "leads": { "EN": "" },
+          "viewId": "PlG1KB",
+          "position": [-0.6480171, 0.052688, 0.3623342],
+          "direction": [-0.7191764, -0.3773647, 0.5834219],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "kZos5IJqsuvn",
+          "titles": { "EN": "Metal Anklet" },
+          "leads": { "EN": "Metal ring tied to a cowry shell." },
+          "viewId": "U5m6gT",
+          "style": "Extended",
+          "position": [0.343877, 0.0451887, 0.0973404],
+          "direction": [0.9818647, 0.030446, -0.187122],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "0tiMYRyWDN1R",
+          "titles": { "EN": "Brass Bracelet" },
+          "leads": { "EN": "" },
+          "viewId": "wnWH6R",
+          "position": [-0.0883185, 2.062398, -0.3642915],
+          "direction": [0.590173, 0.4544325, -0.6672232],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "iB9ijQtKAlBz",
+          "titles": { "EN": "Iron Staff" },
+          "leads": {
+            "EN": "Iron staff with representation of three stylized birds on each side. Possibly an image of powerful women, healing, and medicine."
+          },
+          "viewId": "VWz315",
+          "style": "Extended",
+          "position": [0.0081828, 1.6135017, -0.0859054],
+          "direction": [0.5617463, 0.6629877, 0.4948619],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "KAYvtVbKl6L2",
+          "titles": { "EN": "Brass Bracelet" },
+          "leads": { "EN": "" },
+          "viewId": "T0eQYD",
+          "position": [-0.6965315, 1.9496354, 0.4313226],
+          "direction": [-0.5859815, 0.4575156, 0.6688087],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        },
+        {
+          "id": "lQUQM3mtHGfK",
+          "titles": { "EN": "Beaded Necklace" },
+          "leads": { "EN": "Flat beads tied with red fabric" },
+          "viewId": "1tt4oc",
+          "style": "Extended",
+          "position": [-0.1359874, 2.2893315, -0.1952333],
+          "direction": [0.5442687, 0.3479699, -0.7633403],
+          "scale": 0.1660765,
+          "color": [0.3058824, 0.1647059, 0.5176471]
+        }
+      ]
+    }
+  ],
+  "metas": [
+    {
+      "collection": {
+        "titles": { "EN": "Esu Shrne | IBD12-AD-2-1" },
+        "intros": { "EN": "" }
+      },
+      "images": [
+        {
+          "uri": "scene-image-thumb.jpg",
+          "quality": "Thumb",
+          "byteSize": 15195,
+          "width": 320,
+          "height": 320
+        },
+        {
+          "uri": "scene-image-low.jpg",
+          "quality": "Low",
+          "byteSize": 42507,
+          "width": 640,
+          "height": 640
+        },
+        {
+          "uri": "scene-image-medium.jpg",
+          "quality": "Medium",
+          "byteSize": 126255,
+          "width": 1280,
+          "height": 1280
+        },
+        {
+          "uri": "scene-image-high.jpg",
+          "quality": "High",
+          "byteSize": 391989,
+          "width": 2560,
+          "height": 2560
+        }
+      ]
+    }
+  ],
+  "setups": [
+    {
+      "units": "cm",
+      "interface": {
+        "visible": true,
+        "logo": true,
+        "menu": true,
+        "tools": true
+      },
+      "viewer": {
+        "shader": "Default",
+        "exposure": 1,
+        "toneMapping": true,
+        "gamma": 2,
+        "isWallMountAR": false,
+        "arScale": 1,
+        "annotationsVisible": true
+      },
+      "reader": { "enabled": false, "position": "Overlay" },
+      "navigation": {
+        "enabled": true,
+        "autoZoom": true,
+        "autoRotation": false,
+        "lightsFollowCamera": true,
+        "type": "Orbit",
+        "orbit": {
+          "orbit": [-12.9417989, 399.5226343, 0],
+          "offset": [7.0126145, 15.7058002, 51.467535],
+          "minOrbit": [-90, null, null],
+          "maxOrbit": [90, null, null],
+          "minOffset": [null, null, 0.1],
+          "maxOffset": [null, null, 10000]
+        }
+      },
+      "background": {
+        "style": "Solid",
+        "color0": [1, 1, 1],
+        "color1": [1, 1, 1]
+      },
+      "floor": {
+        "visible": false,
+        "position": [-1.9644399, -7.0424326, -1.8334297],
+        "size": 45.1466641,
+        "color": [0.6, 0.75, 0.8],
+        "opacity": 0.5,
+        "receiveShadow": false,
+        "autoSize": true
+      },
+      "grid": { "visible": false, "color": [0.5, 0.7, 0.8] },
+      "tape": { "enabled": false },
+      "slicer": {
+        "enabled": false,
+        "axis": "X",
+        "position": 0.5,
+        "inverted": false,
+        "color": [0, 0.61, 0.87]
+      },
+      "snapshots": {
+        "features": ["reader", "viewer", "navigation"],
+        "targets": [
+          "scenes/0/setup/reader/enabled",
+          "scenes/0/setup/reader/position",
+          "scenes/0/setup/reader/articleId",
+          "scenes/0/setup/viewer/annotationsVisible",
+          "scenes/0/setup/viewer/activeAnnotation",
+          "scenes/0/setup/viewer/activeTags",
+          "scenes/0/setup/viewer/shader",
+          "scenes/0/setup/viewer/variant",
+          "scenes/0/setup/viewer/exposure",
+          "scenes/0/setup/navigation/orbit",
+          "scenes/0/setup/navigation/offset"
+        ],
+        "states": [
+          {
+            "id": "RUKZYg",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "kZos5IJqsuvn",
+              null,
+              null,
+              null,
+              null,
+              [-10.6137566, 75.9247507, 0],
+              [2.8174548, 2.1215702, 22.6466344]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "PlG1KB",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "OtlHAiWlheWR",
+              null,
+              null,
+              null,
+              null,
+              [5.1005291, 305.8189306, 0],
+              [2.8174548, 2.1215702, 22.6466344]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "Jtufqy",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "ZioqXw91VsiO",
+              null,
+              null,
+              null,
+              null,
+              [-30.984127, 269.1522639, 0],
+              [2.8174548, 2.1215702, 22.6466344]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "v8mmik",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "B2PpobrKw6rv",
+              null,
+              null,
+              null,
+              null,
+              [3.3544974, 276.1363909, 0],
+              [2.8174548, 2.1215702, 19.5870741]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "3nDjoe",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "82bQ0xUc2nov",
+              null,
+              null,
+              null,
+              null,
+              [2.1904762, 393.1205179, 0],
+              [2.8174548, 2.1215702, 19.5870741]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "CpPlxA",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "23gkVOCyfeJh",
+              null,
+              null,
+              null,
+              null,
+              [-30.4021164, 228.4115232, 0],
+              [5.3697825, 7.4361475, 22.2676335]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "lrK0ay",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "9Fcdb481wI31",
+              null,
+              null,
+              null,
+              null,
+              [-26.9100529, 380.3162851, 0],
+              [4.3720567, 12.0803321, 26.8797718]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "w2AmsX",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "c6wlR0HwNYmO",
+              null,
+              null,
+              null,
+              null,
+              [-43.2063492, 178.3586131, 0],
+              [4.3720567, 12.0803321, 27.653058]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "H2rBz9",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "5orSlu3tx6eY",
+              null,
+              null,
+              null,
+              null,
+              [1.026455, 191.7448565, 0],
+              [4.3720567, 12.0803321, 17.8912571]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "i4QIgG",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "rPmdpwUNWEOQ",
+              null,
+              null,
+              null,
+              null,
+              [-7.1216931, 170.7924756, 0],
+              [1.8009915, 5.566967, 21.5969472]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "NWlx3q",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "5CugJEsCBIxX",
+              null,
+              null,
+              null,
+              null,
+              [-28.0740741, 312.8030576, 0],
+              [1.8009915, 5.566967, 29.9947128]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "FVaYln",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "0tiMYRyWDN1R",
+              null,
+              null,
+              null,
+              null,
+              [-17.015873, 92.8030576, 0],
+              [4.7408759, 20.333233, 15.2974404]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "kqtw0Y",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              [-19.9259259, 87.5649623, 0],
+              [12.0566689, 14.0008838, 25.3954595]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "VWz315",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "iB9ijQtKAlBz",
+              null,
+              null,
+              null,
+              null,
+              [-19.9259259, 87.5649623, 0],
+              [12.0566689, 14.0008838, 25.3954595]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "T0eQYD",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "KAYvtVbKl6L2",
+              null,
+              null,
+              null,
+              null,
+              [-23.4179894, 305.8189306, 0],
+              [12.0566689, 14.0008838, 25.3954595]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "1tt4oc",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "lQUQM3mtHGfK",
+              null,
+              null,
+              null,
+              null,
+              [-28.6560847, 493.226338, 0],
+              [6.2162467, 20.156331, 21.5915626]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "wnWH6R",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "0tiMYRyWDN1R",
+              null,
+              null,
+              null,
+              null,
+              [-17.015873, 92.8030576, 0],
+              [4.7408759, 20.333233, 12.1843136]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "U5m6gT",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "kZos5IJqsuvn",
+              null,
+              null,
+              null,
+              null,
+              [-0.1375661, 50.3162851, 0],
+              [2.8174548, 2.1215702, 11.7855596]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "x2Pk0A",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "ZioqXw91VsiO",
+              null,
+              null,
+              null,
+              null,
+              [-30.984127, 269.1522639, 0],
+              [4.0756011, 6.2554792, 27.3372725]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "eODOtg",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "9Fcdb481wI31",
+              null,
+              null,
+              null,
+              null,
+              [-26.9100529, 380.3162851, 0],
+              [4.3667549, 15.3704347, 24.8756966]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "WHW45U",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              [-43.2063492, 178.3586131, 0],
+              [7.2886639, 11.9405429, 25.4659314]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "hbKvjx",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "c6wlR0HwNYmO",
+              null,
+              null,
+              null,
+              null,
+              [-43.2063492, 178.3586131, 0],
+              [7.2886639, 11.9405429, 25.4659314]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "B6JNF7",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              [-28.0740741, 312.8030576, 0],
+              [1.8009915, 5.566967, 24.1264572]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          },
+          {
+            "id": "QjE9sF",
+            "values": [
+              null,
+              null,
+              null,
+              null,
+              "5CugJEsCBIxX",
+              null,
+              null,
+              null,
+              null,
+              [-28.0740741, 312.8030576, 0],
+              [1.8009915, 5.566967, 24.1264572]
+            ],
+            "curve": "EaseOutQuad",
+            "duration": 1
+          }
+        ]
+      },
+      "derivatives": { "enabled": false },
+      "environment": { "index": 0, "visible": false, "rotation": [0, 0, 0] },
+      "language": { "language": "EN" },
+      "audio": { "narrationId": "" }
+    }
+  ]
+}

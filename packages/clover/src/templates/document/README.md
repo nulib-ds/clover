@@ -12,17 +12,17 @@ or narrows them (8rem to 24rem; drag it, click or tap it to step from 8rem to 13
 document of one page has no page thumbnails, bar or toggle: the page takes the whole
 width.
 
-Each view (a spread is one) is a sheet, fitted whole, and never taller than the stage
+Each view (a spread is one) is a sheet, fitted whole, and never taller than the column
 less a strip, so the top of the next always shows under it. Scroll through them as
 through any page, with the wheel, a trackpad, a finger or the scrollbar; past the first
-or last, the web page scrolls on. The top of the stage is where a sheet is active: when
+or last, the web page scrolls on. The top of the column is where a sheet is active: when
 the scroll comes to rest, the next sheet is brought there once the active one has been
 scrolled a quarter of its height on (the previous once a quarter of it shows), and
 otherwise the active one settles back. A press on another sheet, a thumbnail, and PageUp
 and PageDown bring theirs too. Sheets not active are muted. The active sheet is the live
 Canvas, to zoom into and explore; it and its controls show once it is in place and
 drawn, and while the column scrolls its controls slide out of the way. Zoomed in or out,
-or moved, the active sheet fills the stage and the others dissolve, until it is home
+or moved, the active sheet fills the column and the others dissolve, until it is home
 again (Reset, or `0`) or another sheet comes in.
 
 The information panel, from the panel toggle among the Canvas's controls, sits to the

@@ -120,11 +120,94 @@
 }
 
 /*
- * The sidebar's foot holds its Collapse button alone, the appearance switch being in the
- * footer (`ThemeSwitch.tsx`; Mat, 2026-10-21): kept at the end, where it sat beside it.
+ * More room round the sidebar's list, and over the page beside it, where the window is
+ * wide (Mat, 2026-10-23: "more breathing is good"; "padding tops should always match"),
+ * tightening as it narrows: Nextra's 1rem where the sidebar first shows, 48rem wide,
+ * growing to `l` at the list's start and `xl` over the list and the page alike at 90rem.
+ * The open sidebar widens by what its start gains, so its list keeps the width Nextra
+ * gives it (and pins, once the sidebar is collapsed and opened again).
  */
-.nextra-sidebar > div:last-child > button[aria-expanded="true"] {
-  margin-inline-start: auto;
+:root {
+  --docs-room-start: clamp(0rem, (100vw - 48rem) * 0.618 / 42, 0.618rem);
+  --docs-room-top: clamp(0rem, (100vw - 48rem) * 1.618 / 42, 1.618rem);
+}
+
+.nextra-sidebar[class~="x:w-64"] {
+  width: calc(16rem + var(--docs-room-start));
+}
+
+.nextra-sidebar > .nextra-scrollbar,
+.nextra-sidebar ~ article {
+  padding-block-start: calc(1rem + var(--docs-room-top));
+}
+
+.nextra-sidebar > .nextra-scrollbar {
+  padding-inline-start: calc(1rem + var(--docs-room-start));
+}
+
+/*
+ * The sidebar's foot holds its Collapse button alone, the appearance switch being in the
+ * footer (`ThemeSwitch.tsx`; Mat, 2026-10-21): at its start, in line with the list, the
+ * sidebar open or collapsed (Nextra centers it in a collapsed one), with no rule over it
+ * (Mat, 2026-10-23).
+ */
+.nextra-sidebar > .nextra-sidebar-footer {
+  border-top-width: 0;
+  justify-content: flex-start;
+  margin-inline-start: calc(1rem + var(--docs-room-start));
+}
+
+/*
+ * The Collapse button is drawn as Clover's control that shows and hides its Panel
+ * (`PanelToggle`; Mat, 2026-10-23): round, the controls' dark fill and white glyph, the
+ * accent under the pointer or focused, and the toggle's glyph, mirrored as this panel is
+ * on the left: a page with a side panel, the panel filled while the sidebar is open.
+ * Nextra's icon gives way to it, a mask, so it takes the button's color.
+ */
+.nextra-sidebar > .nextra-sidebar-footer > button {
+  --panel-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect x='64' y='96' width='384' height='320' rx='40' fill='none' stroke='%23000' stroke-width='36'/%3E%3Cpath d='M192 96v320' fill='none' stroke='%23000' stroke-width='36'/%3E%3Cpath d='M192 96h-88a40 40 0 0 0-40 40v240a40 40 0 0 0 40 40h88z'/%3E%3C/svg%3E");
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--clover-control);
+  height: var(--clover-control);
+  padding: 0;
+  border-radius: var(--clover-radius-pill, 2rem);
+  background-color: var(--clover-color-control, #1a1d1e);
+  color: var(--clover-color-control-glyph, #fff);
+}
+
+.nextra-sidebar > .nextra-sidebar-footer > button[aria-expanded="false"] {
+  --panel-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect x='64' y='96' width='384' height='320' rx='40' fill='none' stroke='%23000' stroke-width='36'/%3E%3Cpath d='M192 96v320' fill='none' stroke='%23000' stroke-width='36'/%3E%3C/svg%3E");
+}
+
+.nextra-sidebar > .nextra-sidebar-footer > button:is(:hover, :focus-visible) {
+  background-color: var(--clover-color-accent);
+}
+
+.nextra-sidebar > .nextra-sidebar-footer > button > svg {
+  display: none;
+}
+
+.nextra-sidebar > .nextra-sidebar-footer > button::before {
+  width: 1rem;
+  height: 1rem;
+  background-color: currentColor;
+  -webkit-mask: var(--panel-glyph) center / contain no-repeat;
+  mask: var(--panel-glyph) center / contain no-repeat;
+  content: "";
+}
+
+@media (forced-colors: active) {
+  .nextra-sidebar > .nextra-sidebar-footer > button {
+    outline: 1px solid ButtonText;
+  }
+
+  /* Forced colors would paint the glyph's ground, and so the glyph, as the page's. */
+  .nextra-sidebar > .nextra-sidebar-footer > button::before {
+    forced-color-adjust: none;
+    background-color: ButtonText;
+  }
 }
 
 /*
@@ -211,10 +294,57 @@ html:not(.dark) .nextra-callout :not(pre) > code {
  * spaced as Nextra spaces its tables. While it scrolls the box is a focusable region, so
  * it shows focus as the site's controls do.
  */
+/*
+ * Tables drawn as Clover draws its boxes (Mat, 2026-10-23: "brighten up these tables …
+ * match the rest of the Clover aesthetic"): one hairline box with the containers' corners
+ * (`--radius-4`) and a code block's lift (`--code-lift`), across the page's width as code
+ * blocks and examples are (Mat, 2026-10-23), its rows ruled by hairlines in place of
+ * Nextra's grid and stripes (no gray fills), its head quieter, smaller and to the start,
+ * its groups' names in the text's color, and its cells padded on the scale.
+ */
 .docs-table {
+  border: 1px solid var(--gray-6);
+  border-radius: var(--radius-4);
+  box-shadow: var(--code-lift);
   margin-top: 1.25em;
+  max-width: 100%;
   overflow-x: auto;
   position: relative;
+}
+
+.docs-table > table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.docs-table tr {
+  background: none;
+  border: 0;
+}
+
+.docs-table :is(th, td) {
+  border: 0;
+  border-top: 1px solid var(--gray-6);
+  padding: 0.618rem 1rem;
+  text-align: start;
+  vertical-align: top;
+}
+
+.docs-table thead th {
+  border-top: 0;
+  color: var(--gray-11);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/*
+ * A group's name over its rows (`scope="rowgroup"`): a step up from the head, in the
+ * text's color (Mat, 2026-10-23).
+ */
+.docs-table th[scope="rowgroup"] {
+  color: var(--nav-text);
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .docs-table:first-child {
@@ -222,7 +352,7 @@ html:not(.dark) .nextra-callout :not(pre) > code {
 }
 
 .docs-table:focus-visible {
-  box-shadow: var(--focus-ring);
+  box-shadow: var(--focus-ring), var(--code-lift);
   outline: none;
 }
 
@@ -298,6 +428,161 @@ footer.site-footer {
 }
 
 /*
+ * The scale's table at the reader's root size (`docs/components/ScaleCalculator.tsx`),
+ * which they change on the rows at `1rem`: a number to type, step or drag, drawn as live
+ * code's values are (`LiveCode.module.css`'s `.value`), underlined with dashes, here in
+ * the text accent on the accent's wash so it reads as the one thing to change. 24px or
+ * more each way (WCAG 2.5.8); its ring the page's controls' (2px, the accent).
+ */
+.docs-scale {
+  margin-block-start: 1.25em;
+}
+
+/* The rows at `1rem`, where the reader sets it, lit as a code block's marked lines are. */
+.docs-scale tr[data-base] > :is(td, th) {
+  background: var(--editor-mark);
+}
+
+.docs-scale-value {
+  -moz-appearance: textfield;
+  appearance: textfield;
+  background: var(--editor-mark);
+  border: 0;
+  border-bottom: 1px dashed currentColor;
+  border-radius: var(--radius-2) var(--radius-2) 0 0;
+  box-sizing: border-box;
+  color: var(--accent-11);
+  cursor: ew-resize;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  margin: 0;
+  min-height: 1.5rem;
+  min-width: 1.5rem;
+  padding: 0 0.236rem;
+  text-align: end;
+  touch-action: none;
+}
+
+.docs-scale-value::-webkit-inner-spin-button,
+.docs-scale-value::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.docs-scale-value:hover,
+.docs-scale-value[data-dragging] {
+  background: color-mix(in srgb, var(--accent-9) 16%, transparent);
+}
+
+.docs-scale-value:focus {
+  cursor: text;
+}
+
+.docs-scale-value:focus-visible {
+  outline: 2px solid var(--accent-11);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .docs-scale-value {
+    border-bottom-color: CanvasText;
+  }
+}
+
+/* The Viewer at that size, framed as the examples' are (`--card-shadow`). */
+.docs-scale-viewer {
+  display: block;
+  width: 100%;
+  height: 40rem;
+  margin-block: 1.25em 1.618rem;
+  border: 0;
+  border-radius: var(--radius-4);
+  box-shadow: var(--card-shadow);
+}
+
+/*
+ * A list to tick through (`docs/components/Checklist.tsx`): each item its checkbox and its
+ * words, the box on the words' first line and in the accent once ticked. The whole label
+ * takes the press, so the target is the line, not the box alone (WCAG 2.5.8).
+ */
+.docs-checklist {
+  display: grid;
+  gap: 0.618rem;
+  margin-block: 1.25em 0;
+  padding: 0;
+  list-style: none;
+}
+
+.docs-checklist label {
+  display: flex;
+  gap: 0.618rem;
+  align-items: flex-start;
+  cursor: pointer;
+  line-height: 1.75;
+}
+
+.docs-checklist input {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin: 0.375em 0 0;
+  accent-color: var(--accent-9);
+  cursor: pointer;
+}
+
+/*
+ * Demos side by side, each named over it (`scene.mdx`'s two drawings; Mat, 2026-10-23:
+ * "label these"): halves of one row, each a figure, its caption and then its demo, which
+ * takes the rest of the row's height. Stacked where halves would be too narrow (1.4.10).
+ */
+.docs-compare {
+  display: flex;
+  gap: 1rem;
+  height: 22.5rem;
+}
+
+.docs-compare > figure {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.618rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.docs-compare > figure > figcaption {
+  color: var(--gray-11);
+  font-size: 0.875rem;
+}
+
+/* A name in a caption, as a component page's head names its part (`.docs-part-head-name`). */
+.docs-compare > figure > figcaption > code {
+  color: var(--accent-11);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.docs-compare > figure > div {
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 40rem) {
+  .docs-compare {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .docs-compare > figure > div {
+    flex: none;
+    height: 15rem;
+  }
+}
+
+/*
  * A page without a table of contents (`theme.toc: false` in `_meta.ts`) gets its column:
  * Nextra leaves the empty `nav` holding 16rem.
  */
@@ -307,40 +592,48 @@ nav.nextra-toc:empty {
 
 /*
  * Such a page takes more room at its sides where the window has room to spare (Mat,
- * 2026-10-21), easing in: Nextra's 3rem up to 64rem wide, then wider with the window, to
- * 6rem at 90rem, where the layout stops widening. Narrower screens keep Nextra's.
+ * 2026-10-21; and 2026-10-23, "a bit more on wide screens"), easing in: Nextra's 3rem up
+ * to 64rem wide, then wider with the window, to 8rem at 90rem, where the layout stops
+ * widening. Narrower screens keep Nextra's.
  */
+nav.nextra-toc:empty ~ article {
+  --docs-bleed: 0px;
+}
+
 @media (min-width: 64rem) {
   nav.nextra-toc:empty ~ article {
-    padding-inline: clamp(3rem, 3rem + (100vw - 64rem) * 0.1154, 6rem);
+    /* What a wide window adds at each side, which a wide example takes back. */
+    --docs-bleed: clamp(0rem, (100vw - 64rem) * 0.1923, 5rem);
+    padding-inline: calc(3rem + var(--docs-bleed));
   }
 }
 
 /*
  * A reference page, laid out as Radix Themes lays out its components' (the Viewer's; Mat,
  * 2026-10-21): a lede under the title (`<div className="docs-lede">`), room between the
- * sections, and its prose held to a reading measure, while its examples and tables take
- * the page's width.
+ * sections, and its prose, examples and tables across the page's width, to one right edge
+ * (Mat, 2026-10-23). The lede's lines are a little looser than Nextra's fixed 1.75rem
+ * gives its larger size (Mat, 2026-10-23: "just a tad"), and no tighter on a phone.
  */
 .docs-lede {
   color: var(--gray-11);
   font-size: var(--text-lede);
-  line-height: 1.5;
+  line-height: max(1.4em, 1.75rem);
   margin-top: var(--clover-space-m, 1rem);
-  max-width: 44rem;
 }
 
 .docs-lede > p {
+  line-height: inherit;
   margin: 0;
 }
 
 /*
- * A component page is one with a lede and no breadcrumb (`reference()`,
- * `content/docs/_meta.ts`). White space under its head (Mat, 2026-10-22: "white space is
- * king"): the example under the lede (its margin, which the lede's own takes in) well
- * clear of it.
+ * Every docs page (one beside the sidebar) reads as the component pages do (Mat,
+ * 2026-10-23: "style like the Components pages"): white space under its head (Mat,
+ * 2026-10-22: "white space is king"), what follows the lede (its margin, which the
+ * lede's own takes in) well clear of it.
  */
-main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > .docs-lede {
+.nextra-sidebar ~ article > main > .docs-lede {
   margin-bottom: var(--clover-space-xl, 2.618rem);
 }
 
@@ -378,15 +671,15 @@ main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > .docs-lede {
 }
 
 /*
- * Named as the homepage's tiles name their parts (`Parts.module.css`'s `.tileName`), in the
- * code's face and the text accent, on the page's ground, bold, a notch under the page's
- * size, as the badge's figure is (Mat, 2026-10-22).
+ * Named as the homepage's tiles name their parts (`Parts.module.css`'s `.tileName`; Mat,
+ * 2026-10-23): the code's face at 0.875rem, medium, in the text accent, on the page's
+ * ground.
  */
 .docs-part-head-name {
   color: var(--accent-11);
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
+  font-size: 0.875rem;
+  font-weight: 500;
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -446,22 +739,26 @@ main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > .docs-lede {
  * The title set as the homepage's sections' are (`SectionIntro.module.css`'s `.title`),
  * with no stroke under it (Mat, 2026-10-22).
  */
-main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > h1,
-main:not(.nextra-breadcrumb ~ main):has(> .docs-lede) > .docs-title-row > h1 {
+/*
+ * Running text in the text's color, black (white on a dark page), not Nextra's slate
+ * (Mat, 2026-10-23: "all paragraph lists table content should be black"): paragraphs,
+ * lists and tables inherit it; the lede and the tables' heads stay muted, as set.
+ */
+.nextra-sidebar ~ article > main {
+  color: var(--nav-text);
+}
+
+.nextra-sidebar ~ article > main h1 {
   font-size: clamp(1.618rem, 3vw, 2.618rem);
   letter-spacing: -0.02em;
   line-height: 1.1;
 }
 
-main:has(> .docs-lede) > :is(p, ul, ol) {
-  max-width: 44rem;
-}
-
-main:has(> .docs-lede) > h2 {
+.nextra-sidebar ~ article > main > h2 {
   margin-top: 6.854rem;
 }
 
-main:has(> .docs-lede) > h3 {
+.nextra-sidebar ~ article > main > h3 {
   margin-top: 4.236rem;
 }
 
@@ -532,6 +829,20 @@ main:has(> .docs-lede) > h3 {
   color: var(--color-background);
 }
 
+/*
+ * A switch of an example's own (the Viewer's template, `LiveTemplates`), drawn as this
+ * one: its chosen option marked by `data-checked`, as the example holds the choice.
+ */
+.code-switch-option[data-checked] {
+  background: var(--clover-color-control, #1a1d1e);
+  color: var(--clover-color-control-glyph, #fff);
+}
+
+:root.dark .code-switch-option[data-checked] {
+  background: var(--gray-12);
+  color: var(--color-background);
+}
+
 /* Under the pointer, or focused, the accent, chosen or not, as the controls take it. */
 :root .code-switch > .code-switch-option[data-option]:hover,
 :root
@@ -577,7 +888,8 @@ main:has(> .docs-lede) > h3 {
   :root:not([data-code="web-components"])
     .code-switch-option[data-option="react"],
   :root[data-code="web-components"]
-    .code-switch-option[data-option="web-components"] {
+    .code-switch-option[data-option="web-components"],
+  .code-switch-option[data-checked] {
     background-color: Highlight;
     color: HighlightText;
   }

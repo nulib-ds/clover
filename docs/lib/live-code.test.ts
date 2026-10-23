@@ -263,6 +263,77 @@ describe("codeLines", () => {
     expect(remountKey(knobs, values)).toBe("true");
   });
 
+  it("writes a template picked in the code as each flavor names it", () => {
+    const knobs: Knob[] = [
+      {
+        prop: "template",
+        value: "Document",
+        options: ["Default", "Document", "Gallery"],
+      },
+    ];
+    const tree: CodeTree = {
+      url: URL,
+      nodes: [
+        {
+          jsx: "Viewer",
+          html: "clover-viewer",
+          attrs: [
+            {
+              prop: "template",
+              attribute: "template",
+              template: "Document",
+              knob: "part:template",
+            },
+          ],
+        },
+      ],
+    };
+    expect(code(tree, knobs)).toEqual({
+      react: "<Viewer template={Document} />",
+      html: '<clover-viewer template="document"></clover-viewer>',
+    });
+    const [line] = codeLines(tree, knobs, initialValues(knobs), "react");
+    expect(line.tokens.find((token) => token.knob)?.choices).toEqual([
+      "Default",
+      "Document",
+      "Gallery",
+    ]);
+    expect(code(tree, knobs, { "part:template": "Gallery" }).html).toBe(
+      '<clover-viewer template="gallery"></clover-viewer>',
+    );
+  });
+
+  it("carries a movable part's key on every line it writes, in both flavors", () => {
+    const tree: CodeTree = {
+      url: URL,
+      nodes: [
+        {
+          jsx: "aside",
+          html: "aside",
+          attrs: [],
+          children: [
+            {
+              jsx: "Clover.Label",
+              html: "clover-label",
+              attrs: [{ prop: "as", attribute: "as", value: "h3" }],
+              key: "title",
+            },
+            { jsx: "Clover.Next", html: "clover-next", attrs: [], key: "next" },
+          ],
+        },
+      ],
+    };
+    for (const flavor of ["react", "html"] as const) {
+      const lines = codeLines(tree, [], {}, flavor);
+      expect(lines.map((line) => line.part)).toEqual([
+        undefined,
+        "title",
+        "next",
+        undefined,
+      ]);
+    }
+  });
+
   it("breaks a lone style too long for its line, a property a line", () => {
     const knobs: Knob[] = [
       {

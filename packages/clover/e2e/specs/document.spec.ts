@@ -4,7 +4,7 @@ import { serveIIIF } from "./fixtures";
 
 /*
  * Document's pages down one column (`templates/document/Sheets.tsx`), as a PDF reader's
- * continuous view, and the one place a sheet is active, the top of the stage:
+ * continuous view, and the one place a sheet is active, the top of the column:
  *
  * - a sheet for each view, the next one's top in sight under the one at rest, those not
  *   active muted;
@@ -13,16 +13,16 @@ import { serveIIIF } from "./fixtures";
  * - a press on a sheet, a thumbnail, PageDown and PageUp bringing theirs, and a reader's
  *   scroll taking over from one on its way;
  * - the Canvas, and its controls, shown only once its sheet is in place and drawn;
- * - zoomed into or out of, the active sheet filling the stage and the others dissolving,
+ * - zoomed into or out of, the active sheet filling the column and the others dissolving,
  *   until home again or another sheet comes in;
- * - the active sheet kept at the top as the stage resizes;
+ * - the active sheet kept at the top as the column resizes;
  * - a finger that scrolls the column until the reader zooms in.
  *
  * After every move, `settled` checks the whole of it: the active sheet at its place, the
  * live Canvas exactly over it and shown, nothing on its way.
  */
 const BOOK = "https://fixtures.test/0009-book-1.json";
-/** Twelve single pages, portrait: room to scroll, every sheet as tall as the stage allows. */
+/** Twelve single pages, portrait: room to scroll, every sheet as tall as the column allows. */
 const PAGES = "https://fixtures.test/generated/12.json";
 
 async function open(page: Page, content = PAGES) {
@@ -36,7 +36,7 @@ async function open(page: Page, content = PAGES) {
   await settled(page, 0);
 }
 
-const stage = (page: Page) => page.locator(".clover-template-document-stage");
+const column = (page: Page) => page.locator(".clover-template-document-column");
 const sheets = (page: Page) => page.locator(".clover-template-document-sheet");
 /** Which thumbnail is selected: the current view, as the sidebar shows it. */
 const selected = (page: Page) =>
@@ -47,13 +47,13 @@ const selected = (page: Page) =>
         (option) => option.getAttribute("aria-selected") === "true",
       ),
     );
-/** The panel's toggle, the one control that never fades with the chrome at rest. */
+/** The panel's toggle, the one control that never fades with the others at rest. */
 const toggle = (page: Page) =>
   page.locator(".clover-template-document-live [data-button='panel']");
 
 /** The column now: where it is, each sheet, the live Canvas, and what is on its way. */
 const read = (page: Page) =>
-  stage(page).evaluate((element) => {
+  column(page).evaluate((element) => {
     const all = [
       ...element.querySelectorAll<HTMLElement>(
         ".clover-template-document-sheet",
@@ -104,7 +104,7 @@ async function settled(page: Page, index: number) {
 /** A scroll as the wheel, a finger or the scrollbar makes it, by a share of a sheet. */
 const scrollBy = async (page: Page, share: number) => {
   const { sheets: all } = await read(page);
-  await stage(page).evaluate(
+  await column(page).evaluate(
     (element, by) => element.scrollBy(0, by),
     Math.round(all[0].height * share),
   );
@@ -220,12 +220,12 @@ test("a fling rests on one sheet, the Canvas never shown on the way", async ({
   // Record every time the Canvas shows while the column moves.
   await page.evaluate(() => {
     const live = document.querySelector(".clover-template-document-live")!;
-    const stage = document.querySelector(".clover-template-document-stage")!;
+    const column = document.querySelector(".clover-template-document-column")!;
     (window as any).__shownMoving = 0;
     new MutationObserver(() => {
       if (
         !live.hasAttribute("data-moved") &&
-        stage.hasAttribute("data-scrolling")
+        column.hasAttribute("data-scrolling")
       )
         (window as any).__shownMoving++;
     }).observe(live, { attributes: true, attributeFilter: ["data-moved"] });
@@ -243,7 +243,7 @@ test("a trackpad's run of small wheel steps rests on one sheet, and PageDown pre
   await open(page);
   // Mobile WebKit has no wheel to send, as an iPhone has no trackpad.
   if (!(browserName === "webkit" && isMobile)) {
-    const box = (await stage(page).boundingBox())!;
+    const box = (await column(page).boundingBox())!;
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     // Forty small steps, 12px each, a frame or two apart: one gesture, past a quarter.
     for (let step = 0; step < 40; step++) {
@@ -269,7 +269,7 @@ test("a press on a muted sheet brings it to the top; the controls wait until it 
   await open(page);
   await expect(toggle(page)).toHaveCSS("opacity", "1");
   await sheets(page).nth(1).click();
-  // On its way, the controls are going or gone (they fade as the chrome does).
+  // On its way, the controls are going or gone (they fade, as when put away).
   await expect
     .poll(async () =>
       Number(await toggle(page).evaluate((e) => getComputedStyle(e).opacity)),
@@ -311,7 +311,7 @@ test("a thumbnail, PageDown and PageUp bring their sheets; a reader's scroll tak
   await showItems();
   await thumbnails.nth(0).click();
   await page.waitForTimeout(60);
-  await stage(page).dispatchEvent("wheel", { deltaY: 1 });
+  await column(page).dispatchEvent("wheel", { deltaY: 1 });
   await scrollBy(page, 1);
   await expect
     .poll(async () => (await read(page)).moving, { timeout: 8000 })
@@ -319,7 +319,7 @@ test("a thumbnail, PageDown and PageUp bring their sheets; a reader's scroll tak
   await settled(page, (await read(page)).active);
 });
 
-test("zoomed in or out, the active sheet fills the stage and the others dissolve; home, or another sheet, puts it back", async ({
+test("zoomed in or out, the active sheet fills the column and the others dissolve; home, or another sheet, puts it back", async ({
   page,
 }) => {
   await open(page);
@@ -329,7 +329,7 @@ test("zoomed in or out, the active sheet fills the stage and the others dissolve
   await expect(viewport).toHaveCSS("touch-action", "pan-y");
   await viewport.focus();
   await page.keyboard.press("+");
-  await expect(stage(page)).toHaveAttribute("data-zoomed", "");
+  await expect(column(page)).toHaveAttribute("data-zoomed", "");
   await expect
     .poll(async () => {
       const now = await read(page);
@@ -343,26 +343,26 @@ test("zoomed in or out, the active sheet fills the stage and the others dissolve
 
   // Home again: a sheet among the rest.
   await page.keyboard.press("0");
-  await expect(stage(page)).not.toHaveAttribute("data-zoomed");
+  await expect(column(page)).not.toHaveAttribute("data-zoomed");
   await expect(sheets(page).nth(1)).toHaveCSS("opacity", "0.618");
   await settled(page, 0);
 
   // Out past home counts too.
   await page.keyboard.press("-");
-  await expect(stage(page)).toHaveAttribute("data-zoomed", "");
+  await expect(column(page)).toHaveAttribute("data-zoomed", "");
   await page.keyboard.press("0");
-  await expect(stage(page)).not.toHaveAttribute("data-zoomed");
+  await expect(column(page)).not.toHaveAttribute("data-zoomed");
 
   // Zoomed, a scroll past the threshold brings the next sheet in, at home.
   await page.keyboard.press("+");
-  await expect(stage(page)).toHaveAttribute("data-zoomed", "");
+  await expect(column(page)).toHaveAttribute("data-zoomed", "");
   await scrollBy(page, 0.5);
   await settled(page, 1);
-  await expect(stage(page)).not.toHaveAttribute("data-zoomed");
+  await expect(column(page)).not.toHaveAttribute("data-zoomed");
   await expect(sheets(page).nth(0)).toHaveCSS("opacity", "0.618");
 });
 
-test("the active sheet stays at the top as the stage resizes", async ({
+test("the active sheet stays at the top as the column resizes", async ({
   page,
 }) => {
   await open(page);

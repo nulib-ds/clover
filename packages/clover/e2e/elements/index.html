@@ -49,7 +49,7 @@
         display: grid;
         gap: 1rem;
       }
-      /* The containers' layout: the split as tall as a stage, the panel's pane scrolling. */
+      /* The containers' layout: the split as tall as a Body, the panel's pane scrolling. */
       .containers clover-split {
         height: 70vh;
       }
@@ -67,7 +67,7 @@
         display: grid;
         gap: 1rem;
       }
-      /* A view the page draws: its words, centered on the stage. */
+      /* A view the page draws: its words, centered in the Body. */
       .own-renderer {
         align-items: center;
         box-sizing: border-box;
@@ -121,9 +121,8 @@
       <section class="containers" aria-labelledby="containers-title">
         <h2 id="containers-title">A layout of containers</h2>
         <p>
-          The stage, its toggle among its controls, a handle, and the
-          information panel beside it, as Default lays them out, in the page's
-          own markup.
+          The Body, its toggle among its controls, a handle, and the information
+          panel beside it, as Default lays them out, in the page's own markup.
         </p>
         <clover-root
           iiif-content="https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json"
@@ -202,7 +201,7 @@
         <h2 id="own-title">Parts of your own</h2>
         <p>
           The root's Clover read by the page's own script, a control replaced by
-          a button of the page's, another button of its own among the stage's
+          a button of the page's, another button of its own among the Body's
           controls, and one view drawn by a renderer of the page's.
         </p>
         <clover-root
@@ -210,7 +209,7 @@
           iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
         >
           <clover-label as="h3"></clover-label>
-          <clover-body id="own-stage" style="height: 40vh">
+          <clover-body id="own-body" style="height: 40vh">
             <button
               type="button"
               id="own-copy"

@@ -124,10 +124,10 @@ down from it (§3).
   `--clover-transport-bar-height`), the seek row (`l`), `xs` between them and `m` above
   and below. Captions and the caption box clear it.
 - `--clover-transport-menu-room` (on `.clover-canvas-transport`) caps a transport menu:
-  the stage's height (`100cqb`; `.clover-canvas-media` is a size container) less the
+  the Body's height (`100cqb`; `.clover-canvas-media` is a size container) less the
   bar's inset `m`, a control, the `s` gap and `xs` clear of the top. A menu also
   measures the room above its own button, whichever row the bar wrapped it onto, so its
-  first option never sits above the stage.
+  first option never sits above the Body.
 
 ## 3. Adjacency: the step comes from how closely things belong together
 
@@ -137,9 +137,9 @@ down: decide the outer level first, then step down for each level inside it.
 
 | Relationship                                               | Step  | Examples                                                                                                                                                                                                    |
 | ---------------------------------------------------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A region's inset (`--clover-inset`)                        | `l`   | A layout's header and thumbnail strip, each padded all round; the information panel; the picture on the stage at home; the lightbox                                                                         |
+| A region's inset (`--clover-inset`)                        | `l`   | A layout's header and thumbnail strip, each padded all round; the information panel; the picture in the Body at home; the lightbox                                                                          |
 | Separate groups in one list                                | `l`   | Annotation sets                                                                                                                                                                                             |
-| A region's parts; a part's inset in a region               | `m`   | The header's title and actions; the strip's header over its thumbnails; About's parts; a tab row over its content; the cluster's and the transport's inset from the stage                                   |
+| A region's parts; a part's inset in a region               | `m`   | The header's title and actions; the strip's header over its thumbnails; About's parts; a tab row over its content; the cluster's and the transport's inset from the Body                                    |
 | Items that are each a group                                | `m`   | Thumbnails in any layout of Items (each a picture with its caption)                                                                                                                                         |
 | Siblings within one part                                   | `s`   | Cluster buttons; transport buttons; a strip's titles and Position; metadata's label-value pairs; a row's inline padding; the map over its list of places                                                    |
 | Parts of one control or one item; a heading over its value | `xs`  | A thumbnail and its caption; a label and its select; a search field and its button; the seek row over the bar; an icon beside a text button's label; a row's block padding; a metadata label over its value |
@@ -147,17 +147,17 @@ down: decide the outer level first, then step down for each level inside it.
 | Lines of one caption                                       | `3xs` | A thumbnail's label and summary; a map overlay's name over "Georeferenced image"                                                                                                                            |
 
 A region's content sits `--clover-inset` (`l`, 1.618rem) in from its edges, whatever the
-region: a layout's header, its thumbnail strip, the information panel, the picture on
-the stage at home (`--clover-canvas-inset`, kept by the renderer and the placeholder
+region: a layout's header, its thumbnail strip, the information panel, the picture in
+the Body at home (`--clover-canvas-inset`, kept by the renderer and the placeholder
 alike), the lightbox. So the title, the strip's header, the panel's first heading and the
 page all start on the same line. Everything inside a region steps down from its inset, a
 step a level: its parts `m` apart, what is within a part `s`, a label over its value
 `xs`. Something that scrolls past may run on to the region's edge, as the strip's
 thumbnails do and a zoomed picture does, but what starts the region keeps the inset. A
 box that is its own target (an accordion heading, with its hover) reaches out over the
-inset by its own padding, so its text lands on the line rather than a step in. Chrome
-over the stage (the cluster, the media bar) is a part of the stage, not its content, so
-it sits a part's `m` in from the stage's edge, nearer it than the picture.
+inset by its own padding, so its text lands on the line rather than a step in. The
+controls over the Body (the cluster, the media bar) are a part of the Body, not its
+content, so they sit a part's `m` in from the Body's edge, nearer it than the picture.
 
 Worked examples, from the top of the Viewer down:
 
@@ -167,14 +167,14 @@ Worked examples, from the top of the Viewer down:
   page titles at the start and the Position at the end, is `m` over its thumbnails, the
   titles and the Position within it `s` apart. The thumbnails run on past the strip's end padding to the pane's edge; its
   arrows stay inside it.
-- **The stage**: the picture at home, and its placeholder, `l` in all round
+- **The Body**: the picture at home, and its placeholder, `l` in all round
   (`--clover-canvas-inset`, the region's inset).
-- **The Canvas's controls**: the cluster sits `m` in from the stage's top and end, with
+- **The Canvas's controls**: the cluster sits `m` in from the Body's top and end, with
   its buttons `s` apart. Each is one `--clover-control`. A placeholder's toggle takes a
   control's place beside it, `s` away.
-- **The media bar**: `m` in from the stage's sides and bottom, with `xl` of scrim above.
+- **The media bar**: `m` in from the Body's sides and bottom, with `xl` of scrim above.
   The seek row is `xs` over the bar, since they are one control. The bar's controls are
-  `s` apart, as the cluster's are. On a narrow stage (under 28rem, or 37.5rem with
+  `s` apart, as the cluster's are. In a narrow Body (under 28rem, or 37.5rem with
   chapters, whose title wants room of its own) it is two rows, `xs` apart: the time and
   chapter under the seek row, then the controls, those at the end kept together at the
   end of the last row.
@@ -225,7 +225,7 @@ The stylesheet's size is part of the design.
   | Rows and their lists | `Panel.css`        | annotations, Ranges, cues, search hits, places on the map                                                         |
   | Fields               | `styles/scale.css` | a search's query, a Collection's menu, a transcript's track menu                                                  |
   | Popovers             | `ui/Tip.css`       | every control that shows an icon alone (§7), the Canvas's hotspots, a split's handle                              |
-  | Chrome               | `Canvas.css`       | the Canvas's controls, navigator, a placeholder's toggle, the media transport, its captions                       |
+  | Controls             | `Canvas.css`       | the Canvas's cluster, navigator, a placeholder's toggle, the media transport, its captions                        |
 
   A family meant to be refined by its members is `:where()`, with no specificity. A
   family that sets a look its members keep is `:is()`.
@@ -235,22 +235,22 @@ The stylesheet's size is part of the design.
   `Highlight`. The current row stays distinct with no color of Clover's own.
 
 - **A state many parts share is decided once**, as custom properties on the part that
-  owns it, and each reads them. The Canvas's chrome is shown by one selector, which sets
-  `--clover-chrome-shown` (0 or 1), `--clover-chrome-events` and
-  `--clover-chrome-timing` on `.clover-canvas`; one rule fades, tucks and spares every
-  piece of it from them, and captions lift by the same number. Never repeat the state's
-  selector per piece.
-- **Chrome never hides on a timer from a reader who cannot hover** (WCAG 2.2.1). A
-  mouse, or a pen that hovers, shows it by moving, and it fades after `hideDelay`.
-  Resting on a piece of chrome holds it (`:hover`, WCAG 1.4.13). A finger, or a pen that
-  does not hover, has no timer: a tap on the picture shows the chrome, and the next tap
-  hides it. A press where faded chrome sits only shows it, and goes no further: no zoom,
-  no play, no hotspot. Focus that no press brought, and keyboard focus
-  (`:has(:focus-visible)`), hold it. One pointer can always zoom back out: at the
+  owns it, and each reads them. The Canvas's controls are shown by one selector, which
+  sets `--clover-controls-shown` (0 or 1), `--clover-controls-events` and
+  `--clover-controls-timing` on `.clover-canvas`; one rule fades, tucks and spares each
+  of the controls from them, and captions lift by the same number. Never repeat the
+  state's selector per piece.
+- **The controls never hide on a timer from a reader who cannot hover** (WCAG 2.2.1). A
+  mouse, or a pen that hovers, shows them by moving, and they fade after `hideDelay`.
+  Resting on one of them holds them (`:hover`, WCAG 1.4.13). A finger, or a pen that
+  does not hover, has no timer: a tap on the picture shows the controls, and the next
+  tap hides them. A press where faded controls sit only shows them, and goes no further:
+  no zoom, no play, no hotspot. Focus that no press brought, and keyboard focus
+  (`:has(:focus-visible)`), hold them. One pointer can always zoom back out: at the
   largest zoom, a click, a double click or a double tap goes home (WCAG 2.5.1).
 - **The viewport lies beneath everything else in the figure**: `z-index: -1` in an
-  isolated figure, inline as well as in the stylesheet. Chrome, in the flow or
-  positioned, then takes its own presses with or without the stylesheet (WCAG 2.5.8).
+  isolated figure, inline as well as in the stylesheet. The controls, in the flow or
+  positioned, then take their own presses with or without the stylesheet (WCAG 2.5.8).
 - **A hotspot is as large as its region**, however small: a line of OCR can be a few
   pixels tall at the zoom shown. It meets WCAG 2.5.8 by the Equivalent exception: the
   Canvas's annotations menu lists the view's annotations, each a row at least 24px tall,
@@ -274,19 +274,19 @@ The stylesheet's size is part of the design.
 
 Some values are not space between things, and stay as they are:
 
-- **Dimensions**: stage heights (`--clover-body-height`), panel widths and their
+- **Dimensions**: the Body's height (`--clover-body-height`), panel widths and their
   bounds, thumbnail heights, menu widths, and a target's minimum size (24px, in CSS px
   as WCAG 2.5.8 measures it, such as the link lists' `min-block-size`). Use the scale
   where a dimension is really a space; the navigator, for example, is a golden
   rectangle, `2xl + xl` by `2xl`.
 - **Hairlines**: borders, outlines, focus rings, slider rails and thumbs, at most 4px.
-- **Motion**: chrome leaves on `--clover-chrome-leave` (180ms, accelerating away),
-  tucked `--clover-chrome-tuck` (`s`) toward its edge, and comes back on
-  `--clover-chrome-enter` (340ms, springing out a touch past and back). One pair for all
-  of it, so it moves as one. Reduced motion sets all three to zero: chrome still comes and
-  goes, without moving.
-- **Breakpoints**, percentages and viewport units. Breakpoints for a part over the stage
-  are container queries on the stage (`.clover-canvas-media`), not the window.
+- **Motion**: the controls leave on `--clover-controls-leave` (180ms, accelerating
+  away), tucked `--clover-controls-tuck` (`s`) toward their edges, and come back on
+  `--clover-controls-enter` (340ms, springing out a touch past and back). One pair for all
+  of them, so they move as one. Reduced motion sets all three to zero: the controls still
+  come and go, without moving.
+- **Breakpoints**, percentages and viewport units. Breakpoints for a part over the Body
+  are container queries on the Body (`.clover-canvas-media`), not the window.
 
 ## 6. Adding or changing a style
 
@@ -338,14 +338,14 @@ does it faster.
 - **Placed by family**, `xs` from the control: above by default; below a control along
   the top of what it sits on (the cluster, the panel's close, a toolbar); beside the
   cluster when it is a column on a phone; at either end of a row, lined up with the
-  control's outer edge, so it stays inside the stage; and beside a split's handle, at
+  control's outer edge, so it stays inside the Body; and beside a split's handle, at
   its grip, over the pane after it (a handle is as tall as its layout, so a popover
   above or below would put the name at its far ends). Then, each time it shows, it is
-  measured and kept inside what clips it (the stage, a scrolling panel, the window),
+  measured and kept inside what clips it (the Body, a scrolling panel, the window),
   `xs` clear: it wraps to the room there is and moves in from the edge, so text spacing,
   zoom or a longer language never cut a name off (WCAG 1.4.10, 1.4.12).
-- **A hotspot's popover** wraps, no wider than the stage, and sits on the side of the
-  hotspot with more room. It is kept inside the stage across and down, `xs` from its
+- **A hotspot's popover** wraps, no wider than the Body, and sits on the side of the
+  hotspot with more room. It is kept inside the Body across and down, `xs` from its
   edges. Where neither side has room, it moves over the hotspot.
 - **Part of its control, not something to press.** A control that acts on press or drag
   ignores presses that start on its `.clover-tip`, and the Tip keeps `cursor: default`.

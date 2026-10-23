@@ -6,7 +6,7 @@
  *
  * On the scale, as Default's: the toolbar, the thumbnails, the page and the panel are
  * regions, each keeping `--clover-inset` (`l`) at its sides, so their edges share one line
- * (the toolbar's first and last controls, the thumbnails, the page and the stage's own
+ * (the toolbar's first and last controls, the thumbnails, the page and the Body's own
  * controls); a region's parts `s` apart. The toolbar is a bar: `s` above and below.
  */
 .clover-template-document {
@@ -121,10 +121,10 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   display: none;
 }
 
-/* ---------- body ---------- */
+/* ---------- panes ---------- */
 
 /* A `Clover.Split`: the thumbnails' pane, the bar, and the page's pane. */
-.clover-template-document-body {
+.clover-template-document-panes {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
@@ -145,7 +145,7 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 
 /*
  * Put away, the toggle sits over the page's top left as the Canvas's controls do its
- * right: the same inset in from the corner (`--clover-canvas-chrome-inset` is the inset).
+ * right: the same inset in from the corner (`--clover-canvas-controls-inset` is the inset).
  */
 .clover-template-document-sidebar-closed {
   position: absolute;
@@ -213,11 +213,11 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 }
 
 /*
- * The stage: the pages down one column, a spread to a sheet (`Sheets.tsx`). It scrolls
- * as a PDF reader's continuous view does; where it rests, `Sheets` brings a sheet to its
+ * The column: the pages down it, a spread to a sheet (`Sheets.tsx`). It scrolls as a
+ * PDF reader's continuous view does; where it rests, `Sheets` brings a sheet to its
  * top, the one place a sheet is active. Its own size is what the sheets are sized from.
  */
-.clover-template-document-stage {
+.clover-template-document-column {
   position: absolute;
   inset: 0;
   overflow-x: hidden;
@@ -231,10 +231,10 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 
 /*
  * A sheet: its pictures side by side at one height, fitted whole with the inset round
- * them, as the Canvas fits them at home. At most as tall as the stage less twice the
+ * them, as the Canvas fits them at home. At most as tall as the column less twice the
  * inset, so under a sheet at rest the next one's picture shows by the inset's depth.
  * Between two sheets' pictures, the inset of each: `2l` of the gray ground. A document
- * of one sheet has nothing to show under it, and takes the whole stage.
+ * of one sheet has nothing to show under it, and takes the whole column.
  */
 .clover-template-document-sheet {
   --clover-template-document-tease: calc(2 * var(--clover-inset));
@@ -252,23 +252,23 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 }
 
 /*
- * Zoomed into, moved or turned, the active sheet takes the stage's whole height, pushing
+ * Zoomed into, moved or turned, the active sheet takes the column's whole height, pushing
  * the others down (`Sheets`), and they dissolve away; the Canvas over it shows the
  * picture, its still out of sight beneath. Home again, it is a sheet among the rest.
  */
-.clover-template-document-stage[data-zoomed]
+.clover-template-document-column[data-zoomed]
   .clover-template-document-sheet[data-active] {
   height: 100cqh;
 }
 
-.clover-template-document-stage[data-zoomed]
+.clover-template-document-column[data-zoomed]
   .clover-template-document-sheet[data-active]
   > * {
   visibility: hidden;
 }
 
 /* And the other sheets dissolve away, until the Canvas is home again. */
-.clover-template-document-stage[data-zoomed]
+.clover-template-document-column[data-zoomed]
   .clover-template-document-sheet:not([data-active]) {
   --clover-template-document-muted: 0;
   pointer-events: none;
@@ -315,7 +315,7 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   transition: opacity 160ms ease;
 }
 
-.clover-template-document-content .clover-canvas {
+.clover-template-document-body .clover-canvas {
   --clover-canvas-inset: var(--clover-inset);
   background-color: transparent;
 }
@@ -327,19 +327,19 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 }
 
 /*
- * While the scroll runs between sheets, the Canvas's controls slide away, as its chrome
- * does when put away, and come back as it rests; not while focus is among them.
+ * While the scroll runs between sheets, the Canvas's controls slide away, as they do
+ * when put away, and come back as it rests; not while focus is among them.
  */
-.clover-template-document-stage[data-scrolling]
+.clover-template-document-column[data-scrolling]
   .clover-template-document-live:not(:focus-within)
   .clover-canvas-controls
   > * {
-  --clover-chrome-shown: 0;
-  --clover-chrome-events: none;
+  --clover-controls-shown: 0;
+  --clover-controls-events: none;
 }
 
 /* A finger scrolls the column; zoomed into a sheet, the Canvas takes every drag. */
-.clover-template-document-stage:not([data-zoomed]) .clover-canvas-viewport {
+.clover-template-document-column:not([data-zoomed]) .clover-canvas-viewport {
   touch-action: pan-y;
 }
 
@@ -348,7 +348,7 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 /*
  * Beside the page, where there is room for both (the template measures its own width):
  * a pane of its own, `24rem` to start, then wherever the bar before it is dragged
- * (remembered under `storageKey`). As tall as the body, whatever its sections run to,
+ * (remembered under `storageKey`). As tall as the Split, whatever its sections run to,
  * scrolling within.
  */
 .clover-template-document-panel {
@@ -367,11 +367,11 @@ button.clover-template-document-sidebar-toggle:focus-visible {
  * never more than the layout less a strip of the page.
  */
 /* The panel waits off the end while it slides: never a sideways scroll for the page. */
-.clover-template-document-body[data-panel="over"] {
+.clover-template-document-panes[data-panel="over"] {
   overflow: clip;
 }
 
-.clover-template-document-body[data-panel="over"]
+.clover-template-document-panes[data-panel="over"]
   > .clover-template-document-panel {
   position: absolute;
   inset-block: 0;
@@ -393,7 +393,7 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.clover-template-document-body[data-panel="over"]
+.clover-template-document-panes[data-panel="over"]
   > .clover-template-document-panel:dir(rtl) {
   transform: translateX(-100%);
   background-position:
@@ -429,13 +429,13 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   );
 }
 
-.clover-template-document-body[data-panel="over"]
+.clover-template-document-panes[data-panel="over"]
   > .clover-template-document-panel[data-open="true"] {
   transform: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .clover-template-document-body[data-panel="over"]
+  .clover-template-document-panes[data-panel="over"]
     > .clover-template-document-panel {
     transition: none;
   }
@@ -461,7 +461,7 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   }
 
   /* Over the page, the thumbnails are not beside anything to share the width with. */
-  .clover-template-document-body > .clover-split-handle {
+  .clover-template-document-panes > .clover-split-handle {
     display: none;
   }
 }
@@ -470,7 +470,7 @@ button.clover-template-document-sidebar-toggle:focus-visible {
  * Open, the page thumbnails' toggle sits on the bar between them and the page, over them
  * but for its far rounded end, and the panel's on the bar between the page and it,
  * centered: each
- * on its spine (`useSpine`), level with the Canvas's controls (their chrome inset,
+ * on its spine (`useSpine`), level with the Canvas's controls (their inset,
  * `--clover-inset`, down).
  */
 .clover-template-document-spine {

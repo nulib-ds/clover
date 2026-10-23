@@ -7,7 +7,7 @@ const useLayout = typeof window === "undefined" ? useEffect : useLayoutEffect;
  * Lays `element` on a Split's bar, its spine: centered across the bar, or with `cap` all
  * of it over the pane before the bar but its far rounded end, which hangs over the pane
  * after it (the bar where that end's curve begins); and down at the top of `from` (the
- * stage whose controls it sits among), where its stylesheet adds the space. Render it in the Split right after the `SplitHandle`; it is placed by `left` and
+ * Body whose controls it sits among), where its stylesheet adds the space. Render it in the Split right after the `SplitHandle`; it is placed by `left` and
  * `--clover-template-spine-top`, measured again as the panes or it resize (the bar
  * dragged, a title wrapping, a count growing). Where the bar is hidden (a pane floating
  * over the page as a drawer), it sits so on that pane's inner edge instead. Its

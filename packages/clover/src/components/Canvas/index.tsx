@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from "react";
 
 import type { CloverCanvasProps } from "./Canvas.types";
 import CanvasView from "./CanvasView";
-import { CanvasPending } from "./Pending";
+import { CanvasPending } from "../Body/Pending";
 import { useOptionalClover } from "../../react/context";
 
 /*

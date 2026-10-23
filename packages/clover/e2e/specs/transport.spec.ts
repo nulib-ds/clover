@@ -68,8 +68,8 @@ async function serveAboutCaptions(page: Page) {
 }
 
 /*
- * The media transport at reflow sizes (WCAG 1.4.10): on a narrow stage its bar wraps
- * onto two rows with every control on the stage, and on a short one its menus stay on
+ * The media transport at reflow sizes (WCAG 1.4.10): in a narrow Body its bar wraps
+ * onto two rows with every control in the Body, and in a short one its menus stay in
  * it. Its toggles' marks, and the caption tracks a real video lists (WCAG 1.2.2). Layout
  * and text tracks need a real engine; checked in Chromium.
  */
@@ -149,25 +149,25 @@ async function layout(page: Page) {
   });
 }
 
-/** Whether `locator`'s box lies wholly on its stage, which clips what leaves it. */
-function onStage(locator: Locator) {
+/** Whether `locator`'s box lies wholly in its Body, which clips what leaves it. */
+function inBody(locator: Locator) {
   return locator.evaluate((element) => {
-    const stage = element.closest(".clover-canvas")!.getBoundingClientRect();
+    const figure = element.closest(".clover-canvas")!.getBoundingClientRect();
     const box = element.getBoundingClientRect();
     return (
-      box.top >= stage.top - 0.5 &&
-      box.bottom <= stage.bottom + 0.5 &&
-      box.left >= stage.left - 0.5 &&
-      box.right <= stage.right + 0.5
+      box.top >= figure.top - 0.5 &&
+      box.bottom <= figure.bottom + 0.5 &&
+      box.left >= figure.left - 0.5 &&
+      box.right <= figure.right + 0.5
     );
   });
 }
 
 /**
  * Opens the transport's menu `name` from the keyboard, and tells whether it and its first
- * option lie wholly on the stage, then closes it.
+ * option lie wholly in the Body, then closes it.
  */
-async function menuOnStage(page: Page, name: string) {
+async function menuInBody(page: Page, name: string) {
   const button = page.getByRole("button", { name });
   await button.focus();
   await page.keyboard.press("Enter");
@@ -177,9 +177,9 @@ async function menuOnStage(page: Page, name: string) {
   );
   await expect(menu).toBeVisible();
   const first = menu.locator(".clover-canvas-transport-option").first();
-  // The bar springs into place as the chrome shows: read it at rest.
-  await expect.poll(() => onStage(menu)).toBe(true);
-  const placed = { menu: await onStage(menu), first: await onStage(first) };
+  // The bar springs into place as the controls show: read it at rest.
+  await expect.poll(() => inBody(menu)).toBe(true);
+  const placed = { menu: await inBody(menu), first: await inBody(first) };
   await page.keyboard.press("Escape");
   await expect(button).toHaveAttribute("aria-expanded", "false");
   return placed;
@@ -200,14 +200,14 @@ function topmost(locator: Locator, [dx, dy] = [0, 0]) {
   );
 }
 
-/** Whether the Canvas's chrome shows, as the stylesheet decides it. */
+/** Whether the Canvas's controls show, as the stylesheet decides it. */
 function shown(page: Page) {
   return page
     .locator(".clover-canvas-media")
     .first()
     .evaluate((element) =>
       getComputedStyle(element)
-        .getPropertyValue("--clover-chrome-shown")
+        .getPropertyValue("--clover-controls-shown")
         .trim(),
     );
 }
@@ -218,7 +218,7 @@ test.describe("transport", () => {
   });
 
   for (const spacing of [false, true]) {
-    test(`wraps onto two rows at 320 px, every control on the stage${spacing ? ", with text spacing" : ""}`, async ({
+    test(`wraps onto two rows at 320 px, every control in the Body${spacing ? ", with text spacing" : ""}`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: 320, height: 640 });
@@ -262,16 +262,16 @@ test.describe("transport", () => {
 
   /*
    * Where the bar needs a third row: the Default template at 1280 × 720 and 200% (a
-   * stage beside the panel), and the Document template at 320 px, short and tall. The
+   * Body beside the panel), and the Document template at 320 px, short and tall. The
    * controls at the end keep together at the end of the bar's last row, and their
-   * menus open above them, on the stage.
+   * menus open above them, in the Body.
    */
   for (const { scene, width, height } of [
     { scene: "", width: 640, height: 360 },
     { scene: "scene=document&", width: 320, height: 256 },
     { scene: "scene=document&", width: 320, height: 640 },
   ]) {
-    test(`keeps the Chapters and Captions menus on the stage, ${scene ? "Document" : "Default"} at ${width} × ${height}`, async ({
+    test(`keeps the Chapters and Captions menus in the Body, ${scene ? "Document" : "Default"} at ${width} × ${height}`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height });
@@ -287,7 +287,7 @@ test.describe("transport", () => {
       expect(bar.inside).toBe(true);
       expect(bar.endTogether).toBe(true);
       for (const name of ["Chapters", "Captions"]) {
-        expect(await menuOnStage(page, name)).toEqual({
+        expect(await menuInBody(page, name)).toEqual({
           menu: true,
           first: true,
         });
@@ -310,9 +310,9 @@ test.describe("transport", () => {
     });
   }
 
-  // 1280 × 1024 at 400% and 1280 × 720 at 400%: a stage about 166 and 117 px tall.
+  // 1280 × 1024 at 400% and 1280 × 720 at 400%: a Body about 166 and 117 px tall.
   for (const height of [256, 180]) {
-    test(`keeps the Captions menu on a short stage, 320 × ${height}`, async ({
+    test(`keeps the Captions menu in a short Body, 320 × ${height}`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: 320, height });
@@ -325,11 +325,11 @@ test.describe("transport", () => {
       await page.keyboard.press("Enter");
       const menu = page.locator(".clover-canvas-transport-options");
       await expect(menu).toBeVisible();
-      expect(await onStage(menu)).toBe(true);
-      // Its first option ("Off") is on the stage too, not cut off above it.
+      expect(await inBody(menu)).toBe(true);
+      // Its first option ("Off") is in the Body too, not cut off above it.
       const off = page.locator(".clover-canvas-transport-option").first();
       await expect(off).toHaveText("Off");
-      expect(await onStage(off)).toBe(true);
+      expect(await inBody(off)).toBe(true);
       // An open menu is over the Canvas's controls, so none covers an option.
       const point = await off.boundingBox();
       const hit = await page.evaluate(
@@ -344,7 +344,7 @@ test.describe("transport", () => {
   }
 
   for (const height of [180, 256]) {
-    test(`keeps the information box and the captions on a 320 × ${height} stage`, async ({
+    test(`keeps the information box and the captions in a 320 × ${height} Body`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: 320, height });
@@ -355,7 +355,7 @@ test.describe("transport", () => {
       await expect(captions).toHaveAttribute("data-active", "");
 
       // A two-line cue on the chosen track, as the browser would make it active. Keyboard
-      // focus on the transport holds the chrome, so the cue is lifted over the bar.
+      // focus on the transport holds the controls, so the cue is lifted over the bar.
       await captions.focus();
       await page.evaluate(() => {
         const [track] = Array.from(document.querySelector("video")!.textTracks);
@@ -368,8 +368,8 @@ test.describe("transport", () => {
       const cue = page.locator(".clover-canvas-captions-cue");
       await expect(cue).toBeVisible();
       await expect.poll(() => shown(page)).toBe("1");
-      // Lifted by the transport's whole room it would leave the stage; it stays on it.
-      await expect.poll(() => onStage(cue)).toBe(true);
+      // Lifted by the transport's whole room it would leave the Body; it stays in it.
+      await expect.poll(() => inBody(cue)).toBe(true);
 
       // Halfway through, with Seek focused: the cue runs down over the bar, but never
       // over the focused control, its thumb or its ring (WCAG 2.4.7, 2.4.11).
@@ -398,13 +398,13 @@ test.describe("transport", () => {
         expect(await topmost(seek, offset)).toBe("itself");
       }
 
-      // The Canvas's information, over the transport if it must, but on the stage.
+      // The Canvas's information, over the transport if it must, but in the Body.
       const about = page.getByRole("button", { name: "About" });
       await about.focus();
       await page.keyboard.press("Enter");
       const box = page.locator(".clover-canvas-caption");
       await expect(box).toBeVisible();
-      expect(await onStage(box)).toBe(true);
+      expect(await inBody(box)).toBe(true);
       // Tall enough to show more than its own padding: something to read and scroll.
       const room = await box.evaluate((element) => {
         const style = getComputedStyle(element);
@@ -416,7 +416,7 @@ test.describe("transport", () => {
       });
       expect(room).toBeGreaterThan(16);
 
-      // Its close button is clear of the Canvas's controls, however the stage wraps
+      // Its close button is clear of the Canvas's controls, however the Body wraps
       // them (WCAG 2.5.8): a press there closes it.
       const close = box.getByRole("button", { name: "Close" });
       const point = (await close.boundingBox())!;
@@ -431,7 +431,7 @@ test.describe("transport", () => {
     });
   }
 
-  test("keeps an animation's frames menu on a 320 × 180 stage", async ({
+  test("keeps an animation's frames menu in a 320 × 180 Body", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 320, height: 180 });
@@ -457,12 +457,12 @@ test.describe("transport", () => {
       ".clover-canvas-transport-frames > .clover-canvas-menu",
     );
     await expect(menu).toBeVisible();
-    expect(await onStage(menu)).toBe(true);
-    // Opening focuses the frame showing, the first: it is on the stage, not hidden
+    expect(await inBody(menu)).toBe(true);
+    // Opening focuses the frame showing, the first: it is in the Body, not hidden
     // above it (WCAG 2.4.11).
     const first = menu.locator(".clover-canvas-menu-item").first();
     await expect(first.locator("input")).toBeFocused();
-    expect(await onStage(first)).toBe(true);
+    expect(await inBody(first)).toBe(true);
   });
 
   test("marks a toggle that is on with more than its fill (WCAG 1.4.1)", async ({
@@ -545,7 +545,7 @@ test.describe("transport", () => {
       )
       .toBe("1px");
     // A slider draws something: its rail and thumb, beside none at all. Focus on
-    // Play holds the chrome in sight.
+    // Play holds the controls in sight.
     await play.focus();
     await expect.poll(() => shown(page)).toBe("1");
     for (const name of ["Seek", "Volume"]) {

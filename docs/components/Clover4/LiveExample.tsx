@@ -125,9 +125,18 @@ const url = (tag: string): CodeAttr => ({
   url: true,
 });
 
+/**
+ * The parts Body draws with, which a page shows alone, with what they draw loaded by their
+ * `iiifContent`.
+ */
+const BODY_PARTS = ["Canvas", "Timeline", "Scene"];
+
 interface LivePartProps {
-  /** The part, as `@nulib/clover` exports it, or `Canvas` or `Map`, alone. */
-  part: PartName | "Canvas" | "Map";
+  /**
+   * The part, as `@nulib/clover` exports it; or, alone, Canvas, Timeline or Scene
+   * (`BODY_PARTS`), or `Map`.
+   */
+  part: PartName | "Canvas" | "Timeline" | "Scene" | "Map";
   /** The values the reader can change, in the order its code writes them. */
   knobs?: Knob[];
   /** Props its code writes, fixed: `of="canvas"`. */
@@ -140,7 +149,7 @@ interface LivePartProps {
   body?: boolean;
   /** A box of this height round it, which scrolls, as `PartDemo`'s. */
   box?: string;
-  /** Its code without a `Root` (`Value`); `Canvas` and `Map` are always alone. */
+  /** Its code without a `Root` (`Value`); `BODY_PARTS` and `Map` are always alone. */
   alone?: boolean;
   /** React's imports, where the code is a whole module (`Map`'s own import). */
   imports?: string[];
@@ -164,19 +173,20 @@ export function LivePart({
   }));
   const on = (where: Knob["on"]) =>
     named.filter((knob) => (knob.on ?? "part") === where);
-  const canvas = part === "Canvas";
-  const single = alone || canvas || part === "Map";
+  const bodyPart = BODY_PARTS.includes(part);
+  const single = alone || bodyPart || part === "Map";
   const own: CodeNode = {
     jsx: part === "Map" ? "Map" : `Clover.${part}`,
     html: tag,
     attrs: [
-      ...(canvas || part === "Map" ? [url(tag)] : []),
+      ...(bodyPart || part === "Map" ? [url(tag)] : []),
       ...attrsOf(tag, shown, on("part")),
     ],
     mark: !single,
   };
-  // The box round it: `Canvas` fills one with a height; a tall part scrolls in one.
-  const boxed = canvas || box;
+  // The box round it: Canvas, Timeline or Scene fills one with a height; a tall part
+  // scrolls in one.
+  const boxed = bodyPart || box;
   const wrapped: CodeNode = boxed
     ? {
         jsx: "div",
@@ -219,7 +229,7 @@ export function LivePart({
     ],
   };
   const demo: LiveDemo = {
-    kind: canvas ? "canvas" : part === "Map" ? "map" : "part",
+    kind: bodyPart ? "bodyPart" : part === "Map" ? "map" : "part",
     part,
     props: { ...props, ...shown },
     resource,
@@ -239,12 +249,15 @@ export function LiveViewerExample({
   templates,
   headingLevel,
   height,
+  wide,
 }: {
   /** A key of the homepage's resources (`playground-config.ts`). */
   resource: string;
   templates: Partial<Record<TemplateName, Knob[]>>;
   headingLevel?: number;
   height?: string;
+  /** Wider than the page's column, where the window has room (Mat, 2026-10-23). */
+  wide?: boolean;
 }) {
   const found = resourceByKey(resource);
   if (!found) throw new Error(`LiveViewerExample: no resource ${resource}`);
@@ -252,17 +265,30 @@ export function LiveViewerExample({
     ? publishedAddress(found.resource)
     : found.resource;
   const entries = Object.entries(templates) as [TemplateName, Knob[]][];
+  const names = entries.map(([name]) => name);
   const options = entries.map(([name, knobs]) => {
     const named = knobs.map((knob) => ({
       ...knob,
       label: labelOf(name === "Default" ? "Viewer" : `${name} template`, knob),
     }));
+    /*
+     * The template, written out even for Default, so the reader picks it in the code as
+     * by the switch under it (Mat, 2026-10-23: "toggle adjusts the code and vice
+     * versa"). Each template's code names its own; `LiveTemplates` reads the pick.
+     */
+    const template: Knob = {
+      prop: "template",
+      on: "code",
+      value: name,
+      options: names,
+      label: "Viewer template",
+    };
     const own = name !== "Default";
     const tree: CodeTree = {
       url: address,
       imports: [
         'import Viewer from "@nulib/clover";',
-        ...(own ? [`import { ${name} } from "@nulib/clover/templates";`] : []),
+        `import { ${name} } from "@nulib/clover/templates";`,
         'import "@nulib/clover/styles.css";',
         ...(own ? ['import "@nulib/clover/templates.css";'] : []),
       ],
@@ -272,18 +298,22 @@ export function LiveViewerExample({
           html: "clover-viewer",
           attrs: [
             url("clover-viewer"),
-            ...(own
-              ? [{ prop: "template", attribute: "template", template: name }]
-              : []),
+            {
+              prop: "template",
+              attribute: "template",
+              template: name,
+              knob: knobId(template),
+            },
             ...attrsOf("clover-viewer", {}, named),
           ],
         },
       ],
     };
-    return { name, knobs: named, tree };
+    return { name, knobs: [template, ...named], tree };
   });
   return (
     <LiveTemplates
+      wide={wide}
       options={options}
       resource={resource}
       headingLevel={headingLevel}

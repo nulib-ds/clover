@@ -1090,7 +1090,7 @@ export class CanvasRenderer implements GestureTarget {
       if (this.atHome) {
         this.home(true);
       } else {
-        // Keep the same world width in view as the stage resizes.
+        // Keep the same world width in view as the Body resizes.
         const current = this.camera.current;
         const ratio = width / Math.max(previous.width, 1);
         this.camera.set(

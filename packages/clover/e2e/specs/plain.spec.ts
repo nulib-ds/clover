@@ -4,7 +4,7 @@ import { serveIIIF } from "./fixtures";
 
 /*
  * The plain-layout promise: with no stylesheet at all, every part still lays out
- * usably — reading order, a stage with height, icons at their own size, nothing hidden
+ * usably — reading order, a Body with height, icons at their own size, nothing hidden
  * that should show or shown that should hide.
  */
 test("without the stylesheet, the Viewer still lays out usably", async ({
@@ -17,8 +17,7 @@ test("without the stylesheet, the Viewer still lays out usably", async ({
   ).toBeVisible();
   expect(await page.locator("style[data-vite-dev-id]").count()).toBe(0);
 
-  const stage = page.locator(".clover-body");
-  const box = await stage.boundingBox();
+  const box = await page.locator(".clover-body").boundingBox();
   expect(box!.height).toBeGreaterThan(200);
 
   // No icon fills its container: each SVG keeps the size its attributes give it.

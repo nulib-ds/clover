@@ -233,22 +233,38 @@ export function LiveCode({
   );
 }
 
-const CloverCanvas = dynamic(
-  () => import("@nulib/clover").then((clover) => clover.Canvas),
-  { ssr: false },
-);
+/**
+ * The parts Body draws with, Canvas, Timeline and Scene, which a live example shows alone,
+ * each loading what it draws (`iiifContent`).
+ */
+const BODY_PARTS = {
+  Canvas: dynamic(
+    () => import("@nulib/clover").then((clover) => clover.Canvas),
+    { ssr: false },
+  ),
+  Timeline: dynamic(
+    () => import("@nulib/clover").then((clover) => clover.Timeline),
+    { ssr: false },
+  ),
+  Scene: dynamic(() => import("@nulib/clover").then((clover) => clover.Scene), {
+    ssr: false,
+  }),
+};
 
-/** What a live example draws: a part in a `Root` (`PartDemo`), or `Canvas` or `Map` alone. */
+/**
+ * What a live example draws: a part in a `Root` (`PartDemo`), or one of `BODY_PARTS` or
+ * `Map` alone.
+ */
 export interface LiveDemo {
-  kind: "part" | "canvas" | "map";
-  part: PartName | "Canvas" | "Map";
+  kind: "part" | "bodyPart" | "map";
+  part: PartName | keyof typeof BODY_PARTS | "Map";
   /** Its fixed props: those its code writes, and those given to the demo alone. */
   props?: Record<string, unknown>;
   resource: PartDemoResource;
   body?: boolean;
   /** A box of this height round the part, which scrolls. */
   box?: string;
-  /** The height of `Canvas`'s box. */
+  /** The height of the box round Canvas, Timeline or Scene. */
   height?: number;
 }
 
@@ -272,14 +288,19 @@ function Demo({
   const box = knobProps(knobs, values, "box").style as
     | Record<string, string | number>
     | undefined;
-  const path = RESOURCES[demo.resource];
-  const url = useMock(demo.kind === "part" ? "" : path);
-  if (demo.kind === "canvas")
+  const path: string = RESOURCES[demo.resource];
+  // A mock is this site's; an address of its own (a Cookbook recipe's) is as it is.
+  const remote = /^https?:/.test(path);
+  const mock = useMock(demo.kind === "part" || remote ? "" : path);
+  const url = remote ? path : mock;
+  if (demo.kind === "bodyPart") {
+    const BodyPart = BODY_PARTS[demo.part as keyof typeof BODY_PARTS];
     return (
       <div style={{ height: box?.height ?? demo.height ?? 420 }}>
-        {url && <CloverCanvas iiifContent={url} {...props} />}
+        {url && <BodyPart iiifContent={url} {...props} />}
       </div>
     );
+  }
   if (demo.kind === "map") return <MapDemo mock={path} props={props} />;
   return (
     <PartDemo

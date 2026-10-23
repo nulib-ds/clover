@@ -1,4 +1,4 @@
-/* The lightbox: a modal dialog holding the stage. */
+/* The lightbox: a modal dialog holding the Body. */
 .clover-template-lightbox {
   width: min(96vw, 72rem);
   max-height: 94vh;
@@ -14,7 +14,7 @@
   background: rgb(0 0 0 / 0.6);
 }
 
-.clover-template-lightbox-body {
+.clover-template-lightbox-content {
   display: flex;
   flex-direction: column;
   gap: var(--clover-space-m);

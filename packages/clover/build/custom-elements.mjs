@@ -141,7 +141,7 @@ const API = readFileSync(
 function handleOf(methods) {
   let text =
     comment(
-      "The Canvas's handle (onReady in React): the camera and its coordinates. The stage's elements keep it as handle.",
+      "The Canvas's handle (onReady in React): the camera and its coordinates. <clover-canvas> and <clover-body> keep it as handle.",
     ) +
     "export interface CloverCanvasHandle {\n" +
     '  readonly backendKind: "webgl2" | "canvas2d" | "none";\n' +

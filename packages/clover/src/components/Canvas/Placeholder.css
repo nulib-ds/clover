@@ -1,8 +1,8 @@
 /*
- * A Canvas's placeholder: a still image fitted to the stage and centered, over a viewport
+ * A Canvas's placeholder: a still image fitted to the Body and centered, over a viewport
  * that waits, empty and hidden, until the reader opens the Canvas.
  *
- * The frame is sized from the stage (a size container, inside the Canvas's inset as the
+ * The frame is sized from the Body (a size container, inside the Canvas's inset as the
  * renderer's home view is) and the stills' combined aspect (`--ratio`), so a spread of
  * several stills is fitted as one picture, edge to edge.
  */
@@ -39,7 +39,7 @@
   min-width: 0;
   min-height: 0;
   object-fit: contain;
-  /* No broken-image glyph or alt text drawn over the stage while it loads. */
+  /* No broken-image glyph or alt text drawn over the Body while it loads. */
   color: transparent;
 }
 
@@ -63,12 +63,12 @@
 /*
  * The toggle sits in the top right, where the control cluster makes room for it
  * (`data-has-placeholder`). While the placeholder shows it is the only control, and always
- * there; once the Canvas is open it comes and goes with the rest of the chrome.
+ * there; once the Canvas is open it comes and goes with the rest of the controls.
  */
 button.clover-canvas-placeholder-toggle {
   position: absolute;
-  top: var(--clover-canvas-chrome-inset);
-  right: var(--clover-canvas-chrome-inset);
+  top: var(--clover-canvas-controls-inset);
+  right: var(--clover-canvas-controls-inset);
   /* With the controls, over the popups they open, so its Tip shows over them. */
   z-index: 3;
   margin: 0;
@@ -104,7 +104,7 @@ button.clover-canvas-placeholder-toggle {
 /* Its toggle is in the middle, so the cluster keeps no room for it in the corner. */
 .clover-canvas[data-placeholder="true"][data-media]
   > .clover-canvas-controls[data-has-placeholder="true"] {
-  right: var(--clover-canvas-chrome-inset);
+  right: var(--clover-canvas-controls-inset);
 }
 
 /* The whole still plays it: pointing anywhere on it lights the play button, as on it. */
@@ -120,8 +120,8 @@ button.clover-canvas-placeholder-toggle {
  * hand beside the toggle rather than fading.
  */
 .clover-canvas[data-placeholder="true"] > .clover-canvas-controls > * {
-  --clover-chrome-shown: 1;
-  --clover-chrome-events: auto;
+  --clover-controls-shown: 1;
+  --clover-controls-events: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -138,8 +138,8 @@ button.clover-canvas-placeholder-toggle {
  */
 .clover-canvas:has(> .clover-canvas-controls > [data-button="panel"])
   > .clover-canvas-controls[data-has-placeholder="true"] {
-  --top: var(--clover-canvas-chrome-inset);
-  right: var(--clover-canvas-chrome-inset);
+  --top: var(--clover-canvas-controls-inset);
+  right: var(--clover-canvas-controls-inset);
 }
 
 .clover-canvas[data-placeholder]:not([data-placeholder="true"][data-media]):has(
@@ -154,7 +154,7 @@ button.clover-canvas-placeholder-toggle {
   )
   > button.clover-canvas-placeholder-toggle {
   right: calc(
-    var(--clover-canvas-chrome-inset) + var(--clover-control) +
+    var(--clover-canvas-controls-inset) + var(--clover-control) +
       var(--clover-space-s)
   );
 }

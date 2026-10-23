@@ -7,6 +7,8 @@ import { fireEvent, waitFor, within } from "@testing-library/dom";
 
 import { defineCloverElements } from "../define";
 import bookJson from "../../fixtures/iiif-cookbook/0009-book-1.json";
+import audioJson from "../../fixtures/iiif-cookbook/0002-mvm-audio-v4.json";
+import modelJson from "../../fixtures/iiif-cookbook/0608-mvm-3d-v4.json";
 import placesJson from "../../fixtures/iiif-cookbook/0240-navPlace-on-canvases.json";
 import { stubViewport } from "../../components/Canvas/testing/viewport";
 import { initCloverI18n } from "../../i18n";
@@ -27,6 +29,16 @@ vi.mock("../../lib/renderer", async (importOriginal) => ({
     overlays: { container: document.createElement("div"), add: vi.fn() },
     on: () => () => undefined,
   })),
+}));
+
+/** The Scene's 3D drawing, without WebGL, as the Scene's own tests stand it in. */
+vi.mock("../../components/Scene/cloverEngine", () => ({
+  createEngine: () => ({
+    load: vi.fn().mockResolvedValue({ center: [0, 0, 0], radius: 1 }),
+    draw: vi.fn(),
+    resize: vi.fn(),
+    dispose: vi.fn(),
+  }),
 }));
 
 /** MapLibre, as the Map's own tests stand it in: a map that loads at once. */
@@ -137,6 +149,52 @@ describe("A Canvas, as an element", () => {
     fireEvent.click(await within(root).findByRole("button", { name: "Next" }));
     expect(
       await within(root).findByRole("img", { name: labelOf(1) }),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("A Timeline and a Scene, as elements", () => {
+  it("plays a Manifest's first Timeline, by URL, in the Canvas's figure", async () => {
+    serve(audioJson);
+    document.body.innerHTML = `<clover-timeline iiif-content="https://example.org/audio.json"></clover-timeline>`;
+    const element = document.querySelector("clover-timeline") as HTMLElement;
+    const play = await within(element).findByRole(
+      "button",
+      { name: "Play" },
+      { timeout: 4000 },
+    );
+    expect(play.closest("figure")).toHaveClass(
+      "clover-canvas",
+      "clover-timeline",
+    );
+  });
+
+  it("draws a Scene it is given, and its root's Scene inside a clover-root", async () => {
+    const scene = document.createElement("clover-scene") as HTMLElement & {
+      scene: unknown;
+    };
+    scene.scene = modelJson.items[0];
+    document.body.append(scene);
+    const view = await within(scene).findByRole(
+      "img",
+      { name: "A Scene" },
+      { timeout: 4000 },
+    );
+    expect(view.closest("figure")).toHaveClass("clover-scene");
+    document.body.innerHTML = "";
+
+    const root = document.createElement("clover-root") as HTMLElement & {
+      iiifContent: unknown;
+    };
+    root.innerHTML = `<clover-scene></clover-scene>`;
+    root.iiifContent = modelJson;
+    document.body.append(root);
+    expect(
+      await within(root).findByRole(
+        "img",
+        { name: "A Scene" },
+        { timeout: 4000 },
+      ),
     ).toBeInTheDocument();
   });
 });

@@ -168,16 +168,16 @@ describe("Tip, kept inside what clips it", () => {
     });
   }
 
-  /** A 300px stage that hides its overflow, a control in it at `at`, and its Tip. */
-  function stage(at: number, label = "Reset zoom") {
+  /** A 300px Body that hides its overflow, a control in it at `at`, and its Tip. */
+  function inBody(at: number, label = "Reset zoom") {
     const view = render(
-      <div data-testid="stage" style={{ overflow: "hidden" }}>
+      <div data-testid="body-box" style={{ overflow: "hidden" }}>
         <button type="button" aria-label={label}>
           <Tip label={label} />
         </button>
       </div>,
     );
-    const element = screen.getByTestId("stage");
+    const element = screen.getByTestId("body-box");
     Object.defineProperty(element, "clientWidth", { value: 300 });
     box(
       element,
@@ -201,9 +201,9 @@ describe("Tip, kept inside what clips it", () => {
   const shift = (tip: HTMLElement) =>
     tip.style.getPropertyValue("--clover-tip-shift");
 
-  it("moves in from the stage's edge when the pointer comes to its control", () => {
-    const { button, tip } = stage(270);
-    // Centered on the control, 133px wide: 20px past the stage's end.
+  it("moves in from the Body's edge when the pointer comes to its control", () => {
+    const { button, tip } = inBody(270);
+    // Centered on the control, 133px wide: 20px past the Body's end.
     box(
       tip,
       () => 288 - 133 / 2 + (parseFloat(shift(tip)) || 0),
@@ -215,7 +215,7 @@ describe("Tip, kept inside what clips it", () => {
   });
 
   it("moves in from the start when focus comes to its control", () => {
-    const { button, tip } = stage(4);
+    const { button, tip } = inBody(4);
     box(
       tip,
       () => 22 - 40 + (parseFloat(shift(tip)) || 0),
@@ -226,7 +226,7 @@ describe("Tip, kept inside what clips it", () => {
   });
 
   it("stays where its family puts it when it fits", () => {
-    const { button, tip } = stage(120);
+    const { button, tip } = inBody(120);
     box(
       tip,
       () => 98,
@@ -238,8 +238,8 @@ describe("Tip, kept inside what clips it", () => {
   });
 
   it("wraps to the room beside its control, where it sits beside it", () => {
-    const { button, tip } = stage(250);
-    // Beside the control, toward the stage (the cluster as a column): ending 6px before it.
+    const { button, tip } = inBody(250);
+    // Beside the control, toward the Body (the cluster as a column): ending 6px before it.
     box(
       tip,
       () => 244 - (parseFloat(room(tip)) || 260),
@@ -250,8 +250,8 @@ describe("Tip, kept inside what clips it", () => {
     expect(shift(tip)).toBe("");
   });
 
-  it("wraps to the stage's width, less its clearance, when wider than the stage", () => {
-    const { button, tip } = stage(132);
+  it("wraps to the Body's width, less its clearance, when wider than the Body", () => {
+    const { button, tip } = inBody(132);
     box(
       tip,
       () => 150 - (parseFloat(room(tip)) || 400) / 2,
@@ -263,7 +263,7 @@ describe("Tip, kept inside what clips it", () => {
   });
 
   it("measures afresh each time it shows", () => {
-    const { button, tip } = stage(270);
+    const { button, tip } = inBody(270);
     let width = 133;
     box(
       tip,
@@ -279,7 +279,7 @@ describe("Tip, kept inside what clips it", () => {
 });
 
 describe("forwardShortcut", () => {
-  function Stage() {
+  function Figure() {
     const viewport = React.useRef<HTMLDivElement>(null);
     return (
       <figure onKeyDown={(event) => forwardShortcut(event, viewport.current)}>
@@ -291,7 +291,7 @@ describe("forwardShortcut", () => {
   }
 
   it("sends a Canvas key pressed on one of its controls to the viewport", () => {
-    render(<Stage />);
+    render(<Figure />);
     const keys: string[] = [];
     screen
       .getByTestId("viewport")

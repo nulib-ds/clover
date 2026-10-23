@@ -38,7 +38,7 @@ export const statusDocs: ElementDocs = {
   attributes: {
     loading: {
       description:
-        '"false" shows no loading mark and only announces it, for a layout whose stage shows its own.',
+        '"false" shows no loading mark and only announces it, for a layout whose Body shows its own.',
     },
   },
   slots: {
@@ -166,7 +166,7 @@ export const annotations: ElementSpec = {
 export const annotationsDocs: ElementDocs = {
   name: "CloverAnnotationsElement",
   description:
-    "The annotations, by layer and then by Canvas: each to pick, which frames it on the stage, with its region pictured.",
+    "The annotations, by layer and then by Canvas: each to pick, which frames it on the Body, with its region pictured.",
   attributes: {
     scope: {
       description: "Every Canvas's annotations, or only the view's.",

@@ -224,7 +224,7 @@ describe("canvasScene media", () => {
     ]);
   });
 
-  it("gives sound with no picture a 16:9 stage of its own", () => {
+  it("gives sound with no picture a 16:9 frame of its own", () => {
     const { images, media, placements } = canvasScene(
       items(audio),
       "left-to-right",

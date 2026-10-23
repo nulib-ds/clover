@@ -1,6 +1,6 @@
 /*
  * A Canvas's media layer: the transport and the captions. It
- * covers the stage but takes no pointer events itself, so drag, pinch and the click that
+ * covers the Body but takes no pointer events itself, so drag, pinch and the click that
  * plays still reach the viewport beneath; its children opt back in.
  */
 .clover-canvas-media {
@@ -9,13 +9,13 @@
   z-index: 1;
   pointer-events: none;
   /*
-   * The bar, its menus and the captions size against the stage, not the window. It is
-   * the stage's size whatever it holds, so containing its height changes nothing.
+   * The bar, its menus and the captions size against the Body, not the window. It is
+   * the Body's size whatever it holds, so containing its height changes nothing.
    */
   container-type: size;
 }
 
-/* An open menu is over everything on the stage, the Canvas's controls too. */
+/* An open menu is over everything in the Body, the Canvas's controls too. */
 .clover-canvas-media:has([aria-expanded="true"]) {
   z-index: 4;
 }
@@ -31,19 +31,19 @@
  * Above the bar, whose scrim would otherwise wash them out, and lifted clear of it while
  * it shows, moving with it.
  *
- * They sit at the foot of the stage above that line, in from its sides and foot by the
- * chrome's inset (`--clover-canvas-chrome-inset`), as the controls are, and over the
- * seek bar's chapter popover while it shows, `2xs` clear of its top
- * (`--clover-transport-preview-top`, `Transport.tsx`), unless it is put away. Too many to fit
- * there (a short stage, large text), they start from its top and run on over the bar,
- * rather than off the top of the stage, where they could not be read (WCAG 1.4.10).
+ * They sit at the foot of the Body above that line, in from its sides and foot as the
+ * controls are (`--clover-canvas-controls-inset`), and over the seek bar's chapter
+ * popover while it shows, `2xs` clear of its top (`--clover-transport-preview-top`,
+ * `Transport.tsx`), unless it is put away. Too many to fit there (a short Body, large
+ * text), they start from its top and run on over the bar, rather than off the top of the
+ * Body, where they could not be read (WCAG 1.4.10).
  */
 .clover-canvas-captions {
   position: absolute;
   inset: 0 0
     max(
-      var(--clover-canvas-chrome-inset) + var(--clover-chrome-shown) *
-        (var(--clover-transport-room) - var(--clover-canvas-chrome-inset)),
+      var(--clover-canvas-controls-inset) + var(--clover-controls-shown) *
+        (var(--clover-transport-room) - var(--clover-canvas-controls-inset)),
       var(--clover-transport-preview-top, 0px) + var(--clover-space-2xs)
     );
   z-index: 3;
@@ -53,9 +53,9 @@
   justify-content: flex-end;
   justify-content: safe flex-end;
   gap: var(--clover-space-2xs);
-  padding: 0 var(--clover-canvas-chrome-inset);
+  padding: 0 var(--clover-canvas-controls-inset);
   pointer-events: none;
-  transition: bottom var(--clover-chrome-timing);
+  transition: bottom var(--clover-controls-timing);
 }
 
 /* The chapter popover put away (Escape): the cues back down. */
@@ -91,7 +91,7 @@
 
 /*
  * Captions grow with the picture, a step at a time, on the scale: `s` on a small player,
- * then the page's size, `m` and `l` as the stage widens (where 2.6% of its width reaches
+ * then the page's size, `m` and `l` as the Body widens (where 2.6% of its width reaches
  * each step).
  */
 @container (min-width: 38.5rem) {

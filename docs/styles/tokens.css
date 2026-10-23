@@ -124,13 +124,18 @@
 
   /*
    * A card lifted off the page (Mat, 2026-10-22: one look for all of them): the
-   * playground's stage, the homepage's example viewer and its other side, the stories on
+   * playground's Viewer, the homepage's example viewer and its other side, the stories on
    * the page's ground, the docs' examples. A hairline edge (`--card-shadow`), then a
    * close, soft gray shadow (`--card-lift`, which the playground's field shares); on a dark
    * page the edge does the lifting and the shadow only deepens it.
    */
   --card-lift: 0 1px 2px rgb(0 0 0 / 0.04), 0 6px 24px rgb(0 0 0 / 0.06);
   --card-shadow: 0 0 0 1px var(--gray-6), var(--card-lift);
+  /*
+   * A code block's lift, a step under a card's (Mat, 2026-10-23: "a subtle shadow …
+   * slightly less than the example shadow"): every code and command block, `code.css`.
+   */
+  --code-lift: 0 1px 2px rgb(0 0 0 / 0.03), 0 4px 14px rgb(0 0 0 / 0.04);
 
   /*
    * Focus ring, used consistently on every interactive surface: the text accent, so it
@@ -313,6 +318,7 @@
   --shadow-2: 0 1px 2px #00000040, 0 1px 3px #00000030;
   --shadow-4: 0 8px 24px -8px #00000060, 0 2px 6px -2px #00000040;
   --card-lift: 0 6px 24px rgb(0 0 0 / 0.4);
+  --code-lift: 0 4px 14px rgb(0 0 0 / 0.3);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -339,6 +345,7 @@
     --surface-raised: var(--gray-4);
     --surface-sunken: var(--gray-2);
     --card-lift: 0 6px 24px rgb(0 0 0 / 0.4);
+    --code-lift: 0 4px 14px rgb(0 0 0 / 0.3);
   }
 }
 
@@ -421,7 +428,7 @@ b {
 }
 
 /*
- * Nextra weights both its prose and its chrome with utility classes (`x:font-medium`,
+ * Nextra weights both its prose and its frame with utility classes (`x:font-medium`,
  * `x:font-semibold`: the sidebar, the table of contents and the navbar), so collapsing
  * them into the two-weight system means naming them. Nextra's are in cascade layers and
  * these are not, so these win whatever the specificity.

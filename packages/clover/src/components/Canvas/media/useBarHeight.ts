@@ -3,7 +3,7 @@ import { type RefObject, useLayoutEffect } from "react";
 /**
  * A transport bar's height, written to its Canvas as `--clover-transport-bar-height`,
  * for what has to clear the bar (`--clover-transport-room`, `Transport.css`): a narrow
- * stage wraps it onto two rows, and larger text or text spacing make a row taller.
+ * Body wraps it onto two rows, and larger text or text spacing make a row taller.
  */
 export function useBarHeight(bar: RefObject<HTMLElement | null>) {
   useLayoutEffect(() => {

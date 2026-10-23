@@ -42,6 +42,9 @@ export type ControlButtons = {
   fullPage?: React.ComponentType<ControlButtonProps>;
   rotateRight?: React.ComponentType<ControlButtonProps>;
   rotateLeft?: React.ComponentType<ControlButtonProps>;
+  /** A Scene's: its models turned up, or down, about the horizontal axis. */
+  rotateUp?: React.ComponentType<ControlButtonProps>;
+  rotateDown?: React.ComponentType<ControlButtonProps>;
   reset?: React.ComponentType<ControlButtonProps>;
   choice?: React.ComponentType<ControlButtonProps>;
 };

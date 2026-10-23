@@ -28,11 +28,14 @@ const REGISTRY = resolve(src, "web-components/styles.ts");
 const OWNERS = {
   // Every element's: the scale's custom properties, and its controls' font.
   "styles/scale": ["web-components/host.tsx"],
-  // The stage's box while its code loads, then the Canvas.
+  // The Body's box while its code loads, then the Canvas, a Timeline's or a Scene's.
   "components/Canvas/Canvas": [
     "components/Canvas/CanvasView.tsx",
-    "components/Canvas/Pending.tsx",
+    "components/Body/Pending.tsx",
+    "components/Scene/SceneView.tsx",
   ],
+  // A Scene's own, with its view (`Body` loads the view, never the part's module).
+  "components/Scene/Scene": ["components/Scene/SceneView.tsx"],
   // The overlay layer is on every Canvas, with hotspots or without.
   "components/Canvas/Annotations": [
     "components/Canvas/Annotations.tsx",
@@ -42,9 +45,9 @@ const OWNERS = {
     "components/Canvas/ControlMenu.tsx",
     "components/Canvas/ChoiceMenu.tsx",
   ],
-  // A recording's stage and transport, and an animation's.
-  "components/Canvas/media/MediaStage": [
-    "components/Canvas/media/MediaStage.tsx",
+  // A recording's Body and transport, and an animation's.
+  "components/Canvas/media/MediaBody": [
+    "components/Canvas/media/MediaBody.tsx",
     "components/Canvas/FrameAnimation.tsx",
   ],
   "components/Canvas/media/Transport": [
@@ -72,13 +75,14 @@ const OWNERS = {
     "components/Primitives/Primitives.tsx",
     "components/Panel/About.tsx",
     "components/Collection/Collection.tsx",
-    "components/Canvas/Caption.tsx",
+    "components/Body/Caption.tsx",
     "components/Annotations/Annotations.tsx",
     "components/Canvas/AnnotationMenu.tsx",
   ],
+  // A Body's alert, where it could not load what it was to draw.
   "components/Status/Status": [
     "components/Status/Status.tsx",
-    "components/Canvas/LoadedCanvas.tsx",
+    "components/Body/BodyAlert.tsx",
   ],
   // The pager is Items' (`clover-items clover-pager`).
   "components/Items/Items": [
@@ -153,9 +157,10 @@ const APART = new Set([
 ]);
 const LAZY = new Set([
   "maplibre",
-  "components/Canvas/media/MediaStage",
+  "components/Canvas/media/MediaBody",
   "components/Canvas/media/Transport",
   "components/Map/Map",
+  "components/Scene/Scene",
 ]);
 
 /**

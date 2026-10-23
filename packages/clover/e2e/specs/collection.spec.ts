@@ -160,7 +160,7 @@ test.describe("A Collection", () => {
       await page.setViewportSize({ width: 320, height: 800 });
       await open(page, "&panel=tabs");
       if (spaced) await page.addStyleTag({ content: SPACING });
-      // On a phone the panel is over the stage: opened by its toggle.
+      // On a phone the panel is over the Body: opened by its toggle.
       const toggle = page.locator('.clover-canvas [data-button="panel"]');
       if ((await toggle.getAttribute("aria-expanded")) !== "true")
         await toggle.click();

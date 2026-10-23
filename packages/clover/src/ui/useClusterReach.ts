@@ -8,14 +8,14 @@ const BESIDE_MIN = 128;
 /**
  * How far a Canvas's control cluster reaches from its corner, across and down, written
  * to its Canvas as `--clover-canvas-controls-width` and `--clover-canvas-controls-height`
- * for the popups it opens to clear (`ControlMenu.css`). A short or narrow stage wraps
+ * for the popups it opens to clear (`ControlMenu.css`). A short or narrow Body wraps
  * the cluster onto more than one column or row, and a popup placed beside one would sit
  * under the next, its own controls covered (WCAG 2.5.8).
  *
  * Measured from the controls, not the cluster's box, which a placed control (the panel's
  * toggle) and the room kept for it are part of.
  *
- * It also says where those popups go: below the cluster, unless a short stage leaves
+ * It also says where those popups go: below the cluster, unless a short Body leaves
  * them too little there (the playback controls' room taken too), and there is room
  * beside it, from the top (`data-popups="beside"` on the Canvas).
  */
@@ -27,7 +27,7 @@ export function useClusterReach(cluster: HTMLElement | null) {
       let start = cluster.offsetWidth;
       let bottom = 0;
       for (const control of gone ? [] : Array.from(cluster.children)) {
-        // Offsets leave out the controls' tuck as the chrome fades: they measure at rest.
+        // Offsets leave out the controls' tuck as they fade: they measure at rest.
         if (!(control instanceof HTMLElement) || !control.offsetParent)
           continue;
         start = Math.min(start, control.offsetLeft);
@@ -55,7 +55,7 @@ export function useClusterReach(cluster: HTMLElement | null) {
       else delete canvas.dataset.popups;
     };
     write();
-    // The stage's size wraps it; a control coming or going changes it.
+    // The Body's size wraps it; a control coming or going changes it.
     const resize = new ResizeObserver(() => write());
     resize.observe(cluster);
     resize.observe(canvas);

@@ -64,8 +64,8 @@ export function toRenderers(value: unknown): BodyRenderer[] | undefined {
 }
 
 /**
- * A view, drawn by the page's `render` in a box filling the stage, and drawn again when
- * the view changes, after what the last drawing returned undoes it. The stage's controls
+ * A view, drawn by the page's `render` in a box filling the Body, and drawn again when
+ * the view changes, after what the last drawing returned undoes it. The Body's controls
  * stay over it, in the cluster, where the Canvas has them.
  */
 function Rendered({

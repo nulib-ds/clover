@@ -6,7 +6,7 @@ import type {
   ControlButtons,
 } from "../../ui/controlButtons";
 
-/** What the page's function for one of the stage's controls is told. */
+/** What the page's function for one of the Body's controls is told. */
 export interface PageControl {
   /** Which control: `zoomIn`, `zoomOut`, `fullPage`, `rotateRight`, `rotateLeft`, `reset`, `choice`. */
   name: keyof ControlButtons;
@@ -20,7 +20,7 @@ export interface PageControl {
 }
 
 /**
- * The stage's controls, each replaced by a button of the page's, without React: a
+ * The Body's controls, each replaced by a button of the page's, without React: a
  * function that makes the button, which Clover keeps named, keyed and in its state, wires
  * to the control's action, and gives the popover its own have (`DESIGN.md` §7).
  *

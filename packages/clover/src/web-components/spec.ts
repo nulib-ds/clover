@@ -39,7 +39,7 @@ export interface EventSpec {
    * The element keeps the callback's first argument as this read-only property (a
    * Canvas's `handle`, a root's `clover`), so a page that listens late still reaches it.
    * Such an event is the element's own (`clover-ready`), so it does not bubble, as `load`
-   * does not: a root's listener never hears the stage inside it.
+   * does not: a root's listener never hears the Body inside it.
    */
   keeps?: string;
 }

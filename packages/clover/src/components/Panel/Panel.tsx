@@ -2,7 +2,7 @@ import React, { Suspense, forwardRef, lazy, useRef } from "react";
 
 import { About } from "./About";
 import { Tip } from "../../ui/Tip";
-import { Close } from "../Canvas/glyphs";
+import { Close } from "../Body/glyphs";
 import {
   canvasCaptions,
   canvasTextTranscripts,
@@ -105,7 +105,7 @@ export interface PanelProps
   /**
    * The panel floats over the page: Escape inside it closes it too, and its close button
    * sits at its inner edge (the start, for a panel over the end of the page) rather than
-   * the end of its first row. A panel docked beside the stage needs neither, and is
+   * the end of its first row. A panel docked beside the Body needs neither, and is
    * better without `onClose` at all: the toggle that opens it closes it.
    */
   closeOnEscape?: boolean;

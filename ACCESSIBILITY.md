@@ -23,7 +23,7 @@ There are 79 verified findings in the package. 75 are fixed (20 serious, 40 mode
 
 - **Canvas names and focus:** the viewport, unlabeled hotspots and the lightbox now have names. Focusing an off-screen hotspot no longer detaches the overlay, the controls stay under a resting pointer, and the frame arrows keep focus (1.1.1, 4.1.2, 2.4.7, 1.4.13, 2.4.3; P1–P4, P29, P77).
 - **Captions:** they carry `lang`, decode character references and expose the on/off state (3.1.2, 1.2.2, 4.1.2; P31, P32, P105).
-- **Captions and transport:** tracks inside the stream are offered, the bar wraps and its menus stay on a short stage, toggles show their state by more than color, focus survives auto-advance, chapter and track names carry `lang`, and the media toggle reads "Close player" (1.2.2, 1.4.10, 1.4.1, 2.4.3, 3.1.2, 2.4.6; P16, P18, P22, P23, P28, P30, P34).
+- **Captions and transport:** tracks inside the stream are offered, the bar wraps and its menus stay in a short Body, toggles show their state by more than color, focus survives auto-advance, chapter and track names carry `lang`, and the media toggle reads "Close player" (1.2.2, 1.4.10, 1.4.1, 2.4.3, 3.1.2, 2.4.6; P16, P18, P22, P23, P28, P30, P34).
 - **Items:** unlabeled items read "Item N of M", and the figure no longer hides the option's name (4.1.2; P53, P97).
 - **Language:** the error boundary, Contents, Transcript, annotation set titles and thumbnail alt carry `lang`, and full screen has one name in every locale (3.1.2, 3.2.4; P43, P52, P70, P107).
 - **Interface language:** Clover's strings carry `lang` where it is not the page's, the Canvas reads its IIIF text in the Root's language, and Items' list name keeps its label's (3.1.2; P39, P10, P60).
@@ -34,14 +34,14 @@ There are 79 verified findings in the package. 75 are fixed (20 serious, 40 mode
 - **Color:** links are underlined, and the search placeholder reaches 5.3:1 (1.4.1, 1.4.3; P93, P66).
 - **Color and targets:** the focused Item has a two-tone inner ring, matched search words are bold, and link list items are 24px tall (1.4.1, 2.5.8; P98, P75, P74).
 - **Map:** it shows focus, themes its popup, cases its lines and reports the credits state. A list of places under it is its text alternative and the keyboard's way to them, it is one region named in Clover's language, and its popups carry `lang` (2.4.7, 1.4.3, 1.4.11, 4.1.2, 2.1.1, 1.1.1, 3.1.2; P88, P89, P91, P113, P85, P86, P90, P92).
-- **Hotspots:** two-tone outlines, names in a `Tip` that can be hovered and dismissed and stays in the stage, the annotations' order, `aria-current`, a pan clear of the chrome on Tab, and alt text for image annotations (1.4.11, 1.4.13, 2.4.11, 2.4.3, 4.1.2, 1.1.1; P5, P6, P8, P9, P17, P65).
+- **Hotspots:** two-tone outlines, names in a `Tip` that can be hovered and dismissed and stays in the Body, the annotations' order, `aria-current`, a pan clear of the controls on Tab, and alt text for image annotations (1.4.11, 1.4.13, 2.4.11, 2.4.3, 4.1.2, 1.1.1; P5, P6, P8, P9, P17, P65).
 - **Viewport and controls:** one pointer can always zoom out, and the controls take their presses without the stylesheet (2.5.1, 2.5.8; P12, P99).
 - **Split handle:** a 3:1 grip, a click that steps the pane, and a handle that shows in forced colors and without the stylesheet (1.4.11, 2.5.7, 2.4.7; P78, P80, P81, P101).
 - **Headings:** templates and parts take `headingLevel`, and Markdown keeps its lists and headings (1.3.1; P102, P61, P44).
 - **Status messages:** Status's region stays mounted and Search's stays in the accessibility tree, so Loading and fast errors are announced (4.1.3; P41, P95).
 - **Collections:** CollectionSelect loads only on Enter or a choice from its own list (3.2.2; P54).
 - **Tips:** they wrap and move inside what clips them (1.4.12; P110).
-- **Long hotspot notes:** a note taller than the stage is capped inside it and scrolls, by wheel, touch and the keys from its hotspot, still hoverable across the gap, never taking focus (1.4.10, 1.4.13; P13).
+- **Long hotspot notes:** a note taller than the Body is capped inside it and scrolls, by wheel, touch and the keys from its hotspot, still hoverable across the gap, never taking focus (1.4.10, 1.4.13; P13).
 - **Long titles under thumbnails:** a carousel's or grid's title cut at three lines shows in full over its picture while its item is hovered or focused, and Escape hides it. Default's rail titles wrap (1.4.12, 1.4.13; P57).
 - **Sliders in forced colors,** found since the audit: the transport's seek and volume sliders draw in system colors, with an outline on focus, and its buttons keep their edge (1.4.11, 2.4.7).
 - **Focus rings over pictures,** found since the audit: the viewport's and the map's rings are a dark edge, the accent and a light band at full strength, `primary` and `secondary` 9:1 apart, so one keeps 3:1 over any picture (1.4.11, C40; N1).
@@ -60,7 +60,7 @@ What remains. Items 1 to 4 are done in code and need a check the tests cannot ma
 
 2. **The viewport in screen readers** (4.1.2). The viewport has a role description, `aria-keyshortcuts` and its keys in words, all dropped when it cannot move. Test it in NVDA, JAWS and VoiceOver, where browse mode still takes the arrow keys, and then settle its role (`img` or `group`, or `application` on the viewport alone). Decide whether sighted keyboard users get a visible key hint. File: `CanvasView.tsx`. Size M. (P7)
 
-3. **Touch with a screen reader** (2.2.1). Under a finger or a pen that does not hover, the chrome has no timer, and focus no press brought holds it. Test VoiceOver in iOS Safari and TalkBack in Chrome on Android: a screen reader that moves only its own cursor sends the page no event, so a faded control could still sit unseen under it. File: `useChromeVisibility.ts`. Size S. (P104)
+3. **Touch with a screen reader** (2.2.1). Under a finger or a pen that does not hover, the controls have no timer, and focus no press brought holds them. Test VoiceOver in iOS Safari and TalkBack in Chrome on Android: a screen reader that moves only its own cursor sends the page no event, so a faded control could still sit unseen under it. File: `useControlsVisibility.ts`. Size S. (P104)
 
 4. **Locale review** (3.1.2). Every locale has every string, and `locales.test.ts` keeps them complete, but no native speaker has read the new ones: es, fi, fr, nb (and no, its copy), nn, and pt, which is European Portuguese and what Brazilian readers get too. Mat owns this, and will make the English strings more concise and consistent, then ask translators to review. It does not block the rest of this plan, and agents leave the translations alone until then. (P56)
 
@@ -83,7 +83,7 @@ Mat, October 16, 2026: the docs plan below waits until 4.x is being readied for 
 - Every page has `<html lang="en">` (3.1.1; D3).
 - The Example Viewer's editor: a part picked by a press (or its grip focused) moves with Move up and Move down, Body's height is a number to type, its head's buttons are 24px, Escape puts away a part's name tag, and focus on a part of the held viewer above the window lets it go (2.5.7, 2.5.8, 1.4.13, 2.4.11; D4, D32, D70, D72).
 - The playground's resource field, which replaced "Your own" and its popover, has a 3:1 edge, as does the Template button (`--pg-edge`: 3.4:1 light, 5.5:1 dark), and its list closes when focus leaves it, so it never covers focus (1.4.11, 2.4.11; D33).
-- The playground's held bar no longer covers focus: while it can hold, the page's scroll padding is the navbar and the bar, measured (`useStuck`), so a control in the stage that takes focus comes into view below it, checked by Tab in Chromium, WebKit and Firefox; the bar is held only over the stage (2.4.11; D29).
+- The playground's held bar no longer covers focus: while it can hold, the page's scroll padding is the navbar and the bar, measured (`useStuck`), so a control in the playground's Viewer that takes focus comes into view below it, checked by Tab in Chromium, WebKit and Firefox; the bar is held only over the Viewer (2.4.11; D29).
 - Focus stays in order and in view: parts chips, CanvasRecipe buttons, settings panel, phone banner (2.4.3, 2.4.11; D30, D34, D35, D66).
 - Errors are announced, and 3.x Content State validates its input (4.1.3, 3.3.1; D31, D45, D79).
 - Links and the current page are marked by more than color (1.4.1; D28, D41).
@@ -109,14 +109,14 @@ Mat, October 16, 2026: the docs plan below waits until 4.x is being readied for 
 
 6. **Media alternatives** (1.2.1, 1.2.2). Film has no text alternative, and the 0003 and 0013 demos play speech without captions. Point 0003 at 0219, which has captions, and caption 0013 through `adapt`. `canvas.mdx`, `Demos.tsx`. M. (D55, D64)
 
-7. **Nextra chrome** (4.1.2, 4.1.3, 1.3.1, 2.4.11). Toggles don't expose their state, search announces nothing and doesn't name each result's page, the phone menu leaves the page behind it focusable, and the nav's structure is flat. Patch nextra-theme-docs for `aria-expanded`, a search status region, page names in results and an inert page under the menu. Make separators headings in `SidebarTitle` and nest the TOC through `toc.component`. `app/layout.tsx`, `patches/`. L. (D36, D37, D39, D65, D90, D91)
+7. **Nextra's page frame** (4.1.2, 4.1.3, 1.3.1, 2.4.11). Toggles don't expose their state, search announces nothing and doesn't name each result's page, the phone menu leaves the page behind it focusable, and the nav's structure is flat. Patch nextra-theme-docs for `aria-expanded`, a search status region, page names in results and an inert page under the menu. Make separators headings in `SidebarTitle` and nest the TOC through `toc.component`. `app/layout.tsx`, `patches/`. L. (D36, D37, D39, D65, D90, D91)
 
 8. **Field label** (3.3.2). The IIIF field's only label is a placeholder that disappears. Show a visible label. `CustomManifest.tsx`. S. (D47)
 
 ### Decisions needed
 
 - **Film** (D64): describe a shortened Reel 1 published as a mock, or swap in a film that already has a description?
-- **Edge token** (D83): a 3:1 edge is darker than the design's hairlines. The playground's field and Template button now use `--gray-11` at 75% over the page (`--pg-edge`, `Playground.module.css`). Only on controls (Mat, October 16, 2026: the stage and the parts' tiles keep their hairlines; matching them to the field was tried and put back). Still open: make it the token for the site's other fields (D83's textareas)?
+- **Edge token** (D83): a 3:1 edge is darker than the design's hairlines. The playground's field and Template button now use `--gray-11` at 75% over the page (`--pg-edge`, `Playground.module.css`). Only on controls (Mat, October 16, 2026: the playground's Viewer and the parts' tiles keep their hairlines; matching them to the field was tried and put back). Still open: make it the token for the site's other fields (D83's textareas)?
 - **Nav headings** (D90): should four sidebar headings come before every page's h1?
 
 Also: D60, D77, D89, mark German, Arabic and tile-fact text with `lang` (3.1.2, S). D23, failures in @samvera/clover-iiif itself, to report to samvera-labs/clover-iiif.
@@ -132,13 +132,13 @@ The audit's ids, cited by the plans, and N for those found since. Most severe fi
 | P19  | 1.2.2 Captions          | serious  | Checked in the system player on the iOS Simulator; captions in picture in picture are unchecked                      | `packages/clover/src/components/Canvas/media/useCaptionTracks.ts:33-60`, `packages/clover/src/components/Canvas/media/useCaptionTracks.ts:170` |
 | P56  | 3.1.2 Language of Parts | serious  | Every locale is complete, but no native speaker has reviewed the new strings                                         | `packages/clover/src/i18n/locales/es.json`, `packages/clover/src/i18n/locales/pt.json` …                                                       |
 | P7   | 4.1.2 Name              | moderate | The viewport's role and key description are untested in NVDA, JAWS and VoiceOver, and nothing visible names its keys | `packages/clover/src/components/Canvas/CanvasView.tsx:753-757`, `packages/clover/src/components/Canvas/CanvasView.tsx:79-95`                   |
-| P104 | 2.2.1 Timing Adjustable | moderate | Fixed in code for touch and pen, untested with VoiceOver and TalkBack, whose cursor may rest on a faded control      | `packages/clover/src/components/Canvas/useChromeVisibility.ts:19-30`                                                                           |
+| P104 | 2.2.1 Timing Adjustable | moderate | Fixed in code for touch and pen, untested with VoiceOver and TalkBack, whose cursor may rest on a faded control      | `packages/clover/src/components/Body/useControlsVisibility.ts:19-30`                                                                           |
 
 ### Docs
 
 | Id  | Criterion                              | Severity | Finding                                                                                                        | Where                                                                                                                                         |
 | --- | -------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| D10 | 2.4.3 Focus Order                      | serious  | The demo's full-window Viewer panel is not modal, so focus moves to page chrome hidden under it                | `docs/components/CookbookRecipes/CookbookViewerPanel.tsx:68`, `docs/components/CookbookRecipes/CookbookViewerPanel.tsx:94` …                  |
+| D10 | 2.4.3 Focus Order                      | serious  | The demo's full-window Viewer panel is not modal, so focus moves to the page's frame hidden under it           | `docs/components/CookbookRecipes/CookbookViewerPanel.tsx:68`, `docs/components/CookbookRecipes/CookbookViewerPanel.tsx:94` …                  |
 | D11 | 1.4.10 Reflow                          | serious  | The Cookbook recipe tables crush and overlap their titles at phone widths and under text spacing               | `docs/components/CookbookRecipes/CookbookCoverageTable.module.css:1`, `docs/components/CookbookRecipes/CookbookCoverageTable.module.css:18` … |
 | D14 | 2.1.1 Keyboard                         | serious  | Picking coordinates in the 3.x Map demo works only with a pointer                                              | `docs/components/Map/CoordinatePickingDemo.tsx:26`, `docs/components/Map/CoordinatePickingDemo.tsx:40` …                                      |
 | D23 | 4.1.2 Name                             | serious  | Out of scope: @samvera/clover-iiif's own components fail several A criteria on these pages                     | `node_modules/@samvera/clover-iiif/dist/primitives/index.mjs:691`, `node_modules/@samvera/clover-iiif/dist/primitives/index.mjs:651` …        |

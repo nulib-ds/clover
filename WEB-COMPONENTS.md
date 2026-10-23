@@ -338,7 +338,7 @@ phases 2 and 8. Work may stop at a session's limit; resume from this list.
 - **Moves and upgrade order work.** A root moved keeps the reader's place without
   reloading; a part moved into another root reads that one; parts defined before their
   root wait for it; a property set before an element is defined is taken.
-- **Display.** Roots and items are blocks; `<clover-body>` is the stage's box, sized
+- **Display.** Roots and items are blocks; `<clover-body>` is the Body's box, sized
   by `--clover-body-height` or its own `style`; `<clover-label>` is
   `display: contents`, so a heading or a word in a sentence sits as if written there. The
   page's CSS wins: a root given `display: grid` lays out its parts. Nothing overflows at
@@ -347,7 +347,7 @@ phases 2 and 8. Work may stop at a session's limit; resume from this list.
   with one observer for the runs only media and maps need.
 - **The keyboard and the accessibility tree match the React composition**: the Canvas's
   controls, its viewport, the listbox as one tab stop, then Next; an arrow key moves the
-  stage and a label in another element.
+  Body and a label in another element.
 - **It stays quick.** Only an element whose props change re-renders (tested). In headless
   Chrome on the dev server, 1,200 elements in 200 roots draw in 77 ms, and 3,000 in
   234 ms with one long task of 59 ms.
@@ -413,7 +413,7 @@ element, each a small stub that loads its code the first time one connects.
   score of small chunks, which cost the viewer page 7 kB; one shared chunk (Preact, the
   core, the host and `<clover-root>`, which every page with an element loads) halved
   that, and Rollup's `experimentalMinChunkSize` made every page larger.
-- **Elements draw as their code arrives**, the stage last (it brings the Canvas). Their
+- **Elements draw as their code arrives**, the Body last (it brings the Canvas). Their
   display rules go in before any code loads, so the page does not move.
 - **Phase 1's parts left `lang=""`** after a language change, as `<clover-viewer>` had;
   the host now removes it wherever it draws, for every element (tested, and checked in
@@ -491,7 +491,7 @@ Begun and done October 22, 2026: the containers.
 ### What phase 4 found (October 22, 2026)
 
 - **A layout as Default's works in HTML** (`e2e/elements`, "A layout of containers"): the
-  stage with the toggle among its controls, a handle the keys move and the page
+  Body with the toggle among its controls, a handle the keys move and the page
   remembers, the panel's tabs with a label's markup copied and a tab's content moved into
   its section, the toggle hiding the pane and the handle going with it. Chrome's
   accessibility tree reads as the React composition's (a separator named "Resize
@@ -535,7 +535,7 @@ resume from this list.
 ### What phase 5 found (October 22, 2026)
 
 1. **A Canvas of its own costs every viewer page.** `<clover-canvas>` shares the Canvas
-   with the stage and the viewer, so Rollup cut that code into more chunks: a
+   with the Body and the viewer, so Rollup cut that code into more chunks: a
    `<clover-viewer>` page went from 36 files and 104.5 kB to 39 files and 106.3 kB
    gzipped apart, against 96.3 kB as one. The case for giving the viewer one whole entry
    grows with each phase: 10.0 kB now. A Canvas alone loads 75.6 kB once it draws, and a
@@ -557,7 +557,7 @@ resume from this list.
    with a visible ring; the accessibility tree as written; axe at 0 violations, with the
    panel and the lightbox open too; nothing scrolling across at 320px. Gallery's lightbox
    opens with Enter and gives focus back on Escape. The first screenshots were gray: a
-   stage draws only once it comes near the window, as it should.
+   Body draws only once it comes near the window, as it should.
 
 ## Phase 6 progress
 
@@ -582,23 +582,23 @@ session's limit; resume from this list.
 
 1. **The handle, not methods.** Forwarding the handle's 18 methods onto the element cost
    every page 0.25 kB in the entry, for a second way to the handle React does not have.
-   The element keeps the handle as `handle` (`stage.handle.zoomBy(2)`), as `onReady`
+   The element keeps the handle as `handle` (`body.handle.zoomBy(2)`), as `onReady`
    hands it to a React host.
-2. **A ready event must not bubble.** The stage inside a root sends its own
-   `clover-ready`, and the test page's script, listening on the root, read the stage's
+2. **A ready event must not bubble.** The Body inside a root sends its own
+   `clover-ready`, and the test page's script, listening on the root, read the Body's
    detail as the root's and threw. Each element's `clover-ready` is its own now, as
    `load` is: one name, and a root's listener hears only the root.
 3. **A control of the page's must be one of the cluster's own children.** The cluster's
-   `> *` rules fade each control with the chrome and take its clicks while it is away.
-   In a box of `display: contents` a button inherits the clicks rule but not the fade:
-   shown, and unpressable. The page's buttons go right after a hidden mark Clover draws
-   among its controls, as a React host's children sit.
+   `> *` rules fade each control with the rest of the controls and take its clicks while
+   it is away. In a box of `display: contents` a button inherits the clicks rule but not
+   the fade: shown, and unpressable. The page's buttons go right after a hidden mark
+   Clover draws among its controls, as a React host's children sit.
 4. **A Tip of its own.** React's parts of your own have `<Clover.Tip>`; the elements had
    nothing for a page's own control, which `DESIGN.md` §7 calls an accessibility boon.
    `<clover-tip>` draws it into its button, since Tip takes its parent for its control.
 5. **Adapters only where used.** The renderers' and control buttons' adapters (1.3 kB
    gzip alone) load on a page that gives them, and what needs one waits for it, so the
-   stage never shows Clover's controls and then the page's. The root's API (0.6 kB) is in
+   Body never shows Clover's controls and then the page's. The root's API (0.6 kB) is in
    the shared chunk: it is the phase. A viewer page went from 106.3 to 107.1 kB (97.1 kB
    as one), a page of labels from 39.8 to 40.6, the entry from 5.5 to 5.8. React's pages
    did not change.
@@ -608,7 +608,7 @@ session's limit; resume from this list.
    nothing of React's, so a page of elements needs no React types.
 7. **In Chrome** (`e2e/elements`, "Parts of your own"): the page's script follows the
    root; the page's zoom in zooms; its copy button sits after Clover's controls with its
-   popover, follows the stage onto a renderer's view and back; the renderer draws its view
+   popover, follows the Body onto a renderer's view and back; the renderer draws its view
    and lets it go. axe at 0 violations on both views; nine tab stops in order; nothing
    scrolling across at 320px.
 8. **A phase 4 failure, found in a dark mode.** Checked in the preview's dark mode (the

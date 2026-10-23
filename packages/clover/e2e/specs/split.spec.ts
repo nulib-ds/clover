@@ -60,7 +60,7 @@ test("Default: a click on the bar steps the panel to its widest, its narrowest a
   page,
   isMobile,
 }) => {
-  test.skip(isMobile, "on a phone the panel slides over the stage: no bar");
+  test.skip(isMobile, "on a phone the panel slides over the Body: no bar");
   await open(page);
   const handle = page.getByRole("separator", { name: "Resize panels" });
   const panel = page.locator(".clover-template-default-panel");
@@ -77,7 +77,7 @@ test("Default: a click on the bar steps the panel to its widest, its narrowest a
       Math.round(
         (widest /
           (await page
-            .locator(".clover-template-default-body")
+            .locator(".clover-template-default-panes")
             .evaluate((element) => element.clientWidth))) *
           100,
       ),
@@ -125,7 +125,7 @@ test.describe("under a finger", () => {
     page,
     isMobile,
   }) => {
-    test.skip(isMobile, "on a phone the panel slides over the stage: no bar");
+    test.skip(isMobile, "on a phone the panel slides over the Body: no bar");
     await open(page);
     const handle = page.getByRole("separator", { name: "Resize panels" });
     const panel = page.locator(".clover-template-default-panel");
@@ -234,7 +234,7 @@ test("without the stylesheet, the bar is a focus stop that can be seen: its name
   page,
   isMobile,
 }) => {
-  test.skip(isMobile, "on a phone the panel slides over the stage: no bar");
+  test.skip(isMobile, "on a phone the panel slides over the Body: no bar");
   await open(page, "css=0&");
   const handle = page.getByRole("separator", { name: "Resize panels" });
   await handle.focus();
@@ -267,7 +267,7 @@ for (const across of [1280, 1000])
     );
     // The panel's bar, which its toggle's spine follows while the panel is open.
     const panelBar = page.locator(
-      ".clover-template-document-body > .clover-split-handle[aria-controls$='-panel']",
+      ".clover-template-document-panes > .clover-split-handle[aria-controls$='-panel']",
     );
     await expect(panelBar).toBeVisible();
     await expect.poll(() => width(panel)).toBeCloseTo(384, 0);

@@ -76,7 +76,7 @@ document.getElementById("own-copy")!.addEventListener("click", () => {
 });
 // Zoom in, as a button of the page's, in Clover's look: its name, key and popover are Clover's.
 (
-  document.getElementById("own-stage") as HTMLElement & {
+  document.getElementById("own-body") as HTMLElement & {
     controlButtons: unknown;
   }
 ).controlButtons = {

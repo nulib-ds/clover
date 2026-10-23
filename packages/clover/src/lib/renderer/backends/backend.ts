@@ -18,7 +18,7 @@ export interface DrawCommand {
   /** The source's pixel size. */
   width: number;
   height: number;
-  /** Source pixels → stage CSS pixels. */
+  /** Source pixels → the Body's CSS pixels. */
   transform: Affine;
   /** The part of the source to draw, in source pixels. Defaults to all of it. */
   crop?: Rect;
