@@ -37,6 +37,8 @@ export {
   Thumbnail,
   Value,
 } from "./components/Primitives/Primitives";
+export { Logo, Provider } from "./components/Provider/Provider";
+export type { LogoProps, ProviderProps } from "./components/Provider/Provider";
 export { Panel, Tab } from "./components/Panel/Panel";
 export type {
   PanelLayout,
@@ -108,6 +110,8 @@ export {
   useLangOf,
   useVisibleCanvases,
 } from "./react/hooks";
+/** The provider a part is drawn for, inside `Provider`: for parts of your own there. */
+export { useProvider } from "./components/Primitives/resource";
 /** Inline styles that hide text from sight but not from assistive technology. */
 export { visuallyHidden } from "./ui/visuallyHidden";
 /** The popover Clover's own controls show: a name, and a key when there is one. */

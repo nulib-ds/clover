@@ -177,7 +177,7 @@ export class CanvasRenderer implements GestureTarget {
   private navigatorAsked = 0;
 
   private viewport: ViewportSize = { width: 1, height: 1 };
-  /** The host's padding: the space the home view keeps clear round the picture. */
+  /** The host's padding: the space the home view keeps clear around the picture. */
   private inset: Inset = NO_INSET;
   private pixelRatio = 1;
   private items: SceneItem[] = [];

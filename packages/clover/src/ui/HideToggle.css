@@ -1,5 +1,5 @@
 /*
- * A page's hide toggle (`ui/HideToggle.tsx`): an eye, `text-s` wide with `xs` round it,
+ * A page's hide toggle (`ui/HideToggle.tsx`): an eye, `text-s` wide with `xs` around it,
  * as small as a transcript's language codes and the same `l` target, which keeps it over
  * 24px (WCAG 2.5.8). The muted primary at rest; under the pointer or on keyboard focus
  * the accent, as Clover's controls take it. The eye struck through says it is hidden;

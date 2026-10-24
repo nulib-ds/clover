@@ -1,6 +1,6 @@
 /*
  * Annotation hotspots, styled as `Image` styles its OpenSeadragon overlays, in tones that
- * read over any picture (WCAG 1.4.11): at rest a dark line round a light one; on hover,
+ * read over any picture (WCAG 1.4.11): at rest a dark line around a light one; on hover,
  * focus, or once picked, an accent band between a dark edge and a light one, and a
  * dimmed surround. The dark and the light are `primary` and `secondary`, 9:1 apart or
  * more, so one of them keeps 3:1 against whatever is behind (C40). A hotspot's name is
@@ -70,7 +70,7 @@
 
 /*
  * From the outside in: the dark edge, the accent band, the light line. Nothing is laid
- * over what it marks; the picture round it is dimmed a little instead, as 3.x's was, and
+ * over what it marks; the picture around it is dimmed a little instead, as 3.x's was, and
  * more lightly.
  */
 .clover-canvas-annotation:is([data-active="true"], :focus-visible) {
@@ -116,7 +116,7 @@
   pointer-events: auto;
 }
 
-/* Active, an accent band round the light ring, and the dark edge round that. */
+/* Active, an accent band around the light ring, and the dark edge around that. */
 .clover-canvas-annotation[data-shape="point"]:is(
     [data-active="true"],
     :focus-visible
@@ -193,7 +193,7 @@
 /*
  * In forced colors shadows are dropped, and the picture is not repainted: a rectangle's
  * edge in the text's color with the light line drawn by an outline instead, in the
- * background's; active, the highlight round it.
+ * background's; active, the highlight around it.
  */
 @media (forced-colors: active) {
   .clover-canvas-annotation {

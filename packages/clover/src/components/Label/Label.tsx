@@ -8,6 +8,7 @@ import {
   useOptionalClover,
   useOptionalCloverSelector,
 } from "../../react/context";
+import { useProvider } from "../Primitives/resource";
 
 export interface LabelProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "lang"> {
@@ -20,8 +21,9 @@ export interface LabelProps
 }
 
 /**
- * A label, in the Root's language and marked with the language it is in. Renders nothing
- * while there is none.
+ * A label, in the Root's language and marked with the language it is in: the Manifest's,
+ * the Canvas's, or inside a `Provider` the provider's name. Renders nothing while there is
+ * none.
  */
 export const Label = forwardRef<HTMLElement, LabelProps>(function Label(
   { of = "manifest", label, as: Tag = "span", className, ...rest },
@@ -36,8 +38,12 @@ export const Label = forwardRef<HTMLElement, LabelProps>(function Label(
         : state.manifest?.label) as LanguageMapLike,
     undefined,
   );
+  const provider = useProvider();
   const language = useOptionalClover()?.language;
-  const { text, lang } = localize(label ?? fromRoot, language);
+  const { text, lang } = localize(
+    label ?? (provider ? provider.label : fromRoot),
+    language,
+  );
   if (!text) return null;
   return (
     <Tag

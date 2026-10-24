@@ -1,9 +1,10 @@
 /*
- * The homepage's section intros, "IIIF building blocks.", "Thoughtful and flexible." and "Install is easy." (Mat,
- * 2026-10-20: styled alike, concise, each with a clear way out): a title under the hero's
- * stroke, a sentence, and its call to action at the end of the row, which wraps under
- * them where the row is narrow. No rule over it, and room round it, so space alone sets
- * it apart (Mat, 2026-10-21). Spaces on the golden scale.
+ * The homepage's section intros, "Thoughtful and flexible." and "Install is easy." (Mat,
+ * 2026-10-20: styled alike, concise, each with a clear way out), whose title and note the
+ * choice under the playground shares: a title under the hero's stroke, a sentence, and its
+ * call to action at the end of the row, which wraps under them where the row is narrow.
+ * No rule over it, and room around it, so space alone sets it apart (Mat, 2026-10-21).
+ * Spaces on the golden scale.
  */
 /* Its button 1.618rem from its words, beside them or under them. */
 .intro {
@@ -40,7 +41,7 @@
   text-wrap: balance;
 }
 
-/* A link in the note, underlined: Nextra's reset leaves it looking like the text round it. */
+/* A link in the note, underlined: Nextra's reset leaves it looking like the text around it. */
 .note a {
   color: var(--accent-11);
   text-decoration: underline;
@@ -64,7 +65,7 @@
  */
 /*
  * One column that does not wrap: wrapping, a column sizes the row as if its two were
- * stacked, and leaves that room round them once they sit side by side.
+ * stacked, and leaves that room around them once they sit side by side.
  */
 .intro[data-beside] {
   align-items: stretch;

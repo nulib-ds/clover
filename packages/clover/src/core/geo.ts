@@ -56,7 +56,7 @@ export interface Georeference {
   mask?: Position[];
   /** Its name: the annotation's label, or the Canvas's. */
   label?: LanguageMapLike;
-  /** What to draw: an image body (or a bare image service) for `thumbnailSource`. */
+  /** What to draw: an image body (or a bare image service), sized by `overlayImageUrl`. */
   image: Record<string, unknown>;
 }
 
@@ -328,37 +328,6 @@ export function georeferencesOf(manifest: Manifest | null): Georeference[] {
 }
 
 export { hasMapData } from "./geo-detect";
-
-/**
- * The URL of an overlay's image, about `size` pixels on its longer side: an image service
- * is asked for that size where its level allows (`!w,h` at level 2, `w,` at level 1), and
- * for its whole image at level 0; without a service, the image itself. The map's own, so
- * it shares no module with the parts (see the Map notes in AGENTS.md).
- */
-export function overlayImageUrl(
-  image: Record<string, unknown>,
-  size = 2048,
-): string | undefined {
-  for (const service of asArray(image.service) as Json[]) {
-    const id = service?.id ?? service?.["@id"];
-    if (typeof id !== "string") continue;
-    const type = String(service.type ?? service["@type"] ?? "");
-    const profile = JSON.stringify(service.profile ?? "");
-    const level = Number(/level([012])/.exec(profile)?.[1] ?? 0);
-    const v2 = type === "ImageService2" || /image\/2/.test(profile);
-    const region = `${id.replace(/\/$/, "")}/full/`;
-    const sized =
-      level === 2
-        ? `!${size},${size}`
-        : level === 1
-          ? `${size},`
-          : v2
-            ? "full"
-            : "max";
-    return `${region}${sized}/0/default.jpg`;
-  }
-  return typeof image.id === "string" ? image.id : undefined;
-}
 
 // ── The affine overlay ────────────────────────────────────────────────────────
 

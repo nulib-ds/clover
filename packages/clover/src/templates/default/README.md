@@ -9,7 +9,7 @@ Manifest's `rendering`) are listed in the panel's About.
 
 The panel never stacks. As in 3.x it has its own space beside the Body, 24rem to start,
 and the bar between them shares the width: drag it by its grip; click or tap it to step
-the panel from its narrowest to 24rem to its widest and round again; or focus it and use
+the panel from its narrowest to 24rem to its widest and around again; or focus it and use
 the arrow keys (Home and End for the limits). The Body keeps at least
 16rem and the panel 14rem, and the width the reader chooses is remembered. With no room
 for both (about 31rem, a phone), the panel slides over the Body instead, leaving a strip

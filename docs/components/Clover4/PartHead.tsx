@@ -38,7 +38,7 @@ function Figure({ value, caption }: { value: string; caption: string }) {
  * ```
  */
 export function PartHead({ part }: { part: keyof typeof partLoads }) {
-  // A part its page shows with no `Root` round it, measured on a page by itself.
+  // A part its page shows with no `Root` around it, measured on a page by itself.
   const alone = aloneParts.has(part);
   return (
     <p className="docs-part-head">

@@ -310,7 +310,7 @@ describe("useControlsVisibility", () => {
       const { getByTestId } = render(<Probe />);
       const probe = getByTestId("probe");
 
-      // A faded control takes no pointer, so the press lands on the cluster round it.
+      // A faded control takes no pointer, so the press lands on the cluster around it.
       tap(getByTestId("controls"), { pointerType });
       // Not at once: the click the browser makes of the tap would land on the control.
       expect(probe).toHaveAttribute("data-visible", "false");

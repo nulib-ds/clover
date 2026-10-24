@@ -29,6 +29,8 @@ import styles from "docs/components/Playground/Playground.module.css";
 import home from "docs/components/Home/Home.module.css";
 import intro from "docs/components/Home/SectionIntro.module.css";
 import { Swoosh } from "docs/components/Home/Swoosh";
+import { partCount } from "docs/components/Home/counts";
+import { ChoiceArrows } from "docs/components/Playground/ChoiceArrows";
 import { useRouter } from "docs/lib/router";
 
 /**
@@ -327,173 +329,211 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
     }, [layoutOpen]);
 
     return (
-      <section
-        aria-labelledby="playground-title"
-        className={styles.section}
-        id="playground"
-      >
-        {/*
-         * Its heading, for the page's outline and for finding it by headings, hidden, as
-         * the playground's Viewer needs no title over it (the parts' is too, `Parts.tsx`);
-         * the Viewer's own title one below it.
-         */}
-        <h2 className={styles.visuallyHidden} id="playground-title">
-          Try the templates
-        </h2>
-        {/* The bar is held only as far as the Viewer reaches, and leaves with it. */}
-        <div>
-          <div className={styles.bar} ref={barRef}>
-            <ResourceField
-              current={current}
-              onOwn={openOwn}
-              onPick={selectResource}
-              own={own}
-            />
-          </div>
-
-          {/* No font and no color here: Clover takes both from the page. */}
-          <div className={styles.viewer} data-template={active} ref={viewerRef}>
-            {ready && (
-              <TemplateViewer
-                key={`${active}-${resource}`}
-                template={spec.name as "Default"}
-                iiifContent={resource}
-                headingLevel={3}
+      <>
+        <section
+          aria-labelledby="playground-title"
+          className={styles.section}
+          id="playground"
+        >
+          {/*
+           * Its heading, for the page's outline and for finding it by headings, hidden, as
+           * the playground's Viewer needs no title over it (the parts' is too, `Parts.tsx`);
+           * the Viewer's own title one below it.
+           */}
+          <h2 className={styles.visuallyHidden} id="playground-title">
+            Try the templates
+          </h2>
+          {/* The bar is held only as far as the Viewer reaches, and leaves with it. */}
+          <div>
+            <div className={styles.bar} ref={barRef}>
+              <ResourceField
+                current={current}
+                onOwn={openOwn}
+                onPick={selectResource}
+                own={own}
               />
-            )}
+            </div>
+
+            {/* No font and no color here: Clover takes both from the page. */}
+            <div
+              className={styles.viewer}
+              data-template={active}
+              ref={viewerRef}
+            >
+              {ready && (
+                <TemplateViewer
+                  key={`${active}-${resource}`}
+                  template={spec.name as "Default"}
+                  iiifContent={resource}
+                  headingLevel={3}
+                />
+              )}
+            </div>
           </div>
-        </div>
+        </section>
 
         {/*
-         * Between the playground and the parts, the two ways to use Clover, centered
-         * (Mat, 2026-10-20): a short headline, then one sentence with both, a template
-         * named in it by the Viewer's template menu, or a layout of one's own from the
-         * parts; under it, where to read about each. The headline's last words marked
-         * with the hero's stroke, drawn in as they come into view.
+         * Under the playground's Viewer, the two ways to use Clover, as the two halves of
+         * one sentence (Mat, 2026-10-23: "it needs to be two. but they need to
+         * communicate"), on the parts' two columns below, the two alike, floating, their
+         * titles one sentence across them, "Use a template… …or build your own.", its last
+         * words under the hero's stroke, as the choice's headline had them. On the left,
+         * under the Viewer it changes: a ready-made template, its menu, and Get started.
+         * On the right, over the tiles it heads: the building blocks, counted, and the way
+         * to see them all.
          */}
         <div className={styles.choice}>
-          {/* The sections' own title and note, so the two read as one voice (Mat, 2026-10-22). */}
-          <h2 className={intro.title}>
-            Use a template{" "}
-            <span className={styles.nowrap}>
-              or build{" "}
-              <Swoosh className={`${home.mark} ${home.markOnScroll}`}>
-                your own.
-              </Swoosh>
-            </span>
-          </h2>
-          <p className={intro.note}>
-            Start with a{" "}
-            <span
-              className={styles.layoutPicker}
-              onBlur={(e) => {
-                if (layoutOpen && !e.currentTarget.contains(e.relatedTarget))
-                  closeLayout(false);
-              }}
-              ref={layoutRef}
-            >
-              <button
-                aria-controls="pg-layouts"
-                aria-expanded={layoutOpen}
-                aria-labelledby="pg-layout-current pg-layout"
-                className={styles.layoutTrigger}
-                onClick={() =>
-                  layoutOpen ? closeLayout() : setLayoutOpen(true)
-                }
-                ref={layoutTriggerRef}
-                type="button"
-              >
-                {/* Every name in one place, the others hidden, so the button is as
-                    wide as the longest and the sentence holds still as it changes. */}
-                <span className={styles.layoutNames}>
-                  {templateOrder.map((key) => (
-                    <span
-                      aria-hidden={key === active ? undefined : true}
-                      data-current={key === active || undefined}
-                      id={key === active ? "pg-layout-current" : undefined}
-                      key={key}
-                    >
-                      {templateSpecs[key].name}
-                    </span>
-                  ))}
-                </span>
-                <svg
-                  aria-hidden="true"
-                  className={styles.chevron}
-                  fill="none"
-                  height="16"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  width="16"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </button>
-
-              {layoutOpen && (
+          <ChoiceArrows />
+          <div className={styles.template}>
+            {/* A section intro's title and note, and the room between them (`intro.text`). */}
+            <div className={intro.text}>
+              <h3 className={intro.title}>
+                Use a template…
                 <span
-                  aria-labelledby="pg-layout"
-                  className={styles.layoutMenu}
-                  id="pg-layouts"
-                  onKeyDown={(e) => {
-                    pressed.current = false;
-                    if (e.key === "Escape" || e.key === "Enter") {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      closeLayout();
-                    }
-                  }}
-                  onPointerDown={() => (pressed.current = true)}
-                  ref={layoutMenuRef}
-                  role="radiogroup"
+                  aria-hidden="true"
+                  className={styles.arrowFrom}
+                  data-arrow="up"
+                />
+              </h3>
+              <p className={intro.note}>Try each one in the Viewer above.</p>
+            </div>
+            {/*
+             * The template's menu beside the way in, drawn as a dropdown is (Mat,
+             * 2026-10-23: "next to get started … an obvious dropdown").
+             */}
+            <div className={styles.templateActions}>
+              <span
+                className={styles.layoutPicker}
+                onBlur={(e) => {
+                  if (layoutOpen && !e.currentTarget.contains(e.relatedTarget))
+                    closeLayout(false);
+                }}
+                ref={layoutRef}
+              >
+                <button
+                  aria-controls="pg-layouts"
+                  aria-expanded={layoutOpen}
+                  className={styles.layoutTrigger}
+                  onClick={() =>
+                    layoutOpen ? closeLayout() : setLayoutOpen(true)
+                  }
+                  ref={layoutTriggerRef}
+                  type="button"
                 >
-                  {templateOrder.map((key) => (
-                    <label
-                      className={styles.layoutOption}
-                      data-selected={key === active}
-                      key={key}
-                    >
-                      <input
-                        checked={key === active}
-                        className={styles.choiceInput}
-                        name="pg-layout"
-                        onChange={() => selectTemplate(key)}
-                        // A press chooses and closes; an arrow key only chooses.
-                        onClick={() => pressed.current && closeLayout()}
-                        type="radio"
-                        value={key}
-                      />
-                      {templateSpecs[key].name}
-                    </label>
-                  ))}
+                  {/* Every name in one place, the others hidden, so the button is as
+                    wide as the longest and holds still as it changes. */}
+                  <span className={styles.layoutNames}>
+                    {templateOrder.map((key) => (
+                      <span
+                        aria-hidden={key === active ? undefined : true}
+                        data-current={key === active || undefined}
+                        key={key}
+                      >
+                        {templateSpecs[key].name}
+                      </span>
+                    ))}
+                  </span>
+                  {/* Named "Document template", its visible name first (WCAG 2.5.3). */}
+                  <span className={styles.visuallyHidden}> template</span>
+                  <svg
+                    aria-hidden="true"
+                    className={styles.chevron}
+                    fill="none"
+                    height="16"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    width="16"
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+
+                {layoutOpen && (
+                  <span
+                    aria-label="Template"
+                    className={styles.layoutMenu}
+                    id="pg-layouts"
+                    onKeyDown={(e) => {
+                      pressed.current = false;
+                      if (e.key === "Escape" || e.key === "Enter") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        closeLayout();
+                      }
+                    }}
+                    onPointerDown={() => (pressed.current = true)}
+                    ref={layoutMenuRef}
+                    role="radiogroup"
+                  >
+                    {templateOrder.map((key) => (
+                      <label
+                        className={styles.layoutOption}
+                        data-selected={key === active}
+                        key={key}
+                      >
+                        <input
+                          checked={key === active}
+                          className={styles.choiceInput}
+                          name="pg-layout"
+                          onChange={() => selectTemplate(key)}
+                          // A press chooses and closes; an arrow key only chooses.
+                          onClick={() => pressed.current && closeLayout()}
+                          type="radio"
+                          value={key}
+                        />
+                        {templateSpecs[key].name}
+                      </label>
+                    ))}
+                  </span>
+                )}
+              </span>
+              <Link href="/docs" className="cta-solid">
+                Get started
+                <span className="cta-arrow" aria-hidden="true">
+                  →
                 </span>
-              )}
-            </span>{" "}
-            <span id="pg-layout">template</span> or build your own layout.
-          </p>
-          {/*
-           * Two ways on (Mat, 2026-10-21): Get started, the way in, and the Viewer's own
-           * docs, its templates among them.
-           */}
-          <div className={styles.choiceActions}>
-            <Link href="/docs" className="cta-solid">
-              Get started
-              <span className="cta-arrow" aria-hidden="true">
-                →
-              </span>
-            </Link>
-            <Link href="/docs/viewer" className="cta-outline">
-              Viewer documentation
-              <span className="cta-arrow" aria-hidden="true">
-                →
-              </span>
-            </Link>
+              </Link>
+            </div>
+          </div>
+          <div>
+            {/*
+             * The parts' heading (`#parts`), which a chip's resource sends focus to
+             * (`Parts.tsx`), in the section intros' type.
+             */}
+            <div className={intro.text}>
+              <h2
+                className={`${intro.title} ${styles.buildTitle}`}
+                id="parts"
+                tabIndex={-1}
+              >
+                …or build{" "}
+                <Swoosh className={`${home.mark} ${home.markOnScroll}`}>
+                  your own.
+                </Swoosh>
+                <span
+                  aria-hidden="true"
+                  className={styles.arrowFrom}
+                  data-arrow="down"
+                />
+              </h2>
+              <p className={intro.note} data-arrow-clear>
+                {partCount} pieces that snap together any way you like.
+              </p>
+            </div>
+            <div className={styles.buildActions} data-arrow-clear>
+              <Link href="/docs/body" className="cta-outline">
+                See them all
+                <span className="cta-arrow" aria-hidden="true">
+                  →
+                </span>
+              </Link>
+            </div>
           </div>
         </div>
-      </section>
+      </>
     );
   },
 );

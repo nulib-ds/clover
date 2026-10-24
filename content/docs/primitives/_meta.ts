@@ -13,6 +13,8 @@ const meta: MetaRecord = {
   rendering: "Rendering",
   "part-of": "PartOf",
   id: "Id",
+  provider: "Provider",
+  logo: "Logo",
   value: "Value",
 };
 

@@ -10,7 +10,6 @@ import {
   cornersOf,
   georeferencesOf,
   navPlaceOf,
-  overlayImageUrl,
   type Position,
   readGeoreference,
 } from "../../core/geo";
@@ -658,7 +657,8 @@ async function drawOverlay(
   overlay: Georeference,
   request: CloverRequest | undefined,
 ): Promise<HTMLCanvasElement | null> {
-  const url = overlayImageUrl(overlay.image, OVERLAY_SIZE);
+  const { overlayImageUrl } = await import("./overlayImage");
+  const url = await overlayImageUrl(overlay.image, OVERLAY_SIZE, request);
   if (!url) return null;
   const image = await new Promise<HTMLImageElement | null>((done) => {
     const element = new Image();

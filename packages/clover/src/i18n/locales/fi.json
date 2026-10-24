@@ -38,6 +38,8 @@
   "aboutRights": "Oikeudet",
   "aboutHomepage": "Kotisivu",
   "aboutSeeAlso": "Katso myös",
+  "aboutProvider": "Tarjoaja",
+  "logo": "Logo",
   "aboutManifest": "IIIF-manifesti",
   "aboutCanvas": "IIIF-kanvaasi",
   "aboutPartOf": "Osa kokonaisuutta",

@@ -1,8 +1,6 @@
 import type { MetadataItem } from "@iiif/presentation-3";
 import React, { useEffect, useState } from "react";
 
-import type { CloverState } from "../../core/clover";
-import { selectSequence } from "../../core/selectors";
 import { resolveThumbnail, thumbnailSource } from "../../core/thumbnail";
 import { toPlainText } from "../../core/text";
 import { type LanguageMapLike, localize } from "../../core/value";
@@ -13,42 +11,43 @@ import {
 } from "../../react/context";
 import { MetadataList, Markup } from "../../ui/Markup";
 import { ReadMore } from "../../ui/ReadMore";
+import {
+  type Json,
+  type Of,
+  asArray,
+  resourceOf,
+  useProvider,
+} from "./resource";
+
+export type { Of } from "./resource";
 
 /**
  * The IIIF descriptive properties, one part each. Inside a `Root` each reads the
- * Manifest, or the current Canvas with `of="canvas"`; anywhere, a value passed as a prop
- * wins. Text is in the Root's language and marked with the language it is in; HTML is
- * sanitized. A part with nothing to show renders nothing.
+ * Manifest, or the current Canvas with `of="canvas"`; inside a `Provider`, the provider
+ * it is drawn for (`useProvider`); anywhere, a value passed as a prop wins. Text is in the
+ * Root's language and marked with the language it is in; HTML is sanitized. A part with
+ * nothing to show renders nothing.
  */
 
-export type Of = "manifest" | "canvas";
-
-type Json = Record<string, any>;
-
-const resourceOf = (state: CloverState, of: Of): Json | null =>
-  of === "canvas"
-    ? ((selectSequence(state.manifest).canvases.find(
-        (canvas) => canvas.id === state.canvasId,
-      ) as Json | undefined) ?? null)
-    : (state.manifest as Json | null);
-
-/** A property of the Root's Manifest or current Canvas, unless one is given. */
+/**
+ * A property of the Root's Manifest or current Canvas, or inside a `Provider` of the
+ * provider it is drawn for, unless one is given.
+ */
 function useProperty<T>(
   of: Of,
   key: string,
   given: T | undefined,
 ): T | undefined {
+  const provider = useProvider();
   const fromRoot = useOptionalCloverSelector(
     (state) => resourceOf(state, of)?.[key] as T | undefined,
     undefined,
   );
-  return given !== undefined ? given : fromRoot;
+  if (given !== undefined) return given;
+  return provider ? (provider[key] as T | undefined) : fromRoot;
 }
 
 const useLanguage = () => useOptionalClover()?.language;
-
-const asArray = <T,>(value: T | T[] | null | undefined): T[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
 
 interface PartProps<Value>
   extends Omit<React.HTMLAttributes<HTMLElement>, "lang"> {
@@ -83,7 +82,7 @@ export function Summary({
 }: PartProps<LanguageMapLike>) {
   const summary = useProperty<LanguageMapLike>(of, "summary", value);
   const language = useLanguage();
-  // Nothing at all without a summary: no button, and no empty box round it.
+  // Nothing at all without a summary: no button, and no empty box around it.
   if (!localize(summary, language).text) return null;
   return (
     <ReadMore>
@@ -315,7 +314,7 @@ export function Thumbnail({
   );
   const resource = (value as Json | undefined) ?? fromRoot;
   const language = useLanguage();
-  const source = resource ? thumbnailSource(resource, size) : null;
+  const source = resource ? thumbnailSource(resource) : null;
   const key = source?.src ?? source?.service ?? source?.fallback;
   const [src, setSrc] = useState(source?.src);
   const request = useOptionalClover()?.clover.request;

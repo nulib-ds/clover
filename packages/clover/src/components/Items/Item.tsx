@@ -5,6 +5,7 @@ import { isSound } from "../../core/annotations";
 import type { CloverRequest } from "../../core/request";
 import { resolveThumbnail, thumbnailSource } from "../../core/thumbnail";
 import { localize } from "../../core/value";
+import { NEAR_VIEWPORT_MARGIN, useNearViewport } from "../Body/useNearViewport";
 import { watchClamp } from "./clamped";
 
 /** `h:mm:ss`, or `m:ss` under an hour. */
@@ -17,20 +18,23 @@ export function formatDuration(seconds: number): string {
 }
 
 /**
- * A part's thumbnail URL: at once for a sizeable service, after `info.json` for level 0.
+ * A part's thumbnail URL: the image itself, or its service's once its `info.json` is read,
+ * which waits until the item comes `near` (a strip of a thousand reads a strip's worth).
  * `none` when the resource has no image to ask for at all (sound with no picture).
  */
 function useThumbnail(
   part: ItemPart,
   size: number,
   request: CloverRequest | undefined,
+  near: boolean,
 ) {
-  const source = thumbnailSource(part.resource, size);
+  const source = thumbnailSource(part.resource);
   const [src, setSrc] = useState(source?.src);
   const key = source?.src ?? source?.service ?? source?.fallback;
   useEffect(() => {
     if (!source) return setSrc(undefined);
     if (source.src) return setSrc(source.src);
+    if (!near) return;
     let current = true;
     resolveThumbnail(source, size, request).then((url) => {
       if (current) setSrc(url);
@@ -40,7 +44,7 @@ function useThumbnail(
     };
     // `key` stands in for `source`, a new object each render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, size]);
+  }, [key, size, near]);
   return { src, none: !source };
 }
 
@@ -75,7 +79,17 @@ function Picture({
   /** The language of the `alt`, a label's. */
   altLang?: string;
 }) {
-  const { src, none } = useThumbnail(part, size, request);
+  /*
+   * Near the screen, or in a carousel near the edge of the box that scrolls it, found by
+   * the markup, as the stylesheet that makes it scroll may come after.
+   */
+  const [box, setBox] = useState<HTMLSpanElement | null>(null);
+  const near = useNearViewport(
+    box,
+    NEAR_VIEWPORT_MARGIN,
+    box?.closest('[data-layout="carousel"] .clover-items-viewport'),
+  );
+  const { src, none } = useThumbnail(part, size, request, near);
   const [loaded, setLoaded] = useState(false);
   /*
    * The Canvas's own shape, as the image's width and height attributes, so its card has
@@ -94,6 +108,7 @@ function Picture({
    */
   return (
     <span
+      ref={setBox}
       className="clover-items-picture"
       data-loaded={loaded}
       data-empty={src ? undefined : true}

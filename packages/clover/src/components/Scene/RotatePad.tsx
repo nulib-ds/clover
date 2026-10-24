@@ -9,7 +9,7 @@ import type { ControlButtons } from "../../ui/controlButtons";
  * A Scene's rotate pad (Mat, 2026-10-23: "rotate controls on scene are not intuitive …
  * a compound control larger than existing controls … in the lower right"), drawn from
  * what other 3D viewers and maps do: one round group in the corner, each way to turn on
- * the side it turns toward, Clover's caret pointing its way, round a disc that is a
+ * the side it turns toward, Clover's caret pointing its way, around a disc that is a
  * handle to drag, whose ring shows where the view is, as a map's compass does, and in its
  * last corner the way home, as Canvas's.
  *
@@ -54,7 +54,7 @@ const GLOBE = 236;
 /** A coordinate as the glyph writes it. */
 const n = (value: number) => value.toFixed(1);
 
-/** Half an ellipse round the globe's center, from one end of an axis round one side. */
+/** Half an ellipse around the globe's center, from one end of an axis around one side. */
 function half(rx: number, ry: number, upright: boolean, sweep: 0 | 1) {
   const [from, to] = upright
     ? [`256 ${n(256 - ry)}`, `256 ${n(256 + ry)}`]
@@ -67,7 +67,7 @@ function half(rx: number, ry: number, upright: boolean, sweep: 0 | 1) {
  * more obviously a sphere"): lines on the ball's own face, as on a globe the models stand
  * at the heart of: its equator as flat as the view is level, its meridian through their
  * front as open as they are turned from the reader, and a dot where their front is. Each
- * line is drawn as two halves, the one round the ball's far side fainter (Mat,
+ * line is drawn as two halves, the one around the ball's far side fainter (Mat,
  * 2026-10-23: "the lines in the back should be more translucent"): the equator's far half
  * is above it while the view looks down, the meridian's on the side away from the front
  * while the front faces the reader. Facing the reader, the dot is on the equator's near
@@ -137,7 +137,7 @@ export const Orientation = React.forwardRef<SVGGElement>(
 );
 
 export interface RotatePadProps {
-  /** Its controls, each in its place round the disc, the way home in the last corner. */
+  /** Its controls, each in its place around the disc, the way home in the last corner. */
   controls: Partial<Record<Direction | "reset", ControlSpec>>;
   controlButtons?: ControlButtons;
   /** Turns the view, radians about the up axis and across it, while one is held. */

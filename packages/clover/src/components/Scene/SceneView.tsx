@@ -131,7 +131,7 @@ const ALL_CONTROLS: Required<SceneControlsConfig> = {
   information: true,
 };
 
-/** A control's turn, and a key's: an eighth of the way round, or a twelfth up or down. */
+/** A control's turn, and a key's: an eighth of the way around, or a twelfth up or down. */
 const TURN = Math.PI / 4;
 const TILT = Math.PI / 12;
 /** An arrow key's turn: half a control's, a whole one with Shift. */
@@ -240,7 +240,7 @@ function SceneBody({
   /** The controls' corner (zoom, full screen, the rotate pad), and the way home's glyph. */
   const navigation = useRef<HTMLDivElement>(null);
   const indicator = useRef<SVGGElement>(null);
-  // Whatever is full screen holds the Scene: its own figure, or a Viewer round it.
+  // Whatever is full screen holds the Scene: its own figure, or a Viewer around it.
   const withinFullscreen = useWithinFullscreen(wrapper);
 
   /** Draw once in the next frame, however many moves come before it. */

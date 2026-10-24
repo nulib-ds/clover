@@ -216,7 +216,7 @@
   --editor-property: var(--code-light-property);
 }
 
-/* Dark: the homepage's editor, a hairline round it where the page is dark too. */
+/* Dark: the homepage's editor, a hairline around it where the page is dark too. */
 .dark,
 [data-editor="dark"] {
   --editor-background: var(--code-background);

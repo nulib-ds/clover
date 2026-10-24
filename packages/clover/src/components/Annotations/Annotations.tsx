@@ -16,6 +16,7 @@ import type { Manifest } from "../../core/presentation";
 import { selectSequence, selectVisibleCanvases } from "../../core/selectors";
 import { parseTime } from "../../core/ranges";
 import { regionSource } from "../../core/region";
+import { resolveThumbnail } from "../../core/thumbnail";
 import { markdownToPlainText, readAs, toPlainText } from "../../core/text";
 import {
   type LanguageMapLike,
@@ -57,7 +58,7 @@ export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
  * - Each entry shows its content (IIIF's limited HTML, sanitized; an image body as an
  *   image). Pressing it frames the annotation on the Canvas, going to its Canvas first if
  *   need be. For the keyboard, a button inside it does the same, out of sight, its focus
- *   drawn round the entry.
+ *   drawn around the entry.
  * - Hovering or focusing an entry highlights its hotspot, and hovering a hotspot
  *   highlights its entry: one highlight, shared through the Root, with no timers.
  * - Each set is headed by its AnnotationPage's own label, when it has one, after a toggle
@@ -623,24 +624,45 @@ const AnnotationLayers = forwardRef<
   );
 });
 
-/**
- * One annotation in the list: its content, pressed anywhere to frame it, and, for the
- * keyboard, a button out of sight that does the same, its focus drawn round the entry.
- */
 /** A region's picture: an `l` square (about a line), fetched at twice that for dense screens. */
 const THUMBNAIL_SIZE = 52;
 
 /**
  * The picture of what an entry marks: its region of the Canvas, cut small by the image
- * server (`regionSource`). None for an entry that shows an image of its own (0377), one
- * with no rectangle, or an image the server cannot cut.
+ * server once its `info.json` is read (`regionSource`, `resolveThumbnail`). None for an
+ * entry that shows an image of its own (0377), one with no rectangle, or an image the
+ * server cannot cut.
  */
-function regionThumbnail(entry: AnnotationEntry, canvas?: Record<string, any>) {
-  const rect = entry.target.rect;
-  if (!rect || !canvas || entry.bodies.some((body) => body.image)) return null;
-  return regionSource(canvas, rect, THUMBNAIL_SIZE);
+function useRegionThumbnail(
+  entry: AnnotationEntry,
+  canvas?: Record<string, any>,
+): string | undefined {
+  const { clover } = useClover("Annotations");
+  const source = useMemo(() => {
+    const rect = entry.target.rect;
+    if (!rect || !canvas || entry.bodies.some((body) => body.image))
+      return null;
+    return regionSource(canvas, rect);
+  }, [entry, canvas]);
+  const [src, setSrc] = useState<string>();
+  useEffect(() => {
+    setSrc(undefined);
+    if (!source) return;
+    let live = true;
+    void resolveThumbnail(source, THUMBNAIL_SIZE, clover.request).then(
+      (url) => live && setSrc(url),
+    );
+    return () => {
+      live = false;
+    };
+  }, [source, clover]);
+  return src;
 }
 
+/**
+ * One annotation in the list: its content, pressed anywhere to frame it, and, for the
+ * keyboard, a button out of sight that does the same, its focus drawn around the entry.
+ */
 function AnnotationItem({
   entry,
   canvas,
@@ -683,10 +705,7 @@ function AnnotationItem({
   // Clover's words and the annotation's: both in the page's language, or each in its own.
   const oneLanguage = !show.lang && !langWithin(text.lang, hostLanguage);
   const name = text.text ? `${show.text}: ${text.text}` : show.text;
-  const thumbnail = useMemo(
-    () => regionThumbnail(entry, canvas),
-    [entry, canvas],
-  );
+  const thumbnail = useRegionThumbnail(entry, canvas);
   return (
     <li
       className="clover-annotations-entry"

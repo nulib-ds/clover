@@ -38,8 +38,8 @@ export const SUMMARY =
 export const OPENING = { label: "Page 15", behavior: ["facing-pages"] };
 
 /**
- * The plates that pair a "Then" with a "Now", by page, each with the box round its "Then"
- * (the inset scene and the word printed by it) and round its "Now" (most of the picture,
+ * The plates that pair a "Then" with a "Now", by page, each with the box around its "Then"
+ * (the inset scene and the word printed by it) and around its "Now" (most of the picture,
  * kept clear of its edges; on the Back Cover, the round scene below), in the page's own
  * pixels: x, y, width, height. Page 15 prints "Now" with no "Then", so it has none.
  */
@@ -64,7 +64,7 @@ const thenAndNow = new Map(
   ]),
 );
 
-/** A page's tags: words printed on it, each round the box it names. */
+/** A page's tags: words printed on it, each around the box it names. */
 const tags = (canvas, words) => ({
   id: `${canvas}/tags`,
   type: "AnnotationPage",

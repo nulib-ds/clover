@@ -1,0 +1,142 @@
+---
+title: Provider
+description: Who provided a IIIF resource, its provider, each with its logo and its name linked to its homepage. A compound part, whose parts read the provider they are drawn for.
+---
+
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
+
+<div className="docs-title-row">
+
+# Provider
+
+<PartHead part="Provider" />
+
+</div>
+
+<div className="docs-lede">
+  Who provided the resource: each provider's logo and name, linked to its
+  homepage.
+</div>
+
+<Example>
+<PartDemo part="Provider" />
+
+```jsx {2}
+<Clover.Root iiifContent={url}>
+  <Clover.Provider />
+</Clover.Root>
+```
+
+</Example>
+
+## API reference
+
+Reads `provider` from the Root's resource and renders a `ul`, an item for each provider:
+its [logo](/docs/primitives/logo) and its name, linked to its first homepage. A provider
+with no name of its own is named by its homepage. It renders nothing while there is none,
+and its other props go to the `ul`.
+
+`Provider` is a compound part: what it holds is drawn once for each provider, inside its
+link, and the parts in it read that provider rather than the resource. `Logo` draws its
+logo, `Label` its name, and `Homepage`, `SeeAlso` and `Id` its own links. A part of your
+own reads it with `Clover.useProvider()`. The Panel's About section shows it whole, and
+the Default and Document templates its logo alone, at the end of their title's line.
+
+<ApiReference elements="clover-provider">
+
+| Prop        | Type                              | Default               | Description                                                       |
+| ----------- | --------------------------------- | --------------------- | ----------------------------------------------------------------- |
+| `of`        | `"manifest" \| "canvas"`          | `"manifest"`          | Whose `provider`: the resource's, or the Canvas the reader is on. |
+| `value`     | `{ id, label, homepage, logo }[]` | —                     | Providers to show instead of the Root's, as IIIF gives them.      |
+| `link`      | `boolean`                         | `true`                | Link each provider to its homepage, when it has one.              |
+| `children`  | `ReactNode`                       | its logo and its name | What to draw for each provider.                                   |
+| `className` | `string`                          | —                     | Added to `clover-provider`.                                       |
+
+</ApiReference>
+
+## Examples
+
+### Its logo alone
+
+Hold a `Logo`, and each provider is its logo alone, linked to its homepage and named by
+the provider for assistive technology, as the templates show it.
+
+<Example>
+<PartDemo part="Provider" holds={[{ part: "Logo" }]} />
+
+```jsx {2-4}
+<Clover.Root iiifContent={url}>
+  <Clover.Provider>
+    <Clover.Logo />
+  </Clover.Provider>
+</Clover.Root>
+```
+
+</Example>
+
+### Outside a Root
+
+Give it `value`, the providers as IIIF gives them, and it needs no `Root`.
+
+<Example>
+<PartDemo
+  part="Provider"
+  props={{
+    value: [
+      {
+        id: "https://www.library.northwestern.edu/",
+        type: "Agent",
+        label: { none: ["Northwestern University Libraries"] },
+        homepage: [
+          {
+            id: "https://dc.library.northwestern.edu/",
+            type: "Text",
+            format: "text/html",
+          },
+        ],
+        logo: [
+          {
+            id: "https://iiif.dc.library.northwestern.edu/iiif/2/00000000-0000-0000-0000-000000000003/full/pct:50/0/default.webp",
+            type: "Image",
+            format: "image/webp",
+            width: 1190,
+            height: 139,
+          },
+        ],
+      },
+    ],
+  }}
+/>
+
+```jsx
+<Clover.Provider
+  value={[
+    {
+      id: "https://www.library.northwestern.edu/",
+      type: "Agent",
+      label: { none: ["Northwestern University Libraries"] },
+      homepage: [
+        {
+          id: "https://dc.library.northwestern.edu/",
+          type: "Text",
+          format: "text/html",
+        },
+      ],
+      logo: [
+        {
+          id: "https://iiif.dc.library.northwestern.edu/iiif/2/00000000-0000-0000-0000-000000000003/full/pct:50/0/default.webp",
+          type: "Image",
+          format: "image/webp",
+          width: 1190,
+          height: 139,
+        },
+      ],
+    },
+  ]}
+/>
+```
+
+</Example>

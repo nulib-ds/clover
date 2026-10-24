@@ -1,0 +1,50 @@
+/*
+ * The providers (`Provider`): each a list item, side by side and wrapping, `m` apart; its
+ * logo and its name `s` apart, linked to its homepage. Each at least 24px tall, in CSS px
+ * as the criterion is (WCAG 2.5.8).
+ */
+.clover-provider {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clover-space-s) var(--clover-space-m);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clover-provider-agent {
+  display: flex;
+  align-items: center;
+  min-block-size: 24px;
+}
+
+.clover-provider-link,
+.clover-provider-content {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--clover-space-s);
+}
+
+/*
+ * The link reads as one whatever a page's reset does: its name underlined, in the text
+ * accent, not only colored (WCAG 1.4.1); a long name wraps (1.4.10).
+ */
+.clover-provider-link {
+  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+  overflow-wrap: anywhere;
+  text-decoration-line: underline;
+  text-underline-offset: var(--clover-space-3xs);
+}
+
+/*
+ * A logo (`Logo`): `--clover-logo-height` tall, 1.618rem (Mat, 2026-10-24), as wide as it
+ * is drawn, never wider than its room.
+ */
+.clover-logo {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: var(--clover-logo-height, 1.618rem);
+  object-fit: contain;
+}

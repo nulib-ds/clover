@@ -101,7 +101,7 @@ function Control({
         value={value}
         onChange={onChange}
         className={`${live.value} ${live.scrub} ${live.number}`}
-        // As wide as its value, so the code round it reads as written (`"8rem"`).
+        // As wide as its value, so the code around it reads as written (`"8rem"`).
         style={{ width: `${Math.max(String(value).length, 1)}ch` }}
       />
     );
@@ -262,9 +262,9 @@ export interface LiveDemo {
   props?: Record<string, unknown>;
   resource: PartDemoResource;
   body?: boolean;
-  /** A box of this height round the part, which scrolls. */
+  /** A box of this height around the part, which scrolls. */
   box?: string;
-  /** The height of the box round Canvas, Timeline or Scene. */
+  /** The height of the box around Canvas, Timeline or Scene. */
   height?: number;
 }
 

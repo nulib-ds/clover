@@ -63,7 +63,7 @@ Text keeps your page's size, or takes one of four a small step either side of it
 `--clover-text-xs` (0.764rem) for a badge, `--clover-text-s` (0.854rem) for secondary
 text, `--clover-text-m` (1.146rem) for a section's heading, and `--clover-text-l`
 (1.236rem) for a layout's title. Every round control is `--clover-control`, a 1rem icon
-with `s` all round it (2.236rem).
+with `s` of space on every side (2.236rem).
 
 So one property makes a layout tighter or roomier, and the rest follows:
 
@@ -82,8 +82,8 @@ The Body takes its height from `--clover-body-height` (`60vh`, or its template's
 ```
 
 The picture fills the Body edge to edge at home; `--clover-canvas-inset` keeps a margin
-round it instead. The Canvas's controls sit `--clover-canvas-controls-inset` in from its
-edges, the region's inset by default, so they line up with what is round the Body.
+around it instead. The Canvas's controls sit `--clover-canvas-controls-inset` in from its
+edges, the region's inset by default, so they line up with the parts around the Body.
 
 ## Colors
 
@@ -233,16 +233,16 @@ part declares for itself on its class, where your CSS still wins over Clover's l
 
 On the transport's dark scrim, in every theme.
 
-| Variable                          | Default                  | What it colors                                          |
-| --------------------------------- | ------------------------ | ------------------------------------------------------- |
-| `--clover-player-text`            | `#fff`                   | The transport's text and menus, and its sliders' thumbs |
-| `--clover-player-track`           | `rgb(255 255 255 / 65%)` | The seek and volume sliders' tracks                     |
-| `--clover-player-track-shadow`    | `none`                   | A shadow under those tracks                             |
-| `--clover-player-menu-surface`    | `#151718`                | The Captions and Chapters menus' ground                 |
-| `--clover-player-menu-hover`      | `#26292b`                | A menu's option under the pointer                       |
-| `--clover-player-caption-surface` | `rgb(0 0 0 / 85%)`       | The box behind captions                                 |
-| `--clover-player-caption-text`    | `#fff`                   | The captions' text                                      |
-| `--clover-player-caption-edge`    | `none`                   | An edge round the captions' letters (a `text-shadow`)   |
+| Variable                          | Default                  | What it colors                                            |
+| --------------------------------- | ------------------------ | --------------------------------------------------------- |
+| `--clover-player-text`            | `#fff`                   | The transport's text and menus, and its sliders' thumbs   |
+| `--clover-player-track`           | `rgb(255 255 255 / 65%)` | The seek and volume sliders' tracks                       |
+| `--clover-player-track-shadow`    | `none`                   | A shadow under those tracks                               |
+| `--clover-player-menu-surface`    | `#151718`                | The Captions and Chapters menus' ground                   |
+| `--clover-player-menu-hover`      | `#26292b`                | A menu's option under the pointer                         |
+| `--clover-player-caption-surface` | `rgb(0 0 0 / 85%)`       | The box behind captions                                   |
+| `--clover-player-caption-text`    | `#fff`                   | The captions' text                                        |
+| `--clover-player-caption-edge`    | `none`                   | An outline around the captions' letters (a `text-shadow`) |
 
 ### Sizes and spaces
 
@@ -273,32 +273,33 @@ On the transport's dark scrim, in every theme.
 
 ### The Body
 
-On `.clover-canvas`, but for `--clover-body-height`, which Body reads from anything
-round it. Clover sets the controls' durations to `0s` for a reader who prefers reduced
+On `.clover-canvas`, but for `--clover-body-height`, which you can set on Body or on any
+element that contains it. Clover sets the controls' durations to `0s` for a reader who prefers reduced
 motion: set yours inside `@media (prefers-reduced-motion: no-preference)`.
 
 | Variable                         | Default                                                              | What it sets                                      |
 | -------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------- |
 | `--clover-body-height`           | `60vh` (Default `min(65vh, 40rem)`, the lightbox `min(70vh, 48rem)`) | The Body's height                                 |
-| `--clover-canvas-inset`          | `0px` (Document: `var(--clover-inset)`)                              | A margin round the picture at home                |
+| `--clover-canvas-inset`          | `0px` (Document: `var(--clover-inset)`)                              | A margin around the picture at home               |
 | `--clover-canvas-controls-inset` | `var(--clover-inset)`                                                | How far the controls sit in from the Body's edges |
 | `--clover-controls-leave`        | `180ms cubic-bezier(0.4, 0, 1, 1)`                                   | How the controls leave when the reader is idle    |
 | `--clover-controls-enter`        | `340ms cubic-bezier(0.34, 1.56, 0.64, 1)`                            | How they come back                                |
 | `--clover-controls-tuck`         | `var(--clover-space-s)`                                              | How far they tuck toward their edge as they leave |
 
-### Items, Summary and Map
+### Items, Summary, Logo and Map
 
-Items' are set on `.clover-items`; the Summary's and the Map's on them or on anything
-round them.
+Items' are set on `.clover-items`; the Summary's, the Logo's and the Map's on them or on
+any element that contains them.
 
-| Variable                 | Default                 | What it sets                                  |
-| ------------------------ | ----------------------- | --------------------------------------------- |
-| `--clover-items-height`  | `8rem`                  | A carousel's picture height                   |
-| `--clover-items-size`    | `10rem`                 | A grid's cell (the Gallery's `size` sets it)  |
-| `--clover-items-gap`     | `var(--clover-space-m)` | The space between items                       |
-| `--clover-items-lines`   | `3`                     | The lines of an item's label before it is cut |
-| `--clover-summary-lines` | `5`                     | The lines of a Summary before Read more       |
-| `--clover-map-height`    | `24rem`                 | The Map's height                              |
+| Variable                 | Default                 | What it sets                                    |
+| ------------------------ | ----------------------- | ----------------------------------------------- |
+| `--clover-items-height`  | `8rem`                  | A carousel's picture height                     |
+| `--clover-items-size`    | `10rem`                 | A grid's cell (the Gallery's `size` sets it)    |
+| `--clover-items-gap`     | `var(--clover-space-m)` | The space between items                         |
+| `--clover-items-lines`   | `3`                     | The lines of an item's label before it is cut   |
+| `--clover-summary-lines` | `5`                     | The lines of a Summary before Read more         |
+| `--clover-logo-height`   | `1.618rem`              | A provider's logo's height, its width following |
+| `--clover-map-height`    | `24rem`                 | The Map's height                                |
 
 ### Templates
 

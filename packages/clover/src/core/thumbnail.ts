@@ -2,25 +2,36 @@ import type { CloverRequest } from "./request";
 import {
   fetchInfo,
   findImageServiceId,
-  imageRequestUrl,
 } from "../lib/renderer/sources/imageService";
+import {
+  type RegionShare,
+  sizedImageUrl,
+} from "../lib/renderer/sources/sizedImage";
 
 /**
  * A small picture of a IIIF resource, for a list or a strip of them.
  *
  * - The resource's own `thumbnail` comes first; then, for a Canvas, the first image it
  *   paints; then its placeholder or accompanying Canvas's (video and sound).
- * - An image service that can size images (level 1 or 2) is asked for one at once.
- * - A level 0 service can only hand out the sizes it lists, so its `info.json` is read
- *   first (the renderer's cached fetch, so a Canvas shown later does not ask again).
+ * - An image service is asked for nothing until its own `info.json` has been read (the
+ *   renderer's cached fetch, so a Canvas shown later does not ask again), and then only
+ *   as strictly as it says it can answer (`sizedImageUrl`): never more than the image has,
+ *   nor than its limits, at level 0 only a size it lists (Mat, 2026-10-24: "be
+ *   responsible when making IIIF image server requests"). What a manifest says of a
+ *   service is not trusted to say what its server does.
  * - Without a service, the image itself is used.
  */
 
 export interface ThumbnailSource {
-  /** Ready to use. */
+  /** Ready to use: an image with no service. */
   src?: string;
-  /** Needs `info.json` before it has a URL: a level 0 (or unlabeled) service. */
+  /** An image service: its `info.json` is read before a URL is made (`resolveThumbnail`). */
   service?: string;
+  /**
+   * Only part of the image: shares of it (a target's region), or a region in Image API
+   * syntax in the service's own pixels (a painting's selector), read against its `info.json`.
+   */
+  region?: RegionShare | string;
   /** Used if the service cannot answer. */
   fallback?: string;
 }
@@ -29,16 +40,6 @@ type Json = Record<string, any>;
 
 const asArray = (value: unknown): unknown[] =>
   Array.isArray(value) ? value : value == null ? [] : [value];
-
-/** The compliance level a service declares: 0, 1 or 2, or undefined. */
-export function serviceLevel(service: unknown): number | undefined {
-  for (const candidate of asArray(service) as Json[]) {
-    const profile = JSON.stringify(candidate?.profile ?? "");
-    const match = /level([012])/.exec(profile);
-    if (match) return Number(match[1]);
-  }
-  return undefined;
-}
 
 /** The first image a Canvas paints: a `Choice`'s first item, a SpecificResource's source. */
 function firstPaintedImage(container: Json | undefined): Json | undefined {
@@ -60,65 +61,77 @@ function firstPaintedImage(container: Json | undefined): Json | undefined {
 }
 
 /**
- * An image body (or a bare `{ service }`) as a source of about `size` pixels: all of it,
- * or the `region` of it a painting cuts out (Image API region syntax).
+ * A region in Image API syntax (`x,y,w,h` in the image's pixels, or `pct:`) as shares of
+ * an image this size. Null for one it cannot read (`square`).
+ */
+function regionShare(
+  region: string,
+  { width, height }: { width: number; height: number },
+): RegionShare | null {
+  if (region === "full") return { x: 0, y: 0, width: 1, height: 1 };
+  const match = /^(pct:)?([\d.]+),([\d.]+),([\d.]+),([\d.]+)$/.exec(region);
+  if (!match) return null;
+  const [x, y, w, h] = match.slice(2).map(Number);
+  const [across, down] = match[1] ? [100, 100] : [width, height];
+  return { x: x / across, y: y / down, width: w / across, height: h / down };
+}
+
+/**
+ * An image body (or a bare `{ service }`) as a source: its service, to be read before it
+ * is asked for anything (`resolveThumbnail`), with all of it or the `region` of it a
+ * painting cuts out (Image API region syntax); or, without a service, the image itself.
+ * The image is the fallback, for a service that cannot answer.
  */
 export function imageSource(
   image: Json | undefined,
-  size: number,
   region = "full",
 ): ThumbnailSource | null {
   if (!image) return null;
   const service = findImageServiceId(image.service);
   if (service) {
-    const level = serviceLevel(image.service);
-    if (level === 1 || level === 2) {
-      return { src: `${service}/${region}/!${size},${size}/0/default.jpg` };
-    }
-    return { service, fallback: image.id };
+    return region === "full"
+      ? { service, fallback: image.id }
+      : { service, region, fallback: image.id };
   }
   return image.id ? { src: image.id } : null;
 }
 
-/** Where a resource's thumbnail comes from. Null if it has nothing to show. */
-export function thumbnailSource(
-  resource: unknown,
-  size = 200,
-): ThumbnailSource | null {
+/**
+ * Where a resource's thumbnail comes from, to be sized by `resolveThumbnail`. Null if it
+ * has nothing to show.
+ */
+export function thumbnailSource(resource: unknown): ThumbnailSource | null {
   const value = resource as Json | undefined;
   if (!value) return null;
-  const own = imageSource(
-    asArray(value.thumbnail)[0] as Json | undefined,
-    size,
-  );
-  if (own) return own;
   return (
-    imageSource(firstPaintedImage(value), size) ??
-    imageSource(firstPaintedImage(value.placeholderContainer), size) ??
-    imageSource(firstPaintedImage(value.accompanyingContainer), size)
+    imageSource(asArray(value.thumbnail)[0] as Json | undefined) ??
+    imageSource(firstPaintedImage(value)) ??
+    imageSource(firstPaintedImage(value.placeholderContainer)) ??
+    imageSource(firstPaintedImage(value.accompanyingContainer))
   );
 }
 
 /**
- * A picture to stand in for a Canvas as large as it is drawn, at about `size` pixels: the
- * first image it paints first, then its placeholder's or accompanying Canvas's, and only
- * then its own `thumbnail`, which is often small. Null if it has nothing to show.
+ * A picture to stand in for a Canvas as large as it is drawn, to be sized by
+ * `resolveThumbnail`: the first image it paints first, then its placeholder's or
+ * accompanying Canvas's, and only then its own `thumbnail`, which is often small. Null if
+ * it has nothing to show.
  */
-export function stillSource(
-  resource: unknown,
-  size: number,
-): ThumbnailSource | null {
+export function stillSource(resource: unknown): ThumbnailSource | null {
   const value = resource as Json | undefined;
   if (!value) return null;
   return (
-    imageSource(firstPaintedImage(value), size) ??
-    imageSource(firstPaintedImage(value.placeholderContainer), size) ??
-    imageSource(firstPaintedImage(value.accompanyingContainer), size) ??
-    imageSource(asArray(value.thumbnail)[0] as Json | undefined, size)
+    imageSource(firstPaintedImage(value)) ??
+    imageSource(firstPaintedImage(value.placeholderContainer)) ??
+    imageSource(firstPaintedImage(value.accompanyingContainer)) ??
+    imageSource(asArray(value.thumbnail)[0] as Json | undefined)
   );
 }
 
-/** A level 0 service's URL: the smallest listed size that fills `size`, else the largest. */
+/**
+ * A source's URL at about `size` pixels on its longer side: a service's, made from its own
+ * `info.json` (`sizedImageUrl`), else the fallback, as where the service cannot answer.
+ */
 export async function resolveThumbnail(
   source: ThumbnailSource,
   size = 200,
@@ -128,22 +141,12 @@ export async function resolveThumbnail(
   if (!source.service) return source.fallback;
   try {
     const info = await fetchInfo(source.service, { request });
-    const full = { x: 0, y: 0, width: info.width, height: info.height };
-    if (info.level > 0 || info.sizeByW) {
-      const scale = Math.min(1, size / Math.max(info.width, info.height));
-      return imageRequestUrl(
-        info,
-        full,
-        Math.round(info.width * scale),
-        Math.round(info.height * scale),
-      );
-    }
-    const sizes = [...info.sizes].sort((a, b) => a.width - b.width);
-    const pick =
-      sizes.find((s) => Math.max(s.width, s.height) >= size) ?? sizes.at(-1);
-    return pick
-      ? imageRequestUrl(info, full, pick.width, pick.height)
-      : source.fallback;
+    const share =
+      typeof source.region === "string"
+        ? regionShare(source.region, info)
+        : source.region;
+    if (share === null) return source.fallback;
+    return sizedImageUrl(info, size, share) ?? source.fallback;
   } catch {
     return source.fallback;
   }

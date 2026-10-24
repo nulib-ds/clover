@@ -197,7 +197,7 @@ export type SplitHandleProps = React.HTMLAttributes<HTMLDivElement>;
 /**
  * The bar between two panes, with a grip at its middle. Drag it. Or click or tap it: each
  * click steps the pane on to its next width, from its narrowest to its own size to its
- * widest and round again, so one pointer resizes it without a drag (WCAG 2.5.7). A double
+ * widest and around again, so one pointer resizes it without a drag (WCAG 2.5.7). A double
  * click steps it once. Or focus it and use the arrow keys (Shift for bigger steps, Home
  * and End for the limits). It is a focusable `separator` carrying the sized pane's share
  * of the width, and names itself in a popover on hover and focus.

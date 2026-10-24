@@ -12,6 +12,33 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`Provider` and `Logo`: IIIF's `provider`, and the `logo` on each (Mat, 2026-10-24).**
+  `Clover.Provider` (`<clover-provider>`) lists who provided the resource, each
+  provider's logo and name linked to its homepage. It is a compound part: what it holds is
+  drawn once for each provider, and the parts in it read that provider rather than the
+  resource: `Logo` its logo, `Label` its name, `Homepage`, `SeeAlso` and `Id` its links. A
+  part of your own reads it with `useProvider()`. `Clover.Logo` (`<clover-logo>`) draws a
+  provider's logo, `--clover-logo-height` tall (1.618rem), its `alt` the provider's name.
+  About shows the providers, under "Provider", after the required statement, and the
+  Default template's header and the Document template's toolbar end with each one's logo,
+  linked. Two strings, `aboutProvider` and `logo`, in every locale. Budgets raised for
+  them, about 1.1 kB gzip wherever About is and 0.25 kB where the property parts read a
+  provider: Default's page to 68.1 kB, Document's to 70.4, a layout of the containers to
+  109.2, the four parts' page to 94.5, a Label's to 32.7, a `<clover-viewer>` page to
+  110.1 (its own entry 91.8), `<clover-viewer template="document">` to 116.2, the
+  elements' entry to 5.55 (two more elements), and `styles.css` to 12.76 (with the
+  Scene's cel-shaded disc).
+
+  ```jsx
+  <Clover.Provider>
+    <Clover.Logo />
+  </Clover.Provider>
+  ```
+
+  ```html
+  <clover-provider><clover-logo></clover-logo></clover-provider>
+  ```
+
 - **`Timeline` and `Scene`, Presentation 4's other containers.** `Body` draws a Timeline
   view with `Timeline` and a Scene view with `Scene`, each loaded the first time such a
   view shows, so the Viewer's templates play sound and draw 3D with no prop; a renderer of
@@ -38,9 +65,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     (`.clover-scene-navigation`), over a shade rising from its foot, coming and going as
     Canvas's do: zoom and full screen in a row, ending beside a pad that turns them
     (`.clover-scene-rotate`, a group named "Rotate"): at its center a disc to drag, as the
-    view is dragged (`.clover-scene-rotate-disc`, a ball shaded as a sphere and lit by the
-    accent, more while it is pointed at, held, or the view turns, a globe across it that
-    turns with the models and shows where their front is), round it each way on the side
+    view is dragged (`.clover-scene-rotate-disc`, a ball in the accent, cel-shaded, flat
+    tones with crisp edges, a step lighter and larger while it is pointed at, held, or the
+    view turns, a globe across it that
+    turns with the models and shows where their front is), around it each way on the side
     it turns toward, Clover's caret pointing its way, a press a step and held to keep
     turning, and in its last corner Reset view, as Canvas's. The top right keeps the `i`
     and a host's own controls. `controlButtons` replaces any of its buttons as it does the
@@ -274,7 +302,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
 
 - **`Clover.titled(level, id)`, for a layout of your own.** A title at a heading level
   and the group it heads: to `h6`, the heading (`as`); past it, a `p` with `id`, and
-  `role="group"` with `aria-labelledby` for the element round what it heads, as Clover's
+  `role="group"` with `aria-labelledby` for the element around what it heads, as Clover's
   own parts and templates do (see Changed).
 
   ```jsx
@@ -581,7 +609,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   - Pressing an entry frames it on the Canvas, moving to its Canvas first. An entry has
     no button of its own to see: for the keyboard, a button inside it ("Find on the
     image: …", `annotationsShow`) does the same out of sight, and its focus is drawn
-    round the entry. Hovering an entry or its region on the Canvas highlights both,
+    around the entry. Hovering an entry or its region on the Canvas highlights both,
     through the Root, with no timers or polling.
   - Each set's header is its hide toggle, an eye (`label.clover-hide`: a checkbox,
     checked while hidden, the eye struck through), then a heading only when its
@@ -952,7 +980,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   - `Document`: reads like a PDF viewer. A toolbar (the `Label`, and `Download`),
     `Items` down the left (the Manifest's Canvases as page thumbnails), and the
     pages down one column, as a PDF reader's continuous view: a sheet for each view (a
-    spread is one), fitted whole on the gray ground with `--clover-inset` round it, and
+    spread is one), fitted whole on the gray ground with `--clover-inset` around it, and
     at most the column less twice the inset tall, so the top of the next always shows
     under the one at rest. The column scrolls as any page does (wheel, trackpad, a
     finger, the scrollbar), and at either end the web page scrolls on. The top of the
@@ -989,7 +1017,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
     thumbnails, the page and the Canvas's controls share one edge; the Manifest's
     `Label` is `text-l`, `Items`' pane starts at 13rem (its thumbnails as wide as
     before), and the panel is as wide as `Default`'s floating one. The page keeps the
-    inset clear round it on its gray background.
+    inset clear around it on its gray background.
   - `Gallery`: `Items` as a grid of the views, opening one in a lightbox (a native
     `<dialog>`) with the Canvas and Items' pager.
 
@@ -1168,11 +1196,11 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
 - **`Clover.Items`' hover, selection and focus rings take no room.** They were outlines
   outside each thumbnail, so a carousel cut off the first thumbnail's ring and a list or
   grid's rings reached past the edge of the content. Now they take no room, nothing cuts
-  them, and the thumbnails line up with what is beside them (see the ring round the whole
+  them, and the thumbnails line up with what is beside them (see the ring around the whole
   item, below). A grid's cells now stay square for a tall picture too. The items in
   `Items` are `--clover-space-m` (1rem) apart in every layout (`--clover-items-gap`):
   each is a group, a picture with its caption. In `Default`, `Items` has the region's
-  inset round it (`--clover-inset`, 1.618rem), as its header has. Each Canvas in an item has its own picture with its own
+  inset around it (`--clover-inset`, 1.618rem), as its header has. Each Canvas in an item has its own picture with its own
   label under it: a spread from `behavior: paged` (or the Canvases of a continuous
   Manifest) is one item whose Canvases meet with no gap, labels and all, rather than one
   label "Frontispiece – Title page" across both pages. `ItemModel.label` still joins
@@ -1188,12 +1216,12 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   color for keyboard focus, and the accent at half strength for hover. Focus adds a
   second ring inside the pictures' edge, `secondary` beside `primary`, so it shows on
   any picture. It is an outline
-  on `.clover-items-pictures`, in 4px of room the item keeps round itself
+  on `.clover-items-pictures`, in 4px of room the item keeps around itself
   (`--clover-items-ring-room`) and gives back with a negative margin, so items are still
   `--clover-items-gap` apart and the edge of `Items` never cuts a ring. Only a carousel,
   which scrolls across, keeps that room at its sides: a list or a grid keeps it above and
   below alone, so it never reaches past its own sides, which had put a scrollbar across a
-  scrolling box with no padding round it. Clover now draws focus's inner ring on
+  scrolling box with no padding around it. Clover now draws focus's inner ring on
   `.clover-items-pictures::after`. A stylesheet that styled that pseudo-element should
   style `.clover-items-pictures`'s outline instead, and leave `::after` to Clover. The thumbnails' corners are rounded to match, `--clover-radius` (3px), a
   spread's outer corners only: each picture now clips its image, where only a grid's did.
@@ -1212,7 +1240,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   controls for video and sound are unchanged.
   - At home, a Canvas fills the space it is given edge to edge, and its placeholder the
     same, so the placeholder hands over to it without moving. `--clover-canvas-inset`
-    (default `0px`) keeps a margin clear round the picture at home instead, the region's
+    (default `0px`) keeps a margin clear around the picture at home instead, the region's
     inset for instance:
 
     ```css
@@ -1235,7 +1263,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
     carousel's own scroll drives them (a named scroll timeline); browsers without
     scroll-driven animation show none. Its items snap to the carousel's start rather
     than to the ring's room before them, so a carousel at rest has not scrolled.
-  - `Default`'s thumbnails run on past the end padding round `Items` to the edge of
+  - `Default`'s thumbnails run on past the end padding around `Items` to the edge of
     their `SplitPane`, as the Canvas does, while the labels and `Position` over them
     keep the padding. `Items`' arrows line up with what is above them: the left one `s`
     past the line the labels start on, the right one under the Canvas's controls,
@@ -1318,7 +1346,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   - A `controlButtons` replacement gets `tip` to render inside its button, and
     `aria-keyshortcuts` in `buttonProps`.
   - Rotate left mirrors only its icon, not the whole button, so its `Tip` reads the
-    right way round; on hover its icon turns a little the other way. A stylesheet that
+    right way around; on hover its icon turns a little the other way. A stylesheet that
     relied on `transform: scaleX(-1)` on `[data-button="rotate-left"]` now finds the flip
     on its `svg` (`scale: -1 1`).
   - The Canvas's controls are named by `aria-label` rather than by their icon's SVG
@@ -1522,7 +1550,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
       showing; keyboard focus still does.
     - **Sliders.** The seek bar and the volume are solid and edgeless: the rail 65% white
       where nothing is loaded, 90% where it is, the played span in the accent, the thumb
-      white, with no dark ring round rail or thumb (`--clover-player-track-shadow` is
+      white, with no dark ring around rail or thumb (`--clover-player-track-shadow` is
       `none` by default). The scrim keeps them at 3:1 over the lightest picture (WCAG
       1.4.11): it is at least 60% black up to the seek bar and fades out above it, for
       video and sound alike (sound's own softer scrim is gone). A focused thumb keeps its
@@ -1746,6 +1774,62 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   The API is experimental and may change in any release.
 
 ### Changed
+
+- **Document draws no border around itself (Mat, 2026-10-24).** Its root,
+  `.clover-template-document`, had a 1px `--clover-color-secondary-muted` border and
+  `--clover-radius` corners; it sits in its page as Default does. A page that wants the
+  frame draws it:
+
+  ```css
+  .clover-template-document {
+    border: 1px solid var(--clover-color-secondary-muted);
+    border-radius: var(--clover-radius);
+  }
+  ```
+
+- **Pictures are asked of image servers as their own `info.json` allows, never larger
+  than the image (Mat, 2026-10-24).** Clover asked a service the manifest called level 1
+  or 2 for a size at once (`!w,h`): Document's stills at 1600, thumbnails at 200,
+  Annotations' regions at 52, the Map's overlay at 2048. A server that will not scale an
+  image up left them blank (the University of Washington's answers 403 past 200%, and
+  its manifests call a level 2 server level 1). Now every one reads the service's
+  `info.json` first (cached, shared with the Canvas) and asks for no more than the image
+  or region has (the whole image at its own size, `full` or `max`, where it would be
+  larger), within `maxWidth`, `maxHeight` and `maxArea`, in the size form every level 1
+  server answers (`w,` in 2.x, `w,h` in 3.0), at level 0 only a size it lists, and no
+  region of a server that cannot cut one. The frames menu's and Annotations' pictures
+  appear once `info.json` is read. So that a long strip does not read a thousand, Items'
+  thumbnails read theirs as they come within half a screen (or half their carousel or
+  pane) of view, and Document's stills within a column's height.
+
+  `thumbnailSource(resource)` and `stillSource(resource)` take no size, and a source
+  with an image service no longer has a `src`; `regionSource(canvas, rect)` takes no
+  size and returns such a source, not a URL. Size them with `resolveThumbnail`:
+
+  ```tsx
+  // Before
+  const source = thumbnailSource(manifest, 200);
+  const url = source?.src; // set at once for a level 1 or 2 service
+  const region = regionSource(canvas, rect, 52);
+
+  // Now
+  const source = thumbnailSource(manifest);
+  const url = source && (await resolveThumbnail(source, 200, request));
+  const cut = regionSource(canvas, rect);
+  const region = cut && (await resolveThumbnail(cut, 52, request));
+  ```
+
+- **Document's toolbar has more room above and below its controls (Mat, 2026-10-24):**
+  `--clover-space-m`, was `--clover-space-s`.
+
+- **Document's thumbnails' labels start at their pictures' edge (Mat, 2026-10-24),** as
+  Items' own do, no longer centered. To center them again:
+
+  ```css
+  .clover-template-document-sidebar .clover-items-caption {
+    text-align: center;
+  }
+  ```
 
 - **Named for the components (Mat, 2026-10-23): the Body and its controls.** What was
   "the stage" is the Body, and what came and went over it, "the chrome", is the
@@ -2002,7 +2086,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
 
 - **`Transcript` follows the playing cue within its own box, never the page.** With
   `follow` on, it brought the cue into view with `scrollIntoView`, which scrolls every
-  scrolling box round it, the page too: a reader who had scrolled away while a recording
+  scrolling box around it, the page too: a reader who had scrolled away while a recording
   played was pulled back to the Transcript at each cue. It now scrolls only the box the
   Transcript scrolls in, as `Annotations` does; with none (a Transcript in the page's
   flow), the page is left where the reader put it. Nothing to do.
@@ -2164,15 +2248,15 @@ are in the repository's `ACCESSIBILITY.md`.
     `scrolls` for a popover of your own that may outgrow its room; give it a
     `max-height` and `overflow-y: auto`.
 
-  - Hotspots are outlined in two tones, `--clover-color-primary` round
+  - Hotspots are outlined in two tones, `--clover-color-primary` around
     `--clover-color-secondary`. Hovered, focused or picked, an accent band runs between
-    them; nothing covers what it marks, and the picture round a rectangle dims a little
+    them; nothing covers what it marks, and the picture around a rectangle dims a little
     (as 3.x's did, more lightly). Another hotspot beneath it shows none of its lines where the active one
     lies (its rectangle, or its shape's own outline), as a vector editor hides what a
     shape covers; those inside it and over it stay whole. It is a `mask-image` from
     `--clover-annotation-mask`, set inline on the hotspots beneath; a rule of yours that
     sets `mask` on `.clover-canvas-annotation` replaces it. In forced colors a rectangle has a
-    `CanvasText` edge round a `Canvas` line, and an active one a `Highlight` ring.
+    `CanvasText` edge around a `Canvas` line, and an active one a `Highlight` ring.
   - Hotspots are in the DOM in the annotations' order, so Tab and screen readers follow
     the menu's order, not size. Stacking is a `z-index` from `--clover-annotation-depth`,
     set inline: smaller over larger, the active one over the rest, the later of two on
@@ -2399,7 +2483,7 @@ are in the repository's `ACCESSIBILITY.md`.
 
 - **Split.**
   - A click or tap on a `SplitHandle` steps its sized pane from its narrowest to its own
-    `size` to its widest, and round again. A press is a click until it moves 4px (8px
+    `size` to its widest, and around again. A press is a click until it moves 4px (8px
     for a finger); past that it is a drag. `event.preventDefault()` in your `onClick`
     skips the step.
   - A double click no longer resets the pane: it steps once, and its second click, which

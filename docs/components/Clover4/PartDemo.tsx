@@ -16,6 +16,7 @@ import { useMock } from "docs/lib/useMock";
  * <PartDemo part="Summary" resource="paged" />
  * <PartDemo part="Label" props={{ of: "canvas", as: "p" }} body />
  * <PartDemo parts={[{ part: "Thumbnail" }, { part: "Label" }]} row />
+ * <PartDemo part="Provider" holds={[{ part: "Logo" }]} />
  * ```
  */
 
@@ -34,12 +35,14 @@ const PARTS = [
   "Id",
   "Items",
   "Label",
+  "Logo",
   "Metadata",
   "Next",
   "Panel",
   "PartOf",
   "Position",
   "Previous",
+  "Provider",
   "Rendering",
   "RequiredStatement",
   "Rights",
@@ -54,10 +57,12 @@ const PARTS = [
 
 export type PartName = (typeof PARTS)[number];
 
-/** A part to show and its props, plain values only. */
+/** A part to show and its props, plain values only, and the parts it holds. */
 interface Shown {
   part: PartName;
   props?: Record<string, unknown>;
+  /** The parts a compound part holds, drawn inside it (`Provider`'s `Logo`). */
+  holds?: Shown[];
 }
 
 interface PartDemoProps {
@@ -65,12 +70,14 @@ interface PartDemoProps {
   part?: PartName;
   /** Its props: plain values only. */
   props?: Record<string, unknown>;
+  /** The parts it holds, for a compound part (`Provider` holding a `Logo`). */
+  holds?: Shown[];
   /** Several parts in the one Root, in order, as a layout places them: for `part`. */
   parts?: Shown[];
   /** The parts on one line, centered across it, rather than stacked. */
   row?: boolean;
   /**
-   * A box of this height round the parts, which scrolls: as a layout scrolls a tall part
+   * A box of this height around the parts, which scrolls: as a layout scrolls a tall part
    * (a Panel), and as its code shows it.
    */
   box?: string;
@@ -106,12 +113,17 @@ const Live = dynamic(
         height: number;
         rootProps?: Record<string, unknown>;
       }) {
-        const parts = shown.map(({ part, props }, index) => {
+        const draw = ({ part, props, holds }: Shown, index: number) => {
           const Part = clover[part] as React.ComponentType<
             Record<string, unknown>
           >;
-          return <Part key={`${part}-${index}`} {...props} />;
-        });
+          return (
+            <Part key={`${part}-${index}`} {...props}>
+              {holds?.map(draw)}
+            </Part>
+          );
+        };
+        const parts = shown.map(draw);
         return (
           <clover.Root
             {...rootProps}
@@ -145,6 +157,7 @@ const Live = dynamic(
 export function PartDemo({
   part,
   props = {},
+  holds,
   parts,
   row = false,
   box,
@@ -176,7 +189,7 @@ export function PartDemo({
     <div className="docs-part-demo">
       {ready && (
         <Live
-          shown={parts ?? (part ? [{ part, props }] : [])}
+          shown={parts ?? (part ? [{ part, props, holds }] : [])}
           row={row}
           box={box}
           iiifContent={url}

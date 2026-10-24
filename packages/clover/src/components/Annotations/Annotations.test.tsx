@@ -624,19 +624,43 @@ describe("Annotations, every Canvas's (scope all)", () => {
         },
       ],
     };
+    // Asked as the server's own info.json says it can answer, never larger than the region.
+    const fetch = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            "@context": "http://iiif.io/api/image/3/context.json",
+            id: service,
+            type: "ImageService3",
+            protocol: "http://iiif.io/api/image",
+            profile: "level1",
+            width: 1000,
+            height: 1000,
+          }),
+        ),
+    );
     const { container } = render(
-      <Clover.Root iiifContent={pictured}>
+      <Clover.Root iiifContent={pictured} request={{ fetch }}>
         <Clover.Annotations scope="all" />
       </Clover.Root>,
     );
     await screen.findByText("Boxed");
-    const picture = container.querySelector("img.clover-annotations-thumbnail");
-    expect(picture).toHaveAttribute(
-      "src",
-      `${service}/100,200,300,400/!52,52/0/default.jpg`,
+    await waitFor(() =>
+      expect(
+        container.querySelector("img.clover-annotations-thumbnail"),
+      ).toHaveAttribute(
+        "src",
+        `${service}/100,200,300,400/39,52/0/default.jpg`,
+      ),
+    );
+    expect(fetch).toHaveBeenCalledWith(
+      `${service}/info.json`,
+      expect.anything(),
     );
     // Decorative: the entry's text names it.
-    expect(picture).toHaveAttribute("alt", "");
+    expect(
+      container.querySelector("img.clover-annotations-thumbnail"),
+    ).toHaveAttribute("alt", "");
   });
 
   it("lists a Manifest of one Canvas by layer alone, with no Canvas to name", async () => {

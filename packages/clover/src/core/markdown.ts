@@ -4,7 +4,7 @@
  * (`ul`, `ol`, nested by indent), headings, and footnotes (`[^1]` and `[^1]: …`). Not a
  * full CommonMark parser — enough for annotation text, and small.
  *
- * As in CommonMark, a heading needs no blank line round it, a list may follow a line of
+ * As in CommonMark, a heading needs no blank line around it, a list may follow a line of
  * text directly (a numbered one only from 1, so a line that opens with a year stays
  * text), and a line of text after a list item carries the item on.
  *
@@ -140,7 +140,7 @@ function list(lines: string[], notes: Map<string, number>): string {
   }
 
   let html = "";
-  // The lists open round the item, outermost first, each at its first item's indent.
+  // The lists open around the item, outermost first, each at its first item's indent.
   const open: Array<{ indent: number; tag: "ul" | "ol" }> = [];
   const close = () => (html += `</li></${open.pop()!.tag}>`);
   for (const item of items) {
@@ -181,7 +181,7 @@ export function markdownToHtml(
   const base = Math.max(headingLevel, 1);
   // The `#` depths of the headings a later one may sit under, the outermost first.
   const above: number[] = [];
-  // The `#` depths of the groups open round headings past 6, each closed by a heading as
+  // The `#` depths of the groups open around headings past 6, each closed by a heading as
   // shallow, or at the end.
   const open: number[] = [];
 

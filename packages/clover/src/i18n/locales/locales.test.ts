@@ -67,10 +67,13 @@ const SAME_AS_ENGLISH: Record<string, string[]> = {
     "informationPanelTabsCollection",
     "playerPause",
     "playerVolume",
+    // A provider's logo, as these languages write it.
+    "logo",
   ],
-  nb: ["playerPause"],
-  nn: ["playerPause"],
-  no: ["playerPause"],
+  fi: ["logo"],
+  nb: ["playerPause", "logo"],
+  nn: ["playerPause", "logo"],
+  no: ["playerPause", "logo"],
   pt: ["playerVolume"],
 };
 

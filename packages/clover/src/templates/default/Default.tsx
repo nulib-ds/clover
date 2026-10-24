@@ -208,6 +208,13 @@ export function Default({
                 className="clover-template-default-title"
                 {...title.title}
               />
+              {/*
+               * Who provided it: each provider's logo at the line's end, linked to its
+               * homepage and named by the provider (Mat, 2026-10-24).
+               */}
+              <Clover.Provider className="clover-template-default-provider">
+                <Clover.Logo />
+              </Clover.Provider>
             </header>
           )}
           {/* The Body shows the loading; announced here, nothing moves. */}

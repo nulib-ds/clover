@@ -8,7 +8,7 @@ reader is ("3 / 17"). While they show, it sits on the bar between them and the p
 them but for its far rounded end, so the thumbnails have their pane's whole height; put
 away, it waits over the page's top left, level with the Canvas's controls. The bar widens
 or narrows them (8rem to 24rem; drag it, click or tap it to step from 8rem to 13rem to
-24rem and round again, or use the arrow keys on it), and the width is remembered. A
+24rem and around again, or use the arrow keys on it), and the width is remembered. A
 document of one page has no page thumbnails, bar or toggle: the page takes the whole
 width.
 

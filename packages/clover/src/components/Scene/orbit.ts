@@ -1,5 +1,5 @@
 /**
- * The Scene's camera, as the reader moves it: on a sphere round the models' center,
+ * The Scene's camera, as the reader moves it: on a sphere around the models' center,
  * turned about the up axis (`theta`), tilted from it (`phi`), at a `distance`. Pure, so
  * every way of moving it (a drag, a pinch, a key, a control) goes through the same steps,
  * each clamped the same way.
@@ -18,7 +18,7 @@ export interface Orbit {
   distance: number;
 }
 
-/** The models' bounding sphere, which the camera turns round and frames. */
+/** The models' bounding sphere, which the camera turns around and frames. */
 export interface Bounds {
   center: [number, number, number];
   radius: number;
@@ -31,7 +31,7 @@ const HOME_PHI = (75 * Math.PI) / 180;
 /** Never quite straight down or up, where turning about the up axis would spin the view. */
 const MIN_PHI = (5 * Math.PI) / 180;
 const MAX_PHI = Math.PI - MIN_PHI;
-/** Room left round the models at home. */
+/** Room left around the models at home. */
 const MARGIN = 1.1;
 /** How near the camera comes, and how far it goes, as multiples of home's distance. */
 const NEAREST = 0.35;
@@ -75,7 +75,7 @@ export function zoomed(orbit: Orbit, factor: number, home: Orbit): Orbit {
   };
 }
 
-/** The camera's position for an orbit round `center`. */
+/** The camera's position for an orbit around `center`. */
 export function cameraPosition(
   orbit: Orbit,
   center: [number, number, number],

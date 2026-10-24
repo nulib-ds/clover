@@ -295,7 +295,7 @@ describe("The Split, as elements", () => {
       panel: 741,
     });
 
-    // A click steps round: from its widest to its narrowest, then its own size again.
+    // A click steps around: from its widest to its narrowest, then its own size again.
     fireEvent.click(handle);
     await waitFor(() => expect(sizeOf(panel)).toBe("224px"));
     fireEvent.click(handle);

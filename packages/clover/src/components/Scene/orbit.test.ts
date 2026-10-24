@@ -26,7 +26,7 @@ describe("orbit", () => {
     expect(fitDistance(1, 2)).toBeCloseTo(fitDistance(1, 1));
   });
 
-  it("turns all the way round, but never tilts over the top or under", () => {
+  it("turns all the way around, but never tilts over the top or under", () => {
     const home = homeOrbit(bounds);
     expect(turned(home, Math.PI * 2, 0).theta).toBeCloseTo(Math.PI * 2);
     expect(sameOrbit(turned(home, Math.PI * 2, 0), home)).toBe(true);

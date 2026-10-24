@@ -15,7 +15,7 @@
   --clover-items-size: 10rem;
   /* Each item is a group (a picture and its caption): `m` apart, a step over its insides. */
   --clover-items-gap: var(--clover-space-m);
-  /* Room round each item's pictures for their ring: 1px clear, then the ring, 3px. */
+  /* Room around each item's pictures for their ring: 1px clear, then the ring, 3px. */
   --clover-items-ring-room: 4px;
   --clover-items-lines: 3;
   color: var(--clover-color-primary, #1a1d1e);
@@ -59,8 +59,8 @@
 }
 
 /*
- * The ring's room, given back: items keep it round themselves, and the viewport keeps it
- * round them, so a strip's edge never cuts a ring and the pictures still line up with
+ * The ring's room, given back: items keep it around themselves, and the viewport keeps it
+ * around them, so a strip's edge never cuts a ring and the pictures still line up with
  * what is beside them. Items snap to that same edge (`scroll-padding`), not to the
  * viewport's own, so a track at rest has not scrolled by the room.
  */
@@ -177,7 +177,7 @@
 }
 
 /*
- * Room for the ring round each item's pictures (below), kept round the item and given
+ * Room for the ring around each item's pictures (below), kept around the item and given
  * back with a negative margin, so it takes no space: the items stay
  * `--clover-items-gap` apart, and a strip's edge never cuts a ring.
  */

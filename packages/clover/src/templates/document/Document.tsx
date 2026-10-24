@@ -281,6 +281,13 @@ function DocumentLayout({
           {...title.title}
         />
         {download && <Clover.Download headingLevel={below(headingLevel)} />}
+        {/*
+         * Who provided it: each provider's logo at the toolbar's end, linked to its
+         * homepage and named by the provider (Mat, 2026-10-24).
+         */}
+        <Clover.Provider className="clover-template-document-provider">
+          <Clover.Logo />
+        </Clover.Provider>
       </header>
       {/* The Body shows the loading; announced here, nothing moves. */}
       <Clover.Status loading={false} />

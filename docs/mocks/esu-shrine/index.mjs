@@ -74,7 +74,7 @@ export const TURN = -(source.setups[0].navigation.orbit.orbit[1] - 360);
 /**
  * The first of the object page's photographs of the shrine ("Esu Shrine_1"), at the size
  * the page links it. Not the Voyager scene's renderings of the model: each shows its
- * editor's guides, a box drawn round the model.
+ * editor's guides, a box drawn around the model.
  */
 const PHOTO = {
   id: "https://sites.northwestern.edu/materialhistorylab/files/2025/10/DSC_4700-602x1024.jpg",

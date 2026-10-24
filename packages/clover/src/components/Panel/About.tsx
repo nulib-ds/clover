@@ -15,6 +15,7 @@ import {
   Summary,
 } from "../Primitives/Primitives";
 import { DownloadGroups, useDownloads } from "../Download/Download";
+import { Provider } from "../Provider/Provider";
 import { titled } from "../../ui/heading";
 
 export interface AboutProps extends React.HTMLAttributes<HTMLElement> {
@@ -37,8 +38,9 @@ const PartOfManifest = lazy(() => import("./PartOfManifest"));
 
 /**
  * Everything the Manifest says about itself, in the order 3.x's About tab shows it:
- * what a Canvas shown on its own is part of, then summary, metadata, required statement, rights, homepage, see also, downloads, and the
- * Manifest's own address. Its thumbnail is the layout's to place (`Default` puts it in
+ * what a Canvas shown on its own is part of, then summary, metadata, required statement,
+ * provider (its logo and name, linked to its homepage), rights, homepage, see also,
+ * downloads, and the Manifest's own address. Its thumbnail is the layout's to place (`Default` puts it in
  * its header, beside the title). Each part renders only if the Manifest has
  * it. The downloads are Download's: the `rendering` of the page in view ("This page")
  * and of the Manifest ("All pages").
@@ -119,6 +121,7 @@ export function About({
       <Summary className="clover-about-summary" />
       <Metadata className="clover-about-metadata" />
       <RequiredStatement className="clover-about-metadata" />
+      {section("aboutProvider", hasAny("provider"), <Provider />)}
       {section("aboutRights", manifest.rights, <Rights />)}
       {section("aboutHomepage", hasAny("homepage"), <Homepage />)}
       {section("aboutSeeAlso", hasAny("seeAlso"), <SeeAlso />)}

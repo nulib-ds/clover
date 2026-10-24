@@ -120,7 +120,7 @@
 }
 
 /*
- * More room round the sidebar's list, and over the page beside it, where the window is
+ * More room around the sidebar's list, and over the page beside it, where the window is
  * wide (Mat, 2026-10-23: "more breathing is good"; "padding tops should always match"),
  * tightening as it narrows: Nextra's 1rem where the sidebar first shows, 48rem wide,
  * growing to `l` at the list's start and `xl` over the list and the page alike at 90rem.
@@ -379,7 +379,7 @@ html:not(.dark) .nextra-callout :not(pre) > code {
  * The footer (`docs/components/SiteFooter.tsx`), in the site's own materials: the
  * page's white (`--color-background`, as the navbar's), set off by white space alone, no
  * line over it (Mat, 2026-10-21), the page's text and muted text, links in the text accent and underlined (WCAG 1.4.1), spaces on the
- * golden scale. Nextra draws the band round it; these take it over, matched by Nextra's
+ * golden scale. Nextra draws the band around it; these take it over, matched by Nextra's
  * own classes, whole (its utilities are layered, so these outrank them). Its appearance
  * switch is the site's own, in its row of links (`ThemeSwitch.tsx`).
  */
@@ -774,7 +774,7 @@ nav.nextra-toc:empty ~ article {
 /*
  * The header's switch for the docs' code, React or Web Components (`CodeSwitch.tsx`),
  * drawn as the Transcript's EN | TXT is (`Transcript.css`; Mat, 2026-10-21): pills with
- * no frame round them, the text small and semibold, muted until chosen. The chosen one in
+ * no frame around them, the text small and semibold, muted until chosen. The chosen one in
  * the Viewer's controls' dark fill, its text white, not the accent (Mat, 2026-10-21: the
  * accent drew the eye from the page), and light on a dark page, where the dark would
  * vanish (16:1 against the page and for its text; WCAG 1.4.11, 1.4.3); under the pointer

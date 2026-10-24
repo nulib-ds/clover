@@ -23,7 +23,7 @@ export const PUBLIC_BASE = "https://nulib-ds.github.io/clover/mocks/tagging";
 
 /**
  * The words printed on the plate, top to bottom and left to right, each with the box
- * round it on the Canvas: x, y, width, height.
+ * around it on the Canvas: x, y, width, height.
  */
 export const TAGS = [
   ["Plate 1", [210, 121, 134, 45]],

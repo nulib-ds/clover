@@ -160,7 +160,7 @@ export function createEngine(
 }
 
 /**
- * A model, placed as the Scene says: its transforms in the order given, each round what
+ * A model, placed as the Scene says: its transforms in the order given, each around what
  * came before, then moved to its point. A turn is about the Scene's own axes, `x` first,
  * then `y`, then `z` (Presentation 4), which is three.js's `ZYX`.
  */

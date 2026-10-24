@@ -13,7 +13,7 @@
 export type Plain = string | number | boolean;
 
 /**
- * Where a knob's prop is written: on the part, on the `Root` round it, or on its box; or
+ * Where a knob's prop is written: on the part, on the `Root` around it, or on its box; or
  * in the code alone, its value read by the example itself (the Viewer's template, which
  * picks the code shown).
  */
@@ -279,7 +279,7 @@ function written(attribute: CodeAttr, context: Context) {
 
 /**
  * A knob's value, as runs: the value itself, the knob's to change, and what its flavor
- * writes round it, on a prop or in a style. In HTML's style it is CSS, unquoted.
+ * writes around it, on a prop or in a style. In HTML's style it is CSS, unquoted.
  */
 function knobTokens(
   id: string,

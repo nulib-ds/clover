@@ -64,6 +64,11 @@ const LOADERS: Record<string, LoadPart> = {
   "clover-rendering": primitive("Rendering"),
   "clover-part-of": primitive("PartOf"),
   "clover-id": primitive("Id"),
+  // A provider reads its <clover-logo>s, which draw nothing there (`elements/provider.tsx`).
+  "clover-provider": () =>
+    import("./elements/provider").then((module) => module.ProviderElement),
+  "clover-logo": () =>
+    import("./elements/logo").then((module) => module.LogoElement),
   "clover-value": primitive("Value"),
   "clover-about": part(() => import("../components/Panel/About"), "About"),
   "clover-annotations": part(

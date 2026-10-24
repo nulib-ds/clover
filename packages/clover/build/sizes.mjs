@@ -171,6 +171,8 @@ const PARTS = [
   "Rendering",
   "PartOf",
   "Id",
+  "Provider",
+  "Logo",
 ];
 
 /*

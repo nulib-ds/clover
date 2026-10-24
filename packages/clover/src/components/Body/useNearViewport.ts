@@ -11,10 +11,15 @@ export const NEAR_VIEWPORT_MARGIN = "50%";
  * until a reader could see it, so a page of many stays cheap until scrolled. Anything
  * hidden (`display: none`, a closed tab) never intersects, so it waits until shown.
  * Without IntersectionObserver, everything loads at once, as before.
+ *
+ * `root` measures it against a box that scrolls it instead (a carousel), the margin ahead
+ * of that box's edges: against the screen, the box clips what it holds, and its next
+ * items would come near only as they scroll into sight.
  */
 export function useNearViewport(
   element: Element | null,
   rootMargin = NEAR_VIEWPORT_MARGIN,
+  root: Element | null = null,
 ): boolean {
   const [near, setNear] = useState(
     () => typeof IntersectionObserver === "undefined",
@@ -29,11 +34,11 @@ export function useNearViewport(
           observer.disconnect();
         }
       },
-      { rootMargin },
+      { root, rootMargin },
     );
     observer.observe(element);
     return () => observer.disconnect();
-  }, [element, near, rootMargin]);
+  }, [element, near, rootMargin, root]);
 
   return near;
 }

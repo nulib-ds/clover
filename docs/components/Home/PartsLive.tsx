@@ -1,5 +1,5 @@
 import * as Clover from "@nulib/clover";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import React, {
   Suspense,
   lazy,
@@ -22,8 +22,6 @@ import { useMapWorker } from "docs/lib/map-worker";
 import { isScrolling } from "docs/lib/scrolling";
 import { StoryLines } from "docs/components/Home/StoryLines";
 import { AccessibilityTree } from "docs/components/Home/AccessibilityTree";
-import { SectionIntro } from "docs/components/Home/SectionIntro";
-import { partCount } from "docs/components/Home/counts";
 import { elementLoads, partLoads } from "docs/lib/sizes";
 import { Choice, Scrub, Switch } from "docs/components/CodeValues";
 import { Flavored, PartName, elementTag } from "docs/components/Flavored";
@@ -64,6 +62,7 @@ type PartKey =
   | "seeAlso"
   | "partOf"
   | "id"
+  | "provider"
   | "annotations"
   | "map"
   | "contents"
@@ -116,12 +115,19 @@ const SHOWN_IN: Partial<Record<PartKey, string>> = {
   homepage: "collection",
   seeAlso: "collection",
   partOf: "collection",
+  provider: "catalog",
   items: "catalog",
   annotations: "print",
   map: "map",
   contents: "catalog",
   transcript: "footage",
 };
+
+/*
+ * The fewest parts folded where the resource has no Collection to fold them from: fewer
+ * fit in about the fold's own height, so it would hide next to nothing.
+ */
+const FOLD_FROM = 3;
 
 /** Where each part is documented: its own page, under Components. */
 const DOCS: Record<string, string> = {
@@ -135,6 +141,8 @@ const DOCS: Record<string, string> = {
   Homepage: "/docs/primitives/homepage",
   SeeAlso: "/docs/primitives/see-also",
   Id: "/docs/primitives/id",
+  Provider: "/docs/primitives/provider",
+  Logo: "/docs/primitives/logo",
   Rights: "/docs/primitives/rights",
   RequiredStatement: "/docs/primitives/required-statement",
   Annotations: "/docs/annotations",
@@ -167,9 +175,17 @@ export default function PartsLive({
   resource: string;
   onTry: (key: string) => void;
 }) {
+  // Every part shown, once the reader asks: kept over the Root, so another resource keeps it.
+  const [all, setAll] = useState(false);
+  const showAll = useCallback(() => setAll(true), []);
   return (
     <Clover.Root iiifContent={resource} key={resource} className={styles.root}>
-      <Exploded resource={resource} onTry={onTry} />
+      <Exploded
+        resource={resource}
+        onTry={onTry}
+        all={all}
+        onShowAll={showAll}
+      />
     </Clover.Root>
   );
 }
@@ -177,9 +193,14 @@ export default function PartsLive({
 function Exploded({
   resource,
   onTry,
+  all,
+  onShowAll,
 }: {
   resource: string;
   onTry: (key: string) => void;
+  /** Whether every part shows, those after the Collection's tile too. */
+  all: boolean;
+  onShowAll: () => void;
 }) {
   const manifest = Clover.useManifest() as Json | null;
   const { canvases, views } = Clover.useSequence();
@@ -303,7 +324,15 @@ function Exploded({
     const partOf = first(asArray(manifest.partOf)[0]?.label);
     // Items moves between views, so a single view gives it nothing.
     const several = views.length > 1;
+    // Annotations and Contents share a row; either alone takes it whole.
+    const annotated = notes.length > 0;
+    const structured = asArray(manifest.structures).length > 0;
 
+    /*
+     * In this order (Mat, 2026-10-23): the parts the example viewer is made of, then what
+     * a record states, the lists beside each other, and the Collection it is part of,
+     * folded from halfway through with the rest until the reader shows them all (`folded`).
+     */
     return [
       {
         key: "label",
@@ -363,6 +392,35 @@ function Exploded({
         body: <Clover.Metadata className={styles.fields} />,
       },
       {
+        key: "requiredStatement",
+        name: "RequiredStatement",
+        reads: "requiredStatement",
+        present: Boolean(first(manifest.requiredStatement?.value)),
+        span: 6,
+        href: DOCS.RequiredStatement,
+        body: <Clover.RequiredStatement className={styles.statement} />,
+      },
+      {
+        key: "annotations",
+        name: "Annotations",
+        reads: "annotations",
+        present: annotated,
+        // Beside Contents, the list beside the list (Mat, 2026-10-21).
+        span: structured ? 3 : 6,
+        href: DOCS.Annotations,
+        // Its pages' titles one below the tile's.
+        body: <Clover.Annotations headingLevel={4} className={styles.scroll} />,
+      },
+      {
+        key: "contents",
+        name: "Contents",
+        reads: "structures",
+        present: structured,
+        span: annotated ? 3 : 6,
+        href: DOCS.Contents,
+        body: <Clover.Contents className={styles.scroll} />,
+      },
+      {
         key: "partOf",
         name: "Collection",
         reads: "partOf",
@@ -414,33 +472,14 @@ function Exploded({
         body: <Clover.Rights className={styles.small} />,
       },
       {
-        key: "requiredStatement",
-        name: "RequiredStatement",
-        reads: "requiredStatement",
-        present: Boolean(first(manifest.requiredStatement?.value)),
-        span: 6,
-        href: DOCS.RequiredStatement,
-        body: <Clover.RequiredStatement className={styles.statement} />,
-      },
-      {
-        key: "annotations",
-        name: "Annotations",
-        reads: "annotations",
-        present: notes.length > 0,
-        // Beside Contents, the list beside the list (Mat, 2026-10-21).
+        key: "provider",
+        name: "Provider",
+        reads: "provider",
+        present: asArray(manifest.provider).length > 0,
         span: 3,
-        href: DOCS.Annotations,
-        // Its pages' titles one below the tile's.
-        body: <Clover.Annotations headingLevel={4} className={styles.scroll} />,
-      },
-      {
-        key: "contents",
-        name: "Contents",
-        reads: "structures",
-        present: asArray(manifest.structures).length > 0,
-        span: 3,
-        href: DOCS.Contents,
-        body: <Clover.Contents className={styles.scroll} />,
+        href: DOCS.Provider,
+        // Its logo and its name, linked to its homepage, as About shows it.
+        body: <Clover.Provider />,
       },
       {
         key: "map",
@@ -719,21 +758,46 @@ function Exploded({
   }, [disarmList]);
   const shown = useMemo(() => parts.filter((part) => part.present), [parts]);
   const missing = useMemo(() => parts.filter((part) => !part.present), [parts]);
-  // The first tile past the viewer's own parts: "IIIF building blocks." goes over it, the Collection
-  // among those under it (Mat, 2026-10-21).
-  const firstMore = shown.find(
-    (part) =>
-      !(
-        [
-          "label",
-          "thumbnail",
-          "body",
-          "items",
-          "summary",
-          "metadata",
-        ] as PartKey[]
-      ).includes(part.key),
-  )?.key;
+  /*
+   * The Collection's tile and the parts after it, folded under a fade until the reader
+   * shows them all (Mat, 2026-10-23: "Collection --> Nothing"), so the stories after them
+   * come sooner.
+   */
+  const folded = useMemo(
+    () =>
+      new Set(
+        parts
+          .slice(parts.findIndex((part) => part.key === "partOf"))
+          .map((part) => part.key),
+      ),
+    [parts],
+  );
+  const after = shown.filter((part) => folded.has(part.key));
+  const lead = after[0]?.key;
+  const fold = !all && (lead === "partOf" || after.length >= FOLD_FROM);
+  const rest = useRef<HTMLDivElement>(null);
+  const restId = useId();
+  /*
+   * Folded, it ends halfway through its first tile, the Collection's (Mat, 2026-10-23:
+   * "fade should occur half way through collections"), the fade centered there: written
+   * on it as the tile's height changes, never through React's state.
+   */
+  useLayoutEffect(() => {
+    const node = rest.current;
+    const first = node?.firstElementChild;
+    if (!fold || !node || !(first instanceof HTMLElement)) return;
+    const measure = () =>
+      node.style.setProperty("--fold-at", `${first.offsetHeight / 2}px`);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(first);
+    return () => observer.disconnect();
+  }, [fold, lead]);
+  // Shown, focus goes on to the first of them, as the button goes (WCAG 2.4.3).
+  const showAll = () => {
+    flushSync(onShowAll);
+    rest.current?.querySelector<HTMLElement>("a[href]")?.focus();
+  };
   // The parts the example viewer shows, in the order its code gives them.
   const order = useMemo(
     () =>
@@ -791,20 +855,20 @@ function Exploded({
   );
 
   // The tiles, drawn again only for what they show, or a pointer coming or going.
-  const tiles = useMemo(
-    () =>
-      shown.map((part, index) => (
-        <React.Fragment key={part.key}>
-          {/*
-           * After the parts the viewer is made of (and the Collection it belongs to), a
-           * line: the rest are more of the same kit, and how many there are to use.
-           */}
-          {part.key === firstMore && index > 0 && <More />}
-          <Tile part={part} on={pointed === part.key} onPoint={setPointed} />
-        </React.Fragment>
-      )),
-    [shown, firstMore, pointed],
-  );
+  const tiles = useMemo(() => {
+    const tile = (part: PartSpec) => (
+      <Tile
+        key={part.key}
+        part={part}
+        on={pointed === part.key}
+        onPoint={setPointed}
+      />
+    );
+    return {
+      through: shown.filter((part) => !folded.has(part.key)).map(tile),
+      after: shown.filter((part) => folded.has(part.key)).map(tile),
+    };
+  }, [shown, folded, pointed]);
 
   if (!manifest) {
     return (
@@ -971,39 +1035,74 @@ function Exploded({
         onPointerDown={armList}
         onPointerLeave={disarmList}
       >
-        {tiles}
+        {/*
+         * Under "…or build your own.", the choice's half for a layout of one's own,
+         * which heads them (`Playground.tsx`; Mat, 2026-10-23).
+         */}
+        {tiles.through}
+        {/*
+         * Folded, the Collection's tile and the rest fade out, a preview only, inert, so
+         * nothing out of sight takes focus or is read (WCAG 2.4.11), until "Show all":
+         * the parts this resource gives nothing to among them, at their end (Mat,
+         * 2026-10-24: "place this inside of the Show All expanded content").
+         */}
+        {(tiles.after.length > 0 || missing.length > 0) && (
+          <div
+            ref={rest}
+            id={restId}
+            className={styles.rest}
+            data-folded={fold || undefined}
+            inert={fold}
+          >
+            {tiles.after}
+            {missing.length > 0 && (
+              <div className={styles.missing}>
+                <p className={styles.missingTitle}>
+                  Nothing for these in this resource
+                </p>
+                <ul className={styles.chips}>
+                  {missing.map((part) => {
+                    const elsewhere = SHOWN_IN[part.key];
+                    const name = elsewhere && resourceByKey(elsewhere)?.name;
+                    return (
+                      <li key={part.key} className={styles.chip}>
+                        <Link href={part.href} className={styles.chipName}>
+                          <PartName name={part.name} />
+                        </Link>
+                        <span className={styles.reads}>{part.reads}</span>
+                        {name && (
+                          <button
+                            type="button"
+                            className={styles.try}
+                            onClick={() => {
+                              // A part folded here shows in the resource that has it.
+                              if (folded.has(part.key)) onShowAll();
+                              onTry(elsewhere);
+                            }}
+                          >
+                            {name} →
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+        {fold && (
+          <button
+            type="button"
+            className={`cta-outline ${styles.showAll}`}
+            aria-expanded="false"
+            aria-controls={restId}
+            onClick={showAll}
+          >
+            Show all<span className={styles.visuallyHidden}> parts</span>
+          </button>
+        )}
       </div>
-
-      {missing.length > 0 && (
-        <div className={styles.missing}>
-          <p className={styles.missingTitle}>
-            Nothing for these in this resource
-          </p>
-          <ul className={styles.chips}>
-            {missing.map((part) => {
-              const elsewhere = SHOWN_IN[part.key];
-              const name = elsewhere && resourceByKey(elsewhere)?.name;
-              return (
-                <li key={part.key} className={styles.chip}>
-                  <Link href={part.href} className={styles.chipName}>
-                    <PartName name={part.name} />
-                  </Link>
-                  <span className={styles.reads}>{part.reads}</span>
-                  {name && (
-                    <button
-                      type="button"
-                      className={styles.try}
-                      onClick={() => onTry(elsewhere)}
-                    >
-                      {name} →
-                    </button>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
     </>
   );
 }
@@ -1049,7 +1148,10 @@ const Tile = React.memo(function Tile({
       data-tile={part.key}
       data-on={on || undefined}
       {...pointerTo(part.key, onPoint)}
-      onFocus={() => onPoint(part.key)}
+      // Lit by focus where focus shows: not a press's, nor "Show all" moving it after one.
+      onFocus={(event) => {
+        if (event.target.matches(":focus-visible")) onPoint(part.key);
+      }}
       onBlur={() => onPoint(null)}
     >
       {/*
@@ -1072,24 +1174,6 @@ const Tile = React.memo(function Tile({
     </article>
   );
 });
-
-/**
- * A line across the tiles, between the parts the example viewer is made of and the rest:
- * how many there are to build with, each documented. Its figures are counted from the
- * docs' Components menu (`counts.ts`). Words to be worked on (Mat, 2026-10-20).
- */
-function More() {
-  return (
-    <SectionIntro
-      as="h3"
-      className={styles.more}
-      // Named for what they are, as LEGO's pieces are, and how they go together (Mat, 2026-10-22).
-      title="IIIF building blocks."
-      note={`${partCount} pieces that snap together any way you like, each one made for IIIF.`}
-      cta={{ href: "/docs/body", label: "See them all" }}
-    />
-  );
-}
 
 /**
  * "Why Clover"'s Coverage story, read on the viewer's other side: a Cookbook recipe in a

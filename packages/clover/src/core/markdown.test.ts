@@ -133,7 +133,7 @@ describe("markdownToHtml", () => {
     ).toBe(true);
   });
 
-  it("takes a heading from the lines round it, and its closing hashes off", () => {
+  it("takes a heading from the lines around it, and its closing hashes off", () => {
     expect(markdownToHtml("# Title #\nText under it.\n- a\n- b")).toBe(
       '<p role="heading" aria-level="3"><b>Title</b></p>' +
         "<p>Text under it.</p><ul><li>a</li><li>b</li></ul>",

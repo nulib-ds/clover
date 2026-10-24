@@ -2,8 +2,9 @@
  * The playground's resource, shown one IIIF property at a time by the
  * components Clover's templates are made of (`PartsLive.tsx`).
  *
- * Under the playground and the choice between its templates and a layout of one's own
- * (`Playground.tsx`), 2xl apart on the golden scale. On the left, the
+ * Under the choice between the playground's templates and a layout of one's own
+ * (`Playground.tsx`), whose "…or build your own." heads the tiles, `2xl` over them, room
+ * for the arrow pointing down to them. On the left, the
  * viewer its parts make, held in view while the parts scroll by; on the right, each part
  * on its own, the tiles `l` apart and `l` inside, so each reads as a thing of its own. No
  * gray fills: hairline edges, the resource's own pictures and words, the accent for what
@@ -275,7 +276,7 @@
   box-shadow: inset 0 0 0 1px var(--code-rule);
 }
 
-/* On a dark page, black on near-black: a hairline round it, drawn inside. */
+/* On a dark page, black on near-black: a hairline around it, drawn inside. */
 :global(.dark) .editorFrame {
   box-shadow: inset 0 0 0 1px var(--gray-6);
 }
@@ -869,7 +870,7 @@
 }
 
 /*
- * Items' region holds the room Items keeps round each picture for its ring
+ * Items' region holds the room Items keeps around each picture for its ring
  * (`--clover-items-ring-room`, 4px), which Items lets out past its edges: so the strip
  * meets the Body's edges, and the region's outline keeps clear of the rings, as every
  * other part's keeps clear of its part.
@@ -1076,9 +1077,39 @@
     box-shadow 160ms ease;
 }
 
-/* "IIIF building blocks." across the tiles, its space above from the tiles' gap and its own. */
-.more {
+/*
+ * The Collection's tile and those after it, on the same six columns (`PartsLive`).
+ * Folded, they fade out halfway through the first (Mat, 2026-10-23), the fade centered
+ * at its middle (`--fold-at`, written by `PartsLive`), "Show all" over its end. Inert
+ * meanwhile, so it takes no press or focus; shown, nothing changes but its height and the
+ * fade, with no animation.
+ */
+.rest {
+  display: grid;
+  gap: 1.618rem;
+  grid-auto-flow: row dense;
   grid-column: 1 / -1;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.rest[data-folded] {
+  --fold-fade: 6.854rem;
+  -webkit-mask-image: linear-gradient(
+    #000 calc(100% - var(--fold-fade)),
+    transparent
+  );
+  mask-image: linear-gradient(#000 calc(100% - var(--fold-fade)), transparent);
+  max-height: calc(var(--fold-at, 13.5rem) + var(--fold-fade) / 2);
+  overflow: clip;
+}
+
+.showAll {
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin-top: -2.618rem;
 }
 
 .tile[data-span="2"] {
@@ -1380,17 +1411,12 @@
 /* ── What this resource has nothing for ───────────────────────────────────── */
 
 /* Under the tiles, in their column, clear of the viewer held in view beside them. */
+/* Last under "Show all", across the tiles, 4.236rem from them as before (with the gap). */
 .missing {
   display: grid;
   gap: 1rem;
-  grid-column: 2;
-  margin-top: 4.236rem;
-}
-
-@media (max-width: 64rem) {
-  .missing {
-    grid-column: 1;
-  }
+  grid-column: 1 / -1;
+  margin-top: 2.618rem;
 }
 
 .missingTitle {

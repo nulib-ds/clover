@@ -2,12 +2,14 @@
  * Document: reads like a PDF viewer. A toolbar; page thumbnails down the left; the pages
  * down one column on a gray ground, a spread to a sheet; the information panel to the
  * right, beside the pages where there is room, sliding out over them where there is not.
- * Size it with `--clover-template-document-height`.
+ * Size it with `--clover-template-document-height`. No border around it (Mat, 2026-10-24):
+ * a frame is the page's to draw, as Default's is.
  *
  * On the scale, as Default's: the toolbar, the thumbnails, the page and the panel are
  * regions, each keeping `--clover-inset` (`l`) at its sides, so their edges share one line
  * (the toolbar's first and last controls, the thumbnails, the page and the Body's own
- * controls); a region's parts `s` apart. The toolbar is a bar: `s` above and below.
+ * controls); a region's parts `s` apart. The toolbar is a bar: `m` above and below (Mat,
+ * 2026-10-24: "a bit more padding").
  */
 .clover-template-document {
   --clover-template-document-height: min(85vh, 56rem);
@@ -15,8 +17,6 @@
   flex-direction: column;
   height: var(--clover-template-document-height);
   overflow: hidden;
-  border: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
-  border-radius: var(--clover-radius, 3px);
   background-color: var(--clover-color-secondary, #fff);
   color: var(--clover-color-primary, #1a1d1e);
 }
@@ -28,8 +28,17 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--clover-space-s);
-  padding: var(--clover-space-s) var(--clover-inset);
+  padding: var(--clover-space-m) var(--clover-inset);
   border-bottom: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+/*
+ * The provider's logo (`Clover.Provider` around a `Clover.Logo`) at the toolbar's end;
+ * where the row wraps, on a line of its own.
+ */
+.clover-template-document-provider {
+  max-width: 100%;
+  margin-inline-start: auto;
 }
 
 /*
@@ -199,10 +208,10 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   object-fit: contain;
 }
 
+/* Its label at the start, as Items' own are, never centered (Mat, 2026-10-24). */
 .clover-template-document-sidebar
   .clover-items[data-layout]
   .clover-items-caption {
-  text-align: center;
   font-size: var(--clover-text-s);
 }
 
@@ -230,7 +239,7 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 }
 
 /*
- * A sheet: its pictures side by side at one height, fitted whole with the inset round
+ * A sheet: its pictures side by side at one height, fitted whole with the inset around
  * them, as the Canvas fits them at home. At most as tall as the column less twice the
  * inset, so under a sheet at rest the next one's picture shows by the inset's depth.
  * Between two sheets' pictures, the inset of each: `2l` of the gray ground. A document

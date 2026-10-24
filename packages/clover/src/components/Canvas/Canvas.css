@@ -7,15 +7,15 @@
  */
 .clover-canvas {
   /*
-   * The space kept clear round the picture at home: none, so it fills the Body edge to
+   * The space kept clear around the picture at home: none, so it fills the Body edge to
    * edge, as 3.x's viewer does. The viewport takes it as padding, which the renderer
    * reads to fit its home view, and the placeholder takes the same, so the still hands
-   * over without a jump. Set it (`var(--clover-inset)`, say) to keep a margin round it.
+   * over without a jump. Set it (`var(--clover-inset)`, say) to keep a margin around it.
    */
   --clover-canvas-inset: 0px;
   /*
    * How far the controls (the cluster, a still's toggle, the navigator) sit in from the
-   * Body's edges: the region's inset, so they line up with what is round the Body, a
+   * Body's edges: the region's inset, so they line up with what is around the Body, a
    * header's title or a strip's position.
    */
   --clover-canvas-controls-inset: var(--clover-inset);

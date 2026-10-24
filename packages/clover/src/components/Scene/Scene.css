@@ -120,38 +120,34 @@
   justify-content: center;
   border-radius: 50%;
   /*
-   * A dark shade of the accent, black mixed in sRGB, which keeps the accent's hue and
-   * saturation and lowers only its brightness (Mat, 2026-10-23: "saturation and hue
-   * should match"); the arrows round it stay the controls' fill, so the two never run
-   * together.
+   * A ball drawn as a cartoon draws one (Mat, 2026-10-24: "more friendly … think cell
+   * shading"): flat tones with crisp edges, not a gradient's blur, in the accent's own hue
+   * (white and black mixed in sRGB keep it). Its face the accent; a glint high on its
+   * left, where the light falls; a crescent of shade on its lower right, outside a circle
+   * a golden share of the way out, dulled, the accent darkened a little ("dull the black
+   * shading"); an ink line around it; a soft shadow cast beneath it. The globe's lines lie
+   * on its face.
    */
-  background-color: color-mix(
-    in srgb,
-    var(--clover-color-accent, #0065c3) 35%,
-    #000
-  );
-  /*
-   * A sphere by shading alone (Mat, 2026-10-23: "more obviously a sphere … css
-   * tricks"): a glint high on its left, where the light falls, its face darkening toward
-   * its edge as a ball's falls away (black again, so the hue holds), a shadow inside its
-   * lower right, a rim of the accent on its upper left, and a soft shadow cast beneath
-   * it. The globe's lines lie on its face.
-   */
+  background-color: var(--clover-color-accent, #0065c3);
   background-image:
     radial-gradient(
-      circle at 33% 27%,
-      color-mix(in srgb, var(--clover-color-accent, #0065c3) 55%, #fff),
-      transparent 18%
+      circle at 32% 28%,
+      color-mix(in srgb, var(--clover-color-accent, #0065c3) 38%, #fff) 0 11%,
+      transparent 11.5%
     ),
-    radial-gradient(circle at 40% 35%, transparent 30%, rgb(0 0 0 / 55%) 100%);
+    radial-gradient(
+      circle at 38% 34%,
+      transparent 0 61.8%,
+      color-mix(in srgb, var(--clover-color-accent, #0065c3) 78%, #000) 62.3%
+    );
   box-shadow:
-    inset -0.236rem -0.382rem 0.618rem rgb(0 0 0 / 40%),
-    inset 0.146rem 0.236rem 0.382rem
-      color-mix(in srgb, var(--clover-color-accent, #0065c3) 50%, transparent),
-    0 0.236rem 0.618rem rgb(0 0 0 / 25%);
+    inset 0 0 0 0.09rem
+      color-mix(in srgb, var(--clover-color-accent, #0065c3) 55%, #000),
+    0 0.236rem 0.618rem rgb(0 0 0 / 18%);
   color: var(--clover-color-control-glyph, #fff);
   cursor: grab;
   isolation: isolate;
+  transition: scale 200ms ease;
 }
 
 .clover-scene-rotate-disc:active {
@@ -159,23 +155,18 @@
 }
 
 /*
- * A ball, not a wash (Mat, 2026-10-23: "less muddy … a hint of accent"): solid, a dark
- * shade of the accent, nothing of the ground showing through, lit from its upper left by
- * the accent itself, a hint at rest and whole while it is pointed at or held,
- * while a control of the pad has keyboard focus, and while the view turns, by any means
- * (`data-turning`, from the Scene). An opacity, so it fades as the controls do.
+ * Lit from the start, as it was only under the pointer before (Mat, 2026-10-24: "make the
+ * hover behavior the default"). Pointed at or held, while a control of the pad has
+ * keyboard focus, and while the view turns, by any means (`data-turning`, from the
+ * Scene), it comes forward a step: a flat tone lighter, and a little larger.
  */
 .clover-scene-rotate-disc::before {
   position: absolute;
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: radial-gradient(
-    circle at 35% 30%,
-    var(--clover-color-accent, #0065c3),
-    transparent 70%
-  );
-  opacity: 0.35;
+  background: color-mix(in srgb, #fff 16%, transparent);
+  opacity: 0;
   transition: opacity 200ms ease;
   content: "";
 }
@@ -184,6 +175,18 @@
 .clover-scene-rotate:has(:focus-visible) .clover-scene-rotate-disc::before,
 .clover-scene-navigation[data-turning] .clover-scene-rotate-disc::before {
   opacity: 1;
+}
+
+.clover-scene-rotate-disc:is(:hover, :active),
+.clover-scene-rotate:has(:focus-visible) .clover-scene-rotate-disc,
+.clover-scene-navigation[data-turning] .clover-scene-rotate-disc {
+  scale: 1.06;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-scene-rotate-disc {
+    transition: none;
+  }
 }
 
 @media (forced-colors: active) {

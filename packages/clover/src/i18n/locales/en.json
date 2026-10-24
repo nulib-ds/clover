@@ -38,6 +38,8 @@
   "aboutRights": "Rights",
   "aboutHomepage": "Homepage",
   "aboutSeeAlso": "See also",
+  "aboutProvider": "Provider",
+  "logo": "Logo",
   "aboutManifest": "IIIF Manifest",
   "aboutCanvas": "IIIF Canvas",
   "aboutPartOf": "Part of",

@@ -4,7 +4,7 @@
  * of Nextra's sticky navbar when linked to via `#playground`.
  *
  * Wider than the reading sections below it (1300px), but held off the edges of a wide
- * screen, with room round it for the Viewer's shadow.
+ * screen, with room around it for the Viewer's shadow.
  */
 .section {
   color: var(--gray-12);
@@ -199,7 +199,7 @@
 
 /*
  * The field with its label joined to its start: one box, lifted as the field is, edged
- * at 3:1 all round with no line between the two (Mat, 2026-10-22). The label has no fill. On a phone, where it would crowd
+ * at 3:1 all around with no line between the two (Mat, 2026-10-22). The label has no fill. On a phone, where it would crowd
  * the field, it is a tab on the field's top edge instead.
  */
 .fieldGroup {
@@ -288,7 +288,7 @@
   text-overflow: ellipsis;
 }
 
-/* The field draws the ring round all of it (above), so the input draws none of its own. */
+/* The field draws the ring around all of it (above), so the input draws none of its own. */
 .field .fieldInput:focus-visible {
   box-shadow: none;
 }
@@ -383,7 +383,7 @@
 
 /*
  * A resource: its thumbnail, its own label, and what it holds under it. Marked as the thumbnails of
- * Items are: a ring round the picture for the one in the Viewer, with its name in the text
+ * Items are: a ring around the picture for the one in the Viewer, with its name in the text
  * accent and a check, so more than color tells it; the one the arrow keys reach, an
  * inner ring in the text accent.
  */
@@ -515,8 +515,6 @@
 
 .viewer :global(.clover-template-document) {
   --clover-template-document-height: 100%;
-  border: 0;
-  border-radius: 0;
 }
 
 .viewer :global(.clover-template-gallery) {
@@ -538,35 +536,184 @@
  * sentence, and the way on. Side by side, one above the other on a phone.
  */
 /*
- * The two ways to use Clover, centered on the page's ground (Mat, 2026-10-20), held well
- * off the Viewer and the parts: a short headline, one sentence with the template named
- * in it by its menu, and the two actions under it.
- */
-/*
- * Its title and its sentence are a section intro's (`SectionIntro.module.css`), the same
- * size, leading and room between them (1rem), and its buttons as far under them (1.618rem).
+ * Under the Viewer, the two ways to use Clover (`Playground.tsx`; Mat, 2026-10-23), on
+ * the parts' columns below (`Parts.module.css`'s `.grid`: 1300px at most, in the golden
+ * ratio, `3xl` apart), so each half heads what is under it: the template the Viewer
+ * above, the building blocks the tiles. Both float on the page's ground, alike (a black
+ * card for the template was tried, under the Viewer and then apart from it), their
+ * titles one sentence across them (Mat, 2026-10-23: two titles side by side competed),
+ * their words a section intro's (`SectionIntro.module.css`), with room over them as the
+ * choice had, and nearer the tiles than the Viewer.
  */
 .choice {
+  --pg-edge: color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
+  /* The room over it, under the Viewer, which its arrow up rises through. */
+  --choice-gap: clamp(4.236rem, 9vw, 6.854rem);
+  align-items: start;
+  column-gap: 4.236rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.618fr);
+  margin: var(--choice-gap) auto 0;
+  max-width: 1300px;
+  row-gap: 2.618rem;
+}
+
+@media (max-width: 64rem) {
+  .choice {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/*
+ * The arrows drawn from each half's title (`ChoiceArrows.tsx`; Mat, 2026-10-23: "make
+ * more natural … drawn like our stroke. but gray and faint"), on a layer over the choice
+ * and the room over and under it, measured from the page: a dull gray, faint where the
+ * pen comes down (from nothing, most of it early) and full where it lifts, tapered as
+ * the swoosh is, and drawn once from tail to head as the strokes are, the head after
+ * the shaft. Never read
+ * (`aria-hidden`): the words say what they point at, so they ask no contrast (WCAG
+ * 1.4.11). Each starts just past its title's last word (`.arrowFrom`).
+ */
+.choice {
+  position: relative;
+}
+
+.arrows {
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+  position: absolute;
+  top: calc(-1 * var(--choice-gap));
+}
+
+/* The pen's lines, in the masks that draw the arrows in: white, as wide as the shapes. */
+.arrows mask path {
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* From nothing where the pen comes down to the full gray, most of it early (Mat, 2026-10-23). */
+.arrowNone {
+  stop-color: var(--gray-8);
+  stop-opacity: 0;
+}
+
+/* A marker's ink, a little short of solid, so it builds up where its strokes cross. */
+.arrowFaint {
+  stop-color: var(--gray-8);
+  stop-opacity: 0.5;
+}
+
+.arrowFull {
+  stop-color: var(--gray-8);
+  stop-opacity: 0.85;
+}
+
+/* The head pops about its tip, in the layer's own space. */
+.arrowTip {
+  transform-box: view-box;
+}
+
+.arrowFrom {
+  display: inline-block;
+  height: 1em;
+  width: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Their lines hidden past their ends, round caps and all, until drawn. */
+  .arrows mask path {
+    stroke-dasharray: 1 1.1;
+    stroke-dashoffset: 1.05;
+  }
+
+  /*
+   * As a marker draws it (Mat, 2026-10-23: "fun and playful like a marker"): the shaft
+   * one swipe, quick off the mark and soft where it lands; then the head, two quick
+   * flicks, and a little pop past its size and back as the marker lifts.
+   */
+  .arrows [data-drawn] .arrowShaftLine {
+    animation: arrow-draw 520ms cubic-bezier(0.33, 0, 0.15, 1) 150ms both;
+  }
+
+  .arrows [data-drawn] .arrowHeadLine {
+    animation: arrow-draw 200ms cubic-bezier(0.2, 0, 0, 1) 630ms both;
+  }
+
+  .arrows [data-drawn] .arrowTip {
+    animation: arrow-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) 640ms both;
+  }
+}
+
+@keyframes arrow-pop {
+  from {
+    scale: 0.618;
+  }
+
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes arrow-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* The parts' heading, which a chip's resource scrolls to, clear of the navbar. */
+.buildTitle {
+  scroll-margin-top: 5rem;
+}
+
+/*
+ * Each half's calls to action `xl` under its note, as a section intro's are (its
+ * `.intro`'s gap), its title and note `m` apart in the intro's own grid (`intro.text`). The two halves line up by their words
+ * alone (Mat, 2026-10-23: "great balance in content so they naturally align"): a title
+ * and a note of one line each, the notes as long as their columns are wide.
+ */
+.templateActions,
+.buildActions {
+  margin-top: 1.618rem;
+}
+
+/* The template's menu and Get started, side by side, as tall as each other. */
+.templateActions {
   align-items: center;
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin: clamp(4.236rem, 9vw, 6.854rem) auto clamp(2.618rem, 6vw, 4.236rem);
-  max-width: 44rem;
-  text-align: center;
-}
-
-/* Where it must break, it breaks after "template". */
-.nowrap {
-  white-space: nowrap;
-}
-
-.choiceActions {
-  display: flex;
-  margin-top: 0.618rem;
   flex-wrap: wrap;
-  gap: var(--clover-space-m, 1rem);
-  justify-content: center;
+  gap: 1rem;
+  line-height: 1.5;
+}
+
+/*
+ * The menu, drawn as a dropdown is (Mat, 2026-10-23: "an obvious dropdown"), the one
+ * strong thing in its half: a box as tall as Get started beside it, on the page's
+ * ground, its edge 3:1 (`--pg-edge`, WCAG 1.4.11) and the resource field's lift, the
+ * template's name in it and a chevron at its end; its edge the accent's under the
+ * pointer and while open, as an outlined button's is.
+ */
+.template .layoutTrigger {
+  background: var(--color-background);
+  box-shadow: var(--pg-lift, var(--card-lift));
+  font-size: var(--text-sm);
+  gap: 0.618rem;
+  line-height: inherit;
+  padding: calc(0.625rem - 1px) calc(0.75rem - 1px) calc(0.625rem - 1px)
+    calc(1.125rem - 1px);
+}
+
+.template .layoutTrigger:hover,
+.template .layoutTrigger[aria-expanded="true"] {
+  border-color: var(--accent-11);
+}
+
+.template .chevron {
+  color: var(--gray-12);
+  height: 1rem;
+  width: 1rem;
 }
 
 /* ── The template: a menu of the three, by name, in the sentence ──────────── */

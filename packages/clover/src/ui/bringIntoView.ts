@@ -1,7 +1,7 @@
 /*
  * Bringing an entry into view within the list that scrolls it: Annotations' picked entry
  * and Canvas groups, Transcript's playing cue. Never the page itself, which a reader may
- * have scrolled elsewhere (`scrollIntoView` moves every scrolling box round it, the page
+ * have scrolled elsewhere (`scrollIntoView` moves every scrolling box around it, the page
  * too).
  */
 

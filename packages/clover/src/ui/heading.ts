@@ -31,7 +31,7 @@ export interface Titled {
   as: React.ElementType;
   /** For the title: past 6, the `id` its group is named by. */
   title: { id?: string };
-  /** For the element round what it heads: past 6, a group the title names. */
+  /** For the element around what it heads: past 6, a group the title names. */
   group: { role?: "group"; "aria-labelledby"?: string };
 }
 
@@ -39,7 +39,7 @@ export interface Titled {
  * A title at `level` with this `id`, and the group it heads, for a layout of your own.
  * To h6 the title is a heading, and its group needs nothing. Past 6 it is a `p` (or
  * `fallback`) that names the group: spread `title` on the title and `group` on the
- * element round what it heads.
+ * element around what it heads.
  *
  * ```tsx
  * const title = Clover.titled(headingLevel, "viewer-title");

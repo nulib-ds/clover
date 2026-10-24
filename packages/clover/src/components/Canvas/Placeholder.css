@@ -89,7 +89,7 @@ button.clover-canvas-placeholder-toggle {
   box-shadow: 0 4px 16px #0003;
 }
 
-/* Its icon in proportion, as a control's: 1rem of its 1rem and `s` round it. */
+/* Its icon in proportion, as a control's: 1rem of its 1rem and `s` around it. */
 .clover-canvas[data-placeholder="true"][data-media]
   > button.clover-canvas-placeholder-toggle
   svg {

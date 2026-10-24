@@ -147,7 +147,7 @@ interface LivePartProps {
   resource?: PartDemoResource;
   /** A `Body` above it, as `PartDemo`'s. */
   body?: boolean;
-  /** A box of this height round it, which scrolls, as `PartDemo`'s. */
+  /** A box of this height around it, which scrolls, as `PartDemo`'s. */
   box?: string;
   /** Its code without a `Root` (`Value`); `BODY_PARTS` and `Map` are always alone. */
   alone?: boolean;
@@ -184,7 +184,7 @@ export function LivePart({
     ],
     mark: !single,
   };
-  // The box round it: Canvas, Timeline or Scene fills one with a height; a tall part
+  // The box around it: Canvas, Timeline or Scene fills one with a height; a tall part
   // scrolls in one.
   const boxed = bodyPart || box;
   const wrapped: CodeNode = boxed

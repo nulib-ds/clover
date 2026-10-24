@@ -1,0 +1,67 @@
+---
+title: Logo
+description: A IIIF provider's logo, each of the resource's providers' in turn, its alt text the provider's name; inside a Provider, that provider's.
+---
+
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { PartHead } from "docs/components/Clover4/PartHead";
+
+<div className="docs-title-row">
+
+# Logo
+
+<PartHead part="Logo" />
+
+</div>
+
+<div className="docs-lede">A provider's logo, named by the provider.</div>
+
+<Example>
+<PartDemo part="Logo" />
+
+```jsx {2}
+<Clover.Root iiifContent={url}>
+  <Clover.Logo />
+</Clover.Root>
+```
+
+</Example>
+
+## API reference
+
+Reads the `logo` of each of the resource's providers (its `provider`) and renders an
+`img` for each, the first logo a provider gives. Inside a
+[`Provider`](/docs/primitives/provider), it shows the logo of the provider it is drawn
+for. It renders nothing while there is none, and its other props go to each `img`.
+
+Its `alt` is the provider's name, else its homepage's, else "Logo": give your own, or
+`alt=""` where the name is written beside it. It is `--clover-logo-height` tall, 1.618rem
+by default, and as wide as that makes it, never wider than its room.
+
+<ApiReference elements="clover-logo">
+
+| Prop        | Type                               | Default             | Description                                                      |
+| ----------- | ---------------------------------- | ------------------- | ---------------------------------------------------------------- |
+| `of`        | `"manifest" \| "canvas"`           | `"manifest"`        | Whose providers: the resource's, or the Canvas the reader is on. |
+| `value`     | `{ id, width, height }`, providers | —                   | Logos to show instead: images, or providers with theirs.         |
+| `alt`       | `string`                           | the provider's name | Its alt text.                                                    |
+| `className` | `string`                           | —                   | Added to `clover-logo`.                                          |
+
+</ApiReference>
+
+## Examples
+
+### Its size
+
+Set `--clover-logo-height` for a larger or smaller logo; its width follows.
+
+<Example>
+<PartDemo part="Logo" props={{ style: { "--clover-logo-height": "2.618rem" } }} />
+
+```jsx
+<Clover.Logo style={{ "--clover-logo-height": "2.618rem" }} />
+```
+
+</Example>

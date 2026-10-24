@@ -29,7 +29,7 @@ import * as Clover from "../../parts";
  * the top and the Canvas has drawn it; then it shows, and its controls slide in.
  */
 
-/** A still's longer side, in pixels: sharp across most screens. */
+/** A still's longer side, in pixels: sharp across most screens (no more than the image has). */
 const STILL_SIZE = 1600;
 /**
  * A scroll quiet this long has come to rest. A trackpad sends nothing while a finger
@@ -61,7 +61,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
   const sheetsBox = useRef<HTMLDivElement>(null);
   const live = useRef<HTMLDivElement>(null);
 
-  /* A spread's pages side by side, as the Canvas lays them: the book's way round. */
+  /* A spread's pages side by side, as the Canvas lays them: the book's way around. */
   const reversed =
     sequence.direction === "right-to-left" ||
     sequence.direction === "bottom-to-top";
@@ -441,16 +441,44 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
   );
 }
 
+/**
+ * Whether `element` has come within a column's height of the column's view, and so stays:
+ * a still's image service is read only then, so a Manifest of a thousand pages reads a
+ * few. Without IntersectionObserver, at once.
+ */
+function useNearColumn(element: Element | null): boolean {
+  const [near, setNear] = useState(
+    () => typeof IntersectionObserver === "undefined",
+  );
+  useEffect(() => {
+    if (near || !element) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        setNear(true);
+        observer.disconnect();
+      },
+      {
+        root: element.closest(".clover-template-document-column"),
+        rootMargin: "100% 0px",
+      },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [element, near]);
+  return near;
+}
+
 /** A Canvas's still: its picture at about the column's size, or an empty page until then. */
 function Still({ canvas }: { canvas: Canvas }) {
   const { clover } = Clover.useClover("Document");
-  const source = useMemo(
-    () => Clover.stillSource(canvas, STILL_SIZE),
-    [canvas],
-  );
+  const source = useMemo(() => Clover.stillSource(canvas), [canvas]);
+  const [page, setPage] = useState<HTMLElement | null>(null);
+  const near = useNearColumn(page);
   const [src, setSrc] = useState(source?.src);
   useEffect(() => {
     if (!source || source.src) return setSrc(source?.src);
+    if (!near) return;
     let current = true;
     void Clover.resolveThumbnail(source, STILL_SIZE, clover.request).then(
       (url) => current && setSrc(url),
@@ -458,12 +486,12 @@ function Still({ canvas }: { canvas: Canvas }) {
     return () => {
       current = false;
     };
-  }, [source, clover]);
+  }, [source, clover, near]);
   const style = { aspectRatio: String(ratioOf(canvas)) };
   return src ? (
     // eslint-disable-next-line @next/next/no-img-element
     <img alt="" decoding="async" loading="lazy" src={src} style={style} />
   ) : (
-    <span style={style} />
+    <span ref={setPage} style={style} />
   );
 }

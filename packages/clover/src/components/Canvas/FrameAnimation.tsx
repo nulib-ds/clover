@@ -10,7 +10,9 @@ import { useUniqueId } from "../../ui/useUniqueId";
 import ChoiceMenu from "./ChoiceMenu";
 import { type AnimationFrame, resolveBody } from "./layout";
 import { useBarHeight } from "./media/useBarHeight";
-import { imageSource } from "../../core/thumbnail";
+import { imageSource, resolveThumbnail } from "../../core/thumbnail";
+import type { CloverRequest } from "../../core/request";
+import { useOptionalClover } from "../../react/context";
 import { Tip } from "../../ui/Tip";
 import type { CanvasRenderer } from "../../lib/renderer";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
@@ -33,16 +35,32 @@ const HOLD_MS = 50;
 const FRAME_IMAGE = 128;
 
 /**
- * A frame's picture for the frames menu, as the scene paints it (its region cut out):
- * small where its image service can size one, else the image itself, which the scene has
- * already loaded to play it.
+ * The frames' pictures for the frames menu, as the scene paints them (a region cut out),
+ * each asked of its image service as its `info.json` says it can answer (read already, to
+ * play the frames), small where it can size one; else the image itself.
  */
-function frameImage(frame: AnimationFrame): string | undefined {
-  const { body } = frame.annotation;
-  const resolved = resolveBody(Array.isArray(body) ? body[0] : body);
-  if (!resolved) return undefined;
-  const source = imageSource(resolved.body, FRAME_IMAGE, resolved.region);
-  return source?.src ?? source?.fallback;
+function useFrameImages(
+  frames: AnimationFrame[],
+  request: CloverRequest | undefined,
+): (string | undefined)[] {
+  const [images, setImages] = useState<(string | undefined)[]>([]);
+  useEffect(() => {
+    let live = true;
+    void Promise.all(
+      frames.map((frame) => {
+        const { body } = frame.annotation;
+        const resolved = resolveBody(Array.isArray(body) ? body[0] : body);
+        const source = resolved && imageSource(resolved.body, resolved.region);
+        return source
+          ? resolveThumbnail(source, FRAME_IMAGE, request)
+          : undefined;
+      }),
+    ).then((urls) => live && setImages(urls));
+    return () => {
+      live = false;
+    };
+  }, [frames, request]);
+  return images;
 }
 
 /**
@@ -148,17 +166,18 @@ export function FrameControls({
     },
     [triggerId],
   );
+  const images = useFrameImages(frames, useOptionalClover()?.clover.request);
   // One group, as a Canvas's Choice is: the frames, by the Manifest's labels.
   const group = useMemo(
     () => ({
       key: "frame",
-      items: frames.map((f) => ({
+      items: frames.map((f, n) => ({
         label: (f.annotation as { label?: unknown }).label,
         id: f.annotation.id,
-        image: frameImage(f),
+        image: images[n],
       })),
     }),
-    [frames],
+    [frames, images],
   );
   const position = t("framePosition", {
     index: frame + 1,

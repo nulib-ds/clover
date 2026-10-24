@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import dynamic from "next/dynamic";
 import styles from "docs/components/Home/Parts.module.css";
 
@@ -34,26 +34,16 @@ const Parts: React.FC<{
   index?: React.ReactNode;
   children?: React.ReactNode;
 }> = ({ resource, onTry, index, children }) => {
-  // A chip's resource remounts the parts, chip and all, so focus moves here first.
-  const heading = useRef<HTMLHeadingElement>(null);
+  /*
+   * A chip's resource remounts the parts, chip and all, so focus moves first to their
+   * heading, "…or build your own." over the tiles (`#parts`, `Playground.tsx`).
+   */
   const tryResource = (key: string) => {
     onTry(key);
-    heading.current?.focus({ preventScroll: true });
+    document.getElementById("parts")?.focus({ preventScroll: true });
   };
   return (
-    <section className={styles.section}>
-      {/*
-       * `#parts` for links to the section. The calls to action over it, under the
-       * playground's Viewer, lead to the docs.
-       */}
-      <h2
-        ref={heading}
-        tabIndex={-1}
-        className={styles.visuallyHidden}
-        id="parts"
-      >
-        Parts
-      </h2>
+    <div className={styles.section}>
       <div className={styles.grid}>
         {resource ? (
           <PartsLive resource={resource} onTry={tryResource} />
@@ -69,7 +59,7 @@ const Parts: React.FC<{
         )}
         {children && <div className={styles.after}>{children}</div>}
       </div>
-    </section>
+    </div>
   );
 };
 

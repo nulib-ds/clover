@@ -4,6 +4,7 @@ import {
   render,
   renderHook,
   screen,
+  waitFor,
 } from "@testing-library/react";
 import React from "react";
 
@@ -201,7 +202,7 @@ describe("FrameControls", () => {
     );
   });
 
-  it("lists the frames by their labels, as a Choice's menu, pausing to choose one", () => {
+  it("lists the frames by their labels, as a Choice's menu, pausing to choose one", async () => {
     const [canvas] = (p4(muybridgeJson) as any).items as IIIFCanvas[];
     const frames = animationFrames(canvas);
     const animation = state(3);
@@ -216,8 +217,16 @@ describe("FrameControls", () => {
     expect(radios).toHaveLength(16);
     // Named by the Manifest's labels, each with its picture; the frame showing checked.
     expect(screen.getByRole("radio", { name: "4" })).toBeChecked();
-    expect(document.querySelectorAll(".clover-canvas-menu-image")).toHaveLength(
-      16,
+    await waitFor(() =>
+      expect(
+        document.querySelectorAll(".clover-canvas-menu-image"),
+      ).toHaveLength(16),
+    );
+    // Each frame's own image, which the scene loads to play it: it names no service.
+    expect(
+      document.querySelector(".clover-canvas-menu-image")?.getAttribute("src"),
+    ).toMatch(
+      /\/pct:1\.2882,1\.2152,23\.6669,23\.3242\/full\/0\/default\.jpg$/,
     );
     fireEvent.click(screen.getByRole("radio", { name: "9" }));
     expect(animation.setFrame).toHaveBeenCalledWith(8);

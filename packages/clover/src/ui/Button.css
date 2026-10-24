@@ -143,7 +143,7 @@ button.clover-canvas-button:is(
 
 /*
  * Rotate left is rotate right's glyph, mirrored: the glyph alone, not the button, so the
- * button's popover reads the right way round. Its nudge turns the other way.
+ * button's popover reads the right way around. Its nudge turns the other way.
  */
 button.clover-canvas-button[data-button="rotate-left"] svg {
   scale: -1 1;

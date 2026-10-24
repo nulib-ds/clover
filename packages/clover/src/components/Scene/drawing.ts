@@ -8,7 +8,7 @@ import type { CloverRequest } from "../../core/request";
  */
 
 export interface SceneEngine {
-  /** Load the models and lay them out; their bounding sphere, which the camera turns round. */
+  /** Load the models and lay them out; their bounding sphere, which the camera turns around. */
   load(models: SceneModel[], request?: CloverRequest): Promise<Bounds>;
   /** Draw the Scene from this place on the orbit. */
   draw(orbit: Orbit): void;

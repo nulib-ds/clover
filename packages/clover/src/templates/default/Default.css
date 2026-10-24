@@ -63,6 +63,17 @@
   font-weight: 400;
 }
 
+/*
+ * The provider's logo (`Clover.Provider` around a `Clover.Logo`) at the end of the title's
+ * line; on a narrow line it gives way, drawn smaller within its share, rather than push
+ * the title out.
+ */
+.clover-template-default-provider {
+  flex: 0 1 auto;
+  max-width: 38.2%;
+  margin-inline-start: auto;
+}
+
 /* A `Clover.Split`: the main pane (header, Body, strip), the bar, and the panel's pane. */
 .clover-template-default-panes {
   position: relative;
@@ -166,7 +177,7 @@
 
 /*
  * The strip under the Body, as 3.x's: its header carries the view's titles and "2 / 9".
- * A region of its own, as the header is: the inset inside all round, its header `m` over
+ * A region of its own, as the header is: the inset inside all around, its header `m` over
  * the thumbnails.
  */
 .clover-template-default-rail {

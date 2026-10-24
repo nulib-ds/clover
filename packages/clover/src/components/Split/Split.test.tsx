@@ -148,7 +148,7 @@ describe("Split", () => {
     fireEvent.click(handle);
     expect(size()).toBe("741px");
     await waitFor(() => expect(handle).toHaveAttribute("aria-valuenow", "74"));
-    // From its widest, round to its narrowest.
+    // From its widest, around to its narrowest.
     fireEvent.click(handle);
     expect(size()).toBe("224px");
     // Then its own size again, as it asked: the reader's is forgotten.

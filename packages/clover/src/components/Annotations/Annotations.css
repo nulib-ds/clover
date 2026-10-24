@@ -155,7 +155,7 @@ label.clover-annotations-entry > input {
 
 /*
  * The entry is what is pressed. The button that does the same for the keyboard is out of
- * sight (inline), as the menu's radio is, so its focus is drawn round the entry.
+ * sight (inline), as the menu's radio is, so its focus is drawn around the entry.
  */
 .clover-annotations-entry:has(
   > :is(button.clover-annotations-show, input):focus-visible

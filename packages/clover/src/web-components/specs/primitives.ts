@@ -161,6 +161,51 @@ export const thumbnailDocs = /* @__PURE__ */ propertyDocs(
   },
 );
 
+/*
+ * `<clover-provider>`: who provided the resource, each its logo and its name, linked to
+ * its homepage. A `<clover-logo>` in it makes it draw each provider's logo alone, as
+ * React's `<Provider><Logo /></Provider>` does (`elements/provider.tsx`).
+ */
+export const provider = property("clover-provider", {
+  link: { prop: "link", type: ["false"] },
+});
+export const providerDocs = /* @__PURE__ */ propertyDocs(
+  "CloverProviderElement",
+  "The providers: who provided the resource, each its logo and its name, linked to its homepage. With a clover-logo in it, each provider's logo alone, linked, its alt text the provider's name.",
+  {
+    type: "Record<string, unknown> | Array<Record<string, unknown>>",
+    description: "Providers (IIIF Agents)",
+  },
+  {
+    link: {
+      description:
+        '"false" draws each provider without a link to its homepage.',
+    },
+  },
+);
+
+/*
+ * `<clover-logo>`: a provider's logo. Inside a `<clover-provider>` it is read, not drawn:
+ * the provider draws each provider's logo in its place (`elements/logo.tsx`).
+ */
+export const logo = property("clover-logo", {
+  alt: { prop: "alt", type: "string" },
+});
+export const logoDocs = /* @__PURE__ */ propertyDocs(
+  "CloverLogoElement",
+  "A provider's logo, its alt text the provider's name: each of the resource's providers' in turn. Inside a clover-provider it draws nothing itself, and the provider draws each provider's logo in its place.",
+  {
+    type: "Record<string, unknown> | Array<Record<string, unknown>>",
+    description: "Logos: images, or Agents with theirs",
+  },
+  {
+    alt: {
+      description:
+        'Its alt text instead of the provider\'s name: "" where the name is written beside it.',
+    },
+  },
+);
+
 /** `<clover-value>`: any language map, as text, HTML or Markdown. */
 export const value: ElementSpec = {
   tag: "clover-value",

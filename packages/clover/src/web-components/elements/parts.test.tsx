@@ -107,6 +107,43 @@ describe("The parts that read a root's state, as elements", () => {
     );
   });
 
+  it("lists the providers, and with a clover-logo in it, each one's logo alone", async () => {
+    const element = root(`
+      <clover-provider data-test="whole"></clover-provider>
+      <clover-provider data-test="logos"><clover-logo></clover-logo></clover-provider>
+      <clover-logo data-test="alone"></clover-logo>
+    `);
+    const part = (name: string) =>
+      element.querySelector<HTMLElement>(`[data-test="${name}"]`)!;
+    const [agent] = paged.provider;
+    await waitFor(() =>
+      expect(
+        within(part("whole")).getByRole("link", {
+          name: "Northwestern University Libraries",
+        }),
+      ).toHaveAttribute("href", agent.homepage[0].id),
+    );
+    await waitFor(() =>
+      expect(
+        within(part("logos")).getByRole("img", {
+          name: "Northwestern University Libraries",
+        }),
+      ).toBeInTheDocument(),
+    );
+    // Its clover-logo is read, not drawn: one logo, the provider's, and no name beside it.
+    expect(part("logos").querySelectorAll("img")).toHaveLength(1);
+    expect(
+      within(part("logos")).queryByText("Northwestern University Libraries"),
+    ).toBeNull();
+    await waitFor(() =>
+      expect(
+        within(part("alone")).getByRole("img", {
+          name: "Northwestern University Libraries",
+        }),
+      ).toHaveAttribute("src", agent.logo[0].id),
+    );
+  });
+
   it("reads the Canvas in view with of=canvas, and shows a value given it, anywhere", async () => {
     const element = root(`
       <clover-label of="canvas" as="p"></clover-label>

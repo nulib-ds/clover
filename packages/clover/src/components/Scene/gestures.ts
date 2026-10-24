@@ -1,6 +1,6 @@
 import { TAP_SLOP, isInteractive } from "../../lib/pointer";
 
-/** What the Scene's gestures move: the camera, round the models. */
+/** What the Scene's gestures move: the camera, around the models. */
 export interface OrbitInput {
   /** Turn by these radians: about the up axis, then from it. */
   turn(dTheta: number, dPhi: number): void;
@@ -8,7 +8,7 @@ export interface OrbitInput {
   zoom(factor: number): void;
 }
 
-/** A drag the height of the Body turns the models round once, as three.js's orbit does. */
+/** A drag the height of the Body turns the models around once, as three.js's orbit does. */
 const TURN_PER_HEIGHT = 2 * Math.PI;
 /** How far a trackpad's pinch (a wheel with Ctrl) zooms, per pixel of its delta. */
 const WHEEL_ZOOM = 0.01;

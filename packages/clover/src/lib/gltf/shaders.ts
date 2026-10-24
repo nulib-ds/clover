@@ -78,7 +78,7 @@ out vec4 outColor;
 
 const float PI = 3.14159265;
 const float LAMP = 3.0;
-// The room: a sky and a ground for the light all round, and three lights in it.
+// The room: a sky and a ground for the light all around, and three lights in it.
 const vec3 SKY = vec3(0.73);
 const vec3 GROUND = vec3(0.58);
 const vec3 LIGHTS[3] = vec3[3](
@@ -187,7 +187,7 @@ void main() {
     vec3 specular = fresnel * distribution * visibility;
     color += ((1.0 - fresnel) * diffuse + PI * specular) * RADIANCE[i] * nl;
   }
-  // The room's light all round: diffuse, and what a rough or smooth surface reflects of it.
+  // The room's light all around: diffuse, and what a rough or smooth surface reflects of it.
   vec4 c0 = vec4(-1.0, -0.0275, -0.572, 0.022);
   vec4 c1 = vec4(1.0, 0.0425, 1.04, -0.04);
   vec4 r = roughness * c0 + c1;

@@ -202,7 +202,7 @@ every rule below.
   or lighten it. The grab area is `::before`, `l` wide; Document puts it on the page's
   side, off the thumbnails' scrollbar. Forced colors: `CanvasText`, `Highlight` while
   active, and a 2px outline on focus.
-- A click or tap steps the sized pane min → own `size` → max and round (WCAG 2.5.7). A
+- A click or tap steps the sized pane min → own `size` → max and around (WCAG 2.5.7). A
   press turns into a drag only past 4px (8px for touch). A step starts from the size the
   pane was given (stored, or its own), not its measured width, which flex may squeeze
   below it; measuring stalled the cycle. Reaching its own size clears the stored size.
@@ -254,7 +254,8 @@ every rule below.
   flow like Preview's continuous PDF view; it replaced `usePaging`, a page per wheel
   gesture). Every view is a sheet down one natively scrolling column
   (`.clover-template-document-column`), a still of its pictures (`stillSource`, the
-  painted image at about 1600px, not the small `thumbnail`), each at most the column
+  painted image at about 1600px, never more than it has, not the small `thumbnail`,
+  its service read only within a column's height of view), each at most the column
   less `2 × --clover-inset` tall, so the next one's picture shows under the one at rest.
   No CSS snap: the top of the column is the one place a sheet is active
   (Mat, 2026-10-16), and `Sheets` decides where the scroll rests (`SETTLE_MS`, 200, quiet;
@@ -283,7 +284,7 @@ every rule below.
   for its widest: nothing sits after the toggle), no thumbnail. Its name starts with its
   Tip's words ("Show items"), then the place. Open, it sits on the thumbnails' spine
   (below), over them but for its far rounded end, which hangs over the page (Mat: the
-  bar where that end's curve begins; its start's, the other way round, was tried
+  bar where that end's curve begins; its start's, the other way around, was tried
   first), so the thumbnails keep their pane's whole height; shut, it sits
   over the page's top left, `--clover-inset` in, level with the Canvas's controls.
   `e2e/specs/document.spec.ts` checks every move with `settled()`, and where the toggle
@@ -524,8 +525,9 @@ every rule below.
   - Each entry shows its region (`regionSource` in `core/region.ts`, Mat 2026-10-19, as
     3.x drew one). It is its own module, apart from `core/thumbnail.ts`, which every page
     loads for its strip: in there, its import of `parseAnnotationTarget` put about
-    0.23 kB on every template's first load. The painted image's level 1/2 service cuts it and sizes it to
-    `!52,52` (twice the `l` square it is shown at). Never a level 0 or service-less
+    0.23 kB on every template's first load. The painted image's service cuts it once its `info.json` is
+    read (`resolveThumbnail`), at 52 (twice the `l` square it is shown at) and never more
+    than the region has. Never a service that cannot cut (level 0) or a service-less
     image, which would mean fetching a large one: those get none. Intersect the region
     with the painted image's bounds; never clamp its corner.
   - It needs every Canvas's pages, so it calls `clover.holdAllAnnotationPages()`, which
@@ -544,7 +546,7 @@ every rule below.
     would take in the toggle's. A pick of a hidden page's annotation still frames it or
     goes to it. `ControlMenu` focuses a checked radio on opening, never the checked eye.
 - **Hotspot look.** Active (picked, hovered, focused), a rectangle keeps its edges and
-  covers nothing it marks; the picture round it dims (`0 0 38vw 38vw #0002`, lighter than
+  covers nothing it marks; the picture around it dims (`0 0 38vw 38vw #0002`, lighter than
   3.x's `#0003`). The 18% accent tint inside it, and inside a shape, was dropped at
   Mat's request, 2026-10-19: it washed out what the annotation points to. Hotspots beneath the
   active one (`depthOf` below its own) that meet it carry `--clover-annotation-mask`
@@ -725,8 +727,10 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `onSelect` stays a choice (Enter, a click), which the Gallery opens on. A Collection's
   members stay manual, since each selection loads a Manifest. Standalone it is a
   list of links (`core/load.ts` `fetchResource`, which does not open a Collection).
-  Thumbnails come from `core/thumbnail.ts`: sized at once for level 1/2 services, through
-  the renderer's cached `fetchInfo` for level 0.
+  Thumbnails come from `core/thumbnail.ts`: a service's `info.json` is read first (the
+  renderer's cached `fetchInfo`), then the picture asked as it allows (`sizedImageUrl`),
+  and only once the item is near (`useNearViewport` against the box that scrolls it), so
+  a strip of a thousand reads a strip's worth (`e2e/specs/scale.spec.ts` counts them).
   Items is the one part for a sequence and where the reader is in it (Mat, 2026-10-16: the
   Pager was to become an abstraction of Items). `layout="pager"` is the count, then
   `Previous` and `Next`, with no thumbnails, over whatever the source lists (views,
@@ -772,7 +776,8 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     `iiifContent` wrapper is `Map.tsx`, map entry only): a lazy chunk importing `Root`
     made esbuild hoist `Root` and the core into a standalone Canvas (35.6 → 43.7 kB). It
     shares as little as it can with the parts: it builds its overlay URL itself
-    (`overlayImageUrl`), not through `core/thumbnail`. What remains is esbuild's chunk
+    (`components/Map/overlayImage.ts`, imported only to draw an overlay), not through
+    `core/thumbnail`. What remains is esbuild's chunk
     overhead, about 0.7 kB on a Canvas.
   - The worker URL is global, as MapLibre's is: `setMapWorkerUrl` (`core/map-config.ts`),
     exported from both entries; a standalone `Map` also takes `workerUrl`.
@@ -782,7 +787,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     `Georeference`s, memoized on the Manifest.
   - Georeferences are drawn the basic way, with no Allmaps: the least-squares affine fit
     of the control points in Web Mercator (exact for three) maps the image's corners, and
-    the image (about 2048 px via `core/thumbnail` `imageSource`, clipped to the
+    the image (about 2048 px, asked as its `info.json` allows, `overlayImage.ts`, clipped to the
     SvgSelector mask on a 2D canvas) is a MapLibre `canvas` source under the places.
     Needs CORS on the image. No TPS, no tiled overlay: document, don't add.
   - Inside a Root the Map overlays the view's Canvases only (memoized, or the map is
@@ -909,7 +914,7 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   last button in the pad's empty corner, `s` left of the down arrow, and the rotate pad,
   `RotatePad.tsx`, a group named `sceneRotate`, three controls across, each way to turn in
   the cell on its side, `s` apart as the cluster's are, its glyph Clover's caret (`Caret`,
-  the pager's chevron) pointing its way, round a disc that is a handle to drag
+  the pager's chevron) pointing its way, around a disc that is a handle to drag
   (`.clover-scene-rotate-disc`; Mat, 2026-10-23: "something you can hold onto and drag …
   the button is the disk"): a drag on it turns the models as one on the Scene does,
   measured against the Scene's height (`span`), and a pinch zooms; a pointer's
@@ -984,6 +989,16 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
 - Image services: `sources/imageService.ts` parses `info.json` for 3.0, 2.1.1 and 2.0 and
   spells **canonical** request URLs. A level 0 static tree answers to nothing else, which
   is also why a tile covering the whole image uses the region `full`.
+- Every other picture Clover asks of an image service (thumbnails, Document's stills,
+  Annotations' regions, the frames menu, the Map's overlay) is built there too, from the
+  server's own `info.json`, read first (`sizedImageUrl`; Mat, 2026-10-24: "always look at
+  info json and build accordingly/strictly"): never more pixels than the image or region
+  has (the whole image at its own size, `full` or `max`, where a request would be larger:
+  some servers refuse to scale up, the University of Washington's past 200%), within
+  `maxWidth`, `maxHeight` and `maxArea`, `w,` (2.x) or `w,h` (3.0), at level 0 only a size
+  it lists, and no region from a server that cannot cut. Never a URL templated on the
+  service's id from what a manifest declares of it: its profile is not always the
+  server's.
   `sources/tilePyramid.ts` builds levels from `tiles`, from `sizes`, or from tiles Clover
   derives itself.
 - Each frame is decided by `scene/planFrame.ts`, which is pure. `io/TileCache.ts` follows

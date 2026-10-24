@@ -198,6 +198,8 @@ export const StoryLines = React.memo(function StoryLines({
       const crossing = new Set(
         [...document.querySelectorAll<HTMLElement>("[data-tile]")]
           .filter((tile) => {
+            // Not a folded one (`inert`), out of sight under its fade.
+            if (tile.closest("[inert]")) return false;
             const { top, bottom } = tile.getBoundingClientRect();
             return top <= middle && bottom >= middle;
           })
