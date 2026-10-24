@@ -843,6 +843,14 @@ nav.nextra-toc:empty ~ article {
   color: var(--color-background);
 }
 
+/*
+ * The header's switch on Get started too, under its two ways (Mat, 2026-10-24), in step
+ * with the header's: what the reader chooses there is chosen here.
+ */
+.docs-flavor {
+  margin-top: 1rem;
+}
+
 /* Under the pointer, or focused, the accent, chosen or not, as the controls take it. */
 :root .code-switch > .code-switch-option[data-option]:hover,
 :root
@@ -859,13 +867,13 @@ nav.nextra-toc:empty ~ article {
 }
 
 /*
- * On a phone, "Web" for Web Components, the rest of its name out of sight but still
- * read, so the header keeps its wordmark and its menu; narrower still, at 320px, the
- * repository's icon gives way, the footer linking the source, so nothing scrolls sideways
- * (WCAG 1.4.10).
+ * On a phone, "Web" for Web Components in the header, the rest of its name out of sight
+ * but still read, so the header keeps its wordmark and its menu (the switch on Get
+ * started has the room for all of it); narrower still, at 320px, the repository's icon
+ * gives way, the footer linking the source, so nothing scrolls sideways (WCAG 1.4.10).
  */
 @media (max-width: 47.9375rem) {
-  .code-switch-more {
+  .nextra-navbar .code-switch-more {
     clip: rect(0 0 0 0);
     clip-path: inset(50%);
     height: 1px;

@@ -4,47 +4,64 @@ description: "What Clover is and how to start, in React or with web components: 
 ---
 
 import { Callout } from "nextra/components";
+import { Way, Ways } from "docs/components/Clover4/Ways";
+import { CodeSwitch } from "docs/components/CodeSwitch";
 import { earlierElement } from "docs/lib/earlier-size";
 import { loads } from "docs/lib/figures";
 
 # Get started
 
 <div className="docs-lede">
-  Clover builds interfaces for IIIF content in React or as web components: a
-  Manifest, a Collection, a Canvas or a content state, read through the IIIF
-  Presentation API. It is accessible, composable and light, and it draws images,
-  video and sound with a renderer of its own.
+  Clover builds interfaces for IIIF content, in React or as web components:
+  accessible, composable and light.
 </div>
 
-Clover is used two ways.
+{/* The two ways in, side by side (`Ways.tsx`; Mat, 2026-10-24). */}
 
-- **The Viewer**, ready-made. Give it a Manifest, and a template for a layout other than
-  the default.
+<Ways>
+<Way id="viewer" title="Start with the Viewer" react="<Viewer />" webComponents="<clover-viewer>">
 
-  ```jsx
-  import Viewer from "@nulib/clover";
-  import { Document } from "@nulib/clover/templates";
+One component for any IIIF resource, with its panel, keyboard and languages built
+in. See [Viewer](/docs/viewer) for its templates and props.
 
-  <Viewer iiifContent={url} />
-  <Viewer iiifContent={url} template={Document} />
-  ```
+```jsx
+import Viewer from "@nulib/clover";
+import "@nulib/clover/styles.css";
 
-- **The parts** it is built from, for a layout of your own. Each reads from the nearest
-  `Root`, wherever it sits in your markup: see [Composing layouts](/docs/composing).
+<Viewer iiifContent={url} />;
+```
 
-  ```jsx
-  import * as Clover from "@nulib/clover";
+</Way>
+<Way id="parts" title="Compose with its parts" react="<Clover.Root>" webComponents="<clover-root>">
 
-  <Clover.Root iiifContent={url}>
-    <Clover.Label as="h1" />
-    <Clover.Body />
-    <Clover.Items layout="pager" />
-    <Clover.Items />
-  </Clover.Root>;
-  ```
+Place them anywhere inside a `Root`, among your own markup; only the parts you use
+load. See [Composing](/docs/composing) for hooks and layouts.
 
-A page loads only the template it uses, and the parts tree-shake: a page that never draws
-an information panel never loads one.
+```jsx
+import * as Clover from "@nulib/clover";
+import "@nulib/clover/styles.css";
+
+<Clover.Root iiifContent={url}>
+  <Clover.Label as="h1" />
+  <Clover.Body />
+  <Clover.Items />
+</Clover.Root>;
+```
+
+</Way>
+</Ways>
+
+## React or web components
+
+The Viewer and its parts are React components, and custom elements for a page without
+React: a CMS template, a static site, an exhibit page ([Web components](#web-component)).
+The examples in these docs are written both ways. Show yours, here or in the header:
+
+{/* The header's switch, here too, the two in step (`CodeSwitch.tsx`; Mat, 2026-10-24). */}
+
+<div className="docs-flavor">
+  <CodeSwitch />
+</div>
 
 ## Install
 

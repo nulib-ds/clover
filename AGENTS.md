@@ -202,6 +202,23 @@ deadline.
     the templates on it: their old page, `/docs/viewer/templates`, forwards to
     `#templates`), Composing, Styling, IIIF Cookbook (the menu's names, short, for the
     pages titled "Composing layouts" and "Cookbook recipes"; Mat, 2026-10-23).
+  - Get started opens (Mat, 2026-10-24) with a lede of two lines (what Clover is: no
+    renderer named) and then its two ways in, side by side, above the fold at
+    1280 × 800 (`Ways.tsx`): "Start with the Viewer" and "Compose with its parts", each
+    under the component it starts from as the reader's flavor writes it (`<Viewer />`,
+    `<Clover.Root>`), in the code face and the accent, as a component page's head names
+    its part. Its reader has come from the homepage, whose choice offered the two, so it
+    says more, never the homepage's words again (Mat: "add more information not just
+    repeat ourselves"): what each way gives, in the page's black, its last sentence
+    linking the page that goes on with it by the menu's own name ("See Viewer…", "See
+    Composing…"; no calls to action here), then its code in the page's own light editor
+    (one Viewer with no `template`; the parts without a pager; both importing the
+    stylesheet, which the elements' twin leaves out, as they inject their own). The two
+    share their rows, so they line up; where the page is narrow, one follows the other.
+    Under them, before Install, "React or web components": a few words on the two
+    flavors, linking the page's own Web components section, and the code switch, the
+    header's second (Mat, 2026-10-24: "bring the toggle below this"; and asked, keep the
+    switch in the header as well as on Get started, for every other page).
   - The Viewer page reads as Radix Themes' component pages do (Mat, 2026-10-21): the title
     and a lede (`docs-lede`), one example at the top (the Viewer, its code under it, live:
     each template's own knobs, `LiveViewerExample`, kept as the reader switches; Mat,
@@ -558,8 +575,10 @@ deadline.
     across tabs, and set on the root as `data-code` before the page paints
     (`code-flavor-script.ts`, in the root layout's head), so CSS shows an example's code in
     the chosen flavor (`data-code-flavor`, `layout.css`) with no flash and no re-render;
-    both flavors stay in the HTML, for agents and pages read without scripts. On a phone
-    it reads "React | Web", the rest of the name still read (2.5.3); under 360px the
+    both flavors stay in the HTML, for agents and pages read without scripts. Get started
+    has a second, under its two ways (`.docs-flavor`), the two in step, as they share the
+    choice's store. On a phone the header's reads "React | Web", the rest of the name
+    still read (2.5.3), and Get started's all of it; under 360px the
     repository's icon gives way (the footer links the source), so the header fits at
     320px (1.4.10).
   - Menus, calls to action, headings, titles, tabs and labels are in sentence case, on
