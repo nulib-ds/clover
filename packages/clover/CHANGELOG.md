@@ -1800,7 +1800,11 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   region of a server that cannot cut one. The frames menu's and Annotations' pictures
   appear once `info.json` is read. So that a long strip does not read a thousand, Items'
   thumbnails read theirs as they come within half a screen (or half their carousel or
-  pane) of view, and Document's stills within a column's height.
+  pane) of view, and Document's stills within a column's height. Budgets raised for it, by
+  0.1 to 0.7 kB gzip: a Canvas alone to 38.2, the Default, Document and Gallery
+  templates to 68.4, 70.9 and 59.4, and the web components' pages (`<clover-viewer>`
+  110.8, its own entry 92.2, in Document 117.0, a `<clover-canvas>` alone 79.6, the four
+  parts 95.2, a layout of containers 109.9).
 
   `thumbnailSource(resource)` and `stillSource(resource)` take no size, and a source
   with an image service no longer has a `src`; `regionSource(canvas, rect)` takes no
@@ -2014,6 +2018,14 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   children) is now clipped to it, so draw it on the entry itself.
 
 ### Fixed
+
+- **Document's thumbnails no longer move as their pictures arrive (Mat, 2026-10-24).** A
+  picture waiting for its image was a sliver one control tall (`--clover-space-xl`), and
+  grew to the sidebar's width as its image came in, so the thumbnails below it moved, and
+  a press could start on one and end on another, choosing neither. Each is now its
+  Canvas's shape at the sidebar's width, waiting or loaded, its image contained in it.
+  Items keeps `--clover-items-ratio` on a loaded picture whose resource has a size, for a
+  layout that holds to it.
 
 - **Two copies of Clover on one page keep their ids apart.** A page with React's Clover
   and the elements', or with both of the elements' entries (`@nulib/clover/web-components`

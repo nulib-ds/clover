@@ -385,12 +385,28 @@ deadline.
     viewer renders as a React transition; no `:has()` on the page's root or its
     ancestors (attributes instead: `data-bar-stuck` and
     `docs/lib/full-width.ts`'s rules); no view transitions (their snapshot costs frames).
+    Nothing a story begins or ends restyles more than a few hundred elements in one frame
+    (Mat, 2026-10-24: "sluggish" as the Accessible and Composable stories met Seamless,
+    whose preview went on and off over 1,500 elements at once): Seamless's preview reaches
+    only what is on screen (the viewer's face shown, the stories and their line, the
+    tiles the fold shows), and goes on and off about 400 elements a frame, a frame after
+    the story's own change (`previewPageTheme`, `page-theme.ts`); and no inherited
+    property (`pointer-events`, `visibility`, a custom property) is set on a large
+    subtree as a story changes (the turned viewer's front is kept from the pointer by an
+    empty layer over it, `.flip::after`, not `pointer-events` on it).
     Measure with a scroll in a current Chrome (`npx playwright` with
     `channel: "chrome"`), since Playwright's bundled Chromium is slower to restyle, and
-    on a production build (`next dev`'s React is several times slower at each story's
-    change), by wheel (as a trackpad scrolls) at Mat's size too, about 1876 × 1960:
-    there, on October 21, 2026, main-thread tasks were 1.7ms at the median, the Seamless
-    story's restyle 6ms, and the only long frames the headless browser's own software raster.
+    on a production build (`next dev`'s React adds some 16ms to each story's change),
+    built in a copy of the tree with `node_modules` cloned (`cp -c`), so a running
+    `npm run dev` is untouched, by wheel (as a trackpad scrolls) at Mat's size too, about
+    1876 × 1960, with a Chrome trace: `UpdateLayoutTree`'s element count says how much
+    restyled, and invalidation tracking
+    (`disabled-by-default-devtools.timeline.invalidationTracking`) says why. There, on
+    October 21, 2026, main-thread tasks were 1.7ms at the median, the Seamless story's
+    restyle 6ms, and the only long frames the headless browser's own software raster; on
+    October 24, no task at a story's edge was over 9.2ms (15.7 before), the preview's
+    frames 5 to 7ms, the longest the Composable story's own change (9ms, React's part
+    3 to 4ms), and no frame of 802 over 16.8ms.
   - That section is one `Root` for that resource. On the left its parts make a small
     viewer, held in view (by its foot, once taller than the window), and held so that
     at the page's end its foot meets the npm block's (Install's, where the grid ends;

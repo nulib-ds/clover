@@ -198,6 +198,14 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   contain: inline-size;
 }
 
+/*
+ * Each picture its Canvas's shape at the sidebar's width, waiting for its image or not,
+ * the image contained in it: one arriving, or shaped otherwise than its Canvas, never
+ * moves the thumbnails (Mat, 2026-10-24: a press was lost as the ones above it grew).
+ */
+.clover-template-document-sidebar
+  .clover-items[data-layout]
+  .clover-items-picture[data-empty],
 .clover-template-document-sidebar
   .clover-items[data-layout]
   .clover-items-picture
@@ -205,6 +213,7 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   width: 100%;
   height: auto;
   max-height: 20rem;
+  aspect-ratio: var(--clover-items-ratio, auto);
   object-fit: contain;
 }
 

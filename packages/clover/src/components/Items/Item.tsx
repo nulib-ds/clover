@@ -112,8 +112,9 @@ function Picture({
       className="clover-items-picture"
       data-loaded={loaded}
       data-empty={src ? undefined : true}
+      // Its Canvas's shape, kept once its image is in, for a layout that holds to it.
       style={
-        src
+        src && !(width && height)
           ? undefined
           : ({ "--clover-items-ratio": ratio } as React.CSSProperties)
       }

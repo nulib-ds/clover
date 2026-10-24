@@ -744,7 +744,17 @@
 
 .flip:is([data-face="back"], [data-face="recipe"]) > [data-face-of="front"] {
   opacity: 0;
-  pointer-events: none;
+}
+
+/*
+ * No pointer reaches the front meanwhile: an empty layer over it takes the pointer, not
+ * `pointer-events` on the face, which every element in it inherits, so setting it
+ * restyled all of them as the viewer turned (Mat, 2026-10-24: smooth).
+ */
+.flip:is([data-face="back"], [data-face="recipe"])::after {
+  content: "";
+  inset: 0;
+  position: absolute;
 }
 
 .flip[data-face="back"] > [data-face-of="back"],

@@ -559,9 +559,12 @@ function Exploded({
    * meanwhile. Never the font, which would reflow the page under the reader (Mat,
    * 2026-10-20: a layout shift). Not on a dark page, where a dark accent on the dark
    * ground would fall below the contrast its text needs (WCAG 1.4.3). Shown on what is
-   * in view as it begins (the navbar, the viewer, the stories and their line, the tiles
-   * and chips on screen), which looks the same as the whole page and spares it a restyle
-   * of every element mid-scroll (Mat, 2026-10-21: smooth). Meanwhile the viewer's
+   * in view as it begins (the viewer's face shown, the stories and their line, the
+   * navbar, the tiles and chips on screen, of those folded only what the fold shows),
+   * which looks the same as the whole page and spares it a restyle of every element
+   * mid-scroll (Mat, 2026-10-21: smooth), and a few at a time (`previewPageTheme`; Mat,
+   * 2026-10-24: the viewer's three faces and the folded tiles, 1,500 elements, restyled
+   * in one frame as the story began and ended). Meanwhile the viewer's
    * thumbnails show their Next as the pointer would find it (`data-hovered`,
    * `Parts.module.css`): in the accent, its name showing, so the color is plain to see
    * (Mat, 2026-10-21). Only shown: nothing is focused or pressed.
@@ -571,26 +574,53 @@ function Exploded({
     if (!branding) return endPageThemePreview();
     if (document.documentElement.classList.contains("dark")) return;
     const node = assembled.current;
-    const inView = (element: Element) => {
+    // On screen, and within `clip` (the fold) where one is given.
+    const inView = (element: Element, clip?: DOMRect) => {
       const { top, bottom } = element.getBoundingClientRect();
-      return bottom > 0 && top < window.innerHeight;
+      return (
+        bottom > Math.max(0, clip?.top ?? 0) &&
+        top < Math.min(window.innerHeight, clip?.bottom ?? Infinity)
+      );
     };
-    const within = [
-      document.querySelector<HTMLElement>(".nextra-navbar"),
-      node,
-      node
+    // An element the preview can be set on: HTML, or the stories' line (SVG).
+    const html = (element: Element | null | undefined) =>
+      element instanceof HTMLElement || element instanceof SVGElement
+        ? [element as HTMLElement]
+        : [];
+    // The stories' column: each story on screen, and the intros around them.
+    const column = [
+      ...(node
         ?.closest<HTMLElement>(`.${styles.grid}`)
-        ?.querySelector<HTMLElement>(`.${styles.after}`),
-      document.querySelector<HTMLElement>(`.${styles.storyLines}`),
-      ...[
-        ...(document.querySelector<HTMLElement>(`.${styles.tiles}`)?.children ??
-          []),
-        document.querySelector<HTMLElement>(`.${styles.missing}`),
-      ].filter(
-        (element): element is HTMLElement =>
-          Boolean(element) && inView(element!),
-      ),
-    ].filter((element): element is HTMLElement => Boolean(element));
+        ?.querySelector<HTMLElement>(`.${styles.after}`)?.children ?? []),
+    ].flatMap((child) =>
+      child.querySelector(":scope > [data-point]")
+        ? [...child.children]
+        : [child],
+    );
+    // The tiles on screen; of those folded under "Show all", what the fold shows.
+    const tiles = [
+      ...(document.querySelector<HTMLElement>(`.${styles.tiles}`)?.children ??
+        []),
+    ].flatMap((child) =>
+      child.classList.contains(styles.rest)
+        ? [...child.children].filter((tile) =>
+            inView(
+              tile,
+              child.hasAttribute("data-folded")
+                ? child.getBoundingClientRect()
+                : undefined,
+            ),
+          )
+        : [child].filter((tile) => inView(tile)),
+    );
+    // The face shown alone, its others out of sight meanwhile; the nearest first.
+    const within = [
+      ...html(viewer.current),
+      ...column.filter((element) => inView(element)).flatMap(html),
+      ...html(document.querySelector(`.${styles.storyLines}`)),
+      ...html(document.querySelector(".nextra-navbar")),
+      ...tiles.flatMap(html),
+    ];
     previewPageTheme(
       {
         accent:

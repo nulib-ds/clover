@@ -186,16 +186,80 @@ const subscribePageTheme = (listener: () => void) => {
  * root is left as it was. A change on the root restyles every element on the page, some
  * 2,400 on the homepage, a frame dropped mid-scroll; on what is in view it looks the
  * same (Mat, 2026-10-21: smooth). Only the accent is so shown: a font would reflow.
+ *
+ * It goes on, and comes off, a few elements a frame (`step`): the accent's properties
+ * are inherited, so an element restyles with all it holds, and all at once the homepage's
+ * restyled some 1,500 elements in one frame, which a scroll felt as it began and ended
+ * (Mat, 2026-10-24: "sluggish"). A few frames apart, it looks no different.
  */
 let previewing = false;
-let within: HTMLElement[] = [];
+/** What the preview is to be on, and in which accent. */
+let wanted: { element: HTMLElement; accent: string }[] = [];
+/** What it is on now, and in which accent. */
+const shown = new Map<HTMLElement, string>();
+let stepping = 0;
 
+/** About as many elements as restyle within a frame's few milliseconds. */
+const FRAME_ELEMENTS = 400;
+
+/** What a change on `element` restyles: it and all it holds. */
+const weight = (element: HTMLElement) =>
+  element.getElementsByTagName("*").length + 1;
+
+const takeOff = (element: HTMLElement) => {
+  delete element.dataset.pageTheme;
+  ACCENT_PROPERTIES.forEach((prop) => element.style.removeProperty(prop));
+  shown.delete(element);
+};
+
+/** A frame's share: first off what is no longer wanted, then on what is, in its order. */
+const step = () => {
+  stepping = 0;
+  // Never past the frame's share, but for one element larger than it alone.
+  let budget = FRAME_ELEMENTS;
+  const fits = (element: HTMLElement) => {
+    const cost = weight(element);
+    if (cost > budget && budget < FRAME_ELEMENTS) return false;
+    budget -= cost;
+    return true;
+  };
+  const wants = new Map(wanted.map((w) => [w.element, w.accent]));
+  for (const [element, accent] of [...shown]) {
+    if (wants.get(element) === accent) continue;
+    if (!fits(element)) break;
+    takeOff(element);
+  }
+  for (const { element, accent } of wanted) {
+    if (budget <= 0) break;
+    if (shown.get(element) === accent) continue;
+    if (!fits(element)) break;
+    element.dataset.pageTheme = "";
+    applyTo(element, { accent });
+    shown.set(element, accent);
+  }
+  const done =
+    [...shown].every(([element, accent]) => wants.get(element) === accent) &&
+    wanted.every(({ element, accent }) => shown.get(element) === accent);
+  if (!done) stepping = requestAnimationFrame(step);
+};
+
+/*
+ * Begun a frame late: what asked for it (a story beginning or ending) changes the page
+ * in the frame it asks, and the two together would cost that frame both.
+ */
+const schedule = () => {
+  if (!stepping)
+    stepping = requestAnimationFrame(() => {
+      stepping = requestAnimationFrame(step);
+    });
+};
+
+/** All of it off at once, for a choice, which the root then shows. */
 const endWithin = () => {
-  within.forEach((element) => {
-    delete element.dataset.pageTheme;
-    ACCENT_PROPERTIES.forEach((prop) => element.style.removeProperty(prop));
-  });
-  within = [];
+  cancelAnimationFrame(stepping);
+  stepping = 0;
+  wanted = [];
+  [...shown.keys()].forEach(takeOff);
 };
 
 export const previewPageTheme = (
@@ -204,13 +268,10 @@ export const previewPageTheme = (
 ) => {
   previewing = true;
   current = { ...getPageTheme(), ...next };
-  if (elements?.length && next.font === undefined) {
-    endWithin();
-    within = elements;
-    within.forEach((element) => {
-      element.dataset.pageTheme = "";
-      applyTo(element, { accent: next.accent });
-    });
+  if (elements?.length && next.font === undefined && next.accent) {
+    const accent = next.accent;
+    wanted = elements.map((element) => ({ element, accent }));
+    schedule();
   } else applyPageTheme(next);
   listeners.forEach((listener) => listener());
 };
@@ -219,8 +280,10 @@ export const endPageThemePreview = () => {
   if (!previewing) return;
   previewing = false;
   current = readStoredPageTheme();
-  if (within.length) endWithin();
-  else applyPageTheme(current);
+  if (wanted.length || shown.size) {
+    wanted = [];
+    schedule();
+  } else applyPageTheme(current);
   listeners.forEach((listener) => listener());
 };
 
@@ -228,7 +291,7 @@ export const endPageThemePreview = () => {
 export const setPageTheme = (next: Partial<PageTheme>) => {
   current = { ...getPageTheme(), ...next };
   // A choice over a preview shown within some elements: all of it to the root now.
-  if (previewing && within.length) {
+  if (previewing && (wanted.length || shown.size)) {
     endWithin();
     applyPageTheme(current);
   } else applyPageTheme(next);
