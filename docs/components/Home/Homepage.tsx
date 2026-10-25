@@ -5,7 +5,6 @@ import Playground, {
 } from "docs/components/Playground/Playground";
 import React, { useRef, useState } from "react";
 import Hero from "docs/components/Home/Hero";
-import Link from "next/link";
 import Parts from "docs/components/Home/Parts";
 import styles from "docs/components/Home/Home.module.css";
 import { cookbookSections } from "docs/components/CookbookRecipes/cookbookSections";
@@ -25,6 +24,7 @@ import { BrandCode, BrandControls } from "docs/components/Home/BrandPicker";
 import { FormatPicker } from "docs/components/Home/FormatPicker";
 import { IIIFLogo } from "docs/components/Home/IIIFLogo";
 import { InstallCommand } from "docs/components/Home/InstallCommand";
+import { RecipeSelect } from "docs/components/Home/RecipeSelect";
 import { SectionIntro } from "docs/components/Home/SectionIntro";
 import { Swoosh } from "docs/components/Home/Swoosh";
 
@@ -101,6 +101,14 @@ interface Story {
    * its resource in the playground and so in the example viewer (`FormatPicker.tsx`).
    */
   formats?: boolean;
+  /**
+   * Whether the Cookbook's recipes are listed across the story's foot, under its words, as
+   * Composable's code is, in the playground's own select, the one chosen opened in the
+   * playground (`RecipeSelect.tsx`; Mat, 2026-10-25). The example viewer reads its own
+   * `recipe` still, always (Mat, 2026-10-25: "it should remain as the 0032 collection
+   * always").
+   */
+  recipes?: boolean;
 }
 
 const stories: Story[] = [
@@ -217,18 +225,23 @@ const stories: Story[] = [
          * its code and components, named, never "it’s" or "its", and "IIIF" said once
          * (Mat, 2026-10-25). No date, no range of recipes; the link one word.
          */}
+        {/*
+         * What Clover handles in its sentence, not a column of its own (Mat,
+         * 2026-10-25: "put the 62 in line in the sentence … bold the number and
+         * underline it"), bold, with the figures' stroke under it, drawn once, and no
+         * total or count in part (Mat, 2026-10-21). "cookbook" goes to the IIIF
+         * Cookbook itself (Mat, 2026-10-25).
+         */}
         Clover gains IIIF fluency from building blocks designed natively to open
-        specifications. Code and components are crafted toward recipes in the{" "}
-        <Link href="/docs/cookbook">cookbook</Link>.
+        specifications. Code and components are crafted toward recipes, with{" "}
+        <strong className={styles.inlineFigure}>
+          <Swoosh className={styles.figureMark}>{cookbook.handled}</Swoosh>
+        </strong>{" "}
+        handled in the <a href="https://iiif.io/api/cookbook/">cookbook</a>.
       </>
     ),
-    // What Clover handles, with no total and no count in part (Mat, 2026-10-21).
-    figures: [
-      {
-        value: String(cookbook.handled),
-        caption: "Recipes handled",
-      },
-    ],
+    figures: [],
+    recipes: true,
   },
 ];
 
@@ -358,6 +371,11 @@ const Homepage: React.FC<{
                   data-bar-until={index === 0 || undefined}
                   data-side={index % 2 ? "end" : "start"}
                   data-tone={index % 2 ? "code" : "page"}
+                  // One column where it has no figures beside its words (Natural's is in them).
+                  data-single={
+                    (!story.figures.length && !story.formats && !story.brand) ||
+                    undefined
+                  }
                 >
                   <div className={styles.storyText}>
                     <p className={styles.storyLabel}>{story.label}</p>
@@ -387,6 +405,35 @@ const Homepage: React.FC<{
                   {story.composer && (
                     <div className={styles.storyComposer} data-composer="" />
                   )}
+                  {story.recipes && (
+                    <RecipeSelect
+                      current={resourceKey}
+                      resource={resource}
+                      onOpen={(content) => {
+                        playground.current?.openContent(content);
+                        /*
+                         * Up to the Viewer it opens in (Mat, 2026-10-25: "make this
+                         * change/submit navigate the user top"), smoothly where motion
+                         * is allowed, and focus with the reader, to the playground's
+                         * field, which shows it now (WCAG 2.4.3, 2.4.11).
+                         */
+                        const still = matchMedia(
+                          "(prefers-reduced-motion: reduce)",
+                        ).matches;
+                        scrollTo({
+                          top: 0,
+                          behavior: still ? "auto" : "smooth",
+                        });
+                        document
+                          .querySelector<HTMLInputElement>(
+                            '#playground input[role="combobox"]',
+                          )
+                          ?.focus({ preventScroll: true });
+                      }}
+                      // Staged as the example viewer shows it, never opened unasked.
+                      staged={story.recipe?.resource}
+                    />
+                  )}
                   {/*
                    * Seamless's controls where the others' figures are, its code under its
                    * words, after them in the page's order, as what they write.
@@ -401,9 +448,9 @@ const Homepage: React.FC<{
                       chosen={resourceKey}
                       onPick={(key) => playground.current?.pickResource(key)}
                     />
-                  ) : (
+                  ) : story.figures.length ? (
                     figures
-                  )}
+                  ) : null}
                 </article>
               );
             })}

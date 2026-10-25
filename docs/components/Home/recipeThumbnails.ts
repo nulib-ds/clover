@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 
+import { thumbnailFrom } from "docs/lib/iiif-image-sizes";
+
 /*
- * Coverage's recipe (Cookbook 0032, a Collection) publishes no thumbnails for its
- * members. For this example alone (Mat, 2026-10-22; never `Collection` in general), each
- * member's is made from its first image's service, at a size its `info.json` prescribes:
- * one of its `sizes`, else the whole image at one of its tiles' scale factors, a level
- * the server keeps. Of those, the smallest that is still twice the thumbnail's drawn
- * size, else the largest.
+ * The Natural story's recipe (Cookbook 0032, a Collection, until another is chosen from
+ * its list) publishes no thumbnails for its members. For this example alone (Mat,
+ * 2026-10-22; never `Collection` in general), each
+ * member's is made from its first image's service, at a size its `info.json` allows
+ * (`thumbnailFrom`): twice the thumbnail's drawn size where the server makes any, else
+ * the smallest it keeps that is still that size, else the largest.
  */
 
 type Json = Record<string, any>;
@@ -25,36 +27,6 @@ async function fetchJson(url: string): Promise<Json> {
   return response.json();
 }
 
-interface Size {
-  width: number;
-  height: number;
-}
-
-/** The sizes an image's `info.json` prescribes. */
-function prescribedSizes(info: Json): Size[] {
-  const listed = (asArray(info.sizes) as Json[]).filter(
-    (size) => size?.width > 0 && size?.height > 0,
-  ) as Size[];
-  if (listed.length) return listed;
-  const { width, height } = info;
-  if (!(width > 0 && height > 0)) return [];
-  return (asArray(info.tiles) as Json[]).flatMap((tile) =>
-    (asArray(tile?.scaleFactors) as number[]).map((scale) => ({
-      width: Math.ceil(width / scale),
-      height: Math.ceil(height / scale),
-    })),
-  );
-}
-
-/** Of the prescribed sizes, the smallest still `WANTED` wide, else the largest. */
-function chooseSize(sizes: Size[]): Size | undefined {
-  const byWidth = [...sizes].sort((a, b) => a.width - b.width);
-  return (
-    byWidth.find((size) => Math.min(size.width, size.height) >= WANTED) ??
-    byWidth.at(-1)
-  );
-}
-
 /** A thumbnail for a member Manifest, from its first Canvas's first image's service. */
 async function thumbnailOf(manifestId: string): Promise<Json | undefined> {
   const manifest = await fetchJson(manifestId);
@@ -66,17 +38,12 @@ async function thumbnailOf(manifestId: string): Promise<Json | undefined> {
   const serviceId: string | undefined = service?.id ?? service?.["@id"];
   if (!serviceId) return undefined;
   const base = serviceId.replace(/\/$/, "");
-  const size = chooseSize(
-    prescribedSizes(await fetchJson(`${base}/info.json`)),
+  const sized = thumbnailFrom(
+    base,
+    await fetchJson(`${base}/info.json`),
+    WANTED,
   );
-  if (!size) return undefined;
-  return {
-    id: `${base}/full/${size.width},${size.height}/0/default.jpg`,
-    type: "Image",
-    format: "image/jpeg",
-    width: size.width,
-    height: size.height,
-  };
+  return sized && { ...sized, type: "Image", format: "image/jpeg" };
 }
 
 /** The Collection, each member given a thumbnail where it has none. */

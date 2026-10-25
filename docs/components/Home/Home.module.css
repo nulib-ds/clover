@@ -283,6 +283,22 @@
   display: none;
 }
 
+/*
+ * The Natural story's recipes, across its foot as Composable's code is: the playground's
+ * own select (`RecipeSelect.tsx`), in the site's dark palette (`dark` on it).
+ */
+.recipes {
+  grid-column: 1 / -1;
+  min-width: 0;
+  order: 1;
+}
+
+/* Its list, open, over what follows the story (its entrance makes the story a layer). */
+.story:has(> .recipes:focus-within) {
+  position: relative;
+  z-index: 2;
+}
+
 /* The figure first, on the left, in every other story. */
 .story[data-side="start"] {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.618fr);
@@ -290,6 +306,24 @@
 
 .story[data-side="start"] .storyFigures {
   order: -1;
+}
+
+/*
+ * A story with no figures beside its words (Natural's is in its sentence; Mat,
+ * 2026-10-25: "instead of going columns for this card"): one column.
+ */
+.story[data-single][data-side] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* A figure in a story's words: bold, in the words' white, its stroke under it. */
+.inlineFigure {
+  color: var(--code-bright);
+  font-weight: var(--weight-bold);
+}
+
+.story[data-tone="page"] .inlineFigure {
+  color: var(--gray-12);
 }
 
 .storyLabel {
@@ -330,8 +364,8 @@
   line-height: 1.5;
   margin: 0;
   max-width: 34rem;
-  /* No last line of one word ("away."). */
-  text-wrap: pretty;
+  /* Lines of a length, never a last one short (Mat, 2026-10-25: "balance"). */
+  text-wrap: balance;
 }
 
 .storyBody a {

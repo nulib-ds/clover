@@ -34,6 +34,11 @@ const MOVES: [RegExp, string][] = [
   [/^\/docs\/web-component$/, "/docs#web-component"],
   // The part that draws the view, when it was Content (Mat, 2026-10-22: now Body).
   [/^\/docs\/content$/, "/docs/body"],
+  /*
+   * The Cookbook's recipes, listed on a page of their own until the homepage listed them
+   * (its Viewing field and its Natural story; Mat, 2026-10-25).
+   */
+  [/^\/docs\/cookbook$/, "/"],
 ];
 
 /** The page moved to from `path`, or nothing. */

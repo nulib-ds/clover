@@ -1,4 +1,11 @@
 import React, { useEffect, useId, useRef, useState } from "react";
+import { recipeBase } from "docs/components/CookbookRecipes/cookbookCatalog";
+import {
+  type CatalogRecipe,
+  readRecipes,
+  recipeFor,
+} from "docs/components/CookbookRecipes/recipeCatalog";
+import { IIIFLogo } from "docs/components/Home/IIIFLogo";
 import { resources } from "docs/components/Playground/playground-config";
 
 import styles from "docs/components/Playground/Playground.module.css";
@@ -8,6 +15,18 @@ export const OWN = "own";
 
 /** The list's first item: an empty field, for the reader's own. */
 const NEW = "new";
+
+/** The list's last item: the IIIF Cookbook's recipes, tucked away until asked for. */
+const COOKBOOK = "cookbook";
+
+const COOKBOOK_NAME = "IIIF Cookbook recipes";
+
+/*
+ * The recipes, read when they are first listed, or when one is in the Viewer (a link from
+ * a recipe's page on iiif.io opens it here), from the curated Collection the Natural
+ * story draws too (`docs/mocks/cookbook/`).
+ */
+type Recipe = CatalogRecipe;
 
 /*
  * Not `validIiifContent` from `docs/lib/iiif-content`: it brings `@iiif/helpers`, an ESM
@@ -147,7 +166,9 @@ interface Choice {
   /** A few words under the label. */
   about: string;
   thumbnail?: string;
-  /** The reader's: its address or content state. */
+  /** Where it has no thumbnail, what its empty slot shows: a recipe's number. */
+  mark?: string;
+  /** The reader's, or a recipe's: its address or content state. */
   content?: string;
   selected: boolean;
 }
@@ -164,6 +185,20 @@ export interface ResourceFieldProps {
   onPick: (key: string) => void;
   /** The reader's own was entered: an address or a content state. */
   onOwn: (content: string) => void;
+  /**
+   * What it lists: the playground's resources, the reader's own and, tucked away, the
+   * Cookbook's recipes (default); or the recipes alone, as the Natural story's select
+   * does (`RecipeSelect.tsx`), a recipe opened as the reader's own is.
+   */
+  of?: "resources" | "recipes";
+  /** Where Open sends what it opens: to the Viewer beside it, or up top, its caret up. */
+  toward?: "right" | "up";
+  /**
+   * For the recipes alone: a recipe's address shown in the field, not opened, while the
+   * Viewer shows none (the one the example viewer reads, 0032; Mat, 2026-10-25: "stage
+   * the 0032 manifest in the select. do not have it be submitted"). Open opens it.
+   */
+  staged?: string;
 }
 
 /**
@@ -180,17 +215,26 @@ export interface ResourceFieldProps {
  * or else what is typed; Escape closes the list, and then puts back what the Viewer
  * shows. A press on the field or its chevron opens it too. Focus stays in the field
  * throughout.
+ *
+ * With `of="recipes"`, the same select lists the Cookbook's recipes alone, read while the
+ * page is idle, its field showing the one in the Viewer, else nothing but what it asks
+ * for (Mat, 2026-10-25: "just use the same select as above").
  */
 export default function ResourceField({
   current,
   own,
   onPick,
   onOwn,
+  of = "resources",
+  toward = "right",
+  staged,
 }: ResourceFieldProps) {
+  const onlyRecipes = of === "recipes";
   const id = useId();
   const inputId = `${id}-input`;
   const listId = `${id}-list`;
   const errorId = `${id}-error`;
+  const recipeId = `${id}-recipe`;
   const optionId = (key: string) => `${id}-${key}`;
 
   /*
@@ -198,44 +242,132 @@ export default function ResourceField({
    * go back to one. Held here only, in memory, and gone with the page; never stored.
    */
   const [provided, setProvided] = useState<string[]>([]);
+
+  /*
+   * The IIIF Cookbook's recipes, at the end of the list, under one option that shows and
+   * hides them (Mat, 2026-10-25: "a category that is tucked away at the bottom of the
+   * list"). Read when it is first chosen, or when a recipe is in the Viewer; `null`
+   * until then. Held in memory only. Shown while a recipe is in the Viewer, they fold
+   * away again as anything else opens (Mat, 2026-10-25), so ours stand apart again.
+   */
+  const [recipes, setRecipes] = useState<Recipe[] | null>(null);
+  const [cookbookShown, setCookbookShown] = useState(false);
+  const [readingRecipes, setReadingRecipes] = useState(false);
+  /* What the list's last change was, said to assistive technology (WCAG 4.1.3). */
+  const [status, setStatus] = useState("");
+  const recipeAddress = current === OWN && own.startsWith(recipeBase);
+
   useEffect(() => {
-    if (current === OWN && own)
-      setProvided((list) => (list.includes(own) ? list : [own, ...list]));
-  }, [current, own]);
+    if (recipeAddress && !recipes) void readRecipes().then(setRecipes);
+  }, [recipeAddress, recipes]);
+
+  // The recipes alone: read while the page is idle, to list them and name the one shown.
+  useEffect(() => {
+    if (!onlyRecipes) return;
+    const read = () => void readRecipes().then(setRecipes);
+    if (!("requestIdleCallback" in window)) {
+      const timer = setTimeout(read, 2000);
+      return () => clearTimeout(timer);
+    }
+    const idle = requestIdleCallback(read, { timeout: 4000 });
+    return () => cancelIdleCallback(idle);
+  }, [onlyRecipes]);
+
+  // The recipe in the Viewer, where it is one.
+  const recipeShown = current === OWN ? recipeFor(recipes, own) : undefined;
+  // For the recipes alone, the one staged while the Viewer shows none.
+  const stagedRecipe =
+    onlyRecipes && !recipeShown && staged
+      ? recipeFor(recipes, staged)
+      : undefined;
+
+  /*
+   * Another resource in the Viewer folds the recipes away; one of them opens them again,
+   * just after (below), once it is known to be one. Only a change of resource: reading
+   * the recipes, or the reader showing or hiding them, leaves them as they are.
+   */
+  const inViewer = current === OWN ? own : current;
+  useEffect(() => setCookbookShown(false), [inViewer]);
+
+  useEffect(() => {
+    if (onlyRecipes || current !== OWN || !own) return;
+    // A recipe's address waits for the recipes, to be shown as one, its category open.
+    if (own.startsWith(recipeBase) && !recipes) return;
+    if (recipeShown) return setCookbookShown(true);
+    setProvided((list) => (list.includes(own) ? list : [own, ...list]));
+  }, [onlyRecipes, current, own, recipes, recipeShown]);
   const details = useDetails(provided);
 
-  const choices: Choice[] = [
-    // First, always: the way to one of the reader's own, an empty field to enter it in.
-    {
-      key: NEW,
-      label: { text: "View your own" },
-      about: "The address of a IIIF Manifest or Collection",
-      selected: false,
-    },
-    ...provided.map((content, index) => {
-      const address = rootAddress(content);
-      return {
-        // Counted from the first given, so each keeps its key as more arrive.
-        key: `own-${provided.length - 1 - index}`,
-        label: details[content]?.label ?? { text: address ?? content },
-        // Its address: for a content state, the Manifest or Collection it opens.
-        about: address ?? content,
-        thumbnail: details[content]?.thumbnail,
-        content,
-        selected: current === OWN && own === content,
-      };
-    }),
-    ...resources.map((r) => ({
-      key: r.key,
-      label: { text: r.title },
-      about: r.description,
-      thumbnail: r.thumbnail,
-      selected: r.key === current,
-    })),
+  const choices: Choice[] = onlyRecipes
+    ? []
+    : [
+        // First, always: the way to one of the reader's own, an empty field to enter it in.
+        {
+          key: NEW,
+          label: { text: "View your own" },
+          about: "The address of a IIIF Manifest or Collection",
+          selected: false,
+        },
+        ...provided.map((content, index) => {
+          const address = rootAddress(content);
+          return {
+            // Counted from the first given, so each keeps its key as more arrive.
+            key: `own-${provided.length - 1 - index}`,
+            label: details[content]?.label ?? { text: address ?? content },
+            // Its address: for a content state, the Manifest or Collection it opens.
+            about: address ?? content,
+            thumbnail: details[content]?.thumbnail,
+            content,
+            selected: current === OWN && own === content && !recipeShown,
+          };
+        }),
+        ...resources.map((r) => ({
+          key: r.key,
+          label: { text: r.title },
+          about: r.description,
+          thumbnail: r.thumbnail,
+          selected: r.key === current,
+        })),
+      ];
+  // Last, the way to the recipes, which shows them and hides them again.
+  const cookbook: Choice = {
+    key: COOKBOOK,
+    label: { text: COOKBOOK_NAME },
+    about: readingRecipes
+      ? "Loading…"
+      : cookbookShown
+        ? "Hide them"
+        : recipes?.length
+          ? `Show all ${recipes.length}`
+          : "Show them all",
+    selected: false,
+  };
+  const recipeChoices: Choice[] = (recipes ?? []).map((recipe) => ({
+    key: `recipe-${recipe.slug}`,
+    // The recipe's title as the Cookbook writes it, and its folder's name on iiif.io.
+    label: { text: recipe.title },
+    about: recipe.slug,
+    thumbnail: recipe.thumbnail,
+    mark: recipe.slug.slice(0, 4),
+    content: recipe.resource,
+    selected: recipe === (recipeShown ?? stagedRecipe),
+  }));
+  const chosen = [...choices, ...recipeChoices].find(
+    (choice) => choice.selected,
+  );
+  // The recipes alone are always shown, with no category to show them by.
+  const recipesShown = onlyRecipes || cookbookShown;
+  const resourcesOnly = [
+    ...choices.filter((choice) => choice.key !== NEW),
+    ...(recipesShown ? recipeChoices : []),
   ];
-  const chosen = choices.find((choice) => choice.selected);
-  const resourcesOnly = choices.filter((choice) => choice.key !== NEW);
-  const shown = chosen?.label ?? { text: own };
+  /*
+   * While a recipe's address waits for its title, the field shows nothing of the address;
+   * the recipes alone show nothing but a recipe.
+   */
+  const shown =
+    chosen?.label ??
+    ((recipeAddress && !recipes) || onlyRecipes ? { text: "" } : { text: own });
 
   /* A picture that would not load leaves the empty slot. */
   const [broken, setBroken] = useState<string[]>([]);
@@ -245,6 +377,8 @@ export default function ResourceField({
 
   /* What the reader has typed, until it is opened or put back; `null` while untouched. */
   const [draft, setDraft] = useState<string | null>(null);
+  // The recipe in the Viewer, hinted in the field until the reader types over it.
+  const recipeHint = !onlyRecipes && draft === null ? recipeShown : undefined;
   /* What narrows the list: what was typed, or nothing when the list was asked for. */
   const [filter, setFilter] = useState("");
   const [open, setOpen] = useState(false);
@@ -254,13 +388,24 @@ export default function ResourceField({
   /* How the field was last pressed: a touch keeps its label unselected. */
   const pointer = useRef<string>("");
 
+  const listName = onlyRecipes ? COOKBOOK_NAME : "IIIF resources";
   const query = filter.trim().toLowerCase();
-  // Narrowed by what is typed, among the resources: one's own is already being entered.
+  const matches = (choice: Choice) =>
+    `${choice.label.text} ${choice.about}`.toLowerCase().includes(query);
+  /*
+   * Narrowed by what is typed, among the resources: one's own is already being entered.
+   * The recipes are among them once shown; their category, where its name matches.
+   */
+  const unfiltered = onlyRecipes
+    ? recipeChoices
+    : [...choices, cookbook, ...(cookbookShown ? recipeChoices : [])];
   const options = query
-    ? resourcesOnly.filter((choice) =>
-        `${choice.label.text} ${choice.about}`.toLowerCase().includes(query),
-      )
-    : choices;
+    ? [
+        ...resourcesOnly.filter(matches),
+        ...(recipesShown ? [] : [cookbook].filter(matches)),
+      ]
+    : unfiltered;
+  const listedRecipes = options.filter((o) => o.key.startsWith("recipe-"));
   const expanded = open && options.length > 0;
 
   // Another resource in the Viewer, from here, the page or a link, puts its name back.
@@ -281,15 +426,52 @@ export default function ResourceField({
 
   /** Opens the whole list, marking the one in the Viewer, or else the first or last. */
   const show = (from: "first" | "last" | null) => {
+    const all = unfiltered;
+    if (!all.length) return;
     setFilter("");
     setOpen(true);
     setActive(
       from === null
         ? null
-        : chosen
+        : chosen && all.includes(chosen)
           ? chosen.key
-          : choices[from === "first" ? 0 : choices.length - 1].key,
+          : all[from === "first" ? 0 : all.length - 1].key,
     );
+  };
+
+  const listRef = useRef<HTMLUListElement>(null);
+
+  /*
+   * Shows the recipes, read first if they are not yet, and marks the first of them, the
+   * category at the list's top so they follow it; or hides them again. The list stays
+   * open and focus in the field.
+   */
+  const toggleCookbook = () => {
+    if (cookbookShown) {
+      setCookbookShown(false);
+      setActive(COOKBOOK);
+      setStatus(`${COOKBOOK_NAME} hidden`);
+      return;
+    }
+    setActive(COOKBOOK);
+    if (!recipes) setReadingRecipes(true);
+    void readRecipes().then((list) => {
+      setReadingRecipes(false);
+      setRecipes(list);
+      if (!list.length)
+        return setStatus(`${COOKBOOK_NAME} could not be loaded`);
+      setCookbookShown(true);
+      setActive(`recipe-${list[0].slug}`);
+      setStatus(`${list.length} ${COOKBOOK_NAME} listed`);
+      requestAnimationFrame(() => {
+        const category = document.getElementById(optionId(COOKBOOK));
+        const box = listRef.current;
+        // The list alone scrolls, never the page around it.
+        if (category && box)
+          box.scrollTop =
+            category.offsetTop - parseFloat(getComputedStyle(box).paddingTop);
+      });
+    });
   };
 
   const close = () => {
@@ -298,6 +480,7 @@ export default function ResourceField({
   };
 
   const choose = (choice: Choice) => {
+    if (choice.key === COOKBOOK) return toggleCookbook();
     close();
     setFilter("");
     setError(undefined);
@@ -335,7 +518,14 @@ export default function ResourceField({
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     close();
-    if (draft === null) return;
+    /*
+     * Nothing typed: the recipes alone open the one their field shows, staged or already
+     * up top, so Open always takes the reader to it.
+     */
+    if (draft === null) {
+      if (onlyRecipes && chosen?.content) onOwn(chosen.content);
+      return;
+    }
     const value = draft.trim();
     // One in the list, by its label, opens as if chosen.
     const named = resourcesOnly.find(
@@ -403,8 +593,20 @@ export default function ResourceField({
            * and the name holds the words shown (2.5.3).
            */}
           <div className={styles.fieldGroup}>
+            {/*
+             * A Cookbook recipe in the Viewer, said plainly (Mat, 2026-10-25: "strongly
+             * hint they are viewing a recipe"): IIIF's logo on the pill's top edge, in its
+             * middle, clear of the thumbnail, and its folder's name on iiif.io after its
+             * title. The playground's own field only: the recipes alone say so already.
+             */}
+            {recipeHint && (
+              <span className={styles.fieldBadge} aria-hidden="true">
+                <IIIFLogo className={styles.fieldBadgeLogo} />
+              </span>
+            )}
             <Picture
               className={styles.fieldMedia}
+              mark={draft === null ? chosen?.mark : undefined}
               onBroken={brake}
               // While the reader types, the field is theirs: an empty slot.
               src={draft === null ? pictured(chosen?.thumbnail) : undefined}
@@ -417,63 +619,96 @@ export default function ResourceField({
                */}
               <label className={styles.fieldLabel} htmlFor={inputId}>
                 Viewing
-                <span className={styles.visuallyHidden}> IIIF resource</span>
+                <span className={styles.visuallyHidden}>
+                  {onlyRecipes ? " IIIF Cookbook recipe" : " IIIF resource"}
+                </span>
               </label>
-              <input
-                aria-activedescendant={
-                  expanded && active ? optionId(active) : undefined
-                }
-                aria-autocomplete="list"
-                aria-controls={listId}
-                aria-describedby={error ? errorId : undefined}
-                aria-expanded={expanded}
-                aria-invalid={error ? true : undefined}
-                autoCapitalize="off"
-                autoComplete="off"
-                className={styles.fieldInput}
-                enterKeyHint="go"
-                id={inputId}
-                /*
-                 * No on-screen keyboard while the field shows one of ours (Mat, 2026-10-21):
-                 * a press lists them, and "View your own" brings the keyboard for an address.
-                 * A keyboard of keys types and moves as ever.
-                 */
-                inputMode={draft === null ? "none" : "url"}
-                // The label's language, while the field shows a label in another.
-                lang={draft === null ? shown.lang : undefined}
-                onChange={(event) => {
-                  setDraft(event.target.value);
-                  setFilter(event.target.value);
-                  setError(undefined);
-                  setOpen(true);
-                  setActive(null);
-                }}
-                onClick={(event) => {
+              <span
+                className={styles.fieldLine}
+                data-hinted={recipeHint ? "" : undefined}
+              >
+                <input
+                  aria-activedescendant={
+                    expanded && active ? optionId(active) : undefined
+                  }
+                  aria-autocomplete="list"
+                  aria-controls={listId}
+                  aria-describedby={
+                    [error && errorId, recipeHint && recipeId]
+                      .filter(Boolean)
+                      .join(" ") || undefined
+                  }
+                  aria-expanded={expanded}
+                  aria-invalid={error ? true : undefined}
+                  autoCapitalize="off"
+                  autoComplete="off"
+                  className={styles.fieldInput}
+                  enterKeyHint="go"
+                  id={inputId}
                   /*
-                   * Untouched, a press lists ours, and, by mouse, selects the label, so a
-                   * paste replaces it; by touch, it leaves it, or the phone's selection
-                   * handles would come up over it.
+                   * No on-screen keyboard while the field shows one of ours (Mat, 2026-10-21):
+                   * a press lists them, and "View your own" brings the keyboard for an address.
+                   * A keyboard of keys types and moves as ever.
                    */
-                  if (draft !== null) return;
-                  if (pointer.current !== "touch") event.currentTarget.select();
-                  if (!expanded) show(null);
-                }}
-                onPointerDown={(event) => {
-                  pointer.current = event.pointerType;
-                }}
-                onKeyDown={onKeyDown}
-                placeholder="https://"
-                ref={inputRef}
-                role="combobox"
-                spellCheck={false}
-                type="text"
-                value={draft ?? shown.text}
-              />
+                  inputMode={draft === null ? "none" : "url"}
+                  // The label's language, while the field shows a label in another.
+                  lang={draft === null ? shown.lang : undefined}
+                  onChange={(event) => {
+                    setDraft(event.target.value);
+                    setFilter(event.target.value);
+                    setError(undefined);
+                    setOpen(true);
+                    setActive(null);
+                  }}
+                  onClick={(event) => {
+                    /*
+                     * Untouched, a press lists ours, and, by mouse, selects the label, so a
+                     * paste replaces it; by touch, it leaves it, or the phone's selection
+                     * handles would come up over it.
+                     */
+                    if (draft !== null) return;
+                    if (pointer.current !== "touch")
+                      event.currentTarget.select();
+                    if (!expanded) show(null);
+                  }}
+                  onPointerDown={(event) => {
+                    pointer.current = event.pointerType;
+                  }}
+                  onKeyDown={onKeyDown}
+                  // An address to type; for the recipes alone, a recipe to choose.
+                  placeholder={onlyRecipes ? "Choose a recipe" : "https://"}
+                  ref={inputRef}
+                  role="combobox"
+                  spellCheck={false}
+                  type="text"
+                  value={draft ?? shown.text}
+                />
+                {recipeHint && (
+                  // Described to assistive technology as what it is; a press lists ours.
+                  <span
+                    className={styles.fieldRecipe}
+                    id={recipeId}
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      inputRef.current?.focus();
+                      if (!expanded) show(null);
+                    }}
+                  >
+                    <span className={styles.visuallyHidden}>
+                      IIIF Cookbook recipe{" "}
+                    </span>
+                    {recipeHint.slug.slice(0, 4)}
+                    <span className={styles.fieldRecipeRest}>
+                      {recipeHint.slug.slice(4)}
+                    </span>
+                  </span>
+                )}
+              </span>
             </div>
             <button
               aria-controls={listId}
               aria-expanded={expanded}
-              aria-label="IIIF resources"
+              aria-label={listName}
               className={styles.fieldToggle}
               // Focus stays in the field.
               onMouseDown={(event) => event.preventDefault()}
@@ -503,11 +738,12 @@ export default function ResourceField({
             {/*
              * Open, round, at the pill's end (Mat, 2026-10-25): the caret Items' Next draws,
              * so the site's round buttons agree, named "Open" for assistive technology and
-             * a voice.
+             * a voice; pointing up where it opens in the Viewer up top (Mat, 2026-10-25).
              */}
             <button
               aria-label="Open"
               className={styles.openButton}
+              data-toward={toward}
               title="Open"
               type="submit"
             >
@@ -518,7 +754,7 @@ export default function ResourceField({
                 width="16"
               >
                 <path
-                  d="M6 3l5 5-5 5"
+                  d={toward === "up" ? "M3 10l5-5 5 5" : "M6 3l5 5-5 5"}
                   fill="none"
                   stroke="currentColor"
                   strokeLinecap="round"
@@ -530,56 +766,105 @@ export default function ResourceField({
           </div>
 
           <ul
-            aria-label="IIIF resources"
+            aria-label={listName}
             className={styles.resourceList}
             hidden={!expanded}
             id={listId}
             // A press chooses without taking focus from the field.
             onMouseDown={(event) => event.preventDefault()}
+            ref={listRef}
             role="listbox"
           >
-            {options.map((choice) => (
-              <li
-                aria-selected={choice.selected}
-                className={styles.option}
-                data-active={choice.key === active || undefined}
-                id={optionId(choice.key)}
-                key={choice.key}
-                onClick={() => choose(choice)}
-                role="option"
-              >
-                <Picture
-                  className={styles.media}
-                  lazy
-                  onBroken={brake}
-                  plus={choice.key === NEW}
-                  src={pictured(choice.thumbnail)}
-                />
-                <span className={styles.optionText}>
-                  <span className={styles.optionName} lang={choice.label.lang}>
-                    {choice.label.text}
-                  </span>
-                  <span className={styles.optionAbout}>{choice.about}</span>
-                </span>
-                <svg
-                  aria-hidden="true"
-                  className={styles.check}
-                  fill="none"
-                  height="16"
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2.5"
-                  viewBox="0 0 24 24"
-                  width="16"
-                >
-                  <path d="M5 12.5 10 17.5 19 7" />
-                </svg>
+            {options
+              .filter((choice) => !choice.key.startsWith("recipe-"))
+              .map((choice) =>
+                choice.key === COOKBOOK ? (
+                  <li
+                    aria-selected={false}
+                    className={`${styles.option} ${styles.cookbook}`}
+                    data-active={choice.key === active || undefined}
+                    data-shown={cookbookShown || undefined}
+                    id={optionId(choice.key)}
+                    key={choice.key}
+                    onClick={() => choose(choice)}
+                    onPointerEnter={() => void readRecipes()}
+                    role="option"
+                  >
+                    <span className={styles.media} data-logo>
+                      <IIIFLogo className={styles.logo} />
+                    </span>
+                    <span className={styles.optionText}>
+                      <span className={styles.optionName}>
+                        {choice.label.text}
+                      </span>
+                      <span className={styles.optionAbout}>{choice.about}</span>
+                    </span>
+                    <svg
+                      aria-hidden="true"
+                      className={styles.disclose}
+                      fill="none"
+                      height="16"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      width="16"
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </li>
+                ) : (
+                  <Option
+                    active={choice.key === active}
+                    choice={choice}
+                    id={optionId(choice.key)}
+                    key={choice.key}
+                    onBroken={brake}
+                    onChoose={choose}
+                    picture={pictured(choice.thumbnail)}
+                    plus={choice.key === NEW}
+                  />
+                ),
+              )}
+            {listedRecipes.length > 0 && (
+              /*
+               * The recipes, one group named for them (WAI-ARIA's grouped listbox). Under
+               * their category its option names them; narrowed by typing, the name shows.
+               */
+              <li className={styles.group} role="presentation">
+                <ul aria-labelledby={`${id}-recipes`} role="group">
+                  <li
+                    className={
+                      query && !onlyRecipes
+                        ? styles.groupName
+                        : styles.visuallyHidden
+                    }
+                    id={`${id}-recipes`}
+                    role="presentation"
+                  >
+                    {COOKBOOK_NAME}
+                  </li>
+                  {listedRecipes.map((choice) => (
+                    <Option
+                      active={choice.key === active}
+                      choice={choice}
+                      id={optionId(choice.key)}
+                      key={choice.key}
+                      onBroken={brake}
+                      onChoose={choose}
+                      picture={pictured(choice.thumbnail)}
+                    />
+                  ))}
+                </ul>
               </li>
-            ))}
+            )}
           </ul>
         </div>
       </div>
+      <p className={styles.visuallyHidden} role="status">
+        {status}
+      </p>
       {error && (
         <p className={styles.error} id={errorId} role="alert">
           {error}
@@ -589,25 +874,93 @@ export default function ResourceField({
   );
 }
 
+/** A resource in the list: its thumbnail, its label over a few words, and a check. */
+function Option({
+  active,
+  choice,
+  id,
+  onBroken,
+  onChoose,
+  picture,
+  plus,
+}: {
+  active: boolean;
+  choice: Choice;
+  id: string;
+  onBroken: (src: string) => void;
+  onChoose: (choice: Choice) => void;
+  picture?: string;
+  plus?: boolean;
+}) {
+  return (
+    <li
+      aria-selected={choice.selected}
+      className={styles.option}
+      data-active={active || undefined}
+      id={id}
+      onClick={() => onChoose(choice)}
+      role="option"
+    >
+      <Picture
+        className={styles.media}
+        lazy
+        mark={choice.mark}
+        onBroken={onBroken}
+        plus={plus}
+        src={picture}
+      />
+      <span className={styles.optionText}>
+        <span className={styles.optionName} lang={choice.label.lang}>
+          {choice.label.text}
+        </span>
+        <span className={styles.optionAbout}>{choice.about}</span>
+      </span>
+      <svg
+        aria-hidden="true"
+        className={styles.check}
+        fill="none"
+        height="16"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.5"
+        viewBox="0 0 24 24"
+        width="16"
+      >
+        <path d="M5 12.5 10 17.5 19 7" />
+      </svg>
+    </li>
+  );
+}
+
 /**
- * A resource's thumbnail, or, where it has none or it will not load, an empty slot; with
- * `plus`, a slot to fill, as "View your own" is.
+ * A resource's thumbnail, or, where it has none or it will not load, an empty slot, with
+ * its `mark` where it has one (a recipe's number); with `plus`, a slot to fill, as "View
+ * your own" is.
  */
 function Picture({
   className,
   lazy,
+  mark,
   onBroken,
   plus,
   src,
 }: {
   className: string;
   lazy?: boolean;
+  mark?: string;
   onBroken: (src: string) => void;
   plus?: boolean;
   src?: string;
 }) {
   return (
     <span className={className} data-empty={!src || undefined}>
+      {!src && mark && (
+        // The number is in the option's words too, so it is read once.
+        <span aria-hidden="true" className={styles.mark}>
+          {mark}
+        </span>
+      )}
       {plus && (
         <svg
           aria-hidden="true"

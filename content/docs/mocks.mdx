@@ -519,6 +519,36 @@ on its own. Its generator is `docs/mocks/standalone-canvas/index.mjs`, and the C
 fetched is `docs/mocks/standalone-canvas/source.json`: to bring it up to date, fetch the
 published file into `source.json` again and run `npm run build:mocks`.
 
+## Cookbook: the IIIF Cookbook's recipes, curated
+
+A Collection of the [IIIF Cookbook](https://iiif.io/api/cookbook/)'s recipes, each a
+member by the resource the Cookbook publishes for it (a Manifest, or a Collection), in the
+Cookbook's order, with:
+
+- its label, the recipe's title as the Cookbook writes it, and its summary, the name of
+  its folder on iiif.io ("0047-homepage"), in no language (`none`);
+- its thumbnail: the resource's own, else its first Canvas's (or a Collection's first
+  member's), else its first image by its image service, at a size the service's
+  `info.json` allows. A recipe that publishes no image has none;
+- its homepage, the recipe's page on iiif.io.
+
+A resource is listed once, under the recipe it belongs to: 0466 and 0599, which open
+0001's and 0006's Manifests, are left out. The Collection's own words, and what it leaves
+out and why (`LEFT_OUT`), are curated in its generator.
+
+| Resource   | Published (static)                                                                                    |
+| ---------- | ----------------------------------------------------------------------------------------------------- |
+| Collection | [`/mocks/cookbook/collection.json`](https://nulib-ds.github.io/clover/mocks/cookbook/collection.json) |
+
+It answers no query, so it is static only. The homepage reads it twice: its Viewing field
+lists the members under "IIIF Cookbook recipes", and its Natural story's select (the same
+field) lists them alone, each opening in the playground's Viewer. Its generator is
+`docs/mocks/cookbook/index.mjs`, and what it lists is `docs/mocks/cookbook/recipes.json`,
+written by `npm run build:cookbook`, which reads every recipe's resource from iiif.io
+(leaving out, and saying, one that no longer answers) and says which recipes iiif.io's
+index lists that the docs' own list (`cookbookSections.ts`) does not. When the Cookbook
+changes, run `npm run build:cookbook`, then `npm run build:mocks`.
+
 ## Esu Shrine: a 3D model
 
 Northwestern University's Material History Lab's scan of an Esu shrine, an altar piece
@@ -578,5 +608,7 @@ image are Northwestern University Libraries', from the Charles Deering McCormick
 of Special Collections, and keep their attribution. The Esu shrine's model and its
 photograph are Northwestern University's, from its Material History Lab: the model
 (© 2025 Northwestern University) kept here as the Lab serves it, the photograph (on a
-page © 2026 Northwestern University) linked from there, never copied. The mocks'
+page © 2026 Northwestern University) linked from there, never copied. The Cookbook
+Collection's members are the IIIF Cookbook's own resources, linked, never copied, and
+their thumbnails are asked of the servers they name. The mocks'
 structure is Clover's, under its license.

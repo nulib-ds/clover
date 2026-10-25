@@ -15,13 +15,12 @@
 
 /* Fixed widths keep the columns aligned from one section's table to the next. */
 /* The icon box (1.75rem) plus the cell's 0.75rem padding on each side. */
-.coverage[data-status="true"] th:nth-child(1) {
+.coverage th:nth-child(1) {
   width: 3.25rem;
 }
 
-/* The actions column: third beside the status, second without it. */
-.coverage[data-status="true"] th:nth-child(3),
-.coverage[data-status="false"] th:nth-child(2) {
+/* The actions column, third, beside the status and the recipe. */
+.coverage th:nth-child(3) {
   width: 13rem;
 }
 

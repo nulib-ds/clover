@@ -3,9 +3,7 @@
 import React from "react";
 import dynamic from "next/dynamic";
 
-import CookbookCoverageTable, {
-  StatusIcon,
-} from "docs/components/CookbookRecipes/CookbookCoverageTable";
+import { StatusIcon } from "docs/components/CookbookRecipes/CookbookCoverageTable";
 import ViewerDemo from "docs/components/CookbookRecipes/ViewerDemo";
 import {
   recipeBase,
@@ -42,34 +40,6 @@ const renderViewer = (resource: string) => (
     <Viewer key={resource} iiifContent={resource} fill />
   </div>
 );
-
-/**
- * The Cookbook recipes page: every IIIF Cookbook recipe to open in the Viewer, which
- * slides in over the page. Each recipe is listed whether Clover 4 handles it yet or not;
- * how far it does is on the unlisted progress page. The homepage is the demo, with its
- * own field for any resource, so this page has none.
- */
-export function Cookbook4Demo({ children }: { children?: React.ReactNode }) {
-  return (
-    <ViewerDemo
-      field={false}
-      featured={false}
-      renderViewer={renderViewer}
-      preload={preload}
-      renderRecipes={(onView, onPreload) => (
-        <CookbookCoverageTable
-          onView={onView}
-          onPreload={onPreload}
-          showStatus={false}
-          // Under the page's own title, an h1.
-          headingLevel={2}
-        />
-      )}
-    >
-      {children}
-    </ViewerDemo>
-  );
-}
 
 const statusName: Record<Status, string> = {
   yes: "handled",

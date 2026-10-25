@@ -37,7 +37,8 @@ const SEEK = 1200;
  * `data-drawn`, for good, so its figure's stroke draws then too (`Home.module.css`). Only
  * where the viewer is held beside the stories; elsewhere nothing is drawn, lit or turned.
  * At the page's foot the last story is over too (Mat, 2026-10-21): its line fades and its
- * change is undone, until the page is scrolled `BAND` back up from the foot.
+ * change is undone, until the page is scrolled `BAND` back up from the foot; but for a
+ * recipe read (Natural's, 0032), which the viewer keeps past it (Mat, 2026-10-25).
  *
  * The line is decoration, hidden from assistive technology: what each story is about is
  * in its words. It is drawn in as a story arrives, from the moment its end can be shown
@@ -242,7 +243,16 @@ export const StoryLines = React.memo(function StoryLines({
 
       // The story's own change, with its line: begun and undone as the line is.
       set("turned", Boolean(story?.hasAttribute("data-turn")));
-      set("reading", Boolean(story?.dataset.recipe));
+      /*
+       * Past the last story, to the page's foot, its recipe stays read (Mat, 2026-10-25:
+       * "do not reset the side floating viewer … after the Natural story. it should remain
+       * as the 0032 collection always"): the viewer keeps that face; only its line is over.
+       */
+      const pastLast = !story && passed === stories.length;
+      set(
+        "reading",
+        Boolean((story ?? (pastLast ? stories.at(-1) : null))?.dataset.recipe),
+      );
       set("composing", Boolean(story?.hasAttribute("data-compose")));
       set("branding", Boolean(story?.hasAttribute("data-brand")));
       set("weighing", Boolean(story?.hasAttribute("data-weigh")));
@@ -345,10 +355,25 @@ export const StoryLines = React.memo(function StoryLines({
         attributes: true,
         attributeFilter: ["data-face"],
       });
+    /*
+     * The recipe's face drawing what it read: the line follows its part to where it now
+     * is. Only the recipe's face, not the viewer's own, which plays.
+     */
+    const redrawn = new MutationObserver((records) => {
+      const onRecipe = records.some((record) => {
+        const node = record.target;
+        const element =
+          node instanceof Element ? node : (node.parentElement ?? null);
+        return element?.closest('[data-face-of="recipe"]');
+      });
+      if (onRecipe) schedule();
+    });
+    if (flip) redrawn.observe(flip, { childList: true, subtree: true });
     return () => {
       cancelAnimationFrame(frame);
       window.clearTimeout(fading);
       turning.disconnect();
+      redrawn.disconnect();
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
       held.removeEventListener("change", schedule);

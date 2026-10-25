@@ -2,6 +2,7 @@
 
 import React, { useId, useRef } from "react";
 import styles from "docs/components/Home/Home.module.css";
+import { holdInPlace } from "docs/components/Home/holdInPlace";
 import { resourceByKey } from "docs/components/Playground/playground-config";
 
 /**
@@ -14,53 +15,6 @@ const FORMATS: { name: string; key: string }[] = [
   { name: "3D model", key: "model" },
   { name: "Text", key: "manuscript" },
 ];
-
-/**
- * How long the formats are held in place after a pick once the page above them has
- * stopped changing height, and the most they are ever held.
- */
-const SETTLE = 2000;
-const HOLD_MOST = 8000;
-
-/**
- * Holds `element` where it is in the window while the page above it changes height (the
- * parts' tiles, emptied and filled again as their Root loads another resource): each
- * frame, before it is painted, the page is scrolled by however far it moved, until nothing
- * has moved for `SETTLE`, or the reader scrolls on their own. Done here in every browser,
- * not left to scroll anchoring: Safari has none, and Firefox's loses its anchor as the
- * tiles empty. Meanwhile the browser's anchoring is off, so the two never compensate
- * twice, and the page keeps at least its height, so the emptied tiles never cut the
- * scroll short.
- */
-const holdInPlace = (element: HTMLElement) => {
-  const root = document.documentElement;
-  const top = element.getBoundingClientRect().top;
-  const began = performance.now();
-  let moved = began;
-  let frame = 0;
-  root.style.overflowAnchor = "none";
-  root.style.minHeight = `${root.scrollHeight}px`;
-  const events = ["wheel", "touchstart", "keydown"] as const;
-  const release = () => {
-    cancelAnimationFrame(frame);
-    root.style.overflowAnchor = "";
-    root.style.minHeight = "";
-    events.forEach((name) => window.removeEventListener(name, release));
-  };
-  const hold = (now: number) => {
-    const drift = element.getBoundingClientRect().top - top;
-    if (Math.abs(drift) >= 1) {
-      window.scrollBy(0, drift);
-      moved = now;
-    }
-    if (now - moved > SETTLE || now - began > HOLD_MOST) return release();
-    frame = requestAnimationFrame(hold);
-  };
-  frame = requestAnimationFrame(hold);
-  events.forEach((name) =>
-    window.addEventListener(name, release, { passive: true }),
-  );
-};
 
 /**
  * The Adaptable story's formats, in the column the other stories give their figures: a

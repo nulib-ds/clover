@@ -44,15 +44,8 @@ const StatusIcon: React.FC<{ status: Status }> = ({ status }) => (
 interface CookbookCoverageTableProps {
   /** Opens a recipe's resource in the viewer. Keep it stable: the table renders once. */
   onView: (resource: string) => void;
-  /**
-   * Whether each recipe says if Clover covers it, with the count above. Default `true`.
-   * Off, it is a list of recipes to open, handled or not (Clover 4's public demo).
-   */
-  showStatus?: boolean;
   /** Called when a View control is approached, so the viewer can load ahead of the click. */
   onPreload?: () => void;
-  /** The level of each group's title, one under the heading the table sits under. Default 4. */
-  headingLevel?: 2 | 3 | 4 | 5 | 6;
 }
 
 /**
@@ -66,29 +59,22 @@ interface CookbookCoverageTableProps {
 const CookbookCoverageTable: React.FC<CookbookCoverageTableProps> = ({
   onView,
   onPreload,
-  showStatus = true,
-  headingLevel = 4,
 }) => {
-  const Title = `h${headingLevel}` as "h4";
   return (
-    <div className={styles.coverage} data-status={showStatus}>
-      {showStatus && (
-        <p className={styles.summary}>
-          <strong>{coverage.yes}</strong> of {coverage.total} recipes supported
-          {coverage.partial > 0 && <>, {coverage.partial} partially</>}.
-        </p>
-      )}
+    <div className={styles.coverage}>
+      <p className={styles.summary}>
+        <strong>{coverage.yes}</strong> of {coverage.total} recipes supported
+        {coverage.partial > 0 && <>, {coverage.partial} partially</>}.
+      </p>
       {cookbookSections.map((section) => (
         <section key={section.title}>
-          <Title className={styles.sectionTitle}>{section.title}</Title>
+          <h4 className={styles.sectionTitle}>{section.title}</h4>
           <table>
             <thead>
               <tr>
-                {showStatus && (
-                  <th scope="col">
-                    <span className={styles.visuallyHidden}>Supported</span>
-                  </th>
-                )}
+                <th scope="col">
+                  <span className={styles.visuallyHidden}>Supported</span>
+                </th>
                 <th>Recipe</th>
                 <th>Demo</th>
               </tr>
@@ -97,14 +83,12 @@ const CookbookCoverageTable: React.FC<CookbookCoverageTableProps> = ({
               {section.recipes.map((recipe) => {
                 const status = statusFor(recipe.slug);
                 const resource = resourceFor(recipe.slug);
-                const note = showStatus ? partialNotes[recipe.slug] : undefined;
+                const note = partialNotes[recipe.slug];
                 return (
                   <tr key={recipe.slug}>
-                    {showStatus && (
-                      <td>
-                        <StatusIcon status={status} />
-                      </td>
-                    )}
+                    <td>
+                      <StatusIcon status={status} />
+                    </td>
                     <td>
                       <div className={styles.titleRow}>
                         {resource ? (

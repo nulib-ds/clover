@@ -33,6 +33,8 @@
 
 /* The resource's field, centered over the Viewer, `xl` over it as the template is under it. */
 .bar {
+  /* Never to the Viewer's edges at rest (Mat, 2026-10-25): a little room at each side. */
+  --pg-room: var(--clover-space-m, 1rem);
   display: flex;
   justify-content: center;
   margin-bottom: var(--clover-space-xl, 2.618rem);
@@ -158,16 +160,18 @@
  * pickers step as the Viewer under them does.
  */
 .resourcePicker {
+  /*
+   * Its own edge and lift, so it is the same select wherever it is (the Natural story's
+   * too, `RecipeSelect.tsx`), and in a dark palette (`dark` around it) its dark one.
+   */
+  --pg-edge: color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
+  --pg-lift: var(--card-lift);
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: var(--clover-space-xs, 0.382rem);
-  /*
-   * Never to the Viewer's edges at rest (Mat, 2026-10-25): a little room at each side,
-   * at every width. Held under the navbar, it runs to them (below).
-   */
-  --pg-room: var(--clover-space-m, 1rem);
-  max-width: min(40rem, 100% - 2 * var(--pg-room));
+  /* The bar's room at its sides (`--pg-room`); held under the navbar, none (below). */
+  max-width: min(40rem, 100% - 2 * var(--pg-room, 0px));
   min-width: 0;
   transition: max-width 200ms ease;
   width: 100%;
@@ -216,6 +220,8 @@
   align-items: center;
   border: 1px solid var(--pg-edge);
   border-radius: 999px;
+  /* Its recipe's badge sits on its top edge (`.fieldBadge`). */
+  position: relative;
   box-shadow: var(--pg-lift);
   display: flex;
   gap: var(--clover-space-s, 0.618rem);
@@ -253,9 +259,12 @@
 
 /* Thumbnails square, in the field and the list; round in the field, as the pill is. */
 .fieldMedia {
+  align-items: center;
   aspect-ratio: 1;
   border-radius: var(--radius-2);
+  display: flex;
   flex: none;
+  justify-content: center;
   height: 1.75rem;
   overflow: hidden;
 }
@@ -263,6 +272,91 @@
 .fieldGroup .fieldMedia {
   border-radius: 50%;
   height: 2.5rem;
+}
+
+/*
+ * For a Cookbook recipe in the Viewer (`ResourceField.tsx`; Mat, 2026-10-25), IIIF's logo
+ * set into the pill's top edge, in its middle, as a fieldset's legend is: the edge breaks
+ * around it, on the page's ground, so it is part of the select, not a thing on top of it
+ * (Mat: "meshes better with the select"); no disc, edge or shadow of its own.
+ */
+.fieldBadge {
+  background: var(--color-background);
+  display: flex;
+  left: 50%;
+  padding-inline: var(--clover-space-xs, 0.382rem);
+  position: absolute;
+  top: -1px;
+  translate: -50% -50%;
+}
+
+.fieldBadgeLogo {
+  display: block;
+  height: 1rem;
+  width: auto;
+}
+
+/* Held under the navbar, the pill's edge a little under it: the logo lower, all of it shown. */
+.bar[data-stuck] .fieldBadge {
+  translate: -50% calc(-50% + 0.25rem);
+}
+
+/*
+ * The field's line: a recipe's title, then its folder's name after it (Mat, 2026-10-25),
+ * the field as wide as the title where a browser sizes it so (else the name at the end),
+ * the name giving way first, to its number.
+ */
+.fieldLine {
+  align-items: center;
+  container-type: inline-size;
+  display: flex;
+  gap: var(--clover-space-xs, 0.382rem);
+  min-width: 0;
+}
+
+.fieldLine .fieldInput {
+  flex: 1 1 0;
+}
+
+@supports (field-sizing: content) {
+  .fieldLine[data-hinted] .fieldInput {
+    field-sizing: content;
+    flex: 0 1 auto;
+    width: auto;
+  }
+}
+
+/*
+ * The folder's name, set back from the title in the code's face and a size smaller, in
+ * its muted gray (lighter would fall under 4.5:1, WCAG 1.4.3); cut short before the title.
+ */
+.fieldRecipe {
+  color: var(--gray-11);
+  cursor: text;
+  flex: 0 1000 auto;
+  min-width: 5.5ch;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  max-width: 50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Where the field is narrow (a phone), its number alone, so the title has the room; the
+ * rest of its name is out of sight, still in what the field is described by.
+ */
+@container (max-width: 20rem) {
+  .fieldRecipeRest {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
 }
 
 /* A resource of the reader's that names no thumbnail is drawn as an empty slot. */
@@ -356,6 +450,11 @@
 
 .openButton:hover svg {
   translate: 0.125rem 0;
+}
+
+/* Open to the Viewer up top (`toward="up"`): its caret up, stepping up. */
+.openButton[data-toward="up"]:hover svg {
+  translate: 0 -0.125rem;
 }
 
 .openButton:focus-visible {
@@ -468,6 +567,79 @@
 
 .option[aria-selected="true"] .check {
   visibility: visible;
+}
+
+/*
+ * The IIIF Cookbook's recipes, last (Mat, 2026-10-25: "a category that is tucked away at
+ * the bottom of the list"): their category set off from ours by a hairline over it, IIIF's
+ * logo in its slot, and a chevron that turns over as it shows them.
+ */
+.cookbook {
+  margin-top: var(--clover-space-xs, 0.382rem);
+  position: relative;
+}
+
+.cookbook::before {
+  border-top: 1px solid var(--gray-6);
+  content: "";
+  inset-inline: var(--clover-space-xs, 0.382rem);
+  position: absolute;
+  top: calc(
+    (var(--clover-space-xs, 0.382rem) + var(--clover-space-2xs, 0.236rem)) / -2
+  );
+}
+
+.media[data-logo] {
+  border: 1px solid var(--gray-6);
+  box-sizing: border-box;
+}
+
+.logo {
+  height: 55%;
+  width: auto;
+}
+
+.disclose {
+  color: var(--gray-11);
+  flex: none;
+  transition: rotate 120ms ease;
+}
+
+.cookbook[data-shown] .disclose {
+  rotate: 180deg;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disclose {
+    transition: none;
+  }
+}
+
+/* The recipes' group, its options spaced as ours are. */
+.group > ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-2xs, 0.236rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Its name, shown while typing narrows the list, as the category's option is not. */
+.groupName {
+  color: var(--gray-11);
+  font-size: var(--clover-text-s, 0.854rem);
+  font-weight: var(--weight-bold);
+  line-height: 1.3;
+  padding: var(--clover-space-xs, 0.382rem) var(--clover-space-xs, 0.382rem) 0;
+}
+
+/* A recipe with no thumbnail: its number in the empty slot, in the code's face. */
+.mark {
+  color: var(--gray-11);
+  font-family: var(--font-mono);
+  font-size: var(--clover-text-xs, 0.75rem);
+  line-height: 1;
 }
 
 /* A picture in the same box for every resource, with room for its ring. */

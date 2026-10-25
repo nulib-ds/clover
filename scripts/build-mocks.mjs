@@ -62,6 +62,10 @@ import {
   MODEL_FILE as ESU_SHRINE_MODEL,
   manifest as esuShrineManifest,
 } from "../docs/mocks/esu-shrine/index.mjs";
+import {
+  PUBLIC_BASE as COOKBOOK_BASE,
+  collection as cookbookCollection,
+} from "../docs/mocks/cookbook/index.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "public/mocks/content-search");
@@ -217,3 +221,13 @@ if (!existsSync(esuShrineModel)) {
   writeFileSync(esuShrineModel, Buffer.from(await response.arrayBuffer()));
 }
 console.log(`esu-shrine: manifest.json, ${ESU_SHRINE_MODEL}`);
+
+// The IIIF Cookbook's recipes, curated as one Collection: one static Collection.
+const cookbook = join(root, "public/mocks/cookbook");
+rmSync(cookbook, { recursive: true, force: true });
+mkdirSync(cookbook, { recursive: true });
+writeFileSync(
+  join(cookbook, "collection.json"),
+  `${JSON.stringify(cookbookCollection(COOKBOOK_BASE), null, 2)}\n`,
+);
+console.log("cookbook: collection.json");

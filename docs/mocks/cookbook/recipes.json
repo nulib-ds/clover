@@ -1,0 +1,585 @@
+{
+  "checked": "2026-10-25",
+  "recipes": [
+    {
+      "slug": "0001-mvm-image",
+      "title": "Simplest Manifest - Image",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0002-mvm-audio",
+      "title": "Simplest Manifest - Audio",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0003-mvm-video",
+      "title": "Simplest Manifest - Video",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0003-mvm-video/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0608-mvm-3d",
+      "title": "Simplest Manifest - 3D",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0608-mvm-3d/v4/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0004-canvas-size",
+      "title": "Image and Canvas with Differing Dimensions",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0004-canvas-size/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0005-image-service",
+      "title": "Support Deep Viewing with Basic Use of a IIIF Image Service",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0005-image-service/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0006-text-language",
+      "title": "Internationalization and Multi-language Values",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0006-text-language/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/329817fc8a251a01c393f517d8a17d87-Whistlers_Mother/full/108,96/0/default.jpg"
+    },
+    {
+      "slug": "0118-multivalue",
+      "title": "Displaying Multiple Values with Language Maps",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0118-multivalue/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0007-string-formats",
+      "title": "Embedding HTML in descriptive properties",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0007-string-formats/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0029-metadata-anywhere",
+      "title": "Metadata on any Resource",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0029-metadata-anywhere/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/421e65be2ce95439b3ad6ef1f2ab87a9-dee-natural/full/151,96/0/default.jpg"
+    },
+    {
+      "slug": "0008-rights",
+      "title": "Rights statement(s)",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0008-rights/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0009-book-1",
+      "title": "Simple Manifest - Book",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/59d09e6773341f28ea166e9f3c1e674f-gallica_ark_12148_bpt6k1526005v_f18/full/96,138/0/default.jpg"
+    },
+    {
+      "slug": "0011-book-3-behavior",
+      "title": "Book behavior (paging) variations",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0011-book-3-behavior/manifest-continuous.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/8c169124171e6b2253b698a22a938f07-21198-zz001hbmd9_1300412_master/full/686,96/0/default.jpg"
+    },
+    {
+      "slug": "0299-region",
+      "title": "Addressing a spatial region",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0299-region/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/4ce82cef49fb16798f4c2440307c3d6f-newspaper-p2/full/96,136/0/default.jpg"
+    },
+    {
+      "slug": "0010-book-2-viewing-direction",
+      "title": "Viewing direction and its effect on navigation",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0010-book-2-viewing-direction/manifest-rtl.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001/full/96,132/0/default.jpg"
+    },
+    {
+      "slug": "0283-missing-image",
+      "title": "Missing Images in a Sequence",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0283-missing-image/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/d3bbf5397c6df6b894c5991195c912ab-1-21198-zz001d8m41_774608_master/full/96,136/0/default.jpg"
+    },
+    {
+      "slug": "0117-add-image-thumbnail",
+      "title": "Image Thumbnail for Manifest",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0117-add-image-thumbnail/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001/full/96,132/0/default.jpg"
+    },
+    {
+      "slug": "0232-image-thumbnail-canvas",
+      "title": "Implementation discussion: Thumbnails on Canvases",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0232-image-thumbnail-canvas/manifest-image.json",
+      "type": "Manifest",
+      "thumbnail": "https://fixtures.iiif.io/other/level0/Glen/photos/gottingen/full/252,189/0/default.jpg"
+    },
+    {
+      "slug": "0013-placeholderCanvas",
+      "title": "Load a Preview Image Before the Main Content",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0013-placeholderCanvas/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0014-accompanyingcanvas",
+      "title": "Audio Presentation with Accompanying Image",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0014-accompanyingcanvas/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/4b45bba3ea612ee46f5371ce84dbcd89-mahler-0/full/96,124/0/default.jpg"
+    },
+    {
+      "slug": "0202-start-canvas",
+      "title": "Load Manifest Beginning with a Specific Canvas",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0202-start-canvas/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/59d09e6773341f28ea166e9f3c1e674f-gallica_ark_12148_bpt6k1526005v_f18/full/96,138/0/default.jpg"
+    },
+    {
+      "slug": "0015-start",
+      "title": "Begin playback at a specific point - Time-based media",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0015-start/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0230-navdate",
+      "title": "Navigation by Chronology",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0230-navdate/navdate-collection.json",
+      "type": "Collection",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/43153e2ec7531f14dd1c9b2fc401678a-88695674/full/96,130/0/default.jpg"
+    },
+    {
+      "slug": "0154-geo-extension",
+      "title": "Locate a Manifest on a Web Map",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0154-geo-extension/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/28473c77da3deebe4375c3a50572d9d3-laocoon/full/96,124/0/default.jpg"
+    },
+    {
+      "slug": "0240-navPlace-on-canvases",
+      "title": "Locate Multiple Canvases on a Web Map",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0240-navPlace-on-canvases/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/28473c77da3deebe4375c3a50572d9d3-laocoon/full/96,124/0/default.jpg"
+    },
+    {
+      "slug": "0234-provider",
+      "title": "Acknowledge Content Contributors",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0234-provider/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001_full/full/96,113/0/default.jpg"
+    },
+    {
+      "slug": "0032-collection",
+      "title": "Simple Collection",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0032-collection/collection.json",
+      "type": "Collection",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/329817fc8a251a01c393f517d8a17d87-Winslow_Homer_-_The_Gulf_Stream_-_Metropolitan_Museum_of_Art/full/160,96/0/default.jpg"
+    },
+    {
+      "slug": "0464-reuse-manifest",
+      "title": "Reuse parts of a Manifest",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0464-reuse-manifest/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0017-transcription-av",
+      "title": "Using Transcripts with A/V Content",
+      "section": "Textual and other supplementary content",
+      "resource": "https://iiif.io/api/cookbook/recipe/0017-transcription-av/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0103-poetry-reading-annotations",
+      "title": "Scholarly Annotation of a Poetry Reading",
+      "section": "Textual and other supplementary content",
+      "resource": "https://iiif.io/api/cookbook/recipe/0103-poetry-reading-annotations/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0046-rendering",
+      "title": "Providing Alternative Representations",
+      "section": "Textual and other supplementary content",
+      "resource": "https://iiif.io/api/cookbook/recipe/0046-rendering/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001/full/96,132/0/default.jpg"
+    },
+    {
+      "slug": "0219-using-caption-file",
+      "title": "Using Caption Files with Video Content",
+      "section": "Textual and other supplementary content",
+      "resource": "https://iiif.io/api/cookbook/recipe/0219-using-caption-file/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0253-using-transcript-file",
+      "title": "Video with Accompanying Transcript",
+      "section": "Textual and other supplementary content",
+      "resource": "https://iiif.io/api/cookbook/recipe/0253-using-transcript-file/v4/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0266-full-canvas-annotation",
+      "title": "Simplest Annotation",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0266-full-canvas-annotation/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0019-html-in-annotations",
+      "title": "HTML in Annotations",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0019-html-in-annotations/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0045-css",
+      "title": "CSS in an Annotation",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0045-css/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/213,96/0/default.jpg"
+    },
+    {
+      "slug": "0021-tagging",
+      "title": "Simple Annotation - Tagging",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0021-tagging/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0261-non-rectangular-commenting",
+      "title": "Annotation with a Non-Rectangular Polygon",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0261-non-rectangular-commenting/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0258-tagging-external-resource",
+      "title": "Tagging with an External Resource",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0258-tagging-external-resource/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0022-linking-with-a-hotspot",
+      "title": "Redirecting from one Canvas to another resource (Hotspot linking)",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0022-linking-with-a-hotspot/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0326-annotating-image-layer",
+      "title": "Annotate a specific images or layers",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0326-annotating-image-layer/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/421e65be2ce95439b3ad6ef1f2ab87a9-dee-natural/full/151,96/0/default.jpg"
+    },
+    {
+      "slug": "0135-annotating-point-in-canvas",
+      "title": "Annotating a specific point of an image",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0135-annotating-point-in-canvas/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/43153e2ec7531f14dd1c9b2fc401678a-88695674/full/96,130/0/default.jpg"
+    },
+    {
+      "slug": "0139-geolocate-canvas-fragment",
+      "title": "Geographic coordinates",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0139-geolocate-canvas-fragment/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/43153e2ec7531f14dd1c9b2fc401678a-88695674/full/96,130/0/default.jpg"
+    },
+    {
+      "slug": "0269-embedded-or-referenced-annotations",
+      "title": "Embedded or Referenced Annotations",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0269-embedded-or-referenced-annotations/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0306-linking-annotations-to-manifests",
+      "title": "Linking external Annotations targeting a Canvas to a Manifest",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0306-linking-annotations-to-manifests/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0309-annotation-collection",
+      "title": "Using Annotation collections",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/4ce82cef49fb16798f4c2440307c3d6f-newspaper-p1/full/96,133/0/default.jpg"
+    },
+    {
+      "slug": "0377-image-in-annotation",
+      "title": "Image in annotations",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0377-image-in-annotation/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0346-multilingual-annotation-body",
+      "title": "Annotating in Multiple Languages",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0346-multilingual-annotation-body/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/213,96/0/default.jpg"
+    },
+    {
+      "slug": "0561-text-on-image",
+      "title": "Visible Text Resource on a Canvas",
+      "section": "Other kinds of annotations",
+      "resource": "https://iiif.io/api/cookbook/recipe/0561-text-on-image/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/213,96/0/default.jpg"
+    },
+    {
+      "slug": "0024-book-4-toc",
+      "title": "Table of Contents for Book Chapters",
+      "section": "Internal structure",
+      "resource": "https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/d3bbf5397c6df6b894c5991195c912ab-1-21198-zz001d8m41_774608_master/full/96,136/0/default.jpg"
+    },
+    {
+      "slug": "0025-newspaper-article-index",
+      "title": "Navigation by Newspaper Article",
+      "section": "Internal structure",
+      "resource": "https://iiif.io/api/cookbook/recipe/0025-newspaper-article-index/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/c0f1e980f00f66ef47caaf52cead8119-p1/full/96,141/0/default.jpg"
+    },
+    {
+      "slug": "0026-toc-opera",
+      "title": "Table of contents for A/V content",
+      "section": "Internal structure",
+      "resource": "https://iiif.io/api/cookbook/recipe/0026-toc-opera/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0229-behavior-ranges",
+      "title": "Adding Thumbnail Navigation and no-nav to a Video Resource",
+      "section": "Internal structure",
+      "resource": "https://iiif.io/api/cookbook/recipe/0229-behavior-ranges/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0027-alternative-page-order",
+      "title": "Alternative Page Sequences",
+      "section": "Internal structure",
+      "resource": "https://iiif.io/api/cookbook/recipe/0027-alternative-page-order/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/3ec31f43ce55cfcc076804c88c06aa43-CF-f0186r_aVISNK_387/full/96,142/0/default.jpg"
+    },
+    {
+      "slug": "0030-multi-volume",
+      "title": "Multi-volume Work with Individually-bound Volumes",
+      "section": "Higher-level structure",
+      "resource": "https://iiif.io/api/cookbook/recipe/0030-multi-volume/collection.json",
+      "type": "Collection",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/5b0b39c2bf5591d21d807f9aadb437fa-uclaeal_wahon_A06_bib1974505_vol01_001/full/96,128/0/default.jpg"
+    },
+    {
+      "slug": "0031-bound-multivolume",
+      "title": "Multiple Volumes in a Single Bound Volume",
+      "section": "Higher-level structure",
+      "resource": "https://iiif.io/api/cookbook/recipe/0031-bound-multivolume/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/15f769d62ca9a3a2deca390efed75d73-1_frontcover/full/96,128/0/default.jpg"
+    },
+    {
+      "slug": "0033-choice",
+      "title": "Multiple choice of images in a single view",
+      "section": "Segmentation and complex resources",
+      "resource": "https://iiif.io/api/cookbook/recipe/0033-choice/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/421e65be2ce95439b3ad6ef1f2ab87a9-dee-natural/full/151,96/0/default.jpg"
+    },
+    {
+      "slug": "0035-foldouts",
+      "title": "Foldouts, Flaps, and Maps",
+      "section": "Segmentation and complex resources",
+      "resource": "https://iiif.io/api/cookbook/recipe/0035-foldouts/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/0a469c27256eda739d43124cc448a3ba-1_frontcover/full/96,168/0/default.jpg"
+    },
+    {
+      "slug": "0036-composition-from-multiple-images",
+      "title": "Composition from Multiple Images",
+      "section": "Segmentation and complex resources",
+      "resource": "https://iiif.io/api/cookbook/recipe/0036-composition-from-multiple-images/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/899da506920824588764bc12b10fc800-bnf_chateauroux/full/128,96/0/default.jpg"
+    },
+    {
+      "slug": "0560-resources-on-a-timeline",
+      "title": "Rendering Resources Sequentially on a Timeline",
+      "section": "Segmentation and complex resources",
+      "resource": "https://iiif.io/api/cookbook/recipe/0560-resources-on-a-timeline/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/329817fc8a251a01c393f517d8a17d87-Northeaster_by_Winslow_Homer_1895/full/140,96/0/default.jpg"
+    },
+    {
+      "slug": "0489-multimedia-canvas",
+      "title": "Rendering Multiple Media Types on a Time-Based Canvas",
+      "section": "Segmentation and complex resources",
+      "resource": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/213,96/0/default.jpg"
+    },
+    {
+      "slug": "0040-image-rotation-service",
+      "title": "Image Rotation Two Ways",
+      "section": "Segmentation and complex resources",
+      "resource": "https://iiif.io/api/cookbook/recipe/0040-image-rotation-service/manifest-service.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/85a96c630f077e6ac6cb984f1b752bbf-0-21198-zz00022840-1-page1/full/96,133/0/default.jpg"
+    },
+    {
+      "slug": "0047-homepage",
+      "title": "Linking to Web Page of an Object (homepage)",
+      "section": "Linking",
+      "resource": "https://iiif.io/api/cookbook/recipe/0047-homepage/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/28473c77da3deebe4375c3a50572d9d3-laocoon/full/96,124/0/default.jpg"
+    },
+    {
+      "slug": "0053-seeAlso",
+      "title": "Linking to Structured Metadata",
+      "section": "Linking",
+      "resource": "https://iiif.io/api/cookbook/recipe/0053-seeAlso/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001/full/96,132/0/default.jpg"
+    },
+    {
+      "slug": "0466-link-for-loading-manifest",
+      "title": "Loading a manifest with a viewer using a link",
+      "section": "Sharing IIIF content",
+      "resource": "https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0485-contentstate-canvas-region",
+      "title": "Open a specific region of a canvas in a viewer",
+      "section": "Sharing IIIF content",
+      "resource": "https://iiif.io/api/cookbook/recipe/0485-contentstate-canvas-region/annotation.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0540-link-for-opening-multiple-canvases",
+      "title": "Sharing a link for opening two or more Canvases",
+      "section": "Sharing IIIF content",
+      "resource": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/annotation.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0599-drag-and-drop",
+      "title": "Drag and drop",
+      "section": "Sharing IIIF content",
+      "resource": "https://iiif.io/api/cookbook/recipe/0006-text-language/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/329817fc8a251a01c393f517d8a17d87-Whistlers_Mother/full/108,96/0/default.jpg"
+    },
+    {
+      "slug": "0057-publishing-v2-and-v3",
+      "title": "Making IIIF Presentation API v2 and v3 manifests available at the same URL",
+      "section": "Technical",
+      "resource": "https://iiif.io/api/cookbook/recipe/0057-publishing-v2-and-v3/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0434-choice-av",
+      "title": "Multiple Choice of Audio Formats in a Single View (Canvas)",
+      "section": "Real-world complex objects (ideally taken from actual collections)",
+      "resource": "https://iiif.io/api/cookbook/recipe/0434-choice-av/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0064-opera-one-canvas",
+      "title": "Table of Contents for Multiple A/V files on a Single Canvas",
+      "section": "Real-world complex objects (ideally taken from actual collections)",
+      "resource": "https://iiif.io/api/cookbook/recipe/0064-opera-one-canvas/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://fixtures.iiif.io/video/indiana/donizetti-elixir/act1-thumbnail.png"
+    },
+    {
+      "slug": "0065-opera-multiple-canvases",
+      "title": "Table of Contents for Multiple A/V files on Multiple Canvases",
+      "section": "Real-world complex objects (ideally taken from actual collections)",
+      "resource": "https://iiif.io/api/cookbook/recipe/0065-opera-multiple-canvases/manifest.json",
+      "type": "Manifest",
+      "thumbnail": "https://fixtures.iiif.io/video/indiana/donizetti-elixir/act1-thumbnail.png"
+    },
+    {
+      "slug": "0068-newspaper",
+      "title": "Basic Newspaper",
+      "section": "Real-world complex objects (ideally taken from actual collections)",
+      "resource": "https://iiif.io/api/cookbook/recipe/0068-newspaper/newspaper_title-collection.json",
+      "type": "Collection",
+      "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=https%3A%2F%2Fiiif.europeana.eu%2Fimage%2F2YMIN6YXMQ6COVM5AO2XKB5KMCKPMT2YKEKNMAGHVRBIHOOY4AVA%2Fpresentation_images%2F9340afd0-ffe2-11e5-b68d-fa163e60dd72%2Fnode-2%2Fimage%2FSBB%2FBerliner_Tageblatt%2F1925%2F02%2F16%2F0%2FF_SBB_00001_19250216_054_079_0_001%2Ffull%2Ffull%2F0%2Fdefault.jpg&type=TEXT"
+    },
+    {
+      "slug": "0074-multiple-language-captions",
+      "title": "Using Caption and Subtitle Files in Multiple Languages with Video Content",
+      "section": "Real-world complex objects (ideally taken from actual collections)",
+      "resource": "https://iiif.io/api/cookbook/recipe/0074-multiple-language-captions/manifest.json",
+      "type": "Manifest"
+    },
+    {
+      "slug": "0318-navPlace-navDate",
+      "title": "Locating an Item in Place and Time",
+      "section": "Real-world complex objects (ideally taken from actual collections)",
+      "resource": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/collection.json",
+      "type": "Collection",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/71b9228e087f15c75b628214cd9f647d-Castel_Sant_Angelo_Rome/full/130,96/0/default.jpg"
+    }
+  ]
+}

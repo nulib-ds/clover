@@ -15,7 +15,6 @@ const meta: MetaRecord = {
   viewer: "Viewer",
   composing: "Composing",
   styling: "Styling",
-  cookbook: "IIIF Cookbook",
   "--components": {
     type: "separator",
     title: "Components",

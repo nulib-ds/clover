@@ -202,8 +202,8 @@ deadline.
   - Use Clover: Get started (`/docs`, which holds the web components, `<clover-viewer>`
     and the parts, in a section of their own, `#web-component`), Viewer (`/docs/viewer`,
     the templates on it: their old page, `/docs/viewer/templates`, forwards to
-    `#templates`), Composing, Styling, IIIF Cookbook (the menu's names, short, for the
-    pages titled "Composing layouts" and "Cookbook recipes"; Mat, 2026-10-23).
+    `#templates`), Composing, Styling (the menu's names, short; "Composing" for the page
+    titled "Composing layouts"; Mat, 2026-10-23).
   - Get started opens (Mat, 2026-10-24) with a lede of two lines (what Clover is: no
     renderer named) and then its two ways in, side by side, above the fold at
     1280 × 800 (`Ways.tsx`): "Start with the Viewer" and "Compose with its parts", each
@@ -251,12 +251,12 @@ deadline.
   - The homepage is Clover 4's demo (Mat, 2026-10-20): its playground opens what
     `?iiif-content=` names. iiif.io's recipe pages link to
     `…/docs/viewer/demo?iiif-content=<manifest>`, the demo's old address, which the 404
-    table forwards to the homepage with its query: never drop that forward. IIIF
-    Cookbook (`/docs/cookbook`, its page titled "Cookbook recipes", last under Use Clover)
-    lists every IIIF Cookbook recipe to
-    open in the Viewer, which slides in over the page, handled or not
-    (`docs/components/Clover4/CookbookDemo.tsx`); it has no field of its own, as the
-    homepage has one. `/docs/viewer/progress` is
+    table forwards to the homepage with its query: never drop that forward. The
+    Cookbook's recipes are listed on the homepage, in its Viewing field, tucked away at
+    its end, and in its Natural story's select (below); the page that listed them,
+    `/docs/cookbook` ("IIIF Cookbook" under Use Clover), was taken down on 2026-10-25
+    (Mat: "we can now remove this page and any components that are unique to it"), and
+    its address forwards to the homepage. `/docs/viewer/progress` is
     unlisted (hidden in the sidebar, out of search): each recipe's status in 4.x beside
     3.x, and what is missing. Its data is `docs/components/CookbookRecipes/progress4.ts`;
     when a recipe starts working, or stops, record it there with the date.
@@ -353,13 +353,37 @@ deadline.
     ARIA, the keyboard, targets, contrast and text size, captions, language, motion),
     each with its mark, in the standard's order (1.1.1, 1.2.2…), then an ARIA snapshot with tab stops,
     the card as tall as both need where the window has room under the held viewer,
-    focus anywhere in the viewer's column giving it up; Mat, 2026-10-22) and Natural (`data-recipe`; Coverage until 2026-10-25, renamed so its label is an adjective as the others' are, "Native" set aside as it can read as about people, its words of Clover itself, never "we", saying "IIIF" once: "Clover gains IIIF fluency from building blocks designed natively to open specifications." (active, never "comes from"), then "Code and components are crafted toward recipes in the cookbook." (never "it's" or "its", and no range of recipes after it), with no date and the link the one word "cookbook"; its title "Reads the IIIF cookbook.", "cookbook" lowercase there and in its words (Mat, 2026-10-25, an exception to the IIIF Cookbook's capitals elsewhere), IIIF's logo for the word, in its own colors and proportions (never squeezed), sized a little past where its stems match the title's weight (0.786em, as its colors on black read smaller), on the title's baseline, `aria-hidden`, the word read in its place (beside or over the figure was tried and undone), `docs/components/Home/IIIFLogo.tsx`, a copy of the 3.x badge's, which goes with the 3.x pages; Mat, 2026-10-25) a Cookbook recipe (0032, a
+    focus anywhere in the viewer's column giving it up; Mat, 2026-10-22) and Natural (`data-recipe`; Coverage until 2026-10-25, renamed so its label is an adjective as the others' are, "Native" set aside as it can read as about people, its words of Clover itself, never "we", saying "IIIF" once: "Clover gains IIIF fluency from building blocks designed natively to open specifications." (active, never "comes from"), then "Code and components are crafted toward recipes, with **62** handled in the cookbook." (never "it's" or "its", and no range of recipes; the figure in the sentence, `cookbook.handled`, bold with the figures' stroke under it, `.inlineFigure`, rather than in a column of its own, the card one column, `data-single`; Mat, 2026-10-25: "instead of going columns for this card. put the 62 in line in the sentence … bold the number and underline it"), with no date and the link the one word "cookbook", to the IIIF Cookbook itself, `https://iiif.io/api/cookbook/` (Mat, 2026-10-25); its title "Reads the IIIF cookbook.", "cookbook" lowercase there and in its words (Mat, 2026-10-25, an exception to the IIIF Cookbook's capitals elsewhere), IIIF's logo for the word, in its own colors and proportions (never squeezed), sized a little past where its stems match the title's weight (0.786em, as its colors on black read smaller), on the title's baseline, `aria-hidden`, the word read in its place (beside or over the figure was tried and undone), `docs/components/Home/IIIFLogo.tsx`, a copy of the 3.x badge's, which goes with the 3.x pages; Mat, 2026-10-25) a Cookbook recipe (0032, a
     Collection, read by Label, Body, Metadata and Collection, all outlined but Metadata;
     Mat, 2026-10-21; for this example alone, the Collection held in from its outline, its
     address on one line, and its members given thumbnails from their own images at a size
     each `info.json` prescribes, its `sizes` else a level of its tiles,
     `recipeThumbnails.ts`; Mat, 2026-10-22), each crossfading with the viewer (no flip), inert, and given
-    up when focus comes to the viewer (2.4.7); Seamless (`data-brand`) previews Northwestern
+    up when focus comes to the viewer (2.4.7). Under Natural's words, across its foot as
+    Composable's code is (Mat, 2026-10-25: "put it underneath the marketing language like
+    we do for the jsx editor on composable"), the playground's own select, the same
+    `ResourceField` (Mat, 2026-10-25: "just use the same select as above. it will need
+    dark capability. the arrow should point up. try to keep it dry between the two";
+    `RecipeSelect.tsx`): `of="recipes"`, the Cookbook's recipes alone, from the curated
+    `cookbook` Collection (Mat: "use a IIIF Collection that we can curate"), read while
+    the page is idle, named "Viewing" ("Viewing IIIF Cookbook recipe" to hear), showing
+    the recipe up top, else the one the example viewer reads (0032), staged (`staged`;
+    Mat, 2026-10-25: "stage the 0032 manifest in the select. do not have it be
+    submitted"): in the field and marked in its list, never in `?iiif-content=` until the
+    reader chooses it or presses Open, which opens what the field shows; `toward="up"`, Open's caret pointing up; in the site's
+    dark palette (`dark` around it), the select carrying its own edge and lift
+    (`--pg-edge`, `--pg-lift` on `.resourcePicker`), so it is the same select anywhere.
+    Choosing one opens it in the playground's Viewer up top (Mat: "load in the viewer up
+    top, not JUST swap out the side bar") and takes the reader up to it (Mat: "make this
+    change/submit navigate the user top"): the page to its top, smoothly where motion is
+    allowed, and focus to the playground's field, which shows it now (2.4.3, 2.4.11). Its field shows the recipe up top, chosen there or in the
+    playground's field, so the two are one choice. While focus is in it the story is
+    lifted (`z-index`), so its list lies over what follows. The held viewer's recipe face
+    reads 0032, always, whatever the playground shows (Mat, 2026-10-25: "it should remain
+    as the 0032 collection always"), and keeps it past the story to the page's foot, only
+    its line ending there (`StoryLines`, which follows the Collection part as the face
+    draws). The select shows at every width: what it opens is up top, the Viewer, which is there
+    when the columns stack too. Seamless (`data-brand`) previews Northwestern
     purple without keeping it, on what is in view as it begins (the navbar, the viewer,
     the stories and their line, the tiles and chips on screen; `previewPageTheme`'s
     elements, marked `data-page-theme` so the accent's steps mix again there,
@@ -376,7 +400,9 @@ deadline.
     2026-10-21: in sync) and waits `BAND` past its edge before undoing; the line draws in
     from the moment its end can be shown (a part on a face the viewer is turning to is
     looked for each frame), and the page's foot ends the last story too, its line fading
-    (`data-gone`), still drawn to it, and its change undone. Where the viewer is held, a
+    (`data-gone`), still drawn to it, and its change undone, but for Natural's recipe,
+    which the viewer keeps past it (Mat, 2026-10-25: "do not reset the side floating
+    viewer … after the Natural story"). Where the viewer is held, a
     story's figure strokes draw as its line reaches it too (`data-drawn`), and elsewhere
     once they come into view past a point; every stroke draws once and stays drawn until
     the page loads again, never by the scroll's own position (`Swoosh.tsx`; Mat, 2026-10-22). Seamless has the site's Font family and Color (`BrandPicker.tsx`),
@@ -486,7 +512,39 @@ deadline.
     "Your own" tile was), which empties the field for an address. Each of the reader's
     own joins the list as they open it, after that, by its root `label` and
     `thumbnail` (never a Canvas's or member's) over its address, so they can switch
-    between theirs and ours; held in memory only, never stored, gone with the page. The
+    between theirs and ours; held in memory only, never stored, gone with the page. Last,
+    tucked away (Mat, 2026-10-25: "list all but place them inside of a category that is
+    tucked away at the bottom of the list"), "IIIF Cookbook recipes", IIIF's logo in its
+    slot, a hairline over it: chosen, it reads the recipes (the curated `cookbook`
+    Collection's members, never fetched until asked for) and shows every one under it
+    in one group (WAI-ARIA's grouped listbox, named for them), the list kept open, the
+    first recipe marked and the count said in a status (4.1.3); chosen again, it hides
+    them. Each is listed by its title as the Cookbook writes it, its folder's name on
+    iiif.io under it ("0047-homepage"; Mat, 2026-10-25), and its thumbnail, else its
+    number in the empty slot. Shown, typing narrows
+    them with ours; they stay shown while a recipe is in the Viewer, and fold away again
+    as anything else opens there, so ours stand apart (Mat, 2026-10-25: "toggling to a non
+    recipe causes the two groups to come back together"). A recipe opens as the reader's own
+    does (`?iiif-content=` its address), but the field shows it as the recipe, never
+    adding it to the reader's own: so a link from a recipe's page on iiif.io arrives
+    titled, its category open. A recipe in the Viewer is said plainly in the field (Mat,
+    2026-10-25: "strongly hint they are viewing a recipe"): IIIF's logo set into the pill's top edge, in its middle, clear of the thumbnail, as a fieldset's legend is: the edge breaks around it on the page's ground, with no disc, edge or shadow of its own (Mat, 2026-10-25: "meshes better with the select"; held under the navbar, a little lower, so all of it shows), and after the title its folder's name on iiif.io, in the code's face, a
+    size smaller and the title's muted gray (lighter would fail 1.4.3), the field as wide
+    as the title where a browser sizes it so (`field-sizing`; else the name at the line's
+    end), the name giving way first and never below its number, and on a narrow field
+    (a container query) its number alone; the field described by it ("IIIF Cookbook recipe
+    0029-metadata-anywhere"); gone while the reader types. The playground's field only. The recipes are read through `readRecipes`
+    (`recipeCatalog.ts`), here and by the Natural story, from the `cookbook` mock, a IIIF
+    Collection curated in `docs/mocks/cookbook/index.mjs` (Mat, 2026-10-25), so what it
+    lists is what both list. What it lists is `docs/mocks/cookbook/recipes.json`, written
+    by `npm run build:cookbook` (`scripts/build-cookbook.mjs`) from `cookbookSections.ts`
+    and `resourceFor`: it reads each resource, leaves out (and says) one that does not
+    answer, keeps its type (a Manifest or a Collection), finds its
+    thumbnail (its own, its first Canvas's or member's, else its first image's service at
+    a size its `info.json` allows, `docs/lib/iiif-image-sizes.ts`; an image without a
+    service is never taken, being perhaps the full image), and says which recipes
+    iiif.io's index lists that `cookbookSections.ts` does not, or the other way about.
+    Run it when the Cookbook changes, then `npm run build:mocks`. The
     field shows the label of the one in the Viewer, never our word for its kind (`name`,
     which only the parts' chips use). It is a WAI-ARIA editable combobox: typing narrows the
     list, Down and Up open and move through it, Enter opens the one marked or what is
@@ -980,7 +1038,14 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   (Mat, 2026-10-23: "download the model so we don't have to worry about cors"):
   `npm run build:mocks` fetches it from the Lab only when it is missing, and the live
   copy (`pages/api/mocks/esu-shrine/`) serves that file. The photograph is linked, never
-  copied. It is the playground's Model. The package's tests use copies of
+  copied. It is the playground's Model; `cookbook`, the IIIF Cookbook's recipes as one
+  Collection, each a member by the resource the Cookbook publishes for it, its title,
+  its folder's name on iiif.io as its summary ("0047-homepage", `none`; Mat,
+  2026-10-25), its thumbnail and its page on iiif.io (its homepage),
+  curated in its generator (its words, and `LEFT_OUT`: a resource another recipe owns is
+  listed once, so 0466 and 0599 are out), from `recipes.json`, which
+  `npm run build:cookbook` writes (static; the homepage's field and Natural story read
+  it). The package's tests use copies of
   `page-transcript`, `paged`, `rudolf-hess-nuremberg` and `transcripts`, in
   `packages/clover/src/fixtures/mocks/<name>/`.
 

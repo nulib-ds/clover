@@ -1,0 +1,2511 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/cookbook/collection.json",
+  "type": "Collection",
+  "label": {
+    "en": [
+      "IIIF Cookbook recipes"
+    ]
+  },
+  "summary": {
+    "en": [
+      "Every recipe the IIIF Cookbook publishes, each by the resource it is about."
+    ]
+  },
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0001-mvm-image/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Simplest Manifest - Image"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0001-mvm-image"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0001-mvm-image/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Simplest Manifest - Image"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0002-mvm-audio/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Simplest Manifest - Audio"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0002-mvm-audio"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0002-mvm-audio/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Simplest Manifest - Audio"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0003-mvm-video/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Simplest Manifest - Video"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0003-mvm-video"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0003-mvm-video/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Simplest Manifest - Video"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0608-mvm-3d/v4/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Simplest Manifest - 3D"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0608-mvm-3d"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0608-mvm-3d/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Simplest Manifest - 3D"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0004-canvas-size/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Image and Canvas with Differing Dimensions"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0004-canvas-size"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0004-canvas-size/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Image and Canvas with Differing Dimensions"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0005-image-service/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Support Deep Viewing with Basic Use of a IIIF Image Service"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0005-image-service"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0005-image-service/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Support Deep Viewing with Basic Use of a IIIF Image Service"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0006-text-language/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Internationalization and Multi-language Values"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0006-text-language"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/329817fc8a251a01c393f517d8a17d87-Whistlers_Mother/full/108,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0006-text-language/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Internationalization and Multi-language Values"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0118-multivalue/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Displaying Multiple Values with Language Maps"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0118-multivalue"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0118-multivalue/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Displaying Multiple Values with Language Maps"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0007-string-formats/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Embedding HTML in descriptive properties"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0007-string-formats"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0007-string-formats/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Embedding HTML in descriptive properties"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0029-metadata-anywhere/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Metadata on any Resource"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0029-metadata-anywhere"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/421e65be2ce95439b3ad6ef1f2ab87a9-dee-natural/full/151,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0029-metadata-anywhere/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Metadata on any Resource"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0008-rights/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Rights statement(s)"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0008-rights"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0008-rights/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Rights statement(s)"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Simple Manifest - Book"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0009-book-1"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/59d09e6773341f28ea166e9f3c1e674f-gallica_ark_12148_bpt6k1526005v_f18/full/96,138/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0009-book-1/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Simple Manifest - Book"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0011-book-3-behavior/manifest-continuous.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Book behavior (paging) variations"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0011-book-3-behavior"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/8c169124171e6b2253b698a22a938f07-21198-zz001hbmd9_1300412_master/full/686,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0011-book-3-behavior/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Book behavior (paging) variations"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0299-region/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Addressing a spatial region"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0299-region"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/4ce82cef49fb16798f4c2440307c3d6f-newspaper-p2/full/96,136/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0299-region/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Addressing a spatial region"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0010-book-2-viewing-direction/manifest-rtl.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Viewing direction and its effect on navigation"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0010-book-2-viewing-direction"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001/full/96,132/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0010-book-2-viewing-direction/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Viewing direction and its effect on navigation"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0283-missing-image/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Missing Images in a Sequence"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0283-missing-image"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/d3bbf5397c6df6b894c5991195c912ab-1-21198-zz001d8m41_774608_master/full/96,136/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0283-missing-image/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Missing Images in a Sequence"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0117-add-image-thumbnail/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Image Thumbnail for Manifest"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0117-add-image-thumbnail"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001/full/96,132/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0117-add-image-thumbnail/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Image Thumbnail for Manifest"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0232-image-thumbnail-canvas/manifest-image.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Implementation discussion: Thumbnails on Canvases"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0232-image-thumbnail-canvas"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://fixtures.iiif.io/other/level0/Glen/photos/gottingen/full/252,189/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0232-image-thumbnail-canvas/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Implementation discussion: Thumbnails on Canvases"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0013-placeholderCanvas/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Load a Preview Image Before the Main Content"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0013-placeholderCanvas"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0013-placeholderCanvas/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Load a Preview Image Before the Main Content"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0014-accompanyingcanvas/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Audio Presentation with Accompanying Image"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0014-accompanyingcanvas"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/4b45bba3ea612ee46f5371ce84dbcd89-mahler-0/full/96,124/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0014-accompanyingcanvas/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Audio Presentation with Accompanying Image"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0202-start-canvas/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Load Manifest Beginning with a Specific Canvas"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0202-start-canvas"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/59d09e6773341f28ea166e9f3c1e674f-gallica_ark_12148_bpt6k1526005v_f18/full/96,138/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0202-start-canvas/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Load Manifest Beginning with a Specific Canvas"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0015-start/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Begin playback at a specific point - Time-based media"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0015-start"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0015-start/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Begin playback at a specific point - Time-based media"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0230-navdate/navdate-collection.json",
+      "type": "Collection",
+      "label": {
+        "en": [
+          "Navigation by Chronology"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0230-navdate"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/43153e2ec7531f14dd1c9b2fc401678a-88695674/full/96,130/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0230-navdate/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Navigation by Chronology"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0154-geo-extension/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Locate a Manifest on a Web Map"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0154-geo-extension"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/28473c77da3deebe4375c3a50572d9d3-laocoon/full/96,124/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0154-geo-extension/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Locate a Manifest on a Web Map"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0240-navPlace-on-canvases/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Locate Multiple Canvases on a Web Map"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0240-navPlace-on-canvases"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/28473c77da3deebe4375c3a50572d9d3-laocoon/full/96,124/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0240-navPlace-on-canvases/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Locate Multiple Canvases on a Web Map"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0234-provider/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Acknowledge Content Contributors"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0234-provider"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001_full/full/96,113/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0234-provider/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Acknowledge Content Contributors"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0032-collection/collection.json",
+      "type": "Collection",
+      "label": {
+        "en": [
+          "Simple Collection"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0032-collection"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/329817fc8a251a01c393f517d8a17d87-Winslow_Homer_-_The_Gulf_Stream_-_Metropolitan_Museum_of_Art/full/160,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0032-collection/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Simple Collection"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0464-reuse-manifest/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Reuse parts of a Manifest"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0464-reuse-manifest"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0464-reuse-manifest/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Reuse parts of a Manifest"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0017-transcription-av/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Using Transcripts with A/V Content"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0017-transcription-av"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0017-transcription-av/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Using Transcripts with A/V Content"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0103-poetry-reading-annotations/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Scholarly Annotation of a Poetry Reading"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0103-poetry-reading-annotations"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0103-poetry-reading-annotations/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Scholarly Annotation of a Poetry Reading"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0046-rendering/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Providing Alternative Representations"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0046-rendering"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001/full/96,132/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0046-rendering/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Providing Alternative Representations"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0219-using-caption-file/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Using Caption Files with Video Content"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0219-using-caption-file"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0219-using-caption-file/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Using Caption Files with Video Content"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0253-using-transcript-file/v4/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Video with Accompanying Transcript"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0253-using-transcript-file"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0253-using-transcript-file/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Video with Accompanying Transcript"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0266-full-canvas-annotation/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Simplest Annotation"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0266-full-canvas-annotation"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0266-full-canvas-annotation/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Simplest Annotation"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0019-html-in-annotations/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "HTML in Annotations"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0019-html-in-annotations"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0019-html-in-annotations/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "HTML in Annotations"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0045-css/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "CSS in an Annotation"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0045-css"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/213,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0045-css/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "CSS in an Annotation"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0021-tagging/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Simple Annotation - Tagging"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0021-tagging"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0021-tagging/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Simple Annotation - Tagging"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0261-non-rectangular-commenting/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Annotation with a Non-Rectangular Polygon"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0261-non-rectangular-commenting"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0261-non-rectangular-commenting/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Annotation with a Non-Rectangular Polygon"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0258-tagging-external-resource/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Tagging with an External Resource"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0258-tagging-external-resource"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0258-tagging-external-resource/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Tagging with an External Resource"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0022-linking-with-a-hotspot/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Redirecting from one Canvas to another resource (Hotspot linking)"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0022-linking-with-a-hotspot"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0022-linking-with-a-hotspot/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Redirecting from one Canvas to another resource (Hotspot linking)"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0326-annotating-image-layer/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Annotate a specific images or layers"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0326-annotating-image-layer"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/421e65be2ce95439b3ad6ef1f2ab87a9-dee-natural/full/151,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0326-annotating-image-layer/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Annotate a specific images or layers"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0135-annotating-point-in-canvas/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Annotating a specific point of an image"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0135-annotating-point-in-canvas"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/43153e2ec7531f14dd1c9b2fc401678a-88695674/full/96,130/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0135-annotating-point-in-canvas/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Annotating a specific point of an image"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0139-geolocate-canvas-fragment/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Geographic coordinates"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0139-geolocate-canvas-fragment"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/43153e2ec7531f14dd1c9b2fc401678a-88695674/full/96,130/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0139-geolocate-canvas-fragment/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Geographic coordinates"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0269-embedded-or-referenced-annotations/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Embedded or Referenced Annotations"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0269-embedded-or-referenced-annotations"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0269-embedded-or-referenced-annotations/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Embedded or Referenced Annotations"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0306-linking-annotations-to-manifests/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Linking external Annotations targeting a Canvas to a Manifest"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0306-linking-annotations-to-manifests"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0306-linking-annotations-to-manifests/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Linking external Annotations targeting a Canvas to a Manifest"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Using Annotation collections"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0309-annotation-collection"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/4ce82cef49fb16798f4c2440307c3d6f-newspaper-p1/full/96,133/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Using Annotation collections"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0377-image-in-annotation/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Image in annotations"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0377-image-in-annotation"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0377-image-in-annotation/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Image in annotations"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0346-multilingual-annotation-body/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Annotating in Multiple Languages"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0346-multilingual-annotation-body"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/213,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0346-multilingual-annotation-body/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Annotating in Multiple Languages"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0561-text-on-image/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Visible Text Resource on a Canvas"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0561-text-on-image"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/213,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0561-text-on-image/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Visible Text Resource on a Canvas"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Table of Contents for Book Chapters"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0024-book-4-toc"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/d3bbf5397c6df6b894c5991195c912ab-1-21198-zz001d8m41_774608_master/full/96,136/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0024-book-4-toc/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Table of Contents for Book Chapters"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0025-newspaper-article-index/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Navigation by Newspaper Article"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0025-newspaper-article-index"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/c0f1e980f00f66ef47caaf52cead8119-p1/full/96,141/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0025-newspaper-article-index/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Navigation by Newspaper Article"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0026-toc-opera/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Table of contents for A/V content"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0026-toc-opera"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0026-toc-opera/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Table of contents for A/V content"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0229-behavior-ranges/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Adding Thumbnail Navigation and no-nav to a Video Resource"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0229-behavior-ranges"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0229-behavior-ranges/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Adding Thumbnail Navigation and no-nav to a Video Resource"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0027-alternative-page-order/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Alternative Page Sequences"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0027-alternative-page-order"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/3ec31f43ce55cfcc076804c88c06aa43-CF-f0186r_aVISNK_387/full/96,142/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0027-alternative-page-order/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Alternative Page Sequences"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0030-multi-volume/collection.json",
+      "type": "Collection",
+      "label": {
+        "en": [
+          "Multi-volume Work with Individually-bound Volumes"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0030-multi-volume"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/5b0b39c2bf5591d21d807f9aadb437fa-uclaeal_wahon_A06_bib1974505_vol01_001/full/96,128/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0030-multi-volume/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Multi-volume Work with Individually-bound Volumes"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0031-bound-multivolume/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Multiple Volumes in a Single Bound Volume"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0031-bound-multivolume"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/15f769d62ca9a3a2deca390efed75d73-1_frontcover/full/96,128/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0031-bound-multivolume/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Multiple Volumes in a Single Bound Volume"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0033-choice/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Multiple choice of images in a single view"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0033-choice"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/421e65be2ce95439b3ad6ef1f2ab87a9-dee-natural/full/151,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0033-choice/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Multiple choice of images in a single view"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0035-foldouts/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Foldouts, Flaps, and Maps"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0035-foldouts"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/0a469c27256eda739d43124cc448a3ba-1_frontcover/full/96,168/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0035-foldouts/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Foldouts, Flaps, and Maps"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0036-composition-from-multiple-images/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Composition from Multiple Images"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0036-composition-from-multiple-images"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/899da506920824588764bc12b10fc800-bnf_chateauroux/full/128,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0036-composition-from-multiple-images/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Composition from Multiple Images"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0560-resources-on-a-timeline/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Rendering Resources Sequentially on a Timeline"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0560-resources-on-a-timeline"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/329817fc8a251a01c393f517d8a17d87-Northeaster_by_Winslow_Homer_1895/full/140,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0560-resources-on-a-timeline/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Rendering Resources Sequentially on a Timeline"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Rendering Multiple Media Types on a Time-Based Canvas"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0489-multimedia-canvas"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/213,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Rendering Multiple Media Types on a Time-Based Canvas"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0040-image-rotation-service/manifest-service.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Image Rotation Two Ways"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0040-image-rotation-service"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/85a96c630f077e6ac6cb984f1b752bbf-0-21198-zz00022840-1-page1/full/96,133/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0040-image-rotation-service/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Image Rotation Two Ways"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0047-homepage/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Linking to Web Page of an Object (homepage)"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0047-homepage"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/28473c77da3deebe4375c3a50572d9d3-laocoon/full/96,124/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0047-homepage/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Linking to Web Page of an Object (homepage)"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0053-seeAlso/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Linking to Structured Metadata"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0053-seeAlso"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001/full/96,132/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0053-seeAlso/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Linking to Structured Metadata"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0485-contentstate-canvas-region/annotation.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Open a specific region of a canvas in a viewer"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0485-contentstate-canvas-region"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0485-contentstate-canvas-region/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Open a specific region of a canvas in a viewer"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/annotation.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Sharing a link for opening two or more Canvases"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0540-link-for-opening-multiple-canvases"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Sharing a link for opening two or more Canvases"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0057-publishing-v2-and-v3/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Making IIIF Presentation API v2 and v3 manifests available at the same URL"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0057-publishing-v2-and-v3"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0057-publishing-v2-and-v3/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Making IIIF Presentation API v2 and v3 manifests available at the same URL"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0434-choice-av/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Multiple Choice of Audio Formats in a Single View (Canvas)"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0434-choice-av"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0434-choice-av/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Multiple Choice of Audio Formats in a Single View (Canvas)"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0064-opera-one-canvas/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Table of Contents for Multiple A/V files on a Single Canvas"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0064-opera-one-canvas"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://fixtures.iiif.io/video/indiana/donizetti-elixir/act1-thumbnail.png",
+          "type": "Image",
+          "format": "image/png"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0064-opera-one-canvas/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Table of Contents for Multiple A/V files on a Single Canvas"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0065-opera-multiple-canvases/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Table of Contents for Multiple A/V files on Multiple Canvases"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0065-opera-multiple-canvases"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://fixtures.iiif.io/video/indiana/donizetti-elixir/act1-thumbnail.png",
+          "type": "Image",
+          "format": "image/png"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0065-opera-multiple-canvases/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Table of Contents for Multiple A/V files on Multiple Canvases"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0068-newspaper/newspaper_title-collection.json",
+      "type": "Collection",
+      "label": {
+        "en": [
+          "Basic Newspaper"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0068-newspaper"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=https%3A%2F%2Fiiif.europeana.eu%2Fimage%2F2YMIN6YXMQ6COVM5AO2XKB5KMCKPMT2YKEKNMAGHVRBIHOOY4AVA%2Fpresentation_images%2F9340afd0-ffe2-11e5-b68d-fa163e60dd72%2Fnode-2%2Fimage%2FSBB%2FBerliner_Tageblatt%2F1925%2F02%2F16%2F0%2FF_SBB_00001_19250216_054_079_0_001%2Ffull%2Ffull%2F0%2Fdefault.jpg&type=TEXT",
+          "type": "Image"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0068-newspaper/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Basic Newspaper"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0074-multiple-language-captions/manifest.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Using Caption and Subtitle Files in Multiple Languages with Video Content"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0074-multiple-language-captions"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0074-multiple-language-captions/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Using Caption and Subtitle Files in Multiple Languages with Video Content"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/collection.json",
+      "type": "Collection",
+      "label": {
+        "en": [
+          "Locating an Item in Place and Time"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0318-navPlace-navDate"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/71b9228e087f15c75b628214cd9f647d-Castel_Sant_Angelo_Rome/full/130,96/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Locating an Item in Place and Time"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    }
+  ]
+}
