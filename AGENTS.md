@@ -617,7 +617,7 @@ deadline.
     (on `.figureMark`, inline, so they sit as the marks do: `Swoosh.tsx`'s spans) and the
     wordmark keep that; measure a new one against them. A stroke draws from one end to
     the other, as a pen draws it, never stretched (Mat, 2026-10-22): a window slides
-    open over ink that slides back as far, both transforms, so it holds still.
+    open over ink that slides back as far, both transforms, so it holds still. A stroke never draws again for a color: its ink eases to a new accent (a registered `--stroke-ink`, 480ms, none where the reader asks for reduced motion; Mat, 2026-10-25).
   - Every card, container, call to action and code block on the site has one radius,
     `--radius-4` (12px), Nextra's code blocks, callouts and search field too
     (`layout.css`); what sits inside one takes a smaller step (`--radius-2`,

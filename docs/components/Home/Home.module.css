@@ -99,15 +99,35 @@
   z-index: -1;
 }
 
+/*
+ * The stroke's ink, the accent eased from one color to the next when a brand is chosen or
+ * previewed (Mat, 2026-10-25: "don't redraw swooshes on color change … give a nice
+ * transition for the color"): a registered color, so it transitions, where a gradient
+ * itself cannot. Only its color: the stroke stays drawn.
+ */
+@property --stroke-ink {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #0f62fe;
+}
+
 /* Faint where the pen comes down, the full accent where it lifts. */
 .mark::after,
 .strokeInk {
+  --stroke-ink: var(--accent-9);
   background: linear-gradient(
     to right,
-    color-mix(in srgb, var(--accent-9) 30%, transparent),
-    var(--accent-9)
+    color-mix(in srgb, var(--stroke-ink) 30%, transparent),
+    var(--stroke-ink)
   );
   mask: var(--swoosh) center / 100% 100% no-repeat;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mark::after,
+  .strokeInk {
+    transition: --stroke-ink 480ms ease;
+  }
 }
 
 .mark::after {
