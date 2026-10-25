@@ -630,8 +630,9 @@ deadline.
     least 36rem tall (not a phone, where with the navbar it would take too much height),
     it holds under the navbar as its lower half, a little up under it (0.382rem): while
     the playground's Viewer and then the parts pass under, the navbar's edge moves to the
-    bar's foot, the field runs the playground's width, to the Viewer's edges (at rest it
-    keeps 1rem from them), and the bar's foot rides on the first story's top (Adaptable,
+    bar's foot, the field runs as wide as the navbar's content, the wordmark to the
+    repository's icon, never past it (Mat, 2026-10-25: "only the viewer container can do
+    this"; at rest it keeps 1rem from the Viewer's edges), and the bar's foot rides on the first story's top (Adaptable,
     `data-bar-until`) as it leaves (Mat, 2026-10-25: "keep this sticky … all the way
     through the component examples"). Its box reaches there: a spacer after the Viewer
     (`.reach`) as tall as from the Viewer's foot to the story, and the same room taken

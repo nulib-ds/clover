@@ -186,7 +186,11 @@
  * the Viewer does (Mat, 2026-10-25); its room is only at rest.
  */
 .bar[data-stuck] .resourcePicker {
-  max-width: 100%;
+  /*
+   * Never past the navbar's content, the wordmark to the repository's icon (its 1300px,
+   * `Home.module.css`; Mat, 2026-10-25): only the Viewer runs wider.
+   */
+  max-width: min(100%, 1300px);
 }
 
 @media (prefers-reduced-motion: reduce) {
