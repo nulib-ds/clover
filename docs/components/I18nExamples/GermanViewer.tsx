@@ -3,6 +3,7 @@
 import Viewer from "docs/components/DynamicImports/Viewer";
 import { initCloverI18n } from "@samvera/clover-iiif/i18n";
 import { useEffect } from "react";
+import { EXAMPLE, example } from "docs/lib/example";
 
 const DEMO_MANIFEST =
   "https://iiif.io/api/cookbook/recipe/0025-newspaper-article-index/manifest.json";
@@ -33,7 +34,11 @@ const GermanViewer: React.FC = () => {
     });
   }, []);
 
-  return <Viewer iiifContent={DEMO_MANIFEST} options={viewerOptions} />;
+  return (
+    <div {...example(EXAMPLE)}>
+      <Viewer iiifContent={DEMO_MANIFEST} options={viewerOptions} />
+    </div>
+  );
 };
 
 export default GermanViewer;

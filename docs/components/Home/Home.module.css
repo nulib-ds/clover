@@ -220,10 +220,11 @@
   color: var(--gray-11);
   /*
    * Set by the headline's size (Mat, 2026-10-25): its 8vw and 5.236rem over 2.618 and
-   * a little, never under the reader's 1rem: one line at every width, 320px up;
-   * balanced, should a reader's larger text wrap it.
+   * a little, never under the stories' words at their smallest (`--text-lg`, 1.125rem,
+   * `--text-lede`'s floor; Mat, 2026-10-25), so it is never smaller than the text below
+   * it. Balanced over two lines where a phone is too narrow for one.
    */
-  font-size: clamp(var(--text-md), 3vw, 2rem);
+  font-size: clamp(var(--text-lg), 3vw, 2rem);
   line-height: 1.5;
   /* No bottom margin: the hero's own bottom padding sets the gap to the playground. */
   margin: 0 auto;

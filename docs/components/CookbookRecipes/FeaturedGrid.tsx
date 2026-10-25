@@ -2,6 +2,7 @@ import React from "react";
 
 import { featuredItems } from "docs/components/CookbookRecipes/featuredItems";
 import styles from "docs/components/CookbookRecipes/FeaturedGrid.module.css";
+import { example } from "docs/lib/example";
 
 interface FeaturedGridProps {
   /** Opens a resource in the viewer. Keep it stable: the grid renders once. */
@@ -13,7 +14,11 @@ interface FeaturedGridProps {
 /** A grid of items to open in the Viewer with one click. Memoized for the same reason as the table. */
 const FeaturedGrid: React.FC<FeaturedGridProps> = ({ onView, onPreload }) => {
   return (
-    <section className={styles.container} aria-label="Example items">
+    <section
+      className={styles.container}
+      aria-label="Example items"
+      {...example()}
+    >
       <ul className={styles.grid}>
         {featuredItems.map((featured) => (
           <li key={featured.resource}>

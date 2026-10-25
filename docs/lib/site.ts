@@ -53,7 +53,11 @@ export const shareImage = {
   type: "image/jpeg",
   width: 1200,
   height: 630,
-  alt: "The cover of the White Sewing Machine Company's 1896 bicycle catalog: a woman in a white dress and straw hat rides a bicycle down a country road, “The White” lettered beside her.",
+  /*
+   * Said as a sample from the docs' examples, as it is (Mat, 2026-10-25): every page
+   * carries it, and the pages are about Clover, not the catalog (`docs/lib/example.ts`).
+   */
+  alt: "A sample image from Clover's examples: an 1896 bicycle catalog's cover, a woman in a white dress and straw hat riding a bicycle down a country road.",
 };
 
 /*
@@ -84,6 +88,7 @@ export function pageMetadata({
   route,
   modified,
   markdown = false,
+  indexed = true,
 }: {
   title?: string;
   description?: string;
@@ -92,6 +97,8 @@ export function pageMetadata({
   modified?: string;
   /** Whether the page has a Markdown copy (`markdownUrl`), linked for agents. */
   markdown?: boolean;
+  /** Whether search engines may index the page: not the unlisted, nor the test mocks. */
+  indexed?: boolean;
 }): Metadata {
   const fullTitle = title ? `${title} – ${siteTitle}` : homeTitle;
   const text =
@@ -115,6 +122,14 @@ export function pageMetadata({
       siteName: siteTitle,
       images: [shareImage],
     },
+    /*
+     * No page's pictures indexed: they are the examples' sample images, never Clover's
+     * (Mat, 2026-10-25), whose marks are drawn inline. An unlisted page or a test mock
+     * not indexed at all.
+     */
+    robots: indexed
+      ? { noimageindex: true }
+      : { index: false, follow: true, noimageindex: true },
     // X reads the title, description and picture from Open Graph; its alt it does not.
     twitter: { card: "summary_large_image" },
     other: { "twitter:image:alt": shareImage.alt },

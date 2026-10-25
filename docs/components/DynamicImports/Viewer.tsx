@@ -8,6 +8,7 @@ import type {
 } from "@samvera/clover-iiif/viewer";
 import dynamic from "next/dynamic";
 import { useRouter } from "docs/lib/router";
+import { EXAMPLE, example } from "docs/lib/example";
 
 // todo: set this as a constant somewhere?
 const defaultIiifContent =
@@ -79,17 +80,19 @@ const CloverViewer = ({
    * (`#FCFCFD` light, `#111113` dark).
    */
   return (
-    <Viewer
-      contentStateCallback={
-        contentStateCallback ?? (logContentState ? logState : undefined)
-      }
-      iiifContent={iiifResource}
-      iiifContentSearchQuery={iiifContentSearchQuery}
-      options={options}
-      key={iiifResource}
-      {...(customDisplays && { customDisplays })}
-      {...(plugins && { plugins })}
-    />
+    <div {...example(EXAMPLE)}>
+      <Viewer
+        contentStateCallback={
+          contentStateCallback ?? (logContentState ? logState : undefined)
+        }
+        iiifContent={iiifResource}
+        iiifContentSearchQuery={iiifContentSearchQuery}
+        options={options}
+        key={iiifResource}
+        {...(customDisplays && { customDisplays })}
+        {...(plugins && { plugins })}
+      />
+    </div>
   );
 };
 

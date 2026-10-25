@@ -16,6 +16,7 @@ import {
 import { resources } from "docs/components/Playground/playground-config";
 import { loadMapWorker } from "docs/lib/map-worker";
 import { useRouter } from "docs/lib/router";
+import { EXAMPLE, example } from "docs/lib/example";
 
 /**
  * The Viewer page's examples (`content/docs/viewer/index.mdx`), laid out as Radix Themes
@@ -295,7 +296,7 @@ export function ViewerExample({
 }) {
   return (
     <figure className={styles.example} data-wide={wide || undefined}>
-      <div className={styles.preview}>
+      <div className={styles.preview} {...example(EXAMPLE)}>
         <Live {...live} />
       </div>
       {children && <CodeArea editor={editor}>{children}</CodeArea>}
@@ -373,7 +374,7 @@ export function OptionsExample({
           ))}
         </div>
       </div>
-      <div className={styles.preview}>
+      <div className={styles.preview} {...example(EXAMPLE)}>
         <Live key={nameOf(value)} {...live} {...shown} />
       </div>
       <CodeArea editor={editor}>
@@ -462,7 +463,7 @@ export function LiveTemplates({
       data-lead
       data-wide={wide || undefined}
     >
-      <div className={styles.preview}>
+      <div className={styles.preview} {...example(EXAMPLE)}>
         <Live
           key={`${option.name}|${remountKey(option.knobs, current)}`}
           {...live}
@@ -552,7 +553,9 @@ export function Example({
   );
   return (
     <figure className={styles.example} data-wide={wide || undefined}>
-      <div className={styles.preview}>{demo}</div>
+      <div className={styles.preview} {...example(EXAMPLE)}>
+        {demo}
+      </div>
       {code.length > 0 && <CodeArea editor={editor}>{code}</CodeArea>}
     </figure>
   );

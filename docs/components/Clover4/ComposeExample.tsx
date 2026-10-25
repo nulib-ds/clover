@@ -21,6 +21,7 @@ import {
   knobId,
   textOf,
 } from "docs/lib/live-code";
+import { EXAMPLE, example } from "docs/lib/example";
 
 /**
  * Composing's first example, live (Mat, 2026-10-23: "make this draggable/customizable
@@ -420,7 +421,7 @@ export function ComposeExample() {
   const at = picked ? order.indexOf(picked) : -1;
   return (
     <figure className={styles.example}>
-      <div className={styles.preview}>
+      <div className={styles.preview} {...example(EXAMPLE)}>
         <Demo order={order} values={values} />
       </div>
       <div className={styles.code}>

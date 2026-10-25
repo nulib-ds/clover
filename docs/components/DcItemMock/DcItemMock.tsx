@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import styles from "docs/components/DcItemMock/DcItemMock.module.css";
 import { useRouter } from "docs/lib/router";
+import { example } from "docs/lib/example";
 
 /**
  * A rough mock of a Northwestern Digital Collections item page, for trying Clover 4 in a
@@ -143,7 +144,7 @@ const DcItemMock: React.FC = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} {...example("Example page")}>
       <style>{FULL_WIDTH}</style>
       <p className={styles.notice}>
         Mock Digital Collections item page, for testing Clover 4

@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 
 import { useMock } from "docs/lib/useMock";
+import { EXAMPLE, example } from "docs/lib/example";
 
 /**
  * The languages `@nulib/clover` ships, each by its own name, switching one Viewer's
@@ -59,7 +60,7 @@ export function LanguagesDemo() {
     [],
   );
   return (
-    <div style={{ margin: "1.5rem 0 2rem" }}>
+    <div style={{ margin: "1.5rem 0 2rem" }} {...example(EXAMPLE)}>
       <div
         role="group"
         aria-label="Clover's language"

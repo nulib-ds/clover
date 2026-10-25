@@ -3,6 +3,7 @@
 import Slider, { type CloverSliderProps } from "@samvera/clover-iiif/slider";
 import { demoResources } from "docs/lib/demo-resources";
 import { useRouter } from "docs/lib/router";
+import { EXAMPLE, example } from "docs/lib/example";
 
 /**
  * Forwards every Slider prop rather than naming a few.
@@ -30,7 +31,11 @@ const CloverSlider = ({
     (router.query["iiif-content"] as string) ||
     demoResources.slider;
 
-  return <Slider {...props} iiifContent={iiifResource} key={iiifResource} />;
+  return (
+    <div {...example(EXAMPLE)}>
+      <Slider {...props} iiifContent={iiifResource} key={iiifResource} />
+    </div>
+  );
 };
 
 export default CloverSlider;

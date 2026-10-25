@@ -267,7 +267,7 @@ deadline.
   - The homepage (`docs/components/Home/`) opens, `l` under the navbar and `2xl` over the
     resource field (Mat, 2026-10-25: swapped, so the field has room), with its headline, "A viewer as distinctive /
     as your collections." (two lines, its stroke under "distinctive") (`Hero.tsx`, the page's `h1`), standing out (Mat, 2026-10-25): 8vw, so each line keeps to one from 320px up, to 5.236rem, under `.hero .headline` so the docs pages' title rule (`.nextra-sidebar ~ article > main h1`, which matches the homepage too, its sidebar only hidden) never holds it small, and one sentence, on one line where it fits
-    (Mat, 2026-10-20; his rewording, 2026-10-22: one verb, no commas, IIIF given a role and never a tack-on): "Design a user experience rooted in IIIF." ("with Clover" taken off, Mat, 2026-10-25; the homepage's description then names Clover, `homeDescription`). Its size is set by the headline's (`clamp(1rem, 3vw, 2rem)`; Mat, 2026-10-25: "make relative to hero size. try to keep one line"), one line from 320px up; nothing after it (its "Docs →" link was removed, 2026-10-25). It has two halves: the templates live under it
+    (Mat, 2026-10-20; his rewording, 2026-10-22: one verb, no commas, IIIF given a role and never a tack-on): "Design a user experience rooted in IIIF." ("with Clover" taken off, Mat, 2026-10-25; the homepage's description then names Clover, `homeDescription`). Its size is set by the headline's (`clamp(var(--text-lg), 3vw, 2rem)`; Mat, 2026-10-25: "make relative to hero size. try to keep one line"), never under the stories' words at their smallest (`--text-lg`, 1.125rem, `--text-lede`'s floor; Mat, 2026-10-25), balanced over two lines on the narrowest phones; nothing after it (its "Docs →" link was removed, 2026-10-25). It has two halves: the templates live under it
     (`docs/components/Playground/`), and below them the same resource shown one IIIF
     property at a time by the components the templates are made of (`Parts.tsx` and
     `PartsLive.tsx`), with no heading of its own in sight. The playground's `h2`, "Try the templates", is
@@ -740,6 +740,34 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     then undefined ("Element type is invalid").
   - A page has one `main`, Nextra's: the homepage's shell and the test mocks' pages are
     `div`s inside it.
+  - The live examples' sample material is not what the site is about (Mat, 2026-10-25:
+    "the important content retrieved from the page is the documentation for the Clover
+    app and its marketing material -- NOT THE the rich material being using for
+    examples"), but it stays there for everyone, said to be an example ("make sure that
+    the examples are accessible, but that they are accurately described as examples. we
+    want these examples to remain helpful for agents aiding users"). Every live example's
+    demo, never its code, spreads `example()` (`docs/lib/example.ts`): `data-example`,
+    `data-nosnippet` (out of search engines' snippets; Google reads it on a `div`, `span`
+    or `section`), `data-pagefind-ignore="all"` (out of the docs' search), and, given a
+    name, a group so named ("Example"), which a screen reader and an agent reading the
+    accessibility tree meet; unnamed where the demo has a name of its own (the held
+    "Example Viewer", the 3.x "Example items"), is a control (the select), or sits in a
+    named example already (a demo inside `<Example>`, whose frame marks it; never two).
+    Where: the docs' example frames (`ViewerDocs.tsx`'s `preview`, `LiveCode.tsx`,
+    `ComposeExample.tsx`), `LanguagesDemo`, the 3.x wrappers (`DynamicImports/*`,
+    `GermanViewer`, the Cookbook panel, `FeaturedGrid`), the test mocks ("Example page"),
+    and on the homepage the playground's Viewer, its select, the held viewer's faces and
+    each tile's live part (its head, the part's name and docs link, unmarked). A new live
+    example takes it. The agents' Markdown quotes a marked demo under **Example**, saying
+    it shows sample IIIF data (`scripts/build-agent-docs.mjs`), and `llms.txt` says the
+    same and that the examples are worth using to show a reader how Clover behaves. The
+    select renders its options only while open, so no page's HTML holds the samples'
+    names. Every page is `noimageindex` (its pictures are the samples'; the site's marks
+    are inline), the unlisted and the test mocks `noindex` too (`pageMetadata`'s
+    `indexed`), and the share card's alt says it is a sample image from the examples.
+    `robots.txt` cannot help on `nulib-ds.github.io/clover` (read only at a host's root);
+    on a domain of its own, disallow `/mocks/` and `/test/`. The Mocks page stays as it
+    is: its tables are the mocks' addresses and queries, documentation a developer needs.
   - What agents and crawlers read (Mat, 2026-10-21) is built with the site, from what it
     already holds (`docs/lib/agents.ts`: the docs' menu, each page's front matter, and
     `figures.ts`), and, the site being a static export on GitHub Pages, each is a file:

@@ -28,6 +28,7 @@ import { Flavored, PartName, elementTag } from "docs/components/Flavored";
 import { useCodeFlavor } from "docs/lib/code-flavor";
 import { useRecipeContent } from "docs/components/Home/recipeThumbnails";
 import { endPageThemePreview, previewPageTheme } from "docs/lib/page-theme";
+import { EXAMPLE, example } from "docs/lib/example";
 
 /**
  * The playground's resource, taken apart (`Parts.tsx` is the section around it). One
@@ -1091,7 +1092,7 @@ function Exploded({
           hold(event);
         }}
       >
-        <div className={styles.flip} data-face={face}>
+        <div className={styles.flip} data-face={face} {...example()}>
           {/* Named for assistive technology; on screen the viewer speaks for itself. */}
           <section
             ref={viewer}
@@ -1311,7 +1312,9 @@ const Tile = React.memo(function Tile({
           →
         </span>
       </header>
-      <div className={styles.tileBody}>{part.body}</div>
+      <div className={styles.tileBody} {...example(EXAMPLE)}>
+        {part.body}
+      </div>
     </article>
   );
 });

@@ -7,6 +7,7 @@ import { iiifContentError } from "docs/lib/iiif-content";
 import { inertWhen } from "docs/lib/inert";
 import styles from "docs/components/CookbookRecipes/CookbookViewerPanel.module.css";
 import type { ViewerConfigOptions } from "@samvera/clover-iiif/viewer";
+import { EXAMPLE, example } from "docs/lib/example";
 
 /** Matches the slide transition in the stylesheet. */
 const slideDuration = 300;
@@ -123,7 +124,9 @@ const CookbookViewerPanel: React.FC<CookbookViewerPanelProps> = ({
           validate={iiifContentError}
         />
       </div>
-      <div className={styles.body}>{shown && renderViewer(shown)}</div>
+      <div className={styles.body} {...example(EXAMPLE)}>
+        {shown && renderViewer(shown)}
+      </div>
     </aside>
   );
 };

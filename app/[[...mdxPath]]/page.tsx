@@ -64,6 +64,11 @@ export async function generateMetadata(props: Props) {
     modified: route === "/" ? undefined : modifiedOf(metadata),
     // Linked as Markdown, as `scripts/build-agent-docs.mjs` writes it: all but the unlisted.
     markdown: (metadata as { searchable?: unknown }).searchable !== false,
+    // Indexed by search engines: all but the unlisted and the test mocks (`/test/`).
+    indexed:
+      (metadata as { searchable?: unknown }).searchable !== false &&
+      route !== "/test" &&
+      !route.startsWith("/test/"),
   });
 }
 

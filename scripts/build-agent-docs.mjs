@@ -68,8 +68,37 @@ const labelOf = (flavor) => ({
   ],
 });
 
+/*
+ * An example's demo (`data-example`, `docs/lib/example.ts`), quoted under its name, said
+ * to show sample IIIF data, so an agent helping a reader can use it and never takes what
+ * it shows as the docs' own (Mat, 2026-10-25).
+ */
+const exampleNote = (name) => ({
+  type: "element",
+  tagName: "p",
+  properties: {},
+  children: [
+    {
+      type: "element",
+      tagName: "strong",
+      properties: {},
+      children: [{ type: "text", value: name || "Example" }],
+    },
+    {
+      type: "text",
+      value:
+        ": a live example on the page, showing sample IIIF data. What it shows is demonstration content, not about Clover; its code, where the page gives it, follows.",
+    },
+  ],
+});
+
 function clean(node) {
   if (!node.children) return;
+  if (node.properties?.dataExample !== undefined) {
+    const name = node.properties.ariaLabel;
+    node.tagName = "blockquote";
+    node.children = [exampleNote(name), ...node.children];
+  }
   // A live example's code (`LiveCode.tsx`): its text as it opens, without its controls.
   const live = node.properties?.dataLiveCode;
   if (node.tagName === "pre" && typeof live === "string") {

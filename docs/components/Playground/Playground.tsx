@@ -31,6 +31,7 @@ import intro from "docs/components/Home/SectionIntro.module.css";
 import { Swoosh } from "docs/components/Home/Swoosh";
 import { partCount } from "docs/components/Home/counts";
 import { useRouter } from "docs/lib/router";
+import { EXAMPLE, example } from "docs/lib/example";
 
 /**
  * The Viewer in a template, as a page would write it: `<Viewer template={Document} />`.
@@ -418,6 +419,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
               className={styles.viewer}
               data-template={active}
               ref={viewerRef}
+              {...example(EXAMPLE)}
             >
               {ready && (
                 <TemplateViewer

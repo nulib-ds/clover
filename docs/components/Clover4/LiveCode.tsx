@@ -25,6 +25,7 @@ import {
 } from "docs/lib/live-code";
 import { type PartDemoResource, RESOURCES } from "docs/lib/part-demo-resources";
 import { useMock } from "docs/lib/useMock";
+import { EXAMPLE, example } from "docs/lib/example";
 
 /**
  * A live example's code (`docs/lib/live-code.ts`), as the homepage's editor is live (Mat,
@@ -333,7 +334,7 @@ export function LiveFrame({
     setValues((current) => ({ ...current, [id]: value }));
   return (
     <figure className={styles.example}>
-      <div className={styles.preview}>
+      <div className={styles.preview} {...example(EXAMPLE)}>
         <Demo
           key={remountKey(knobs, values)}
           demo={demo}

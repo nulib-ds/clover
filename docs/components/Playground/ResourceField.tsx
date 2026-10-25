@@ -9,6 +9,7 @@ import { IIIFLogo } from "docs/components/Home/IIIFLogo";
 import { resources } from "docs/components/Playground/playground-config";
 
 import styles from "docs/components/Playground/Playground.module.css";
+import { example } from "docs/lib/example";
 
 /** The reader's own resource, where a resource's key would be. */
 export const OWN = "own";
@@ -585,7 +586,7 @@ export default function ResourceField({
       onSubmit={submit}
     >
       <div className={styles.resourceRow}>
-        <div className={styles.combo}>
+        <div className={styles.combo} {...example()}>
           {/*
            * One pill, as Airbnb's search is (Mat, 2026-10-25): the resource's thumbnail,
            * then the field's label over the field, the list's chevron, and Open, round, at
@@ -775,59 +776,66 @@ export default function ResourceField({
             ref={listRef}
             role="listbox"
           >
-            {options
-              .filter((choice) => !choice.key.startsWith("recipe-"))
-              .map((choice) =>
-                choice.key === COOKBOOK ? (
-                  <li
-                    aria-selected={false}
-                    className={`${styles.option} ${styles.cookbook}`}
-                    data-active={choice.key === active || undefined}
-                    data-shown={cookbookShown || undefined}
-                    id={optionId(choice.key)}
-                    key={choice.key}
-                    onClick={() => choose(choice)}
-                    onPointerEnter={() => void readRecipes()}
-                    role="option"
-                  >
-                    <span className={styles.media} data-logo>
-                      <IIIFLogo className={styles.logo} />
-                    </span>
-                    <span className={styles.optionText}>
-                      <span className={styles.optionName}>
-                        {choice.label.text}
-                      </span>
-                      <span className={styles.optionAbout}>{choice.about}</span>
-                    </span>
-                    <svg
-                      aria-hidden="true"
-                      className={styles.disclose}
-                      fill="none"
-                      height="16"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                      width="16"
+            {/*
+             * Its options only while it is open: shut, the page holds none of the sample
+             * resources' names, which are not what it is about (`docs/lib/example.ts`).
+             */}
+            {expanded &&
+              options
+                .filter((choice) => !choice.key.startsWith("recipe-"))
+                .map((choice) =>
+                  choice.key === COOKBOOK ? (
+                    <li
+                      aria-selected={false}
+                      className={`${styles.option} ${styles.cookbook}`}
+                      data-active={choice.key === active || undefined}
+                      data-shown={cookbookShown || undefined}
+                      id={optionId(choice.key)}
+                      key={choice.key}
+                      onClick={() => choose(choice)}
+                      onPointerEnter={() => void readRecipes()}
+                      role="option"
                     >
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
-                  </li>
-                ) : (
-                  <Option
-                    active={choice.key === active}
-                    choice={choice}
-                    id={optionId(choice.key)}
-                    key={choice.key}
-                    onBroken={brake}
-                    onChoose={choose}
-                    picture={pictured(choice.thumbnail)}
-                    plus={choice.key === NEW}
-                  />
-                ),
-              )}
-            {listedRecipes.length > 0 && (
+                      <span className={styles.media} data-logo>
+                        <IIIFLogo className={styles.logo} />
+                      </span>
+                      <span className={styles.optionText}>
+                        <span className={styles.optionName}>
+                          {choice.label.text}
+                        </span>
+                        <span className={styles.optionAbout}>
+                          {choice.about}
+                        </span>
+                      </span>
+                      <svg
+                        aria-hidden="true"
+                        className={styles.disclose}
+                        fill="none"
+                        height="16"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                        width="16"
+                      >
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
+                    </li>
+                  ) : (
+                    <Option
+                      active={choice.key === active}
+                      choice={choice}
+                      id={optionId(choice.key)}
+                      key={choice.key}
+                      onBroken={brake}
+                      onChoose={choose}
+                      picture={pictured(choice.thumbnail)}
+                      plus={choice.key === NEW}
+                    />
+                  ),
+                )}
+            {expanded && listedRecipes.length > 0 && (
               /*
                * The recipes, one group named for them (WAI-ARIA's grouped listbox). Under
                * their category its option names them; narrowed by typing, the name shows.

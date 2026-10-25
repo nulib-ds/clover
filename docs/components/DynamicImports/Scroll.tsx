@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useRouter } from "docs/lib/router";
+import { EXAMPLE, example } from "docs/lib/example";
 
 // todo: set this as a constant somewhere?
 const defaultIiifContent =
@@ -34,7 +35,9 @@ const CloverScroll = ({
     defaultIiifContent;
 
   return (
-    <Scroll iiifContent={iiifResource} key={iiifResource} options={options} />
+    <div {...example(EXAMPLE)}>
+      <Scroll iiifContent={iiifResource} key={iiifResource} options={options} />
+    </div>
   );
 };
 

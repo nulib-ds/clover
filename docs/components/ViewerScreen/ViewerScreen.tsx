@@ -7,6 +7,7 @@ import { resourceByKey } from "docs/components/Playground/playground-config";
 import styles from "docs/components/ViewerScreen/ViewerScreen.module.css";
 import { loadMapWorker } from "docs/lib/map-worker";
 import { useRouter } from "docs/lib/router";
+import { example } from "docs/lib/example";
 
 /**
  * The Viewer's Default template alone on the screen, for trying it on a phone: nothing of
@@ -64,7 +65,7 @@ const ViewerScreen: React.FC = () => {
   }, [router.isReady, router.query.rem]);
 
   return (
-    <div className={styles.screen}>
+    <div className={styles.screen} {...example("Example page")}>
       <style>{FULL_WIDTH}</style>
       {resource && <Viewer key={resource} iiifContent={resource} />}
     </div>
