@@ -1,0 +1,573 @@
+/*
+ * A lone recording of sound, played as a music app plays one (`Player.tsx`; Mat,
+ * 2026-10-24: Apple Music's and Spotify's players): the artwork beside its title and what
+ * it is part of, on a ground of the artwork's own colors, the transport under them, the
+ * captions as lyrics, the chapters as tracks. The figure is `[data-player]`; the player
+ * (`.clover-canvas-player`) is a grid in the media layer, which stays the size container
+ * its parts measure against (`MediaBody.css`).
+ *
+ * Its colors are the tokens' alone, each mixed once, on the player. The ground is the
+ * artwork's colors, a few pixels of it spread and blurred, under a wash of the controls'
+ * dark fill (72%), so every word and control on it holds AA whatever the picture: white
+ * 6.9:1 or more over a white one, the second line (80% white) 5.1:1 (WCAG 1.4.3,
+ * 1.4.11). With no artwork, the ground is the accent darkened by that fill. Spaces on
+ * Clover's scale.
+ */
+
+/* Every control in sight, as a player's are: none fades, and no scrim is needed. */
+.clover-canvas[data-player] > .clover-canvas-scrim {
+  display: none;
+}
+
+.clover-canvas[data-player] > .clover-canvas-controls > * {
+  opacity: 1;
+  translate: none;
+}
+
+/*
+ * The player lies over the viewport, which keeps the Canvas's keys and its name: its
+ * keyboard focus ring, drawn inside it, is drawn again over the player (WCAG 2.4.7).
+ */
+.clover-canvas[data-player]:has(> .clover-canvas-viewport:focus-visible)
+  > .clover-canvas-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 2px var(--clover-color-primary, #1a1d1e),
+    inset 0 0 0 5px var(--clover-color-accent, #0065c3),
+    inset 0 0 0 7px var(--clover-color-secondary, #fff);
+}
+
+/*
+ * One row while it is short, as a compact embed: the artwork as tall as the room, beside
+ * its title, its lyrics and the transport. Taller, the transport and then the tracks go
+ * under it (below).
+ */
+.clover-canvas-player {
+  --clover-player-pad: var(--clover-space-l);
+  --clover-player-text: var(--clover-color-control-glyph, #fff);
+  --clover-player-muted: color-mix(
+    in srgb,
+    var(--clover-player-text) 80%,
+    transparent
+  );
+  --clover-player-dark: var(--clover-color-control, #1a1d1e);
+  /* The artwork's height: all the room, up to a size it reads at. */
+  --clover-player-art-height: min(
+    calc(100cqb - 2 * var(--clover-player-pad)),
+    26rem
+  );
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  box-sizing: border-box;
+  display: grid;
+  grid-template:
+    "art head" auto
+    "art cues" minmax(0, 1fr)
+    "art transport" auto / auto minmax(0, 1fr);
+  align-content: center;
+  gap: var(--clover-space-s) var(--clover-space-l);
+  padding: var(--clover-player-pad);
+  color: var(--clover-player-text);
+}
+
+/* ── the ground ──────────────────────────────────────────────────────────── */
+
+.clover-canvas-player-ground {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 22%,
+    var(--clover-player-dark)
+  );
+}
+
+.clover-canvas-player-ground > img {
+  position: absolute;
+  inset: -12%;
+  width: 124%;
+  height: 124%;
+  object-fit: cover;
+  filter: blur(2.618rem) saturate(1.382);
+}
+
+.clover-canvas-player-ground[data-art]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: color-mix(in srgb, var(--clover-player-dark) 72%, #0000);
+}
+
+/* ── the artwork, the title ──────────────────────────────────────────────── */
+
+/* At its own shape, never cropped square, and never more than 2/5 across. */
+.clover-canvas-player-art {
+  grid-area: art;
+  align-self: center;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  width: min(
+    calc(var(--clover-player-art-height) * var(--clover-player-art-ratio, 1)),
+    40cqi
+  );
+  aspect-ratio: var(--clover-player-art-ratio, 1);
+  border-radius: calc(2 * var(--clover-radius, 3px));
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 40%,
+    var(--clover-player-dark)
+  );
+  box-shadow: 0 0.618rem 1.618rem
+    color-mix(in srgb, var(--clover-player-dark) 45%, #0000);
+}
+
+.clover-canvas-player-art > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+
+.clover-canvas-player-art[data-loaded] > img {
+  opacity: 1;
+}
+
+.clover-canvas-player-note {
+  width: 38.2%;
+  height: 38.2%;
+  fill: currentColor;
+  opacity: 0.85;
+}
+
+/* Its title, and what it is part of, clear of the controls in the corner. */
+.clover-canvas-player-head {
+  grid-area: head;
+  align-self: end;
+  min-width: 0;
+  padding-inline-end: var(--clover-player-clear, 0px);
+}
+
+.clover-canvas[data-player]:has(> .clover-canvas-controls)
+  .clover-canvas-player {
+  --clover-player-clear: calc(var(--clover-control) + var(--clover-space-s));
+}
+
+.clover-canvas-player-title,
+.clover-canvas-player-part-of {
+  margin: 0;
+  overflow-wrap: break-word;
+}
+
+.clover-canvas-player-title {
+  font-size: var(--clover-text-l);
+  font-weight: 700;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.clover-canvas-player-part-of {
+  margin-top: var(--clover-space-3xs);
+  color: var(--clover-player-muted);
+  font-size: var(--clover-text-s);
+  line-height: 1.35;
+}
+
+/*
+ * The captions and the annotations on its time, as a music app shows lyrics: large and
+ * bold in the player's room, never boxes over a picture. A page's own caption colors
+ * still apply (`--clover-player-caption-*`).
+ */
+.clover-canvas-player > .clover-canvas-captions {
+  grid-area: cues;
+  position: static;
+  z-index: auto;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  transition: none;
+}
+
+.clover-canvas-player .clover-canvas-captions-cue {
+  max-width: none;
+  padding: 0;
+  background-color: var(--clover-player-caption-surface, #0000);
+  color: var(--clover-player-caption-text, inherit);
+  font-size: var(--clover-text-m);
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: start;
+  text-wrap: pretty;
+}
+
+/* ── the transport, as a player's ────────────────────────────────────────── */
+
+/*
+ * Play, large, at its start; the seek bar beside it, its time under it at either end and
+ * the chapter between; the rest at its end. Its rows are the bar's pieces, laid on one
+ * grid (`display: contents`), so nothing is moved in the reading order.
+ */
+.clover-canvas-player > .clover-canvas-transport {
+  grid-area: transport;
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  display: grid;
+  grid-template:
+    "play seek seek seek mute volume end"
+    "play now chapter total . . ." / auto auto minmax(0, 1fr) auto auto auto
+    auto;
+  align-items: center;
+  gap: var(--clover-space-3xs) var(--clover-space-s);
+  padding: 0;
+}
+
+.clover-canvas-player > .clover-canvas-transport::before {
+  content: none;
+}
+
+.clover-canvas-player
+  :is(
+    .clover-canvas-transport-bar,
+    .clover-canvas-transport-status,
+    .clover-canvas-transport-time
+  ) {
+  display: contents;
+}
+
+.clover-canvas-player .clover-canvas-transport-seek-area {
+  grid-area: seek;
+}
+
+.clover-canvas-player [data-button="play"] {
+  grid-area: play;
+}
+
+.clover-canvas-player [data-button="mute"] {
+  grid-area: mute;
+}
+
+.clover-canvas-player .clover-canvas-transport-volume {
+  grid-area: volume;
+}
+
+.clover-canvas-player .clover-canvas-transport-end {
+  grid-area: end;
+  margin: 0;
+}
+
+.clover-canvas-player .clover-canvas-transport-time > *,
+.clover-canvas-player .clover-canvas-transport-chapter {
+  color: var(--clover-player-muted);
+  font-size: var(--clover-text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.clover-canvas-player .clover-canvas-transport-time > :first-child {
+  grid-area: now;
+}
+
+.clover-canvas-player .clover-canvas-transport-time > :last-child {
+  grid-area: total;
+  justify-self: end;
+}
+
+/* The two times stand apart, at the seek bar's ends: no slash between them. */
+.clover-canvas-player .clover-canvas-transport-time > [aria-hidden] {
+  display: none;
+}
+
+.clover-canvas-player .clover-canvas-transport-chapter {
+  grid-area: chapter;
+  justify-self: center;
+  max-width: 100%;
+}
+
+/*
+ * The rest bare at rest, their glyphs alone on the ground, as these players draw them:
+ * white on it, 6.9:1 or more (WCAG 1.4.11). The accent under the pointer or focused.
+ */
+.clover-canvas-player
+  .clover-canvas-transport-button:not(
+    [data-button="play"],
+    :hover,
+    :focus-visible
+  ) {
+  background-color: #0000;
+}
+
+/*
+ * Play, large and white, as these players have it, its glyph in the controls' dark fill:
+ * 15:1, and the white 6.9:1 or more against the ground. The accent under the pointer or
+ * focused, as on every round control.
+ */
+.clover-canvas-player [data-button="play"].clover-canvas-transport-button {
+  width: calc(1.382 * var(--clover-control));
+  height: calc(1.382 * var(--clover-control));
+  background-color: var(--clover-player-text);
+  color: var(--clover-player-dark);
+}
+
+.clover-canvas-player
+  [data-button="play"].clover-canvas-transport-button:is(
+    :hover,
+    :focus-visible
+  ) {
+  background-color: var(--clover-color-accent, #0065c3);
+  color: var(--clover-player-text);
+}
+
+/* ── the tracks ──────────────────────────────────────────────────────────── */
+
+/*
+ * Taller, the chapters listed under the player, its tracks, as an album's are under its
+ * player: the artwork smaller to make room. Shorter, the list goes, and the transport's
+ * Chapters menu stays.
+ */
+.clover-canvas-player-chapters {
+  display: none;
+  grid-area: chapters;
+  min-height: 0;
+  margin: var(--clover-space-xs) 0 0;
+  padding: var(--clover-space-xs) 0 0;
+  overflow-y: auto;
+  border-top: 1px solid color-mix(in srgb, var(--clover-player-text) 25%, #0000);
+  list-style: none;
+  pointer-events: auto;
+}
+
+.clover-canvas-player-chapter {
+  display: grid;
+  grid-template-columns: 2.5ch minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--clover-space-s);
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 24px;
+  margin: 0;
+  padding: var(--clover-space-xs) var(--clover-space-s);
+  border: 0;
+  border-radius: var(--clover-radius, 3px);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--clover-text-s);
+  line-height: 1.35;
+  text-align: start;
+  cursor: pointer;
+}
+
+.clover-canvas-player-chapter:hover {
+  background-color: color-mix(in srgb, var(--clover-player-text) 12%, #0000);
+}
+
+.clover-canvas-player-chapter:focus-visible {
+  outline: 2px solid var(--clover-player-text);
+  outline-offset: -2px;
+}
+
+/* The one playing: bold, and a bar at its start, never its color alone (WCAG 1.4.1). */
+.clover-canvas-player-chapter[aria-current="true"] {
+  box-shadow: inset 3px 0 0 var(--clover-player-text);
+  font-weight: 700;
+}
+
+.clover-canvas-player-chapter-number,
+.clover-canvas-player-chapter-time {
+  color: var(--clover-player-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── sizes ───────────────────────────────────────────────────────────────── */
+
+/*
+ * Taller, the transport runs the player's width under the artwork and its title, as a
+ * music app's mini player has it, so its seek bar has the room: the artwork as tall as
+ * what is left above it.
+ */
+@container (min-height: 18rem) {
+  .clover-canvas-player {
+    --clover-player-art-height: min(
+      calc(
+        100cqb - 2 * var(--clover-player-pad) - 1.382 * var(--clover-control) -
+          var(--clover-space-l)
+      ),
+      22rem
+    );
+    grid-template-areas: "art head" "art cues" "transport transport";
+  }
+
+  .clover-canvas-player > .clover-canvas-transport {
+    margin-top: calc(var(--clover-space-l) - var(--clover-space-s));
+  }
+}
+
+/* Tall enough for the tracks: listed under the transport. */
+@container (min-height: 24rem) {
+  .clover-canvas-player:has(> .clover-canvas-player-chapters) {
+    --clover-player-art-height: min(36cqb, 16rem);
+    grid-template:
+      "art head" auto
+      "art cues" minmax(0, auto)
+      "transport transport" auto
+      "chapters chapters" minmax(0, 1fr) / auto minmax(0, 1fr);
+    align-content: stretch;
+  }
+
+  .clover-canvas-player-chapters {
+    display: block;
+  }
+}
+
+/*
+ * Large, as a Viewer's Body is, the player one block in its middle, as a music app's now
+ * playing: the artwork large, and beside it, centered against it, the title, the lyrics
+ * and the transport.
+ */
+@container (min-height: 28rem) and (min-width: 40rem) {
+  .clover-canvas-player:not(:has(> .clover-canvas-player-chapters)) {
+    --clover-player-art-height: min(
+      calc(100cqb - 2 * var(--clover-player-pad)),
+      28rem
+    );
+    grid-template:
+      "art head" minmax(0, 1fr)
+      "art cues" auto
+      "art transport" minmax(0, 1fr) / auto minmax(0, 1fr);
+    column-gap: var(--clover-space-xl);
+  }
+
+  .clover-canvas-player:not(:has(> .clover-canvas-player-chapters))
+    > .clover-canvas-transport {
+    align-self: start;
+    margin-top: var(--clover-space-s);
+  }
+}
+
+/*
+ * Narrow, whatever its height: the transport under the rest, the player's width, in three
+ * rows (Play beside the seek bar and its times, then Mute, the chapter and the rest), so
+ * nothing runs off its edge (WCAG 1.4.10); the title a step smaller; the volume the
+ * system's, Mute staying.
+ */
+@container (max-width: 30rem) {
+  .clover-canvas-player {
+    --clover-player-pad: var(--clover-space-m);
+    --clover-player-art-height: min(
+      calc(
+        100cqb - 2 * var(--clover-player-pad) - 2.382 * var(--clover-control) -
+          2 * var(--clover-space-s)
+      ),
+      22rem
+    );
+    grid-template-areas: "art head" "art cues" "transport transport";
+    column-gap: var(--clover-space-m);
+  }
+
+  .clover-canvas-player > .clover-canvas-transport {
+    grid-template:
+      "play seek seek"
+      "play now total"
+      "mute chapter end" / auto minmax(0, 1fr) auto;
+    row-gap: var(--clover-space-2xs);
+  }
+
+  .clover-canvas-player .clover-canvas-transport-chapter {
+    justify-self: start;
+  }
+
+  .clover-canvas-player-title {
+    font-size: var(--clover-text-m);
+  }
+
+  .clover-canvas-player .clover-canvas-transport-volume {
+    display: none;
+  }
+}
+
+/*
+ * Narrow and tall, as a phone holds it: the artwork over the rest, as a music app's now
+ * playing, then the title, the lyrics, the transport and the tracks.
+ */
+@container (max-width: 30rem) and (min-height: 26rem) {
+  .clover-canvas-player,
+  .clover-canvas-player:has(> .clover-canvas-player-chapters) {
+    --clover-player-art-height: min(38cqb, 70cqi);
+    grid-template:
+      "art" auto
+      "head" auto
+      "cues" minmax(0, auto)
+      "transport" auto
+      "chapters" minmax(0, 1fr) / minmax(0, 1fr);
+    align-content: start;
+  }
+
+  .clover-canvas-player-art {
+    justify-self: center;
+    width: min(
+      calc(var(--clover-player-art-height) * var(--clover-player-art-ratio, 1)),
+      100%
+    );
+  }
+}
+
+/*
+ * Narrow and short, too short for the artwork beside the title: it steps aside, and the
+ * title and its line keep to two lines and one, which the viewport's name holds whole.
+ */
+@container (max-width: 30rem) and (max-height: 16rem) {
+  .clover-canvas-player {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "head" "cues" "transport";
+  }
+
+  .clover-canvas-player-art {
+    display: none;
+  }
+
+  .clover-canvas-player-title,
+  .clover-canvas-player-part-of {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .clover-canvas-player-part-of {
+    -webkit-line-clamp: 1;
+  }
+}
+
+/* ── preferences ─────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: no-preference) {
+  .clover-canvas-player-art > img {
+    transition: opacity 382ms ease;
+  }
+}
+
+/* Where colors are forced, the system's: no ground of the picture's colors under text. */
+@media (forced-colors: active) {
+  .clover-canvas-player-ground {
+    display: none;
+  }
+
+  .clover-canvas-player {
+    color: CanvasText;
+  }
+
+  .clover-canvas-player-chapter[aria-current="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}

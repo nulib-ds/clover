@@ -1,9 +1,9 @@
 /**
- * Titles that a line clamp cuts short, under a carousel's or grid's pictures (`Items.css`).
+ * Titles that a line clamp cuts short, under a slider's or grid's pictures (`Items.css`).
  * A title cut short shows in full while its item is hovered or focused (WCAG 1.4.12), so
  * each label is watched here and told when it is cut and when it is not.
  *
- * One watcher for every title on the page, however many carousels there are: a title is
+ * One watcher for every title on the page, however many sliders there are: a title is
  * measured when its box is resized, and every title again, a frame later, when the page's
  * styles or fonts change. A reader's text spacing, or a web font arriving, can lengthen a
  * title whose clamped box stays the same size.

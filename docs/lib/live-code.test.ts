@@ -111,14 +111,14 @@ describe("codeLines", () => {
 
   it("shows a knob only while the knob its `when` names allows it", () => {
     const items: Knob[] = [
-      { prop: "layout", value: "carousel", options: ["carousel", "grid"] },
+      { prop: "layout", value: "slider", options: ["slider", "grid"] },
       {
         prop: "style.--clover-items-height",
         value: 8,
         format: "{}rem",
         min: 4,
         max: 16,
-        when: { layout: ["carousel"] },
+        when: { layout: ["slider"] },
       },
       {
         prop: "style.--clover-items-size",
@@ -155,7 +155,7 @@ describe("codeLines", () => {
     );
     const grid = { ...initialValues(items), "part:layout": "grid" };
     expect(code(tree, items, grid)).toEqual({
-      // Measured with the carousel's height too, its props keep their lines.
+      // Measured with the slider's height too, its props keep their lines.
       react: [
         "<Clover.Root iiifContent={url}>",
         "  <Clover.Body />",
@@ -169,7 +169,7 @@ describe("codeLines", () => {
         "<clover-root",
         `  iiif-content="${URL}">`,
         "  <clover-body></clover-body>",
-        // At its widest, `"carousel"`, the line runs past 80 columns.
+        // At its widest, `"slider"`, the line runs past 80 columns.
         "  <clover-items",
         '    layout="grid"',
         '    style="--clover-items-size: 10rem">',
@@ -196,7 +196,7 @@ describe("codeLines", () => {
         value: "accordion",
         options: ["accordion", "tabs"],
       },
-      { prop: "items", value: "carousel", options: ["carousel", false] },
+      { prop: "items", value: "slider", options: ["slider", false] },
     ];
     const tree: CodeTree = {
       url: URL,
@@ -259,7 +259,7 @@ describe("codeLines", () => {
     const items = codeLines(tree, knobs, values, "react")
       .flatMap((line) => line.tokens)
       .find((token) => token.knob === "part:items");
-    expect(items?.choices).toEqual(['"carousel"', "{false}"]);
+    expect(items?.choices).toEqual(['"slider"', "{false}"]);
     expect(remountKey(knobs, values)).toBe("true");
   });
 

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * A row (or column) of slides that scrolls natively: the browser's own scrolling, wheel,
- * trackpad and touch, with CSS scroll snapping. On top of that, three things a carousel
+ * trackpad and touch, with CSS scroll snapping. On top of that, three things a slider
  * needs:
  *
  * - **Paging**, for previous / next buttons: by what fits (`slidesToScroll: "auto"`) or by

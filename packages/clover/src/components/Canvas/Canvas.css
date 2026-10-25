@@ -182,7 +182,11 @@
 .clover-canvas-scrim {
   position: absolute;
   inset: 0 0 auto;
-  z-index: 1;
+  /*
+   * Over the viewport (-1), under a placeholder's still (0, later), as it always was,
+   * leaving 1 for the play button over the still (`Placeholder.css`).
+   */
+  z-index: 0;
   height: calc(var(--clover-control) + 2 * var(--clover-space-l));
   pointer-events: none;
   background: linear-gradient(

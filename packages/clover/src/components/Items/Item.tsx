@@ -80,14 +80,14 @@ function Picture({
   altLang?: string;
 }) {
   /*
-   * Near the screen, or in a carousel near the edge of the box that scrolls it, found by
+   * Near the screen, or in a slider near the edge of the box that scrolls it, found by
    * the markup, as the stylesheet that makes it scroll may come after.
    */
   const [box, setBox] = useState<HTMLSpanElement | null>(null);
   const near = useNearViewport(
     box,
     NEAR_VIEWPORT_MARGIN,
-    box?.closest('[data-layout="carousel"] .clover-items-viewport'),
+    box?.closest('[data-layout="slider"] .clover-items-viewport'),
   );
   const { src, none } = useThumbnail(part, size, request, near);
   const [loaded, setLoaded] = useState(false);
@@ -145,10 +145,10 @@ function Picture({
 }
 
 /**
- * One card's label. Under a carousel's or grid's pictures it runs to three lines and is
+ * One card's label. Under a slider's or grid's pictures it runs to three lines and is
  * cut short after (`Items.css`). Cut short, a full copy shows over the card's picture,
  * from where its lines end upward, while the item is hovered or focused (WCAG 1.4.12),
- * so nothing beside or below it moves and a carousel's scrolling box cannot clip it. The
+ * so nothing beside or below it moves and a slider's scrolling box cannot clip it. The
  * copy exists only while the label is cut (`clamped.ts`). It is `hidden` until the
  * stylesheet shows it, and hidden from assistive technology, which has the item's whole
  * name.

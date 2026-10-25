@@ -10,7 +10,11 @@
   position: absolute;
   inset: 0;
   padding: var(--clover-canvas-inset);
-  z-index: 1;
+  /*
+   * Over the viewport (-1) and the scrim (0, earlier), and under the play button in its
+   * middle (1), which is under the popups (2, `ControlMenu.css`).
+   */
+  z-index: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -79,8 +83,14 @@ button.clover-canvas-placeholder-toggle {
  * Video or sound: a large play button in the middle of the still, as a video player
  * has. Once open, it is the close control in the top right like any other.
  */
+/*
+ * There it is over the still but under the Canvas's popups (an annotations menu, its
+ * information), so one open over the middle is never covered by it: no longer one of the
+ * controls in their corner, it leaves their layer (3) for its own, 1.
+ */
 .clover-canvas[data-placeholder="true"][data-media]
   > button.clover-canvas-placeholder-toggle {
+  z-index: 1;
   top: 50%;
   right: 50%;
   width: var(--clover-space-2xl);

@@ -149,14 +149,14 @@ describe("<clover-viewer>", () => {
     );
     expect(warn).not.toHaveBeenCalled();
 
-    const element = mount({ items: "slider" });
+    const element = mount({ items: "carousel" });
     await drawn(element);
     expect(element.querySelector(".clover-items")).toHaveAttribute(
       "data-layout",
-      "carousel",
+      "slider",
     );
     expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining('items="slider"'),
+      expect.stringContaining('items="carousel"'),
     );
     warn.mockRestore();
   });

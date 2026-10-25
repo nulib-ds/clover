@@ -245,11 +245,24 @@ describe("canvasScene media", () => {
     expect(media[0].kind).toBe("audio");
   });
 
+  // A lone recording plays as a player, its accompanying Canvas its artwork, not drawn.
+  it("leaves sound's stand-ins out of the scene when asked", () => {
+    const { images, media } = canvasScene(
+      items(accompanying),
+      "left-to-right",
+      {},
+      { standIns: false },
+    );
+    expect(images).toEqual([]);
+    expect(media[0].kind).toBe("audio");
+  });
+
   it("takes a video's poster from its placeholder Canvas", () => {
     const { media } = canvasScene(items(placeholder), "left-to-right");
-    expect(media[0].poster).toBe(
-      "https://fixtures.iiif.io/video/indiana/donizetti-elixir/act1-thumbnail.png",
-    );
+    // The image itself, which has no service to read.
+    expect(media[0].poster).toEqual({
+      src: "https://fixtures.iiif.io/video/indiana/donizetti-elixir/act1-thumbnail.png",
+    });
   });
 
   it("offers each supplementing WebVTT file as a caption track", () => {

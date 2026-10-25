@@ -197,6 +197,54 @@ date, fetch
 `https://api.dc.library.northwestern.edu/api/v2/works/24157482-0c2c-4907-8d25-7905adc3cfd9?as=iiif`
 into `source.json` again and run `npm run build:mocks`.
 
+## Hindenburg: a broadcast and its box
+
+Northwestern University Libraries' record of WLS-AM's broadcast of Herbert Morrison and
+Charlie Nehlsen's recording of the Hindenburg disaster (May 1937), from the Charles
+Deering McCormick Library of Special Collections: a Manifest of a Canvas of sound, the
+reel's, then four photographs, the front and back of the reel's enclosure and of its
+carrier, with:
+
+- an `accompanyingCanvas` on the Canvas of sound, which the record does not carry: the
+  enclosure's back, the box the reel came in, where its label is written (the one the
+  record's Notes quote), painted with the record's own image of it, so a player shows the box while the
+  broadcast plays;
+- no `width` and `height` on the Canvas of sound and its sound, and no `duration` on the
+  photographs: the API gives them stand-ins (100 × 100, and 1 second), which sound and
+  stills do not have, so the Canvas of sound is a Timeline once upgraded to
+  Presentation 4;
+- English captions, a `supplementing` WebVTT file (`captions.vtt`). The record has no
+  transcript, so the words were transcribed from the broadcast by speech recognition
+  (Whisper) and corrected by hand: the names from the record and the broadcast itself
+  (Herbert Morrison, Charles Nehlsen, WLS, the Prairie Farmer station, Lakehurst), and
+  those of the airship's commanders and survivors as history gives them. A word that
+  could not be told is `[unclear]`, and so is a passenger's answer (10:25–10:54). They
+  have not yet been checked word for word by a listener;
+- nine chapters (`structures`), one for each part of the broadcast (the studio's
+  introduction, Morrison asked about the scene, the landing, the fire, his return to
+  the wreck, the survivors he meets, the count of the saved, the studio's close), each
+  titled with the broadcast's own words where it begins: "It burst into flames!";
+- a page of annotations, "The broadcast", eight `describing` notes, each on a stretch of
+  the sound (`t=start,end`) and saying what happens there;
+- everything else as Northwestern's Digital Collections API published it on October 24,
+  2026, apart from the ids of the Manifest and its Canvases, which are the mock's own;
+- the sound from Northwestern's HLS stream (14 minutes), and the images from its IIIF
+  Image API (level 2, CORS open).
+
+| Resource | Published (static)                                                                                    |
+| -------- | ----------------------------------------------------------------------------------------------------- |
+| Manifest | [`/mocks/hindenburg/manifest.json`](https://nulib-ds.github.io/clover/mocks/hindenburg/manifest.json) |
+| Captions | [`/mocks/hindenburg/captions.vtt`](https://nulib-ds.github.io/clover/mocks/hindenburg/captions.vtt)   |
+
+It answers no query. In `npm run dev` it is live under `/api/mocks/hindenburg/`, so its
+captions answer before they are deployed. The homepage's playground shows it as
+Recording, and Timeline's page plays it. Its generator is
+`docs/mocks/hindenburg/index.mjs`, its captions' cues `docs/mocks/hindenburg/captions.json`,
+and the record as fetched is `docs/mocks/hindenburg/source.json`: to bring the record up
+to date, fetch
+`https://api.dc.library.northwestern.edu/api/v2/works/f184ccf3-4ee6-4b64-bb7b-a87bb9d15254?as=iiif`
+into `source.json` again and run `npm run build:mocks`.
+
 ## Paged: a catalog in spreads
 
 Northwestern University Libraries' record of the White Sewing Machine Company's

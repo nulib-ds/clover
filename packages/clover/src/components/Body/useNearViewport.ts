@@ -12,7 +12,7 @@ export const NEAR_VIEWPORT_MARGIN = "50%";
  * hidden (`display: none`, a closed tab) never intersects, so it waits until shown.
  * Without IntersectionObserver, everything loads at once, as before.
  *
- * `root` measures it against a box that scrolls it instead (a carousel), the margin ahead
+ * `root` measures it against a box that scrolls it instead (a slider), the margin ahead
  * of that box's edges: against the screen, the box clips what it holds, and its next
  * items would come near only as they scroll into sight.
  */

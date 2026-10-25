@@ -49,7 +49,7 @@ const GROUPS = [
         "A region’s inset, from its edge to its content",
       ],
       ["--clover-radius-pill", 2, "The corners of round controls and pills"],
-      ["--clover-items-height", 8, "A carousel’s pictures"],
+      ["--clover-items-height", 8, "A slider’s pictures"],
       ["--clover-items-size", 10, "A grid’s cell"],
       ["--clover-map-height", 24, "The Map"],
     ],

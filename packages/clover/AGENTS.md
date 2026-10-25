@@ -127,7 +127,7 @@ every rule below.
   scrolling. The shadows under the open heading (once scrolled) and over the next one
   (while more is below) are the buttons' `::after` / `::before`, as scroll-driven
   animations on the nearest scroller (`animation-timeline: scroll()`, inside
-  `@supports`), so they cost no script; keep them that way. `Items`' carousel casts the
+  `@supports`), so they cost no script; keep them that way. `Items`' slider casts the
   same shadows at its ends from the frame's `::before` / `::after`, reading the
   viewport's scroll through a named timeline (`--clover-items-track`, `timeline-scope`
   on the frame); its arrows sit above them (`z-index: 2`). Both use
@@ -738,14 +738,14 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   to `ItemsPager`. `Previous`, `Next` and `Position` are the same pieces read from the
   Root (`of`). They live in `Items/Pager.tsx`, which imports no thumbnails or `Items.tsx`,
   so a layout with a pager and no strip carries none of the strip. A step is a selection,
-  as the carousel's arrows' are (`followFocus`, else `onActivate` for members). Position
+  as the slider's arrows' are (`followFocus`, else `onActivate` for members). Position
   keeps its widest count's room (`.clover-pager-room`, `hidden` without the stylesheet),
   so nothing beside it moves. Its gap is the Canvas cluster's `s`, so a pager over a Body
   lines up with the controls; don't override it in a template.
   A step with nowhere to go shows disabled, never hidden (Mat, 2026-10-16): faded, taking
   no pointer, whole again while focused. One rule in `ui/Button.css` covers the pager's,
   the strip's and an animation's frames' steps; a new Previous or Next joins it.
-  A carousel's or grid's title is clamped (`--clover-items-lines`, 3) on
+  A slider's or grid's title is clamped (`--clover-items-lines`, 3) on
   `.clover-items-label-text`. `Items/clamped.ts` watches every title with one
   ResizeObserver (and the page's styles and fonts, for text spacing), and a title cut short
   gets `data-clamped` and a hidden, `aria-hidden` copy, shown over the picture while its
@@ -834,7 +834,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
 - **Native scroll track** (`ui/useScrollTrack.ts`): CSS scroll snap plus paging, resting a
   slide at an alignment, and mouse dragging that swallows the click ending it. Positions
   come from bounding rectangles and `scrollBy`, so right-to-left needs no special case.
-  No carousel library (Embla is on the forbidden list). 3.x's `useTrack` is a copy.
+  No carousel or slider library (Embla, `embla-carousel`, is on the forbidden list). 3.x's `useTrack` is a copy.
 - Buttons in package CSS are selected `button.x`, not `.x`: a reset's `[type="button"]`
   ties with one class, and the tie goes to whichever stylesheet loads last.
 - In `dist/styles.css` every rule is in `@layer clover`, so any unlayered stylesheet beats
@@ -863,13 +863,34 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   navigator), `Connected.tsx` renders the connected Canvas for a Root's Timeline view
   and nothing for another, and `iiifContent` goes to `LoadedCanvas` with `of="Timeline"`
   (a Manifest's first Timeline). So every audio recipe that played on Canvas plays the
-  same (0002, 0014, 0103, 0434). A sound with no picture, nor a placeholder showing,
-  names itself in the Body over the transport (`CanvasView`,
-  `.clover-canvas-sound-label` in `Canvas.css`; Mat, 2026-10-23: "label these"): for
-  the eye alone, `aria-hidden`, as the viewport is named by the same words, and only
-  where it has a name of its own. A lighter view of its own, without the 2D renderer, is
-  deferred. A switch of kind (a Canvas view to a Timeline view) remounts the part in the
-  Body.
+  same (0002, 0014, 0103, 0434). A lone recording of sound (`player` in `CanvasView`:
+  a lone Canvas whose media is audio, so a Timeline always) plays as a music app plays
+  one (Mat, 2026-10-24: Apple Music's and Spotify's players), drawn by `MediaBody` in
+  the media chunk (`media/Player.tsx`, `Player.css`), the figure `data-player`:
+  - its artwork is its placeholder Canvas until it first plays, then its accompanying
+    Canvas, each standing in for the other, else its thumbnail (`stillSource`), at its
+    own shape (`--clover-player-art-ratio`), asked as its service's `info.json` allows
+    (`resolveThumbnail`, 1,200 px), its alt its Canvas's label; none of it is in the
+    scene (`canvasScene`'s `standIns: false`), so the renderer draws nothing;
+  - its ground is a few pixels of the same artwork (32 px), blurred, under a wash of 72%
+    of `--clover-color-control`, which keeps white text 6.9:1 and the 80% second line
+    5.1:1 whatever the picture; with no artwork, the accent darkened by that fill;
+  - its title is its name (the viewport's too, so `aria-hidden`), with `partOf` under
+    it (the Manifest's label, from `Connected` and `LoadedCanvas`);
+  - Canvas's transport, captions and annotations stay as they are, laid out by CSS
+    alone (the bar's pieces on one grid by `display: contents`, never moved in the
+    reading order), always shown; the cues show as lyrics; chapters are also listed as
+    tracks (`PlayerChapters`, `aria-current`, bold and a bar, never color alone) where
+    the player is at least 24rem tall;
+  - it lays itself out by container queries on the media layer: one row when short;
+    from 18rem tall, the transport across under the artwork; from 28rem × 40rem, one
+    centered block; under 30rem wide, the transport in three rows, and under 16rem tall
+    too, the artwork set aside;
+  - the placeholder never holds it back (its still is the artwork, not a gate), and it
+    never plays by itself; the viewport keeps the keys and the name, its focus ring
+    drawn again over the player (`Player.css`).
+    The old `.clover-canvas-sound-label` stays for sound beside a picture. A switch of kind
+    (a Canvas view to a Timeline view) remounts the part in the Body.
 - **Scene** (`components/Scene/`): `models.ts` reads a Scene's painting annotations into
   `SceneModel`s (a `Model` body, a `Choice`'s first, a `SpecificResource`'s `source` and
   `transform`s in order; the target's `PointSelector`), memoized on the Scene, pure.

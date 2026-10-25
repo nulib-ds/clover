@@ -84,6 +84,21 @@ export const resources: PlaygroundResource[] = [
     mock: true,
     thumbnail: `${works}/46dc28d1-9d59-4160-a511-72418f70cffc/thumbnail`,
   },
+  // An Arabic manuscript of about 1800 in the University of Illinois Archives, as
+  // Northwestern's Maktaba publishes it: two pages, `paged` (Mat, 2026-10-25, for the
+  // homepage's text format). Its server sends CORS headers.
+  {
+    key: "manuscript",
+    name: "Manuscript",
+    title:
+      "The Rushd al-Ghāfil / Guide for the Heedless (ʿAbd Allāh b. al-Ḥājj Ibrāhīm al-ʿAlawī, d. 1818)",
+    description: "Manuscript in Arabic",
+    resource:
+      "https://iiif-maktaba.dc.library.northwestern.edu/dc8ff749-adad-42a7-81e0-0eb473ef88a5.json",
+    // The Manifest's own thumbnail, as it gives it.
+    thumbnail:
+      "https://images.digital.library.illinois.edu/iiif/2/19870760-96bc-013c-4aba-02d0d7bfd6e4-d/full/!256,256/0/default.jpg",
+  },
   {
     key: "collection",
     name: "Collection",
@@ -160,13 +175,11 @@ export const resources: PlaygroundResource[] = [
   {
     key: "recording",
     name: "Recording",
-    title: "Partial audio recording of Gustav Mahler's Symphony No. 3",
-    description: "Audio with its score",
-    resource:
-      "https://iiif.io/api/cookbook/recipe/0014-accompanyingcanvas/manifest.json",
-    // The score's first page, which the recording shows while it plays.
-    thumbnail:
-      "https://iiif.io/api/image/3.0/example/reference/4b45bba3ea612ee46f5371ce84dbcd89-mahler-0/full/!300,300/0/default.jpg",
+    title: "Hindenburg broadcast",
+    description: "Audio with its box as artwork",
+    resource: "hindenburg/manifest.json",
+    mock: true,
+    thumbnail: `${works}/f184ccf3-4ee6-4b64-bb7b-a87bb9d15254/thumbnail`,
   },
   {
     key: "animation",

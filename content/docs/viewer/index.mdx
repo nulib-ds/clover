@@ -27,8 +27,8 @@ import { LiveViewerExample } from "docs/components/Clover4/LiveExample";
     Default: [
       {
         prop: "items",
-        value: "carousel",
-        options: ["carousel", "list", "grid", false],
+        value: "slider",
+        options: ["slider", "list", "grid", false],
       },
       {
         prop: "panelLayout",
@@ -103,17 +103,17 @@ Everything is upgraded to IIIF Presentation 4 as it loads, so every part reads o
 The Viewer's own layout, drawn when it is given no `template`: the title over the Body,
 the thumbnails under it, and the information panel beside them, as in Clover 3.x.
 
-| Prop               | Type                                      | Default                     | Description                                                       |
-| ------------------ | ----------------------------------------- | --------------------------- | ----------------------------------------------------------------- |
-| `header`           | `boolean`                                 | `true`                      | The thumbnail and title over the Body.                            |
-| `headingLevel`     | `number`                                  | `2`                         | The title's level; the panel's sections are a level below.        |
-| `panel`            | `boolean`                                 | `true`                      | The information panel and its toggle.                             |
-| `download`         | `boolean`                                 | `true`                      | The downloads in the panel's About, where there is a `rendering`. |
-| `defaultPanelOpen` | `boolean`                                 | Open where it fits          | Whether the panel starts open.                                    |
-| `panelLayout`      | `"accordion" \| "tabs"`                   | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                |
-| `items`            | `"carousel" \| "list" \| "grid" \| false` | `"carousel"`                | The thumbnails under the Body, or none.                           |
-| `storageKey`       | `string \| false`                         | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.        |
-| `fill`             | `boolean`                                 | `false`                     | Fill the box it sits in; the Body takes what the rest leave.      |
+| Prop               | Type                                    | Default                     | Description                                                       |
+| ------------------ | --------------------------------------- | --------------------------- | ----------------------------------------------------------------- |
+| `header`           | `boolean`                               | `true`                      | The thumbnail and title over the Body.                            |
+| `headingLevel`     | `number`                                | `2`                         | The title's level; the panel's sections are a level below.        |
+| `panel`            | `boolean`                               | `true`                      | The information panel and its toggle.                             |
+| `download`         | `boolean`                               | `true`                      | The downloads in the panel's About, where there is a `rendering`. |
+| `defaultPanelOpen` | `boolean`                               | Open where it fits          | Whether the panel starts open.                                    |
+| `panelLayout`      | `"accordion" \| "tabs"`                 | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                |
+| `items`            | `"slider" \| "list" \| "grid" \| false` | `"slider"`                  | The thumbnails under the Body, or none.                           |
+| `storageKey`       | `string \| false`                       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.        |
+| `fill`             | `boolean`                               | `false`                     | Fill the box it sits in; the Body takes what the rest leave.      |
 
 ### Document
 
@@ -192,19 +192,19 @@ boxes.
 
 ### Thumbnails
 
-Use `items` to lay the thumbnails under the Body out as a carousel, a list or a grid, or
+Use `items` to lay the thumbnails under the Body out as a slider, a list or a grid, or
 `false` to leave them out.
 
 <OptionsExample
   prop="items"
   label="items"
-  options={["carousel", "list", "grid", false]}
+  options={["slider", "list", "grid", false]}
   resource="catalog"
 >
-<div data-option="carousel">
+<div data-option="slider">
 
 ```jsx
-<Viewer iiifContent={url} items="carousel" />
+<Viewer iiifContent={url} items="slider" />
 ```
 
 </div>

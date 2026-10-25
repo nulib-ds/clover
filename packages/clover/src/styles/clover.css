@@ -25,6 +25,7 @@
 @import "../components/Canvas/ControlMenu.css";
 @import "../components/Canvas/media/MediaBody.css";
 @import "../components/Canvas/media/Transport.css";
+@import "../components/Canvas/media/Player.css";
 @import "../components/Scene/Scene.css";
 @import "../ui/ControlCluster.css";
 @import "../ui/Button.css";

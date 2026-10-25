@@ -217,7 +217,7 @@ function Exploded({
    */
   const [turned, setTurned] = useState(false);
   const [focused, setFocused] = useState(false);
-  // The Coverage story's Cookbook recipe, loaded as the stories are reached, and read then.
+  // The Natural story's Cookbook recipe, loaded as the stories are reached, and read then.
   const [recipe, setRecipe] = useState<{ url: string; name: string } | null>(
     null,
   );
@@ -597,7 +597,7 @@ function Exploded({
         ? [...child.children]
         : [child],
     );
-    // The tiles on screen; of those folded under "Show all", what the fold shows.
+    // The tiles on screen; of those folded under "More components", what the fold shows.
     const tiles = [
       ...(document.querySelector<HTMLElement>(`.${styles.tiles}`)?.children ??
         []),
@@ -1072,7 +1072,7 @@ function Exploded({
         {tiles.through}
         {/*
          * Folded, the Collection's tile and the rest fade out, a preview only, inert, so
-         * nothing out of sight takes focus or is read (WCAG 2.4.11), until "Show all":
+         * nothing out of sight takes focus or is read (WCAG 2.4.11), until "More components":
          * the parts this resource gives nothing to among them, at their end (Mat,
          * 2026-10-24: "place this inside of the Show All expanded content").
          */}
@@ -1129,7 +1129,8 @@ function Exploded({
             aria-controls={restId}
             onClick={showAll}
           >
-            Show all<span className={styles.visuallyHidden}> parts</span>
+            {/* Its visible words its whole name (Mat, 2026-10-25), at the tiles' end. */}
+            More components
           </button>
         )}
       </div>
@@ -1178,7 +1179,7 @@ const Tile = React.memo(function Tile({
       data-tile={part.key}
       data-on={on || undefined}
       {...pointerTo(part.key, onPoint)}
-      // Lit by focus where focus shows: not a press's, nor "Show all" moving it after one.
+      // Lit by focus where focus shows: not a press's, nor "More components" moving it after one.
       onFocus={(event) => {
         if (event.target.matches(":focus-visible")) onPoint(part.key);
       }}
@@ -1206,7 +1207,7 @@ const Tile = React.memo(function Tile({
 });
 
 /**
- * "Why Clover"'s Coverage story, read on the viewer's other side: a Cookbook recipe in a
+ * "Why Clover"'s Natural story, read on the viewer's other side: a Cookbook recipe in a
  * Root of its own (0032, a Collection; Mat, 2026-10-21), read by the same Label, Body,
  * Metadata and Collection, all but Metadata outlined with their names (Mat, 2026-10-21),
  * and the recipe named at the head, so it is plain what is being read. Its members are
@@ -1322,7 +1323,7 @@ interface ViewValues {
   controls: boolean;
   layout: Clover.ItemsLayout;
   /**
-   * Items' size where the code sets one: a carousel's picture height
+   * Items' size where the code sets one: a slider's picture height
    * (`--clover-items-height`), or a grid's or list's column (`--clover-items-size`).
    */
   itemsSize?: string;
@@ -1333,11 +1334,11 @@ interface ViewValues {
 const VIEW_DEFAULTS: ViewValues = {
   height: 240,
   controls: true,
-  layout: "carousel",
+  layout: "slider",
   order: ["thumbnail", "label", "body", "items", "summary", "metadata"],
 };
 
-const LAYOUTS: Clover.ItemsLayout[] = ["carousel", "list", "grid"];
+const LAYOUTS: Clover.ItemsLayout[] = ["slider", "list", "grid"];
 
 /*
  * The recipe side's Body height, its own: tied to the viewer's code, every change
@@ -1347,7 +1348,7 @@ const RECIPE_HEIGHT = 220;
 
 /** The custom property that sizes Items' pictures in a layout (`Items.css`). */
 const itemsSizeProperty = (layout: Clover.ItemsLayout) =>
-  layout === "carousel" ? "--clover-items-height" : "--clover-items-size";
+  layout === "slider" ? "--clover-items-height" : "--clover-items-size";
 
 type TokenKind =
   | "keyword"
@@ -1685,7 +1686,7 @@ const ViewerCode = React.memo(function ViewerCode({
       case "items": {
         const layout: Token[] = [
           attr("layout"),
-          // The menu shows its value quoted, `"carousel"`, as the attribute writes it.
+          // The menu shows its value quoted, `"slider"`, as the attribute writes it.
           punct("="),
           {
             text: `"${view.layout}"`,

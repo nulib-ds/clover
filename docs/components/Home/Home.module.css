@@ -32,18 +32,29 @@
 /* ── Hero ─────────────────────────────────────────────────────────────────── */
 
 /* Room to breathe above and below, on the golden scale (2xl over, xl under). */
+/*
+ * Less room over the headline than under it (Mat, 2026-10-25: swapped), so it sits up
+ * near the navbar and the resource field under it has room to breathe.
+ */
 .hero {
-  padding: 4.236rem 0 2.618rem;
+  padding: 2.618rem 0 4.236rem;
   text-align: center;
 }
 
-.headline {
-  /* Two lines, each a `.line`, wrapping within itself, balanced, on a narrow screen.
-   * Large, and wide enough for each line. */
-  font-size: clamp(2.25rem, 5vw, 4.236rem);
+/*
+ * Two lines, each a `.line`, wrapping within itself, balanced, where it must. It stands
+ * out (Mat, 2026-10-25: "make it standout. bigger"): 8vw, so its longer line (10.5em)
+ * keeps to one line from 320px up, to 5.236rem (5.854rem was a little much, Mat,
+ * 2026-10-25). Tighter as it grows, as display type is.
+ * Under the hero (`.hero .headline`), so it outranks the docs pages' title
+ * (`.nextra-sidebar ~ article > main h1`, `layout.css`), which matches the homepage too,
+ * whose sidebar is only hidden, and held it at 1.618rem to 2.618rem.
+ */
+.hero .headline {
+  font-size: clamp(1.618rem, 8vw, 5.236rem);
   font-weight: var(--weight-bold);
-  letter-spacing: -0.032em;
-  line-height: 1.1;
+  letter-spacing: -0.04em;
+  line-height: 1.06;
   margin: 0 auto 1rem;
   max-width: 76rem;
   text-wrap: balance;
@@ -330,8 +341,9 @@
   color: var(--code-faint);
 }
 
+/* The homepage's one title size and its words' (`tokens.css`), as the section intros' are. */
 .storyTitle {
-  font-size: clamp(1.618rem, 4.5cqi, 2.618rem);
+  font-size: var(--text-title);
   font-weight: var(--weight-bold);
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -339,8 +351,8 @@
 }
 
 .storyBody {
-  font-size: var(--text-lg);
-  line-height: 1.55;
+  font-size: var(--text-lede);
+  line-height: 1.5;
   margin: 0;
   max-width: 34rem;
   /* No last line of one word ("away."). */
@@ -497,6 +509,78 @@
     var(--focus-ring);
 }
 
+/*
+ * The Adaptable story's formats (`FormatPicker.tsx`; Mat, 2026-10-25): a thumbnail of
+ * each, two by two, its name under it, in the column the other stories give their
+ * figures. Chosen, a ring in the page's text color around a gap of the page's ground, as
+ * a chosen swatch has, so the choice shows by more than color (WCAG 1.4.1); focused, the
+ * page's accent ring outside it (2.4.7).
+ */
+.formats {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.story[data-side="start"] > .formats {
+  order: -1;
+}
+
+.format {
+  cursor: pointer;
+  display: grid;
+  gap: 0.382rem;
+  position: relative;
+}
+
+.formatThumb {
+  aspect-ratio: 1;
+  background: var(--gray-3);
+  border-radius: var(--radius-3);
+  box-shadow: 0 0 0 1px var(--gray-6);
+  display: block;
+  overflow: hidden;
+}
+
+.formatThumb img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .formatThumb img {
+    transition: transform 200ms ease;
+  }
+
+  .format:hover .formatThumb img {
+    transform: scale(1.04);
+  }
+}
+
+.format input:checked + .formatThumb {
+  box-shadow:
+    0 0 0 2px var(--color-background),
+    0 0 0 4px var(--gray-12);
+}
+
+.format input:focus-visible + .formatThumb {
+  outline: 2px solid var(--accent-11);
+  outline-offset: 6px;
+}
+
+.formatName {
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+
+.format input:checked ~ .formatName {
+  color: var(--gray-12);
+  font-weight: var(--weight-bold);
+}
+
 /* A value the brand changed, lit a moment: an overlay fading by opacity alone. */
 .brandFresh {
   isolation: isolate;
@@ -556,6 +640,25 @@
 .storyFigures {
   display: grid;
   gap: 1.5rem;
+}
+
+/*
+ * IIIF's logo for the word in a story's title (Natural's, "Reads the IIIF cookbook.";
+ * Mat, 2026-10-25), in its own colors and proportions, in the title's `em` so the two
+ * scale together. Its stems a little past the title's weight: Google Sans Flex Bold's are
+ * 0.155em, and the logo's are 21.45% of its height, so they match at 0.723em tall, but its
+ * blue and red on black read smaller than white letters do, so it is 0.786em (stems
+ * 0.169em; Mat, 2026-10-25: "still reads as smaller"). Its stems end in a slant,
+ * only their corners at its foot, so it is dropped a little to sit on the baseline as the
+ * letters do. The word spaces either side, the one after a hair tighter, as the "f"
+ * opens on its right. The word is read in its place (`.visuallyHidden`).
+ */
+.titleLogo {
+  display: inline-block;
+  height: 0.786em;
+  margin-inline-end: -0.03em;
+  vertical-align: -0.03em;
+  width: auto;
 }
 
 .figure {
@@ -667,8 +770,19 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .story[data-side="start"] .storyFigures {
+  .story[data-side="start"] .storyFigures,
+  .story[data-side="start"] > .formats {
     order: 0;
+  }
+
+  /*
+   * The formats under the words, a row of four, not two by two across the story's whole
+   * width, where each would be a quarter of the window (Mat, 2026-10-25: "the examples
+   * get VERY large"); a name that does not fit its thumbnail's width wraps under it.
+   */
+  .formats {
+    gap: 0.618rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   /* Seamless: its words, then its controls, then the code they write. */

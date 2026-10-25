@@ -135,6 +135,10 @@ export default function LoadedCanvas({
           (view.canvas.label as CloverCanvasProps["label"]) ??
           (view.content.manifest.label as CloverCanvasProps["label"])
         }
+        partOf={
+          props.partOf ??
+          (view.content.manifest.label as CloverCanvasProps["partOf"])
+        }
         annotations={props.annotations ?? annotations}
         onAnnotationLink={onAnnotationLink ?? follow}
       />

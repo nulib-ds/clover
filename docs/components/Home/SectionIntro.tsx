@@ -7,8 +7,8 @@ import { Swoosh } from "docs/components/Home/Swoosh";
 /**
  * A section's intro on the homepage: its title, under the hero's stroke, one sentence,
  * and where to go from it, a button (`cta-solid` for the page's one primary way on,
- * `cta-outline` otherwise). What goes `beside` the button (Install's npm command) shares
- * its row, under the words.
+ * `cta-outline` otherwise), under the words. What goes `beside` the button (Install's npm
+ * command) shares its row.
  */
 export function SectionIntro({
   title,

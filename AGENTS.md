@@ -152,9 +152,11 @@ deadline.
     a prototype or experimental (Mat, 2026-10-23). They are on no homepage tile (Body's
     covers them), so `DOCS` has no entry for them. A part Body draws with (`BODY_PARTS` in
     `LiveExample.tsx` and `LiveCode.tsx`: Canvas, Timeline, Scene) shows alone in a
-    `LivePart`, loading its `iiifContent`; their resources are the Cookbook's Presentation
-    4 recipes 0002 and 0608 (`audio`, `model` in `part-demo-resources.ts`, addresses, not
-    mocks). A size in a page's prose is `<Measured size="…" />`
+    `LivePart`, loading its `iiifContent`; their resources are the `hindenburg` mock and the
+    Cookbook's recipe 0608 (`audio`, `model` in `part-demo-resources.ts`, 0608 an
+    address): `hindenburg` is the homepage's Recording, Northwestern's Hindenburg
+    broadcast with its reel's box as its accompanying Canvas, which Timeline's page uses
+    throughout (Mat, 2026-10-24), shown as Timeline's player, its artwork the box. A size in a page's prose is `<Measured size="…" />`
     (`docs/components/Clover4/Measured.tsx`), the build's own figure. Scene's "Customizing
     engine" says Clover's own engine is the default for its size, giving both engines'
     (Mat, 2026-10-23), and shows the two side by side: demos side by side are figures in a
@@ -262,71 +264,64 @@ deadline.
     already"): it has no banner, and nothing a reader or an agent meets says Clover 4 is
     unreleased or still to come ("in development", "not on npm yet", "until Clover 4 is
     released").
-  - The homepage (`docs/components/Home/`) opens with its headline, "A viewer as distinctive /
-    as your collections." (two lines, its stroke under "distinctive") (`Hero.tsx`, the page's `h1`), and one sentence, on one line where it fits
-    (Mat, 2026-10-20; his rewording, 2026-10-22: one verb, no commas, IIIF given a role and never a tack-on): "Design a user experience rooted in IIIF with Clover." After it, `s` away, in its own size, family and gray, "Documentation →", a link to Get started (Mat, 2026-10-22; `.subtitleLink`), underlined, which marks it as a link where its color does not (WCAG 1.4.1), its arrow smaller and out of the underline. It has two halves: the templates live under it
+  - The homepage (`docs/components/Home/`) opens, `l` under the navbar and `2xl` over the
+    resource field (Mat, 2026-10-25: swapped, so the field has room), with its headline, "A viewer as distinctive /
+    as your collections." (two lines, its stroke under "distinctive") (`Hero.tsx`, the page's `h1`), standing out (Mat, 2026-10-25): 8vw, so each line keeps to one from 320px up, to 5.236rem, under `.hero .headline` so the docs pages' title rule (`.nextra-sidebar ~ article > main h1`, which matches the homepage too, its sidebar only hidden) never holds it small, and one sentence, on one line where it fits
+    (Mat, 2026-10-20; his rewording, 2026-10-22: one verb, no commas, IIIF given a role and never a tack-on): "Design a user experience rooted in IIIF with Clover." After it, `s` away, in its own size, family and gray, "Docs →", a link to Get started (Mat, 2026-10-22; "Docs" since 2026-10-25; `.subtitleLink`), underlined, which marks it as a link where its color does not (WCAG 1.4.1), its arrow smaller and out of the underline. It has two halves: the templates live under it
     (`docs/components/Playground/`), and below them the same resource shown one IIIF
     property at a time by the components the templates are made of (`Parts.tsx` and
     `PartsLive.tsx`), with no heading of its own in sight. The playground's `h2`, "Try the templates", is
     hidden, over its Viewer's title (`headingLevel` 3) (Mat, 2026-10-21); the parts' is
     "…or build your own.", below. Between the two, under the playground's Viewer, is the
     choice (Mat, 2026-10-23: "it needs to be two. but they need to communicate"): two
-    halves on the parts' two columns (`.choice`, as `Parts.module.css`'s `.grid`), both
-    floating on the page's ground, alike, with no box (a card on the code editor's black
-    was tried, hanging from under the Viewer, "too much is going on", then apart from it),
-    their titles one sentence across them, set as the section intros' are, "Use a
-    template…" and "…or build your own.", its last words under the hero's stroke (Mat,
-    2026-10-23: two titles side by side, "Ready when you are." and "IIIF building
-    blocks.", competed, as did labels over them). On the left, under the Viewer it
-    changes: its title (an `h3`), its note, "Try each one in the Viewer above.", then,
-    side by side and as tall, the template's menu, drawn as a dropdown is (Mat,
-    2026-10-23: "an obvious dropdown"; a box on the page's ground, its edge 3:1
-    (`--pg-edge`, set on the choice as on the playground) and the resource field's lift,
-    the name and a chevron in it, the accent's edge under the pointer, as wide as the
-    longest name, so it holds still; named "Default template", its visible name first,
-    WCAG 2.5.3), and Get started (`/docs`, the solid one). On the right, floating over the
-    tiles it heads: the parts' `h2` (`#parts`, where a chip's resource sends focus), its
-    note the parts counted (`counts.ts`), pieces that snap together any way you like, and
-    "See them all" (`/docs/body`), nearer the tiles than anything else (`xl`). The two
-    line up by their words alone (Mat, 2026-10-23: "great balance in content so they
-    naturally align"; pinning the calls to action to a shared foot was tried and undone):
-    a title and a note of one line each wherever the two sit side by side, each note as
-    long as its column is wide, so the calls to action meet on one line. Each half's title and note sit
-    in the section intros' own grid (`intro.text`), so their sizes and gaps are those
-    of "Thoughtful and flexible." (Mat, 2026-10-23: "match gaps/fontsize"). Arrows say
-    what belongs together (Mat, 2026-10-23: "drawn like our stroke. but gray and faint";
-    "use gr rules and allow for natural errors"), drawn by hand from just past each
-    title's last word (`.arrowFrom`): up from "Use a template…" to the room under the
-    Viewer, around past the end of its note's words and down from "…or build your own." to
-    the room over the tiles (`ChoiceArrows.tsx`). Every proportion is the golden ratio's
-    (the up arrow in a golden rectangle, widest at its golden section, its tip back a
-    golden share; the down arrow as wide as clearing the words needs and its tip back a
-    golden share; the barbs open 42.5°, the golden angle's complement), with a hand's
-    errors (a drift as the pen leaves, the way down a hair wider than the way out, one
-    barb shorter and wider, the head's vertex a hair off the shaft). Measured from the
-    page and drawn again only when the choice's size changes, never as it scrolls, so
-    they fit every window to 320px; in `--gray-8`, from nothing where the pen comes down (50% a 0.236 of the way, Mat,
-    2026-10-23: "all the way to 0 is okay") to 85% where it lifts; shapes, not lines,
-    tapered as the swoosh is ("allow tapering like we do for the underline swoosh. same
-    for endpoint"), but as a kid's marker draws, chunky and never to a point (Mat,
-    2026-10-23: "think kids marker. taper should not go to fine point"): the shaft a
-    0.618 of its weight where it starts, its whole weight by its golden section, each
-    barb whole where they meet and a 0.764 at its end, every end round, the head a 0.618em
-    long; their weight 0.2em, at least 5px, each drawn
-    in by a mask the pen's line uncovers, as a marker draws (Mat, 2026-10-23: "fun and
-    playful like a marker": the shaft one swipe, quick off the mark and soft where it
-    lands, 520ms; the head two quick flicks, 200ms, and a pop about its tip from a 0.618
-    past its size and back, 420ms; its ink at 85%, so it builds up where the barbs and
-    the shaft cross); drawn once, tail then head, when
-    their title comes into view, as the strokes are; `aria-hidden`, as the words say
-    both. The room under the choice is `2xl` (`Parts.module.css`'s `.section`). Viewer
+    halves on one card on the code editor's black, as "Why Clover"'s black stories are
+    (Mat, 2026-10-25: "would it help if we went black here and didn't float text over
+    bg?"; the `--code-*` tokens, its words white and its notes the faint text, 6.1:1; a
+    hairline inside it on a dark page), a hairline between the halves (across them when
+    stacked), its corners `--radius-4`, no shadow. Before it, the two floated on the
+    page's ground with hand-drawn gray arrows from each title, to the Viewer and to the
+    tiles (`ChoiceArrows.tsx`, 2026-10-23 to 2026-10-25, removed with the card: "the
+    weakest part of the whole page"), and a black card under the template alone was
+    tried on 2026-10-23, "too much is going on". Their titles are one sentence across
+    them, set as the section intros' are, "Use a template…" and "…or build your own.",
+    its last words under the hero's stroke (Mat, 2026-10-23: two titles side by side,
+    "Ready when you are." and "IIIF building blocks.", competed, as did labels over
+    them). First: its title (an `h3`), its note, "Try each one in the Viewer above.",
+    then, side by side and as tall, the template's menu, drawn as a dropdown is (Mat,
+    2026-10-23: "an obvious dropdown"; on the card, its edge the card's 3:1 one
+    (`--pg-edge`, 5.6:1 on black), its words white, no lift, the name and a chevron in
+    it, the accent's edge under the pointer, as wide as the longest name, so it holds
+    still; named "Default template", its visible name first, WCAG 2.5.3), and Get
+    started (`/docs`, the solid one). Then: the parts' `h2` (`#parts`, where a chip's
+    resource sends focus), its note "IIIF building blocks that snap together.", and "See all (the count)
+    components" (`/docs/body`, the parts counted, `counts.ts`; Mat, 2026-10-25), outlined in the card's
+    edge, its words white, its edge the accent under the pointer (the accent's text step
+    falls under 4.5:1 on black). Each half's title and note sit in the section intros'
+    own grid (`intro.text`), so their sizes and gaps are those of "Thoughtful and
+    flexible." (Mat, 2026-10-23: "match gaps/fontsize"). Side by side while their words
+    fit (Mat, 2026-10-25: "these stack too early"): the template's half never narrower
+    than its words and its two calls to action on one line: from 64rem, where the example
+    viewer is held, the parts' own columns, the card's hairline in the middle of their
+    gap and each half's words 1.618rem in, where the viewer's and the tiles' start; under it, half and half
+    (Mat, 2026-10-25: "it should just go 50/50 once the floating viewer goes away"); the
+    building blocks' note wrapping before its title would; one above the other under
+    48rem, each half centered. The
+    room over the card is `l` to `xl`, and under it `2xl` (`Parts.module.css`'s
+    `.section`). Viewer
     documentation is not offered there (Mat, 2026-10-23); the navbar has no link to the
     docs. No figure and no code. The parts follow the playground: `Homepage` holds the resource the playground reports
     (`onResourceChange`) and hands it down, and the section's chips put another of the
     playground's resources in its Viewer (`pickResource`).
-  - After the parts, "Why Clover" tells five stories, one at a time: Accessible, Seamless,
-    Composable, Lightweight, Coverage, on the code editor's black and the page's ground in
-    turn, black first (Mat, 2026-10-20). Set apart from the parts by size, not colors of
+  - After the parts, "Why Clover" tells six stories, one at a time: Adaptable, Accessible,
+    Seamless, Composable, Lightweight, Natural, on the page's ground and the code editor's
+    black in turn, Adaptable on the ground so Accessible keeps its black (Mat, 2026-10-20
+    and 2026-10-25). Adaptable (Versatile until 2026-10-25; its title "Multimodal by design.") is about formats: in its figures' column, a thumbnail of
+    each (Image, A/V, its name spelled out for a screen reader, 3D model, Text: the playground's Catalog, Footage, Model and Manuscript; Mat, 2026-10-25), native radios, one tab stop, the chosen one ringed as a chosen swatch is
+    (`FormatPicker.tsx`), each opening its resource in the playground and so in the held
+    viewer; two by two beside the words, a row of four under them where the story stacks (Mat, 2026-10-25: "the examples get VERY large"); its line goes to Body (`data-point="body"`). A pick holds the story where it is
+    in the window, frame by frame, while the parts above it load again, with the browser's
+    scroll anchoring off and the page's height kept meanwhile (Safari has no anchoring, and
+    Firefox's loses its anchor as the tiles empty). Set apart from the parts by size, not colors of
     its own; its accent is `--accent-9` itself, never a shade or a fill: the hero's marker stroke under every figure, the figures themselves in the text's color (black on the page's ground; on black, white, `--code-bright`, never the editor's tinted text; Mat, 2026-10-20 and 2026-10-21). Its
     words are Apple-style marketing, by way of Strunk and White: plain and conversational,
     as one person speaking to another, never terse bursts (Mat, 2026-10-21); titles short, each ending in a period,
@@ -352,7 +347,7 @@ deadline.
     ARIA, the keyboard, targets, contrast and text size, captions, language, motion),
     each with its mark, in the standard's order (1.1.1, 1.2.2…), then an ARIA snapshot with tab stops,
     the card as tall as both need where the window has room under the held viewer,
-    focus anywhere in the viewer's column giving it up; Mat, 2026-10-22) and Coverage (`data-recipe`) a Cookbook recipe (0032, a
+    focus anywhere in the viewer's column giving it up; Mat, 2026-10-22) and Natural (`data-recipe`; Coverage until 2026-10-25, renamed so its label is an adjective as the others' are, "Native" set aside as it can read as about people, its words of Clover itself, never "we", saying "IIIF" once: "Clover gains IIIF fluency from building blocks designed natively to open specifications." (active, never "comes from"), then "Code and components are crafted toward recipes in the cookbook." (never "it's" or "its", and no range of recipes after it), with no date and the link the one word "cookbook"; its title "Reads the IIIF cookbook.", "cookbook" lowercase there and in its words (Mat, 2026-10-25, an exception to the IIIF Cookbook's capitals elsewhere), IIIF's logo for the word, in its own colors and proportions (never squeezed), sized a little past where its stems match the title's weight (0.786em, as its colors on black read smaller), on the title's baseline, `aria-hidden`, the word read in its place (beside or over the figure was tried and undone), `docs/components/Home/IIIFLogo.tsx`, a copy of the 3.x badge's, which goes with the 3.x pages; Mat, 2026-10-25) a Cookbook recipe (0032, a
     Collection, read by Label, Body, Metadata and Collection, all outlined but Metadata;
     Mat, 2026-10-21; for this example alone, the Collection held in from its outline, its
     address on one line, and its members given thumbnails from their own images at a size
@@ -393,7 +388,7 @@ deadline.
     handful of state changes, each once per story); nor does the page scrolling under a
     resting pointer: a part's hover (`point`, `Tile`) takes the pointer's moves, not what
     passes under it (`docs/lib/scrolling.ts`), and a tile's list in a box of its own
-    (`.scroll`) lets the wheel pass to the page until the reader points into it or
+    (`.scroll`) (as tall as a third of the window, 8rem to 15rem; a Collection's 14rem to 24rem; Mat, 2026-10-25: never dominating a small window where a drag would be captured) lets the wheel pass to the page until the reader points into it or
     focuses in it (`data-armed`), so a trackpad's gesture is never spent on a box the
     page brought under the pointer; `Tile`, the viewer's parts, `ViewerCode`,
     `RecipeFace` and `AccessibilityTree` are memoized on what they show; animations are opacity or transform only (no `background-color` or
@@ -456,7 +451,7 @@ deadline.
     controls' (the accent, 2px). Where the tiles are under 47.5rem wide (a container
     query), the third and the two thirds beside it share their row in halves, as a third
     is then too narrow for a name, which never breaks, and its arrow. A part the resource gives
-    nothing to is a chip at the end, under the last tile, inside what "Show all" shows
+    nothing to is a chip at the end, under the last tile, inside what "More components" shows
     (Mat, 2026-10-24), naming what it would read and the playground resource
     that has it (`SHOWN_IN`). Every value shown is the resource's own: no illustrations,
     made-up figures or copy. Golden-ratio spaces, hairline edges, no gray fills.
@@ -464,7 +459,7 @@ deadline.
     RequiredStatement, Annotations beside Contents (either alone across the row), the
     Collection, then the rest. Provider (its logo and name, linked) is among the rest, after Rights (Mat, 2026-10-24). From halfway through the Collection's tile (its middle,
     measured, `--fold-at`, the fade centered there) to the end, the chips too, they fade
-    out, a preview only, inert, under "Show all" (named "Show all parts"): pressed, it
+    out, a preview only, inert, under "More components", at the tiles' end (Mat, 2026-10-25; "Show all" before): pressed, it
     shows them all and goes, focus moving to the first of them (2.4.3), and they stay shown
     for another resource; a chip for a folded part shows them all too. Without a Collection the fold
     starts halfway through the first tile after it, and fewer than three such tiles do not
@@ -476,7 +471,7 @@ deadline.
     (Mat, 2026-10-22), 2px inside its edge on every side, whole pixels so its gaps round
     alike, for the address or content state of the reader's own, with ours listed under it,
     the list as wide as the whole select (its label, the field and Open; Mat, 2026-10-22) (`resources`
-    in `playground-config.ts`: a catalog, a print, a Collection, a photo, a map, a model
+    in `playground-config.ts`: a catalog, a print, a manuscript in Arabic (Maktaba's), a Collection, a photo, a map, a model
     in 3D, a film, a recording…), each by its thumbnail, its own label, and a few words on one thing it has
     that the others do not (`description`: concise, only what the resource has). The
     list's first item, always, is "View your own" (a dashed slot with a plus, as the old
@@ -502,12 +497,22 @@ deadline.
     every pairing, with a hairline edge and a small, soft gray shadow (never the accent).
     Keep the playground itself about layout and UX: names and those few words, no
     marketing lines; the marketing is in the choice under it and in Why Clover.
+  - The homepage's titles and the words under them are two sizes, wherever they are (Mat,
+    2026-10-25: "make sure we continue the same weight/size throughout … simplify our
+    styling so that we are not building so many variants"): every title, a section
+    intro's, the choice's halves and the stories' cards, is `--text-title`, bold, set by
+    the window and never by the box it is in; every note and story's words are
+    `--text-lede`, as the hero's sentence is (`tokens.css`). A new card or section takes
+    these, never a size of its own. The hero's headline, the mono labels and the
+    figures are their own.
   - The homepage's two sections after the parts open alike, with `SectionIntro`
     (`docs/components/Home/SectionIntro.tsx`): no rule over it and room around it (Mat,
     2026-10-21), a title ending in a period under the hero's stroke, one short note (`--text-lede`, as the hero's sentence and the choice's), and one call to action (`cta-solid` or `cta-outline`,
-    `tokens.css`). The parts' is the choice's right half, above. Why Clover (titled "Thoughtful and flexible.", Mat, 2026-10-22; "Read the
-    docs"; its note one conversational sentence of why, the full spectrum of user experience,
-    every visitor, layout and IIIF resource, never "intention", a colon, or the title's words, never the stories in brief, which would say them twice; Mat, 2026-10-22) and Install ("Install is easy.", "Get started"), the last in the gap after Coverage, beside the
+    `tokens.css`), under the note, always (Mat, 2026-10-25: "place it under the description paragraph"),
+    all of it centered under 64rem, where the example viewer is no longer held (Install's
+    command then its own width, 24rem at most, beside its button, the pair centered). The parts' is the choice's right half, above. Why Clover (titled "Thoughtful and flexible.", Mat, 2026-10-22; "Read the
+    docs", solid in the accent since 2026-10-25; its note one conversational sentence of why, the full spectrum of user experience,
+    every visitor, layout and IIIF resource, never "intention", a colon, or the title's words, never the stories in brief, which would say them twice; Mat, 2026-10-22) and Install ("Install is easy.", "Get started"), the last in the gap after Natural, beside the
     held viewer, the grid ending with its npm block (its Copy drawn as the example viewer's
     editor's is, `.installCopy`; the block beside its button, `SectionIntro`'s `beside`, as
     tall as it, and under it where the column is narrow; Mat, 2026-10-22), and a few rem under it, no more
@@ -527,9 +532,9 @@ deadline.
     its "more" linking to the repository's contributors; the two across 61.8% of the
     footer's width (all of it on a phone). No history, and no titles. Under it, `3xl`
     away, that it is MIT licensed and fully open source, the holder as `LICENSE` names
-    it: Northwestern University Libraries, from 2026, and the site's links (Source code,
-    `#clover-iiif` on IIIF's Slack, `https://iiif.slack.com/archives/C090ZBQCL77`, Mat,
-    2026-10-22, and License;
+    it: Northwestern University Libraries, from 2026, and the site's links (Code, the repository,
+    Slack, named so alone and opening `#clover-iiif` on IIIF's Slack, `https://iiif.slack.com/archives/C090ZBQCL77`, Mat,
+    2026-10-22 and 2026-10-25, and License;
     never the earlier version, Mat, 2026-10-21), with the
     appearance after them (Light, Dark or System, `ThemeSwitch.tsx`, Nextra's `Select`) on
     every page (Mat, 2026-10-21). Nextra's own switch is off (`darkMode={false}`), so
@@ -643,7 +648,8 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     Northwestern University Libraries, linking the Libraries'
     site (`docs/components/Subheader.tsx`, by `usePathname`, so the static export holds
     it in the homepage's HTML only; styled in `docs/styles/layout.css`). It is
-    aligned to the end of the navbar's content. It is not held (Mat, 2026-10-16):
+    aligned to the end of the navbar's content, and centered under 48rem (Mat, 2026-10-25),
+    over the centered hero. It is not held (Mat, 2026-10-16):
     the root layout's `navbar` renders it after Nextra's `Navbar`, outside the navbar's
     sticky box, so it scrolls away with the page.
   - On the homepage the navbar's content, and that line, line up with the sections'
@@ -919,7 +925,15 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   `facing-pages`, so it stands alone and Page 16 and Page 17 share a spread, and Ranges
   for its sections (`structures`, titled only by its printed headings or the covers'
   Canvas labels; some name a region), and each plate's "Then" and "Now" tagged (static),
-  the playground's Catalog; `transcripts`, Cookbook 0219's _Lunchroom Manners_ with its
+  the playground's Catalog; `hindenburg`, Northwestern's record of WLS-AM's
+  Hindenburg broadcast, kept as fetched, its Canvas of sound given an
+  `accompanyingCanvas` painting the reel's box (the record's "enclosure back", its label; Mat,
+  2026-10-24), English captions transcribed by speech recognition and corrected by hand
+  (`captions.json`, `[unclear]` where a word could not be told; not yet checked by a
+  listener), nine chapters titled with the broadcast's own words, and a page of
+  `describing` notes on its time (Mat, 2026-10-24), the playground's Recording and
+  Timeline's resource (static, and live in `npm run dev` under
+  `pages/api/mocks/hindenburg/`, since its captions are its own); `transcripts`, Cookbook 0219's _Lunchroom Manners_ with its
   English captions and, as the Canvas's `rendering` (0017's way), the film's plain-text
   transcript that 0253 provides (static); `page-transcript`, `content-search`'s newspaper
   with each page's own OCR as a plain-text `rendering` in German, a line of the page a

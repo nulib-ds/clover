@@ -29,10 +29,11 @@ export const RESOURCES = {
   collection:
     "https://api.dc.library.northwestern.edu/api/v2/collections/c373ecd2-2c45-45f2-9f9e-52dc244870bd?as=iiif",
   /**
-   * The IIIF Cookbook's recipe 0002 in Presentation 4 (not a mock): one Timeline, its sound
-   * an `Audio` body, for `Timeline`.
+   * Northwestern's Hindenburg broadcast, its reel's box accompanying the sound, for
+   * `Timeline`, as the homepage's Recording is (Mat, 2026-10-24). A Presentation 3 Canvas
+   * of sound, which Clover upgrades to a Timeline.
    */
-  audio: "https://iiif.io/api/cookbook/recipe/0002-mvm-audio/v4/manifest.json",
+  audio: "hindenburg/manifest.json",
   /**
    * The IIIF Cookbook's recipe 0608 in Presentation 4 (not a mock): one Scene painting a
    * glTF model at its origin, for `Scene`.

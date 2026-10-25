@@ -12,6 +12,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`partOf` on `Canvas` and `Timeline` (Mat, 2026-10-24).** What the view is part of,
+  named under its title where a lone recording plays as a player (below): the Manifest's
+  label by default, inside a `Root` or given `iiifContent`.
+
 - **`Provider` and `Logo`: IIIF's `provider`, and the `logo` on each (Mat, 2026-10-24).**
   `Clover.Provider` (`<clover-provider>`) lists who provided the resource, each
   provider's logo and name linked to its homepage. It is a compound part: what it holds is
@@ -973,7 +977,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
     `defaultPanelOpen` now defaults to open only when the panel fits beside the Canvas.
     Its panel's sections are stacked boxes by default (`panelLayout="accordion"`), as
     Document's are; `panelLayout="tabs"` gives tabs. `items` picks `Items`' layout
-    (`"carousel"`, `"list"` or `"grid"`), or `false` for none. `header={false}` leaves
+    (`"slider"`, `"list"` or `"grid"`), or `false` for none. `header={false}` leaves
     out the `Thumbnail` and `Label` over the Canvas (3.x's `showTitle: false`), and
     `panel={false}` the `Panel` and its `PanelToggle`.
 
@@ -1061,7 +1065,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   are exported; `Root` takes `annotationPages="all"` to fetch every Canvas's referenced
   annotation pages, not only the view's. `Thumbnail` takes any resource as `value`, and
   image attributes such as `alt`.
-- **`Clover.Items`**, thumbnails of a sequence as a `carousel` (the default), `list` or
+- **`Clover.Items`**, thumbnails of a sequence as a `slider` (the default), `list` or
   `grid`, or one item at a time as a `pager`. It succeeds 3.x's `Slider` and the row of
   thumbnails under 3.x's Viewer.
   - `layout="pager"` is the count, then Previous and Next (mirrored in a right-to-left
@@ -1085,10 +1089,10 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
     `onSelect(item, event)` hears each choice; `event.preventDefault()` keeps the reader
     on the page.
   - `renderItem` replaces an item's figure.
-  - The carousel is the browser's own scrolling with CSS snap points, with no carousel
+  - The slider is the browser's own scrolling with CSS snap points, with no slider
     library: wheel, trackpad, touch and keyboard all scroll it, and a mouse can drag it.
-  - A carousel's arrows choosing between views (inside a `Root`) are Previous and Next:
-    they step the selection, and the carousel follows it into view. A carousel of links
+  - A slider's arrows choosing between views (inside a `Root`) are Previous and Next:
+    they step the selection, and the slider follows it into view. A slider of links
     has no selection, so its arrows scroll it, as "Show previous items" and "Show more
     items".
   - Thumbnails load lazily, asked of each image service at `thumbnailSize` (200 by
@@ -1097,7 +1101,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
     at its shape (square for sound, which has none), so its cell never collapses to its
     caption; sound with nothing to picture shows a speaker in it.
   - Size it with `--clover-items-height`, `--clover-items-size` and `--clover-items-gap`.
-    A carousel's or grid's titles run to three lines and are cut short after
+    A slider's or grid's titles run to three lines and are cut short after
     (`--clover-items-lines`), as the thumbnails under 3.x's Viewer cut their captions at
     five.
 
@@ -1194,7 +1198,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   fixed blue and a fixed yellow, so they kept those colors under any other accent.
 
 - **`Clover.Items`' hover, selection and focus rings take no room.** They were outlines
-  outside each thumbnail, so a carousel cut off the first thumbnail's ring and a list or
+  outside each thumbnail, so a slider cut off the first thumbnail's ring and a list or
   grid's rings reached past the edge of the content. Now they take no room, nothing cuts
   them, and the thumbnails line up with what is beside them (see the ring around the whole
   item, below). A grid's cells now stay square for a tall picture too. The items in
@@ -1218,7 +1222,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   any picture. It is an outline
   on `.clover-items-pictures`, in 4px of room the item keeps around itself
   (`--clover-items-ring-room`) and gives back with a negative margin, so items are still
-  `--clover-items-gap` apart and the edge of `Items` never cuts a ring. Only a carousel,
+  `--clover-items-gap` apart and the edge of `Items` never cuts a ring. Only a slider,
   which scrolls across, keeps that room at its sides: a list or a grid keeps it above and
   below alone, so it never reaches past its own sides, which had put a scrollbar across a
   scrolling box with no padding around it. Clover now draws focus's inner ring on
@@ -1256,13 +1260,13 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
     `:root` or any ancestor.
   - In the `Panel`, the accordion's headings and content sit on the panel's
     inset, as its tabs' content does: the boxes reach out over the panel's padding.
-  - A carousel's thumbnails slide under a shadow at either end, as the
-    `Panel`'s headings do: at the start once the carousel has scrolled, at
+  - A slider's thumbnails slide under a shadow at either end, as the
+    `Panel`'s headings do: at the start once the slider has scrolled, at
     the end while there is more, and at neither when all its thumbnails fit. Each shadow
     is as tall as the pictures and level with them, not the captions under them. The
-    carousel's own scroll drives them (a named scroll timeline); browsers without
-    scroll-driven animation show none. Its items snap to the carousel's start rather
-    than to the ring's room before them, so a carousel at rest has not scrolled.
+    slider's own scroll drives them (a named scroll timeline); browsers without
+    scroll-driven animation show none. Its items snap to the slider's start rather
+    than to the ring's room before them, so a slider at rest has not scrolled.
   - `Default`'s thumbnails run on past the end padding around `Items` to the edge of
     their `SplitPane`, as the Canvas does, while the labels and `Position` over them
     keep the padding. `Items`' arrows line up with what is above them: the left one `s`
@@ -1643,11 +1647,11 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   new steps and stepped captions, and for those headings holding inside the panel's
   padding, which brought it to 7,647 B, then to 7.9 kB for the faint shadows that show
   content passing under them (7,891 B), and to 8 kB for a lone section that cannot be
-  closed (7,905 B), then to 8.1 kB for the same shadows at a carousel's ends (8,082 B). For that, and for a content state opening a Collection on one of its
+  closed (7,905 B), then to 8.1 kB for the same shadows at a slider's ends (8,082 B). For that, and for a content state opening a Collection on one of its
   members, `Document`'s budget was raised to 61.7 kB (61,609 B), then to 61.9 kB for the
   `Panel`'s Collection section beside its own `CollectionSelect` (61,784 B),
   and `<clover-viewer>`'s
-  to 92.7 kB (92,603 B), then to 92.8 kB for the carousel's shadows in its inlined
+  to 92.7 kB (92,603 B), then to 92.8 kB for the slider's shadows in its inlined
   stylesheet (92,710 B). For the `Panel`'s Collection section fetching a
   `partOf` Collection when it opens (`openCollection`), `Document`'s was raised to 62 kB
   (61.92 kB) and `<clover-viewer>`'s to 93 kB (92.9 kB).
@@ -1775,6 +1779,59 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
 
 ### Changed
 
+- **`Items`' `layout="carousel"` is now `layout="slider"` (Mat, 2026-10-25).** The
+  scrolling row of thumbnails, still the default, is named a slider everywhere: the
+  `layout` value, the Default template's `items`, the elements' `layout` and `items`
+  attributes, and the `data-layout` your CSS selects. `"carousel"` is no longer read: TypeScript
+  rejects it in React, and `<clover-viewer items="carousel">` shows the slider with a
+  warning in the console. Rename it where you set it:
+
+  ```diff
+  - <Clover.Items layout="carousel" />
+  + <Clover.Items layout="slider" />
+  - <Viewer iiifContent={url} items="carousel" />
+  + <Viewer iiifContent={url} items="slider" />
+  - .clover-items[data-layout="carousel"] { … }
+  + .clover-items[data-layout="slider"] { … }
+  ```
+
+- **A recording plays as a music app plays one (Mat, 2026-10-24: Apple Music's and
+  Spotify's players).** A lone recording of sound (a Timeline, or a Canvas of sound
+  alone) no longer draws its accompanying or placeholder image over the Body under the
+  transport. It plays as a player: its artwork beside its title (its label) and what it
+  is part of (`partOf`), on a ground of the artwork's own colors under a dark wash that
+  keeps every word and control at AA; the transport under them, always shown, Play
+  large and white; its captions and the annotations on its time as lyrics; and, where
+  it is tall enough, its chapters listed as tracks, the one playing marked, a press
+  going to it (the Chapters menu stays). Its artwork is its placeholder Canvas until it
+  first plays, then its accompanying Canvas, each standing in for the other, else its
+  thumbnail, at its own shape and asked of its image service as its `info.json` allows.
+  It lays itself out for its Body: one row when short, the transport across it when
+  taller, one centered block when large, the artwork over the rest when narrow. The
+  renderer draws nothing for it, and the placeholder no longer holds it back: its image
+  is the artwork until it plays. The figure carries `data-player`; the player's classes
+  are `clover-canvas-player` and its `-ground`, `-art`, `-note`, `-head`, `-title`,
+  `-part-of`, `-chapters` and `-chapter` (with `-number`, `-label`, `-time`);
+  `.clover-canvas-sound-label` is drawn no longer for a lone recording. Its styles are in
+  `styles.css` (1.5 kB gzip more), and the web components load them with the player's
+  code, only for a recording. Budgets raised by 0.2 to 0.4 kB gzip for the rest: a
+  Canvas or Timeline alone to 38.5, the Default, Document and Gallery templates to 68.8,
+  71.3 and 59.8, `styles.css` to 14.4, and the web components' pages (`<clover-viewer>`
+  111.1, its own entry 92.6, in Document 117.4, a `<clover-canvas>` alone 79.9, the four
+  parts 95.5, a layout of containers 110.2). To keep the chapters to the menu:
+
+  ```css
+  .clover-canvas-player-chapters {
+    display: none !important;
+  }
+  ```
+
+- **A placeholder's still, and a video's poster, read their image service's `info.json`
+  first (Mat, 2026-10-24),** as every other picture Clover asks for does: asked as it
+  allows, never larger than the image, where they were asked for `!1280,1280` whatever
+  the server said it could answer. The resolver loads with the first placeholder that
+  needs one.
+
 - **Document draws no border around itself (Mat, 2026-10-24).** Its root,
   `.clover-template-document`, had a 1px `--clover-color-secondary-muted` border and
   `--clover-radius` corners; it sits in its page as Default does. A page that wants the
@@ -1799,7 +1856,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   server answers (`w,` in 2.x, `w,h` in 3.0), at level 0 only a size it lists, and no
   region of a server that cannot cut one. The frames menu's and Annotations' pictures
   appear once `info.json` is read. So that a long strip does not read a thousand, Items'
-  thumbnails read theirs as they come within half a screen (or half their carousel or
+  thumbnails read theirs as they come within half a screen (or half their slider or
   pane) of view, and Document's stills within a column's height. Budgets raised for it, by
   0.1 to 0.7 kB gzip: a Canvas alone to 38.2, the Default, Document and Gallery
   templates to 68.4, 70.9 and 59.4, and the web components' pages (`<clover-viewer>`
@@ -2019,6 +2076,14 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
 
 ### Fixed
 
+- **A Canvas's open popups are over its play button (Mat, 2026-10-25).** On video or
+  sound waiting behind its placeholder, the large play button in the middle sat on the
+  controls' layer, over the Canvas's popups, so an annotations menu or the information
+  open over the middle of a small Canvas had the button on top of its words. The button
+  now sits between the still and the popups. The layers, for a page that stacks its own
+  over them: the scrim and the still are at 0 (were 1), the play button at 1 (was 3),
+  the popups at 2 and the controls at 3, as before.
+
 - **Document's thumbnails no longer move as their pictures arrive (Mat, 2026-10-24).** A
   picture waiting for its image was a sliver one control tall (`--clover-space-xl`), and
   grew to the sidebar's width as its image came in, so the thumbnails below it moved, and
@@ -2069,8 +2134,8 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
 - **`<clover-viewer>` takes an `iiifContent` set before it is defined.** Its script loads
   async, so a page could set the property first, and the value hid the element's own.
 - **`<clover-viewer>` reads `"false"` in any case, and checks `items`.** `FALSE` or
-  `" false "` turns a part off. An `items` that is not `carousel`, `list`, `grid` or
-  `false` shows the carousel, with a warning in the console, rather than passing on.
+  `" false "` turns a part off. An `items` that is not `slider`, `list`, `grid` or
+  `false` shows the slider, with a warning in the console, rather than passing on.
 - **Clover's elements never mark their words `lang=""`.** Where Clover drops a `lang`
   after the language changes, React removes the attribute but Preact empties it, and
   `lang=""` says the language is unknown (WCAG 3.1.2). The page's host removes it
@@ -2361,7 +2426,7 @@ are in the repository's `ACCESSIBILITY.md`.
     rail and thumb, the played part in `Highlight`, and an outline on focus. The
     transport's buttons keep a 1px `ButtonText` border.
 
-- **Previous and Next.** `Previous`, `Next` and Items' carousel arrows keep keyboard focus
+- **Previous and Next.** `Previous`, `Next` and Items' slider arrows keep keyboard focus
   at the first and last view. There they are `aria-disabled`, not `disabled`: they leave
   the tab order, a press does nothing, and while focused they stay in sight with the
   arrow faded. Once focus leaves they show disabled, faded (`opacity: 0.38`) and taking
@@ -2406,7 +2471,7 @@ are in the repository's `ACCESSIBILITY.md`.
     still keeps Space from scrolling the page.
   - Entering a nested Collection keeps focus in the list, on the new list's selected
     member or else its first.
-  - A carousel's or grid's title cut short at three lines shows in full while its item is
+  - A slider's or grid's title cut short at three lines shows in full while its item is
     hovered or focused, over the picture above it, so nothing around it moves. Escape
     hides it until the pointer comes back or focus leaves. The label's markup changed:
     `.clover-items-label` now holds `.clover-items-label-text`, which carries `lang` and

@@ -30,7 +30,6 @@ import home from "docs/components/Home/Home.module.css";
 import intro from "docs/components/Home/SectionIntro.module.css";
 import { Swoosh } from "docs/components/Home/Swoosh";
 import { partCount } from "docs/components/Home/counts";
-import { ChoiceArrows } from "docs/components/Playground/ChoiceArrows";
 import { useRouter } from "docs/lib/router";
 
 /**
@@ -375,26 +374,16 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
         {/*
          * Under the playground's Viewer, the two ways to use Clover, as the two halves of
          * one sentence (Mat, 2026-10-23: "it needs to be two. but they need to
-         * communicate"), on the parts' two columns below, the two alike, floating, their
+         * communicate"), on one black card (Mat, 2026-10-25), a hairline between them, their
          * titles one sentence across them, "Use a template… …or build your own.", its last
-         * words under the hero's stroke, as the choice's headline had them. On the left,
-         * under the Viewer it changes: a ready-made template, its menu, and Get started.
-         * On the right, over the tiles it heads: the building blocks, counted, and the way
-         * to see them all.
+         * words under the hero's stroke. First: a ready-made template, its menu, and Get
+         * started. Then: the building blocks, counted, and the way to see them all.
          */}
         <div className={styles.choice}>
-          <ChoiceArrows />
           <div className={styles.template}>
             {/* A section intro's title and note, and the room between them (`intro.text`). */}
             <div className={intro.text}>
-              <h3 className={intro.title}>
-                Use a template…
-                <span
-                  aria-hidden="true"
-                  className={styles.arrowFrom}
-                  data-arrow="up"
-                />
-              </h3>
+              <h3 className={intro.title}>Use a template…</h3>
               <p className={intro.note}>Try each one in the Viewer above.</p>
             </div>
             {/*
@@ -498,7 +487,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
               </Link>
             </div>
           </div>
-          <div>
+          <div className={styles.build}>
             {/*
              * The parts' heading (`#parts`), which a chip's resource sends focus to
              * (`Parts.tsx`), in the section intros' type.
@@ -513,19 +502,15 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
                 <Swoosh className={`${home.mark} ${home.markOnScroll}`}>
                   your own.
                 </Swoosh>
-                <span
-                  aria-hidden="true"
-                  className={styles.arrowFrom}
-                  data-arrow="down"
-                />
               </h2>
-              <p className={intro.note} data-arrow-clear>
-                {partCount} pieces that snap together any way you like.
+              <p className={intro.note}>
+                IIIF building blocks that snap together.
               </p>
             </div>
-            <div className={styles.buildActions} data-arrow-clear>
+            <div className={styles.buildActions}>
               <Link href="/docs/body" className="cta-outline">
-                See them all
+                {/* The parts counted here, not in the note (Mat, 2026-10-25). */}
+                See all {partCount} components
                 <span className="cta-arrow" aria-hidden="true">
                   →
                 </span>

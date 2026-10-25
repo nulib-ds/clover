@@ -35,8 +35,8 @@ export function SiteFooter() {
           </a>
           . Developed since {SINCE}, now at {VERSION}, it is used in a variety
           of implementations, with contributions from folks at Princeton
-          University, Texas A&amp;M University, UNC Chapel Hill, the University
-          of Pennsylvania, Cogapp, and{" "}
+          University, Texas A&amp;M University, UNC Chapel Hill, University of
+          Pennsylvania, Cogapp, and{" "}
           <a href="https://github.com/nulib-ds/clover/graphs/contributors">
             more
           </a>
@@ -51,13 +51,11 @@ export function SiteFooter() {
         <div className="site-footer-links">
           <ul>
             <li>
-              <a href="https://github.com/nulib-ds/clover">Source code</a>
+              <a href="https://github.com/nulib-ds/clover">Code</a>
             </li>
             {/* Clover's channel on IIIF's Slack (Mat, 2026-10-22). */}
             <li>
-              <a href="https://iiif.slack.com/archives/C090ZBQCL77">
-                #clover-iiif on Slack
-              </a>
+              <a href="https://iiif.slack.com/archives/C090ZBQCL77">Slack</a>
             </li>
             <li>
               <a href="https://github.com/nulib-ds/clover/blob/main/LICENSE">

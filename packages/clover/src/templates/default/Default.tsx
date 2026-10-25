@@ -39,7 +39,7 @@ export type DefaultProps = Omit<RootProps, "children"> & {
   panelLayout?: PanelLayout;
   /** The downloads in the panel's About, as links. Default `true`. */
   download?: boolean;
-  /** The thumbnails under the Body: a layout, or `false` for none. Default `carousel`. */
+  /** The thumbnails under the Body: a layout, or `false` for none. Default `slider`. */
   items?: Exclude<ItemsLayout, "pager"> | false;
   /**
    * Where the panel's width is remembered once the reader drags its bar
@@ -75,7 +75,7 @@ export function Default({
   defaultPanelOpen,
   panelLayout = "accordion",
   download = true,
-  items = "carousel",
+  items = "slider",
   storageKey = "clover-template-default",
   fill = false,
   ...root

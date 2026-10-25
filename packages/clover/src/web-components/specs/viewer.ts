@@ -15,7 +15,7 @@ export const viewer: ElementSpec = {
     annotations: { prop: "annotations", type: "data" },
     // Past 6 the titles name what they head instead (`ui/heading.ts`).
     "heading-level": { prop: "headingLevel", type: "number", min: 2 },
-    items: { prop: "items", type: ["carousel", "list", "grid", "false"] },
+    items: { prop: "items", type: ["slider", "list", "grid", "false"] },
     header: { prop: "header", type: "boolean" },
     panel: { prop: "panel", type: "boolean" },
     download: { prop: "download", type: "boolean" },
@@ -78,8 +78,8 @@ export const viewerDocs: ElementDocs = {
     },
     items: {
       description:
-        'Default: the thumbnails, as a carousel, list or grid, or "false" for none.',
-      default: "carousel",
+        'Default: the thumbnails, as a slider, list or grid, or "false" for none.',
+      default: "slider",
     },
     header: {
       description:

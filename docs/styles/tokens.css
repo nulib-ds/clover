@@ -64,9 +64,19 @@
   /* One step above body, for a label that titles something without being a heading.
    * The scale otherwise jumped straight from 1rem to `--section-heading-size`. */
   --text-lg: 1.125rem;
-  /* The homepage's summary lines, one size, so they read as one voice: the hero's, the
-   * choice's under the playground, and the section intros' notes (Mat, 2026-10-20). */
+  /*
+   * The homepage's words under a title, one size, so they read as one voice: the hero's
+   * sentence, the section intros' notes, the choice's under the playground, and the
+   * stories' words (Mat, 2026-10-20; the stories too, 2026-10-25).
+   */
   --text-lede: clamp(var(--text-lg), 2vw, 1.375rem);
+  /*
+   * The homepage's titles, one size wherever they are, as the window sets it, never the
+   * box they are in (Mat, 2026-10-25: "make sure we continue the same weight/size
+   * throughout"): the section intros' ("Thoughtful and flexible."), the choice's halves
+   * and the stories' cards. The hero's headline is its own.
+   */
+  --text-title: clamp(1.618rem, 3vw, 2.618rem);
   /*
    * Display sizes, for the site only: Clover packages none (its largest is
    * `--clover-text-l`). Built as Clover's text steps are, the page's 1rem plus a space

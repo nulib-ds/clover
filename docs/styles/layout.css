@@ -42,6 +42,17 @@
   text-align: end;
 }
 
+/*
+ * Centered on a narrow window (Mat, 2026-10-25), over the hero, which is centered,
+ * rather than hanging off the navbar's end; under 48rem, where the playground's bar
+ * stops holding too.
+ */
+@media (max-width: 47.9375rem) {
+  .site-subheader > p {
+    text-align: center;
+  }
+}
+
 .site-subheader a {
   color: var(--accent-link);
   text-decoration: underline;

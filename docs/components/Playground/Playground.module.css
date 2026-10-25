@@ -530,137 +530,124 @@
 /* ── Under the Viewer: a template, or a layout of one's own ─────────────── */
 
 /*
- * The two ways to use Clover, under the Viewer, as cards in "Why Clover"'s manner (Mat,
- * 2026-10-20): the page's ground with the Viewer's hairline and soft gray shadow, and the
- * code editor's black; a label, a title with the hero's stroke under its key words, a
- * sentence, and the way on. Side by side, one above the other on a phone.
- */
-/*
- * Under the Viewer, the two ways to use Clover (`Playground.tsx`; Mat, 2026-10-23), on
- * the parts' columns below (`Parts.module.css`'s `.grid`: 1300px at most, in the golden
- * ratio, `3xl` apart), so each half heads what is under it: the template the Viewer
- * above, the building blocks the tiles. Both float on the page's ground, alike (a black
- * card for the template was tried, under the Viewer and then apart from it), their
- * titles one sentence across them (Mat, 2026-10-23: two titles side by side competed),
- * their words a section intro's (`SectionIntro.module.css`), with room over them as the
- * choice had, and nearer the tiles than the Viewer.
+ * Under the Viewer, the two ways to use Clover (`Playground.tsx`), on one black card
+ * (Mat, 2026-10-25: "would it help if we went black here and didn't float text over
+ * bg?"), as "Why Clover"'s black stories are (the code editor's black, its words white,
+ * `--code-*`, `tokens.css`): the template, then the building blocks, a hairline between
+ * them, their titles one sentence across them (Mat, 2026-10-23), their words a section
+ * intro's (`SectionIntro.module.css`). No arrows: the card holds the two together
+ * (drawn arrows from each title, to the Viewer and to the tiles, were tried on
+ * 2026-10-23 and taken out with the card). A black card for the template alone was
+ * tried on 2026-10-23, "too much is going on"; this one holds both.
+ *
+ * Where the example viewer is held beside the tiles (64rem and up), the parts' own columns
+ * (`Parts.module.css`'s `.grid`), so the card lines up with what is under it: the
+ * hairline in the middle of their gap, each half's words where the viewer's and the
+ * tiles' start.
+ * Under that, where the viewer no longer floats, half and half (Mat, 2026-10-25: "it
+ * should just go 50/50 once the floating viewer goes away"). Either way the template's
+ * half is never narrower than its words and its two calls to action on one line, and the
+ * building blocks' note wraps before its title would; one above the other under 48rem,
+ * the hairline across.
  */
 .choice {
-  --pg-edge: color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
-  /* The room over it, under the Viewer, which its arrow up rises through. */
-  --choice-gap: clamp(4.236rem, 9vw, 6.854rem);
+  /* Edges on black, 3:1 and more (5.6:1; WCAG 1.4.11). */
+  --pg-edge: color-mix(in srgb, var(--code-text) 55%, transparent);
+  --choice-pad: clamp(1.618rem, 4vw, 4.236rem);
+  --choice-split: clamp(1.618rem, 3vw, 2.618rem);
   align-items: start;
-  column-gap: 4.236rem;
+  background: var(--code-background);
+  border-radius: var(--radius-4);
+  box-sizing: border-box;
+  color: var(--code-bright);
+  column-gap: var(--choice-split);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.618fr);
-  margin: var(--choice-gap) auto 0;
+  grid-template-columns: minmax(max-content, 1fr) minmax(0, 1fr);
+  margin: clamp(2.618rem, 6vw, 4.236rem) auto 0;
   max-width: 1300px;
-  row-gap: 2.618rem;
+  padding: var(--choice-pad);
+  row-gap: var(--choice-split);
 }
 
-@media (max-width: 64rem) {
+/* On a dark page, black on near-black: a hairline around it, inside, as the stories'. */
+:global(.dark) .choice {
+  box-shadow: inset 0 0 0 1px var(--gray-6);
+}
+
+.build {
+  border-inline-start: 1px solid var(--code-rule);
+  min-width: 0;
+  padding-inline-start: var(--choice-split);
+}
+
+/* The notes in the faint text the stories' labels are in (6.1:1 on black). */
+.choice :is(h2, h3) + p {
+  color: var(--code-faint);
+}
+
+@media (min-width: 64.0625rem) {
   .choice {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-/*
- * The arrows drawn from each half's title (`ChoiceArrows.tsx`; Mat, 2026-10-23: "make
- * more natural … drawn like our stroke. but gray and faint"), on a layer over the choice
- * and the room over and under it, measured from the page: a dull gray, faint where the
- * pen comes down (from nothing, most of it early) and full where it lifts, tapered as
- * the swoosh is, and drawn once from tail to head as the strokes are, the head after
- * the shaft. Never read
- * (`aria-hidden`): the words say what they point at, so they ask no contrast (WCAG
- * 1.4.11). Each starts just past its title's last word (`.arrowFrom`).
- */
-.choice {
-  position: relative;
-}
-
-.arrows {
-  left: 0;
-  overflow: visible;
-  pointer-events: none;
-  position: absolute;
-  top: calc(-1 * var(--choice-gap));
-}
-
-/* The pen's lines, in the masks that draw the arrows in: white, as wide as the shapes. */
-.arrows mask path {
-  fill: none;
-  stroke: #fff;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* From nothing where the pen comes down to the full gray, most of it early (Mat, 2026-10-23). */
-.arrowNone {
-  stop-color: var(--gray-8);
-  stop-opacity: 0;
-}
-
-/* A marker's ink, a little short of solid, so it builds up where its strokes cross. */
-.arrowFaint {
-  stop-color: var(--gray-8);
-  stop-opacity: 0.5;
-}
-
-.arrowFull {
-  stop-color: var(--gray-8);
-  stop-opacity: 0.85;
-}
-
-/* The head pops about its tip, in the layer's own space. */
-.arrowTip {
-  transform-box: view-box;
-}
-
-.arrowFrom {
-  display: inline-block;
-  height: 1em;
-  width: 0;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  /* Their lines hidden past their ends, round caps and all, until drawn. */
-  .arrows mask path {
-    stroke-dasharray: 1 1.1;
-    stroke-dashoffset: 1.05;
+    column-gap: 4.236rem;
+    grid-template-columns: minmax(max-content, 1fr) minmax(0, 1.618fr);
+    padding-inline: 0;
   }
 
   /*
-   * As a marker draws it (Mat, 2026-10-23: "fun and playful like a marker"): the shaft
-   * one swipe, quick off the mark and soft where it lands; then the head, two quick
-   * flicks, and a little pop past its size and back as the marker lifts.
+   * Each half's words in from its column's edge as the viewer's and the tiles' are from
+   * theirs (1.618rem, `Parts.module.css`), so the template's line up with the viewer's
+   * and the building blocks' with the tiles'.
    */
-  .arrows [data-drawn] .arrowShaftLine {
-    animation: arrow-draw 520ms cubic-bezier(0.33, 0, 0.15, 1) 150ms both;
+  .choice > .template {
+    padding-inline-start: 1.618rem;
   }
 
-  .arrows [data-drawn] .arrowHeadLine {
-    animation: arrow-draw 200ms cubic-bezier(0.2, 0, 0, 1) 630ms both;
+  .build {
+    border-inline-start: 0;
+    padding-inline: 1.618rem;
+    position: relative;
   }
 
-  .arrows [data-drawn] .arrowTip {
-    animation: arrow-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) 640ms both;
+  .build::before {
+    border-inline-start: 1px solid var(--code-rule);
+    content: "";
+    inset-block: 0;
+    inset-inline-start: calc(-4.236rem / 2);
+    position: absolute;
   }
 }
 
-@keyframes arrow-pop {
-  from {
-    scale: 0.618;
+/* Stacked, each half centered, its words and its calls to action (Mat, 2026-10-25). */
+@media (max-width: 48rem) {
+  .choice {
+    grid-template-columns: minmax(0, 1fr);
+    text-align: center;
   }
 
-  to {
-    scale: 1;
+  .build {
+    border-inline-start: 0;
+    border-top: 1px solid var(--code-rule);
+    padding-inline-start: 0;
+    padding-top: var(--choice-split);
+  }
+
+  .templateActions {
+    justify-content: center;
   }
 }
 
-@keyframes arrow-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
+/*
+ * See them all, outlined, on black: its edge the card's 3:1 one, its words white; under
+ * the pointer its edge the accent (3.8:1 on black), its words still white, as the
+ * accent's text step would fall under 4.5:1 there.
+ */
+.choice :global(.cta-outline) {
+  border-color: var(--pg-edge);
+  color: var(--code-bright);
+}
+
+.choice :global(.cta-outline):hover {
+  border-color: var(--accent-9);
+  color: var(--code-bright);
 }
 
 /* The parts' heading, which a chip's resource scrolls to, clear of the navbar. */
@@ -696,8 +683,9 @@
  * pointer and while open, as an outlined button's is.
  */
 .template .layoutTrigger {
-  background: var(--color-background);
-  box-shadow: var(--pg-lift, var(--card-lift));
+  /* On the black card: its edge the card's (3:1 and more), its words white, no lift. */
+  background: transparent;
+  color: var(--code-bright);
   font-size: var(--text-sm);
   gap: 0.618rem;
   line-height: inherit;
@@ -707,11 +695,11 @@
 
 .template .layoutTrigger:hover,
 .template .layoutTrigger[aria-expanded="true"] {
-  border-color: var(--accent-11);
+  border-color: var(--accent-9);
 }
 
 .template .chevron {
-  color: var(--gray-12);
+  color: var(--code-bright);
   height: 1rem;
   width: 1rem;
 }

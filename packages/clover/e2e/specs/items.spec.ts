@@ -150,7 +150,7 @@ async function edgeContrast(page: Page, pictures: Locator) {
  */
 const SCENES = [
   ["Items", "/?scene=items&content=https://fixtures.test/0009-book-1.json"],
-  ["Default's carousel", "/?content=https://fixtures.test/0009-book-1.json"],
+  ["Default's slider", "/?content=https://fixtures.test/0009-book-1.json"],
 ] as const;
 const PICTURES = [
   ["paper", [246, 242, 233]],

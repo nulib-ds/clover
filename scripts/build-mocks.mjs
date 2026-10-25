@@ -28,6 +28,11 @@ import {
   manifest as navPlaceManifest,
 } from "../docs/mocks/navplace/index.mjs";
 import {
+  PUBLIC_BASE as HINDENBURG_BASE,
+  captions as hindenburgCaptions,
+  manifest as hindenburgManifest,
+} from "../docs/mocks/hindenburg/index.mjs";
+import {
   PUBLIC_BASE as PAGED_BASE,
   manifest as pagedManifest,
 } from "../docs/mocks/paged/index.mjs";
@@ -126,6 +131,17 @@ writeFileSync(
   `${JSON.stringify(navPlaceManifest(NAVPLACE_BASE), null, 2)}\n`,
 );
 console.log("navplace: manifest.json");
+
+// The broadcast with its box, the box accompanying the sound, and its captions.
+const hindenburg = join(root, "public/mocks/hindenburg");
+rmSync(hindenburg, { recursive: true, force: true });
+mkdirSync(hindenburg, { recursive: true });
+writeFileSync(
+  join(hindenburg, "manifest.json"),
+  `${JSON.stringify(hindenburgManifest(HINDENBURG_BASE), null, 2)}\n`,
+);
+writeFileSync(join(hindenburg, "captions.vtt"), `${hindenburgCaptions()}\n`);
+console.log("hindenburg: manifest.json, captions.vtt");
 
 // The catalog in spreads, its double-page plate shown alone: one static Manifest.
 const paged = join(root, "public/mocks/paged");

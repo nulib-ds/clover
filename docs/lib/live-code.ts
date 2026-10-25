@@ -38,7 +38,7 @@ export interface Knob {
   options?: Plain[];
   /**
    * Shown and set only while another of the element's knobs holds one of these values:
-   * a carousel's height while `layout` is `carousel`.
+   * a slider's height while `layout` is `slider`.
    */
   when?: Record<string, Plain[]>;
   /** Read only as the part mounts (`defaultValue`): the demo draws again for each value. */

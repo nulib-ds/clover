@@ -1,6 +1,6 @@
 ---
 title: Items
-description: A sequence and where the reader is in it, as thumbnails in a carousel, a list or a grid, or one item at a time.
+description: A sequence and where the reader is in it, as thumbnails in a slider, a list or a grid, or one item at a time.
 ---
 
 import { CollectionItemsDemo } from "docs/components/Clover4/Demos";
@@ -19,8 +19,8 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 </div>
 
 <div className="docs-lede">
-  A sequence and where the reader is in it: thumbnails in a carousel, a list or
-  a grid, or one item at a time.
+  A sequence and where the reader is in it: thumbnails in a slider, a list or a
+  grid, or one item at a time.
 </div>
 
 <LivePart
@@ -29,8 +29,8 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
   knobs={[
     {
       prop: "layout",
-      value: "carousel",
-      options: ["carousel", "list", "grid", "pager"],
+      value: "slider",
+      options: ["slider", "list", "grid", "pager"],
     },
     {
       prop: "style.--clover-items-height",
@@ -38,7 +38,7 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
       format: "{}rem",
       min: 4,
       max: 16,
-      when: { layout: ["carousel"] },
+      when: { layout: ["slider"] },
       label: "Items picture height, in rem",
     },
     {
@@ -61,20 +61,20 @@ lists a Collection's members as links.
 
 <ApiReference elements="clover-items">
 
-| Prop            | Type                                        | Default                         | Description                                                  |
-| --------------- | ------------------------------------------- | ------------------------------- | ------------------------------------------------------------ |
-| `layout`        | `"carousel" \| "list" \| "grid" \| "pager"` | `"carousel"`                    | Thumbnails in a row, a column or a grid, or one at a time.   |
-| `of`            | `"views" \| "members"`                      | `"views"`                       | In a `Root`: its views, or its Collection's members.         |
-| `iiifContent`   | `string \| object`                          | —                               | On its own: a Collection (its members) or a Manifest.        |
-| `items`         | `object[]`                                  | —                               | On its own: IIIF resources to list as they are.              |
-| `navigation`    | `"id" \| "homepage"`                        | `"id"`; `"homepage"` on its own | Select a view, or link to each item's `homepage`.            |
-| `onSelect`      | `(item, event) => void`                     | —                               | An item was chosen; on a link, `preventDefault()` stays put. |
-| `header`        | `boolean`                                   | `true`                          | On its own: the resource's label, summary and homepage link. |
-| `headingLevel`  | `number`                                    | `2`                             | On its own: the header's title level.                        |
-| `thumbnailSize` | `number`                                    | `200`                           | Pixels asked for each thumbnail's longer side.               |
-| `renderItem`    | `(item, { selected }) => ReactNode`         | —                               | Your own item in place of the figure.                        |
-| `request`       | `{ credentials, headers, fetch }`           | The Root's                      | On its own: for every request.                               |
-| `language`      | `string`                                    | The reader's                    | On its own: the language to read IIIF text in.               |
+| Prop            | Type                                      | Default                         | Description                                                  |
+| --------------- | ----------------------------------------- | ------------------------------- | ------------------------------------------------------------ |
+| `layout`        | `"slider" \| "list" \| "grid" \| "pager"` | `"slider"`                      | Thumbnails in a row, a column or a grid, or one at a time.   |
+| `of`            | `"views" \| "members"`                    | `"views"`                       | In a `Root`: its views, or its Collection's members.         |
+| `iiifContent`   | `string \| object`                        | —                               | On its own: a Collection (its members) or a Manifest.        |
+| `items`         | `object[]`                                | —                               | On its own: IIIF resources to list as they are.              |
+| `navigation`    | `"id" \| "homepage"`                      | `"id"`; `"homepage"` on its own | Select a view, or link to each item's `homepage`.            |
+| `onSelect`      | `(item, event) => void`                   | —                               | An item was chosen; on a link, `preventDefault()` stays put. |
+| `header`        | `boolean`                                 | `true`                          | On its own: the resource's label, summary and homepage link. |
+| `headingLevel`  | `number`                                  | `2`                             | On its own: the header's title level.                        |
+| `thumbnailSize` | `number`                                  | `200`                           | Pixels asked for each thumbnail's longer side.               |
+| `renderItem`    | `(item, { selected }) => ReactNode`       | —                               | Your own item in place of the figure.                        |
+| `request`       | `{ credentials, headers, fetch }`         | The Root's                      | On its own: for every request.                               |
+| `language`      | `string`                                  | The reader's                    | On its own: the language to read IIIF text in.               |
 
 </ApiReference>
 
@@ -122,7 +122,7 @@ spread at a time through a paged book.
 
 ### Size
 
-Size the thumbnails with CSS: `--clover-items-height` for a carousel's pictures (default
+Size the thumbnails with CSS: `--clover-items-height` for a slider's pictures (default
 `8rem`), `--clover-items-size` for a grid's columns (`10rem`), `--clover-items-gap`
 between them (`1rem`).
 

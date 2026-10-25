@@ -47,6 +47,7 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
   onEnded,
   placeholder = true,
   label,
+  partOf,
   language: givenLanguage,
   annotations: givenAnnotations,
   chapters: givenChapters,
@@ -283,6 +284,7 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
         (active?.label as CloverCanvasProps["label"]) ??
         (manifest?.label as CloverCanvasProps["label"])
       }
+      partOf={partOf ?? (manifest?.label as CloverCanvasProps["partOf"])}
       options={connectedOptions}
       placeholder={showPlaceholder}
       onReady={handleReady}

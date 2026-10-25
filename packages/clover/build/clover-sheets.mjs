@@ -159,6 +159,7 @@ const LAZY = new Set([
   "maplibre",
   "components/Canvas/media/MediaBody",
   "components/Canvas/media/Transport",
+  "components/Canvas/media/Player",
   "components/Map/Map",
   "components/Scene/Scene",
 ]);

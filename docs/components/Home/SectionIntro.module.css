@@ -2,17 +2,17 @@
  * The homepage's section intros, "Thoughtful and flexible." and "Install is easy." (Mat,
  * 2026-10-20: styled alike, concise, each with a clear way out), whose title and note the
  * choice under the playground shares: a title under the hero's stroke, a sentence, and its
- * call to action at the end of the row, which wraps under them where the row is narrow.
+ * call to action under them, always (Mat, 2026-10-25: "place it under the description
+ * paragraph"; it sat at the end of their row before).
  * No rule over it, and room around it, so space alone sets it apart (Mat, 2026-10-21).
  * Spaces on the golden scale.
  */
-/* Its button 1.618rem from its words, beside them or under them. */
+/* Its button 1.618rem under its words, at their start. */
 .intro {
-  align-items: flex-end;
+  align-items: flex-start;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 1.618rem;
-  justify-content: space-between;
   margin: clamp(4.236rem, 9vw, 6.854rem) 0 clamp(2.618rem, 6vw, 4.236rem);
 }
 
@@ -24,7 +24,7 @@
 }
 
 .title {
-  font-size: clamp(1.618rem, 3vw, 2.618rem);
+  font-size: var(--text-title);
   font-weight: var(--weight-bold);
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -63,14 +63,9 @@
  * beside the button, it goes under it. The grid ends with the command, so the intro keeps
  * no room under it, and the held viewer's foot meets the command's.
  */
-/*
- * One column that does not wrap: wrapping, a column sizes the row as if its two were
- * stacked, and leaves that room around them once they sit side by side.
- */
+/* Its row of the button and the command across the column. */
 .intro[data-beside] {
   align-items: stretch;
-  flex-direction: column;
-  flex-wrap: nowrap;
   margin-bottom: 0;
 }
 
@@ -84,4 +79,31 @@
 .actions > :last-child {
   flex: 1 1 20rem;
   min-width: 0;
+}
+
+/*
+ * Centered where the example viewer is no longer held beside them, under 64rem (Mat,
+ * 2026-10-25: "Center at this breakpoint and below"): the title, the note in its measure,
+ * the button, and Install's row of the button and the command.
+ */
+@media (max-width: 64rem) {
+  .intro {
+    align-items: center;
+    text-align: center;
+  }
+
+  /* A section intro's note only: the choice under the playground borrows `.note`, kept at its start. */
+  .intro .note {
+    margin-inline: auto;
+  }
+
+  .actions {
+    justify-content: center;
+  }
+
+  /* Install's command as wide as it needs, beside its button, the pair centered; its words at its start. */
+  .actions > :last-child {
+    flex: 0 1 24rem;
+    text-align: start;
+  }
 }

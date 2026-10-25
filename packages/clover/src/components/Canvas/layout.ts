@@ -6,6 +6,7 @@ import {
 import type { Rect, SceneImage } from "../../lib/renderer";
 import { findImageServiceId } from "../../lib/renderer";
 import { type ViewingDirection, resolveDirection } from "../../core/sequence";
+import type { ThumbnailSource } from "../../core/thumbnail";
 
 export { type ViewingDirection, resolveDirection };
 
@@ -103,8 +104,11 @@ export interface MediaPlacement {
   /** World units. */
   placement: Rect;
   duration?: number;
-  /** A still to show before playback: the placeholder Canvas's first image. */
-  poster?: string;
+  /**
+   * A still to show before playback: the placeholder Canvas's first image, its URL made
+   * once its service's `info.json` is read (`useMediaElement`).
+   */
+  poster?: ThumbnailSource;
   captions: CaptionTrack[];
 }
 
@@ -503,6 +507,16 @@ export function canvasScene(
   canvases: IIIFCanvas[],
   direction: ViewingDirection,
   selections: ChoiceSelections = {},
+  {
+    standIns = true,
+  }: {
+    /**
+     * Sound's accompanying or placeholder images in the scene, in place of its picture.
+     * Off for a lone recording, which plays as a player and shows them as its artwork
+     * (`media/Player.tsx`), so the renderer draws nothing for it.
+     */
+    standIns?: boolean;
+  } = {},
 ): {
   images: SceneImage[];
   media: MediaPlacement[];
@@ -545,6 +559,7 @@ export function canvasScene(
      */
     const companion = companionCanvas(canvas);
     if (
+      standIns &&
       !painted.length &&
       sounds.some((m) => m.kind === "audio") &&
       companion
@@ -610,29 +625,37 @@ export function canvasScene(
 }
 
 /** The placeholder Canvas's first image, as a still for a video's poster frame. */
-function posterFor(canvas: IIIFCanvas): string | undefined {
-  return placeholderStill(canvas)?.src;
+function posterFor(canvas: IIIFCanvas): ThumbnailSource | undefined {
+  return placeholderStill(canvas)?.source;
 }
+
+/** The size a placeholder's still is asked at: one that fills a Body, never more than it has. */
+export const STILL_SIZE = 1280;
 
 /**
  * A Canvas's placeholder, as one still image: its placeholder Canvas's first painted
- * image, asked of its image service at a size that fills a Body, or else its `id`.
- * Shown fitted before the Canvas itself is opened, and as a video's poster frame.
+ * image, as a source (`ThumbnailSource`): its image service, asked for a size that fills
+ * a Body only once its own `info.json` is read and as that allows (`resolveThumbnail`,
+ * `STILL_SIZE`; Mat, 2026-10-24: never a URL written from the service's id), or else the
+ * image itself. Shown fitted before the Canvas is opened, and as a video's poster frame.
  */
 export function placeholderStill(
   canvas: IIIFCanvas,
-): { src: string; width: number; height: number } | undefined {
+): { source: ThumbnailSource; width: number; height: number } | undefined {
   const placeholder = canvas.placeholderContainer;
   if (!placeholder) return undefined;
   const body = paintedImages(placeholder)[0]?.body;
   if (!body) return undefined;
   const service = findImageServiceId(body.service);
-  const src = service
-    ? `${service}/full/!1280,1280/0/default.jpg`
-    : (body.id as string | undefined);
-  if (!src) return undefined;
+  const id = typeof body.id === "string" ? body.id : undefined;
+  const source = service
+    ? { service, fallback: id }
+    : id
+      ? { src: id }
+      : undefined;
+  if (!source) return undefined;
   const { width, height } = canvasSize(placeholder);
-  return { src, width, height };
+  return { source, width, height };
 }
 
 /** A rectangle in a Canvas's own coordinates, in world units. */

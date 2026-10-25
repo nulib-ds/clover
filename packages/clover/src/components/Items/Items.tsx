@@ -28,10 +28,10 @@ import { useScrollTrack } from "../../ui/useScrollTrack";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 
 /**
- * A scrolling row of thumbnails (`carousel`), a column, a wrapping grid, or one item at a
+ * A scrolling row of thumbnails (`slider`), a column, a wrapping grid, or one item at a
  * time (`pager`: Previous, Position and Next).
  */
-export type ItemsLayout = "carousel" | "list" | "grid" | "pager";
+export type ItemsLayout = "slider" | "list" | "grid" | "pager";
 
 export interface ItemsProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children"> {
@@ -67,7 +67,7 @@ export interface ItemsProps
   header?: boolean;
   /**
    * Standalone: the level of the header's title, to fit the outline of the page around
-   * it (a carousel under an `h2` takes 3). Default 2.
+   * it (a slider under an `h2` takes 3). Default 2.
    */
   headingLevel?: number;
   /** Pixels requested for each thumbnail's longer side. Default 200. */
@@ -91,9 +91,9 @@ export interface ItemsProps
  * - **Inside a `Root`**, a single-select listbox of the Root's views (a spread is one
  *   item). One tab stop; arrows move, Enter or Space selects; the selection follows the
  *   pager and stays in view.
- * - **Standalone**, a list of links to each item's `homepage` — a Collection carousel.
+ * - **Standalone**, a list of links to each item's `homepage` — a Collection slider.
  *
- * The carousel is the browser's own scrolling with CSS snap points: wheel, trackpad,
+ * The slider is the browser's own scrolling with CSS snap points: wheel, trackpad,
  * touch and keyboard all work, and a mouse can drag it.
  */
 export const Items = forwardRef<HTMLElement, ItemsProps>(
@@ -177,7 +177,7 @@ function ViewItems({
   const items = itemsOfManifest(manifest);
   // One view has nothing to choose between.
   if (items.length < 2) return null;
-  // A step is a selection, as the carousel's arrows' are: the Root goes there.
+  // A step is a selection, as the slider's arrows' are: the Root goes there.
   const select = (item: ItemModel) => clover.goTo(item.id);
   if (rest.layout === "pager") {
     return (
@@ -372,7 +372,7 @@ function ItemsView({
   selected,
   navigation,
   rtl = false,
-  layout = "carousel",
+  layout = "slider",
   thumbnailSize = 200,
   request,
   language,
@@ -393,7 +393,7 @@ function ItemsView({
   const root = useRootLanguage(forwardedRef, rest.lang);
   const { langOf } = root;
 
-  const carousel = layout === "carousel";
+  const slider = layout === "slider";
   const listbox = navigation === "id";
   const track = useScrollTrack({
     align: listbox ? "center" : "start",
@@ -403,7 +403,7 @@ function ItemsView({
   useEffect(() => () => window.clearTimeout(held.current), []);
   const roving = useRovingFocus(items.length, selected, {
     orientation:
-      layout === "carousel"
+      layout === "slider"
         ? "horizontal"
         : layout === "list"
           ? "vertical"
@@ -454,7 +454,7 @@ function ItemsView({
     if (selected < 0) return;
     const instant = !arrived.current;
     arrived.current = true;
-    if (carousel) {
+    if (slider) {
       track.scrollToIndex(selected, { instant });
       return;
     }
@@ -463,7 +463,7 @@ function ItemsView({
     );
     if (option) keepInView(option, instant);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [carousel, selected]);
+  }, [slider, selected]);
 
   // Past 6 not a heading (`ui/heading.ts`): the list is named by it either way.
   const Title = titleTag(headingLevel) as "h2";
@@ -514,15 +514,15 @@ function ItemsView({
   const positionLang = (item: ItemModel) =>
     positioned(item) ? langOf("canvasPosition") : undefined;
 
-  const trackStyle: React.CSSProperties | undefined = carousel
+  const trackStyle: React.CSSProperties | undefined = slider
     ? { display: "flex", margin: 0, padding: 0, listStyle: "none" }
     : undefined;
-  const slideStyle: React.CSSProperties | undefined = carousel
+  const slideStyle: React.CSSProperties | undefined = slider
     ? { flex: "0 0 auto", scrollSnapAlign: listbox ? "center" : "start" }
     : undefined;
 
   /*
-   * The carousel's arrows. Choosing between views (a listbox), they are Previous and Next:
+   * The slider's arrows. Choosing between views (a listbox), they are Previous and Next:
    * they step the selection, which the strip follows into view. A list of links has no
    * selection, so there they scroll the strip.
    *
@@ -631,18 +631,18 @@ function ItemsView({
           // A right-to-left book runs leftward: its first item, and "back", on the right.
           dir={rtl ? "rtl" : undefined}
         >
-          {carousel && scrollButton("prev")}
+          {slider && scrollButton("prev")}
           <div
             id={`${id}-viewport`}
             className="clover-items-viewport"
-            ref={carousel ? track.ref : undefined}
+            ref={slider ? track.ref : undefined}
           >
             {listbox ? (
               <div
                 ref={listRef}
                 role="listbox"
                 {...listName}
-                aria-orientation={carousel ? "horizontal" : "vertical"}
+                aria-orientation={slider ? "horizontal" : "vertical"}
                 className="clover-items-track"
                 style={trackStyle}
               >
@@ -695,7 +695,7 @@ function ItemsView({
               </ul>
             )}
           </div>
-          {carousel && scrollButton("next")}
+          {slider && scrollButton("next")}
         </div>
         {fallbackName.node}
       </Tag>

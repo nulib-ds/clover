@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
-import type { MediaPlacement } from "../layout";
+import { type MediaPlacement, STILL_SIZE } from "../layout";
+import { resolveThumbnail } from "../../../core/thumbnail";
 import { type LanguageMapLike, localize } from "../../../core/value";
 import {
   type CloverRequest,
@@ -49,6 +50,9 @@ export function useMediaElement(
   const presentation =
     requested === "texture" && corsFailedSrc !== media.src ? "texture" : "dom";
   const captionsKey = JSON.stringify(media.captions);
+  const posterKey = media.poster
+    ? (media.poster.src ?? media.poster.service ?? "")
+    : "";
   const withCredentials = sendsCredentials(request);
   // Read through a ref, so a new object with the same settings does not remake the element.
   const requestRef = useRef(request);
@@ -71,7 +75,15 @@ export function useMediaElement(
       video.crossOrigin = withCredentials ? "use-credentials" : "anonymous";
       video.addEventListener("error", onCorsError, { once: true });
     }
-    if (media.poster) video.poster = media.poster;
+    // The poster once its service's `info.json` is read, as every image is asked.
+    const poster = media.poster;
+    if (poster?.src) video.poster = poster.src;
+    else if (poster)
+      void resolveThumbnail(poster, STILL_SIZE, requestRef.current).then(
+        (url) => {
+          if (!canceled && url) video.poster = url;
+        },
+      );
 
     /*
      * A cross-origin `<track>` loads only when the video itself asks for CORS, which a
@@ -155,7 +167,7 @@ export function useMediaElement(
   }, [
     media.src,
     media.format,
-    media.poster,
+    posterKey,
     captionsKey,
     presentation,
     requestKey(request),

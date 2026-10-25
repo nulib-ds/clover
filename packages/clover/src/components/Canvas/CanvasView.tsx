@@ -132,6 +132,7 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
   src,
   isTiledImage = false,
   label,
+  partOf,
   language,
   instanceId,
   className,
@@ -314,9 +315,17 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
     [canvases],
   );
   const frames = animated ? animationFrames(animated) : NO_FRAMES;
+  /*
+   * A lone recording plays as a player (`media/Player.tsx`), its accompanying or
+   * placeholder images its artwork: none of them is drawn in the scene.
+   */
   const scene = useMemo(
     () =>
-      canvases?.length ? canvasScene(canvases, direction, selections) : null,
+      canvases?.length
+        ? canvasScene(canvases, direction, selections, {
+            standIns: canvases.length > 1,
+          })
+        : null,
     [canvases, direction, selections],
   );
   const bodyImages = useMemo(
@@ -352,6 +361,12 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
    * control cluster.
    */
   const mediaOnly = Boolean(media) && canvases?.length === 1;
+  /*
+   * A lone recording of sound is a player, as a music app's (Mat, 2026-10-24: Apple
+   * Music's and Spotify's): its artwork, its title, the transport, its captions as lyrics
+   * and its chapters as tracks, drawn by `MediaBody` (`media/Player.tsx`), never a picture.
+   */
+  const player = mediaOnly && media?.kind === "audio";
   /** The reader can move the camera: not a lone recording, nor held still by the host. */
   const navigable = !mediaOnly && options?.gestures?.navigable !== false;
   /** The Canvases last drawn: when the host hands over others, frame them afresh. */
@@ -381,8 +396,14 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
    */
   const [imagesOpen, setImagesOpen] = useState(false);
   const [mediaOpenedFor, setMediaOpenedFor] = useState<string | null>(null);
+  /*
+   * A player shows its placeholder as its artwork until it plays, its Play in reach: the
+   * placeholder never holds it back.
+   */
   const showPlaceholder =
-    stills.length > 0 && (media ? mediaOpenedFor !== canvasKey : !imagesOpen);
+    !player &&
+    stills.length > 0 &&
+    (media ? mediaOpenedFor !== canvasKey : !imagesOpen);
   /*
    * A lone media Canvas carries all its controls in the transport at the bottom: full
    * screen moves there, and the top cluster (and the scrim behind it) is shown only for a
@@ -496,6 +517,11 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
   const ownName = [label, canvases?.[0]?.label, firstBody?.label]
     .map((value) => localize(value as any, language))
     .find((value) => value.text);
+  // A player's second line: what it is part of, where that is not its own name again.
+  const partOfName = useMemo(() => {
+    const name = localize(partOf as any, language);
+    return name.text && name.text !== ownName?.text ? name : undefined;
+  }, [partOf, language, ownName?.text]);
   const viewportName = useContainerName(
     ownName?.text || t("canvasImage"),
     ownName ? ownName.lang : root.langOf("canvasImage"),
@@ -935,9 +961,12 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
         data-fullscreen={isFullscreen}
         data-controls={controlsVisible ? "visible" : "hidden"}
         data-media={media?.kind}
+        data-player={player ? "" : undefined}
         data-animated={animated ? "" : undefined}
         data-navigable={navigable}
-        data-placeholder={stills.length ? showPlaceholder : undefined}
+        data-placeholder={
+          stills.length && !player ? showPlaceholder : undefined
+        }
         ref={root.ref}
         onKeyDown={(event) => {
           /*
@@ -1058,6 +1087,7 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
          * already carries the name.
          */}
         {media?.kind === "audio" &&
+          !player &&
           baseImages.length === 0 &&
           !showPlaceholder &&
           ownName?.text && (
@@ -1079,7 +1109,7 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
             ))}
           </span>
         )}
-        {stills.length > 0 && (
+        {stills.length > 0 && !player && (
           <Placeholder
             instance={instance}
             stills={stills}
@@ -1090,6 +1120,7 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
             active={showPlaceholder}
             lingering={status === "loading" && !cleared}
             onToggle={togglePlaceholder}
+            request={options?.request}
           />
         )}
         {renderer && media && nearViewport && !showPlaceholder && (
@@ -1114,9 +1145,20 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
               chapters={chapters}
               highlightedChapter={highlightedChapter}
               onChapterHighlight={onChapterHighlight}
-              autoPlay={stills.length > 0 && quietlyOpened !== canvasKey}
+              autoPlay={
+                !player && stills.length > 0 && quietlyOpened !== canvasKey
+              }
               language={language}
               notes={timedAnnotations}
+              player={
+                player && canvases
+                  ? {
+                      canvas: canvases[0],
+                      title: ownName,
+                      partOf: partOfName,
+                    }
+                  : undefined
+              }
             />
           </Suspense>
         )}

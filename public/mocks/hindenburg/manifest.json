@@ -1,0 +1,1202 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/manifest.json",
+  "type": "Manifest",
+  "label": {
+    "none": [
+      "Hindenburg broadcast"
+    ]
+  },
+  "metadata": [
+    {
+      "label": {
+        "none": [
+          "Contributor"
+        ]
+      },
+      "value": {
+        "none": [
+          "Morrison, Herb (Interviewee)",
+          "Nehlsen, Charlie (Interviewee)",
+          "McCormick, Robert R. (Robert Rutherford), 1880-1955 (Interviewer)",
+          "WLS (Radio station : Chicago, Ill.) (Broadcaster)"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Date"
+        ]
+      },
+      "value": {
+        "none": [
+          "May 6, 1937 to May 7, 1937",
+          "1936"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Department"
+        ]
+      },
+      "value": {
+        "none": [
+          "Charles Deering McCormick Library of Special Collections"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Genre"
+        ]
+      },
+      "value": {
+        "none": [
+          "open reel audiotapes"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Identifier"
+        ]
+      },
+      "value": {
+        "none": [
+          "Item 9",
+          "Original series identifier: I-55c (31)"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Last Modified"
+        ]
+      },
+      "value": {
+        "none": [
+          "2026-07-15T17:28:08.340484Z"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Language"
+        ]
+      },
+      "value": {
+        "none": [
+          "English"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Materials"
+        ]
+      },
+      "value": {
+        "none": [
+          "1 audiotape reel"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Notes"
+        ]
+      },
+      "value": {
+        "none": [
+          " Label on box: Broadcast of 1936, recorded 1937-05-07 (Local Note)"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Provenance"
+        ]
+      },
+      "value": {
+        "none": [
+          "Received from the Robert R. McCormick Foundation, Chicago Tribune Company, and Nexstar Media Group on January 10, 2020, accession #SPEC-2020-1."
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Related URL"
+        ]
+      },
+      "value": {
+        "none": [
+          "<span><a href=https://findingaids.library.northwestern.edu/repositories/7/resources/1613>Finding Aid</a></span>"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Rights Statement"
+        ]
+      },
+      "value": {
+        "none": [
+          "In Copyright"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Series"
+        ]
+      },
+      "value": {
+        "none": [
+          "Robert R. McCormick. Recordings of speeches; recordings of operas and operettas--1936-1943--Hindenburg broadcast"
+        ]
+      }
+    },
+    {
+      "label": {
+        "none": [
+          "Subject"
+        ]
+      },
+      "value": {
+        "none": [
+          "Hindenburg (Airship)",
+          "Radio news programs",
+          "Airships--Accidents",
+          "New Jersey--Manchester (Township)"
+        ]
+      }
+    }
+  ],
+  "summary": {
+    "none": [
+      "A radio broadcast on WLS-AM of the recording of the Hindenburg disaster recorded by Herbert Morrison and Charlie Nehlsen the prior day"
+    ]
+  },
+  "requiredStatement": {
+    "label": {
+      "none": [
+        "Attribution"
+      ]
+    },
+    "value": {
+      "none": [
+        "Courtesy of Northwestern University Libraries",
+        "The works on this web site, from material in the collections of the Charles Deering McCormick Library of Special Collections of Northwestern University Libraries, are provided for use by its students, faculty and staff, and by other researchers visiting this site, for research consultation and scholarly purposes only. Further distribution and/or any commercial use of the images from this site is not permitted."
+      ]
+    }
+  },
+  "rights": "http://rightsstatements.org/vocab/InC/1.0/",
+  "thumbnail": [
+    {
+      "id": "https://api.dc.library.northwestern.edu/api/v2/works/f184ccf3-4ee6-4b64-bb7b-a87bb9d15254/thumbnail",
+      "type": "Image",
+      "format": "image/jpeg",
+      "height": 300,
+      "width": 300
+    }
+  ],
+  "seeAlso": [
+    {
+      "id": "https://api.dc.library.northwestern.edu/api/v2/works/f184ccf3-4ee6-4b64-bb7b-a87bb9d15254",
+      "type": "Dataset",
+      "format": "application/json",
+      "label": {
+        "none": [
+          "Northwestern University Libraries Digital Collections API"
+        ]
+      }
+    }
+  ],
+  "homepage": [
+    {
+      "id": "https://dc.library.northwestern.edu/items/f184ccf3-4ee6-4b64-bb7b-a87bb9d15254",
+      "type": "Text",
+      "format": "text/html",
+      "label": {
+        "none": [
+          "Homepage at Northwestern University Libraries Digital Collections"
+        ]
+      }
+    }
+  ],
+  "partOf": [
+    {
+      "id": "https://api.dc.library.northwestern.edu/api/v2/collections/6c8bcf72-ffc4-489d-bd9e-3bfbe481b408?as=iiif",
+      "type": "Collection",
+      "label": {
+        "none": [
+          "Robert R. McCormick. Recordings of speeches; recordings of operas and operettas"
+        ]
+      },
+      "summary": {
+        "none": [
+          "This series was formed around recordings of the speeches of Col. Robert R. McCormick (1880-1955), editor and publisher of the Chicago tribune. (The series contains both the original transcription discs, and later copies on magnetic tape.) These speeches are primarly those given during a weekly musical broadcast, but include a few speeches delivered on other occasions. The topics covered by McCormick in his speeches include American history, politics and government, military affairs (foreign and domestic), foreign policy, current events (including the course of the second World War), and descriptions of his travels to Europe, South America, Africa and Asia. McCormick's views on the freedom of the press and other matters contained in the United States Constitution and Declaration of Independence also occur frequently. This series also includes many recordings of musical performances given during broadcasts of the weekly Chicago Theater of the Air program (and materials related to those performances), as well as a few speeches and other broadcasts of historical interest that are not directly related to Col. McCormick."
+        ]
+      }
+    }
+  ],
+  "items": [
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+      "type": "Canvas",
+      "duration": 856.611,
+      "label": {
+        "none": [
+          "j1084_robe_b016_i09_v01_a.wav"
+        ]
+      },
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://meadow-streaming.rdc.library.northwestern.edu/b7/06/2e/b2/-f/25/8-/43/0e/-9/21/c-/bd/11/87/73/e7/28/b7062eb2-f258-430e-921c-bd118773e728.m3u8",
+                "type": "Sound",
+                "format": "application/x-mpegurl",
+                "duration": 856.611,
+                "label": {
+                  "en": [
+                    "j1084_robe_b016_i09_v01_a.wav"
+                  ]
+                }
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1"
+            }
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes",
+          "type": "AnnotationPage",
+          "label": {
+            "en": [
+              "The broadcast"
+            ]
+          },
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/1",
+              "type": "Annotation",
+              "motivation": "describing",
+              "body": {
+                "type": "TextualBody",
+                "value": "The studio introduces the recording, made at Lakehurst, New Jersey, the night before.",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "type": "Canvas"
+                },
+                "selector": {
+                  "type": "FragmentSelector",
+                  "conformsTo": "http://www.w3.org/TR/media-frags/",
+                  "value": "t=7.08,84.68"
+                }
+              }
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/2",
+              "type": "Annotation",
+              "motivation": "describing",
+              "body": {
+                "type": "TextualBody",
+                "value": "Morrison's recording begins as the Hindenburg nears the mooring mast, its ropes dropped to the ground crew.",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "type": "Canvas"
+                },
+                "selector": {
+                  "type": "FragmentSelector",
+                  "conformsTo": "http://www.w3.org/TR/media-frags/",
+                  "value": "t=123.1,181.18"
+                }
+              }
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/3",
+              "type": "Annotation",
+              "motivation": "describing",
+              "body": {
+                "type": "TextualBody",
+                "value": "The airship bursts into flames as Morrison describes the landing.",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "type": "Canvas"
+                },
+                "selector": {
+                  "type": "FragmentSelector",
+                  "conformsTo": "http://www.w3.org/TR/media-frags/",
+                  "value": "t=181.18,188.16"
+                }
+              }
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/4",
+              "type": "Annotation",
+              "motivation": "describing",
+              "body": {
+                "type": "TextualBody",
+                "value": "The frame crashes to the ground short of the mooring mast: “Oh, the humanity.”",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "type": "Canvas"
+                },
+                "selector": {
+                  "type": "FragmentSelector",
+                  "conformsTo": "http://www.w3.org/TR/media-frags/",
+                  "value": "t=206.37,216.76"
+                }
+              }
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/5",
+              "type": "Annotation",
+              "motivation": "describing",
+              "body": {
+                "type": "TextualBody",
+                "value": "Morrison meets Philip Mangone of New York, a passenger who jumped clear, and sees him to a car.",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "type": "Canvas"
+                },
+                "selector": {
+                  "type": "FragmentSelector",
+                  "conformsTo": "http://www.w3.org/TR/media-frags/",
+                  "value": "t=394.78,462.78"
+                }
+              }
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/6",
+              "type": "Annotation",
+              "motivation": "describing",
+              "body": {
+                "type": "TextualBody",
+                "value": "Two more passengers come to Morrison, safe, Mr. O'Laughlin of Chicago among them.",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "type": "Canvas"
+                },
+                "selector": {
+                  "type": "FragmentSelector",
+                  "conformsTo": "http://www.w3.org/TR/media-frags/",
+                  "value": "t=577.98,677.24"
+                }
+              }
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/7",
+              "type": "Annotation",
+              "motivation": "describing",
+              "body": {
+                "type": "TextualBody",
+                "value": "From the emergency station: between 25 and 30 of about 106 on board saved and accounted for.",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "type": "Canvas"
+                },
+                "selector": {
+                  "type": "FragmentSelector",
+                  "conformsTo": "http://www.w3.org/TR/media-frags/",
+                  "value": "t=689.14,718.96"
+                }
+              }
+            },
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/8",
+              "type": "Annotation",
+              "motivation": "describing",
+              "body": {
+                "type": "TextualBody",
+                "value": "The studio closes the broadcast, Herbert Morrison with it.",
+                "language": "en",
+                "format": "text/plain"
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": {
+                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "type": "Canvas"
+                },
+                "selector": {
+                  "type": "FragmentSelector",
+                  "conformsTo": "http://www.w3.org/TR/media-frags/",
+                  "value": "t=814.9,846.1"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/captions",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/captions/1",
+              "type": "Annotation",
+              "motivation": "supplementing",
+              "body": {
+                "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/captions.vtt",
+                "type": "Text",
+                "format": "text/vtt",
+                "label": {
+                  "en": [
+                    "Captions in WebVTT format"
+                  ]
+                },
+                "language": "en"
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1"
+            }
+          ]
+        }
+      ],
+      "accompanyingCanvas": {
+        "type": "Canvas",
+        "height": 3020,
+        "width": 2980,
+        "label": {
+          "none": [
+            "enclosure back"
+          ]
+        },
+        "thumbnail": [
+          {
+            "id": "https://iiif.dc.library.northwestern.edu/iiif/3/be4138a8-a900-47d1-aa75-bcc2e88cf0a3/full/!300,300/0/default.jpg",
+            "type": "Image",
+            "format": "image/jpeg",
+            "height": 300,
+            "width": 300,
+            "service": [
+              {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/be4138a8-a900-47d1-aa75-bcc2e88cf0a3",
+                "profile": "http://iiif.io/api/image/3/level2.json",
+                "type": "ImageService3"
+              }
+            ]
+          }
+        ],
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/accompanying/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/accompanying/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/be4138a8-a900-47d1-aa75-bcc2e88cf0a3/full/600,/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "height": 3020,
+                  "width": 2980,
+                  "label": {
+                    "en": [
+                      "enclosure back"
+                    ]
+                  },
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/be4138a8-a900-47d1-aa75-bcc2e88cf0a3",
+                      "profile": "http://iiif.io/api/image/3/level2.json",
+                      "type": "ImageService3"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/accompanying"
+              }
+            ]
+          }
+        ],
+        "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/accompanying"
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2",
+      "type": "Canvas",
+      "height": 3005,
+      "width": 2989,
+      "label": {
+        "none": [
+          "enclosure front"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b0e617e2-add3-4953-a8de-ea4b2efccb68/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b0e617e2-add3-4953-a8de-ea4b2efccb68",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b0e617e2-add3-4953-a8de-ea4b2efccb68/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 3005,
+                "width": 2989,
+                "label": {
+                  "en": [
+                    "enclosure front"
+                  ]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b0e617e2-add3-4953-a8de-ea4b2efccb68",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 643,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b0e617e2-add3-4953-a8de-ea4b2efccb68/full/!640,643/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 643,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b0e617e2-add3-4953-a8de-ea4b2efccb68",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3",
+      "type": "Canvas",
+      "height": 3020,
+      "width": 2980,
+      "label": {
+        "none": [
+          "enclosure back"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/be4138a8-a900-47d1-aa75-bcc2e88cf0a3/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/be4138a8-a900-47d1-aa75-bcc2e88cf0a3",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/be4138a8-a900-47d1-aa75-bcc2e88cf0a3/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 3020,
+                "width": 2980,
+                "label": {
+                  "en": [
+                    "enclosure back"
+                  ]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/be4138a8-a900-47d1-aa75-bcc2e88cf0a3",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 648,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/be4138a8-a900-47d1-aa75-bcc2e88cf0a3/full/!640,648/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 648,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/be4138a8-a900-47d1-aa75-bcc2e88cf0a3",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4",
+      "type": "Canvas",
+      "height": 3088,
+      "width": 3593,
+      "label": {
+        "none": [
+          "carrier front"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/a3fc78c6-75f5-44d3-b79c-9e50b1d5d3b0/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/a3fc78c6-75f5-44d3-b79c-9e50b1d5d3b0",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/a3fc78c6-75f5-44d3-b79c-9e50b1d5d3b0/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 3088,
+                "width": 3593,
+                "label": {
+                  "en": [
+                    "carrier front"
+                  ]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/a3fc78c6-75f5-44d3-b79c-9e50b1d5d3b0",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 550,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/a3fc78c6-75f5-44d3-b79c-9e50b1d5d3b0/full/!640,550/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 550,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/a3fc78c6-75f5-44d3-b79c-9e50b1d5d3b0",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5",
+      "type": "Canvas",
+      "height": 3052,
+      "width": 3082,
+      "label": {
+        "none": [
+          "carrier back"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/3/cbdaf6f8-1254-4d10-981e-e50bfd80ab77/full/!300,300/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg",
+          "height": 300,
+          "width": 300,
+          "service": [
+            {
+              "id": "https://iiif.dc.library.northwestern.edu/iiif/3/cbdaf6f8-1254-4d10-981e-e50bfd80ab77",
+              "profile": "http://iiif.io/api/image/3/level2.json",
+              "type": "ImageService3"
+            }
+          ]
+        }
+      ],
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5/page/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.dc.library.northwestern.edu/iiif/3/cbdaf6f8-1254-4d10-981e-e50bfd80ab77/full/600,/0/default.jpg",
+                "type": "Image",
+                "format": "image/tiff",
+                "height": 3052,
+                "width": 3082,
+                "label": {
+                  "en": [
+                    "carrier back"
+                  ]
+                },
+                "service": [
+                  {
+                    "id": "https://iiif.dc.library.northwestern.edu/iiif/3/cbdaf6f8-1254-4d10-981e-e50bfd80ab77",
+                    "profile": "http://iiif.io/api/image/3/level2.json",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5"
+            }
+          ]
+        }
+      ],
+      "placeholderCanvas": {
+        "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5/placeholder",
+        "type": "Canvas",
+        "width": 640,
+        "height": 633,
+        "items": [
+          {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5/placeholder/page",
+            "type": "AnnotationPage",
+            "items": [
+              {
+                "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5/placeholder/page/1",
+                "type": "Annotation",
+                "motivation": "painting",
+                "body": {
+                  "id": "https://iiif.dc.library.northwestern.edu/iiif/3/cbdaf6f8-1254-4d10-981e-e50bfd80ab77/full/!640,633/0/default.jpg",
+                  "type": "Image",
+                  "format": "image/tiff",
+                  "width": 640,
+                  "height": 633,
+                  "service": [
+                    {
+                      "id": "https://iiif.dc.library.northwestern.edu/iiif/3/cbdaf6f8-1254-4d10-981e-e50bfd80ab77",
+                      "type": "ImageService3",
+                      "profile": "http://iiif.io/api/image/3/level2.json"
+                    }
+                  ]
+                },
+                "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5/placeholder"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "provider": [
+    {
+      "id": "https://www.library.northwestern.edu/",
+      "type": "Agent",
+      "label": {
+        "none": [
+          "Northwestern University Libraries"
+        ]
+      },
+      "homepage": [
+        {
+          "id": "https://dc.library.northwestern.edu/",
+          "type": "Text",
+          "label": {
+            "none": [
+              "Northwestern University Libraries Digital Collections Homepage"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ],
+      "logo": [
+        {
+          "id": "https://iiif.dc.library.northwestern.edu/iiif/2/00000000-0000-0000-0000-000000000003/full/pct:50/0/default.webp",
+          "type": "Image",
+          "format": "image/webp",
+          "height": 139,
+          "width": 1190
+        }
+      ]
+    }
+  ],
+  "logo": [
+    {
+      "id": "https://iiif.dc.library.northwestern.edu/iiif/2/00000000-0000-0000-0000-000000000003/full/pct:50/0/default.webp",
+      "type": "Image",
+      "format": "image/webp",
+      "height": 139,
+      "width": 1190
+    }
+  ],
+  "structures": [
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/1",
+      "type": "Range",
+      "label": {
+        "en": [
+          "In place of a program originally scheduled"
+        ]
+      },
+      "items": [
+        {
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "type": "Canvas"
+          },
+          "selector": {
+            "type": "FragmentSelector",
+            "conformsTo": "http://www.w3.org/TR/media-frags/",
+            "value": "t=0,84.68"
+          }
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/2",
+      "type": "Range",
+      "label": {
+        "en": [
+          "Was there anything unusual about the scene?"
+        ]
+      },
+      "items": [
+        {
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "type": "Canvas"
+          },
+          "selector": {
+            "type": "FragmentSelector",
+            "conformsTo": "http://www.w3.org/TR/media-frags/",
+            "value": "t=84.68,123.1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/3",
+      "type": "Range",
+      "label": {
+        "en": [
+          "The ship is riding majestically toward us"
+        ]
+      },
+      "items": [
+        {
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "type": "Canvas"
+          },
+          "selector": {
+            "type": "FragmentSelector",
+            "conformsTo": "http://www.w3.org/TR/media-frags/",
+            "value": "t=123.1,181.18"
+          }
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/4",
+      "type": "Range",
+      "label": {
+        "en": [
+          "It burst into flames!"
+        ]
+      },
+      "items": [
+        {
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "type": "Canvas"
+          },
+          "selector": {
+            "type": "FragmentSelector",
+            "conformsTo": "http://www.w3.org/TR/media-frags/",
+            "value": "t=181.18,242.6"
+          }
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/5",
+      "type": "Range",
+      "label": {
+        "en": [
+          "I'm going to have to stop for a minute"
+        ]
+      },
+      "items": [
+        {
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "type": "Canvas"
+          },
+          "selector": {
+            "type": "FragmentSelector",
+            "conformsTo": "http://www.w3.org/TR/media-frags/",
+            "value": "t=242.6,394.78"
+          }
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/6",
+      "type": "Range",
+      "label": {
+        "en": [
+          "Ladies and gentlemen, I'm back again"
+        ]
+      },
+      "items": [
+        {
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "type": "Canvas"
+          },
+          "selector": {
+            "type": "FragmentSelector",
+            "conformsTo": "http://www.w3.org/TR/media-frags/",
+            "value": "t=394.78,577.98"
+          }
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/7",
+      "type": "Range",
+      "label": {
+        "en": [
+          "We're back with another important bulletin"
+        ]
+      },
+      "items": [
+        {
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "type": "Canvas"
+          },
+          "selector": {
+            "type": "FragmentSelector",
+            "conformsTo": "http://www.w3.org/TR/media-frags/",
+            "value": "t=577.98,681.34"
+          }
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/8",
+      "type": "Range",
+      "label": {
+        "en": [
+          "I have some very good news for you"
+        ]
+      },
+      "items": [
+        {
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "type": "Canvas"
+          },
+          "selector": {
+            "type": "FragmentSelector",
+            "conformsTo": "http://www.w3.org/TR/media-frags/",
+            "value": "t=681.34,814.9"
+          }
+        }
+      ]
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/9",
+      "type": "Range",
+      "label": {
+        "en": [
+          "You've been listening to an actual eyewitness description"
+        ]
+      },
+      "items": [
+        {
+          "type": "SpecificResource",
+          "source": {
+            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "type": "Canvas"
+          },
+          "selector": {
+            "type": "FragmentSelector",
+            "conformsTo": "http://www.w3.org/TR/media-frags/",
+            "value": "t=814.9,856.611"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 ---
 title: Timeline
-description: "Clover's player for IIIF Presentation 4 Timelines: sound, with Canvas's transport, captions and chapters, on its own or in a Root."
+description: "Clover's player for IIIF Presentation 4 Timelines: sound, played as a music app plays it, with its artwork, Canvas's transport, captions as lyrics and chapters as tracks, on its own or in a Root."
 ---
 
 import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
@@ -19,8 +19,9 @@ import { Measured } from "docs/components/Clover4/Measured";
 </div>
 
 <div className="docs-lede">
-  Sound, as Presentation 4 shapes it: a Timeline, played with Canvas's
-  transport, captions and chapters.
+  Sound, as Presentation 4 shapes it: a Timeline, played as a music app plays
+  it, its artwork beside its title, its captions as lyrics and its chapters as
+  tracks.
 </div>
 
 <LivePart
@@ -33,7 +34,7 @@ import { Measured } from "docs/components/Clover4/Measured";
       value: 240,
       min: 160,
       max: 480,
-      label: "Height of the box round Timeline, in pixels",
+      label: "Height of the box around Timeline, in pixels",
     },
   ]}
 />
@@ -47,8 +48,12 @@ Presentation 3 Canvas of sound alone is a Timeline once upgraded, so the Viewer 
 with it too. It fills its parent, so give the parent a height.
 
 It plays through [Canvas](/docs/canvas), with its transport, captions, chapters and
-annotations on the recording's time, and shows the Timeline's accompanying or placeholder
-Canvas while it plays.
+annotations on the recording's time, as a player: the Timeline's label is its title and
+its Manifest's is under it; its captions and annotations show as lyrics; and where it
+has room, its chapters are listed as tracks under it. Its artwork is the Timeline's
+placeholder Canvas until it first plays, then its accompanying Canvas, each standing in
+for the other, else its thumbnail, at its own shape. The player's ground takes the
+artwork's colors.
 
 <ApiReference elements="clover-timeline">
 
@@ -56,12 +61,13 @@ Canvas while it plays.
 | ----------------- | ---------------------------------------------------- | --------------------------- | --------------------------------------------------------------------------- |
 | `timeline`        | `object`                                             | The Root's view             | A Presentation 4 Timeline to play; `toPresentation4()` upgrades older ones. |
 | `iiifContent`     | `string \| object`                                   | —                           | A Timeline to load and play, or a Manifest's first: URL or JSON.            |
-| `label`           | language map or `string`                             | The Timeline's label        | The view's accessible name.                                                 |
+| `label`           | language map or `string`                             | The Timeline's label        | The view's accessible name, and the player's title.                         |
+| `partOf`          | language map or `string`                             | The Manifest's label        | What it is part of, under its title.                                        |
 | `language`        | `string`                                             | The reader's, or the Root's | The language to read labels, captions' names and annotations in.            |
 | `controls`        | `boolean \| { annotations, information }`            | `true`                      | The round controls over the Body; the transport stays.                      |
-| `placeholder`     | `boolean`                                            | `true`                      | Open on the Timeline's `placeholderContainer`, where it has one.            |
+| `placeholder`     | `boolean`                                            | `true`                      | Show the Timeline's `placeholderContainer` as its artwork until it plays.   |
 | `annotations`     | `{ annotation, targetIndex, pageLabel?, pageId? }[]` | The Root's                  | Annotations on its time, each a cue while its stretch plays.                |
-| `chapters`        | `{ id?, label, lang?, start, end? }[]`               | The Ranges, in a `Root`     | Chapters, on its seek bar and in a menu.                                    |
+| `chapters`        | `{ id?, label, lang?, start, end? }[]`               | The Ranges, in a `Root`     | Chapters, on its seek bar, in a menu, and as tracks where there is room.    |
 | `caption`         | `string \| null`                                     | —                           | The caption file (`id`) to show while captions are on.                      |
 | `onCaptionChange` | `(caption: { id, language? } \| null) => void`       | —                           | The reader chose a caption file, or Off (`null`).                           |
 | `onMediaElement`  | `(element: HTMLVideoElement \| null) => void`        | —                           | The recording's element, for a transcript of your own.                      |
@@ -79,28 +85,29 @@ Canvas while it plays.
 The Viewer plays a Manifest's Timelines with it, as it shows its Canvases with Canvas.
 
 <ViewerExample
-  resource="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/v4/manifest.json"
-  height="16rem"
+  resource="recording"
+  height="22rem"
   headingLevel={4}
 >
 
 ```jsx
-<Viewer iiifContent="https://iiif.io/api/cookbook/recipe/0002-mvm-audio/v4/manifest.json" />
+<Viewer iiifContent="https://nulib-ds.github.io/clover/mocks/hindenburg/manifest.json" />
 ```
 
 </ViewerExample>
 
-### With an accompanying image
+### Its artwork
 
-A Timeline's `accompanyingContainer` shows while it plays, fitted to the Body.
+A Timeline's `accompanyingContainer` is its artwork while it plays, here the box the
+broadcast's reel came in, at its own shape; its ground takes the artwork's colors.
 
 <Example>
 <div style={{ height: 420 }}>
-  <CloverTimeline iiifContent="https://iiif.io/api/cookbook/recipe/0014-accompanyingcanvas/manifest.json" />
+  <CloverTimeline mock="hindenburg/manifest.json" />
 </div>
 
 ```jsx
-<Clover.Timeline iiifContent="https://iiif.io/api/cookbook/recipe/0014-accompanyingcanvas/manifest.json" />
+<Clover.Timeline iiifContent="https://nulib-ds.github.io/clover/mocks/hindenburg/manifest.json" />
 ```
 
 </Example>
@@ -123,8 +130,11 @@ named and has its key in its popover, and the controls stay on screen while keyb
 focus is in them. With the view focused, Space or K plays and pauses, J and L skip ten
 seconds back or forward, and M mutes.
 
-Captions come from the Timeline's WebVTT files, each in its own language, and its
-plain-text transcript shows in the Panel's Transcript. A recording never starts by
+Captions come from the Timeline's WebVTT files, each in its own language, and show in
+the player as lyrics; its plain-text transcript shows in the Panel's Transcript. The
+artwork is described by its Canvas's label, and every word and control on the player's
+ground keeps its contrast whatever the artwork's colors. The chapters listed as tracks
+say which is playing in words and weight, not color alone. A recording never starts by
 itself: it plays when the reader presses Play, or follows a link or the Manifest's
 `auto-advance`.
 
@@ -138,5 +148,5 @@ time a Timeline shows, and the Default template stays
 
 ## What's next
 
-- A lighter view for sound with no picture, drawn without Canvas's 2D renderer.
+- The player made without Canvas's 2D renderer at all, which it no longer draws with.
 - Timelines painted into Scenes, and Presentation 4's `timeMode`.

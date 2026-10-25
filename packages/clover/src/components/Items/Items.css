@@ -1,14 +1,14 @@
 /*
- * Items: a carousel (the default), a list or a grid of thumbnails.
+ * Items: a slider (the default), a list or a grid of thumbnails.
  *
  * Sizes are custom properties, set on `.clover-items` or any ancestor:
- *   --clover-items-height  a carousel's picture height (default 8rem)
+ *   --clover-items-height  a slider's picture height (default 8rem)
  *   --clover-items-size    a grid column's width (default 10rem)
  *   --clover-items-gap     the space between items (default 0.75rem)
- *   --clover-items-lines   the lines a carousel's or grid's title runs to (default 3)
+ *   --clover-items-lines   the lines a slider's or grid's title runs to (default 3)
  *
  * The scroll container, its flex row and each item's snap point are set inline (by the
- * component and `useScrollTrack`), so a carousel still scrolls without this file.
+ * component and `useScrollTrack`), so a slider still scrolls without this file.
  */
 .clover-items {
   --clover-items-height: 8rem;
@@ -81,7 +81,7 @@
 }
 
 /*
- * Thumbnails passing under a carousel's ends show that they do, as the information
+ * Thumbnails passing under a slider's ends show that they do, as the information
  * panel's headings do: a shadow at the start once the track has scrolled, and at the end
  * while there is more. Each is a gradient at the viewport's edge, `s` wide, as tall as
  * the pictures and level with them (not the captions under them), its ends faded over
@@ -89,16 +89,16 @@
  * supported, there is none.
  */
 @supports (timeline-scope: --clover-items-track) {
-  .clover-items[data-layout="carousel"] .clover-items-frame {
+  .clover-items[data-layout="slider"] .clover-items-frame {
     timeline-scope: --clover-items-track;
   }
 
-  .clover-items[data-layout="carousel"] .clover-items-viewport {
+  .clover-items[data-layout="slider"] .clover-items-viewport {
     scroll-timeline: --clover-items-track inline;
   }
 
-  .clover-items[data-layout="carousel"] .clover-items-frame::before,
-  .clover-items[data-layout="carousel"] .clover-items-frame::after {
+  .clover-items[data-layout="slider"] .clover-items-frame::before,
+  .clover-items[data-layout="slider"] .clover-items-frame::after {
     content: "";
     position: absolute;
     top: var(--clover-items-ring-room);
@@ -123,13 +123,13 @@
     animation-timeline: --clover-items-track;
   }
 
-  .clover-items[data-layout="carousel"] .clover-items-frame::before {
+  .clover-items[data-layout="slider"] .clover-items-frame::before {
     --clover-items-shade: to right;
     left: calc(-1 * var(--clover-items-ring-room));
     animation-range: 0 var(--clover-space-m);
   }
 
-  .clover-items[data-layout="carousel"] .clover-items-frame::after {
+  .clover-items[data-layout="slider"] .clover-items-frame::after {
     --clover-items-shade: to left;
     right: calc(-1 * var(--clover-items-ring-room));
     animation-direction: reverse;
@@ -137,13 +137,13 @@
   }
 
   /* A right-to-left track starts on the right: its shadows swap ends. */
-  .clover-items[data-layout="carousel"] .clover-items-frame[dir="rtl"]::before {
+  .clover-items[data-layout="slider"] .clover-items-frame[dir="rtl"]::before {
     --clover-items-shade: to left;
     right: calc(-1 * var(--clover-items-ring-room));
     left: auto;
   }
 
-  .clover-items[data-layout="carousel"] .clover-items-frame[dir="rtl"]::after {
+  .clover-items[data-layout="slider"] .clover-items-frame[dir="rtl"]::after {
     --clover-items-shade: to right;
     left: calc(-1 * var(--clover-items-ring-room));
     right: auto;
@@ -188,13 +188,13 @@
 }
 
 /*
- * Only a carousel scrolls across, and cuts what passes its sides: a list or a grid keeps
+ * Only a slider scrolls across, and cuts what passes its sides: a list or a grid keeps
  * the room above and below its items alone (an item the keys bring into view shows its
  * ring whole). Its ring is an outline, drawn past an item's side without taking room, so
  * nothing reaches past Items' own sides to widen what holds it, which had put a
  * scrollbar across a scrolling box with no padding of its own.
  */
-.clover-items:not([data-layout="carousel"])
+.clover-items:not([data-layout="slider"])
   :is(
     .clover-items-viewport,
     .clover-items-item[role="option"],
@@ -311,11 +311,11 @@
 }
 
 /*
- * Under a carousel's or grid's pictures, a title runs to three lines
+ * Under a slider's or grid's pictures, a title runs to three lines
  * (`--clover-items-lines`) and is cut short after, so a long one cannot push its row
  * apart. A list's titles sit beside their pictures and keep their own rules.
  */
-.clover-items:is([data-layout="carousel"], [data-layout="grid"])
+.clover-items:is([data-layout="slider"], [data-layout="grid"])
   .clover-items-label-text {
   display: -webkit-box;
   overflow: hidden;
@@ -328,7 +328,7 @@
  * A title cut short shows in full while its item is hovered or focused (WCAG 1.4.12):
  * over the card's own picture, its last line where the cut title's last line is, on the
  * secondary color with a soft shadow above. Nothing beside or below it moves,
- * and a carousel's scrolling box cannot clip it. It is part of the item, so the pointer
+ * and a slider's scrolling box cannot clip it. It is part of the item, so the pointer
  * can rest on it, and Escape hides it until the pointer comes back or focus leaves
  * (WCAG 1.4.13, `clamped.ts`).
  */
@@ -365,9 +365,9 @@
   grid-column: 1 / -1;
 }
 
-/* Carousel: a common picture height, each picture at its own aspect. */
-.clover-items[data-layout="carousel"] .clover-items-picture[data-empty],
-.clover-items[data-layout="carousel"] .clover-items-picture img {
+/* Slider: a common picture height, each picture at its own aspect. */
+.clover-items[data-layout="slider"] .clover-items-picture[data-empty],
+.clover-items[data-layout="slider"] .clover-items-picture img {
   width: auto;
   height: var(--clover-items-height);
 }
@@ -471,7 +471,7 @@
 
 /*
  * An item of one's own (`renderItem`) has no pictures to ring, so focus rings the item:
- * the same ring, drawn inside the room it keeps, which a carousel's edge never cuts.
+ * the same ring, drawn inside the room it keeps, which a slider's edge never cuts.
  */
 :is(.clover-items-item[role="option"], .clover-items-link):not(
     :has(.clover-items-pictures)
@@ -517,7 +517,7 @@
   font-weight: 600;
 }
 
-/* ---------- carousel buttons ---------- */
+/* ---------- slider buttons ---------- */
 
 /*
  * Buttons are selected as `button.x`, not `.x`: one class ties with the

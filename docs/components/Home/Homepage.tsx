@@ -22,6 +22,8 @@ import {
 } from "docs/lib/figures";
 import { FULL_WIDTH } from "docs/lib/full-width";
 import { BrandCode, BrandControls } from "docs/components/Home/BrandPicker";
+import { FormatPicker } from "docs/components/Home/FormatPicker";
+import { IIIFLogo } from "docs/components/Home/IIIFLogo";
 import { InstallCommand } from "docs/components/Home/InstallCommand";
 import { SectionIntro } from "docs/components/Home/SectionIntro";
 import { Swoosh } from "docs/components/Home/Swoosh";
@@ -68,7 +70,7 @@ interface Story {
    * middle of the window (`data-recipe`, `StoryLines.tsx`).
    */
   recipe?: { slug: string; resource?: string };
-  title: string;
+  title: React.ReactNode;
   body: React.ReactNode;
   /** A figure, and its unit (`kB`), which is set smaller than it. */
   /**
@@ -94,9 +96,24 @@ interface Story {
    * brand a while (`data-brand`, `PartsLive.tsx`).
    */
   brand?: boolean;
+  /**
+   * Whether a thumbnail of each format takes the column its figures would, each opening
+   * its resource in the playground and so in the example viewer (`FormatPicker.tsx`).
+   */
+  formats?: boolean;
 }
 
 const stories: Story[] = [
+  {
+    // Adaptable, with "multimodal" in its title (Mat, 2026-10-25).
+    label: "Adaptable",
+    // Body, which draws each format, switching between Canvas, Timeline and Scene.
+    point: "body",
+    formats: true,
+    title: "Multimodal by design.",
+    body: "Images, sound, film, 3D models and the printed page all open in the same viewer, each with the controls it needs. Choose one and the example viewer takes it in.",
+    figures: [],
+  },
   {
     label: "Accessible",
     // The viewer turned over: what assistive technology is given, and the tab order.
@@ -169,7 +186,8 @@ const stories: Story[] = [
     ],
   },
   {
-    label: "Coverage",
+    // Natural, not "Native", which can read as about people (Mat, 2026-10-25).
+    label: "Natural",
     /*
      * Cookbook 0032, a Collection, read by the same Label, Body, Metadata and
      * Collection (Mat, 2026-10-21), the line drawn to the Collection.
@@ -180,19 +198,35 @@ const stories: Story[] = [
       resource:
         "https://iiif.io/api/cookbook/recipe/0032-collection/collection.json",
     },
-    title: "Reads the Cookbook.",
+    /*
+     * IIIF's logo for the word (Mat, 2026-10-25), which is read in its place, so the
+     * title is "Reads the IIIF cookbook." to assistive technology, search and a copy.
+     * "cookbook" lowercase here, in the title and the words (Mat, 2026-10-25).
+     */
+    title: (
+      <>
+        Reads the <IIIFLogo className={styles.titleLogo} />
+        <span className={styles.visuallyHidden}>IIIF</span> cookbook.
+      </>
+    ),
     body: (
       <>
-        Clover 4 is checked against every recipe in the IIIF Cookbook, from a
-        single image to annotations on film. Last checked {cookbook.checked}.{" "}
-        <Link href="/docs/cookbook">Open each one in the Viewer</Link>.
+        {/*
+         * Clover as itself, never "we", and active ("gains", never "comes from"): its
+         * IIIF fluency first, from building blocks native to open specifications, then
+         * its code and components, named, never "it’s" or "its", and "IIIF" said once
+         * (Mat, 2026-10-25). No date, no range of recipes; the link one word.
+         */}
+        Clover gains IIIF fluency from building blocks designed natively to open
+        specifications. Code and components are crafted toward recipes in the{" "}
+        <Link href="/docs/cookbook">cookbook</Link>.
       </>
     ),
     // What Clover handles, with no total and no count in part (Mat, 2026-10-21).
     figures: [
       {
         value: String(cookbook.handled),
-        caption: "IIIF Cookbook recipes handled",
+        caption: "Recipes handled",
       },
     ],
   },
@@ -238,6 +272,8 @@ const Homepage: React.FC<{
 }> = ({ partsIndex }) => {
   const playground = useRef<PlaygroundHandle>(null);
   const [resource, setResource] = useState<string | null>(null);
+  // The playground's resource by key, for the Adaptable story's formats.
+  const [resourceKey, setResourceKey] = useState<string | null>(null);
   return (
     <div className={styles.page}>
       <style>{HOMEPAGE_LAYOUT}</style>
@@ -247,7 +283,10 @@ const Homepage: React.FC<{
       <div className={styles.shell}>
         <Playground
           ref={playground}
-          onResourceChange={(next) => setResource(next)}
+          onResourceChange={(next, key) => {
+            setResource(next);
+            setResourceKey(key);
+          }}
         />
 
         {/*
@@ -263,7 +302,8 @@ const Homepage: React.FC<{
             title="Thoughtful and flexible."
             // One sentence of why, never the title's words or the stories' again (Mat, 2026-10-22).
             note="Clover is designed with the full spectrum of user experience in mind, for every visitor, every layout and every IIIF resource."
-            cta={{ href: "/docs", label: "Read the docs" }}
+            // In the accent, the solid call to action (Mat, 2026-10-25).
+            cta={{ href: "/docs", label: "Read the docs", primary: true }}
           />
 
           {/*
@@ -309,9 +349,12 @@ const Homepage: React.FC<{
                   data-compose={story.composer || undefined}
                   data-brand={story.brand || undefined}
                   {...(story.recipe && recipeData(story.recipe))}
-                  data-side={index % 2 ? "start" : "end"}
-                  // Black first, so Accessible rides in it (Mat, 2026-10-20).
-                  data-tone={index % 2 ? "page" : "code"}
+                  /*
+                   * Adaptable on the page's ground, leading, so Accessible keeps the black
+                   * it rides in (Mat, 2026-10-20 and 2026-10-25).
+                   */
+                  data-side={index % 2 ? "end" : "start"}
+                  data-tone={index % 2 ? "code" : "page"}
                 >
                   <div className={styles.storyText}>
                     <p className={styles.storyLabel}>{story.label}</p>
@@ -350,6 +393,11 @@ const Homepage: React.FC<{
                       <BrandControls />
                       <BrandCode />
                     </>
+                  ) : story.formats ? (
+                    <FormatPicker
+                      chosen={resourceKey}
+                      onPick={(key) => playground.current?.pickResource(key)}
+                    />
                   ) : (
                     figures
                   )}
@@ -360,7 +408,7 @@ const Homepage: React.FC<{
 
           {/*
            * Install, last in the stories' column, beside the held viewer: the room the
-           * viewer needs to stay held while Coverage reads its recipe, put to use.
+           * viewer needs to stay held while Natural reads its recipe, put to use.
            */}
           <SectionIntro
             title="Install is easy."

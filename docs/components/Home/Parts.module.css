@@ -1090,7 +1090,7 @@
 /*
  * The Collection's tile and those after it, on the same six columns (`PartsLive`).
  * Folded, they fade out halfway through the first (Mat, 2026-10-23), the fade centered
- * at its middle (`--fold-at`, written by `PartsLive`), "Show all" over its end. Inert
+ * at its middle (`--fold-at`, written by `PartsLive`), "More components" over its end. Inert
  * meanwhile, so it takes no press or focus; shown, nothing changes but its height and the
  * fade, with no animation.
  */
@@ -1113,12 +1113,13 @@
   overflow: clip;
 }
 
+/* "More components", at the tiles' end, under the fade (Mat, 2026-10-25: "align this right"). */
 .showAll {
   background: none;
   cursor: pointer;
   font-family: inherit;
   grid-column: 1 / -1;
-  justify-self: center;
+  justify-self: end;
   margin-top: -2.618rem;
 }
 
@@ -1310,6 +1311,15 @@
   margin: 0;
 }
 
+/*
+ * The Collection's summary cut to three lines, not Clover's five, so the tile shows its
+ * members sooner (Mat, 2026-10-25), with Read more under it as ever
+ * (`--clover-summary-lines`, `Primitives.css`).
+ */
+.tile[data-tile="partOf"] {
+  --clover-summary-lines: 3;
+}
+
 /* The statement as the resource words it, its value cut to five lines. */
 .statement {
   font-size: var(--text-sm);
@@ -1333,7 +1343,7 @@
  * The viewer's strip is too small for names: its pictures alone, the tile has them named.
  * Hidden on screen only, so each option keeps its name for assistive technology.
  */
-.viewerStrip[data-layout="carousel"] :global(.clover-items-caption) {
+.viewerStrip[data-layout="slider"] :global(.clover-items-caption) {
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
   height: 1px;
@@ -1347,12 +1357,12 @@
  * Laid out as a list or a grid (from its code), its pictures smaller, and scrolling in a
  * box 15rem tall at most, so the viewer stays in the window.
  */
-.viewerStrip:not([data-layout="carousel"]) {
+.viewerStrip:not([data-layout="slider"]) {
   --clover-items-size: 6.854rem;
 }
 
 /* Items sets its viewport's overflow inline, which only `!important` outweighs. */
-.viewerStrip:not([data-layout="carousel"]) :global(.clover-items-viewport) {
+.viewerStrip:not([data-layout="slider"]) :global(.clover-items-viewport) {
   max-height: 15rem;
   overflow-y: auto !important;
 }
@@ -1385,9 +1395,15 @@
  * Scrolls up and down, never across. Room at its sides for a ring drawn past an edge
  * (Items' selection), given back so what it holds lines up with the rest of the tile.
  */
+/*
+ * A list in a box of its own (Annotations, Contents, Transcript): as tall as a third of
+ * the window, 15rem at most and 8rem at least (Mat, 2026-10-25: "we don't want this to
+ * dominate smaller viewports where a scroll/drag interaction would be captured"), so a
+ * finger dragging the page meets one less often.
+ */
 .scroll {
   margin-inline: -4px;
-  max-height: 18rem;
+  max-height: clamp(8rem, 35vh, 15rem);
   overflow: hidden auto;
   padding-inline: 4px;
 }
@@ -1403,9 +1419,9 @@
   }
 }
 
-/* Taller for a Collection, so its members show under its label and summary. */
+/* Taller for a Collection, so its members show under its label and summary; by the window too. */
 .tall {
-  max-height: 29rem;
+  max-height: clamp(14rem, 55vh, 24rem);
 }
 
 /* The map at the tile's height, its places listed under it; its room held while it loads. */
@@ -1421,7 +1437,7 @@
 /* ── What this resource has nothing for ───────────────────────────────────── */
 
 /* Under the tiles, in their column, clear of the viewer held in view beside them. */
-/* Last under "Show all", across the tiles, 4.236rem from them as before (with the gap). */
+/* Last under "More components", across the tiles, 4.236rem from them as before (with the gap). */
 .missing {
   display: grid;
   gap: 1rem;

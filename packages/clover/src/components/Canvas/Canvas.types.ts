@@ -162,6 +162,11 @@ export interface CloverCanvasProps {
   /** Accessible name for the viewport. */
   label?: InternationalString | string;
   /**
+   * What the view is part of, named under its title where a lone recording plays as a
+   * player: the Manifest's label, by default, inside a `Root` or given `iiifContent`.
+   */
+  partOf?: InternationalString | string;
+  /**
    * The language to read IIIF text in: labels, Choices, annotations. The reader's, by
    * default; inside a `Root`, the Root's.
    */

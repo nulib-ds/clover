@@ -15,6 +15,7 @@ import captionsJson from "../../../fixtures/iiif-cookbook/0219-using-caption-fil
 import poetryJson from "../../../fixtures/iiif-cookbook/0103-poetry-reading-annotations.json";
 import hessJson from "../../../fixtures/mocks/rudolf-hess-nuremberg/manifest.json";
 import { clearVttCache } from "../../../core/vtt";
+import { clearInfoCache } from "../../../lib/renderer/sources/imageService";
 import * as Clover from "../../../index";
 
 // Published fixtures, upgraded to Presentation 4 as Clover holds them.
@@ -1088,13 +1089,90 @@ describe("Canvas media", () => {
     expect(screen.getByRole("slider", { name: "Seek" })).toBeInTheDocument();
   });
 
-  it("shows sound's accompanying image, fitted, without a navigator", async () => {
-    render(<Canvas canvases={accompanying.items as any} />);
+  /*
+   * A lone recording of sound plays as a player (`Player.tsx`): nothing drawn in the
+   * scene; its accompanying Canvas its artwork, asked as its image service's `info.json`
+   * allows and named by that Canvas's label; its title for the eye, the view named by
+   * it; and what it is part of under it.
+   */
+  it("plays lone sound as a player, its accompanying image its artwork", async () => {
+    const fetch = vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input) =>
+        new Response(
+          JSON.stringify({
+            "@context": "http://iiif.io/api/image/3/context.json",
+            id: String(input).replace(/\/info\.json$/, ""),
+            type: "ImageService3",
+            protocol: "http://iiif.io/api/image",
+            profile: "level1",
+            width: 772,
+            height: 998,
+          }),
+        ),
+    );
+    render(<Canvas canvases={accompanying.items as any} partOf="A symphony" />);
     await transport();
-    const [images] = renderer.setImages.mock.lastCall;
-    expect(images).toHaveLength(1);
-    expect(images[0].media).toBeUndefined();
+    expect(screen.getByTestId("clover-canvas")).toHaveAttribute("data-player");
+    expect(renderer.setImages.mock.lastCall?.[0] ?? []).toHaveLength(0);
     expect(screen.queryByTestId("clover-canvas-navigator")).toBeNull();
+    const art = await screen.findByRole("img", {
+      name: "First page of score for Gustav Mahler, Symphony No. 3",
+    });
+    // All of it at its own size, 772 by 998, short of the 1,200 a player asks for.
+    expect(art.getAttribute("src")).toMatch(/\/full\/max\/0\/default\.jpg$/);
+    expect(
+      screen.getByText("Gustav Mahler, Symphony No. 3, CD 1", {
+        selector: ".clover-canvas-player-title",
+      }),
+    ).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByText("A symphony")).toHaveClass(
+      "clover-canvas-player-part-of",
+    );
+    fetch.mockRestore();
+    clearInfoCache();
+  });
+
+  it("lists a player's chapters as tracks, the one playing marked, a press going to it", async () => {
+    const onMediaElement = vi.fn();
+    render(
+      <Canvas
+        canvases={audio.items as any}
+        onMediaElement={onMediaElement}
+        chapters={[
+          { label: "Opening", start: 0, end: 10 },
+          { label: "Lunch", start: 10, end: 20 },
+        ]}
+      />,
+    );
+    await transport();
+    const element = onMediaElement.mock.calls.at(-1)?.[0] as HTMLVideoElement;
+    const tracks = () =>
+      within(screen.getByRole("list", { name: "Chapters" })).getAllByRole(
+        "button",
+      );
+    // Each named by its title and its start, the number for the eye alone.
+    expect(tracks().map((track) => track.textContent)).toEqual([
+      "1Opening 0:00",
+      "2Lunch 0:10",
+    ]);
+    expect(tracks()[0]).toHaveAttribute("aria-current", "true");
+    fireEvent.click(tracks()[1]);
+    expect(element.currentTime).toBe(10);
+    act(() => {
+      element.dispatchEvent(new Event("timeupdate"));
+    });
+    expect(tracks()[1]).toHaveAttribute("aria-current", "true");
+    expect(tracks()[0]).not.toHaveAttribute("aria-current");
+  });
+
+  // Never for a recording beside a picture, or a video: those keep Canvas's look.
+  it("plays no video as a player", async () => {
+    render(<Canvas canvases={video.items as any} />);
+    await transport();
+    expect(screen.getByTestId("clover-canvas")).not.toHaveAttribute(
+      "data-player",
+    );
+    expect(document.querySelector(".clover-canvas-player")).toBeNull();
   });
 
   it("does not load the media player for a Canvas of images", () => {

@@ -35,7 +35,7 @@ schedule excuses a failure.
   handlers do. Every Escape handler first checks `event.defaultPrevented`. An Escape
   from elsewhere may close a popup, but never moves focus (2.4.3).
 - A control with nothing left to do at the end of a sequence (Previous, Next, a
-  carousel's arrows, a frame step) is `aria-disabled`, never `disabled`, which would
+  `Items` slider's arrows, a frame step) is `aria-disabled`, never `disabled`, which would
   drop focus to the page. Its press does nothing, so the press that reaches the end
   keeps focus (2.4.3). One the stylesheet hides at an end also leaves the tab order
   (`tabindex="-1"`), and stays in sight while focused.

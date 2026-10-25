@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { Close, CloseViewer, OpenViewer, Play } from "../Body/glyphs";
 import Button from "../../ui/Button";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
+import type { CloverRequest } from "../../core/request";
+import type { ThumbnailSource } from "../../core/thumbnail";
+import { STILL_SIZE } from "./layout";
 
 export interface PlaceholderStill {
-  src: string;
+  /** Its image, or its image service, asked as its `info.json` allows (`placeholderStill`). */
+  source: ThumbnailSource;
   width: number;
   height: number;
   alt: string;
@@ -32,6 +36,60 @@ interface PlaceholderProps {
    */
   lingering: boolean;
   onToggle: () => void;
+  /** How Clover fetches: the `info.json` a still's service is read from. */
+  request?: CloverRequest;
+}
+
+/**
+ * A still's URL: the image itself, or its service's, made once its `info.json` is read
+ * (`resolveThumbnail`), never written from the service's id. The resolver is loaded with
+ * the first placeholder that needs it, so a Canvas with none never carries it.
+ */
+function useStill(
+  source: ThumbnailSource,
+  request: CloverRequest | undefined,
+): string | undefined {
+  const [src, setSrc] = useState(source.src);
+  const key = source.src ?? source.service ?? source.fallback;
+  useEffect(() => {
+    if (source.src) return setSrc(source.src);
+    let live = true;
+    void import("../../core/thumbnail")
+      .then(({ resolveThumbnail }) =>
+        resolveThumbnail(source, STILL_SIZE, request),
+      )
+      .then((url) => live && setSrc(url));
+    return () => {
+      live = false;
+    };
+    // `key` stands in for `source`, a new object each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+  return src;
+}
+
+/** One still, sized to its share of the run, drawn once its URL is made. */
+function Still({
+  still,
+  request,
+  style,
+}: {
+  still: PlaceholderStill;
+  request?: CloverRequest;
+  style: React.CSSProperties;
+}) {
+  const src = useStill(still.source, request);
+  return src ? (
+    // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
+    <img
+      alt={still.alt}
+      lang={still.alt ? still.lang : undefined}
+      src={src}
+      style={style}
+    />
+  ) : (
+    <span style={style} />
+  );
 }
 
 /**
@@ -51,6 +109,7 @@ const Placeholder: React.FC<PlaceholderProps> = ({
   active,
   lingering,
   onToggle,
+  request,
 }) => {
   const { t, langOf } = useCloverTranslation();
   const toggleKey = media
@@ -108,12 +167,10 @@ const Placeholder: React.FC<PlaceholderProps> = ({
             style={{ "--ratio": ratio } as React.CSSProperties}
           >
             {stills.map((still, index) => (
-              // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
-              <img
-                alt={still.alt}
-                lang={still.alt ? still.lang : undefined}
+              <Still
                 key={index}
-                src={still.src}
+                still={still}
+                request={request}
                 style={{
                   [vertical ? "height" : "width"]:
                     `${(shares[index] / total) * 100}%`,

@@ -40,7 +40,7 @@ pass it: `template={Default}`, from `@nulib/clover/templates`.
 | `download`         | `true`                      | The downloads in the panel's About, where there is a `rendering`. |
 | `defaultPanelOpen` | —                           | Whether the panel starts open. Unset: open when it fits beside.   |
 | `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.               |
-| `items`            | `"carousel"`                | The thumbnails: `"carousel"`, `"list"`, `"grid"`, or `false`.     |
+| `items`            | `"slider"`                  | The thumbnails: `"slider"`, `"list"`, `"grid"`, or `false`.       |
 | `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.        |
 | …                  |                             | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`…   |
 

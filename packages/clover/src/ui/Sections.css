@@ -387,7 +387,7 @@ button.clover-sections-scroll-next {
 }
 
 /*
- * A shadow fading in with the scroll; Items' carousel uses it too. Both ends are given:
+ * A shadow fading in with the scroll; Items' slider uses it too. Both ends are given:
  * each shadow is hidden as it stands (`opacity: 0`), so where its container cannot
  * scroll, and the timeline has nothing to drive, it stays hidden.
  */

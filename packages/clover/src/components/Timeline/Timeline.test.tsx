@@ -48,19 +48,20 @@ describe("Timeline", () => {
     expect(screen.queryByTestId("clover-canvas-navigator")).toBeNull();
   });
 
-  it("names a sound with no picture in its Body, for the eye alone", async () => {
+  it("plays as a player, its title for the eye alone", async () => {
     const timeline = audioV4Json.items[0];
     render(
       <Clover.Timeline timeline={timeline as never} label="A recording" />,
     );
-    const name = screen.getByText("A recording", {
-      selector: ".clover-canvas-sound-label",
+    const title = await screen.findByText("A recording", {
+      selector: ".clover-canvas-player-title",
     });
-    expect(name).toHaveAttribute("aria-hidden", "true");
+    expect(title).toHaveAttribute("aria-hidden", "true");
     // The view is named by the same words, for assistive technology.
     expect(
       screen.getByRole("img", { name: "A recording" }),
     ).toBeInTheDocument();
+    expect(document.querySelector(".clover-canvas-sound-label")).toBeNull();
   });
 
   it("shows no name over a picture", async () => {

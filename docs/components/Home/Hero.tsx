@@ -23,7 +23,7 @@ const Hero: React.FC = () => (
       <p className={styles.subtitle}>
         {homeTagline}{" "}
         <Link className={styles.subtitleLink} href="/docs">
-          Documentation
+          Docs
           <span
             className={`cta-arrow ${styles.subtitleArrow}`}
             aria-hidden="true"

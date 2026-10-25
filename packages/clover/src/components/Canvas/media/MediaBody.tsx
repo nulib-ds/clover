@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 
 import type { TimedAnnotation } from "../Annotations";
 import type { MediaPlacement } from "../layout";
+import { type PlayerInfo, PlayerChapters, PlayerFace } from "./Player";
 import Transport, { type TransportChapter } from "./Transport";
 import { type CaptionOption, useCaptionTracks } from "./useCaptionTracks";
 import { useMediaController } from "./useMediaController";
@@ -57,6 +58,12 @@ export interface MediaBodyProps {
    * stretch plays, as a caption does, under its AnnotationPage's label.
    */
   notes?: TimedAnnotation[];
+  /**
+   * A lone recording of sound, played as a player (`Player.tsx`): its artwork, title and
+   * what it is part of, its cues as lyrics and its chapters as tracks, around the
+   * transport.
+   */
+  player?: PlayerInfo;
 }
 
 /**
@@ -97,6 +104,7 @@ const MediaBody: React.FC<MediaBodyProps> = ({
   onChapterHighlight,
   language: givenLanguage,
   notes,
+  player,
 }) => {
   // IIIF text in the Root's language, or the reader's when there is no Root.
   const rootLanguage = useOptionalClover()?.language;
@@ -221,6 +229,17 @@ const MediaBody: React.FC<MediaBodyProps> = ({
   // The cues are in their track's language (WCAG 3.1.2); IIIF's "none" is not a tag.
   const captionLanguage = captions.options[captions.active]?.language;
 
+  /*
+   * A player's artwork turns from its placeholder to its accompanying Canvas once it has
+   * played, and holds there, as the IIIF has them: one before, one while it plays.
+   */
+  const [started, setStarted] = useState(false);
+  useEffect(() => setStarted(false), [media.id]);
+  const { paused } = controller;
+  useEffect(() => {
+    if (!paused) setStarted(true);
+  }, [paused]);
+
   // The annotations whose stretch is playing, in the order given.
   const { currentTime } = controller;
   const playing = useMemo(
@@ -234,71 +253,114 @@ const MediaBody: React.FC<MediaBodyProps> = ({
     [notes, currentTime],
   );
 
+  const transport = (
+    <Transport
+      instance={instance}
+      controller={controller}
+      kind={media.kind}
+      captions={captionLabels}
+      activeCaption={captions.active}
+      onCaptionChange={(index) => {
+        captions.select(index);
+        // The Manifest's files come first in the menu; past them, the media's own.
+        const chosen = media.captions[index];
+        onCaptionChange?.(
+          chosen ? { id: chosen.id, language: chosen.language } : null,
+        );
+      }}
+      fullscreen={fullscreen}
+      isFullscreen={isFullscreen}
+      video={media.kind === "video" ? element : null}
+      chapters={chapters}
+      highlightedChapter={highlightedChapter}
+      onChapterHighlight={onChapterHighlight}
+    />
+  );
+  /*
+   * After the transport: the stylesheet lifts the cues clear of it. The annotations over
+   * the captions, which keep the line nearest the bar. In a player, they are its lyrics.
+   */
+  const cuesShown = cues.length + playing.length > 0 && (
+    <div className="clover-canvas-captions" aria-live="off">
+      {playing.map((note) => (
+        <span
+          className="clover-canvas-captions-cue"
+          data-kind="annotation"
+          key={note.id}
+        >
+          {note.page && (
+            <span
+              className="clover-canvas-captions-cue-label"
+              lang={note.page.lang}
+            >
+              {note.page.text}
+            </span>
+          )}
+          <span lang={note.lang}>{note.label}</span>
+        </span>
+      ))}
+      {cues.map((text, index) => (
+        <span
+          className="clover-canvas-captions-cue"
+          key={index}
+          lang={
+            captionLanguage && captionLanguage !== "none"
+              ? captionLanguage
+              : undefined
+          }
+        >
+          {text}
+        </span>
+      ))}
+    </div>
+  );
+
+  if (player) {
+    // The chapter playing, as the transport finds it: the last begun.
+    let current = -1;
+    (chapters ?? []).forEach((chapter, index) => {
+      if (chapter.start <= currentTime) current = index;
+    });
+    /*
+     * In reading order, which is also the keyboard's: what it is, its lyrics, the
+     * transport, then its tracks, under it as an album's are under its player.
+     */
+    return (
+      <div
+        className="clover-canvas-media"
+        data-kind={media.kind}
+        data-player=""
+        data-testid="clover-canvas-media"
+      >
+        <div className="clover-canvas-player">
+          <PlayerFace
+            player={player}
+            started={started}
+            request={request}
+            language={language}
+          />
+          {cuesShown}
+          {transport}
+          {chapters && chapters.length > 0 && (
+            <PlayerChapters
+              chapters={chapters}
+              current={current}
+              onSeek={controller.seek}
+            />
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="clover-canvas-media"
       data-kind={media.kind}
       data-testid="clover-canvas-media"
     >
-      <Transport
-        instance={instance}
-        controller={controller}
-        kind={media.kind}
-        captions={captionLabels}
-        activeCaption={captions.active}
-        onCaptionChange={(index) => {
-          captions.select(index);
-          // The Manifest's files come first in the menu; past them, the media's own.
-          const chosen = media.captions[index];
-          onCaptionChange?.(
-            chosen ? { id: chosen.id, language: chosen.language } : null,
-          );
-        }}
-        fullscreen={fullscreen}
-        isFullscreen={isFullscreen}
-        video={media.kind === "video" ? element : null}
-        chapters={chapters}
-        highlightedChapter={highlightedChapter}
-        onChapterHighlight={onChapterHighlight}
-      />
-      {/*
-        After the transport: the stylesheet lifts the cues clear of it. The annotations
-        over the captions, which keep the line nearest the bar.
-      */}
-      {cues.length + playing.length > 0 && (
-        <div className="clover-canvas-captions" aria-live="off">
-          {playing.map((note) => (
-            <span
-              className="clover-canvas-captions-cue"
-              data-kind="annotation"
-              key={note.id}
-            >
-              {note.page && (
-                <span
-                  className="clover-canvas-captions-cue-label"
-                  lang={note.page.lang}
-                >
-                  {note.page.text}
-                </span>
-              )}
-              <span lang={note.lang}>{note.label}</span>
-            </span>
-          ))}
-          {cues.map((text, index) => (
-            <span
-              className="clover-canvas-captions-cue"
-              key={index}
-              lang={
-                captionLanguage && captionLanguage !== "none"
-                  ? captionLanguage
-                  : undefined
-              }
-            >
-              {text}
-            </span>
-          ))}
-        </div>
-      )}
+      {transport}
+      {cuesShown}
     </div>
   );
 };

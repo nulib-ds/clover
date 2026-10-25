@@ -5,7 +5,7 @@ export const items: ElementSpec = {
   tag: "clover-items",
   kind: "part",
   attributes: {
-    layout: { prop: "layout", type: ["carousel", "list", "grid", "pager"] },
+    layout: { prop: "layout", type: ["slider", "list", "grid", "pager"] },
     of: { prop: "of", type: ["views", "members"] },
     navigation: { prop: "navigation", type: ["id", "homepage"] },
     "iiif-content": { prop: "iiifContent", type: "string" },
@@ -28,7 +28,7 @@ export const itemsDocs: ElementDocs = {
     layout: {
       description:
         "A scrolling row, a column, a wrapping grid, or a pager: Previous, the position and Next, with no thumbnails.",
-      default: "carousel",
+      default: "slider",
     },
     of: {
       description:
