@@ -179,7 +179,12 @@ export default function PartsLive({
   const [all, setAll] = useState(false);
   const showAll = useCallback(() => setAll(true), []);
   return (
-    <Clover.Root iiifContent={resource} key={resource} className={styles.root}>
+    <Clover.Root
+      iiifContent={resource}
+      key={resource}
+      className={styles.root}
+      language={startOf(resource)?.language}
+    >
       <Exploded
         resource={resource}
         onTry={onTry}
@@ -248,7 +253,70 @@ function Exploded({
   const [code, setCode] = useState(false);
   const codeId = useId();
   // What the viewer's code says, and so what the viewer shows.
-  const [view, setView] = useState<ViewValues>(VIEW_DEFAULTS);
+  const start = useMemo(() => startOf(resource), [resource]);
+  const [view, setView] = useState<ViewValues>(() => ({
+    ...VIEW_DEFAULTS,
+    ...start?.view,
+  }));
+  const { clover } = Clover.useClover("The example viewer");
+  /*
+   * A resource's own start (`STARTS`), once its annotations have come: its pages put
+   * away and its annotation picked, which takes the Body to it, past its placeholder.
+   */
+  const started = useRef(false);
+  useEffect(() => {
+    if (!start || started.current) return;
+    const entries = sets.flatMap((set) => set.entries);
+    const picked = start.pick
+      ? entries.find((entry) => entry.id.endsWith(start.pick!))
+      : undefined;
+    if (start.pick && !picked) return;
+    started.current = true;
+    sets
+      .filter((set) =>
+        start.hide?.some(
+          (end) =>
+            set.id.endsWith(end) ||
+            set.entries.some((entry) => entry.id.includes(`${end}/`)),
+        ),
+      )
+      .forEach((set) => clover.setSetVisible(set.id, false));
+    if (picked) clover.selectAnnotation(picked.id);
+  }, [start, sets, clover]);
+  /*
+   * Its recording played, where its start asks: muted (the reader may turn the sound on),
+   * once its element is there and the viewer is in view, and once only.
+   */
+  const media = useRef<HTMLVideoElement | null>(null);
+  const played = useRef(false);
+  const inView = useRef(false);
+  const playOnce = useCallback(() => {
+    const element = media.current;
+    if (!start?.play || played.current || !element || !inView.current) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    played.current = true;
+    element.play().catch(() => undefined);
+  }, [start]);
+  const onMedia = useCallback(
+    (element: HTMLVideoElement | null) => {
+      media.current = element;
+      if (!element) return;
+      element.defaultMuted = true;
+      element.muted = true;
+      playOnce();
+    },
+    [playOnce],
+  );
+  useEffect(() => {
+    const node = viewer.current;
+    if (!start?.play || !node) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      inView.current = entry.isIntersecting;
+      playOnce();
+    });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [start, playOnce, manifest]);
 
   // A part's name tag, shown while it is pointed at, is put away by Escape (WCAG 1.4.13).
   useEffect(() => {
@@ -855,9 +923,13 @@ function Exploded({
   );
   const bodyPart = useMemo(
     () => (
-      <Clover.Body controls={view.controls} style={{ height: view.height }} />
+      <Clover.Body
+        controls={view.controls}
+        style={{ height: view.height }}
+        onMediaElement={start?.play ? onMedia : undefined}
+      />
     ),
-    [view.controls, view.height],
+    [view.controls, view.height, start, onMedia],
   );
   const itemsPart = useMemo(
     () => (
@@ -881,6 +953,15 @@ function Exploded({
   );
   const metadataPart = useMemo(
     () => <Clover.Metadata className={styles.viewerFields} />,
+    [],
+  );
+  const annotationsPart = useMemo(
+    () => (
+      <Clover.Annotations
+        headingLevel={4}
+        className={styles.viewerAnnotations}
+      />
+    ),
     [],
   );
 
@@ -965,6 +1046,11 @@ function Exploded({
         {metadataPart}
       </Region>
     ),
+    annotations: (
+      <Region key="annotations" name="Annotations" {...region("annotations")}>
+        {annotationsPart}
+      </Region>
+    ),
   };
 
   return (
@@ -1002,6 +1088,7 @@ function Exploded({
               id={codeId}
               open
               resource={resource}
+              language={start?.language}
               order={order}
               view={view}
               onView={setView}
@@ -1042,6 +1129,7 @@ function Exploded({
               id={codeId}
               open={code}
               resource={resource}
+              language={start?.language}
               order={order}
               view={view}
               onView={setView}
@@ -1304,7 +1392,8 @@ type ViewerPart =
   | "body"
   | "items"
   | "summary"
-  | "metadata";
+  | "metadata"
+  | "annotations";
 
 const PART_NAMES: Record<ViewerPart, string> = {
   thumbnail: "Thumbnail",
@@ -1313,6 +1402,7 @@ const PART_NAMES: Record<ViewerPart, string> = {
   items: "Items",
   summary: "Summary",
   metadata: "Metadata",
+  annotations: "Annotations",
 };
 
 /** The values the example viewer's code lets a reader change, as they start. */
@@ -1337,6 +1427,55 @@ const VIEW_DEFAULTS: ViewValues = {
   layout: "slider",
   order: ["thumbnail", "label", "body", "items", "summary", "metadata"],
 };
+
+/*
+ * How the example viewer starts for a resource best shown its own way (Mat, 2026-10-25),
+ * whichever way it was chosen (the Adaptable story's formats, the playground): its view,
+ * the annotation pages put away, the annotation picked, and whether its recording plays,
+ * muted, once the viewer is in view, never where the reader asks for reduced motion
+ * (its pause is in its controls, WCAG 2.2.2). Ids by their ends, as the dev server's live
+ * copy of a mock has its own. Any other resource starts as `VIEW_DEFAULTS`.
+ */
+interface ViewerStart {
+  view: Partial<ViewValues>;
+  /** The Root's `language`: the one to read IIIF text in, and its annotations' choice. */
+  language?: string;
+  hide?: string[];
+  pick?: string;
+  play?: boolean;
+}
+
+const STARTS: { resource: string; start: ViewerStart }[] = [
+  {
+    /*
+     * The Footage: its annotations under it, Hess led out of the dock, playing; its Body
+     * the other examples' size (Mat, 2026-10-25).
+     */
+    resource: "/mocks/rudolf-hess-nuremberg/manifest.json",
+    start: {
+      view: {
+        order: ["thumbnail", "label", "body", "annotations"],
+      },
+      hide: ["/annotations/other-defendants"],
+      pick: "/annotations/hess/removal",
+      play: true,
+    },
+  },
+  {
+    /*
+     * The Manuscript: its annotations, each page's Arabic and its English translation,
+     * under its Body in place of Items, Summary and Metadata, in the reader's language
+     * to start, English on this page (Mat, 2026-10-25), Arabic a press away.
+     */
+    resource: "/dc8ff749-adad-42a7-81e0-0eb473ef88a5.json",
+    start: {
+      view: { order: ["thumbnail", "label", "body", "annotations"] },
+    },
+  },
+];
+
+const startOf = (resource: string) =>
+  STARTS.find((entry) => resource.endsWith(entry.resource))?.start;
 
 const LAYOUTS: Clover.ItemsLayout[] = ["slider", "list", "grid"];
 
@@ -1434,6 +1573,7 @@ const ViewerCode = React.memo(function ViewerCode({
   id,
   open,
   resource,
+  language,
   order,
   view,
   onView,
@@ -1444,6 +1584,8 @@ const ViewerCode = React.memo(function ViewerCode({
   id: string;
   open: boolean;
   resource: string;
+  /** The Root's `language`, where the resource's start sets one. */
+  language?: string;
   order: ViewerPart[];
   view: ViewValues;
   onView: React.Dispatch<React.SetStateAction<ViewValues>>;
@@ -1632,6 +1774,15 @@ const ViewerCode = React.memo(function ViewerCode({
             ]),
           },
         ];
+      case "annotations":
+        return [
+          {
+            depth: 1,
+            tokens: htmlElement("Annotations", [
+              [attr("heading-level"), punct("="), str('"4"')],
+            ]),
+          },
+        ];
       case "body":
         return [
           { depth: 1, tokens: [punct("<"), tag("clover-body")] },
@@ -1742,6 +1893,15 @@ const ViewerCode = React.memo(function ViewerCode({
           {
             depth: 1,
             tokens: element("Label", [[attr("as"), punct("="), str('"h3"')]]),
+          },
+        ];
+      case "annotations":
+        return [
+          {
+            depth: 1,
+            tokens: element("Annotations", [
+              [attr("headingLevel"), punct("={"), num("4"), punct("}")],
+            ]),
           },
         ];
       case "body":
@@ -1863,6 +2023,9 @@ const ViewerCode = React.memo(function ViewerCode({
         attr("iiif-content"),
         punct("="),
         str(JSON.stringify(resource)),
+        ...(language
+          ? [plain(" "), attr("language"), punct("="), str(`"${language}"`)]
+          : []),
         punct(">"),
       ],
     },
@@ -1900,6 +2063,9 @@ const ViewerCode = React.memo(function ViewerCode({
         attr("iiifContent"),
         punct("="),
         str(JSON.stringify(resource)),
+        ...(language
+          ? [plain(" "), attr("language"), punct("="), str(`"${language}"`)]
+          : []),
         punct(">"),
       ],
     },

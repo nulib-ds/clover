@@ -608,6 +608,17 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     (WCAG 2.4.3). `Connected` and the list's "Open the link" use `showLink(clover, link)`;
     `LoadedCanvas` follows within what it loaded, keeping its `CanvasView` (with
     `manifestId="loading"`) while another Manifest loads, so focus stays.
+  - Annotations in several languages (Mat, 2026-10-25; Northwestern's Maktaba): where a
+    layer gives the same words as separate annotations, one per language
+    (`languagesOf` in `components/Annotations/languages.ts`: two or more languages, split
+    across its annotations, never where each holds them all), its header ends with
+    their codes (`LanguageChoice`, drawn as the Transcript's), one listed at a time:
+    the Root's `language` to start, else the reader's (`startingLanguage`, as
+    `localize` chooses); annotations in no language show either way. Each radio is
+    named by its code and its language's own name (`autonym`, `Intl.DisplayNames`) in
+    that language. The choice is the list's alone: the Canvas's caption and menu still
+    show every language. A layer's first Canvas coming into view brings the layer's
+    header with it, so the choice is never scrolled out of sight.
   - An image body shows in the hotspot's `Tip` (`image`), lazy, re-placed on load.
   - A whole-Canvas annotation (no region, point, shape or time) goes to the caption
     (`wholeCanvasComments`, in the hotspot chunk, so the `i` it brings shows once that
@@ -682,6 +693,9 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `Markup` keeps its line breaks as `<br>` and never loads the sanitizer. The Markdown
   converter (`core/markdown.ts`, footnotes included, 1.7 kB gzip, loaded with the
   sanitizer) is Clover's own; no GFM library (Mat: package size).
+- **Direction.** `Markup` gives IIIF text in a right-to-left language or script
+  `dir="rtl"` beside its `lang` (`directionOf`, `core/direction.ts`: two patterns, as
+  every value reads it), and nothing otherwise, so other text takes the page's.
 - **Markdown.** `core/markdown.ts` escapes `& < > "` before it writes any markup, so no
   source text can close an attribute. Headings are `p[role=heading][aria-level]`, never
   `h1`–`h6`. Levels come from a stack (each heading goes one level under the nearest

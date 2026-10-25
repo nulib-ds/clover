@@ -31,7 +31,16 @@ import { useClover, useCloverSelector } from "../../react/context";
 import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { titleTag } from "../../ui/heading";
 import { HideToggle } from "../../ui/HideToggle";
+import { languageCode } from "../../ui/languageCode";
+import { Tip } from "../../ui/Tip";
+import { useContainerName } from "../../ui/useContainerName";
 import { visuallyHidden } from "../../ui/visuallyHidden";
+import {
+  autonym,
+  inLanguage,
+  languagesOf,
+  startingLanguage,
+} from "./languages";
 
 export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
   /**
@@ -64,6 +73,10 @@ export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
  * - Each set is headed by its AnnotationPage's own label, when it has one, after a toggle
  *   that hides its annotations from the Canvas (`HideToggle`: an eye, "Hide" and the
  *   page's label, or "Hide annotations" for a page without one).
+ * - Where the same words come as separate annotations, one per language (a transcription
+ *   and its translation), the set's header offers their languages by code ("AR", "EN"),
+ *   and lists one at a time: the Root's `language` to start, else the reader's
+ *   (`LanguageChoice`). Annotations in no language show whichever is chosen.
  */
 export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
   function Annotations(
@@ -208,6 +221,12 @@ function AnnotationGroup({
   const id = useUniqueId();
   // Headings in an entry's Markdown sit under the set's own, or at its level without one.
   const headingLevel = title.text ? setLevel + 1 : setLevel;
+  const languages = useMemo(() => languagesOf(entries), [entries]);
+  const [picked, setPicked] = useState<string>();
+  const chosen = languages.includes(picked ?? "")
+    ? picked
+    : startingLanguage(languages, language);
+  const listed = entries.filter((entry) => inLanguage(entry, chosen));
   return (
     <section
       className="clover-annotations-set"
@@ -230,9 +249,16 @@ function AnnotationGroup({
             {title.text}
           </Heading>
         )}
+        {chosen && (
+          <LanguageChoice
+            languages={languages}
+            chosen={chosen}
+            onChange={setPicked}
+          />
+        )}
       </div>
       <ol className="clover-annotations-list">
-        {entries.map((entry, index) => (
+        {listed.map((entry, index) => (
           <AnnotationItem
             key={entry.id}
             entry={entry}
@@ -459,6 +485,8 @@ const AnnotationLayers = forwardRef<
     [canvases],
   );
   const elsewhere = useElsewhere(layers, canvasById);
+  // Each layer's language, where it offers a choice: the reader's, by layer, once picked.
+  const [picked, setPicked] = useState<Record<string, string>>({});
   const manifestLabel = useCloverSelector((state) => state.manifest?.label);
   const title = useMemo(
     () => localize(manifestLabel as LanguageMapLike, language),
@@ -496,7 +524,14 @@ const AnnotationLayers = forwardRef<
         ),
       )
       .find(Boolean);
-    if (group) bringIntoView(group, "start");
+    if (!group) return;
+    /*
+     * The first Canvas of its layer brings the layer's header too, its eye and its
+     * languages (`LanguageChoice`), rather than scrolling them out of sight.
+     */
+    const layer = group.closest<HTMLElement>(".clover-annotations-set");
+    const first = layer?.querySelector("[data-canvas]") === group;
+    bringIntoView(first && layer ? layer : group, "start");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shownKey]);
   // One chosen on the Canvas is brought into view.
@@ -530,6 +565,12 @@ const AnnotationLayers = forwardRef<
         const hidden = layer.setIds.every((setId) =>
           hiddenSets.includes(setId),
         );
+        const languages = languagesOf(
+          layer.canvases.flatMap((group) => group.entries),
+        );
+        const chosen = languages.includes(picked[layer.key] ?? "")
+          ? picked[layer.key]
+          : startingLanguage(languages, language);
         return (
           <section
             key={layer.key}
@@ -553,8 +594,21 @@ const AnnotationLayers = forwardRef<
                   {layer.title.text}
                 </Title>
               )}
+              {chosen && (
+                <LanguageChoice
+                  languages={languages}
+                  chosen={chosen}
+                  onChange={(tag) =>
+                    setPicked((current) => ({ ...current, [layer.key]: tag }))
+                  }
+                />
+              )}
             </div>
             {layer.canvases.map((group, groupIndex) => {
+              const entries = group.entries.filter((entry) =>
+                inLanguage(entry, chosen),
+              );
+              if (!entries.length) return null;
               // A Manifest of one Canvas has nothing to tell apart: no label, no mark.
               /*
                * On a Canvas of another Manifest the annotations name: named by that
@@ -597,7 +651,7 @@ const AnnotationLayers = forwardRef<
                     </Label>
                   )}
                   <ol className="clover-annotations-list">
-                    {group.entries.map((entry, index) => (
+                    {entries.map((entry, index) => (
                       <AnnotationItem
                         key={entry.id}
                         entry={entry}
@@ -623,6 +677,57 @@ const AnnotationLayers = forwardRef<
     </Tag>
   );
 });
+
+/**
+ * A set's languages, where its annotations come one per language: a row of their codes
+ * ("AR", "EN"), drawn as the Transcript's are, one chosen. Native radios, one stop in the
+ * tab order, the arrow keys moving between them; the row named "Language", each radio by
+ * its code and then its language's own name in that language (WCAG 2.5.3, 3.1.2), which
+ * its popover shows.
+ */
+function LanguageChoice({
+  languages,
+  chosen,
+  onChange,
+}: {
+  languages: string[];
+  chosen: string;
+  onChange: (tag: string) => void;
+}) {
+  const { t, langOf } = useCloverTranslation();
+  const id = useUniqueId();
+  const name = useContainerName(
+    t("annotationsLanguage"),
+    langOf("annotationsLanguage"),
+  );
+  return (
+    <>
+      {name.node}
+      <fieldset {...name.props} className="clover-annotations-languages">
+        {languages.map((tag) => {
+          const own = autonym(tag);
+          return (
+            <label key={tag} className="clover-annotations-language">
+              <input
+                type="radio"
+                name={`${id}-language`}
+                checked={tag === chosen}
+                onChange={() => onChange(tag)}
+              />
+              <span className="clover-annotations-language-code">
+                {languageCode(tag)}
+              </span>{" "}
+              <span style={visuallyHidden} lang={tag}>
+                {own}
+              </span>
+              <Tip label={own} lang={tag} />
+            </label>
+          );
+        })}
+      </fieldset>
+    </>
+  );
+}
 
 /** A region's picture: an `l` square (about a line), fetched at twice that for dense screens. */
 const THUMBNAIL_SIZE = 52;

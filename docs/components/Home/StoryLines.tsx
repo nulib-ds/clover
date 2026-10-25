@@ -191,7 +191,21 @@ export const StoryLines = React.memo(function StoryLines({
       else if (toFoot > BAND) atFoot = false;
       if (atFoot && story === stories.at(-1)) story = null;
 
-      const point = story?.dataset.point ?? "";
+      /*
+       * A part this resource's viewer does not show (Seamless's Items, where the
+       * Footage's viewer has its annotations instead; `STARTS`, `PartsLive.tsx`): the line
+       * goes to the viewer as a whole. Not for a story that turns the viewer to another
+       * face, whose part is there and not yet shown.
+       */
+      const named = story?.dataset.point ?? "";
+      const absent =
+        Boolean(story) &&
+        named !== "" &&
+        named !== WHOLE &&
+        !story!.dataset.recipe &&
+        !story!.hasAttribute("data-turn") &&
+        !viewer.current?.querySelector(`[data-part="${CSS.escape(named)}"]`);
+      const point = absent ? WHOLE : named;
       const whole = point === WHOLE;
 
       // The tiles crossing the middle of the window, lit with their parts.

@@ -302,7 +302,9 @@ deadline.
     fit (Mat, 2026-10-25: "these stack too early"): the template's half never narrower
     than its words and its two calls to action on one line: from 64rem, where the example
     viewer is held, the parts' own columns, the card's hairline in the middle of their
-    gap and each half's words 1.618rem in, where the viewer's and the tiles' start; under it, half and half
+    gap and each half's words in from it by more as the window widens, 1.618rem at
+    1025px to the card's own padding (Mat, 2026-10-25: "increase padding left/right at
+    wide viewports"); under it, half and half
     (Mat, 2026-10-25: "it should just go 50/50 once the floating viewer goes away"); the
     building blocks' note wrapping before its title would; one above the other under
     48rem, each half centered. The
@@ -315,10 +317,10 @@ deadline.
   - After the parts, "Why Clover" tells six stories, one at a time: Adaptable, Accessible,
     Seamless, Composable, Lightweight, Natural, on the page's ground and the code editor's
     black in turn, Adaptable on the ground so Accessible keeps its black (Mat, 2026-10-20
-    and 2026-10-25). Adaptable (Versatile until 2026-10-25; its title "Multimodal by design.") is about formats: in its figures' column, a thumbnail of
-    each (Image, A/V, its name spelled out for a screen reader, 3D model, Text: the playground's Catalog, Footage, Model and Manuscript; Mat, 2026-10-25), native radios, one tab stop, the chosen one ringed as a chosen swatch is
+    and 2026-10-25). Adaptable (Versatile until 2026-10-25; its title "Multimodal first.", short enough for one line at every width) is about formats: in its figures' column, a thumbnail of
+    each (Image, Audio & video, 3D model, Text: the playground's Catalog, Footage, Model and Manuscript; Mat, 2026-10-25), native radios, one tab stop, drawn as Clover's Items draws its items (the accent's 3px ring 1px clear when chosen, half of it under the pointer, its name in the text accent; focus in the text's color with a two-tone ring inside)
     (`FormatPicker.tsx`), each opening its resource in the playground and so in the held
-    viewer; two by two beside the words, a row of four under them where the story stacks (Mat, 2026-10-25: "the examples get VERY large"); its line goes to Body (`data-point="body"`). A pick holds the story where it is
+    viewer; two by two beside the words, a row of four under them where the story stacks (Mat, 2026-10-25: "the examples get VERY large"); its line goes to Body (`data-point="body"`). Some resources start the held viewer their own way (`STARTS` in `PartsLive.tsx`; Mat, 2026-10-25): the Footage with its annotations under its Body (the other examples' 240) in place of Items, Summary and Metadata, in a box of one height for every resource, so the viewers match, the Other Defendants page put away, "Hess is led out of the dock" picked, and its film playing, muted, once in view (never where the reader asks for reduced motion); the Manuscript (Maktaba's, the Text) with its annotations under its Body likewise, in the reader's language to start, English here, Arabic a press away (Mat, 2026-10-25; the Annotations page's example starts in Arabic, its Root's `language`); a story whose part such a viewer lacks draws its line to the viewer as a whole (`StoryLines.tsx`). A pick holds the story where it is
     in the window, frame by frame, while the parts above it load again, with the browser's
     scroll anchoring off and the page's height kept meanwhile (Safari has no anchoring, and
     Firefox's loses its anchor as the tiles empty). Set apart from the parts by size, not colors of

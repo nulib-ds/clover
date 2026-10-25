@@ -12,6 +12,34 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Annotations in several languages (Mat, 2026-10-25).** Where a layer gives the same
+  words as separate annotations, one per language (a transcription and its translation,
+  as Northwestern's Maktaba publishes them), `Annotations` lists one language at a time,
+  offered by their codes at the end of the layer's header ("AR", "EN"), drawn as the
+  Transcript's are: native radios in a group named "Language", each named by its code
+  and then its language's own name in that language ("AR العربية"), which its popover
+  shows. It starts on the Root's `language`, else the reader's, as IIIF text is chosen;
+  annotations in no language show whichever is chosen. Nothing changes where a layer is
+  in one language, or where each annotation holds all of its languages. One string,
+  `annotationsLanguage`, in every locale. With right-to-left text (below), it adds about
+  0.18 kB gzip wherever Annotations is, so budgets are raised for it: Default's page to
+  68.9 kB, Document's to 71.4, Gallery's to 59.9, a layout of the containers to 110.4, a
+  `<clover-viewer>` page to 111.3 (its own entry 92.8), and
+  `<clover-viewer template="document">` to 117.6.
+
+  ```jsx
+  <Clover.Root iiifContent={manuscript} language="ar">
+    <Clover.Body />
+    <Clover.Annotations />
+  </Clover.Root>
+  ```
+
+- **Right-to-left text (Mat, 2026-10-25).** IIIF text in a language written right to
+  left (Arabic, Hebrew, Persian, Urdu…, or a right-to-left script subtag) carries
+  `dir="rtl"` beside its `lang`, wherever Clover shows a value (`Summary`, `Metadata`,
+  annotations, captions' information), so it aligns and orders as it is written. Other
+  text carries no `dir` and takes the page's.
+
 - **`partOf` on `Canvas` and `Timeline` (Mat, 2026-10-24).** What the view is part of,
   named under its title where a lone recording plays as a player (below): the Manifest's
   label by default, inside a `Root` or given `iiifContent`.

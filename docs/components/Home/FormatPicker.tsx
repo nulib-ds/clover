@@ -8,10 +8,9 @@ import { resourceByKey } from "docs/components/Playground/playground-config";
  * The formats Clover opens, each by one of the playground's resources (Mat, 2026-10-25:
  * images, A/V, 3D models and textual materials), in the order the story names them.
  */
-const FORMATS: { name: string; more?: string; key: string }[] = [
+const FORMATS: { name: string; key: string }[] = [
   { name: "Image", key: "catalog" },
-  // "A/V" shown (Mat, 2026-10-25), spelled out after it for a screen reader (`more`).
-  { name: "A/V", more: " (audio and video)", key: "footage" },
+  { name: "Audio & video", key: "footage" },
   { name: "3D model", key: "model" },
   { name: "Text", key: "manuscript" },
 ];
@@ -111,16 +110,7 @@ export function FormatPicker({
                 <img src={resource.thumbnail} alt="" loading="lazy" />
               )}
             </span>
-            {/*
-             * Its name the visible word, and where that is short, the words after it,
-             * read but not shown, so the name still begins with what is seen (WCAG 2.5.3).
-             */}
-            <span className={styles.formatName}>
-              {format.name}
-              {format.more && (
-                <span className={styles.visuallyHidden}>{format.more}</span>
-              )}
-            </span>
+            <span className={styles.formatName}>{format.name}</span>
           </label>
         );
       })}

@@ -713,3 +713,167 @@ describe("Annotations, every Canvas's (scope all)", () => {
     expect(panel).toHaveTextContent("Comment 2");
   });
 });
+
+describe("Annotations in several languages", () => {
+  const base = "https://example.org/languages";
+  const text = (
+    canvas: number,
+    id: string,
+    value: string,
+    language?: string,
+  ) => ({
+    id: `${base}/annotation/${id}`,
+    type: "Annotation",
+    motivation: "supplementing",
+    body: {
+      type: "TextualBody",
+      value,
+      format: "text/plain",
+      ...(language ? { language } : {}),
+    },
+    target: `${base}/canvas/${canvas}`,
+  });
+  // A transcription and its translation, one annotation each, as Maktaba publishes them,
+  // and a note in no language on the first page.
+  const manifest = {
+    "@context": "http://iiif.io/api/presentation/3/context.json",
+    id: `${base}/manifest.json`,
+    type: "Manifest",
+    label: { none: ["A manuscript"] },
+    items: [1, 2].map((n) => ({
+      id: `${base}/canvas/${n}`,
+      type: "Canvas",
+      label: { none: [`Folio ${n}`] },
+      width: 100,
+      height: 100,
+      items: [],
+      annotations: [
+        {
+          id: `${base}/page/${n}`,
+          type: "AnnotationPage",
+          items: [
+            text(n, `en-${n}`, `In the name of God ${n}`, "en"),
+            text(n, `ar-${n}`, `بسم الله ${n}`, "ar"),
+            ...(n === 1 ? [text(n, "note", "Folio stamped")] : []),
+          ],
+        },
+      ],
+    })),
+  };
+
+  it("offers their languages by code, each named in its own language, and lists the reader's", async () => {
+    render(
+      <Clover.Root iiifContent={manifest}>
+        <Clover.Annotations scope="all" />
+      </Clover.Root>,
+    );
+    await screen.findByText("In the name of God 1");
+    const languages = screen.getByRole("group", { name: "Language" });
+    expect(
+      within(languages)
+        .getAllByRole("radio")
+        .map((radio) => radio.closest("label")?.textContent?.split(/\s/)[0]),
+    ).toEqual(["EN", "AR"]);
+    expect(
+      within(languages).getByRole("radio", { name: /^EN English/ }),
+    ).toBeChecked();
+    expect(
+      within(languages).getByRole("radio", { name: /^AR العربية/ }),
+    ).not.toBeChecked();
+    expect(screen.getByText("In the name of God 2")).toBeInTheDocument();
+    expect(screen.queryByText("بسم الله 1")).toBeNull();
+    // In no language: shown whichever is chosen.
+    expect(screen.getByText("Folio stamped")).toBeInTheDocument();
+  });
+
+  it("starts on the Root's language, its text written right to left, and changes as chosen", async () => {
+    render(
+      <Clover.Root iiifContent={manifest} language="ar">
+        <Clover.Annotations scope="all" />
+      </Clover.Root>,
+    );
+    const shown = { selector: ".clover-annotations-text" };
+    const arabic = await screen.findByText("بسم الله 1", shown);
+    expect(arabic.closest("[lang]")).toHaveAttribute("lang", "ar");
+    expect(arabic.closest("[lang]")).toHaveAttribute("dir", "rtl");
+    expect(screen.queryByText("In the name of God 1", shown)).toBeNull();
+    expect(screen.getByText("Folio stamped", shown)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("radio", { name: /^EN/ }));
+    const english = await screen.findByText("In the name of God 1", shown);
+    expect(screen.queryByText("بسم الله 1", shown)).toBeNull();
+    expect(english).not.toHaveAttribute("dir");
+  });
+
+  it("does the same for the view's alone", async () => {
+    render(
+      <Clover.Root iiifContent={manifest} language="ar">
+        <Clover.Annotations scope="view" />
+      </Clover.Root>,
+    );
+    const shown = { selector: ".clover-annotations-text" };
+    await screen.findByText("بسم الله 1", shown);
+    fireEvent.click(screen.getByRole("radio", { name: /^EN/ }));
+    expect(
+      await screen.findByText("In the name of God 1", shown),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("بسم الله 1", shown)).toBeNull();
+  });
+
+  it("offers no choice where each annotation holds every language, or there is one", async () => {
+    const both = {
+      ...manifest,
+      items: manifest.items.map((canvas, index) => ({
+        ...canvas,
+        annotations: [
+          {
+            id: `${base}/page/both-${index}`,
+            type: "AnnotationPage",
+            items: [
+              {
+                ...text(index + 1, `both-${index}`, ""),
+                body: [
+                  text(index + 1, "x", `Words ${index}`, "en").body,
+                  text(index + 1, "y", `كلمات ${index}`, "ar").body,
+                ],
+              },
+            ],
+          },
+        ],
+      })),
+    };
+    const { unmount } = render(
+      <Clover.Root iiifContent={both}>
+        <Clover.Annotations scope="all" />
+      </Clover.Root>,
+    );
+    await screen.findByText("Words 1", {
+      selector: ".clover-annotations-text",
+    });
+    expect(screen.queryByRole("group", { name: "Language" })).toBeNull();
+    unmount();
+
+    const english = {
+      ...manifest,
+      items: manifest.items.map((canvas, index) => ({
+        ...canvas,
+        annotations: [
+          {
+            id: `${base}/page/en-${index}`,
+            type: "AnnotationPage",
+            items: [text(index + 1, `only-${index}`, `English ${index}`, "en")],
+          },
+        ],
+      })),
+    };
+    render(
+      <Clover.Root iiifContent={english}>
+        <Clover.Annotations scope="all" />
+      </Clover.Root>,
+    );
+    await screen.findByText("English 1", {
+      selector: ".clover-annotations-text",
+    });
+    expect(screen.queryByRole("group", { name: "Language" })).toBeNull();
+  });
+});

@@ -542,8 +542,7 @@
  *
  * Where the example viewer is held beside the tiles (64rem and up), the parts' own columns
  * (`Parts.module.css`'s `.grid`), so the card lines up with what is under it: the
- * hairline in the middle of their gap, each half's words where the viewer's and the
- * tiles' start.
+ * hairline in the middle of their gap.
  * Under that, where the viewer no longer floats, half and half (Mat, 2026-10-25: "it
  * should just go 50/50 once the floating viewer goes away"). Either way the template's
  * half is never narrower than its words and its two calls to action on one line, and the
@@ -593,17 +592,22 @@
   }
 
   /*
-   * Each half's words in from its column's edge as the viewer's and the tiles' are from
-   * theirs (1.618rem, `Parts.module.css`), so the template's line up with the viewer's
-   * and the building blocks' with the tiles'.
+   * Each half's words in from its column's edge by more as the window widens (Mat,
+   * 2026-10-25: "increase padding left/right at wide viewports"), up to the card's own
+   * room over and under them: 1.618rem at 1025px, where the template's words and buttons
+   * just fill their column, so the hairline stays in the middle of the parts' gap.
    */
+  .choice {
+    --choice-inset: clamp(1.618rem, 10vw - 4.75rem, var(--choice-pad));
+  }
+
   .choice > .template {
-    padding-inline-start: 1.618rem;
+    padding-inline-start: var(--choice-inset);
   }
 
   .build {
     border-inline-start: 0;
-    padding-inline: 1.618rem;
+    padding-inline: var(--choice-inset);
     position: relative;
   }
 

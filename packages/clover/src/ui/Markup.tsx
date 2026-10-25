@@ -8,6 +8,7 @@ import {
   toPlainText,
 } from "../core/text";
 import { type LanguageMapLike, localize } from "../core/value";
+import { directionOf } from "../core/direction";
 
 /**
  * A IIIF value, which may hold the HTML the Presentation API allows.
@@ -59,7 +60,10 @@ type MarkupProps = {
   headingLevel?: number;
   /** The language to read the value in; the reader's by default. */
   language?: string;
-} & Omit<React.HTMLAttributes<HTMLElement>, "dangerouslySetInnerHTML" | "lang">;
+} & Omit<
+  React.HTMLAttributes<HTMLElement>,
+  "dangerouslySetInnerHTML" | "lang" | "dir"
+>;
 
 /** A IIIF language map, in the closest language, as sanitized HTML. Nothing when empty. */
 export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
@@ -67,6 +71,8 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
   ref,
 ) {
   const { text, lang } = localize(markup, language);
+  // Written right to left where its language is (Arabic, Hebrew…), else as the page is.
+  const dir = directionOf(lang);
   const kind = readAs(format, text);
   const markdown = kind === "markdown";
   // Plain text is never markup: nothing is sanitized, so nothing loads for it.
@@ -78,7 +84,7 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
   if (!text) return null;
   if (kind === "plain")
     return (
-      <Tag ref={ref} {...rest} lang={lang}>
+      <Tag ref={ref} {...rest} lang={lang} dir={dir}>
         {text.split(/\r?\n/).map((line, index) => (
           <React.Fragment key={index}>
             {index > 0 && <br />}
@@ -92,11 +98,12 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
       ref={ref}
       {...rest}
       lang={lang}
+      dir={dir}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   ) : (
     // Until the sanitizer arrives, Markdown shows without its syntax.
-    <Tag ref={ref} {...rest} lang={lang}>
+    <Tag ref={ref} {...rest} lang={lang} dir={dir}>
       {markdown ? markdownToPlainText(text) : toPlainText(text)}
     </Tag>
   );

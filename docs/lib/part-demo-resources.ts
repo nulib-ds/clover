@@ -29,6 +29,13 @@ export const RESOURCES = {
   collection:
     "https://api.dc.library.northwestern.edu/api/v2/collections/c373ecd2-2c45-45f2-9f9e-52dc244870bd?as=iiif",
   /**
+   * An Arabic manuscript of about 1800, as Northwestern's Maktaba publishes it (not a
+   * mock): each page's Arabic text and its English translation, one annotation each, for
+   * Annotations' languages (Mat, 2026-10-25), as the homepage's Text is.
+   */
+  manuscript:
+    "https://iiif-maktaba.dc.library.northwestern.edu/dc8ff749-adad-42a7-81e0-0eb473ef88a5.json",
+  /**
    * Northwestern's Hindenburg broadcast, its reel's box accompanying the sound, for
    * `Timeline`, as the homepage's Recording is (Mat, 2026-10-24). A Presentation 3 Canvas
    * of sound, which Clover upgrades to a Timeline.

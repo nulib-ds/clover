@@ -46,7 +46,9 @@ Inside a `Root`, it lists every Canvas's annotations, and those of pages the Roo
 `annotations` adds, by layer (AnnotationPages that share a label) and then by Canvas; with
 none, it renders nothing. Pressing one finds it on the Canvas, and the eye before a layer
 hides the layer there; in a box that scrolls, the Canvases in view come to its top as the
-reader moves. Its other props, and its `ref`, go to its element.
+reader moves. Where a layer gives the same words as separate annotations, one per language,
+it lists one language at a time, offered by their codes in its header: the Root's
+`language` to start, else the reader's. Its other props, and its `ref`, go to its element.
 
 <ApiReference elements="clover-annotations">
 
@@ -78,6 +80,34 @@ follow the defendants through the film, in two layers; its captions are the
 
 ```jsx {3}
 <Clover.Root iiifContent="https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/manifest.json">
+  <Clover.Body />
+  <Clover.Annotations />
+</Clover.Root>
+```
+
+</Example>
+
+### In several languages
+
+Where a page gives its words once per language, a transcription and its translation, each
+an annotation of its own, Annotations offers their languages by code and lists one at a
+time. It starts on the Root's `language`, here Arabic, and Arabic text is written right to
+left. This manuscript's English is Ariela Marcus-Sells's translation.
+
+<Example>
+<PartDemo
+  part="Annotations"
+  resource="manuscript"
+  rootProps={{ language: "ar" }}
+  props={{ headingLevel: 4, style: { maxHeight: "20rem", overflowY: "auto" } }}
+  body
+/>
+
+```jsx {3,6}
+<Clover.Root
+  iiifContent="https://iiif-maktaba.dc.library.northwestern.edu/dc8ff749-adad-42a7-81e0-0eb473ef88a5.json"
+  language="ar"
+>
   <Clover.Body />
   <Clover.Annotations />
 </Clover.Root>

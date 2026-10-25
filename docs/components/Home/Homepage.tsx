@@ -110,8 +110,8 @@ const stories: Story[] = [
     // Body, which draws each format, switching between Canvas, Timeline and Scene.
     point: "body",
     formats: true,
-    title: "Multimodal by design.",
-    body: "Images, sound, film, 3D models and the printed page all open in the same viewer, each with the controls it needs. Choose one and the example viewer takes it in.",
+    title: "Multimodal first.",
+    body: "Images, audio/video, 3D models and the printed page all open in the same viewer, each with the controls it needs. Choose one and the example viewer takes it in.",
     figures: [],
   },
   {

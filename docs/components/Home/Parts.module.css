@@ -907,6 +907,19 @@
  * The fields as far as the Date, whole, and no further: the cut falls in the gap before
  * the next label, faded across it, so a field running past it elsewhere fades out too.
  */
+/*
+ * The viewer's annotations, where a resource's start shows them under its Body (the
+ * Footage's; `STARTS`, `PartsLive.tsx`): small, as its other parts are, in a box of their
+ * own that scrolls, as tall as a third of the window, 16rem at most (Mat, 2026-10-25: "a
+ * little taller"), and that tall however few they are, so every resource's viewer is the
+ * same height ("match height of these").
+ */
+.viewerAnnotations {
+  font-size: var(--text-sm);
+  height: clamp(9rem, 30vh, 16rem);
+  overflow: hidden auto;
+}
+
 .viewerFields {
   font-size: var(--text-sm);
   margin: 0;

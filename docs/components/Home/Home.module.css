@@ -533,13 +533,25 @@
   position: relative;
 }
 
+/*
+ * Drawn as Clover's Items draws its items (`Items.css`; Mat, 2026-10-25: "style like an
+ * active item in Items and Collection"): a 3px ring 1px clear of the picture, transparent
+ * at rest, the accent at half strength under the pointer and the accent when chosen, its
+ * name then in the text accent, semibold; focus rings it in the text's color, with a
+ * second ring inside the picture's edge, the ground's color and the text's, so focus shows
+ * by its shape over any picture (WCAG 1.4.1, 1.4.11, C40). In forced colors, Highlight and
+ * CanvasText.
+ */
 .formatThumb {
   aspect-ratio: 1;
   background: var(--gray-3);
-  border-radius: var(--radius-3);
-  box-shadow: 0 0 0 1px var(--gray-6);
+  border-radius: var(--radius-2);
   display: block;
+  outline: 3px solid var(--ring-color, transparent);
+  outline-offset: 1px;
   overflow: hidden;
+  position: relative;
+  transition: outline-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .formatThumb img {
@@ -549,25 +561,45 @@
   width: 100%;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .formatThumb img {
-    transition: transform 200ms ease;
-  }
-
-  .format:hover .formatThumb img {
-    transform: scale(1.04);
-  }
+.format:hover .formatThumb {
+  --ring-color: color-mix(in srgb, var(--accent-9) 50%, transparent);
 }
 
 .format input:checked + .formatThumb {
-  box-shadow:
-    0 0 0 2px var(--color-background),
-    0 0 0 4px var(--gray-12);
+  --ring-color: var(--accent-9);
 }
 
 .format input:focus-visible + .formatThumb {
-  outline: 2px solid var(--accent-11);
-  outline-offset: 6px;
+  --ring-color: var(--gray-12);
+}
+
+.format input:focus-visible + .formatThumb::after {
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 4px var(--gray-12);
+  content: "";
+  inset: 0;
+  outline: 2px solid var(--color-background);
+  outline-offset: -2px;
+  pointer-events: none;
+  position: absolute;
+}
+
+@media (forced-colors: active) {
+  .formatThumb {
+    outline-color: var(--ring-color, Canvas);
+  }
+
+  .format input:checked + .formatThumb {
+    --ring-color: Highlight;
+  }
+
+  .format input:focus-visible + .formatThumb {
+    --ring-color: CanvasText;
+  }
+
+  .format input:focus-visible + .formatThumb::after {
+    outline-color: CanvasText;
+  }
 }
 
 .formatName {
@@ -577,8 +609,8 @@
 }
 
 .format input:checked ~ .formatName {
-  color: var(--gray-12);
-  font-weight: var(--weight-bold);
+  color: var(--accent-11);
+  font-weight: 600;
 }
 
 /* A value the brand changed, lit a moment: an overlay fading by opacity alone. */
