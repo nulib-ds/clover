@@ -12,6 +12,11 @@
   list-style: none;
 }
 
+/* Every provider left out, as its logo alone failed to load (`ProviderItem`): no list. */
+.clover-provider:empty {
+  display: none;
+}
+
 .clover-provider-agent {
   display: flex;
   align-items: center;

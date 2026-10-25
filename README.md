@@ -2,8 +2,7 @@
 
 **A [Northwestern University Libraries](https://www.library.northwestern.edu/) project.**
 
-A viewer as distinctive as your collections. Design a user experience rooted in IIIF with
-Clover.
+A viewer as distinctive as your collections. Design a user experience rooted in IIIF.
 
 Clover builds accessible viewers for IIIF Manifests and Collections, in React or as web
 components: a ready-made `Viewer`, and the parts it is made of, to compose your own. This repository holds the package,

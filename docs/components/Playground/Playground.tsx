@@ -74,9 +74,12 @@ function usePressOutside(
 }
 
 /**
- * Marks the bar `data-stuck` while it is held under the navbar with the Viewer passing
- * beneath it: from when the Viewer's top goes under the bar's foot until the bar, let go
- * where the Viewer ends, has gone up under the navbar. Its stylesheet holds the bar only
+ * Marks the bar `data-stuck` while it is held under the navbar with the Viewer, and then
+ * the parts, passing beneath it: from when the Viewer's top goes under the bar's foot
+ * until the bar, let go where the stories begin (`[data-bar-until]`), has gone up under
+ * the navbar. It is held that far as its box reaches there (`.reach`), from the
+ * Viewer's foot to the story's top, read each frame with the rest, as the parts above
+ * the story change height while they load and fold. Its stylesheet holds the bar only
  * where the screen has room for it; elsewhere the Viewer never reaches under it.
  *
  * Read from the two boxes once a frame while the page scrolls, and written to the bar
@@ -98,8 +101,30 @@ function useStuck(
     let frame = 0;
     // The line the bar is held at, the navbar's foot: 0 where the bar is not sticky.
     let line = 0;
+    const hold = node.parentElement;
+    /*
+     * How far its box reaches: from the Viewer's foot to the first story's top. Read with
+     * the rest each frame (the parts above the stories change height as they load and
+     * fold, while the page's own height may be held), written only when it changes.
+     */
+    const until = document.querySelector("[data-bar-until]");
+    const spacer = hold?.querySelector<HTMLElement>("[data-reach]");
+    const stretch = () => {
+      if (!hold || !spacer || !until) return;
+      const reach = `${Math.round(
+        Math.max(
+          0,
+          until.getBoundingClientRect().top -
+            under.getBoundingClientRect().bottom,
+        ),
+      )}px`;
+      if (spacer.style.height === reach) return;
+      spacer.style.height = reach;
+      hold.style.marginBottom = `-${reach}`;
+    };
     const read = () => {
       frame = 0;
+      stretch();
       const { bottom } = node.getBoundingClientRect();
       const stuck =
         bottom > line + 1 && under.getBoundingClientRect().top < bottom;
@@ -111,6 +136,15 @@ function useStuck(
     const measure = () => {
       line = parseFloat(getComputedStyle(node).top) || 0;
       root.style.scrollPaddingTop = line ? `${line + node.offsetHeight}px` : "";
+      /*
+       * Its height, for the example viewer held beside the parts, under it (`Parts`):
+       * written only when it changes. The reach is written to the spacer and the box
+       * themselves, never as a custom property on a box the Viewer is in, which all of it
+       * would inherit.
+       */
+      const height = `${node.offsetHeight}px`;
+      if (root.style.getPropertyValue("--bar-height") !== height)
+        root.style.setProperty("--bar-height", height);
       read();
     };
     const schedule = () => {
@@ -126,6 +160,11 @@ function useStuck(
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", measure);
       root.style.scrollPaddingTop = "";
+      root.style.removeProperty("--bar-height");
+      if (hold) hold.style.marginBottom = "";
+      hold
+        ?.querySelector<HTMLElement>("[data-reach]")
+        ?.style.removeProperty("height");
       root.removeAttribute("data-bar-stuck");
     };
   }, [bar, viewer]);
@@ -154,9 +193,12 @@ export interface PlaygroundProps {
   onResourceChange?: (resource: string, key: string) => void;
 }
 
-/** For the page around the playground: open one of its resources in the Viewer. */
+/** For the page around the playground: open a resource in its Viewer. */
 export interface PlaygroundHandle {
+  /** One of its resources, by key. */
   pickResource: (key: string) => void;
+  /** Any address or content state: one of its resources if it is one, else the reader's own. */
+  openContent: (content: string) => void;
 }
 
 const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
@@ -290,8 +332,6 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
       syncUrl(active, chosen ? addressOf(chosen) : null);
     };
 
-    useImperativeHandle(ref, () => ({ pickResource: selectResource }));
-
     /* The reader's own: an address or a content state, which may have places. */
     const openOwn = (content: string) => {
       loadMapWorker();
@@ -299,6 +339,22 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
       setPicked(OWN);
       syncUrl(active, content);
     };
+
+    /*
+     * A resource opened below, by the parts' Collection (Mat, 2026-10-25: "clicking a
+     * collection item … should adjust the Viewing select"): ours where it is ours, so the
+     * field shows it as listed, else the reader's own, which joins the list.
+     */
+    const openContent = (content: string) => {
+      const match = resources.find((r) => addressOf(r) === content);
+      if (match) selectResource(match.key);
+      else openOwn(content);
+    };
+
+    useImperativeHandle(ref, () => ({
+      pickResource: selectResource,
+      openContent,
+    }));
 
     /*
      * The templates: a button naming the Viewer's, opening a list of the four. Arrow
@@ -342,8 +398,12 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
           <h2 className={styles.visuallyHidden} id="playground-title">
             Try the templates
           </h2>
-          {/* The bar is held only as far as the Viewer reaches, and leaves with it. */}
-          <div>
+          {/*
+           * The bar is held past the Viewer, through the parts, as far as the stories'
+           * first (Mat, 2026-10-25), and leaves with it: this box reaches that far
+           * (`.reach`, measured by `useStuck`), and gives the room back after it.
+           */}
+          <div className={styles.hold}>
             <div className={styles.bar} ref={barRef}>
               <ResourceField
                 current={current}
@@ -368,6 +428,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
                 />
               )}
             </div>
+            <div aria-hidden="true" className={styles.reach} data-reach="" />
           </div>
         </section>
 

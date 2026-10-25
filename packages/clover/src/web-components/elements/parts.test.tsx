@@ -144,6 +144,33 @@ describe("The parts that read a root's state, as elements", () => {
     );
   });
 
+  it("draws no broken logo, and drops a provider its logo alone stood for", async () => {
+    const element = root(`
+      <clover-provider data-test="whole"></clover-provider>
+      <clover-provider data-test="logos"><clover-logo></clover-logo></clover-provider>
+    `);
+    const part = (name: string) =>
+      element.querySelector<HTMLElement>(`[data-test="${name}"]`)!;
+    const name = "Northwestern University Libraries";
+    await waitFor(() =>
+      expect(part("logos").querySelector("img")).not.toBeNull(),
+    );
+    await waitFor(() =>
+      expect(part("whole").querySelector("img")).not.toBeNull(),
+    );
+    fireEvent.error(part("logos").querySelector("img")!);
+    fireEvent.error(part("whole").querySelector("img")!);
+    // The logo alone: no picture and no empty link, an empty list its stylesheet hides.
+    await waitFor(() =>
+      expect(part("logos").querySelector("ul")).toBeEmptyDOMElement(),
+    );
+    // The logo beside the name: the name, still linked.
+    await waitFor(() => expect(part("whole").querySelector("img")).toBeNull());
+    expect(
+      within(part("whole")).getByRole("link", { name }),
+    ).toBeInTheDocument();
+  });
+
   it("reads the Canvas in view with of=canvas, and shows a value given it, anywhere", async () => {
     const element = root(`
       <clover-label of="canvas" as="p"></clover-label>

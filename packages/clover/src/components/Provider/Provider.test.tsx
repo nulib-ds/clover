@@ -1,4 +1,10 @@
-import { render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import React from "react";
 
 import { initCloverI18n } from "../../i18n";
@@ -129,6 +135,35 @@ describe("Provider", () => {
     ).toHaveAttribute("href", "https://example.org/");
   });
 
+  it("drops a provider whose logo it drew alone once that logo fails to load", () => {
+    const { container } = render(
+      <Clover.Provider value={[library, unnamed]}>
+        <Clover.Logo />
+      </Clover.Provider>,
+    );
+    fireEvent.error(screen.getByRole("img", { name: "The press" }));
+    // No broken picture, and no empty link left behind, a tab stop with no name.
+    expect(screen.queryByRole("img", { name: "The press" })).toBeNull();
+    expect(
+      screen.getAllByRole("link").map((link) => link.getAttribute("href")),
+    ).toEqual(["https://example.org/"]);
+    fireEvent.error(
+      screen.getByRole("img", { name: "Bibliothèque d'exemple" }),
+    );
+    // No provider left: an empty list, which its stylesheet hides.
+    expect(container.querySelector(".clover-provider")).toBeEmptyDOMElement();
+  });
+
+  it("keeps a provider's name, linked, when the logo beside it fails to load", () => {
+    render(<Clover.Provider value={[library]} />);
+    const link = screen.getByRole("link", { name: "Bibliothèque d'exemple" });
+    fireEvent.error(within(link).getByRole("presentation"));
+    expect(within(link).queryByRole("presentation")).toBeNull();
+    expect(
+      screen.getByRole("link", { name: "Bibliothèque d'exemple" }),
+    ).toHaveAttribute("href", "https://example.org/");
+  });
+
   it("renders nothing without a provider", () => {
     const { container } = render(<Clover.Provider value={[]} />);
     expect(container).toBeEmptyDOMElement();
@@ -158,6 +193,50 @@ describe("Logo", () => {
     expect(screen.getByRole("img", { name: "Mark" })).not.toHaveAttribute(
       "lang",
     );
+  });
+
+  it("draws nothing for a logo that fails to load, and still calls onError", () => {
+    const onError = vi.fn();
+    render(<Clover.Logo value={[library, unnamed]} onError={onError} />);
+    fireEvent.error(screen.getByRole("img", { name: "The press" }));
+    expect(
+      screen.getAllByRole("img").map((logo) => logo.getAttribute("alt")),
+    ).toEqual(["Bibliothèque d'exemple"]);
+    expect(onError).toHaveBeenCalledTimes(1);
+  });
+
+  it("draws nothing for a logo that failed before it could listen", async () => {
+    // A page drawn on the server: the picture is done, with no size, and will not decode.
+    const done = vi
+      .spyOn(HTMLImageElement.prototype, "complete", "get")
+      .mockReturnValue(true);
+    const decode = HTMLImageElement.prototype.decode;
+    HTMLImageElement.prototype.decode = () =>
+      Promise.reject(new Error("The source image cannot be decoded."));
+    try {
+      render(<Clover.Logo value={library} />);
+      await waitFor(() => expect(screen.queryByRole("img")).toBeNull());
+    } finally {
+      done.mockRestore();
+      HTMLImageElement.prototype.decode = decode;
+    }
+  });
+
+  it("keeps a logo with no size of its own that decodes", async () => {
+    const done = vi
+      .spyOn(HTMLImageElement.prototype, "complete", "get")
+      .mockReturnValue(true);
+    const decode = HTMLImageElement.prototype.decode;
+    const decoded = Promise.resolve();
+    HTMLImageElement.prototype.decode = () => decoded;
+    try {
+      render(<Clover.Logo value={{ id: "https://example.org/mark.svg" }} />);
+      await decoded;
+      expect(screen.getByRole("img", { name: "Logo" })).toBeInTheDocument();
+    } finally {
+      done.mockRestore();
+      HTMLImageElement.prototype.decode = decode;
+    }
   });
 
   it("reads the Root's providers", async () => {

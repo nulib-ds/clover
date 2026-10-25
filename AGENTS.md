@@ -267,7 +267,7 @@ deadline.
   - The homepage (`docs/components/Home/`) opens, `l` under the navbar and `2xl` over the
     resource field (Mat, 2026-10-25: swapped, so the field has room), with its headline, "A viewer as distinctive /
     as your collections." (two lines, its stroke under "distinctive") (`Hero.tsx`, the page's `h1`), standing out (Mat, 2026-10-25): 8vw, so each line keeps to one from 320px up, to 5.236rem, under `.hero .headline` so the docs pages' title rule (`.nextra-sidebar ~ article > main h1`, which matches the homepage too, its sidebar only hidden) never holds it small, and one sentence, on one line where it fits
-    (Mat, 2026-10-20; his rewording, 2026-10-22: one verb, no commas, IIIF given a role and never a tack-on): "Design a user experience rooted in IIIF with Clover." After it, `s` away, in its own size, family and gray, "Docs →", a link to Get started (Mat, 2026-10-22; "Docs" since 2026-10-25; `.subtitleLink`), underlined, which marks it as a link where its color does not (WCAG 1.4.1), its arrow smaller and out of the underline. It has two halves: the templates live under it
+    (Mat, 2026-10-20; his rewording, 2026-10-22: one verb, no commas, IIIF given a role and never a tack-on): "Design a user experience rooted in IIIF." ("with Clover" taken off, Mat, 2026-10-25; the homepage's description then names Clover, `homeDescription`). Its size is set by the headline's (`clamp(1rem, 3vw, 2rem)`; Mat, 2026-10-25: "make relative to hero size. try to keep one line"), one line from 320px up; nothing after it (its "Docs →" link was removed, 2026-10-25). It has two halves: the templates live under it
     (`docs/components/Playground/`), and below them the same resource shown one IIIF
     property at a time by the components the templates are made of (`Parts.tsx` and
     `PartsLive.tsx`), with no heading of its own in sight. The playground's `h2`, "Try the templates", is
@@ -313,7 +313,11 @@ deadline.
     documentation is not offered there (Mat, 2026-10-23); the navbar has no link to the
     docs. No figure and no code. The parts follow the playground: `Homepage` holds the resource the playground reports
     (`onResourceChange`) and hands it down, and the section's chips put another of the
-    playground's resources in its Viewer (`pickResource`).
+    playground's resources in its Viewer (`pickResource`). A member the reader opens
+    from the Collection's tile goes up to the playground too (Root's `onManifestChange`,
+    `openContent`: ours by its key, else the reader's own), so the Viewing field and the
+    Viewer show it (Mat, 2026-10-25); the parts' Root, already showing it, is kept rather
+    than drawn again, so focus stays on the member chosen (WCAG 2.4.3).
   - After the parts, "Why Clover" tells six stories, one at a time: Adaptable, Accessible,
     Seamless, Composable, Lightweight, Natural, on the page's ground and the code editor's
     black in turn, Adaptable on the ground so Accessible keeps its black (Mat, 2026-10-20
@@ -424,7 +428,9 @@ deadline.
   - That section is one `Root` for that resource. On the left its parts make a small
     viewer, held in view (by its foot, once taller than the window), and held so that
     at the page's end its foot meets the npm block's (Install's, where the grid ends;
-    lower on a window too tall for the page to scroll so far, `--assembled-end`), with
+    lower on a window too tall for the page to scroll so far, `--assembled-end`); where
+    the columns stack (64rem and under) it is not shown at all, nor its code (Mat,
+    2026-10-25: "should just go away when the columns stack"), with
     no caption (it
     is a region named "Example Viewer" for assistive technology; never `<Clover.Root />`),
     its parts in the order its code gives them. The code control under it opens that code
@@ -468,10 +474,10 @@ deadline.
     fold (`FOLD_FROM`).
   - The playground shows how far one Viewer stretches: any layout with any kind of
     resource. Two pickers, each changing the Viewer without the other. Over it, centered,
-    the resource (`ResourceField.tsx`): one field, its label, "Select…" (named "Select a IIIF resource": the ellipsis hidden, the rest visually hidden, WCAG 2.5.3; Mat, 2026-10-22), joined to its start with no line between them (2026-10-22) (Mat,
-    2026-10-20; a tab on its top edge on a phone; its `<label>`), Open inside it at its end
-    (Mat, 2026-10-22), 2px inside its edge on every side, whole pixels so its gaps round
-    alike, for the address or content state of the reader's own, with ours listed under it,
+    the resource (`ResourceField.tsx`): one field, its label, "Viewing" (named "Viewing IIIF resource", the rest visually hidden, WCAG 2.5.3; Mat, 2026-10-25; "Select…" before), in one pill, as Airbnb's search is (Mat, 2026-10-25: "more compact and friendly"):
+    the resource's thumbnail, round, then the label (its `<label>`, semibold) over the field
+    (its name, muted), the list's chevron, and Open at its end, a round accent button with
+    Items' caret (the site's round buttons agree; Mat, 2026-10-25), named "Open", for the address or content state of the reader's own, with ours listed under it,
     the list as wide as the whole select (its label, the field and Open; Mat, 2026-10-22) (`resources`
     in `playground-config.ts`: a catalog, a print, a manuscript in Arabic (Maktaba's), a Collection, a photo, a map, a model
     in 3D, a film, a recording…), each by its thumbnail, its own label, and a few words on one thing it has
@@ -504,9 +510,9 @@ deadline.
     styling so that we are not building so many variants"): every title, a section
     intro's, the choice's halves and the stories' cards, is `--text-title`, bold, set by
     the window and never by the box it is in; every note and story's words are
-    `--text-lede`, as the hero's sentence is (`tokens.css`). A new card or section takes
-    these, never a size of its own. The hero's headline, the mono labels and the
-    figures are their own.
+    `--text-lede` (`tokens.css`). A new card or section takes
+    these, never a size of its own. The hero's headline and its sentence (sized by the
+    headline since 2026-10-25), the mono labels and the figures are their own.
   - The homepage's two sections after the parts open alike, with `SectionIntro`
     (`docs/components/Home/SectionIntro.tsx`): no rule over it and room around it (Mat,
     2026-10-21), a title ending in a period under the hero's stroke, one short note (`--text-lede`, as the hero's sentence and the choice's), and one call to action (`cta-solid` or `cta-outline`,
@@ -564,10 +570,17 @@ deadline.
   - Headers are solid, never frosted or translucent: the navbar (`docs/styles/layout.css`
     overrides Nextra's blur) and the playground's bar. From 48rem wide, on a screen at
     least 36rem tall (not a phone, where with the navbar it would take too much height),
-    it holds under the navbar as its lower half: while the playground's Viewer passes
-    under, the navbar's edge moves to the bar's foot, the field runs the playground's
-    width, and the bar's foot rides on the Viewer's as the two leave (they share a box,
-    so the template row under the Viewer is never under it). `useStuck` writes
+    it holds under the navbar as its lower half, a little up under it (0.382rem): while
+    the playground's Viewer and then the parts pass under, the navbar's edge moves to the
+    bar's foot, the field runs the playground's width, to the Viewer's edges (at rest it
+    keeps 1rem from them), and the bar's foot rides on the first story's top (Adaptable,
+    `data-bar-until`) as it leaves (Mat, 2026-10-25: "keep this sticky … all the way
+    through the component examples"). Its box reaches there: a spacer after the Viewer
+    (`.reach`) as tall as from the Viewer's foot to the story, and the same room taken
+    back as the box's negative margin, both written by `useStuck` only when they change,
+    never as a custom property (the Viewer would inherit it). While it is held, the
+    example viewer beside the tiles is held under it (`html[data-bar-stuck] .assembled`,
+    `--bar-height`), and goes up to its place as the bar leaves. `useStuck` writes
     `data-stuck` to the bar directly, not to state, so this never re-renders the Viewer.
     While the bar can hold, `useStuck` sets the page's `scroll-padding-top` to the navbar
     and the bar, measured, so a control that takes focus in the Viewer comes into view
@@ -645,7 +658,9 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     not permit further distribution of its images).
   - Under the navbar on the homepage alone (Mat, 2026-10-22: not on interior pages, whose
     footer says it), a small acknowledgment in the corner, on the page's
-    ground with no band of its own (Mat, 2026-10-20), muted (`--gray-11`, 2026-10-21),
+    ground with no band or edge of its own (Mat, 2026-10-20; a gray band and hairline
+    were tried and taken off, 2026-10-25), at Clover's smallest step (`--clover-text-xs`,
+    2026-10-25), muted (`--gray-11`, 2026-10-21; its link too, underlined, 2026-10-25),
     says Clover is a project of
     Northwestern University Libraries, linking the Libraries'
     site (`docs/components/Subheader.tsx`, by `usePathname`, so the static export holds

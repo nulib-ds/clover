@@ -13,8 +13,8 @@ export const siteTitle = "Clover IIIF";
  * description and structured data and `llms.txt` carry them (Mat, 2026-10-22).
  */
 export const homeHeadline = "A viewer as distinctive as your collections.";
-export const homeTagline =
-  "Design a user experience rooted in IIIF with Clover.";
+// "with Clover" taken off (Mat, 2026-10-25): the headline and the page say whose it is.
+export const homeTagline = "Design a user experience rooted in IIIF.";
 
 /* The homepage's title, and any page's without one of its own: the name and the headline. */
 export const homeTitle = `${siteTitle} – ${homeHeadline.replace(/\.$/, "")}`;
@@ -30,7 +30,7 @@ const whatItDoes =
 export const siteDescription = `Clover ${whatItDoes}`;
 
 /* The homepage's: the hero's line, then what Clover is, as plainly. */
-export const homeDescription = `${homeTagline} It ${whatItDoes}`;
+export const homeDescription = `${homeTagline} ${siteDescription}`;
 
 /*
  * What Clover is, at more length, in the Get started page's words

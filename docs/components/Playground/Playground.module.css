@@ -14,14 +14,16 @@
   /*
    * The Viewer's one height, for every template and resource, so switching either never
    * moves the page. When the bar is held, the Viewer fills the screen under it: the
-   * screen less the navbar, the bar (3.736rem: the field, and its padding), the
-   * space under the bar and room for the Viewer's shadow. A template taller than it (a
+   * screen less the navbar, the bar (the field, 3.375rem and its edge, and its padding,
+   * less what is held under the navbar), the space under the bar and room for the
+   * Viewer's shadow. A template taller than it (a
    * Gallery) scrolls inside.
    */
   --pg-viewer-height: clamp(
     36rem,
     calc(
-      100vh - var(--nextra-navbar-height, 4rem) - 3.736rem - 2rem - 1.618rem
+      100vh - var(--nextra-navbar-height, 4rem) - 4.229rem - 2px - 2rem -
+        1.618rem
     ),
     54rem
   );
@@ -52,12 +54,26 @@
     margin-block: -0.618rem 0;
     padding-block: 0.618rem;
     position: sticky;
-    top: var(--nextra-navbar-height, 4rem);
+    /*
+     * Held a little up under the navbar (Mat, 2026-10-25: "tighten up gap"), its top
+     * padding's first 0.382rem under the navbar's foot, which is drawn over it.
+     */
+    top: calc(var(--nextra-navbar-height, 4rem) - 0.382rem);
     z-index: 10;
   }
 
   .viewer {
     margin-top: calc(var(--clover-space-xl, 2.618rem) - 0.618rem);
+  }
+
+  /*
+   * The bar's box reaches past the Viewer to the first story (`.reach`'s height, written
+   * by `useStuck`), so the bar is held through the parts (Mat, 2026-10-25), and gives that
+   * room back after it (its `margin-bottom`, written too), so nothing below moves. What
+   * follows is drawn over the reach, which takes no presses.
+   */
+  .reach {
+    pointer-events: none;
   }
 
   /*
@@ -136,8 +152,8 @@
 }
 
 /*
- * The resource: a field for an address, ours in a list under it, its label joined to its
- * start and Open inside it at its end. A message takes a line of its own under it. Spaces
+ * The resource: a field for an address, ours in a list under it, in one pill with its
+ * label and Open. A message takes a line of its own under it. Spaces
  * on Clover's own golden-ratio scale (`--clover-space-*`, the package's DESIGN.md), so the
  * pickers step as the Viewer under them does.
  */
@@ -146,7 +162,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--clover-space-xs, 0.382rem);
-  max-width: 40rem;
+  /*
+   * Never to the Viewer's edges at rest (Mat, 2026-10-25): a little room at each side,
+   * at every width. Held under the navbar, it runs to them (below).
+   */
+  --pg-room: var(--clover-space-m, 1rem);
+  max-width: min(40rem, 100% - 2 * var(--pg-room));
   min-width: 0;
   transition: max-width 200ms ease;
   width: 100%;
@@ -156,7 +177,10 @@
   flex-basis: 100%;
 }
 
-/* Held under the navbar, the field runs the playground's width, as the Viewer does. */
+/*
+ * Held under the navbar, the field runs the playground's width, to the Viewer's edges, as
+ * the Viewer does (Mat, 2026-10-25); its room is only at rest.
+ */
 .bar[data-stuck] .resourcePicker {
   max-width: 100%;
 }
@@ -181,90 +205,64 @@
   min-width: 0;
 }
 
-/* The thumbnail of the resource in the Viewer, its label or address, and the list's chevron. */
-.field {
-  align-items: center;
-  border: 1px solid var(--pg-edge);
-  border-radius: var(--radius-4);
-  box-shadow: var(--pg-lift);
-  display: flex;
-  gap: var(--clover-space-xs, 0.382rem);
-  height: 2.5rem;
-  padding-inline: var(--clover-space-xs, 0.382rem) 2px;
-}
-
-.field:focus-within {
-  box-shadow: var(--focus-ring), var(--pg-lift);
-}
-
 /*
- * The field with its label joined to its start: one box, lifted as the field is, edged
- * at 3:1 all around with no line between the two (Mat, 2026-10-22). The label has no fill. On a phone, where it would crowd
- * the field, it is a tab on the field's top edge instead.
+ * The field, one pill, as Airbnb's search is (Mat, 2026-10-25): the thumbnail of the
+ * resource in the Viewer, its label over its name or address, the list's chevron, and
+ * Open, round, at its end. Edged at 3:1 (`--pg-edge`, WCAG 1.4.11) and lifted as the
+ * Viewer is; the ring goes around all of it while the field is focused, not while Open is,
+ * which draws its own.
  */
 .fieldGroup {
-  border-radius: var(--radius-4);
+  align-items: center;
+  border: 1px solid var(--pg-edge);
+  border-radius: 999px;
   box-shadow: var(--pg-lift);
   display: flex;
+  gap: var(--clover-space-s, 0.618rem);
+  /*
+   * Concentric (Mat, 2026-10-25: "breathing nicely"): the thumbnail and Open, both 40px
+   * and round, sit 6px inside the edge on every side, so each one's curve follows the
+   * pill's, and the words have room from the thumbnail.
+   */
+  height: calc(2.5rem + 2 * 0.375rem + 2px);
+  padding-inline: 0.375rem;
 }
 
-/* Its ring while the field is focused, not while Open is: Open draws its own. */
 .fieldGroup:has(.fieldInput:focus) {
   box-shadow: var(--focus-ring), var(--pg-lift);
 }
 
-.fieldLabel {
-  align-items: center;
-  border: 1px solid var(--pg-edge);
-  border-inline-end: 0;
-  border-radius: var(--radius-4) 0 0 var(--radius-4);
-  color: var(--gray-11);
+/* The label over the field, as Airbnb's "Who" is over "Add guests". */
+.fieldText {
   display: flex;
-  flex: none;
-  font-size: var(--text-sm);
-  height: 2.5rem;
-  padding-inline: var(--clover-space-s, 0.618rem);
-  white-space: nowrap;
-}
-
-.fieldGroup .field,
-.fieldGroup .field:focus-within {
-  border-inline-start: 0;
-  border-radius: 0 var(--radius-4) var(--radius-4) 0;
-  box-shadow: none;
   flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.0625rem;
+  justify-content: center;
   min-width: 0;
 }
 
-@media (max-width: 30rem) {
-  .fieldGroup {
-    flex-direction: column;
-  }
-
-  .fieldLabel {
-    align-self: flex-start;
-    border-block-end: 0;
-    border-inline-end: 1px solid var(--pg-edge);
-    border-radius: var(--radius-4) var(--radius-4) 0 0;
-    height: auto;
-    line-height: 1.2;
-    padding-block: var(--clover-space-xs, 0.382rem);
-  }
-
-  .fieldGroup .field,
-  .fieldGroup .field:focus-within {
-    border-inline-start: 1px solid var(--pg-edge);
-    border-radius: 0 var(--radius-4) var(--radius-4) var(--radius-4);
-  }
+.fieldLabel {
+  color: var(--gray-12);
+  /* 0.875rem (Mat, 2026-10-25), an exception to the floor (`tokens.css`). */
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-/* Thumbnails square, in the field and the list. */
+/* Thumbnails square, in the field and the list; round in the field, as the pill is. */
 .fieldMedia {
   aspect-ratio: 1;
   border-radius: var(--radius-2);
   flex: none;
   height: 1.75rem;
   overflow: hidden;
+}
+
+.fieldGroup .fieldMedia {
+  border-radius: 50%;
+  height: 2.5rem;
 }
 
 /* A resource of the reader's that names no thumbnail is drawn as an empty slot. */
@@ -274,22 +272,29 @@
   box-sizing: border-box;
 }
 
+/* Its name, muted under the label (6:1 on white, WCAG 1.4.3). */
 .fieldInput {
   background: transparent;
   border: 0;
-  color: var(--gray-12);
-  flex: 1 1 auto;
+  color: var(--gray-11);
   font: inherit;
-  font-size: var(--text-sm);
-  height: 100%;
+  /* The reader's 1rem (Mat, 2026-10-25), a step over its label. */
+  font-size: var(--text-md);
+  line-height: 1.3;
   min-width: 0;
   outline: none;
   padding: 0;
   text-overflow: ellipsis;
+  width: 100%;
 }
 
-/* The field draws the ring around all of it (above), so the input draws none of its own. */
-.field .fieldInput:focus-visible {
+/* What the reader types is theirs, in the text's color. */
+.fieldInput:focus {
+  color: var(--gray-12);
+}
+
+/* The pill draws the ring around all of it (above), so the input draws none of its own. */
+.fieldGroup .fieldInput:focus-visible {
   box-shadow: none;
 }
 
@@ -302,13 +307,17 @@
   align-items: center;
   background: transparent;
   border: 0;
-  border-radius: var(--radius-2);
+  border-radius: 50%;
   color: var(--gray-11);
   cursor: pointer;
   display: flex;
   flex: none;
   height: 2rem;
   justify-content: center;
+  /* Closer to Open than the words are to it: the two controls go together. */
+  margin-inline-end: calc(
+    var(--clover-space-3xs, 0.146rem) - var(--clover-space-s, 0.618rem)
+  );
   width: 2rem;
 }
 
@@ -320,28 +329,33 @@
   rotate: 180deg;
 }
 
-/*
- * Open: the primary action, the accent's fill, inside the field at its end (Mat,
- * 2026-10-22), 2px inside its edge on every side. Whole pixels, so its edges round alike
- * wherever the field falls: at `3xs` (2.336px) one gap drew a pixel wider than the other.
- * Its corners a step smaller, so they nest.
- */
+/* Open: the primary action, the accent's fill, round at the pill's end, 40px. */
 .openButton {
+  align-items: center;
   background: var(--accent-9);
   border: 0;
-  border-radius: var(--radius-3);
+  border-radius: 50%;
   color: var(--accent-contrast);
   cursor: pointer;
+  display: flex;
   flex: none;
-  font: inherit;
-  font-size: var(--text-sm);
-  height: calc(100% - 4px);
-  padding: 0 var(--clover-space-s, 0.618rem);
+  height: 2.5rem;
+  justify-content: center;
+  padding: 0;
   transition: background-color 120ms ease;
+  width: 2.5rem;
+}
+
+.openButton svg {
+  transition: translate 120ms ease;
 }
 
 .openButton:hover {
   background: var(--accent-10);
+}
+
+.openButton:hover svg {
+  translate: 0.125rem 0;
 }
 
 .openButton:focus-visible {
@@ -349,9 +363,15 @@
   outline: none;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .openButton svg {
+    transition: none;
+  }
+}
+
 /* Ours, under the field: a row each, scrolling within on a short screen. */
 /*
- * As wide as the whole select at rest, its label, the field and Open (Mat, 2026-10-22),
+ * As wide as the whole pill at rest, its label, the field and Open (Mat, 2026-10-22),
  * and no wider while the field runs wide.
  */
 .resourceList {

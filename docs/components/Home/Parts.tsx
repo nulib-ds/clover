@@ -27,13 +27,15 @@ const Parts: React.FC<{
   resource: string | null;
   /** Open one of the playground's resources in its Viewer, by key. */
   onTry: (key: string) => void;
+  /** Open a resource the parts moved to (a Collection's member) in the playground. */
+  onOpen?: (content: string) => void;
   /**
    * The parts, listed (`PartsIndex.tsx`, drawn on the server): out of sight until the live
    * parts take its place, for a reader without the page's scripts.
    */
   index?: React.ReactNode;
   children?: React.ReactNode;
-}> = ({ resource, onTry, index, children }) => {
+}> = ({ resource, onTry, onOpen, index, children }) => {
   /*
    * A chip's resource remounts the parts, chip and all, so focus moves first to their
    * heading, "…or build your own." over the tiles (`#parts`, `Playground.tsx`).
@@ -46,7 +48,7 @@ const Parts: React.FC<{
     <div className={styles.section}>
       <div className={styles.grid}>
         {resource ? (
-          <PartsLive resource={resource} onTry={tryResource} />
+          <PartsLive resource={resource} onTry={tryResource} onOpen={onOpen} />
         ) : (
           <div className={styles.placeholder}>
             {/* Out of the site's search, which finds each part on its own page. */}

@@ -86,13 +86,35 @@
   grid-template-columns: minmax(0, 1fr);
   position: sticky;
   top: var(--assembled-top);
+  transition: top 200ms ease;
 }
 
+/*
+ * While the playground's bar is held over the parts (`data-bar-stuck`), the viewer is held
+ * under it, not behind it, and goes up to its place as the bar leaves at the stories.
+ * `top` itself, not `--assembled-top`, which every part inside would inherit.
+ */
+:global(html[data-bar-stuck]) .assembled {
+  top: min(
+    max(
+      calc(
+        var(--nextra-navbar-height, 4rem) - 0.382rem + var(--bar-height, 0px) +
+          1.618rem
+      ),
+      calc(100vh - var(--assembled-height, 0px) - var(--assembled-end, 100vh))
+    ),
+    calc(100vh - var(--assembled-height, 0px) - 1.618rem)
+  );
+}
+
+/*
+ * Where the columns stack, it goes (Mat, 2026-10-25): with nothing beside it to hold
+ * through, it would only show the tiles' parts again, before them. The tiles are live
+ * themselves, and the playground's Viewer is above.
+ */
 @media (max-width: 64rem) {
   .assembled {
-    grid-row: auto;
-    margin-bottom: 2.618rem;
-    position: static;
+    display: none;
   }
 }
 
@@ -175,6 +197,12 @@
 
 .editor[data-open] > .editorInner {
   visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assembled {
+    transition: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

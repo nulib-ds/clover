@@ -397,27 +397,28 @@ export default function ResourceField({
       <div className={styles.resourceRow}>
         <div className={styles.combo}>
           {/*
-           * The field's label, joined to its start, outside its edge (Mat, 2026-10-20). Its
-           * `<label>`, so it names the field (WCAG 1.3.1, 3.3.2), and the name holds the
-           * words shown (2.5.3).
+           * One pill, as Airbnb's search is (Mat, 2026-10-25): the resource's thumbnail,
+           * then the field's label over the field, the list's chevron, and Open, round, at
+           * its end. The label is a `<label>`, so it names the field (WCAG 1.3.1, 3.3.2),
+           * and the name holds the words shown (2.5.3).
            */}
           <div className={styles.fieldGroup}>
-            {/*
-             * "Select…" to see, "Select a IIIF resource" to hear: the name starts with
-             * what shows, so a voice saying "Select" finds it (WCAG 2.5.3), and the
-             * ellipsis is not read (Mat, 2026-10-22).
-             */}
-            <label className={styles.fieldLabel} htmlFor={inputId}>
-              Select<span aria-hidden="true">…</span>
-              <span className={styles.visuallyHidden}> a IIIF resource</span>
-            </label>
-            <div className={styles.field}>
-              <Picture
-                className={styles.fieldMedia}
-                onBroken={brake}
-                // While the reader types, the field is theirs: an empty slot.
-                src={draft === null ? pictured(chosen?.thumbnail) : undefined}
-              />
+            <Picture
+              className={styles.fieldMedia}
+              onBroken={brake}
+              // While the reader types, the field is theirs: an empty slot.
+              src={draft === null ? pictured(chosen?.thumbnail) : undefined}
+            />
+            <div className={styles.fieldText}>
+              {/*
+               * "Viewing" to see, "Viewing IIIF resource" to hear (Mat, 2026-10-25): the
+               * name starts with what shows, so a voice saying "Viewing" finds it (WCAG
+               * 2.5.3), and says what the field holds.
+               */}
+              <label className={styles.fieldLabel} htmlFor={inputId}>
+                Viewing
+                <span className={styles.visuallyHidden}> IIIF resource</span>
+              </label>
               <input
                 aria-activedescendant={
                   expanded && active ? optionId(active) : undefined
@@ -468,41 +469,64 @@ export default function ResourceField({
                 type="text"
                 value={draft ?? shown.text}
               />
-              <button
-                aria-controls={listId}
-                aria-expanded={expanded}
-                aria-label="IIIF resources"
-                className={styles.fieldToggle}
-                // Focus stays in the field.
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => {
-                  inputRef.current?.focus();
-                  if (expanded) close();
-                  else show(null);
-                }}
-                tabIndex={-1}
-                type="button"
+            </div>
+            <button
+              aria-controls={listId}
+              aria-expanded={expanded}
+              aria-label="IIIF resources"
+              className={styles.fieldToggle}
+              // Focus stays in the field.
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                inputRef.current?.focus();
+                if (expanded) close();
+                else show(null);
+              }}
+              tabIndex={-1}
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                className={styles.chevron}
+                fill="none"
+                height="16"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                width="16"
               >
-                <svg
-                  aria-hidden="true"
-                  className={styles.chevron}
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            {/*
+             * Open, round, at the pill's end (Mat, 2026-10-25): the caret Items' Next draws,
+             * so the site's round buttons agree, named "Open" for assistive technology and
+             * a voice.
+             */}
+            <button
+              aria-label="Open"
+              className={styles.openButton}
+              title="Open"
+              type="submit"
+            >
+              <svg
+                aria-hidden="true"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+              >
+                <path
+                  d="M6 3l5 5-5 5"
                   fill="none"
-                  height="16"
                   stroke="currentColor"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                  viewBox="0 0 24 24"
-                  width="16"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </button>
-              {/* Open, inside the field at its end (Mat, 2026-10-22). */}
-              <button className={styles.openButton} type="submit">
-                Open
-              </button>
-            </div>
+                />
+              </svg>
+            </button>
           </div>
 
           <ul

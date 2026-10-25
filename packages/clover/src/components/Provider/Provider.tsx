@@ -1,4 +1,12 @@
-import React from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { toPlainText } from "../../core/text";
 import { type LanguageMapLike, localize } from "../../core/value";
@@ -23,6 +31,21 @@ import {
  * its name, its logo and its homepage (Mat, 2026-10-24: "Provider and Logo components to
  * match the iiif properties").
  */
+
+/** A layout effect in the browser, an effect on the server (where there is no layout). */
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+/**
+ * Told once a logo drawn for a provider has failed to load and left the page, so the
+ * provider can see whether it still shows anything (`ProviderItem`).
+ */
+const LogoFailed = createContext<(() => void) | null>(null);
+
+/** Whether an element shows anything: words, or a picture of some kind. */
+const showsAnything = (element: Element) =>
+  Boolean(element.textContent?.trim()) ||
+  element.querySelector("img, svg, picture, video, canvas, object") !== null;
 
 /** An Agent worth drawing: one with a name, a logo or a homepage to show. */
 const isAgent = (value: unknown): value is Json =>
@@ -105,20 +128,58 @@ export function Provider({
           </>
         );
         return (
-          <li key={agent.id ?? index} className="clover-provider-agent">
-            <ProviderContext.Provider value={agent}>
-              {homepage ? (
-                <a href={homepage} className="clover-provider-link">
-                  {drawn}
-                </a>
-              ) : (
-                <span className="clover-provider-content">{drawn}</span>
-              )}
-            </ProviderContext.Provider>
-          </li>
+          <ProviderItem
+            key={agent.id ?? index}
+            agent={agent}
+            homepage={homepage}
+          >
+            {drawn}
+          </ProviderItem>
         );
       })}
     </ul>
+  );
+}
+
+/**
+ * One provider: what `Provider` draws for it, linked to its homepage when it has one. A
+ * logo in it that fails to load draws nothing (`LogoImage`); if nothing is left to show,
+ * the provider draws nothing either, never an empty link, a tab stop with no name (WCAG
+ * 2.4.4, 4.1.2), and a list left with none is hidden (`Provider.css`).
+ */
+function ProviderItem({
+  agent,
+  homepage,
+  children,
+}: {
+  agent: Json;
+  homepage: string | undefined;
+  children: React.ReactNode;
+}) {
+  // Its link, or its span where it has no homepage.
+  const content = useRef<HTMLAnchorElement & HTMLSpanElement>(null);
+  // The provider it was emptied for: another, given in its place, is drawn afresh.
+  const [emptied, setEmptied] = useState<Json | null>(null);
+  const failed = useCallback(() => {
+    if (content.current && !showsAnything(content.current)) setEmptied(agent);
+  }, [agent]);
+  if (emptied === agent) return null;
+  return (
+    <li className="clover-provider-agent">
+      <ProviderContext.Provider value={agent}>
+        <LogoFailed.Provider value={failed}>
+          {homepage ? (
+            <a ref={content} href={homepage} className="clover-provider-link">
+              {children}
+            </a>
+          ) : (
+            <span ref={content} className="clover-provider-content">
+              {children}
+            </span>
+          )}
+        </LogoFailed.Provider>
+      </ProviderContext.Provider>
+    </li>
   );
 }
 
@@ -135,7 +196,8 @@ export interface LogoProps
  * `Provider`, the logo of the provider it is drawn for; elsewhere, each of the resource's
  * providers' in turn. Its `alt` is the provider's name (else its homepage's, else "Logo"),
  * unless one is given; `alt=""` where its name is written beside it. Renders nothing
- * without a logo.
+ * without a logo, and nothing for a logo that fails to load, never the browser's broken
+ * picture.
  */
 export function Logo({
   of = "manifest",
@@ -174,7 +236,7 @@ export function Logo({
       {logos.map(({ image, agent }, index) => {
         const name = nameOf(agent, language);
         return (
-          <img
+          <LogoImage
             key={`${image.id}-${index}`}
             src={image.id}
             alt={alt ?? name?.text ?? t("logo")}
@@ -192,5 +254,47 @@ export function Logo({
         );
       })}
     </>
+  );
+}
+
+/**
+ * One logo's picture. One that fails to load draws nothing, as a provider without a logo
+ * does, never the browser's broken picture with its alt text in it, and tells the provider
+ * it is drawn for (`LogoFailed`).
+ */
+function LogoImage({
+  alt,
+  onError,
+  ...rest
+}: React.ImgHTMLAttributes<HTMLImageElement>) {
+  const failedFor = useContext(LogoFailed);
+  const [failed, setFailed] = useState(false);
+  const fail = useCallback(() => setFailed(true), []);
+  // Told once the picture is gone from the page, so the provider sees what is left.
+  useIsomorphicLayoutEffect(() => {
+    if (failed) failedFor?.();
+  }, [failed, failedFor]);
+  /*
+   * One that failed before this script could listen (a page drawn on the server) is told
+   * apart from one with no size of its own (an SVG's can have none) by decoding it, which
+   * a broken picture refuses.
+   */
+  const check = useCallback(
+    (image: HTMLImageElement | null) => {
+      if (image?.complete && !image.naturalWidth) image.decode?.().catch(fail);
+    },
+    [fail],
+  );
+  if (failed) return null;
+  return (
+    <img
+      ref={check}
+      alt={alt}
+      onError={(event) => {
+        onError?.(event);
+        fail();
+      }}
+      {...rest}
+    />
   );
 }

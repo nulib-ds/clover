@@ -297,6 +297,7 @@ const Homepage: React.FC<{
           index={partsIndex}
           resource={resource}
           onTry={(key) => playground.current?.pickResource(key)}
+          onOpen={(content) => playground.current?.openContent(content)}
         >
           <SectionIntro
             title="Thoughtful and flexible."
@@ -353,6 +354,8 @@ const Homepage: React.FC<{
                    * Adaptable on the page's ground, leading, so Accessible keeps the black
                    * it rides in (Mat, 2026-10-20 and 2026-10-25).
                    */
+                  // The playground's bar is held as far as the first (Mat, 2026-10-25).
+                  data-bar-until={index === 0 || undefined}
                   data-side={index % 2 ? "end" : "start"}
                   data-tone={index % 2 ? "code" : "page"}
                 >

@@ -2104,6 +2104,22 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
 
 ### Fixed
 
+- **A logo that fails to load draws nothing (Mat, 2026-10-25).** `Logo` drew the
+  browser's broken picture, its alt text in it, when its image did not load, as on
+  Maktaba's manuscript, whose provider's logo its host refuses (HTTP 403). Inside a
+  `Provider` that drew only the logo (`<Provider><Logo /></Provider>`, the Default and
+  Document templates' title line), that broken picture was the provider's link. A logo
+  that fails now draws nothing, as one the resource does not give. A provider left with
+  nothing to show draws nothing either, so no empty link is left as a tab stop with no
+  name (WCAG 2.4.4, 4.1.2), and a `Provider` left with none is hidden
+  (`.clover-provider:empty`). Beside the provider's name (`Provider` as it comes, About),
+  the name stays, linked. A logo that failed before Clover could listen, on a page drawn
+  on the server, is caught as it mounts. `<clover-logo>` and `<clover-provider>` do the
+  same, and an `onError` given to `Logo` is still called. It adds about 0.25 kB gzip
+  wherever `Provider` is, so budgets are raised for it: Default's page to 69.2 kB,
+  Document's to 71.7, a layout of the containers to 110.8, a `<clover-viewer>` page to
+  111.6 (its own entry 93.0), and `<clover-viewer template="document">` to 118.0.
+
 - **A Canvas's open popups are over its play button (Mat, 2026-10-25).** On video or
   sound waiting behind its placeholder, the large play button in the middle sat on the
   controls' layer, over the Canvas's popups, so an annotations menu or the information

@@ -171,22 +171,44 @@ interface PartSpec {
 export default function PartsLive({
   resource,
   onTry,
+  onOpen,
 }: {
   resource: string;
   onTry: (key: string) => void;
+  onOpen?: (content: string) => void;
 }) {
   // Every part shown, once the reader asks: kept over the Root, so another resource keeps it.
   const [all, setAll] = useState(false);
   const showAll = useCallback(() => setAll(true), []);
+  /*
+   * A member the reader opens from the Collection's tile goes up to the playground, its
+   * field and its Viewer (Mat, 2026-10-25), which hands it back down as the resource. The
+   * Root here already shows it, so it is kept, not drawn again, and focus stays on the
+   * member just chosen (WCAG 2.4.3). Any other resource draws the Root afresh.
+   */
+  const [content, setContent] = useState(resource);
+  const opened = useRef<string | null>(null);
+  if (resource !== content && resource !== opened.current) {
+    opened.current = null;
+    setContent(resource);
+  }
+  const moved = useCallback(
+    (manifestId: string) => {
+      opened.current = manifestId;
+      onOpen?.(manifestId);
+    },
+    [onOpen],
+  );
   return (
     <Clover.Root
-      iiifContent={resource}
-      key={resource}
+      iiifContent={content}
+      key={content}
+      onManifestChange={moved}
       className={styles.root}
-      language={startOf(resource)?.language}
+      language={startOf(content)?.language}
     >
       <Exploded
-        resource={resource}
+        resource={content}
         onTry={onTry}
         all={all}
         onShowAll={showAll}

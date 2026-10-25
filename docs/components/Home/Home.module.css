@@ -198,41 +198,16 @@
  */
 .subtitle {
   color: var(--gray-11);
-  font-size: var(--text-lede);
+  /*
+   * Set by the headline's size (Mat, 2026-10-25): its 8vw and 5.236rem over 2.618 and
+   * a little, never under the reader's 1rem: one line at every width, 320px up;
+   * balanced, should a reader's larger text wrap it.
+   */
+  font-size: clamp(var(--text-md), 3vw, 2rem);
   line-height: 1.5;
-  /* No bottom margin: the hero's own bottom padding sets the gap to the playground
-   * now that no buttons sit between them. */
+  /* No bottom margin: the hero's own bottom padding sets the gap to the playground. */
   margin: 0 auto;
-  /* One line where it fits, with room to spare for a browser that sets the type wider;
-   * balanced where it wraps. */
-  max-width: 52rem;
   text-wrap: balance;
-}
-
-/*
- * The documentation, after the sentence (Mat, 2026-10-22): the sentence's own size,
- * family and gray, `s` from it, underlined, which marks it as a link where its color does
- * not (WCAG 1.4.1).
- */
-.subtitleLink {
-  border-radius: var(--radius-2);
-  color: inherit;
-  margin-inline-start: var(--clover-space-s, 0.618rem);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-  white-space: nowrap;
-}
-
-/* The calls to action's arrow, smaller than the words, and out of their underline. */
-.subtitleArrow {
-  display: inline-block;
-  font-size: 0.8em;
-  margin-inline-start: 0.3em;
-}
-
-.subtitleLink:focus-visible {
-  box-shadow: var(--focus-ring);
-  outline: none;
 }
 
 /* ── Why Clover ───────────────────────────────────────────────────────────── */
