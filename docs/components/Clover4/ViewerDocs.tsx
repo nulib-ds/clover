@@ -17,6 +17,10 @@ import { resources } from "docs/components/Playground/playground-config";
 import { loadMapWorker } from "docs/lib/map-worker";
 import { useRouter } from "docs/lib/router";
 import { EXAMPLE, example } from "docs/lib/example";
+import {
+  AgentPreview,
+  usePreviewHost,
+} from "docs/components/Clover4/PreviewHost";
 
 /**
  * The Viewer page's examples (`content/docs/viewer/index.mdx`), laid out as Radix Themes
@@ -294,12 +298,19 @@ export function ViewerExample({
   editor?: Editor;
   wide?: boolean;
 }) {
+  const { ref, preview } = usePreviewHost();
   return (
-    <figure className={styles.example} data-wide={wide || undefined}>
-      <div className={styles.preview} {...example(EXAMPLE)}>
-        <Live {...live} />
-      </div>
-      {children && <CodeArea editor={editor}>{children}</CodeArea>}
+    <figure ref={ref} className={styles.example} data-wide={wide || undefined}>
+      {preview ? (
+        <AgentPreview shown={preview} />
+      ) : (
+        <>
+          <div className={styles.preview} {...example(EXAMPLE)}>
+            <Live {...live} />
+          </div>
+          {children && <CodeArea editor={editor}>{children}</CodeArea>}
+        </>
+      )}
     </figure>
   );
 }
@@ -338,6 +349,7 @@ export function OptionsExample({
   wide?: boolean;
 }) {
   const id = useId();
+  const { ref, preview } = usePreviewHost();
   const [value, setValue] = useState<Plain>(options[0]);
   // `template` and `width` are the example's own; any other prop is the Viewer's.
   const shown =
@@ -348,52 +360,61 @@ export function OptionsExample({
         : { props: { ...live.props, [prop]: value } };
   return (
     <figure
+      ref={ref}
       className={styles.example}
       data-lead={lead || undefined}
       data-wide={wide || undefined}
     >
-      <div className={styles.switchBar}>
-        <span className={styles.switchLabel} id={`${id}-label`}>
-          {label}
-        </span>
-        <div
-          role="group"
-          aria-labelledby={`${id}-label`}
-          className={styles.segmented}
-        >
-          {options.map((option, index) => (
-            <button
-              key={nameOf(option)}
-              type="button"
-              aria-pressed={option === value}
-              className={styles.segment}
-              onClick={() => setValue(option)}
+      {preview ? (
+        <AgentPreview shown={preview} />
+      ) : (
+        <>
+          <div className={styles.switchBar}>
+            <span className={styles.switchLabel} id={`${id}-label`}>
+              {label}
+            </span>
+            <div
+              role="group"
+              aria-labelledby={`${id}-label`}
+              className={styles.segmented}
             >
-              {labels?.[index] ?? nameOf(option)}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className={styles.preview} {...example(EXAMPLE)}>
-        <Live key={nameOf(value)} {...live} {...shown} />
-      </div>
-      <CodeArea editor={editor}>
-        {/*
-         * The chosen value's code shows; the others are hidden by CSS, not `hidden`, so the
-         * page's Markdown keeps every value's code (`data-shown`, `ViewerDocs.module.css`).
-         */}
-        {React.Children.map(children, (child) =>
-          React.isValidElement<{
-            "data-option"?: string;
-            "data-shown"?: string;
-          }>(child) && child.props["data-option"] !== undefined
-            ? React.cloneElement(child, {
-                "data-shown":
-                  child.props["data-option"] === nameOf(value) ? "" : undefined,
-              })
-            : child,
-        )}
-      </CodeArea>
+              {options.map((option, index) => (
+                <button
+                  key={nameOf(option)}
+                  type="button"
+                  aria-pressed={option === value}
+                  className={styles.segment}
+                  onClick={() => setValue(option)}
+                >
+                  {labels?.[index] ?? nameOf(option)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={styles.preview} {...example(EXAMPLE)}>
+            <Live key={nameOf(value)} {...live} {...shown} />
+          </div>
+          <CodeArea editor={editor}>
+            {/*
+             * The chosen value's code shows; the others are hidden by CSS, not `hidden`, so the
+             * page's Markdown keeps every value's code (`data-shown`, `ViewerDocs.module.css`).
+             */}
+            {React.Children.map(children, (child) =>
+              React.isValidElement<{
+                "data-option"?: string;
+                "data-shown"?: string;
+              }>(child) && child.props["data-option"] !== undefined
+                ? React.cloneElement(child, {
+                    "data-shown":
+                      child.props["data-option"] === nameOf(value)
+                        ? ""
+                        : undefined,
+                  })
+                : child,
+            )}
+          </CodeArea>
+        </>
+      )}
     </figure>
   );
 }
@@ -427,7 +448,8 @@ export function LiveTemplates({
   wide?: boolean;
 }) {
   const id = useId();
-  const figure = useRef<HTMLElement>(null);
+  // The frame, which can hold an agent's preview in place of the Viewer (`PreviewHost`).
+  const { ref: figure, preview } = usePreviewHost();
   const [chosen, setChosen] = useState(options[0].name);
   const [values, setValues] = useState(() =>
     Object.fromEntries(
@@ -463,62 +485,68 @@ export function LiveTemplates({
       data-lead
       data-wide={wide || undefined}
     >
-      <div className={styles.preview} {...example(EXAMPLE)}>
-        <Live
-          key={`${option.name}|${remountKey(option.knobs, current)}`}
-          {...live}
-          template={option.name}
-          props={knobProps(option.knobs, current) as Record<string, Plain>}
-        />
-      </div>
-      <CodeArea editor={editor}>
-        {/*
-         * Every template's code, the chosen one's shown by CSS (`data-shown`), as
-         * `OptionsExample` keeps each value's, so the page's Markdown holds them all.
-         */}
-        {options.map((each) => (
-          <div
-            key={each.name}
-            data-option={each.name}
-            data-shown={each.name === option.name ? "" : undefined}
-          >
-            <LiveCode
-              tree={each.tree}
-              knobs={each.knobs}
-              values={values[each.name]}
-              onChange={set(each.name)}
+      {preview ? (
+        <AgentPreview shown={preview} />
+      ) : (
+        <>
+          <div className={styles.preview} {...example(EXAMPLE)}>
+            <Live
+              key={`${option.name}|${remountKey(option.knobs, current)}`}
+              {...live}
+              template={option.name}
+              props={knobProps(option.knobs, current) as Record<string, Plain>}
             />
           </div>
-        ))}
-      </CodeArea>
-      <div className={styles.switchUnder}>
-        <span className={styles.switchUnderLabel} id={`${id}-label`}>
-          Template
-        </span>
-        <div
-          className="code-switch"
-          role="radiogroup"
-          aria-labelledby={`${id}-label`}
-        >
-          {options.map(({ name }) => (
-            <label
-              key={name}
-              className="code-switch-option"
-              data-option={name}
-              data-checked={name === option.name || undefined}
+          <CodeArea editor={editor}>
+            {/*
+             * Every template's code, the chosen one's shown by CSS (`data-shown`), as
+             * `OptionsExample` keeps each value's, so the page's Markdown holds them all.
+             */}
+            {options.map((each) => (
+              <div
+                key={each.name}
+                data-option={each.name}
+                data-shown={each.name === option.name ? "" : undefined}
+              >
+                <LiveCode
+                  tree={each.tree}
+                  knobs={each.knobs}
+                  values={values[each.name]}
+                  onChange={set(each.name)}
+                />
+              </div>
+            ))}
+          </CodeArea>
+          <div className={styles.switchUnder}>
+            <span className={styles.switchUnderLabel} id={`${id}-label`}>
+              Template
+            </span>
+            <div
+              className="code-switch"
+              role="radiogroup"
+              aria-labelledby={`${id}-label`}
             >
-              <input
-                type="radio"
-                name={`${id}-template`}
-                value={name}
-                checked={name === option.name}
-                onChange={() => setChosen(name)}
-              />
-              <span>{name}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+              {options.map(({ name }) => (
+                <label
+                  key={name}
+                  className="code-switch-option"
+                  data-option={name}
+                  data-checked={name === option.name || undefined}
+                >
+                  <input
+                    type="radio"
+                    name={`${id}-template`}
+                    value={name}
+                    checked={name === option.name}
+                    onChange={() => setChosen(name)}
+                  />
+                  <span>{name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </figure>
   );
 }
@@ -551,12 +579,19 @@ export function Example({
   const [demo, ...code] = React.Children.toArray(children).filter(
     (child) => !(typeof child === "string" && !child.trim()),
   );
+  const { ref, preview } = usePreviewHost();
   return (
-    <figure className={styles.example} data-wide={wide || undefined}>
-      <div className={styles.preview} {...example(EXAMPLE)}>
-        {demo}
-      </div>
-      {code.length > 0 && <CodeArea editor={editor}>{code}</CodeArea>}
+    <figure ref={ref} className={styles.example} data-wide={wide || undefined}>
+      {preview ? (
+        <AgentPreview shown={preview} />
+      ) : (
+        <>
+          <div className={styles.preview} {...example(EXAMPLE)}>
+            {demo}
+          </div>
+          {code.length > 0 && <CodeArea editor={editor}>{code}</CodeArea>}
+        </>
+      )}
     </figure>
   );
 }

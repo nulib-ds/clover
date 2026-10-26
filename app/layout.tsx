@@ -27,10 +27,13 @@ import { CODE_FLAVOR_SCRIPT } from "docs/lib/code-flavor-script";
 import { NoLastUpdated } from "docs/components/NoLastUpdated";
 import React from "react";
 
+import AgentTools from "docs/components/AgentTools";
 import Logo from "docs/components/Logo";
 import SiteEffects from "docs/components/SiteEffects";
 import Subheader from "docs/components/Subheader";
 import { pageMetadata, siteTitle } from "docs/lib/site";
+import { WEBMCP_ORIGIN_TRIAL } from "docs/lib/webmcp/origin-trial";
+import { agentTools } from "docs/lib/webmcp/tools";
 
 export const metadata: Metadata = {
   ...pageMetadata({ route: "/" }),
@@ -71,6 +74,13 @@ export default async function RootLayout({
          * the start.
          */}
         <script dangerouslySetInnerHTML={{ __html: CODE_FLAVOR_SCRIPT }} />
+        {/*
+         * Chrome's origin trial for WebMCP, once its token is registered: readers' Chrome
+         * then offers the page `document.modelContext`, for the agent tools (WEBMCP.md).
+         */}
+        {WEBMCP_ORIGIN_TRIAL && (
+          <meta httpEquiv="origin-trial" content={WEBMCP_ORIGIN_TRIAL} />
+        )}
       </Head>
       <body>
         <Layout
@@ -136,6 +146,12 @@ export default async function RootLayout({
           {children}
         </Layout>
         <SiteEffects />
+        {/*
+         * Tools for agents in the reader's browser (WebMCP; WEBMCP.md), registered where
+         * it offers them: their definitions from the catalog here, what they do loaded
+         * when first called.
+         */}
+        <AgentTools tools={agentTools()} />
       </body>
     </html>
   );

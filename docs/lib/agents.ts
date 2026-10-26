@@ -24,6 +24,7 @@ import {
   siteTitle,
   siteUrl,
 } from "docs/lib/site";
+import { CLOVER, agentTools } from "docs/lib/webmcp/tools";
 import cloverPackage from "../../packages/clover/package.json";
 
 /*
@@ -227,6 +228,16 @@ export async function llmsTxt() {
     "## At a glance",
     "",
     ...glance().map((fact) => `- ${fact}`),
+    "",
+    "## Tools for agents",
+    "",
+    "Every page of these docs offers its tools to an agent in the reader's browser, through WebMCP (`document.modelContext`), where the browser supports it. They answer about Clover itself, never the examples' sample data, and change nothing.",
+    "",
+    // What Clover is, said above, is left off each description.
+    ...agentTools().map(
+      (tool) =>
+        `- \`${tool.name}\` (${tool.title}): ${tool.description.replace(` ${CLOVER}`, "")}`,
+    ),
     ...sections.flatMap((section) => [
       "",
       `## ${section.title}`,

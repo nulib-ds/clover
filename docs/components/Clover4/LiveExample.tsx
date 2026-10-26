@@ -1,6 +1,7 @@
 import React from "react";
 
 import { elementTag } from "docs/components/Flavored";
+import { attributeFor } from "docs/lib/compose/catalog";
 import { type LiveDemo, LiveFrame } from "docs/components/Clover4/LiveCode";
 import type { PartName } from "docs/components/Clover4/PartDemo";
 import {
@@ -18,7 +19,6 @@ import {
   publishedAddress,
 } from "docs/lib/live-code";
 import { type PartDemoResource, RESOURCES } from "docs/lib/part-demo-resources";
-import { SPECS } from "../../../packages/clover/src/web-components/specs";
 
 /**
  * The live examples (Mat, 2026-10-22: the major props of a component, "adjusted by a
@@ -42,24 +42,12 @@ import { SPECS } from "../../../packages/clover/src/web-components/specs";
  * Pick knobs that change what the demo shows at once: a layout, a size, a control.
  */
 
-/** The attribute an element's spec reads a prop from: `headingLevel` is `heading-level`. */
+/** The attribute an element's spec reads a prop from, or, failing the build, none. */
 function attributeOf(tag: string, prop: string) {
-  if (prop === "style") return "style";
-  const spec = SPECS.find((each) => each.tag === tag);
-  if (!spec) throw new Error(`LiveExample: no element ${tag}`);
-  // An attribute is where it opens and what moves it later: React's `defaultX` is `x`.
-  const read = (name: string) =>
-    Object.entries(spec.attributes).find(
-      ([, attribute]) => attribute.prop === name,
-    );
-  const found =
-    read(prop) ??
-    (/^default[A-Z]/.test(prop)
-      ? read(prop[7].toLowerCase() + prop.slice(8))
-      : undefined);
+  const found = attributeFor(tag, prop);
   if (!found)
     throw new Error(`LiveExample: <${tag}> has no attribute for ${prop}`);
-  return found[0];
+  return found;
 }
 
 /** A prop's words, as speech says them: `panelLayout` is "panel layout" (WCAG 2.5.3). */

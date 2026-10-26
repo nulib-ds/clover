@@ -1,0 +1,89 @@
+---
+title: Build with an agent
+searchable: false
+description: How an AI agent in your browser can help you build with Clover 4 on these pages, finding the parts for what your page needs or your IIIF resource has, writing their code in React or as web components, and showing it working here.
+---
+
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
+
+# Build with an agent
+
+<div className="docs-lede">
+  If you use an AI agent in your browser, it can help you build with Clover
+  right here. Ask it for a layout that suits your collection, see it working on
+  the page, and take the code.
+</div>
+
+<Example>
+<PartDemo part="Items" body />
+
+```jsx
+<Clover.Root iiifContent={url}>
+  <Clover.Body />
+  <Clover.Items />
+</Clover.Root>
+```
+
+</Example>
+
+Ask your agent to show you something here, and its preview takes this example's place.
+
+## What you can ask
+
+Ask in your own words, as you would ask a colleague. Your agent finds what these pages
+offer it by itself.
+
+**"What would show my film, with its captions?"** Your agent finds the parts of Clover
+that handle what you describe, what each one can do, and its page in these docs. Give it
+the address of your IIIF resource, and it looks at what the resource has (images, sound,
+video, 3D, annotations, a search service) and suggests a layout that fits.
+
+**"Write that as web components."** It writes the layout's code, in React or as web
+components, ready to copy, and tells you how to install Clover. If something you asked
+for won't work, such as a part Clover doesn't have or a setting no part takes, it says
+so and suggests what will.
+
+**"Show me."** It draws the layout here, live, over your resource or one of these docs'
+examples, with its code under it. On a component's page, ask to see the component, and
+it shows you that one.
+
+## What happens on the page
+
+The preview takes the place of the page's first example, with its code under it in React
+or as web components, as you chose at the top of the page. Press "Show this page's
+example" to bring the page's own back. Your place on the page and your keyboard focus
+stay where they are: the preview comes into view only when you ask to see it. A screen
+reader announces it as it appears and as it goes.
+
+Leaving the page takes the preview with it. Pages without an example, such as Get
+started and Styling, have nowhere to show one: ask on this page,
+[Composing](/docs/composing), or any component's page.
+
+## What it reads, and never sends
+
+- **What your resource is, not what it says.** To see what your resource has, it looks
+  at what kind of material it is and what Clover could do with it. Its titles,
+  descriptions, metadata and transcripts stay out of what it tells your agent.
+- **Nothing of yours.** It reads your resource as anyone on the web could: without your
+  sign-in cookies, and without the address of the page you're reading.
+- **About Clover only.** What it tells your agent is about Clover: its parts, their
+  settings, their code and these docs. It never tells your agent about the material in
+  these docs' examples.
+- **This page only.** A preview changes nothing but the page you're on, and only until
+  you bring its example back or leave.
+
+## What you need
+
+An AI agent that works in your browser and uses WebMCP, a way for web pages to offer
+agents tools of their own. WebMCP is a
+[draft from the W3C](https://webmachinelearning.github.io/webmcp/), and browsers are
+starting to try it.
+
+Where your browser doesn't offer it yet, nothing on these pages changes, and your agent
+can still read them: every page is also Markdown, at its address with `.md` added, and
+[llms.txt](/llms.txt) lists them all.
+
+Working on Clover itself?
+[WEBMCP.md](https://github.com/nulib-ds/clover/blob/main/WEBMCP.md) explains how these
+tools are built and how they grow with Clover.

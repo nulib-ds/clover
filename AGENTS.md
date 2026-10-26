@@ -203,7 +203,15 @@ deadline.
     and the parts, in a section of their own, `#web-component`), Viewer (`/docs/viewer`,
     the templates on it: their old page, `/docs/viewer/templates`, forwards to
     `#templates`), Composing, Styling (the menu's names, short; "Composing" for the page
-    titled "Composing layouts"; Mat, 2026-10-23).
+    titled "Composing layouts"; Mat, 2026-10-23). Build with an agent (`/docs/agents`;
+    Mat, 2026-10-26) is hidden for now (Mat, 2026-10-26: "let's hide this page for now"):
+    out of the menu (`display: "hidden"` in `content/docs/_meta.ts`, its place after
+    Styling kept) and of search, the sitemap, `llms.txt` and the Markdown
+    (`searchable: false`), at its address still. It is for a reader with an AI agent in the browser, in
+    plain sentences to that reader, what to ask, what happens on the page, what it reads
+    and never sends, and what they need, with an example of its own (under the lede, so
+    a preview there sits under the page's title) for an agent's preview to take the
+    place of. It never names the tools or says how they work (`WEBMCP.md` does).
   - Get started opens (Mat, 2026-10-24) with a lede of two lines (what Clover is: no
     renderer named) and then its two ways in, side by side, above the fold at
     1280 × 800 (`Ways.tsx`): "Start with the Viewer" and "Compose with its parts", each
@@ -780,8 +788,9 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     one only at a host's root, so it counts on a domain of the site's own). After
     Pagefind, `scripts/build-agent-docs.mjs` writes each of the sitemap's pages as
     Markdown beside its HTML (`/docs/items.md`, converted from the built page, its
-    examples' code and tables included, front matter giving its title, description,
-    address and version) and `llms-full.txt` (Clover 4's pages, in `llms.txt`'s order),
+    examples' code and tables included, each fence with its language, from its block's
+    `data-lang`, and each link's words without the space Nextra's arrow left, front
+    matter giving its title, description, address and version) and `llms-full.txt` (Clover 4's pages, in `llms.txt`'s order),
     and fails the build if `llms.txt` links to a page it could not write. Each page's
     head links its Markdown (`alternate`, `text/markdown`; the homepage's is `llms.txt`).
     The homepage's structured data is Clover itself (`homeData`: the site, its publisher,
@@ -790,6 +799,39 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     sight and out of search) until the live parts take its place, for a reader without
     the page's scripts. Agent-facing words say what Clover does as released
     (`npm install @nulib/clover`; Mat, 2026-10-21: "assume my product will be live").
+  - Agents' helpers (WebMCP; Mat, 2026-10-25 and 2026-10-26) are planned in `WEBMCP.md`:
+    tools about Clover (its parts, what it handles, and code that builds with it), never
+    the examples' sample material, and lean ("let's also try to be lean and not overload
+    tools"): three tools, `clover_suggest_layout`, `clover_compose_layout` and
+    `clover_preview_layout`, which knows the page it is on. Fold a new helper into one of
+    them before adding a tool; a new tool needs Mat's agreement. Phase 2 (2026-10-26)
+    registers the first two on every page (`docs/components/AgentTools.tsx`, in the root
+    layout; `docs/lib/webmcp/`: their definitions from the catalog, `run.ts` loaded on
+    the first call), and `llms.txt` lists them. Phase 3 (2026-10-26) lets
+    `clover_suggest_layout` read a resource's structure (`structure.ts`,
+    `read-resource.ts`): counts and tokens checked against what IIIF defines, never a
+    string the resource wrote, fetched without the reader's cookies, bounded, and marked
+    untrusted. Phase 4 (2026-10-26) adds `clover_preview_layout`, which draws a layout in
+    the page's first example frame, in place of the page's own until the reader brings
+    it back ("Show this page's example"), its code under it, over a sample that has what
+    was asked for, and, given nothing on a part's page, that part. Every example frame
+    takes `usePreviewHost()` (`docs/components/Clover4/PreviewHost.tsx`); a new frame
+    component takes it too. Phase 5 (2026-10-26): the docs' e2e suite checks them
+    (`e2e/specs/agent-tools.spec.ts`), and Chrome's origin-trial token, once Mat
+    registers it, goes in `docs/lib/webmcp/origin-trial.ts`. Readers meet the tools on
+    Build with an agent (`content/docs/agents.mdx`, under Use Clover, hidden for now),
+    written for a
+    reader with an AI agent in the browser, never as notes on the tools (Mat,
+    2026-10-26: "it reads like notes to a developer"); how they work is `WEBMCP.md`'s,
+    its example of a layout and its code held to `compose`'s by a test. Their engine is
+    `docs/lib/compose/` (phase 1, built 2026-10-26), written to grow as Clover's templates,
+    components and helpers do (Mat, 2026-10-26): it reads the element specs, the docs'
+    menus, `sizes.json` and the docs' own code writer (`live-code.ts`), and keeps by hand
+    only `capabilities.ts` (what each part handles, in a reader's words, with a sample)
+    and three small tables in `catalog.ts` (`ENTRY`, `INSIDE`, `DOCUMENTED_ON`), each
+    held by `catalog.test.ts`, which fails saying what to add. A new part, template, prop,
+    format or helper: follow "Built to grow" in `WEBMCP.md`. `nulib-labs/clover-mcp`, 3.x's
+    MCP server, is context only, and updating it is separate work.
   - `/test/…` (`content/test/`) holds unlisted mocks of host pages, for trying Clover 4
     where it is meant to live: raw layout, no docs navbar or footer, out of search.
     `/test/dc-item` is a Digital Collections item page (`docs/components/DcItemMock/`),
@@ -803,7 +845,13 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
   `packages/clover/e2e/react18`; the root's React is 19, the docs') and the web
   components' under Preact, as they ship (`packages/clover/vitest.preact.config.mjs`).
   CI also builds the package and runs `npm run test:build`, the build's own checks and
-  budgets. The end-to-end suite runs locally only (`npm run e2e`).
+  budgets. The end-to-end suites run locally only (`npm run e2e`): the package's
+  (`packages/clover/e2e/`), then the docs site's (`e2e/` at the root, `npm run e2e:docs`,
+  Chromium over `npm run dev`, a running one reused), which checks the agent tools with a
+  stand-in `document.modelContext`. Against a build instead: `npm run build:docs` (in a
+  copy of the tree while `npm run dev` runs), `node e2e/serve.mjs` (`out/` as Pages
+  serves it, its base path taken off), then `DOCS_URL=http://localhost:4400 npm run
+e2e:docs`.
 
 ## Nextra 4
 

@@ -15,6 +15,8 @@ const meta: MetaRecord = {
   viewer: "Viewer",
   composing: "Composing",
   styling: "Styling",
+  // Hidden for now (Mat, 2026-10-26): out of the menu and of search, at its address still.
+  agents: { title: "Build with an agent", display: "hidden" },
   "--components": {
     type: "separator",
     title: "Components",

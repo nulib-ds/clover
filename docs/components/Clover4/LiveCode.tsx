@@ -26,6 +26,10 @@ import {
 import { type PartDemoResource, RESOURCES } from "docs/lib/part-demo-resources";
 import { useMock } from "docs/lib/useMock";
 import { EXAMPLE, example } from "docs/lib/example";
+import {
+  AgentPreview,
+  usePreviewHost,
+} from "docs/components/Clover4/PreviewHost";
 
 /**
  * A live example's code (`docs/lib/live-code.ts`), as the homepage's editor is live (Mat,
@@ -330,21 +334,33 @@ export function LiveFrame({
   demo: LiveDemo;
 }) {
   const [values, setValues] = useState(() => initialValues(knobs));
+  const { ref, preview } = usePreviewHost();
   const set = (id: string, value: Plain) =>
     setValues((current) => ({ ...current, [id]: value }));
   return (
-    <figure className={styles.example}>
-      <div className={styles.preview} {...example(EXAMPLE)}>
-        <Demo
-          key={remountKey(knobs, values)}
-          demo={demo}
-          knobs={knobs}
-          values={values}
-        />
-      </div>
-      <div className={styles.code}>
-        <LiveCode tree={tree} knobs={knobs} values={values} onChange={set} />
-      </div>
+    <figure ref={ref} className={styles.example}>
+      {preview ? (
+        <AgentPreview shown={preview} />
+      ) : (
+        <>
+          <div className={styles.preview} {...example(EXAMPLE)}>
+            <Demo
+              key={remountKey(knobs, values)}
+              demo={demo}
+              knobs={knobs}
+              values={values}
+            />
+          </div>
+          <div className={styles.code}>
+            <LiveCode
+              tree={tree}
+              knobs={knobs}
+              values={values}
+              onChange={set}
+            />
+          </div>
+        </>
+      )}
     </figure>
   );
 }

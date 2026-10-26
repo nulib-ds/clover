@@ -22,6 +22,10 @@ import {
   textOf,
 } from "docs/lib/live-code";
 import { EXAMPLE, example } from "docs/lib/example";
+import {
+  AgentPreview,
+  usePreviewHost,
+} from "docs/components/Clover4/PreviewHost";
 
 /**
  * Composing's first example, live (Mat, 2026-10-23: "make this draggable/customizable
@@ -222,6 +226,7 @@ const GripGlyph = () => (
 
 export function ComposeExample() {
   const hint = useId();
+  const { ref, preview } = usePreviewHost();
   const [order, setOrder] = useState<PartKey[]>(START);
   const [values, setValues] = useState<Values>(() => initialValues(KNOBS));
   const [picked, setPicked] = useState<PartKey | null>(null);
@@ -419,8 +424,14 @@ export function ComposeExample() {
   };
 
   const at = picked ? order.indexOf(picked) : -1;
+  if (preview)
+    return (
+      <figure ref={ref} className={styles.example}>
+        <AgentPreview shown={preview} />
+      </figure>
+    );
   return (
-    <figure className={styles.example}>
+    <figure ref={ref} className={styles.example}>
       <div className={styles.preview} {...example(EXAMPLE)}>
         <Demo order={order} values={values} />
       </div>

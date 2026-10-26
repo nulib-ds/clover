@@ -1,0 +1,9 @@
+/* Out of sight, and read: the status region an agent's preview speaks through. */
+.status {
+  block-size: 1px;
+  clip-path: inset(50%);
+  inline-size: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+}

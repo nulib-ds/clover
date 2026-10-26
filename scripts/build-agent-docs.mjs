@@ -113,6 +113,23 @@ function clean(node) {
     ];
     return;
   }
+  /*
+   * A code block's language (`CodeBlock`'s `data-lang`, its fence's), where Markdown's
+   * converter reads it, on its `code`: so its fence says `jsx`, `html`, `json`.
+   */
+  const fenced = node.properties?.dataLang;
+  if (node.tagName === "pre" && typeof fenced === "string") {
+    const code = node.children.find(
+      (child) => child.type === "element" && child.tagName === "code",
+    );
+    if (code)
+      code.properties.className = [
+        ...classes(code).filter(
+          (name) => !String(name).startsWith("language-"),
+        ),
+        `language-${fenced}`,
+      ];
+  }
   const flavor = node.properties?.dataCodeFlavor;
   // A name in prose (`code-flavors.mjs`): React's as written, then web components' after it.
   if (node.tagName === "span" && FLAVORS[flavor]) {
@@ -128,6 +145,15 @@ function clean(node) {
     (child) =>
       child.type !== "comment" && (child.type !== "element" || !isFrame(child)),
   );
+  // A link's words end where its words do: not on the space before Nextra's arrow for
+  // another site, which is gone with its icon.
+  if (node.tagName === "a")
+    while (node.children.at(-1)?.type === "text") {
+      const last = node.children.at(-1);
+      last.value = last.value.replace(/\s+$/, "");
+      if (last.value) break;
+      node.children.pop();
+    }
   // A callout is a quotation, without its icon.
   if (classes(node).includes("nextra-callout")) {
     node.tagName = "blockquote";

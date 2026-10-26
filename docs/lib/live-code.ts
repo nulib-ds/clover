@@ -677,3 +677,6 @@ const SITE = (
 /** A resource's published address: an address as it is, a mock's under the site. */
 export const publishedAddress = (resource: string) =>
   /^https?:/.test(resource) ? resource : `${SITE}/mocks/${resource}`;
+
+/** A page's published address, by its route: `/docs/items`. */
+export const pageAddress = (route: string) => `${SITE}${route}`;

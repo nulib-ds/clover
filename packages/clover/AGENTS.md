@@ -22,6 +22,15 @@ every rule below.
   `components/Body/`, `useControlsVisibility`, `MediaBody`); a template's `-body` class on
   its `Clover.Body` alone, `-panes` on its `Split`, and Document's scrolling pages its
   column (`.clover-template-document-column`).
+- **Specs speak for the docs' agent helpers** (`WEBMCP.md`; Mat, 2026-10-26). The docs
+  read every part, prop and template from the element specs (`src/web-components/specs/`)
+  to check and write layouts for agents (`docs/lib/compose/`), so keep each spec's words
+  in their patterns: a Viewer prop only some templates read opens its description with
+  their names ("Default and Document: …"), the Viewer's description names each template
+  with what it is ("Gallery (a grid, …)"), and a prop read only alone or only in a Root
+  opens "Alone: …" or "Inside a root: …". A new part or template is in the catalog once
+  its spec is; `docs/lib/compose/catalog.test.ts` says what else it needs (a line in
+  `capabilities.ts`, a docs page).
 - **Relative imports only.** Nothing in `src/` imports `src/...`, `docs/...` or
   `@samvera/clover-iiif`; ESLint forbids it. The Vite build throws on any bare import that
   is not a declared dependency or peer, so OpenSeadragon, Radix and the like cannot slip
