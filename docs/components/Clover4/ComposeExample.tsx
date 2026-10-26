@@ -1,25 +1,19 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import React, { useEffect, useId, useRef, useState } from "react";
+import React from "react";
 
-import { Choice } from "docs/components/CodeValues";
 import compose from "docs/components/Clover4/ComposeExample.module.css";
-import live from "docs/components/Clover4/LiveCode.module.css";
+import {
+  type EditorPart,
+  PartsEditor,
+} from "docs/components/Clover4/PartsEditor";
 import styles from "docs/components/Clover4/ViewerDocs.module.css";
 import {
-  type CodeNode,
   type CodeTree,
-  type Flavor,
   type Knob,
-  type Line,
-  type Plain,
-  type TokenKind,
   type Values,
-  codeLines,
-  initialValues,
   knobId,
-  textOf,
 } from "docs/lib/live-code";
 import { EXAMPLE, example } from "docs/lib/example";
 import {
@@ -62,7 +56,7 @@ const AS = knobId(KNOBS[0]);
 const OF = knobId(KNOBS[1]);
 
 /** The aside's parts: each one's code, and its name for assistive technology. */
-const PARTS: Record<PartKey, { name: string; node: CodeNode }> = {
+const PARTS: Record<PartKey, EditorPart> = {
   title: {
     name: "the title's Label",
     node: {
@@ -135,27 +129,6 @@ const treeOf = (order: PartKey[]): CodeTree => ({
   ],
 });
 
-/** A part moved from one place in the order to another. */
-const moved = <T,>(list: T[], from: number, to: number) => {
-  const next = [...list];
-  const [item] = next.splice(from, 1);
-  next.splice(to, 0, item);
-  return next;
-};
-
-/** Each run's color in the editor, as Nextra's highlighter gives it (`--shiki-editor`). */
-const COLOR: Record<TokenKind, string> = {
-  keyword: "var(--editor-keyword)",
-  string: "var(--editor-string)",
-  tag: "var(--editor-tag)",
-  attr: "var(--editor-attr)",
-  punctuation: "var(--editor-punctuation)",
-  number: "var(--editor-number)",
-  property: "var(--editor-property)",
-};
-
-const LANGUAGE: Record<Flavor, string> = { react: "jsx", html: "html" };
-
 /** The demo: the parts, as the code writes them, the aside's in the reader's order. */
 const Demo = dynamic(
   () =>
@@ -207,223 +180,8 @@ const Demo = dynamic(
   { ssr: false },
 );
 
-/** A grip's glyph: two columns of three dots. */
-const GripGlyph = () => (
-  <svg viewBox="0 0 8 12" width="8" height="12" aria-hidden="true">
-    {[0, 1].flatMap((column) =>
-      [0, 1, 2].map((row) => (
-        <circle
-          key={`${column}-${row}`}
-          cx={2 + column * 4}
-          cy={2 + row * 4}
-          r="1.1"
-          fill="currentColor"
-        />
-      )),
-    )}
-  </svg>
-);
-
 export function ComposeExample() {
-  const hint = useId();
   const { ref, preview } = usePreviewHost();
-  const [order, setOrder] = useState<PartKey[]>(START);
-  const [values, setValues] = useState<Values>(() => initialValues(KNOBS));
-  const [picked, setPicked] = useState<PartKey | null>(null);
-  const [dragging, setDragging] = useState<PartKey | null>(null);
-  const [said, setSaid] = useState("");
-  const [copied, setCopied] = useState<Flavor | null>(null);
-  const codes = useRef(new Map<Flavor, HTMLElement>());
-  const press = useRef<{ part: PartKey; y: number; moved: boolean } | null>(
-    null,
-  );
-  // A press that dragged is not also a press that picks.
-  const dragged = useRef(false);
-
-  useEffect(() => {
-    if (!picked) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && !event.defaultPrevented) setPicked(null);
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [picked]);
-
-  useEffect(() => {
-    if (!copied) return;
-    const timer = setTimeout(() => setCopied(null), 1600);
-    return () => clearTimeout(timer);
-  }, [copied]);
-
-  const move = (part: PartKey, to: number) => {
-    const from = order.indexOf(part);
-    if (to < 0 || to >= order.length || to === from) return;
-    setOrder(moved(order, from, to));
-    setSaid(`${PARTS[part].name}, ${to + 1} of ${order.length}`);
-  };
-
-  /** Where each part's lines sit in a flavor's code, from its first to its last. */
-  const blocks = (flavor: Flavor) => {
-    const code = codes.current.get(flavor);
-    return order.map((key) => {
-      const lines = code?.querySelectorAll<HTMLElement>(`[data-part="${key}"]`);
-      const first = lines?.[0]?.getBoundingClientRect();
-      const last = lines?.[lines.length - 1]?.getBoundingClientRect();
-      return first && last ? (first.top + last.bottom) / 2 : 0;
-    });
-  };
-
-  const grip = (part: PartKey, flavor: Flavor) => (
-    <button
-      type="button"
-      className={compose.grip}
-      aria-label={`Move ${PARTS[part].name}`}
-      aria-describedby={hint}
-      aria-pressed={picked === part}
-      onClick={() => {
-        if (dragged.current) {
-          dragged.current = false;
-          return;
-        }
-        setPicked((current) => (current === part ? null : part));
-      }}
-      onKeyDown={(event) => {
-        const by =
-          event.key === "ArrowUp" ? -1 : event.key === "ArrowDown" ? 1 : 0;
-        if (!by) return;
-        event.preventDefault();
-        move(part, order.indexOf(part) + by);
-      }}
-      onPointerDown={(event) => {
-        if (event.button !== 0) return;
-        event.currentTarget.setPointerCapture(event.pointerId);
-        press.current = { part, y: event.clientY, moved: false };
-      }}
-      onPointerMove={(event) => {
-        const pressed = press.current;
-        if (!pressed) return;
-        if (!pressed.moved && Math.abs(event.clientY - pressed.y) < 4) return;
-        pressed.moved = true;
-        setDragging(part);
-        // Past the middle of the part above or below, it takes that part's place.
-        const middles = blocks(flavor);
-        const at = order.indexOf(part);
-        if (at > 0 && event.clientY < middles[at - 1]) move(part, at - 1);
-        else if (at < order.length - 1 && event.clientY > middles[at + 1])
-          move(part, at + 1);
-      }}
-      onPointerUp={() => {
-        dragged.current = Boolean(press.current?.moved);
-        press.current = null;
-        setDragging(null);
-      }}
-      onPointerCancel={() => {
-        press.current = null;
-        setDragging(null);
-      }}
-    >
-      <GripGlyph />
-    </button>
-  );
-
-  const code = (flavor: Flavor) => {
-    const lines: Line[] = codeLines(treeOf(order), KNOBS, values, flavor);
-    const text = textOf(lines);
-    const language = LANGUAGE[flavor];
-    const seen = new Map<string, number>();
-    return (
-      <div
-        key={flavor}
-        data-code-flavor={flavor === "react" ? "react" : "web-components"}
-      >
-        <div className="docs-code">
-          <pre
-            data-lang={language}
-            data-live-code={text}
-            ref={(element) => {
-              if (element) codes.current.set(flavor, element);
-            }}
-          >
-            <code className={`nextra-code language-${language}`}>
-              {lines.map((line, index) => {
-                // A part's lines are keyed by the part, so they keep their grip, and its
-                // focus, as they move.
-                const n = line.part ? (seen.get(line.part) ?? 0) : 0;
-                if (line.part) seen.set(line.part, n + 1);
-                const key = line.part ? `${line.part}:${n}` : `line:${index}`;
-                const part = line.part as PartKey | undefined;
-                return (
-                  <React.Fragment key={key}>
-                    {index > 0 && "\n"}
-                    <span
-                      data-part={part}
-                      data-picked={part && picked === part ? "" : undefined}
-                      data-dragging={part && dragging === part ? "" : undefined}
-                    >
-                      {line.tokens.length === 0 ? " " : "  ".repeat(line.depth)}
-                      {part && n === 0 && grip(part, flavor)}
-                      {line.tokens.map((token, at) => {
-                        const knob = token.knob
-                          ? KNOBS.find((each) => knobId(each) === token.knob)
-                          : undefined;
-                        if (knob?.options)
-                          return (
-                            <Choice
-                              key={at}
-                              label={knob.label ?? knob.prop}
-                              options={knob.options}
-                              value={values[token.knob!]}
-                              onChange={(value: Plain) =>
-                                setValues((current) => ({
-                                  ...current,
-                                  [token.knob!]: value,
-                                }))
-                              }
-                              written={(option, i) =>
-                                token.choices?.[i] ?? String(option)
-                              }
-                              className={`${live.value} ${live.choice} ${live.string}`}
-                            />
-                          );
-                        return (
-                          <span
-                            key={at}
-                            style={
-                              token.kind
-                                ? ({
-                                    "--shiki-editor": COLOR[token.kind],
-                                  } as React.CSSProperties)
-                                : undefined
-                            }
-                          >
-                            {token.text}
-                          </span>
-                        );
-                      })}
-                    </span>
-                  </React.Fragment>
-                );
-              })}
-            </code>
-          </pre>
-          <button
-            type="button"
-            className="docs-code-copy"
-            onClick={() =>
-              navigator.clipboard?.writeText(text).then(
-                () => setCopied(flavor),
-                () => undefined,
-              )
-            }
-          >
-            {copied === flavor ? "Copied" : "Copy"}
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const at = picked ? order.indexOf(picked) : -1;
   if (preview)
     return (
       <figure ref={ref} className={styles.example}>
@@ -432,40 +190,19 @@ export function ComposeExample() {
     );
   return (
     <figure ref={ref} className={styles.example}>
-      <div className={styles.preview} {...example(EXAMPLE)}>
-        <Demo order={order} values={values} />
-      </div>
-      <div className={styles.code}>
-        <div className={compose.tools}>
-          <p id={hint} className={compose.hint}>
-            {picked
-              ? `Moving ${PARTS[picked].name}: Move up or Move down, or its arrow keys. Escape lets it go.`
-              : "Drag a part by its grip, or press the grip, then Move up or Move down."}
-          </p>
-          <div className={compose.moves}>
-            <button
-              type="button"
-              disabled={at <= 0}
-              onClick={() => picked && move(picked, at - 1)}
-            >
-              Move up
-            </button>
-            <button
-              type="button"
-              disabled={at < 0 || at >= order.length - 1}
-              onClick={() => picked && move(picked, at + 1)}
-            >
-              Move down
-            </button>
+      <PartsEditor
+        parts={PARTS}
+        start={START}
+        knobs={KNOBS}
+        treeOf={treeOf}
+        className={styles.code}
+      >
+        {(order, values) => (
+          <div className={styles.preview} {...example(EXAMPLE)}>
+            <Demo order={order} values={values} />
           </div>
-        </div>
-        <div className={compose.codes}>
-          {(["react", "html"] as const).map(code)}
-        </div>
-        <span role="status" className={compose.status}>
-          {copied ? "Copied the code" : said}
-        </span>
-      </div>
+        )}
+      </PartsEditor>
     </figure>
   );
 }

@@ -1,7 +1,7 @@
 /*
  * Composing's live example (`ComposeExample.tsx`): its demo laid out as the page's code
- * writes it, a Body and an aside beside it, then over its code what a move asks, Move up
- * and Move down, and in its code each part's grip.
+ * writes it, a Body and an aside beside it. Its code is the docs' editor's
+ * (`PartsEditor.module.css`).
  */
 .layout {
   align-items: start;
@@ -29,109 +29,4 @@
 
 .muted {
   color: var(--gray-11);
-}
-
-.tools {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.618rem 1rem;
-  justify-content: space-between;
-  margin-bottom: 0.618rem;
-}
-
-.hint {
-  color: var(--gray-11);
-  font-size: 0.875rem;
-  margin: 0;
-}
-
-.moves {
-  display: flex;
-  gap: 0.382rem;
-}
-
-/* Edged 3:1, as the playground's controls are; 24px or more each way (WCAG 2.5.8). */
-.moves > button {
-  background: var(--color-background);
-  border: 1px solid
-    color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
-  border-radius: var(--radius-2);
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.875rem;
-  min-height: 1.5rem;
-  padding: 0.236rem 0.618rem;
-}
-
-.moves > button:hover:not(:disabled) {
-  border-color: var(--accent-9);
-  color: var(--accent-11);
-}
-
-.moves > button:focus-visible {
-  outline: 2px solid var(--accent-11);
-  outline-offset: 2px;
-}
-
-/* Nothing picked, or at an end: shown off, as a disabled control may be (1.4.3). */
-.moves > button:disabled {
-  cursor: default;
-  opacity: 0.5;
-}
-
-/* A part's grip, at the start of its first line; its lines move with it. */
-.grip {
-  align-items: center;
-  background: none;
-  border: 0;
-  border-radius: var(--radius-2);
-  color: var(--editor-faint);
-  cursor: grab;
-  display: inline-flex;
-  height: 1.3em;
-  justify-content: center;
-  margin-inline-end: 0.3em;
-  padding: 0;
-  touch-action: none;
-  vertical-align: -0.25em;
-  width: 1.3em;
-}
-
-.grip:hover,
-.grip[aria-pressed="true"] {
-  background: var(--editor-mark);
-  color: var(--accent-11);
-}
-
-.grip:focus-visible {
-  outline: 2px solid var(--editor-text);
-  outline-offset: 1px;
-}
-
-/* A part picked or dragged: its lines lit as a code block's marked lines are. */
-.codes span[data-picked],
-.codes span[data-dragging] {
-  background: var(--editor-mark);
-}
-
-.codes span[data-dragging] .grip {
-  cursor: grabbing;
-}
-
-.status {
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  height: 1px;
-  overflow: hidden;
-  position: absolute;
-  white-space: nowrap;
-  width: 1px;
-}
-
-@media (forced-colors: active) {
-  .grip {
-    color: ButtonText;
-  }
 }

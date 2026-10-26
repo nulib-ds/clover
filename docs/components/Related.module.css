@@ -1,0 +1,91 @@
+/*
+ * Related content and next steps (`Related.tsx`): small cards, as many to a row as fit,
+ * each lifted off the page as every card is (`--card-shadow`, `--radius-4`). The whole
+ * card is its link. Pointed at or focused, its edge and its arrow take the accent and the
+ * arrow steps forward, by a transform alone, as the homepage's tiles do (`.tileArrow`).
+ */
+.related {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));
+  list-style: none;
+  margin: 1.618rem 0 0;
+  padding: 0;
+}
+
+.card {
+  margin: 0;
+}
+
+.link {
+  background: var(--color-background);
+  border-radius: var(--radius-4);
+  box-shadow: var(--card-shadow);
+  color: inherit;
+  display: grid;
+  gap: 0.236rem;
+  height: 100%;
+  padding: 1rem 2.618rem 1.236rem 1.236rem;
+  position: relative;
+  text-decoration: none;
+  transition: box-shadow 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.link:hover {
+  box-shadow:
+    0 0 0 1px var(--accent-9),
+    var(--card-lift);
+}
+
+/* Focused, the ring the page's other controls take: the accent, off the card's edge. */
+.link:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.title {
+  color: var(--accent-11);
+  font-weight: 600;
+}
+
+.link:hover .title {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.note {
+  color: var(--gray-11);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Drawn only, in the muted text's gray (5.9:1 on white): a press on it is the link's. */
+.arrow {
+  color: var(--gray-11);
+  inset-block-start: 1rem;
+  inset-inline-end: 1.236rem;
+  position: absolute;
+  transition: transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.link:is(:hover, :focus-visible) .arrow {
+  color: var(--accent-11);
+  transform: translateX(0.236rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link,
+  .arrow {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .link {
+    border: 1px solid CanvasText;
+  }
+
+  .link:hover {
+    border-color: Highlight;
+  }
+}

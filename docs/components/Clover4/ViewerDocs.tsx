@@ -185,7 +185,7 @@ function useNear(box: React.RefObject<HTMLElement | null>) {
   return near;
 }
 
-interface LiveProps {
+export interface LiveProps {
   /** A key of the homepage's resources (`playground-config.ts`), `search`, or an address. */
   resource: string;
   template?: TemplateName;
@@ -204,7 +204,7 @@ interface LiveProps {
 }
 
 /** The live Viewer of an example, mounted near the window, its height kept when let go. */
-function Live({
+export function Live({
   resource,
   template,
   props,

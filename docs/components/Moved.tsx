@@ -31,7 +31,7 @@ const MOVES: [RegExp, string][] = [
   [/^\/docs\/information-panel$/, "/docs/panel"],
   // Pages folded into others: the templates under the Viewer, the element into Get started.
   [/^\/docs\/templates$/, "/docs/viewer#templates"],
-  [/^\/docs\/web-component$/, "/docs#web-component"],
+  [/^\/docs\/web-component$/, "/docs/technical"],
   // The part that draws the view, when it was Content (Mat, 2026-10-22: now Body).
   [/^\/docs\/content$/, "/docs/body"],
   /*

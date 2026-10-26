@@ -859,11 +859,112 @@ nav.nextra-toc:empty ~ article {
 }
 
 /*
- * The header's switch on Get started too, under its two ways (Mat, 2026-10-24), in step
- * with the header's: what the reader chooses there is chosen here.
+ * A page's steps (`<div className="docs-steps">`, Get started's install): each of its own
+ * `###` headings numbered, as Nextra's `Steps` numbers them, on a rule down their side.
+ * Only its own headings: Nextra's numbers every heading in it, an example's Viewer's
+ * title too (Mat, 2026-10-26).
  */
-.docs-flavor {
+.docs-steps {
+  counter-reset: docs-step;
+  margin: 0 0 3rem 1rem;
+  padding-inline-start: 1.5rem;
+  position: relative;
+}
+
+/*
+ * The rule down their side: a hairline, fading out toward the last step's end
+ * (Mat, 2026-10-26).
+ */
+.docs-steps::before {
+  background: linear-gradient(var(--gray-6) 50%, transparent);
+  content: "";
+  inset-block: 0;
+  inset-inline-start: 0;
+  position: absolute;
+  width: 1px;
+}
+
+/*
+ * More air between the steps, and between what each holds, on the golden scale (Mat,
+ * 2026-10-26: "add more air between steps and elements within them"). Doubled to
+ * outweigh the room `code.css` gives a block after something.
+ */
+.docs-steps > h3 {
+  counter-increment: docs-step;
+  margin-top: 4.236rem;
+}
+
+.docs-steps > h3:first-child {
+  margin-top: 2rem;
+}
+
+.docs-steps.docs-steps > :not(h3) {
+  margin-top: 2rem;
+}
+
+.docs-steps.docs-steps > h3 + * {
+  margin-top: 1.618rem;
+}
+
+.docs-steps > h3::before {
+  background: var(--gray-4);
+  border: 4px solid var(--color-background);
+  border-radius: 50%;
+  color: var(--gray-12);
+  content: counter(docs-step);
+  font-size: 1rem;
+  font-weight: 400;
+  height: 2.0625rem;
+  line-height: 1.5rem;
+  margin-inline-start: calc(-1.5rem - 1.03125rem + 0.5px);
+  position: absolute;
+  text-align: center;
+  width: 2.0625rem;
+}
+
+/*
+ * Get started's install, three ways (`InstallGuide.tsx`; Mat, 2026-10-26), its choice the
+ * code switch's: React chosen from the page's root, as the header's is, before the page
+ * hydrates; of the two web components ways, the guide's own (`data-web`).
+ */
+:root:not([data-code="web-components"])
+  .install-guide
+  .code-switch-option[data-option="react"],
+:root[data-code="web-components"]
+  .install-guide:not([data-web="cdn"])
+  .code-switch-option[data-option="bundler"],
+:root[data-code="web-components"]
+  .install-guide[data-web="cdn"]
+  .code-switch-option[data-option="cdn"] {
+  background: var(--clover-color-control, #1a1d1e);
+  color: var(--clover-color-control-glyph, #fff);
+}
+
+:root.dark:not([data-code="web-components"])
+  .install-guide
+  .code-switch-option[data-option="react"],
+:root.dark[data-code="web-components"]
+  .install-guide:not([data-web="cdn"])
+  .code-switch-option[data-option="bundler"],
+:root.dark[data-code="web-components"]
+  .install-guide[data-web="cdn"]
+  .code-switch-option[data-option="cdn"] {
+  background: var(--gray-12);
+  color: var(--color-background);
+}
+
+.install-guide > .code-switch {
+  flex-wrap: wrap;
   margin-top: 1rem;
+}
+
+.install-guide[data-web="cdn"] [data-install="bundler"],
+.install-guide:not([data-web="cdn"]) [data-install="cdn"] {
+  display: none;
+}
+
+.install-way {
+  margin-top: 1.618rem;
 }
 
 /* Under the pointer, or focused, the accent, chosen or not, as the controls take it. */
@@ -912,6 +1013,15 @@ nav.nextra-toc:empty ~ article {
     .code-switch-option[data-option="react"],
   :root[data-code="web-components"]
     .code-switch-option[data-option="web-components"],
+  :root:not([data-code="web-components"])
+    .install-guide
+    .code-switch-option[data-option="react"],
+  :root[data-code="web-components"]
+    .install-guide:not([data-web="cdn"])
+    .code-switch-option[data-option="bundler"],
+  :root[data-code="web-components"]
+    .install-guide[data-web="cdn"]
+    .code-switch-option[data-option="cdn"],
   .code-switch-option[data-checked] {
     background-color: Highlight;
     color: HighlightText;

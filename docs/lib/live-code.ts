@@ -154,6 +154,11 @@ export interface CodeTree {
   nodes: CodeNode[];
   /** React's imports, where the code is a whole module; the HTML then imports the elements. */
   imports?: string[];
+  /**
+   * The page has loaded the elements already (Get started's install steps do), so the
+   * HTML is the markup alone, without the script that imports them.
+   */
+  loaded?: boolean;
   /** The example's resource, its published address. */
   url: string;
 }
@@ -625,7 +630,7 @@ export function codeLines(
       tree.imports!.forEach((line) =>
         lines.push({ depth: 0, tokens: importTokens(line) }),
       );
-    else
+    else if (!tree.loaded)
       lines.push(
         {
           depth: 0,
@@ -650,7 +655,8 @@ export function codeLines(
         },
         { depth: 0, tokens: [punct("</"), tag("script"), punct(">")] },
       );
-    lines.push({ depth: 0, tokens: [] });
+    if (flavor === "react" || !tree.loaded)
+      lines.push({ depth: 0, tokens: [] });
   }
   tree.nodes.forEach((node) => nodeLines(node, 0, context, flavor, lines));
   // A module's markup is a statement: it ends in a semicolon, as Prettier writes it.

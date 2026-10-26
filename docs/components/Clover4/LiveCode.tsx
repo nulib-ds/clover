@@ -3,10 +3,9 @@
 import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 
-import { Choice, Scrub, Switch, Text } from "docs/components/CodeValues";
+import { Control } from "docs/components/Clover4/CodeControl";
 import { MapDemo } from "docs/components/Clover4/Demos";
 import { PartDemo, type PartName } from "docs/components/Clover4/PartDemo";
-import live from "docs/components/Clover4/LiveCode.module.css";
 import styles from "docs/components/Clover4/ViewerDocs.module.css";
 import {
   type CodeTree,
@@ -55,72 +54,6 @@ const COLOR: Record<TokenKind, string> = {
 
 const LANGUAGE: Record<Flavor, string> = { react: "jsx", html: "html" };
 
-/** A knob's value, as the control its kind is. */
-function Control({
-  knob,
-  value,
-  choices,
-  kind,
-  onChange,
-}: {
-  knob: Knob;
-  value: Plain;
-  choices?: string[];
-  kind?: TokenKind;
-  onChange: (value: Plain) => void;
-}) {
-  const label = knob.label ?? knob.prop;
-  const color = kind === "string" ? live.string : live.number;
-  if (knob.options)
-    return (
-      <Choice
-        label={label}
-        options={knob.options}
-        value={value}
-        onChange={onChange}
-        written={(option, index) => choices?.[index] ?? String(option)}
-        className={`${live.value} ${live.choice} ${color}`}
-      />
-    );
-  if (typeof value === "boolean")
-    return (
-      <Switch
-        label={label}
-        value={value}
-        onChange={onChange}
-        className={`${live.value} ${live.number}`}
-      />
-    );
-  if (typeof value === "number") {
-    const min = knob.min ?? 0;
-    const max = knob.max ?? 100;
-    const step = knob.step ?? 1;
-    return (
-      <Scrub
-        label={label}
-        min={min}
-        max={max}
-        step={step}
-        // A pixel a pixel, or across its range in some 200, whichever is slower.
-        rate={Math.min(1, (max - min) / step / 200)}
-        value={value}
-        onChange={onChange}
-        className={`${live.value} ${live.scrub} ${live.number}`}
-        // As wide as its value, so the code around it reads as written (`"8rem"`).
-        style={{ width: `${Math.max(String(value).length, 1)}ch` }}
-      />
-    );
-  }
-  return (
-    <Text
-      label={label}
-      value={value}
-      onChange={onChange}
-      className={`${live.value} ${live.text} ${live.string}`}
-    />
-  );
-}
-
 /** One flavor's code, as a code block of the site's, its knobs live. */
 function Block({
   lines,
@@ -159,7 +92,9 @@ function Block({
                   if (knob)
                     return (
                       <Control
-                        key={at}
+                        // Keyed by its knob, not its place: a value another takes the place of (a
+                        // slider's height, then a grid's width) never keeps the other's draft.
+                        key={token.knob}
                         knob={knob}
                         value={values[token.knob!]}
                         choices={token.choices}

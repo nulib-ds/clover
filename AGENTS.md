@@ -199,11 +199,17 @@ deadline.
     every line keeps its colors (dimming the rest would take them under 4.5:1), and the
     twin marks the same element's lines (`twinLines`, `code-flavors.mjs`). Mark a part's
     own lines where an example's code holds a `Root` or other parts around it.
-  - Use Clover: Get started (`/docs`, which holds the web components, `<clover-viewer>`
-    and the parts, in a section of their own, `#web-component`), Viewer (`/docs/viewer`,
+  - Use Clover: Get started (`/docs`, a quick start and nothing more; Mat, 2026-10-26:
+    "everything should be about a quick start"), Viewer (`/docs/viewer`,
     the templates on it: their old page, `/docs/viewer/templates`, forwards to
     `#templates`), Composing, Styling (the menu's names, short; "Composing" for the page
-    titled "Composing layouts"; Mat, 2026-10-23). Build with an agent (`/docs/agents`;
+    titled "Composing layouts"; Mat, 2026-10-23), Technical overview (`/docs/technical`;
+    Mat, 2026-10-26: the package's entry points, the Viewer, events, languages, parts,
+    layouts, parts of your own, types, what it loads, styles, and coming from 3.x, in
+    React and as web components, the two at parity: each section says it in the reader's
+    flavor, `<div data-code-flavor>`, or once for both, as the events' table does; the
+    web components' detail Get started held, and `/docs/web-component`'s forward, are
+    here). Build with an agent (`/docs/agents`;
     Mat, 2026-10-26) is hidden for now (Mat, 2026-10-26: "let's hide this page for now"):
     out of the menu (`display: "hidden"` in `content/docs/_meta.ts`, its place after
     Styling kept) and of search, the sitemap, `llms.txt` and the Markdown
@@ -212,23 +218,27 @@ deadline.
     and never sends, and what they need, with an example of its own (under the lede, so
     a preview there sits under the page's title) for an agent's preview to take the
     place of. It never names the tools or says how they work (`WEBMCP.md` does).
-  - Get started opens (Mat, 2026-10-24) with a lede of two lines (what Clover is: no
-    renderer named) and then its two ways in, side by side, above the fold at
-    1280 × 800 (`Ways.tsx`): "Start with the Viewer" and "Compose with its parts", each
-    under the component it starts from as the reader's flavor writes it (`<Viewer />`,
-    `<Clover.Root>`), in the code face and the accent, as a component page's head names
-    its part. Its reader has come from the homepage, whose choice offered the two, so it
-    says more, never the homepage's words again (Mat: "add more information not just
-    repeat ourselves"): what each way gives, in the page's black, its last sentence
-    linking the page that goes on with it by the menu's own name ("See Viewer…", "See
-    Composing…"; no calls to action here), then its code in the page's own light editor
-    (one Viewer with no `template`; the parts without a pager; both importing the
-    stylesheet, which the elements' twin leaves out, as they inject their own). The two
-    share their rows, so they line up; where the page is narrow, one follows the other.
-    Under them, before Install, "React or web components": a few words on the two
-    flavors, linking the page's own Web components section, and the code switch, the
-    header's second (Mat, 2026-10-24: "bring the toggle below this"; and asked, keep the
-    switch in the header as well as on Get started, for every other page).
+  - Get started (Mat, 2026-10-26) is a quick start: its title, a lede of two lines (what
+    Clover is: no renderer named), then Install, in steps (`<div className="docs-steps">`,
+    numbered by `layout.css`; not Nextra's `Steps`, which numbers every heading in it, an
+    example's Viewer's title too), three ways (`InstallGuide.tsx`): React, Web components
+    (a bundler) and Web components from a CDN, chosen as the header's code switch is
+    drawn and in step with it (React chooses React's code across the docs, either other
+    the web components'). Each way's "Add it to a page" step holds the example
+    (`StartExample.tsx`): its two ways in as radio cards, stacked, "Start with the Viewer"
+    and "Compose with its parts", each linking the page that goes on with it, then, in the
+    page's column, the chosen one live, the Viewer or a `Root` of Label, Body and Items,
+    its code under it (its HTML the markup alone, `CodeTree.loaded`, as the steps load the
+    elements; React's a whole module, as a component file is), the
+    parts' lines moved and their values picked in the docs' editor (`PartsEditor.tsx`,
+    Composing's first example's too, working as the homepage's example viewer's editor
+    does, in the page's editor colors). Every example on it reads Northwestern's record
+    of a street in Corozal (`…/works/3510cac2-…?as=iiif`). Then Next, where to go on, as
+    small link cards (`<Related>` and `<RelatedLink href title note />`,
+    `docs/components/Related.tsx`; Mat, 2026-10-26: "we will use this type of thing for
+    related content/next steps"), the site's one way to list related pages. Nothing another page says (Mat: "don't repeat this from other parts of the
+    docs. focus on what we are doing"). JSX code blocks across the site run on past the
+    block's edge, scrolling, rather than wrap (`code.css`).
   - The Viewer page reads as Radix Themes' component pages do (Mat, 2026-10-21): the title
     and a lede (`docs-lede`), one example at the top (the Viewer, its code under it, live:
     each template's own knobs, `LiveViewerExample`, kept as the reader switches; Mat,
@@ -662,10 +672,9 @@ deadline.
     across tabs, and set on the root as `data-code` before the page paints
     (`code-flavor-script.ts`, in the root layout's head), so CSS shows an example's code in
     the chosen flavor (`data-code-flavor`, `layout.css`) with no flash and no re-render;
-    both flavors stay in the HTML, for agents and pages read without scripts. Get started
-    has a second, under its two ways (`.docs-flavor`), the two in step, as they share the
-    choice's store. On a phone the header's reads "React | Web", the rest of the name
-    still read (2.5.3), and Get started's all of it; under 360px the
+    both flavors stay in the HTML, for agents and pages read without scripts. Get started's
+    install choice sets it too (`InstallGuide.tsx`). On a phone the header's reads
+    "React | Web", the rest of the name still read (2.5.3); under 360px the
     repository's icon gives way (the footer links the source), so the header fits at
     320px (1.4.10).
   - Menus, calls to action, headings, titles, tabs and labels are in sentence case, on

@@ -114,6 +114,38 @@
   white-space: pre-wrap;
 }
 
+/*
+ * JSX runs on past the block's edge rather than wrapping (Mat, 2026-10-26: "let jsx
+ * codeblocks overflow"), so a component's props stay on their line: the block scrolls
+ * sideways, by keyboard too (it takes focus, WCAG 2.1.1), its head holding still, and its
+ * lines as wide as the longest, so a marked line's tint reaches its end.
+ */
+.docs-code.docs-code pre:is([data-lang="jsx"], [data-lang="tsx"]) {
+  overflow-wrap: normal;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.docs-code pre:is([data-lang="jsx"], [data-lang="tsx"])::before {
+  left: 0;
+  position: sticky;
+}
+
+.docs-code.docs-code
+  pre:is([data-lang="jsx"], [data-lang="tsx"])
+  code.nextra-code {
+  min-width: 100%;
+  width: max-content;
+}
+
+.docs-code.docs-code
+  pre:is([data-lang="jsx"], [data-lang="tsx"])
+  code.nextra-code
+  > span {
+  text-indent: 0;
+  white-space: pre;
+}
+
 .docs-code pre code.nextra-code > span::before {
   color: var(--editor-faint);
   content: counter(line);
