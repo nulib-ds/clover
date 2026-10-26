@@ -102,7 +102,8 @@ deadline.
     `PanelToggle` (round, the controls' fill and glyph, the accent under the pointer or
     focused, its glyph mirrored for a panel on the left, a mask that forced colors paint;
     Mat, 2026-10-23).
-  - Every part the homepage shows has a page under "Components" (Mat, 2026-10-20):
+  - Every part the homepage shows has a page under "Root components" (Mat, 2026-10-20;
+    the group so named on 2026-10-26):
     Body, Canvas, Items, Panel, the Panel's sections (Annotations, Collection with
     CollectionSelect, Contents, Search, Transcript), Download and Map, then Primitives
     (`content/docs/primitives/`, an overview and a page per property part: Label,
@@ -221,10 +222,12 @@ deadline.
   - Get started (Mat, 2026-10-26) is a quick start: its title, a lede of two lines (what
     Clover is: no renderer named), then Install, in steps (`<div className="docs-steps">`,
     numbered by `layout.css`; not Nextra's `Steps`, which numbers every heading in it, an
-    example's Viewer's title too), three ways (`InstallGuide.tsx`): React, Web components
-    (a bundler) and Web components from a CDN, chosen as the header's code switch is
-    drawn and in step with it (React chooses React's code across the docs, either other
-    the web components'). Each way's "Add it to a page" step holds the example
+    example's Viewer's title too). Its first step, "Choose your setup", offers three
+    ways as radio cards (`InstallGuide.tsx`, `RadioCards.tsx`): React, Web components
+    (npm) and Web components (CDN), each in a plain sentence (Mat, 2026-10-26: "say this
+    less technically"), in step with the header's code switch (React chooses React's
+    code across the docs, either other the web components'); the chosen way's steps
+    count on from it. Each way's "Add it to a page" step holds the example
     (`StartExample.tsx`): its two ways in as radio cards, stacked, "Start with the Viewer"
     and "Compose with its parts", each linking the page that goes on with it, then, in the
     page's column, the chosen one live, the Viewer or a `Root` of Label, Body and Items,

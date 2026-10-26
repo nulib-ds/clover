@@ -1,0 +1,127 @@
+/*
+ * A choice as radio cards (`RadioCards.tsx`; Mat, 2026-10-26: "make more obvious we are
+ * toggling these options", "use radio cards?", "stack these", "make the cards float"):
+ * each a native radio, a mark at its start, a name in the code's face (optional), a title
+ * and a sentence of what it gives. One over the other. The chosen one floats, lifted off
+ * the page as every card is (`--card-shadow`), its mark filled and its title in the text
+ * accent; the others lie flat, their mark's ring the control's edge (WCAG 1.4.11), and
+ * lift a little under the pointer.
+ */
+/*
+ * What the cards ask, over them, and the group's name (Mat, 2026-10-26: "make more clear
+ * this is a choice … more friendly and less technical sounding").
+ */
+.ask {
+  font-weight: 600;
+  margin: 0 0 1.236rem;
+}
+
+.cards {
+  display: grid;
+  gap: 1.236rem;
+}
+
+/* A card: its native radio transparent over the whole of it, so a press anywhere on it chooses it. */
+.card {
+  border-radius: var(--radius-4);
+  cursor: pointer;
+  display: grid;
+  gap: 0.382rem;
+  padding: 1rem 1.236rem 1.236rem 3rem;
+  position: relative;
+  transition: box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card:hover {
+  box-shadow: var(--card-lift);
+}
+
+.card:has(> input:checked) {
+  background: var(--color-background);
+  box-shadow: var(--card-shadow);
+}
+
+.card:has(> input:focus-visible) {
+  outline: 2px solid var(--accent-11);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}
+
+/*
+ * A radio's mark at the card's start (Mat, 2026-10-26), so it reads as a choice: a ring
+ * with the controls' 3:1 edge, filled with the accent when chosen (WCAG 1.4.11).
+ */
+.dot {
+  border: 1px solid
+    color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
+  border-radius: 50%;
+  height: 1.125rem;
+  inset-block-start: 1.118rem;
+  inset-inline-start: 1.236rem;
+  position: absolute;
+  width: 1.125rem;
+}
+
+.card:has(> input:checked) > .dot {
+  border: 5px solid var(--accent-9);
+}
+
+.card > input {
+  appearance: none;
+  border-radius: inherit;
+  cursor: inherit;
+  inset: 0;
+  margin: 0;
+  position: absolute;
+}
+
+/* Its name in the code's face, as a component page's head names its part. */
+.name {
+  color: var(--accent-11);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.card:has(> input:checked) .title {
+  color: var(--accent-11);
+  font-weight: 600;
+}
+
+.note {
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* A link in its sentence, over the card's radio, so a press on it follows the link. */
+.note a {
+  position: relative;
+}
+
+@media (forced-colors: active) {
+  .card:has(> input:checked) > .dot {
+    border-color: Highlight;
+  }
+
+  /* Shadows are dropped: the chosen card is edged in the system's highlight. */
+  .card:has(> input:checked) {
+    outline: 2px solid Highlight;
+  }
+
+  .card:has(> input:focus-visible) {
+    outline-color: CanvasText;
+  }
+}

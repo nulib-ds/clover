@@ -20,7 +20,7 @@ const meta: MetaRecord = {
   agents: { title: "Build with an agent", display: "hidden" },
   "--components": {
     type: "separator",
-    title: "Components",
+    title: "Root components",
   },
   body: "Body",
   canvas: "Canvas",

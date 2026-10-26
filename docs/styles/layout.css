@@ -135,6 +135,32 @@
 }
 
 /*
+ * The Viewer's entry marked as the one to start from (Mat, 2026-10-26: "a little star …
+ * to indicate it is special"): a four-pointed star after its name, in the accent, drawn
+ * as a mask so it takes the link's place in forced colors too. Decorative only: empty
+ * content, so the link's name stays "Viewer". `$=` keeps the base path out of it and the
+ * 3.x Viewer (`/docs/3.x/viewer`) out of the match.
+ */
+:is(.nextra-sidebar, .nextra-mobile-nav) a[href$="/docs/viewer"]::after {
+  align-self: center;
+  background-color: var(--accent-9);
+  content: "";
+  flex: none;
+  height: 0.75em;
+  margin-inline-start: 0.382rem;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.5l2.6 7.9 7.9 2.6-7.9 2.6L12 22.5l-2.6-7.9L1.5 12l7.9-2.6z'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  width: 0.75em;
+}
+
+@media (forced-colors: active) {
+  :is(.nextra-sidebar, .nextra-mobile-nav) a[href$="/docs/viewer"]::after {
+    background-color: LinkText;
+    forced-color-adjust: none;
+  }
+}
+
+/*
  * More room around the sidebar's list, and over the page beside it, where the window is
  * wide (Mat, 2026-10-23: "more breathing is good"; "padding tops should always match"),
  * tightening as it narrows: Nextra's 1rem where the sidebar first shows, 48rem wide,
@@ -867,7 +893,8 @@ nav.nextra-toc:empty ~ article {
 .docs-steps {
   counter-reset: docs-step;
   margin: 0 0 3rem 1rem;
-  padding-inline-start: 1.5rem;
+  /* Room at its end as at its start, by the rule and numbers (Mat, 2026-10-26). */
+  padding-inline: 1.5rem 2.5rem;
   position: relative;
 }
 
@@ -889,24 +916,31 @@ nav.nextra-toc:empty ~ article {
  * 2026-10-26: "add more air between steps and elements within them"). Doubled to
  * outweigh the room `code.css` gives a block after something.
  */
-.docs-steps > h3 {
+/*
+ * A step's heading, and what it holds: the steps' own, and those of the install way
+ * shown in them (`InstallGuide.tsx`), which count on from its first step, "Choose your
+ * setup" (Mat, 2026-10-26). A way not shown is `display: none`, so it counts nothing.
+ */
+:where(.docs-steps, .docs-steps > .install-guide > .install-way) > h3 {
   counter-increment: docs-step;
-  margin-top: 4.236rem;
+  margin-top: 5.236rem;
 }
 
 .docs-steps > h3:first-child {
   margin-top: 2rem;
 }
 
-.docs-steps.docs-steps > :not(h3) {
-  margin-top: 2rem;
+.docs-steps.docs-steps > :not(h3),
+.docs-steps > .install-guide > .install-way.install-way > :not(h3) {
+  margin-top: 2.236rem;
 }
 
-.docs-steps.docs-steps > h3 + * {
-  margin-top: 1.618rem;
+.docs-steps.docs-steps > h3 + *,
+.docs-steps > .install-guide > .install-way.install-way > h3 + * {
+  margin-top: 2.236rem;
 }
 
-.docs-steps > h3::before {
+:is(.docs-steps, .docs-steps > .install-guide > .install-way) > h3::before {
   background: var(--gray-4);
   border: 4px solid var(--color-background);
   border-radius: 50%;
@@ -965,6 +999,39 @@ nav.nextra-toc:empty ~ article {
 
 .install-way {
   margin-top: 1.618rem;
+}
+
+/*
+ * The package's name in the install command, under the hero's stroke (Mat, 2026-10-26:
+ * "give this a nice underline swoosh"): the site's one shape (`--swoosh`), set as the
+ * hero's is (`.mark::after`, `Home.module.css`), behind the letters. The token holds the
+ * space before the name, so the stroke starts a character in.
+ */
+.install-way .docs-terminal code > span > span:last-child {
+  isolation: isolate;
+  position: relative;
+}
+
+.install-way .docs-terminal code > span > span:last-child::after {
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--accent-9) 30%, transparent),
+    var(--accent-9)
+  );
+  bottom: -0.1em;
+  content: "";
+  height: 0.42em;
+  left: calc(1ch - 0.04em);
+  mask: var(--swoosh) center / 100% 100% no-repeat;
+  position: absolute;
+  right: -0.06em;
+  rotate: 1.5deg;
+  z-index: -1;
+}
+
+/* In the steps, a way's first step has a step's room over it, as any step does. */
+.docs-steps > .install-guide > .install-way {
+  margin-top: 0;
 }
 
 /* Under the pointer, or focused, the accent, chosen or not, as the controls take it. */

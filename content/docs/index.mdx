@@ -16,13 +16,16 @@ import { InstallGuide, InstallWay } from "docs/components/Clover4/InstallGuide";
 
 ## Install
 
+<div className="docs-steps">
+
+### Choose your setup
+
 The Viewer and its parts are React components, and custom elements for a page without
 React: a CMS template, a static site, an exhibit page. Choose yours, and every example in
 these docs is written that way.
 
 <InstallGuide>
 <InstallWay way="react">
-<div className="docs-steps">
 
 ### Install the package
 
@@ -36,10 +39,8 @@ React 18 and 19 are supported.
 
 <StartExample />
 
-</div>
 </InstallWay>
 <InstallWay way="bundler">
-<div className="docs-steps">
 
 ### Install the package
 
@@ -60,10 +61,8 @@ import "@nulib/clover/web-components";
 
 <StartExample />
 
-</div>
 </InstallWay>
 <InstallWay way="cdn">
-<div className="docs-steps">
 
 ### Load the script
 
@@ -78,9 +77,10 @@ to add.
 
 <StartExample />
 
-</div>
 </InstallWay>
 </InstallGuide>
+
+</div>
 
 ## Next
 
@@ -102,7 +102,7 @@ to add.
   />
   <RelatedLink
     href="/docs/body"
-    title="Components"
+    title="Root components"
     note="A page for each part, from Body to the Primitives."
   />
   <RelatedLink

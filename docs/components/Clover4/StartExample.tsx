@@ -2,9 +2,10 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { Flavored } from "docs/components/Flavored";
+import { RadioCards } from "docs/components/RadioCards";
 import { LiveCode } from "docs/components/Clover4/LiveCode";
 import {
   type EditorPart,
@@ -80,11 +81,12 @@ const WAYS: {
           react={<code className="nextra-code">Root</code>}
           webComponents={<code className="nextra-code">{"<clover-root>"}</code>}
         />
-        , among your own markup; only the parts you use load. See{" "}
+        , among your own markup; only the parts you use load. The example here
+        is a minimal starter layout, to show how they fit together; see{" "}
         <Link href="/docs/composing" className={LINK}>
           Composing
         </Link>{" "}
-        for hooks and layouts.
+        for layouts of your own and the hooks.
       </>
     ),
   },
@@ -345,7 +347,6 @@ const PartsDemo = dynamic(
 );
 
 export function StartExample() {
-  const id = useId();
   const { ref, preview } = usePreviewHost();
   const [way, setWay] = useState<Way>("viewer");
   const [template, setTemplate] = useState<TemplateName>("Default");
@@ -362,38 +363,19 @@ export function StartExample() {
   }, [template, ref]);
   return (
     <div className={start.frame}>
-      <p id={`${id}-ask`} className={start.ask}>
-        How would you like to start? Pick one to see it here.
-      </p>
-      <div
-        className={start.cards}
-        role="radiogroup"
-        aria-labelledby={`${id}-ask`}
-      >
-        {WAYS.map((each) => (
-          <div key={each.value} className={start.card}>
-            <input
-              type="radio"
-              name={`${id}-way`}
-              value={each.value}
-              checked={each.value === way}
-              onChange={() => setWay(each.value)}
-              aria-labelledby={`${id}-${each.value}`}
-              aria-describedby={`${id}-${each.value}-note`}
-            />
-            <span className={start.dot} aria-hidden="true" />
-            <p className={start.name} aria-hidden="true">
-              <Flavored react={each.react} webComponents={each.webComponents} />
-            </p>
-            <span id={`${id}-${each.value}`} className={start.title}>
-              {each.title}
-            </span>
-            <p id={`${id}-${each.value}-note`} className={start.note}>
-              {each.note}
-            </p>
-          </div>
-        ))}
-      </div>
+      <RadioCards<Way>
+        ask="How would you like to start? Pick one to see it here."
+        options={WAYS.map((each) => ({
+          value: each.value,
+          title: each.title,
+          note: each.note,
+          name: (
+            <Flavored react={each.react} webComponents={each.webComponents} />
+          ),
+        }))}
+        value={way}
+        onChange={setWay}
+      />
       <figure ref={ref} className={styles.example}>
         {preview ? (
           <AgentPreview shown={preview} />
