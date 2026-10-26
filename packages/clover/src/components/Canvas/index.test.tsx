@@ -124,7 +124,11 @@ describe("Canvas", () => {
       "https://example.org/book.json",
       expect.anything(),
     );
-    expect(renderer.setImages).toHaveBeenCalled();
+    // Its images are set once it knows it is near the window, a step after the viewport is
+    // drawn: on a loaded machine, not yet as the viewport appears.
+    await waitFor(() => expect(renderer.setImages).toHaveBeenCalled(), {
+      timeout: 3000,
+    });
     unmount();
     render(<Canvas iiifContent={bookJson.items[1] as any} />);
     await waitFor(
