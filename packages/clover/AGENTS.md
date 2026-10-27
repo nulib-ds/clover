@@ -4,7 +4,8 @@ The composable 4.x Clover, used two ways: the ready-made `Viewer` (the default e
 `<Viewer iiifContent={url} template={Document} />`), or parts with dot notation around one
 `Clover.Root` (named exports). The Viewer only draws a template, and every template is
 built only from the parts. It is an npm workspace of the
-repository, private and unpublished. The repository root is its documentation site. The
+repository, set up to publish (see "Publishing" in the root `AGENTS.md`), its version and
+its publishing Mat's. The repository root is its documentation site. The
 3.x line, `@samvera/clover-iiif`, is maintained separately, in `samvera-labs/clover-iiif`.
 
 The root `AGENTS.md` applies here too, including the agents' scope of work: no commits,

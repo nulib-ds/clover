@@ -5,10 +5,12 @@ All notable changes to `@nulib/clover` are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the
 project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-`@nulib/clover` is the composable 4.x Clover. It is not published yet. The 3.x line,
+`@nulib/clover` is the composable 4.x Clover. The 3.x line,
 `@samvera/clover-iiif`, keeps its own changelog in `samvera-labs/clover-iiif`.
 
 ## Unreleased
+
+## [4.0.0-beta.0] - 2026-10-27
 
 ### Added
 

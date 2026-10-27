@@ -36,6 +36,13 @@ const HOSTS = [
   ],
 ] as const;
 
+/*
+ * What a browser's sub-pixel layout takes off a length: Firefox lays out in sixtieths of a
+ * pixel, so links set 24px apart can measure 23.99998px. Far under anything a reader's
+ * pointer meets; a link set short of 24px still fails.
+ */
+const ROUNDING = 0.01;
+
 for (const [host, css] of HOSTS) {
   test(`lists of links space each link to a 24px target, with ${host} (WCAG 2.5.8)`, async ({
     page,
@@ -70,12 +77,15 @@ for (const [host, css] of HOSTS) {
       for (let index = 1; index < boxes.length; index++) {
         const [above, below] = [boxes[index - 1], boxes[index]];
         // Too short to be 24px itself, so a 24px circle on each must clear the other.
-        if (above.height >= 24 && below.height >= 24) continue;
-        expect(below.center - above.center, list).toBeGreaterThanOrEqual(24);
+        if (above.height >= 24 - ROUNDING && below.height >= 24 - ROUNDING)
+          continue;
+        expect(below.center - above.center, list).toBeGreaterThanOrEqual(
+          24 - ROUNDING,
+        );
         expect(
           below.center - below.height / 2 - above.center,
           list,
-        ).toBeGreaterThanOrEqual(12);
+        ).toBeGreaterThanOrEqual(12 - ROUNDING);
       }
     }
   });

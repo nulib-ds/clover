@@ -24,8 +24,9 @@ test("1,000 Canvases: opens quickly, fetches only what shows, moves without lag"
 
   const started = Date.now();
   await page.goto("/?content=https://fixtures.test/generated/1000.json");
+  // The Viewer's title; About repeats the label a level down.
   await expect(
-    page.getByRole("heading", { name: "1000 Canvases" }),
+    page.getByRole("heading", { name: "1000 Canvases", level: 2 }),
   ).toBeVisible();
   const opened = Date.now() - started;
   await expect(page.locator(".clover-pager-position")).toHaveText(

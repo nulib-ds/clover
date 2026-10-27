@@ -83,8 +83,12 @@ test("a press in the list moves the Canvas, never the list under the pointer", a
     .filter({ hasText: "Page 22" })
     .locator(".clover-annotations-entry")
     .first();
-  // In view before it is pressed, as a reader's would be, so only Clover could move it.
-  await entry.scrollIntoViewIfNeeded();
+  /*
+   * Under the pointer before it is pressed, as a reader's would be, so only Clover could
+   * move it. Brought into view alone, it can sit under the stuck headings, where the click
+   * would scroll it clear itself before pressing.
+   */
+  await entry.hover();
   const before = (await placeOf(page, "Page 22")).scrollTop;
   await entry.click();
   await expect

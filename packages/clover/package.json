@@ -1,7 +1,30 @@
 {
   "name": "@nulib/clover",
-  "private": true,
   "description": "Composable IIIF components, for React and as web components: Clover 4.x.",
+  "keywords": [
+    "iiif",
+    "iiif-presentation",
+    "iiif-viewer",
+    "viewer",
+    "react",
+    "web-components",
+    "custom-elements",
+    "deep-zoom",
+    "audio",
+    "video",
+    "3d",
+    "map",
+    "accessibility"
+  ],
+  "homepage": "https://nulib-ds.github.io/clover/",
+  "bugs": {
+    "url": "https://github.com/nulib-ds/clover/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nulib-ds/clover.git",
+    "directory": "packages/clover"
+  },
   "license": "MIT",
   "sideEffects": [
     "*.css",
@@ -42,9 +65,15 @@
   "customElements": "./dist/web-components/custom-elements.json",
   "types": "./dist/index.d.mts",
   "files": [
-    "dist"
+    "dist",
+    "!dist/**/.vite"
   ],
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta"
+  },
   "scripts": {
+    "prepublishOnly": "npm run build && npm run test:build",
     "clean": "rimraf dist",
     "build": "npm run clean && vite build && node build/styles.mjs && npm run build:types && npm run build:web-components && npm run build:sizes",
     "test": "vitest",
@@ -78,5 +107,6 @@
     "@types/three": "^0.186.0",
     "preact": "^10.24.3",
     "three": "^0.186.1"
-  }
+  },
+  "version": "4.0.0-beta.0"
 }

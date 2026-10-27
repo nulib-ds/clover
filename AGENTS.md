@@ -998,7 +998,16 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
 ## Packages
 
 - `packages/clover` is `@nulib/clover`, the composable 4.x Clover, as an npm workspace.
-  It is private and unpublished. Its own rules are in `packages/clover/AGENTS.md`.
+  Its own rules are in `packages/clover/AGENTS.md`.
+- Publishing (Mat, 2026-10-27: a beta first, 4.0.0 later that week): the package is
+  public and ready to publish, but for its `version`, which is Mat's, as publishing is.
+  `publishConfig` gives `access: public` and `tag: beta`; take the tag out before 4.0.0,
+  or that release goes to `beta` and leaves `latest` on a beta (a `--tag` given to
+  `npm publish` wins over it). npm 11's "Publishing … with tag latest" notice reads the
+  command line only: the publish itself takes `publishConfig`'s tag. `prepublishOnly`
+  builds from clean and runs `test:build`, so no stale `dist/` ships, and `files` leaves
+  out the build's chunk maps (`.vite/`). Its README (`packages/clover/README.md`) is the
+  npm page, its links absolute; its `LICENSE` is a copy of the root's, kept the same.
 - The package never imports the docs or 3.x (`@samvera/clover-iiif`): ESLint forbids it,
   and the package's build rejects undeclared imports. Only the 3.x docs pages import 3.x.
 - 3.x is maintained in `samvera-labs/clover-iiif`, apart from this repository. Code the
@@ -1157,3 +1166,13 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
 
 - Node: 20.10 or later (`engines` in `package.json`).
 - When working with IIIF resources, verify CORS in local examples.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

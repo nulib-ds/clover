@@ -283,10 +283,11 @@ test("previews the Viewer on its page, and refuses a page with no example", asyn
     shows: "the Viewer",
     page: "Viewer",
   });
+  // The Viewer's title, a level under the page's; About repeats the label further down.
   await expect(
     page
       .getByRole("group", { name: "Preview from your agent" })
-      .getByRole("heading", { name: /White bicycles/ }),
+      .getByRole("heading", { name: /White bicycles/, level: 2 }),
   ).toBeVisible();
 
   await open(page, "/docs/styling");
