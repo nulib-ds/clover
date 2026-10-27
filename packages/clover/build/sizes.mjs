@@ -110,7 +110,11 @@ const BUNDLES = [
     "sceneOnDemandGzip",
     "Scene",
     "index.mjs",
-    { onDemand: /\/components\/Scene\/engine\.mjs$/ },
+    // Opt-in: a page that registers it (`@nulib/clover/three`).
+    {
+      onDemand: /\/components\/Scene\/engine\.mjs$/,
+      also: ["registerThreeEngine", "three/index.mjs"],
+    },
   ],
   [
     "Clover's 3D, on a Scene",

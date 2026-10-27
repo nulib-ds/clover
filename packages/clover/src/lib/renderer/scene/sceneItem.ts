@@ -45,7 +45,8 @@ export interface SceneImage {
    * (`dom`, the default), or uploaded to the GPU each frame (`texture`), which needs
    * CORS. Sound shows its element as a video does; it simply has no picture.
    */
-  media?: { element: HTMLVideoElement; presentation?: "dom" | "texture" };
+  /** A video, shown as itself in the DOM layer with the camera's transform. */
+  media?: { element: HTMLVideoElement };
   /**
    * Kept, with its tiles loaded, but not drawn: the frames of an animation not showing.
    * Not part of the image's identity, so changing it (`setHidden`) never prepares it
@@ -177,7 +178,6 @@ function prepareMedia(
       height,
       naturalWidth: width,
       naturalHeight: height,
-      opaque: (media.presentation ?? "dom") === "dom",
     },
     size,
     clip,
@@ -223,7 +223,6 @@ export function sameSpec(a: SceneImage, b: SceneImage): boolean {
     a.height === b.height &&
     a.region === b.region &&
     a.media?.element === b.media?.element &&
-    a.media?.presentation === b.media?.presentation &&
     JSON.stringify(a.placement) === JSON.stringify(b.placement)
   );
 }

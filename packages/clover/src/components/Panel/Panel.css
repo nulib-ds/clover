@@ -344,14 +344,8 @@
 /*
  * What a Canvas shown on its own is part of: each Manifest's label, and under it the
  * button that opens it in place, as the read-more button reads, its target 24px or more
- * (WCAG 2.5.8).
+ * (WCAG 2.5.8). As every list in About, it has no margin, padding or markers.
  */
-.clover-about ul.clover-about-part-of {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 .clover-about-part-of > li {
   display: flex;
   flex-direction: column;

@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * A row (or column) of slides that scrolls natively: the browser's own scrolling, wheel,
- * trackpad and touch, with CSS scroll snapping. On top of that, three things a slider
- * needs:
+ * A row of slides that scrolls natively: the browser's own scrolling, wheel, trackpad and
+ * touch, with CSS scroll snapping. On top of that, three things a slider needs (Items'
+ * slider and the Panel's tabs, both in a row):
  *
- * - **Paging**, for previous / next buttons: by what fits (`slidesToScroll: "auto"`) or by
- *   a number of slides, and whether there is anywhere to go.
- * - **Bringing a slide to rest** at the start, center or end, which is how a host keeps
+ * - **Paging**, for previous / next buttons: by most of what fits, and whether there is
+ *   anywhere to go.
+ * - **Bringing a slide to rest** at the start or the center, which is how a host keeps
  *   its selection in view.
  * - **Dragging with a mouse**, which native scrolling only offers to touch. A drag that
  *   moves swallows the click that ends it, so dragging never activates a slide.
@@ -18,18 +18,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * Slides are the elements carrying `data-track-index`, anywhere inside the viewport.
  */
 
-export type TrackOrientation = "horizontal" | "vertical";
-
 export interface ScrollTrackOptions {
   /** Where a scrolled-to slide comes to rest, and where slides snap. */
-  align?: "start" | "center" | "end";
+  align?: "start" | "center";
   /** No snapping: scrolling stops wherever it stops. */
   dragFree?: boolean;
   /** Re-measure when the number of slides changes. */
   itemCount?: number;
-  orientation?: TrackOrientation;
-  /** Slides per page for `scrollNext`/`scrollPrev`; `"auto"` pages by what fits. */
-  slidesToScroll?: number | "auto";
 }
 
 export interface ScrollTrack {
@@ -56,40 +51,33 @@ export function useScrollTrack({
   align = "start",
   dragFree = false,
   itemCount = 0,
-  orientation = "horizontal",
-  slidesToScroll = "auto",
 }: ScrollTrackOptions = {}): ScrollTrack {
   const [viewport, setViewport] = useState<HTMLElement | null>(null);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
-  const vertical = orientation === "vertical";
-  const settings = useRef({ align, vertical, slidesToScroll });
-  settings.current = { align, vertical, slidesToScroll };
+  const alignment = useRef(align);
+  alignment.current = align;
+  const snap = dragFree ? "none" : "x mandatory";
 
   const measure = useCallback(() => {
     if (!viewport) return;
-    const position = Math.abs(
-      vertical ? viewport.scrollTop : viewport.scrollLeft,
-    );
-    const max = vertical
-      ? viewport.scrollHeight - viewport.clientHeight
-      : viewport.scrollWidth - viewport.clientWidth;
+    // `scrollLeft` runs negative right to left.
+    const position = Math.abs(viewport.scrollLeft);
+    const max = viewport.scrollWidth - viewport.clientWidth;
     setCanScrollPrev(position > 1);
     setCanScrollNext(position < max - 1);
-  }, [viewport, vertical]);
+  }, [viewport]);
 
   // The viewport's own scrolling and snapping, set here so they hold without CSS.
   useEffect(() => {
     if (!viewport) return;
     const style = viewport.style;
-    style.overflowX = vertical ? "hidden" : "auto";
-    style.overflowY = vertical ? "auto" : "hidden";
-    style.scrollSnapType = dragFree
-      ? "none"
-      : `${vertical ? "y" : "x"} mandatory`;
+    style.overflowX = "auto";
+    style.overflowY = "hidden";
+    style.scrollSnapType = snap;
     style.setProperty("--clover-track-align", align);
-    style.overscrollBehaviorX = vertical ? "" : "contain";
-  }, [viewport, vertical, dragFree, align]);
+    style.overscrollBehaviorX = "contain";
+  }, [viewport, snap, align]);
 
   // Keep the buttons' state current as the track scrolls or resizes.
   useEffect(() => {
@@ -115,88 +103,47 @@ export function useScrollTrack({
     };
   }, [viewport, measure, itemCount]);
 
-  /** Scroll by a distance along the axis. */
+  /** Scroll by a distance along the row. */
   const scrollAlong = useCallback(
     (distance: number, instant = false) => {
       if (!viewport || !distance) return;
       const behavior: ScrollBehavior =
         instant || prefersReducedMotion() ? "auto" : "smooth";
-      viewport.scrollBy(
-        settings.current.vertical
-          ? { top: distance, behavior }
-          : { left: distance, behavior },
-      );
+      viewport.scrollBy({ left: distance, behavior });
     },
     [viewport],
   );
 
-  const slides = useCallback(
-    () =>
-      viewport
-        ? Array.from(
-            viewport.querySelectorAll<HTMLElement>("[data-track-index]"),
-          )
-        : [],
-    [viewport],
-  );
-
-  /** How far slide `element` is from resting where `align` puts it. */
-  const offsetOf = useCallback(
-    (element: HTMLElement) => {
-      if (!viewport) return 0;
-      const { vertical, align } = settings.current;
-      const box = viewport.getBoundingClientRect();
-      const rect = element.getBoundingClientRect();
-      const [boxStart, boxSize, start, size] = vertical
-        ? [box.top, box.height, rect.top, rect.height]
-        : [box.left, box.width, rect.left, rect.width];
-      const rtl = !vertical && getComputedStyle(viewport).direction === "rtl";
-      if (align === "center")
-        return start + size / 2 - (boxStart + boxSize / 2);
-      const atStart = align === "start" ? !rtl : rtl;
-      return atStart ? start - boxStart : start + size - (boxStart + boxSize);
-    },
-    [viewport],
-  );
-
+  /** Bring slide `index` to rest where `align` puts it: its start (by the row's direction) or its center. */
   const scrollToIndex = useCallback(
     (index: number, { instant = false } = {}) => {
-      const target = slides().find(
-        (slide) => Number(slide.dataset.trackIndex) === index,
+      const slide = viewport?.querySelector<HTMLElement>(
+        `[data-track-index="${index}"]`,
       );
-      if (target) scrollAlong(offsetOf(target), instant);
+      if (!viewport || !slide) return;
+      const box = viewport.getBoundingClientRect();
+      const rect = slide.getBoundingClientRect();
+      const rtl = getComputedStyle(viewport).direction === "rtl";
+      scrollAlong(
+        alignment.current === "center"
+          ? rect.left + rect.width / 2 - (box.left + box.width / 2)
+          : rtl
+            ? rect.right - box.right
+            : rect.left - box.left,
+        instant,
+      );
     },
-    [slides, offsetOf, scrollAlong],
+    [viewport, scrollAlong],
   );
-
-  /** The slide nearest its resting place: where the reader is. */
-  const currentIndex = useCallback(() => {
-    let best = 0;
-    let distance = Infinity;
-    for (const slide of slides()) {
-      const offset = Math.abs(offsetOf(slide));
-      if (offset < distance) {
-        distance = offset;
-        best = Number(slide.dataset.trackIndex);
-      }
-    }
-    return best;
-  }, [slides, offsetOf]);
 
   const page = useCallback(
     (direction: 1 | -1) => {
       if (!viewport) return;
-      const { slidesToScroll: step, vertical } = settings.current;
-      if (step === "auto") {
-        const size = vertical ? viewport.clientHeight : viewport.clientWidth;
-        const rtl = !vertical && getComputedStyle(viewport).direction === "rtl";
-        // Most of a screen, so the last slide seen stays in view as a landmark.
-        scrollAlong(direction * size * 0.9 * (rtl ? -1 : 1));
-        return;
-      }
-      scrollToIndex(Math.max(0, currentIndex() + direction * step));
+      const rtl = getComputedStyle(viewport).direction === "rtl";
+      // Most of a screen, so the last slide seen stays in view as a landmark.
+      scrollAlong(direction * viewport.clientWidth * 0.9 * (rtl ? -1 : 1));
     },
-    [viewport, scrollAlong, scrollToIndex, currentIndex],
+    [viewport, scrollAlong],
   );
   const scrollNext = useCallback(() => page(1), [page]);
   const scrollPrev = useCallback(() => page(-1), [page]);
@@ -204,23 +151,17 @@ export function useScrollTrack({
   // Drag to scroll with a mouse; touch and pens scroll natively.
   useEffect(() => {
     if (!viewport) return;
-    let start: { x: number; y: number; scroll: number } | null = null;
+    let start: { x: number; scroll: number } | null = null;
     let dragging = false;
 
     const onDown = (event: PointerEvent) => {
       if (event.pointerType !== "mouse" || event.button !== 0) return;
-      start = {
-        x: event.clientX,
-        y: event.clientY,
-        scroll: vertical ? viewport.scrollTop : viewport.scrollLeft,
-      };
+      start = { x: event.clientX, scroll: viewport.scrollLeft };
       dragging = false;
     };
     const onMove = (event: PointerEvent) => {
       if (!start) return;
-      const moved = vertical
-        ? event.clientY - start.y
-        : event.clientX - start.x;
+      const moved = event.clientX - start.x;
       if (!dragging && Math.abs(moved) < DRAG_THRESHOLD) return;
       if (!dragging) {
         dragging = true;
@@ -229,8 +170,7 @@ export function useScrollTrack({
         viewport.style.scrollSnapType = "none";
         viewport.dataset.dragging = "true";
       }
-      if (vertical) viewport.scrollTop = start.scroll - moved;
-      else viewport.scrollLeft = start.scroll - moved;
+      viewport.scrollLeft = start.scroll - moved;
     };
     const onUp = (event: PointerEvent) => {
       if (!start) return;
@@ -239,9 +179,7 @@ export function useScrollTrack({
       viewport.releasePointerCapture?.(event.pointerId);
       delete viewport.dataset.dragging;
       // Restoring snapping settles the track on the nearest slide.
-      viewport.style.scrollSnapType = dragFree
-        ? "none"
-        : `${vertical ? "y" : "x"} mandatory`;
+      viewport.style.scrollSnapType = snap;
     };
     // The click that ends a drag is not a press on a slide.
     const onClick = (event: MouseEvent) => {
@@ -263,7 +201,7 @@ export function useScrollTrack({
       viewport.removeEventListener("pointercancel", onUp);
       viewport.removeEventListener("click", onClick, true);
     };
-  }, [viewport, vertical, dragFree]);
+  }, [viewport, snap]);
 
   return {
     ref: setViewport,

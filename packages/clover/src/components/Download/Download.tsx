@@ -7,6 +7,7 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
 import { titleTag } from "../../ui/heading";
+import { asArray } from "../../lib/asArray";
 
 export interface DownloadProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "children"> {
@@ -23,9 +24,6 @@ export interface Rendering {
   lang?: string;
   format?: string;
 }
-
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
 
 function renderingsOf(
   resources: Array<Record<string, any> | null | undefined>,

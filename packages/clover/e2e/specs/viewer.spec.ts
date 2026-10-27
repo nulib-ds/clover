@@ -9,7 +9,10 @@ test.describe("Viewer", () => {
     await serveIIIF(page);
     await page.goto("/?content=https://fixtures.test/0009-book-1.json");
     await expect(
-      page.getByRole("heading", { name: "Simple Manifest - Book" }),
+      page.getByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      }),
     ).toBeVisible();
     const position = page.locator(".clover-pager-position");
     await expect(position).toHaveText(/Item 1 of 3/);

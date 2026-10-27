@@ -130,7 +130,6 @@ export type { Navigation } from "./react/hooks";
 export { useClover, useCloverSelector } from "./react/context";
 
 // Data
-export { createClover } from "./core/clover";
 export type {
   Clover,
   CloverOptions,
@@ -138,7 +137,7 @@ export type {
   CloverStatus,
   ViewportState,
 } from "./core/clover";
-export { isPresentation4, toPresentation4 } from "./core/presentation";
+export { toPresentation4 } from "./core/presentation";
 export type {
   Canvas as Presentation4Canvas,
   Collection as Presentation4Collection,
@@ -150,11 +149,8 @@ export type {
 export type { IIIFContent } from "./core/load";
 export type { CloverRequest } from "./core/request";
 export type { ContentStateOutput, Target } from "./core/content-state";
-export {
-  buildContentState,
-  decodeContentState,
-  encodeContentState,
-} from "./core/content-state";
+export { buildContentState, encodeContentState } from "./core/content-state";
+export { decodeContentState } from "./core/content-state-reader";
 export type {
   AnnotationBodyEntry,
   AnnotationEntry,

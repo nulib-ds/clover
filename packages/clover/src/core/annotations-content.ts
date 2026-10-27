@@ -1,7 +1,5 @@
-import {
-  loadAnnotationSets,
-  manifestOfAnnotation,
-} from "./annotation-collection";
+import { loadAnnotationSets } from "./annotation-collection";
+import { manifestOfAnnotation } from "./annotation-sets";
 import {
   CloverContentError,
   type LoadContentOptions,

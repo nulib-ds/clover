@@ -1,13 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import type { CanvasAnnotation } from "./Annotations";
 import { parseAnnotationTarget } from "../../core/annotations";
 import type { SvgShape } from "../../core/svg-shape";
+import { useLoaded } from "../../hooks/useLoaded";
 
 /** Reads an SvgSelector's shapes: `core/svg-shape.ts`, loaded when a shape needs it. */
 export type SvgReader = (svg: string) => SvgShape | null;
 
-let svgReader: SvgReader | null = null;
+const loadSvgShape = () => import("../../core/svg-shape");
 
 /**
  * The SVG reader, once loaded. It loads the first time an annotation in view has an
@@ -28,17 +29,5 @@ export function useSvgReader(
       ),
     [annotations],
   );
-  const [reader, setReader] = useState<SvgReader | null>(() => svgReader);
-  useEffect(() => {
-    if (!needed || reader) return;
-    let live = true;
-    void import("../../core/svg-shape").then((module) => {
-      svgReader = module.readSvgShape;
-      if (live) setReader(() => module.readSvgShape);
-    });
-    return () => {
-      live = false;
-    };
-  }, [needed, reader]);
-  return reader;
+  return useLoaded(loadSvgShape, needed)?.readSvgShape ?? null;
 }

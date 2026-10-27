@@ -132,6 +132,6 @@ export function defineCloverElements(
 ): void {
   if (assets.mapWorkerUrl) setMapWorkerUrl(assets.mapWorkerUrl);
   for (const spec of SPECS) {
-    if (tags.includes(spec.tag)) defineElement(spec, LOADERS[spec.tag], assets);
+    if (tags.includes(spec.tag)) defineElement(spec, LOADERS[spec.tag]);
   }
 }

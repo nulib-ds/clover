@@ -11,18 +11,15 @@ import { compose, scale, toClipMat3, translate } from "../../math/affine";
 
 interface TextureEntry {
   texture: WebGLTexture;
-  version: number | undefined;
   width: number;
   height: number;
-  mipmapped: boolean;
 }
 
 /**
  * The primary backend: every drawable is a textured unit quad.
  *
  * Uploads are cached by key, so a still image or tile is uploaded once and then costs one
- * draw call per frame. A source whose `version` changes (a video frame) is re-uploaded
- * into the same texture.
+ * draw call per frame. Video never comes here: it is shown as itself, in the DOM layer.
  *
  * Cross-origin pixels without CORS cannot be uploaded at all — `texImage2D` throws a
  * `SecurityError` — so `draw` reports `"tainted"` and the renderer presents that item as a
@@ -86,13 +83,40 @@ export class WebGL2Backend implements Backend {
     this.gl = gl;
     this.callbacks = callbacks;
     this.maxTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE) || 4096;
-    this.initialize();
-    canvas.addEventListener("webglcontextlost", this.handleLost);
-    canvas.addEventListener("webglcontextrestored", this.handleRestored);
-  }
+    const program = linkProgram(gl, VERTEX_SHADER, FRAGMENT_SHADER);
+    this.program = program;
+    this.uniforms = {
+      matrix: gl.getUniformLocation(program, "u_matrix"),
+      crop: gl.getUniformLocation(program, "u_crop"),
+      opacity: gl.getUniformLocation(program, "u_opacity"),
+      texture: gl.getUniformLocation(program, "u_texture"),
+    };
 
-  get lost(): boolean {
-    return this.isLost;
+    const vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
+      gl.STATIC_DRAW,
+    );
+    const location = gl.getAttribLocation(program, "a_position");
+    gl.enableVertexAttribArray(location);
+    gl.vertexAttribPointer(location, 2, gl.FLOAT, false, 0, 0);
+    gl.bindVertexArray(null);
+    this.vao = vao;
+
+    // Premultiplied throughout, so edges of transparent PNGs don't fringe.
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.pixelStorei(
+      gl.UNPACK_COLORSPACE_CONVERSION_WEBGL,
+      gl.BROWSER_DEFAULT_WEBGL,
+    );
+    canvas.addEventListener("webglcontextlost", this.handleLost);
   }
 
   resize(width: number, height: number, pixelRatio: number): void {
@@ -177,10 +201,6 @@ export class WebGL2Backend implements Backend {
 
   dispose(): void {
     this.canvas.removeEventListener("webglcontextlost", this.handleLost);
-    this.canvas.removeEventListener(
-      "webglcontextrestored",
-      this.handleRestored,
-    );
     if (!this.isLost) {
       for (const key of [...this.textures.keys()]) this.release(key);
       if (this.program) this.gl.deleteProgram(this.program);
@@ -199,11 +219,9 @@ export class WebGL2Backend implements Backend {
   private upload(command: DrawCommand): TextureEntry | "tainted" | null {
     const gl = this.gl;
     const existing = this.textures.get(command.key);
-    const dynamic = command.version !== undefined;
 
     if (
       existing &&
-      existing.version === command.version &&
       existing.width === command.width &&
       existing.height === command.height
     ) {
@@ -215,11 +233,6 @@ export class WebGL2Backend implements Backend {
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
     try {
-      /*
-       * Always `texImage2D`, into the same texture object, even for a video frame of
-       * unchanged size: it is the call Chrome copies GPU-to-GPU from the decoder, and
-       * `texSubImage2D` from a video uploaded black there (Chrome 154, GPU and SwiftShader).
-       */
       gl.texImage2D(
         gl.TEXTURE_2D,
         0,
@@ -234,14 +247,12 @@ export class WebGL2Backend implements Backend {
       throw error;
     }
 
-    // Still images get mipmaps, so a zoomed-out view is filtered rather than aliased.
-    // Video frames change every upload, where a mip chain would cost more than it buys.
-    const mipmapped = !dynamic;
-    if (mipmapped) gl.generateMipmap(gl.TEXTURE_2D);
+    // Mipmaps, so a zoomed-out view is filtered rather than aliased.
+    gl.generateMipmap(gl.TEXTURE_2D);
     gl.texParameteri(
       gl.TEXTURE_2D,
       gl.TEXTURE_MIN_FILTER,
-      mipmapped ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR,
+      gl.LINEAR_MIPMAP_LINEAR,
     );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -249,65 +260,21 @@ export class WebGL2Backend implements Backend {
 
     const entry: TextureEntry = {
       texture,
-      version: command.version,
       width: command.width,
       height: command.height,
-      mipmapped,
     };
     this.textures.set(command.key, entry);
     return entry;
   }
 
-  private initialize(): void {
-    const gl = this.gl;
-    const program = linkProgram(gl, VERTEX_SHADER, FRAGMENT_SHADER);
-    this.program = program;
-    this.uniforms = {
-      matrix: gl.getUniformLocation(program, "u_matrix"),
-      crop: gl.getUniformLocation(program, "u_crop"),
-      opacity: gl.getUniformLocation(program, "u_opacity"),
-      texture: gl.getUniformLocation(program, "u_texture"),
-    };
-
-    const vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
-      gl.STATIC_DRAW,
-    );
-    const location = gl.getAttribLocation(program, "a_position");
-    gl.enableVertexAttribArray(location);
-    gl.vertexAttribPointer(location, 2, gl.FLOAT, false, 0, 0);
-    gl.bindVertexArray(null);
-    this.vao = vao;
-
-    // Premultiplied throughout, so edges of transparent PNGs don't fringe.
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-    gl.pixelStorei(
-      gl.UNPACK_COLORSPACE_CONVERSION_WEBGL,
-      gl.BROWSER_DEFAULT_WEBGL,
-    );
-  }
-
-  private handleLost = (event: Event) => {
-    // Without preventDefault the browser will not offer to restore the context.
-    event.preventDefault();
+  /*
+   * The browser took the context. Nothing waits for it back: the renderer lets this
+   * backend and its canvas go at once (`onLost`), and draws on another.
+   */
+  private handleLost = () => {
     this.isLost = true;
     this.textures.clear();
     this.callbacks.onLost?.();
-  };
-
-  private handleRestored = () => {
-    this.isLost = false;
-    this.textures.clear();
-    this.initialize();
-    this.callbacks.onRestored?.();
   };
 }
 

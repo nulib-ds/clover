@@ -16,6 +16,7 @@ import renderingJson from "../fixtures/iiif-cookbook/0046-rendering.json";
 import rtlJson from "../fixtures/iiif-cookbook/0010-book-2-viewing-direction-rtl.json";
 import { initCloverI18n } from "../i18n";
 import * as Templates from "./index";
+import { SLIDE_MS } from "./shared/useSlide";
 
 beforeEach(() => initCloverI18n({ lng: "en" }));
 
@@ -196,7 +197,7 @@ describe("templates", () => {
     expect(previous.closest("[dir]")).toHaveAttribute("dir", "rtl");
   });
 
-  it("Default: narrowing under the open panel hands focus in it to its toggle", async () => {
+  it("Default: narrowing under the open panel closes it, focus to its toggle; widening brings it back", async () => {
     // jsdom lays nothing out: the layout measures wide, then phone-wide (zoomed in, say).
     const panes: Array<() => void> = [];
     vi.stubGlobal(
@@ -230,6 +231,24 @@ describe("templates", () => {
         screen.getByRole("button", { name: "More information" }),
       ).toHaveFocus(),
     );
+    // Room again: back beside the Body, as it was.
+    width.mockReturnValue(1280);
+    act(() => panes.forEach((measure) => measure()));
+    expect(
+      document.querySelector(".clover-template-default-panel"),
+    ).not.toHaveAttribute("hidden");
+    // Focus on its toggle, on the spine, follows it to the Body's controls as it narrows.
+    const onSpine = document.querySelector<HTMLElement>(
+      ".clover-template-default-spine [data-button='panel']",
+    )!;
+    onSpine.focus();
+    width.mockReturnValue(390);
+    act(() => panes.forEach((measure) => measure()));
+    await waitFor(() => {
+      const toggle = screen.getByRole("button", { name: "More information" });
+      expect(toggle).not.toBe(onSpine);
+      expect(toggle).toHaveFocus();
+    });
     width.mockRestore();
     vi.unstubAllGlobals();
   });
@@ -321,14 +340,103 @@ describe("templates", () => {
       expect(option).toHaveFocus();
     });
 
-    it("starts open over the Body only when the host asks", async () => {
+    it("starts closed over the Body even when the host asks it open, focus left where it was", async () => {
       render(<Templates.Default iiifContent={bookJson} defaultPanelOpen />);
       await screen.findByRole("heading", {
         level: 2,
         name: "Simple Manifest - Book",
       });
-      expect(panel()).toBeVisible();
+      expect(panel()).not.toBeVisible();
+      expect(toggle()).toHaveAttribute("aria-expanded", "false");
+      // Nothing over the Body on arrival, nor a moment later.
+      expect(
+        document.querySelector(".clover-template-default-scrim"),
+      ).toBeNull();
+      await act(() => new Promise((done) => setTimeout(done, SLIDE_MS + 60)));
+      expect(panel()).not.toBeVisible();
+      expect(document.body).toHaveFocus();
     });
+
+    it("takes focus into the panel as the reader opens it", async () => {
+      render(<Templates.Default iiifContent={bookJson} />);
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
+      fireEvent.click(toggle());
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "About" })).toHaveFocus(),
+      );
+    });
+  });
+
+  it("Document: narrowing under the panel and thumbnails closes them, focus to its toggle; widening brings them back", async () => {
+    // jsdom lays nothing out: the layout measures wide, then phone-wide (zoomed in, say).
+    const panes: Array<() => void> = [];
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        constructor(private callback: () => void) {}
+        observe(node: Element) {
+          if (node.classList.contains("clover-template-document-panes"))
+            panes.push(this.callback);
+        }
+        disconnect() {}
+      },
+    );
+    const width = vi
+      .spyOn(HTMLElement.prototype, "clientWidth", "get")
+      .mockReturnValue(1280);
+    try {
+      render(<Templates.Document iiifContent={bookJson} defaultPanelOpen />);
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
+      const panel = document.querySelector<HTMLElement>(
+        ".clover-template-document-panel",
+      )!;
+      const sidebar = document.querySelector<HTMLElement>(
+        ".clover-template-document-sidebar",
+      )!;
+      expect(panel).not.toHaveAttribute("hidden");
+      expect(sidebar).not.toHaveAttribute("hidden");
+      // Open on arrival, its code loads first.
+      (await within(panel).findByRole("button", { name: "About" })).focus();
+      width.mockReturnValue(390);
+      act(() => panes.forEach((measure) => measure()));
+      expect(panel).toHaveAttribute("hidden");
+      expect(sidebar).toHaveAttribute("hidden");
+      expect(
+        document.querySelector(".clover-template-document-panes"),
+      ).toHaveAttribute("data-narrow");
+      // Its toggle has moved, from the spine to the Canvas's controls.
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: "More information" }),
+        ).toHaveFocus(),
+      );
+      // Room again: both back beside the page, as they were.
+      width.mockReturnValue(1280);
+      act(() => panes.forEach((measure) => measure()));
+      expect(panel).not.toHaveAttribute("hidden");
+      expect(sidebar).not.toHaveAttribute("hidden");
+      // Focus on the thumbnails' toggle, on their spine, follows it over the page's top
+      // left as they go.
+      const items = () => screen.getByRole("button", { name: /^Show items/ });
+      items().focus();
+      width.mockReturnValue(390);
+      act(() => panes.forEach((measure) => measure()));
+      await waitFor(() => {
+        expect(
+          items().closest(".clover-template-document-sidebar-closed"),
+        ).not.toBeNull();
+        expect(items()).toHaveFocus();
+      });
+    } finally {
+      width.mockRestore();
+      vi.unstubAllGlobals();
+    }
   });
 
   it("Document: no thumbnails, bar or their toggle for a single page", async () => {
@@ -358,6 +466,14 @@ describe("templates", () => {
       within(dialog).getByRole("heading", { name: "Frontispiece" }),
     ).toBeInTheDocument();
     expect(within(dialog).getByText(/Item 2 of 3/)).toBeInTheDocument();
+    // The Body's code loads with the first open (or as the reader reaches for the grid):
+    // the title, Close and the pager are there at once, the Body a moment later.
+    await waitFor(() =>
+      expect(dialog.querySelector(".clover-body")).not.toBeNull(),
+    );
+    expect(
+      dialog.querySelector(".clover-template-lightbox-pending"),
+    ).toBeNull();
     fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
     expect(dialog.querySelector(".clover-body")).toBeNull();
   });
@@ -435,8 +551,11 @@ describe("templates", () => {
     const info = () => screen.getByRole("button", { name: "More information" });
     expect(panel).toHaveAttribute("hidden");
     expect(screen.getAllByRole("separator")).toHaveLength(1);
+    // Shut, its code has not loaded: nothing in its pane until it first opens.
+    expect(panel).toBeEmptyDOMElement();
     fireEvent.click(info());
-    expect(panel).not.toHaveAttribute("hidden");
+    // The first press loads it, then opens it whole.
+    await waitFor(() => expect(panel).not.toHaveAttribute("hidden"));
     // Its sections are stacked boxes, as Default's, About open.
     expect(
       within(panel).getByRole("button", { name: "About" }),
@@ -501,7 +620,7 @@ describe("templates", () => {
     ).toBeNull();
   });
 
-  it("Document: a title that would be past h6 names what it heads, never an h6 beside its own", async () => {
+  it("Document: the downloads in its toolbar only, never again in its panel's About", async () => {
     render(
       <Templates.Document
         iiifContent={renderingJson}
@@ -513,15 +632,27 @@ describe("templates", () => {
     const panel = document.querySelector<HTMLElement>(
       ".clover-template-document-panel",
     )!;
+    await within(panel).findByRole("heading", { level: 5, name: "About" });
+    expect(
+      within(panel).queryByRole("heading", { name: "Download" }),
+    ).toBeNull();
+    expect(screen.getAllByRole("link", { name: /PDF version/ })).toHaveLength(
+      1,
+    );
+  });
+
+  it("Default: a title that would be past h6 names what it heads, never an h6 beside its own", async () => {
+    render(<Templates.Default iiifContent={renderingJson} headingLevel={4} />);
+    await screen.findByRole("heading", { level: 4 });
     // About is a 5, its titles 6: its downloads' groups would be 7.
     expect(
-      await within(panel).findByRole("heading", { level: 6, name: "Download" }),
+      await screen.findByRole("heading", { level: 6, name: "Download" }),
     ).toBeInTheDocument();
     expect(
-      within(panel).getByRole("region", { name: "All pages" }),
+      screen.getByRole("region", { name: "All pages" }),
     ).toBeInTheDocument();
     expect(
-      within(panel).queryByRole("heading", { name: "All pages" }),
+      screen.queryByRole("heading", { name: "All pages" }),
     ).not.toBeInTheDocument();
   });
 
@@ -545,6 +676,34 @@ describe("templates", () => {
     });
     afterEach(() => width.mockRestore());
 
+    it("starts with the panel and thumbnails closed, even when the host asks them open", async () => {
+      render(
+        <Templates.Document
+          iiifContent={bookJson}
+          defaultPanelOpen
+          defaultSidebarOpen
+        />,
+      );
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
+      const panel = document.querySelector<HTMLElement>(
+        ".clover-template-document-panel",
+      )!;
+      expect(panel).toHaveAttribute("hidden");
+      expect(
+        document.querySelector(".clover-template-document-sidebar"),
+      ).toHaveAttribute("hidden");
+      expect(
+        screen.getByRole("button", { name: /^Show items/ }),
+      ).toHaveAttribute("aria-expanded", "false");
+      expect(document.querySelector(".clover-template-scrim")).toBeNull();
+      await act(() => new Promise((done) => setTimeout(done, SLIDE_MS + 60)));
+      expect(panel).toHaveAttribute("hidden");
+      expect(document.body).toHaveFocus();
+    });
+
     it("slides the panel over the page, focused, closing on Escape or its button", async () => {
       render(<Templates.Document iiifContent={bookJson} />);
       await screen.findByRole("heading", {
@@ -558,8 +717,8 @@ describe("templates", () => {
         screen.getByRole("button", { name: "More information" });
       fireEvent.click(info());
       await waitFor(() => expect(panel).toHaveAttribute("data-open", "true"));
-      // Over the page there is no bar for it, only the thumbnails'.
-      expect(screen.getAllByRole("separator")).toHaveLength(1);
+      // Over the page there is no bar for it, nor for the thumbnails.
+      expect(screen.queryAllByRole("separator")).toHaveLength(0);
 
       // Opening takes focus into the panel, at the open box's heading; Escape there
       // hands it back to the toggle.
@@ -589,41 +748,88 @@ describe("templates", () => {
       )!;
       fireEvent.click(screen.getByRole("button", { name: "More information" }));
       await waitFor(() => expect(panel).toHaveAttribute("data-open", "true"));
-      // Tabbing back from the panel reaches the thumbnails it covers.
-      const sidebar = screen.getByRole("complementary", { name: "Items" });
-      const option = within(sidebar).getAllByRole("option")[0];
-      option.focus();
-      fireEvent.keyDown(option, { key: "Escape" });
+      // Tabbing back from the panel reaches the thumbnails' toggle it covers.
+      const under = screen.getByRole("button", { name: /^Show items/ });
+      under.focus();
+      fireEvent.keyDown(under, { key: "Escape" });
       expect(panel).toHaveAttribute("data-open", "false");
-      expect(option).toHaveFocus();
+      expect(under).toHaveFocus();
     });
 
-    it("on a phone, choosing a page puts the thumbnails away, focus on their toggle", async () => {
-      const matchMedia = vi.spyOn(window, "matchMedia").mockImplementation(
-        (query: string) =>
-          ({
-            matches: query === "(max-width: 40rem)",
-            media: query,
-            addEventListener: () => {},
-            removeEventListener: () => {},
-          }) as unknown as MediaQueryList,
+    const items = () => screen.getByRole("button", { name: /^Show items/ });
+    /** Open the thumbnails over the page, as the reader does: focus goes to the page they are on. */
+    const openThumbnails = async () => {
+      items().focus();
+      fireEvent.click(items());
+      const sidebar = screen.getByRole("complementary", { name: "Items" });
+      await waitFor(() =>
+        expect(within(sidebar).getAllByRole("option")[0]).toHaveFocus(),
       );
-      render(<Templates.Document iiifContent={bookJson} defaultSidebarOpen />);
+      return sidebar;
+    };
+
+    it("on a phone, opened, the thumbnails take focus at the page the reader is on", async () => {
+      render(<Templates.Document iiifContent={bookJson} />);
       await screen.findByRole("heading", {
         level: 2,
         name: "Simple Manifest - Book",
       });
-      const sidebar = screen.getByRole("complementary", { name: "Items" });
+      const sidebar = await openThumbnails();
+      expect(items()).toHaveAttribute("aria-expanded", "true");
+      // Over the page, with a wash beside them and no bar.
+      expect(
+        document.querySelector(".clover-template-scrim[data-for='sidebar']"),
+      ).not.toBeNull();
+      expect(screen.queryAllByRole("separator")).toHaveLength(0);
+      // A press on the wash puts them away, focus to their toggle.
+      fireEvent.click(
+        document.querySelector(".clover-template-scrim[data-for='sidebar']")!,
+      );
+      expect(sidebar).toHaveAttribute("hidden");
+      await waitFor(() => expect(items()).toHaveFocus());
+    });
+
+    it("on a phone, Escape in the thumbnails puts them away, focus to their toggle", async () => {
+      render(<Templates.Document iiifContent={bookJson} />);
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
+      const sidebar = await openThumbnails();
+      fireEvent.keyDown(within(sidebar).getAllByRole("option")[0], {
+        key: "Escape",
+      });
+      expect(sidebar).toHaveAttribute("hidden");
+      await waitFor(() => expect(items()).toHaveFocus());
+    });
+
+    it("on a phone, Escape from under the thumbnails puts them away, leaving focus there", async () => {
+      render(<Templates.Document iiifContent={bookJson} />);
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
+      const sidebar = await openThumbnails();
+      // Tabbing on from the thumbnails reaches the page they cover.
+      const under = screen.getByRole("button", { name: "More information" });
+      under.focus();
+      fireEvent.keyDown(under, { key: "Escape" });
+      expect(sidebar).toHaveAttribute("hidden");
+      expect(under).toHaveFocus();
+    });
+
+    it("on a phone, choosing a page puts the thumbnails away, focus on their toggle", async () => {
+      render(<Templates.Document iiifContent={bookJson} />);
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
+      const sidebar = await openThumbnails();
       const option = within(sidebar).getAllByRole("option")[1];
       option.focus();
       fireEvent.click(option);
       expect(sidebar).toHaveAttribute("hidden");
-      await waitFor(() =>
-        expect(
-          screen.getByRole("button", { name: /^Show items/ }),
-        ).toHaveFocus(),
-      );
-      matchMedia.mockRestore();
+      await waitFor(() => expect(items()).toHaveFocus());
     });
   });
 });

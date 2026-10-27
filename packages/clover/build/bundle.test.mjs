@@ -49,6 +49,7 @@ const LAZY_MODULES = [
   "/components/Canvas/panClearOfControls.ts",
   // Hotspots and the Canvas's menus, for a Canvas with annotations or a Choice.
   "/components/Canvas/Annotations.tsx",
+  "/components/Canvas/AnnotationState.tsx",
   "/components/Canvas/AnnotationMenu.tsx",
   "/components/Canvas/ChoiceMenu.tsx",
   // Off by default.
@@ -62,7 +63,6 @@ const LAZY_MODULES = [
   "/components/Timeline/Connected.tsx",
   "/components/Scene/Connected.tsx",
   "/components/Scene/Loaded.tsx",
-  "/components/Scene/engine.ts",
   // Clover's own glTF renderer, the Scene's other drawing.
   "/components/Scene/cloverEngine.ts",
   "/lib/gltf/renderer.ts",
@@ -70,6 +70,14 @@ const LAZY_MODULES = [
   "/core/keep-fragments.ts",
   // About's "Part of", for a Canvas shown on its own.
   "/components/Panel/PartOfManifest.tsx",
+  // The hotspots' layer, the DOM layer and Canvas2D, made when first needed.
+  "/lib/renderer/overlays/OverlayLayer.ts",
+  "/lib/renderer/backends/dom/DomLayers.ts",
+  "/lib/renderer/backends/canvas2d/Canvas2DBackend.ts",
+  // Items outside a Root, which no template has.
+  "/components/Items/StandaloneItems.tsx",
+  // A floating drawer's drag, loaded as one first floats.
+  "/templates/shared/dragToClose.ts",
   // Every language but English, the first time Clover is to speak it.
   ...["es", "fi", "fr", "nb", "nn", "no", "pt"].map(
     (lng) => `/i18n/locales/${lng}.json`,
@@ -115,13 +123,14 @@ function closure(chunks, start, dynamic = false) {
   return seen;
 }
 
-test("three entries, only package source, externals within dependencies and peers", async () => {
+test("four entries, only package source, externals within dependencies and peers", async () => {
   const chunks = await emitted();
   const entries = [...chunks.values()].filter((chunk) => chunk.isEntry);
   assert.deepEqual(entries.map((chunk) => chunk.fileName).sort(), [
     "index.mjs",
     "map/index.mjs",
     "templates/index.mjs",
+    "three/index.mjs",
   ]);
 
   const allowed = new Set([
@@ -200,6 +209,69 @@ test("MapLibre loads only on demand; the parts reach the map only lazily", async
     ),
     "the Map tab must be reachable from the parts, lazily",
   );
+});
+
+/*
+ * The Scene's three.js engine is opt-in (`DRY.md` decision 1): only `@nulib/clover/three`
+ * reaches it, and three.js with it, on demand; the parts never do, up front or later.
+ */
+test("three.js only through the opt-in entry, and only on demand", async () => {
+  const chunks = await emitted();
+  const engine = [...chunks.values()].find((c) =>
+    Object.keys(c.modules).some((id) =>
+      id.endsWith("/components/Scene/engine.ts"),
+    ),
+  );
+  assert.ok(engine, "the three.js engine must be emitted");
+  for (const entry of ["index.mjs", "templates/index.mjs", "map/index.mjs"])
+    assert.ok(
+      !closure(chunks, entry, true).has(engine.fileName),
+      `${entry} reaches the three.js engine`,
+    );
+  assert.ok(!closure(chunks, "three/index.mjs").has(engine.fileName));
+  assert.ok(closure(chunks, "three/index.mjs", true).has(engine.fileName));
+});
+
+/*
+ * A Timeline draws on a surface of its own (`playerSurface`), so a page that plays sound
+ * never loads the image renderer, up front or later, alone or as a Root's view.
+ */
+test("a Timeline never loads the image renderer", async () => {
+  const chunks = await emitted();
+  for (const entry of [
+    "components/Timeline/Timeline.mjs",
+    "components/Timeline/Connected.mjs",
+  ]) {
+    assert.ok(chunks.has(entry), `${entry} must be emitted`);
+    for (const fileName of closure(chunks, entry, true))
+      assert.ok(
+        !fileName.startsWith("lib/renderer/CanvasRenderer"),
+        `${entry} reaches ${fileName}`,
+      );
+  }
+});
+
+/*
+ * A Gallery draws thumbnails until the reader opens one, and Document's panel starts
+ * shut: the lightbox's Body and Document's Panel load on demand (`LightboxBody`,
+ * `DocumentPanel`), never with the template.
+ */
+test("a Gallery loads its lightbox's Body, and Document its Panel, only on demand", async () => {
+  const chunks = await emitted();
+  for (const [entry, part] of [
+    ["templates/gallery/Gallery.mjs", "components/Body/Body.mjs"],
+    ["templates/document/Document.mjs", "components/Panel/Panel.mjs"],
+  ]) {
+    assert.ok(chunks.has(entry), `${entry} must be emitted`);
+    assert.ok(
+      !closure(chunks, entry).has(part),
+      `${entry} loads ${part} up front`,
+    );
+    assert.ok(
+      closure(chunks, entry, true).has(part),
+      `${entry} must reach ${part} on demand`,
+    );
+  }
 });
 
 const kB = (bytes, digits = 1) => (bytes / 1000).toFixed(digits);

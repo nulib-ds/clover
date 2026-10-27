@@ -18,6 +18,7 @@ import pagesJson from "../../fixtures/mocks/page-transcript/manifest.json";
 import {
   type IIIFCanvas,
   arrangeCanvases,
+  canvasCaptions,
   canvasScene,
   canvasTextTranscripts,
   findChoices,
@@ -316,6 +317,50 @@ describe("canvasTextTranscripts", () => {
         id: "https://nulib-ds.github.io/clover/mocks/page-transcript/text/p1.txt",
         label: { en: ["Text (OCR)"] },
         language: "de",
+      },
+    ]);
+  });
+});
+
+describe("canvasCaptions", () => {
+  it("reads a caption file whose language is null as in no language", () => {
+    const canvas = {
+      id: "https://example.org/canvas/1",
+      type: "Canvas",
+      annotations: [
+        {
+          id: "https://example.org/canvas/1/captions",
+          type: "AnnotationPage",
+          items: [
+            {
+              id: "https://example.org/canvas/1/captions/1",
+              type: "Annotation",
+              motivation: ["supplementing"],
+              body: {
+                id: "https://example.org/captions.vtt",
+                type: "Text",
+                format: "text/vtt",
+                language: null,
+              },
+              target: "https://example.org/canvas/1",
+            },
+            // A body of null is no body.
+            {
+              id: "https://example.org/canvas/1/captions/2",
+              type: "Annotation",
+              motivation: ["supplementing"],
+              body: null,
+              target: "https://example.org/canvas/1",
+            },
+          ],
+        },
+      ],
+    } as unknown as IIIFCanvas;
+    expect(canvasCaptions(canvas)).toEqual([
+      {
+        id: "https://example.org/captions.vtt",
+        label: undefined,
+        language: undefined,
       },
     ]);
   });

@@ -1,3 +1,6 @@
+import { GROUPS, bodiesOf } from "./painting";
+import { asArray } from "../lib/asArray";
+
 /**
  * Where an annotation points, read from any form of Presentation 4 target:
  *
@@ -34,9 +37,6 @@ type Target =
       selector?: unknown;
     };
 
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
-
 /** `xywh=`, `t=`, or both, in a fragment or a selector's value. */
 function readFragment(
   id: string,
@@ -65,9 +65,6 @@ function readUri(uri: string): ParsedAnnotationTarget {
   if (query >= 0) return { id: uri.slice(0, query), t: uri.slice(query + 3) };
   return { id: uri };
 }
-
-/** Presentation 4's groups of several targets (or bodies), each item one of its own. */
-export const GROUPS = ["Independents", "Composite", "List"];
 
 /** A target's first part: the first item of an array or a group, or the target itself. */
 const first = (target: any): Target =>
@@ -141,16 +138,4 @@ export const isRegionText = (
   Boolean(target.rect || target.svg || target.point) &&
   !target.t;
 
-/** An annotation's bodies, with Presentation 4's groups unwrapped. */
-export function bodiesOf(
-  annotation: Record<string, any>,
-): Record<string, any>[] {
-  return (toArray(annotation?.body) as Record<string, any>[]).flatMap((body) =>
-    GROUPS.includes(body?.type)
-      ? (toArray(body.items) as Record<string, any>[])
-      : [body],
-  );
-}
-
-const toArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
+export { GROUPS, bodiesOf };

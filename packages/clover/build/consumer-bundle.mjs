@@ -39,7 +39,8 @@ export async function bundleAsConsumer(contents) {
           // `"use client"` is dropped in a bundle, and Rollup says so per module. An
           // import it cannot find would be left out of the count: fail instead.
           onwarn: (warning) => {
-            if (warning.code === "UNRESOLVED_IMPORT") throw new Error(warning.message);
+            if (warning.code === "UNRESOLVED_IMPORT")
+              throw new Error(warning.message);
           },
         },
       },

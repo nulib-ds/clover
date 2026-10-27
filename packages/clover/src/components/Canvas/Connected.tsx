@@ -7,7 +7,8 @@ import React, {
 } from "react";
 
 import type { CanvasHandle, CloverCanvasProps } from "./Canvas.types";
-import CanvasView from "./CanvasView";
+import CanvasView, { type CanvasViewProps } from "./CanvasView";
+import { applyTarget as apply, useRangeChapters } from "./fromManifest";
 import { type IIIFCanvas, paintedMedia } from "./layout";
 import {
   selectDrawnSets,
@@ -17,7 +18,6 @@ import {
 import type { AnnotationLink } from "../../core/link";
 import { showLink } from "../../core/show-link";
 import { chaptersOf } from "../../core/ranges";
-import { localize } from "../../core/value";
 import { hasBehavior } from "../../core/selectors";
 import type { CanvasAnnotation } from "./Annotations";
 import { useClover, useCloverSelector } from "../../react/context";
@@ -41,7 +41,7 @@ import {
  * - **Auto-advance.** When playback ends on a Manifest or Canvas with `auto-advance`, the
  *   next view plays; with `repeat`, the last wraps to the first.
  */
-const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
+const ConnectedCanvas: React.FC<CanvasViewProps> = ({
   options,
   onReady,
   onViewportChange,
@@ -163,22 +163,11 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
   const mediaCanvas = hasMedia
     ? canvases.find((canvas) => paintedMedia(canvas).length > 0)
     : undefined;
-  const rangeChapters = useMemo(
-    () =>
-      chaptersOf(manifest, mediaCanvas?.id ?? null, mediaCanvas?.duration).map(
-        (chapter) => {
-          // The label's language goes with it, for the transport to tag (WCAG 3.1.2).
-          const value = localize(chapter.label, language);
-          return {
-            ...(chapter.id ? { id: chapter.id } : {}),
-            label: value.text,
-            lang: value.lang,
-            start: chapter.start,
-            end: chapter.end,
-          };
-        },
-      ),
-    [manifest, mediaCanvas, language],
+  const rangeChapters = useRangeChapters(
+    manifest,
+    mediaCanvas,
+    language,
+    chaptersOf,
   );
   const hasMediaRef = useRef(hasMedia);
   hasMediaRef.current = hasMedia;
@@ -188,29 +177,9 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
     const pending = clover.store.get().target;
     if (!pending) return;
     const visible = clover.store.get().canvasId;
-    if (!handle.current || !visible) return;
-    if (pending.region) {
-      const { x, y, w, h } = pending.region;
-      const placed = handle.current.fitCanvasRect(
-        pending.canvasId,
-        { x, y, width: w, height: h },
-        true,
-      );
-      if (!placed) return; // Not laid out yet: the next `change` tries again.
-    }
-    const element = media.current;
-    if (
-      hasMediaRef.current &&
-      (pending.time !== undefined || pending.autoplay)
-    ) {
-      if (!element) return; // The media element is not made yet.
-      const play = () => {
-        if (pending.time !== undefined) element.currentTime = pending.time;
-        if (pending.autoplay) element.play().catch(() => undefined);
-      };
-      if (element.readyState >= HTMLMediaElement.HAVE_METADATA) play();
-      else element.addEventListener("loadedmetadata", play, { once: true });
-    }
+    if (!visible) return;
+    if (!apply(pending, handle.current, media.current, hasMediaRef.current))
+      return; // The next `change`, or the media element, tries again.
     clover.consumeTarget();
   }, [clover]);
 

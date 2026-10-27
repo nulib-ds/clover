@@ -6,6 +6,15 @@ import {
 import type { Rect } from "../math/rect";
 
 /**
+ * A renderer's overlay layer, made the first time something is pinned to it: after the
+ * renderer's own layers, as it was when every renderer made one.
+ */
+export const overlaysOf = (renderer: {
+  host: HTMLElement;
+  overlays: OverlayLayer | null;
+}): OverlayLayer => (renderer.overlays ??= new OverlayLayer(renderer.host));
+
+/**
  * Interactive elements pinned to world rectangles — annotation hotspots, chiefly.
  *
  * They stay real, focusable DOM so a reader can tab to them and a screen reader can name
@@ -62,10 +71,6 @@ export class OverlayLayer {
     if (!this.overlays.has(element)) return;
     this.overlays.set(element, rect);
     if (this.view) this.position(...this.view, element);
-  }
-
-  get size(): number {
-    return this.overlays.size;
   }
 
   /** Place every element pinned, or `only` that one, in the view. */

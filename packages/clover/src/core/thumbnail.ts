@@ -7,6 +7,8 @@ import {
   type RegionShare,
   sizedImageUrl,
 } from "../lib/renderer/sources/sizedImage";
+import { paintedBodies } from "./painted-bodies";
+import { asArray } from "../lib/asArray";
 
 /**
  * A small picture of a IIIF resource, for a list or a strip of them.
@@ -38,26 +40,11 @@ export interface ThumbnailSource {
 
 type Json = Record<string, any>;
 
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
-
 /** The first image a Canvas paints: a `Choice`'s first item, a SpecificResource's source. */
 function firstPaintedImage(container: Json | undefined): Json | undefined {
-  for (const page of asArray(container?.items) as Json[]) {
-    for (const annotation of asArray(page?.items) as Json[]) {
-      const motivation = asArray(annotation?.motivation);
-      if (motivation.length && !motivation.includes("painting")) continue;
-      for (let body of asArray(annotation?.body) as Json[]) {
-        if (body?.type === "Choice") body = asArray(body.items)[0] as Json;
-        if (body?.type === "SpecificResource") {
-          body =
-            typeof body.source === "string" ? { id: body.source } : body.source;
-        }
-        if (body?.type === "Image" || (body?.id && !body?.type)) return body;
-      }
-    }
-  }
-  return undefined;
+  return paintedBodies(container).find(
+    ({ body }) => body.type === "Image" || (body.id && !body.type),
+  )?.body;
 }
 
 /**

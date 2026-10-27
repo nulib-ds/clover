@@ -1,4 +1,6 @@
 import type { AnnotationEntry } from "./annotation-sets";
+import type { CloverState } from "./clover";
+import type { Store } from "./store";
 import { parseAnnotationTarget } from "./annotations";
 import { type CloverRequest, fetchJson } from "./request";
 import {
@@ -7,6 +9,7 @@ import {
   type SearchResults,
   type SearchService,
 } from "./search-service";
+import { asArray } from "../lib/asArray";
 
 /**
  * Asking a Content Search service and reading its answer, version 1 or 2, into hits and
@@ -18,8 +21,28 @@ const MAX_PAGES = 10;
 
 type Json = Record<string, any>;
 
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
+/**
+ * A Root's search, read into its store: the hits, or an error. One a newer search
+ * superseded, or answered for another Manifest, is left unread. Embedding a fetched
+ * annotation page replaces the Manifest object, not the Manifest, so it is known by id.
+ */
+export async function searchInto(
+  store: Store<CloverState>,
+  service: SearchService,
+  query: string,
+  request: CloverRequest | undefined,
+  signal: AbortSignal,
+): Promise<void> {
+  const manifestId = store.get().manifest?.id;
+  try {
+    const { hits, set } = await search(service, query, { request, signal });
+    if (signal.aborted || store.get().manifest?.id !== manifestId) return;
+    store.set({ search: { query, status: "ready", hits, set } });
+  } catch {
+    if (signal.aborted) return;
+    store.set({ search: { query, status: "error", hits: [], set: null } });
+  }
+}
 
 /** Ask the service, following further pages, and read the hits. */
 export async function search(

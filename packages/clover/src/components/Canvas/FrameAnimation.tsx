@@ -13,7 +13,7 @@ import { useBarHeight } from "./media/useBarHeight";
 import { imageSource, resolveThumbnail } from "../../core/thumbnail";
 import type { CloverRequest } from "../../core/request";
 import { useOptionalClover } from "../../react/context";
-import { Tip } from "../../ui/Tip";
+import { TransportButton } from "./media/TransportButton";
 import type { CanvasRenderer } from "../../lib/renderer";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { PauseIcon, PlayIcon } from "../../ui/mediaIcons";
@@ -222,12 +222,9 @@ export function FrameControls({
       </div>
       {/* On a narrow Body, which frame shows wraps below the buttons. */}
       <div className="clover-canvas-transport-bar" ref={bar}>
-        <button
-          type="button"
-          className="clover-canvas-transport-button"
-          aria-label={t("framePrevious")}
-          lang={langOf("framePrevious")}
-          aria-disabled={frame === 0 || undefined}
+        <TransportButton
+          words="framePrevious"
+          disabled={frame === 0}
           onClick={() => step(-1)}
         >
           <svg
@@ -246,14 +243,10 @@ export function FrameControls({
               strokeLinejoin="round"
             />
           </svg>
-          <Tip label={t("framePrevious")} />
-        </button>
-        <button
-          type="button"
-          className="clover-canvas-transport-button"
-          data-button={playing ? "pause" : "play"}
-          aria-label={playing ? t("playerPause") : t("playerPlay")}
-          lang={langOf(playing ? "playerPause" : "playerPlay")}
+        </TransportButton>
+        <TransportButton
+          words={playing ? "playerPause" : "playerPlay"}
+          button={playing ? "pause" : "play"}
           onClick={() => {
             // Playing from the last frame starts again.
             if (!playing && frame === last) setFrame(0);
@@ -261,14 +254,10 @@ export function FrameControls({
           }}
         >
           {playing ? <PauseIcon /> : <PlayIcon />}
-          <Tip label={playing ? t("playerPause") : t("playerPlay")} />
-        </button>
-        <button
-          type="button"
-          className="clover-canvas-transport-button"
-          aria-label={t("frameNext")}
-          lang={langOf("frameNext")}
-          aria-disabled={frame === last || undefined}
+        </TransportButton>
+        <TransportButton
+          words="frameNext"
+          disabled={frame === last}
           onClick={() => step(1)}
         >
           <svg
@@ -287,15 +276,11 @@ export function FrameControls({
               strokeLinejoin="round"
             />
           </svg>
-          <Tip label={t("frameNext")} />
-        </button>
-        <button
-          type="button"
-          className="clover-canvas-transport-button"
-          data-button="repeat"
-          aria-label={t("frameRepeat")}
-          lang={langOf("frameRepeat")}
-          aria-pressed={repeat}
+        </TransportButton>
+        <TransportButton
+          words="frameRepeat"
+          button="repeat"
+          pressed={repeat}
           onClick={() => setRepeat(!repeat)}
         >
           <svg
@@ -314,8 +299,7 @@ export function FrameControls({
               strokeLinejoin="round"
             />
           </svg>
-          <Tip label={t("frameRepeat")} />
-        </button>
+        </TransportButton>
         <span className="clover-canvas-transport-frames">
           <button
             type="button"

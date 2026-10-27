@@ -307,8 +307,8 @@ deadline.
     them, set as the section intros' are, "Use a template…" and "…or build your own.",
     its last words under the hero's stroke (Mat, 2026-10-23: two titles side by side,
     "Ready when you are." and "IIIF building blocks.", competed, as did labels over
-    them). First: its title (an `h3`), its note, "Try each one in the Viewer above.",
-    then, side by side and as tall, the template's menu, drawn as a dropdown is (Mat,
+    them). First: its title (an `h3`), its note, "Demo each in the Viewer above." (Mat,
+    2026-10-27), then, side by side and as tall, the template's menu, drawn as a dropdown is (Mat,
     2026-10-23: "an obvious dropdown"; on the card, its edge the card's 3:1 one
     (`--pg-edge`, 5.6:1 on black), its words white, no lift, the name and a chevron in
     it, the accent's edge under the pointer, as wide as the longest name, so it holds
@@ -364,7 +364,8 @@ deadline.
     `Parts` as children; the Root draws no box). `StoryLines.tsx` drives it from the
     scroll, only where the viewer is held: one 3px line from the story at the middle to
     the part it names (`data-point`, or `viewer` for the frame); `data-lit` on that part
-    and on the tiles crossing the middle; Lightweight (`data-weigh`) draws its line to
+    and on the tiles crossing the middle (not the Thumbnail's, beside the Label: `quiet`,
+    `data-quiet`; Mat, 2026-10-27); Lightweight (`data-weigh`) draws its line to
     the viewer's middle and lights every part it shows, each tag giving, after the
     part's name, what it adds to a page with a `Root` (`sizes.json`'s `parts`, measured by
     `build/sizes.mjs`, through `docs/lib/sizes.ts`; `data-weighed` on the viewer; in words
@@ -480,7 +481,9 @@ deadline.
     2026-10-25: "should just go away when the columns stack"), with
     no caption (it
     is a region named "Example Viewer" for assistive technology; never `<Clover.Root />`),
-    its parts in the order its code gives them. The code control under it opens that code
+    its parts in the order its code gives them, from the Label, with no Thumbnail (Mat,
+    2026-10-27: moved to the title's right, then taken out; its tile stays), for every
+    resource (`VIEW_DEFAULTS` and `STARTS`). The code control under it opens that code
     below, as an editor (Prism's Material colors on black, `--code-*` in
     `docs/styles/tokens.css`): its `Root` and parts as written. Its values are live
     (Body's `height` a number to type, step or drag, its `controls` a switch, Items'
@@ -1017,7 +1020,7 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
 - Lookup order: the set `lng`, or else the page's `<html lang>` and then the browser's
   languages (Mat, 2026-10-16: Clover speaks the language of the page around it; 3.x put
   the browser first). After that come `fallbackLng`, and English last. IIIF text without
-  a Root `language` follows the same order (`readerLanguages` in `core/value.ts`). Each regional tag also tries its base
+  a Root `language` follows the same order (`readerLanguages`, `src/i18n/reader.ts`, which Clover's strings read too; `closestLanguage` in `core/value.ts` picks the tag, IIIF's rule, held to `@iiif/helpers`' by `value.test.ts`). Each regional tag also tries its base
   language (`pt-BR` → `pt`).
 - Components call `useCloverTranslation()` and use `t` and `langOf`. It re-renders through
   `useSyncExternalStore` when `initCloverI18n` changes the language or the strings.
@@ -1054,7 +1057,9 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   arrives its strings show in English, marked `lang="en"`, and readers re-render when it
   does. A server render or a test that needs them first awaits `cloverI18n.ready()`
   (`initCloverI18n(...)` returns it).
-- Shipped: en, es, fi, fr, nb, nn, no (a copy of nb) and pt (European Portuguese, which
+- Shipped: en, es, fi, fr, nb, nn, no (the same strings as nb for now, but its own file:
+  Norwegian's three tags, `no`, Bokmål `nb` and Nynorsk `nn`, each keep one, to be
+  translated apart; never merge them; Mat, 2026-10-27) and pt (European Portuguese, which
   Brazilian readers get too). The non-English strings await native review
   (`ACCESSIBILITY.md`, P56).
 

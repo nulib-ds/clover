@@ -40,24 +40,6 @@ describe("WebGL2Backend", () => {
     expect(backend.canvas.width).toBe(400);
   });
 
-  it("re-uploads in place when a dynamic source's version changes", () => {
-    const fake = createFakeGl();
-    const backend = WebGL2Backend.create(canvasWithFakeGl(fake))!;
-    backend.begin();
-    backend.draw(command({ version: 1 }));
-    backend.draw(command({ version: 1 }));
-    backend.draw(command({ version: 2 }));
-    backend.end();
-
-    // Into the same texture: whole frames, since `texSubImage2D` from a video is black
-    // in Chrome.
-    expect(fake.count("createTexture")).toBe(1);
-    expect(fake.count("texImage2D")).toBe(2);
-    expect(fake.count("texSubImage2D")).toBe(0);
-    // Video frames skip the mip chain.
-    expect(fake.count("generateMipmap")).toBe(0);
-  });
-
   it("reports cross-origin pixels as tainted rather than throwing", () => {
     const fake = createFakeGl();
     const backend = WebGL2Backend.create(canvasWithFakeGl(fake))!;
@@ -82,30 +64,20 @@ describe("WebGL2Backend", () => {
 
     backend.dispose();
     expect(fake.loseContext).toHaveBeenCalled();
-    expect(backend.lost).toBe(true);
     expect(backend.draw(command())).toBe("skipped");
   });
 
-  it("skips drawing while the context is lost, and re-uploads once restored", () => {
+  it("skips drawing once the context is lost, and tells the renderer, which lets it go", () => {
     const fake = createFakeGl();
-    const onRestored = vi.fn();
-    const backend = WebGL2Backend.create(canvasWithFakeGl(fake), {
-      onRestored,
-    })!;
+    const onLost = vi.fn();
+    const backend = WebGL2Backend.create(canvasWithFakeGl(fake), { onLost })!;
     backend.begin();
     backend.draw(command());
     backend.end();
 
-    backend.canvas.dispatchEvent(
-      new Event("webglcontextlost", { cancelable: true }),
-    );
+    backend.canvas.dispatchEvent(new Event("webglcontextlost"));
+    expect(onLost).toHaveBeenCalledTimes(1);
     expect(backend.draw(command())).toBe("skipped");
-
-    backend.canvas.dispatchEvent(new Event("webglcontextrestored"));
-    expect(onRestored).toHaveBeenCalled();
-    backend.begin();
-    backend.draw(command());
-    backend.end();
-    expect(fake.count("texImage2D")).toBe(2);
+    expect(backend.has("a")).toBe(false);
   });
 });

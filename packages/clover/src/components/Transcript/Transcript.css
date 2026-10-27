@@ -49,70 +49,13 @@
 }
 
 /*
- * Its languages, where it has several caption files: a row of their codes ("EN", "IT"),
+ * Its languages, where it has several caption files: a row of their codes (`ui/Codes.css`),
  * one chosen, beside the Transcript's heading in an accordion (`useSectionActions`), else
- * over the cues. A row of native radios, `2xs` apart, as tall as a heading's label line,
- * with no edge or fill of its own: the codes in the muted text on the panel, the chosen
- * one a pill filled with the accent (5:1 under its white code, and against the panel),
- * as is any under the pointer or focused (focus with its ring), at the smaller text size. Each is `l` square at the least, past 24px (WCAG
- * 2.5.8); the radio stays for the keyboard and assistive technology, the code is what
- * shows, and its file's label its popover.
+ * over the cues, as tall as a heading's label line; each file's label is its code's
+ * popover. At the end of its row, over the cues as beside a heading (Mat, 2026-10-26).
  */
-/* At the end of its row, over the cues as beside a heading (Mat, 2026-10-26). */
 .clover-transcript-languages {
-  display: flex;
-  flex-wrap: wrap;
   justify-content: flex-end;
-  gap: var(--clover-space-2xs);
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font-size: var(--clover-text-xs);
-  line-height: 1;
-}
-
-.clover-transcript-languages > .clover-transcript-language {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  min-width: var(--clover-space-l);
-  min-height: var(--clover-space-l);
-  padding: 0 var(--clover-space-xs);
-  border-radius: var(--clover-radius-pill, 2rem);
-  color: var(--clover-color-primary-muted, #26292b);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* Chosen, and any under the pointer or focused, as Clover's controls take it: the accent. */
-.clover-transcript-language:is(
-  :has(input:checked),
-  :hover,
-  :has(input:focus-visible)
-) {
-  background-color: var(--clover-color-accent, #0065c3);
-  /* On the accent, the round controls' glyph color: kept 4.5:1 from it in either mode. */
-  color: var(--clover-color-control-glyph, #fff);
-}
-
-.clover-transcript-language:has(input:focus-visible) {
-  outline: 2px solid var(--clover-color-accent, #0065c3);
-  outline-offset: 2px;
-}
-
-.clover-transcript-language input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-@media (forced-colors: active) {
-  .clover-transcript-language:has(input:checked) {
-    background-color: Highlight;
-    color: HighlightText;
-  }
 }
 
 /*

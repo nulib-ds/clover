@@ -1,12 +1,10 @@
-import {
-  bodiesOf,
-  isSound,
-  parseAnnotationTarget,
-} from "../../core/annotations";
+import { isSound, parseAnnotationTarget } from "../../core/annotations";
+import { bodiesOf, isPainting } from "../../core/painting";
 import type { Rect, SceneImage } from "../../lib/renderer";
-import { findImageServiceId } from "../../lib/renderer";
+import { findImageServiceId } from "../../lib/renderer/sources/imageService";
 import { type ViewingDirection, resolveDirection } from "../../core/sequence";
 import type { ThumbnailSource } from "../../core/thumbnail";
+import { asArray } from "../../lib/asArray";
 
 export { type ViewingDirection, resolveDirection };
 
@@ -114,9 +112,6 @@ export interface MediaPlacement {
 
 /** A Timeline (sound) has no size; it is laid out at this one, 16:9. */
 const TIME_BASED_CANVAS = { width: 1600, height: 900 };
-
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value === undefined ? [] : [value];
 
 /**
  * Where each Canvas sits in the world.
@@ -246,8 +241,7 @@ export function animationFrames(canvas: IIIFCanvas): AnimationFrame[] {
   const frames: AnimationFrame[] = [];
   for (const page of canvas.items ?? []) {
     for (const annotation of page.items ?? []) {
-      const motivations = asArray(annotation.motivation);
-      if (motivations.length && !motivations.includes("painting")) continue;
+      if (!isPainting(annotation)) continue;
       const t = annotation.target
         ? parseAnnotationTarget(annotation.target as any)?.t
         : undefined;
@@ -285,8 +279,7 @@ function eachPaintingBody(
 ) {
   (canvas.items ?? []).forEach((page, p) => {
     (page.items ?? []).forEach((annotation, a) => {
-      const motivations = asArray(annotation.motivation);
-      if (motivations.length && !motivations.includes("painting")) return;
+      if (!isPainting(annotation)) return;
       bodiesOf(annotation as Record<string, any>).forEach((body, b) =>
         visit(body, choiceKey(canvas, annotation, p, a, b), annotation),
       );

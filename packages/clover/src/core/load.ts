@@ -1,9 +1,4 @@
-import {
-  type Target,
-  decodeContentState,
-  isContentState,
-  resolveContentState,
-} from "./content-state";
+import { type Target, isContentState } from "./content-state";
 import {
   type Collection,
   type Manifest,
@@ -25,6 +20,9 @@ import type { AnnotationSet } from "./annotation-sets";
  */
 
 export type IIIFContent = string | Record<string, unknown>;
+
+/** The content-state reader, loaded only for one: a URL to show needs none. */
+const readContentState = () => import("./content-state-reader");
 
 export interface Loaded {
   manifest: Manifest;
@@ -112,7 +110,10 @@ async function dereference(
   return (await fetchJson(request, resource.id, signal)) as Record<string, any>;
 }
 
-/** Pages of a paged Collection followed, at most: a guard against a `next` loop. */
+/**
+ * Pages of a paged Collection followed, at most, and never one twice: guards against a
+ * `next` that leads back, which would list its members again.
+ */
 const MAX_COLLECTION_PAGES = 50;
 
 /**
@@ -127,9 +128,12 @@ export async function withMembers(
   if (Array.isArray(json.items) && json.items.length) return collection;
   if (!json.first) return collection;
   const items: unknown[] = [];
+  const seen = new Set<unknown>();
   let next: unknown = json.first;
   for (let page = 0; next && page < MAX_COLLECTION_PAGES; page++) {
     const reference = typeof next === "string" ? { id: next } : (next as Json);
+    if (seen.has(reference.id ?? reference)) break;
+    seen.add(reference.id ?? reference);
     const fetched = (
       reference.items
         ? reference
@@ -214,6 +218,7 @@ export async function loadContent(
 
   /** A content state names what to load and where to go in it. */
   const followContentState = async (state: Record<string, any>) => {
+    const { resolveContentState } = await readContentState();
     const resolved = resolveContentState(state);
     if (!resolved) throw new CloverContentError("Unreadable content state");
     target = resolved.target ?? target;
@@ -226,6 +231,7 @@ export async function loadContent(
     if (isUrl(input.trim())) {
       json = await fetchJson(request, input.trim(), signal);
     } else {
+      const { decodeContentState } = await readContentState();
       const state = decodeContentState(input);
       if (!state) throw new CloverContentError("Unreadable iiifContent");
       json = isContentState(state) ? await followContentState(state) : state;

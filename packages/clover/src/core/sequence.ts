@@ -1,3 +1,5 @@
+import { asArray } from "../lib/asArray";
+
 /**
  * Manifest-level layout: which Canvases of a sequence are shown together.
  *
@@ -45,9 +47,6 @@ const LAYOUT_BEHAVIORS: SequenceBehavior[] = [
   "continuous",
   "unordered",
 ];
-
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value === undefined ? [] : [value];
 
 /**
  * The layout behavior to use: the first recognized layout value, so a `behavior` array

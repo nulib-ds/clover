@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import type { Clover } from "../../core/clover";
-import { selectPosition, selectSequence } from "../../core/selectors";
+import {
+  selectCanvas,
+  selectPosition,
+  selectSequence,
+} from "../../core/selectors";
 import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { visuallyHidden } from "../../ui/visuallyHidden";
@@ -36,12 +40,11 @@ export function Announcer({
       const first = last === null;
       last = canvasId;
       if (first) return;
-      const { canvases, views } = selectSequence(manifest);
-      const canvas = canvases.find((item) => item.id === canvasId);
+      const canvas = selectCanvas(manifest, canvasId);
       const label = localize(canvas?.label as any, language);
       const position = tRef.current("canvasPosition", {
         index: selectPosition(manifest, canvasId) + 1,
-        total: views.length,
+        total: selectSequence(manifest).views.length,
       });
       setMessage({
         label: label.text,

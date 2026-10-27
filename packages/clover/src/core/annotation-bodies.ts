@@ -1,5 +1,6 @@
-import { bodiesOf } from "./annotations";
+import { bodiesOf } from "./painting";
 import type { LanguageMapLike } from "./value";
+import { asArray } from "../lib/asArray";
 
 /**
  * What an annotation says: its text bodies (plain, HTML or Markdown, as their `format`
@@ -19,9 +20,6 @@ export interface AnnotationBodyEntry {
 }
 
 type Json = Record<string, any>;
-
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
 
 const isCaptionFile = (body: Json) =>
   body?.format === "text/vtt" ||

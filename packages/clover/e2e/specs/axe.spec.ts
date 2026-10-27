@@ -14,8 +14,12 @@ for (const scene of ["viewer", "document", "items"]) {
     await page.goto(
       `/?scene=${scene}&content=https://fixtures.test/0009-book-1.json`,
     );
+    // The page's title: the Viewer's an h2, the items scene's an h1 (About's is lower).
     await expect(
-      page.getByRole("heading", { name: "Simple Manifest - Book" }),
+      page.getByRole("heading", {
+        level: scene === "items" ? 1 : 2,
+        name: "Simple Manifest - Book",
+      }),
     ).toBeVisible();
     await page.waitForTimeout(500);
     await page.addScriptTag({ path: axePath });

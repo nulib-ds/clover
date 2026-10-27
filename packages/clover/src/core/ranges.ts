@@ -1,6 +1,7 @@
 import { parseAnnotationTarget } from "./annotations";
 import type { Manifest } from "./presentation";
 import type { LanguageMapLike } from "./value";
+import { asArray } from "../lib/asArray";
 
 /**
  * Chapters of a time-based Canvas, from the Manifest's Ranges: a Range whose items name
@@ -18,9 +19,6 @@ export interface Chapter {
 }
 
 type Json = Record<string, any>;
-
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
 
 /** `"30"`, `"0,30"` and `"0,"` are all legal; malformed is undefined, never NaN. */
 export function parseTime(

@@ -34,7 +34,8 @@ export function panClearOfControls(
   renderer: CanvasRenderer,
   hotspot: HTMLElement,
 ) {
-  const layer = renderer.overlays.container;
+  const layer = renderer.overlays?.container;
+  if (!layer) return;
   const figure = layer.closest(".clover-canvas");
   // A Canvas the reader cannot move (a lone video or sound, or one the host holds still)
   // has no way to pan back.

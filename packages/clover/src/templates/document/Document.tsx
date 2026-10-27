@@ -2,16 +2,25 @@ import React, { useEffect, useRef, useState } from "react";
 
 import * as Clover from "../../parts";
 import type { PanelLayout, RootProps } from "../../parts";
-import { useDragToClose } from "../shared/useDragToClose";
-import { useFocusOnOpen, useSlide, useWideEnough } from "../shared/useSlide";
+import { useDrawer } from "../shared/useDrawer";
 import { useFollowFocus } from "../shared/useFollowFocus";
-import { useSpine } from "../shared/useSpine";
+import { useWideEnough } from "../shared/useSlide";
+import type DocumentPanelPart from "./DocumentPanel";
 import { Sheets } from "./Sheets";
 
+// The information panel, a chunk of its own (`DocumentPanel`).
+const loadPanel = () => import("./DocumentPanel");
+
 export type DocumentProps = Omit<RootProps, "children"> & {
-  /** Whether the page thumbnails start shown. Default: shown on a wide screen. */
+  /**
+   * Whether the page thumbnails start shown beside the page. Default `true`. On a phone,
+   * where they would float over the page, they start put away.
+   */
   defaultSidebarOpen?: boolean;
-  /** Whether the information panel starts open. Default `false`. */
+  /**
+   * Whether the information panel starts open beside the page. Default `false`. Where it
+   * has no room there and would slide over the page, it starts closed.
+   */
   defaultPanelOpen?: boolean;
   /**
    * How the information panel lays out its sections: `"accordion"` (the default, as
@@ -78,8 +87,6 @@ export function Document({
   );
 }
 
-const NARROW = "(max-width: 40rem)";
-
 /** The heading level under another. Past 6, the parts' titles name what they head. */
 const below = (level: number) => level + 1;
 
@@ -93,6 +100,11 @@ const PANEL_MIN = "14rem";
  */
 const BESIDE_REM = 16 + 14 + 1;
 const SIDEBAR_REM = 8 + 1;
+/**
+ * Narrower than this (a phone, or a narrow column of a wide page: the template measures
+ * its own width), the thumbnails float over the page instead.
+ */
+const SIDEBAR_BESIDE_REM = 40;
 
 function DocumentLayout({
   defaultSidebarOpen,
@@ -121,129 +133,98 @@ function DocumentLayout({
   const sidebarLang = langOf("templateSidebar");
   const id = Clover.useUniqueId().replace(/:/g, "");
   const navigation = Clover.useNavigation();
-  const [sidebar, setSidebar] = useState(
-    () =>
-      defaultSidebarOpen ??
-      !(typeof window !== "undefined" && window.matchMedia?.(NARROW).matches),
-  );
+  const panes = useRef<HTMLElement>(null);
+  /*
+   * The page thumbnails' toggle is where they are: on the spine, the bar between them and
+   * the page (on a phone, where they float over it, their inner edge), while they show,
+   * so they keep their pane's whole height; and over the page's top left while they are
+   * put away. So every press moves it, and focus on it, or in the pane as the pane goes,
+   * follows it to its new place (`useDrawer`). On a phone, opened, they take focus at the
+   * page the reader is on, and can be dragged back off to the start.
+   */
+  const sidebarSpine = useRef<HTMLDivElement>(null);
+  const followFocus = useFollowFocus();
+  const sidebar = useDrawer({
+    id: `${id}-sidebar`,
+    beside: useWideEnough(panes, SIDEBAR_BESIDE_REM),
+    defaultOpen: defaultSidebarOpen ?? true,
+    side: "start",
+    focus: (pane) =>
+      pane.querySelector<HTMLElement>('[role="option"][aria-selected="true"]'),
+    slides: false,
+    alongside: sidebarSpine,
+    followFocus,
+  });
   /*
    * Thumbnails only when there is more than one page to choose. Until the content has
    * loaded there are none, so a one-page document never shows an empty sidebar first.
    * The pane stays in the tree, hidden, so the page beside it is never remounted.
    */
   const pages = navigation.total > 1;
-  const showSidebar = pages && sidebar;
-  const [panel, setPanel] = useState(Boolean(defaultPanelOpen));
+  const showSidebar = pages && sidebar.open;
   /*
    * The panel sits beside the page, its own pane with a bar to share the width, where
    * there is room for both, as Default's does; where there is not, it slides over the
-   * page, takes focus, and closes on its own button or Escape.
+   * page, takes focus, and closes on its own button, Escape, a press on the page beside
+   * it, or a drag back off to the end. Its toggle sits on the spine, the bar between the
+   * pages and the panel, while the panel is open beside them, and among the Canvas's
+   * controls otherwise; a press moves it, and focus follows it there.
    */
-  const panes = useRef<HTMLElement>(null);
-  const beside = useWideEnough(
-    panes,
-    BESIDE_REM + (showSidebar ? SIDEBAR_REM : 0),
-  );
-  const over = !beside;
-  const slide = useSlide(over && panel);
-  const panelRef = useRef<HTMLElement>(null);
-  useFocusOnOpen(panelRef, over && slide.mounted);
-  const panelShown = over ? slide.mounted : panel;
-
-  /*
-   * Whatever floats over the page can be dragged back off the way it came, as an app's
-   * drawer can, and a press on the page beside it puts it away: the panel to the end, and
-   * on a phone the thumbnails to the start.
-   */
-  const narrow = useMatches(NARROW);
-  const panelPane = useRef<HTMLElement>(null);
-  const sidebarPane = useRef<HTMLElement>(null);
-  const sidebarToggle = useRef<HTMLButtonElement>(null);
-  // Focus in a pane as it goes is handed to its toggle, never left on what is hidden.
-  const closePanel = () => {
-    if (panelPane.current?.contains(document.activeElement))
-      document
-        .querySelector<HTMLElement>(`[aria-controls~="${id}-panel"]`)
-        ?.focus();
-    setPanel(false);
-  };
-  /*
-   * The page thumbnails' toggle is where they are: on the spine, the bar between them and
-   * the page (on a phone, where they float over it, their inner edge), while they show,
-   * so they keep their pane's whole height; and over the page's top left while they are
-   * put away. So every press moves it, and focus on it, or in the pane as the pane goes,
-   * follows it to its new place.
-   */
-  const sidebarSpine = useRef<HTMLDivElement>(null);
-  const followFocus = useFollowFocus();
-  const followToggle = () => followFocus(() => sidebarToggle.current);
-  const toggleSidebar = () => {
-    followToggle();
-    setSidebar((open) => !open);
-  };
-  const closeSidebar = () => {
-    if (sidebarPane.current?.contains(document.activeElement)) followToggle();
-    setSidebar(false);
-  };
-  const scrim = useRef<HTMLDivElement>(null);
-  useDragToClose(panelPane, {
-    enabled: over && slide.open,
+  const panel = useDrawer({
+    id: `${id}-panel`,
+    beside: useWideEnough(panes, BESIDE_REM + (showSidebar ? SIDEBAR_REM : 0)),
+    defaultOpen: Boolean(defaultPanelOpen),
     side: "end",
-    onClose: closePanel,
-    scrim,
+    followFocus,
   });
-  useDragToClose(sidebarPane, {
-    enabled: narrow && showSidebar,
-    side: "start",
-    onClose: closeSidebar,
-    alongside: sidebarSpine,
-    exits: true,
-  });
-
-  // On a narrow screen the sidebar covers the page: choosing a page puts it away.
-  const choose = () => {
-    if (window.matchMedia?.(NARROW).matches) closeSidebar();
+  const over = panel.over;
+  /*
+   * The panel's code loads as the reader reaches for its toggle (pointed at or focused),
+   * or as it opens (the host's, or beside the page again). A first press waits for it,
+   * then opens the panel whole, so focus has its section to go to.
+   */
+  const [PanelPart, setPanelPart] = useState<typeof DocumentPanelPart>();
+  const loadPart = () =>
+    loadPanel().then((module) => setPanelPart(() => module.default));
+  useEffect(() => {
+    if (panel.open) void loadPart();
+  }, [panel.open]);
+  const reach = (event: React.SyntheticEvent) => {
+    if (
+      !PanelPart &&
+      (event.target as Element).closest?.(`[aria-controls~="${id}-panel"]`)
+    )
+      void loadPart();
   };
 
-  /*
-   * The panel's toggle sits on the spine, the bar between the pages and the panel, while
-   * the panel is open beside them, and among the Canvas's controls otherwise; a press
-   * moves it, and focus follows it there.
-   */
-  const docked = !over && panel;
-  const spine = useRef<HTMLDivElement>(null);
-  const main = (element: React.RefObject<HTMLElement | null>) => () =>
-    element.current?.parentElement?.querySelector<HTMLElement>(
-      ".clover-template-document-main",
-    );
-  useSpine(spine, main(spine), docked);
-  // Over the thumbnails it belongs to, but for its far rounded end, over the page.
-  useSpine(sidebarSpine, main(sidebarSpine), showSidebar, { cap: true });
+  // Over the page the thumbnails cover it: choosing a page puts them away.
+  const choose = () => {
+    if (sidebar.over) sidebar.close();
+  };
+
+  const docked = !over && panel.open;
+  // Each toggle on its spine is placed by the stylesheet (`Document.css`): over the
+  // thumbnails it belongs to, but for its far rounded end, over the page.
   const panelToggle = (
     <Clover.PanelToggle
-      open={panel}
-      onOpenChange={(next) => {
-        if (!over)
-          followFocus(() =>
-            document.querySelector<HTMLElement>(
-              `[data-button="panel"][aria-controls~="${id}-panel"]`,
-            ),
-          );
-        setPanel(next);
-      }}
+      open={panel.open}
+      onOpenChange={(next) =>
+        next && !PanelPart
+          ? loadPart().then(() => panel.setOpen(true))
+          : panel.setOpen(next)
+      }
       controls={`${id}-panel`}
     />
   );
 
   const toggle = pages && (
     <button
-      ref={sidebarToggle}
       type="button"
       className="clover-template-document-sidebar-toggle"
-      aria-expanded={sidebar}
+      aria-expanded={sidebar.open}
       aria-controls={`${id}-sidebar`}
       lang={langOf("templateSidebarToggle")}
-      onClick={toggleSidebar}
+      onClick={() => sidebar.setOpen(!sidebar.open)}
     >
       {/*
        * A toggle, plainly: a list of thumbnails, each a small picture beside a line,
@@ -256,7 +237,7 @@ function DocumentLayout({
         width="16"
         height="16"
         viewBox="0 0 16 16"
-        fill={sidebar ? "currentColor" : "none"}
+        fill={sidebar.open ? "currentColor" : "none"}
         stroke="currentColor"
         strokeWidth="1.25"
         strokeLinecap="round"
@@ -293,27 +274,23 @@ function DocumentLayout({
       <Clover.Status loading={false} />
       <Clover.Split
         ref={panes}
-        className="clover-template-document-panes"
+        className="clover-template-document-panes clover-template-panes"
         data-sidebar={showSidebar ? "open" : "closed"}
+        data-narrow={sidebar.over || undefined}
         data-panel={over ? "over" : "beside"}
         storageKey={storageKey || undefined}
         onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
-          // Escape anywhere puts the floating panel away, uncovering a control focus
-          // reached under it, and leaves focus there (the panel's own Escape, handled
-          // first, hands focus to its toggle).
-          if (
-            over &&
-            panel &&
-            event.key === "Escape" &&
-            !event.defaultPrevented
-          ) {
-            event.preventDefault();
-            setPanel(false);
-          }
+          // Escape anywhere puts what floats over the page away, the panel first,
+          // uncovering a control focus reached under it, and leaves focus there (the
+          // panel's own Escape, handled first, hands focus to its toggle).
+          panel.onKeyDown(event);
+          sidebar.onKeyDown(event);
         }}
+        onPointerOver={reach}
+        onFocus={reach}
       >
         <Clover.SplitPane
-          ref={sidebarPane}
+          ref={sidebar.pane}
           as="aside"
           id={`${id}-sidebar`}
           name="sidebar"
@@ -322,7 +299,7 @@ function DocumentLayout({
           aria-labelledby={sidebarLang ? `${id}-sidebar-name` : undefined}
           size="13rem"
           // On a phone Items slides over the Canvas, so it takes no room from it.
-          min={narrow ? undefined : "8rem"}
+          min={sidebar.over ? undefined : "8rem"}
           max="24rem"
           hidden={!showSidebar}
         >
@@ -338,8 +315,10 @@ function DocumentLayout({
             onSelect={choose}
           />
         </Clover.SplitPane>
-        {/* The bar between the thumbnails and the page; hidden where they cover it. */}
-        {showSidebar && <Clover.SplitHandle aria-controls={`${id}-sidebar`} />}
+        {/* The bar between the thumbnails and the page; none where they cover it. */}
+        {showSidebar && !sidebar.over && (
+          <Clover.SplitHandle aria-controls={`${id}-sidebar`} />
+        )}
         {/* Open, their toggle on its spine, right after the bar (on a phone, the edge). */}
         {showSidebar && (
           <div
@@ -353,12 +332,10 @@ function DocumentLayout({
         <Clover.SplitPane
           className="clover-template-document-main"
           // A minimum only beside another pane: Items, or the Panel docked.
-          min={
-            (showSidebar && !narrow) || (panel && !over) ? PAGE_MIN : undefined
-          }
+          min={(showSidebar && !sidebar.over) || docked ? PAGE_MIN : undefined}
         >
           {/* Put away, their toggle waits over the page's top left. */}
-          {pages && !sidebar && (
+          {pages && !sidebar.open && (
             <div className="clover-template-document-sidebar-closed">
               {toggle}
             </div>
@@ -370,70 +347,48 @@ function DocumentLayout({
         {docked && <Clover.SplitHandle aria-controls={`${id}-panel`} />}
         {/* Open beside the pages, its toggle on the spine, right after the bar. */}
         {docked && (
-          <div ref={spine} className="clover-template-document-spine">
-            {panelToggle}
-          </div>
+          <div className="clover-template-document-spine">{panelToggle}</div>
         )}
         <Clover.SplitPane
-          ref={panelPane}
+          ref={panel.pane}
           id={`${id}-panel`}
           data-spine={over || undefined}
           name="panel"
-          className="clover-template-document-panel"
+          className="clover-template-document-panel clover-template-drawer"
           size="24rem"
           min={over ? undefined : PANEL_MIN}
-          data-open={over ? slide.open : panel}
-          hidden={!panelShown}
+          data-open={panel.opened}
+          hidden={!panel.shown}
         >
-          {/* Over the page it floats, so Escape and its own button put it away too. */}
-          <Clover.Panel
-            ref={panelRef}
-            layout={panelLayout}
-            headingLevel={below(headingLevel)}
-            onClose={over ? () => setPanel(false) : undefined}
-            closeOnEscape={over}
-          />
+          {/*
+           * Over the page it floats, so Escape and its own button put it away too. Its
+           * About lists no downloads: the toolbar has them.
+           */}
+          {PanelPart && (
+            <PanelPart
+              layout={panelLayout}
+              headingLevel={below(headingLevel)}
+              download={false}
+              onClose={over ? panel.close : undefined}
+              closeOnEscape={over}
+            />
+          )}
         </Clover.SplitPane>
-        {/*
-         * A press on the page beside what covers it puts that away. It takes no focus, so
-         * focus in the pane is still there to hand back to its toggle, never left to fall
-         * to the page (WCAG 2.4.3).
-         */}
-        {over && slide.mounted && (
+        {/* A press on the page beside what covers it puts that away. */}
+        {panel.scrim && (
           <div
-            ref={scrim}
-            className="clover-template-document-scrim"
-            data-open={slide.open}
-            aria-hidden="true"
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={closePanel}
+            className="clover-template-document-scrim clover-template-scrim"
+            {...panel.scrim}
           />
         )}
-        {narrow && showSidebar && (
+        {pages && sidebar.scrim && (
           <div
-            className="clover-template-document-scrim"
+            className="clover-template-document-scrim clover-template-scrim"
             data-for="sidebar"
-            data-open="true"
-            aria-hidden="true"
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={closeSidebar}
+            {...sidebar.scrim}
           />
         )}
       </Clover.Split>
     </>
   );
-}
-
-/** Whether a media query matches, following it as it changes. */
-function useMatches(query: string) {
-  const [matches, setMatches] = useState(false);
-  useEffect(() => {
-    const list = window.matchMedia?.(query);
-    if (!list) return;
-    const update = () => setMatches(list.matches);
-    update();
-    list.addEventListener?.("change", update);
-    return () => list.removeEventListener?.("change", update);
-  }, [query]);
-  return matches;
 }

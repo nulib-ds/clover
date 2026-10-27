@@ -1,6 +1,8 @@
 import type { Collection, Container, Manifest } from "./presentation";
 import { selectSequence } from "./selectors";
 import { type LanguageMapLike, localize } from "./value";
+import { paintedBodies } from "./painted-bodies";
+import { asArray } from "../lib/asArray";
 
 /**
  * What `Items` shows: light models of a Manifest's views or a Collection's members, never
@@ -34,21 +36,9 @@ export interface ItemModel {
 
 type Json = Record<string, any>;
 
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
-
 /** The kind of content a Canvas paints first: `Image`, `Video` or `Sound`. */
 function paintedType(container: Json): string | undefined {
-  for (const page of asArray(container.items) as Json[]) {
-    for (const annotation of asArray(page?.items) as Json[]) {
-      for (let body of asArray(annotation?.body) as Json[]) {
-        if (body?.type === "Choice") body = asArray(body.items)[0] as Json;
-        if (body?.type === "SpecificResource") body = body.source;
-        if (body?.type) return body.type;
-      }
-    }
-  }
-  return undefined;
+  return paintedBodies(container).find(({ body }) => body.type)?.body.type;
 }
 
 function part(resource: Json): ItemPart {

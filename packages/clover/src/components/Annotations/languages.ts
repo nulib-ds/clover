@@ -27,13 +27,16 @@ export function languagesOf(entries: AnnotationEntry[]): string[] {
 }
 
 /**
- * The language a choice starts on: the one the Root reads IIIF text in (`language`), or
- * else the reader's, as IIIF text is chosen (`localize`); else the first given.
+ * The language a choice shows: the reader's pick (`picked`) where the set has it, else the
+ * one the Root reads IIIF text in (`language`), or else the reader's, as IIIF text is
+ * chosen (`localize`); else the first given.
  */
 export function startingLanguage(
   languages: string[],
   language?: string,
+  picked?: string,
 ): string | undefined {
+  if (picked && languages.includes(picked)) return picked;
   if (!languages.length) return undefined;
   const map = Object.fromEntries(languages.map((tag) => [tag, [tag]]));
   return localize(map, language).lang ?? languages[0];

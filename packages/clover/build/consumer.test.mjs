@@ -59,7 +59,8 @@ test("the Viewer is a shell: no template and no part load with it", async () => 
       .map((id) => id.slice(root.length + 1));
   const upFront = [...initial].flatMap((fileName) =>
     fromPackage(chunks.get(fileName)).filter(
-      (id) => chunks.get(fileName).modules[resolve(root, id)].renderedLength > 0,
+      (id) =>
+        chunks.get(fileName).modules[resolve(root, id)].renderedLength > 0,
     ),
   );
   assert.deepEqual(
@@ -90,7 +91,10 @@ test("the Viewer is the default export, and Clover.Viewer too", () => {
     { cwd: root, encoding: "utf8" },
   );
   assert.equal(status, 0, stderr);
-  assert.deepEqual(JSON.parse(stdout.trim()), { viewer: "function", same: true });
+  assert.deepEqual(JSON.parse(stdout.trim()), {
+    viewer: "function",
+    same: true,
+  });
 });
 
 test("the templates entry imports in plain node", () => {

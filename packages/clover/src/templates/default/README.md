@@ -38,7 +38,7 @@ pass it: `template={Default}`, from `@nulib/clover/templates`.
 | `headingLevel`     | `2`                         | The title's level; the panel's sections are a level below.        |
 | `panel`            | `true`                      | The information panel and its toggle.                             |
 | `download`         | `true`                      | The downloads in the panel's About, where there is a `rendering`. |
-| `defaultPanelOpen` | —                           | Whether the panel starts open. Unset: open when it fits beside.   |
+| `defaultPanelOpen` | `true`                      | Whether the panel starts open beside the Body; over it, closed.   |
 | `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.               |
 | `items`            | `"slider"`                  | The thumbnails: `"slider"`, `"list"`, `"grid"`, or `false`.       |
 | `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.        |

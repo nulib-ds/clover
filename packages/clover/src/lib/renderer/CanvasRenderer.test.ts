@@ -141,7 +141,10 @@ describe("CanvasRenderer", () => {
       { id: "a", url: "a.jpg" },
       { id: "b", url: "b.jpg" },
     ]);
-    expect(renderer.getItemRect(1)).toEqual({
+    // The second, 400 square, placed in the world beside the first, scaled to its height.
+    expect(
+      renderer.itemRectToWorld(1, { x: 0, y: 0, width: 400, height: 400 }),
+    ).toEqual({
       x: 1000,
       y: 0,
       width: 500,
@@ -246,10 +249,12 @@ describe("CanvasRenderer", () => {
     const el = host();
     const renderer = new CanvasRenderer(el, { animationTime: 0 });
     await renderer.setImages([{ id: "a", url: "a.jpg" }]);
-    await frames();
+    // The DOM layer's code loads with the first frame that needs it.
+    await vi.waitFor(() =>
+      expect(el.querySelector(".clover-canvas-dom-item")).not.toBeNull(),
+    );
 
     const item = el.querySelector(".clover-canvas-dom-item") as HTMLElement;
-    expect(item).not.toBeNull();
     expect(item.style.transform).toMatch(/^matrix\(/);
     expect(item.querySelector("img")).not.toBeNull();
     renderer.dispose();
@@ -267,11 +272,12 @@ describe("CanvasRenderer", () => {
     renderer.dispose();
   });
 
-  it("falls back to Canvas2D without WebGL2", async () => {
+  it("falls back to Canvas2D without WebGL2, once its code has loaded", async () => {
     webgl = false;
     const el = host();
     const renderer = new CanvasRenderer(el);
-    expect(renderer.backendKind).toBe("canvas2d");
+    // Meanwhile its canvas waits, drawing nothing: the host's background shows.
+    await vi.waitFor(() => expect(renderer.backendKind).toBe("canvas2d"));
     expect(el.dataset.backend).toBe("canvas2d");
     renderer.dispose();
   });
@@ -444,7 +450,7 @@ describe("the page's WebGL contexts", () => {
     renderer.dispose();
   });
 
-  it("holds a few: one out of view gives its back to one in view, and past them all in view, Canvas2D", () => {
+  it("holds a few: one out of view gives its back to one in view, and past them all in view, Canvas2D", async () => {
     const shown = Array.from(
       { length: MAX_CONTEXTS },
       () => new CanvasRenderer(host()),
@@ -460,7 +466,7 @@ describe("the page's WebGL contexts", () => {
     expect(shown[0].host.dataset.backend).toBe("released");
     // Every one in view: one more draws with Canvas2D.
     const more = new CanvasRenderer(host());
-    expect(more.backendKind).toBe("canvas2d");
+    await vi.waitFor(() => expect(more.backendKind).toBe("canvas2d"));
     [...shown, next, more].forEach((each) => each.dispose());
   });
 
@@ -471,7 +477,7 @@ describe("the page's WebGL contexts", () => {
     lost.dispatchEvent(new Event("webglcontextlost", { cancelable: true }));
     // Never the browser's picture of a lost context: that canvas is gone.
     expect(lost.isConnected).toBe(false);
-    expect(renderer.backendKind).toBe("canvas2d");
+    await vi.waitFor(() => expect(renderer.backendKind).toBe("canvas2d"));
     inView(el, false);
     await frames(1);
     expect(el.dataset.backend).toBe("released");

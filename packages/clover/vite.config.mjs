@@ -38,6 +38,8 @@ export default defineConfig({
         "templates/index": resolve(root, "src/templates/index.ts"),
         // The map: navPlace and georeferences, MapLibre loaded on demand.
         "map/index": resolve(root, "src/map/index.ts"),
+        // The Scene's three.js engine, opt-in: `three` a page installs to use it.
+        "three/index": resolve(root, "src/three/index.ts"),
       },
       formats: ["es"],
     },

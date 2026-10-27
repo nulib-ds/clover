@@ -1,30 +1,15 @@
 /**
- * Detect whether a content resource id / format pair represents an HLS
- * playlist. Strips any query string before checking the file extension so
- * tokenized URLs like `…/playlist.m3u8?token=…` are matched, then falls
- * back to a list of common HLS MIME types.
+ * HLS's MIME types: Apple's (`application/vnd.apple.mpegurl`, and `vnd.apple.mpegurl`),
+ * and the common `mpegurl` and `x-mpegurl`, under `application/`, `audio/` or `video/`.
+ * MIME types are read without regard to case.
  */
-export const isHls = (id?: string, format?: string): boolean => {
-  if (id) {
-    const path = id.split("?")[0];
-    if (path.split(".").pop()?.toLowerCase() === "m3u8") return true;
-  }
-  if (format && hlsMimeTypes.includes(format)) return true;
-  return false;
-};
+const HLS_TYPE = /^((application|audio|video)\/)?(vnd\.apple\.|x-)?mpegurl$/i;
 
-export const hlsMimeTypes = [
-  // Apple santioned
-  "application/vnd.apple.mpegurl",
-  "vnd.apple.mpegurl",
-  // Apple sanctioned for backwards compatibility
-  "audio/mpegurl",
-  // Very common
-  "audio/x-mpegurl",
-  // Very common
-  "application/x-mpegurl",
-  // Included for completeness
-  "video/x-mpegurl",
-  "video/mpegurl",
-  "application/mpegurl",
-];
+/**
+ * Whether a content resource's id and format are an HLS playlist: a `.m3u8` path, its
+ * query or fragment set aside (a tokenized `…/playlist.m3u8?token=…`), or one of HLS's
+ * MIME types.
+ */
+export const isHls = (id?: string, format?: string): boolean =>
+  Boolean(id && /\.m3u8$/i.test(id.split(/[?#]/)[0])) ||
+  Boolean(format && HLS_TYPE.test(format));

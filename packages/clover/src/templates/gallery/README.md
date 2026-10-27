@@ -24,5 +24,9 @@ import "@nulib/clover/templates.css";
 | `headingLevel` | `2`     | The title's level; the lightbox's title is one below. |
 | …              |         | Every `Clover.Root` prop.                             |
 
-To change the layout, copy `Gallery.tsx`, `Gallery.css` and `../shared/Lightbox.tsx` into
-your app. They use only what `@nulib/clover` exports.
+The lightbox's Body loads its code when the lightbox first opens, or as the reader's
+pointer or focus first comes to the gallery, so the page loads only the thumbnails.
+
+To change the layout, copy `Gallery.tsx`, `Gallery.css`, and `../shared/Lightbox.tsx`,
+`Lightbox.css` and `LightboxBody.tsx` into your app. They use only what `@nulib/clover`
+exports.

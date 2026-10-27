@@ -16,8 +16,8 @@ const LoadedScene = lazy(() => import("./Loaded"));
  * A IIIF Presentation 4 Scene, drawn in 3D: the glTF models it paints, each
  * where the Scene places it, lit as a neutral room lights them and framed by a default
  * camera, which the reader turns and zooms by pointer, key or control. Its drawing, Clover's
- * own WebGL2 glTF renderer (or three.js, `engine="three"`), loads only when a Scene first
- * comes near the window.
+ * own WebGL2 glTF renderer (or three.js, `engine="three"`, once the page registers it from
+ * `@nulib/clover/three`), loads only when a Scene first comes near the window.
  *
  * - **Inside a `Root`**, given nothing to draw, it draws the Root's view when that is a
  *   Scene, and nothing otherwise. `Body` draws a Scene view with it.

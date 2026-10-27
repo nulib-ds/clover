@@ -17,7 +17,6 @@ import {
 export class Canvas2DBackend implements Backend {
   readonly kind = "canvas2d" as const;
   readonly canvas: HTMLCanvasElement;
-  readonly lost = false;
 
   private ctx: CanvasRenderingContext2D;
   private pixelRatio = 1;

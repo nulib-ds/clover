@@ -31,6 +31,27 @@ describe("navPlaceOf", () => {
     expect(features[0].properties.canvasId).toBeUndefined();
   });
 
+  it("titles a feature in plain text, its markup off and its entities decoded", () => {
+    const feature = manifestJson.navPlace.features[0];
+    const { features } = navPlaceOf(
+      p4({
+        ...manifestJson,
+        navPlace: {
+          ...manifestJson.navPlace,
+          features: [
+            {
+              ...feature,
+              properties: {
+                label: { en: ["<b>Getty</b> Villa &amp; Museum"] },
+              },
+            },
+          ],
+        },
+      }),
+    );
+    expect(features[0].properties.title).toBe("Getty Villa & Museum");
+  });
+
   it("names the Canvas a Canvas's navPlace belongs to", () => {
     const manifest = p4(canvasesJson);
     const { features } = navPlaceOf(manifest);

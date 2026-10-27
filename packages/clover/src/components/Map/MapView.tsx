@@ -26,6 +26,7 @@ import {
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useRootLanguage } from "../../react/language";
 import { getMapWorkerUrl } from "../../core/map-config";
+import { useNearViewport } from "../Body/useNearViewport";
 
 export interface MapProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "onSelect"> {
@@ -226,6 +227,12 @@ function MapView({
   const root = useRootLanguage(forwardedRef, rest.lang);
   const { langOf } = root;
   const container = useRef<HTMLDivElement>(null);
+  /*
+   * MapLibre (290 kB) loads only as the map comes within half a screen of view, as a
+   * Canvas's images do: a map far down a page, or in a tab not yet open, loads none.
+   */
+  const [box, setBox] = useState<HTMLDivElement | null>(null);
+  const near = useNearViewport(box);
   const [map, setMap] = useState<any>(null);
   const [failed, setFailed] = useState(false);
   // The overlays on the map, by id, once their images are drawn.
@@ -239,8 +246,9 @@ function MapView({
   // The extent last framed.
   const framed = useRef("");
 
-  // MapLibre, loaded and started once.
+  // MapLibre, loaded and started once, near the window.
   useEffect(() => {
+    if (!near) return;
     let live = true;
     let instance: any = null;
     let observer: ResizeObserver | null = null;
@@ -341,7 +349,7 @@ function MapView({
     };
     // Style, worker and wheel are read once: a new map would be a new viewer.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [near]);
 
   // The places.
   useEffect(() => {
@@ -487,6 +495,7 @@ function MapView({
       >
         {/* Functional: the map needs a box to draw in, with or without the stylesheet. */}
         <div
+          ref={setBox}
           style={{
             position: "relative",
             height: "var(--clover-map-height, 24rem)",

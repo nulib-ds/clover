@@ -1,4 +1,5 @@
-import { bodiesOf } from "../../core/annotations";
+import { bodiesOf, isPainting } from "../../core/painting";
+import { asArray } from "../../lib/asArray";
 
 /**
  * What `Scene` draws: the 3D models a IIIF Presentation 4 Scene paints, each where the
@@ -53,9 +54,6 @@ export interface IIIFScene {
  * Scenes paint and the IIIF 3D community recommends.
  */
 export const MODEL_FORMATS = ["model/gltf-binary", "model/gltf+json"];
-
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
 
 const number = (value: unknown, fallback: number) => {
   const read = Number(value);
@@ -121,8 +119,7 @@ export function sceneModels(scene: IIIFScene): SceneModel[] {
   const models: SceneModel[] = [];
   for (const page of scene.items ?? []) {
     for (const annotation of page?.items ?? []) {
-      const motivations = asArray(annotation?.motivation);
-      if (motivations.length && !motivations.includes("painting")) continue;
+      if (!isPainting(annotation)) continue;
       for (let body of bodiesOf(annotation)) {
         if (body?.type === "Choice")
           body = asArray(body.items)[0] as Record<string, any>;

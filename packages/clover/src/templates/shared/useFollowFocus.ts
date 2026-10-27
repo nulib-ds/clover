@@ -12,7 +12,8 @@ const FRAMES = 30;
  * has gone (with the element it was on, or the pane it was in), the control takes it.
  * Frame by frame, not after a render: React may commit the move a render or more later
  * (a Canvas draws its controls later still). If the reader puts focus somewhere of their
- * own meanwhile, it is left there.
+ * own meanwhile, it is left there. A layout whose panes' toggles all move gives them one,
+ * so a later follow takes over from any before it: focus has one place to go.
  */
 export function useFollowFocus() {
   const frame = useRef(0);

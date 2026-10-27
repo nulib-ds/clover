@@ -70,15 +70,6 @@ export interface CloverCanvasOptions {
    * reader asking for reduced motion is never autoplayed.
    */
   animation?: { autoplay?: boolean; loop?: boolean };
-  media?: {
-    /**
-     * How video reaches the screen. `dom` (the default) places a real `<video>` with the
-     * camera's transform, so the browser composites it and PiP, AirPlay and HDR keep
-     * working. `texture` draws each frame into the canvas with the images, which needs CORS
-     * on the media.
-     */
-    presentation?: "dom" | "texture";
-  };
   /**
    * Credentials, headers and a custom `fetch` for every request the Canvas makes:
    * `info.json`, tiles, captions and HLS. A `<video>` or an image without CORS can only

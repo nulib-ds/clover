@@ -1,3 +1,5 @@
+import { hideUntilBack } from "../../ui/Tip";
+
 /**
  * Titles that a line clamp cuts short, under a slider's or grid's pictures (`Items.css`).
  * A title cut short shows in full while its item is hovered or focused (WCAG 1.4.12), so
@@ -67,17 +69,14 @@ function hideFull(event: KeyboardEvent) {
   if (!shown.length) return;
   event.preventDefault();
   event.stopPropagation();
-  shown.forEach((item) => {
-    item.dataset.fullHidden = "";
-    // Back when the pointer comes again; and when focus leaves, or, for an item hidden
-    // from under the pointer only, when focus comes to it afresh.
-    const back = ["pointerenter", item === focused ? "blur" : "focus"];
-    const show = () => {
-      delete item.dataset.fullHidden;
-      back.forEach((type) => item.removeEventListener(type, show));
-    };
-    back.forEach((type) => item.addEventListener(type, show));
-  });
+  // Back when the pointer comes again; and when focus leaves, or, for an item hidden
+  // from under the pointer only, when focus comes to it afresh.
+  shown.forEach((item) =>
+    hideUntilBack(item, "fullHidden", [
+      "pointerenter",
+      item === focused ? "blur" : "focus",
+    ]),
+  );
 }
 
 function start() {

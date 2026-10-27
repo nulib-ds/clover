@@ -12,7 +12,7 @@ import { useCloverTranslation } from "../../../i18n/useCloverTranslation";
 import { useContainerName } from "../../../ui/useContainerName";
 import type { IIIFCanvas } from "../layout";
 import type { TransportChapter } from "./Transport";
-import { formatTime } from "./useMediaController";
+import { CueTime } from "../../../ui/Cue";
 
 /*
  * A lone recording of sound, played as a music app plays one (Mat, 2026-10-24: Apple
@@ -205,8 +205,8 @@ export function PlayerFace({
 /**
  * The chapters as a music app lists an album's tracks: numbered, each with where it
  * starts, the one playing marked (`aria-current`, and in words and weight, never by color
- * alone), a press going to it, as the transport's Chapters menu does. Where the player is
- * too short for it, the stylesheet leaves it out, and the menu stays.
+ * alone), a press playing it from its start, as a press on any time Clover lists does.
+ * Where the player is too short for it, the stylesheet leaves it out, and the menu stays.
  */
 export function PlayerChapters({
   chapters,
@@ -247,10 +247,14 @@ export function PlayerChapters({
               >
                 {chapter.label}
               </span>{" "}
-              {/* Apart from the label in its name, as on screen: "Allegro 12:30". */}
-              <span className="clover-canvas-player-chapter-time">
-                {formatTime(chapter.start)}
-              </span>
+              {/*
+               * Apart from the label in its name, as on screen: "Allegro 12:30". Where it
+               * starts, as every time a recording lists is written (`CueTime`).
+               */}
+              <CueTime
+                start={chapter.start}
+                className="clover-canvas-player-chapter-time"
+              />
             </button>
           </li>
         ))}

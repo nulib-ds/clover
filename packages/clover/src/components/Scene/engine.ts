@@ -24,10 +24,12 @@ import { MODEL_FORMATS, type SceneModel, isDrawable } from "./models";
 
 /**
  * The Scene's optional drawing, with three.js (`engine="three"`; Clover's own,
- * `cloverEngine.ts`, is the default): the one module that imports three.js, loaded only
- * for a Scene that asks for it, the first time one comes near the window, so no other page
- * carries it. For what Clover's does not draw yet: compressed models, animations, glTF's
- * material extensions.
+ * `cloverEngine.ts`, is the default): the one module that imports three.js, reached only
+ * through the opt-in entry (`@nulib/clover/three`, `web-components/three.mjs`) and loaded
+ * the first time a Scene that asks for it comes near the window, so no other page carries
+ * it. For what Clover's does not draw yet: glTF's material extensions, skins and morph
+ * targets at rest, sparse accessors, a second set of texture coordinates. Not compressed
+ * models, nor animations (below).
  *
  * It draws on demand, never in a loop: once the models arrive, and each time the camera
  * moves or the Body changes size. At rest it does nothing. glTF 2.0 is drawn with

@@ -46,8 +46,8 @@ gives its first Scene). Inside a `Root`, given nothing, it draws the Root's view
 is a Scene; [`Body`](/docs/body) draws a Scene view with it, unless a renderer of yours
 claims it. It fills its parent, so give the parent a height.
 
-What draws the models, Clover's own renderer (or three.js, `engine="three"`), loads the
-first time a Scene comes near the window.
+What draws the models, Clover's own renderer (or three.js, `engine="three"`, which a page
+opts into), loads the first time a Scene comes near the window.
 
 A drag turns the models and a pinch zooms. The controls sit together in the lower right,
 over a soft shade, and show while the pointer moves over the view or keyboard focus is in
@@ -69,7 +69,7 @@ left, plus and minus zoom, and 0 resets. A plain wheel scrolls the page.
 | `controls`       | `boolean \| { zoom, fullPage, rotation, reset, information }` | `true`                      | All of Clover's controls, none, or all but those set `false`.             |
 | `controlButtons` | `object`                                                      | —                           | Components of your own for any control, as Canvas takes them.             |
 | `options`        | `{ request?, hideDelay? }`                                    | —                           | Credentials and headers for the Scene and its models; the controls' fade. |
-| `engine`         | `"clover" \| "three"`                                         | `"clover"`                  | Clover's own WebGL2 renderer, or three.js for what it does not draw yet.  |
+| `engine`         | `"clover" \| "three"`                                         | `"clover"`                  | Clover's own WebGL2 renderer, or three.js, once the page registers it.    |
 | `className`      | `string`                                                      | —                           | Added to `clover-canvas clover-scene`, on its `figure`.                   |
 | `children`       | `ReactNode`                                                   | —                           | Your own controls, after Clover's.                                        |
 
@@ -100,13 +100,39 @@ loads the first time a Scene comes near the window:
 
 - `engine="clover"`, Clover's own WebGL2 renderer: <Measured size="sceneCloverOnDemandGzip" /> gzipped.
 - `engine="three"`, three.js: <Measured size="sceneOnDemandGzip" /> gzipped, for what
-  Clover's does not draw yet: compressed models, animations, glTF's material extensions.
+  Clover's does not draw yet.
 
-Choose three.js for what Clover's engine does not draw yet: compressed models (Draco,
-Meshopt, KTX2), skins, morph targets, animations, sparse accessors, a second set of
-texture coordinates, and glTF's material extensions beyond unlit, such as clearcoat,
-transmission and sheen. Clover's engine says which of these a model needs, in an alert,
-rather than drawing it wrong.
+Choose three.js for what Clover's engine does not draw yet: glTF's material extensions
+beyond unlit, such as clearcoat, transmission and sheen, skins and morph targets (at
+rest), sparse accessors and a second set of texture coordinates. Clover's engine says
+which of these a model needs, in an alert, rather than drawing it wrong. Neither engine
+draws compressed models (Draco, Meshopt, KTX2) or plays animations yet.
+
+three.js is opt-in: install it, and register it once, before a Scene draws. A page that
+never does carries none of it.
+
+<div data-code-flavor="react">
+
+```js
+// npm install three
+import { registerThreeEngine } from "@nulib/clover/three";
+
+registerThreeEngine();
+```
+
+</div>
+
+<div data-code-flavor="web-components">
+
+```html
+<!-- three.js comes bundled in it -->
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/web-components/three.mjs"
+></script>
+```
+
+</div>
 
 Both of these are a Scene with the same model, seen from the same camera; only their
 `engine` differs.

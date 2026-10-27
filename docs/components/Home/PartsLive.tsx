@@ -167,6 +167,12 @@ interface PartSpec {
   /** Its share of the grid's six columns, and whether it runs tall. */
   span: 2 | 3 | 4 | 6;
   tall?: boolean;
+  /**
+   * Not lit as it crosses the window's middle (`data-quiet`, `StoryLines`): the
+   * Thumbnail's, beside the Label, whose part the example viewer no longer shows (Mat,
+   * 2026-10-27: "just label").
+   */
+  quiet?: boolean;
   body: React.ReactNode;
 }
 
@@ -443,6 +449,7 @@ function Exploded({
         reads: manifest.thumbnail ? "thumbnail" : "items[0]",
         present: true,
         span: 2,
+        quiet: true,
         href: DOCS.Thumbnail,
         body: <Clover.Thumbnail alt="" size={400} className={styles.thumb} />,
       },
@@ -643,9 +650,9 @@ function Exploded({
   /*
    * As the Composable story passes (`onCompose`), its code makes a change of its own, to
    * the layout Mat set in it (2026-10-20): Body first and taller, then the Label and
-   * Summary, then Items with larger pictures; the Thumbnail and Metadata out. Nothing is
-   * lit for it: the code crossfades to the new (`change`), its new lines lit a moment, and
-   * the viewer follows; a part lights as its code is pointed at. When the story goes, it
+   * Summary, then Items with larger pictures; Metadata out. Nothing is lit for it: the
+   * code crossfades to the new (`change`), its new lines lit a moment, and the viewer
+   * follows; a part lights as its code is pointed at. When the story goes, it
    * is put back, unless the reader has changed the code meanwhile.
    */
   /*
@@ -792,8 +799,7 @@ function Exploded({
         order: [
           ...lead.filter((key) => view.order.includes(key)),
           ...view.order.filter(
-            (key) =>
-              !lead.includes(key) && key !== "thumbnail" && key !== "metadata",
+            (key) => !lead.includes(key) && key !== "metadata",
           ),
         ],
       };
@@ -929,7 +935,6 @@ function Exploded({
     () =>
       view.order.filter(
         (key) =>
-          key === "thumbnail" ||
           key === "label" ||
           key === "body" ||
           shown.some((part) => part.key === key),
@@ -941,10 +946,6 @@ function Exploded({
    * The viewer's parts themselves, made once for the values they take: an outline coming
    * or going redraws its Region, never the part inside it.
    */
-  const thumbnailPart = useMemo(
-    () => <Clover.Thumbnail alt="" size={128} className={styles.viewerThumb} />,
-    [],
-  );
   const labelPart = useMemo(
     () => <Clover.Label as="h3" className={styles.viewerTitle} />,
     [],
@@ -1019,16 +1020,6 @@ function Exploded({
   }
 
   const regions: Record<ViewerPart, React.ReactNode> = {
-    thumbnail: (
-      <Region
-        key="thumbnail"
-        name="Thumbnail"
-        className={styles.regionThumb}
-        {...region("thumbnail")}
-      >
-        {thumbnailPart}
-      </Region>
-    ),
     label: (
       <Region
         key="label"
@@ -1293,6 +1284,7 @@ const Tile = React.memo(function Tile({
       data-span={part.span}
       data-tall={part.tall || undefined}
       data-tile={part.key}
+      data-quiet={part.quiet || undefined}
       data-on={on || undefined}
       {...pointerTo(part.key, onPoint)}
       // Lit by focus where focus shows: not a press's, nor "More components" moving it after one.
@@ -1417,7 +1409,6 @@ function Region({
 
 /** The parts of the example viewer, which its code lists and a reader can reorder. */
 type ViewerPart =
-  | "thumbnail"
   | "label"
   | "body"
   | "items"
@@ -1426,7 +1417,6 @@ type ViewerPart =
   | "annotations";
 
 const PART_NAMES: Record<ViewerPart, string> = {
-  thumbnail: "Thumbnail",
   label: "Label",
   body: "Body",
   items: "Items",
@@ -1455,7 +1445,7 @@ const VIEW_DEFAULTS: ViewValues = {
   height: 240,
   controls: true,
   layout: "slider",
-  order: ["thumbnail", "label", "body", "items", "summary", "metadata"],
+  order: ["label", "body", "items", "summary", "metadata"],
 };
 
 /*
@@ -1484,7 +1474,7 @@ const STARTS: { resource: string; start: ViewerStart }[] = [
     resource: "/mocks/rudolf-hess-nuremberg/manifest.json",
     start: {
       view: {
-        order: ["thumbnail", "label", "body", "annotations"],
+        order: ["label", "body", "annotations"],
       },
       hide: ["/annotations/other-defendants"],
       pick: "/annotations/hess/removal",
@@ -1499,7 +1489,7 @@ const STARTS: { resource: string; start: ViewerStart }[] = [
      */
     resource: "/dc8ff749-adad-42a7-81e0-0eb473ef88a5.json",
     start: {
-      view: { order: ["thumbnail", "label", "body", "annotations"] },
+      view: { order: ["label", "body", "annotations"] },
     },
   },
 ];
@@ -1785,16 +1775,6 @@ const ViewerCode = React.memo(function ViewerCode({
   // Each part as Clover's elements write it: what `jsxLines` writes, in HTML.
   const htmlLines = (key: ViewerPart): Line[] => {
     switch (key) {
-      case "thumbnail":
-        return [
-          {
-            depth: 1,
-            tokens: htmlElement("Thumbnail", [
-              [attr("alt"), punct("="), str('""')],
-              [attr("size"), punct("="), str('"128"')],
-            ]),
-          },
-        ];
       case "label":
         return [
           {
@@ -1908,16 +1888,6 @@ const ViewerCode = React.memo(function ViewerCode({
 
   const jsxLines = (key: ViewerPart): Line[] => {
     switch (key) {
-      case "thumbnail":
-        return [
-          {
-            depth: 1,
-            tokens: element("Thumbnail", [
-              [attr("alt"), punct("="), str('""')],
-              [attr("size"), punct("={"), num("128"), punct("}")],
-            ]),
-          },
-        ];
       case "label":
         return [
           {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import * as Clover from "../../parts";
 import type { RootProps } from "../../parts";
-import { Lightbox } from "../shared/Lightbox";
+import { Lightbox, preloadLightbox } from "../shared/Lightbox";
 
 export type GalleryProps = Omit<RootProps, "children"> & {
   /** The size of a grid cell. Default `10rem`, through `--clover-items-size`. */
@@ -45,6 +45,9 @@ export function Gallery({
           ? ({ ...style, "--clover-items-size": size } as React.CSSProperties)
           : style
       }
+      // The lightbox's Body loads as the reader reaches for the gallery, not with the page.
+      onPointerOver={preloadLightbox}
+      onFocus={preloadLightbox}
       {...title.group}
       {...root}
     >

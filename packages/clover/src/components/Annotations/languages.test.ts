@@ -32,6 +32,9 @@ describe("an annotation list's languages", () => {
     expect(startingLanguage(["ar", "en"])).toBe("en");
     expect(startingLanguage(["ar", "fa"], "de")).toBe("ar");
     expect(startingLanguage([])).toBeUndefined();
+    // The reader's pick, where the set has it.
+    expect(startingLanguage(["en", "ar"], "ar", "en")).toBe("en");
+    expect(startingLanguage(["en", "ar"], "ar", "fr")).toBe("ar");
   });
 
   it("show an annotation in the chosen language, or in none", () => {

@@ -17,7 +17,8 @@ describe("CameraAnimator", () => {
     animator.animateTo({ state: target }, viewport);
     const steps = run(animator);
     expect(steps).toBeLessThan(600);
-    expect(animator.animating).toBe(false);
+    // Settled: a further frame has nothing left to do.
+    expect(animator.step(1 / 60, viewport)).toBe(false);
     expect(animator.current).toEqual(target);
   });
 
@@ -62,7 +63,8 @@ describe("CameraAnimator", () => {
       viewport,
     );
     run(animator);
-    expect(animator.animating).toBe(false);
+    // Settled: a further frame has nothing left to do.
+    expect(animator.step(1 / 60, viewport)).toBe(false);
     expect(animator.current).toEqual(target);
   });
 

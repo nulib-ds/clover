@@ -1,6 +1,17 @@
-import React, { useEffect, useRef } from "react";
+import React, { Suspense, lazy, useEffect, useRef } from "react";
 
 import * as Clover from "../../parts";
+
+// The Body, a chunk of its own (`LightboxBody`).
+const load = () => import("./LightboxBody");
+const LightboxBody = lazy(load);
+
+/**
+ * Starts loading the lightbox's Body before it is first opened: as the reader's pointer or
+ * focus first comes to the layout, so the Body is there, or nearly, by the time they open
+ * a view.
+ */
+export const preloadLightbox = () => void load();
 
 export interface LightboxProps {
   open: boolean;
@@ -13,7 +24,9 @@ export interface LightboxProps {
 /**
  * The current Canvas in a modal `<dialog>`: its label, the Body, and the pager (with the
  * position). A native dialog keeps focus inside, closes on Escape, and returns focus to
- * whatever opened it. The Body mounts only while open, so it is sized when drawn.
+ * whatever opened it. The Body mounts only while open, so it is sized when drawn, and its
+ * code loads the first time (`preloadLightbox` starts it sooner): until then its box holds
+ * its place, busy, while the title, Close and the pager are already there.
  */
 export function Lightbox({
   open,
@@ -89,7 +102,16 @@ export function Lightbox({
               <Clover.Tip label={t("commonClose")} />
             </button>
           </header>
-          <Clover.Body className="clover-template-lightbox-body" />
+          <Suspense
+            fallback={
+              <div
+                className="clover-template-lightbox-body clover-template-lightbox-pending"
+                aria-busy="true"
+              />
+            }
+          >
+            <LightboxBody />
+          </Suspense>
           <Clover.Items layout="pager" />
         </div>
       )}

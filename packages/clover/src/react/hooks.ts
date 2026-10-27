@@ -4,10 +4,15 @@ import {
   type AnnotationSet,
   selectAnnotationSets,
 } from "../core/annotation-sets";
-import type { CloverStatus } from "../core/clover";
+import {
+  type CloverStatus,
+  type Navigation,
+  navigationOf,
+} from "../core/clover";
 import type { Container, Manifest } from "../core/presentation";
 import {
   type Sequence,
+  selectCanvas,
   selectPosition,
   selectSequence,
   selectVisibleCanvases,
@@ -51,26 +56,12 @@ export function useVisibleCanvases(): Container[] {
 
 /** The Canvas the reader is on (the first of the current view). */
 export function useActiveCanvas(): Container | null {
-  return useCloverSelector(
-    (state) =>
-      selectSequence(state.manifest).canvases.find(
-        (canvas) => canvas.id === state.canvasId,
-      ) ?? null,
+  return useCloverSelector((state) =>
+    selectCanvas(state.manifest, state.canvasId),
   );
 }
 
-export interface Navigation {
-  /** Zero-based index of the current view. */
-  position: number;
-  total: number;
-  hasPrevious: boolean;
-  hasNext: boolean;
-  previous(): void;
-  next(): void;
-  first(): void;
-  last(): void;
-  goTo(canvasId: string): void;
-}
+export type { Navigation };
 
 /** Moving between views. Steps by view, so a spread moves two pages at a time. */
 export function useNavigation(): Navigation {
@@ -82,17 +73,7 @@ export function useNavigation(): Navigation {
     (state) => selectSequence(state.manifest).views.length,
   );
   return useMemo(
-    () => ({
-      position,
-      total,
-      hasPrevious: position > 0,
-      hasNext: position + 1 < total,
-      previous: () => clover.previous(),
-      next: () => clover.next(),
-      first: () => clover.first(),
-      last: () => clover.last(),
-      goTo: (canvasId: string) => clover.goTo(canvasId),
-    }),
+    () => navigationOf(clover, position, total),
     [clover, position, total],
   );
 }

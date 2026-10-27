@@ -1,6 +1,6 @@
 import type React from "react";
 
-import { bodiesOf } from "../../core/annotations";
+import { paintedBodies } from "../../core/painted-bodies";
 import type { Container } from "../../core/presentation";
 
 /**
@@ -35,35 +35,13 @@ export interface BodyRenderer {
   component: React.ComponentType<BodyRendererProps>;
 }
 
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
-
 /** Every body the Canvases paint, unwrapped, in painting order. */
 export function paintingBodies(
   canvases: Container[],
 ): Array<Record<string, any>> {
-  const bodies: Array<Record<string, any>> = [];
-  for (const canvas of canvases as Array<Record<string, any>>) {
-    for (const page of asArray(canvas.items) as Array<Record<string, any>>) {
-      for (const annotation of asArray(page?.items) as Array<
-        Record<string, any>
-      >) {
-        const motivation = asArray(annotation?.motivation);
-        if (motivation.length && !motivation.includes("painting")) continue;
-        for (let body of bodiesOf(annotation)) {
-          if (body?.type === "Choice") body = asArray(body.items)[0] as never;
-          if (body?.type === "SpecificResource") {
-            body =
-              typeof body.source === "string"
-                ? { id: body.source }
-                : (body.source as never);
-          }
-          if (body) bodies.push(body);
-        }
-      }
-    }
-  }
-  return bodies;
+  return canvases.flatMap((canvas) =>
+    paintedBodies(canvas).map(({ body }) => body),
+  );
 }
 
 /** The first renderer that draws this view, or null for `Canvas` to draw it. */

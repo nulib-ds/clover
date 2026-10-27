@@ -7,7 +7,7 @@
  */
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
@@ -159,6 +159,54 @@ test("the Viewer's own entry is built whole, and a page with it alone loads less
   );
   assert.ok(whole < shared);
   assert.ok(whole <= budget.viewerEntryGzip, `${whole} B gzip, over budget`);
+});
+
+test("every file the Viewer's own entry names is there, in its folder or the one above", (t) => {
+  // From its two entry files along every module and asset their code names (an import, a
+  // lazy `import()`, a `new URL(…, import.meta.url)`), each resolved against the file that
+  // names it, as a browser resolves it. `dedupe-viewer.mjs` takes the copies both builds
+  // wrote out of `viewer/` and points them at `../`: none may lead nowhere, or out of
+  // `web-components/`.
+  const NAMED = /(["'`])((?:\.\.?\/|assets\/)[\w./-]+)\1/g;
+  const reached = new Set();
+  const queue = ["index.mjs", "index.umd.js"].map((file) =>
+    join(VIEWER_DIR, file),
+  );
+  while (queue.length) {
+    const file = queue.pop();
+    if (reached.has(file)) continue;
+    reached.add(file);
+    if (!/\.m?js$/.test(file)) continue;
+    for (const [, , path] of readFileSync(file, "utf8").matchAll(NAMED)) {
+      const named = resolve(dirname(file), path);
+      const by = relative(dir, file);
+      assert.ok(
+        !relative(dir, named).startsWith(".."),
+        `${by} names ${path}, outside web-components/`,
+      );
+      assert.ok(existsSync(named), `${by} names ${path}, which is not there`);
+      queue.push(named);
+    }
+  }
+  const above = [...reached].filter(
+    (file) => !file.startsWith(VIEWER_DIR + sep),
+  );
+  t.diagnostic(
+    `<clover-viewer>'s own entry reaches ${reached.size} files, ${above.length} of them in the folder above`,
+  );
+  assert.ok(
+    above.length > 0,
+    "what both entries use loads from the folder above",
+  );
+  // And the chunk map the size measures read (`element-size.mjs`).
+  const map = JSON.parse(
+    readFileSync(join(VIEWER_DIR, ".vite/manifest.json"), "utf8"),
+  );
+  for (const { file } of Object.values(map))
+    assert.ok(
+      existsSync(join(VIEWER_DIR, file)),
+      `viewer/.vite/manifest.json names ${file}, which is not there`,
+    );
 });
 
 test("what each page loads stays within budget", (t) => {

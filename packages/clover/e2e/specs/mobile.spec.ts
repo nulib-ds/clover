@@ -64,7 +64,10 @@ test("the Viewer fits a phone: no sideways scroll, and the pager taps", async ({
   await serveIIIF(page);
   await page.goto("/?content=https://fixtures.test/0009-book-1.json");
   await expect(
-    page.getByRole("heading", { name: "Simple Manifest - Book" }),
+    page.getByRole("heading", {
+      level: 2,
+      name: "Simple Manifest - Book",
+    }),
   ).toBeVisible();
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - window.innerWidth,

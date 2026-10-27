@@ -70,64 +70,11 @@
 }
 
 /*
- * A set's languages, where its annotations come one per language (`LanguageChoice`): at
- * the end of its header, drawn as the Transcript's codes are (`Transcript.css`): native
- * radios, `2xs` apart, the codes in the muted text, the chosen one a pill filled with the
- * accent, as is any under the pointer or focused (focus with its ring), at the smaller
- * text size; each `l` square at the least, past 24px (WCAG 2.5.8).
+ * A set's languages, where its annotations come one per language (`LanguageChoice`),
+ * drawn as the Transcript's codes are (`ui/Codes.css`), at the end of its header.
  */
 .clover-annotations-languages {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--clover-space-2xs);
-  margin: 0;
   margin-inline-start: auto;
-  padding: 0;
-  border: 0;
-  font-size: var(--clover-text-xs);
-  line-height: 1;
-}
-
-.clover-annotations-languages > .clover-annotations-language {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  min-width: var(--clover-space-l);
-  min-height: var(--clover-space-l);
-  padding: 0 var(--clover-space-xs);
-  border-radius: var(--clover-radius-pill, 2rem);
-  color: var(--clover-color-primary-muted, #26292b);
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.clover-annotations-language:is(
-  :has(input:checked),
-  :hover,
-  :has(input:focus-visible)
-) {
-  background-color: var(--clover-color-accent, #0065c3);
-  color: var(--clover-color-control-glyph, #fff);
-}
-
-.clover-annotations-language:has(input:focus-visible) {
-  outline: 2px solid var(--clover-color-accent, #0065c3);
-  outline-offset: 2px;
-}
-
-.clover-annotations-language input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-@media (forced-colors: active) {
-  .clover-annotations-language:has(input:checked) {
-    background-color: Highlight;
-    color: HighlightText;
-  }
 }
 
 :is(li, label).clover-annotations-entry {

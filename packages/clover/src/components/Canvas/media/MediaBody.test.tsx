@@ -2,7 +2,8 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { p4 } from "../../../fixtures/presentation4";
 import React from "react";
 
-import Canvas, { containAspect } from "..";
+import Canvas from "..";
+import { containAspect } from "./MediaBody";
 import { type FakeTrack, FakeTrackList } from "../testing/textTracks";
 import { stubViewport } from "../testing/viewport";
 import { formatTime } from "./useMediaController";
@@ -127,13 +128,13 @@ describe("Canvas media", () => {
     expect(element.src).toBe(
       "https://fixtures.iiif.io/video/indiana/lunchroom_manners/high/lunchroom_manners_1024kb.mp4",
     );
-    // DOM presentation by default, so no CORS is asked of the media.
+    // Shown as itself, in the DOM layer, so no CORS is asked of the media.
     expect(element.crossOrigin).toBeNull();
     expect(renderer.setImages).toHaveBeenLastCalledWith(
       [
         expect.objectContaining({
           placement: { x: 0, y: 0, width: 480, height: 360 },
-          media: { element, presentation: "dom" },
+          media: { element },
         }),
       ],
       expect.anything(),
@@ -144,42 +145,6 @@ describe("Canvas media", () => {
     );
     // An overview cannot show a playing frame.
     expect(screen.queryByTestId("clover-canvas-navigator")).toBeNull();
-  });
-
-  it("asks for CORS when frames are drawn as a texture", async () => {
-    const onMediaElement = vi.fn();
-    render(
-      <Canvas
-        canvases={video.items as any}
-        options={{ media: { presentation: "texture" } }}
-        onMediaElement={onMediaElement}
-      />,
-    );
-    await transport();
-    const element = onMediaElement.mock.calls.at(-1)?.[0] as HTMLVideoElement;
-    expect(element.crossOrigin).toBe("anonymous");
-    expect(renderer.setImages).toHaveBeenLastCalledWith(
-      [
-        expect.objectContaining({
-          media: { element, presentation: "texture" },
-        }),
-      ],
-      expect.anything(),
-    );
-
-    // The CORS request fails outright: the video is made again without, and shown as DOM.
-    act(() => element.dispatchEvent(new Event("error")));
-    const retried = onMediaElement.mock.calls.at(-1)?.[0] as HTMLVideoElement;
-    expect(retried).not.toBe(element);
-    expect(retried.crossOrigin).toBeNull();
-    expect(renderer.setImages).toHaveBeenLastCalledWith(
-      [
-        expect.objectContaining({
-          media: { element: retried, presentation: "dom" },
-        }),
-      ],
-      expect.anything(),
-    );
   });
 
   it("plays and pauses from the transport, a click on the picture, and the keyboard", async () => {

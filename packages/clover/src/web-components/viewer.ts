@@ -16,6 +16,6 @@ import { viewer } from "./specs/viewer";
 import { setMapWorkerUrl } from "../core/map-config";
 
 if (assets.mapWorkerUrl) setMapWorkerUrl(assets.mapWorkerUrl);
-defineElement(viewer, () => Promise.resolve(ViewerElement), assets);
+defineElement(viewer, () => Promise.resolve(ViewerElement));
 
 export { initCloverI18n };

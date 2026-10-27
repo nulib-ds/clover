@@ -144,14 +144,15 @@
 /*
  * Over the Body, when there is not: it slides in from the end, never wider than the
  * layout less a strip, so some of the page stays in sight and a click there closes it.
+ * Document's panel too, and the wash beside it (`clover-template-panes`, `-drawer` and
+ * `-scrim`, which both templates set): written once, here, in `styles.css`.
  */
 /* The panel waits off the end while it slides: never a sideways scroll for the page. */
-.clover-template-default-panes[data-panel="over"] {
+.clover-template-panes[data-panel="over"] {
   overflow: clip;
 }
 
-.clover-template-default-panes[data-panel="over"]
-  > .clover-template-default-panel {
+.clover-template-panes[data-panel="over"] > .clover-template-drawer {
   position: absolute;
   inset-block: 0;
   inset-inline-end: 0;
@@ -159,7 +160,6 @@
   width: min(24rem, calc(100% - var(--clover-space-2xl)));
   max-width: none;
   max-height: none;
-  overscroll-behavior: contain;
   border-inline-start: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
   /*
    * It can be dragged back off (`useDragToClose`): a grip on its inner edge says so, and
@@ -181,20 +181,19 @@
   transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.clover-template-default-panes[data-panel="over"]
-  > .clover-template-default-panel:dir(rtl) {
+.clover-template-panes[data-panel="over"] > .clover-template-drawer:dir(rtl) {
   transform: translateX(-100%);
   background-position:
     right var(--clover-space-2xs) center,
     0 0;
 }
 
-.clover-template-default-panes[data-panel="over"]
-  > .clover-template-default-panel[data-open="true"] {
+.clover-template-panes[data-panel="over"]
+  > .clover-template-drawer[data-open="true"] {
   transform: none;
 }
 
-.clover-template-default-scrim {
+.clover-template-scrim {
   position: absolute;
   inset: 0;
   z-index: 3;
@@ -204,14 +203,13 @@
   transition: opacity 240ms ease;
 }
 
-.clover-template-default-scrim[data-open="true"] {
+.clover-template-scrim[data-open="true"] {
   opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .clover-template-default-panes[data-panel="over"]
-    > .clover-template-default-panel,
-  .clover-template-default-scrim {
+  .clover-template-panes[data-panel="over"] > .clover-template-drawer,
+  .clover-template-scrim {
     transition: none;
   }
 }
@@ -302,12 +300,26 @@
 }
 
 /*
- * Open beside the Body, the panel's toggle sits on the bar between them, its spine
- * (`useSpine`), centered on it and level with the Body's controls (their inset,
- * `--clover-inset`, down).
+ * Open beside the Body, the panel's toggle sits on the bar between them, its spine: a
+ * box of no width in the Split's row, right after the bar, which the toggle hangs from,
+ * centered on the bar (half its 3px back) and level with the Body's controls (their
+ * inset, `--clover-inset`, down from the Body's top, `useSpineTop`). In the row, it moves
+ * with the bar as it is dragged, and reads right to left with the page.
  */
 .clover-template-default-spine {
+  position: relative;
+  z-index: 3;
+  flex: none;
+  width: 0;
+}
+
+.clover-template-default-spine > * {
   position: absolute;
   top: calc(var(--clover-template-spine-top, 0px) + var(--clover-inset));
-  z-index: 3;
+  inset-inline-start: -1.5px;
+  translate: -50%;
+}
+
+.clover-template-default-spine:dir(rtl) > * {
+  translate: 50%;
 }

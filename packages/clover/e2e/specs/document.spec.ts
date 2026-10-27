@@ -167,16 +167,53 @@ test("the thumbnails' toggle sits on their spine while they show, its far end ov
   expect(Math.abs(now.start - now.controls)).toBeLessThan(1);
 
   // On a phone the thumbnails float over the page: the toggle sits so on their inner edge.
+  // Opened there, they take focus at the page the reader is on; Escape gives it back.
   await page.setViewportSize({ width: 375, height: 700 });
+  // Once the template has measured itself narrow: opened before, they would close with it.
+  await expect(page.locator(".clover-template-document-panes")).toHaveAttribute(
+    "data-narrow",
+  );
   await page.keyboard.press("Enter");
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
-  await expect(toggle).toBeFocused();
+  await expect(
+    page.locator(
+      ".clover-template-document-sidebar [role='option'][aria-selected='true']",
+    ),
+  ).toBeFocused();
   await expect
     .poll(async () => {
       const { over, rest } = await where();
       return Math.abs(over - rest) < 1;
     })
     .toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(toggle).toBeFocused();
+});
+
+test("narrowing under the thumbnails puts them away, focus on their toggle going with it, and widening brings them back", async ({
+  page,
+}) => {
+  await open(page);
+  const toggle = page.getByRole("button", { name: /^Show items/ });
+  const sidebar = page.locator(".clover-template-document-sidebar");
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  // On their spine, as they show beside the page.
+  await toggle.focus();
+  await page.setViewportSize({ width: 375, height: 700 });
+  await expect(page.locator(".clover-template-document-panes")).toHaveAttribute(
+    "data-narrow",
+  );
+  await expect(sidebar).toBeHidden();
+  // The toggle is over the page's top left now, a new element, and focus is on it.
+  await expect(
+    page.locator(
+      ".clover-template-document-sidebar-closed .clover-template-document-sidebar-toggle",
+    ),
+  ).toBeFocused();
+  await page.setViewportSize({ width: 1100, height: 760 });
+  await expect(sidebar).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
 });
 
 test("a sheet for each view, the next one in sight under the first, the rest muted", async ({

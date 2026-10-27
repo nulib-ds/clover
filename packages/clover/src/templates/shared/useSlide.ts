@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 
 /** Long enough for a panel's slide; it is `hidden` once it is out of sight. */
 export const SLIDE_MS = 240;
@@ -25,30 +25,14 @@ export function useSlide(want: boolean) {
   return { mounted, open: want && open };
 }
 
-/**
- * Opening a panel that covers the page takes focus into it, at its current tab, as an
- * overlay should: the reader's next keys belong to it. Not on arrival with it open.
- * `shown` turns true in the commit that takes `hidden` off its wrapper, so it can be
- * focused at once.
- */
-export function useFocusOnOpen(
-  panel: React.RefObject<HTMLElement | null>,
-  shown: boolean,
-) {
-  const was = useRef(shown);
-  useEffect(() => {
-    const opened = shown && !was.current;
-    was.current = shown;
-    if (!opened) return;
-    // The selected tab; with stacked boxes, the open box's heading, or else the first.
-    const at = (selector: string) =>
-      panel.current?.querySelector<HTMLElement>(selector);
-    (
-      at('[role="tab"][aria-selected="true"]') ??
-      at('.clover-sections-button[aria-expanded="true"]') ??
-      at(".clover-sections-button")
-    )?.focus({ preventScroll: true });
-  }, [panel, shown]);
+/** Into the panel: its selected tab, or with stacked boxes the open box's heading, or else the first. */
+export function panelFocus(pane: HTMLElement) {
+  const at = (selector: string) => pane.querySelector<HTMLElement>(selector);
+  return (
+    at('[role="tab"][aria-selected="true"]') ??
+    at('.clover-sections-button[aria-expanded="true"]') ??
+    at(".clover-sections-button")
+  );
 }
 
 const useIsomorphicLayoutEffect =
@@ -57,13 +41,14 @@ const useIsomorphicLayoutEffect =
 /**
  * Whether `element` is at least `rem` wide: measured before paint, and again whenever it
  * resizes. Its own width, not the window's, so a layout in a narrow column of a wide page
- * still knows it is narrow. True until measured (on the server, or with no layout yet).
+ * still knows it is narrow. `undefined` until measured (on the server, or with no layout
+ * yet), so the first measure is never mistaken for the layout narrowing or widening.
  */
 export function useWideEnough(
   element: React.RefObject<HTMLElement | null>,
   rem: number,
-): boolean {
-  const [wide, setWide] = useState(true);
+): boolean | undefined {
+  const [wide, setWide] = useState<boolean>();
   useIsomorphicLayoutEffect(() => {
     const node = element.current;
     if (!node) return;

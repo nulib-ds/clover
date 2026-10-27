@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from "react";
 
 import type { CloverCanvasProps } from "./Canvas.types";
 import CanvasView from "./CanvasView";
+import { rendererSurface } from "./rendererSurface";
 import { CanvasPending } from "../Body/Pending";
 import { useOptionalClover } from "../../react/context";
 
@@ -30,23 +31,23 @@ const Canvas: React.FC<CloverCanvasProps> = (props) => {
   if (props.iiifContent !== undefined && props.canvases === undefined)
     return (
       <Suspense fallback={<CanvasPending />}>
-        <LoadedCanvas {...props} />
+        <LoadedCanvas {...props} surface={rendererSurface} />
       </Suspense>
     );
   const handed =
     props.canvases !== undefined ||
     props.body !== undefined ||
     props.src !== undefined;
+  // Its box, busy, while its part loads, as every Body part's: never an empty box.
   return root && !handed ? (
-    <Suspense fallback={null}>
-      <ConnectedCanvas {...props} />
+    <Suspense fallback={<CanvasPending />}>
+      <ConnectedCanvas {...props} surface={rendererSurface} />
     </Suspense>
   ) : (
-    <CanvasView {...props} />
+    <CanvasView {...props} surface={rendererSurface} />
   );
 };
 
-export { canvasRegion, containAspect, toSceneImages } from "./CanvasView";
 export type { IIIFCanvas, ViewingDirection } from "./layout";
 export type {
   CanvasHandle,

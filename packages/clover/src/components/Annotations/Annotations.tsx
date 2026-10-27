@@ -6,10 +6,11 @@ import {
   type AnnotationEntry,
   type AnnotationSet,
   findEntry,
+  manifestOfAnnotation,
   selectListedSets,
   selectHiddenSets,
 } from "../../core/annotation-sets";
-import { manifestOfAnnotation } from "../../core/annotation-collection";
+import { annotationName } from "../../core/annotation-name";
 import { readLink } from "../../core/link";
 import { showLink } from "../../core/show-link";
 import type { Clover } from "../../core/clover";
@@ -19,7 +20,6 @@ import { selectSequence, selectVisibleCanvases } from "../../core/selectors";
 import { parseTime } from "../../core/ranges";
 import { regionSource } from "../../core/region";
 import { resolveThumbnail } from "../../core/thumbnail";
-import { markdownToPlainText, readAs, toPlainText } from "../../core/text";
 import {
   type LanguageMapLike,
   type LocalizedValue,
@@ -251,9 +251,7 @@ function AnnotationGroup({
   const headingLevel = title.text ? setLevel + 1 : setLevel;
   const languages = useMemo(() => languagesOf(entries), [entries]);
   const [picked, setPicked] = useState<string>();
-  const chosen = languages.includes(picked ?? "")
-    ? picked
-    : startingLanguage(languages, language);
+  const chosen = startingLanguage(languages, language, picked);
   const listed = entries.filter((entry) => inLanguage(entry, chosen));
   return (
     <section
@@ -596,9 +594,7 @@ const AnnotationLayers = forwardRef<
         const languages = languagesOf(
           layer.canvases.flatMap((group) => group.entries),
         );
-        const chosen = languages.includes(picked[layer.key] ?? "")
-          ? picked[layer.key]
-          : startingLanguage(languages, language);
+        const chosen = startingLanguage(languages, language, picked[layer.key]);
         return (
           <section
             key={layer.key}
@@ -956,26 +952,10 @@ function FollowLink({ annotation }: { annotation: Record<string, any> }) {
 }
 
 /**
- * An entry's text, plain, for its button's name, and the language it is in: HTML's tags
- * and Markdown's syntax taken off, so neither is read out. With no text of its own, an
- * image's label names it.
+ * An entry's name, for its button, as its hotspot and the Canvas's menu name it
+ * (`annotationName`), cut to 120 characters: what it says is beside the button, in full.
  */
 function entryText(entry: AnnotationEntry, language?: string): LocalizedValue {
-  const values = entry.bodies
-    .filter((body) => body.value)
-    .map((body) => ({
-      [body.language ?? "none"]: [
-        {
-          markdown: markdownToPlainText,
-          html: toPlainText,
-          plain: (value: string) => value,
-        }[readAs(body.format, body.value)](body.value!),
-      ],
-    }));
-  const image = entry.bodies.find((body) => body.image && body.label);
-  const found: LocalizedValue = values.length
-    ? localize(Object.assign({}, ...values), language)
-    : localize(image?.label, language);
-  const text = values.length ? found.text : toPlainText(found.text);
-  return { ...found, text: text.trim().slice(0, 120) };
+  const { text = "", lang } = annotationName(entry.bodies, language);
+  return { text: text.slice(0, 120), ...(lang ? { lang } : {}) };
 }

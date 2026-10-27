@@ -223,7 +223,7 @@ The stylesheet's size is part of the design.
   | Round controls       | `ui/Button.css`    | the Canvas's cluster, the media transport, Items' arrows, `Previous` and `Next` (Items' pager), the Panel's close |
   | Text buttons         | `ui/Button.css`    | Search's button                                                                                                   |
   | Rows and their lists | `Panel.css`        | annotations, Ranges, cues, search hits, places on the map                                                         |
-  | Fields               | `styles/scale.css` | a search's query, a Collection's menu, a transcript's track menu                                                  |
+  | Fields               | `styles/scale.css` | a field pill's query (Search's and the Transcript's find), a Collection's menu                                    |
   | Popovers             | `ui/Tip.css`       | every control that shows an icon alone (§7), the Canvas's hotspots, a split's handle                              |
   | Controls             | `Canvas.css`       | the Canvas's cluster, navigator, a placeholder's toggle, the media transport, its captions                        |
 

@@ -1,7 +1,9 @@
 /**
  * IIIF HTML as plain text: tags dropped and the common entities decoded. What a value
  * shows before the sanitizer has loaded, and wherever markup cannot go (an `alt`, an
- * `aria-label`). Never used as HTML.
+ * `aria-label`). Never used as HTML. A numeric reference outside Unicode (`&#0;`,
+ * `&#x110000;`) stays as written, as `cueText`'s does: decoding it would throw, and parts
+ * render this.
  */
 const ENTITIES: Record<string, string> = {
   amp: "&",
@@ -22,7 +24,9 @@ export function toPlainText(html: string): string {
           entity[1] === "x" || entity[1] === "X"
             ? parseInt(entity.slice(2), 16)
             : parseInt(entity.slice(1), 10);
-        return Number.isFinite(code) ? String.fromCodePoint(code) : match;
+        return code > 0 && code <= 0x10ffff
+          ? String.fromCodePoint(code)
+          : match;
       }
       return ENTITIES[entity.toLowerCase()] ?? match;
     });

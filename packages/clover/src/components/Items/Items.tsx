@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, forwardRef, lazy, useEffect, useRef } from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
 import { ItemFigure } from "./Item";
@@ -6,12 +6,10 @@ import { ItemsPager, type Steps } from "./Pager";
 import { Tip } from "../../ui/Tip";
 import {
   type ItemModel,
-  itemsOf,
   itemsOfCollection,
   itemsOfManifest,
 } from "../../core/items";
-import { type IIIFContent, fetchResource } from "../../core/load";
-import type { Collection, Manifest } from "../../core/presentation";
+import type { IIIFContent } from "../../core/load";
 import type { CloverRequest } from "../../core/request";
 import { selectPosition, selectSequence } from "../../core/selectors";
 import type { ViewingDirection } from "../../core/sequence";
@@ -102,14 +100,22 @@ export const Items = forwardRef<HTMLElement, ItemsProps>(
     const standalone =
       !root || props.iiifContent !== undefined || props.items !== undefined;
     return standalone ? (
-      <StandaloneItems {...props} forwardedRef={ref} />
+      <Suspense fallback={null}>
+        <StandaloneItems {...props} forwardedRef={ref} />
+      </Suspense>
     ) : (
       <ConnectedItems {...props} forwardedRef={ref} />
     );
   },
 );
 
-type Forwarded = { forwardedRef: React.ForwardedRef<HTMLElement> };
+export type Forwarded = { forwardedRef: React.ForwardedRef<HTMLElement> };
+
+/*
+ * Items of a resource it loads itself, or of a list it is handed, outside a Root: its own
+ * chunk, so the templates, whose Items are always in one, never carry it.
+ */
+const StandaloneItems = lazy(() => import("./StandaloneItems"));
 
 /** Inside a Root: its views, or its Collection's members. */
 function ConnectedItems({ of = "views", ...props }: ItemsProps & Forwarded) {
@@ -208,93 +214,8 @@ function ViewItems({
   );
 }
 
-/** Items of a resource the component loads itself, or of a list it is handed. */
-function StandaloneItems({
-  iiifContent,
-  items: provided,
-  navigation,
-  onSelect,
-  request,
-  header = true,
-  forwardedRef,
-  ...rest
-}: ItemsProps & Forwarded) {
-  const [resource, setResource] = useState<Manifest | Collection | null>(null);
-  const [selected, setSelected] = useState(0);
-  const key =
-    typeof iiifContent === "string"
-      ? iiifContent
-      : (iiifContent as { id?: string })?.id;
-  const latest = useRef({ iiifContent, request });
-  latest.current = { iiifContent, request };
-
-  useEffect(() => {
-    if (provided || latest.current.iiifContent === undefined) return;
-    const controller = new AbortController();
-    fetchResource(latest.current.iiifContent, {
-      request: latest.current.request,
-      signal: controller.signal,
-    })
-      .then((loaded) => {
-        if (!controller.signal.aborted) setResource(loaded);
-      })
-      .catch(() => undefined);
-    return () => controller.abort();
-  }, [key, provided]);
-
-  const items = useMemo(
-    () => itemsOf(provided ? (provided as never) : resource),
-    [provided, resource],
-  );
-  if (!items.length) return null;
-
-  const isViews = !provided && resource?.type === "Manifest";
-  const mode = navigation ?? (isViews ? "id" : "homepage");
-  // A pager steps a selection over the list, and tells `onSelect` of each step.
-  if (rest.layout === "pager") {
-    return (
-      <Pager
-        {...rest}
-        forwardedRef={forwardedRef}
-        steps={stepsOf(items, selected, "left-to-right", (item, event) => {
-          onSelect?.(item, event);
-          setSelected(items.indexOf(item));
-        })}
-      />
-    );
-  }
-  const homepage = (resource as { homepage?: Array<{ id?: string }> } | null)
-    ?.homepage?.[0]?.id;
-
-  return (
-    <ItemsView
-      {...rest}
-      forwardedRef={forwardedRef}
-      items={items}
-      selected={mode === "id" ? selected : -1}
-      navigation={mode}
-      request={request}
-      showSummary={!isViews}
-      heading={
-        header && resource
-          ? {
-              label: resource.label as LanguageMapLike,
-              summary: (resource as { summary?: LanguageMapLike }).summary,
-              homepage,
-            }
-          : undefined
-      }
-      onActivate={(item, event) => {
-        onSelect?.(item, event);
-        setSelected(items.indexOf(item));
-      }}
-      followFocus={(item) => setSelected(items.indexOf(item))}
-    />
-  );
-}
-
 /** A list's items, and the one selected, as the pager's steps. */
-function stepsOf(
+export function stepsOf(
   items: ItemModel[],
   selected: number,
   direction: ViewingDirection,
@@ -315,7 +236,7 @@ function stepsOf(
  * Items' `pager` layout, standalone or in a Root: Items' own props that are not the
  * `nav`'s are left behind, and the page's language is read as the strip reads it.
  */
-function Pager({
+export function Pager({
   steps,
   forwardedRef,
   /* eslint-disable @typescript-eslint/no-unused-vars -- Items' own, not the nav's */
@@ -366,7 +287,7 @@ interface ItemsViewProps extends Omit<ItemsProps, "navigation" | "items"> {
   followFocus?: (item: ItemModel) => void;
 }
 
-function ItemsView({
+export function ItemsView({
   forwardedRef,
   items,
   selected,

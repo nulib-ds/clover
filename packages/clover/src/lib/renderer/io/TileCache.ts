@@ -1,4 +1,4 @@
-import type { LoadedImage } from "./decode";
+import { type LoadedImage, releaseImage } from "./decode";
 
 /**
  * Tiles: asked for, decoded, held and let go.
@@ -226,7 +226,7 @@ export class TileCache {
       (image) => {
         if (this.disposed || this.entries.get(entry.url) !== entry) {
           // Superseded while decoding: never cache what nobody asked to keep.
-          if (image.kind === "bitmap") image.source.close();
+          releaseImage(image);
           return;
         }
         entry.state = "ready";
@@ -277,7 +277,7 @@ export class TileCache {
       if (this.bytes <= this.budget) break;
       this.entries.delete(entry.url);
       this.bytes -= entry.bytes;
-      if (entry.image?.kind === "bitmap") entry.image.source.close();
+      if (entry.image) releaseImage(entry.image);
       this.options.onEvict(entry.url);
     }
   }

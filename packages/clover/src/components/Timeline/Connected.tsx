@@ -1,6 +1,7 @@
 import React from "react";
 
 import type { TimelineProps } from "./Timeline";
+import { playerSurface } from "./playerSurface";
 import ConnectedCanvas from "../Canvas/Connected";
 import { join } from "../../lib/classnames";
 import { useVisibleCanvases } from "../../react/hooks";
@@ -23,6 +24,7 @@ export default function ConnectedTimeline({
       {...props}
       className={join("clover-timeline", className)}
       navigator={false}
+      surface={playerSurface}
     />
   );
 }

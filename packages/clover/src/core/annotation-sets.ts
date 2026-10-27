@@ -1,16 +1,15 @@
 import {
   type ParsedAnnotationTarget,
-  bodiesOf,
   isRegionText,
   parseAnnotationTarget,
 } from "./annotations";
 import { type AnnotationBodyEntry, readBodies } from "./annotation-bodies";
+import { asArray } from "../lib/asArray";
 
-export { bodiesOf, readBodies };
 export type { AnnotationBodyEntry };
 import type { Manifest } from "./presentation";
 import { SEARCH_SET_ID } from "./search-service";
-import { selectSequence } from "./selectors";
+import { selectCanvas, selectSequence } from "./selectors";
 import type { LanguageMapLike } from "./value";
 
 /**
@@ -45,9 +44,6 @@ export interface AnnotationSet {
 }
 
 type Json = Record<string, any>;
-
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
 
 const isLinking = (annotation: Json) =>
   asArray(annotation?.motivation).includes("linking");
@@ -174,14 +170,6 @@ export function startsHidden(
   );
 }
 
-/** The Manifest's Canvases by id, for what a set's entries hang on. */
-function canvasesById(manifest: Manifest | null): Map<string, Json> {
-  const canvases = new Map<string, Json>();
-  for (const canvas of selectSequence(manifest).canvases as Json[])
-    canvases.set(canvas.id, canvas);
-  return canvases;
-}
-
 const listedOf = new WeakMap<AnnotationSet[], AnnotationSet[]>();
 
 /**
@@ -197,9 +185,9 @@ export function selectListedSets(
   const sets = selectAnnotationSets(manifest, added);
   let listed = listedOf.get(sets);
   if (!listed) {
-    const canvases = canvasesById(manifest);
     const kept = sets.filter(
-      (set) => !startsHidden(set, (id) => canvases.get(id)),
+      (set) =>
+        !startsHidden(set, (id) => selectCanvas(manifest, id) ?? undefined),
     );
     listed = kept.length === sets.length ? sets : kept;
     listedOf.set(sets, listed);
@@ -227,13 +215,12 @@ export function selectHiddenSets(
   const cached = hiddenOf.get(sets);
   if (cached && cached.hidden === hidden && cached.shown === shown)
     return cached.ids;
-  const canvases = canvasesById(manifest);
   const quiet = sets
     .filter(
       (set) =>
         !hidden.includes(set.id) &&
         !shown.includes(set.id) &&
-        startsHidden(set, (id) => canvases.get(id)),
+        startsHidden(set, (id) => selectCanvas(manifest, id) ?? undefined),
     )
     .map((set) => set.id);
   const ids = quiet.length ? [...hidden, ...quiet] : hidden;
@@ -267,6 +254,23 @@ export function selectUnlistedSets(
 }
 
 /** An entry by id, across sets. */
+/**
+ * The Manifest an annotation's target says its Canvas is `partOf`, as annotations made
+ * apart from any Manifest name it (a shared link, a page of tags across a collection).
+ */
+export function manifestOfAnnotation(
+  annotation: Record<string, any>,
+): string | undefined {
+  for (const target of asArray(annotation?.target) as Record<string, any>[]) {
+    const source = target?.type === "SpecificResource" ? target.source : target;
+    const part = asArray(source?.partOf).find(
+      (each: any) => each?.id && (!each.type || each.type === "Manifest"),
+    ) as Record<string, any> | undefined;
+    if (part) return part.id;
+  }
+  return undefined;
+}
+
 export function findEntry(
   sets: AnnotationSet[],
   id: string | null,

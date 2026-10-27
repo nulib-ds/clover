@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import React, { useRef } from "react";
 
 import { useDragToClose } from "./useDragToClose";
@@ -35,17 +35,21 @@ function pointer(
   element.dispatchEvent(event);
 }
 
-function setup() {
+async function setup() {
   const onClose = vi.fn();
   const { getByTestId } = render(<Pane onClose={onClose} />);
+  // The drag's code loads as the pane first can be dragged, and attaches then.
+  await act(async () => {
+    await import("./dragToClose");
+  });
   const pane = getByTestId("pane");
   pane.getBoundingClientRect = () => ({ width: 300 }) as DOMRect;
   return { pane, edge: getByTestId("edge"), onClose };
 }
 
 describe("useDragToClose", () => {
-  it("follows a drag toward its edge, and closes when let go past a third", () => {
-    const { pane, onClose } = setup();
+  it("follows a drag toward its edge, and closes when let go past a third", async () => {
+    const { pane, onClose } = await setup();
     pointer(pane, "pointerdown", 100, 0, { at: 0 });
     pointer(pane, "pointermove", 140, 0, { at: 100 });
     expect(pane.style.translate).toBe("40px 0");
@@ -54,8 +58,8 @@ describe("useDragToClose", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("springs back from a short drag", () => {
-    const { pane, onClose } = setup();
+  it("springs back from a short drag", async () => {
+    const { pane, onClose } = await setup();
     pointer(pane, "pointerdown", 100, 0, { at: 0 });
     pointer(pane, "pointermove", 160, 0, { at: 400 });
     pointer(pane, "pointerup", 160, 0, { at: 800 });
@@ -63,8 +67,8 @@ describe("useDragToClose", () => {
     expect(pane.style.translate).toBe("");
   });
 
-  it("moves what sits on the pane's edge with it, and back", () => {
-    const { pane, edge } = setup();
+  it("moves what sits on the pane's edge with it, and back", async () => {
+    const { pane, edge } = await setup();
     pointer(pane, "pointerdown", 100, 0, { at: 0 });
     pointer(pane, "pointermove", 160, 0, { at: 400 });
     expect(edge.style.translate).toBe("60px 0");
@@ -74,8 +78,8 @@ describe("useDragToClose", () => {
     expect(edge.style.transition).toBe(pane.style.transition);
   });
 
-  it("closes on a flick however short", () => {
-    const { pane, onClose } = setup();
+  it("closes on a flick however short", async () => {
+    const { pane, onClose } = await setup();
     pointer(pane, "pointerdown", 100, 0, { at: 0 });
     pointer(pane, "pointermove", 130, 0, { at: 20 });
     pointer(pane, "pointermove", 170, 0, { at: 60 });
@@ -83,8 +87,8 @@ describe("useDragToClose", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("leaves a drag up or down to scroll, and a mouse to select", () => {
-    const { pane, onClose } = setup();
+  it("leaves a drag up or down to scroll, and a mouse to select", async () => {
+    const { pane, onClose } = await setup();
     pointer(pane, "pointerdown", 100, 100);
     pointer(pane, "pointermove", 110, 160);
     pointer(pane, "pointermove", 260, 160);

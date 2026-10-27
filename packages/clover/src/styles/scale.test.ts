@@ -1,5 +1,9 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
+import { render } from "@testing-library/react";
+import React from "react";
+
+import { FieldPill } from "../ui/FieldPill";
 
 /*
  * The scale is the only source of space and type size (DESIGN.md). Every stylesheet in the
@@ -95,13 +99,40 @@ describe("the scale", () => {
 });
 
 /*
- * The search field's placeholder is the theme's text mixed into its ground, at full
- * opacity: browsers' own (Safari's gray, Firefox's half opacity) fall under 4.5:1.
+ * A field's placeholder is the theme's text mixed into its ground, at full opacity:
+ * browsers' own (Safari's gray, Firefox's half opacity) fall under 4.5:1. Every field
+ * pill's query takes it, the Transcript's find as Search's.
  */
 describe("a field's placeholder", () => {
-  const rule = readFileSync(SCALE, "utf8").match(
-    /:where\(\.clover-content-search-query\)::placeholder\s*\{([^}]*)\}/,
-  )?.[1];
+  const [, selector, rule] =
+    readFileSync(SCALE, "utf8").match(
+      /:where\(([^)]*)\)::placeholder\s*\{([^}]*)\}/,
+    ) ?? [];
+
+  it("is every field pill's query, whatever classes its part adds", () => {
+    const parts = {
+      search: {
+        form: "clover-content-search-form",
+        query: "clover-content-search-query",
+      },
+      transcript: { form: "clover-transcript-find-field" },
+    };
+    for (const [part, classes] of Object.entries(parts)) {
+      const { container, unmount } = render(
+        React.createElement(FieldPill, {
+          id: `${part}-find`,
+          value: "",
+          onChange: () => {},
+          onSubmit: () => {},
+          onClear: () => {},
+          classes,
+        }),
+      );
+      const query = container.querySelector("input");
+      expect(query?.matches(selector), part).toBe(true);
+      unmount();
+    }
+  });
 
   it("is drawn at full opacity", () => {
     expect(rule).toMatch(/opacity:\s*1;/);

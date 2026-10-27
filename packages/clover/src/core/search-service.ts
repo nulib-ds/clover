@@ -1,5 +1,6 @@
 import type { AnnotationSet } from "./annotation-sets";
 import type { Manifest } from "./presentation";
+import { asArray } from "../lib/asArray";
 
 /**
  * IIIF Content Search, versions 1 and 2: finding the Manifest's service, asking it, and
@@ -45,9 +46,6 @@ export interface SearchResults {
 export const SEARCH_SET_ID = "content-search";
 
 type Json = Record<string, any>;
-
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
 
 const VERSION = /\/search\/([0-2])\//;
 

@@ -450,7 +450,7 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
             {/* A section intro's title and note, and the room between them (`intro.text`). */}
             <div className={intro.text}>
               <h3 className={intro.title}>Use a template…</h3>
-              <p className={intro.note}>Try each one in the Viewer above.</p>
+              <p className={intro.note}>Demo each in the Viewer above.</p>
             </div>
             {/*
              * The template's menu beside the way in, drawn as a dropdown is (Mat,

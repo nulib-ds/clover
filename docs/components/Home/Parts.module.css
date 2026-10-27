@@ -866,35 +866,15 @@
 
 /*
  * Its parts in the order its code gives them (which a reader can drag), each a row of its
- * own; a thumbnail keeps its width, and a title beside it, before or after, takes the
- * rest of the row, cut short if it must be. Summary and Metadata together are a step
- * closer, as one part's text.
+ * own. Summary and Metadata together are a step closer, as one part's text.
  */
 .viewer > .region {
   flex: 1 0 100%;
 }
 
-.viewer > .regionThumb {
-  flex: none;
-}
-
-.viewer > .regionThumb + .regionLabel,
-.viewer > .regionLabel:has(+ .regionThumb) {
-  flex: 1 1 0;
-}
-
 .viewer > .regionSummary + .regionMetadata,
 .viewer > .regionMetadata + .regionSummary {
   margin-top: -0.382rem;
-}
-
-.viewerThumb {
-  border-radius: var(--radius-2);
-  display: block;
-  height: 2.236rem;
-  max-width: 5rem;
-  object-fit: cover;
-  width: auto;
 }
 
 .viewerTitle {
@@ -987,7 +967,7 @@
   position: absolute;
   top: -0.618rem;
   transform: translateY(0.236rem);
-  /* One line, however narrow its part (the Thumbnail's, with its size). */
+  /* One line, however narrow its part. */
   white-space: nowrap;
   transition:
     opacity 160ms ease,
@@ -1027,12 +1007,6 @@
 
 .viewer[data-weighed] .regionSize {
   display: inline;
-}
-
-/* The Label's tag at its end, clear of the Thumbnail's beside it when both are lit. */
-.regionLabel > .regionName {
-  left: auto;
-  right: 0.618rem;
 }
 
 /*

@@ -5,7 +5,24 @@ import React from "react";
 
 import { createPortal } from "react-dom";
 
-import { Sections, type SectionsLayout, useSectionActions } from "./Sections";
+import {
+  Sections as HeldSections,
+  type SectionsLayout,
+  useSectionActions,
+} from "./Sections";
+
+/** Sections as the Panel holds them: the section open in its state, the first to start. */
+function Sections(
+  props: Omit<
+    React.ComponentProps<typeof HeldSections>,
+    "value" | "onValueChange"
+  >,
+) {
+  const [value, setValue] = React.useState<string | null>(
+    props.items[0]?.value ?? null,
+  );
+  return <HeldSections {...props} value={value} onValueChange={setValue} />;
+}
 
 const mounts: string[] = [];
 function Body({ name }: { name: string }) {

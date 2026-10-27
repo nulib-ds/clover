@@ -1,7 +1,10 @@
-import { bodiesOf, parseAnnotationTarget } from "./annotations";
+import { parseAnnotationTarget } from "./annotations";
+import { bodiesOf, isPainting } from "./painting";
 import type { Collection, Manifest } from "./presentation";
 import { selectSequence } from "./selectors";
+import { toPlainText } from "./text";
 import { type LanguageMapLike, localize } from "./value";
+import { asArray } from "../lib/asArray";
 
 /**
  * Where a IIIF resource is, read for a map: navPlace (on a Collection, Manifest, Canvas
@@ -62,9 +65,6 @@ export interface Georeference {
 
 type Json = Record<string, any>;
 
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
-
 const GEOMETRIES = new Set([
   "Point",
   "MultiPoint",
@@ -118,7 +118,8 @@ function flatten(
     ? ownTitle
     : localize(owner.label as LanguageMapLike, language);
   if (title.text) {
-    properties.title = title.text.replace(/<[^>]*>/g, "");
+    // Plain text, its entities decoded: the map shows it as text, never as markup.
+    properties.title = toPlainText(title.text);
     if (title.lang) properties.titleLang = title.lang;
   }
   if (owner.canvasId) properties.canvasId = owner.canvasId;
@@ -223,7 +224,7 @@ function readMask(svg: unknown): Position[] | undefined {
 function paintedImage(canvas: Json | undefined): Json | undefined {
   for (const page of asArray(canvas?.items) as Json[]) {
     for (const annotation of asArray(page?.items) as Json[]) {
-      if (!motivations(annotation).includes("painting")) continue;
+      if (!isPainting(annotation)) continue;
       const body = bodiesOf(annotation).find(
         (item) => item?.type === "Image" || item?.service,
       );

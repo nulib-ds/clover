@@ -30,7 +30,7 @@ vi.mock("../../lib/renderer", async (importOriginal) => ({
   })),
 }));
 
-const ASSETS = { styles: [{ key: "clover-1", css: ".clover-root{}" }] };
+const ASSETS = {};
 
 let viewport: ReturnType<typeof stubViewport>;
 beforeAll(() => defineCloverElements(ASSETS));

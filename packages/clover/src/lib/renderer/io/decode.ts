@@ -21,9 +21,8 @@ import {
 export type LoadedImage =
   | {
       /**
-       * A video element, playing: drawn from its current frame. `opaque` here means
-       * "present as a DOM layer" — a positioned `<video>` the browser composites itself —
-       * rather than uploading frames to the GPU.
+       * A video element, playing, shown as a DOM layer: a positioned `<video>` the
+       * browser composites itself, so PiP, AirPlay and HDR keep working. Never uploaded.
        */
       kind: "media";
       source: HTMLVideoElement;
@@ -31,7 +30,6 @@ export type LoadedImage =
       height: number;
       naturalWidth: number;
       naturalHeight: number;
-      opaque: boolean;
     }
   | {
       kind: "bitmap";

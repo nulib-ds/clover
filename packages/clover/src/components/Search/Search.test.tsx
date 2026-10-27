@@ -10,6 +10,7 @@ import React from "react";
 import { CANVAS, SEARCH_V2, manifest, v2Pages } from "../../fixtures/search";
 import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
+import { createClover } from "../../core/clover";
 
 const withSearch = manifest([{ id: SEARCH_V2, type: "SearchService2" }]);
 
@@ -221,7 +222,7 @@ describe("Search", () => {
 
 describe("clover.search", () => {
   it("draws the hits as a set beside the annotations, and forgets them on another Manifest", async () => {
-    const clover = Clover.createClover({ request: { fetch: mockFetch() } });
+    const clover = createClover({ request: { fetch: mockFetch() } });
     await clover.load(withSearch);
     await clover.search("bird");
     const { search } = clover.store.get();

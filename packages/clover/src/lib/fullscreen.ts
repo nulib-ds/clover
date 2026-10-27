@@ -45,11 +45,10 @@ export const getCloverRoot = (from: Element | null): HTMLElement | null =>
 
 /**
  * Hand `video` to the system player (iPhone Safari), which takes only a video on the page.
- * A video drawn into the canvas (`texture`) is not on the page, so it is placed in its
- * Canvas for as long as the player has it: first, at full size under the viewport, which
- * paints over it, so it is laid out like any video rather than hidden. It is the same
- * element the renderer draws from, so playback carries on in the page when the player
- * closes.
+ * One not on the page (sound, which the scene never places) is placed in its Canvas for as
+ * long as the player has it: first, at full size under the viewport, which paints over
+ * it, so it is laid out like any video rather than hidden. It is the same element that
+ * plays, so playback carries on in the page when the player closes.
  */
 const enterNativeFullscreen = (video: PrefixedVideo, from: Element) => {
   if (typeof video.webkitEnterFullscreen !== "function") return;

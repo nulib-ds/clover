@@ -399,6 +399,33 @@ describe("createClover: Collections", () => {
     expect(manifest?.id).toBe(BOOK);
   });
 
+  it("follows a paged Collection's pages once, though a next leads back", async () => {
+    const fetch = mockFetch({
+      "https://example.org/shelf/page/2": {
+        id: "https://example.org/shelf/page/2",
+        type: "CollectionPage",
+        items: [member(LETTER)],
+        next: "https://example.org/shelf/page/1",
+      },
+      "https://example.org/shelf/page/1": {
+        id: "https://example.org/shelf/page/1",
+        type: "CollectionPage",
+        items: [member(BOOK)],
+        next: "https://example.org/shelf/page/2",
+      },
+      [BOOK]: bookJson,
+    });
+    const clover = createClover({ request: { fetch } });
+    await clover.load({
+      ...shelf([]),
+      items: undefined,
+      first: "https://example.org/shelf/page/1",
+    });
+    expect(
+      clover.store.get().collection?.items?.map((item: any) => item.id),
+    ).toEqual([BOOK, LETTER]);
+  });
+
   it("opens the member a host names, without fetching the first", async () => {
     const fetch = mockFetch({ [BOOK]: bookJson, [LETTER]: letter });
     const clover = createClover({ request: { fetch } });

@@ -14,11 +14,11 @@ import {
 } from "./annotation-sets";
 import { createClover } from "./clover";
 import { SEARCH_SET_ID } from "./search-service";
+import { buildContentState } from "./content-state";
 import {
-  buildContentState,
   decodeContentState,
   resolveContentState,
-} from "./content-state";
+} from "./content-state-reader";
 
 describe("annotation sets", () => {
   it("reads a Canvas's commenting annotations, with their language", () => {
@@ -259,6 +259,26 @@ describe("added annotations", () => {
     expect((fetch.mock.calls[0] as unknown[])[1]).toMatchObject({
       credentials: "include",
     });
+  });
+
+  it("reads a collection's pages once, though a next leads back", async () => {
+    const table: Record<string, unknown> = {
+      "https://example.org/collection": {
+        id: "https://example.org/collection",
+        type: "AnnotationCollection",
+        first: "https://example.org/pages/1",
+      },
+      "https://example.org/pages/1": page(1, "https://example.org/pages/2"),
+      "https://example.org/pages/2": page(2, "https://example.org/pages/1"),
+    };
+    const fetch = vi.fn(
+      async (url: string) => new Response(JSON.stringify(table[url])),
+    );
+    const sets = await loadAnnotationSets("https://example.org/collection", {
+      request: { fetch },
+    });
+    expect(sets.map((set) => set.entries[0].target.rect?.x)).toEqual([1, 2]);
+    expect(fetch).toHaveBeenCalledTimes(3);
   });
 
   it("selects an added annotation on another Canvas by going there", async () => {

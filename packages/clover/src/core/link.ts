@@ -1,7 +1,6 @@
-import { bodiesOf, parseAnnotationTarget } from "./annotations";
-
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
+import { parseAnnotationTarget } from "./annotations";
+import { bodiesOf } from "./painting";
+import { asArray } from "../lib/asArray";
 
 /**
  * Where a `linking` annotation leads (Cookbook 0022): its first body that is not text. A

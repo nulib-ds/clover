@@ -85,10 +85,6 @@ export class DomLayers {
     }
   }
 
-  has(key: string): boolean {
-    return this.boxes.has(key);
-  }
-
   dispose(): void {
     this.boxes.clear();
     this.container.remove();

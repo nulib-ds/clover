@@ -4,13 +4,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import type { TimedAnnotation } from "../Annotations";
 import type { MediaPlacement } from "../layout";
 import { type PlayerInfo, PlayerChapters, PlayerFace } from "./Player";
-import Transport, { type TransportChapter } from "./Transport";
+import Transport, { type TransportChapter, chapterAt } from "./Transport";
 import { type CaptionOption, useCaptionTracks } from "./useCaptionTracks";
 import { useMediaController } from "./useMediaController";
-import { useMediaElement } from "./useMediaElement";
-import { type LanguageMapLike, localize } from "../../../core/value";
+import { captionName, useMediaElement } from "./useMediaElement";
 import { cueText } from "../../../core/vtt";
-import type { CanvasRenderer } from "../../../lib/renderer";
+import { playFrom } from "../../../lib/time";
+import type { CanvasSurface } from "../surface";
+import type { Rect } from "../../../lib/renderer";
 import { useOptionalClover } from "../../../react/context";
 
 const SKIP_SECONDS = 10;
@@ -19,18 +20,19 @@ const MOMENT_SECONDS = 3;
 
 export interface MediaBodyProps {
   media: MediaPlacement;
-  presentation: "dom" | "texture";
   request?: CloverRequest;
-  renderer: CanvasRenderer;
+  /** What the Canvas draws on, whose viewport takes the clicks and keys. */
+  surface: CanvasSurface;
   instance: string;
+  /** The element, once made, and `null` when it goes. */
+  onElement: (element: HTMLVideoElement | null) => void;
   /**
-   * The element, once made (and `null` when it goes), and how it is presented — `dom`
-   * when `texture` was asked for but the media would not load with CORS.
+   * Where a video sits in its target, fitted at its own aspect once its frame size is
+   * known, and `null` until then: a Canvas may declare a shape the file does not have
+   * (Cookbook 0074 declares portrait for a landscape film), so the video is fitted inside
+   * rather than stretched or letterboxed.
    */
-  onElement: (
-    element: HTMLVideoElement | null,
-    presentation: "dom" | "texture",
-  ) => void;
+  onFit?: (placement: Rect | null) => void;
   onEnded?: () => void;
   /** The reader chose a caption track: the Manifest's file, or `null` (Off, or the media's own). */
   onCaptionChange?: (caption: { id: string; language?: string } | null) => void;
@@ -70,14 +72,14 @@ export interface MediaBodyProps {
  * A Canvas's video or sound: the element, its transport, and its captions.
  *
  * Loaded only when a Canvas paints media, so a page of images never downloads it. The
- * picture itself is the renderer's: this hands it the element to place, and leaves zoom,
- * pan and fullscreen to the Canvas around it.
+ * picture itself is the surface's (the renderer, or a Timeline's): this hands it the
+ * element to place, and leaves zoom, pan and fullscreen to the Canvas around it.
  *
  * - A click on the picture plays or pauses, as the Player's does; double-click still
  *   zooms, except on a lone media Canvas, which never moves. On the focused Canvas, Space or K plays and pauses, M mutes, and J / L skip
  *   back and forward ten seconds.
  * - Captions are drawn here from the active track's cues, above the transport, so they
- *   read at any zoom whichever way the video is presented. The tracks are the
+ *   read at any zoom. The tracks are the
  *   Manifest's and any the media carries itself (`useCaptionTracks`). Annotations on
  *   the recording's time show among them, each while its stretch plays.
  * - It stays mounted from one recording to the next, as auto-advance moves on, so the
@@ -87,11 +89,11 @@ export interface MediaBodyProps {
  */
 const MediaBody: React.FC<MediaBodyProps> = ({
   media,
-  presentation,
   request,
-  renderer,
+  surface,
   instance,
   onElement,
+  onFit,
   onEnded,
   onCaptionChange,
   caption,
@@ -109,20 +111,16 @@ const MediaBody: React.FC<MediaBodyProps> = ({
   // IIIF text in the Root's language, or the reader's when there is no Root.
   const rootLanguage = useOptionalClover()?.language;
   const language = givenLanguage ?? rootLanguage;
-  const { element, presentation: presented } = useMediaElement(media, {
-    presentation,
-    request,
-    language,
-  });
+  const element = useMediaElement(media, { request, language });
   const controller = useMediaController(element, media.duration);
   // The Manifest's tracks, named in the reader's language and tagged with it (WCAG 3.1.2).
   const own = useMemo<CaptionOption[]>(
     () =>
       media.captions.map((caption, index) => {
-        const name = localize(caption.label as LanguageMapLike, language);
+        const name = captionName(caption, index, language);
         return {
-          label: name.text || caption.language || String(index + 1),
-          labelLang: name.text ? name.lang : undefined,
+          label: name.text,
+          labelLang: name.lang,
           language: caption.language,
         };
       }),
@@ -145,9 +143,19 @@ const MediaBody: React.FC<MediaBodyProps> = ({
   const [cues, setCues] = useState<string[]>([]);
 
   useEffect(() => {
-    onElement(element, presented);
-    return () => onElement(null, presented);
-  }, [element, presented, onElement]);
+    onElement(element);
+    return () => onElement(null);
+  }, [element, onElement]);
+
+  const size = useVideoSize(media.kind === "video" ? element : null);
+  const fit = useMemo(
+    () => size && containAspect(media.placement, size),
+    [media.placement, size],
+  );
+  useEffect(() => {
+    onFit?.(fit);
+    return () => onFit?.(null);
+  }, [fit, onFit]);
 
   useEffect(() => {
     if (!element || !onEnded) return;
@@ -168,20 +176,20 @@ const MediaBody: React.FC<MediaBodyProps> = ({
 
   // A click on the picture plays and pauses; double-click (and pinch) still zoom.
   useEffect(() => {
-    renderer.setGestures({
+    surface.setGestures({
       clickToZoom: false,
       dblClickToZoom: true,
       navigable,
     });
-    const off = renderer.on("tap", () => toggle());
+    const off = surface.on("tap", () => toggle());
     return () => {
       off();
-      renderer.setGestures({});
+      surface.setGestures({});
     };
-  }, [renderer, toggle, navigable]);
+  }, [surface, toggle, navigable]);
 
   useEffect(() => {
-    const host = renderer.host;
+    const host = surface.host;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.target !== host || event.altKey || event.metaKey) return;
       if (event.ctrlKey) return;
@@ -195,7 +203,7 @@ const MediaBody: React.FC<MediaBodyProps> = ({
     };
     host.addEventListener("keydown", onKeyDown);
     return () => host.removeEventListener("keydown", onKeyDown);
-  }, [renderer, toggle, toggleMute, skip]);
+  }, [surface, toggle, toggleMute, skip]);
 
   // Draw the chosen track's cues.
   const { track } = captions;
@@ -317,10 +325,7 @@ const MediaBody: React.FC<MediaBodyProps> = ({
 
   if (player) {
     // The chapter playing, as the transport finds it: the last begun.
-    let current = -1;
-    (chapters ?? []).forEach((chapter, index) => {
-      if (chapter.start <= currentTime) current = index;
-    });
+    const current = chapterAt(chapters ?? [], currentTime);
     /*
      * In reading order, which is also the keyboard's: what it is, its lyrics, the
      * transport, then its tracks, under it as an album's are under its player.
@@ -345,7 +350,8 @@ const MediaBody: React.FC<MediaBodyProps> = ({
             <PlayerChapters
               chapters={chapters}
               current={current}
-              onSeek={controller.seek}
+              // A track pressed plays from its start, as every time a part lists does.
+              onSeek={(seconds) => element && playFrom(element, seconds)}
             />
           )}
         </div>
@@ -366,3 +372,50 @@ const MediaBody: React.FC<MediaBodyProps> = ({
 };
 
 export default MediaBody;
+
+/** A video element's frame size, kept current as metadata arrives or the stream changes. */
+function useVideoSize(element: HTMLVideoElement | null) {
+  const [size, setSize] = useState<{ width: number; height: number } | null>(
+    null,
+  );
+  useEffect(() => {
+    setSize(null);
+    if (!element) return;
+    const read = () => {
+      const { videoWidth: width, videoHeight: height } = element;
+      if (width > 0 && height > 0) {
+        setSize((current) =>
+          current?.width === width && current.height === height
+            ? current
+            : { width, height },
+        );
+      }
+    };
+    read();
+    element.addEventListener("loadedmetadata", read);
+    element.addEventListener("resize", read);
+    return () => {
+      element.removeEventListener("loadedmetadata", read);
+      element.removeEventListener("resize", read);
+    };
+  }, [element]);
+  return size;
+}
+
+/** The largest rectangle of `size`'s aspect centered inside `box`; `box` until it is known. */
+
+export function containAspect(
+  box: Rect,
+  size: { width: number; height: number } | null,
+): Rect {
+  if (!size || !box.width || !box.height) return box;
+  const scale = Math.min(box.width / size.width, box.height / size.height);
+  const width = size.width * scale;
+  const height = size.height * scale;
+  return {
+    x: box.x + (box.width - width) / 2,
+    y: box.y + (box.height - height) / 2,
+    width,
+    height,
+  };
+}

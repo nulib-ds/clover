@@ -119,7 +119,7 @@ export const sceneDocs: ElementDocs = {
     },
     engine: {
       description:
-        'What draws the models: Clover\'s own WebGL2 renderer ("clover"), or three.js ("three"), loaded only for a Scene that asks for it, for what Clover\'s does not draw yet (compressed models, animations, glTF\'s material extensions).',
+        'What draws the models: Clover\'s own WebGL2 renderer ("clover"), or three.js ("three"), once the page loads web-components/three.mjs, for what Clover\'s does not draw yet (glTF\'s material extensions, skins and morph targets at rest, sparse accessors).',
       default: "clover",
     },
   },

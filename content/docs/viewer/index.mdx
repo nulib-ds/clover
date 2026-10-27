@@ -109,7 +109,7 @@ the thumbnails under it, and the information panel beside them, as in Clover 3.x
 | `headingLevel`     | `number`                                | `2`                         | The title's level; the panel's sections are a level below.        |
 | `panel`            | `boolean`                               | `true`                      | The information panel and its toggle.                             |
 | `download`         | `boolean`                               | `true`                      | The downloads in the panel's About, where there is a `rendering`. |
-| `defaultPanelOpen` | `boolean`                               | Open where it fits          | Whether the panel starts open.                                    |
+| `defaultPanelOpen` | `boolean`                               | `true`                      | Whether the panel starts open beside the Body; over it, closed.   |
 | `panelLayout`      | `"accordion" \| "tabs"`                 | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                |
 | `items`            | `"slider" \| "list" \| "grid" \| false` | `"slider"`                  | The thumbnails under the Body, or none.                           |
 | `storageKey`       | `string \| false`                       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.        |
@@ -120,14 +120,14 @@ the thumbnails under it, and the information panel beside them, as in Clover 3.x
 Reads like a PDF viewer: a toolbar with the title and Download, page thumbnails down the
 left, the pages down one column, and the information panel sliding out on the right.
 
-| Prop                 | Type                    | Default                      | Description                                                    |
-| -------------------- | ----------------------- | ---------------------------- | -------------------------------------------------------------- |
-| `defaultSidebarOpen` | `boolean`               | Open on a wide screen        | Whether the page thumbnails start shown.                       |
-| `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the information panel starts open.                     |
-| `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | The panel's sections as stacked boxes, or as tabs.             |
-| `download`           | `boolean`               | `true`                       | Download's links in the toolbar, where there is a `rendering`. |
-| `headingLevel`       | `number`                | `2`                          | The title's level; the panel's sections are a level below.     |
-| `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it. |
+| Prop                 | Type                    | Default                      | Description                                                     |
+| -------------------- | ----------------------- | ---------------------------- | --------------------------------------------------------------- |
+| `defaultSidebarOpen` | `boolean`               | `true`                       | Whether the page thumbnails start shown; over the page, not.    |
+| `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the panel starts open beside the page; over it, closed. |
+| `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | The panel's sections as stacked boxes, or as tabs.              |
+| `download`           | `boolean`               | `true`                       | Download's links in the toolbar, where there is a `rendering`.  |
+| `headingLevel`       | `number`                | `2`                          | The title's level; the panel's sections are a level below.      |
+| `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.  |
 
 ### Gallery
 
@@ -235,7 +235,8 @@ Use `items` to lay the thumbnails under the Body out as a slider, a list or a gr
 
 Use `header={false}` to leave out the title over the Body, and `panel={false}` to leave
 out the information panel and its toggle. `defaultPanelOpen` starts the panel open or
-closed.
+closed beside the Body. On a phone, where it would cover the Body, it starts closed
+whatever you pass, and the reader opens it with its toggle.
 
 <ViewerExample resource="film" props={{ header: false, panel: false }}>
 

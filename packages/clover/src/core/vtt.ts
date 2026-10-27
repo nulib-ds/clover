@@ -94,25 +94,38 @@ export function cueAt(cues: Cue[], time: number): number {
   return -1;
 }
 
-const files = new Map<string, Promise<string>>();
-
-/** A WebVTT file's text, fetched once per URL (with CORS and the request settings). */
-export function loadVtt(url: string, request?: CloverRequest): Promise<string> {
-  let file = files.get(url);
+/**
+ * A file's text, fetched once per URL into `cache` (with CORS and the request settings)
+ * and read by `read`. A failure is not kept: a later caller may try again.
+ */
+function fetchOnce(
+  cache: Map<string, Promise<string>>,
+  url: string,
+  request: CloverRequest | undefined,
+  read: (response: Response) => Promise<string>,
+): Promise<string> {
+  let file = cache.get(url);
   if (!file) {
     file = cloverFetch(request, url)
       .then((response) =>
         response.ok
-          ? response.text()
+          ? read(response)
           : Promise.reject(new Error(String(response.status))),
       )
       .catch((error) => {
-        files.delete(url); // A failure is not kept: a later caller may try again.
+        cache.delete(url);
         throw error;
       });
-    files.set(url, file);
+    cache.set(url, file);
   }
   return file;
+}
+
+const files = new Map<string, Promise<string>>();
+
+/** A WebVTT file's text, fetched once per URL (with CORS and the request settings). */
+export function loadVtt(url: string, request?: CloverRequest): Promise<string> {
+  return fetchOnce(files, url, request, (response) => response.text());
 }
 
 const texts = new Map<string, Promise<string>>();
@@ -127,22 +140,9 @@ export function loadText(
   url: string,
   request?: CloverRequest,
 ): Promise<string> {
-  let file = texts.get(url);
-  if (!file) {
-    file = cloverFetch(request, url)
-      .then((response) =>
-        response.ok
-          ? response.arrayBuffer()
-          : Promise.reject(new Error(String(response.status))),
-      )
-      .then(decodeText)
-      .catch((error) => {
-        texts.delete(url); // A failure is not kept: a later caller may try again.
-        throw error;
-      });
-    texts.set(url, file);
-  }
-  return file;
+  return fetchOnce(texts, url, request, async (response) =>
+    decodeText(await response.arrayBuffer()),
+  );
 }
 
 /**

@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react";
 
-import { selectSequence } from "../../core/selectors";
+import { selectCanvas } from "../../core/selectors";
 import { toPlainText } from "../../core/text";
 import { type LanguageMapLike, localize } from "../../core/value";
 import { join } from "../../lib/classnames";
@@ -32,9 +32,7 @@ export const Label = forwardRef<HTMLElement, LabelProps>(function Label(
   const fromRoot = useOptionalCloverSelector(
     (state) =>
       (of === "canvas"
-        ? selectSequence(state.manifest).canvases.find(
-            (canvas) => canvas.id === state.canvasId,
-          )?.label
+        ? selectCanvas(state.manifest, state.canvasId)?.label
         : state.manifest?.label) as LanguageMapLike,
     undefined,
   );

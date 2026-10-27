@@ -77,6 +77,18 @@ describe("Clover i18n", () => {
     expect(cloverI18n.language).toBe("pt");
   });
 
+  it("follows the page's language as it changes, though the chain is kept between strings", async () => {
+    preferLanguages([]);
+    document.documentElement.lang = "";
+    const { cloverI18n } = await load();
+    expect(cloverI18n.t("imageZoomIn")).toBe("Zoom in");
+    // A page that sets its language late (a router's, say): the next string reads it.
+    document.documentElement.lang = "es";
+    await cloverI18n.ready();
+    expect(cloverI18n.language).toBe("es");
+    expect(cloverI18n.t("imageZoomIn")).not.toBe("Zoom in");
+  });
+
   it("uses the page's language when the browser offers none", async () => {
     preferLanguages([]);
     document.documentElement.lang = "es";

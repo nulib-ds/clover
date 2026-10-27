@@ -35,7 +35,8 @@ const loadChoiceMenu = () => import("./ChoiceMenu");
 const ZOOM_PER_CLICK = 2;
 
 interface CanvasControlsProps {
-  renderer: CanvasRenderer;
+  /** The camera the zoom, rotation and reset controls move; none offers them. */
+  renderer: CanvasRenderer | null;
   instance: string;
   config: Required<CanvasControlsConfig>;
   controlButtons?: ControlButtons;
@@ -142,7 +143,8 @@ const Controls: React.FC<CanvasControlsProps> = ({
   const canFullscreen = useFullscreenSupported();
   const controls = (isFullscreen: boolean): ControlSpec[] => {
     const specs: ControlSpec[] = [];
-    if (config.zoom) {
+    const camera = renderer;
+    if (config.zoom && camera) {
       specs.push(
         {
           key: "zoomIn",
@@ -151,7 +153,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
           label: t("imageZoomIn"),
           lang: langOf("imageZoomIn"),
           glyph: <ZoomIn />,
-          onClick: () => renderer.zoomBy(ZOOM_PER_CLICK),
+          onClick: () => camera.zoomBy(ZOOM_PER_CLICK),
         },
         {
           key: "zoomOut",
@@ -160,7 +162,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
           label: t("imageZoomOut"),
           lang: langOf("imageZoomOut"),
           glyph: <ZoomOut />,
-          onClick: () => renderer.zoomBy(1 / ZOOM_PER_CLICK),
+          onClick: () => camera.zoomBy(1 / ZOOM_PER_CLICK),
         },
       );
     }
@@ -175,7 +177,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
         onClick: (event) => void toggleFullscreen(event.currentTarget),
       });
     }
-    if (config.rotation) {
+    if (config.rotation && camera) {
       specs.push(
         {
           key: "rotateRight",
@@ -184,7 +186,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
           label: t("imageRotateRight"),
           lang: langOf("imageRotateRight"),
           glyph: <Rotate />,
-          onClick: () => renderer.rotateBy(90),
+          onClick: () => camera.rotateBy(90),
         },
         {
           key: "rotateLeft",
@@ -193,11 +195,11 @@ const Controls: React.FC<CanvasControlsProps> = ({
           label: t("imageRotateLeft"),
           lang: langOf("imageRotateLeft"),
           glyph: <Rotate />,
-          onClick: () => renderer.rotateBy(-90),
+          onClick: () => camera.rotateBy(-90),
         },
       );
     }
-    if (config.reset) {
+    if (config.reset && camera) {
       specs.push({
         key: "reset",
         id: `reset-${instance}`,
@@ -206,7 +208,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
         lang: langOf("imageResetZoom"),
         glyph: <Reset />,
         // Home also turns the image upright, as `Image`'s reset does.
-        onClick: () => renderer.home(),
+        onClick: () => camera.home(),
       });
     }
     if (choices.length) {

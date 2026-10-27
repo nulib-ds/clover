@@ -57,6 +57,28 @@ export function selectSequence(manifest: Manifest | null): Sequence {
   return sequence;
 }
 
+const byId = new WeakMap<Sequence, Map<string, Container>>();
+
+/**
+ * The Canvas (or Timeline, or Scene) of this id in the Manifest's sequence, the first of
+ * that id, or null: looked up, not searched, from a map made once for the Manifest.
+ */
+export function selectCanvas(
+  manifest: Manifest | null,
+  id: string | null | undefined,
+): Container | null {
+  if (!id) return null;
+  const sequence = selectSequence(manifest);
+  let canvases = byId.get(sequence);
+  if (!canvases) {
+    canvases = new Map();
+    for (const canvas of sequence.canvases)
+      if (!canvases.has(canvas.id)) canvases.set(canvas.id, canvas);
+    byId.set(sequence, canvases);
+  }
+  return canvases.get(id) ?? null;
+}
+
 /** The index of the view holding a Canvas; 0 when it is not in the Manifest. */
 export function selectPosition(
   manifest: Manifest | null,
@@ -124,10 +146,10 @@ export const hasBehavior = (resource: unknown, value: string) => {
     : behavior === value;
 };
 
-/** The first Collection a Manifest says it is `partOf`. */
+/** The first Collection a Manifest says it is `partOf`, one or a list of them. */
 export const partOfCollection = (manifest: unknown) =>
   (
-    ((manifest as { partOf?: unknown } | null)?.partOf ?? []) as Array<{
+    [(manifest as { partOf?: unknown } | null)?.partOf ?? []].flat() as Array<{
       id?: string;
       type?: string;
       label?: unknown;

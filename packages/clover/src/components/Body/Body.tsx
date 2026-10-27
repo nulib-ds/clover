@@ -3,6 +3,7 @@ import React, { Suspense, lazy, useMemo } from "react";
 import { type BodyRenderer, paintingBodies, pickRenderer } from "./renderers";
 import ConnectedCanvas from "../Canvas/Connected";
 import type { CloverCanvasProps } from "../Canvas/Canvas.types";
+import { rendererSurface } from "../Canvas/rendererSurface";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
 import { useVisibleCanvases } from "../../react/hooks";
@@ -85,7 +86,9 @@ export function Body({
           <ConnectedTimeline {...canvas}>{children}</ConnectedTimeline>
         </Suspense>
       ) : (
-        <ConnectedCanvas {...canvas}>{children}</ConnectedCanvas>
+        <ConnectedCanvas {...canvas} surface={rendererSurface}>
+          {children}
+        </ConnectedCanvas>
       )}
       {busy && <Loading overlay />}
     </div>

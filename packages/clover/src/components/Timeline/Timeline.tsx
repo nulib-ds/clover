@@ -3,6 +3,7 @@ import React, { Suspense, lazy } from "react";
 import type { CloverCanvasProps } from "../Canvas/Canvas.types";
 import CanvasView from "../Canvas/CanvasView";
 import type { IIIFCanvas } from "../Canvas/layout";
+import { playerSurface } from "./playerSurface";
 import { CanvasPending } from "../Body/Pending";
 import { join } from "../../lib/classnames";
 import { useOptionalClover } from "../../react/context";
@@ -40,7 +41,8 @@ export type TimelineProps = Omit<
  * A IIIF Presentation 4 Timeline, played: sound, which has a duration and
  * no picture. It is drawn on Canvas's Body, with Canvas's transport, captions, chapters
  * and annotations on its time, and shows the Timeline's accompanying Canvas (or its
- * placeholder) while it plays, as the Viewer has shown sound.
+ * placeholder) while it plays, as the Viewer has shown sound. It draws on a surface of its
+ * own (`playerSurface`), not Canvas's image renderer, which it never loads.
  *
  * - **Inside a `Root`**, given nothing to play, it plays the Root's view when that is a
  *   Timeline, and draws nothing otherwise. `Body` draws a Timeline view with it.
@@ -53,7 +55,12 @@ export function Timeline({ timeline, className, ...props }: TimelineProps) {
   if (props.iiifContent !== undefined && timeline === undefined)
     return (
       <Suspense fallback={<CanvasPending />}>
-        <LoadedCanvas {...props} className={classes} of="Timeline" />
+        <LoadedCanvas
+          {...props}
+          className={classes}
+          of="Timeline"
+          surface={playerSurface}
+        />
       </Suspense>
     );
   if (!timeline)
@@ -68,6 +75,7 @@ export function Timeline({ timeline, className, ...props }: TimelineProps) {
       className={classes}
       canvases={[timeline]}
       navigator={false}
+      surface={playerSurface}
     />
   );
 }

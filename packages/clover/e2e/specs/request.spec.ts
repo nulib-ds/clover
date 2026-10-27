@@ -21,7 +21,10 @@ test("request settings reach every request: the Manifest, image services and ima
   const requests = await serveIIIF(page);
   await page.goto("/?headers=1&content=https://fixtures.test/0009-book-1.json");
   await expect(
-    page.getByRole("heading", { name: "Simple Manifest - Book" }),
+    page.getByRole("heading", {
+      level: 2,
+      name: "Simple Manifest - Book",
+    }),
   ).toBeVisible();
   await expect.poll(() => requests.length).toBeGreaterThan(2);
 

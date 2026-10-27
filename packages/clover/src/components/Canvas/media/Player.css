@@ -382,8 +382,9 @@
   font-weight: 700;
 }
 
+/* The time is a cue's (`ui/Cue.css`), in the player's muted white, not the page's gray. */
 .clover-canvas-player-chapter-number,
-.clover-canvas-player-chapter-time {
+.clover-canvas-player-chapter > .clover-canvas-player-chapter-time {
   color: var(--clover-player-muted);
   font-variant-numeric: tabular-nums;
 }

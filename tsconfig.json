@@ -16,6 +16,7 @@
       "@nulib/clover/styles.css": ["packages/clover/src/styles/clover.css"],
       "@nulib/clover/templates": ["packages/clover/src/templates/index.ts"],
       "@nulib/clover/map": ["packages/clover/src/map/index.ts"],
+      "@nulib/clover/three": ["packages/clover/src/three/index.ts"],
       "@nulib/clover/templates.css": [
         "packages/clover/src/templates/templates.css"
       ],

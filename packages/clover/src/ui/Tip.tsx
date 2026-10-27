@@ -238,17 +238,27 @@ function hideTips(event: KeyboardEvent) {
   const focused = document.activeElement;
   const control = focused && (controlOf(focused) as HTMLElement);
   if (control && tipOf(control)) shown.add(control);
-  shown.forEach((control) => {
-    control.dataset.tipHidden = "";
-    // Back once the pointer comes again, or focus leaves it (or the input in it).
-    const show = () => {
-      delete control.dataset.tipHidden;
-      control.removeEventListener("pointerenter", show);
-      control.removeEventListener("focusout", show);
-    };
-    control.addEventListener("pointerenter", show);
-    control.addEventListener("focusout", show);
-  });
+  // Back once the pointer comes again, or focus leaves it (or the input in it).
+  shown.forEach((control) =>
+    hideUntilBack(control, "tipHidden", ["pointerenter", "focusout"]),
+  );
+}
+
+/**
+ * Hide a popover Escape put away (WCAG 1.4.13): `data-<key>` on `element`, until one of
+ * `back` happens on it (the pointer coming again, focus leaving or coming afresh).
+ */
+export function hideUntilBack(
+  element: HTMLElement,
+  key: string,
+  back: string[],
+) {
+  element.dataset[key] = "";
+  const show = () => {
+    delete element.dataset[key];
+    back.forEach((type) => element.removeEventListener(type, show));
+  };
+  back.forEach((type) => element.addEventListener(type, show));
 }
 
 /**

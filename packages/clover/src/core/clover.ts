@@ -1,15 +1,12 @@
 import {
   type AnnotationSet,
   findEntry,
+  manifestOfAnnotation,
   selectDrawnSets,
   selectHiddenSets,
   readPage,
 } from "./annotation-sets";
-import {
-  type AnnotationsInput,
-  loadAnnotationSets,
-  manifestOfAnnotation,
-} from "./annotation-collection";
+import type { AnnotationsInput } from "./annotation-collection";
 import {
   type ContentStateOutput,
   type Target,
@@ -27,6 +24,7 @@ import type { CloverRequest } from "./request";
 import {
   canvasOfView,
   selectPosition,
+  selectCanvas,
   selectSequence,
   selectStart,
   selectVisibleCanvases,
@@ -175,6 +173,41 @@ export interface Clover {
   holdAllAnnotationPages(): () => void;
   /** Abandon any load in flight. The instance stays usable. */
   dispose(): void;
+}
+
+export interface Navigation {
+  /** Zero-based index of the current view. */
+  position: number;
+  total: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+  previous(): void;
+  next(): void;
+  first(): void;
+  last(): void;
+  goTo(canvasId: string): void;
+}
+
+/**
+ * Moving between views from where the reader is: `useNavigation()`'s, and a root
+ * element's `navigation()`. Steps by view, so a spread moves two pages at a time.
+ */
+export function navigationOf(
+  clover: Clover,
+  position: number,
+  total: number,
+): Navigation {
+  return {
+    position,
+    total,
+    hasPrevious: position > 0,
+    hasNext: position + 1 < total,
+    previous: () => clover.previous(),
+    next: () => clover.next(),
+    first: () => clover.first(),
+    last: () => clover.last(),
+    goTo: (canvasId: string) => clover.goTo(canvasId),
+  };
 }
 
 /** Where to open: the host's Canvas, its default, and in a Collection its Manifest. */
@@ -558,9 +591,7 @@ export function createClover(options: CloverOptions = {}): Clover {
       const shown = selectVisibleCanvases(manifest, canvasId).some(
         (canvas) => canvas.id === entry.canvasId,
       );
-      const exists = selectSequence(manifest).canvases.some(
-        (canvas) => canvas.id === entry.canvasId,
-      );
+      const exists = selectCanvas(manifest, entry.canvasId) !== null;
       if (!shown && exists) navigate(entry.canvasId, null);
       // On a Canvas of another Manifest it names (`partOf`): open that one there.
       const elsewhere = exists
@@ -579,34 +610,15 @@ export function createClover(options: CloverOptions = {}): Clover {
       }
       const controller = new AbortController();
       searching = controller;
-      // Embedding a fetched annotation page replaces the Manifest object, not the Manifest.
-      const manifestId = store.get().manifest?.id;
       store.set((state) => ({
         search: { ...state.search, query: q, status: "loading" },
       }));
       try {
-        // Asking and reading a service loads with the first search, as few pages search.
-        const { search } = await import("./search");
-        const results = await search(service, q, {
-          request,
-          signal: controller.signal,
-        });
-        if (
-          controller.signal.aborted ||
-          store.get().manifest?.id !== manifestId
-        ) {
-          return;
-        }
-        store.set({
-          search: {
-            query: q,
-            status: "ready",
-            hits: results.hits,
-            set: results.set,
-          },
-        });
+        // Asking and reading a service, and the rest of this, load with the first search.
+        const { searchInto } = await import("./search");
+        await searchInto(store, service, q, request, controller.signal);
       } catch {
-        if (controller.signal.aborted) return;
+        // The search's own code would not load.
         store.set({
           search: { query: q, status: "error", hits: [], set: null },
         });
@@ -625,6 +637,8 @@ export function createClover(options: CloverOptions = {}): Clover {
       const controller = new AbortController();
       annotating = controller;
       try {
+        // Read only for a Root given annotations of the host's own, as few are.
+        const { loadAnnotationSets } = await import("./annotation-collection");
         const sets = await loadAnnotationSets(input, {
           request,
           signal: controller.signal,

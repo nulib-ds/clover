@@ -22,6 +22,12 @@
   --clover-body-height: min(70vh, 48rem);
 }
 
+/* The Body's box while its code loads: its height and a Canvas's own background. */
+.clover-template-lightbox-pending {
+  height: var(--clover-body-height, 60vh);
+  background-color: #0001;
+}
+
 .clover-template-lightbox-header {
   display: flex;
   align-items: center;

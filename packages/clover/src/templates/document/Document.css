@@ -386,58 +386,9 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 }
 
 /*
- * Over the page, where there is not: it slides out over the right, as wide as Default's,
- * never more than the layout less a strip of the page.
+ * Over the page, where there is not: it slides out over the right, as Default's does, and
+ * so does the wash beside it (`templates/default/Default.css`, in `styles.css`).
  */
-/* The panel waits off the end while it slides: never a sideways scroll for the page. */
-.clover-template-document-panes[data-panel="over"] {
-  overflow: clip;
-}
-
-.clover-template-document-panes[data-panel="over"]
-  > .clover-template-document-panel {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-end: 0;
-  z-index: 4;
-  width: min(24rem, calc(100% - var(--clover-space-2xl)));
-  max-width: none;
-  max-height: none;
-  border-inline-start: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
-  /* Dragged back off (`useDragToClose`): a grip on its inner edge; sideways is its own. */
-  background:
-    linear-gradient(var(--clover-grip), var(--clover-grip)) no-repeat left
-      var(--clover-space-2xs) center / 4px var(--clover-space-xl),
-    var(--clover-color-secondary, #fff);
-  touch-action: pan-y;
-  box-shadow: calc(-1 * var(--clover-space-s)) 0 var(--clover-space-l)
-    rgb(0 0 0 / 0.12);
-  transform: translateX(100%);
-  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.clover-template-document-panes[data-panel="over"]
-  > .clover-template-document-panel:dir(rtl) {
-  transform: translateX(-100%);
-  background-position:
-    right var(--clover-space-2xs) center,
-    0 0;
-}
-
-/* The page beside what floats over it: a press there puts that away. */
-.clover-template-document-scrim {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  background-color: rgb(0 0 0 / 0.2);
-  opacity: 0;
-  cursor: pointer;
-  transition: opacity 240ms ease;
-}
-
-.clover-template-document-scrim[data-open="true"] {
-  opacity: 1;
-}
 
 /* Under the thumbnails, which sit lower than the panel. */
 .clover-template-document-scrim[data-for="sidebar"] {
@@ -452,53 +403,74 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   );
 }
 
-.clover-template-document-panes[data-panel="over"]
-  > .clover-template-document-panel[data-open="true"] {
-  transform: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .clover-template-document-panes[data-panel="over"]
-    > .clover-template-document-panel {
-    transition: none;
-  }
-}
-
 /* ---------- narrow ---------- */
 
-@media (max-width: 40rem) {
-  .clover-template-document-sidebar {
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
-    z-index: 3;
-    width: min(14rem, 80%);
-    border-inline-end: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
-    /* Dragged back off to the start (`useDragToClose`), its grip on its inner edge. */
-    background:
-      linear-gradient(var(--clover-grip), var(--clover-grip)) no-repeat right
-        var(--clover-space-2xs) center / 4px var(--clover-space-xl),
-      var(--clover-color-secondary, #fff);
-    touch-action: pan-y;
-    box-shadow: var(--clover-space-s) 0 var(--clover-space-l) rgb(0 0 0 / 0.12);
-  }
+/*
+ * Narrow (the template measures its own width, `data-narrow`), the thumbnails float over
+ * the page, with no bar: this wide, their spine at their edge.
+ */
+.clover-template-document-panes[data-narrow] {
+  --clover-template-sidebar-width: min(14rem, 80%);
+}
 
-  /* Over the page, the thumbnails are not beside anything to share the width with. */
-  .clover-template-document-panes > .clover-split-handle {
-    display: none;
-  }
+.clover-template-document-panes[data-narrow]
+  > .clover-template-document-sidebar {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 3;
+  width: var(--clover-template-sidebar-width);
+  border-inline-end: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
+  /* Dragged back off to the start (`useDragToClose`), its grip on its inner edge. */
+  background:
+    linear-gradient(var(--clover-grip), var(--clover-grip)) no-repeat right
+      var(--clover-space-2xs) center / 4px var(--clover-space-xl),
+    var(--clover-color-secondary, #fff);
+  touch-action: pan-y;
+  box-shadow: var(--clover-space-s) 0 var(--clover-space-l) rgb(0 0 0 / 0.12);
 }
 
 /*
  * Open, the page thumbnails' toggle sits on the bar between them and the page, over them
  * but for its far rounded end, and the panel's on the bar between the page and it,
- * centered: each
- * on its spine (`useSpine`), level with the Canvas's controls (their inset,
- * `--clover-inset`, down).
+ * centered: each on its spine, a box of no width in the Split's row right after its bar,
+ * which the toggle hangs from, level with the Canvas's controls (their inset,
+ * `--clover-inset`, down). In the row, a spine moves with its bar as it is dragged, and
+ * reads right to left with the page.
  */
 .clover-template-document-spine {
-  position: absolute;
-  top: calc(var(--clover-template-spine-top, 0px) + var(--clover-inset));
+  position: relative;
   /* Over the thumbnails floating over a phone's page, and the wash beside them. */
   z-index: 4;
+  flex: none;
+  width: 0;
+}
+
+.clover-template-document-spine > * {
+  position: absolute;
+  top: var(--clover-inset);
+  inset-inline-start: -1.5px;
+  translate: -50%;
+}
+
+.clover-template-document-spine:dir(rtl) > * {
+  translate: 50%;
+}
+
+/* Its far end, as round as the control is tall, past the bar's middle. */
+.clover-template-document-spine[data-for="sidebar"] > * {
+  inset-inline: auto calc(1.5px - var(--clover-control) / 2);
+  translate: none;
+}
+
+/* Narrow, the thumbnails float, with no bar: the spine at their inner edge. */
+.clover-template-document-panes[data-narrow]
+  > .clover-template-document-spine[data-for="sidebar"] {
+  inset-inline-start: var(--clover-template-sidebar-width);
+}
+
+.clover-template-document-panes[data-narrow]
+  > .clover-template-document-spine[data-for="sidebar"]
+  > * {
+  inset-inline-end: calc(var(--clover-control) / -2);
 }

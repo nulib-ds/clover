@@ -64,6 +64,7 @@ beforeEach(() => {
     home: vi.fn(),
     invalidate: vi.fn(),
     fitItemRect: vi.fn(),
+    fitBounds: vi.fn(),
     fitAnnotation: vi.fn(),
     attachNavigator: vi.fn(() => vi.fn()),
     itemRectToWorld: vi.fn((_: number, rect: any) => rect),
@@ -85,13 +86,25 @@ const open = async () => {
 const loaded = () =>
   act(async () => {
     await Promise.all([
-      import("./Annotations"),
+      import("./AnnotationState"),
       import("./AnnotationMenu"),
       import("./ChoiceMenu"),
     ]);
   });
 
 describe("Canvas", () => {
+  // Never an empty box: busy, with the loading mark, as every Body part is meanwhile.
+  it("shows its box busy while its part for a Root loads", async () => {
+    render(
+      <Root iiifContent={bookJson as never}>
+        <Canvas />
+      </Root>,
+    );
+    const pending = document.querySelector(".clover-canvas");
+    expect(pending).toHaveAttribute("aria-busy", "true");
+    expect(await screen.findByTestId("clover-canvas")).toBeInTheDocument();
+  });
+
   it("renders nothing without a source, as Image does", () => {
     const { container } = render(<Canvas src={[]} />);
     expect(container).toBeEmptyDOMElement();
@@ -252,6 +265,8 @@ describe("Canvas", () => {
         screen.getByRole("button", { name: "A note" }),
       ).toBeInTheDocument(),
     );
+    // Its region framed, as a Root frames a deep link's.
+    expect(renderer.fitBounds).toHaveBeenCalledWith(expect.anything(), true);
   });
 
   // Cookbook 0022: its hotspot leads to the Manifest's other Canvas, which it then shows.

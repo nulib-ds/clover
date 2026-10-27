@@ -31,7 +31,7 @@ vi.mock("../../lib/renderer", async (importOriginal) => ({
   })),
 }));
 
-const ASSETS = { styles: [{ key: "clover-1", css: ".clover-root{}" }] };
+const ASSETS = {};
 
 let viewport: ReturnType<typeof stubViewport>;
 /** How many times each counting part has drawn. */
@@ -61,7 +61,6 @@ beforeAll(() => {
         draws.set(hosted.element, (draws.get(hosted.element) ?? 0) + 1);
         return <span>{String(props.value)}</span>;
       },
-    ASSETS,
   );
   // A part loaded on demand, and one that answers its callback, to show what a spec gives.
   defineElement(
@@ -74,7 +73,6 @@ beforeAll(() => {
       },
     },
     loadLazy,
-    ASSETS,
   );
   defineElement(
     {
@@ -98,7 +96,6 @@ beforeAll(() => {
           </button>
         );
       },
-    ASSETS,
   );
   // A part that fails, to show one element's failure is its own.
   defineElement(
@@ -107,7 +104,6 @@ beforeAll(() => {
       function Broken(): React.ReactNode {
         throw new Error("Broken on purpose");
       },
-    ASSETS,
   );
 });
 beforeEach(() => {
@@ -483,9 +479,6 @@ describe("Clover's elements", () => {
     await within(one).findAllByRole("option");
     expect(
       document.head.querySelectorAll('style[data-clover="elements"]'),
-    ).toHaveLength(1);
-    expect(
-      document.head.querySelectorAll('style[data-clover="clover-1"]'),
     ).toHaveLength(1);
     const css = document.head.querySelector(
       'style[data-clover="elements"]',

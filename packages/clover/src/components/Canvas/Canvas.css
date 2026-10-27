@@ -63,19 +63,16 @@
   );
 }
 
+/*
+ * Its geometry is inline (`CanvasView`, `SceneView`), for the plain layout: over the whole
+ * Body, clipped, and beneath everything else in the wrapper (which is isolated), at
+ * `z-index: -1`. Here, its own stacking layer: everything drawn in it (the image, hotspots,
+ * an active one raising itself, the focus ring) stacks within it, so none of it can rise
+ * above the controls or the navigator.
+ */
 .clover-canvas-viewport {
-  position: absolute;
-  inset: 0;
   padding: var(--clover-canvas-inset);
-  /*
-   * Its own stacking layer, beneath everything else in the wrapper (which is isolated),
-   * as it is inline for the plain layout. Everything drawn in the viewport — the image,
-   * hotspots (an active one raises itself), the focus ring — stacks within it, so none
-   * of it can rise above the controls or the navigator.
-   */
-  z-index: -1;
   isolation: isolate;
-  overflow: hidden;
   /* The renderer owns drag and pinch; the page must not scroll or zoom underneath. */
   touch-action: none;
   user-select: none;
@@ -92,23 +89,6 @@
 /* A Canvas the reader cannot move, a lone recording or one held still: no grab hand. */
 .clover-canvas[data-navigable="false"] > .clover-canvas-viewport {
   cursor: default;
-}
-
-.clover-canvas-surface,
-.clover-canvas-dom-layer {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.clover-canvas-surface {
-  display: block;
-}
-
-.clover-canvas-dom-layer {
-  overflow: hidden;
 }
 
 /*
@@ -137,25 +117,12 @@
 }
 
 /*
- * A DOM item is a crop box carrying the camera transform, with its element offset inside
- * it. Both transform about their own top-left corner, matching the renderer's math.
+ * The surfaces (`.clover-canvas-surface`, `.clover-canvas-dom-layer`) and a DOM item's
+ * crop box and element (`DomLayers`) carry their geometry inline, so the Canvas draws
+ * without the stylesheet. Here, only what the plain layout can do without.
  */
-.clover-canvas-dom-item {
-  position: absolute;
-  top: 0;
-  left: 0;
-  overflow: hidden;
-  transform-origin: 0 0;
-}
-
 .clover-canvas-dom-media {
-  position: absolute;
-  top: 0;
-  left: 0;
   display: block;
-  max-width: none;
-  max-height: none;
-  transform-origin: 0 0;
   -webkit-user-drag: none;
 }
 

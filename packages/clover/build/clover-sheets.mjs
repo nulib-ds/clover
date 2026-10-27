@@ -36,7 +36,7 @@ const OWNERS = {
   ],
   // A Scene's own, with its view (`Body` loads the view, never the part's module).
   "components/Scene/Scene": ["components/Scene/SceneView.tsx"],
-  // The overlay layer is on every Canvas, with hotspots or without.
+  // The hotspots and their layer, which the first hotspot makes (`overlaysOf`).
   "components/Canvas/Annotations": [
     "components/Canvas/Annotations.tsx",
     "lib/renderer/overlays/OverlayLayer.ts",
@@ -70,6 +70,11 @@ const OWNERS = {
     "components/Canvas/FrameAnimation.tsx",
   ],
   "ui/ReadMore": ["ui/ReadMore.tsx", "web-components/elements/read-more.tsx"],
+  // A row of language codes: a Transcript's files, an annotation set's languages.
+  "ui/Codes": [
+    "components/Transcript/Transcript.tsx",
+    "components/Annotations/Annotations.tsx",
+  ],
   // Its links' rule reaches About's, a caption's and an annotation's text.
   "components/Primitives/Primitives": [
     "components/Primitives/Primitives.tsx",

@@ -19,6 +19,7 @@ import canvasesJson from "../../fixtures/iiif-cookbook/0240-navPlace-on-canvases
 import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
 import { Map as CloverMap } from "../../map";
+import { stubViewport } from "../Canvas/testing/viewport";
 
 /** A MapLibre that records what is asked of it, and loads at once. */
 const maps: FakeMap[] = [];
@@ -152,11 +153,15 @@ beforeAll(() => {
   });
 });
 
+// Every map on screen, as the suite's own observer reports none: MapLibre loads near view.
+let viewport: ReturnType<typeof stubViewport>;
 beforeEach(() => {
   initCloverI18n({ lng: "en" });
   maps.length = 0;
   popups.length = 0;
+  viewport = stubViewport();
 });
+afterEach(() => viewport.restore());
 
 const placeData = (map: FakeMap) =>
   map.sources["geomap-navplace"].setData.mock.calls.at(-1)?.[0];
@@ -188,6 +193,30 @@ describe("Map", () => {
     );
     // A place with no name is listed by its number.
     expect(screen.getByRole("button", { name: "Place 1" })).toBeInTheDocument();
+  });
+
+  it("loads MapLibre only as it comes near the window", async () => {
+    viewport.restore();
+    viewport = stubViewport({ onScreen: false });
+    const { container } = render(
+      <CloverMap
+        navPlace={{
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-87.69, 42.04] },
+        }}
+      />,
+    );
+    await act(() => new Promise((done) => setTimeout(done, 50)));
+    expect(maps).toHaveLength(0);
+    expect(container.querySelector(".clover-geomap")).toHaveAttribute(
+      "data-status",
+      "loading",
+    );
+    act(() =>
+      viewport.scrollIntoView(container.querySelector(".clover-geomap")!),
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
   });
 
   it("draws GeoJSON it is given, framed on its one point", async () => {

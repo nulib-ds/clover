@@ -3,7 +3,7 @@ import type React from "react";
 import type { HostedProps } from "./host";
 import { initCloverI18n } from "./i18n";
 import type { AttributeSpec, ElementSpec } from "./spec";
-import { type ElementAssets, stylesFor } from "./styles";
+import { stylesFor } from "./styles";
 
 /** What an element draws, loaded the first time one of its kind connects. */
 export type LoadPart = () => Promise<React.ComponentType<HostedProps>>;
@@ -90,7 +90,7 @@ const sameProps = (a: Record<string, unknown>, b: Record<string, unknown>) => {
  * attributes are its, and it loads and draws nothing. Its display rule goes in with the
  * others, so it is not shown where it is written.
  */
-function defineConfig(spec: ElementSpec, assets: ElementAssets) {
+function defineConfig(spec: ElementSpec) {
   class CloverConfigElement extends HTMLElement {
     static get observedAttributes() {
       return Object.keys(spec.attributes);
@@ -99,7 +99,7 @@ function defineConfig(spec: ElementSpec, assets: ElementAssets) {
     readonly kind = spec.kind;
 
     connectedCallback() {
-      stylesFor(this.ownerDocument, assets).inject("elements", ELEMENT_CSS);
+      stylesFor(this.ownerDocument).inject("elements", ELEMENT_CSS);
     }
   }
   customElements.define(spec.tag, CloverConfigElement);
@@ -109,14 +109,10 @@ function defineConfig(spec: ElementSpec, assets: ElementAssets) {
  * Define an element (once) from its spec: drawn by the page's host, with what `load`
  * gives, the first time one connects.
  */
-export function defineElement(
-  spec: ElementSpec,
-  load: LoadPart | undefined,
-  assets: ElementAssets,
-) {
+export function defineElement(spec: ElementSpec, load: LoadPart | undefined) {
   if (typeof customElements === "undefined") return;
   if (customElements.get(spec.tag)) return;
-  if (spec.kind === "config" || !load) return defineConfig(spec, assets);
+  if (spec.kind === "config" || !load) return defineConfig(spec);
   const kind = spec.kind;
   const properties = spec.properties ?? [];
   const events = Object.entries(spec.events ?? {});
@@ -218,13 +214,12 @@ export function defineElement(
       }
       this.update();
       this.warnOfAria();
-      const styles = stylesFor(this.ownerDocument, assets);
-      styles.inject("elements", ELEMENT_CSS);
+      stylesFor(this.ownerDocument).inject("elements", ELEMENT_CSS);
       /*
        * Drawn once its code and the host are here, if still on the page. Its sheets came
        * with its code (`addSheet`), so they are in before it draws.
        */
-      void Promise.all([ready(), styles.ready]).then(() => {
+      void ready().then(() => {
         if (this.isConnected)
           hostModule!.hostOf(this.ownerDocument).connect(this);
       });

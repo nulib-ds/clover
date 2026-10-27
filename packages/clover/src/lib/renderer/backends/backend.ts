@@ -7,7 +7,6 @@ export type BackendKind = "webgl2" | "canvas2d" | "none";
 export type DrawSource =
   | ImageBitmap
   | HTMLImageElement
-  | HTMLVideoElement
   | HTMLCanvasElement
   | OffscreenCanvas;
 
@@ -30,11 +29,6 @@ export interface DrawCommand {
    * the overlap anyway.
    */
   bleed?: { right: boolean; bottom: boolean };
-  /**
-   * Bumped when the pixels behind `key` change (a new video frame). A backend that
-   * caches uploads re-uploads when it differs from what it last saw.
-   */
-  version?: number;
 }
 
 export type DrawResult =
@@ -54,8 +48,6 @@ export type DrawResult =
 export interface Backend {
   readonly kind: BackendKind;
   readonly canvas: HTMLCanvasElement;
-  /** True while the GPU context is gone; draws are skipped until it is restored. */
-  readonly lost: boolean;
   resize(width: number, height: number, pixelRatio: number): void;
   begin(): void;
   draw(command: DrawCommand): DrawResult;
@@ -69,19 +61,12 @@ export interface Backend {
 }
 
 export interface BackendCallbacks {
-  /** The context came back; everything must be redrawn (uploads were lost with it). */
-  onRestored?: () => void;
+  /** The browser took the context: the renderer lets this backend go, never restored. */
   onLost?: () => void;
 }
 
-/** A video with no current frame has nothing to upload yet. */
+/** An image not yet decoded has nothing to upload yet. */
 export function hasPixels(source: DrawSource): boolean {
-  if (
-    typeof HTMLVideoElement !== "undefined" &&
-    source instanceof HTMLVideoElement
-  ) {
-    return source.readyState >= 2 && source.videoWidth > 0;
-  }
   if (
     typeof HTMLImageElement !== "undefined" &&
     source instanceof HTMLImageElement

@@ -60,15 +60,7 @@ import { SHORTCUTS, forwardShortcut } from "../../ui/Tip";
 import { useContainerName } from "../../ui/useContainerName";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
-
-/**
- * The Scene's drawing: Clover's own, or three.js's for a Scene that asks for it (`engine`),
- * each loaded when a Scene that draws with it first comes near the window.
- */
-const ENGINES = {
-  clover: () => import("./cloverEngine"),
-  three: () => import("./engine"),
-};
+import { engineFor } from "./engines";
 
 /** Which of the Scene's controls to show. All are on by default. */
 export interface SceneControlsConfig {
@@ -115,8 +107,9 @@ export interface SceneProps {
   manifestId?: string;
   /**
    * What draws the models: Clover's own WebGL2 renderer (`"clover"`, the default), or
-   * three.js (`"three"`), loaded only for a Scene that asks for it, for what Clover's does
-   * not draw yet (compressed models, animations, glTF's material extensions).
+   * three.js (`"three"`), once the page registers it (`registerThreeEngine`, from
+   * `@nulib/clover/three`), for glTF's material extensions, skins and morph targets at
+   * rest, and sparse accessors, which Clover's does not draw yet.
    */
   engine?: "clover" | "three";
   /** Rendered after the controls in the cluster: a host's own controls. */
@@ -334,7 +327,8 @@ function SceneBody({
       };
     }
     setStatus({ state: "loading" });
-    (ENGINES[drawWith] ?? ENGINES.clover)()
+    // Clover's own, or one the page registered (`engines.ts`), loaded as it is first drawn.
+    engineFor(drawWith)()
       .then(({ createEngine }) => {
         if (!live) return;
         drawing = createEngine(host, {

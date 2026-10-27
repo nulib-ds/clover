@@ -1,16 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import type { CanvasAnnotation } from "./Annotations";
-import type { CloverCanvasProps } from "./Canvas.types";
-import CanvasView from "./CanvasView";
-import type { IIIFCanvas } from "./layout";
+import type { CanvasHandle, CloverCanvasProps } from "./Canvas.types";
+import CanvasView, { type CanvasViewProps } from "./CanvasView";
+import { applyTarget, useRangeChapters } from "./fromManifest";
+import { type IIIFCanvas, paintedMedia } from "./layout";
 import { CanvasPending } from "../Body/Pending";
 import { BodyAlert } from "../Body/BodyAlert";
 import { loadAnnotationSets } from "../../core/annotation-collection";
 import { type AnnotationSet, readPage } from "../../core/annotation-sets";
+import type { Target } from "../../core/content-state";
 import type { AnnotationLink } from "../../core/link";
 import { type Loaded, loadContent } from "../../core/load";
 import type { CloverRequest } from "../../core/request";
+import { useLoaded } from "../../hooks/useLoaded";
+
+// The Ranges' reader, loaded only for a Canvas that plays: a still image has no chapters.
+const loadRanges = () => import("../../core/ranges");
 
 type View =
   | { state: "loading" }
@@ -26,7 +32,9 @@ type View =
  * Manifest's first Timeline; a Scene is never a Canvas's to draw. It draws the Canvas's own annotations (embedded or
  * referenced, and a content state's note), unless the host gives its own, and follows a
  * linking annotation (Cookbook 0022) to another of the Manifest's Canvases, or to the
- * Manifest its target is `partOf`, unless the host takes `onAnnotationLink`.
+ * Manifest its target is `partOf`, unless the host takes `onAnnotationLink`. As a Root's
+ * Canvas does, it plays with the chapters the Manifest's Ranges give what it plays, and a
+ * content state's region or time opens it there, past its placeholder.
  *
  * Until it is drawn, the Canvas's box shows its background, with the loading mark along
  * the top and `aria-busy` (`CanvasPending`); if it will not load, an alert there says so,
@@ -36,9 +44,12 @@ type View =
 export default function LoadedCanvas({
   iiifContent,
   onAnnotationLink,
+  onReady,
+  onMediaElement,
+  placeholder = true,
   of,
   ...props
-}: CloverCanvasProps & {
+}: CanvasViewProps & {
   /** Only containers of this type: a `Timeline`'s. Any a Canvas draws, by default. */
   of?: "Canvas" | "Timeline";
 }) {
@@ -123,6 +134,60 @@ export default function LoadedCanvas({
       setFollowed({ ...target, key, manifestId: target.manifestId });
   };
 
+  /*
+   * A content state's region or time, applied as a Root applies a deep link's
+   * (`applyTarget`): once the Canvas is laid out, and once its media can play. Then let
+   * go, and the placeholder stays away from the view it opened.
+   */
+  const linked =
+    ready?.content.target?.canvasId === ready?.canvas.id &&
+    Boolean(
+      ready?.content.target?.region ||
+        ready?.content.target?.time !== undefined,
+    );
+  const pending = useRef<Target | null>(null);
+  const handle = useRef<CanvasHandle | null>(null);
+  const media = useRef<HTMLVideoElement | null>(null);
+  const shown = useRef<IIIFCanvas | null>(null);
+  shown.current = ready?.canvas ?? null;
+  const apply = useCallback(() => {
+    const target = pending.current;
+    if (!target || !shown.current) return;
+    const hasMedia = paintedMedia(shown.current).length > 0;
+    if (applyTarget(target, handle.current, media.current, hasMedia))
+      pending.current = null;
+  }, []);
+  useEffect(() => {
+    pending.current = linked ? (ready?.content.target ?? null) : null;
+    apply();
+  }, [ready?.content, ready?.canvas, linked, apply]);
+  const handleReady = useCallback(
+    (ready: CanvasHandle) => {
+      handle.current = ready;
+      ready.on("change", apply);
+      apply();
+      onReady?.(ready);
+    },
+    [apply, onReady],
+  );
+  const handleMediaElement = useCallback(
+    (element: HTMLVideoElement | null) => {
+      media.current = element;
+      if (element) apply();
+      onMediaElement?.(element);
+    },
+    [apply, onMediaElement],
+  );
+  const playing =
+    ready && paintedMedia(ready.canvas).length ? ready.canvas : undefined;
+  const ranges = useLoaded(loadRanges, Boolean(playing));
+  const chapters = useRangeChapters(
+    ready?.content.manifest,
+    playing,
+    props.language,
+    ranges?.chaptersOf ?? null,
+  );
+
   if (view.state === "ready")
     return (
       <CanvasView
@@ -141,6 +206,10 @@ export default function LoadedCanvas({
         }
         annotations={props.annotations ?? annotations}
         onAnnotationLink={onAnnotationLink ?? follow}
+        chapters={props.chapters ?? chapters}
+        placeholder={placeholder && !linked}
+        onReady={handleReady}
+        onMediaElement={handleMediaElement}
       />
     );
   if (view.state === "error")

@@ -51,6 +51,10 @@ in a bundler) loads {loads.viewerEntry} kB, where the one for every element load
 {loads.element} kB for the same page. Load one entry on a page, not both: each brings its
 own copy of Clover.
 
+If you serve Clover's files from your own server, copy the whole `dist/web-components`
+folder, not `viewer/` alone: the Viewer's entry loads what the other entry has too (the
+map, streaming video, the languages) from the folder above its own.
+
 </div>
 
 ## The Viewer
@@ -414,6 +418,34 @@ for the root's language.
   ```
 
 </div>
+
+## Helpers
+
+A few of the functions Clover's parts are built with, for parts of your own and the page
+around Clover, from `@nulib/clover`'s main entry. With React or with the elements, a
+bundler reaches them there; the elements' CDN scripts do not carry them.
+
+| Helper                                                      | What it does                                                                                                                                                                                                              |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `readAs(format, value)`                                     | How a text is read: `"html"`, `"markdown"` or `"plain"`, by its `format`'s media type, or, with none, by IIIF's rule (HTML only from a first `<` to a last `>`).                                                          |
+| `toPlainText(html)`                                         | IIIF HTML as plain text, its tags dropped and the common entities decoded, for where markup cannot go: an `alt`, an `aria-label`.                                                                                         |
+| `thumbnailSource(resource)`                                 | Where a resource's thumbnail comes from: its `thumbnail`, else the first image it paints, its placeholder's or its accompanying Canvas's. `null` if it has nothing to show.                                               |
+| `regionSource(canvas, { x, y, w, h })`                      | A small picture of a region of a Canvas, in the Canvas's own coordinates (an annotation's `xywh`), cut by the image server. `null` where no image with a service is painted there.                                        |
+| `resolveThumbnail(source, size, request)`                   | Either source as a URL about `size` pixels on its longer side (200 by default), asked of the image service as its own `info.json` allows: never larger than the image, and a level 0 server's listed sizes only.          |
+| `buildContentState({ manifestId, canvasId, region, time })` | Where a reader is, as a content state: `{ json, encoded }`, the annotation and its base64url form for a link's `iiif-content`. `encodeContentState(json)` encodes one of your own, `decodeContentState(value)` reads one. |
+
+```js
+import {
+  buildContentState,
+  resolveThumbnail,
+  thumbnailSource,
+} from "@nulib/clover";
+
+const { encoded } = buildContentState({ manifestId, canvasId, time: 42 });
+const link = `https://example.org/viewer?iiif-content=${encoded}`;
+
+const picture = await resolveThumbnail(thumbnailSource(manifest), 400);
+```
 
 ## Types
 

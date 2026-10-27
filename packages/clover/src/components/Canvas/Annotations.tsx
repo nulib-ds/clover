@@ -12,14 +12,17 @@ import { createPortal } from "react-dom";
 import type { IIIFCanvas } from "./layout";
 import { type TrackKey, annotationTargets, boxAt, orderKeys } from "./track";
 import type { SvgReader } from "./useSvgReader";
-import { bodiesOf, parseAnnotationTarget } from "../../core/annotations";
+import { readBodies } from "../../core/annotation-bodies";
+import { annotationName } from "../../core/annotation-name";
+import { parseAnnotationTarget } from "../../core/annotations";
+import { bodiesOf } from "../../core/painting";
 import { type AnnotationLink, readLink } from "../../core/link";
 import type { SvgShape } from "../../core/svg-shape";
-import { markdownToPlainText, readAs } from "../../core/text";
 import { parseTime } from "../../core/ranges";
 import { type LanguageMapLike, localize } from "../../core/value";
 import { Tip } from "../../ui/Tip";
 import type { CanvasRenderer, Rect } from "../../lib/renderer";
+import { overlaysOf } from "../../lib/renderer/overlays/OverlayLayer";
 
 export interface CanvasAnnotation {
   annotation: Annotation;
@@ -471,7 +474,7 @@ const Annotations: React.FC<AnnotationsProps> = ({
         />
       ))}
     </>,
-    renderer.overlays.container,
+    overlaysOf(renderer).container,
   );
 };
 
@@ -527,7 +530,7 @@ const AnnotationButton: React.FC<{
 
   useEffect(() => {
     if (!element) return;
-    const unpin = renderer.overlays.add(element, { x, y, width, height });
+    const unpin = overlaysOf(renderer).add(element, { x, y, width, height });
     renderer.invalidate();
     return unpin;
   }, [element, renderer, x, y, width, height]);
@@ -651,7 +654,7 @@ function useFollow(
     let last: boolean | undefined;
     const update = (time: number) => {
       const box = boxAt(track, time);
-      if (box && element) renderer.overlays.move(element, box);
+      if (box && element) renderer.overlays?.move(element, box);
       onMoveRef.current(box);
       const now = box !== null;
       if (now === last) return;
@@ -659,7 +662,7 @@ function useFollow(
       if (!now && element) {
         const hovered = element.matches(":hover");
         if (element.contains(document.activeElement)) {
-          renderer.overlays.container.parentElement?.focus({
+          renderer.overlays?.container.parentElement?.focus({
             preventScroll: true,
           });
         } else if (hovered) onGoneRef.current();
@@ -757,68 +760,17 @@ const ShapeOutline: React.FC<{ svg: SvgShape }> = ({ svg }) => {
 };
 
 /**
- * The annotation's text, as plain text. A body may be HTML (`text/html`, or no format at
- * all, as annotations often come); it is read for its text only, never injected as
- * markup. Markdown (`text/markdown`) is read without its syntax. A body that names
- * another format is text as written, a "<" included.
- */
-export function annotationText(annotation: Annotation): string | undefined {
-  return annotationLabel(annotation).text;
-}
-
-/**
- * The annotation's text and the language its body declares. Of bodies in several
- * languages, the one closest to `language` (the reader's by default), as any IIIF text
- * is chosen. An image with no text beside it is named by its label, or its annotation's.
+ * The annotation's name and the language it is in, as the Annotations list names it
+ * (`annotationName`): for its hotspot, the Canvas's menu and a recording's cues.
  */
 export function annotationLabel(
   annotation: Annotation,
   language?: string,
 ): { text?: string; lang?: string } {
-  const all = bodiesOf(annotation as any);
-  const bodies = all.filter(
-    (candidate) => typeof candidate?.value === "string",
-  );
-  if (!bodies.length) {
-    const image = all.find((candidate) => candidate?.type === "Image");
-    if (!image) return {};
-    const { text, lang } = localize(
-      image.label ?? (annotation as any).label,
-      language,
-    );
-    return text.trim() ? { text: text.trim(), ...(lang ? { lang } : {}) } : {};
-  }
-  const tagOf = (body: Record<string, any>) => {
-    const tag = [body.language].flat()[0];
-    return typeof tag === "string" && tag && tag !== "none" ? tag : "none";
-  };
-  // The first body in each language, chosen between by `localize`.
-  const byTag: Record<string, string[]> = {};
-  bodies.forEach((body, index) => {
-    byTag[tagOf(body)] ??= [String(index)];
-  });
-  const body = bodies[Number(localize(byTag, language).text) || 0];
-  const value: string = body.value;
-  if (!value.trim()) return {};
-  const tag = tagOf(body);
-  const lang = tag === "none" ? undefined : tag;
-  // Read by its format (`readAs`). Markdown's syntax is taken off, so neither the name
-  // nor the tip reads it out; HTML is read for its text.
-  const kind = readAs(body.format, value);
-  if (kind === "markdown") {
-    const text = markdownToPlainText(value);
-    return text ? { text, lang } : {};
-  }
-  if (kind === "plain" || typeof DOMParser === "undefined")
-    return { text: value, lang };
-  const text = new DOMParser()
-    .parseFromString(value, "text/html")
-    .body.textContent?.trim();
-  return text ? { text, lang } : {};
+  return annotationName(readBodies(annotation as any), language);
 }
 
 export default Annotations;
-export { boxAt };
 
 /** How far a key scrolls a popover that scrolls: a line, a page, or to an end. */
 const SCROLL_KEYS: Record<string, (tip: HTMLElement) => number> = {

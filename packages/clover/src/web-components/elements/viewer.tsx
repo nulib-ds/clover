@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useMemo } from "react";
 
-import { Viewer, type ViewerProps } from "../../components/Viewer/Viewer";
+import type { ViewerProps } from "../../components/Viewer/Viewer";
 import { Default } from "../../templates/default/Default";
 import type { HostedProps } from "../host";
 import { loadRenderers, useLoaded } from "./later";
@@ -67,12 +67,14 @@ export function ViewerElement({ props }: HostedProps) {
       given.storageKey.trim().toLowerCase() === "false"
         ? false
         : given.storageKey;
-  const Template = TEMPLATES[named];
+  // The template itself, as the Viewer draws a template it is given.
+  const Template = TEMPLATES[named] as React.ComponentType<
+    Partial<ViewerProps>
+  >;
   return (
     <Suspense fallback={null}>
-      <Viewer
+      <Template
         {...(given as Partial<ViewerProps>)}
-        template={Template as ViewerProps["template"]}
         iiifContent={props.iiifContent as ViewerProps["iiifContent"]}
       />
     </Suspense>

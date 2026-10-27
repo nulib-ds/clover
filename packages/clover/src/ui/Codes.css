@@ -1,0 +1,69 @@
+/*
+ * A row of language codes ("EN", "IT"), native radios drawn as pills: a Transcript's caption
+ * files and an annotation set's languages (`Annotations`'s `LanguageChoice`), one sheet
+ * for both. `2xs` apart, with no edge or fill of their own: the codes in the muted text on
+ * the panel, the chosen one a pill filled with the accent (5:1 under its white code, and
+ * against the panel), as is any under the pointer or focused (focus with its ring), at
+ * the smaller text size. Each is `l` square at the least, past 24px (WCAG 2.5.8); the
+ * radio stays for the keyboard and assistive technology, the code is what shows. Each
+ * part places its row (`Transcript.css`, `Annotations.css`).
+ */
+:is(.clover-transcript-languages, .clover-annotations-languages) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clover-space-2xs);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: var(--clover-text-xs);
+  line-height: 1;
+}
+
+.clover-transcript-languages > .clover-transcript-language,
+.clover-annotations-languages > .clover-annotations-language {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: var(--clover-space-l);
+  min-height: var(--clover-space-l);
+  padding: 0 var(--clover-space-xs);
+  border-radius: var(--clover-radius-pill, 2rem);
+  color: var(--clover-color-primary-muted, #26292b);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Chosen, and any under the pointer or focused, as Clover's controls take it: the accent. */
+:is(.clover-transcript-language, .clover-annotations-language):is(
+  :has(input:checked),
+  :hover,
+  :has(input:focus-visible)
+) {
+  background-color: var(--clover-color-accent, #0065c3);
+  /* On the accent, the round controls' glyph color: kept 4.5:1 from it in either mode. */
+  color: var(--clover-color-control-glyph, #fff);
+}
+
+:is(.clover-transcript-language, .clover-annotations-language):has(
+  input:focus-visible
+) {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+}
+
+:is(.clover-transcript-language, .clover-annotations-language) input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  :is(.clover-transcript-language, .clover-annotations-language):has(
+    input:checked
+  ) {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}

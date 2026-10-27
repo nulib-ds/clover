@@ -34,17 +34,9 @@ export class CameraAnimator {
     this.timeConstant = timeConstant;
   }
 
-  get animating(): boolean {
-    return this.target !== null;
-  }
-
   /** The state the camera is heading to (or at, when idle). */
   get destination(): CameraState {
     return this.target ? { ...this.target.state } : { ...this.current };
-  }
-
-  setTimeConstant(seconds: number): void {
-    this.timeConstant = Math.max(0, seconds);
   }
 
   /** Jump, canceling any animation. Used by drags, which must track the pointer 1:1. */

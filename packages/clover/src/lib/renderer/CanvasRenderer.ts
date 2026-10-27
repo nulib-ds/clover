@@ -1,12 +1,11 @@
 import type { CloverRequest } from "../../core/request";
 import type { Backend, BackendKind, DrawSource } from "./backends/backend";
-import { Canvas2DBackend } from "./backends/canvas2d/Canvas2DBackend";
 import {
   type ContextHolder,
   claimContext,
   returnContext,
 } from "./backends/contexts";
-import { DomLayers, type DomLayerItem } from "./backends/dom/DomLayers";
+import type { DomLayerItem, DomLayers } from "./backends/dom/DomLayers";
 import { WebGL2Backend } from "./backends/webgl2/WebGL2Backend";
 import {
   type CameraState,
@@ -32,7 +31,7 @@ import { uploadBudget } from "./scene/uploadBudget";
 import { type Point, apply, compose, rotate, scale } from "./math/affine";
 import { type Rect, clamp, union } from "./math/rect";
 import type { Navigator } from "./overlays/Navigator";
-import { OverlayLayer } from "./overlays/OverlayLayer";
+import type { OverlayLayer } from "./overlays/OverlayLayer";
 import { planFrame } from "./scene/planFrame";
 import {
   type SceneImage,
@@ -56,11 +55,6 @@ export interface CanvasRendererOptions {
   maxZoomPixelRatio?: number;
   /** Smallest zoom, as a fraction of the home zoom (OpenSeadragon's `minZoomImageRatio`). */
   minZoomImageRatio?: number;
-  /**
-   * Fraction of the viewport left clear around the home view, inside the host's own
-   * padding (which the home view always keeps clear).
-   */
-  homePadding?: number;
   /** Seconds for an animation to close most of its distance. 0 disables animation. */
   animationTime?: number;
   /** Credentials, headers and `fetch` for `info.json` and image requests. */
@@ -91,7 +85,6 @@ type Listener = (detail?: unknown) => void;
 const DEFAULTS = {
   maxZoomPixelRatio: 1.1,
   minZoomImageRatio: 0.9,
-  homePadding: 0,
   animationTime: 0.09,
   request: undefined as CloverRequest | undefined,
   byteBudget: 192 * 1024 * 1024,
@@ -149,10 +142,19 @@ const sameInset = (a: Inset, b: Inset) =>
  * Framework-free — the React `Canvas` component is a thin host around it — so it can be
  * driven, measured and tested on its own.
  */
+/** Canvas2D's code, loaded once for the page, the first time a renderer needs it. */
+let canvas2d:
+  | Promise<typeof import("./backends/canvas2d/Canvas2DBackend")>
+  | undefined;
+
 export class CanvasRenderer implements GestureTarget {
   readonly host: HTMLElement;
-  /** Annotation hotspots and anything else pinned to a world rectangle. */
-  readonly overlays: OverlayLayer;
+  /**
+   * Annotation hotspots and anything else pinned to a world rectangle: made by the first
+   * thing pinned (`overlaysOf`, in the hotspots' chunk), so a Canvas with none never
+   * loads it.
+   */
+  overlays: OverlayLayer | null = null;
 
   private options: typeof DEFAULTS;
   private backend: Backend | null = null;
@@ -165,7 +167,14 @@ export class CanvasRenderer implements GestureTarget {
   };
   /** In the window, as last seen: only then does it hold a context. */
   private visible = true;
-  private dom: DomLayers;
+  /**
+   * Elements the backend does not draw (`dom` video, pixels WebGL may not read): made,
+   * its code loaded, the first time a frame holds one.
+   */
+  private dom: DomLayers | null = null;
+  private domAsked = false;
+  /** A canvas waiting for Canvas2D's code, the host's background showing meanwhile. */
+  private pending: HTMLCanvasElement | null = null;
   private camera: CameraAnimator;
   private loop: FrameLoop;
   private gestures: GestureController;
@@ -188,11 +197,6 @@ export class CanvasRenderer implements GestureTarget {
   private opaqueUrls = new Set<string>();
   /** Media items' elements, by their one tile's key. Never in the tile cache. */
   private mediaByKey = new Map<string, LoadedImage>();
-  /**
-   * Each video element's decoded-frame count, where `requestVideoFrameCallback` reports
-   * one: a drawn video re-uploads only when it changes, not on every display frame.
-   */
-  private mediaFrames = new Map<HTMLVideoElement, number>();
   private detachMedia: Array<() => void> = [];
   private opened = false;
   /** True until the reader moves the camera; a resize then refits rather than crops. */
@@ -216,8 +220,6 @@ export class CanvasRenderer implements GestureTarget {
     } as typeof DEFAULTS;
     if (prefersReducedMotion()) this.options.animationTime = 0;
 
-    this.dom = new DomLayers(host);
-    this.overlays = new OverlayLayer(host);
     this.camera = new CameraAnimator(
       { x: 0, y: 0, zoom: 1, rotation: 0 },
       this.options.animationTime,
@@ -608,16 +610,6 @@ export class CanvasRenderer implements GestureTarget {
     return screenPointToWorld(this.camera.current, this.viewport, point);
   }
 
-  /** Where item `index` sits in the world. */
-  getItemRect(index: number): Rect | null {
-    const item = this.items[index];
-    return item ? { ...item.rect } : null;
-  }
-
-  get itemCount(): number {
-    return this.items.length;
-  }
-
   /**
    * A rectangle in item `index`'s own coordinates (its declared size — what an
    * annotation's `xywh` targets) → world units.
@@ -662,15 +654,6 @@ export class CanvasRenderer implements GestureTarget {
     };
   }
 
-  /** Diagnostics: what the tile cache holds and is fetching. */
-  getStats(): { tileBytes: number; pending: number; backend: BackendKind } {
-    return {
-      tileBytes: this.cache.byteSize,
-      pending: this.cache.pending,
-      backend: this.backendKind,
-    };
-  }
-
   invalidate(): void {
     this.loop.invalidate();
   }
@@ -689,8 +672,8 @@ export class CanvasRenderer implements GestureTarget {
     this.navigator = null;
     this.releaseBackend();
     this.cache.dispose();
-    this.dom.dispose();
-    this.overlays.dispose();
+    this.dom?.dispose();
+    this.overlays?.dispose();
     this.items = [];
     this.detachMedia.forEach((detach) => detach());
     this.mediaByKey.clear();
@@ -724,7 +707,7 @@ export class CanvasRenderer implements GestureTarget {
       plan.wants.filter((want) => !want.url.startsWith(MEDIA_KEY_PREFIX)),
     );
     this.paint(plan.draws);
-    this.overlays.position(camera, this.viewport);
+    this.overlays?.position(camera, this.viewport);
     this.navigator?.render(
       this.items.filter((item) => !item.spec.hidden),
       this.worldBounds,
@@ -738,28 +721,12 @@ export class CanvasRenderer implements GestureTarget {
       this.lastEmitted = { ...camera };
       if (this.opened) this.emit("viewport");
     }
-    // A video drawn into the canvas needs a frame per display frame while it plays.
     // Tiles held back by the upload budget need the next frame too.
-    return animating || this.texturePlaying() || uploads.deferred;
+    return animating || uploads.deferred;
   };
 
   private getTile = (url: string) =>
     this.mediaByKey.get(url) ?? this.cache.get(url);
-
-  /** A drawn video playing without frame callbacks: poll it every display frame. */
-  private texturePlaying(): boolean {
-    for (const media of this.mediaByKey.values()) {
-      if (
-        media.kind === "media" &&
-        !media.opaque &&
-        !media.source.paused &&
-        !this.mediaFrames.has(media.source)
-      ) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   /**
    * Track the scene's media elements: redraw when one has a new frame to show (it
@@ -780,24 +747,6 @@ export class CanvasRenderer implements GestureTarget {
       this.detachMedia.push(() =>
         events.forEach((type) => element.removeEventListener(type, redraw)),
       );
-      if (!item.media.opaque && "requestVideoFrameCallback" in element) {
-        // Redraw once per decoded frame, at the frame's own rate.
-        this.mediaFrames.set(element, 0);
-        let handle = 0;
-        const onFrame = () => {
-          this.mediaFrames.set(
-            element,
-            (this.mediaFrames.get(element) ?? 0) + 1,
-          );
-          this.invalidate();
-          handle = element.requestVideoFrameCallback(onFrame);
-        };
-        handle = element.requestVideoFrameCallback(onFrame);
-        this.detachMedia.push(() => {
-          element.cancelVideoFrameCallback(handle);
-          this.mediaFrames.delete(element);
-        });
-      }
     }
   }
 
@@ -809,16 +758,12 @@ export class CanvasRenderer implements GestureTarget {
     backend?.begin();
     for (const draw of draws) {
       const { image } = draw;
-      /*
-       * DOM layers: video presented as a `<video>` (the default) whatever the backend,
-       * and anything WebGL may not read.
-       */
+      // DOM layers: video, as a `<video>`, whatever the backend, and what WebGL may not read.
       const asDom =
-        image.kind === "media"
-          ? image.opaque || this.opaqueUrls.has(draw.url)
-          : image.kind === "element" &&
-            webgl &&
-            (image.opaque || this.opaqueUrls.has(draw.url));
+        image.kind === "media" ||
+        (image.kind === "element" &&
+          webgl &&
+          (image.opaque || this.opaqueUrls.has(draw.url)));
 
       if (!asDom && backend) {
         const result = backend.draw({
@@ -830,12 +775,6 @@ export class CanvasRenderer implements GestureTarget {
           crop: draw.crop,
           opacity: 1,
           bleed: draw.bleed,
-          // A video re-uploads as its frame changes; a still image uploads once.
-          version:
-            image.kind === "media"
-              ? (this.mediaFrames.get(image.source) ??
-                Math.round(image.source.currentTime * 1000))
-              : undefined,
         });
         if (result !== "tainted" || image.kind === "bitmap") continue;
         // WebGL may not read these pixels. Show the element itself from now on.
@@ -855,7 +794,19 @@ export class CanvasRenderer implements GestureTarget {
       }
     }
     backend?.end();
-    this.dom.sync(domItems);
+    if (this.dom) this.dom.sync(domItems);
+    else if (domItems.length && !this.domAsked) {
+      this.domAsked = true;
+      void import("./backends/dom/DomLayers").then(({ DomLayers }) => {
+        if (this.disposed) return;
+        const dom = new DomLayers(this.host);
+        // Over the canvas, under the hotspots.
+        if (this.overlays)
+          this.host.insertBefore(dom.container, this.overlays.container);
+        this.dom = dom;
+        this.invalidate();
+      });
+    }
   }
 
   private loadTile(url: string, signal?: AbortSignal) {
@@ -894,7 +845,6 @@ export class CanvasRenderer implements GestureTarget {
         height: Math.max(1, this.viewport.height - top - bottom),
       },
       upright,
-      this.options.homePadding,
     );
     // Centered in the padded area, off the viewport's center when its sides differ.
     camera.x -= (left - right) / 2 / camera.zoom;
@@ -928,7 +878,7 @@ export class CanvasRenderer implements GestureTarget {
 
   /** @param webgl false to draw with Canvas2D whatever the preference, as after a loss. */
   private acquireBackend(webgl = true): void {
-    if (this.backend || this.disposed) return;
+    if (this.backend || this.pending || this.disposed) return;
 
     const canvas = document.createElement("canvas");
     canvas.className = "clover-canvas-surface";
@@ -946,7 +896,11 @@ export class CanvasRenderer implements GestureTarget {
       display: "block",
       pointerEvents: "none",
     });
-    this.host.insertBefore(canvas, this.dom.container);
+    // Under the DOM layer and the hotspots, made before it or after.
+    this.host.insertBefore(
+      canvas,
+      this.dom?.container ?? this.overlays?.container ?? null,
+    );
 
     const tryWebGL =
       webgl &&
@@ -963,16 +917,33 @@ export class CanvasRenderer implements GestureTarget {
       backend = WebGL2Backend.create(canvas, { onLost: this.onContextLost });
       if (!backend) returnContext(this.holder);
     }
-    if (!backend && this.backendPreference !== "webgl2") {
-      backend = Canvas2DBackend.create(canvas);
+    if (backend) this.install(backend);
+    else if (this.backendPreference === "webgl2") this.none(canvas);
+    else {
+      /*
+       * Canvas2D, whose code loads the first time it is needed: a context past the page's
+       * share, a lost one, or no WebGL2 at all. Given back or disposed meanwhile, it is
+       * not made.
+       */
+      this.pending = canvas;
+      void (canvas2d ??= import("./backends/canvas2d/Canvas2DBackend")).then(
+        ({ Canvas2DBackend }) => {
+          if (this.pending !== canvas) return;
+          this.pending = null;
+          const made = Canvas2DBackend.create(canvas);
+          if (made) this.install(made);
+          else this.none(canvas);
+        },
+      );
     }
+  }
 
-    if (!backend) {
-      canvas.remove();
-      this.host.dataset.backend = "none";
-      return;
-    }
+  private none(canvas: HTMLCanvasElement): void {
+    canvas.remove();
+    this.host.dataset.backend = "none";
+  }
 
+  private install(backend: Backend): void {
     this.backend = backend;
     this.host.dataset.backend = backend.kind;
     backend.resize(this.viewport.width, this.viewport.height, this.pixelRatio);
@@ -987,6 +958,8 @@ export class CanvasRenderer implements GestureTarget {
 
   private releaseBackend(): void {
     returnContext(this.holder);
+    this.pending?.remove();
+    this.pending = null;
     if (!this.backend) return;
     const canvas = this.backend.canvas;
     this.backend.dispose();

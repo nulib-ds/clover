@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 
 export interface MediaState {
   paused: boolean;
-  ended: boolean;
   currentTime: number;
   /** The element's, once known; the Canvas's declared duration until then. */
   duration: number;
@@ -10,12 +9,10 @@ export interface MediaState {
   volume: number;
   /** Seconds buffered from the start of the current range. */
   buffered: number;
-  waiting: boolean;
 }
 
 export interface MediaController extends MediaState {
   play: () => void;
-  pause: () => void;
   toggle: () => void;
   seek: (seconds: number) => void;
   skip: (seconds: number) => void;
@@ -32,8 +29,6 @@ const EVENTS = [
   "loadedmetadata",
   "volumechange",
   "progress",
-  "waiting",
-  "playing",
   "seeked",
 ];
 
@@ -58,13 +53,11 @@ export function useMediaController(
       }
       return {
         paused: el?.paused ?? true,
-        ended: el?.ended ?? false,
         currentTime: el?.currentTime ?? 0,
         duration,
         muted: el?.muted ?? false,
         volume: el?.volume ?? 1,
         buffered,
-        waiting: false,
       };
     },
     [declaredDuration],
@@ -75,11 +68,7 @@ export function useMediaController(
   useEffect(() => {
     setState(read(element));
     if (!element) return;
-    const sync = (event: Event) =>
-      setState({
-        ...read(element),
-        waiting: event.type === "waiting",
-      });
+    const sync = () => setState(read(element));
     EVENTS.forEach((type) => element.addEventListener(type, sync));
     return () =>
       EVENTS.forEach((type) => element.removeEventListener(type, sync));
@@ -120,7 +109,7 @@ export function useMediaController(
     if (element) element.muted = !element.muted;
   }, [element]);
 
-  return { ...state, play, pause, toggle, seek, skip, setVolume, toggleMute };
+  return { ...state, play, toggle, seek, skip, setVolume, toggleMute };
 }
 
 // Where it is, as a player counts it, written as every time in Clover is.

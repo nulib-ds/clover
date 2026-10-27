@@ -98,9 +98,13 @@ export default defineConfig({
     // (`build/element-size.mjs`).
     manifest: true,
     lib: {
-      entry: resolve(root, "src/web-components/index.ts"),
+      // The elements, and the Scene's three.js engine, opt-in, which a page loads beside.
+      entry: {
+        index: resolve(root, "src/web-components/index.ts"),
+        three: resolve(root, "src/web-components/three.ts"),
+      },
       formats: ["es"],
-      fileName: () => "index.mjs",
+      fileName: (_format, name) => `${name}.mjs`,
     },
     rollupOptions: {
       external: [],

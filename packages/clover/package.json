@@ -20,6 +20,10 @@
       "types": "./dist/map/index.d.mts",
       "import": "./dist/map/index.mjs"
     },
+    "./three": {
+      "types": "./dist/three/index.d.mts",
+      "import": "./dist/three/index.mjs"
+    },
     "./web-components": {
       "types": "./dist/web-components/index.d.mts",
       "import": "./dist/web-components/index.mjs"
@@ -28,6 +32,7 @@
       "types": "./dist/web-components/viewer/index.d.mts",
       "import": "./dist/web-components/viewer/index.mjs"
     },
+    "./web-components/three": "./dist/web-components/three.mjs",
     "./web-components/custom-elements.json": "./dist/web-components/custom-elements.json",
     "./styles.css": "./dist/styles.css",
     "./templates.css": "./dist/templates.css",
@@ -46,26 +51,32 @@
     "test:ci": "vitest run && vitest run --config vitest.preact.config.mjs",
     "test:build": "node --test build/*.test.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "build:types": "dts-bundle-generator --project tsconfig.json --out-file dist/index.d.mts src/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/templates/index.d.mts src/templates/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/map/index.d.mts src/map/index.ts --no-check",
-    "build:web-components": "vite build --config build/web-components.config.mjs && cp build/web-components-loader.js dist/web-components/index.umd.js && vite build --config build/web-components-viewer.config.mjs && cp build/web-components-loader.js dist/web-components/viewer/index.umd.js && node build/custom-elements.mjs",
+    "build:types": "dts-bundle-generator --project tsconfig.json --out-file dist/index.d.mts src/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/templates/index.d.mts src/templates/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/map/index.d.mts src/map/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/three/index.d.mts src/three/index.ts --no-check",
+    "build:web-components": "vite build --config build/web-components.config.mjs && cp build/web-components-loader.js dist/web-components/index.umd.js && vite build --config build/web-components-viewer.config.mjs && node build/dedupe-viewer.mjs && cp build/web-components-loader.js dist/web-components/viewer/index.umd.js && node build/custom-elements.mjs",
     "build:sizes": "node build/sizes.mjs",
     "e2e": "playwright test --config=e2e/playwright.config.ts"
   },
   "dependencies": {
-    "@iiif/helpers": "^4.0.0",
     "@iiif/parser": "^4.0.3",
     "@iiif/presentation-3": "^1.1.3",
     "dompurify": "^3.0.2",
     "hls.js": "^1.5.17",
-    "maplibre-gl": "^6.6.0",
-    "three": "^0.186.1"
+    "maplibre-gl": "^6.6.0"
   },
   "peerDependencies": {
     "react": "^18.2.0 || ^19.0.0",
-    "react-dom": "^18.2.0 || ^19.0.0"
+    "react-dom": "^18.2.0 || ^19.0.0",
+    "three": "^0.186.1"
+  },
+  "peerDependenciesMeta": {
+    "three": {
+      "optional": true
+    }
   },
   "devDependencies": {
+    "@iiif/helpers": "^4.0.0",
     "@types/three": "^0.186.0",
-    "preact": "^10.24.3"
+    "preact": "^10.24.3",
+    "three": "^0.186.1"
   }
 }

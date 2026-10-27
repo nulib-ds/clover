@@ -92,12 +92,12 @@ export const viewerDocs: ElementDocs = {
     },
     download: {
       description:
-        'Default and Document: "false" leaves the downloads out of the panel\'s About.',
+        "Default and Document: \"false\" leaves out the downloads: Default's in its panel's About, Document's in its toolbar (its panel's About lists none).",
       default: "true",
     },
     "panel-open": {
       description:
-        "Default and Document: whether the information panel starts open. Default's opens where it has room; Document's starts shut.",
+        "Default and Document: whether the information panel starts open beside the page. Default's does, by default; Document's starts shut. Where it would slide over the page (a phone), it starts shut.",
     },
     "panel-layout": {
       description:
@@ -106,7 +106,7 @@ export const viewerDocs: ElementDocs = {
     },
     "sidebar-open": {
       description:
-        "Document: whether the page thumbnails start shown. Shown on a wide screen, by default.",
+        "Document: whether the page thumbnails start shown beside the page, as they do by default. Where they would float over the page (a phone), they start put away.",
     },
     "storage-key": {
       description:

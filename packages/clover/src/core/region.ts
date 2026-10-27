@@ -1,6 +1,8 @@
 import { parseAnnotationTarget } from "./annotations";
 import type { ThumbnailSource } from "./thumbnail";
 import { findImageServiceId } from "../lib/renderer/sources/imageService";
+import { isPainting } from "./painting";
+import { asArray } from "../lib/asArray";
 
 /*
  * Apart from `thumbnail.ts`, which every page loads for its strip: this reads annotation
@@ -8,9 +10,6 @@ import { findImageServiceId } from "../lib/renderer/sources/imageService";
  */
 
 type Json = Record<string, any>;
-
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
 
 /**
  * A small picture of a region of a Canvas (an annotation's `xywh`, in the Canvas's own
@@ -26,8 +25,7 @@ export function regionSource(
 ): ThumbnailSource | null {
   for (const page of asArray(canvas?.items) as Json[]) {
     for (const annotation of asArray(page?.items) as Json[]) {
-      const motivation = asArray(annotation?.motivation);
-      if (motivation.length && !motivation.includes("painting")) continue;
+      if (!isPainting(annotation)) continue;
       for (const body of asArray(annotation?.body) as Json[]) {
         if (body?.type !== "Image" || !body.width || !body.height) continue;
         const service = findImageServiceId(body.service);

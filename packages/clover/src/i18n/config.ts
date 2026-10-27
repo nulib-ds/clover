@@ -1,4 +1,5 @@
 import { en, loaders } from "./locales";
+import { readerLanguages } from "./reader";
 
 /**
  * Clover's translations, without a translation library.
@@ -59,21 +60,6 @@ function withBase(lng: string): string[] {
   return base && base !== lng ? [lng, base] : [lng];
 }
 
-/**
- * The languages to speak, most preferred first: the page's, then the browser's. Clover is
- * a part of its host's page, so it speaks the page's language where it has strings for
- * it, and the reader's otherwise.
- */
-function preferredLanguages(): string[] {
-  const found: string[] = [];
-  if (typeof document !== "undefined")
-    found.push(document.documentElement.lang);
-  if (typeof navigator !== "undefined") {
-    found.push(...(navigator.languages ?? []), navigator.language);
-  }
-  return found.filter(Boolean);
-}
-
 /** Each shipped language's load, once asked for: it settles whether it loads or fails. */
 const loading = new Map<string, Promise<void>>();
 
@@ -114,10 +100,27 @@ function loadFor(chain: string[]): Promise<void> {
   return lng && lng !== "en" ? load(lng) : Promise.resolve();
 }
 
-/** Every language to look in, in order, ending with English. */
+/** The chain last made, and what it was made from (`lookupChain`). */
+let chain: string[] = [];
+let madeFrom = "";
+
+/**
+ * Every language to look in, in order, ending with English. Made again only when what it
+ * is made from changes: the strings or settings (`version`, which `initCloverI18n`,
+ * `changeLanguage` and each language's load move), or, with no language set, the page's
+ * `<html lang>` and the browser's languages. Every string asks for it, a strip of
+ * hundreds of thumbnails one each, so it is read, not rebuilt.
+ */
 function lookupChain(): string[] {
-  const requested = language ? [language] : preferredLanguages();
-  const chain = [
+  const from = language
+    ? `${version}`
+    : `${version} ${typeof document < "u" ? document.documentElement.lang : ""} ${
+        typeof navigator < "u" ? navigator.languages : ""
+      }`;
+  if (from === madeFrom) return chain;
+  madeFrom = from;
+  const requested = language ? [language] : readerLanguages();
+  chain = [
     ...new Set([...requested, ...fallbacks].flatMap(withBase).concat("en")),
   ];
   // Idempotent, and it settles later, so asking from a render is safe.

@@ -109,7 +109,8 @@ test("a press in the list opens the Canvas past its placeholder, there to show t
     .first()
     .click();
   await expect(canvas).toHaveAttribute("data-placeholder", "false");
-  const then = page.getByRole("button", { name: "Then", exact: true });
+  // Named by its tag and the cataloger's words after it ("Then – Postman on foot…").
+  const then = page.getByRole("button", { name: /^Then – / });
   await expect(then).toHaveAttribute("aria-current", "true");
   // Named on the Canvas without the pointer on it.
   await page.mouse.move(0, 0);
@@ -130,12 +131,13 @@ test("the Canvas's own annotations menu works over its placeholder, opening it t
   await control.focus();
   await page.keyboard.press("Enter");
   // Focus lands on the first, Then; the arrow moves to Now and picks it.
-  await expect(page.getByRole("radio", { name: "Then" })).toBeFocused();
+  await expect(page.getByRole("radio", { name: /^Then – / })).toBeFocused();
   await page.keyboard.press("ArrowDown");
   await expect(canvas).toHaveAttribute("data-placeholder", "false");
-  await expect(
-    page.getByRole("button", { name: "Now", exact: true }),
-  ).toHaveAttribute("aria-current", "true");
+  await expect(page.getByRole("button", { name: /^Now – / })).toHaveAttribute(
+    "aria-current",
+    "true",
+  );
 });
 
 /*

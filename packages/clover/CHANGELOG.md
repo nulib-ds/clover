@@ -210,7 +210,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the same page, its code cut into the chunks the elements share. Load one entry on a
   page, not both: each brings its own copy of Clover. `index.umd.js` loads it from a
   classic script, as the main entry's does; `sizes.json` records it
-  (`viewerEntryGzip`), held to 90.6 kB.
+  (`viewerEntryGzip`), held to 90.6 kB. `viewer/` holds only the Viewer's own files and
+  loads the 20 it has in common with the main entry (MapLibre and its worker, hls.js,
+  DOMPurify, the languages and a few small modules) from the folder above, so the package
+  is 0.49 MB gzip lighter and a page loads what it did. If you serve Clover's files
+  yourself, copy the whole `web-components` folder, not `viewer/` alone.
 
   ```html
   <script src=".../web-components/viewer/index.umd.js"></script>
@@ -630,8 +634,6 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   (`"styles-1"`) or MapLibre's (`"maplibre"`), with its place in `styles.css`'s order
   (`data-clover-index`), which keeps the cascade the stylesheet's. Where a page looked for
   `style[data-clover="clover"]`, look for `style[data-clover]`, which finds them all.
-  `defineCloverElements`' `styles`, optional, takes a stylesheet handed in whole, or a
-  loader for it, injected before Clover's own sheets.
 
   ```html
   <script src=".../web-components/index.umd.js"></script>
@@ -1237,7 +1239,6 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   `useVisibleCanvases`, `useActiveCanvas`, `useNavigation` and `useLocalized`. Each
   re-renders only when what it reads changes. The viewport and the media element are
   passed through channels, not state, so panning and playback re-render nothing.
-  `createClover()` gives the same state without React.
 - **Space and type on one scale, from your page.** Every space in Clover is a step of
   the golden ratio from your page's own `1rem` (`--clover-space-3xs` to
   `--clover-space-2xl`, and `--clover-control` for the round controls), and every text
@@ -1356,8 +1357,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
 
 - **Phones.** iPhone Safari can put a video full screen, but no other element. There, the
   Canvas offers no full-screen control for images, and a video's full-screen button opens
-  the system player. That includes a video drawn into the `<canvas>` element
-  (`presentation: "texture"`). The same applies inside an `<iframe>` that is not allowed
+  the system player. The same applies inside an `<iframe>` that is not allowed
   full screen, where the button used to do nothing. Other browsers are unchanged.
 - **The playback controls for video and sound keep their size.** The play, volume, time,
   chapters, captions and full-screen controls hold their size, and the current chapter's
@@ -1668,9 +1668,7 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
       reader picks in the Captions menu (`{ id, language }`, or `null` for Off), and
       `caption` (a file's `id`) chooses the one shown while captions are on, for a
       transcript of a host's own to lead and follow; inside a `Root` the Canvas reads it
-      from the Root's new `clover.captions` channel, which `Transcript` sets. `options.media.presentation: "texture"` draws video
-      frames into the WebGL canvas instead of positioning a `<video>`. This needs CORS,
-      and a video without it falls back.
+      from the Root's new `clover.captions` channel, which `Transcript` sets.
 
     ```jsx
     <Clover.Canvas
@@ -1859,6 +1857,260 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   The API is experimental and may change in any release.
 
 ### Changed
+
+- **Lighter, from a pass over dead code (Mat, 2026-10-27; `DRY.md`, Phase 1).** What a
+  page loads, measured by the build: the Default template's page 70.3 kB gzip (70.8
+  before), Document's 72.8 (73.3), Gallery's 60.2 (60.8), a Canvas's or a Timeline's first
+  load 38.7 (38.9), the stylesheet 15.5 (15.6), a `<clover-viewer>` 113.9 (114.4) and its
+  own entry 95.2 (95.9). What went, none of it reachable from a page: the renderer's
+  path for a WebGL context restored (the renderer lets a lost context go at once), its
+  members and options no caller used, the scroll track's vertical axis and numeric
+  paging, the Panel sections' uncontrolled state, two icons, the media controller's
+  unread state, and rules in `Canvas.css` and `Canvas/Annotations.css` that the
+  elements' inline geometry always overrode (a host's own rules for those classes were
+  overridden too, so none changes). The Default template's root no longer carries
+  `data-panel-open`, which nothing read: a page that styled by it can read
+  `[data-open]` on the panel's pane. The budgets in `build/size-budget.json` follow:
+  each one that fell, to its measured size and about 250 B more, and a `<clover-canvas>`
+  alone, which a Canvas loading its own chapters and deep links (Fixed, below) grew to
+  82.8 kB, raised to 83.0. The Ranges' reader loads only for a Canvas that plays, and an
+  annotation's name only with its hotspots, so neither weighs on a still image.
+
+- **A Timeline no longer loads the image renderer (Mat, 2026-10-27; `DRY.md`, A3).**
+  Sound has no picture to draw, so a `Timeline` (standalone, loading its own, or a
+  Root's view, `Body`'s too) now draws on a small surface of its own in place of Canvas's
+  WebGL renderer: nothing of the tiles, the camera or the gestures loads for it, and in
+  view it no longer holds one of the page's WebGL contexts. It plays as before: the same
+  player, transport, captions, chapters and notes; a click on its view plays and pauses
+  and a finger's tap shows the controls; its view keeps its name, its keys and its
+  focus. A Timeline alone now loads 23.4 kB gzip up front (38.7 before), a
+  `<clover-timeline>` page 66.9 kB (81.5). A Root's shared content state now names a
+  Timeline view with no region, where it carried an `xywh` a Timeline cannot have. A
+  `Canvas` handed a Timeline still draws it with the renderer. The elements' Canvas view
+  and its renderer are now two chunks, fetched together, so a Timeline can take one
+  without the other; that costs an element page holding a Canvas about 0.56 kB, of which
+  reading what a container paints one way (below) wins back 0.1 to 0.33 kB. A React
+  page, whose bundler makes its own chunks, changes by under 50 B.
+  `build/bundle.test.mjs` now fails if a Timeline can reach the renderer. Nothing to do
+  when upgrading.
+
+- **What a container paints is read one way (Mat, 2026-10-27; `DRY.md`, A2).** A
+  thumbnail, Items' kind of each item, the Body's renderer, a region's image, the
+  Canvas's layout, the Map's overlay and the Scene's models now read painting
+  annotations by one rule (`core/painting.ts`, `core/painted-bodies.ts`): `painting`
+  among the motivations, or none said; Presentation 4's groups (`Composite`,
+  `Independents`, `List`) unwrapped; a `Choice`'s first item; a `SpecificResource`'s
+  source. So a Canvas that paints its image inside a group now has that image as its
+  thumbnail and still, and Items calls it an image (it called it `Composite`); Items no
+  longer takes a body from an annotation that does not paint; and the Map draws the
+  image of a georeferenced Canvas whose painting annotation names no motivation. The
+  package's twenty copies of one helper are one (`lib/asArray.ts`). Measured: the
+  Default template's page 70.0 kB gzip (70.3 after Phase 1), Document's 72.6 (72.8),
+  Gallery's 60.1 (60.2), a Scene's first load 15.3 (15.6), a Map's 18.5 (18.6), a
+  `<clover-viewer>` 114.2 and its own entry 95.0 (95.2). The budgets follow, each to its
+  measured size and about 250 B more; the budgets of the elements' pages that hold a
+  Canvas end 0.2 to 0.55 kB over Phase 1's (`webComponentsGzip` 114.4 kB, `composedPageGzip` 97.6,
+  `layoutPageGzip` 113.5, `canvasElementGzip` 83.55, `documentElementGzip` 120.75), the
+  rest of the Timeline's split, and Timeline's budget falls to 23.65 kB.
+
+- **Six decisions on what Clover keeps (Mat, 2026-10-27; `DRY.md`, decisions 1, 2, 4, 10,
+  12, 13).**
+  - **three.js is opt-in.** The Scene's `engine="three"` draws with three.js only once a
+    page registers it, and `three` is no longer installed with Clover (an optional peer
+    dependency): install it, and register it once, before a Scene draws. The web
+    components bring theirs bundled, in a module a page loads beside the elements. A
+    Scene asked for an engine no one registered draws with Clover's own, and says so in
+    the console. The docs no longer say it draws compressed models or animations: it
+    does neither (no Draco, Meshopt or KTX2 decoder, and no animation loop).
+
+    ```js
+    // npm install three
+    import { registerThreeEngine } from "@nulib/clover/three";
+    registerThreeEngine();
+    ```
+
+    ```html
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/web-components/three.mjs"
+    ></script>
+    ```
+
+  - **Video is always the browser's own element.** `options.media.presentation`
+    (`"texture"`, drawing frames into the canvas) is gone with the `media` option: a
+    video is the `<video>` itself, placed by the camera, so it asks for no CORS. Remove
+    `options.media` where you passed it.
+  - **A floating drawer's drag loads when one first floats.** Swiping a panel or
+    Document's thumbnails away works as before, its code loaded the first time a drawer
+    slides over the page; a wide layout never loads it.
+  - **`@iiif/helpers` is no longer a dependency.** Which language a IIIF value shows in is
+    Clover's own `closestLanguage`, held by a test to give the answers `@iiif/helpers`'
+    `getClosestLanguage` gives, and Clover's strings and IIIF text read the reader's
+    languages one way (`navigator.language` after `navigator.languages`).
+  - **The public helpers, settled.** `readAs`, `toPlainText`, `thumbnailSource`,
+    `regionSource`, `resolveThumbnail` and `buildContentState` are documented (Technical
+    overview, Helpers). `createClover` and `isPresentation4` are no longer exported:
+    a `Root`'s state is read through `useClover` and the hooks, and `toPresentation4`
+    stays.
+  - **`defineCloverElements` takes no `styles`.** A page styles Clover with its own
+    stylesheet, which outranks Clover's `clover` layer; nothing in the package handed one.
+
+  Measured, gzip, against before them: the Default template's page 65.5 kB (66.6),
+  Document's 62.0 (63.0), a Canvas alone 35.8 (36.2), a Timeline 21.7 (21.8), the
+  elements' entry 5.4 (5.6), all the web components 109.0 (110.4), `<clover-viewer>`'s
+  entry 89.9 (91.2), one in Document 115.5 (116.9); a Scene alone +14 B, for the
+  engines' registry. The package ships one copy of three.js where it shipped two. The
+  budgets follow.
+
+- **More of Clover loads only when a page needs it (Mat, 2026-10-27; `DRY.md`, B3 to
+  B9).** Nothing draws differently; a few things a page did not use now wait for it.
+  - **Annotations' state.** What a Canvas keeps of its annotations (which pages show,
+    the hotspots' places, the hovered and the picked one, framing a pick, going to one
+    on a recording's time, opening the Canvas past its placeholder for a pick) loads
+    with the hotspots, only for a Canvas with annotations. A pick made before they
+    arrive, a host's `selectedAnnotation` say, is framed once they have, as one made
+    before its view was drawn always was.
+  - **Hotspots' layer.** A Canvas makes its `.clover-canvas-overlays` layer, and loads
+    its code, with its first hotspot. A Canvas with no annotations has none, so a script
+    or style that reached for it there finds nothing.
+  - **Video sizing.** How a video is fitted at its own aspect is read by the media's own
+    code, which only a recording loads.
+  - **Content state.** Reading a content state handed to a Root (JSON or base64url, not
+    a URL) loads a small chunk of its own; writing one, and `decodeContentState` imported
+    from `@nulib/clover`, are as before.
+  - **Items outside a Root.** Standalone Items (given `iiifContent` or `items`) is a
+    chunk of its own, so a template, whose Items are always in a Root, never carries it.
+    It draws a moment later, and no longer in a server's first pass.
+  - **The renderer's fallbacks.** Canvas2D, which draws when WebGL2 cannot be had (a
+    context past the page's share, a lost one, or none), loads the first time it is
+    needed, the Body's background showing meanwhile. The DOM layer
+    (`.clover-canvas-dom-layer`, for `dom` video and images served without CORS) is made
+    with the first frame that holds one; until its code arrives, such an image's first
+    frame waits.
+  - **Maps.** MapLibre loads only as a map comes within half a screen of view, as a
+    Canvas's images do, so a map far down a page, or in a tab not yet open, loads none
+    of it. A `Map` given its own `iiifContent` loads its Root's code as a chunk of its
+    own, its box holding its place meanwhile, so a map handed its places, or inside a
+    Root, never carries the loader.
+
+  Measured, gzip: the Default template's page 66.6 kB (69.7), Document's 63.0 (66.2),
+  Gallery's 26.1 (26.8), a Canvas alone 36.2 (38.7), a Timeline 21.8 (23.4), a Map 11.8
+  (18.5), a page of `<clover-root>` and `<clover-label>` 32.5 (32.9), all the web
+  components 110.4 (113.5), `<clover-viewer>`'s entry 91.2 (94.4), one in Document 116.9
+  (120.0). The budgets follow.
+
+- **Gallery and Document load what starts hidden when it is first wanted (Mat,
+  2026-10-27; `DRY.md`, B1, B2).**
+  - Gallery's lightbox Body is a chunk of its own, loaded the first time the lightbox
+    opens, or sooner, as the reader's pointer or focus first comes to the gallery. The
+    dialog's title, Close and the pager are there at once, so it is named and takes focus
+    as before; until the Body's code arrives, its box holds the Body's place, busy, with
+    a Canvas's background (`clover-template-lightbox-pending`).
+  - Document's information panel is a chunk of its own, loaded as the reader points at
+    or focuses its toggle, or as it opens (`defaultPanelOpen`, or beside the page again).
+    A first press waits for it, then opens the panel whole, so focus still goes to its
+    section over the page. Until then its pane is empty, so a page's script or style that
+    reaches into `.clover-panel` before the panel first opens finds nothing, and a
+    server render with `defaultPanelOpen` draws the pane without its sections.
+
+  Measured: the Gallery template's page 26.8 kB gzip (59.9), Document's 66.2 (72.3),
+  `templates.css` +23 B. A `<clover-viewer>` in Document gains 114 B: its entry already
+  holds the Panel, with the Default template, so the chunk saves it nothing. The budgets
+  follow, that one's raised to 120.2 kB.
+
+- **One rule for what floats over the page (Mat, 2026-10-27; `DRY.md`, Decision 7, A26,
+  A29).** Default's panel and Document's panel and page thumbnails now behave alike where
+  there is no room for them beside the page (a phone, a narrow column, a reader zoomed
+  in):
+  - They start closed there, whatever `defaultPanelOpen` or `defaultSidebarOpen` (the
+    `panel-open` and `sidebar-open` attributes) say: open, they covered the Body the
+    reader came for, with focus behind them (WCAG 2.4.11). Both props now say whether the
+    pane starts open beside the page; `defaultPanelOpen` defaults to `true` in Default
+    and `false` in Document, `defaultSidebarOpen` to `true`. A host that wants the panel
+    in view on a phone can no longer open it on arrival; the reader opens it with its
+    toggle.
+  - Narrowing under an open one closes it, and focus in it, or on its toggle on the
+    spine, follows the toggle to its new place; widening brings it back beside the page.
+    Document's panel used to float over the page and take focus instead, and Default
+    dropped focus that was on the panel's toggle as the toggle moved (WCAG 2.4.3).
+  - Document's thumbnails over the page now behave as the panel does: opening them puts
+    focus on the thumbnail of the page the reader is on, and Escape anywhere in the
+    template puts them away (focus in them back to their toggle, focus elsewhere left
+    where it is), as a press on the wash or a drag does. Before, Escape did nothing, and
+    Tab could reach page controls hidden under them.
+  - Document decides that its thumbnails float by its own width (under 40rem), as both
+    templates decide for the panel, not the window's: in a narrow column of a wide page
+    they now float too. Its stylesheet keys this on `data-narrow` on
+    `.clover-template-document-panes` rather than `@media (max-width: 40rem)`, and their
+    bar is left out while they float rather than hidden; a page that styled the narrow
+    thumbnails under that media query needs the attribute instead. A server render no
+    longer draws them open on a phone's first paint and closed on its hydration.
+  - Document's drawers share `templates/shared/useDrawer.ts`; Default keeps the same rule
+    in its own code, lighter so.
+
+  Measured: the Default template's page 69.7 kB gzip (−44 B), Document's 72.3 (+82 B,
+  the thumbnails' new Escape and focus, and focus kept on a toggle as it moves),
+  `templates.css` −8 B, a `<clover-viewer>` 113.5 (−92 B), one in Document +94 B, and
+  its own entry −28 B. The budgets follow.
+
+- **The templates share their drawer, and place their spines by CSS (Mat, 2026-10-27;
+  `DRY.md`, A27, A28, A30).**
+  - Default's and Document's panel over the Body, the wash beside it and their
+    reduced-motion rule are written once, in `styles.css` (`Default.css`), on classes both
+    templates now set beside their own: `clover-template-panes` on the Split,
+    `clover-template-drawer` on the panel's pane, `clover-template-scrim` on each wash.
+    Document's copies left `templates.css`. A page's rules for the old selectors still
+    apply as before; Document's washes now also go without their fade where the reader
+    asks for reduced motion, as Default's did.
+  - Each panel toggle's spine (`.clover-template-default-spine`,
+    `.clover-template-document-spine`) is now a box of no width in the Split's row, right
+    after its bar, which the toggle hangs from (`position: relative`, no inline `left`):
+    centered on the bar, or for Document's thumbnails all over them but for its far
+    rounded end, and on a phone at their edge (`--clover-template-sidebar-width`). It
+    follows a dragged bar and right to left with nothing measured; Default measures only
+    how far down its Body begins. A page that placed the spine itself needs updating.
+  - `<clover-viewer>` draws its template directly, not through the Viewer's shell.
+
+  Measured: the Default template's page 69.8 kB gzip (69.9), Document's 72.2 (72.5),
+  `templates.css` 2.0 (2.1), `styles.css` 15.5 (+37 B), a `<clover-viewer>` 113.6 (113.7),
+  one in Document 119.8 (120.0), and its own entry 94.5 (94.7). The budgets follow.
+
+- **The parts' shared rules written once (Mat, 2026-10-27; `DRY.md`, A21 to A25).** The
+  language codes of a Transcript's files and an annotation set's languages are drawn by
+  one sheet, `ui/Codes.css`, on the classes they had (`clover-transcript-language`,
+  `clover-annotations-language`), each part placing its row as before; Search's hidden
+  status is one rule; an annotation set's language and a popover hidden by Escape until
+  the reader comes back (a Tip's, an item's full title) are each decided in one place.
+  Measured: the stylesheet 15.5 kB gzip (29 B less), the Default template's page 69.9
+  (17 B less), Document's 72.5 (39 B less), the elements' pages 33 to 77 B less; a Canvas,
+  Timeline or Scene alone 10 to 17 B more, which loads the Tip's shared code without
+  Items'. Budgets follow. Nothing to do when upgrading: no class, rule or behavior a page
+  reads changed.
+
+- **A Root loads less of the core (Mat, 2026-10-27; `DRY.md`, A12 to A20).** The
+  reader of a host's own annotations (`annotations` on `Root`, an AnnotationCollection
+  or pages) now loads only for a Root given some, and the rest of a search with the first
+  search; the Canvas's SVG reader and the elements' modules on demand load as every
+  other part's do (`useLoaded`), so one that will not load no longer leaves an unhandled
+  rejection; and the elements' root reads the active Canvas and builds the navigation
+  with the React hooks' own code (`selectCanvas`, a lookup made once per Manifest where
+  each read searched the Canvases; `navigationOf`). Measured: the Default template's
+  page 69.9 kB gzip (70.0), Document's 72.5 (72.6), Gallery's 59.9 (60.1), a Map's 18.5,
+  a `<clover-viewer>` 113.8 (114.2) and its own entry 94.7 (95.0), the elements' other
+  pages 0.23 to 0.40 kB lighter. A `<clover-canvas>` that loads its own content is
+  0.26 kB heavier (83.5 kB), as the annotations' reader it loads is now a chunk of its
+  own; its budget rises to 83.8 kB, and the budgets that fell follow, each to its measured
+  size and about 250 B more. Nothing to do when upgrading: `Navigation` is exported as
+  before.
+
+- **The player's tracks play from where they start (Mat, 2026-10-27; `DRY.md`, A11).**
+  A press on a track in the player's list now plays from its start, as a press on any
+  time Clover lists does (a Transcript's cue, an annotation's, a Range's), where it moved
+  there and left a paused recording paused. Its time is written as theirs are
+  (`CueTime`, `clover-cue-time` beside `clover-canvas-player-chapter-time`), in the
+  player's muted white. The transport's and the animation bar's buttons are one
+  component, named and keyed as before. HLS is now found by a playlist's MIME type in
+  any case, and by a `.m3u8` path with a fragment after it.
 
 - **Size budgets raised to what the package now loads (Mat, 2026-10-26).** Fifteen
   budgets in `build/size-budget.json`, each to its measured size and about 200 B more:
@@ -2270,6 +2522,80 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
 
 ### Fixed
 
+- **A paged Collection or AnnotationCollection whose `next` leads back is read once
+  (Mat, 2026-10-27; `DRY.md`, A16).** A Collection's pages, and an AnnotationCollection's
+  (or a page's `next`), are followed until one comes again, as Content Search's results
+  already were: a loop listed a Collection's members again, up to 50 pages of them, and
+  an AnnotationCollection's annotations up to 100 times.
+- **A Canvas in a Root is never an empty box while it loads (Mat, 2026-10-27; `DRY.md`,
+  A4).** A `Canvas` placed in a `Root` (not through `Body`) now shows its box busy, with
+  the loading mark, while its part for the Root loads, as `Timeline`, `Scene` and a
+  Canvas loading its own do; it showed nothing. And while a Canvas loads, its loading mark
+  comes before its caption, so the `<figcaption>` is last in its `<figure>` again.
+- **A Canvas or Timeline loading its own plays as a Root's does (Mat, 2026-10-27).** Given
+  `iiifContent`, it now plays with the chapters its Manifest's Ranges give what it plays
+  (marked on the seek bar, in the Chapters menu, and listed by the player), and a content
+  state's region or time opens it there, past its placeholder; before, both were read
+  only inside a `Root`. A deep link's time into a recording with nothing to draw (a
+  Timeline of sound alone) now applies in a `Root` too: it waited for the Canvas to be
+  laid out, which such a recording never is. The two share one module,
+  `components/Canvas/fromManifest.ts`.
+
+- **Document lists its downloads once (Mat, 2026-10-27).** Its toolbar has Download, and
+  its panel's About listed them again. The About of Document's panel now lists none, and
+  `download={false}` (`<clover-viewer download="false">`) leaves the toolbar's out, as
+  the attribute's description now says.
+
+- **A panel asked to start open on a narrow layout no longer takes focus (Mat,
+  2026-10-27).** On a layout too narrow for the panel beside the page, `defaultPanelOpen`
+  (the `panel-open` attribute) slid the panel open and moved focus into it as the page
+  loaded, in Default and Document alike (WCAG 2.4.3). Default then closed it, as if the
+  layout had narrowed, leaving focus on the hidden panel. The first measure of the
+  layout's width is now arrival, never a narrowing or an opening, and the panel starts
+  closed there (see "One rule for what floats over the page", under Changed). A panel the
+  reader opens takes focus as before.
+
+- **Full screen looks the same in the transport as in the controls (Mat, 2026-10-27).**
+  The media transport drew its own exit-full-screen glyph, a different one from the
+  controls' over a Canvas or a Scene. It now draws the controls' glyphs, to enter and to
+  exit (WCAG 3.2.4).
+
+- **An annotation is named alike wherever it shows (Mat, 2026-10-27).** Its hotspot and
+  the Canvas's menu took the first text body in each language and read HTML with
+  `DOMParser`; the Annotations list took the last and read HTML with `toPlainText`. Both
+  now use `annotationName` (`core/annotation-name.ts`): the first body in each
+  language, HTML read as `toPlainText` reads it, Markdown without its syntax, an image's
+  label where it has no text (WCAG 3.2.4). The list's button still cuts its name to 120
+  characters, the full text beside it. A hotspot's name may change where an annotation
+  had several bodies in one language, or HTML with named entities other than `&amp;`,
+  `&lt;`, `&gt;`, `&quot;`, `&apos;` and `&nbsp;`.
+
+- **Small reading fixes (Mat, 2026-10-27).** A Manifest whose `partOf` is one Collection
+  rather than a list of them threw in the Panel and `Collection`; it is now read as its
+  Collection. A caption file whose `language` is `null` is read as in no language. A map
+  feature's title is plain text with its entities decoded, so "Smith &amp; Co" reads
+  "Smith & Co".
+
+- **The Transcript's find field reads as Search's does (Mat, 2026-10-26).** Its
+  placeholder was the browser's own, which Safari draws in a pale gray and Firefox at half
+  opacity, under 4.5:1 (WCAG 1.4.3). Its typed words were the browser's field text, not
+  the theme's, so on a dark theme they could all but vanish. The fields' rules
+  (`styles/scale.css`) keyed on Search's query alone, `.clover-content-search-query`; they
+  now key on `.clover-field-pill-query`, which every field pill's query carries, Search's
+  and the Transcript's alike. The placeholder is the theme's text mixed into its ground
+  at full opacity (5.3:1 on white, 7.4:1 on a dark theme), and the words are
+  `--clover-color-primary`. Search's field looks as it did. A page that styled the
+  placeholder through `.clover-content-search-query` still can: Search's query keeps that
+  class. The rules no longer name `.clover-transcript-track select`, which nothing has
+  drawn since the Transcript's track menu became its language codes.
+
+- **A label with a character reference outside Unicode no longer breaks the part (Mat,
+  2026-10-26).** `toPlainText` decoded any numeric reference, and
+  `String.fromCodePoint` throws past U+10FFFF, so a label holding `&#x110000;` threw as
+  `Label`, `Thumbnail`'s alt, a link part's words (`Homepage`, `SeeAlso`, `Rendering`…),
+  `Provider` or the Annotations list rendered it. A reference outside Unicode (`&#0;`, `&#x110000;`) now stays as written,
+  as a caption's already did.
+
 - **A logo that fails to load draws nothing (Mat, 2026-10-25).** `Logo` drew the
   browser's broken picture, its alt text in it, when its image did not load, as on
   Maktaba's manuscript, whose provider's logo its host refuses (HTTP 403). Inside a
@@ -2609,8 +2935,7 @@ are in the repository's `ACCESSIBILITY.md`.
     Body, and is left out only where a page cannot set the volume (iOS).
   - The player stays mounted from one recording to the next (auto-advance), so focus
     stays on the transport. If the focused control goes with the recording
-    (Captions, Chapters, Full screen), Play/Pause takes focus. A `texture` recording
-    whose CORS request fails falls back to `dom` for that recording only.
+    (Captions, Chapters, Full screen), Play/Pause takes focus.
   - While one of its controls has keyboard focus, the transport sits above the captions,
     so a cue never covers the focused control.
   - The Captions and Chapters menus stay open while the arrow keys move through them.

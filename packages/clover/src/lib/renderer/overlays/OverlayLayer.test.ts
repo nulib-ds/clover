@@ -121,7 +121,6 @@ describe("OverlayLayer", () => {
       layer.position({ x: 400, y: 300, zoom: 1, rotation: 0 }, viewport);
       layer.move(element, { x: 0, y: 0, width: 10, height: 10 });
       expect(element.style.transform).toBe("");
-      expect(layer.size).toBe(0);
       layer.dispose();
     });
   });

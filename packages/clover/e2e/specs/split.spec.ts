@@ -149,8 +149,8 @@ test("at rest, the bar's grip keeps 3:1 beside each pane (WCAG 1.4.11)", async (
     return { height: parseFloat(after.height), width: parseFloat(after.width) };
   });
   expect(grip.height).toBeGreaterThan(40);
-  // The bar's 3px, and 1px past it on each side, so it reads as a grip.
-  expect(grip.width).toBe(5);
+  // 6px, centered on the bar's 3px (1.5px past it on each side), so it reads as a grip.
+  expect(grip.width).toBe(6);
   for (const ratio of await gripContrast(handle))
     expect(ratio).toBeGreaterThanOrEqual(3);
 

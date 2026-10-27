@@ -10,7 +10,7 @@ import bookJson from "../../fixtures/iiif-cookbook/0009-book-1.json";
 import tocJson from "../../fixtures/iiif-cookbook/0024-book-4-toc.json";
 import { initCloverI18n } from "../../i18n";
 
-const ASSETS = { styles: [{ key: "clover-1", css: ".clover-root{}" }] };
+const ASSETS = {};
 const BOOK = "Simple Manifest - Book";
 const TOC = "Ethiopic Ms 10";
 

@@ -1,9 +1,10 @@
 import { createContext } from "react";
 
 import { selectAnnotationSets } from "../../core/annotation-sets";
-import type { Clover, CloverState } from "../../core/clover";
+import { type Clover, type CloverState, navigationOf } from "../../core/clover";
 import { tableOfContents } from "../../core/ranges";
 import {
+  selectCanvas,
   selectPosition,
   selectSequence,
   selectVisibleCanvases,
@@ -58,28 +59,15 @@ function own(
       return selectVisibleCanvases(state().manifest, state().canvasId);
     },
     activeCanvas() {
-      const { manifest, canvasId } = state();
-      return (
-        selectSequence(manifest).canvases.find(
-          (canvas) => canvas.id === canvasId,
-        ) ?? null
-      );
+      return selectCanvas(state().manifest, state().canvasId);
     },
     navigation() {
       const { manifest, canvasId } = state();
-      const position = selectPosition(manifest, canvasId);
-      const total = selectSequence(manifest).views.length;
-      return {
-        position,
-        total,
-        hasPrevious: position > 0,
-        hasNext: position + 1 < total,
-        previous: () => clover.previous(),
-        next: () => clover.next(),
-        first: () => clover.first(),
-        last: () => clover.last(),
-        goTo: (canvasId: string) => clover.goTo(canvasId),
-      };
+      return navigationOf(
+        clover,
+        selectPosition(manifest, canvasId),
+        selectSequence(manifest).views.length,
+      );
     },
     annotationSets() {
       return selectAnnotationSets(state().manifest, state().addedSets);

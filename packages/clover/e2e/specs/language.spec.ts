@@ -55,7 +55,8 @@ test("marks Clover's French apart from the page's English and the label's German
   await expect(next).toHaveAttribute("lang", "fr");
   await expect(page.locator(".clover-root")).not.toHaveAttribute("lang");
   // Text in none is the page's.
-  const title = page.getByRole("heading", { name: "Atlas" });
+  // The Viewer's title, not About's heading of the same name.
+  const title = page.getByRole("heading", { name: "Atlas", level: 2 });
   await expect(title).not.toHaveAttribute("lang");
   expect(await languageOf(title)).toBe("en");
   expect(

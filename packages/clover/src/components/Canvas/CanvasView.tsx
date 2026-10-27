@@ -9,14 +9,8 @@ import React, {
   useState,
 } from "react";
 
-import type {
-  AnnotationPlacer,
-  CanvasAnnotation,
-  ListedAnnotation,
-  PlacedAnnotation,
-  TimedAnnotation,
-} from "./Annotations";
-import { useSvgReader } from "./useSvgReader";
+import type { CanvasAnnotation } from "./Annotations";
+import type { AnnotationModel } from "./AnnotationState";
 import Caption, { captionLabelId, hasInformation } from "../Body/Caption";
 import type {
   CanvasControlsConfig,
@@ -49,28 +43,41 @@ import { SHORTCUTS, forwardShortcut } from "../../ui/Tip";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { join } from "../../lib/classnames";
-import { playFrom } from "../../lib/time";
-import { isRegionText, parseAnnotationTarget } from "../../core/annotations";
 import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useRootLanguage } from "../../react/language";
 import { useContainerName } from "../../ui/useContainerName";
-import {
-  CanvasRenderer,
-  findImageServiceId,
-  type SceneImage,
-} from "../../lib/renderer";
+import type { CanvasRenderer, SceneImage } from "../../lib/renderer";
 import { type Rect, union } from "../../lib/renderer/math/rect";
+import { findImageServiceId } from "../../lib/renderer/sources/imageService";
+import { type CanvasSurface, type MakeSurface, hasCamera } from "./surface";
 
 type CanvasStatus = "loading" | "ready" | "error";
 
 /** Video and sound: only fetched when a Canvas paints them. */
 const MediaBody = lazy(() => import("./media/MediaBody"));
-/** The hotspots, and the placing of them, loaded for a Canvas with annotations. */
-const loadHotspots = () => import("./Annotations");
-const NO_PAGES: string[] = [];
+/**
+ * The hotspots, and the annotations' state (`AnnotationState`), loaded for a Canvas with
+ * annotations.
+ */
+const loadHotspots = () => import("./AnnotationState");
 const NO_COMMENTS: Map<string, CanvasAnnotation["annotation"][]> = new Map();
+/** A Canvas's annotations' state until its controller loads: nothing listed or picked. */
+const NO_MODEL: AnnotationModel = {
+  menu: [],
+  placed: [],
+  timed: [],
+  hiddenPages: [],
+  setPagesVisible: () => undefined,
+  listedCount: 0,
+  comments: NO_COMMENTS,
+  selected: null,
+  select: () => undefined,
+  activate: () => undefined,
+  release: () => false,
+  quietlyOpened: null,
+};
 // Few Canvases are animations: their clock and bar load when one is shown.
 const FrameAnimation = lazy(() => import("./FrameAnimation"));
 
@@ -109,12 +116,17 @@ const ANNOTATION_KEYS = {
   keys: "Escape",
 };
 
+export type CanvasViewProps = CloverCanvasProps & {
+  /** What it draws on: Canvas's renderer, or a Timeline's surface (`surface.ts`). */
+  surface: MakeSurface;
+};
+
 /**
  * `Canvas` drawing exactly what it is handed — IIIF Canvases, or plain images — knowing
  * nothing of the Manifest around them. Standalone use renders this directly; inside a
  * `Root`, `Connected.tsx` hands it the current view.
  */
-const CanvasView: React.FC<CloverCanvasProps> = (props) => {
+const CanvasView: React.FC<CanvasViewProps> = (props) => {
   // Nothing to show renders nothing, as `Image` does.
   const hasSource =
     Boolean(props.canvases?.length) ||
@@ -127,140 +139,39 @@ const CanvasView: React.FC<CloverCanvasProps> = (props) => {
   );
 };
 
-const CanvasBody: React.FC<CloverCanvasProps> = ({
-  manifestId,
-  canvases,
-  viewingDirection,
-  body,
-  src,
-  isTiledImage = false,
-  label,
-  partOf,
-  language,
-  instanceId,
-  className,
-  options,
-  navigator = false,
-  controls = true,
-  controlButtons,
-  annotations: allAnnotations,
-  hiddenPages: hiddenPagesProp,
-  unlistedPages: unlistedPagesProp,
-  onPageVisibilityChange,
-  onAnnotationActive,
-  selectedAnnotation: selectedAnnotationProp,
-  animateAnnotations = false,
-  highlightedAnnotation,
-  onAnnotationSelect,
-  onAnnotationLink,
-  onReady,
-  onViewportChange,
-  onMediaElement,
-  onCaptionChange,
-  caption,
-  onEnded,
-  chapters,
-  highlightedChapter,
-  onChapterHighlight,
-  placeholder = true,
-  children,
-}) => {
+const CanvasBody: React.FC<CanvasViewProps> = (props) => {
+  const {
+    surface: makeSurface,
+    manifestId,
+    canvases,
+    viewingDirection,
+    body,
+    src,
+    isTiledImage = false,
+    label,
+    partOf,
+    language,
+    instanceId,
+    className,
+    options,
+    navigator = false,
+    controls = true,
+    controlButtons,
+    annotations: allAnnotations,
+    onReady,
+    onViewportChange,
+    onMediaElement,
+    onCaptionChange,
+    caption,
+    onEnded,
+    chapters,
+    highlightedChapter,
+    onChapterHighlight,
+    placeholder = true,
+    children,
+  } = props;
   const { t } = useCloverTranslation();
-  /*
-   * AnnotationPages hidden from the picture: the host's (`hiddenPages`), or the Canvas's
-   * own. Nothing of theirs is drawn, nor shown as a cue or in the caption; the menu still
-   * lists them, under their page's hide toggle, to show them again.
-   */
-  const [ownHiddenPages, setOwnHiddenPages] = useState<string[]>([]);
-  const [ownShownPages, setOwnShownPages] = useState<string[]>([]);
-  const controlledPages = hiddenPagesProp !== undefined;
-  /*
-   * Its own pages that start hidden, as a Root's do (`startsHidden`): a still Canvas's
-   * OCR, `supplementing` text on its regions, until the menu shows it. A whole page's
-   * transcription and a recording's are kept.
-   */
-  const ownQuietPages = useMemo(() => {
-    if (controlledPages || !allAnnotations?.length) return NO_PAGES;
-    const quiet = new Map<string, boolean>();
-    for (const each of allAnnotations) {
-      if (!each.pageId) continue;
-      const still = !(Number(canvases?.[each.targetIndex]?.duration) > 0);
-      const supplements =
-        still &&
-        isRegionText(
-          each.annotation.motivation,
-          parseAnnotationTarget(
-            (Array.isArray(each.annotation.target)
-              ? each.annotation.target[0]
-              : each.annotation.target) as never,
-          ),
-        );
-      quiet.set(each.pageId, (quiet.get(each.pageId) ?? true) && supplements);
-    }
-    const ids = [...quiet].filter(([, on]) => on).map(([id]) => id);
-    return ids.length ? ids : NO_PAGES;
-  }, [controlledPages, allAnnotations, canvases]);
-  const ownPages = useMemo(() => {
-    const quiet = ownQuietPages.filter(
-      (id) => !ownShownPages.includes(id) && !ownHiddenPages.includes(id),
-    );
-    return quiet.length ? [...ownHiddenPages, ...quiet] : ownHiddenPages;
-  }, [ownHiddenPages, ownShownPages, ownQuietPages]);
-  const hiddenPages = hiddenPagesProp ?? ownPages;
-  /*
-   * The pages the menu never offers (`unlistedPages`), or, alone, its own OCR, as the
-   * Annotations list leaves them out (Mat, 2026-10-26). With none left, no menu control.
-   */
-  const unlistedPages = unlistedPagesProp ?? ownQuietPages;
-  const listed = useCallback(
-    <T extends { pageId?: string }>(list: T[]) =>
-      unlistedPages.length
-        ? list.filter(
-            (each) => !each.pageId || !unlistedPages.includes(each.pageId),
-          )
-        : list,
-    [unlistedPages],
-  );
-  const listedCount = useMemo(
-    () => (allAnnotations ? listed(allAnnotations).length : 0),
-    [allAnnotations, listed],
-  );
-  /** Those of the pages shown: all of them while none is hidden, the same list. */
-  const shown = useCallback(
-    <T extends { pageId?: string }>(list: T[]) =>
-      hiddenPages.length
-        ? list.filter(
-            (each) => !each.pageId || !hiddenPages.includes(each.pageId),
-          )
-        : list,
-    [hiddenPages],
-  );
-  const annotations = useMemo(
-    () => allAnnotations && shown(allAnnotations),
-    [allAnnotations, shown],
-  );
-  const onPageVisibilityRef = useRef(onPageVisibilityChange);
-  onPageVisibilityRef.current = onPageVisibilityChange;
-  const setPagesVisible = useCallback(
-    (pageIds: string[], visible: boolean) => {
-      onPageVisibilityRef.current?.(pageIds, visible);
-      if (controlledPages) return;
-      setOwnHiddenPages((hidden) => {
-        const rest = hidden.filter((id) => !pageIds.includes(id));
-        return visible ? rest : [...rest, ...pageIds];
-      });
-      setOwnShownPages((shown) => {
-        const rest = shown.filter((id) => !pageIds.includes(id));
-        return visible ? [...rest, ...pageIds] : rest;
-      });
-    },
-    [controlledPages],
-  );
   const hostRef = useRef<HTMLDivElement>(null);
-  const rendererRef = useRef<CanvasRenderer | null>(null);
-  const [renderer, setRenderer] = useState<CanvasRenderer | null>(null);
-  const [navigatorElement, setNavigatorElement] =
-    useState<HTMLDivElement | null>(null);
   const [wrapperElement, setWrapperElement] = useState<HTMLElement | null>(
     null,
   );
@@ -290,6 +201,12 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
    */
   const made = useUniqueId();
   const [instance] = useState(() => instanceId ?? `clover-canvas-${made}`);
+  const surfaceRef = useRef<CanvasSurface | null>(null);
+  const [surface, setSurface] = useState<CanvasSurface | null>(null);
+  // The surface's camera, where it has one: Canvas's renderer, never a Timeline's.
+  const renderer = hasCamera(surface) ? surface : null;
+  const [navigatorElement, setNavigatorElement] =
+    useState<HTMLDivElement | null>(null);
   const controlsConfig: Required<CanvasControlsConfig> | null =
     controls === false
       ? null
@@ -332,16 +249,17 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
   const hasAnnotations = Boolean(allAnnotations?.length);
   const hotspots = useLoaded(loadHotspots, hasAnnotations);
   /*
-   * Comments on a whole Canvas (Cookbook 0266, 0019), by Canvas: with no region to draw
-   * them over, the caption shows them, under the Canvas's own words.
+   * The annotations' state, from its controller once loaded (`AnnotationState`), read
+   * through a ref by what outlives a render: the surface's dismiss, the handle.
    */
-  const comments = useMemo(
-    () =>
-      hotspots
-        ? hotspots.wholeCanvasComments(annotations, canvases)
-        : NO_COMMENTS,
-    [hotspots, annotations, canvases],
-  );
+  const [annotationModel, setAnnotationModel] =
+    useState<AnnotationModel | null>(null);
+  const model = (hasAnnotations && annotationModel) || NO_MODEL;
+  const modelRef = useRef(model);
+  modelRef.current = model;
+  const releaseAnnotation = useCallback(() => modelRef.current.release(), []);
+  // Comments on a whole Canvas (Cookbook 0266, 0019), for the caption.
+  const { comments, listedCount } = model;
   const captioned = useMemo(
     () =>
       showInformation
@@ -397,22 +315,15 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
    * picture of its own and is never placed.
    */
   const media = scene?.media[0] ?? null;
-  const presentation = options?.media?.presentation ?? "dom";
   const [mediaElement, setMediaElement] = useState<HTMLVideoElement | null>(
     null,
   );
-  // What `MediaBody` settled on: `dom` if `texture` was asked of media without CORS.
-  const [presented, setPresented] = useState(presentation);
   const onMediaElementRef = useRef(onMediaElement);
   onMediaElementRef.current = onMediaElement;
-  const handleMediaElement = useCallback(
-    (element: HTMLVideoElement | null, how: "dom" | "texture") => {
-      setMediaElement(element);
-      setPresented(how);
-      onMediaElementRef.current?.(element);
-    },
-    [],
-  );
+  const handleMediaElement = useCallback((element: HTMLVideoElement | null) => {
+    setMediaElement(element);
+    onMediaElementRef.current?.(element);
+  }, []);
   const baseImages = scene ? scene.images : bodyImages;
   /*
    * A lone video or sound Canvas is a player, not a picture to explore: it is always
@@ -512,15 +423,11 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
       ? media.kind === "audio" && !mediaOnly && baseImages.length > 0
       : true);
   /*
-   * The video's own frame size, once known. A Canvas may declare a shape the file does
-   * not have (Cookbook 0074 declares portrait for a landscape film), so the video is
-   * fitted inside its target at its real aspect rather than stretched or letterboxed.
+   * Where the video sits: fitted inside its target at its own aspect once `MediaBody`
+   * knows its frame size (`onFit`), and its target until then.
    */
-  const videoSize = useVideoSize(media?.kind === "video" ? mediaElement : null);
-  const videoPlacement = useMemo(
-    () => (media ? containAspect(media.placement, videoSize) : null),
-    [media, videoSize],
-  );
+  const [fitted, setFitted] = useState<Rect | null>(null);
+  const videoPlacement = media ? (fitted ?? media.placement) : null;
   const images = useMemo<SceneImage[]>(
     () =>
       media?.kind === "video" && mediaElement && videoPlacement
@@ -531,16 +438,16 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
               placement: videoPlacement,
               width: videoPlacement.width,
               height: videoPlacement.height,
-              media: { element: mediaElement, presentation: presented },
+              media: { element: mediaElement },
             },
           ]
         : baseImages,
-    [baseImages, media, mediaElement, presented, videoPlacement],
+    [baseImages, media, mediaElement, videoPlacement],
   );
   // A lone video is framed by the video itself, so it fills the Body.
   const world =
-    mediaOnly && media?.kind === "video" && videoSize && videoPlacement
-      ? videoPlacement
+    mediaOnly && media?.kind === "video" && fitted
+      ? fitted
       : scene
         ? union(scene.placements)
         : null;
@@ -549,11 +456,7 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
   const imagesKey = JSON.stringify([
     baseImages,
     world,
-    images.length !== baseImages.length && [
-      media?.id,
-      presented,
-      videoPlacement,
-    ],
+    images.length !== baseImages.length && [media?.id, videoPlacement],
   ]);
   const shownCanvases = useRef<string | null>(null);
   /** Back at the placeholder since last drawn: reopening frames the Canvas afresh. */
@@ -618,22 +521,6 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
     : undefined;
 
   /*
-   * An annotation lands on the Canvas it targets, wherever that Canvas has been placed;
-   * `targetIndex` counts the handed Canvases when the target names none of them.
-   */
-  const placeAnnotation = useMemo<AnnotationPlacer | undefined>(() => {
-    if (!scene || !canvases) return undefined;
-    return (rect, targetId, targetIndex) => {
-      const found = canvases.findIndex((canvas) => canvas.id === targetId);
-      const index = found === -1 ? targetIndex : found;
-      const placement = scene.placements[index];
-      return placement
-        ? canvasRectToWorld(canvases[index], placement, rect)
-        : null;
-    };
-  }, [scene, canvases]);
-
-  /*
    * The Canvases the renderer has laid out, with their placements: set when it reports a
    * new layout (`open`, `change`), so the handle's Canvas-coordinate methods never use the
    * placements of Canvases that are still loading.
@@ -661,286 +548,35 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
    */
   const drawn = !canvases || drawnScene.current?.key === canvasKey;
 
-  /*
-   * The annotations that can be drawn, shared by the hotspots and the annotations menu,
-   * with one highlight between them: the hovered or focused one, else the one last
-   * picked (from the menu or by clicking its hotspot).
-   */
-  const readSvg = useSvgReader(allAnnotations);
-  // Every annotation placed once, a hidden page's too: the menu lists them all.
-  const allPlaced = useMemo<PlacedAnnotation[]>(
-    () =>
-      hotspots &&
-      renderer &&
-      allAnnotations?.length &&
-      sceneVersion > 0 &&
-      drawn
-        ? hotspots.placeAnnotations(
-            allAnnotations,
-            placeAnnotation ??
-              ((rect, _, targetIndex) =>
-                renderer.itemRectToWorld(targetIndex, rect)),
-            readSvg,
-            language,
-          )
-        : [],
-    [
-      hotspots,
-      renderer,
-      allAnnotations,
-      sceneVersion,
-      drawn,
-      placeAnnotation,
-      readSvg,
-      language,
-    ],
-  );
-  // The hotspots: the shown pages' only.
-  const placedAnnotations = useMemo(() => shown(allPlaced), [allPlaced, shown]);
-  /*
-   * Behind a placeholder nothing is drawn, so nothing is placed: the menu lists them as
-   * the planned layout places them, for their names; a pick opens the Canvas.
-   */
-  const listedAnnotations = useMemo<PlacedAnnotation[]>(
-    () =>
-      allPlaced.length || !hotspots || !placeAnnotation
-        ? allPlaced
-        : hotspots.placeAnnotations(
-            allAnnotations ?? [],
-            placeAnnotation,
-            readSvg,
-            language,
-          ),
-    [allPlaced, hotspots, placeAnnotation, allAnnotations, readSvg, language],
-  );
-  const [hoveredAnnotation, setHoveredAnnotation] = useState<string | null>(
-    null,
-  );
-  /*
-   * The picked annotation: the Canvas's own, or a host's (`selectedAnnotation`), which a
-   * list beside the Canvas can change. A host's pick is framed once its hotspot is placed,
-   * so picking one on another Canvas frames it after the move.
-   */
-  const [ownSelected, setOwnSelected] = useState<string | null>(null);
-  const controlledSelection = selectedAnnotationProp !== undefined;
-  const selectedAnnotation = controlledSelection
-    ? selectedAnnotationProp
-    : ownSelected;
-  const framed = useRef<string | null>(null);
-  const onAnnotationActiveRef = useRef(onAnnotationActive);
-  onAnnotationActiveRef.current = onAnnotationActive;
-  const onAnnotationSelectRef = useRef(onAnnotationSelect);
-  onAnnotationSelectRef.current = onAnnotationSelect;
-  const activateAnnotation = useCallback((id: string | null) => {
-    setHoveredAnnotation(id);
-    onAnnotationActiveRef.current?.(id);
-  }, []);
-  // A pick is framed at once, unless the host asks for the glide (`animateAnnotations`).
-  const glide = useRef(animateAnnotations);
-  glide.current = animateAnnotations;
-  // Behind a placeholder there is nothing to frame yet: the pick opens it, and is framed
-  // once drawn (below), as a host's is.
-  const held = useRef(false);
-  /*
-   * One on the recording's time (Cookbook 0103) goes to where it starts: its cue shows
-   * there, and the recording keeps playing or stays paused as it was.
-   */
-  const mediaElementRef = useRef(mediaElement);
-  mediaElementRef.current = mediaElement;
-  const hotspotsRef = useRef(hotspots);
-  hotspotsRef.current = hotspots;
-  const sought = useRef<string | null>(null);
-  // Read as it is chosen, so `selectAnnotation` stays stable.
-  const hiddenPagesRef = useRef(hiddenPages);
-  hiddenPagesRef.current = hiddenPages;
-  const setPagesVisibleRef = useRef(setPagesVisible);
-  setPagesVisibleRef.current = setPagesVisible;
-  const selectAnnotation = useCallback((annotation: ListedAnnotation) => {
-    // One of a hidden page, chosen from the menu, shows its page again, as in a Root.
-    if (annotation.pageId && hiddenPagesRef.current.includes(annotation.pageId))
-      setPagesVisibleRef.current([annotation.pageId], true);
-    setOwnSelected(annotation.id);
-    onAnnotationActiveRef.current?.(annotation.id);
-    onAnnotationSelectRef.current?.(annotation.id);
-    if (held.current) return;
-    if ("start" in annotation) {
-      const element = mediaElementRef.current;
-      if (!element) return;
-      sought.current = annotation.id;
-      // Pressed in the menu or on its hotspot: from its time, playing.
-      playFrom(element, annotation.start);
-      return;
-    }
-    framed.current = annotation.id;
-    /*
-     * One that follows a recording is not framed, since it moves. Picked while it is not
-     * on the recording, the recording goes to where it starts, as one on its time does;
-     * picked where it is (its hotspot, pressed), nothing moves.
-     */
-    if (annotation.track) {
-      const element = mediaElementRef.current;
-      if (element && hotspotsRef.current?.goToTrack(annotation, element))
-        sought.current = annotation.id;
-      return;
-    }
-    rendererRef.current?.fitAnnotation(annotation.world, !glide.current);
-  }, []);
-  /*
-   * Let go of the pick: a click or tap on the Canvas off every hotspot, or Escape in it
-   * (WCAG 2.1.1). Whether there was one, so that tap does nothing more.
-   */
-  const selectedRef = useRef(selectedAnnotation);
-  selectedRef.current = selectedAnnotation;
-  const releaseAnnotation = useCallback(() => {
-    if (!selectedRef.current) return false;
-    setOwnSelected(null);
-    framed.current = null;
-    onAnnotationSelectRef.current?.(null);
-    return true;
-  }, []);
-  /*
-   * A linking hotspot pressed (Cookbook 0022): where it leads, shown by the host, the
-   * Root, or what the Canvas loaded. Focus goes first to the viewport, which stays as the
-   * view moves on, rather than going with the hotspot (WCAG 2.4.3).
-   */
-  const onAnnotationLinkRef = useRef(onAnnotationLink);
-  onAnnotationLinkRef.current = onAnnotationLink;
-  const canFollow = Boolean(onAnnotationLink);
-  const followLink = useMemo(
-    () =>
-      canFollow
-        ? (annotation: PlacedAnnotation) => {
-            hostRef.current?.focus({ preventScroll: true });
-            releaseAnnotation();
-            if (annotation.link) onAnnotationLinkRef.current?.(annotation.link);
-          }
-        : undefined,
-    [canFollow, releaseAnnotation],
-  );
-  // For the handle's `zoomToAnnotation`, which outlives any one render.
-  const placedRef = useRef(placedAnnotations);
-  placedRef.current = placedAnnotations;
-  /*
-   * A pick not framed yet (a host's, or one made behind the placeholder) is framed once
-   * its hotspot is placed, which is once its view is drawn. One of a hidden page has no
-   * hotspot, but is framed, or gone to on its recording, all the same, from where the
-   * menu lists it: hiding a page hides only what is drawn.
-   */
-  useEffect(() => {
-    if (!selectedAnnotation) {
-      framed.current = null;
-      return;
-    }
-    if (framed.current === selectedAnnotation) return;
-    const find = (list: PlacedAnnotation[]) =>
-      list.find((annotation) => annotation.id === selectedAnnotation);
-    const drawnOne = find(placedAnnotations);
-    const placed = drawnOne ?? find(allPlaced);
-    if (!placed) return; // Not placed yet; the next layout tries again.
-    framed.current = placed.id;
-    if (placed.track) {
-      // One that follows a recording moves: its hotspot goes to it, not framed.
-      if (!drawnOne && mediaElement) hotspots?.goToTrack(placed, mediaElement);
-      return;
-    }
-    rendererRef.current?.fitAnnotation(placed.world, !glide.current);
-  }, [
-    selectedAnnotation,
-    placedAnnotations,
-    allPlaced,
-    hotspots,
-    mediaElement,
-  ]);
-  /*
-   * Annotations on a stretch of the recording's time (Cookbook 0103): cues while it plays,
-   * listed in the menu after those on the picture.
-   */
-  const allTimed = useMemo<TimedAnnotation[]>(
-    () =>
-      hotspots && media
-        ? hotspots.timeAnnotations(allAnnotations ?? [], language)
-        : [],
-    [hotspots, media, allAnnotations, language],
-  );
-  // The cues: the shown pages' only; the menu lists them all.
-  const timedAnnotations = useMemo(() => shown(allTimed), [allTimed, shown]);
-  const menuAnnotations = useMemo<ListedAnnotation[]>(
-    () =>
-      listed(
-        allTimed.length
-          ? [...listedAnnotations, ...allTimed]
-          : listedAnnotations,
-      ),
-    [listedAnnotations, allTimed, listed],
-  );
-  /*
-   * A pick on that time not gone to yet (a host's, or one made behind the placeholder) is
-   * gone to once the recording is there. (One that follows the recording, the hotspots
-   * go to themselves.)
-   */
-  useEffect(() => {
-    if (!selectedAnnotation) {
-      sought.current = null;
-      return;
-    }
-    if (sought.current === selectedAnnotation || !mediaElement) return;
-    const timed = timedAnnotations.find(
-      (annotation) => annotation.id === selectedAnnotation,
-    );
-    if (!timed) return;
-    sought.current = timed.id;
-    mediaElement.currentTime = timed.start;
-  }, [selectedAnnotation, timedAnnotations, mediaElement]);
-  /*
-   * A pick (from a list beside the Canvas, a link, or its own menu over the placeholder)
-   * opens it past its placeholder once the annotation is in this view: the reader asked
-   * to see it there. A recording opened so is not played, as its play button would.
-   */
-  const pendingPick = useRef<string | null>(null);
-  const [quietlyOpened, setQuietlyOpened] = useState<string | null>(null);
-  held.current = showPlaceholder;
-  useEffect(() => {
-    pendingPick.current = selectedAnnotation ?? null;
-  }, [selectedAnnotation]);
-  useEffect(() => {
-    const id = pendingPick.current;
-    if (!id || !allAnnotations?.some((each) => each.annotation?.id === id))
-      return;
-    pendingPick.current = null;
-    if (!showPlaceholder) return;
-    if (!media) {
-      setImagesOpen(true);
-      return;
-    }
-    setMediaOpenedFor(canvasKey);
-    setQuietlyOpened(canvasKey);
-  }, [selectedAnnotation, allAnnotations, showPlaceholder, media, canvasKey]);
-
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
 
-    const renderer = new CanvasRenderer(host, optionsRef.current);
-    rendererRef.current = renderer;
-    setRenderer(renderer);
-    renderer.setDismiss(releaseAnnotation);
+    const surface = makeSurface(host, optionsRef.current);
+    const renderer = hasCamera(surface) ? surface : null;
+    surfaceRef.current = surface;
+    setSurface(surface);
+    surface.setDismiss(releaseAnnotation);
 
-    const offOpen = renderer.on("open", () => {
+    const offOpen = surface.on("open", () => {
       setCleared(false);
       markDrawn();
       setStatus("ready");
       setSceneVersion((v) => v + 1);
+      if (!renderer) return;
       onReadyRef.current?.(
         canvasHandle(
           renderer,
           () => drawnScene.current,
           (id) => {
-            const annotation = placedRef.current.find((a) => a.id === id);
+            const annotation = modelRef.current.placed.find((a) => a.id === id);
             if (!annotation) return false;
-            selectAnnotation(annotation);
+            modelRef.current.select(annotation);
             // Its hotspot takes focus, as OpenSeadragon's overlay does in the Viewer.
             Array.from(
-              renderer.overlays.container.querySelectorAll<HTMLElement>("[id]"),
+              renderer.overlays?.container.querySelectorAll<HTMLElement>(
+                "[id]",
+              ) ?? [],
             )
               .find((element) => element.id === id)
               ?.focus({ preventScroll: true });
@@ -949,17 +585,17 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
         ),
       );
     });
-    const offChange = renderer.on("change", () => {
+    const offChange = surface.on("change", () => {
       setCleared(false);
       markDrawn();
       setStatus("ready");
       setSceneVersion((v) => v + 1);
     });
-    const offError = renderer.on("error", () => {
-      if (!renderer.isOpen) setStatus("error");
+    const offError = surface.on("error", () => {
+      if (!surface.isOpen) setStatus("error");
     });
-    const offViewport = renderer.on("viewport", () => {
-      onViewportChangeRef.current?.(renderer.getBounds());
+    const offViewport = surface.on("viewport", () => {
+      if (renderer) onViewportChangeRef.current?.(renderer.getBounds());
     });
 
     return () => {
@@ -967,13 +603,13 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
       offChange();
       offError();
       offViewport();
-      renderer.dispose();
-      rendererRef.current = null;
-      setRenderer(null);
+      surface.dispose();
+      surfaceRef.current = null;
+      setSurface(null);
     };
-    // A new instanceId is a new viewer; nothing else remounts the renderer
-    // (`selectAnnotation`, `releaseAnnotation` and `markDrawn` are stable).
-  }, [instanceId, selectAnnotation, releaseAnnotation, markDrawn]);
+    // A new instanceId is a new viewer; nothing else remounts the surface
+    // (`makeSurface` is a module's, and `releaseAnnotation` and `markDrawn` are stable).
+  }, [instanceId, makeSurface, releaseAnnotation, markDrawn]);
 
   useEffect(() => {
     if (!renderer || !navigatorElement) return;
@@ -981,18 +617,18 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
   }, [renderer, navigatorElement]);
 
   useEffect(() => {
-    const renderer = rendererRef.current;
+    const surface = surfaceRef.current;
     if (showPlaceholder) placeholderShown.current = true;
-    if (!renderer || !nearViewport || showPlaceholder) return;
+    if (!surface || !nearViewport || showPlaceholder) return;
     const moved =
       shownCanvases.current !== null && shownCanvases.current !== canvasKey;
     // Loading until it is drawn: at first, and again whenever the view moves on.
-    if (!renderer.isOpen || moved) setStatus("loading");
+    if (!surface.isOpen || moved) setStatus("loading");
     const fit =
-      mediaOnly || (placeholderShown.current && renderer.isOpen) || moved;
+      mediaOnly || (placeholderShown.current && surface.isOpen) || moved;
     shownCanvases.current = canvasKey;
     placeholderShown.current = false;
-    renderer.setImages(images, { world: world ?? undefined, fit });
+    surface.setImages(images, { world: world ?? undefined, fit });
     // `imagesKey` stands in for `images`, whose identity changes on every parent render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imagesKey, instanceId, mediaElement, nearViewport, showPlaceholder]);
@@ -1004,7 +640,7 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
   useLayoutEffect(() => {
     if (manifestId === shownManifest.current) return;
     shownManifest.current = manifestId;
-    rendererRef.current?.clear();
+    surfaceRef.current?.clear();
     setCleared(true);
     setStatus("loading");
   }, [manifestId]);
@@ -1088,7 +724,7 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
         )}
         {/* Revealed by CSS only while this wrapper is the full-screen element. */}
         <ExitFullscreen hidden={!isFullscreen} />
-        {renderer && shownControls && (
+        {surface && shownControls && (
           <Controls
             renderer={renderer}
             instance={instance}
@@ -1098,12 +734,12 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
             choices={showPlaceholder ? [] : choices}
             selections={selections}
             onSelect={selectChoice}
-            annotations={menuAnnotations}
-            hiddenPages={hiddenPages}
-            onPageVisibilityChange={setPagesVisible}
-            selectedAnnotation={selectedAnnotation}
-            onAnnotationSelect={selectAnnotation}
-            onAnnotationActivate={activateAnnotation}
+            annotations={model.menu}
+            hiddenPages={model.hiddenPages}
+            onPageVisibilityChange={model.setPagesVisible}
+            selectedAnnotation={model.selected}
+            onAnnotationSelect={model.select}
+            onAnnotationActivate={model.activate}
             captionId={hasCaption ? captionId : undefined}
             captionOpen={isCaptionOpen}
             onCaptionToggle={() => setCaptionOpen((open) => !open)}
@@ -1150,6 +786,16 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
           tabIndex={0}
         />
         {viewportName.node}
+        {viewportKeys.length > 0 && (
+          <span id={keysId} style={visuallyHidden}>
+            {viewportKeys.map(({ description }, index) => (
+              <React.Fragment key={description}>
+                {index > 0 && " "}
+                <span lang={root.langOf(description)}>{t(description)}</span>
+              </React.Fragment>
+            ))}
+          </span>
+        )}
         {/*
          * Sound with no picture of its own, nor one shown for it, names itself in its
          * empty Body (Mat, 2026-10-23: "label these"), for the eye alone: the viewport
@@ -1168,16 +814,6 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
               {ownName.text}
             </p>
           )}
-        {viewportKeys.length > 0 && (
-          <span id={keysId} style={visuallyHidden}>
-            {viewportKeys.map(({ description }, index) => (
-              <React.Fragment key={description}>
-                {index > 0 && " "}
-                <span lang={root.langOf(description)}>{t(description)}</span>
-              </React.Fragment>
-            ))}
-          </span>
-        )}
         {stills.length > 0 && !player && (
           <Placeholder
             instance={instance}
@@ -1192,7 +828,7 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
             request={options?.request}
           />
         )}
-        {renderer && media && nearViewport && !showPlaceholder && (
+        {surface && media && nearViewport && !showPlaceholder && (
           <Suspense fallback={null}>
             {/*
              * Not keyed by the media: from one recording to the next (auto-advance), the
@@ -1200,11 +836,11 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
              */}
             <MediaBody
               media={media}
-              presentation={presentation}
               request={options?.request}
-              renderer={renderer}
+              surface={surface}
               instance={instance}
               onElement={handleMediaElement}
+              onFit={setFitted}
               onCaptionChange={onCaptionChange}
               caption={caption}
               navigable={navigable}
@@ -1215,10 +851,12 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
               highlightedChapter={highlightedChapter}
               onChapterHighlight={onChapterHighlight}
               autoPlay={
-                !player && stills.length > 0 && quietlyOpened !== canvasKey
+                !player &&
+                stills.length > 0 &&
+                model.quietlyOpened !== canvasKey
               }
               language={language}
-              notes={timedAnnotations}
+              notes={model.timed}
               player={
                 player && canvases
                   ? {
@@ -1250,26 +888,26 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
               />
             </Suspense>
           )}
-        {hotspots &&
-          renderer &&
-          hasAnnotations &&
-          sceneVersion > 0 &&
-          !showPlaceholder && (
-            <hotspots.default
-              renderer={renderer}
-              placed={placedAnnotations}
-              sceneVersion={sceneVersion}
-              active={
-                hoveredAnnotation ?? highlightedAnnotation ?? selectedAnnotation
-              }
-              selected={selectedAnnotation}
-              onActivate={activateAnnotation}
-              onSelect={selectAnnotation}
-              onFollow={followLink}
-              // The recording a tracked hotspot follows, where there is one to follow.
-              media={media ? mediaElement : undefined}
-            />
-          )}
+        {/* The annotations' state, and the hotspots it draws (`AnnotationState`). */}
+        {hotspots && hasAnnotations && allAnnotations && (
+          <hotspots.AnnotationState
+            given={props}
+            annotations={allAnnotations}
+            scene={scene}
+            renderer={renderer}
+            sceneVersion={sceneVersion}
+            drawn={drawn}
+            media={media}
+            mediaElement={mediaElement}
+            showPlaceholder={showPlaceholder}
+            canvasKey={canvasKey}
+            openImages={setImagesOpen}
+            openMedia={setMediaOpenedFor}
+            host={hostRef}
+            onModel={setAnnotationModel}
+          />
+        )}
+        {loading && <Loading overlay />}
         {/* Last, as a `<figcaption>` must be first or last in its `<figure>`. */}
         {hasCaption && (
           <Caption
@@ -1281,7 +919,6 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
             language={language}
           />
         )}
-        {loading && <Loading overlay />}
       </figure>
     </HostLanguageContext.Provider>
   );
@@ -1347,54 +984,7 @@ function canvasHandle(
   };
 }
 
-/** A video element's frame size, kept current as metadata arrives or the stream changes. */
-function useVideoSize(element: HTMLVideoElement | null) {
-  const [size, setSize] = useState<{ width: number; height: number } | null>(
-    null,
-  );
-  useEffect(() => {
-    setSize(null);
-    if (!element) return;
-    const read = () => {
-      const { videoWidth: width, videoHeight: height } = element;
-      if (width > 0 && height > 0) {
-        setSize((current) =>
-          current?.width === width && current.height === height
-            ? current
-            : { width, height },
-        );
-      }
-    };
-    read();
-    element.addEventListener("loadedmetadata", read);
-    element.addEventListener("resize", read);
-    return () => {
-      element.removeEventListener("loadedmetadata", read);
-      element.removeEventListener("resize", read);
-    };
-  }, [element]);
-  return size;
-}
-
-/** The largest rectangle of `size`'s aspect centered inside `box`; `box` until it is known. */
-
 const NO_FRAMES: AnimationFrame[] = [];
-
-export function containAspect(
-  box: Rect,
-  size: { width: number; height: number } | null,
-): Rect {
-  if (!size || !box.width || !box.height) return box;
-  const scale = Math.min(box.width / size.width, box.height / size.height);
-  const width = size.width * scale;
-  const height = size.height * scale;
-  return {
-    x: box.x + (box.width - width) / 2,
-    y: box.y + (box.height - height) / 2,
-    width,
-    height,
-  };
-}
 
 /**
  * Painting bodies (or plain sources) as scene images. A body with an image service is

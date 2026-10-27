@@ -24,7 +24,8 @@ const SEEK = 1200;
  * last whose top has passed it), an element with `data-point` (`Homepage.tsx`), has one
  * line drawn from its edge to the part it is about in the viewer (`data-part`), which is
  * lit, or to the viewer itself (`viewer`), only drawn to. The tiles crossing the middle
- * of the window are lit too, with their parts in the viewer. Lit is `data-lit`, written
+ * of the window are lit too, with their parts in the viewer, but a quiet one
+ * (`data-quiet`, the Thumbnail's beside the Label). Lit is `data-lit`, written
  * here on the page itself, never through React's state, so scrolling redraws nothing.
  *
  * A story's own change starts as its line is drawn, and holds as long as the line does
@@ -215,6 +216,8 @@ export const StoryLines = React.memo(function StoryLines({
           .filter((tile) => {
             // Not a folded one (`inert`), out of sight under its fade.
             if (tile.closest("[inert]")) return false;
+            // Nor a quiet one, which leaves its row's light to the part beside it.
+            if (tile.hasAttribute("data-quiet")) return false;
             const { top, bottom } = tile.getBoundingClientRect();
             return top <= middle && bottom >= middle;
           })

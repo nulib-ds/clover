@@ -6,15 +6,14 @@
  * more, so one of them keeps 3:1 against whatever is behind (C40). A hotspot's name is
  * its popover (`Tip`, placed in `ui/Tip.css`).
  */
+/*
+ * The layer's geometry is inline (`OverlayLayer`): over the viewport, passing input through
+ * (only the hotspots take it), and clipped, so focusing a hotspot out of view never
+ * scrolls the layer. Where `clip` is unknown the inline value is dropped, and this hidden
+ * stands in.
+ */
 .clover-canvas-overlays {
-  position: absolute;
-  inset: 0;
-  /* Clipped, so focusing a hotspot out of view never scrolls the layer; hidden where
-     clip is unknown. */
   overflow: hidden;
-  overflow: clip;
-  /* The layer passes input through; only the hotspots themselves take it. */
-  pointer-events: none;
   /*
    * Its own stacking layer, so the hotspots' depths never rise over the viewport's
    * focus ring or the controls; and the box their popovers keep within.
@@ -23,12 +22,9 @@
   container-type: size;
 }
 
+/* A hotspot's place is inline too (`OverlayLayer.add`). */
 .clover-canvas-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
   transform-origin: center;
-  pointer-events: auto;
 }
 
 .clover-canvas-annotation {

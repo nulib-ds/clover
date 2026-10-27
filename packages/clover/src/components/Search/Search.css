@@ -110,27 +110,15 @@
 /*
  * The status's words ("11 results", "No results") are for assistive technology alone,
  * still announced as they change (WCAG 4.1.3): the pill says what was found (Mat,
- * 2026-10-26). "Loading…" and a failure show.
+ * 2026-10-26). "Loading…" and a failure show. Empty, it stays for assistive technology
+ * too, out of sight and out of the column's gap, so its first message is announced as a
+ * change to a region already there (WCAG 4.1.3). Hidden by `display: none`, it would
+ * arrive with its message, which is often not read.
  */
 .clover-content-search-status:not(
   [data-status="loading"],
   [data-status="error"]
-) {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-/*
- * Empty, it stays for assistive technology, out of sight and out of the column's gap, so
- * its first message is announced as a change to a region already there (WCAG 4.1.3).
- * Hidden by `display: none`, it would arrive with its message, which is often not read.
- */
+),
 .clover-content-search-status:empty {
   position: absolute;
   width: 1px;

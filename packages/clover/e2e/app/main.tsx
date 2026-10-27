@@ -21,7 +21,6 @@
  *                                          three.js and by Clover's own renderer
  *   &engine=clover|three                   (scene) what draws the Scene's models
  *   &model=<glTF url>                      (scene, compare) a Scene of this one model
- *   &presentation=texture                  (composed) draw video into the canvas
  *   &navigator=1                           (composed) show the Canvas's navigator
  *   &content=<url or content state>        its iiifContent
  *   &css=0                                 leave the stylesheet out (the plain layout)
@@ -35,6 +34,7 @@ import { createRoot } from "react-dom/client";
 
 import Viewer, * as Clover from "../../src/index";
 import { Map, setMapWorkerUrl } from "../../src/map/index";
+import { registerThreeEngine } from "../../src/three/index";
 import * as Templates from "../../src/templates/index";
 import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 
@@ -70,6 +70,8 @@ const modelScene = (src: string) => ({
 });
 const model = params.get("model");
 const engine = params.get("engine") === "three" ? "three" : "clover";
+// three.js is opt-in, as a page opts in (`@nulib/clover/three`): the harness does.
+registerThreeEngine();
 const request =
   params.get("headers") === "1"
     ? { headers: { "X-Clover": "e2e" }, credentials: "include" as const }
@@ -161,11 +163,6 @@ function Scene() {
           <Clover.Body
             style={{ height: "60vh" }}
             navigator={params.get("navigator") === "1"}
-            options={
-              params.get("presentation") === "texture"
-                ? { media: { presentation: "texture" } }
-                : undefined
-            }
           />
           <Clover.Items layout="pager" />
           <ViewportProbe />

@@ -43,7 +43,7 @@ describe("FrameLoop", () => {
     loop.invalidate();
     for (let i = 0; i < 5; i++) frames.flush();
     expect(tick).toHaveBeenCalledTimes(3);
-    expect(loop.scheduled).toBe(false);
+    expect(frames.pending()).toBe(0);
   });
 
   it("hands the tick elapsed seconds, capped after an idle spell", () => {

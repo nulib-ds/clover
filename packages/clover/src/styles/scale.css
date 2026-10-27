@@ -50,20 +50,17 @@
 }
 
 /*
- * Fields: a search's query, a Collection's member menu, a transcript's track menu. `xs`
- * by `s` inside, as a row of the panel is. No specificity, so a part refines its own
- * field.
+ * Fields: the query of a field pill (`ui/FieldPill.tsx`: Search's and the Transcript's
+ * find), and a Collection's member menu. `xs` by `s` inside, as a row of the panel is. No
+ * specificity, so a part refines its own field: the pill takes the query's edge, inset
+ * and ring for its own.
  *
  * Their edge (Mat, 2026-10-26: "how light can we go?"): the muted text mixed 80% into
  * the ground, as light as keeps 3:1 against it (WCAG 1.4.11) for any muted color that is
  * itself 4.5:1, as Clover's text asks (3.1:1 at the least; 3.8:1 on the docs' white).
  * `--clover-field-edge` to set your own, 3:1 or more. Search's pill shares it.
  */
-:where(
-  .clover-content-search-query,
-  .clover-collection-select-control,
-  .clover-transcript-track select
-) {
+:where(.clover-field-pill-query, .clover-collection-select-control) {
   box-sizing: border-box;
   padding: var(--clover-space-xs) var(--clover-space-s);
   border: 1px solid
@@ -81,9 +78,8 @@
 }
 
 :where(
-  .clover-content-search-query,
-  .clover-collection-select-control,
-  .clover-transcript-track select
+  .clover-field-pill-query,
+  .clover-collection-select-control
 ):focus-visible {
   outline: 2px solid var(--clover-color-accent, #0065c3);
   outline-offset: 1px;
@@ -91,9 +87,10 @@
 
 /*
  * A field's placeholder, mixed from the field's own text and ground at full opacity: some
- * browsers draw it too pale to read (Safari's gray, Firefox's half opacity).
+ * browsers draw it too pale to read (Safari's gray, Firefox's half opacity). Every field
+ * pill's query, so the Transcript's find keeps 4.5:1 as Search's does (WCAG 1.4.3).
  */
-:where(.clover-content-search-query)::placeholder {
+:where(.clover-field-pill-query)::placeholder {
   color: color-mix(
     in srgb,
     var(--clover-color-primary, #1a1d1e) 65%,

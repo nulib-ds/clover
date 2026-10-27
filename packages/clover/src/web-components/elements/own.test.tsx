@@ -59,11 +59,7 @@ vi.mock("../../lib/renderer", async (importOriginal) => ({
 }));
 
 let viewport: ReturnType<typeof stubViewport>;
-beforeAll(() =>
-  defineCloverElements({
-    styles: [{ key: "clover-1", css: ".clover-root{}" }],
-  }),
-);
+beforeAll(() => defineCloverElements({}));
 beforeEach(() => {
   initCloverI18n({ lng: "en" });
   viewport = stubViewport();

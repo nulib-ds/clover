@@ -13,7 +13,10 @@ test("without the stylesheet, the Viewer still lays out usably", async ({
   await serveIIIF(page);
   await page.goto("/?css=0&content=https://fixtures.test/0009-book-1.json");
   await expect(
-    page.getByRole("heading", { name: "Simple Manifest - Book" }),
+    page.getByRole("heading", {
+      level: 2,
+      name: "Simple Manifest - Book",
+    }),
   ).toBeVisible();
   expect(await page.locator("style[data-vite-dev-id]").count()).toBe(0);
 

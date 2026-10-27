@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
+import { TransportButton } from "./TransportButton";
 import { useBarHeight } from "./useBarHeight";
 import { type MediaController, formatTime } from "./useMediaController";
 import { languageCode } from "../../../ui/languageCode";
@@ -53,6 +54,15 @@ export interface TransportChapter {
   lang?: string;
   start: number;
   end?: number;
+}
+
+/** The chapter playing at `time`: the last to start at or before it, or -1. */
+export function chapterAt(chapters: TransportChapter[], time: number): number {
+  let found = -1;
+  chapters.forEach((candidate, index) => {
+    if (candidate.start <= time) found = index;
+  });
+  return found;
 }
 
 /** An option of a transport menu: its name, its language, and a time to show before it. */
@@ -345,16 +355,8 @@ const Transport: React.FC<TransportProps> = ({
   const bar = useRef<HTMLDivElement>(null);
   useBarHeight(bar);
   const { paused, currentTime, duration, buffered, muted, volume } = controller;
-  // The chapter at a time: the last to start at or before it.
-  const chapterAt = (time: number) => {
-    let found = -1;
-    chapters.forEach((candidate, index) => {
-      if (candidate.start <= time) found = index;
-    });
-    return found;
-  };
   // The chapter playing.
-  const chapter = chapterAt(currentTime);
+  const chapter = chapterAt(chapters, currentTime);
   /*
    * The chapter under the pointer on the seek bar: its stretch of the bar drawn out, its
    * start and title in a popover over it, and the host told (`onChapterHighlight`), for a
@@ -474,7 +476,12 @@ const Transport: React.FC<TransportProps> = ({
           if (!duration || (event.target as Element).closest(".clover-tip"))
             return;
           const box = event.currentTarget.getBoundingClientRect();
-          point(chapterAt(((event.clientX - box.left) / box.width) * duration));
+          point(
+            chapterAt(
+              chapters,
+              ((event.clientX - box.left) / box.width) * duration,
+            ),
+          );
         }}
         onPointerLeave={() => point(-1)}
         style={
@@ -546,32 +553,24 @@ const Transport: React.FC<TransportProps> = ({
        * buttons (`Transport.css`), so none is cut off (WCAG 1.4.10).
        */}
       <div className="clover-canvas-transport-bar" ref={bar}>
-        <button
-          aria-label={t(playKey)}
-          lang={langOf(playKey)}
-          aria-keyshortcuts={SHORTCUTS.play.keys}
-          className="clover-canvas-transport-button"
-          data-button={paused ? "play" : "pause"}
+        <TransportButton
+          words={playKey}
+          button={paused ? "play" : "pause"}
+          shortcut={SHORTCUTS.play}
           onClick={controller.toggle}
-          ref={play}
-          type="button"
+          buttonRef={play}
         >
           {paused ? <PlayIcon /> : <PauseIcon />}
-          <Tip label={t(playKey)} shortcut={SHORTCUTS.play} />
-        </button>
+        </TransportButton>
 
-        <button
-          aria-label={t(muteKey)}
-          lang={langOf(muteKey)}
-          aria-keyshortcuts={SHORTCUTS.mute.keys}
-          className="clover-canvas-transport-button"
-          data-button="mute"
+        <TransportButton
+          words={muteKey}
+          button="mute"
+          shortcut={SHORTCUTS.mute}
           onClick={controller.toggleMute}
-          type="button"
         >
           {muted || volume === 0 ? <VolumeMutedIcon /> : <VolumeHighIcon />}
-          <Tip label={t(muteKey)} shortcut={SHORTCUTS.mute} />
-        </button>
+        </TransportButton>
         {canSetVolume() && (
           <input
             aria-label={t("playerVolume")}
@@ -657,21 +656,17 @@ const Transport: React.FC<TransportProps> = ({
               />
             )}
             {hasFullscreen && (
-              <button
-                aria-label={t(fullscreenKey)}
-                lang={langOf(fullscreenKey)}
-                className="clover-canvas-transport-button"
-                data-button="fullscreen"
+              <TransportButton
+                words={fullscreenKey}
+                button="fullscreen"
                 // Straight from the click: the Fullscreen API only honors a
                 // user gesture.
                 onClick={(event) =>
                   void toggleFullscreen(event.currentTarget, video)
                 }
-                type="button"
               >
                 {isFullscreen ? <ExitFullScreenIcon /> : <FullScreenIcon />}
-                <Tip label={t(fullscreenKey)} />
-              </button>
+              </TransportButton>
             )}
           </div>
         )}

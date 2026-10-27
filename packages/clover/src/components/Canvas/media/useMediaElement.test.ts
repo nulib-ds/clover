@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 
 import type { MediaPlacement } from "../layout";
 import { useMediaElement } from "./useMediaElement";
@@ -49,43 +49,34 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks());
 
 describe("useMediaElement", () => {
-  it.each(["dom", "texture"] as const)(
-    "plays HLS through hls.js, even where the browser claims native HLS (%s)",
-    async (presentation) => {
-      // Chromium answers "maybe" for HLS now; that no longer means Safari.
-      vi.spyOn(HTMLMediaElement.prototype, "canPlayType").mockReturnValue(
-        "maybe",
-      );
-      const { result } = renderHook(() =>
-        useMediaElement(media(STREAM, "application/x-mpegURL"), {
-          presentation,
-        }),
-      );
-      await waitFor(() => expect(hls.attachMedia).toHaveBeenCalled());
-      expect(hls.loadSource).toHaveBeenCalledWith(STREAM);
-      expect(hls.attachMedia).toHaveBeenCalledWith(result.current.element);
-      expect(result.current.element?.getAttribute("src")).toBeNull();
-    },
-  );
+  it("plays HLS through hls.js, even where the browser claims native HLS", async () => {
+    // Chromium answers "maybe" for HLS now; that no longer means Safari.
+    vi.spyOn(HTMLMediaElement.prototype, "canPlayType").mockReturnValue(
+      "maybe",
+    );
+    const { result } = renderHook(() =>
+      useMediaElement(media(STREAM, "application/x-mpegURL"), {}),
+    );
+    await waitFor(() => expect(hls.attachMedia).toHaveBeenCalled());
+    expect(hls.loadSource).toHaveBeenCalledWith(STREAM);
+    expect(hls.attachMedia).toHaveBeenCalledWith(result.current);
+    expect(result.current?.getAttribute("src")).toBeNull();
+  });
 
   it("falls back to native HLS where hls.js cannot run", async () => {
     hls.supported = false;
-    const { result } = renderHook(() =>
-      useMediaElement(media(STREAM), { presentation: "dom" }),
-    );
+    const { result } = renderHook(() => useMediaElement(media(STREAM), {}));
     await waitFor(() =>
-      expect(result.current.element?.getAttribute("src")).toBe(STREAM),
+      expect(result.current?.getAttribute("src")).toBe(STREAM),
     );
     expect(hls.attachMedia).not.toHaveBeenCalled();
   });
 
   it("plays other video directly, without loading hls.js", async () => {
     const { result } = renderHook(() =>
-      useMediaElement(media("https://example.org/film.mp4", "video/mp4"), {
-        presentation: "dom",
-      }),
+      useMediaElement(media("https://example.org/film.mp4", "video/mp4"), {}),
     );
-    expect(result.current.element?.getAttribute("src")).toBe(
+    expect(result.current?.getAttribute("src")).toBe(
       "https://example.org/film.mp4",
     );
     await Promise.resolve();
@@ -113,9 +104,7 @@ describe("useMediaElement", () => {
       iterable as unknown as TextTrackList,
     );
     renderHook(() =>
-      useMediaElement(media("https://example.org/film.mp4", "video/mp4"), {
-        presentation: "dom",
-      }),
+      useMediaElement(media("https://example.org/film.mp4", "video/mp4"), {}),
     );
     await waitFor(() =>
       expect(tracks.items.map((t) => t.mode)).toEqual(["hidden", "hidden"]),
@@ -123,26 +112,11 @@ describe("useMediaElement", () => {
     // What shows from then on is `useCaptionTracks`' to keep.
   });
 
-  it("presents media without CORS as dom, for that recording only", async () => {
-    const { result, rerender } = renderHook(
-      ({ src }: { src: string }) =>
-        useMediaElement(media(src, "video/mp4"), { presentation: "texture" }),
-      { initialProps: { src: "https://example.org/no-cors.mp4" } },
+  it("asks for no CORS: the browser shows the element itself", () => {
+    const { result } = renderHook(() =>
+      useMediaElement(media("https://example.org/film.mp4", "video/mp4"), {}),
     );
-    expect(result.current.presentation).toBe("texture");
-    expect(result.current.element?.crossOrigin).toBe("anonymous");
-
-    // Nothing loaded: the CORS request itself failed.
-    act(() => {
-      result.current.element?.dispatchEvent(new Event("error"));
-    });
-    expect(result.current.presentation).toBe("dom");
-    expect(result.current.element?.crossOrigin).toBeNull();
-
-    // The next recording may send CORS headers: it asks again.
-    rerender({ src: "https://example.org/cors.mp4" });
-    expect(result.current.presentation).toBe("texture");
-    expect(result.current.element?.crossOrigin).toBe("anonymous");
+    expect(result.current?.crossOrigin).toBeNull();
   });
 
   it("names each caption track in the reader's language, for the system player's menu", async () => {
@@ -159,12 +133,10 @@ describe("useMediaElement", () => {
             },
           ],
         },
-        { presentation: "dom", language: "it" },
+        { language: "it" },
       ),
     );
-    await waitFor(() => expect(result.current.element).not.toBeNull());
-    expect(result.current.element?.querySelector("track")?.label).toBe(
-      "Sottotitoli",
-    );
+    await waitFor(() => expect(result.current).not.toBeNull());
+    expect(result.current?.querySelector("track")?.label).toBe("Sottotitoli");
   });
 });

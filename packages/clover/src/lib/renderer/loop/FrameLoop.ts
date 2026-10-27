@@ -23,10 +23,6 @@ export class FrameLoop {
       cancelAnimationFrame(handle),
   ) {}
 
-  get scheduled(): boolean {
-    return this.handle !== 0;
-  }
-
   invalidate(): void {
     if (this.disposed || this.handle) return;
     this.handle = this.raf(this.frame);

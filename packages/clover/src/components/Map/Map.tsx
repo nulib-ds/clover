@@ -1,8 +1,14 @@
-import React, { forwardRef } from "react";
+import React, { Suspense, forwardRef, lazy } from "react";
 
 import { ConnectedMap, GivenMap, type MapProps } from "./MapView";
 import { useOptionalClover } from "../../react/context";
-import { Root } from "../Root/Root";
+import { join } from "../../lib/classnames";
+
+/*
+ * A map that loads its own resource, in a Root of its own: its own chunk, so a map handed
+ * its places, or inside a Root, never carries the Root's loader.
+ */
+const LoadedMap = lazy(() => import("./LoadedMap"));
 
 export type { MapProps } from "./MapView";
 
@@ -18,18 +24,25 @@ export type { MapProps } from "./MapView";
 export const CloverMap = forwardRef<HTMLElement, MapProps>(
   function CloverMap(props, ref) {
     const root = useOptionalClover();
+    // The Root's own props, left out of the map's.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { iiifContent, request, language, ...rest } = props;
     if (iiifContent !== undefined) {
       return (
-        <Root
-          iiifContent={iiifContent}
-          request={request}
-          language={language}
-          annotationPages="all"
-          style={{ display: "contents" }}
+        // Its box, while the Root's code loads: the page holds still around it.
+        <Suspense
+          fallback={
+            <div
+              className={join("clover-geomap", rest.className)}
+              data-status="loading"
+              style={rest.style}
+            >
+              <div style={{ height: "var(--clover-map-height, 24rem)" }} />
+            </div>
+          }
         >
-          <ConnectedMap {...rest} scope="all" forwardedRef={ref} />
-        </Root>
+          <LoadedMap {...props} forwardedRef={ref} />
+        </Suspense>
       );
     }
     const given =

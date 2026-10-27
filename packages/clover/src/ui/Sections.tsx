@@ -56,10 +56,8 @@ export type SectionsLayout = "tabs" | "accordion";
 export interface SectionsProps {
   items: SectionSpec[];
   layout?: SectionsLayout;
-  /** The section open, controlled. One always is: a value naming none opens the first. */
-  value?: string | null;
-  /** The section open to start with. Default: the first. */
-  defaultValue?: string;
+  /** The section open, the host's (the Panel's). One always is: a value naming none opens the first. */
+  value: string | null;
   /** Called with a section as it opens. */
   onValueChange?: (value: string) => void;
   /** The tab list's accessible name (`tabs`). */
@@ -71,7 +69,6 @@ export interface SectionsProps {
    * heading (`ui/heading.ts`); its panel is named by the button either way.
    */
   headingLevel?: number;
-  className?: string;
 }
 
 /**
@@ -103,19 +100,14 @@ export function Sections({
   items,
   layout = "tabs",
   value,
-  defaultValue,
   onValueChange,
   label,
   labelLang,
   headingLevel = 3,
-  className,
 }: SectionsProps) {
   const id = useUniqueId();
   const name = useContainerName(label ?? "", labelLang, label === undefined);
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
-  const [own, setOwn] = useState<string | null>(
-    defaultValue ?? items[0]?.value ?? null,
-  );
   const tabs = layout === "tabs";
   const { t, langOf } = useCloverTranslation();
   /*
@@ -124,10 +116,9 @@ export function Sections({
    */
   const track = useScrollTrack({ dragFree: true, itemCount: items.length });
 
-  // Open: the controlled value, or the reader's; the first when that names none.
-  const chosen = value !== undefined ? value : own;
-  const open = items.some((item) => item.value === chosen)
-    ? chosen
+  // Open: the host's value; the first when that names none.
+  const open = items.some((item) => item.value === value)
+    ? value
     : (items[0]?.value ?? null);
   // Every section opened so far: its content stays mounted once it has been shown.
   const mounted = useRef(new Set<string>());
@@ -347,7 +338,6 @@ export function Sections({
     if (item === open) return;
     pressed.current = item;
     if (!tabs) setOpened((last) => ({ value: item, count: last.count + 1 }));
-    if (value === undefined) setOwn(item);
     onValueChange?.(item);
   };
 
@@ -497,7 +487,7 @@ export function Sections({
   return (
     <div
       ref={list}
-      className={["clover-sections", className].filter(Boolean).join(" ")}
+      className="clover-sections"
       data-layout={layout}
       onFocus={tabs ? undefined : keepInSight}
       // How many headings there are, for the stylesheet to stack them (`accordion`).

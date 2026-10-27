@@ -75,7 +75,7 @@ const open = async () => {
 const loaded = () =>
   act(async () => {
     await Promise.all([
-      import("./Annotations"),
+      import("./AnnotationState"),
       import("./AnnotationMenu"),
       import("./ChoiceMenu"),
     ]);

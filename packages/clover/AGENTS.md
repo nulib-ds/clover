@@ -237,8 +237,9 @@ every rule below.
   (`ui/Tip.css`).
 - A template that snaps a split pane to an overlay keeps one tree (the Split stays, the
   pane is positioned over by CSS), so crossing the snap point never remounts the Canvas.
-  `templates/shared/useSlide.ts` holds `useSlide`, `useFocusOnOpen` and `useWideEnough`
-  (a layout's own width, not the window's).
+  `templates/shared/useSlide.ts` holds `useSlide`, `panelFocus` (where focus goes in an
+  opened panel) and `useWideEnough` (a layout's own width, not the window's, measured
+  before paint; `undefined` until measured, so arriving is never read as narrowing).
 
 ## Templates
 
@@ -313,14 +314,18 @@ every rule below.
   sits. The panel slides with `useSlide` (`hidden` once out of sight, so it reads
   plainly without CSS).
 - **Toggles on the spine** (Mat, 2026-10-16). While a pane is open beside the page, its
-  toggle sits on the bar between them (`shared/useSpine.ts`): `Default`'s and
-  `Document`'s `PanelToggle`, centered on the panel's bar, and `Document`'s thumbnails'
-  toggle, `cap` (over the thumbnails but for its far rounded end). It is rendered in the
-  `Split` right after the `SplitHandle` (not in the handle, whose `separator` role makes
-  its contents presentational; not in a pane, which clips or scrolls it), placed by
-  `left` and `--clover-template-spine-top`, level with the Canvas's controls. Where the
-  bar is hidden (`Document`'s thumbnails floating over a phone's page), it sits on the
-  pane's inner edge, and `useDragToClose`'s `alongside` drags it with the pane. Shut, or
+  toggle sits on the bar between them: `Default`'s and `Document`'s `PanelToggle`,
+  centered on the panel's bar, and `Document`'s thumbnails' toggle, over the thumbnails
+  but for its far rounded end. It is rendered in the `Split` right after the
+  `SplitHandle` (not in the handle, whose `separator` role makes its contents
+  presentational; not in a pane, which clips or scrolls it), in a spine: a box of no
+  width in the Split's row, which the toggle hangs from, placed by the template's
+  stylesheet alone (2026-10-27, `DRY.md` A28), so it follows a dragged bar and right to
+  left with nothing measured. Default's `useSpineTop` (`shared/useSpine.ts`) writes only
+  `--clover-template-spine-top`, the Body's top, level with its controls; Document's is 0. Where the bar is hidden (`Document`'s thumbnails floating over a phone's page), the
+  spine sits at their edge (`--clover-template-sidebar-width`), and `useDragToClose`'s
+  `alongside` drags it with the pane by its `translate`, which the toggle's own
+  `translate` leaves free. Shut, or
   over the page, the toggle is back among the Canvas's controls (the panel's) or over
   the page's top left (the thumbnails'). Each press moves it, so focus follows with
   `shared/useFollowFocus.ts`, frame by frame rather than after a render: React 19 can
@@ -328,6 +333,28 @@ every rule below.
   one time in five there), and a Canvas draws its controls a frame later. It focuses the
   control only once focus has gone (on `body`, or in something `hidden`), never taking
   it from somewhere the reader put it.
+- **Panes over the page** (Mat, 2026-10-27, Decision 7 in `DRY.md`): one rule for
+  Default's panel and Document's panel and thumbnails. Beside the page, each opens as the
+  host asks (`defaultPanelOpen`, `defaultSidebarOpen`), then as the reader chooses. Over
+  it, each starts closed whatever the host asks, and closes as the layout narrows under
+  it, focus in it or on its toggle following the toggle to its new place (read as the
+  narrowing render begins, before the commit takes the toggle off its spine); widening
+  brings it back beside. Opened over the
+  page, it takes focus (the panel's open section, the thumbnail of the page the reader is
+  on); Escape anywhere, the wash, a drag or its toggle puts it away, focus in it to the
+  toggle and focus elsewhere left there (WCAG 2.4.11). Document's two are
+  `shared/useDrawer.ts`, one `useFollowFocus` for both; Default writes the same rule in
+  its own code: through the hook it weighed 74 B more, and Default loads (lazily) on
+  Document's page, so whatever it takes from `shared/` lands there up front too. Document
+  decides where its thumbnails go by its own width (`data-narrow` under 40rem), never the
+  window's. The drag is `shared/useDragToClose.ts`, its code `shared/dragToClose.ts`,
+  loaded and attached the first time a drawer floats (Mat, 2026-10-27, `DRY.md` decision
+  4): a wide layout never loads it.
+- **The panel over the page** (2026-10-27, `DRY.md` A27): Default's and Document's
+  drawer, the wash beside it and their reduced-motion rule are `Default.css`'s, in
+  `styles.css`, on `clover-template-panes`, `clover-template-drawer` and
+  `clover-template-scrim`, which both templates set beside their own classes. Change them
+  there, for both; a template's own sheet keeps what is its alone.
 - **Closing the information panel** is `Panel`'s job, not a template's. Only
   a panel floating over the page gets `onClose` (a close button, and focus handed back to
   the `aria-controls` control) and `closeOnEscape`, which also puts the button at the
@@ -336,6 +363,14 @@ every rule below.
   (Mat). A floating one (`Default` on a phone, `Document`) also takes focus when it
   opens. Any new layout with a panel does the same. `shared/Lightbox.tsx` is a native `<dialog>`; jsdom lacks
   `showModal()`, so tests polyfill it.
+- **What starts hidden loads when first wanted** (Mat, 2026-10-27, `DRY.md` B1, B2): the
+  Gallery's lightbox Body (`shared/LightboxBody.tsx`, lazy, a busy box in its place
+  meanwhile) and Document's Panel (`document/DocumentPanel.tsx`, loaded by hand: a first
+  press waits for it, then opens the pane whole, so focus finds its section). Each starts
+  loading as the reader reaches for it (pointer or focus on the gallery, on the panel's
+  toggle). A template's lazy piece is a module of its own, imported only dynamically: a
+  dynamic import of the parts barrel, which the template imports statically, would keep
+  everything. `build/bundle.test.mjs` checks both.
 - **The panel's landmark** (`Panel`'s `aside`) is named "Information panel"
   (`informationPanelTabs`, as its tabs are), through `useContainerName`, so a list of
   landmarks tells it from another (`Document`'s thumbnails, "Items"). A name the host
@@ -413,7 +448,7 @@ every rule below.
   plain layout), `&headers=1` (request settings), `&panel=tabs|accordion` and `&lng=`
   (a host's `initCloverI18n({ lng })`, set before anything renders). `composed`
   puts the viewport channel on `window.__viewport`, for gesture specs, and takes
-  `&navigator=1` and `&presentation=texture`.
+  `&navigator=1`.
 - `specs/fixtures.ts` serves everything from disk, so nothing reaches the network:
   - Cookbook fixtures as `https://fixtures.test/<name>.json`, with the request's Origin
     echoed so credentials work.
@@ -474,7 +509,8 @@ every rule below.
   `accompanyingContainer`, `Timeline` for sound, `motivation` arrays, `{ id, type }`
   targets). Never add a P2/P3 branch to a part; upgrade at the boundary instead.
   `selectSequence` holds Canvases, Timelines and Scenes, each drawn by its own part
-  (below, "Timeline and Scene"). Sound's body is `Audio` in Presentation 4 and `Sound`
+  (below, "Timeline and Scene"). Look one up by id with `selectCanvas(manifest, id)` (a
+  map made once per Manifest), never a search of the sequence. Sound's body is `Audio` in Presentation 4 and `Sound`
   as the upgrader keeps Presentation 3's: test it with `isSound` (`core/annotations.ts`),
   never one name.
 - `createClover()` (`core/clover.ts`) is one Root's state: a small store (`core/store.ts`)
@@ -530,11 +566,16 @@ every rule below.
   (Vite) splits it correctly; its library-mode numbers look larger only because Vite
   does not strip whitespace from ES library output.
 - **Annotations.** `core/annotation-sets.ts` reads the Manifest's non-painting pages
-  (and `addedSets`, from `core/annotation-collection.ts`) into sets of entries, memoized
-  on the Manifest. The store holds `annotationId`, `hiddenSets` and `addedSets`; hover is
+  (and `addedSets`, from `core/annotation-collection.ts`, which the core imports on demand,
+  only for a Root given `annotations`: keep it out of `clover.ts`'s static imports) into
+  sets of entries, memoized on the Manifest. The store holds `annotationId`, `hiddenSets` and `addedSets`; hover is
   the `highlight` channel. Selection is controlled on the Canvas (`selectedAnnotation`),
   which frames a new id once its hotspot is placed. Presentation 4 groups several bodies
-  in `Independents`/`Composite`/`List`; read bodies through `bodiesOf()`.
+  in `Independents`/`Composite`/`List`; read bodies through `bodiesOf()`. What a
+  container paints is read one way (2026-10-27): the rules in `core/painting.ts`
+  (`GROUPS`, `bodiesOf`, `isPainting`) and the walk in `core/painted-bodies.ts`
+  (`paintedBodies`: groups, a `Choice`'s first, a `SpecificResource`'s source), apart so
+  a Canvas alone defers the walk with its thumbnail. One `asArray`, `lib/asArray.ts`.
   - The `Panel` lists every annotation (Mat, 2026-10-19), as `Annotations` does by
     default (`scope="all"`, since 2026-10-21: handled at the part, so one placed alone
     lists what the panel would, and no template passes it): `AnnotationLayers`, by layer (`layersOf`: sets sharing a localized label
@@ -640,7 +681,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     layer gives the same words as separate annotations, one per language
     (`languagesOf` in `components/Annotations/languages.ts`: two or more languages, split
     across its annotations, never where each holds them all), its header ends with
-    their codes (`LanguageChoice`, drawn as the Transcript's), one listed at a time:
+    their codes (`LanguageChoice`, drawn as the Transcript's, by one sheet, `ui/Codes.css`), one listed at a time:
     the Root's `language` to start, else the reader's (`startingLanguage`, as
     `localize` chooses); annotations in no language show either way. Each radio is
     named by its code and its language's own name (`autonym`, `Intl.DisplayNames`) in
@@ -682,8 +723,14 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   (WCAG 2.4.3). A standalone `Canvas` takes `iiifContent` too: `LoadedCanvas.tsx`, lazy
   from `Canvas/index.tsx`, reads it with `loadContent`, as a `Root` does (a Manifest
   gives its first Canvas, a Collection its first Manifest's, a content state the Canvas
-  it names), showing the loading bar until then and an alert (`clover-status`) with the
-  reason if it fails or has no Canvas; never an empty box.
+  it names, read by `core/content-state-reader.ts`, which `loadContent` loads only for
+  one, `DRY.md` B6), showing the loading bar until then and an alert (`clover-status`) with the
+  reason if it fails or has no Canvas; never an empty box. What a Root's Canvas reads
+  from the Manifest around it, a standalone one reads the same way, from
+  `Canvas/fromManifest.ts` (2026-10-27): its chapters from the Ranges
+  (`useRangeChapters`), and a content state's region or time (`applyTarget`), which
+  opens it past its placeholder. Only a region waits for the Canvas to be laid out
+  (`onReady`): a recording with nothing to draw never is, and its time still applies.
 - **Annotations as the content** (Mat, 2026-10-19; 3.x did it). `loadContent` hands an
   AnnotationPage/AnnotationCollection (`ANNOTATIONS`) to `core/annotations-content.ts`,
   imported on demand (in `bundle.test.mjs` `LAZY_MODULES`), which reads it with
@@ -768,7 +815,9 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   (`followFocus`, through `onMove`, a held arrow selecting where it stops), while
   `onSelect` stays a choice (Enter, a click), which the Gallery opens on. A Collection's
   members stay manual, since each selection loads a Manifest. Standalone it is a
-  list of links (`core/load.ts` `fetchResource`, which does not open a Collection).
+  list of links (`core/load.ts` `fetchResource`, which does not open a Collection),
+  drawn by `StandaloneItems.tsx`, lazy (`DRY.md` B9): no template has Items outside a
+  Root, so none carries it.
   Thumbnails come from `core/thumbnail.ts`: a service's `info.json` is read first (the
   renderer's cached `fetchInfo`), then the picture asked as it allows (`sizedImageUrl`),
   and only once the item is near (`useNearViewport` against the box that scrolls it), so
@@ -906,14 +955,18 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   and captions and transcripts are read from the Canvas itself (`layout.ts`).
 - **Map** (`@nulib/clover/map`, `src/map/index.ts`, a third entry). Keep MapLibre small:
   - `maplibre-gl` is a dependency (Mat: the Viewer shows the map by itself, no prop, so
-    the default path must resolve it), imported only inside the Map's mount effect.
+    the default path must resolve it), imported only inside the Map's mount effect, and
+    only once its box comes within half a screen of view (`useNearViewport`, as a
+    Canvas's images; Mat, 2026-10-27, `DRY.md` B5): a map far down a page, or in a tab
+    not yet open, loads none of it.
     `bundle.test.mjs` asserts no entry imports it statically and that the parts reach the
     map only lazily; `@allmaps/*` is on the forbidden list (422 kB gzip). The size table
     has "Map, before MapLibre" and "MapLibre, on a map" (MapLibre's chunks only).
   - The panel offers the tab when `core/geo-detect.ts` `hasMapData` (a look, not a read)
     finds navPlace or a georeference, and lazy-loads `RootMap` from
     `components/Map/MapView.tsx`. That module must never import `Root` (the standalone
-    `iiifContent` wrapper is `Map.tsx`, map entry only): a lazy chunk importing `Root`
+    `iiifContent` wrapper is `LoadedMap.tsx`, lazy from `Map.tsx`, map entry only, so a
+    map handed its places carries no loader): a lazy chunk importing `Root`
     made esbuild hoist `Root` and the core into a standalone Canvas (35.6 → 43.7 kB). It
     shares as little as it can with the parts: it builds its overlay URL itself
     (`components/Map/overlayImage.ts`, imported only to draw an overlay), not through
@@ -997,12 +1050,24 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   figures are each a `clover-canvas` too (`clover-canvas clover-timeline`,
   `clover-canvas clover-scene`), so `Canvas.css`'s rules for the Body (the controls and
   their reveal, scrim, focus ring, full screen, `getCloverRoot`) are theirs; a neutral
-  name waits for Canvas's renaming.
+  name waits for Canvas's renaming. `CanvasView` and `SceneView` each write the frame
+  (the figure, the viewport's name, role, keys and focus, the way out of full screen, the
+  caption last) themselves: a page draws one of them, so a shared frame component only
+  added its props to every page (`DRY.md`, A1, measured 2026-10-27).
+  `Body/frame.parity.test.tsx` holds the two to each other; change both together.
 - **Timeline** (`components/Timeline/`) is Canvas's view for a Timeline:
   `Timeline.tsx` renders `CanvasView` with the Timeline as its one Canvas (no
   navigator), `Connected.tsx` renders the connected Canvas for a Root's Timeline view
   and nothing for another, and `iiifContent` goes to `LoadedCanvas` with `of="Timeline"`
-  (a Manifest's first Timeline). So every audio recipe that played on Canvas plays the
+  (a Manifest's first Timeline). Each hands the view `playerSurface` (2026-10-27,
+  `DRY.md` A3), not Canvas's renderer: `CanvasView` draws on the surface its caller
+  makes (`Canvas/surface.ts`; `Canvas` and `Body` hand it `rendererSurface`), and reads
+  the camera's parts (zoom, rotation and reset, hotspots, the navigator, frames,
+  `onReady`'s handle) only from one that `hasCamera`. So a Timeline loads no tiles,
+  camera or gestures and holds no WebGL context; `build/bundle.test.mjs` fails if it
+  can reach `CanvasRenderer`. Its surface reports `open` and `change` as the renderer
+  does, takes a mouse's tap for `tap` (a finger's is the controls'), and shows a video
+  fitted should a Timeline paint one. So every audio recipe that played on Canvas plays the
   same (0002, 0014, 0103, 0434). A lone recording of sound (`player` in `CanvasView`:
   a lone Canvas whose media is audio, so a Timeline always) plays as a music app plays
   one (Mat, 2026-10-24: Apple Music's and Spotify's players), drawn by `MediaBody` in
@@ -1040,18 +1105,23 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   turned, which bound far more (a scan's node turned 86° drew 28% smaller); every move (drag, pinch, key, control) goes through
   `turned`/`zoomed`. `gestures.ts` is the viewport's pointers (a plain wheel stays the
   page's, as on Canvas). `engine.ts` is the only module that imports three.js (its
-  `WebGLRenderer`, `GLTFLoader` and `RoomEnvironment` for default light), `import()`ed
-  by `SceneView` once a Scene with `engine="three"` is near the window: never import
-  three.js anywhere else,
+  `WebGLRenderer`, `GLTFLoader` and `RoomEnvironment` for default light), reached only
+  through the opt-in entry (Mat, 2026-10-27, `DRY.md` decision 1): `@nulib/clover/three`'s
+  `registerThreeEngine()`, or the elements' `web-components/three.mjs`, registers it in
+  `Scene/engines.ts` (on `globalThis`, so every Clover build on the page sees it), and
+  `SceneView` `import()`s it once a Scene with `engine="three"` is near the window; an
+  engine no one registered draws with Clover's and warns once. Never import three.js
+  anywhere else,
   and keep `bundle.test.mjs`'s `LAZY_PACKAGES` and `LAZY_MODULES` saying so. It draws on
   demand (a frame per change, coalesced; a resize draws at once), never in a loop.
 - **Clover's own glTF renderer** (`lib/gltf/`, framework-free as `lib/renderer/` is, and
   no part of it: Canvas stays 2D) is the Scene's drawing by default (Mat, 2026-10-23:
   "engine is clover by default; three.js is an optional engine", lazy):
   `components/Scene/cloverEngine.ts`, the same `SceneEngine` (`drawing.ts`) as
-  three.js's `engine.ts`, which only `engine="three"` loads. `three` stays a dependency,
-  not an optional peer: a consumer's bundler resolves the engine's `import("three")` at
-  build time, so a missing optional peer would fail every consumer's build. `load.ts` reads GLB and glTF JSON (buffers and images by
+  three.js's `engine.ts`, which only `engine="three"` loads. `three` is an optional peer
+  (2026-10-27): only a page importing `@nulib/clover/three` reaches the engine's
+  `import("three")`, so only it needs `three` installed; the elements bring theirs
+  bundled in `web-components/three.mjs`, one copy for both element builds. `load.ts` reads GLB and glTF JSON (buffers and images by
   address or data URI, fetched with the request's settings; images by
   `createImageBitmap`, unflipped), refusing a required extension it does not draw
   (`EXTENSIONS`), one load shared by the Scenes that ask for a model at once (Chrome fails
@@ -1135,6 +1205,17 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
 - Painters sit behind one `Backend` interface. WebGL2 is primary and Canvas2D is a
   full-fidelity fallback. `DomLayers` positions real `<img>`/`<video>` elements with the same
   camera transform.
+- **A Canvas's annotations' state is in the hotspots' chunk** (Mat, 2026-10-27,
+  `DRY.md` B8): `Canvas/AnnotationState.tsx` holds which pages show, the placing, hover
+  and pick, framing, seeking and the placeholder's quiet open, draws the hotspots, and
+  reports a model CanvasView reads (through a ref where a callback outlives a render).
+  New annotation behavior goes there, not in CanvasView; CanvasView sees only the model.
+- **What a renderer may never need loads when it first does** (Mat, 2026-10-27, `DRY.md`
+  B3, B7): Canvas2D's code (one promise for the page; its canvas waits as `pending`,
+  dropped if the renderer releases meanwhile), the DOM layer (with the first frame holding
+  an element) and the hotspots' layer (`overlaysOf`, with the first hotspot; `overlays`
+  is `null` until then). Their order in the host holds: the canvas, then the DOM layer,
+  then the hotspots'. A new layer joins in that order, and loads with what needs it.
 - **WebGL contexts are rationed** (Mat, 2026-10-19: Chrome's face-in-a-box showed on the
   Canvas page). Browsers cap a page's contexts (about 16, 8 on Android) and kill the
   oldest past it, and Chrome paints a killed one with that picture. So a renderer takes a
@@ -1234,16 +1315,13 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     placed in the scene.
   - HLS goes through `hls.js` wherever `Hls.isSupported()`; native HLS only where it is
     not (older iOS). Do not go back to "`canPlayType` says HLS, so play natively":
-    Chromium plays HLS natively now, and on that path a `texture` video (never on the
-    page) stayed on the lowest rendition and a `dom` one stalled at its first frame.
-  - A video is a `SceneImage` with `media: { element, presentation }`. `dom` (the
-    default) positions the real element. `texture` uploads frames with `texImage2D`,
-    once per `requestVideoFrameCallback` frame. Do not switch to `texSubImage2D`: from
-    a video it uploads black in Chrome.
-  - Only `texture` asks for CORS. If the CORS load fails outright, the element is made
-    again without it and presented as `dom`, for that source only (`useMediaElement`
-    keeps the failed `src`). The next recording asks again. This also covers a cached
-    non-CORS copy of the same URL.
+    Chromium plays HLS natively now, and on that path a video stalled at its first frame.
+  - A video is a `SceneImage` with `media: { element }`, positioned as the real element
+    in the DOM layer, never uploaded (Mat, 2026-10-27, `DRY.md` decision 2: `texture`,
+    which drew frames into the canvas, was dropped). So it asks for no CORS. Should a
+    recipe ever need a painting over a video, stack it in the DOM layer; if frames are
+    ever uploaded again, use `texImage2D`, never `texSubImage2D`, which uploads a video
+    black in Chrome.
   - Captions are fetched with CORS and handed to `<track>` as blob URLs, because a
     cross-origin track is refused on a video without `crossorigin`. `useCaptionTracks`
     lists the Manifest's tracks first, then any the media adds (hls.js, in-band). Clover
@@ -1328,8 +1406,9 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   - One pointer can always zoom out (WCAG 2.5.1): `GestureController.zoomIn` goes home
     at `atMaxZoom()` on a click, a double click or a double tap. A touch double tap zooms
     only with `clickToZoom || dblClickToZoom`.
-  - The viewport is `z-index: -1`, inline and in `Canvas.css`, in a figure isolated
-    inline, so without the stylesheet the controls in the flow still sit above it (WCAG
+  - The viewport is `z-index: -1`, inline (its geometry is never in `Canvas.css`), in a
+    figure isolated inline, so without the stylesheet the controls in the flow still sit
+    above it (WCAG
     2.5.8). Anything placed in the figure to lie beneath the viewport (the iPhone
     `texture` video) goes first, at `z-index: -1`.
   - The transport fades with the rest of the controls, through the single reveal rule
@@ -1585,9 +1664,18 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     written by `custom-elements.mjs`). It shares the main entry's page assets
     (`page-assets.ts`: the deferred style runs and the map's worker), a module never named
     `assets.ts`, since TypeScript then takes `assets.d.ts`, the virtual modules'
-    declarations, as its own. Its files add 0.8 MB to the package's gzipped files (1.1 to
-    1.9 MB), most of it the copies of MapLibre and hls.js, which a page loads only for a
-    map or a stream.
+    declarations, as its own. The two builds cannot share chunks, so the Viewer's writes
+    its own copy of what both use (MapLibre and its worker, hls.js, DOMPurify, the
+    locales, a few small modules); `build/dedupe-viewer.mjs`, run right after it, deletes
+    each file of `viewer/` with the same name and bytes as one in the folder above (the
+    names are content hashes) and points what names it, in `viewer/` and its chunk map, at
+    `../` (Mat, 2026-10-27: 20 files, 0.49 MB gzip), and removes a folder it empties. It
+    fails the build if a reference is left, and `web-components.test.mjs` follows every
+    file the entry names, from `index.mjs` and `index.umd.js` on, failing on one that is
+    not there or outside `web-components/`. So `viewer/` works only inside
+    `web-components/`, never copied alone, as the
+    Technical overview tells hosts; its own entry files (`index.mjs`, `index.umd.js`,
+    `index.d.mts`) always stay.
   - **Two copies on a page.** Each entry brings its own copy of Clover, so a page loads
     one. A page that loads both has two hosts, each with its own translator, popups and
     style registry; the first to define a tag keeps it (`defineElement`). Their ids must
@@ -1663,8 +1751,9 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
   The button of a point or shape takes no pointer; only the marker or the shape does. The
   reader is lazy (`useSvgReader.ts`, listed in `bundle.test.mjs` `LAZY_MODULES`): it
   imports nothing, so its chunk shares nothing and costs no esbuild chunk overhead.
-- The hotspot layer (`Annotations.tsx`) and the annotations and Choice menus load on
-  demand through `hooks/useLoaded.ts`, asked for as soon as the Canvas has annotations
+- The hotspot layer (`Annotations.tsx`), the SVG reader, the elements' adapters
+  (`elements/later.ts`) and the annotations and Choice menus load on
+  demand through `hooks/useLoaded.ts`, the one module cache (2026-10-27), asked for as soon as the Canvas has annotations
   or a Choice, not on the press that opens a menu, so they are there before they are
   used. `useSvgReader` lives apart from the layer because `CanvasView` calls it on every
   draw. The navigator (`overlays/Navigator.ts`) loads in `attachNavigator`, the latest

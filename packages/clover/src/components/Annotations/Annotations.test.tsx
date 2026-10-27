@@ -13,7 +13,7 @@ import hotspotJson from "../../fixtures/iiif-cookbook/0022-linking-with-a-hotspo
 import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
 import { stubViewport } from "../Canvas/testing/viewport";
-import { resolveContentState } from "../../core/content-state";
+import { resolveContentState } from "../../core/content-state-reader";
 
 /** A renderer stand-in: several listeners per event, and the overlay layer hotspots use. */
 const listeners = new Map<string, Set<(detail?: unknown) => void>>();
@@ -72,6 +72,10 @@ async function renderWithBody(
   );
   await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
   emit("open");
+  // The hotspots and the annotations' state, which a Canvas loads on demand, arrive.
+  await act(async () => {
+    await import("../Canvas/AnnotationState");
+  });
 }
 
 describe("Annotations", () => {

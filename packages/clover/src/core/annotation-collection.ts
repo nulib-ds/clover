@@ -1,6 +1,7 @@
 import { type AnnotationSet, readPage } from "./annotation-sets";
 import { upgradePage } from "./pages";
 import { type CloverRequest, fetchJson } from "./request";
+import { asArray } from "../lib/asArray";
 
 /**
  * Annotations a host adds to what the Manifest carries: an AnnotationPage, an
@@ -10,13 +11,13 @@ import { type CloverRequest, fetchJson } from "./request";
 
 export type AnnotationsInput = string | Record<string, unknown> | unknown[];
 
-/** Pages followed in one collection, at most: a guard against a `next` loop. */
+/**
+ * Pages followed in one collection, at most, and never one twice: guards against a `next`
+ * that leads back, which would read its annotations again.
+ */
 const MAX_PAGES = 100;
 
 type Json = Record<string, any>;
-
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];
 
 async function resolve(
   item: unknown,
@@ -43,28 +44,17 @@ async function pagesOf(
   const type = String(json?.type ?? json?.["@type"] ?? "");
   const collection = /AnnotationCollection/.test(type);
   const pages: Json[] = collection ? [] : [json];
+  const seen = new Set<unknown>(collection ? [] : [json.id]);
   let next: unknown = collection ? json.first : json.next;
   while (next && pages.length < MAX_PAGES) {
+    const id = typeof next === "string" ? next : (next as Json).id;
+    if (seen.has(id ?? next)) break;
+    seen.add(id ?? next);
     const page = await resolve(next, request, signal);
     pages.push(page);
     next = page.next;
   }
   return pages;
-}
-
-/**
- * The Manifest an annotation's target says its Canvas is `partOf`, as annotations made
- * apart from any Manifest name it (a shared link, a page of tags across a collection).
- */
-export function manifestOfAnnotation(annotation: Json): string | undefined {
-  for (const target of asArray(annotation?.target) as Json[]) {
-    const source = target?.type === "SpecificResource" ? target.source : target;
-    const part = asArray(source?.partOf).find(
-      (each: any) => each?.id && (!each.type || each.type === "Manifest"),
-    ) as Json | undefined;
-    if (part) return part.id;
-  }
-  return undefined;
 }
 
 export async function loadAnnotationSets(

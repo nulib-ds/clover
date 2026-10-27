@@ -41,7 +41,7 @@ const CanvasRecipe = ({
   adapt?: AdapterName;
   behavior?: string;
   viewingDirection?: string;
-  /** Passed straight to `Canvas`, e.g. `{ media: { presentation: "texture" } }`. */
+  /** Passed straight to `Canvas`, e.g. `{ animation: { autoplay: true } }`. */
   options?: CloverCanvasOptions;
   height?: number;
 }) => {

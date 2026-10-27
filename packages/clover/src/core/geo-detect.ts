@@ -1,5 +1,6 @@
 import type { Collection, Manifest } from "./presentation";
 import { selectSequence } from "./selectors";
+import { asArray } from "../lib/asArray";
 
 /**
  * Whether a Manifest has anything to put on a map: navPlace on the Collection, Manifest,
@@ -39,6 +40,3 @@ export function hasMapData(
 }
 
 type Json = Record<string, any>;
-
-const asArray = (value: unknown): unknown[] =>
-  Array.isArray(value) ? value : value == null ? [] : [value];

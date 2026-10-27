@@ -12,6 +12,7 @@ import { stubViewport } from "../Canvas/testing/viewport";
 import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
 import type { Orbit } from "./orbit";
+import { registerThreeEngine } from "../../three";
 
 /** The 3D drawing, without WebGL: what the Scene asks of it is recorded. */
 const engine = vi.hoisted(() => ({
@@ -231,16 +232,31 @@ describe("Scene", () => {
     await waitFor(() => expect(engine.draw).toHaveBeenCalled());
   });
 
-  it("draws with Clover's own renderer, or with three.js when asked", async () => {
+  it("draws with Clover's own renderer, or with three.js once the page registers it", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const { unmount } = render(<Clover.Scene scene={scene as never} />);
     await waitFor(() => expect(createEngine).toHaveBeenCalled());
     expect(createThreeEngine).not.toHaveBeenCalled();
     unmount();
+
+    // Asked for three.js before it is registered: Clover's own draws, and says so.
+    createEngine.mockClear();
+    const first = render(
+      <Clover.Scene scene={scene as never} engine="three" />,
+    );
+    await waitFor(() => expect(createEngine).toHaveBeenCalled());
+    expect(createThreeEngine).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('"three"'));
+    first.unmount();
+
+    // Registered, as `@nulib/clover/three` does it.
+    registerThreeEngine();
     createEngine.mockClear();
     render(<Clover.Scene scene={scene as never} engine="three" />);
     await waitFor(() => expect(createThreeEngine).toHaveBeenCalled());
     expect(createEngine).not.toHaveBeenCalled();
     await waitFor(() => expect(engine.draw).toHaveBeenCalled());
+    warn.mockRestore();
   });
 
   it("gives the graphics back when it goes", async () => {

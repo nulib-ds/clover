@@ -43,8 +43,8 @@ import "@nulib/clover/templates.css";
 
 | Prop                 | Default                      | What it does                                                    |
 | -------------------- | ---------------------------- | --------------------------------------------------------------- |
-| `defaultSidebarOpen` | open on wide screen          | Whether the page thumbnails start shown.                        |
-| `defaultPanelOpen`   | `false`                      | Whether the information panel starts open.                      |
+| `defaultSidebarOpen` | `true`                       | Whether the page thumbnails start shown; over the page, not.    |
+| `defaultPanelOpen`   | `false`                      | Whether the panel starts open beside the page; over it, closed. |
 | `panelLayout`        | `"accordion"`                | The panel's sections as stacked boxes, or `"tabs"`.             |
 | `download`           | `true`                       | Download's links in the toolbar, where there is a `rendering`.  |
 | `headingLevel`       | `2`                          | The title's level; the panel's sections are a level below.      |
@@ -64,7 +64,10 @@ Pinch and Ctrl-wheel zoom into the current sheet; the plain wheel always scrolls
 column. On a touch screen a finger scrolls it too, until you zoom in: then it moves
 about the page.
 
-To change the layout, copy `Document.tsx`, `Sheets.tsx` and `Document.css` into your
-app, with the hooks in `templates/shared/` they import (`useSlide.ts`,
-`useDragToClose.ts`, `useSpine.ts`, `useFollowFocus.ts`). Otherwise they use only what
+The information panel loads its code when it first opens, or as the reader points at its
+toggle or focuses it, so the page loads without it.
+
+To change the layout, copy `Document.tsx`, `Sheets.tsx`, `DocumentPanel.tsx` and
+`Document.css` into your app, with the hooks in `templates/shared/` they import (`useDrawer.ts`, and through it
+`useSlide.ts`, `useDragToClose.ts` and `useFollowFocus.ts`). Otherwise they use only what
 `@nulib/clover` exports.

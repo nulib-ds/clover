@@ -3,9 +3,9 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as Clover from "../../parts";
 import type { PanelLayout, ItemsLayout, RootProps } from "../../parts";
 import { useDragToClose } from "../shared/useDragToClose";
-import { useFocusOnOpen, useSlide, useWideEnough } from "../shared/useSlide";
+import { panelFocus, useSlide, useWideEnough } from "../shared/useSlide";
 import { useFollowFocus } from "../shared/useFollowFocus";
-import { useSpine } from "../shared/useSpine";
+import { useSpineTop } from "../shared/useSpine";
 
 /** The narrowest the Body and the panel may be dragged, side by side. */
 const BODY_MIN = "16rem";
@@ -30,7 +30,10 @@ export type DefaultProps = Omit<RootProps, "children"> & {
   headingLevel?: number;
   /** The information panel beside the Body, with its toggle. Default `true`. */
   panel?: boolean;
-  /** Whether the panel starts open. Default: open when it has room beside the Body. */
+  /**
+   * Whether the panel starts open beside the Body. Default `true`. Where it has no room
+   * there and would slide over the Body, it starts closed.
+   */
   defaultPanelOpen?: boolean;
   /**
    * How the information panel lays out its sections: `"accordion"` (the default),
@@ -81,20 +84,42 @@ export function Default({
   ...root
 }: DefaultProps) {
   const panes = useRef<HTMLElement>(null);
-  const panelRef = useRef<HTMLElement>(null);
-  const beside = useWideEnough(panes, BESIDE_REM);
+  // Beside the Body until measured otherwise, as on the server.
+  const measured = useWideEnough(panes, BESIDE_REM);
+  const beside = measured ?? true;
   /*
-   * The reader's choice (or the host's, to start with); until one is made the panel is
-   * open when it has room beside the Body, and closed when it would cover it.
+   * Two choices: open beside the Body (the host's to start with, then the reader's), and
+   * open over it. Over the Body it starts closed, whatever the host asks: open, it would
+   * cover what the reader came for, focus behind it (WCAG 2.4.11; Mat, 2026-10-27). The
+   * reader's toggle over the Body sets both, so widening keeps a panel they opened.
+   * Document's drawers follow the same rule (`useDrawer`); with one drawer, this layout
+   * keeps its own, lighter.
    */
-  const [choice, setChoice] = useState<boolean | undefined>(defaultPanelOpen);
-  const open = choice ?? beside;
-  const setOpen = (value: boolean) => setChoice(value);
+  const [choice, setChoice] = useState(defaultPanelOpen ?? true);
+  const [floating, setFloating] = useState(false);
+  const open = beside ? choice : floating;
+  const pane = useRef<HTMLElement>(null);
+  /*
+   * Opened over the Body, the panel takes focus, as an overlay should: as its slide takes
+   * `hidden` off it, a commit or two later, tried after each, three at most.
+   */
+  const tries = useRef(0);
+  useEffect(() => {
+    if (!tries.current || !pane.current) return;
+    tries.current -= 1;
+    const target = panelFocus(pane.current);
+    target?.focus({ preventScroll: true });
+    if (target && document.activeElement === target) tries.current = 0;
+  });
+  const setOpen = (value: boolean) => {
+    tries.current = !beside && value ? 3 : 0;
+    if (!beside) setFloating(value);
+    setChoice(value);
+  };
   const baseId = Clover.useUniqueId().replace(/:/g, "");
   const panelId = `${baseId}-panel`;
   // Past h6 the title is no heading, and names the Viewer instead (`Clover.titled`).
   const title = Clover.titled(headingLevel, `${baseId}-title`);
-  const pane = useRef<HTMLElement>(null);
   /*
    * The panel's toggle sits on the spine, the bar between the Body and the panel, while
    * the panel is open beside the Body, and among the Body's controls otherwise. So a
@@ -112,21 +137,20 @@ export function Default({
     if (pane.current?.contains(document.activeElement)) follow();
   };
   /*
-   * Narrowing under an open panel closes it, rather than suddenly covering the page. Before
-   * paint, while focus is still in the pane just hidden.
+   * Narrowing under an open panel closes it, rather than suddenly covering the page, and
+   * widening brings it back. Focus in it, or on its toggle on the spine, follows the
+   * toggle to the Body's controls.
    */
-  const wasBeside = useRef(beside);
+  const wasBeside = useRef(measured);
   useIsomorphicLayoutEffect(() => {
-    if (wasBeside.current && !beside) {
-      handBack();
-      setChoice(undefined);
-    }
-    wasBeside.current = beside;
-  }, [beside]);
+    if (wasBeside.current === true && measured === false) follow();
+    if (measured === true) setFloating(false);
+    wasBeside.current = measured;
+  }, [measured]);
   const over = !beside;
   const docked = panel && !over && open;
   const spine = useRef<HTMLDivElement>(null);
-  useSpine(
+  useSpineTop(
     spine,
     () =>
       spine.current?.parentElement?.querySelector<HTMLElement>(
@@ -147,7 +171,6 @@ export function Default({
   );
   // Only over the Body does it slide: beside it, it simply shows and hides.
   const slide = useSlide(over && open);
-  useFocusOnOpen(panelRef, over && slide.mounted);
   // Over the Body, it can be dragged back off the way it came, as an app's drawer can.
   const scrim = useRef<HTMLDivElement>(null);
   useDragToClose(pane, {
@@ -171,9 +194,8 @@ export function Default({
     >
       <Clover.Split
         ref={panes}
-        className="clover-template-default-panes"
+        className="clover-template-default-panes clover-template-panes"
         data-panel={over ? "over" : "beside"}
-        data-panel-open={panel && open}
         storageKey={storageKey || undefined}
         onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
           // Escape anywhere puts the floating panel away, uncovering a control focus
@@ -237,14 +259,13 @@ export function Default({
             id={panelId}
             data-spine={over || undefined}
             name="panel"
-            className="clover-template-default-panel"
+            className="clover-template-default-panel clover-template-drawer"
             size="24rem"
             min={over ? undefined : PANEL_MIN}
             data-open={over ? slide.open : open}
             hidden={!shown}
           >
             <Clover.Panel
-              ref={panelRef}
               layout={panelLayout}
               download={download}
               // With no title over them, the sections take its place in the outline.
@@ -261,7 +282,7 @@ export function Default({
           // back to the toggle, never left to fall to the page (WCAG 2.4.3).
           <div
             ref={scrim}
-            className="clover-template-default-scrim"
+            className="clover-template-default-scrim clover-template-scrim"
             data-open={slide.open}
             aria-hidden="true"
             onMouseDown={(event) => event.preventDefault()}

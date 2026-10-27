@@ -11,9 +11,22 @@ import {
 import { loadVtt } from "../../../core/vtt";
 import { isHls } from "../../../lib/hls";
 
+/**
+ * A caption track's name, as the transport's menu and the system player's both name it:
+ * its label in the reader's language, else its language, else its number.
+ */
+export function captionName(
+  caption: MediaPlacement["captions"][number],
+  index: number,
+  language?: string,
+): { text: string; lang?: string } {
+  const name = localize(caption.label as LanguageMapLike, language);
+  return name.text
+    ? { text: name.text, lang: name.lang }
+    : { text: caption.language || String(index + 1) };
+}
+
 export interface MediaElementOptions {
-  /** `texture` draws frames into the canvas, which needs CORS on the media. */
-  presentation: "dom" | "texture";
   /** Captions and HLS get its credentials and headers; the element only its credentials. */
   request?: CloverRequest;
   /** The language to name caption tracks in, for the system player's menu. */
@@ -23,32 +36,25 @@ export interface MediaElementOptions {
 /**
  * The media element for a Canvas's video or sound, made imperatively.
  *
- * Not JSX: the renderer moves the element into its DOM layer (or reads frames from it),
- * and React must not try to own or reconcile a node that has been moved. Sound plays
+ * Not JSX: the renderer moves the element into its DOM layer, and React must not try to
+ * own or reconcile a node that has been moved. Sound plays
  * through a `<video>` too, as the Player plays it — one element type, one transport.
  *
  * - HLS plays through `hls.js` wherever Media Source Extensions let it run, imported only
  *   for an HLS source. Native HLS is the fallback where they cannot (older iOS). A native
  *   `canPlayType` no longer means Safari: Chromium plays HLS natively too, and there a
- *   video drawn as a `texture` (never on the page) stays on the lowest rendition, and a
- *   `dom` one can stall at its first frame.
+ *   video can stall at its first frame.
  * - Each WebVTT caption file becomes a `<track>`, `hidden`: Clover draws the cues itself,
- *   so they stay readable at any zoom and in either presentation. Which track shows, and
- *   how, is `useCaptionTracks`' to keep, with those the media carries itself.
- * - `texture` asks for CORS (`crossOrigin`), since WebGL may not read other frames;
- *   `dom` and sound do not need it. Media that will not load that way (no CORS headers,
- *   or a cached copy fetched without them) is made again without and presented as
- *   `dom`: per item, as an image without CORS is.
+ *   so they stay readable at any zoom. Which track shows, and how, is
+ *   `useCaptionTracks`' to keep, with those the media carries itself.
+ * - It asks for no CORS: the browser shows the element itself (the renderer's DOM layer),
+ *   reading none of its pixels.
  */
 export function useMediaElement(
   media: MediaPlacement,
-  { presentation: requested, request, language }: MediaElementOptions,
-): { element: HTMLVideoElement | null; presentation: "dom" | "texture" } {
+  { request, language }: MediaElementOptions,
+): HTMLVideoElement | null {
   const [element, setElement] = useState<HTMLVideoElement | null>(null);
-  // The source whose CORS request failed: another recording asks again.
-  const [corsFailedSrc, setCorsFailedSrc] = useState<string | null>(null);
-  const presentation =
-    requested === "texture" && corsFailedSrc !== media.src ? "texture" : "dom";
   const captionsKey = JSON.stringify(media.captions);
   const posterKey = media.poster
     ? (media.poster.src ?? media.poster.service ?? "")
@@ -66,15 +72,6 @@ export function useMediaElement(
     video.playsInline = true;
     video.preload = "metadata";
     video.className = "clover-canvas-media-element";
-    const onCorsError = () => {
-      // Nothing loaded at all: the CORS request itself failed.
-      if (video.readyState === HTMLMediaElement.HAVE_NOTHING)
-        setCorsFailedSrc(media.src);
-    };
-    if (presentation === "texture") {
-      video.crossOrigin = withCredentials ? "use-credentials" : "anonymous";
-      video.addEventListener("error", onCorsError, { once: true });
-    }
     // The poster once its service's `info.json` is read, as every image is asked.
     const poster = media.poster;
     if (poster?.src) video.poster = poster.src;
@@ -96,10 +93,7 @@ export function useMediaElement(
       track.kind = "captions";
       if (caption.language) track.srclang = caption.language;
       // Named as Clover's menu names it, for the system player's own menu.
-      track.label =
-        localize(caption.label as LanguageMapLike, languageRef.current).text ||
-        caption.language ||
-        String(index + 1);
+      track.label = captionName(caption, index, languageRef.current).text;
       video.appendChild(track);
       // Shared with `Transcript`: one fetch per file.
       loadVtt(caption.id, requestRef.current)
@@ -153,7 +147,6 @@ export function useMediaElement(
     setElement(video);
     return () => {
       canceled = true;
-      video.removeEventListener("error", onCorsError);
       video.pause();
       hls?.destroy();
       video.removeAttribute("src");
@@ -164,14 +157,7 @@ export function useMediaElement(
     };
     // `captionsKey` stands in for `media.captions`, whose identity changes every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    media.src,
-    media.format,
-    posterKey,
-    captionsKey,
-    presentation,
-    requestKey(request),
-  ]);
+  }, [media.src, media.format, posterKey, captionsKey, requestKey(request)]);
 
-  return { element, presentation };
+  return element;
 }

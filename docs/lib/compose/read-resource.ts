@@ -2,7 +2,7 @@ import { type Structure, structureOf } from "docs/lib/compose/structure";
 import {
   decodeContentState,
   resolveContentState,
-} from "../../../packages/clover/src/core/content-state";
+} from "../../../packages/clover/src/core/content-state-reader";
 
 /**
  * A IIIF resource, read for its structure only (WEBMCP.md, phase 3): from the address an

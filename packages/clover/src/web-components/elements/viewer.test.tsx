@@ -35,9 +35,7 @@ let early: CloverViewer;
 beforeAll(() => {
   early = document.createElement("clover-viewer") as CloverViewer;
   early.iiifContent = bookJson;
-  defineCloverElements({
-    styles: [{ key: "clover-1", css: ".clover-root{}" }],
-  });
+  defineCloverElements({});
 });
 beforeEach(() => {
   initCloverI18n({ lng: "en" });
@@ -81,7 +79,7 @@ describe("<clover-viewer>", () => {
     // The stylesheet is in the document once, however many elements there are.
     mount();
     expect(
-      document.querySelectorAll('style[data-clover="clover-1"]'),
+      document.querySelectorAll('style[data-clover="elements"]'),
     ).toHaveLength(1);
   });
 
@@ -107,12 +105,12 @@ describe("<clover-viewer>", () => {
       "templates/document/Document",
     ])
       expect(keys).not.toContain(absent);
-    // In the stylesheet's order, after what was handed in whole.
+    // In the stylesheet's order, after the elements' own.
     const indexes = sheets().map((style) => Number(style.dataset.cloverIndex));
     expect(indexes).toEqual([...indexes].sort((a, b) => a - b));
     expect(
       document.head
-        .querySelector('style[data-clover="clover-1"]')!
+        .querySelector('style[data-clover="elements"]')!
         .compareDocumentPosition(sheets()[0]) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
