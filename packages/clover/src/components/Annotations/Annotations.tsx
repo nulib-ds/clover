@@ -5,7 +5,8 @@ import { EntryBodies } from "./EntryBodies";
 import {
   type AnnotationEntry,
   type AnnotationSet,
-  selectAnnotationSets,
+  selectListedSets,
+  selectHiddenSets,
 } from "../../core/annotation-sets";
 import { manifestOfAnnotation } from "../../core/annotation-collection";
 import { readLink } from "../../core/link";
@@ -93,12 +94,19 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
     const { t, langOf } = useCloverTranslation();
     const { clover, language } = useClover("Annotations");
     const sets = useCloverSelector((state) =>
-      selectAnnotationSets(state.manifest, state.addedSets),
+      selectListedSets(state.manifest, state.addedSets),
     );
     const shown = useCloverSelector((state) =>
       selectVisibleCanvases(state.manifest, state.canvasId),
     );
-    const hiddenSets = useCloverSelector((state) => state.hiddenSets);
+    const hiddenSets = useCloverSelector((state) =>
+      selectHiddenSets(
+        state.manifest,
+        state.addedSets,
+        state.hiddenSets,
+        state.shownSets,
+      ),
+    );
     const selected = useCloverSelector((state) => state.annotationId);
     const highlighted = React.useSyncExternalStore(
       clover.highlight.subscribe,

@@ -9,7 +9,11 @@ import React, {
 import type { CanvasHandle, CloverCanvasProps } from "./Canvas.types";
 import CanvasView from "./CanvasView";
 import { type IIIFCanvas, paintedMedia } from "./layout";
-import { selectDrawnSets } from "../../core/annotation-sets";
+import {
+  selectDrawnSets,
+  selectHiddenSets,
+  selectUnlistedSets,
+} from "../../core/annotation-sets";
 import type { AnnotationLink } from "../../core/link";
 import { showLink } from "../../core/show-link";
 import { chaptersOf } from "../../core/ranges";
@@ -79,7 +83,27 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
   const sets = useCloverSelector((state) =>
     selectDrawnSets(state.manifest, state.addedSets, state.search.set),
   );
-  const hiddenSets = useCloverSelector((state) => state.hiddenSets);
+  /*
+   * What the menu never offers, as the Annotations list leaves it out (Mat, 2026-10-26):
+   * the search's hits, which Search lists, and the OCR that starts hidden, unless the
+   * reader's host has shown it (`shownSets`).
+   */
+  const unlistedSets = useCloverSelector((state) =>
+    selectUnlistedSets(
+      state.manifest,
+      state.addedSets,
+      state.hiddenSets,
+      state.shownSets,
+    ),
+  );
+  const hiddenSets = useCloverSelector((state) =>
+    selectHiddenSets(
+      state.manifest,
+      state.addedSets,
+      state.hiddenSets,
+      state.shownSets,
+    ),
+  );
   const selectedAnnotation = useCloverSelector((state) => state.annotationId);
   const highlighted = useSyncExternalStore(
     clover.highlight.subscribe,
@@ -299,6 +323,7 @@ const ConnectedCanvas: React.FC<CloverCanvasProps> = ({
       onEnded={handleEnded}
       annotations={annotations}
       hiddenPages={hiddenSets}
+      unlistedPages={unlistedSets}
       onPageVisibilityChange={(pageIds, visible) =>
         pageIds.forEach((id) => clover.setSetVisible(id, visible))
       }

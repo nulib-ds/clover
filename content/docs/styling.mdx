@@ -270,6 +270,7 @@ On the transport's dark scrim, in every theme.
 | `--clover-radius`      | `3px` (`6px` for the Body's menus)        | The corners of Clover's boxes: tips, menus, the panel, the Body, thumbnails |
 | `--clover-radius-pill` | `2rem`                                    | The corners of the round controls and of pills                              |
 | `--clover-transition`  | `all 200ms cubic-bezier(0.16, 1, 0.3, 1)` | How a control changes under the pointer and in focus                        |
+| `--clover-field-edge`  | The muted text mixed 80% into the ground  | The edge of a field: Search's, a menu's. Keep it 3:1 against the ground     |
 
 ### The Body
 
@@ -286,20 +287,21 @@ motion: set yours inside `@media (prefers-reduced-motion: no-preference)`.
 | `--clover-controls-enter`        | `340ms cubic-bezier(0.34, 1.56, 0.64, 1)`                            | How they come back                                |
 | `--clover-controls-tuck`         | `var(--clover-space-s)`                                              | How far they tuck toward their edge as they leave |
 
-### Items, Summary, Logo and Map
+### Items, Summary, Logo, Map and Search
 
-Items' are set on `.clover-items`; the Summary's, the Logo's and the Map's on them or on
-any element that contains them.
+Items' are set on `.clover-items`; the Summary's, the Logo's, the Map's and Search's on
+them or on any element that contains them.
 
-| Variable                 | Default                 | What it sets                                    |
-| ------------------------ | ----------------------- | ----------------------------------------------- |
-| `--clover-items-height`  | `8rem`                  | A slider's picture height                       |
-| `--clover-items-size`    | `10rem`                 | A grid's cell (the Gallery's `size` sets it)    |
-| `--clover-items-gap`     | `var(--clover-space-m)` | The space between items                         |
-| `--clover-items-lines`   | `3`                     | The lines of an item's label before it is cut   |
-| `--clover-summary-lines` | `5`                     | The lines of a Summary before Read more         |
-| `--clover-logo-height`   | `1.618rem`              | A provider's logo's height, its width following |
-| `--clover-map-height`    | `24rem`                 | The Map's height                                |
+| Variable                      | Default                 | What it sets                                                             |
+| ----------------------------- | ----------------------- | ------------------------------------------------------------------------ |
+| `--clover-items-height`       | `8rem`                  | A slider's picture height                                                |
+| `--clover-items-size`         | `10rem`                 | A grid's cell (the Gallery's `size` sets it)                             |
+| `--clover-items-gap`          | `var(--clover-space-m)` | The space between items                                                  |
+| `--clover-items-lines`        | `3`                     | The lines of an item's label before it is cut                            |
+| `--clover-summary-lines`      | `5`                     | The lines of a Summary before Read more                                  |
+| `--clover-content-search-top` | `0px`                   | How far under the top of its scrolling box Search's `sticky` field holds |
+| `--clover-logo-height`        | `1.618rem`              | A provider's logo's height, its width following                          |
+| `--clover-map-height`         | `24rem`                 | The Map's height                                                         |
 
 ### Templates
 

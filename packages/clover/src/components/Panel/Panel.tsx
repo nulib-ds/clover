@@ -1,4 +1,11 @@
-import React, { Suspense, forwardRef, lazy, useRef } from "react";
+import React, {
+  Suspense,
+  forwardRef,
+  lazy,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { About } from "./About";
 import { Tip } from "../../ui/Tip";
@@ -8,11 +15,11 @@ import {
   canvasTextTranscripts,
   type IIIFCanvas,
 } from "../Canvas/layout";
-import { searchServiceOf } from "../../core/search-service";
+import { SEARCH_SET_ID, searchServiceOf } from "../../core/search-service";
 import { hasMapData } from "../../core/geo-detect";
 import { tableOfContents } from "../../core/ranges";
 import { partOfCollection, selectVisibleCanvases } from "../../core/selectors";
-import { selectAnnotationSets } from "../../core/annotation-sets";
+import { selectListedSets } from "../../core/annotation-sets";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
@@ -160,7 +167,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
   },
   ref,
 ) {
-  useClover("Panel");
+  const { clover } = useClover("Panel");
   const element = useRef<HTMLElement | null>(null);
   const { t, langOf } = useCloverTranslation();
   /*
@@ -180,7 +187,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
     return lang ? <span lang={lang}>{t(key)}</span> : t(key);
   };
   const hasAnnotations = useCloverSelector(
-    (state) => selectAnnotationSets(state.manifest, state.addedSets).length > 0,
+    (state) => selectListedSets(state.manifest, state.addedSets).length > 0,
   );
   const hasTranscript = useCloverSelector((state) =>
     (
@@ -251,7 +258,10 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
               {
                 value: "search",
                 label: tabLabel("informationPanelTabsSearch"),
-                content: later(<Search headingLevel={inner} />),
+                // Its steps beside the section's heading, in an accordion (Mat, 2026-10-26).
+                content: later(
+                  <Search headingLevel={inner} pager="heading" sticky />,
+                ),
               },
             ]
           : []),
@@ -284,6 +294,40 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
             ]
           : []),
       ];
+
+  /*
+   * A search started anywhere but the Search section opens it (Mat, 2026-10-26): a
+   * `searchQuery`, given or changed, or a host's own `clover.search()`, so the hits drawn
+   * on the Canvas come with their list. Only the open section changes, never focus
+   * (WCAG 3.2.2); a Panel that is shut stays shut, opening on Search when it shows; a
+   * section the reader folds stays folded until another query; and a `value` the host
+   * controls is the host's. A query beats `defaultValue`: it says what the reader came for.
+   */
+  const query = useCloverSelector((state) => state.search.query);
+  const searchable = tabs.some((tab) => tab.value === "search");
+  const [own, setOwn] = useState<string | null>(() =>
+    query && searchable ? "search" : (defaultValue ?? null),
+  );
+  const asked = useRef(query && searchable ? query : "");
+  useEffect(() => {
+    if (!searchable) return;
+    if (query && query !== asked.current && value === undefined)
+      setOwn("search");
+    asked.current = query;
+  }, [query, searchable, value]);
+
+  /*
+   * A search's hits are drawn on the Canvas only while its section is open (Mat,
+   * 2026-10-26: "search results should go away if search tab is closed"): closed, they go,
+   * the query and its list kept, and they come back as it opens again.
+   */
+  const shown = value !== undefined ? value : own;
+  const searchOpen =
+    (tabs.some((tab) => tab.value === shown) ? shown : tabs[0]?.value) ===
+    "search";
+  useEffect(() => {
+    if (searchable) clover.setSetVisible(SEARCH_SET_ID, searchOpen);
+  }, [clover, searchable, searchOpen]);
 
   if (!tabs.length) return null;
 
@@ -344,9 +388,11 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
       <Sections
         items={tabs}
         layout={layout}
-        value={value}
-        defaultValue={defaultValue}
-        onValueChange={onValueChange}
+        value={value !== undefined ? value : own}
+        onValueChange={(next) => {
+          if (value === undefined) setOwn(next);
+          onValueChange?.(next);
+        }}
         label={t("informationPanelTabs")}
         labelLang={langOf("informationPanelTabs")}
         headingLevel={headingLevel}

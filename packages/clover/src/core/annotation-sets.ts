@@ -1,6 +1,7 @@
 import {
   type ParsedAnnotationTarget,
   bodiesOf,
+  isRegionText,
   parseAnnotationTarget,
 } from "./annotations";
 import { type AnnotationBodyEntry, readBodies } from "./annotation-bodies";
@@ -8,6 +9,7 @@ import { type AnnotationBodyEntry, readBodies } from "./annotation-bodies";
 export { bodiesOf, readBodies };
 export type { AnnotationBodyEntry };
 import type { Manifest } from "./presentation";
+import { SEARCH_SET_ID } from "./search-service";
 import { selectSequence } from "./selectors";
 import type { LanguageMapLike } from "./value";
 
@@ -147,6 +149,121 @@ export function selectDrawnSets(
     bySearch.set(searchSet, drawn);
   }
   return drawn;
+}
+
+/** A Canvas that plays: its `supplementing` text is a recording's, never hidden here. */
+const plays = (canvas: Json | undefined) => Number(canvas?.duration) > 0;
+
+/**
+ * Whether a set starts hidden (Mat, 2026-10-26): a still Canvas's OCR, `supplementing`
+ * text on its regions, line by line or word by word (Cookbook 0068, `isRegionText`), is at
+ * the ready, for a search to point into, and not drawn over the page; a search's hits
+ * (`highlighting`) are what show. A transcription of the whole page (Maktaba's) is there
+ * to read and shows as ever, a Canvas that plays keeps its own, and caption files are
+ * never in a set (`readBodies`). The reader shows one with `setSetVisible`, as any set.
+ */
+export function startsHidden(
+  set: AnnotationSet,
+  canvasOf: (id: string) => Json | undefined,
+): boolean {
+  if (set.source === "search" || !set.entries.length) return false;
+  return set.entries.every(
+    (entry) =>
+      isRegionText(entry.motivation, entry.target) &&
+      !plays(canvasOf(entry.canvasId)),
+  );
+}
+
+/** The Manifest's Canvases by id, for what a set's entries hang on. */
+function canvasesById(manifest: Manifest | null): Map<string, Json> {
+  const canvases = new Map<string, Json>();
+  for (const canvas of selectSequence(manifest).canvases as Json[])
+    canvases.set(canvas.id, canvas);
+  return canvases;
+}
+
+const listedOf = new WeakMap<AnnotationSet[], AnnotationSet[]>();
+
+/**
+ * The sets listed to read (Annotations, the Panel's section): all but those that start
+ * hidden (Mat, 2026-10-26: "don't show supplementing annotations in this"). A still
+ * Canvas's OCR is reached through a search, and drawn as its hits; listed, it would be
+ * hundreds of lines. The same array comes back while nothing changes.
+ */
+export function selectListedSets(
+  manifest: Manifest | null,
+  added: AnnotationSet[],
+): AnnotationSet[] {
+  const sets = selectAnnotationSets(manifest, added);
+  let listed = listedOf.get(sets);
+  if (!listed) {
+    const canvases = canvasesById(manifest);
+    const kept = sets.filter(
+      (set) => !startsHidden(set, (id) => canvases.get(id)),
+    );
+    listed = kept.length === sets.length ? sets : kept;
+    listedOf.set(sets, listed);
+  }
+  return listed;
+}
+
+const hiddenOf = new WeakMap<
+  AnnotationSet[],
+  { hidden: string[]; shown: string[]; ids: string[] }
+>();
+
+/**
+ * The sets not drawn: those switched off (`hiddenSets`), and those that start hidden
+ * (`startsHidden`) and were not switched on (`shownSets`). The same array comes back
+ * while nothing changes.
+ */
+export function selectHiddenSets(
+  manifest: Manifest | null,
+  added: AnnotationSet[],
+  hidden: string[],
+  shown: string[],
+): string[] {
+  const sets = selectAnnotationSets(manifest, added);
+  const cached = hiddenOf.get(sets);
+  if (cached && cached.hidden === hidden && cached.shown === shown)
+    return cached.ids;
+  const canvases = canvasesById(manifest);
+  const quiet = sets
+    .filter(
+      (set) =>
+        !hidden.includes(set.id) &&
+        !shown.includes(set.id) &&
+        startsHidden(set, (id) => canvases.get(id)),
+    )
+    .map((set) => set.id);
+  const ids = quiet.length ? [...hidden, ...quiet] : hidden;
+  hiddenOf.set(sets, { hidden, shown, ids });
+  return ids;
+}
+
+const unlistedOf = new WeakMap<string[], { hidden: string[]; ids: string[] }>();
+
+/**
+ * The sets the Canvas's menu never offers, as the Annotations list leaves them out: the
+ * search's hits (`SEARCH_SET_ID`, which `Search` lists), and those that start hidden and
+ * are still hidden but for the reader's own switching off (`hiddenSets`), which the menu
+ * offers to show again. The same array comes back while nothing changes.
+ */
+export function selectUnlistedSets(
+  manifest: Manifest | null,
+  added: AnnotationSet[],
+  hidden: string[],
+  shown: string[],
+): string[] {
+  const drawnHidden = selectHiddenSets(manifest, added, hidden, shown);
+  const cached = unlistedOf.get(drawnHidden);
+  if (cached && cached.hidden === hidden) return cached.ids;
+  const ids = [
+    SEARCH_SET_ID,
+    ...drawnHidden.filter((id) => !hidden.includes(id)),
+  ];
+  unlistedOf.set(drawnHidden, { hidden, ids });
+  return ids;
 }
 
 /** An entry by id, across sets. */

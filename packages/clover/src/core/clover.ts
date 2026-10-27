@@ -59,6 +59,11 @@ export interface CloverState {
   annotationId: string | null;
   /** Annotation sets switched off: their hotspots are not drawn. */
   hiddenSets: string[];
+  /**
+   * Sets that start hidden (a still Canvas's OCR, `startsHidden`) switched on. What is
+   * drawn is `selectHiddenSets`'s.
+   */
+  shownSets: string[];
   /** Sets the host added through `annotations`, beside the Manifest's own. */
   addedSets: AnnotationSet[];
   /** A Content Search of the Manifest: its query, progress and hits. */
@@ -187,6 +192,7 @@ const INITIAL: CloverState = {
   target: null,
   annotationId: null,
   hiddenSets: [],
+  shownSets: [],
   addedSets: [],
   search: NO_SEARCH,
 };
@@ -578,7 +584,10 @@ export function createClover(options: CloverOptions = {}): Clover {
     setSetVisible(setId, visible) {
       store.set((state) => {
         const hidden = state.hiddenSets.filter((id) => id !== setId);
-        return { hiddenSets: visible ? hidden : [...hidden, setId] };
+        const shown = state.shownSets.filter((id) => id !== setId);
+        return visible
+          ? { hiddenSets: hidden, shownSets: [...shown, setId] }
+          : { hiddenSets: [...hidden, setId], shownSets: shown };
       });
     },
     async loadAnnotations(input) {

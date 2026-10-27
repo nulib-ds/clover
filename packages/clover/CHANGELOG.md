@@ -12,6 +12,40 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **A search's hits show while its section is open (Mat, 2026-10-26).** In a `Panel`
+  with a Search section, the hits are drawn on the Canvas only while that section is
+  open: another section opened, they go, the query and its list kept, and they come back
+  with it. The Panel sets the search set's visibility as its section opens and closes,
+  so `clover.setSetVisible(SEARCH_SET_ID, …)` holds only until it next does.
+
+- **A search opens the Panel's Search section (Mat, 2026-10-26).** A search started
+  anywhere but that section (the Root's `searchQuery`, given or changed, or
+  `clover.search()`) opens Search in a `Panel`, ahead of `defaultValue`, so the hits
+  drawn on the Canvas come with their list. Only the open section changes: focus stays
+  where it is, a Panel that is shut stays shut and opens on Search when it shows, a
+  section the reader leaves stays left until another query, and a controlled `value` is
+  never changed. Nothing to do, unless a `defaultValue` should win over a query: control
+  the section with `value` and `onValueChange` instead.
+
+- **Previous and Next through a search's results (Mat, 2026-10-26).** `Search` shows,
+  under its field, small steps through the hits, drawn as Annotations' language codes
+  are: Previous, the hit current over the total ("3 / 11", "– / 11" until one is), and
+  Next. They go in order, across Canvases, each to its hit, framing it and bringing it
+  into view in the list. Results go to their first hit as they arrive, as find in a
+  page does (the Canvas moves, never focus), so the count reads "1 / 11". With steps, the
+  count's words ("11 results") are for assistive technology alone, still announced;
+  "Loading…", "No results", "1 result" and an error show as before. Assistive technology
+  hears "Result 3 of 11" as the current hit changes, a new string,
+  `contentSearchPosition`, in every locale. Two new props, each an attribute of
+  `<clover-search>` too: `pager="heading"` puts the count and the steps beside the
+  section's heading in a Panel's accordion, held there as the hits scroll; `sticky` holds
+  the field in view as the hits scroll under it, under the accordion's headings or at the
+  top of the box that scrolls them (`--clover-content-search-top` to set it lower), the
+  hits fading into it as they pass under. The Panel's own Search
+  section uses both. A long answer (a common word: hundreds of hits) is drawn 40 hits at
+  a time, the next as the list's end nears the view or focus reaches its last few, the
+  current hit always among them; each laid out and painted only near view.
+
 - **Annotations in several languages (Mat, 2026-10-25).** Where a layer gives the same
   words as separate annotations, one per language (a transcription and its translation,
   as Northwestern's Maktaba publishes them), `Annotations` lists one language at a time,
@@ -1806,6 +1840,54 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   The API is experimental and may change in any release.
 
 ### Changed
+
+- **`Split`'s bar shows as the pointer reaches it (Mat, 2026-10-26).** At rest, the line
+  between the panes is hidden and its grip alone shows, in the muted primary
+  (`--clover-color-primary-muted`), 6px wide and centered on the line. The line comes
+  in, in the
+  accent, as the pointer reaches anywhere in the area to grab (about 26px wide), while
+  it is held, or with keyboard focus. In forced colors it always shows. The Default
+  template centers the line and grip on the Body's edge. Nothing to do; to keep the
+  line at rest, give `.clover-split-handle` its background color back.
+
+- **Search is one pill (Mat, 2026-10-26).** Its field and submit are one pill, as a
+  search field often is: the query, then a round Search button in the accent, its name
+  a tip, at the pill's end, the pill lifted by a soft gray shadow, and before it, while
+  there is a query, Clear: round, named "Clear search" (a new string,
+  `contentSearchClear`, in every locale), a tint of the accent under the pointer and
+  pressed, focus going back to the field. The browser's own clear (×), which the
+  keyboard cannot reach, is hidden. A new prop, `size` (`"large"`, the default, or
+  `"small"`, a tad smaller for a narrow column; the element's `size` attribute too),
+  sets the pill's size. Both corners follow
+  `--clover-radius-pill`, the round controls'. The text button `button.clover-content-search-submit` is now round, so
+  a stylesheet that styled it as a text button should be looked at; the form is wrapped
+  in a new `clover-content-search-field`.
+- **Fields' edges are lighter (Mat, 2026-10-26).** Search's query, the Collection's
+  member menu and a transcript's track menu are edged in the muted text mixed 80% into
+  the ground, as light as keeps 3:1 for any muted color that is itself 4.5:1, rather
+  than the muted text itself. Set `--clover-field-edge` for your own, 3:1 or more.
+
+- **A still Canvas's OCR starts hidden, and is not listed (Mat, 2026-10-26).** An
+  annotation page whose annotations all are `supplementing` text on regions of a Canvas
+  that does not play (a newspaper's OCR, line by line or word by word, as Cookbook
+  recipe 0068 publishes it) is no longer drawn over the image to start: it is at the
+  ready, and what shows is a search's hits (`highlighting`). Nor is it listed by
+  `Annotations`, or counted for the Panel's Annotations section, which a resource with
+  only OCR no longer has, nor offered by the Canvas's annotations menu, which leaves out
+  a search's hits too (Search lists them); with nothing else to offer, the Canvas shows
+  no menu control. `clover.setSetVisible(id, true)` draws it, and the menu then offers
+  it to hide again. A standalone `Canvas` takes `unlistedPages`, the pages its menu never
+  offers. A transcription of the whole page (as
+  Northwestern's Maktaba publishes one, a `supplementing` annotation on the Canvas
+  itself) is drawn and listed as ever. Captions and transcripts are unchanged: caption
+  files (WebVTT) are never annotation sets, and a recording's `supplementing` text is
+  drawn as before. `state.hiddenSets` still holds the sets switched off; those hidden to
+  start are not in it, and a set switched on is in the new `state.shownSets`. To draw a
+  page of OCR from the start:
+
+  ```js
+  clover.setSetVisible("https://example.org/page-1/ocr", true);
+  ```
 
 - **`Items`' `layout="carousel"` is now `layout="slider"` (Mat, 2026-10-25).** The
   scrolling row of thumbnails, still the default, is named a slider everywhere: the

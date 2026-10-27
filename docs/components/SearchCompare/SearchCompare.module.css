@@ -1,0 +1,33 @@
+.page {
+  padding: 2.618rem 1.618rem 4.236rem;
+}
+
+.title {
+  margin: 0 0 1.618rem;
+  font-size: 1.618rem;
+  font-weight: 700;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 32rem), 1fr));
+  gap: 1.618rem;
+  align-items: start;
+}
+
+.column {
+  min-width: 0;
+}
+
+.heading {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.frame {
+  padding: 1rem;
+  border-radius: var(--radius-4);
+  box-shadow: var(--card-shadow);
+  background: var(--color-background);
+}

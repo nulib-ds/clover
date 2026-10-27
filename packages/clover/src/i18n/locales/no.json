@@ -11,6 +11,8 @@
   "contentSearchResult": "1 resultat",
   "contentSearchResults": "{{count}} resultater",
   "contentSearchError": "Søket kunne ikke fullføres.",
+  "contentSearchPosition": "Resultat {{index}} av {{total}}",
+  "contentSearchClear": "Tøm søket",
   "canvasPosition": "Element {{index}} av {{total}}",
   "canvasImage": "Bilde",
   "canvasRoleDescription": "zoombart bilde",

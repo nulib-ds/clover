@@ -152,7 +152,10 @@ sight, at its top and its foot.
 
 Use `defaultValue` to choose the section open first, or `value` and `onValueChange` to
 control it. The default sections are `about`, `collection`, `contents`, `search`, `map`,
-`transcript` and `annotations`. This film opens on its chapters.
+`transcript` and `annotations`. A search started outside the Search section (the Root's
+`searchQuery`, or your own `clover.search()`) opens it, ahead of `defaultValue`, so its
+hits come with their list. Focus stays where it is, and a Panel that is shut stays shut
+until the reader opens it, on Search. A `value` you control is left as you set it. This film opens on its chapters.
 
 <Example>
 <PartDemo

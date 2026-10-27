@@ -1,10 +1,10 @@
 /*
- * Content Search: a field, its status, and the hits grouped by Canvas. The submit is a
- * pill (`ui/Button.css`), the field a field (`styles/scale.css`), the hits rows
+ * Content Search: a field, its status, and the hits grouped by Canvas. The field and its
+ * submit are one pill, as the docs' homepage select is (Mat, 2026-10-26), the hits rows
  * (`Panel.css`, "Rows").
  *
- * On the scale: field, status and results `s` apart; the field `xs` from its button; a
- * Canvas's heading `xs` over its hits.
+ * On the scale: field, status and results `s` apart; a Canvas's heading `xs` over its
+ * hits.
  */
 .clover-content-search {
   display: flex;
@@ -12,20 +12,417 @@
   gap: var(--clover-space-s);
 }
 
+/*
+ * The pill: the fields' edge (`--clover-field-edge`, `styles/scale.css`, 3:1) around the
+ * query and the submit, which sits `3xs` inside it at its end, so its curve follows the
+ * pill's at any `--clover-radius-pill` (the round controls' corner). The ring goes
+ * around all of it while the query has keyboard focus; the submit draws its own.
+ */
 .clover-content-search-form {
   display: flex;
+  align-items: center;
+  gap: var(--clover-space-2xs);
+  box-sizing: border-box;
+  padding: var(--clover-space-3xs);
+  padding-inline-start: var(--clover-space-s);
+  border: 1px solid
+    var(
+      --clover-field-edge,
+      color-mix(
+        in srgb,
+        var(--clover-color-primary-muted, #26292b) 80%,
+        var(--clover-color-secondary, #fff)
+      )
+    );
+  /* The submit's corner and what lies around it, so the two nest at any radius. */
+  border-radius: calc(
+    var(--clover-radius-pill, 2rem) + var(--clover-space-3xs) + 1px
+  );
+  background-color: var(--clover-color-secondary, #fff);
+  /*
+   * A soft lift, gray and small (never the accent), so the pill sits a little above
+   * what it holds still over; its edge, not the lift, is what keeps it 3:1.
+   */
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 2px 8px rgb(0 0 0 / 0.06);
+  transition: box-shadow 160ms;
+}
+
+.clover-content-search-form:hover {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.06),
+    0 4px 14px rgb(0 0 0 / 0.08);
+}
+
+.clover-content-search-form:has(.clover-content-search-query:focus-visible) {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 1px;
+}
+
+/* The query, in the pill: no edge or ring of its own (the pill's are its). */
+.clover-content-search-form .clover-content-search-query {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--clover-space-2xs) 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  outline: none;
+}
+
+/* The browser's own clear is hidden: Clear (below) takes its place, reachable and named. */
+.clover-content-search-query::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+/*
+ * Clear: round, `l` (past the 24px a target needs, WCAG 2.5.8), beside the submit, its
+ * cross in the muted text (4.5:1, so 3:1 and more for a control's glyph, 1.4.11). Under
+ * the pointer or focused, a faint tint of the accent behind it and the cross in the
+ * text's color; pressed, the tint a little stronger.
+ */
+button.clover-content-search-clear {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--clover-radius-pill, 2rem);
+  background-color: transparent;
+  color: var(--clover-color-primary-muted, #26292b);
+  cursor: pointer;
+  transition:
+    background-color 120ms,
+    color 120ms;
+}
+
+button.clover-content-search-clear:is(:hover, :focus-visible) {
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 12%,
+    transparent
+  );
+  color: var(--clover-color-primary, #1a1d1e);
+}
+
+button.clover-content-search-clear:active {
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 22%,
+    transparent
+  );
+}
+
+button.clover-content-search-clear:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 1px;
+}
+
+@media (forced-colors: active) {
+  button.clover-content-search-clear:is(:hover, :focus-visible) {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}
+
+/* Where `:has()` is not read, the query keeps its own ring (`styles/scale.css`). */
+@supports not selector(:has(*)) {
+  .clover-content-search-form .clover-content-search-query:focus-visible {
+    outline: 2px solid var(--clover-color-accent, #0065c3);
+  }
+}
+
+/*
+ * The submit: round, the accent's fill and the round controls' glyph color (4.5:1 from
+ * it in either mode), at a round control's size (`--clover-control`); `size="small"`, a
+ * tad smaller (Mat, 2026-10-26): `l`, past the 24px a target needs (WCAG 2.5.8), its
+ * glyph smaller too. The query keeps the page's `1rem` in both, which a phone does not
+ * zoom into as it takes focus. Pointed at or focused, a step darker and its glyph a
+ * little larger.
+ */
+button.clover-content-search-submit {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--clover-control);
+  height: var(--clover-control);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  /* The round controls' corner (`ui/Button.css`), one variable for all of them. */
+  border-radius: var(--clover-radius-pill, 2rem);
+  background-color: var(--clover-color-accent, #0065c3);
+  color: var(--clover-color-control-glyph, #fff);
+  cursor: pointer;
+  transition: background-color 120ms;
+}
+
+button.clover-content-search-submit svg {
+  width: 1rem;
+  height: 1rem;
+  transition: scale 120ms;
+}
+
+/* `size="small"`: the submit `l`, its glyph and the query's room less. */
+.clover-content-search[data-size="small"] button.clover-content-search-submit {
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+}
+
+.clover-content-search[data-size="small"]
+  button.clover-content-search-submit
+  svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.clover-content-search[data-size="small"]
+  .clover-content-search-form
+  .clover-content-search-query {
+  padding-block: 0;
+}
+
+button.clover-content-search-submit:is(:hover, :focus-visible) {
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 85%,
+    var(--clover-color-primary, #1a1d1e)
+  );
+}
+
+button.clover-content-search-submit:is(:hover, :focus-visible) svg {
+  scale: 1.1;
+}
+
+button.clover-content-search-submit:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  button.clover-content-search-submit {
+    border: 1px solid ButtonText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-content-search-form,
+  button.clover-content-search-clear,
+  button.clover-content-search-submit,
+  button.clover-content-search-submit svg {
+    transition: none;
+  }
+}
+
+/*
+ * Held in view (`sticky`): the field, on the panel's own color with `xs` of it above and
+ * below (drawn back by as much, so nothing moves at rest), so it reads as one with the
+ * heading over it (Mat, 2026-10-26: "modern is the look"), at the top of the box that
+ * scrolls the hits (`--clover-content-search-top` to set it lower, under a page's own
+ * header); in an accordion, under the stuck headings, up to its own (`ui/Sections.css`).
+ * A hit scrolled to or focused lands clear of it (WCAG 2.4.11).
+ */
+.clover-content-search {
+  --clover-content-search-at: var(--clover-content-search-top, 0px);
+}
+
+.clover-sections[data-layout="accordion"] .clover-content-search {
+  --clover-content-search-at: calc(
+    var(--clover-sections-inset-start, 0px) + var(--clover-sections-total) -
+      var(--clover-sections-after)
+  );
+}
+
+.clover-content-search[data-sticky] > .clover-content-search-field {
+  position: sticky;
+  z-index: 1;
+  top: var(--clover-content-search-at);
+  margin-block: calc(-1 * var(--clover-space-xs));
+  padding-block: var(--clover-space-xs);
+  background-color: var(--clover-color-secondary, #fff);
+}
+
+.clover-content-search[data-sticky] button.clover-content-search-hit {
+  /* Clear of the field and of the fade under it (below). */
+  scroll-margin-top: calc(
+    var(--clover-content-search-at) + var(--clover-content-search-field, 0px) +
+      var(--clover-space-l)
+  );
+}
+
+/*
+ * Hits passing under the held field fade into it rather than being cut at its foot: a
+ * band of the panel's own color, `l` deep, clearing to nothing, once the hits have
+ * scrolled. Its opacity alone changes, driven by the scroll, no script; where
+ * scroll-driven animation is not supported, the hits meet the field's foot plainly. In
+ * an accordion it takes the place of the open heading's shadow (`ui/Sections.css`), so
+ * the heading and the field read as one.
+ */
+@supports (animation-timeline: scroll()) {
+  .clover-content-search[data-sticky] > .clover-content-search-field::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    inset-inline: 0;
+    height: var(--clover-space-l);
+    background: linear-gradient(
+      to bottom,
+      var(--clover-color-secondary, #fff),
+      transparent
+    );
+    opacity: 0;
+    pointer-events: none;
+    animation: clover-shade linear both;
+    animation-timeline: scroll();
+    animation-range: 0 var(--clover-space-m);
+  }
+
+  .clover-sections[data-layout="accordion"]
+    > [data-open="true"]:has(.clover-content-search[data-sticky])
+    > .clover-sections-heading
+    > button::after {
+    content: none;
+  }
+}
+
+/* Where the accordion's headings scroll with it, so does the field (`ui/Sections.css`). */
+.clover-sections[data-layout="accordion"][data-stacks="off"]
+  .clover-content-search[data-sticky]
+  > .clover-content-search-field {
+  position: relative;
+  top: auto;
+}
+
+@media (max-height: 32rem) {
+  .clover-sections[data-layout="accordion"]
+    .clover-content-search[data-sticky]
+    > .clover-content-search-field {
+    position: relative;
+    top: auto;
+  }
+}
+
+/*
+ * The status, then at the row's end the steps through the hits, small, as Annotations'
+ * language codes are: the current hit's place over the total ("7 / 11", Items'
+ * `Pager.css` keeping its room), then Previous and Next together, in `xs` text.
+ */
+.clover-content-search-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--clover-space-xs);
 }
 
-.clover-content-search-query {
-  flex: 1 1 auto;
-  min-width: 0;
+.clover-content-search-pager {
+  display: flex;
+  align-items: center;
+  gap: var(--clover-space-2xs);
+  margin-inline-start: auto;
+  font-size: var(--clover-text-xs);
+  line-height: 1;
+}
+
+.clover-content-search-position {
+  margin-inline-end: var(--clover-space-2xs);
+  font-weight: 600;
+}
+
+/* Beside its section's heading (`pager="heading"`), on the heading's line. */
+.clover-sections-actions > .clover-content-search-bar {
+  gap: var(--clover-space-s);
+}
+
+/* `button.` for its weight against CSS resets (`ui/Button.css`, "Selectors"). */
+button.clover-content-search-step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  /* 26px, past the 24 WCAG 2.5.8 asks of a target. */
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--clover-radius-pill, 2rem);
+  background: none;
+  color: var(--clover-color-primary-muted, #26292b);
+  cursor: pointer;
+}
+
+button.clover-content-search-step:is(:hover, :focus-visible):not(
+    [aria-disabled="true"]
+  ) {
+  background-color: var(--clover-color-accent, #0065c3);
+  color: var(--clover-color-control-glyph, #fff);
+}
+
+button.clover-content-search-step:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+}
+
+/*
+ * Nowhere to go: faded and taking no pointer, as the round steps are (`ui/Button.css`),
+ * so it never lights up or shows its tip under one. The press that reaches the end
+ * leaves keyboard focus on it: while focused it is whole again, its glyph faded. An
+ * inactive control needs no contrast (WCAG 1.4.11).
+ */
+button.clover-content-search-step[aria-disabled="true"] {
+  cursor: default;
+}
+
+button.clover-content-search-step[aria-disabled="true"] svg {
+  opacity: 0.5;
+}
+
+button.clover-content-search-step[aria-disabled="true"]:not(:focus-visible) {
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  button.clover-content-search-step[aria-disabled="true"] {
+    color: GrayText;
+  }
 }
 
 .clover-content-search-status {
   margin: 0;
   color: var(--clover-color-primary-muted, #26292b);
   font-size: var(--clover-text-s);
+}
+
+/*
+ * With steps through the hits, their total says the count ("– / 11"), so the status's
+ * words are for assistive technology alone, still announced as they change (WCAG
+ * 4.1.3): "11 results", and "Loading…" or an error in their turn, which show (Mat,
+ * 2026-10-26: "don't show 11 results").
+ */
+.clover-content-search-bar[data-steps][data-status="ready"]
+  > .clover-content-search-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /*
@@ -48,6 +445,21 @@
   margin: 0 0 var(--clover-space-xs);
   font-size: inherit;
   font-weight: 700;
+}
+
+/*
+ * The hits drawn are laid out and painted only near view, as Annotations' long lists are
+ * (`Annotations.css`), each keeping a place its height (once seen, its own).
+ */
+.clover-content-search-hits > li {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 3.236rem;
+}
+
+/* Where the next chunk of hits is asked for (`Search.tsx`): no room of its own. */
+.clover-content-search-more {
+  height: 1px;
+  margin-top: -1px;
 }
 
 /* A hit is text with `mark`s in it, so it stays a block, not a flex row. */

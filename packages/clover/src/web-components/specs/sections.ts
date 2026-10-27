@@ -112,13 +112,34 @@ export const search: ElementSpec = {
   tag: "clover-search",
   kind: "part",
   needsRoot: true,
-  attributes: headingLevel,
+  attributes: {
+    ...headingLevel,
+    pager: { prop: "pager", type: ["status", "heading"] },
+    sticky: { prop: "sticky", type: "boolean" },
+    size: { prop: "size", type: ["large", "small"] },
+  },
 };
 export const searchDocs: ElementDocs = {
   name: "CloverSearchElement",
   description:
-    "A Content Search of the Manifest, where it offers one: a field, and its hits by Canvas, each going to its place.",
-  attributes: headingLevelDocs("each Canvas's group of hits"),
+    "A Content Search of the Manifest, where it offers one: a field, and its hits by Canvas, each going to its place, with Previous and Next through them.",
+  attributes: {
+    ...headingLevelDocs("each Canvas's group of hits"),
+    pager: {
+      description:
+        "Where the count, Previous, Next and the current hit's place sit: under the field, or beside its section's heading in a panel's accordion (under the field elsewhere).",
+      default: "status",
+    },
+    size: {
+      description:
+        "The field's size: large, its submit a round control's, or small, a tad smaller, for a narrow column.",
+      default: "large",
+    },
+    sticky: {
+      description:
+        "The field held in view as the hits scroll under it: at the top of the box that scrolls them, or under a panel accordion's stuck headings.",
+    },
+  },
 };
 
 export const contents: ElementSpec = {

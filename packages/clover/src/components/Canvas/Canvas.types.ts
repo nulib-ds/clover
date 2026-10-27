@@ -201,6 +201,13 @@ export interface CloverCanvasProps {
    * its hide toggle, to show them again. Leave it out for the Canvas to keep its own.
    */
   hiddenPages?: string[];
+  /**
+   * AnnotationPages drawn (while not hidden) but never offered in the annotations menu,
+   * as the Annotations list leaves them out: a search's hits, which Search lists, and a
+   * still Canvas's OCR, which a search finds in. Leave it out for the Canvas to keep its
+   * own OCR out.
+   */
+  unlistedPages?: string[];
   /** The reader hid AnnotationPages from the picture (`visible` false), or showed them. */
   onPageVisibilityChange?: (pageIds: string[], visible: boolean) => void;
   /** The hovered or focused annotation's id, or null when none is. */

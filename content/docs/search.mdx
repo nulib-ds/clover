@@ -18,7 +18,7 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 
 <div className="docs-lede">
   IIIF Content Search of the Manifest: a field, then the hits by Canvas, with
-  the words around them.
+  the words around them, and Previous and Next to step through them.
 </div>
 
 <LivePart
@@ -33,17 +33,28 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 
 Inside a `Root`, it searches the Manifest through its Content Search service, version 1 or
 2, and lists the hits by Canvas, each with the words around it, from up to 10 pages of
-results. Choosing a hit goes to it and frames it, and every hit is drawn on the Canvas. It
-renders nothing without a search service. Its other props, and its `ref`, go to its
+results. Choosing a hit goes to it and frames it, and every hit is drawn on the Canvas.
+Under the field, Previous and Next step through the hits in order, across Canvases,
+showing which is current over the total ("3 / 11"); results go to their first hit as
+they arrive, as find in a page does. With `pager="heading"`, the count
+and steps sit beside the section's heading in a Panel's accordion, and with `sticky` the
+field is held in view as the hits scroll; the Panel's own Search section has both, and
+draws its hits on the Canvas only while it is open. The page's own text, its OCR, is not drawn until a
+search finds something in it. In a Panel, a search started outside its Search section
+opens it ([The open section](/docs/panel#the-open-section)). It renders nothing without a
+search service. Its other props, and its `ref`, go to its
 element.
 
 <ApiReference elements="clover-search">
 
-| Prop           | Type         | Default | Description                                                 |
-| -------------- | ------------ | ------- | ----------------------------------------------------------- |
-| `headingLevel` | `number`     | `3`     | Each Canvas's heading, one below the heading it sits under. |
-| `as`           | element type | `"div"` | The element to render.                                      |
-| `className`    | `string`     | —       | Added to `clover-content-search`.                           |
+| Prop           | Type                    | Default    | Description                                                                                                                  |
+| -------------- | ----------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `headingLevel` | `number`                | `3`        | Each Canvas's heading, one below the heading it sits under.                                                                  |
+| `pager`        | `"status" \| "heading"` | `"status"` | Where the count and the steps through the hits sit: under the field, or beside its section's heading in a Panel's accordion. |
+| `sticky`       | `boolean`               | `false`    | The field held in view as the hits scroll under it.                                                                          |
+| `size`         | `"large" \| "small"`    | `"large"`  | The field's size: its submit a round control's, or a tad smaller, for a narrow column.                                       |
+| `as`           | element type            | `"div"`    | The element to render.                                                                                                       |
+| `className`    | `string`                | —          | Added to `clover-content-search`.                                                                                            |
 
 </ApiReference>
 

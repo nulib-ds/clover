@@ -26,9 +26,9 @@
 
 /*
  * The bar: a faint line between the panes, the muted secondary color at half strength,
- * as 3.x's Viewer draws it, with a grip at its middle in the muted primary. The grip
- * shows the bar can be taken hold of, so it keeps 3:1 beside either pane (WCAG 1.4.11):
- * the muted primary is quieter text, 4.5:1 on both grounds. Hovered, held or focused,
+ * as 3.x's Viewer draws it, with a grip at its middle in the muted primary (below). The
+ * grip shows the bar can be taken hold of, so it keeps 3:1 beside either pane (WCAG
+ * 1.4.11). Hovered, held or focused,
  * the bar and its grip turn the accent. 3px wide, centered in an area `l` wide (about
  * 26px, past the 24px a target needs) to grab that is not drawn.
  */
@@ -57,13 +57,17 @@
 }
 
 /*
- * The grip: `xl` long, at its middle, standing 1px proud of the bar on either side, so it
- * reads as something to take hold of rather than a darker stretch of the line.
+ * The grip: `xl` long, at its middle, 6px wide, centered on the bar (1.5px proud of it on
+ * either side), so it reads as something to take hold of rather than a darker stretch
+ * of the line. At rest, the muted primary (Mat, 2026-10-26: "go with the more muted
+ * color"), quieter text, 4.5:1 on a light ground and a dark one, so 3:1 and more beside
+ * either pane (WCAG 1.4.11) with no edge of its own; hovered, held or focused, the
+ * accent.
  */
 .clover-split-handle::after {
   content: "";
   position: absolute;
-  inset-inline: -1px;
+  inset-inline: -1.5px;
   top: 50%;
   height: var(--clover-space-xl);
   translate: 0 -50%;
@@ -82,6 +86,19 @@
 
 .clover-split-handle:is(:hover, :focus-visible, [data-dragging])::after {
   background-color: var(--clover-color-accent, #0065c3);
+}
+
+/*
+ * At rest the bar is hidden and its grip alone shows, 3:1 beside either pane (WCAG
+ * 1.4.11, above), so the handle is always there to find, by a pointer, a finger or a pen (Mat,
+ * 2026-10-26: "don't hide the handle"). The bar comes in, in the accent, as the pointer
+ * reaches anywhere in the area to grab (`l` wide, 2.5.8), while it is held, or with
+ * keyboard focus, drawn outright (2.4.7). In forced colors the bar always shows.
+ */
+@media (forced-colors: none) {
+  .clover-split-handle:not(:hover, :focus-visible, [data-dragging]) {
+    background-color: transparent;
+  }
 }
 
 /* The keyboard's focus is shown outright, not only by the color. */

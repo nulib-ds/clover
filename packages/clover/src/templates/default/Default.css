@@ -101,6 +101,21 @@
 }
 
 /*
+ * The handle lies over the Body's edge, centered on it (Mat, 2026-10-26: "overlap the
+ * body slightly … even on both sides"): drawn back half its bar's width toward the main
+ * pane, so the bar and its grip (6px, centered on the bar) are both 3px over each side,
+ * and stay aligned as they light. A transform, so neither pane's size moves; its area to
+ * grab moves with it.
+ */
+.clover-template-default-panes > .clover-split-handle {
+  translate: -1.5px 0;
+}
+
+.clover-template-default-panes:dir(rtl) > .clover-split-handle {
+  translate: 1.5px 0;
+}
+
+/*
  * Over the Body, when there is not: it slides in from the end, never wider than the
  * layout less a strip, so some of the page stays in sight and a click there closes it.
  */

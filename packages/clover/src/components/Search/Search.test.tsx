@@ -86,6 +86,89 @@ describe("Search", () => {
     );
   });
 
+  it("steps through the hits with Previous and Next, saying which is current", async () => {
+    const fetch = mockFetch();
+    render(
+      <Clover.Root iiifContent={withSearch} request={{ fetch }}>
+        <Clover.Label of="canvas" data-testid="canvas" />
+        <Clover.Search />
+      </Clover.Root>,
+    );
+    const field = await screen.findByRole("searchbox", { name: "Search" });
+    fireEvent.change(field, { target: { value: "bird" } });
+    fireEvent.submit(field);
+    await screen.findByText("3 results");
+
+    // The answer goes to its first hit, as find in a page does: nothing before it.
+    await screen.findByText("Result 1 of 3");
+    const hits = screen
+      .getAllByRole("listitem")
+      .map((item) => within(item).getByRole("button"));
+    expect(hits[0]).toHaveAttribute("aria-current", "true");
+    expect(screen.getByRole("button", { name: "Previous" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    // Focus stays in the field.
+    expect(document.activeElement).not.toBe(hits[0]);
+
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Result 2 of 3");
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Result 3 of 3");
+    await waitFor(() =>
+      expect(screen.getByTestId("canvas")).toHaveTextContent("Page 2"),
+    );
+    // The last: Next stays where it is, focus kept on it (WCAG 2.4.3).
+    expect(screen.getByRole("button", { name: "Next" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Previous" }));
+    await screen.findByText("Result 2 of 3");
+  });
+
+  it("clears with its own Clear, focus back in the field", async () => {
+    const fetch = mockFetch();
+    render(
+      <Clover.Root
+        iiifContent={withSearch}
+        request={{ fetch }}
+        searchQuery="bird"
+      >
+        <Clover.Search />
+      </Clover.Root>,
+    );
+    await screen.findByText("Result 1 of 3");
+    fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+    const field = screen.getByRole("searchbox", { name: "Search" });
+    expect(field).toHaveValue("");
+    expect(document.activeElement).toBe(field);
+    await waitFor(() =>
+      expect(screen.queryByRole("button", { name: "Birdsong" })).toBeNull(),
+    );
+    // Nothing to clear, no Clear.
+    expect(screen.queryByRole("button", { name: "Clear search" })).toBeNull();
+  });
+
+  it("is large by default, and small when asked", async () => {
+    const { rerender } = render(
+      <Clover.Root iiifContent={withSearch}>
+        <Clover.Search />
+      </Clover.Root>,
+    );
+    const part = () =>
+      screen.getByRole("search").closest(".clover-content-search");
+    await screen.findByRole("search");
+    expect(part()).toHaveAttribute("data-size", "large");
+    rerender(
+      <Clover.Root iiifContent={withSearch}>
+        <Clover.Search size="small" />
+      </Clover.Root>,
+    );
+    expect(part()).toHaveAttribute("data-size", "small");
+  });
+
   it("runs the Root's searchQuery once the Manifest is shown", async () => {
     const fetch = mockFetch();
     render(
@@ -147,5 +230,171 @@ describe("clover.search", () => {
     await clover.load(manifest([]));
     expect(clover.store.get().search.status).toBe("idle");
     expect(clover.store.get().search.set).toBeNull();
+  });
+});
+
+describe("Search in the Panel", () => {
+  let fetch = mockFetch();
+  beforeEach(() => (fetch = mockFetch()));
+  const panel = (props: Record<string, unknown> | null, query: string) => (
+    <Clover.Root
+      iiifContent={withSearch}
+      request={{ fetch }}
+      searchQuery={query}
+    >
+      {props && <Clover.Panel {...props} />}
+    </Clover.Root>
+  );
+  const searched = () =>
+    waitFor(() =>
+      expect(fetch).toHaveBeenCalledWith(
+        expect.stringContaining("?q="),
+        expect.anything(),
+      ),
+    );
+  const tab = (name: string) => screen.findByRole("tab", { name });
+
+  it("opens on Search for a query it did not start, focus left where it was", async () => {
+    render(panel({}, "bird"));
+    expect(await tab("Search")).toHaveAttribute("aria-selected", "true");
+    expect(await screen.findByText("3 results")).toBeInTheDocument();
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it("lets a query beat defaultValue, and a controlled value beat both", async () => {
+    const { unmount } = render(panel({ defaultValue: "about" }, "bird"));
+    expect(await tab("Search")).toHaveAttribute("aria-selected", "true");
+    unmount();
+
+    render(panel({ value: "about" }, "bird"));
+    await searched();
+    expect(await tab("About")).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("opens on Search when a Panel that was shut shows after the query", async () => {
+    const { rerender } = render(panel(null, "bird"));
+    await searched();
+    rerender(panel({}, "bird"));
+    expect(await tab("Search")).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("draws its hits only while its section is open", async () => {
+    function Hidden() {
+      const hidden = Clover.useCloverSelector((state) =>
+        state.hiddenSets.includes(Clover.SEARCH_SET_ID),
+      );
+      return <p data-testid="hits">{hidden ? "hidden" : "drawn"}</p>;
+    }
+    render(
+      <Clover.Root
+        iiifContent={withSearch}
+        request={{ fetch }}
+        searchQuery="bird"
+      >
+        <Clover.Panel />
+        <Hidden />
+      </Clover.Root>,
+    );
+    expect(await tab("Search")).toHaveAttribute("aria-selected", "true");
+    await waitFor(() =>
+      expect(screen.getByTestId("hits")).toHaveTextContent("drawn"),
+    );
+    fireEvent.click(await tab("About"));
+    await waitFor(() =>
+      expect(screen.getByTestId("hits")).toHaveTextContent("hidden"),
+    );
+    fireEvent.click(await tab("Search"));
+    await waitFor(() =>
+      expect(screen.getByTestId("hits")).toHaveTextContent("drawn"),
+    );
+  });
+
+  it("holds the count and steps beside its heading in an accordion", async () => {
+    render(panel({ layout: "accordion" }, "bird"));
+    const status = await screen.findByText("3 results");
+    expect(status.closest(".clover-sections-actions")).not.toBeNull();
+    expect(
+      screen
+        .getByRole("button", { name: "Next" })
+        .closest(".clover-sections-actions"),
+    ).not.toBeNull();
+    // The field is held in view there (`sticky`).
+    expect(
+      screen.getByRole("search").closest(".clover-content-search"),
+    ).toHaveAttribute("data-sticky");
+  });
+
+  it("stays where the reader went until another query", async () => {
+    const { rerender } = render(panel({}, "bird"));
+    expect(await tab("Search")).toHaveAttribute("aria-selected", "true");
+    fireEvent.click(await tab("About"));
+    expect(await tab("About")).toHaveAttribute("aria-selected", "true");
+
+    rerender(panel({}, "birds"));
+    await waitFor(async () =>
+      expect(await tab("Search")).toHaveAttribute("aria-selected", "true"),
+    );
+  });
+});
+
+describe("A long answer", () => {
+  // A hundred hits on page 1, one answer page, no context: each its own match.
+  const many = {
+    "@context": "http://iiif.io/api/search/2/context.json",
+    type: "AnnotationPage",
+    items: Array.from({ length: 100 }, (_, n) => ({
+      id: `https://example.org/hit/many-${n}`,
+      type: "Annotation",
+      motivation: "highlighting",
+      body: { type: "TextualBody", value: `die ${n}` },
+      target: `${CANVAS(1)}#xywh=10,${10 + n * 12},40,10`,
+    })),
+  };
+  const observers: Array<(entries: { isIntersecting: boolean }[]) => void> = [];
+  beforeEach(() => {
+    observers.length = 0;
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        constructor(
+          callback: (entries: { isIntersecting: boolean }[]) => void,
+        ) {
+          observers.push(callback);
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("draws its hits a chunk at a time, the current one always among them", async () => {
+    const fetch = vi.fn(
+      async () =>
+        new Response(JSON.stringify(many), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+    );
+    render(
+      <Clover.Root
+        iiifContent={withSearch}
+        request={{ fetch }}
+        searchQuery="die"
+      >
+        <Clover.Search />
+      </Clover.Root>,
+    );
+    await screen.findByText("Result 1 of 100");
+    const drawn = () => screen.getAllByRole("listitem").length;
+    expect(drawn()).toBe(40);
+
+    // The end nears the view: the next chunk.
+    observers.at(-1)?.([{ isIntersecting: true }]);
+    await waitFor(() => expect(drawn()).toBe(80));
+
+    // Focus on one of the last few drawn: more, so Tab never runs out first.
+    fireEvent.focus(screen.getByRole("button", { name: "die 77" }));
+    await waitFor(() => expect(drawn()).toBe(100));
   });
 });

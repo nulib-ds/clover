@@ -11,6 +11,8 @@
   "contentSearchResult": "1 osuma",
   "contentSearchResults": "{{count}} osumaa",
   "contentSearchError": "Hakua ei voitu suorittaa loppuun.",
+  "contentSearchPosition": "Osuma {{index}} / {{total}}",
+  "contentSearchClear": "Tyhjennä haku",
   "canvasPosition": "Kohde {{index}} / {{total}}",
   "canvasImage": "Kuva",
   "canvasRoleDescription": "zoomattava kuva",

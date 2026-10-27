@@ -11,6 +11,8 @@
   "contentSearchResult": "1 résultat",
   "contentSearchResults": "{{count}} résultats",
   "contentSearchError": "La recherche n’a pas pu aboutir.",
+  "contentSearchPosition": "Résultat {{index}} sur {{total}}",
+  "contentSearchClear": "Effacer la recherche",
   "canvasPosition": "Élément {{index}} sur {{total}}",
   "canvasImage": "Image",
   "canvasRoleDescription": "image zoomable",

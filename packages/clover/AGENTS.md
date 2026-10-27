@@ -188,6 +188,15 @@ every rule below.
 
 ## Split
 
+- The handle at rest is its grip alone, the bar hidden (Mat, 2026-10-26: hidden until
+  hovered was tried, then "don't hide the handle"): the grip keeps 3:1 beside either
+  pane, so it is always there to find, by a pointer, a finger or a pen; the bar comes in
+  under the pointer anywhere in the area to grab, held, or focused. Forced colors show
+  both always. The grip is the muted primary, 6px centered on the bar, with no edge
+  (Mat: "go with the more muted color"; the controls' fill with a ring was tried), the
+  accent when lit; the
+  Default template draws the handle back half the bar's width (a transform), so bar and
+  grip are centered on the Body's edge, 3px over each side, aligned as they light.
 - The handle's logic is `components/Split/splitting.ts`, apart from React: lengths, the
   sizes stored, the panes beside a handle and their limits, a click's steps, the keys,
   and the press that is a click or a drag (`handleGestures`), shared by `SplitHandle` and
@@ -786,7 +795,56 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `selectDrawnSets` (annotations plus the search set); the Annotations list does not.
   `clover-search*` classes are 3.x's, so the part's are `clover-content-search*`. The
   client (`core/search.ts`) loads with the first search (`clover.search`), and the
-  panel's Search section when first opened.
+  panel's Search section when first opened. Previous and Next step through the hits in
+  order, across Canvases, beside the count (Mat, 2026-10-26), with the current one's
+  place ("2 / 11", read "Result 2 of 11" in a live region), small, as Annotations'
+  language codes are (Mat: "make smaller"): Search's own `Step` pills around Items'
+  pager's `PositionText` (`Items/Pager.tsx`), given the hits as `Steps`. `pager="heading"`
+  goes to the first hit as results arrive (Mat, 2026-10-26: as find in a page does, the
+  Canvas moving and never focus, once per answer, a hit already chosen kept), and
+  portals the count and them beside the section's heading in an accordion
+  (`useSectionActions`, as Transcript's languages are). The total always shows ("– /
+  11" until a hit is current), so with steps the count's words are visually hidden,
+  still announced. `sticky` holds the field in view (under the accordion's stuck
+  headings, else `--clover-content-search-top`), its height measured
+  (`--clover-content-search-field`) so hits land clear of it and of the fade (2.4.11),
+  `xs` of the panel's color around it and the hits fading into it as they pass under,
+  in place of the open heading's shadow, so the two read as one (Mat: "modern is the
+  look"); the pill has a soft gray lift. Its Clear (`contentSearchClear`) replaces the
+  browser's ×, hidden, which the keyboard cannot reach nor a stylesheet style (Mat: "make
+  close more actionable"), focus going back to the field. A long answer is drawn
+  `CHUNK` (40) hits at a time (Mat: "lazy load these results"): the next as an
+  `IntersectionObserver` sees the list's end near its scroller, or as focus reaches one
+  of the last five, so Tab never runs out first; the current hit always drawn, so a step
+  reaches any; all at once where there is no `IntersectionObserver`. Each hit is
+  `content-visibility: auto`, as Annotations' long lists are. `size` (Mat: "default
+  should be larger … but allow for small"): `large`, the submit `--clover-control`, or
+  `small`, the submit `l` (26px, past 2.5.8's 24); the query `1rem` in both. The Panel's Search
+  section asks for both, and shows the search set only while it is open
+  (`setSetVisible(SEARCH_SET_ID, …)` as the section opens and closes). The field and its
+  submit are one pill, the submit round in the accent on `--clover-radius-pill`; every
+  field's edge is `--clover-field-edge`, by default the muted text 80% into the ground
+  (3:1 for any 4.5:1 muted color; Mat, 2026-10-26). A search started
+  anywhere but the Panel's Search section opens it (Mat, 2026-10-26), ahead of
+  `defaultValue`: the Panel holds its open section itself unless `value` is given, and
+  moves it to `search` when the store's query changes to one it has not seen. Never
+  focus, never a shut Panel (one that mounts after the query opens on Search), never a
+  controlled `value`.
+- **A still Canvas's OCR starts hidden** (Mat, 2026-10-26: "at the ready and are only
+  shown if search responds with a highlighting"). A set whose annotations all are
+  `supplementing` alone, each on a region and no time (`isRegionText`, `core/annotations.ts`:
+  OCR's lines and words), on Canvases with no `duration`, is not drawn to start
+  (`startsHidden`, `core/annotation-sets.ts`); the hits a search draws are what show. Nor
+  is it listed (`selectListedSets`: Annotations, and the Panel's Annotations section,
+  "don't show supplementing annotations in this"), nor offered by the Canvas's menu
+  (`selectUnlistedSets`, `unlistedPages`: those, and the search's hits, which Search
+  lists; no menu control with nothing left, "applies up here as well"). A whole page's transcription
+  (Maktaba's, on the Canvas itself) is there to read: drawn and listed as ever.
+  What is drawn and listed as hidden is `selectHiddenSets`: `hiddenSets`, plus those
+  that start hidden and are not in `shownSets` (`setSetVisible` keeps both). A Canvas
+  alone does the same with its own pages (`CanvasView.tsx`). Never a recording's text,
+  and never captions: caption files (WebVTT) are left out of every set (`readBodies`),
+  and captions and transcripts are read from the Canvas itself (`layout.ts`).
 - **Map** (`@nulib/clover/map`, `src/map/index.ts`, a third entry). Keep MapLibre small:
   - `maplibre-gl` is a dependency (Mat: the Viewer shows the map by itself, no prop, so
     the default path must resolve it), imported only inside the Map's mount effect.

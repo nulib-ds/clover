@@ -49,6 +49,7 @@ import { SHORTCUTS, forwardShortcut } from "../../ui/Tip";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { join } from "../../lib/classnames";
+import { isRegionText, parseAnnotationTarget } from "../../core/annotations";
 import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
@@ -67,6 +68,7 @@ type CanvasStatus = "loading" | "ready" | "error";
 const MediaBody = lazy(() => import("./media/MediaBody"));
 /** The hotspots, and the placing of them, loaded for a Canvas with annotations. */
 const loadHotspots = () => import("./Annotations");
+const NO_PAGES: string[] = [];
 const NO_COMMENTS: Map<string, CanvasAnnotation["annotation"][]> = new Map();
 // Few Canvases are animations: their clock and bar load when one is shown.
 const FrameAnimation = lazy(() => import("./FrameAnimation"));
@@ -142,6 +144,7 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
   controlButtons,
   annotations: allAnnotations,
   hiddenPages: hiddenPagesProp,
+  unlistedPages: unlistedPagesProp,
   onPageVisibilityChange,
   onAnnotationActive,
   selectedAnnotation: selectedAnnotationProp,
@@ -168,7 +171,59 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
    * lists them, under their page's hide toggle, to show them again.
    */
   const [ownHiddenPages, setOwnHiddenPages] = useState<string[]>([]);
-  const hiddenPages = hiddenPagesProp ?? ownHiddenPages;
+  const [ownShownPages, setOwnShownPages] = useState<string[]>([]);
+  const controlledPages = hiddenPagesProp !== undefined;
+  /*
+   * Its own pages that start hidden, as a Root's do (`startsHidden`): a still Canvas's
+   * OCR, `supplementing` text on its regions, until the menu shows it. A whole page's
+   * transcription and a recording's are kept.
+   */
+  const ownQuietPages = useMemo(() => {
+    if (controlledPages || !allAnnotations?.length) return NO_PAGES;
+    const quiet = new Map<string, boolean>();
+    for (const each of allAnnotations) {
+      if (!each.pageId) continue;
+      const still = !(Number(canvases?.[each.targetIndex]?.duration) > 0);
+      const supplements =
+        still &&
+        isRegionText(
+          each.annotation.motivation,
+          parseAnnotationTarget(
+            (Array.isArray(each.annotation.target)
+              ? each.annotation.target[0]
+              : each.annotation.target) as never,
+          ),
+        );
+      quiet.set(each.pageId, (quiet.get(each.pageId) ?? true) && supplements);
+    }
+    const ids = [...quiet].filter(([, on]) => on).map(([id]) => id);
+    return ids.length ? ids : NO_PAGES;
+  }, [controlledPages, allAnnotations, canvases]);
+  const ownPages = useMemo(() => {
+    const quiet = ownQuietPages.filter(
+      (id) => !ownShownPages.includes(id) && !ownHiddenPages.includes(id),
+    );
+    return quiet.length ? [...ownHiddenPages, ...quiet] : ownHiddenPages;
+  }, [ownHiddenPages, ownShownPages, ownQuietPages]);
+  const hiddenPages = hiddenPagesProp ?? ownPages;
+  /*
+   * The pages the menu never offers (`unlistedPages`), or, alone, its own OCR, as the
+   * Annotations list leaves them out (Mat, 2026-10-26). With none left, no menu control.
+   */
+  const unlistedPages = unlistedPagesProp ?? ownQuietPages;
+  const listed = useCallback(
+    <T extends { pageId?: string }>(list: T[]) =>
+      unlistedPages.length
+        ? list.filter(
+            (each) => !each.pageId || !unlistedPages.includes(each.pageId),
+          )
+        : list,
+    [unlistedPages],
+  );
+  const listedCount = useMemo(
+    () => (allAnnotations ? listed(allAnnotations).length : 0),
+    [allAnnotations, listed],
+  );
   /** Those of the pages shown: all of them while none is hidden, the same list. */
   const shown = useCallback(
     <T extends { pageId?: string }>(list: T[]) =>
@@ -185,7 +240,6 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
   );
   const onPageVisibilityRef = useRef(onPageVisibilityChange);
   onPageVisibilityRef.current = onPageVisibilityChange;
-  const controlledPages = hiddenPagesProp !== undefined;
   const setPagesVisible = useCallback(
     (pageIds: string[], visible: boolean) => {
       onPageVisibilityRef.current?.(pageIds, visible);
@@ -193,6 +247,10 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
       setOwnHiddenPages((hidden) => {
         const rest = hidden.filter((id) => !pageIds.includes(id));
         return visible ? rest : [...rest, ...pageIds];
+      });
+      setOwnShownPages((shown) => {
+        const rest = shown.filter((id) => !pageIds.includes(id));
+        return visible ? [...rest, ...pageIds] : rest;
       });
     },
     [controlledPages],
@@ -434,14 +492,11 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
   const shownControls = !controlsConfig
     ? null
     : showPlaceholder
-      ? captioned.length || hostControls || allAnnotations?.length
+      ? captioned.length || hostControls || listedCount
         ? onlyInformation(controlsConfig, { annotations: true })
         : null
       : mediaOnly
-        ? choices.length ||
-          captioned.length ||
-          hostControls ||
-          allAnnotations?.length
+        ? choices.length || captioned.length || hostControls || listedCount
           ? onlyInformation(controlsConfig, { annotations: true })
           : null
         : controlsConfig;
@@ -801,8 +856,12 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
   const timedAnnotations = useMemo(() => shown(allTimed), [allTimed, shown]);
   const menuAnnotations = useMemo<ListedAnnotation[]>(
     () =>
-      allTimed.length ? [...listedAnnotations, ...allTimed] : listedAnnotations,
-    [listedAnnotations, allTimed],
+      listed(
+        allTimed.length
+          ? [...listedAnnotations, ...allTimed]
+          : listedAnnotations,
+      ),
+    [listedAnnotations, allTimed, listed],
   );
   /*
    * A pick on that time not gone to yet (a host's, or one made behind the placeholder) is

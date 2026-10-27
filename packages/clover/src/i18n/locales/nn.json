@@ -11,6 +11,8 @@
   "contentSearchResult": "1 resultat",
   "contentSearchResults": "{{count}} resultat",
   "contentSearchError": "Søket kunne ikkje fullførast.",
+  "contentSearchPosition": "Resultat {{index}} av {{total}}",
+  "contentSearchClear": "Tøm søket",
   "canvasPosition": "Element {{index}} av {{total}}",
   "canvasImage": "Bilete",
   "canvasRoleDescription": "zoombart bilete",

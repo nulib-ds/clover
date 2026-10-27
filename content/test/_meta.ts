@@ -16,6 +16,21 @@ const meta: MetaRecord = {
       footer: false,
     },
   },
+  search: {
+    title: "Search (test)",
+    display: "hidden",
+    theme: {
+      layout: "full",
+      sidebar: false,
+      toc: false,
+      breadcrumb: false,
+      pagination: false,
+      timestamp: false,
+      copyPage: false,
+      navbar: false,
+      footer: false,
+    },
+  },
   viewer: {
     title: "Viewer (test)",
     display: "hidden",

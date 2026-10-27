@@ -1,5 +1,5 @@
 /*
- * Clover's two button families, each written once (DESIGN.md, "Selectors").
+ * Clover's round controls, written once (DESIGN.md, "Selectors").
  *
  * Every rule is written `button.x`, not `.x`. A single class is specificity (0,1,0), an
  * exact tie with the `[type="button"]` selector that CSS resets (Tailwind's preflight
@@ -160,30 +160,6 @@ button.clover-canvas-button[data-button="rotate-left"]:is(
 button.clover-canvas-button[data-button="reset"]:is(:hover, :focus-visible)
   svg {
   rotate: -15deg;
-}
-
-/*
- * Text buttons: Search's. The label is `m` from the rounded ends and `xs` from the top
- * and bottom; an icon beside it, `xs` from the text.
- */
-button.clover-content-search-submit {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--clover-space-xs);
-  padding: var(--clover-space-xs) var(--clover-space-m);
-  border: 1px solid var(--clover-color-primary-muted, #26292b);
-  border-radius: var(--clover-radius-pill, 2rem);
-  background-color: var(--clover-color-secondary, #fff);
-  color: var(--clover-color-primary, #1a1d1e);
-  cursor: pointer;
-  transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
-}
-
-button.clover-content-search-submit:is(:hover, :focus-visible):not(:disabled) {
-  border-color: var(--clover-color-accent, #0065c3);
-  background-color: var(--clover-color-accent, #0065c3);
-  /* On the accent, the round controls' glyph color: kept 4.5:1 from it in either mode. */
-  color: var(--clover-color-control-glyph, #fff);
 }
 
 @media (prefers-reduced-motion: reduce) {

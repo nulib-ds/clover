@@ -7,9 +7,13 @@ import { loadAnnotationSets } from "./annotation-collection";
 import {
   readPage,
   selectAnnotationSets,
+  selectHiddenSets,
+  selectListedSets,
   selectManifestSets,
+  selectUnlistedSets,
 } from "./annotation-sets";
 import { createClover } from "./clover";
+import { SEARCH_SET_ID } from "./search-service";
 import {
   buildContentState,
   decodeContentState,
@@ -71,6 +75,108 @@ describe("annotation sets", () => {
 
   it("leaves caption files to the media transcript", () => {
     expect(selectManifestSets(p4(captionsJson))).toEqual([]);
+  });
+
+  describe("a still Canvas's OCR", () => {
+    // A page of each: OCR on an image (Cookbook 0068), and text supplementing a recording.
+    const ocr = (canvas: string, motivation = "supplementing") => ({
+      id: `${canvas}/ocr`,
+      type: "AnnotationPage",
+      items: [
+        {
+          id: `${canvas}/ocr#line-0`,
+          type: "Annotation",
+          motivation,
+          body: {
+            type: "TextualBody",
+            value: "I. 54. Jahrgang",
+            language: "de",
+          },
+          target: `${canvas}#xywh=0,376,399,53`,
+        },
+      ],
+    });
+    const manifest = p4({
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/manifest",
+      type: "Manifest",
+      label: { none: ["OCR"] },
+      items: [
+        {
+          id: "https://example.org/page",
+          type: "Canvas",
+          width: 1000,
+          height: 1400,
+          items: [],
+          annotations: [ocr("https://example.org/page")],
+        },
+        {
+          id: "https://example.org/note",
+          type: "Canvas",
+          width: 1000,
+          height: 1400,
+          items: [],
+          annotations: [ocr("https://example.org/note", "commenting")],
+        },
+        {
+          id: "https://example.org/recording",
+          type: "Canvas",
+          duration: 60,
+          items: [],
+          annotations: [ocr("https://example.org/recording")],
+        },
+      ],
+    } as never);
+
+    it("starts hidden, ready for a search, where a recording's and comments do not", () => {
+      expect(selectHiddenSets(manifest, [], [], [])).toEqual([
+        "https://example.org/page/ocr",
+      ]);
+    });
+
+    it("is left out of the sets listed to read, where a recording's and comments stay", () => {
+      expect(selectListedSets(manifest, []).map((set) => set.id)).toEqual([
+        "https://example.org/note/ocr",
+        "https://example.org/recording/ocr",
+      ]);
+    });
+
+    it("is never offered by the Canvas's menu, nor are a search's hits, unless shown", () => {
+      const page = "https://example.org/page/ocr";
+      expect(selectUnlistedSets(manifest, [], [], [])).toEqual([
+        SEARCH_SET_ID,
+        page,
+      ]);
+      // Shown by the host, the menu offers it, to hide again; hidden again, too.
+      expect(selectUnlistedSets(manifest, [], [], [page])).toEqual([
+        SEARCH_SET_ID,
+      ]);
+      expect(selectUnlistedSets(manifest, [], [page], [])).toEqual([
+        SEARCH_SET_ID,
+      ]);
+    });
+
+    it("shows when switched on, and hides again when switched off", () => {
+      const clover = createClover();
+      clover.store.set({ manifest });
+      const hidden = () => {
+        const state = clover.store.get();
+        return selectHiddenSets(
+          state.manifest,
+          state.addedSets,
+          state.hiddenSets,
+          state.shownSets,
+        );
+      };
+      clover.setSetVisible("https://example.org/page/ocr", true);
+      expect(hidden()).toEqual([]);
+      clover.setSetVisible("https://example.org/page/ocr", false);
+      expect(hidden()).toEqual(["https://example.org/page/ocr"]);
+    });
+
+    it("leaves caption files alone: they are never a set", () => {
+      expect(selectHiddenSets(p4(captionsJson), [], [], [])).toEqual([]);
+    });
   });
 
   it("returns the same arrays while nothing changes", () => {

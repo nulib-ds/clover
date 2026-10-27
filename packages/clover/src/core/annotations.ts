@@ -119,6 +119,28 @@ function readTarget(target: Target): ParsedAnnotationTarget {
  */
 export const isSound = (type: unknown) => type === "Audio" || type === "Sound";
 
+/** Supplementing alone: text that transcribes what is painted, as OCR does. */
+export const supplementsOnly = (motivation: unknown): boolean => {
+  const motivations = asArray(motivation);
+  return (
+    motivations.length > 0 &&
+    motivations.every((each) => each === "supplementing")
+  );
+};
+
+/**
+ * OCR's shape (Cookbook 0068): `supplementing` text on a region of its Canvas, a line or
+ * a word where it is printed, at no time. A transcription of the whole page (Maktaba's)
+ * is not: it is there to read.
+ */
+export const isRegionText = (
+  motivation: unknown,
+  target: ParsedAnnotationTarget,
+): boolean =>
+  supplementsOnly(motivation) &&
+  Boolean(target.rect || target.svg || target.point) &&
+  !target.t;
+
 /** An annotation's bodies, with Presentation 4's groups unwrapped. */
 export function bodiesOf(
   annotation: Record<string, any>,

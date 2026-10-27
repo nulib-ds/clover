@@ -50,8 +50,14 @@
 }
 
 /*
- * Fields: a search's query, a Collection's member menu, a transcript's track menu. `xs` by `s` inside, as a row of the panel is. No
- * specificity, so a part refines its own field.
+ * Fields: a search's query, a Collection's member menu, a transcript's track menu. `xs`
+ * by `s` inside, as a row of the panel is. No specificity, so a part refines its own
+ * field.
+ *
+ * Their edge (Mat, 2026-10-26: "how light can we go?"): the muted text mixed 80% into
+ * the ground, as light as keeps 3:1 against it (WCAG 1.4.11) for any muted color that is
+ * itself 4.5:1, as Clover's text asks (3.1:1 at the least; 3.8:1 on the docs' white).
+ * `--clover-field-edge` to set your own, 3:1 or more. Search's pill shares it.
  */
 :where(
   .clover-content-search-query,
@@ -60,7 +66,15 @@
 ) {
   box-sizing: border-box;
   padding: var(--clover-space-xs) var(--clover-space-s);
-  border: 1px solid var(--clover-color-primary-muted, #26292b);
+  border: 1px solid
+    var(
+      --clover-field-edge,
+      color-mix(
+        in srgb,
+        var(--clover-color-primary-muted, #26292b) 80%,
+        var(--clover-color-secondary, #fff)
+      )
+    );
   border-radius: var(--clover-radius, 3px);
   background-color: var(--clover-color-secondary, #fff);
   color: var(--clover-color-primary, #1a1d1e);
