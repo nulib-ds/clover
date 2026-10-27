@@ -74,6 +74,11 @@
   min-width: 0;
   margin: 0;
   font-size: var(--clover-text-l);
+  /*
+   * A title's lines closer than running text's (Mat, 2026-10-26), as a heading's are;
+   * a reader's own spacing (WCAG 1.4.12) still wins and wraps it, never cutting it.
+   */
+  line-height: 1.25;
   font-weight: 400;
   overflow-wrap: anywhere;
 }

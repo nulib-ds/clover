@@ -1841,13 +1841,20 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
 
 ### Changed
 
+- **The templates' titles are set closer (Mat, 2026-10-26).** Default's, Document's and
+  Gallery's titles take a line height of 1.25 rather than the page's, as a heading's
+  lines are. A reader's own text spacing still wins. Set `line-height` on
+  `.clover-template-default-title` (and its Document and Gallery twins) to change it.
+
 - **`Split`'s bar shows as the pointer reaches it (Mat, 2026-10-26).** At rest, the line
   between the panes is hidden and its grip alone shows, in the muted primary
   (`--clover-color-primary-muted`), 6px wide and centered on the line. The line comes
   in, in the
   accent, as the pointer reaches anywhere in the area to grab (about 26px wide), while
   it is held, or with keyboard focus. In forced colors it always shows. The Default
-  template centers the line and grip on the Body's edge. Nothing to do; to keep the
+  template centers the line and grip on the Body's edge, and ends its Items strip at
+  the main pane's edge on the handle's side, its rings' room kept inside, so neither the
+  strip nor its end shadow lies over the panel. Nothing to do; to keep the
   line at rest, give `.clover-split-handle` its background color back.
 
 - **Search is one pill (Mat, 2026-10-26).** Its field and submit are one pill, as a

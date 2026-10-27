@@ -60,6 +60,11 @@
 .clover-template-default-title {
   margin: 0;
   font-size: var(--clover-text-l);
+  /*
+   * A title's lines closer than running text's (Mat, 2026-10-26), as a heading's are;
+   * a reader's own spacing (WCAG 1.4.12) still wins and wraps it, never cutting it.
+   */
+  line-height: 1.25;
   font-weight: 400;
 }
 
@@ -113,6 +118,41 @@
 
 .clover-template-default-panes:dir(rtl) > .clover-split-handle {
   translate: 1.5px 0;
+}
+
+/*
+ * Items' strip keeps its rings' room inside the main pane on the handle's side (Mat,
+ * 2026-10-26: the bar "is overlaying content when inactive"): it reaches 4px past its
+ * box elsewhere, so a ring is never cut, and with the bar unseen at rest, that 4px and
+ * the shadow at the strip's end lay over the panel. Here the strip stops at the pane's
+ * edge and keeps the room as its padding, so nothing is cut, and its end shadow is at
+ * that edge. Physical sides, by the page's direction, not the book's (`dir` on the
+ * strip's frame is the book's).
+ */
+.clover-template-default-panes:dir(ltr) .clover-items-viewport {
+  margin-right: 0;
+}
+
+.clover-template-default-panes:dir(rtl) .clover-items-viewport {
+  margin-left: 0;
+}
+
+.clover-template-default-panes:dir(ltr)
+  .clover-items
+  .clover-items-frame:not([dir="rtl"])::after,
+.clover-template-default-panes:dir(ltr)
+  .clover-items
+  .clover-items-frame[dir="rtl"]::before {
+  right: 0;
+}
+
+.clover-template-default-panes:dir(rtl)
+  .clover-items
+  .clover-items-frame:not([dir="rtl"])::before,
+.clover-template-default-panes:dir(rtl)
+  .clover-items
+  .clover-items-frame[dir="rtl"]::after {
+  left: 0;
 }
 
 /*

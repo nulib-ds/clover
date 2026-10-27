@@ -196,7 +196,11 @@ every rule below.
   (Mat: "go with the more muted color"; the controls' fill with a ring was tried), the
   accent when lit; the
   Default template draws the handle back half the bar's width (a transform), so bar and
-  grip are centered on the Body's edge, 3px over each side, aligned as they light.
+  grip are centered on the Body's edge, 3px over each side, aligned as they light. With
+  the bar unseen at rest, nothing may reach past the main pane into it: Items' strip,
+  which elsewhere reaches 4px past its box for its rings, stops at the pane's edge on
+  the handle's side there, the room kept as padding (Default.css, by the page's
+  direction, never the book's `dir`).
 - The handle's logic is `components/Split/splitting.ts`, apart from React: lengths, the
   sizes stored, the panes beside a handle and their limits, a click's steps, the keys,
   and the press that is a click or a drag (`handleGestures`), shared by `SplitHandle` and
