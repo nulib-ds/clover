@@ -54,9 +54,11 @@ const MASKS =
   "https://api.dc.library.northwestern.edu/api/v2/collections/c373ecd2-2c45-45f2-9f9e-52dc244870bd?as=iiif";
 
 /**
- * One of each kind of thing a page might show: a catalog of pages, a print with its words
- * tagged, a Collection, then still, placed, in 3D and timed. Every template opens each of
- * them.
+ * One of each kind of thing a page might show, in the select's order (Mat, 2026-10-26):
+ * the catalog of pages first (the templates' default), the footage second, the
+ * Collection of masks third, the model in 3D, a manuscript, the recording sixth, then a
+ * postcard, a photo, the film after it, a map and an animation.
+ * Every template opens each.
  */
 export const resources: PlaygroundResource[] = [
   // The White Sewing Machine Company's 1896 bicycle catalog, from Northwestern's
@@ -73,16 +75,46 @@ export const resources: PlaygroundResource[] = [
     mock: true,
     thumbnail: `${works}/386ff30f-1975-4d9c-9905-ec76381d6992/thumbnail`,
   },
-  // Curtis's photogravure, as Northwestern publishes it, with the words printed on the
-  // plate tagged where they sit and its caption as the Canvas's summary (a mock).
+  // The National Archives' footage of the Nuremberg judgment, as Commons publishes it
+  // (a mock): Rudolf Hess and the other defendants followed through it, frame by frame
+  // (`xywh=…&t=…` annotations), with captions from the trial's record and chapters.
   {
-    key: "print",
-    name: "Print",
-    title: "The Vanishing Race - Navaho",
-    description: "Print with its words tagged",
-    resource: "tagging/manifest.json",
+    key: "footage",
+    name: "Footage",
+    title: "Rudolf Hess at Nuremberg Sentencing",
+    description: "Film with spatial annotations through time",
+    resource: "rudolf-hess-nuremberg/manifest.json",
     mock: true,
-    thumbnail: `${works}/46dc28d1-9d59-4160-a511-72418f70cffc/thumbnail`,
+    thumbnail:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sentencing_of_Nazi_Leaders_at_Nuremberg.webm/250px-seek%3D14-Sentencing_of_Nazi_Leaders_at_Nuremberg.webm.jpg",
+  },
+  {
+    key: "collection",
+    name: "Collection",
+    title: "Commedia dell'Arte: The Masks of Antonio Fava",
+    description: "Collection of masks",
+    // The Collection, opened on Zagna "lunga": a content state naming the Manifest, part
+    // of the Collection, so the reader arrives on it among the other masks.
+    resource: contentState({
+      id: nul("71153379-4283-43be-8b0f-4e7e3bfda275"),
+      type: "Manifest",
+      partOf: [{ id: MASKS, type: "Collection" }],
+    }),
+    // The mask it opens on, not the Collection's own.
+    thumbnail: `${works}/71153379-4283-43be-8b0f-4e7e3bfda275/thumbnail`,
+  },
+  // Northwestern's Material History Lab's scan of an Esu shrine (a mock): a Presentation 4
+  // Scene painting its glTF model, which the Viewer draws in 3D, turned to the Lab's view.
+  {
+    key: "model",
+    name: "Model",
+    title: "Esu Shrine",
+    description: "Sculpture in 3D",
+    resource: "esu-shrine/manifest.json",
+    mock: true,
+    // The Lab's own square of its first photograph of the shrine, as its page shows it.
+    thumbnail:
+      "https://sites.northwestern.edu/materialhistorylab/files/2025/10/DSC_4700-265x265.jpg",
   },
   // An Arabic manuscript of about 1800 in the University of Illinois Archives, as
   // Northwestern's Maktaba publishes it: two pages, `paged` (Mat, 2026-10-25, for the
@@ -100,19 +132,23 @@ export const resources: PlaygroundResource[] = [
       "https://images.digital.library.illinois.edu/iiif/2/19870760-96bc-013c-4aba-02d0d7bfd6e4-d/full/!256,256/0/default.jpg",
   },
   {
-    key: "collection",
-    name: "Collection",
-    title: "Commedia dell'Arte: The Masks of Antonio Fava",
-    description: "Collection of masks",
-    // The Collection, opened on Zagna "lunga": a content state naming the Manifest, part
-    // of the Collection, so the reader arrives on it among the other masks.
-    resource: contentState({
-      id: nul("71153379-4283-43be-8b0f-4e7e3bfda275"),
-      type: "Manifest",
-      partOf: [{ id: MASKS, type: "Collection" }],
-    }),
-    // The mask it opens on, not the Collection's own.
-    thumbnail: `${works}/71153379-4283-43be-8b0f-4e7e3bfda275/thumbnail`,
+    key: "recording",
+    name: "Recording",
+    title: "Hindenburg broadcast",
+    description: "Audio with its box as artwork",
+    resource: "hindenburg/manifest.json",
+    mock: true,
+    thumbnail: `${works}/f184ccf3-4ee6-4b64-bb7b-a87bb9d15254/thumbnail`,
+  },
+  // A 1951 postcard of Deering Library, as Northwestern publishes it, part of its
+  // University Archives' postcards (Mat, 2026-10-26: in place of the Curtis print).
+  {
+    key: "postcard",
+    name: "Postcard",
+    title: "Deering Library, Northwestern University, Evanston, Ill.",
+    description: "Postcard from a Collection of postcards",
+    resource: nul("0e66d6d8-5dc5-4686-b056-d18682c79ebf"),
+    thumbnail: `${works}/0e66d6d8-5dc5-4686-b056-d18682c79ebf/thumbnail`,
   },
   // A Sullivan slide of a Chicago bus, as Northwestern publishes it, with a navPlace put
   // at the corner it shows (a mock), so the Viewer adds a Map tab with the photo's place.
@@ -126,6 +162,14 @@ export const resources: PlaygroundResource[] = [
     map: true,
     thumbnail: `${works}/24157482-0c2c-4907-8d25-7905adc3cfd9/thumbnail`,
   },
+  {
+    key: "film",
+    name: "Film",
+    title: "Northwestern Football scrimmages, 1959",
+    description: "Film in seven reels",
+    resource: nul("d8fb6329-f7fb-48bf-8bb7-70a64ded5a15"),
+    thumbnail: `${works}/d8fb6329-f7fb-48bf-8bb7-70a64ded5a15/thumbnail`,
+  },
   // Georeferenced, so the Viewer adds a Map tab that lays the sheet over the town.
   {
     key: "map",
@@ -137,49 +181,6 @@ export const resources: PlaygroundResource[] = [
     map: true,
     thumbnail:
       "https://iiif.dc.library.northwestern.edu/iiif/3/2fb1e81a-9e24-420c-b224-0bfd6a279baf/full/!300,300/0/default.jpg",
-  },
-  // Northwestern's Material History Lab's scan of an Esu shrine (a mock): a Presentation 4
-  // Scene painting its glTF model, which the Viewer draws in 3D, turned to the Lab's view.
-  {
-    key: "model",
-    name: "Model",
-    title: "Esu Shrine",
-    description: "Sculpture in 3D",
-    resource: "esu-shrine/manifest.json",
-    mock: true,
-    // The Lab's own square of its first photograph of the shrine, as its page shows it.
-    thumbnail:
-      "https://sites.northwestern.edu/materialhistorylab/files/2025/10/DSC_4700-265x265.jpg",
-  },
-  {
-    key: "film",
-    name: "Film",
-    title: "Northwestern Football scrimmages, 1959",
-    description: "Film in seven reels",
-    resource: nul("d8fb6329-f7fb-48bf-8bb7-70a64ded5a15"),
-    thumbnail: `${works}/d8fb6329-f7fb-48bf-8bb7-70a64ded5a15/thumbnail`,
-  },
-  // The National Archives' footage of the Nuremberg judgment, as Commons publishes it
-  // (a mock): Rudolf Hess and the other defendants followed through it, frame by frame
-  // (`xywh=…&t=…` annotations), with captions from the trial's record and chapters.
-  {
-    key: "footage",
-    name: "Footage",
-    title: "Rudolf Hess at Nuremberg Sentencing, 30 September–1 October 1946",
-    description: "Film with spatial annotations through time",
-    resource: "rudolf-hess-nuremberg/manifest.json",
-    mock: true,
-    thumbnail:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sentencing_of_Nazi_Leaders_at_Nuremberg.webm/250px-seek%3D14-Sentencing_of_Nazi_Leaders_at_Nuremberg.webm.jpg",
-  },
-  {
-    key: "recording",
-    name: "Recording",
-    title: "Hindenburg broadcast",
-    description: "Audio with its box as artwork",
-    resource: "hindenburg/manifest.json",
-    mock: true,
-    thumbnail: `${works}/f184ccf3-4ee6-4b64-bb7b-a87bb9d15254/thumbnail`,
   },
   {
     key: "animation",

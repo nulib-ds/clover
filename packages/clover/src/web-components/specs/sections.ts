@@ -114,7 +114,6 @@ export const search: ElementSpec = {
   needsRoot: true,
   attributes: {
     ...headingLevel,
-    pager: { prop: "pager", type: ["status", "heading"] },
     sticky: { prop: "sticky", type: "boolean" },
     size: { prop: "size", type: ["large", "small"] },
   },
@@ -125,11 +124,6 @@ export const searchDocs: ElementDocs = {
     "A Content Search of the Manifest, where it offers one: a field, and its hits by Canvas, each going to its place, with Previous and Next through them.",
   attributes: {
     ...headingLevelDocs("each Canvas's group of hits"),
-    pager: {
-      description:
-        "Where the count, Previous, Next and the current hit's place sit: under the field, or beside its section's heading in a panel's accordion (under the field elsewhere).",
-      default: "status",
-    },
     size: {
       description:
         "The field's size: large, its submit a round control's, or small, a tad smaller, for a narrow column.",
@@ -159,17 +153,36 @@ export const transcript: ElementSpec = {
   tag: "clover-transcript",
   kind: "part",
   needsRoot: true,
-  attributes: { follow: { prop: "follow", type: "boolean" } },
+  attributes: {
+    follow: { prop: "follow", type: "boolean" },
+    find: { prop: "find", type: "boolean" },
+    sticky: { prop: "sticky", type: "boolean" },
+    size: { prop: "size", type: ["large", "small"] },
+  },
 };
 export const transcriptDocs: ElementDocs = {
   name: "CloverTranscriptElement",
   description:
-    "The recording's captions as a transcript, following where it plays, and any plain-text transcript after them. Each cue goes to its time.",
+    "The recording's captions as a transcript, following where it plays, and any plain-text transcript after them. Each cue goes to its time; a field over the captions finds words in them, with steps through the cues that have them.",
   attributes: {
     follow: {
       description:
         '"false" stops the current cue being kept in view as it plays.',
       default: "true",
+    },
+    find: {
+      description:
+        '"false" leaves out the field that finds words in the captions, and its steps.',
+      default: "true",
+    },
+    sticky: {
+      description:
+        "The find field held in view as the cues scroll under it: at the top of the box that scrolls them, or under a panel accordion's stuck headings.",
+    },
+    size: {
+      description:
+        "The find field's size, as clover-search's: large, or small, a tad smaller, for a narrow column.",
+      default: "large",
     },
   },
 };
@@ -246,13 +259,15 @@ export const about: ElementSpec = {
   attributes: {
     "canvas-summary": { prop: "canvasSummary", type: "boolean" },
     download: { prop: "download", type: "boolean" },
+    thumbnail: { prop: "thumbnail", type: "boolean" },
+    label: { prop: "label", type: "boolean" },
     ...headingLevel,
   },
 };
 export const aboutDocs: ElementDocs = {
   name: "CloverAboutElement",
   description:
-    "The information panel's first section, on its own: the summary, metadata, required statement, rights, homepage, see also, downloads and address.",
+    "The information panel's first section, on its own: the label and thumbnail, summary, metadata, required statement, rights, homepage, see also, downloads and address.",
   attributes: {
     "canvas-summary": {
       description: "Also the Canvas in view's summary, before the resource's.",
@@ -260,6 +275,14 @@ export const aboutDocs: ElementDocs = {
     },
     download: {
       description: '"false" leaves out the downloads.',
+      default: "true",
+    },
+    thumbnail: {
+      description: '"false" leaves out the resource\'s thumbnail.',
+      default: "true",
+    },
+    label: {
+      description: '"false" leaves out the resource\'s label, its heading.',
       default: "true",
     },
     ...headingLevelDocs("each section's title"),

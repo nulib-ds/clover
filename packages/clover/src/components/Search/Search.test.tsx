@@ -157,8 +157,7 @@ describe("Search", () => {
         <Clover.Search />
       </Clover.Root>,
     );
-    const part = () =>
-      screen.getByRole("search").closest(".clover-content-search");
+    const part = () => screen.getByRole("search");
     await screen.findByRole("search");
     expect(part()).toHaveAttribute("data-size", "large");
     rerender(
@@ -201,7 +200,17 @@ describe("Search", () => {
     const field = await screen.findByRole("searchbox");
     fireEvent.change(field, { target: { value: "none" } });
     fireEvent.submit(field);
-    expect(await screen.findByText("No results")).toBeInTheDocument();
+    // Said in the status, and shown in the pill.
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByRole("status")
+          .some((status) => status.textContent === "No results"),
+      ).toBe(true),
+    );
+    expect(
+      within(screen.getByRole("search")).getByText("No results"),
+    ).toBeInTheDocument();
     fireEvent.change(field, { target: { value: "boom" } });
     fireEvent.submit(field);
     expect(
@@ -309,19 +318,27 @@ describe("Search in the Panel", () => {
     );
   });
 
-  it("holds the count and steps beside its heading in an accordion", async () => {
+  it("holds the count and steps inside its field, the field held in view", async () => {
     render(panel({ layout: "accordion" }, "bird"));
-    const status = await screen.findByText("3 results");
-    expect(status.closest(".clover-sections-actions")).not.toBeNull();
-    expect(
-      screen
-        .getByRole("button", { name: "Next" })
-        .closest(".clover-sections-actions"),
-    ).not.toBeNull();
+    await screen.findByText("Result 1 of 3");
+    const field = screen.getByRole("search");
+    expect(within(field).getByRole("button", { name: "Next" })).toBeVisible();
+    expect(within(field).getByText("1 / 3")).toBeInTheDocument();
     // The field is held in view there (`sticky`).
-    expect(
-      screen.getByRole("search").closest(".clover-content-search"),
-    ).toHaveAttribute("data-sticky");
+    expect(field.closest(".clover-content-search")).toHaveAttribute(
+      "data-sticky",
+    );
+  });
+
+  it("takes focus in its field as the reader opens its section, in an accordion", async () => {
+    render(panel({ layout: "accordion" }, ""));
+    const heading = await screen.findByRole("button", { name: "Search" });
+    fireEvent.click(heading);
+    await waitFor(() =>
+      expect(document.activeElement).toBe(
+        screen.getByRole("searchbox", { name: "Search" }),
+      ),
+    );
   });
 
   it("stays where the reader went until another query", async () => {

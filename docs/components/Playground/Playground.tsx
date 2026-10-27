@@ -32,6 +32,7 @@ import { Swoosh } from "docs/components/Home/Swoosh";
 import { partCount } from "docs/components/Home/counts";
 import { useRouter } from "docs/lib/router";
 import { EXAMPLE, example } from "docs/lib/example";
+import { MOCK_SEARCH } from "docs/lib/mock-search";
 
 /**
  * The Viewer in a template, as a page would write it: `<Viewer template={Document} />`.
@@ -427,6 +428,8 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
                   template={spec.name as "Default"}
                   iiifContent={resource}
                   headingLevel={3}
+                  // The catalog's search, answered here: the static site cannot read `?q=`.
+                  request={MOCK_SEARCH}
                 />
               )}
             </div>

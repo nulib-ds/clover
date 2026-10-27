@@ -1,0 +1,108 @@
+{
+  "@context": "http://iiif.io/api/search/2/context.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/model-d.json",
+  "type": "AnnotationPage",
+  "partOf": {
+    "id": "https://nulib-ds.github.io/clover/mocks/paged/search?q=model%20d",
+    "type": "AnnotationCollection",
+    "total": 2,
+    "first": {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/model-d.json",
+      "type": "AnnotationPage"
+    },
+    "last": {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/model-d.json",
+      "type": "AnnotationPage"
+    }
+  },
+  "startIndex": 0,
+  "items": [
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/14-w2",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2095,3329,892,82"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w3",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3029,462,690,172"
+        }
+      }
+    }
+  ],
+  "annotations": [
+    {
+      "type": "AnnotationPage",
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/14-w2/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/14-w2",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "aLAR \"WHITE\" ",
+                "exact": "MODEL \"D\"-PRICE",
+                "suffix": " $75. SEE SPECIFICATIONS OPPOSITE PAGE."
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w3/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w3",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "Specifications \"White\" 1896 ",
+                "exact": "Model D.",
+                "suffix": " Frame. Double bar drop pattern; 1¼"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

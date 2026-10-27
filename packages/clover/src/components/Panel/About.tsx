@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useRef } from "react";
+import React, { Suspense, lazy, useEffect, useRef } from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
 import { isLoneCanvas } from "../../core/load";
@@ -13,10 +13,12 @@ import {
   Rights,
   SeeAlso,
   Summary,
+  Thumbnail,
 } from "../Primitives/Primitives";
 import { DownloadGroups, useDownloads } from "../Download/Download";
 import { Provider } from "../Provider/Provider";
-import { titled } from "../../ui/heading";
+import { titleTag, titled } from "../../ui/heading";
+import { Label } from "../Label/Label";
 
 export interface AboutProps extends React.HTMLAttributes<HTMLElement> {
   /** Also show the current Canvas's summary, for Manifests that describe each image. */
@@ -28,6 +30,18 @@ export interface AboutProps extends React.HTMLAttributes<HTMLElement> {
   headingLevel?: number;
   /** List the downloads, Download's links, in a section of their own. Default `true`. */
   download?: boolean;
+  /**
+   * The Manifest's thumbnail first, small, at its own shape, floated at the end of the
+   * label's lines, over the summary (Mat, 2026-10-26: "float it right to the side of the
+   * label. and above summary"). Named by the label where there is none beside it, and
+   * decorative where there is. Default `true`.
+   */
+  thumbnail?: boolean;
+  /**
+   * The resource's label again, as a heading at `headingLevel`, over what About says of
+   * it (Mat, 2026-10-26: "repeat label as a heading"). Default `true`.
+   */
+  label?: boolean;
 }
 
 /*
@@ -40,8 +54,8 @@ const PartOfManifest = lazy(() => import("./PartOfManifest"));
  * Everything the Manifest says about itself, in the order 3.x's About tab shows it:
  * what a Canvas shown on its own is part of, then summary, metadata, required statement,
  * provider (its logo and name, linked to its homepage), rights, homepage, see also,
- * downloads, and the Manifest's own address. Its thumbnail is the layout's to place (`Default` puts it in
- * its header, beside the title). Each part renders only if the Manifest has
+ * downloads, and the Manifest's own address, its thumbnail over them all (`thumbnail`).
+ * Each part renders only if the Manifest has
  * it. The downloads are Download's: the `rendering` of the page in view ("This page")
  * and of the Manifest ("All pages").
  */
@@ -49,6 +63,8 @@ export function About({
   canvasSummary = false,
   headingLevel = 3,
   download = true,
+  thumbnail = true,
+  label = true,
   className,
   ...rest
 }: AboutProps) {
@@ -65,6 +81,34 @@ export function About({
    * About itself, never lost to the page (WCAG 2.4.3).
    */
   const root = useRef<HTMLDivElement>(null);
+  /*
+   * The label's height and the thumbnail's width, written to About, so the words after
+   * the label make room for the thumbnail where it hangs past it (`Panel.css`).
+   */
+  useEffect(() => {
+    const about = root.current;
+    const image = about?.querySelector<HTMLElement>(".clover-about-thumbnail");
+    if (!about || !image || typeof ResizeObserver === "undefined") return;
+    const heading = about.querySelector<HTMLElement>(".clover-about-label");
+    const write = () => {
+      about.style.setProperty(
+        "--clover-about-label-height",
+        `${heading?.offsetHeight ?? 0}px`,
+      );
+      about.style.setProperty(
+        "--clover-about-thumbnail-width",
+        `${image.offsetWidth}px`,
+      );
+    };
+    const observer = new ResizeObserver(write);
+    observer.observe(image);
+    if (heading) observer.observe(heading);
+    return () => {
+      observer.disconnect();
+      about.style.removeProperty("--clover-about-label-height");
+      about.style.removeProperty("--clover-about-thumbnail-width");
+    };
+  }, [label, thumbnail, manifest]);
   const id = useUniqueId();
   const onOpened = () => {
     const about = root.current;
@@ -106,6 +150,20 @@ export function About({
       tabIndex={-1}
       {...rest}
     >
+      {(thumbnail || label) && (
+        <div className="clover-about-head">
+          {thumbnail && (
+            <Thumbnail
+              className="clover-about-thumbnail"
+              size={256}
+              alt={label ? "" : undefined}
+            />
+          )}
+          {label && (
+            <Label as={titleTag(headingLevel)} className="clover-about-label" />
+          )}
+        </div>
+      )}
       {canvasSummary && (
         <Summary of="canvas" className="clover-about-summary" />
       )}

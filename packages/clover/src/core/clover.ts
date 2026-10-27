@@ -2,6 +2,7 @@ import {
   type AnnotationSet,
   findEntry,
   selectDrawnSets,
+  selectHiddenSets,
   readPage,
 } from "./annotation-sets";
 import {
@@ -30,7 +31,11 @@ import {
   selectStart,
   selectVisibleCanvases,
 } from "./selectors";
-import { type SearchHit, searchServiceOf } from "./search-service";
+import {
+  SEARCH_SET_ID,
+  type SearchHit,
+  searchServiceOf,
+} from "./search-service";
 import { type Channel, type Store, createChannel, createStore } from "./store";
 
 /**
@@ -141,7 +146,10 @@ export interface Clover {
   consumeTarget(): void;
   /** A controlled host's Canvas, applied without asking it again. */
   syncCanvas(canvasId: string | null): void;
-  /** Pick an annotation (null to clear). On another Canvas, go there first. */
+  /**
+   * Pick an annotation (null to clear). On another Canvas, go there first; in a hidden
+   * set, show the set.
+   */
   selectAnnotation(id: string | null): void;
   /**
    * Search the Manifest through its Content Search service (1 or 2). The hits are listed
@@ -309,6 +317,16 @@ export function createClover(options: CloverOptions = {}): Clover {
       options.onCanvasChange?.(canvasId);
     }
   };
+
+  /** Show or hide a set: the reader's choice, over where it starts. */
+  const setVisible = (setId: string, visible: boolean) =>
+    store.set((state) => {
+      const hidden = state.hiddenSets.filter((id) => id !== setId);
+      const shown = state.shownSets.filter((id) => id !== setId);
+      return visible
+        ? { hiddenSets: hidden, shownSets: [...shown, setId] }
+        : { hiddenSets: [...hidden, setId], shownSets: shown };
+    });
 
   /** Move to a Canvas, or ask a controlled host to. */
   const navigate = (canvasId: string | null, target: Target | null) => {
@@ -522,6 +540,19 @@ export function createClover(options: CloverOptions = {}): Clover {
       );
       store.set({ annotationId: entry ? id : null });
       if (!entry) return;
+      /*
+       * One of a hidden page, chosen, shows its page again, so what was chosen is drawn
+       * (Mat, 2026-10-26: "clicking a hidden annotation should unhide the annotation
+       * page"). Search's hits are the Panel's to show.
+       */
+      const { hiddenSets, shownSets } = store.get();
+      if (
+        entry.setId !== SEARCH_SET_ID &&
+        selectHiddenSets(manifest, addedSets, hiddenSets, shownSets).includes(
+          entry.setId,
+        )
+      )
+        setVisible(entry.setId, true);
       // On a Canvas not in view: go there; the Canvas frames it once laid out. One this
       // Manifest does not have stays picked, with nowhere to go.
       const shown = selectVisibleCanvases(manifest, canvasId).some(
@@ -582,13 +613,7 @@ export function createClover(options: CloverOptions = {}): Clover {
       }
     },
     setSetVisible(setId, visible) {
-      store.set((state) => {
-        const hidden = state.hiddenSets.filter((id) => id !== setId);
-        const shown = state.shownSets.filter((id) => id !== setId);
-        return visible
-          ? { hiddenSets: hidden, shownSets: [...shown, setId] }
-          : { hiddenSets: [...hidden, setId], shownSets: shown };
-      });
+      setVisible(setId, visible);
     },
     async loadAnnotations(input) {
       annotating?.abort();

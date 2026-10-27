@@ -174,6 +174,35 @@ describe("annotation sets", () => {
       expect(hidden()).toEqual(["https://example.org/page/ocr"]);
     });
 
+    it("shows a hidden set again when one of its annotations is chosen", () => {
+      const clover = createClover();
+      clover.store.set({ manifest });
+      const hidden = () => {
+        const state = clover.store.get();
+        return selectHiddenSets(
+          state.manifest,
+          state.addedSets,
+          state.hiddenSets,
+          state.shownSets,
+        );
+      };
+      const note = "https://example.org/note/ocr";
+      clover.setSetVisible(note, false);
+      expect(hidden()).toContain(note);
+      const [entry] = selectAnnotationSets(manifest, []).find(
+        (set) => set.id === note,
+      )!.entries;
+      clover.selectAnnotation(entry.id);
+      expect(clover.store.get().annotationId).toBe(entry.id);
+      expect(hidden()).not.toContain(note);
+      // A set that starts hidden, too.
+      const [line] = selectAnnotationSets(manifest, []).find(
+        (set) => set.id === "https://example.org/page/ocr",
+      )!.entries;
+      clover.selectAnnotation(line.id);
+      expect(hidden()).toEqual([]);
+    });
+
     it("leaves caption files alone: they are never a set", () => {
       expect(selectHiddenSets(p4(captionsJson), [], [], [])).toEqual([]);
     });

@@ -105,7 +105,7 @@ the thumbnails under it, and the information panel beside them, as in Clover 3.x
 
 | Prop               | Type                                    | Default                     | Description                                                       |
 | ------------------ | --------------------------------------- | --------------------------- | ----------------------------------------------------------------- |
-| `header`           | `boolean`                               | `true`                      | The thumbnail and title over the Body.                            |
+| `header`           | `boolean`                               | `true`                      | The title and provider over the Body.                             |
 | `headingLevel`     | `number`                                | `2`                         | The title's level; the panel's sections are a level below.        |
 | `panel`            | `boolean`                               | `true`                      | The information panel and its toggle.                             |
 | `download`         | `boolean`                               | `true`                      | The downloads in the panel's About, where there is a `rendering`. |
@@ -255,12 +255,12 @@ Use `fill` to have the Viewer fill a box of a set height, the window under a pag
 header, say. The Body takes what the title and the thumbnails leave, never less than
 16rem; a shorter box scrolls.
 
-<ViewerExample resource="print" box="34rem">
+<ViewerExample resource="postcard" box="34rem">
 
 ```jsx
 <div style={{ height: "34rem" }}>
   <Viewer
-    iiifContent="https://nulib-ds.github.io/clover/mocks/tagging/manifest.json"
+    iiifContent="https://api.dc.library.northwestern.edu/api/v2/works/0e66d6d8-5dc5-4686-b056-d18682c79ebf?as=iiif"
     fill
   />
 </div>
@@ -398,12 +398,12 @@ and region, or the moment in a recording, they are at. Put it in a link to share
 
 Annotations on the Manifest's Canvases (comments, tags, transcriptions) are listed in the
 panel's Annotations section and drawn on the Canvas. Picking one frames it, moving to its
-Canvas first. This print has the words on its plate tagged where they sit.
+Canvas first. This catalog has each plate's "Then" and "Now" tagged where they are.
 
-<ViewerExample resource="print">
+<ViewerExample resource="catalog">
 
 ```jsx
-<Viewer iiifContent="https://nulib-ds.github.io/clover/mocks/tagging/manifest.json" />
+<Viewer iiifContent="https://nulib-ds.github.io/clover/mocks/paged/manifest.json" />
 ```
 
 </ViewerExample>
@@ -424,16 +424,16 @@ Use `annotations` to show pages of your own beside the Manifest's.
 ### Content Search
 
 A Manifest with a IIIF Content Search service, version 1 or 2, gets a Search section: its
-hits listed by page and drawn on the Canvas. Use `searchQuery` to search as it opens. None
-of the homepage's resources has a search service, so this is Clover's newspaper
-[mock](/docs/mocks), searched for "Moskau".
+hits listed by page and drawn on the Canvas, the first gone to as they arrive. Use
+`searchQuery` to search as it opens. This is the homepage's catalog, its words read by
+machine and searchable ([mock](/docs/mocks)), searched for "steel".
 
-<ViewerExample resource="search" props={{ searchQuery: "Moskau" }}>
+<ViewerExample resource="catalog" props={{ searchQuery: "steel" }}>
 
 ```jsx
 <Viewer
-  iiifContent="https://nulib-ds.github.io/clover/mocks/content-search/manifest.json"
-  searchQuery="Moskau"
+  iiifContent="https://nulib-ds.github.io/clover/mocks/paged/manifest.json"
+  searchQuery="steel"
 />
 ```
 

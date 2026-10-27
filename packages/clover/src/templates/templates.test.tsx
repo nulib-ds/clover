@@ -58,7 +58,10 @@ describe("templates", () => {
   it("Default: title, Body, strip with position and arrows, and the panel", async () => {
     render(<Templates.Default iiifContent={bookJson} />);
     expect(
-      await screen.findByRole("heading", { name: "Simple Manifest - Book" }),
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Item 1 of 3/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument();
@@ -92,7 +95,10 @@ describe("templates", () => {
     const { rerender, container } = render(
       <Templates.Default iiifContent={bookJson} />,
     );
-    await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "Simple Manifest - Book",
+    });
     const layout = () => container.querySelector(".clover-template-default");
     expect(layout()).not.toHaveAttribute("data-fill");
     rerender(<Templates.Default iiifContent={bookJson} fill />);
@@ -172,9 +178,16 @@ describe("templates", () => {
     expect(
       await screen.findByRole("heading", { level: 2, name: "About" }),
     ).toBeInTheDocument();
+    // The title is About's alone, a level under it.
     expect(
-      screen.queryByRole("heading", { name: "Simple Manifest - Book" }),
+      screen.queryByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      }),
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Simple Manifest - Book" }),
+    ).toBeInTheDocument();
   });
 
   it("Default: a right-to-left book's strip runs leftward, Previous on the right", async () => {
@@ -201,7 +214,10 @@ describe("templates", () => {
       .spyOn(HTMLElement.prototype, "clientWidth", "get")
       .mockReturnValue(1280);
     render(<Templates.Default iiifContent={bookJson} />);
-    await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "Simple Manifest - Book",
+    });
     screen.getByRole("button", { name: "About" }).focus();
     width.mockReturnValue(390);
     act(() => panes.forEach((measure) => measure()));
@@ -235,7 +251,10 @@ describe("templates", () => {
 
     it("never stacks: it starts closed, then slides over the Body when asked", async () => {
       render(<Templates.Default iiifContent={bookJson} />);
-      await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
       const panes = document.querySelector(".clover-template-default-panes");
       expect(panes).toHaveAttribute("data-panel", "over");
       expect(panel()).not.toBeVisible();
@@ -252,7 +271,10 @@ describe("templates", () => {
 
     it("closes from the uncovered strip, from Escape, and from its close button", async () => {
       render(<Templates.Default iiifContent={bookJson} />);
-      await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
       const open = async () => {
         fireEvent.click(toggle());
         await waitFor(() =>
@@ -283,7 +305,10 @@ describe("templates", () => {
 
     it("puts the panel away on Escape from under it, leaving focus there", async () => {
       render(<Templates.Default iiifContent={bookJson} />);
-      await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
       fireEvent.click(toggle());
       await waitFor(() =>
         expect(toggle()).toHaveAttribute("aria-expanded", "true"),
@@ -298,7 +323,10 @@ describe("templates", () => {
 
     it("starts open over the Body only when the host asks", async () => {
       render(<Templates.Default iiifContent={bookJson} defaultPanelOpen />);
-      await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
       expect(panel()).toBeVisible();
     });
   });
@@ -364,7 +392,10 @@ describe("templates", () => {
   it("Document: toolbar, thumbnails, a sheet for each view, PageDown, and a sliding panel", async () => {
     render(<Templates.Document iiifContent={bookJson} />);
     expect(
-      await screen.findByRole("heading", { name: "Simple Manifest - Book" }),
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      }),
     ).toBeInTheDocument();
     const sidebar = screen.getByRole("complementary", { name: "Items" });
     // Their toggle: on the spine while they show, out of their pane, which is theirs whole.
@@ -516,7 +547,10 @@ describe("templates", () => {
 
     it("slides the panel over the page, focused, closing on Escape or its button", async () => {
       render(<Templates.Document iiifContent={bookJson} />);
-      await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
       const panel = document.querySelector<HTMLElement>(
         ".clover-template-document-panel",
       )!;
@@ -546,7 +580,10 @@ describe("templates", () => {
 
     it("puts the panel away on Escape from under it, leaving focus there", async () => {
       render(<Templates.Document iiifContent={bookJson} />);
-      await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
       const panel = document.querySelector<HTMLElement>(
         ".clover-template-document-panel",
       )!;
@@ -572,7 +609,10 @@ describe("templates", () => {
           }) as unknown as MediaQueryList,
       );
       render(<Templates.Document iiifContent={bookJson} defaultSidebarOpen />);
-      await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      });
       const sidebar = screen.getByRole("complementary", { name: "Items" });
       const option = within(sidebar).getAllByRole("option")[1];
       option.focus();

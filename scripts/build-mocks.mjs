@@ -35,6 +35,10 @@ import {
 import {
   PUBLIC_BASE as PAGED_BASE,
   manifest as pagedManifest,
+  matches as pagedMatches,
+  ocrPage as pagedOcrPage,
+  pagesOfWords as pagedPages,
+  searchResponse as pagedSearchResponse,
 } from "../docs/mocks/paged/index.mjs";
 import {
   PUBLIC_BASE as TRANSCRIPTS_BASE,
@@ -147,15 +151,48 @@ writeFileSync(
 writeFileSync(join(hindenburg, "captions.vtt"), `${hindenburgCaptions()}\n`);
 console.log("hindenburg: manifest.json, captions.vtt");
 
-// The catalog in spreads, its double-page plate shown alone: one static Manifest.
+// The catalog in spreads, its double-page plate shown alone, its words read by machine
+// and searchable: the Manifest, each page's OCR by line and by word, and example searches.
 const paged = join(root, "public/mocks/paged");
 rmSync(paged, { recursive: true, force: true });
-mkdirSync(paged, { recursive: true });
-writeFileSync(
-  join(paged, "manifest.json"),
-  `${JSON.stringify(pagedManifest(PAGED_BASE), null, 2)}\n`,
+const writePaged = (path, json, { compact = false } = {}) => {
+  const file = join(paged, path);
+  mkdirSync(dirname(file), { recursive: true });
+  writeFileSync(file, `${JSON.stringify(json, null, compact ? 0 : 2)}\n`);
+};
+writePaged("manifest.json", pagedManifest(PAGED_BASE));
+const read = pagedPages().filter((page) => page.words.length);
+for (const { key } of read) {
+  for (const granularity of ["line", "word"]) {
+    writePaged(
+      `ocr/${key}-${granularity}s.json`,
+      pagedOcrPage(PAGED_BASE, key, granularity),
+      { compact: true },
+    );
+  }
+}
+/** Example searches published as files: a word on many pages, a phrase, a miss. */
+const PAGED_EXAMPLES = ["steel", "model d", "zzzz"];
+const pagedSlug = (q) => q.replace(/\s+/g, "-");
+const pagedExampleUrl = (q, n) =>
+  `${PAGED_BASE}/search/examples/${pagedSlug(q)}${n > 1 ? `-${n}` : ""}.json`;
+for (const q of PAGED_EXAMPLES) {
+  const pages = Math.max(1, Math.ceil(pagedMatches(q).length / 25));
+  for (let n = 1; n <= pages; n++) {
+    writePaged(
+      `search/examples/${pagedSlug(q)}${n > 1 ? `-${n}` : ""}.json`,
+      pagedSearchResponse({
+        base: PAGED_BASE,
+        q,
+        page: n,
+        pageUrl: pagedExampleUrl,
+      }),
+    );
+  }
+}
+console.log(
+  `paged: manifest.json, ocr/ (${read.length} pages), search/examples/ (${PAGED_EXAMPLES.join(", ")})`,
 );
-console.log("paged: manifest.json");
 
 // The film with its captions and its transcript: one static Manifest.
 const transcripts = join(root, "public/mocks/transcripts");

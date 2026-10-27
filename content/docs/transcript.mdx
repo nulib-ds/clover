@@ -19,7 +19,8 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 
 <div className="docs-lede">
   The words of the recording or page in view: its captions as text, the cue
-  playing marked, or its transcript as plain text.
+  playing marked, and a field to find words in them, or its transcript as plain
+  text.
 </div>
 
 <LivePart
@@ -38,17 +39,24 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 ## API reference
 
 Inside a `Root`, it reads the view's WebVTT captions and any transcript as plain text,
-with a choice where there are several, and renders nothing where there is neither.
+with a choice where there are several, and renders nothing where there is neither. Over
+the captions, a field finds words as they are typed: the cues with them marked and
+counted, the first current, and Previous, Next or Enter going through them, each seeking
+the recording there. A long transcript is drawn a chunk of cues at a time, more as the
+reader nears its end.
 `Default` and `Document` show it in their [Panel](/docs/panel). Its other props, and its
 `ref`, go to its element.
 
 <ApiReference elements="clover-transcript">
 
-| Prop        | Type         | Default | Description                                         |
-| ----------- | ------------ | ------- | --------------------------------------------------- |
-| `follow`    | `boolean`    | `true`  | Keep the cue playing in view while the media plays. |
-| `as`        | element type | `"div"` | The element to render, such as a `section`.         |
-| `className` | `string`     | —       | Added to `clover-transcript`.                       |
+| Prop        | Type                 | Default   | Description                                                                                  |
+| ----------- | -------------------- | --------- | -------------------------------------------------------------------------------------------- |
+| `follow`    | `boolean`            | `true`    | Keep the cue playing in view while the media plays.                                          |
+| `find`      | `boolean`            | `true`    | A field over the captions to find words in them, with steps through the cues that have them. |
+| `sticky`    | `boolean`            | `false`   | The find field held in view as the cues scroll under it.                                     |
+| `size`      | `"large" \| "small"` | `"large"` | The find field's size, as Search's: a tad smaller for a narrow column.                       |
+| `as`        | element type         | `"div"`   | The element to render, such as a `section`.                                                  |
+| `className` | `string`             | —         | Added to `clover-transcript`.                                                                |
 
 </ApiReference>
 

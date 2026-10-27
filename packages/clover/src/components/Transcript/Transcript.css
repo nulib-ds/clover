@@ -44,11 +44,6 @@
   overflow-wrap: anywhere;
 }
 
-.clover-transcript-time {
-  color: var(--clover-color-primary-muted, #26292b);
-  font-variant-numeric: tabular-nums;
-}
-
 .clover-transcript-voice {
   font-weight: 600;
 }
@@ -63,9 +58,11 @@
  * 2.5.8); the radio stays for the keyboard and assistive technology, the code is what
  * shows, and its file's label its popover.
  */
+/* At the end of its row, over the cues as beside a heading (Mat, 2026-10-26). */
 .clover-transcript-languages {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: var(--clover-space-2xs);
   margin: 0;
   padding: 0;
@@ -115,5 +112,144 @@
   .clover-transcript-language:has(input:checked) {
     background-color: Highlight;
     color: HighlightText;
+  }
+}
+
+/*
+ * Finding in the cues (Mat, 2026-10-26): the field (`ui/FieldPill.css`, Search's own), what it
+ * found inside it (the steps, `ui/Steps.css`, or "No results"), over the cues, `s` from
+ * them (the transcript's own gap). The status's words are for assistive technology alone.
+ */
+.clover-transcript-find-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/*
+ * The words found, marked in the accent, faintly, and bold, so they are not told by color
+ * alone (WCAG 1.4.1), as Search's are; the current match's more strongly.
+ */
+.clover-transcript-cue mark {
+  padding: 0 var(--clover-space-3xs);
+  border-radius: 2px;
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 20%,
+    transparent
+  );
+  color: inherit;
+  font-weight: 700;
+}
+
+.clover-transcript-cue[data-match="current"] mark {
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 36%,
+    transparent
+  );
+  box-shadow: 0 0 0 1px var(--clover-color-accent, #0065c3);
+}
+
+@media (forced-colors: active) {
+  .clover-transcript-cue mark {
+    background-color: Mark;
+    color: MarkText;
+  }
+
+  .clover-transcript-cue[data-match="current"] mark {
+    outline: 2px solid Highlight;
+  }
+}
+
+/* Where the next chunk of cues is asked for (`Transcript.tsx`): no room of its own. */
+.clover-transcript-more {
+  height: 1px;
+  margin-top: -1px;
+}
+
+/*
+ * Held in view (`sticky`; Mat, 2026-10-26: as the Panel's Search is): the find field and
+ * its steps, on the panel's own color with `xs` of it above and below (drawn back by as
+ * much, so nothing moves at rest), at the top of the box that scrolls the cues
+ * (`--clover-transcript-top` to set it lower), or in an accordion under the stuck
+ * headings, up to its own (`ui/Sections.css`). A cue scrolled to or followed lands clear
+ * of it and of the fade under it (WCAG 2.4.11). Where the headings scroll, so does it.
+ */
+.clover-transcript {
+  --clover-transcript-at: var(--clover-transcript-top, 0px);
+}
+
+.clover-sections[data-layout="accordion"] .clover-transcript {
+  --clover-transcript-at: calc(
+    var(--clover-sections-inset-start, 0px) + var(--clover-sections-total) -
+      var(--clover-sections-after)
+  );
+}
+
+.clover-transcript[data-sticky] > .clover-transcript-find {
+  position: sticky;
+  z-index: 1;
+  top: var(--clover-transcript-at);
+  margin-block: calc(-1 * var(--clover-space-xs));
+  padding-block: var(--clover-space-xs);
+  background-color: var(--clover-color-secondary, #fff);
+}
+
+.clover-transcript[data-sticky] .clover-transcript-cue > button {
+  scroll-margin-top: calc(
+    var(--clover-transcript-at) + var(--clover-transcript-find, 0px) +
+      var(--clover-space-l)
+  );
+}
+
+/* The cues fade into the held field as they pass under it, as Search's hits do. */
+@supports (animation-timeline: scroll()) {
+  .clover-transcript[data-sticky] > .clover-transcript-find::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    inset-inline: 0;
+    height: var(--clover-space-l);
+    background: linear-gradient(
+      to bottom,
+      var(--clover-color-secondary, #fff),
+      transparent
+    );
+    opacity: 0;
+    pointer-events: none;
+    animation: clover-shade linear both;
+    animation-timeline: scroll();
+    animation-range: 0 var(--clover-space-m);
+  }
+
+  .clover-sections[data-layout="accordion"]
+    > [data-open="true"]:has(
+      .clover-transcript[data-sticky] .clover-transcript-find
+    )
+    > .clover-sections-heading
+    > button::after {
+    content: none;
+  }
+}
+
+.clover-sections[data-layout="accordion"][data-stacks="off"]
+  .clover-transcript[data-sticky]
+  > .clover-transcript-find {
+  position: relative;
+  top: auto;
+}
+
+@media (max-height: 32rem) {
+  .clover-sections[data-layout="accordion"]
+    .clover-transcript[data-sticky]
+    > .clover-transcript-find {
+    position: relative;
+    top: auto;
   }
 }

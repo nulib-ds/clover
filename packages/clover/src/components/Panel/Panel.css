@@ -17,6 +17,14 @@
     var(--clover-inset) - var(--clover-space-s)
   );
   --clover-sections-inset-end: var(--clover-sections-inset-start);
+  /*
+   * Its headings' rows reach across the rest of its inset, for the wheel
+   * (`ui/Sections.css`): the boxes reach `s` out over it already. To its edge and not
+   * past it, as past it would overflow what scrolls; half a pixel in, for rounding.
+   */
+  --clover-sections-gutter: calc(
+    var(--clover-inset) - var(--clover-space-s) - 0.5px
+  );
   color: var(--clover-color-primary, #1a1d1e);
 }
 
@@ -234,6 +242,89 @@
   display: flex;
   flex-direction: column;
   gap: var(--clover-space-m);
+}
+
+/*
+ * The Manifest's thumbnail and its label, over what About says of it: the thumbnail
+ * small, a golden step under Items' thumbnails' height, at its own shape up to twice as
+ * wide, cropped past that, floated at the end of the label's lines (Mat, 2026-10-26:
+ * "float it right to the side of the label"). It takes no more height in the head than
+ * the label's, so the summary follows the label as closely as it would without it ("the
+ * summary should slide up"), and wraps around it there (below).
+ */
+.clover-about {
+  --clover-about-thumbnail-height: calc(
+    var(--clover-items-height, 8rem) * 0.618
+  );
+}
+
+.clover-about-head {
+  display: flow-root;
+}
+
+.clover-about-thumbnail {
+  float: right;
+  display: block;
+  width: auto;
+  height: var(--clover-about-thumbnail-height);
+  max-width: min(50%, calc(2 * var(--clover-about-thumbnail-height)));
+  margin-inline-start: var(--clover-space-m);
+  /*
+   * Only as deep as the label, so its lines wrap short of it and the head ends where the
+   * label does (`--clover-about-label-height`, written by `About`; the whole thumbnail
+   * until then). A float whose box nets to nothing would shorten no line.
+   */
+  margin-bottom: min(
+    0px,
+    calc(
+      var(--clover-about-label-height, var(--clover-about-thumbnail-height)) -
+        var(--clover-about-thumbnail-height)
+    )
+  );
+  object-fit: cover;
+  border-radius: var(--clover-radius, 3px);
+  background-color: var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+:dir(rtl) .clover-about-thumbnail {
+  float: left;
+}
+
+/*
+ * The words after the label take the rest of the room it hangs into: an empty box
+ * floated at the end of their first text, as wide as the thumbnail and its gap, as deep
+ * as it hangs past the label and the gap under it, and a little more, `m` and `3xs`
+ * clear of its foot, a tad more than beside it (Mat, 2026-10-26: "just a tiny bit more on
+ * the bottom than on the left"), none once it does not (the label's
+ * height and the thumbnail's width written by `About`). Inside that text itself, since a
+ * summary cut short is a block of its own that would sit beside a float rather than wrap.
+ */
+.clover-about-head:has(.clover-about-thumbnail) + * > :first-child::before {
+  content: "";
+  float: right;
+  width: calc(var(--clover-about-thumbnail-width, 0px) + var(--clover-space-m));
+  height: max(
+    0px,
+    calc(
+      var(--clover-about-thumbnail-height) -
+        var(--clover-about-label-height, 0px) + var(--clover-space-3xs)
+    )
+  );
+}
+
+:dir(rtl)
+  .clover-about-head:has(.clover-about-thumbnail)
+  + *
+  > :first-child::before {
+  float: left;
+}
+
+/* The label, at About's own heading level, a step up from its words. */
+.clover-about-label {
+  margin: 0;
+  font-size: var(--clover-text-m);
+  font-weight: 600;
+  line-height: 1.25;
 }
 
 .clover-about :is(p, ul) {

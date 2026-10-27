@@ -291,6 +291,7 @@ describe("<clover-viewer template>", () => {
 
     const plain = viewer({ size: "12rem" });
     await within(plain).findByRole("heading", {
+      level: 2,
       name: "Simple Manifest - Book",
     });
     expect(plain.querySelector(".clover-template-default")).not.toBeNull();

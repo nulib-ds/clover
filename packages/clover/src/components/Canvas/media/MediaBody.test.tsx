@@ -848,8 +848,8 @@ describe("Canvas media", () => {
       });
       pick(item);
       expect(element.currentTime).toBe(702);
-      // Paused it was, and paused it stays.
-      expect(play).not.toHaveBeenCalled();
+      // Paused it was; pressed, it plays from there (Mat, 2026-10-26).
+      expect(play).toHaveBeenCalledTimes(1);
       act(() => element.dispatchEvent(new Event("seeked")));
       expect(cues()).toHaveLength(1);
     });
@@ -967,9 +967,10 @@ describe("Canvas media", () => {
     });
 
     /*
-     * Each page in the menu has its hide toggle, an eye before its label: hiding a page
+     * Each page in the menu has its hide toggle, an eye after its label: hiding a page
      * hides only its annotations on the picture. Its items stay listed, the control that
-     * opens the menu stays, and a pick still goes where the annotation is.
+     * opens the menu stays, and a pick still goes where the annotation is, and shows its
+     * page again.
      */
     it("hides a page's annotations from the picture by its eye in the menu", async () => {
       const onMediaElement = vi.fn();
@@ -1013,6 +1014,11 @@ describe("Canvas media", () => {
       seek(element, 300);
       pick(within(await menu()).getByRole("radio", { name: /led out/ }));
       expect(element.currentTime).toBe(85.67);
+      expect(
+        within(await menu()).getByRole("checkbox", {
+          name: "Hide Rudolf Hess",
+        }),
+      ).not.toBeChecked();
 
       // Opened again, the menu focuses the picked item, not the checked eye before it.
       fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
@@ -1023,7 +1029,8 @@ describe("Canvas media", () => {
       );
 
       fireEvent.click(within(await menu()).getByRole("checkbox"));
-      expect(hess()).toBeInTheDocument();
+      expect(within(await menu()).getByRole("checkbox")).toBeChecked();
+      expect(document.querySelector(".clover-canvas-annotation")).toBeNull();
     });
 
     it("hides a set from the Root, so the menu and the list hide it together", async () => {

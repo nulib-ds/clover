@@ -31,6 +31,21 @@ const meta: MetaRecord = {
       footer: false,
     },
   },
+  transcript: {
+    title: "Transcript (test)",
+    display: "hidden",
+    theme: {
+      layout: "full",
+      sidebar: false,
+      toc: false,
+      breadcrumb: false,
+      pagination: false,
+      timestamp: false,
+      copyPage: false,
+      navbar: false,
+      footer: false,
+    },
+  },
   viewer: {
     title: "Viewer (test)",
     display: "hidden",

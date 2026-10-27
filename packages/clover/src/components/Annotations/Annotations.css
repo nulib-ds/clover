@@ -15,9 +15,10 @@
 }
 
 /*
- * A set's header: its hide toggle (`ui/HideToggle.tsx`), then the AnnotationPage's label
- * when it has one, `2xs` apart on one line, the eye drawn back by its own inset so it
- * lines up with what is under it; `s` over the entries.
+ * A set's header: the AnnotationPage's label when it has one, its languages, and its hide
+ * toggle (`ui/HideToggle.tsx`) at the end (Mat, 2026-10-26: "place hide annotation button
+ * on right side"), `2xs` apart on one line, the eye drawn out by its own inset so it
+ * lines up with the end of what is under it; `s` over the entries.
  */
 /* Element and class, over the menu's own rules for its legends and labels. */
 :is(div, legend).clover-annotations-set-header {
@@ -36,7 +37,30 @@
 }
 
 .clover-annotations-set-header > .clover-hide {
-  margin-inline-start: calc(-1 * var(--clover-space-xs));
+  margin-inline-start: auto;
+  margin-inline-end: calc(-1 * var(--clover-space-xs));
+}
+
+/* After the languages, which take the room before them. */
+.clover-annotations-languages + .clover-hide {
+  margin-inline-start: 0;
+}
+
+/*
+ * What the toggle hides, shown as it is pointed at or focused (Mat, 2026-10-26: "make it
+ * obvious that this would hides/toggles all annotations in the page"): every entry of
+ * its set lit together, as one is under the pointer. The list's sets and the Canvas
+ * menu's alike.
+ */
+.clover-annotations-set:has(
+    > .clover-annotations-set-header > .clover-hide:hover
+  )
+  .clover-annotations-entry,
+.clover-annotations-set:has(
+    > .clover-annotations-set-header > .clover-hide input:focus-visible
+  )
+  .clover-annotations-entry {
+  background-color: var(--clover-color-secondary-muted, #f1f1f1);
 }
 
 .clover-annotations-title {
@@ -56,7 +80,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--clover-space-2xs);
-  margin: 0 0 0 auto;
+  margin: 0;
+  margin-inline-start: auto;
   padding: 0;
   border: 0;
   font-size: var(--clover-text-xs);
@@ -261,13 +286,4 @@ label.clover-annotations-entry > input {
     > .clover-annotations-canvas-label {
     border-inline-start-color: Highlight;
   }
-}
-
-/* Where an entry on a recording's time starts (Cookbook 0103), where an image's has its region. */
-.clover-annotations-time {
-  flex: none;
-  min-width: var(--clover-space-l);
-  color: var(--clover-color-primary-muted, #26292b);
-  font-size: var(--clover-text-s);
-  font-variant-numeric: tabular-nums;
 }

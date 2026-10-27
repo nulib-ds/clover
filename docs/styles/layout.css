@@ -135,32 +135,6 @@
 }
 
 /*
- * The Viewer's entry marked as the one to start from (Mat, 2026-10-26: "a little star …
- * to indicate it is special"): a four-pointed star after its name, in the accent, drawn
- * as a mask so it takes the link's place in forced colors too. Decorative only: empty
- * content, so the link's name stays "Viewer". `$=` keeps the base path out of it and the
- * 3.x Viewer (`/docs/3.x/viewer`) out of the match.
- */
-:is(.nextra-sidebar, .nextra-mobile-nav) a[href$="/docs/viewer"]::after {
-  align-self: center;
-  background-color: var(--accent-9);
-  content: "";
-  flex: none;
-  height: 0.75em;
-  margin-inline-start: 0.382rem;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.5l2.6 7.9 7.9 2.6-7.9 2.6L12 22.5l-2.6-7.9L1.5 12l7.9-2.6z'/%3E%3C/svg%3E")
-    center / contain no-repeat;
-  width: 0.75em;
-}
-
-@media (forced-colors: active) {
-  :is(.nextra-sidebar, .nextra-mobile-nav) a[href$="/docs/viewer"]::after {
-    background-color: LinkText;
-    forced-color-adjust: none;
-  }
-}
-
-/*
  * More room around the sidebar's list, and over the page beside it, where the window is
  * wide (Mat, 2026-10-23: "more breathing is good"; "padding tops should always match"),
  * tightening as it narrows: Nextra's 1rem where the sidebar first shows, 48rem wide,

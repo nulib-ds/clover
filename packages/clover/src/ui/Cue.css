@@ -1,0 +1,21 @@
+/*
+ * A row's time and its words (`ui/Cue.tsx`), alike in a Transcript's cues, in
+ * annotations on a recording's time (the panel's list and the Canvas's menu) and in
+ * Contents' Ranges on it: the time at the smaller text size, muted, in even figures, at
+ * least `l` wide and never shrinking; each on the words'
+ * first baseline, in a row of flex or grid alike, so the smaller time sits on the line
+ * it starts (Mat, 2026-10-26: "valign these. at least on the first line").
+ */
+.clover-cue-time {
+  flex: none;
+  min-width: var(--clover-space-l);
+  align-self: baseline;
+  color: var(--clover-color-primary-muted, #26292b);
+  font-size: var(--clover-text-s);
+  font-variant-numeric: tabular-nums;
+}
+
+.clover-cue-text {
+  align-self: baseline;
+  min-width: 0;
+}

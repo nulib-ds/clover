@@ -20,7 +20,7 @@ const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export type DefaultProps = Omit<RootProps, "children"> & {
-  /** The header over the Body: the resource's thumbnail and title. Default `true`. */
+  /** The header over the Body: the resource's title and provider. Default `true`. */
   header?: boolean;
   /**
    * The title's heading level, to fit the outline of the page around the layout (under
@@ -197,12 +197,6 @@ export function Default({
         >
           {header && (
             <header className="clover-template-default-header">
-              {/* Decorative: the title beside it names what it pictures. */}
-              <Clover.Thumbnail
-                alt=""
-                className="clover-template-default-thumbnail"
-                size={128}
-              />
               <Clover.Label
                 as={title.as}
                 className="clover-template-default-title"

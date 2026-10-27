@@ -1,0 +1,20 @@
+---
+title: Transcript (test)
+searchable: false
+---
+
+import {
+  ComparePage,
+  PartCompare,
+} from "docs/components/PartCompare/PartCompare";
+
+<ComparePage title="Search and transcripts">
+  <PartCompare
+    part="Search"
+    resource="paged"
+    viewer="catalog"
+    props={{ headingLevel: 4 }}
+    rootProps={{ searchQuery: "steel" }}
+  />
+  <PartCompare part="Transcript" resource="footage" />
+</ComparePage>

@@ -17,6 +17,7 @@ import { resources } from "docs/components/Playground/playground-config";
 import { loadMapWorker } from "docs/lib/map-worker";
 import { useRouter } from "docs/lib/router";
 import { EXAMPLE, example } from "docs/lib/example";
+import { MOCK_SEARCH } from "docs/lib/mock-search";
 import {
   AgentPreview,
   usePreviewHost,
@@ -98,25 +99,6 @@ function useResource(key: string) {
     };
   }, [basePath, key]);
   return url;
-}
-
-/**
- * The Content Search mock's service, answered in the browser by its own `mockFetch`: the
- * docs are a static site, which cannot read `?q=`.
- */
-function useSearchRequest(enabled: boolean) {
-  const [request, setRequest] = useState<{ fetch: typeof fetch } | null>(null);
-  useEffect(() => {
-    if (!enabled) return;
-    let live = true;
-    import("docs/mocks/content-search/index.mjs").then(({ mockFetch }) => {
-      if (live) setRequest({ fetch: mockFetch() as typeof fetch });
-    });
-    return () => {
-      live = false;
-    };
-  }, [enabled]);
-  return request;
 }
 
 /**
@@ -217,7 +199,8 @@ export function Live({
   const holder = useRef<HTMLDivElement>(null);
   const near = useNear(holder);
   const url = useResource(resource);
-  const request = useSearchRequest(resource === "search");
+  // The mocks' searches, answered here: the static site cannot read `?q=`.
+  const request = MOCK_SEARCH;
   const state = usePlace(url, place);
   const kept = useRef(0);
   useEffect(() => {
@@ -230,7 +213,7 @@ export function Live({
     return () => observer.disconnect();
   }, []);
   const content = place ? state : url;
-  const ready = content && (resource !== "search" || request);
+  const ready = content;
   return (
     <div
       ref={holder}

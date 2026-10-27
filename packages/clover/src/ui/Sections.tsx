@@ -30,6 +30,19 @@ export function useSectionActions() {
   return useContext(SectionActionsContext);
 }
 
+/**
+ * How many times the reader has opened this section with a press, in an accordion: 0
+ * until they do. A section's content that the reader came to use can take focus as it
+ * changes (Search's field; Mat, 2026-10-26: "search should focus when section is
+ * expanded"); one opened any other way (a search started elsewhere, a `value`) never
+ * moves focus.
+ */
+const SectionOpenedContext = createContext(0);
+
+export function useSectionOpened() {
+  return useContext(SectionOpenedContext);
+}
+
 /** One section: what its button says, and what its panel shows. */
 export interface SectionSpec {
   value: string;
@@ -126,6 +139,9 @@ export function Sections({
    * at the top. Then the scrolling container is moved just enough to bring it back.
    */
   const pressed = useRef<string | null>(null);
+  const [opened, setOpened] = useState<{ value: string | null; count: number }>(
+    { value: null, count: 0 },
+  );
   useEffect(() => {
     if (tabs || !open || pressed.current !== open) return;
     pressed.current = null;
@@ -286,10 +302,51 @@ export function Sections({
     };
   }, [tabs, values, headingLevel]);
 
+  /*
+   * The wheel over a heading scrolls what holds the sections (the page), never the open
+   * box under the headings (Mat, 2026-10-26: "scrolling down here should not scroll the
+   * content for the active accordion section"): stuck at the container's foot or top, the
+   * headings are its frame, not its content, and so is their row across its gutters
+   * ("account for these edges too", `clover-sections-reach`). Listened to on the headings
+   * alone, so a wheel over the content stays the compositor's. A pinch (`ctrlKey`) is
+   * the browser's.
+   */
+  useEffect(() => {
+    if (tabs) return;
+    const headings = buttons.current
+      .map((button) => button?.parentElement)
+      .filter((heading): heading is HTMLElement => Boolean(heading));
+    const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey) return;
+      const heading = event.currentTarget as HTMLElement;
+      const inner = scrolling(heading);
+      if (!inner || inner === document.scrollingElement) return;
+      event.preventDefault();
+      const unit =
+        event.deltaMode === 1
+          ? parseFloat(getComputedStyle(heading).lineHeight) || 16
+          : event.deltaMode === 2
+            ? inner.clientHeight
+            : 1;
+      (scrolling(inner) ?? document.scrollingElement)?.scrollBy({
+        left: event.deltaX * unit,
+        top: event.deltaY * unit,
+        behavior: "instant",
+      });
+    };
+    for (const heading of headings)
+      heading.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      for (const heading of headings)
+        heading.removeEventListener("wheel", onWheel);
+    };
+  }, [tabs, values]);
+
   const choose = (item: string) => {
     // The open section stays open; another opens in its place.
     if (item === open) return;
     pressed.current = item;
+    if (!tabs) setOpened((last) => ({ value: item, count: last.count + 1 }));
     if (value === undefined) setOwn(item);
     onValueChange?.(item);
   };
@@ -497,16 +554,22 @@ export function Sections({
             {!tabs && (
               <Heading className="clover-sections-heading">
                 {button(item, index)}
+                {/* Its row across the container's gutters, for the wheel (below). */}
+                <span className="clover-sections-reach" aria-hidden="true" />
               </Heading>
             )}
-            <Panel
-              id={`${id}-panel-${index}`}
-              tabs={tabs}
-              labelledBy={`${id}-button-${index}`}
-              hidden={!isOpen}
+            <SectionOpenedContext.Provider
+              value={opened.value === item.value ? opened.count : 0}
             >
-              {mounted.current.has(item.value) ? item.content : null}
-            </Panel>
+              <Panel
+                id={`${id}-panel-${index}`}
+                tabs={tabs}
+                labelledBy={`${id}-button-${index}`}
+                hidden={!isOpen}
+              >
+                {mounted.current.has(item.value) ? item.content : null}
+              </Panel>
+            </SectionOpenedContext.Provider>
           </section>
         );
       })}
@@ -593,6 +656,25 @@ function scrollerOf(node: Element): Element | null {
     at = at.parentElement
   ) {
     if (/auto|scroll|hidden/.test(getComputedStyle(at).overflowY)) return at;
+  }
+  return document.scrollingElement;
+}
+
+/**
+ * The nearest box around a node that scrolls and has somewhere to scroll to (`overflow`
+ * auto or scroll, taller than its room), or else the page: never one that only clips.
+ */
+function scrolling(node: Element): Element | null {
+  for (
+    let at = node.parentElement;
+    at && at !== document.body;
+    at = at.parentElement
+  ) {
+    if (
+      /auto|scroll/.test(getComputedStyle(at).overflowY) &&
+      at.scrollHeight > at.clientHeight
+    )
+      return at;
   }
   return document.scrollingElement;
 }

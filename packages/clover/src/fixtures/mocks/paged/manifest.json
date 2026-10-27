@@ -220,6 +220,12 @@
       "The White Sewing Machine Company of Cleveland issued this bicycle catalog in 1896. Color plates by Thulstrup, Mente, Veenfliet, and Clarke pair “Then” with “Now”; specifications describe four models."
     ]
   },
+  "service": [
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search",
+      "type": "SearchService2"
+    }
+  ],
   "items": [
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/1",
@@ -309,7 +315,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/1-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/2",
@@ -489,7 +504,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/3-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/4",
@@ -579,7 +603,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/4-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5",
@@ -681,7 +714,7 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Then",
+                "value": "Then – Postman on foot collects mail from a red letter box on a lamppost.",
                 "language": "en",
                 "format": "text/plain"
               },
@@ -693,13 +726,20 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Now",
+                "value": "Now – Postman on bicycle greets woman in period style white dress on bicycle.",
                 "language": "en",
                 "format": "text/plain"
               },
               "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/5#xywh=236,236,4256,4162"
             }
           ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/5-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
         }
       ]
     },
@@ -791,7 +831,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/6-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7",
@@ -893,7 +942,7 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Then",
+                "value": "Then – Stableman leads a horse from a barn toward a waiting buggy.",
                 "language": "en",
                 "format": "text/plain"
               },
@@ -905,13 +954,20 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Now",
+                "value": "Now – Bearded man with a satchel cycles past a woman standing with her bicycle.",
                 "language": "en",
                 "format": "text/plain"
               },
               "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/7#xywh=237,237,4266,4266"
             }
           ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/7-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
         }
       ]
     },
@@ -1003,7 +1059,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/8-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/9",
@@ -1093,7 +1158,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/9-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/10",
@@ -1183,7 +1257,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/10-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/11",
@@ -1273,7 +1356,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/11-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/12",
@@ -1363,7 +1455,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/12-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13",
@@ -1453,7 +1554,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/13-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/14",
@@ -1543,7 +1653,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/14-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
@@ -1633,7 +1752,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/15-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/16",
@@ -1724,7 +1852,16 @@
           }
         ]
       },
-      "behavior": ["facing-pages"]
+      "behavior": ["facing-pages"],
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/16-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17",
@@ -1814,7 +1951,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/17-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18",
@@ -1904,7 +2050,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/18-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19",
@@ -2006,7 +2161,7 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Then",
+                "value": "Then – Woman at a spinning wheel beside the hearth.",
                 "language": "en",
                 "format": "text/plain"
               },
@@ -2018,13 +2173,20 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Now",
+                "value": "Now – Woman in cycling bloomers mounts a bicycle on a garden path.",
                 "language": "en",
                 "format": "text/plain"
               },
               "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/19#xywh=1062,496,2715,3682"
             }
           ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/19-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
         }
       ]
     },
@@ -2116,7 +2278,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/20-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21",
@@ -2218,7 +2389,7 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Then",
+                "value": "Then – Two women toboggan down a snowy hill.",
                 "language": "en",
                 "format": "text/plain"
               },
@@ -2230,13 +2401,20 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Now",
+                "value": "Now – Three women in white cycle abreast, one waving a handkerchief.",
                 "language": "en",
                 "format": "text/plain"
               },
               "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/21#xywh=1017,473,2931,3759"
             }
           ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/21-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
         }
       ]
     },
@@ -2328,7 +2506,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/22-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23",
@@ -2430,7 +2617,7 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Then",
+                "value": "Then – Children play tag on a lawn before a towered house.",
                 "language": "en",
                 "format": "text/plain"
               },
@@ -2442,13 +2629,20 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Now",
+                "value": "Now – Young man on bicycle reaches to tag a young woman riding ahead.",
                 "language": "en",
                 "format": "text/plain"
               },
               "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/23#xywh=1181,472,2575,3591"
             }
           ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/23-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
         }
       ]
     },
@@ -2540,7 +2734,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/24-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25",
@@ -2642,7 +2845,7 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Then",
+                "value": "Then – Family rides in a two-horse surrey along a country road.",
                 "language": "en",
                 "format": "text/plain"
               },
@@ -2654,13 +2857,20 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Now",
+                "value": "Now – Three generations of a family cycle along a lakeside path.",
                 "language": "en",
                 "format": "text/plain"
               },
               "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/25#xywh=379,615,3977,3740"
             }
           ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/25-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
         }
       ]
     },
@@ -2752,7 +2962,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/26-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27",
@@ -2854,7 +3073,7 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Then",
+                "value": "Then – Three women stroll a garden path with parasols.",
                 "language": "en",
                 "format": "text/plain"
               },
@@ -2866,13 +3085,20 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Now",
+                "value": "Now – Two Vassar students cycle along a campus drive.",
                 "language": "en",
                 "format": "text/plain"
               },
               "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/27#xywh=285,285,4176,4128"
             }
           ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/27-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
         }
       ]
     },
@@ -2964,7 +3190,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/28-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/29",
@@ -3054,7 +3289,16 @@
             ]
           }
         ]
-      }
+      },
+      "annotations": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/29-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
+        }
+      ]
     },
     {
       "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/30",
@@ -3246,7 +3490,7 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Then",
+                "value": "Then – Man and woman riding sidesaddle canter on horseback by a lake.",
                 "language": "en",
                 "format": "text/plain"
               },
@@ -3258,13 +3502,20 @@
               "motivation": "tagging",
               "body": {
                 "type": "TextualBody",
-                "value": "Now",
+                "value": "Now – Man tips his cap to a woman in white as they cycle side by side.",
                 "language": "en",
                 "format": "text/plain"
               },
               "target": "https://nulib-ds.github.io/clover/mocks/paged/canvas/31#xywh=1901,2139,2495,2424"
             }
           ]
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/ocr/31-lines.json",
+          "type": "AnnotationPage",
+          "label": {
+            "en": ["OCR (lines)"]
+          }
         }
       ]
     }

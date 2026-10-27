@@ -29,6 +29,7 @@ import { useCodeFlavor } from "docs/lib/code-flavor";
 import { useRecipeContent } from "docs/components/Home/recipeThumbnails";
 import { endPageThemePreview, previewPageTheme } from "docs/lib/page-theme";
 import { EXAMPLE, example } from "docs/lib/example";
+import { MOCK_SEARCH } from "docs/lib/mock-search";
 
 /**
  * The playground's resource, taken apart (`Parts.tsx` is the section around it). One
@@ -105,8 +106,7 @@ const placesOf = (manifest: Json, canvases: Json[]) =>
 
 /**
  * For each conditional part, a playground resource that gives it something: the chips
- * offer it. Read from the resources themselves; none of them has a search service or
- * downloads.
+ * offer it. Read from the resources themselves; none of them has downloads.
  */
 const SHOWN_IN: Partial<Record<PartKey, string>> = {
   summary: "collection",
@@ -118,9 +118,10 @@ const SHOWN_IN: Partial<Record<PartKey, string>> = {
   partOf: "collection",
   provider: "catalog",
   items: "catalog",
-  annotations: "print",
+  annotations: "catalog",
   map: "map",
   contents: "catalog",
+  search: "catalog",
   transcript: "footage",
 };
 
@@ -205,6 +206,8 @@ export default function PartsLive({
       iiifContent={content}
       key={content}
       onManifestChange={moved}
+      // The mocks' searches answered in the browser, as the static site cannot.
+      request={MOCK_SEARCH}
       className={styles.root}
       language={startOf(content)?.language}
     >
@@ -512,6 +515,17 @@ function Exploded({
         body: <Clover.Contents className={styles.scroll} />,
       },
       {
+        key: "search",
+        name: "Search",
+        reads: "service",
+        present: Boolean(Clover.searchServiceOf(manifest as never)),
+        // After the lists, across their row (Mat, 2026-10-26: "after annotations and
+        // content"), its hits in a box of their own, as theirs are.
+        span: 6,
+        href: DOCS.Search,
+        body: <Clover.Search headingLevel={4} className={styles.scroll} />,
+      },
+      {
         key: "partOf",
         name: "Collection",
         reads: "partOf",
@@ -581,15 +595,6 @@ function Exploded({
         tall: true,
         href: DOCS.Map,
         body: <MapTile />,
-      },
-      {
-        key: "search",
-        name: "Search",
-        reads: "service",
-        present: Boolean(Clover.searchServiceOf(manifest as never)),
-        span: 3,
-        href: DOCS.Search,
-        body: <Clover.Search />,
       },
       {
         key: "transcript",

@@ -294,6 +294,19 @@ button.clover-sections-scroll-next {
 }
 
 /*
+ * A heading's row reaches across the container's gutters (`--clover-sections-gutter`,
+ * from the heading to the container's edge, the Panel's), so the wheel there scrolls the
+ * page as it does over the heading (`Sections.tsx`). Empty and clear, it takes no press.
+ * Never past the container's edge: what scrolls would scroll sideways to it.
+ */
+.clover-sections-reach {
+  position: absolute;
+  inset-block: 0;
+  inset-inline: calc(-1 * var(--clover-sections-gutter, 0px));
+  z-index: -1;
+}
+
+/*
  * The padding above the first heading and below the last is painted in the heading's
  * color, so nothing scrolls into view between a stuck heading and the container's edge.
  * Below the last only while its box is closed: open, its content is what follows it.

@@ -438,7 +438,10 @@ describe("Clover.Root and its parts", () => {
   it("assembles the ready-made Viewer from the same parts", async () => {
     render(<Clover.Viewer iiifContent={bookJson} />);
     expect(
-      await screen.findByRole("heading", { name: "Simple Manifest - Book" }),
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      }),
     ).toBeInTheDocument();
     expect(screen.getByRole("listbox", { name: "Items" })).toBeInTheDocument();
   });

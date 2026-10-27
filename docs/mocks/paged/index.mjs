@@ -16,13 +16,20 @@
  * - `structures`: Ranges for the catalog's sections (`SECTIONS`), which the record has
  *   none of;
  * - each plate that pairs a "Then" with a "Now" has them tagged where they are
- *   (`THEN_AND_NOW`), as Cookbook recipe 0021 tags a fountain.
+ *   (`THEN_AND_NOW`), as Cookbook recipe 0021 tags a fountain;
+ * - its words, read by machine (`ocr.json`, written by `npm run build:paged-ocr` with
+ *   Apple's Vision framework, not corrected by hand), as each page's OCR by line and by
+ *   word, and a IIIF Content Search 2.0 service over them, searchable by word or phrase
+ *   (Mat, 2026-10-26), by the engine the newspaper's mock shares (`../ocr-search.mjs`).
  *
- * Static only (it answers no query): `scripts/build-mocks.mjs` writes it to
- * `public/mocks/paged/`, published at
- * https://nulib-ds.github.io/clover/mocks/paged/. The images are served by
+ * `scripts/build-mocks.mjs` writes it to `public/mocks/paged/` (the Manifest, the OCR
+ * pages and example searches), published at https://nulib-ds.github.io/clover/mocks/paged/;
+ * `npm run dev` answers any query live under `/api/mocks/paged/`, and the docs answer in
+ * the browser (`mockFetch`), as a static site cannot read `?q=`. The images are served by
  * Northwestern's IIIF Image API (level 2, CORS open). Documented at /docs/mocks.
  */
+import { ocrSearch, union } from "../ocr-search.mjs";
+import ocr from "./ocr.json";
 import source from "./source.json";
 
 export const PUBLIC_BASE = "https://nulib-ds.github.io/clover/mocks/paged";
@@ -41,25 +48,76 @@ export const OPENING = { label: "Page 15", behavior: ["facing-pages"] };
  * The plates that pair a "Then" with a "Now", by page, each with the box around its "Then"
  * (the inset scene and the word printed by it) and around its "Now" (most of the picture,
  * kept clear of its edges; on the Back Cover, the round scene below), in the page's own
- * pixels: x, y, width, height. Page 15 prints "Now" with no "Then", so it has none.
+ * pixels: x, y, width, height, and what each shows, described as a cataloger would, after
+ * the word the plate prints (Mat, 2026-10-26: "describe each Then and Now. keep it
+ * concise"; Page 4's "Now" in his words). Page 15 prints "Now" with no "Then", so it has
+ * none.
  */
 export const THEN_AND_NOW = [
-  ["Page 4", [2705, 66, 1419, 1518], [236, 236, 4256, 4162]],
-  ["Page 6", [57, 57, 1706, 1673], [237, 237, 4266, 4266]],
-  ["Page 18", [968, 307, 1723, 1582], [1062, 496, 2715, 3682]],
-  ["Page 20", [2080, 416, 1868, 1229], [1017, 473, 2931, 3759]],
-  ["Page 22", [2386, 227, 1347, 1347], [1181, 472, 2575, 3591]],
-  ["Page 24", [2452, 473, 1922, 1212], [379, 615, 3977, 3740]],
-  ["Page 26", [104, 214, 1542, 1115], [285, 285, 4176, 4128]],
-  ["Back Cover", [404, 86, 3351, 2163], [1901, 2139, 2495, 2424]],
+  [
+    "Page 4",
+    [2705, 66, 1419, 1518],
+    "Postman on foot collects mail from a red letter box on a lamppost.",
+    [236, 236, 4256, 4162],
+    "Postman on bicycle greets woman in period style white dress on bicycle.",
+  ],
+  [
+    "Page 6",
+    [57, 57, 1706, 1673],
+    "Stableman leads a horse from a barn toward a waiting buggy.",
+    [237, 237, 4266, 4266],
+    "Bearded man with a satchel cycles past a woman standing with her bicycle.",
+  ],
+  [
+    "Page 18",
+    [968, 307, 1723, 1582],
+    "Woman at a spinning wheel beside the hearth.",
+    [1062, 496, 2715, 3682],
+    "Woman in cycling bloomers mounts a bicycle on a garden path.",
+  ],
+  [
+    "Page 20",
+    [2080, 416, 1868, 1229],
+    "Two women toboggan down a snowy hill.",
+    [1017, 473, 2931, 3759],
+    "Three women in white cycle abreast, one waving a handkerchief.",
+  ],
+  [
+    "Page 22",
+    [2386, 227, 1347, 1347],
+    "Children play tag on a lawn before a towered house.",
+    [1181, 472, 2575, 3591],
+    "Young man on bicycle reaches to tag a young woman riding ahead.",
+  ],
+  [
+    "Page 24",
+    [2452, 473, 1922, 1212],
+    "Family rides in a two-horse surrey along a country road.",
+    [379, 615, 3977, 3740],
+    "Three generations of a family cycle along a lakeside path.",
+  ],
+  [
+    "Page 26",
+    [104, 214, 1542, 1115],
+    "Three women stroll a garden path with parasols.",
+    [285, 285, 4176, 4128],
+    "Two Vassar students cycle along a campus drive.",
+  ],
+  [
+    "Back Cover",
+    [404, 86, 3351, 2163],
+    "Man and woman riding sidesaddle canter on horseback by a lake.",
+    [1901, 2139, 2495, 2424],
+    "Man tips his cap to a woman in white as they cycle side by side.",
+  ],
 ];
 
 const thenAndNow = new Map(
-  THEN_AND_NOW.map(([page, then, now]) => [
+  THEN_AND_NOW.map(([page, then, thenText, now, nowText]) => [
     page,
     [
-      ["Then", then],
-      ["Now", now],
+      [`Then – ${thenText}`, then],
+      [`Now – ${nowText}`, now],
     ],
   ]),
 );
@@ -172,6 +230,37 @@ const range = (base, pages, section, place) => {
   };
 };
 
+/** Every URL a copy of the mock answers, under one base; a Canvas by its place, from 1. */
+export function urls(base) {
+  return {
+    manifest: `${base}/manifest.json`,
+    canvas: (n) => `${base}/canvas/${n}`,
+    ocr: (n, granularity) => `${base}/ocr/${n}-${granularity}s.json`,
+    search: `${base}/search`,
+    hit: (n, first) => `${base}/search/hit/${n}-w${first}`,
+  };
+}
+
+/** The OCR by page, in the Canvases' order: its words and its lines, with their boxes. */
+export function pagesOfWords() {
+  return ocr.pages.map(({ lines: read }, place) => {
+    const words = [];
+    const lines = read.map((line, index) => {
+      const run = line.map(([text, x, y, w, h]) => {
+        const word = { index: words.length, text, x, y, w, h };
+        words.push(word);
+        return word;
+      });
+      return {
+        index,
+        text: run.map((word) => word.text).join(" "),
+        ...union(run),
+      };
+    });
+    return { key: place + 1, words, lines };
+  });
+}
+
 export function manifest(base = PUBLIC_BASE) {
   // A copy, so the imported source is never changed.
   const { items, ...record } = JSON.parse(JSON.stringify(source));
@@ -182,12 +271,38 @@ export function manifest(base = PUBLIC_BASE) {
     ]),
   );
 
+  const at = urls(base);
+  const read = new Set(
+    pagesOfWords()
+      .filter((page) => page.words.length)
+      .map((page) => page.key),
+  );
+
   return {
     ...record,
     id: `${base}/manifest.json`,
     summary: { en: [SUMMARY] },
+    service: [
+      ...[record.service ?? []].flat(),
+      { id: at.search, type: "SearchService2" },
+    ],
     items: items.map((page, index) => {
       const canvas = `${base}/canvas/${index + 1}`;
+      // Its tags, and its OCR by line where there are words to read.
+      const annotations = [
+        ...(thenAndNow.has(labelOf(page))
+          ? [tags(canvas, thenAndNow.get(labelOf(page)))]
+          : []),
+        ...(read.has(index + 1)
+          ? [
+              {
+                id: at.ocr(index + 1, "line"),
+                type: "AnnotationPage",
+                label: { en: ["OCR (lines)"] },
+              },
+            ]
+          : []),
+      ];
       const placeholder = `${canvas}/placeholder`;
       return {
         ...page,
@@ -203,9 +318,7 @@ export function manifest(base = PUBLIC_BASE) {
           },
         }),
         items: page.items.map((annotations) => painting(canvas, annotations)),
-        ...(thenAndNow.has(labelOf(page)) && {
-          annotations: [tags(canvas, thenAndNow.get(labelOf(page)))],
-        }),
+        ...(annotations.length && { annotations }),
       };
     }),
     structures: SECTIONS.map((section, index) =>
@@ -213,3 +326,23 @@ export function manifest(base = PUBLIC_BASE) {
     ),
   };
 }
+
+/** Its OCR and search, by the engine both OCR mocks share (`../ocr-search.mjs`). */
+const engine = ocrSearch({
+  publicBase: PUBLIC_BASE,
+  pages: pagesOfWords,
+  urls,
+  manifest,
+  ocrPath: (path) => {
+    const found = /^ocr\/(\d+)-(lines|words)\.json$/.exec(path);
+    return found
+      ? {
+          key: Number(found[1]),
+          granularity: found[2] === "words" ? "word" : "line",
+        }
+      : null;
+  },
+  language: "en",
+});
+
+export const { ocrPage, matches, searchResponse, respond, mockFetch } = engine;

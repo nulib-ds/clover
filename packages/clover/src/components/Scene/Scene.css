@@ -120,30 +120,27 @@
   justify-content: center;
   border-radius: 50%;
   /*
-   * A ball drawn as a cartoon draws one (Mat, 2026-10-24: "more friendly … think cell
-   * shading"): flat tones with crisp edges, not a gradient's blur, in the accent's own hue
-   * (white and black mixed in sRGB keep it). Its face the accent; a glint high on its
-   * left, where the light falls; a crescent of shade on its lower right, outside a circle
-   * a golden share of the way out, dulled, the accent darkened a little ("dull the black
-   * shading"); an ink line around it; a soft shadow cast beneath it. The globe's lines lie
-   * on its face.
+   * A ball, simply lit (Mat, 2026-10-26: "slightly less cartoony. keep it simple but
+   * obviously a sphere"; cel-shaded with an ink line before, 2026-10-24): one soft light
+   * from its upper left across the accent's own hue (white and black mixed in sRGB keep
+   * it), falling off to a darker rim on its lower right, a faint highlight where the
+   * light is, and a soft shadow cast beneath it. Its lit side stays dark enough for the
+   * globe's white lines to keep 3:1 there (WCAG 1.4.11). The globe's lines lie on its face.
    */
   background-color: var(--clover-color-accent, #0065c3);
   background-image:
     radial-gradient(
-      circle at 32% 28%,
-      color-mix(in srgb, var(--clover-color-accent, #0065c3) 38%, #fff) 0 11%,
-      transparent 11.5%
+      circle at 34% 30%,
+      rgb(255 255 255 / 14%) 0,
+      rgb(255 255 255 / 0%) 24%
     ),
     radial-gradient(
-      circle at 38% 34%,
-      transparent 0 61.8%,
-      color-mix(in srgb, var(--clover-color-accent, #0065c3) 78%, #000) 62.3%
+      circle at 34% 30%,
+      color-mix(in srgb, var(--clover-color-accent, #0065c3) 84%, #fff) 0,
+      var(--clover-color-accent, #0065c3) 48%,
+      color-mix(in srgb, var(--clover-color-accent, #0065c3) 62%, #000) 100%
     );
-  box-shadow:
-    inset 0 0 0 0.09rem
-      color-mix(in srgb, var(--clover-color-accent, #0065c3) 55%, #000),
-    0 0.236rem 0.618rem rgb(0 0 0 / 18%);
+  box-shadow: 0 0.236rem 0.618rem rgb(0 0 0 / 22%);
   color: var(--clover-color-control-glyph, #fff);
   cursor: grab;
   isolation: isolate;

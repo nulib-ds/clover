@@ -13,6 +13,12 @@ button.clover-contents-button {
   display: block;
 }
 
+/* On a recording's time: its time, then its label, as a cue's row (`ui/Cue.css`). */
+button.clover-contents-button[data-timed="true"] {
+  display: flex;
+  gap: var(--clover-space-s);
+}
+
 button.clover-contents-button:disabled {
   color: var(--clover-color-primary-muted, #26292b);
   cursor: default;

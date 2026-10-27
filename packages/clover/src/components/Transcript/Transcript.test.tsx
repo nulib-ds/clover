@@ -4,6 +4,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import React from "react";
 
@@ -313,5 +314,137 @@ describe("Transcript", () => {
         screen.getByRole("tabpanel", { name: "Transcript" }),
       ).toHaveTextContent("Good manners"),
     );
+  });
+});
+
+describe("Finding in a transcript", () => {
+  // Three cues with "lunch", one without, and enough after them to draw in chunks.
+  const LONG = `WEBVTT
+
+${Array.from({ length: 100 }, (_, n) => {
+  const start = String(n).padStart(2, "0");
+  const words =
+    n === 1 || n === 50 || n === 90 ? `Lunch ${n}, at lunch` : `Line ${n}`;
+  return `00:${start}:00.000 --> 00:${start}:30.000\n${words}`;
+}).join("\n\n")}
+`;
+
+  beforeEach(() => {
+    fetch = vi.fn(async () => new Response(LONG));
+  });
+
+  async function renderFind() {
+    render(
+      <Clover.Root iiifContent={captionsJson} request={{ fetch }}>
+        <Spy />
+        <Clover.Transcript />
+      </Clover.Root>,
+    );
+    await screen.findByRole("button", { name: /Line 0/ });
+    return screen.getByRole("searchbox", { name: "Search" });
+  }
+
+  it("marks the cues with the words, the first current, and nothing moves", async () => {
+    const field = await renderFind();
+    const video = document.createElement("video");
+    act(() => clover.media.emit(video));
+    fireEvent.change(field, { target: { value: "LUNCH" } });
+    await screen.findByText("Result 1 of 3");
+    expect(screen.getByText("3 results")).toBeInTheDocument();
+    // Each place the words are, marked; case aside.
+    expect(
+      screen
+        .getByRole("button", { name: /Lunch 1, at lunch/ })
+        .querySelectorAll("mark"),
+    ).toHaveLength(2);
+    expect(video.currentTime).toBe(0);
+  });
+
+  it("steps through the matches, seeking each, and Enter goes too", async () => {
+    const field = await renderFind();
+    const video = document.createElement("video");
+    act(() => clover.media.emit(video));
+    fireEvent.change(field, { target: { value: "lunch" } });
+    await screen.findByText("Result 1 of 3");
+
+    // Enter goes to the match current, then on.
+    fireEvent.submit(field);
+    expect(video.currentTime).toBe(60);
+    fireEvent.submit(field);
+    await screen.findByText("Result 2 of 3");
+    expect(video.currentTime).toBe(50 * 60);
+
+    // The third is past the first chunk, and drawn to be gone to.
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Result 3 of 3");
+    expect(video.currentTime).toBe(90 * 60);
+    expect(
+      screen.getByRole("button", { name: /Lunch 90, at lunch/ }),
+    ).toBeInTheDocument();
+  });
+
+  it("clears, focus back in the field, and says when nothing is found", async () => {
+    const field = await renderFind();
+    fireEvent.change(field, { target: { value: "zzzz" } });
+    // Said in the status, and shown in the pill.
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByRole("status")
+          .some((status) => status.textContent === "No results"),
+      ).toBe(true),
+    );
+    expect(
+      within(screen.getByRole("search")).getByText("No results"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+    expect(field).toHaveValue("");
+    expect(document.activeElement).toBe(field);
+  });
+});
+
+describe("A long transcript", () => {
+  const observers: Array<(entries: { isIntersecting: boolean }[]) => void> = [];
+  beforeEach(() => {
+    observers.length = 0;
+    vi.stubGlobal(
+      "IntersectionObserver",
+      class {
+        constructor(
+          callback: (entries: { isIntersecting: boolean }[]) => void,
+        ) {
+          observers.push(callback);
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    fetch = vi.fn(
+      async () =>
+        new Response(
+          `WEBVTT\n\n${Array.from(
+            { length: 100 },
+            (_, n) =>
+              `00:${String(n).padStart(2, "0")}:00.000 --> 00:${String(n).padStart(2, "0")}:30.000\nLine ${n}`,
+          ).join("\n\n")}\n`,
+        ),
+    );
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("draws its cues a chunk at a time, more as the end nears or focus reaches it", async () => {
+    render(
+      <Clover.Root iiifContent={captionsJson} request={{ fetch }}>
+        <Clover.Transcript />
+      </Clover.Root>,
+    );
+    await screen.findByRole("button", { name: /Line 0/ });
+    const drawn = () =>
+      document.querySelectorAll(".clover-transcript-cue").length;
+    expect(drawn()).toBe(40);
+    act(() => observers.at(-1)?.([{ isIntersecting: true }]));
+    await waitFor(() => expect(drawn()).toBe(80));
+    fireEvent.focus(screen.getByRole("button", { name: /Line 77/ }));
+    await waitFor(() => expect(drawn()).toBe(100));
   });
 });

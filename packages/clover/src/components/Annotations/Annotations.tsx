@@ -5,6 +5,7 @@ import { EntryBodies } from "./EntryBodies";
 import {
   type AnnotationEntry,
   type AnnotationSet,
+  findEntry,
   selectListedSets,
   selectHiddenSets,
 } from "../../core/annotation-sets";
@@ -27,10 +28,11 @@ import {
 import { langWithin } from "../../i18n/config";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
-import { formatTime } from "../Canvas/media/useMediaController";
+import { playFrom } from "../../lib/time";
 import { useClover, useCloverSelector } from "../../react/context";
 import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { titleTag } from "../../ui/heading";
+import { CueTime } from "../../ui/Cue";
 import { HideToggle } from "../../ui/HideToggle";
 import { languageCode } from "../../ui/languageCode";
 import { Tip } from "../../ui/Tip";
@@ -71,9 +73,10 @@ export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
  *   drawn around the entry.
  * - Hovering or focusing an entry highlights its hotspot, and hovering a hotspot
  *   highlights its entry: one highlight, shared through the Root, with no timers.
- * - Each set is headed by its AnnotationPage's own label, when it has one, after a toggle
- *   that hides its annotations from the Canvas (`HideToggle`: an eye, "Hide" and the
- *   page's label, or "Hide annotations" for a page without one).
+ * - Each set is headed by its AnnotationPage's own label, when it has one, and at the
+ *   header's end a toggle that hides its annotations from the Canvas (`HideToggle`: an
+ *   eye, "Hide" and the page's label, or "Hide annotations" for a page without one).
+ *   Pointed at or focused, it lights every entry it hides.
  * - Where the same words come as separate annotations, one per language (a transcription
  *   and its translation), the set's header offers their languages by code ("AR", "EN"),
  *   and lists one at a time: the Root's `language` to start, else the reader's
@@ -114,6 +117,23 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
       clover.highlight.get,
     );
 
+    /*
+     * A press on one: picked, and one on the recording playing played from its time, as
+     * a Transcript's cue is (`playFrom`). One elsewhere is gone to, not played.
+     */
+    const choose = (id: string) => {
+      const entry = findEntry(sets, id);
+      const time = entry && parseTime(entry.target.t);
+      const element = clover.media.get();
+      if (
+        time &&
+        element &&
+        shown.some((canvas) => canvas.id === entry.canvasId)
+      )
+        playFrom(element, time.start);
+      clover.selectAnnotation(id);
+    };
+
     // Every annotation needs every Canvas's pages: held while the listing shows.
     useEffect(() => {
       if (scope === "all") return clover.holdAllAnnotationPages();
@@ -149,7 +169,7 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
           selected={selected}
           highlighted={highlighted}
           renderEntry={renderEntry}
-          onSelect={(id) => clover.selectAnnotation(id)}
+          onSelect={choose}
           onHighlight={(id) => clover.highlight.emit(id)}
           onVisible={(ids, on) =>
             ids.forEach((id) => clover.setSetVisible(id, on))
@@ -179,7 +199,7 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
             selected={selected}
             highlighted={highlighted}
             renderEntry={renderEntry}
-            onSelect={(id) => clover.selectAnnotation(id)}
+            onSelect={choose}
             onHighlight={(id) => clover.highlight.emit(id)}
             onVisible={(on) => clover.setSetVisible(set.id, on)}
           />
@@ -241,13 +261,8 @@ function AnnotationGroup({
       aria-labelledby={title.text ? `${id}-title` : undefined}
       data-set={set.id}
     >
-      {/* Its hide toggle first, beside the AnnotationPage's label when it has one. */}
+      {/* The AnnotationPage's label when it has one, its languages, its hide toggle last. */}
       <div className="clover-annotations-set-header">
-        <HideToggle
-          hidden={hidden}
-          onChange={(hide) => onVisible(!hide)}
-          of={title.text ? `${id}-title` : undefined}
-        />
         {title.text && (
           <Heading
             className="clover-annotations-title"
@@ -264,6 +279,11 @@ function AnnotationGroup({
             onChange={setPicked}
           />
         )}
+        <HideToggle
+          hidden={hidden}
+          onChange={(hide) => onVisible(!hide)}
+          of={title.text ? `${id}-title` : undefined}
+        />
       </div>
       <ol className="clover-annotations-list">
         {listed.map((entry, index) => (
@@ -588,11 +608,6 @@ const AnnotationLayers = forwardRef<
             }
           >
             <div className="clover-annotations-set-header">
-              <HideToggle
-                hidden={hidden}
-                onChange={(hide) => onVisible(layer.setIds, !hide)}
-                of={layer.title.text ? `${id}-${layerIndex}` : undefined}
-              />
               {layer.title.text && (
                 <Title
                   className="clover-annotations-title"
@@ -611,6 +626,11 @@ const AnnotationLayers = forwardRef<
                   }
                 />
               )}
+              <HideToggle
+                hidden={hidden}
+                onChange={(hide) => onVisible(layer.setIds, !hide)}
+                of={layer.title.text ? `${id}-${layerIndex}` : undefined}
+              />
             </div>
             {layer.canvases.map((group, groupIndex) => {
               const entries = group.entries.filter((entry) =>
@@ -837,9 +857,7 @@ function AnnotationItem({
     >
       {/* What it marks, beside what it says: decorative, as its text names it. */}
       {time && (
-        <span className="clover-annotations-time">
-          {formatTime(time.start)}
-        </span>
+        <CueTime start={time.start} className="clover-annotations-time" />
       )}
       {thumbnail && (
         <img
@@ -852,7 +870,7 @@ function AnnotationItem({
           decoding="async"
         />
       )}
-      <div className="clover-annotations-body">
+      <div className="clover-annotations-body clover-cue-text">
         {renderEntry ? (
           renderEntry(entry)
         ) : (

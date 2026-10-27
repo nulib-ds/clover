@@ -240,7 +240,7 @@ export function manifest(base = PUBLIC_BASE) {
     id: `${base}/manifest.json`,
     type: "Manifest",
     label: {
-      en: ["Rudolf Hess at Nuremberg Sentencing, 30 September–1 October 1946"],
+      en: ["Rudolf Hess at Nuremberg Sentencing"],
     },
     summary: { en: [SUMMARY] },
     navDate: "1946-09-30T00:00:00Z",

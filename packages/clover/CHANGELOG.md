@@ -12,11 +12,33 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Finding in a transcript (Mat, 2026-10-26).** `Transcript` has a field over its
+  captions that finds words as they are typed: the cues with them marked (case aside) and
+  counted, the first current, and Previous, Next or Enter going through them, each
+  seeking the recording there, as a press on a cue does, and bringing it into view.
+  Nothing moves while typing. It is drawn as Search's field and steps are (the same
+  component, `clover-field-pill`, its size and its Search button; what it found inside
+  it, "1 / 1" for one, "No results" for none). A long transcript is drawn 40
+  cues at a time, the next as the list's end nears the view or focus reaches its last
+  few, the cue playing and the match current always among them. It speaks in Search's
+  own words ("Search", "Result 2 of 7", "7 results"), so no strings are new. A new prop,
+  `find` (the element's `find` attribute), leaves the field out with `find={false}`;
+  another, `sticky`, holds the field in view as the cues scroll under it, as Search's
+  does; and `size`, as Search's. The Panel's Search and Transcript sections ask for
+  both, the field `small` there, in the templates (Mat, 2026-10-26); alone, each part's
+  field is `large`.
+
 - **A search's hits show while its section is open (Mat, 2026-10-26).** In a `Panel`
   with a Search section, the hits are drawn on the Canvas only while that section is
   open: another section opened, they go, the query and its list kept, and they come back
   with it. The Panel sets the search set's visibility as its section opens and closes,
   so `clover.setSetVisible(SEARCH_SET_ID, …)` holds only until it next does.
+
+- **Search takes focus as its section opens (Mat, 2026-10-26).** In an accordion, a
+  press that opens Search's section puts focus in its field, there to type into. A
+  section opened any other way (a search from elsewhere, a controlled `value`) leaves
+  focus where it is. `Sections` gives its content `useSectionOpened()`, a count of the
+  reader's presses that opened it.
 
 - **A search opens the Panel's Search section (Mat, 2026-10-26).** A search started
   anywhere but that section (the Root's `searchQuery`, given or changed, or
@@ -28,21 +50,18 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the section with `value` and `onValueChange` instead.
 
 - **Previous and Next through a search's results (Mat, 2026-10-26).** `Search` shows,
-  under its field, small steps through the hits, drawn as Annotations' language codes
-  are: Previous, the hit current over the total ("3 / 11", "– / 11" until one is), and
-  Next. They go in order, across Canvases, each to its hit, framing it and bringing it
-  into view in the list. Results go to their first hit as they arrive, as find in a
-  page does (the Canvas moves, never focus), so the count reads "1 / 11". With steps, the
-  count's words ("11 results") are for assistive technology alone, still announced;
-  "Loading…", "No results", "1 result" and an error show as before. Assistive technology
-  hears "Result 3 of 11" as the current hit changes, a new string,
-  `contentSearchPosition`, in every locale. Two new props, each an attribute of
-  `<clover-search>` too: `pager="heading"` puts the count and the steps beside the
-  section's heading in a Panel's accordion, held there as the hits scroll; `sticky` holds
-  the field in view as the hits scroll under it, under the accordion's headings or at the
+  inside its field before its clear, what the search found: the hit current over the
+  total ("3 / 11"; one is "1 / 1"), then Previous and Next, small, drawn as Annotations'
+  language codes are; or "No results". They go in order, across Canvases, each to its
+  hit, framing it and bringing it into view in the list. Results go to their first hit
+  as they arrive, as find in a page does (the Canvas moves, never focus), so the count
+  reads "1 / 11". The status under the field ("11 results") is for assistive technology
+  alone, still announced; "Loading…" and a failure show. Assistive technology hears
+  "Result 3 of 11" as the current hit changes, a new string, `contentSearchPosition`, in
+  every locale. A new prop, `sticky` (an attribute of `<clover-search>` too), holds the
+  field in view as the hits scroll under it, under the accordion's headings or at the
   top of the box that scrolls them (`--clover-content-search-top` to set it lower), the
-  hits fading into it as they pass under. The Panel's own Search
-  section uses both. A long answer (a common word: hundreds of hits) is drawn 40 hits at
+  hits fading into it as they pass under. The Panel's own Search section uses it. A long answer (a common word: hundreds of hits) is drawn 40 hits at
   a time, the next as the list's end nears the view or focus reaches its last few, the
   current hit always among them; each laid out and painted only near view.
 
@@ -1840,6 +1859,64 @@ controls="id">` in a `<clover-body>` is one of the Body's controls; elsewhere, a
   The API is experimental and may change in any release.
 
 ### Changed
+
+- **Size budgets raised to what the package now loads (Mat, 2026-10-26).** Fifteen
+  budgets in `build/size-budget.json`, each to its measured size and about 200 B more:
+  among them a Canvas's first load to 39.2 kB, the Default template's page to 71.0 kB,
+  the stylesheet to 15.9 kB, a `<clover-viewer>` to 114.6 kB and its own entry to
+  96.1 kB. The growth is the features added since 2026-10-25 (Search's field, finding
+  in a transcript, the catalog's search, About's head, shared times); a cleanup before
+  the 4.x release is to win some back. Nothing to do when upgrading.
+- **Annotations' hide toggle is at the end of its set's heading (Mat, 2026-10-26).** In
+  `Annotations` and in a Canvas's annotations menu, the eye now follows the page's label
+  (and any languages), at the header's end, in the DOM as on screen, so focus reaches the
+  label's heading first. Pointed at or focused, it lights every entry of its set, as one
+  is under the pointer. The menu's groups take `clover-annotations-set` too. Styles that
+  placed `.clover-hide` first in `.clover-annotations-set-header` need updating.
+- **Choosing a hidden annotation shows its page again (Mat, 2026-10-26).**
+  `clover.selectAnnotation` (and so a press in `Annotations` or in a Canvas's menu)
+  shows the set an annotation belongs to when it was hidden, the reader's or one that
+  starts hidden (a still image's OCR); Search's hits stay the Panel's. A standalone
+  `Canvas` does the same for its own pages, and tells a host that controls them through
+  `onPageVisibilityChange`.
+- **Pressing a time plays from it (Mat, 2026-10-26).** A Transcript cue, a Contents
+  Range on the recording's time and a timed annotation (in `Annotations` and in a
+  Canvas's menu or on its hotspot) now go to their time and start playing, where they
+  only went there before. One on another Canvas is gone to, unplayed, as before; a
+  recording still behind its placeholder opens there quietly; stepping through what a
+  Transcript's find found moves without playing; and a selection made in code (a
+  content state, a host's `selectAnnotation`) seeks without playing.
+- **The wheel over an accordion's headings scrolls the page (Mat, 2026-10-26).** Over a
+  `Sections` heading in an accordion, stuck at the container's foot or top, and across
+  the container's gutters beside it (`clover-sections-reach`, as wide as
+  `--clover-sections-gutter`, the Panel's gutter), the wheel scrolls what holds the
+  sections, never the open section's content. A wheel over the content scrolls it as
+  ever.
+- **Times are one piece, on their words' first line (Mat, 2026-10-26).** A Transcript
+  cue's time, an annotation's (in `Annotations` and in a Canvas's menu) and a Contents
+  Range's on the recording's time are drawn alike (`clover-cue-time`, beside the part's
+  own `clover-transcript-time`, `clover-annotations-time` or `clover-contents-time`, the
+  words beside it `clover-cue-text`; a timed Range's button is `data-timed`, its label's
+  `lang` on its text): at the smaller text
+  size (`--clover-text-s`; a cue's was the page's), muted, in even figures, on the first
+  baseline of its words. A cue's time now counts from the second it starts in, as the
+  transport and annotations do (a cue at 12.7s reads 0:12, where it read 0:13). The
+  unused `.clover-canvas-menu-time` rule is gone.
+- **The Scene's rotate disc is simply lit (Mat, 2026-10-26).** One soft light from its
+  upper left across the accent, a darker rim, a faint highlight and a cast shadow, in
+  place of the flat tones, glint and ink outline.
+
+- **The thumbnail and title are About's (Mat, 2026-10-26).** `About` opens with the
+  resource's label as a heading at its `headingLevel` (`clover-about-label`), the
+  Manifest's thumbnail floated at the end of its lines, small (a golden step under Items'
+  thumbnails' height, `--clover-items-height` × 0.618, at its own shape up to twice as
+  wide), the summary under them both (`clover-about-head`, `clover-about-thumbnail`).
+  The thumbnail is decorative beside the label, and named by it where the label is left
+  out. Two new props, `thumbnail` and `label` (the element's `thumbnail` and `label`
+  attributes), leave either out. The Default template's header no longer has a
+  thumbnail: it holds the title and the provider's logo, and
+  `.clover-template-default-thumbnail` is gone. To keep a thumbnail in a header of your
+  own, place `Clover.Thumbnail` there.
 
 - **The templates' titles are set closer (Mat, 2026-10-26).** Default's, Document's and
   Gallery's titles take a line height of 1.25 rather than the page's, as a heading's

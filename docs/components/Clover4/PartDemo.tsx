@@ -1,9 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import { type PartDemoResource, RESOURCES } from "docs/lib/part-demo-resources";
+import { MOCK_SEARCH } from "docs/lib/mock-search";
 import { useMock } from "docs/lib/useMock";
 
 /**
@@ -170,20 +171,9 @@ export function PartDemo({
   const remote = address.startsWith("https://");
   const mock = useMock(remote ? "" : address);
   const url = remote ? address : mock;
-  // The newspaper's search service is answered here, as the static site cannot read `?q=`.
-  const [request, setRequest] = useState<{ fetch: typeof fetch } | null>(null);
-  const searching = resource === "search";
-  useEffect(() => {
-    if (!searching) return;
-    let live = true;
-    import("docs/mocks/content-search/index.mjs").then(({ mockFetch }) => {
-      if (live) setRequest({ fetch: mockFetch() as typeof fetch });
-    });
-    return () => {
-      live = false;
-    };
-  }, [searching]);
-  const ready = url && (!searching || request);
+  // The mocks' searches are answered here, as the static site cannot read `?q=`.
+  const request = MOCK_SEARCH;
+  const ready = url;
   return (
     // Its own box (`layout.css`), given up inside an example's frame.
     <div className="docs-part-demo">

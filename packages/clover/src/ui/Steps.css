@@ -1,0 +1,89 @@
+/*
+ * Steps through matches (`Steps.tsx`): Search's hits, a Transcript's (Mat, 2026-10-26),
+ * small, as Annotations' language codes are: the current one's place over the total
+ * ("7 / 11"), then Previous and Next together, in `xs` text. The place keeps the room of
+ * its widest ("11 / 11"), drawn unseen in the same cell, so nothing beside it moves as it
+ * grows: its digits are all one width (`tabular-nums`).
+ */
+.clover-steps {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--clover-space-2xs);
+  font-size: var(--clover-text-xs);
+  line-height: 1;
+}
+
+.clover-steps-position {
+  display: inline-grid;
+  justify-items: end;
+  margin-inline-end: var(--clover-space-2xs);
+  color: var(--clover-color-primary-muted, #26292b);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.clover-steps-position > [aria-hidden] {
+  grid-area: 1 / 1;
+}
+
+.clover-steps-position > .clover-steps-room[hidden] {
+  display: block;
+  visibility: hidden;
+}
+
+/* `button.` for its weight against CSS resets (`ui/Button.css`, "Selectors"). */
+button.clover-steps-step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  /* 26px, past the 24 WCAG 2.5.8 asks of a target. */
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--clover-radius-pill, 2rem);
+  background: none;
+  color: var(--clover-color-primary-muted, #26292b);
+  cursor: pointer;
+}
+
+button.clover-steps-step:is(:hover, :focus-visible):not(
+    [aria-disabled="true"]
+  ) {
+  background-color: var(--clover-color-accent, #0065c3);
+  color: var(--clover-color-control-glyph, #fff);
+}
+
+button.clover-steps-step:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+}
+
+/*
+ * Nowhere to go: faded and taking no pointer, as the round steps are (`ui/Button.css`),
+ * so it never lights up or shows its tip under one. The press that reaches the end
+ * leaves keyboard focus on it: while focused it is whole again, its glyph faded. An
+ * inactive control needs no contrast (WCAG 1.4.11).
+ */
+button.clover-steps-step[aria-disabled="true"] {
+  cursor: default;
+}
+
+button.clover-steps-step[aria-disabled="true"] svg {
+  opacity: 0.5;
+}
+
+button.clover-steps-step[aria-disabled="true"]:not(:focus-visible) {
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+@media (forced-colors: active) {
+  button.clover-steps-step[aria-disabled="true"] {
+    color: GrayText;
+  }
+}

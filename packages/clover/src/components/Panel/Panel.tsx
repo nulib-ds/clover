@@ -258,9 +258,9 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
               {
                 value: "search",
                 label: tabLabel("informationPanelTabsSearch"),
-                // Its steps beside the section's heading, in an accordion (Mat, 2026-10-26).
+                // Its field small and held as the hits scroll (Mat, 2026-10-26).
                 content: later(
-                  <Search headingLevel={inner} pager="heading" sticky />,
+                  <Search headingLevel={inner} sticky size="small" />,
                 ),
               },
             ]
@@ -279,7 +279,8 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
               {
                 value: "transcript",
                 label: tabLabel("transcriptLabel"),
-                content: later(<Transcript />),
+                // Its find field small and held as the cues scroll, as Search's.
+                content: later(<Transcript sticky size="small" />),
               },
             ]
           : []),

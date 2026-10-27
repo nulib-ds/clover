@@ -76,7 +76,7 @@ describe("structureOf", () => {
       containers: { Canvas: 31, Timeline: 0, Scene: 0 },
       painting: { image: 31 },
       formats: ["image/tiff"],
-      services: ["image-3", "image-level-2"],
+      services: ["image-3", "image-level-2", "search-2"],
       annotations: { motivations: ["tagging"] },
       ranges: 20,
       behavior: ["paged"],

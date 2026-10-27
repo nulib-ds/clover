@@ -5,10 +5,7 @@ import React, {
   useState,
   useSyncExternalStore,
 } from "react";
-import { createPortal } from "react-dom";
 import { useUniqueId } from "../../ui/useUniqueId";
-
-import type { Steps } from "../Items/Pager";
 
 import { type SearchHit, searchServiceOf } from "../../core/search-service";
 import { selectSequence } from "../../core/selectors";
@@ -18,20 +15,13 @@ import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
 import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { titleTag } from "../../ui/heading";
-import { Tip } from "../../ui/Tip";
-import { useSectionActions } from "../../ui/Sections";
-import { visuallyHidden } from "../../ui/visuallyHidden";
+import { useSectionOpened } from "../../ui/Sections";
+import { FieldPill } from "../../ui/FieldPill";
+import type { StepsModel } from "../../ui/Steps";
 
 export interface SearchProps extends React.HTMLAttributes<HTMLElement> {
   /** The heading level of each Canvas's group of hits. Default 3. */
   headingLevel?: number;
-  /**
-   * Where the count, Previous, Next and the current hit's place sit: under the field
-   * (`status`, the default), or beside its section's heading in a Panel's accordion
-   * (`heading`), held there as the hits scroll under it, as a Transcript's languages
-   * are. Where there is no such heading, under the field.
-   */
-  pager?: "status" | "heading";
   /**
    * The field held in view as the hits scroll under it: at the top of the box that
    * scrolls them, or, in a Panel's accordion, under the stuck headings. Default `false`.
@@ -60,7 +50,6 @@ const CHUNK = 40;
 export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
   {
     headingLevel = 3,
-    pager: pagerAt = "status",
     sticky = false,
     size = "large",
     as: Tag = "div",
@@ -92,10 +81,14 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
    * A step brings the hit it reaches into view in the list that scrolls it (a Panel's),
    * never the page; a hit chosen from the list is in view already.
    */
-  const form = useRef<HTMLFormElement>(null);
   const field = useRef<HTMLInputElement>(null);
+  /*
+   * Its field takes focus as the reader opens its section with a press (Mat,
+   * 2026-10-26), there to type into; opened by a search from elsewhere, focus stays.
+   */
+  const opened = useSectionOpened();
+  const focused = useRef(0);
   const stepped = useRef(false);
-  const actions = useSectionActions();
   /*
    * Results that arrive go to their first hit (Mat, 2026-10-26), as find in a page does,
    * so the count reads "1 / 11" from the start and Next goes on to the second. Only the
@@ -117,17 +110,19 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
    * field`), so a hit scrolled to or focused lands clear of it (WCAG 2.4.11).
    */
   useEffect(() => {
-    const field = form.current?.parentElement;
-    const part = field?.parentElement;
-    if (!sticky || !field || !part || typeof ResizeObserver === "undefined")
+    const held = field.current?.closest<HTMLElement>(
+      ".clover-content-search-field",
+    );
+    const part = held?.parentElement;
+    if (!sticky || !held || !part || typeof ResizeObserver === "undefined")
       return;
     const observer = new ResizeObserver(() =>
       part.style.setProperty(
         "--clover-content-search-field",
-        `${field.offsetHeight}px`,
+        `${held.offsetHeight}px`,
       ),
     );
-    observer.observe(field);
+    observer.observe(held);
     return () => {
       observer.disconnect();
       part.style.removeProperty("--clover-content-search-field");
@@ -136,7 +131,7 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
   useEffect(() => {
     if (!stepped.current) return;
     stepped.current = false;
-    const current = form.current
+    const current = field.current
       ?.closest(".clover-content-search")
       ?.querySelector<HTMLElement>(
         '.clover-content-search-hit[aria-current="true"]',
@@ -178,13 +173,17 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
     observer.observe(node);
     return () => observer.disconnect();
   }, [lazy, shown, search.hits.length]);
+  useEffect(() => {
+    if (!opened || opened === focused.current || !field.current) return;
+    focused.current = opened;
+    field.current.focus();
+  }, [opened, service]);
   if (!service) return null;
 
   // The hits in order, as Items' pager steps through views (`Items/Pager.tsx`).
-  const steps: Steps = {
+  const steps: StepsModel = {
     position,
     total: search.hits.length,
-    direction: "left-to-right",
     step: (by) => {
       const to = search.hits[steps.position + by];
       if (!to) return;
@@ -220,58 +219,18 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
           : null;
   const status = statusKey ? t(statusKey, { count }) : "";
 
-  const current = steps.position + 1;
-  const pager = count > 1 && (
-    <div className="clover-content-search-pager">
-      {/*
-       * Which hit is current, read as it changes ("Result 3 of 11"): the region is there
-       * before its first count, so that one is announced too (WCAG 4.1.3).
-       */}
-      <span aria-live="polite" className="clover-content-search-position">
-        <span className="clover-pager-position">
-          {/* The total, always; the hit current before it, a dash until one is. */}
-          <span aria-hidden="true">
-            {current ? current : "–"} / {count}
-          </span>
-          {/*
-           * The widest count, unseen in the same place: it keeps the room, so nothing
-           * beside it moves as it grows (Items' `Pager.css`).
-           */}
-          <span className="clover-pager-room" aria-hidden="true" hidden>
-            {count} / {count}
-          </span>
-          {current > 0 && (
-            <span style={visuallyHidden} lang={langOf("contentSearchPosition")}>
-              {t("contentSearchPosition", { index: current, total: count })}
-            </span>
-          )}
-        </span>
-      </span>
-      <Step steps={steps} step="previous" />
-      <Step steps={steps} step="next" />
-    </div>
-  );
-  /*
-   * The count and the steps: under the field, or beside the section's heading, asked for
-   * and offered (a Panel's accordion), held there as the hits scroll under it.
-   */
+  // What the search found, shown inside the field (`FieldPill`'s `results`).
+  const results = search.status === "ready" ? steps : null;
   const bar = (
-    <div
-      className="clover-content-search-bar"
+    <p
+      className="clover-content-search-status"
+      role="status"
       data-status={search.status}
-      data-steps={count > 1 || undefined}
+      lang={statusKey ? langOf(statusKey) : undefined}
     >
-      <p
-        className="clover-content-search-status"
-        role="status"
-        lang={statusKey ? langOf(statusKey) : undefined}
-      >
-        {status}
-      </p>
-      {pager}
-    </div>
+      {status}
+    </p>
   );
-  const headed = pagerAt === "heading" && actions;
 
   return (
     <Tag
@@ -279,110 +238,35 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
       className={join("clover-content-search", className)}
       data-status={search.status}
       data-sticky={sticky || undefined}
-      data-size={size}
       {...rest}
     >
       <div className="clover-content-search-field">
-        <form
-          ref={form}
-          role="search"
-          className="clover-content-search-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void clover.search(draft);
+        <FieldPill
+          ref={field}
+          id={`${id}-query`}
+          value={draft}
+          onChange={(value) => {
+            setDraft(value);
+            // Emptying the field clears the hits.
+            if (!value && search.query) void clover.search("");
           }}
-        >
-          <label
-            htmlFor={`${id}-query`}
-            style={visuallyHidden}
-            lang={langOf("informationPanelTabsSearch")}
-          >
-            {t("informationPanelTabsSearch")}
-          </label>
-          <input
-            ref={field}
-            id={`${id}-query`}
-            type="search"
-            className="clover-content-search-query"
-            value={draft}
-            placeholder={t("contentSearchPlaceholder")}
-            lang={langOf("contentSearchPlaceholder")}
-            onChange={(event) => {
-              setDraft(event.target.value);
-              // Emptying the field clears the hits.
-              if (!event.target.value && search.query) void clover.search("");
-            }}
-          />
-          {/*
-           * Clear, while there is something to clear: the browser's own × can be neither
-           * reached by the keyboard nor styled, so it is hidden (Search.css) and this
-           * takes its place. Focus goes back to the field, for the next query (2.4.3).
-           */}
-          {draft && (
-            <button
-              type="button"
-              className="clover-content-search-clear"
-              lang={langOf("contentSearchClear")}
-              onClick={() => {
-                setDraft("");
-                if (search.query) void clover.search("");
-                field.current?.focus();
-              }}
-            >
-              <svg
-                aria-hidden="true"
-                focusable="false"
-                width="12"
-                height="12"
-                viewBox="0 0 16 16"
-              >
-                <path
-                  d="M4 4l8 8M12 4l-8 8"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <span style={visuallyHidden}>{t("contentSearchClear")}</span>
-              <Tip label={t("contentSearchClear")} />
-            </button>
-          )}
-          {/* Round, in the accent, at the pill's end, its name a `Tip`. */}
-          <button
-            type="submit"
-            className="clover-content-search-submit"
-            lang={langOf("commonSearch")}
-          >
-            <svg
-              aria-hidden="true"
-              focusable="false"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-            >
-              <circle
-                cx="7"
-                cy="7"
-                r="4.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
-              <path
-                d="M10.5 10.5L14 14"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-            <span style={visuallyHidden}>{t("commonSearch")}</span>
-            <Tip label={t("commonSearch")} />
-          </button>
-        </form>
+          onSubmit={() => void clover.search(draft)}
+          onClear={() => {
+            setDraft("");
+            if (search.query) void clover.search("");
+            field.current?.focus();
+          }}
+          results={results}
+          size={size}
+          classes={{
+            form: "clover-content-search-form",
+            query: "clover-content-search-query",
+            clear: "clover-content-search-clear",
+            submit: "clover-content-search-submit",
+          }}
+        />
       </div>
-      {headed ? createPortal(bar, actions) : bar}
+      {bar}
       {groups.map(({ canvasId, hits }, index) => {
         const canvas = canvases.find((item) => item.id === canvasId);
         const label = localize(canvas?.label as never, language);
@@ -443,50 +327,3 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
     </Tag>
   );
 });
-
-/**
- * A step through the hits, small, as Annotations' language codes are (Mat, 2026-10-26:
- * "make smaller"): a pill around a chevron, muted, the accent under the pointer or
- * focused, its name a `Tip`. At the first hit or the last it is `aria-disabled`, not
- * `disabled`, so the press that reaches the end leaves focus on it (WCAG 2.4.3).
- */
-function Step({ steps, step }: { steps: Steps; step: "previous" | "next" }) {
-  const { t, langOf } = useCloverTranslation();
-  const isNext = step === "next";
-  const available = isNext
-    ? steps.position + 1 < steps.total
-    : steps.position > 0;
-  const key = isNext ? "commonNext" : "commonPrevious";
-  return (
-    <button
-      type="button"
-      className="clover-content-search-step"
-      data-step={step}
-      lang={langOf(key)}
-      aria-disabled={!available || undefined}
-      tabIndex={available ? undefined : -1}
-      onClick={(event) => {
-        if (available) steps.step(isNext ? 1 : -1, event);
-      }}
-    >
-      <svg
-        aria-hidden="true"
-        focusable="false"
-        width="12"
-        height="12"
-        viewBox="0 0 16 16"
-      >
-        <path
-          d={isNext ? "M6 3l5 5-5 5" : "M10 3L5 8l5 5"}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <span style={visuallyHidden}>{t(key)}</span>
-      <Tip label={t(key)} />
-    </button>
-  );
-}

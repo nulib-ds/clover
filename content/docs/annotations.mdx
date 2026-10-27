@@ -44,8 +44,9 @@ import { PartHead } from "docs/components/Clover4/PartHead";
 
 Inside a `Root`, it lists every Canvas's annotations, and those of pages the Root's
 `annotations` adds, by layer (AnnotationPages that share a label) and then by Canvas; with
-none, it renders nothing. Pressing one finds it on the Canvas, and the eye before a layer
-hides the layer there. A still image's OCR (`supplementing` text on its lines or words)
+none, it renders nothing. Pressing one finds it on the Canvas, and shows its layer again if it was hidden; the
+eye at the end of a layer's heading hides the layer there, and lights the entries it
+hides while it is pointed at or focused. A still image's OCR (`supplementing` text on its lines or words)
 is neither listed nor drawn: a [search](/docs/search) finds in it and draws its hits. A
 transcription of the whole page, captions and a recording's text show as ever. In a box
 that scrolls, the Canvases in view come to its top as the

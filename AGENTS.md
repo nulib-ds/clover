@@ -255,8 +255,8 @@ deadline.
     `h3` each with one sentence, a live example and its code. Its examples are
     `ViewerExample` and `OptionsExample` (`docs/components/Clover4/ ViewerDocs.tsx`): a
     Viewer over one of the homepage's resources (`resources` in `playground-config.ts`,
-    never a Cookbook recipe; the one exception is Content Search, the newspaper mock, as
-    none of those has a search service), mounted only near the window (a browser keeps
+    never a Cookbook recipe; Content Search is the catalog's, its words read by machine
+    and searchable since 2026-10-26), mounted only near the window (a browser keeps
     only so many WebGL contexts), in a hairline frame with little room at its sides, its
     code attached under it. The page has no table of contents, so its prose, tables and
     examples have the width, to one right edge (Mat, 2026-10-23), and its sections more
@@ -511,7 +511,7 @@ deadline.
     that has it (`SHOWN_IN`). Every value shown is the resource's own: no illustrations,
     made-up figures or copy. Golden-ratio spaces, hairline edges, no gray fills.
     The tiles run (Mat, 2026-10-23): Label and Thumbnail, Body, Items, Summary, Metadata,
-    RequiredStatement, Annotations beside Contents (either alone across the row), the
+    RequiredStatement, Annotations beside Contents (either alone across the row), Search across its row after them (Mat, 2026-10-26; its Root answers the mocks' searches, `MOCK_SEARCH`), the
     Collection, then the rest. Provider (its logo and name, linked) is among the rest, after Rights (Mat, 2026-10-24). From halfway through the Collection's tile (its middle,
     measured, `--fold-at`, the fade centered there) to the end, the chips too, they fade
     out, a preview only, inert, under "More components", at the tiles' end (Mat, 2026-10-25; "Show all" before): pressed, it
@@ -526,8 +526,9 @@ deadline.
     (its name, muted), the list's chevron, and Open at its end, a round accent button with
     Items' caret (the site's round buttons agree; Mat, 2026-10-25), named "Open", for the address or content state of the reader's own, with ours listed under it,
     the list as wide as the whole select (its label, the field and Open; Mat, 2026-10-22) (`resources`
-    in `playground-config.ts`: a catalog, a print, a manuscript in Arabic (Maktaba's), a Collection, a photo, a map, a model
-    in 3D, a film, a recording…), each by its thumbnail, its own label, and a few words on one thing it has
+    in `playground-config.ts`, in this order (Mat, 2026-10-26): a catalog, the footage, a
+    Collection (the masks), a model in 3D, a manuscript in Arabic (Maktaba's), a
+    recording, a postcard, a photo, a film, a map…), each by its thumbnail, its own label, and a few words on one thing it has
     that the others do not (`description`: concise, only what the resource has). The
     list's first item, always, is "View your own" (a dashed slot with a plus, as the old
     "Your own" tile was), which empties the field for an address. Each of the reader's
@@ -1080,7 +1081,8 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   Evanston township map with a stored georeference annotation and a navPlace (static);
   `tagging`, Northwestern's record of a Curtis photogravure, kept as fetched in
   `source.json`, with the words printed on the plate tagged where they sit (Cookbook 0021) and its Caption moved from the Manifest's `metadata` to the Canvas's `summary`
-  (static). It is the playground's Print;
+  (static), the playground's Print until 2026-10-26, when a postcard of Deering Library
+  took its place (Mat);
   `navplace`, Northwestern's record of a Sullivan slide of a Chicago bus, kept as fetched,
   with a navPlace point at the corner its summary names (static), the playground's
   Photo; `paged`, Northwestern's record of the White Sewing Machine Company's 1896 bicycle
@@ -1088,8 +1090,17 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   fields and pages (it had none), its double-page plate (Page 15)
   `facing-pages`, so it stands alone and Page 16 and Page 17 share a spread, and Ranges
   for its sections (`structures`, titled only by its printed headings or the covers'
-  Canvas labels; some name a region), and each plate's "Then" and "Now" tagged (static),
-  the playground's Catalog; `hindenburg`, Northwestern's record of WLS-AM's
+  Canvas labels; some name a region), each plate's "Then" and "Now" tagged and, after
+  the word, described as a cataloger would, concisely (Mat, 2026-10-26; "Now – Postman on
+  bicycle greets woman in period style white dress on bicycle."), and its
+  words read by machine (Mat, 2026-10-26: "transcribe this item and build a iiif search
+  endpoint for it"; Apple's Vision framework, `npm run build:paged-ocr`,
+  `scripts/ocr-vision.swift`, macOS, each page read at a size its `info.json` lists and
+  no image kept, into `ocr.json`, not corrected by hand) as OCR by line and by word and
+  a Content Search 2.0 service by word or phrase (static, and live in `npm run dev` under
+  `pages/api/mocks/paged/`; the docs answer its searches in the browser,
+  `docs/lib/mock-search.ts`), the playground's Catalog. Its OCR and search, and the
+  newspaper's, are one engine, `docs/mocks/ocr-search.mjs`; `hindenburg`, Northwestern's record of WLS-AM's
   Hindenburg broadcast, kept as fetched, its Canvas of sound given an
   `accompanyingCanvas` painting the reel's box (the record's "enclosure back", its label; Mat,
   2026-10-24), English captions transcribed by speech recognition and corrected by hand
@@ -1108,8 +1119,7 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   kept, with a Contributor metadata line from the record and Ireland tagged (static);
   `rudolf-hess-nuremberg`, the National Archives' reel of the Nuremberg judgment on
   Commons, made to show Rudolf Hess's distress beside the other defendants (Mat,
-  2026-10-19), labeled "Rudolf Hess at Nuremberg Sentencing, 30 September–1 October
-  1946": a "Rudolf Hess" page of three tracked annotations (`xywh=…&t=…`, `tracks.json`)
+  2026-10-19), labeled "Rudolf Hess at Nuremberg Sentencing" (no dates; Mat, 2026-10-26): a "Rudolf Hess" page of three tracked annotations (`xywh=…&t=…`, `tracks.json`)
   and an "Other Defendants" page, English captions from the trial's record
   (`captions.json`, the Russian and French interpretation in the record's English), the
   same words as a plain-text transcript (the Canvas's `rendering`), and chapters titled

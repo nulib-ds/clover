@@ -1,0 +1,230 @@
+/*
+ * A field to search or to find in, as one pill (`FieldPill.tsx`): Search's and the
+ * Transcript's (Mat, 2026-10-26), drawn alike.
+ *
+ * The pill: the fields' edge (`--clover-field-edge`, `styles/scale.css`, 3:1) around the
+ * query and the submit, which sits `3xs` inside it at its end, so its curve follows the
+ * pill's at any `--clover-radius-pill` (the round controls' corner). The ring goes
+ * around all of it while the query has keyboard focus; the submit draws its own.
+ */
+.clover-field-pill {
+  display: flex;
+  align-items: center;
+  gap: var(--clover-space-2xs);
+  box-sizing: border-box;
+  padding: var(--clover-space-3xs);
+  padding-inline-start: var(--clover-space-s);
+  border: 1px solid
+    var(
+      --clover-field-edge,
+      color-mix(
+        in srgb,
+        var(--clover-color-primary-muted, #26292b) 80%,
+        var(--clover-color-secondary, #fff)
+      )
+    );
+  /* The submit's corner and what lies around it, so the two nest at any radius. */
+  border-radius: calc(
+    var(--clover-radius-pill, 2rem) + var(--clover-space-3xs) + 1px
+  );
+  background-color: var(--clover-color-secondary, #fff);
+  /*
+   * A soft lift, gray and small (never the accent), so the pill sits a little above
+   * what it holds still over; its edge, not the lift, is what keeps it 3:1.
+   */
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 2px 8px rgb(0 0 0 / 0.06);
+  transition: box-shadow 160ms;
+}
+
+.clover-field-pill:hover {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.06),
+    0 4px 14px rgb(0 0 0 / 0.08);
+}
+
+.clover-field-pill:has(.clover-field-pill-query:focus-visible) {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 1px;
+}
+
+/* The query, in the pill: no edge or ring of its own (the pill's are its). */
+.clover-field-pill .clover-field-pill-query {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--clover-space-2xs) 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  outline: none;
+}
+
+/* The browser's own clear is hidden: Clear (below) takes its place, reachable and named. */
+.clover-field-pill-query::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+/*
+ * Clear: round, `l` (past the 24px a target needs, WCAG 2.5.8), beside the submit, its
+ * cross in the muted text (4.5:1, so 3:1 and more for a control's glyph, 1.4.11). Under
+ * the pointer or focused, a faint tint of the accent behind it and the cross in the
+ * text's color; pressed, the tint a little stronger.
+ */
+button.clover-field-pill-clear {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--clover-radius-pill, 2rem);
+  background-color: transparent;
+  color: var(--clover-color-primary-muted, #26292b);
+  cursor: pointer;
+  transition:
+    background-color 120ms,
+    color 120ms;
+}
+
+button.clover-field-pill-clear:is(:hover, :focus-visible) {
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 12%,
+    transparent
+  );
+  color: var(--clover-color-primary, #1a1d1e);
+}
+
+button.clover-field-pill-clear:active {
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 22%,
+    transparent
+  );
+}
+
+button.clover-field-pill-clear:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 1px;
+}
+
+@media (forced-colors: active) {
+  button.clover-field-pill-clear:is(:hover, :focus-visible) {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}
+
+/* Where `:has()` is not read, the query keeps its own ring (`styles/scale.css`). */
+@supports not selector(:has(*)) {
+  .clover-field-pill .clover-field-pill-query:focus-visible {
+    outline: 2px solid var(--clover-color-accent, #0065c3);
+  }
+}
+
+/*
+ * The submit: round, the accent's fill and the round controls' glyph color (4.5:1 from
+ * it in either mode), at a round control's size (`--clover-control`); `size="small"`, a
+ * tad smaller (Mat, 2026-10-26): `l`, past the 24px a target needs (WCAG 2.5.8), its
+ * glyph smaller too. The query keeps the page's `1rem` in both, which a phone does not
+ * zoom into as it takes focus. Pointed at or focused, a step darker and its glyph a
+ * little larger.
+ */
+button.clover-field-pill-submit {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--clover-control);
+  height: var(--clover-control);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  /* The round controls' corner (`ui/Button.css`), one variable for all of them. */
+  border-radius: var(--clover-radius-pill, 2rem);
+  background-color: var(--clover-color-accent, #0065c3);
+  color: var(--clover-color-control-glyph, #fff);
+  cursor: pointer;
+  transition: background-color 120ms;
+}
+
+button.clover-field-pill-submit svg {
+  width: 1rem;
+  height: 1rem;
+  transition: scale 120ms;
+}
+
+/* `size="small"`: the submit `l`, its glyph and the query's room less. */
+.clover-field-pill[data-size="small"] button.clover-field-pill-submit {
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+}
+
+.clover-field-pill[data-size="small"] button.clover-field-pill-submit svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.clover-field-pill[data-size="small"] .clover-field-pill-query {
+  padding-block: 0;
+}
+
+button.clover-field-pill-submit:is(:hover, :focus-visible) {
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 85%,
+    var(--clover-color-primary, #1a1d1e)
+  );
+}
+
+button.clover-field-pill-submit:is(:hover, :focus-visible) svg {
+  scale: 1.1;
+}
+
+button.clover-field-pill-submit:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  button.clover-field-pill-submit {
+    border: 1px solid ButtonText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-field-pill,
+  button.clover-field-pill-clear,
+  button.clover-field-pill-submit,
+  button.clover-field-pill-submit svg {
+    transition: none;
+  }
+}
+
+/*
+ * What the query found, inside the pill before Clear: the steps (`ui/Steps.css`), or a
+ * note ("No results"), in the steps' `xs` text and the muted text's color, never
+ * wrapping. Room `2xs` from Clear.
+ */
+.clover-field-pill > .clover-steps,
+.clover-field-pill-note {
+  flex: none;
+  margin-inline-end: var(--clover-space-2xs);
+}
+
+.clover-field-pill-note {
+  color: var(--clover-color-primary-muted, #26292b);
+  font-size: var(--clover-text-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}

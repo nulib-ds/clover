@@ -1,0 +1,21 @@
+{
+  "@context": "http://iiif.io/api/search/2/context.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/zzzz.json",
+  "type": "AnnotationPage",
+  "partOf": {
+    "id": "https://nulib-ds.github.io/clover/mocks/paged/search?q=zzzz",
+    "type": "AnnotationCollection",
+    "total": 0,
+    "first": {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/zzzz.json",
+      "type": "AnnotationPage"
+    },
+    "last": {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/zzzz.json",
+      "type": "AnnotationPage"
+    }
+  },
+  "startIndex": 0,
+  "items": [],
+  "annotations": []
+}

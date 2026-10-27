@@ -9,6 +9,7 @@ import { type LayoutNode, isViewer } from "docs/lib/compose/layout";
 import { partsOf } from "docs/lib/compose/preview";
 import { EXAMPLE, example } from "docs/lib/example";
 import { loadMapWorker } from "docs/lib/map-worker";
+import { MOCK_SEARCH } from "docs/lib/mock-search";
 import { RESOURCES } from "docs/lib/part-demo-resources";
 import { useMock } from "docs/lib/useMock";
 import { type Shown, closePreview } from "docs/lib/webmcp/preview-store";
@@ -35,10 +36,9 @@ const noChange = () => {};
 
 /** The package, and what the layout needs besides: a template, the Map and its worker. */
 function useLoaded(shown: Shown) {
-  const { layout, sample } = shown.plan;
+  const { layout } = shown.plan;
   const viewer = isViewer(layout);
   const mapped = !viewer && partsOf(layout.parts).includes("Map");
-  const searching = sample === "search";
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   useEffect(() => {
     let live = true;
@@ -48,23 +48,20 @@ function useLoaded(shown: Shown) {
       mapped
         ? loadMapWorker().then(() => import("@nulib/clover/map"))
         : undefined,
-      // The newspaper's search service, answered here: the static site cannot read `?q=`.
-      searching ? import("docs/mocks/content-search/index.mjs") : undefined,
-    ]).then(([clover, templates, map, search]) => {
+    ]).then(([clover, templates, map]) => {
       if (!live) return;
       setLoaded({
         clover: clover as unknown as Record<string, unknown>,
         templates: templates as unknown as Record<string, unknown> | undefined,
         Map: map?.Map as unknown as Component | undefined,
-        request: search
-          ? { fetch: search.mockFetch() as typeof fetch }
-          : undefined,
+        // The mocks' searches, answered here: the static site cannot read `?q=`.
+        request: MOCK_SEARCH,
       });
     });
     return () => {
       live = false;
     };
-  }, [viewer, mapped, searching]);
+  }, [viewer, mapped]);
   return loaded;
 }
 

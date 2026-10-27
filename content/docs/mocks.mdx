@@ -272,17 +272,34 @@ Manifest of 31 Canvases (its covers and 29 pages), with:
   the Back Cover), the two tagged where they are, as
   [Cookbook recipe 0021](https://iiif.io/api/cookbook/recipe/0021-tagging/) tags a
   fountain: "Then" around the inset scene and the word printed by it, "Now" around most of
-  the picture, clear of its edges (on the Back Cover, the round scene below). Page 15
-  prints "Now" with no "Then", so it has none;
+  the picture, clear of its edges (on the Back Cover, the round scene below), each after
+  the printed word described briefly, as a cataloger would ("Now – Postman on bicycle
+  greets woman in period style white dress on bicycle."). Page 15 prints "Now" with no
+  "Then", so it has none;
+- its words, read by machine with Apple's Vision framework and not corrected by hand
+  (`docs/mocks/paged/ocr.json`): each page's OCR by line and by word, `supplementing`
+  text on the region each was read from, with a `textGranularity`, the lines referenced
+  from each Canvas that has words ("OCR (lines)"). Running text reads well; ornamental
+  lettering (the covers' script, a plate's signature) and some fractions do not;
+- a IIIF Content Search 2.0 service (`SearchService2`), searchable by word or phrase, as
+  the newspaper's is: each hit a `highlighting` annotation on its words' box, with the
+  words around it, 25 to a page of results;
 - everything else as Northwestern's Digital Collections API published it on 14 October
   2026, apart from the ids of the Manifest and its Canvases, which are the mock's own;
 - the images from Northwestern's IIIF Image API (level 2, CORS open).
 
-| Resource | Published (static)                                                                          |
-| -------- | ------------------------------------------------------------------------------------------- |
-| Manifest | [`/mocks/paged/manifest.json`](https://nulib-ds.github.io/clover/mocks/paged/manifest.json) |
+| Resource       | Published (static)                                                                                                                                                                                                                                                               | Live (`npm run dev`)                     |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Manifest       | [`/mocks/paged/manifest.json`](https://nulib-ds.github.io/clover/mocks/paged/manifest.json)                                                                                                                                                                                      | `/api/mocks/paged/manifest.json`         |
+| A page's lines | [`/mocks/paged/ocr/7-lines.json`](https://nulib-ds.github.io/clover/mocks/paged/ocr/7-lines.json) (its Canvas's place)                                                                                                                                                           | `/api/mocks/paged/ocr/7-lines.json`      |
+| A page's words | [`/mocks/paged/ocr/7-words.json`](https://nulib-ds.github.io/clover/mocks/paged/ocr/7-words.json)                                                                                                                                                                                | `/api/mocks/paged/ocr/7-words.json`      |
+| Search         | Example answers: [`steel`](https://nulib-ds.github.io/clover/mocks/paged/search/examples/steel.json), [`model d`](https://nulib-ds.github.io/clover/mocks/paged/search/examples/model-d.json), [`zzzz`](https://nulib-ds.github.io/clover/mocks/paged/search/examples/zzzz.json) | `/api/mocks/paged/search?q=steel&page=2` |
 
-It answers no query, so it is static only. The homepage's playground shows it as Catalog.
+The published copy cannot read a query, so the docs answer the search in the browser
+(`docs/lib/mock-search.ts`), and `npm run dev` answers any query live. The homepage's
+playground shows it as Catalog. To read its words again, run `npm run build:paged-ocr`
+(macOS: `scripts/ocr-vision.swift`), which reads each page at a size its `info.json` lists
+and keeps no image, then `npm run build:mocks`.
 Its generator is `docs/mocks/paged/index.mjs`, and the record as fetched is
 `docs/mocks/paged/source.json`: to bring the record up to date, fetch
 `https://api.dc.library.northwestern.edu/api/v2/works/386ff30f-1975-4d9c-9905-ec76381d6992?as=iiif`
@@ -337,8 +354,7 @@ Baldur von Schirach and Fritz Sauckel in the row behind. Commons is not a
 IIIF publisher, so the Manifest is the mock's own, made from the file's Commons record
 (read on October 19, 2026):
 
-- **The Manifest** (Presentation 3) is labeled "Rudolf Hess at Nuremberg Sentencing, 30
-  September–1 October 1946", and its summary says what it shows of him. Its
+- **The Manifest** (Presentation 3) is labeled "Rudolf Hess at Nuremberg Sentencing" (its dates are in its metadata), and its summary says what it shows of him. Its
   metadata are the record's: the National Archives' title (the reel's, which the Canvas
   keeps as its label) and description among them. Its rights are the public domain, the
   film being the US Army Signal Corps'. Its homepages are the Commons page and the

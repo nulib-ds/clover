@@ -37,11 +37,19 @@ describe("Contents", () => {
       </Clover.Root>,
     );
     const nav = await screen.findByRole("navigation", { name: "Contents" });
+    // On the recording's time, each leads with it, its label carrying the language.
+    const first = within(nav).getByRole("button", {
+      name: /^0:\d\d Atto Primo$/,
+    });
+    expect(first.querySelector(".clover-cue-time")).toBeInTheDocument();
+    expect(first.querySelector(".clover-cue-text")).toHaveAttribute(
+      "lang",
+      "it",
+    );
     expect(
-      within(nav).getByRole("button", { name: "Atto Primo" }),
-    ).toHaveAttribute("lang", "it");
-    expect(
-      within(nav).getByRole("button", { name: "Remainder of Atto Primo" }),
+      within(nav)
+        .getByRole("button", { name: /Remainder of Atto Primo$/ })
+        .querySelector(".clover-cue-text"),
     ).toHaveAttribute("lang", "en");
   });
 
@@ -62,7 +70,9 @@ describe("Contents", () => {
       </Clover.Root>,
     );
     const nav = await screen.findByRole("navigation", { name: "Contents" });
-    const act1 = within(nav).getByRole("button", { name: "Atto Primo" });
+    const act1 = within(nav).getByRole("button", {
+      name: /^\d+:\d\d Atto Primo$/,
+    });
     fireEvent.mouseEnter(act1);
     const id = clover.chapter.get();
     expect(id).toEqual(expect.stringContaining("http"));

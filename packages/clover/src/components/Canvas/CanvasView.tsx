@@ -49,6 +49,7 @@ import { SHORTCUTS, forwardShortcut } from "../../ui/Tip";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { join } from "../../lib/classnames";
+import { playFrom } from "../../lib/time";
 import { isRegionText, parseAnnotationTarget } from "../../core/annotations";
 import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
@@ -749,7 +750,15 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
   const hotspotsRef = useRef(hotspots);
   hotspotsRef.current = hotspots;
   const sought = useRef<string | null>(null);
+  // Read as it is chosen, so `selectAnnotation` stays stable.
+  const hiddenPagesRef = useRef(hiddenPages);
+  hiddenPagesRef.current = hiddenPages;
+  const setPagesVisibleRef = useRef(setPagesVisible);
+  setPagesVisibleRef.current = setPagesVisible;
   const selectAnnotation = useCallback((annotation: ListedAnnotation) => {
+    // One of a hidden page, chosen from the menu, shows its page again, as in a Root.
+    if (annotation.pageId && hiddenPagesRef.current.includes(annotation.pageId))
+      setPagesVisibleRef.current([annotation.pageId], true);
     setOwnSelected(annotation.id);
     onAnnotationActiveRef.current?.(annotation.id);
     onAnnotationSelectRef.current?.(annotation.id);
@@ -758,7 +767,8 @@ const CanvasBody: React.FC<CloverCanvasProps> = ({
       const element = mediaElementRef.current;
       if (!element) return;
       sought.current = annotation.id;
-      element.currentTime = annotation.start;
+      // Pressed in the menu or on its hotspot: from its time, playing.
+      playFrom(element, annotation.start);
       return;
     }
     framed.current = annotation.id;

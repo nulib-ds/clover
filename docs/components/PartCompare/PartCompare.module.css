@@ -8,6 +8,17 @@
   font-weight: 700;
 }
 
+/* Each comparison, stacked, `2xl` apart. */
+.pair + .pair {
+  margin-top: 4.236rem;
+}
+
+.subtitle {
+  margin: 0 0 1rem;
+  font-size: 1.236rem;
+  font-weight: 700;
+}
+
 .row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 32rem), 1fr));

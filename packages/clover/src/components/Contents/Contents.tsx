@@ -13,6 +13,8 @@ import {
 import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
+import { playFrom } from "../../lib/time";
+import { CueTime } from "../../ui/Cue";
 import { useClover, useCloverSelector } from "../../react/context";
 import { useContainerName } from "../../ui/useContainerName";
 
@@ -54,9 +56,10 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
 
     const choose = (node: ContentsNode) => {
       if (!node.canvasId) return;
-      // On the Canvas playing: seek there. Elsewhere: go, arriving at the moment or region.
+      // On the Canvas playing: play from there (`playFrom`). Elsewhere: go, arriving at
+      // the moment or region.
       if (node.canvasId === canvasId && node.time && element) {
-        element.currentTime = node.time.start;
+        playFrom(element, node.time.start);
         return;
       }
       clover.goTo(node.canvasId, {
@@ -81,10 +84,27 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
                 onMouseLeave={() => clover.chapter.emit(null)}
                 onFocus={() => clover.chapter.emit(node.id)}
                 onBlur={() => clover.chapter.emit(null)}
-                lang={label.text ? label.lang : undefined}
+                // A Range on a recording's time leads with it, as a cue does (`CueTime`).
+                data-timed={node.time ? "true" : undefined}
+                lang={label.text && !node.time ? label.lang : undefined}
                 onClick={() => choose(node)}
               >
-                {label.text || node.id}
+                {node.time ? (
+                  <>
+                    <CueTime
+                      start={node.time.start}
+                      className="clover-contents-time"
+                    />
+                    <span
+                      className="clover-cue-text"
+                      lang={label.text ? label.lang : undefined}
+                    >
+                      {label.text || node.id}
+                    </span>
+                  </>
+                ) : (
+                  label.text || node.id
+                )}
               </button>
               {node.children.length > 0 && render(node.children)}
             </li>

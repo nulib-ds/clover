@@ -63,13 +63,17 @@ function mount(
 
 /** Wait for the Viewer to draw its title. */
 const drawn = (element: HTMLElement) =>
-  within(element).findByRole("heading", { name: "Simple Manifest - Book" });
+  within(element).findByRole("heading", {
+    level: 2,
+    name: "Simple Manifest - Book",
+  });
 
 describe("<clover-viewer>", () => {
   it("renders the Viewer in its light DOM, from a IIIF object set as a property", async () => {
     const element = mount();
     expect(
       await within(element).findByRole("heading", {
+        level: 2,
         name: "Simple Manifest - Book",
       }),
     ).toBeInTheDocument();
@@ -192,7 +196,10 @@ describe("<clover-viewer>", () => {
     );
     const element = mount({ "manifest-id": LETTER }, shelf);
     expect(
-      await within(element).findByRole("heading", { name: "A letter" }),
+      await within(element).findByRole("heading", {
+        level: 2,
+        name: "A letter",
+      }),
     ).toBeInTheDocument();
     vi.unstubAllGlobals();
   });
@@ -237,6 +244,7 @@ describe("<clover-viewer>", () => {
     await within(element).findByRole("button", { name: "Next" });
     expect(
       within(element).queryByRole("heading", {
+        level: 2,
         name: "Simple Manifest - Book",
       }),
     ).toBeNull();
@@ -304,7 +312,10 @@ describe("<clover-viewer>", () => {
     other.append(element); // a move: disconnected, then connected again at once
     await Promise.resolve();
     expect(
-      within(element).getByRole("heading", { name: "Simple Manifest - Book" }),
+      within(element).getByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      }),
     ).toBeInTheDocument();
     element.remove();
     await Promise.resolve();

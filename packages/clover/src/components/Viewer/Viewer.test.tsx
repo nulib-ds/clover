@@ -16,7 +16,10 @@ describe("Viewer", () => {
   it("draws the Default template when given none", async () => {
     const { container } = render(<Viewer iiifContent={bookJson} />);
     expect(
-      await screen.findByRole("heading", { name: "Simple Manifest - Book" }),
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "Simple Manifest - Book",
+      }),
     ).toBeInTheDocument();
     expect(container.firstElementChild).toHaveClass("clover-template-default");
   });

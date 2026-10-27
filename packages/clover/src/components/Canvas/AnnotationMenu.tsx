@@ -2,7 +2,7 @@ import React from "react";
 
 import { type ListedAnnotation, startOf } from "./Annotations";
 import ControlMenu from "./ControlMenu";
-import { formatTime } from "./media/useMediaController";
+import { CueTime } from "../../ui/Cue";
 import { HideToggle } from "../../ui/HideToggle";
 import { useContainerName } from "../../ui/useContainerName";
 
@@ -94,12 +94,11 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
           <fieldset
             // Named by its page's label alone: its legend holds the toggle too.
             {...(group.page ? { "aria-labelledby": labelId } : name.props)}
-            className="clover-canvas-menu-group"
+            className="clover-canvas-menu-group clover-annotations-set"
             key={g}
           >
             {group.page ? (
               <legend className="clover-canvas-menu-legend clover-annotations-set-header">
-                {toggle}
                 <span
                   className="clover-annotations-title"
                   id={labelId}
@@ -107,6 +106,7 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
                 >
                   {group.page.text}
                 </span>
+                {toggle}
               </legend>
             ) : (
               toggle && (
@@ -137,12 +137,13 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
                       onBlur={() => onActivate(null)}
                     />
                     {start !== undefined && (
-                      <span className="clover-annotations-time">
-                        {formatTime(start)}
-                      </span>
+                      <CueTime
+                        start={start}
+                        className="clover-annotations-time"
+                      />
                     )}
                     <span
-                      className="clover-annotations-body"
+                      className="clover-annotations-body clover-cue-text"
                       lang={annotation.label ? annotation.lang : undefined}
                     >
                       {annotation.label ?? String(index + 1)}

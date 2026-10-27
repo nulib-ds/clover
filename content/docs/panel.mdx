@@ -86,15 +86,17 @@ Canvas's controls.
 
 ### About
 
-The panel's first section, and a part of its own: the resource's summary, metadata,
-required statement, rights, homepage, see also, downloads and address. For a Canvas shown
+The panel's first section, and a part of its own: the resource's label and thumbnail, summary,
+metadata, required statement, rights, homepage, see also, downloads and address. For a Canvas shown
 on its own, it starts with the Manifest the Canvas is part of.
 
 | Prop            | Type      | Default | Description                                                 |
 | --------------- | --------- | ------- | ----------------------------------------------------------- |
 | `canvasSummary` | `boolean` | `false` | The current Canvas's summary too, before the resource's.    |
 | `download`      | `boolean` | `true`  | The downloads, Download's links, in a section of their own. |
-| `headingLevel`  | `number`  | `3`     | Its titles: Rights, Homepage and the rest.                  |
+| `headingLevel`  | `number`  | `3`     | Its titles: the label, Rights, Homepage and the rest.       |
+| `label`         | `boolean` | `true`  | The resource's label first, as a heading.                   |
+| `thumbnail`     | `boolean` | `true`  | The resource's thumbnail, small, beside the label.          |
 | `className`     | `string`  | —       | Added to `clover-about`.                                    |
 
 </ApiReference>
@@ -106,7 +108,8 @@ on its own, it starts with the Manifest the Canvas is part of.
 With no `Tab`s, it shows [About](#about), then each section the resource has data for:
 [Collection](/docs/collection), [Contents](/docs/contents), [Search](/docs/search),
 [Map](/docs/map), [Transcript](/docs/transcript) and [Annotations](/docs/annotations).
-This newspaper has a Content Search service, and its OCR as annotations.
+This newspaper has a Content Search service, and its OCR as annotations, which a search
+finds in.
 
 <Example>
 <PartDemo

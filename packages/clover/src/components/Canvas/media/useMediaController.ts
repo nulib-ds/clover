@@ -123,11 +123,5 @@ export function useMediaController(
   return { ...state, play, pause, toggle, seek, skip, setVolume, toggleMute };
 }
 
-/** `m:ss`, or `h:mm:ss` past an hour. */
-export function formatTime(seconds: number): string {
-  const total = Math.max(0, Math.floor(seconds || 0));
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = String(total % 60).padStart(2, "0");
-  return h ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
-}
+// Where it is, as a player counts it, written as every time in Clover is.
+export { formatTime } from "../../../lib/time";

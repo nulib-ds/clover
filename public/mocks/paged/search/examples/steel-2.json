@@ -1,0 +1,592 @@
+{
+  "@context": "http://iiif.io/api/search/2/context.json",
+  "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/steel-2.json",
+  "type": "AnnotationPage",
+  "partOf": {
+    "id": "https://nulib-ds.github.io/clover/mocks/paged/search?q=steel",
+    "type": "AnnotationCollection",
+    "total": 39,
+    "first": {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/steel.json",
+      "type": "AnnotationPage"
+    },
+    "last": {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/steel-2.json",
+      "type": "AnnotationPage"
+    }
+  },
+  "startIndex": 25,
+  "prev": {
+    "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/steel.json",
+    "type": "AnnotationPage"
+  },
+  "items": [
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/13-w222",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2543,2644,205,83"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/13-w251",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3900,3071,187,90"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w15",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1508,1110,202,90"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w41",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1165,1550,202,90"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w48",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=766,1792,236,90"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w73",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1772,2378,215,82"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w155",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3068,1005,226,92"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w170",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3525,1226,180,90"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w198",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3700,1902,195,82"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w228",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2739,2618,220,98"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w260",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2555,3143,174,83"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/17-w33",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2954,994,275,110"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/18-w145",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1408,2800,252,103"
+        }
+      }
+    },
+    {
+      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/18-w223",
+      "type": "Annotation",
+      "motivation": "highlighting",
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2158,3950,218,105"
+        }
+      }
+    }
+  ],
+  "annotations": [
+    {
+      "type": "AnnotationPage",
+      "items": [
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/13-w222/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/13-w222",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "Bearings. Made of best selected high-grade ",
+                "exact": "steel,",
+                "suffix": " carefully tempered and dust proof. We"
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/13-w251/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/13-w251",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "Hubs. Large tubular hubs, from seamless ",
+                "exact": "steel",
+                "suffix": " tubing. Furnishings. Tool bag, wrench, oiler,"
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w15/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w15",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "pattern; 1¼ inch cold drawn seamless ",
+                "exact": "steel",
+                "suffix": " tubing, I8 inch top bar, height"
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w41/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w41",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "rear upright forks. Frame Parts. All ",
+                "exact": "steel",
+                "suffix": " connections, strongly reinforced where necessary. Forks."
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w48/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w48",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "connections, strongly reinforced where necessary. Forks. ",
+                "exact": "Steel",
+                "suffix": " fork sides, gracefully curved and mechanically"
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w73/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w73",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "diameter. Handle Bar. Cold drawn weldless ",
+                "exact": "steel",
+                "suffix": " tube, 18 inches diameter. Stationary in"
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w155/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w155",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "proof centers and bearings. Cranks. Special ",
+                "exact": "steel,",
+                "suffix": " round and tapered, with throw 6"
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w170/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w170",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "Chain. ¼ inch solid link with ",
+                "exact": "steel",
+                "suffix": " centers. Saddle. Black, very handsome in"
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w198/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w198",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "5 inches. Sprocket Wheels. Front detachable, ",
+                "exact": "steel",
+                "suffix": " drop forgings. Front sprocket overhangs crank"
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w228/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w228",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "Made of best selected high-grade tool ",
+                "exact": "steel,",
+                "suffix": " carefully tempered and dust proof. We"
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w260/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w260",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "Hubs. Large tubular hubs, from seamless ",
+                "exact": "steel",
+                "suffix": " tubing. Furnishings. Tool bag, wrench, oiler,"
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/17-w33/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/17-w33",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "are made of special high-grade tool ",
+                "exact": "steel,",
+                "suffix": " turned from a solid bar, hardened"
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/18-w145/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/18-w145",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "machined from the solid bar of ",
+                "exact": "steel.",
+                "suffix": " The flanges have a beaded edge"
+              }
+            ]
+          }
+        },
+        {
+          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/18-w223/context",
+          "type": "Annotation",
+          "motivation": "contextualizing",
+          "target": {
+            "type": "SpecificResource",
+            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/18-w223",
+            "selector": [
+              {
+                "type": "TextQuoteSelector",
+                "prefix": "all turned from the solid tool ",
+                "exact": "steel",
+                "suffix": " and hardened. The rear hub is"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

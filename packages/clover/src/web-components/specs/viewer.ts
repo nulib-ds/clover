@@ -83,7 +83,7 @@ export const viewerDocs: ElementDocs = {
     },
     header: {
       description:
-        'Default: "false" leaves out the thumbnail and title over the Body.',
+        'Default: "false" leaves out the title and provider over the Body.',
       default: "true",
     },
     panel: {

@@ -43,20 +43,6 @@
   padding: var(--clover-inset);
 }
 
-/*
- * The Manifest's thumbnail at the start of the title's line: `xl` high, at its own shape
- * up to 5rem wide; a wider one (a panorama) is held to 5rem and cropped to fill.
- */
-.clover-template-default-thumbnail {
-  flex: none;
-  width: auto;
-  max-width: 5rem;
-  height: var(--clover-space-xl);
-  object-fit: cover;
-  border-radius: var(--clover-radius, 3px);
-  background-color: var(--clover-color-secondary-muted, #e6e8eb);
-}
-
 .clover-template-default-title {
   margin: 0;
   font-size: var(--clover-text-l);

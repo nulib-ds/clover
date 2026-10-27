@@ -561,12 +561,18 @@ every rule below.
   - Hiding a set hides only what the Canvas draws (Mat, 2026-10-20). `Connected` hands
     the Canvas every set's annotations with `pageId`, and the store's `hiddenSets` as
     `hiddenPages`; `CanvasView` filters what it draws and keeps the menu's list whole,
-    each page after its `HideToggle` (`ui/HideToggle.tsx`: an eye, a checkbox checked
+    each page's label before its `HideToggle` (`ui/HideToggle.tsx`: an eye, a checkbox checked
     while hidden, its Tip "Hide", its name "Hide" and the page's label through
     `aria-labelledby`), as the panel's set headers have it. A menu group with a legend is
     named by `aria-labelledby` on its label alone: from its legend's content its name
-    would take in the toggle's. A pick of a hidden page's annotation still frames it or
-    goes to it. `ControlMenu` focuses a checked radio on opening, never the checked eye.
+    would take in the toggle's. A pick of a hidden page's annotation frames it or goes to
+    it, and shows its page again (Mat, 2026-10-26: the store's `selectAnnotation`, and a
+    standalone Canvas's own `selectAnnotation` for its own pages). The eye is at the
+    header's end, after the label and any languages, in the DOM too, so focus follows
+    what is seen ("place hide annotation button on right side"); pointed at or focused,
+    every entry of its set takes the rows' hover fill (`Annotations.css`, the list's sets
+    and the menu's fieldsets both `.clover-annotations-set`). `ControlMenu` focuses a
+    checked radio on opening, never the checked eye.
 - **Hotspot look.** Active (picked, hovered, focused), a rectangle keeps its edges and
   covers nothing it marks; the picture around it dims (`0 0 38vw 38vw #0002`, lighter than
   3.x's `#0003`). The 18% accent tint inside it, and inside a shape, was dropped at
@@ -800,16 +806,18 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `clover-search*` classes are 3.x's, so the part's are `clover-content-search*`. The
   client (`core/search.ts`) loads with the first search (`clover.search`), and the
   panel's Search section when first opened. Previous and Next step through the hits in
-  order, across Canvases, beside the count (Mat, 2026-10-26), with the current one's
+  order, across Canvases, inside the field before its clear (Mat, 2026-10-26: "place the
+  results and next/prev controls inside search … 1 should just be 1 / 1"; the
+  Transcript's find the same, through `FieldPill`'s `found`), with the current one's
   place ("2 / 11", read "Result 2 of 11" in a live region), small, as Annotations'
-  language codes are (Mat: "make smaller"): Search's own `Step` pills around Items'
-  pager's `PositionText` (`Items/Pager.tsx`), given the hits as `Steps`. `pager="heading"`
-  goes to the first hit as results arrive (Mat, 2026-10-26: as find in a page does, the
-  Canvas moving and never focus, once per answer, a hit already chosen kept), and
-  portals the count and them beside the section's heading in an accordion
-  (`useSectionActions`, as Transcript's languages are). The total always shows ("– /
-  11" until a hit is current), so with steps the count's words are visually hidden,
-  still announced. `sticky` holds the field in view (under the accordion's stuck
+  language codes are (Mat: "make smaller"): `ui/Steps.tsx` (its own sheet,
+  `ui/Steps.css`), given the hits as a `StepsModel`; the field is `ui/FieldPill.tsx`
+  (`ui/FieldPill.css`), Search's and the Transcript's alike. Search goes to the first
+  hit as results arrive (Mat, 2026-10-26: as find in a page does, the Canvas moving and
+  never focus, once per answer, a hit already chosen kept). None found is "No results"
+  in the pill. The status under the field is for assistive technology alone, but while
+  loading or failed. (`pager="heading"`, the count beside the section's heading, was
+  tried and taken out the same day.) `sticky` holds the field in view (under the accordion's stuck
   headings, else `--clover-content-search-top`), its height measured
   (`--clover-content-search-field`) so hits land clear of it and of the fade (2.4.11),
   `xs` of the panel's color around it and the hits fading into it as they pass under,
@@ -833,7 +841,54 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `defaultValue`: the Panel holds its open section itself unless `value` is given, and
   moves it to `search` when the store's query changes to one it has not seen. Never
   focus, never a shut Panel (one that mounts after the query opens on Search), never a
-  controlled `value`.
+  controlled `value`. A press that opens it puts focus in its field (Mat: "search should
+  focus when section is expanded"): `useSectionOpened()` (`ui/Sections.tsx`) counts the
+  reader's presses that opened a section, in an accordion only (arrowing through tabs
+  never pulls focus).
+- **About's head** (Mat, 2026-10-26): the label again, as a heading at About's
+  `headingLevel` ("repeat label as a heading"), and the thumbnail floated at the end of
+  its lines, the summary under both ("float it right to the side of the label. and above
+  summary"), in a `flow-root` head. Small: `--clover-items-height` × 0.618, up to twice
+  as wide, cropped past that. `alt=""` beside the label, the label's name without it.
+  Tried and taken out the same day ("too much movement"): the thumbnail on About's
+  accordion heading, growing as it opened and scrolling back with the words; don't bring
+  it back unasked. The Default header has no thumbnail (title and provider).
+- **Cue times** (Mat, 2026-10-26: "make sure cues in vtt transcripts and annotations on
+  time use the same component. DRY"): `ui/Cue.tsx`'s `CueTime` and `ui/Cue.css`, the one
+  time element wherever a row starts on a recording's time (Transcript cues, annotations
+  in the list and the Canvas's menu), `formatTime` (`lib/time.ts`, the transport's; whole
+  seconds, rounded down), the words beside it `clover-cue-text`, both baseline-aligned
+  in a flex or grid row. The rows themselves stay their hosts' (a cue a `button`, an
+  entry an `li` with rich content and a hidden button, a menu item a radio's `label`, a
+  timed Contents Range a `button`, `data-timed`).
+- **A press on a time plays** (Mat, 2026-10-26): `playFrom` (`lib/time.ts`) sets the
+  time and plays if paused, a refused play left paused; used by a cue's press, a timed
+  Range's on the Canvas playing, an annotation's in `Annotations` (on a Canvas in view,
+  before `selectAnnotation`) and `CanvasView`'s `selectAnnotation` (menu, hotspot). The
+  store's `selectAnnotation` and the effect that seeks a host's pick never play; nor do a
+  Transcript find's steps (`seek(cue, false)`).
+- **The wheel over accordion headings** (Mat, 2026-10-26): `Sections` listens for it
+  (non-passive) on each heading alone and scrolls the next real scroll container out
+  (`scrolling`: auto or scroll, with room to move; else the page), never the open box;
+  a pinch passes. Each heading's `clover-sections-reach` spans the gutters
+  (`--clover-sections-gutter`, the Panel's inset less `s`, half a pixel in), never past
+  the scroller's edge: past it, an `overflow: auto` box scrolls sideways to it.
+- **Finding in a transcript** (Mat, 2026-10-26: "make vtt transcripts searchable. follow
+  the same rules for lazy loading"). `Transcript` (`find`, default true; captions only):
+  a `FieldPill`, Search's own, the same props, size and submit (Mat: "this is a generic
+  search component"; Enter or the submit going to the match current and then on; in
+  Search's own strings, "Search", "Result 2 of 7", "7 results", so no new ones; Mat:
+  "use word search so we don't need to write more to i18n") and
+  `Steps` over the cues; matches are found as typed, case aside (`toLocaleLowerCase`),
+  marked with `mark`, the first current without seeking (nothing moves while typing), a
+  step seeking as a press on a cue does. Cues are drawn `CHUNK` (40) at a time as
+  Search's hits are, the playing cue and the current match always drawn. Cues share the
+  list's columns (`subgrid`), so no `content-visibility` on them: its containment would
+  take a cue out of the grid. `size` as Search's; the Panel's Search and Transcript
+  sections ask for `small` (Mat: "make small the default size for both … on templates"),
+  each part alone `large`. `sticky` holds the field as Search's does (the Panel's
+  Transcript section asks for it; Mat: "go absolute as well like we do for content
+  search").
 - **A still Canvas's OCR starts hidden** (Mat, 2026-10-26: "at the ready and are only
   shown if search responds with a highlighting"). A set whose annotations all are
   `supplementing` alone, each on a region and no time (`isRegionText`, `core/annotations.ts`:
@@ -1028,10 +1083,11 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   keys doing all it does. It is a solid ball, a dark shade of the accent (35% of it, black
   mixed in sRGB, which keeps the accent's hue and saturation and lowers only its
   brightness; Mat, 2026-10-23: "saturation and hue should match"), so the arrows in the
-  controls' fill stand clear of it, shaded as a sphere by CSS alone (a glint high on its
-  left, its face darkening toward its edge, inner shadows and a cast one; Mat, 2026-10-23:
-  "less muddy … a hint of accent … more obviously a sphere"), lit from its upper left by
-  the accent (`::before`, an opacity), 35% at rest and whole while it is pointed at or
+  controls' fill stand clear of it, shaded as a sphere by CSS alone: one soft light from
+  its upper left across the accent's hue, falling off to a darker rim, a faint highlight,
+  a cast shadow, no outline (Mat, 2026-10-26: "slightly less cartoony. keep it simple but
+  obviously a sphere"; cel-shaded with an ink line from 2026-10-24), its lit side kept
+  dark enough for the globe's white lines at 3:1, brighter (`::before`) while it is pointed at or
   held, while a pad control has keyboard focus, and while the view turns by any means
   (`data-turning` on the corner, set by the Scene's `turn` for 400ms), its glyph a globe
   across the whole ball that turns with the view (`Orientation`, the svg the disc's size:

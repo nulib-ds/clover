@@ -3,6 +3,18 @@ title: Search (test)
 searchable: false
 ---
 
-import { SearchCompare } from "docs/components/SearchCompare/SearchCompare";
+import {
+  ComparePage,
+  PartCompare,
+} from "docs/components/PartCompare/PartCompare";
 
-<SearchCompare />
+<ComparePage title="Search and transcripts">
+  <PartCompare
+    part="Search"
+    resource="paged"
+    viewer="catalog"
+    props={{ headingLevel: 4 }}
+    rootProps={{ searchQuery: "steel" }}
+  />
+  <PartCompare part="Transcript" resource="footage" />
+</ComparePage>
