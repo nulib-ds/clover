@@ -775,14 +775,13 @@
 
 /*
  * A figure's unit at half its size, on its baseline, close to the number, so the number
- * leads; shown lowercase (Mat, 2026-10-20), its text still "kB", a kilobyte, as a screen
- * reader and a copy read it.
+ * leads; shown as written, "kB", a kilobyte (Mat, 2026-10-27: lowercase "kb", from
+ * 2026-10-20, read as kilobits).
  */
 .figureUnit {
   font-size: 0.5em;
   letter-spacing: -0.02em;
   margin-inline-start: -0.12em;
-  text-transform: lowercase;
 }
 
 /* Where a story has several figures, each is a little smaller. */

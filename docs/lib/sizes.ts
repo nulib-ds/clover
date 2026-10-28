@@ -7,8 +7,16 @@ import sizes from "../../packages/clover/build/sizes.json";
  */
 export { sizes };
 
-/* A size in kB, to the tenth (Mat, 2026-10-20), as `npm run test:build` reports it. */
-export const kB = (bytes: number) => (bytes / 1000).toFixed(1);
+/*
+ * A size in kB, rounded (Mat, 2026-10-27: "no more decimals"): a whole number, or, under
+ * 1 kB, its tenth, never "0"; `npm run test:build` reports the tenths.
+ */
+export const kB = (bytes: number) => {
+  const size = bytes / 1000;
+  return size < 0.95
+    ? Math.max(size, 0.1).toFixed(1)
+    : String(Math.round(size));
+};
 
 /** Each size by the part's name, in kB. */
 const inKB = <T extends Record<string, number>>(bytes: T) =>

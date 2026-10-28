@@ -96,7 +96,12 @@ export function pageFiles(tags = [], dir = ELEMENT_DIR) {
     // What the first element to connect loads, whichever it is.
     visit(sharedKey(map));
     // An element by its tag; or a module by its key (a template, a deferred run).
-    tags.forEach((tag) => keysOf(map, tag).forEach(visit));
+    tags.forEach((tag) => {
+      // A module gone from the map would measure a lighter page than a browser loads.
+      if (!tag.startsWith("clover-") && !map[tag])
+        throw new Error(`${tag} is not in ${dir}'s chunk map`);
+      keysOf(map, tag).forEach(visit);
+    });
   }
   return files;
 }
@@ -105,10 +110,20 @@ export function pageFiles(tags = [], dir = ELEMENT_DIR) {
 export const VIEWER_DIR = join(root, "dist/web-components/viewer");
 
 /**
+ * What a Viewer loads as it opens a Presentation 2 or 3 resource, every one today, by its
+ * keys in a chunk map: the upgrader, which a part's figure leaves out (`build/sizes.mjs`).
+ */
+export const UPGRADER = [
+  "node_modules/@iiif/parser/dist/presentation-4/upgrader.js",
+  "src/core/keep-fragments.ts",
+];
+
+/**
  * What a page with only a `<clover-viewer>` loads from `@nulib/clover/web-components/
- * viewer`: the entry and what it imports, and the host that loads as the viewer connects,
- * with what it imports, the sheets among them. Its lazy parts are left out, as
- * a page's are.
+ * viewer` to its first view: the entry and what it imports, the host that loads as the
+ * viewer connects, with what it imports, the sheets among them, and the upgrader, which
+ * the viewer's build takes from the elements' (`../upgrader-….mjs`). Its other lazy parts
+ * are left out, as a page's are.
  */
 export function viewerEntryFiles(dir = VIEWER_DIR) {
   const map = readMap(dir);
@@ -130,6 +145,10 @@ export function viewerEntryFiles(dir = VIEWER_DIR) {
           visit(later);
           grew = true;
         }
+  }
+  for (const key of UPGRADER) {
+    if (!map[key]) throw new Error(`${key} is not in ${dir}'s chunk map`);
+    visit(key);
   }
   return files;
 }
@@ -166,7 +185,8 @@ export const pageGzip = (tags, dir = ELEMENT_DIR) =>
 /** The pages `sizes.json` records, by budget key: `[name, key, tags]`. */
 export const PAGES = [
   ["Web components entry", "elementsEntryGzip", []],
-  ["A <clover-viewer>", "webComponentsGzip", ["clover-viewer"]],
+  // A Viewer to its first view, the upgrader with it, as it opens a resource.
+  ["A <clover-viewer>", "webComponentsGzip", ["clover-viewer", ...UPGRADER]],
   ["Labels alone", "labelPageGzip", ["clover-root", "clover-label"]],
   [
     "The four parts",
@@ -199,6 +219,6 @@ export const PAGES = [
   [
     "A <clover-viewer> in Document",
     "documentElementGzip",
-    ["clover-viewer", "src/templates/document/Document.tsx"],
+    ["clover-viewer", "src/templates/document/Document.tsx", ...UPGRADER],
   ],
 ];

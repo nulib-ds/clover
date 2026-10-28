@@ -58,7 +58,7 @@ describe("compose", () => {
     ]);
     expect(written.parts[2]).toMatchObject({
       docs: expect.stringMatching(/\/docs\/items$/),
-      loads: expect.stringMatching(/^\d+\.\d kB$/),
+      loads: expect.stringMatching(/^\d+(\.\d)? kB$/),
     });
   });
 

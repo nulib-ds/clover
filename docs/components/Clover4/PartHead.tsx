@@ -52,7 +52,7 @@ export function PartHead({ part }: { part: keyof typeof partLoads }) {
               value={partLoads[part]}
               caption={
                 alone
-                  ? "loaded by a page with it alone, gzipped"
+                  ? "loaded by a page with it alone to first view, gzipped"
                   : "added to a page with a Root, gzipped"
               }
             />
@@ -62,7 +62,7 @@ export function PartHead({ part }: { part: keyof typeof partLoads }) {
               value={elementLoads[part]}
               caption={
                 alone
-                  ? "loaded by a page with it alone, styles included, gzipped"
+                  ? "loaded by a page with it alone to first view, styles included, gzipped"
                   : "added to a page with a <clover-root>, styles included, gzipped"
               }
             />

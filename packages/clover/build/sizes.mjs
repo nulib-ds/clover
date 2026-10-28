@@ -31,12 +31,14 @@ const dist = resolve(root, "dist");
  * chunks are left out. `also` adds exports of another entry, `[exports, entry]`, for what
  * a page imports together. `onDemand` measures instead what loads later, from the lazy
  * chunks it matches (MapLibre's), not everything lazy (the upgrader loads with any
- * content).
+ * content). `draws` adds the lazy chunks a page loads to its first view, each a pattern
+ * for a lazy module, with what they import; `sheets` adds stylesheets, as one file, as an
+ * app's bundler joins them.
  */
 async function initialGzip(
   exports,
   entry = "index.mjs",
-  { onDemand = null, also = null } = {},
+  { onDemand = null, also = null, draws = null, sheets = null } = {},
 ) {
   const line = (names, file) =>
     `export { ${names} } from ${JSON.stringify(resolve(dist, file))};`;
@@ -49,7 +51,35 @@ async function initialGzip(
       (total, fileName) => total + gzipSize(chunks.get(fileName).code),
       0,
     );
-  if (!onDemand) return { size: sum(initial), bundle };
+  if (!onDemand) {
+    const drawn = new Set();
+    const add = (fileName) => {
+      if (drawn.has(fileName) || initial.has(fileName) || !chunks.has(fileName))
+        return;
+      drawn.add(fileName);
+      chunks.get(fileName).imports.forEach(add);
+    };
+    for (const pattern of draws ?? []) {
+      // By the modules it holds: Rollup gives some lazy chunks no facade (`LoadedCanvas`).
+      const found = [...chunks.values()].filter(
+        (chunk) =>
+          chunk.isDynamicEntry &&
+          chunk.moduleIds.some((id) => pattern.test(id)),
+      );
+      // A pattern that finds nothing measures a lighter page than the browser loads.
+      if (!found.length)
+        throw new Error(`${pattern} matches no lazy chunk of ${exports}`);
+      found.forEach((chunk) => add(chunk.fileName));
+    }
+    const styles = sheets
+      ? gzipSize(
+          sheets
+            .map((file) => readFileSync(resolve(dist, file), "utf8"))
+            .join("\n"),
+        )
+      : 0;
+    return { size: sum([...initial, ...drawn]) + styles, bundle };
+  }
   const later = new Set();
   // Never back through what the page loaded up front, and on to everything it loads later.
   const reach = (fileName) => {
@@ -98,6 +128,33 @@ function split({ chunks, initial }, size) {
 
 const gzip = (file) => gzipSync(readFileSync(file), { level: 9 }).length;
 
+/*
+ * What a page loads to its first view, on the plainest resource of its kind (an image,
+ * MP4 audio, a model, a navPlace point), for the figures the site states (Mat,
+ * 2026-10-27: "to first view"). React is the page's own, never counted, nor the engines
+ * others make that load on demand (MapLibre and its worker, hls.js, three.js). A template
+ * counts the upgrader, which reads every Presentation 2 and 3 resource, and its
+ * stylesheets; a part counts neither, a Presentation 4 resource needing no upgrader and
+ * `styles.css` being every part's at once. `build/first-view.mjs` checks each against
+ * what a browser fetches.
+ */
+const UPGRADER = [
+  /\/presentation-4\/upgrader\.js$/,
+  /\/core\/keep-fragments\.mjs$/,
+];
+const LOADED_CANVAS = /\/components\/Canvas\/LoadedCanvas\.mjs$/;
+const FIRST_VIEW = {
+  Canvas: [LOADED_CANVAS],
+  Timeline: [
+    LOADED_CANVAS,
+    /\/components\/Canvas\/media\/MediaBody\.mjs$/,
+    /\/core\/ranges\.mjs$/,
+    /\/core\/thumbnail\.mjs$/,
+  ],
+  Scene: [/\/components\/Scene\/Loaded\.mjs$/, /\/Scene\/cloverEngine\.mjs$/],
+  Map: [/\/components\/Map\/LoadedMap\.mjs$/],
+};
+
 /** What is measured: `[name, budget key, exports, entry, options]`. */
 const BUNDLES = [
   ["Canvas initial JS", "canvasInitialGzip", "Canvas"],
@@ -136,6 +193,52 @@ const BUNDLES = [
     "default",
     "index.mjs",
     { also: [template, "templates/index.mjs"], template },
+  ]),
+  /*
+   * The same pages to their first view, with an image: the upgrader and the styles too.
+   * Default as the README writes it, `<Viewer />` with no template, which loads Default
+   * as it first draws, in a chunk of its own.
+   */
+  [
+    "Viewer, Default, to first view",
+    "defaultTemplateFirstViewGzip",
+    "default",
+    "index.mjs",
+    {
+      draws: [/\/dist\/templates\/default\/Default\.mjs$/, ...UPGRADER],
+      sheets: ["styles.css"],
+    },
+  ],
+  ...[
+    [
+      "Document",
+      "documentTemplateFirstViewGzip",
+      ["styles.css", "templates.css"],
+    ],
+    [
+      "Gallery",
+      "galleryTemplateFirstViewGzip",
+      ["styles.css", "templates.css"],
+    ],
+  ].map(([template, key, sheets]) => [
+    `Viewer, ${template}, to first view`,
+    key,
+    "default",
+    "index.mjs",
+    { also: [template, "templates/index.mjs"], draws: UPGRADER, sheets },
+  ]),
+  // Each part a page holds alone, to its first view: what it loads as it draws.
+  ...[
+    ["Canvas", "canvasFirstViewGzip", "index.mjs"],
+    ["Timeline", "timelineFirstViewGzip", "index.mjs"],
+    ["Scene", "sceneFirstViewGzip", "index.mjs"],
+    ["Map", "mapFirstViewGzip", "map/index.mjs"],
+  ].map(([part, key, entry]) => [
+    `${part}, to first view`,
+    key,
+    part,
+    entry,
+    { draws: FIRST_VIEW[part] },
   ]),
   ["Map, before MapLibre", "mapInitialGzip", "Map", "map/index.mjs"],
   // What a Viewer loads when its Map tab is first shown: MapLibre.
@@ -181,16 +284,32 @@ const PARTS = [
 
 /*
  * The parts a page holds with no `Root` (their docs' examples do): what a page with the
- * part alone loads, up front. `Canvas`, `Timeline`, `Scene` and `Map` are already measured
- * so (`BUNDLES`); `Value` is measured here. Recorded as `partsAlone`, and as elements
- * `elementPartsAlone`.
+ * part alone loads to its first view, its JS (`FIRST_VIEW`). `Canvas`, `Timeline`,
+ * `Scene` and `Map` are already measured so (`BUNDLES`); `Value`, which loads nothing as
+ * it draws, is measured here. Recorded as `partsAlone`, and as elements
+ * `elementPartsAlone`, each element with the modules it loads as it draws, its sheets
+ * among them, by their keys in the elements' chunk map.
  */
 const ALONE = [
-  ["Canvas", "canvasInitialGzip", "canvasElementGzip"],
-  ["Timeline", "timelineInitialGzip", null],
-  ["Scene", "sceneInitialGzip", null],
-  ["Map", "mapInitialGzip", null],
-  ["Value", null, null],
+  ["Canvas", "canvasFirstViewGzip", "canvasElementGzip", []],
+  [
+    "Timeline",
+    "timelineFirstViewGzip",
+    null,
+    [
+      "src/components/Canvas/LoadedCanvas.tsx",
+      "src/components/Canvas/media/MediaBody.tsx",
+      "src/core/thumbnail.ts",
+    ],
+  ],
+  [
+    "Scene",
+    "sceneFirstViewGzip",
+    null,
+    ["src/components/Scene/Loaded.tsx", "src/components/Scene/cloverEngine.ts"],
+  ],
+  ["Map", "mapFirstViewGzip", null, ["src/components/Map/LoadedMap.tsx"]],
+  ["Value", null, null, []],
 ];
 
 const STYLES = [
@@ -257,14 +376,14 @@ export async function measure() {
   }
   sizes.partsAlone = {};
   sizes.elementPartsAlone = {};
-  for (const [part, reactKey, elementKey] of ALONE) {
+  for (const [part, reactKey, elementKey, draws] of ALONE) {
     const tag = `clover-${part.toLowerCase()}`;
     sizes.partsAlone[part] = reactKey
       ? sizes[reactKey]
       : (await initialGzip(part)).size;
     sizes.elementPartsAlone[part] = elementKey
       ? sizes[elementKey]
-      : pageGzip([tag]);
+      : pageGzip([tag, ...draws]);
   }
   return { sizes, rows, pages };
 }

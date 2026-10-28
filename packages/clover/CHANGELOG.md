@@ -10,6 +10,22 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Documentation
+
+- **Sizes are now what a page fetches to its first view.** The figures the docs state
+  counted only the chunks a page imports up front. A Viewer also loads the upgrader as
+  it opens any Presentation 2 or 3 resource (7.8 kB gzipped), and the stylesheet was
+  never counted. Each figure is now measured on the plainest resource of its kind (an
+  image, MP4 audio, a model, a navPlace point) and leaves out React and the engines
+  others make that load on demand (MapLibre and its worker, hls.js, three.js). In React,
+  a template's figure includes the upgrader and its stylesheets, and a part's is its
+  script alone. The Viewer in its Default template showing an image is 89.4 kB (was
+  stated as 65.6 kB); a `<clover-viewer>` from its own entry is 97.9 kB (was 90.1 kB).
+  Nothing in what the package ships changed. New budgets hold the first-view figures
+  (`*FirstViewGzip` in `build/size-budget.json`), and the Viewer's element pages' budgets
+  rise by the upgrader. `npm run check:first-view -w @nulib/clover` opens each page in
+  Chrome and fails if a figure differs from what it fetched.
+
 ### Fixed
 
 - **A map draws its places in any bundler, with no setup.** In an app built with Vite,

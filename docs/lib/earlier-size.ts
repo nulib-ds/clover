@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
 
+import { kB } from "docs/lib/sizes";
+
 /*
  * What Clover 3.x's web component loads up front, measured from the release the 3.x pages
  * pin (`@samvera/clover-iiif`): its module and what it imports statically, gzipped one by
@@ -28,8 +30,8 @@ function measure() {
     for (const match of source.matchAll(IMPORT)) visit(match[1].slice(2));
   };
   visit("index.mjs");
-  return (bytes / 1000).toFixed(0);
+  return kB(bytes);
 }
 
-/** 3.x's element, up front, in kB gzipped, to the kilobyte. */
+/** 3.x's element, up front, in kB gzipped, rounded as `kB` rounds Clover 4's. */
 export const earlierElement = measure();

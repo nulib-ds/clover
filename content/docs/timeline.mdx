@@ -140,11 +140,12 @@ itself: it plays when the reader presses Play, or follows a link or the Manifest
 
 ## Size
 
-A page with a Timeline alone loads what a page with a Canvas alone does, the figure
-beside the title. In a Viewer it adds nothing up front: `Body` loads Timeline the first
-time a Timeline shows, and the Default template stays
+A page with a Timeline alone loads the figure beside the title to its first view, playing
+MP4 audio; hls.js, for a stream, loads only when one plays. In a Viewer it adds nothing up
+front: `Body` loads Timeline the first time a Timeline shows, and the Default template
+stays
 
-<Measured size="defaultTemplateGzip" />.
+<Measured size="defaultTemplateFirstViewGzip" /> to first view.
 
 ## What's next
 

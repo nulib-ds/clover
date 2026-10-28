@@ -31,16 +31,19 @@ export {
 export { elementLoads, kB, partLoads, viewerParts };
 
 /**
- * What a reader's browser loads, in kB gzipped, for a Canvas, for the Viewer with its
- * Default template, and for pages of web components: each a thing that draws, never the
- * Viewer before its template, which draws nothing on its own (Mat, 2026-10-21).
+ * What a reader's browser loads to its first view, in kB gzipped, for a Canvas, for the
+ * Viewer with its Default template, and for pages of web components: each a thing that
+ * draws, never the Viewer before its template, which draws nothing on its own (Mat,
+ * 2026-10-21), on the plainest resource it reads, an image (Mat, 2026-10-27: "to first
+ * view"). React's figures leave out React, and a part's its stylesheet, `styles.css`
+ * being every part's (`build/sizes.mjs`).
  */
 export const loads = {
-  /** A Canvas: images, video, and sound. */
-  canvas: kB(sizes.canvasInitialGzip),
-  /** The Viewer with its Default template. */
-  defaultTemplate: kB(sizes.defaultTemplateGzip),
-  /** A page with a `<clover-viewer>`: the Viewer in its Default template, Preact and the stylesheet. */
+  /** A Canvas alone, with an image: its script. */
+  canvas: kB(sizes.canvasFirstViewGzip),
+  /** The Viewer with its Default template, with an image: its script and styles. */
+  defaultTemplate: kB(sizes.defaultTemplateFirstViewGzip),
+  /** A page with a `<clover-viewer>`, to first view: the Viewer in its Default template, Preact and the stylesheet. */
   element: kB(sizes.webComponentsGzip),
   /** The web components' script itself: every element defined, none drawn yet. */
   elementsEntry: kB(sizes.elementsEntryGzip),

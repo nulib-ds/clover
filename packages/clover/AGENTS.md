@@ -408,7 +408,17 @@ every rule below.
   `Root` and the part less one of `Root` alone, for every part (`PARTS`), and the same as
   elements (`elementParts`). `build/sizes.mjs` fails rather than record one that is not
   positive. The parts a docs page shows with no `Root` (`Canvas`, `Map`, `Value`) are
-  recorded as what a page with each alone loads (`partsAlone`, `elementPartsAlone`).
+  recorded as what a page with each alone loads to its first view (`partsAlone`,
+  `elementPartsAlone`).
+- The figures the site states are to the first view (Mat, 2026-10-27): what a page
+  fetches until it draws the plainest resource of its kind, each `*FirstViewGzip` key
+  and the elements' pages. `sizes.mjs` adds the lazy chunks that view loads (`draws`:
+  `FIRST_VIEW`, `UPGRADER`; the elements' module keys in `element-size.mjs`), and fails
+  if one is gone. React, MapLibre and its worker, hls.js and three.js are never counted;
+  the upgrader and React's stylesheets count for the templates only. The up-front keys
+  stay, as budgets on what a page imports. After a change to what a view loads, run
+  `npm run check:first-view -w @nulib/clover` (Chrome and the network, locally): it
+  builds and opens each page and fails, naming what it fetched, where a figure differs.
 - The sizes are measured as a Vite app builds for production (`build/consumer-bundle.mjs`:
   Rollup, minified, React external), not with esbuild. Through the package entry,
   esbuild's code splitting counts a module as reachable by its re-export alone, even

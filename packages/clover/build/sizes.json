@@ -8,18 +8,25 @@
   "defaultTemplateGzip": 65644,
   "documentTemplateGzip": 62066,
   "galleryTemplateGzip": 26150,
+  "defaultTemplateFirstViewGzip": 89386,
+  "documentTemplateFirstViewGzip": 86543,
+  "galleryTemplateFirstViewGzip": 50627,
+  "canvasFirstViewGzip": 41494,
+  "timelineFirstViewGzip": 39458,
+  "sceneFirstViewGzip": 25625,
+  "mapFirstViewGzip": 19402,
   "mapInitialGzip": 11865,
   "mapOnDemandGzip": 289655,
   "stylesGzip": 15522,
   "templatesStylesGzip": 2020,
   "elementsEntryGzip": 5400,
-  "webComponentsGzip": 109220,
+  "webComponentsGzip": 116999,
   "labelPageGzip": 32294,
   "composedPageGzip": 93280,
   "layoutPageGzip": 109285,
   "canvasElementGzip": 80179,
-  "documentElementGzip": 115720,
-  "viewerEntryGzip": 90072,
+  "documentElementGzip": 123499,
+  "viewerEntryGzip": 97851,
   "parts": {
     "Thumbnail": 2411,
     "Label": 463,
@@ -69,17 +76,17 @@
     "Logo": 13974
   },
   "partsAlone": {
-    "Canvas": 35832,
-    "Timeline": 21722,
-    "Scene": 15354,
-    "Map": 11865,
+    "Canvas": 41494,
+    "Timeline": 39458,
+    "Scene": 25625,
+    "Map": 19402,
     "Value": 2364
   },
   "elementPartsAlone": {
     "Canvas": 80179,
-    "Timeline": 64217,
-    "Scene": 60214,
-    "Map": 62418,
+    "Timeline": 83408,
+    "Scene": 68854,
+    "Map": 62983,
     "Value": 38327
   }
 }

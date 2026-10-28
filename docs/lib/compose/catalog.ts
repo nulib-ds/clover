@@ -268,7 +268,7 @@ export function catalog(): Catalog {
   const templates = words.map((word, at): TemplateInfo => {
     const name = names[at];
     const size = (sizes as unknown as Record<string, number>)[
-      `${word}TemplateGzip`
+      `${word}TemplateFirstViewGzip`
     ];
     return {
       name,

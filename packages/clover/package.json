@@ -83,6 +83,7 @@
     "build:types": "dts-bundle-generator --project tsconfig.json --out-file dist/index.d.mts src/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/templates/index.d.mts src/templates/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/map/index.d.mts src/map/index.ts --no-check && dts-bundle-generator --project tsconfig.json --out-file dist/three/index.d.mts src/three/index.ts --no-check",
     "build:web-components": "vite build --config build/web-components.config.mjs && cp build/web-components-loader.js dist/web-components/index.umd.js && vite build --config build/web-components-viewer.config.mjs && node build/dedupe-viewer.mjs && cp build/web-components-loader.js dist/web-components/viewer/index.umd.js && node build/custom-elements.mjs",
     "build:sizes": "node build/sizes.mjs",
+    "check:first-view": "node build/first-view.mjs",
     "e2e": "playwright test --config=e2e/playwright.config.ts"
   },
   "dependencies": {
@@ -108,5 +109,5 @@
     "preact": "^10.24.3",
     "three": "^0.186.1"
   },
-  "version": "4.0.0-beta.0"
+  "version": "4.0.0-beta.1"
 }

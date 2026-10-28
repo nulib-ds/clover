@@ -433,10 +433,13 @@ describe("Map", () => {
     render(<CloverMap georeferences={[georeferenceOnService()]} />);
     await waitFor(() => expect(maps).toHaveLength(1));
     const [map] = maps;
-    await waitFor(() =>
-      expect(
-        Object.values(map.sources).find((source) => source.type === "canvas"),
-      ).toBeTruthy(),
+    // The overlay's warp loads on demand: past a second while the whole suite runs.
+    await waitFor(
+      () =>
+        expect(
+          Object.values(map.sources).find((source) => source.type === "canvas"),
+        ).toBeTruthy(),
+      { timeout: 4000 },
     );
     const overlay = Object.values(map.sources).find(
       (source) => source.type === "canvas",

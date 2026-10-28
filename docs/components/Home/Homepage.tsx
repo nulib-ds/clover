@@ -181,14 +181,14 @@ const stories: Story[] = [
       {
         value: loads.defaultTemplate,
         unit: "kB",
-        caption: "Viewer (Default template) in React",
+        caption: "All the Viewer needs",
         flavor: "react",
       },
       // A page with a Viewer alone, from the Viewer's own entry (`web-components/viewer`).
       {
         value: loads.viewerEntry,
         unit: "kB",
-        caption: "Viewer (Default template) as a web component",
+        caption: "All the Viewer needs",
         flavor: "web-components",
       },
     ],
@@ -331,7 +331,7 @@ const Homepage: React.FC<{
                   {story.figures.map((figure) => (
                     <p
                       className={styles.figure}
-                      key={figure.caption}
+                      key={`${figure.flavor ?? "both"} ${figure.caption}`}
                       data-code-flavor={figure.flavor}
                     >
                       <span className={styles.figureValue}>

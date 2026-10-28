@@ -49,8 +49,8 @@ modules, load `web-components/index.mjs` with `<script type="module">` instead.
 
 A page that shows a Viewer and nothing else of Clover's can load the Viewer's own entry,
 built whole: `web-components/viewer/index.umd.js` (or `@nulib/clover/web-components/viewer`
-in a bundler) loads {loads.viewerEntry} kB, where the one for every element loads
-{loads.element} kB for the same page. Load one entry on a page, not both: each brings its
+in a bundler) loads {loads.viewerEntry} kB to first view, where the one for every element
+loads {loads.element} kB for the same page. Load one entry on a page, not both: each brings its
 own copy of Clover.
 
 If you serve Clover's files from your own server, copy the whole `dist/web-components`
@@ -473,9 +473,10 @@ gives each element's attributes, properties and events to editors and tools.
 
 <div data-code-flavor="react">
 
-Only the parts you import, as your bundler splits them: a page with the Viewer in its
-Default template loads {loads.defaultTemplate} kB, and one with a `Canvas` alone
-{loads.canvas} kB. Each part's page gives what it adds to a page with a `Root`.
+Only the parts you import, as your bundler splits them. Showing an image, a page with the
+Viewer in its Default template loads {loads.defaultTemplate} kB to first view, its styles
+included, and one with a `Canvas` alone {loads.canvas} kB of script. React is your page's
+own, and not counted. Each part's page gives what it adds to a page with a `Root`.
 
 </div>
 
@@ -483,11 +484,11 @@ Default template loads {loads.defaultTemplate} kB, and one with a `Canvas` alone
 
 The script is {loads.elementsEntry} kB gzipped: it defines every element and draws none.
 An element's code loads the first time one is on the page, with Preact and the styles of
-what it draws, so a page loads only the elements it uses, and their styles: {loads.element} kB with a
-`<clover-viewer>`, the Viewer in its Default template among it (3.x's element loads
-{earlierElement} kB), {loads.documentElement} kB with one in Document, {loads.canvasElement} kB for a
-`<clover-canvas>` alone, and {loads.labels} kB for a `<clover-root>` and its
-`<clover-label>`s, as the package's build measures them.
+what it draws, so a page loads only the elements it uses, and their styles, to first
+view: {loads.element} kB with a `<clover-viewer>`, the Viewer in its Default template
+among it (3.x's element loads {earlierElement} kB), {loads.documentElement} kB with one
+in Document, {loads.canvasElement} kB for a `<clover-canvas>` alone, and {loads.labels} kB
+for a `<clover-root>` and its `<clover-label>`s, as the package's build measures them.
 
 </div>
 

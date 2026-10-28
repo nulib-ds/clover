@@ -354,7 +354,16 @@ deadline.
     as one person speaking to another, never terse bursts (Mat, 2026-10-21); titles short, each ending in a period,
     US English, every claim one Clover keeps. A size is what a reader's browser loads,
     never what a page "ships" (jargon; Mat, 2026-10-21), and only for what draws something:
-    no figure for the Viewer before its template. OpenSeadragon goes unmentioned in Clover
+    no figure for the Viewer before its template. It is what loads to the first view
+    (Mat, 2026-10-27: "to first view", never "from", which sells a used car), on the
+    plainest resource of its kind (an image for the Viewer): React and the engines others
+    make that load on demand (MapLibre and its worker, hls.js, three.js) never counted;
+    the upgrader and, in React, the stylesheets counted for a template only, a part's
+    React figure its script alone (`build/sizes.mjs`, held to a browser by
+    `npm run check:first-view -w @nulib/clover`). Its unit is shown as written, "kB",
+    never lowercased, and its figure rounded, never in tenths: "89 kB", a whole number, or
+    under 1 kB its tenth, "0.5 kB", with no "~" (`kB` in `docs/lib/sizes.ts`; Mat,
+    2026-10-27). OpenSeadragon goes unmentioned in Clover
     4's copy (Mat, 2026-10-21). Every figure is the code's own: sizes from
     `sizes.json` (measured by the package's build), the parts counted from the
     Components menu (`counts.ts`), the Cookbook's counts and date from `progress4.ts`,
@@ -369,8 +378,8 @@ deadline.
     the viewer's middle and lights every part it shows, each tag giving, after the
     part's name, what it adds to a page with a `Root` (`sizes.json`'s `parts`, measured by
     `build/sizes.mjs`, through `docs/lib/sizes.ts`; `data-weighed` on the viewer; in words
-    for assistive technology in the story), its one figure the Viewer's, "Viewer (Default
-    template)" (Mat, 2026-10-22); Accessible (`data-turn`) shows the viewer's
+    for assistive technology in the story), its one figure the Viewer's in its Default template, to first view,
+    captioned "All the Viewer needs" (Mat, 2026-10-22 and 2026-10-27); Accessible (`data-turn`) shows the viewer's
     inspector (`AccessibilityTree.tsx`: WCAG checks measured on the viewer (names and
     ARIA, the keyboard, targets, contrast and text size, captions, language, motion),
     each with its mark, in the standard's order (1.1.1, 1.2.2…), then an ARIA snapshot with tab stops,
