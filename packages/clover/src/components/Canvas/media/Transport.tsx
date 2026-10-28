@@ -1,8 +1,22 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { TransportButton } from "./TransportButton";
 import { useBarHeight } from "./useBarHeight";
 import { type MediaController, formatTime } from "./useMediaController";
+import type { CloverRequest } from "../../../core/request";
+import { type ThumbnailSource, imageSource } from "../../../core/thumbnail";
+import {
+  EntryThumbnail,
+  PICTURE_SIZE,
+  useThumbnail,
+} from "../../../ui/EntryThumbnail";
+import { join } from "../../../lib/classnames";
 import { languageCode } from "../../../ui/languageCode";
 import { SHORTCUTS, Tip } from "../../../ui/Tip";
 import { useOneOpen } from "../../../ui/useOneOpen";
@@ -44,6 +58,8 @@ interface TransportProps {
   highlightedChapter?: string | null;
   /** The chapter under the pointer on the seek bar, by its `id`; null as it leaves. */
   onChapterHighlight?: (id: string | null) => void;
+  /** How the chapters' pictures are fetched: the host's credentials and headers. */
+  request?: CloverRequest;
 }
 
 export interface TransportChapter {
@@ -54,6 +70,30 @@ export interface TransportChapter {
   lang?: string;
   start: number;
   end?: number;
+  /**
+   * A picture of it (its Range's `thumbnail`, Cookbook 0229): a URL, shown as it is, or a
+   * IIIF image, asked of its service as its `info.json` allows.
+   */
+  thumbnail?: string | Record<string, unknown>;
+}
+
+/** A chapter's picture as a source, a URL given as it is. */
+const chapterPicture = (chapter?: TransportChapter) =>
+  typeof chapter?.thumbnail === "string"
+    ? { src: chapter.thumbnail }
+    : imageSource(chapter?.thumbnail as Record<string, any> | undefined);
+
+/**
+ * The seek bar's mask: opaque but for a gap `--clover-transport-gap` wide at each share of
+ * it (a chapter's start, in percent), cut out of the bar (`Transport.css`).
+ */
+function gapMask(at: number[]): string {
+  const half = "var(--clover-transport-gap) / 2";
+  const stops = at.flatMap((share) => [
+    `#000 0 calc(${share}% - ${half})`,
+    `transparent 0 calc(${share}% + ${half})`,
+  ]);
+  return `linear-gradient(to right, ${[...stops, "#000 0"].join(", ")})`;
 }
 
 /** The chapter playing at `time`: the last to start at or before it, or -1. */
@@ -72,6 +112,8 @@ interface TransportOption {
   time?: string;
   /** The language of what it chooses (a caption track's cues), shown as its code. */
   language?: string;
+  /** A picture of what it chooses (a chapter's), under it while it is chosen. */
+  thumbnail?: ThumbnailSource | null;
 }
 
 /**
@@ -139,6 +181,8 @@ function TransportMenu({
   options,
   selected,
   onSelect,
+  request,
+  asMenu = false,
 }: {
   id: string;
   label: string;
@@ -152,6 +196,13 @@ function TransportMenu({
   options: TransportOption[];
   selected: number;
   onSelect: (index: number) => void;
+  /** How the options' pictures are fetched. */
+  request?: CloverRequest;
+  /**
+   * Drawn as the Canvas's other menus are (`ControlMenu.css`), on Clover's ground rather
+   * than the bar's dark: the chapters', as the annotations' menu is (Mat, 2026-10-28).
+   */
+  asMenu?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const menu = useRef<HTMLDivElement>(null);
@@ -249,7 +300,10 @@ function TransportMenu({
       {open && (
         <fieldset
           {...name.props}
-          className="clover-canvas-transport-options"
+          className={join(
+            "clover-canvas-transport-options",
+            asMenu && "clover-canvas-menu",
+          )}
           id={id}
           ref={list}
         >
@@ -282,7 +336,7 @@ function TransportMenu({
                 />
                 {option.time && (
                   <>
-                    <span>{option.time}</span>{" "}
+                    <span className="clover-cue-time">{option.time}</span>{" "}
                   </>
                 )}
                 {/*
@@ -304,7 +358,17 @@ function TransportMenu({
                     />
                   ))}
                 {/* Only the name carries its language: the time is in digits. */}
-                <span lang={option.lang}>{option.label}</span>
+                <span className="clover-cue-text" lang={option.lang}>
+                  {option.label}
+                </span>
+                {/* The chosen one's picture under it, as Contents shows the current one's. */}
+                {selected === index && (
+                  <EntryThumbnail
+                    source={option.thumbnail}
+                    request={request}
+                    large
+                  />
+                )}
               </label>
             );
           })}
@@ -348,6 +412,7 @@ const Transport: React.FC<TransportProps> = ({
   chapters = [],
   highlightedChapter = null,
   onChapterHighlight,
+  request,
 }) => {
   const { t, langOf } = useCloverTranslation();
   // Where the root cannot go full screen (iPhone), a video still can, in the system player.
@@ -358,14 +423,19 @@ const Transport: React.FC<TransportProps> = ({
   // The chapter playing.
   const chapter = chapterAt(chapters, currentTime);
   /*
-   * The chapter under the pointer on the seek bar: its stretch of the bar drawn out, its
-   * start and title in a popover over it, and the host told (`onChapterHighlight`), for a
-   * list beside the Canvas to mark. Keyboard focus on the bar shows the playing chapter's.
-   * Set only as the pointer crosses from one chapter to the next, so a move along the
-   * bar renders nothing. One marked from outside (`highlightedChapter`) has its stretch
-   * drawn out only: a popover away from the pointer could not be hovered (WCAG 1.4.13).
+   * The chapter under the pointer on the seek bar: its stretch of the bar drawn out, the
+   * time under the pointer and the chapter's title in a popover over it, and the host
+   * told (`onChapterHighlight`), for a list beside the Canvas to mark. Keyboard focus on
+   * the bar shows the playing chapter's, at the time playing. Set only as the pointer
+   * crosses from one chapter to the next, and its time from one second to the next, so a
+   * move along the bar renders little. One marked from outside (`highlightedChapter`) has
+   * its stretch drawn out only: a popover away from the pointer could not be hovered
+   * (WCAG 1.4.13).
    */
   const [pointed, setPointed] = useState(-1);
+  // The second under the pointer, as the popover writes it (Mat, 2026-10-28: "show where
+  // the cursor is within the range").
+  const [pointedAt, setPointedAt] = useState(0);
   const pointedRef = useRef(-1);
   const point = (index: number) => {
     if (pointedRef.current === index) return;
@@ -375,6 +445,12 @@ const Transport: React.FC<TransportProps> = ({
   };
   const [seekFocused, setSeekFocused] = useState(false);
   const previewed = pointed >= 0 ? pointed : seekFocused ? chapter : -1;
+  // Its picture over its words, as a hotspot's popover shows its image.
+  const preview = useThumbnail(
+    chapterPicture(chapters[previewed]),
+    PICTURE_SIZE,
+    request,
+  );
   const marked =
     pointed >= 0
       ? pointed
@@ -426,6 +502,16 @@ const Transport: React.FC<TransportProps> = ({
     ? "imageExitFullScreen"
     : "imageFullScreen";
   const progress = duration ? (currentTime / duration) * 100 : 0;
+  // A gap in the seek bar where each chapter after the first begins (Mat, 2026-10-28).
+  const gaps = useMemo(
+    () =>
+      duration > 0 && chapters.length > 1
+        ? gapMask(
+            chapters.slice(1).map((item) => (item.start / duration) * 100),
+          )
+        : undefined,
+    [chapters, duration],
+  );
   const loaded = duration ? (buffered / duration) * 100 : 0;
   const hasFullscreen = fullscreen && canFullscreen;
 
@@ -476,12 +562,12 @@ const Transport: React.FC<TransportProps> = ({
           if (!duration || (event.target as Element).closest(".clover-tip"))
             return;
           const box = event.currentTarget.getBoundingClientRect();
-          point(
-            chapterAt(
-              chapters,
-              ((event.clientX - box.left) / box.width) * duration,
-            ),
+          const at = Math.min(
+            duration,
+            Math.max(0, ((event.clientX - box.left) / box.width) * duration),
           );
+          setPointedAt(Math.floor(at));
+          point(chapterAt(chapters, at));
         }}
         onPointerLeave={() => point(-1)}
         style={
@@ -508,26 +594,21 @@ const Transport: React.FC<TransportProps> = ({
           min={0}
           onChange={(event) => controller.seek(Number(event.target.value))}
           step="any"
+          data-gaps={gaps ? "" : undefined}
           style={
             {
               "--clover-transport-progress": `${progress}%`,
               "--clover-transport-loaded": `${loaded}%`,
+              // The mask, and where the thumb is along it, which it never cuts.
+              ...(gaps && {
+                "--clover-transport-gaps": gaps,
+                "--clover-transport-at": progress / 100,
+              }),
             } as React.CSSProperties
           }
           type="range"
           value={currentTime}
         />
-        {duration > 0 &&
-          chapters
-            .slice(1)
-            .map((marker, index) => (
-              <span
-                aria-hidden="true"
-                className="clover-canvas-transport-chapter-marker"
-                key={index}
-                style={{ left: `${(marker.start / duration) * 100}%` }}
-              />
-            ))}
         {marked >= 0 && duration > 0 && (
           <span
             aria-hidden="true"
@@ -542,8 +623,10 @@ const Transport: React.FC<TransportProps> = ({
           // Made anew for each chapter, so it measures itself into the Body each time.
           <Tip
             key={previewed}
-            label={`${formatTime(chapters[previewed].start)} ${chapters[previewed].label}`}
+            lead={formatTime(pointed >= 0 ? pointedAt : currentTime)}
+            label={chapters[previewed].label}
             lang={chapters[previewed].lang}
+            image={preview}
           />
         )}
       </div>
@@ -636,9 +719,12 @@ const Transport: React.FC<TransportProps> = ({
                   label: item.label,
                   lang: item.lang,
                   time: formatTime(item.start),
+                  thumbnail: chapterPicture(item),
                 }))}
                 selected={chapter}
                 onSelect={(index) => controller.seek(chapters[index].start)}
+                request={request}
+                asMenu
               />
             )}
             {captions.length > 0 && (

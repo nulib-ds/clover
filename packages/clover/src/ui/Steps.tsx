@@ -15,7 +15,9 @@ export interface StepsModel {
 }
 
 /**
- * Steps through matches: Search's hits, a Transcript's (Mat, 2026-10-26), small, as
+ * Steps through matches: Search's hits, a Transcript's (Mat, 2026-10-26), and an
+ * article's parts in Contents, its place read as its figure (Mat, 2026-10-28: "keep it
+ * generic. 1 / 3"), small, as
  * Annotations' language codes are: the current one's place over the total ("3 / 11", a
  * dash until one is current), then Previous and Next together. The place is read as it
  * changes, by `sentence` ("Result 3 of 11"), from a live region there before its first
@@ -27,8 +29,11 @@ export function Steps({
   className,
 }: {
   steps: StepsModel;
-  /** The string read for the place: `{{index}}` of `{{total}}`. */
-  sentence: "contentSearchPosition";
+  /**
+   * The string read for the place: `{{index}}` of `{{total}}`. Without one, the place
+   * is read as it shows, "2 / 4", in no language (an article's parts, Contents).
+   */
+  sentence?: "contentSearchPosition";
   className?: string;
 }) {
   const { t, langOf } = useCloverTranslation();
@@ -38,7 +43,7 @@ export function Steps({
   return (
     <div className={join("clover-steps", className)}>
       <span aria-live="polite" className="clover-steps-position">
-        <span aria-hidden="true">
+        <span aria-hidden={sentence ? "true" : undefined}>
           {current > 0 ? current : "–"} / {total}
         </span>
         {/*
@@ -48,7 +53,7 @@ export function Steps({
         <span className="clover-steps-room" aria-hidden="true" hidden>
           {total} / {total}
         </span>
-        {current > 0 && (
+        {sentence && current > 0 && (
           <span style={visuallyHidden} lang={langOf(sentence)}>
             {t(sentence, { index: current, total })}
           </span>

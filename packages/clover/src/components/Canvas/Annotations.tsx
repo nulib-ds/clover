@@ -18,7 +18,7 @@ import { parseAnnotationTarget } from "../../core/annotations";
 import { bodiesOf } from "../../core/painting";
 import { type AnnotationLink, readLink } from "../../core/link";
 import type { SvgShape } from "../../core/svg-shape";
-import { parseTime } from "../../core/ranges";
+import { parseTime } from "../../lib/time";
 import { type LanguageMapLike, localize } from "../../core/value";
 import { Tip } from "../../ui/Tip";
 import type { CanvasRenderer, Rect } from "../../lib/renderer";
@@ -32,6 +32,8 @@ export interface CanvasAnnotation {
   pageLabel?: LanguageMapLike;
   /** Its AnnotationPage's `id`, by which the menu hides its page (`hiddenPages`). */
   pageId?: string;
+  /** A Range's region: its place among the Range's parts (`AnnotationEntry`'s). */
+  place?: { index: number; total: number };
 }
 
 /**
@@ -58,6 +60,8 @@ export interface PlacedAnnotation {
   world: Rect;
   /** A point's marker, or an SVG shape drawn in `world`; a rectangle needs neither. */
   shape?: { kind: "point" } | { kind: "svg"; svg: SvgShape };
+  /** A Range's region: its place among the Range's parts, shown after its name. */
+  place?: { index: number; total: number };
   /**
    * Where it is through a recording, for one whose targets give a region and a time each
    * (`xywh=…&t=…`): its keys in time order, in world units. Its hotspot follows the
@@ -192,7 +196,13 @@ export function placeAnnotations(
   language?: string,
 ): PlacedAnnotation[] {
   const placed: PlacedAnnotation[] = [];
-  for (const { annotation, targetIndex, pageLabel, pageId } of annotations) {
+  for (const {
+    annotation,
+    targetIndex,
+    pageLabel,
+    pageId,
+    place: partOf,
+  } of annotations) {
     const target = parseAnnotationTarget(annotation?.target as any);
     if (!target) continue;
     let rect: Rect | null = null;
@@ -239,6 +249,7 @@ export function placeAnnotations(
       ...(image ? { image } : {}),
       ...pageOf(pageLabel, language),
       ...(pageId ? { pageId } : {}),
+      ...(partOf ? { place: partOf } : {}),
     });
   }
   return placed;
@@ -517,7 +528,8 @@ const AnnotationButton: React.FC<{
   media,
 }) => {
   const [element, setElement] = useState<HTMLElement | null>(null);
-  const { id } = entry;
+  const { id, place } = entry;
+  const shownPlace = place && `${place.index} / ${place.total}`;
   const attach = useCallback(
     (node: HTMLElement | null) => {
       setElement(node);
@@ -566,7 +578,8 @@ const AnnotationButton: React.FC<{
       data-shape={entry.shape?.kind ?? "rect"}
       data-track={entry.track ? "" : undefined}
       data-link={web || follow ? "true" : undefined}
-      aria-label={name}
+      // A Range's region's place too, as its popover shows it, in no language (WCAG 2.5.3).
+      aria-label={shownPlace ? `${name} ${shownPlace}` : name}
       // A command (zoom to it), not a toggle: pressing the picked one again frames it
       // again, so it is current rather than pressed.
       aria-current={selected ? "true" : undefined}
@@ -609,7 +622,7 @@ const AnnotationButton: React.FC<{
         <span className="clover-canvas-annotation-point" aria-hidden="true" />
       )}
       {entry.shape?.kind === "svg" && <ShapeOutline svg={entry.shape.svg} />}
-      <Tip label={name} scrolls image={entry.image} />
+      <Tip label={name} scrolls image={entry.image} after={shownPlace} />
     </Hotspot>
   );
 };

@@ -245,6 +245,112 @@
 }
 
 /*
+ * The languages to read the resource in (`ReadingLanguages`): a row of their codes
+ * (`ui/Codes.css`) at the end of its line, as the Transcript's are: beside About's
+ * heading in an accordion, shown whichever section is open (`SectionSpec`'s `actions`),
+ * else over what About says.
+ */
+.clover-about-languages {
+  justify-content: flex-end;
+}
+
+/*
+ * About's heading's controls in a Panel (`AboutActions`): its Download button, then its
+ * languages furthest along (Mat, 2026-10-28), `2xs` apart at the end of the row; in
+ * tabs, over what About says.
+ */
+.clover-about-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--clover-space-2xs);
+}
+
+/*
+ * The Download button, drawn as an annotation set's hide toggle is (`ui/HideToggle.css`):
+ * `l` round (past 24px, WCAG 2.5.8), its glyph in the muted text at the smaller size;
+ * under the pointer, focused or open, filled with the accent, the glyph white, and
+ * focused, the accent's ring.
+ */
+.clover-about-download {
+  position: relative;
+  display: inline-flex;
+}
+
+button.clover-about-download-button {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--clover-color-primary-muted, #26292b);
+  cursor: pointer;
+}
+
+button.clover-about-download-button svg {
+  width: var(--clover-text-s);
+  height: var(--clover-text-s);
+}
+
+button.clover-about-download-button:is(
+    :hover,
+    :focus-visible,
+    [aria-expanded="true"]
+  ) {
+  background-color: var(--clover-color-accent, #0065c3);
+  color: var(--clover-color-control-glyph, #fff);
+}
+
+button.clover-about-download-button:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  button.clover-about-download-button:is(
+      :hover,
+      :focus-visible,
+      [aria-expanded="true"]
+    ) {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}
+
+/*
+ * Its popover, under it at its end, drawn as the Canvas's menus are (`ControlMenu.css`),
+ * at the smaller size: each group's title and links in from its edge as a menu's
+ * options are, a link under the pointer filled as an option is.
+ */
+.clover-about-download-menu {
+  top: calc(100% + var(--clover-space-xs));
+  inset-inline-end: 0;
+  max-width: min(20rem, 80vw);
+  font-size: var(--clover-text-s);
+  text-align: start;
+}
+
+.clover-about-download-menu .clover-download-title {
+  padding-inline: var(--clover-space-s);
+}
+
+.clover-about-download-menu .clover-download-link {
+  padding: var(--clover-space-xs) var(--clover-space-s);
+  border-radius: var(--clover-radius, 3px);
+}
+
+.clover-about-download-menu .clover-download-link:hover {
+  background-color: var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+/*
  * The Manifest's thumbnail and its label, over what About says of it: the thumbnail
  * small, a golden step under Items' thumbnails' height, at its own shape up to twice as
  * wide, cropped past that, floated at the end of the label's lines (Mat, 2026-10-26:

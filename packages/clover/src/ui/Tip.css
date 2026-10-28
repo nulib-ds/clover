@@ -59,6 +59,23 @@
   border-radius: calc(var(--clover-radius, 3px) / 2);
 }
 
+/*
+ * A line over the words (`lead`: the time under the pointer, over a chapter's title in
+ * the seek bar's popover) stands out: the popover's own white, semibold, its figures
+ * even. The words under it are muted, in the popover's quieter light,
+ * `--clover-color-secondary-alt`, 10:1 on its ground (WCAG 1.4.3; Mat, 2026-10-28).
+ */
+.clover-tip-lead {
+  display: block;
+  color: var(--clover-color-secondary, #fff);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.clover-tip:has(> .clover-tip-lead) {
+  color: var(--clover-color-secondary-alt, #c1c8cd);
+}
+
 /* The gap between the control and its popover, bridged for the pointer. */
 .clover-tip::before {
   position: absolute;
@@ -283,4 +300,17 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
   .clover-tip {
     outline: 1px solid CanvasText;
   }
+}
+
+/*
+ * A figure after a popover's words (a Range's region's "1 / 4"), set as the step through
+ * a list sets its place (`Steps.css`): a step smaller, semibold, its digits even, `xs`
+ * after the words.
+ */
+.clover-tip-after {
+  margin-inline-start: var(--clover-space-xs);
+  font-size: var(--clover-text-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
 }

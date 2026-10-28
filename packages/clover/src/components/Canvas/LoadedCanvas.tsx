@@ -263,6 +263,7 @@ async function annotationsOf(
         targetIndex: 0,
         pageId: set.id,
         ...(set.label ? { pageLabel: set.label } : {}),
+        ...(entry.place ? { place: entry.place } : {}),
       })),
   );
 }

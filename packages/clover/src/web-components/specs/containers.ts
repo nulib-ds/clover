@@ -16,6 +16,7 @@ export const panel: ElementSpec = {
     value: { prop: "value", type: "string" },
     "heading-level": { prop: "headingLevel", type: "number", min: 1 },
     download: { prop: "download", type: "boolean" },
+    languages: { prop: "languages", type: "boolean" },
     closable: { prop: "closable", type: "boolean" },
     "close-on-escape": { prop: "closeOnEscape", type: "boolean" },
     as: { prop: "as", type: ["aside", "div"] },
@@ -45,7 +46,13 @@ export const panelDocs: ElementDocs = {
       default: "3",
     },
     download: {
-      description: '"false" leaves the downloads out of About.',
+      description:
+        'About\'s heading offers the downloads, by a Download button that lists them; "false" leaves them out.',
+      default: "true",
+    },
+    languages: {
+      description:
+        'Where what the resource says of itself comes in several languages, About\'s heading offers them, and the whole clover-root reads in the one chosen. "false" leaves the choice out.',
       default: "true",
     },
     closable: {

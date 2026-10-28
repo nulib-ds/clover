@@ -45,6 +45,7 @@ import { visuallyHidden } from "../../ui/visuallyHidden";
 import { join } from "../../lib/classnames";
 import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
+import { BodyUnloadable } from "../../ui/BodyUnloadable";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useRootLanguage } from "../../react/language";
 import { useContainerName } from "../../ui/useContainerName";
@@ -214,6 +215,8 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         ? ALL_CONTROLS
         : { ...ALL_CONTROLS, ...controls };
   const [status, setStatus] = useState<CanvasStatus>("loading");
+  // Nothing it paints could be loaded (an image's address answers with an error).
+  const [unloadable, setUnloadable] = useState(false);
   /** Bumped whenever the scene is laid out, so world-pinned overlays re-place. */
   const [sceneVersion, setSceneVersion] = useState(0);
 
@@ -594,6 +597,9 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     const offError = surface.on("error", () => {
       if (!surface.isOpen) setStatus("error");
     });
+    const offUnloadable = surface.on("unloadable", (failed) =>
+      setUnloadable(Boolean(failed)),
+    );
     const offViewport = surface.on("viewport", () => {
       if (renderer) onViewportChangeRef.current?.(renderer.getBounds());
     });
@@ -602,6 +608,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
       offOpen();
       offChange();
       offError();
+      offUnloadable();
       offViewport();
       surface.dispose();
       surfaceRef.current = null;
@@ -662,6 +669,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         className={join("clover-canvas", className)}
         data-testid="clover-canvas"
         data-status={status}
+        data-unloadable={unloadable || undefined}
         data-has-navigator={showNavigator}
         data-fullscreen={isFullscreen}
         data-controls={controlsVisible ? "visible" : "hidden"}
@@ -796,6 +804,8 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             ))}
           </span>
         )}
+        {/* Nothing it paints could be loaded: said in the middle of the Body. */}
+        <BodyUnloadable kind="image" shown={unloadable && !showPlaceholder} />
         {/*
          * Sound with no picture of its own, nor one shown for it, names itself in its
          * empty Body (Mat, 2026-10-23: "label these"), for the eye alone: the viewport

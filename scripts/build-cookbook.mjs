@@ -12,9 +12,11 @@
  * else the first image painted on it, by its image service at a size its `info.json`
  * allows. Nothing else is taken from a resource.
  *
- * The Cookbook's index is read too, and the recipes it lists that `cookbookSections.ts`
- * does not (or the other way about) are said, to be added there by hand, and to
- * `progress4.ts` once checked.
+ * Only the recipes on the Cookbook's viewer matrix are listed (Mat, 2026-10-28: "update
+ * the recipes in selects to these only"), the ones viewers are asked to handle; the rest
+ * are left out and said. The Cookbook's index is read too, and the recipes it lists that
+ * `cookbookSections.ts` does not (or the other way about) are said, to be added there by
+ * hand, and to `progress4.ts` once checked.
  */
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -26,6 +28,7 @@ import { resourceFor } from "docs/components/CookbookRecipes/cookbookCatalog";
 import { thumbnailFrom } from "docs/lib/iiif-image-sizes";
 
 const INDEX = "https://iiif.io/api/cookbook/";
+const MATRIX = "https://iiif.io/api/cookbook/recipe/matrix/";
 const OUT = resolve(
   fileURLToPath(new URL(".", import.meta.url)),
   "../docs/mocks/cookbook/recipes.json",
@@ -125,9 +128,10 @@ async function thumbnailOf(resource, depth = 0) {
   return canvasThumbnail(firstCanvas(resource));
 }
 
-/** The recipes the Cookbook's index lists, in its order. */
-async function indexed() {
-  const response = await fetch(INDEX);
+/** The recipes a page of the Cookbook's links, in its order: its index, or its matrix. */
+async function linked(page) {
+  const response = await fetch(page);
+  if (!response.ok) throw new Error(`${response.status} ${page}`);
   const html = await response.text();
   return [
     ...new Set(
@@ -160,7 +164,7 @@ const listed = cookbookSections.flatMap((section) =>
 
 const problems = [];
 
-const onIndex = await indexed().catch((error) => {
+const onIndex = await linked(INDEX).catch((error) => {
   problems.push(`The Cookbook's index could not be read: ${error.message}`);
   return [];
 });
@@ -173,28 +177,41 @@ if (onIndex.length) {
     problems.push(`In cookbookSections.ts, not on iiif.io's index: ${slug}`);
 }
 
+// Without the matrix, nothing is written: what would be listed is not known.
+const onMatrix = new Set(await linked(MATRIX));
+for (const { slug } of listed.filter((r) => !onMatrix.has(r.slug)))
+  problems.push(`Not on the matrix, left out: ${slug}`);
+for (const slug of [...onMatrix].filter(
+  (slug) => !listed.some((r) => r.slug === slug),
+))
+  problems.push(`On the matrix, not in cookbookSections.ts: ${slug}`);
+
 const recipes = (
-  await pool(listed, 6, async ({ slug, title, section }) => {
-    const resource = resourceFor(slug);
-    if (!resource) return undefined;
-    const read = await fetchJson(resource).catch((error) => {
-      problems.push(`Left out ${slug}: ${error.message}`);
-      return undefined;
-    });
-    if (!read) return undefined;
-    const type = /Collection/.test(read.type ?? read["@type"] ?? "")
-      ? "Collection"
-      : "Manifest";
-    const thumbnail = await thumbnailOf(read).catch(() => undefined);
-    return {
-      slug,
-      title,
-      section,
-      resource,
-      type,
-      ...(thumbnail && { thumbnail }),
-    };
-  })
+  await pool(
+    listed.filter((recipe) => onMatrix.has(recipe.slug)),
+    6,
+    async ({ slug, title, section }) => {
+      const resource = resourceFor(slug);
+      if (!resource) return undefined;
+      const read = await fetchJson(resource).catch((error) => {
+        problems.push(`Left out ${slug}: ${error.message}`);
+        return undefined;
+      });
+      if (!read) return undefined;
+      const type = /Collection/.test(read.type ?? read["@type"] ?? "")
+        ? "Collection"
+        : "Manifest";
+      const thumbnail = await thumbnailOf(read).catch(() => undefined);
+      return {
+        slug,
+        title,
+        section,
+        resource,
+        type,
+        ...(thumbnail && { thumbnail }),
+      };
+    },
+  )
 ).filter(Boolean);
 
 const checked = new Date().toISOString().slice(0, 10);

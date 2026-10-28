@@ -34,6 +34,12 @@
     var(--clover-canvas-controls-inset);
   /* Controls, shown with the rest (`Canvas.css`): they tuck down, toward their edge. */
   --clover-controls-edge: 1;
+  /*
+   * A slider's thumb and its track's height, the seek bar's and the volume's alike: `xs`,
+   * a step of the scale (Mat, 2026-10-28).
+   */
+  --clover-transport-thumb: 12px;
+  --clover-transport-track: var(--clover-space-xs);
   user-select: none;
   /*
    * The room a menu has above its button, on the bar's last row: the Body
@@ -218,6 +224,8 @@ button.clover-canvas-transport-button[aria-pressed="true"]::after {
   position: relative;
   display: flex;
   margin-bottom: var(--clover-space-xs);
+  /* The gap where a chapter begins, a step under the track, `2xs` (below). */
+  --clover-transport-gap: var(--clover-space-2xs);
 }
 
 .clover-canvas-transport input[type="range"] {
@@ -251,7 +259,7 @@ button.clover-canvas-transport-button[aria-pressed="true"]::after {
 }
 
 .clover-canvas-transport input[type="range"]::-webkit-slider-runnable-track {
-  height: 4px;
+  height: var(--clover-transport-track);
   border-radius: var(--clover-radius, 3px);
   background: linear-gradient(
     to right,
@@ -265,7 +273,7 @@ button.clover-canvas-transport-button[aria-pressed="true"]::after {
 }
 
 .clover-canvas-transport input[type="range"]::-moz-range-track {
-  height: 4px;
+  height: var(--clover-transport-track);
   border-radius: var(--clover-radius, 3px);
   background: linear-gradient(
     to right,
@@ -280,17 +288,19 @@ button.clover-canvas-transport-button[aria-pressed="true"]::after {
 
 .clover-canvas-transport input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
-  margin-top: -4px;
+  width: var(--clover-transport-thumb);
+  height: var(--clover-transport-thumb);
+  margin-top: calc(
+    (var(--clover-transport-track) - var(--clover-transport-thumb)) / 2
+  );
   border: none;
   border-radius: var(--clover-radius-pill, 2rem);
   background-color: var(--clover-player-text, #fff);
 }
 
 .clover-canvas-transport input[type="range"]::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
+  width: var(--clover-transport-thumb);
+  height: var(--clover-transport-thumb);
   border: none;
   border-radius: var(--clover-radius-pill, 2rem);
   background-color: var(--clover-player-text, #fff);
@@ -425,8 +435,19 @@ button.clover-canvas-transport-time:focus-visible {
   background-color: var(--clover-player-menu-hover, #26292b);
 }
 
+/*
+ * The chosen option (the chapter playing, the captions showing) is marked as Contents
+ * marks its current entry: a tint of the accent and bold words, never the accent's full
+ * fill (Mat, 2026-10-28). On the menu's dark ground the tint is 24%, as 8% is on a light
+ * one: it shows, and the white words keep 4.5:1 on it.
+ */
 .clover-canvas-transport-option:has(input:checked) {
-  background-color: var(--clover-color-accent, #0065c3);
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 24%,
+    transparent
+  );
+  font-weight: 600;
 }
 
 .clover-canvas-transport-option:has(input:focus-visible) {
@@ -437,8 +458,7 @@ button.clover-canvas-transport-time:focus-visible {
  * A caption track's language, as its code ("EN", "IT") before its name, in a column of
  * its own so the names line up; Off's cell is empty. At the transcript's size for its
  * codes (`Transcript.css`), and a little softer than the name: about 9:1 still on the
- * menu's ground. On the chosen row's accent it is the name's own white, since softened it
- * would fall under 4.5:1 (WCAG 1.4.3).
+ * menu's ground, and 8:1 on the chosen row's tint (WCAG 1.4.3).
  */
 .clover-canvas-transport-code {
   flex: none;
@@ -447,11 +467,6 @@ button.clover-canvas-transport-time:focus-visible {
   font-size: var(--clover-text-xs);
   font-weight: 600;
   line-height: 1;
-}
-
-.clover-canvas-transport-option:has(input:checked)
-  .clover-canvas-transport-code {
-  color: inherit;
 }
 
 /*
@@ -465,6 +480,61 @@ button.clover-canvas-transport-time:focus-visible {
 }
 
 /* The row is the control; the radio stays for keyboard and screen reader only. */
+/*
+ * The chapter playing, with its picture under its time and title (`ui/EntryThumbnail`),
+ * `2xs` below them, a step closer than the option's inset, as Contents sets it.
+ */
+.clover-canvas-transport-option:has(> .clover-entry-thumbnail) {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  justify-items: start;
+  gap: var(--clover-space-2xs) var(--clover-space-s);
+  /* As much room under the picture as beside it, so it sits square in the row. */
+  padding-block-end: var(--clover-space-s);
+}
+
+/*
+ * The chapters' menu is drawn as the Canvas's other menus are (Mat, 2026-10-28: "treat
+ * popover for chapters like we do annotations"): it takes their class,
+ * `clover-canvas-menu` (`ControlMenu.css`: Clover's ground and text, its radius and
+ * shadow), and each chapter is a row as an annotation is in theirs, its time muted in a
+ * column (`ui/Cue.css`) and its title at the page's size, `s` apart; under the pointer
+ * the rows' fill, focused the accent's ring, and the one playing tinted and bold, as
+ * Contents marks its current entry. The captions' menu keeps the bar's dark.
+ */
+.clover-canvas-transport-options.clover-canvas-menu {
+  border-radius: var(--clover-radius, 6px);
+  background-color: var(--clover-color-secondary, #fff);
+  color: var(--clover-color-primary, #1a1d1e);
+}
+
+.clover-canvas-menu > .clover-canvas-transport-option {
+  align-items: baseline;
+  gap: var(--clover-space-s);
+  font-size: inherit;
+}
+
+.clover-canvas-menu > .clover-canvas-transport-option:hover {
+  background-color: var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+/* Forced colors keep the chosen row's `Highlight` (below). */
+@media (forced-colors: none) {
+  .clover-canvas-menu > .clover-canvas-transport-option:has(input:checked) {
+    background-color: color-mix(
+      in srgb,
+      var(--clover-color-accent, #0065c3) 8%,
+      transparent
+    );
+  }
+}
+
+.clover-canvas-menu > .clover-canvas-transport-option:has(input:focus-visible) {
+  box-shadow: none;
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: -2px;
+}
+
 .clover-canvas-transport-option input {
   position: absolute;
   opacity: 0;
@@ -562,31 +632,46 @@ button.clover-canvas-transport-time:focus-visible {
 
 /* ---------- chapters ---------- */
 
-/* A notch where each chapter after the first begins. */
-.clover-canvas-transport-chapter-marker {
-  position: absolute;
-  top: 50%;
-  width: 2px;
-  height: var(--clover-space-s);
-  translate: -1px -50%;
-  border-radius: 1px;
-  background-color: var(--clover-player-text, #fff);
-  opacity: 0.7;
-  pointer-events: none;
+/*
+ * Where each chapter after the first begins, a gap cut out of the seek bar, as by a mask:
+ * the scrim and the picture show through (Mat, 2026-10-28: "treat steps more like masks
+ * of the seek bar"). `--clover-transport-gaps` is the mask (`Transport.tsx`), opaque but
+ * for `--clover-transport-gap` at each chapter's start, a step under the track. A disk at
+ * the thumb, as wide as its focus ring, is never cut. The gaps only mark what the
+ * chapters' menu and the popover name.
+ */
+.clover-canvas-transport-seek[data-gaps] {
+  mask-image:
+    radial-gradient(
+      circle at
+        calc(
+          var(--clover-transport-thumb) / 2 +
+            (100% - var(--clover-transport-thumb)) *
+            var(--clover-transport-at, 0)
+        )
+        50%,
+      #000 var(--clover-transport-thumb),
+      transparent var(--clover-transport-thumb)
+    ),
+    var(--clover-transport-gaps);
 }
 
 /*
  * The chapter under the pointer (`Transport.tsx`): its stretch of the seek bar drawn out
- * over the track, in the bar's own light, and its start and title in a popover (`Tip`)
- * over the stretch's middle, at once rather than after a control's pause, while the
- * pointer is on the bar or keyboard focus is. Escape puts it away (WCAG 1.4.13); the
- * pointer can rest on it. A chapter marked from a list beside the Canvas has its stretch
- * drawn out only.
+ * over the track, a step taller (`s`), in the bar's own light, and the time under the
+ * pointer and its title in a popover (`Tip`) over the stretch's middle, at once rather
+ * than after a control's pause, while the pointer is on the bar or keyboard focus is.
+ * Escape puts it away (WCAG 1.4.13); the pointer can rest on it. A chapter marked from a
+ * list beside the Canvas has its stretch drawn out only.
  */
 .clover-canvas-transport-chapter-span {
   position: absolute;
   top: 50%;
-  height: var(--clover-space-xs);
+  /* Clear of the gaps at its ends. */
+  box-sizing: border-box;
+  border-inline: calc(var(--clover-transport-gap) / 2) solid transparent;
+  background-clip: padding-box;
+  height: var(--clover-space-s);
   translate: 0 -50%;
   border-radius: var(--clover-radius, 3px);
   background-color: var(--clover-player-text, #fff);
@@ -596,6 +681,22 @@ button.clover-canvas-transport-time:focus-visible {
 
 .clover-canvas-transport-seek-area > .clover-tip {
   left: var(--clover-transport-preview, 50%);
+}
+
+/*
+ * A chapter's picture over its start and title (its Range's `thumbnail`, Cookbook 0229):
+ * `--clover-picture` wide, about the frame a video player previews, as Contents and the
+ * menu show the chapter playing, or the popover's room where that is less (`ui/Tip.css`).
+ * Around it, a step more room than a popover of words alone has, `s`, and `xs` between
+ * it and its words (Mat, 2026-10-28).
+ */
+.clover-canvas-transport-seek-area > .clover-tip:has(> .clover-tip-image) {
+  padding: var(--clover-space-s);
+}
+
+.clover-canvas-transport-seek-area > .clover-tip .clover-tip-image {
+  width: var(--clover-picture);
+  margin-block-end: var(--clover-space-xs);
 }
 
 .clover-canvas-transport-seek-area:is(:hover, :has(> input:focus-visible)):not(
@@ -616,9 +717,12 @@ button.clover-canvas-transport-time:focus-visible {
 }
 
 /*
- * Full white, with the time's shadow: dimmed, it fell below 4.5:1 over a light picture.
- * It takes what the time leaves, up to its own width, and adds nothing to the room a row
- * needs (`width: 0`), so a long title is cut short rather than wrapping the bar.
+ * Muted beside the time, as the seek bar's popover sets them (Mat, 2026-10-28), and with
+ * the time's shadow, but only as far as 4.5:1 allows: 85% of the bar's white over the
+ * scrim's lightest (60% black over a white frame, #666) is 4.65:1; 80% fell under
+ * (WCAG 1.4.3). It takes what the time leaves, up to its own width, and adds nothing to
+ * the room a row needs (`width: 0`), so a long title is cut short rather than wrapping
+ * the bar.
  */
 .clover-canvas-transport-status > .clover-canvas-transport-chapter {
   flex: 1 1 auto;
@@ -626,7 +730,7 @@ button.clover-canvas-transport-time:focus-visible {
   width: 0;
   min-width: 0;
   max-width: 16rem;
-  color: var(--clover-player-text, #fff);
+  color: color-mix(in srgb, var(--clover-player-text, #fff) 85%, transparent);
   font-size: var(--clover-text-s);
   text-overflow: ellipsis;
   white-space: nowrap;

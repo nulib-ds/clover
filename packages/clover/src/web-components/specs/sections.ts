@@ -259,6 +259,7 @@ export const about: ElementSpec = {
   attributes: {
     "canvas-summary": { prop: "canvasSummary", type: "boolean" },
     download: { prop: "download", type: "boolean" },
+    languages: { prop: "languages", type: "boolean" },
     thumbnail: { prop: "thumbnail", type: "boolean" },
     label: { prop: "label", type: "boolean" },
     ...headingLevel,
@@ -275,6 +276,11 @@ export const aboutDocs: ElementDocs = {
     },
     download: {
       description: '"false" leaves out the downloads.',
+      default: "true",
+    },
+    languages: {
+      description:
+        'Alone: outside a clover-panel, where what the resource says of itself comes in several languages, a choice of them over what it says, the whole clover-root reading in the one chosen. "false" leaves it out.',
       default: "true",
     },
     thumbnail: {

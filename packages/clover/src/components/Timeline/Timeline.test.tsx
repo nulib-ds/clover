@@ -50,6 +50,33 @@ describe("Timeline", () => {
     expect(screen.queryByTestId("clover-canvas-navigator")).toBeNull();
   });
 
+  it("says in the middle of the Body when its recording could not be loaded, until another comes", async () => {
+    const onMediaElement = vi.fn();
+    render(
+      <Clover.Timeline
+        timeline={audioV4Json.items[0] as never}
+        onMediaElement={onMediaElement}
+      />,
+    );
+    await screen.findByRole("button", { name: "Play" });
+    const element = onMediaElement.mock.calls.at(-1)?.[0] as HTMLMediaElement;
+    Object.defineProperty(element, "error", {
+      configurable: true,
+      value: { code: 4 },
+    });
+    fireEvent(element, new Event("error"));
+    const note = await screen.findByText("This audio could not be loaded.");
+    expect(note.closest("[role]")).toHaveAttribute("role", "status");
+    Object.defineProperty(element, "error", {
+      configurable: true,
+      value: null,
+    });
+    fireEvent(element, new Event("loadstart"));
+    await waitFor(() =>
+      expect(screen.queryByText("This audio could not be loaded.")).toBeNull(),
+    );
+  });
+
   /*
    * It draws on a surface of its own, so a page that plays sound loads no image renderer
    * and holds none of the page's WebGL contexts. Its view keeps its name and keys.

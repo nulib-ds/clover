@@ -13,6 +13,7 @@ import { playFrom } from "../../../lib/time";
 import type { CanvasSurface } from "../surface";
 import type { Rect } from "../../../lib/renderer";
 import { useOptionalClover } from "../../../react/context";
+import { BodyUnloadable } from "../../../ui/BodyUnloadable";
 
 const SKIP_SECONDS = 10;
 /** A moment's annotation (`#t=` with no end) shows this long, to read a few words. */
@@ -113,6 +114,7 @@ const MediaBody: React.FC<MediaBodyProps> = ({
   const language = givenLanguage ?? rootLanguage;
   const element = useMediaElement(media, { request, language });
   const controller = useMediaController(element, media.duration);
+  const failed = useMediaFailed(element);
   // The Manifest's tracks, named in the reader's language and tagged with it (WCAG 3.1.2).
   const own = useMemo<CaptionOption[]>(
     () =>
@@ -282,6 +284,7 @@ const MediaBody: React.FC<MediaBodyProps> = ({
       chapters={chapters}
       highlightedChapter={highlightedChapter}
       onChapterHighlight={onChapterHighlight}
+      request={request}
     />
   );
   /*
@@ -346,6 +349,7 @@ const MediaBody: React.FC<MediaBodyProps> = ({
           />
           {cuesShown}
           {transport}
+          <BodyUnloadable kind={media.kind} shown={failed} room />
           {chapters && chapters.length > 0 && (
             <PlayerChapters
               chapters={chapters}
@@ -367,11 +371,33 @@ const MediaBody: React.FC<MediaBodyProps> = ({
     >
       {transport}
       {cuesShown}
+      <BodyUnloadable kind={media.kind} shown={failed} room />
     </div>
   );
 };
 
 export default MediaBody;
+
+/**
+ * Whether the element could not load what it was given (its `error`, a source that
+ * answers with an error or that the browser cannot play), until it is given another.
+ */
+function useMediaFailed(element: HTMLVideoElement | null) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    setFailed(Boolean(element?.error));
+    if (!element) return;
+    const fail = () => setFailed(Boolean(element.error));
+    const retry = () => setFailed(false);
+    element.addEventListener("error", fail);
+    element.addEventListener("loadstart", retry);
+    return () => {
+      element.removeEventListener("error", fail);
+      element.removeEventListener("loadstart", retry);
+    };
+  }, [element]);
+  return failed;
+}
 
 /** A video element's frame size, kept current as metadata arrives or the stream changes. */
 function useVideoSize(element: HTMLVideoElement | null) {

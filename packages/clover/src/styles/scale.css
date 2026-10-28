@@ -38,6 +38,11 @@
    * `s`, a label over its value `xs`.
    */
   --clover-inset: var(--clover-space-l);
+  /*
+   * A picture of a stretch of a recording (a chapter's): over the seek bar, and under the
+   * chapter playing in Contents and the chapters' menu.
+   */
+  --clover-picture: calc(4 * var(--clover-space-xl));
 }
 
 /*

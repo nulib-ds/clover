@@ -13,6 +13,7 @@ import { Tip } from "./Tip";
 import { useContainerName } from "./useContainerName";
 import { useScrollTrack } from "./useScrollTrack";
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
+import { Chevron } from "./Chevron";
 
 /** A layout effect in the browser, an effect on the server (where there is no layout). */
 const useIsomorphicLayoutEffect =
@@ -48,6 +49,11 @@ export interface SectionSpec {
   value: string;
   label: React.ReactNode;
   content: React.ReactNode;
+  /**
+   * Controls of its own beside its heading in an accordion, shown whether it is open or
+   * not (About's languages, which the whole Root reads in); over its content in tabs.
+   */
+  actions?: React.ReactNode;
 }
 
 /** How the sections are laid out. */
@@ -82,7 +88,7 @@ export interface SectionsProps {
  *   lie past it, and shows an arrow there to page it.
  * - `accordion`: each button sits in a heading above its panel, `aria-expanded`; opening
  *   one closes the others. One is always open, as a tab is, so the open one cannot be
- *   closed: its button is `aria-disabled` and draws no chevron. The arrow keys move
+ *   closed: its button is `aria-disabled`, its chevron up, in the accent. The arrow keys move
  *   between headings without opening them, and each button is its own tab stop
  *   (WAI-ARIA accordion). Every heading stays in sight in a scrolling container: those
  *   scrolled past stack at its top, those an open section pushes below stack at its
@@ -460,26 +466,11 @@ export function Sections({
         onKeyDown={(event) => onKeyDown(event, index)}
       >
         <span className="clover-sections-label">{item.label}</span>
-        {/* A closed box's heading, drawn as something to open; a tab's state is its underline. */}
-        {!tabs && !isOpen && (
-          <svg
-            aria-hidden="true"
-            focusable="false"
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            className="clover-sections-chevron"
-          >
-            <path
-              d="M3 4.5l3 3 3-3"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        )}
+        {/*
+         * A box's chevron: down to open; up, in the accent, on the open one, which cannot
+         * close (Mat, 2026-10-28). A tab's state is its underline.
+         */}
+        {!tabs && <Chevron open={isOpen} className="clover-sections-chevron" />}
       </button>
     );
   };
@@ -556,6 +547,7 @@ export function Sections({
                 tabs={tabs}
                 labelledBy={`${id}-button-${index}`}
                 hidden={!isOpen}
+                actions={item.actions}
               >
                 {mounted.current.has(item.value) ? item.content : null}
               </Panel>
@@ -573,49 +565,60 @@ export function Sections({
  * the end of its row, while the section is open. Its width is written to the section
  * (`--clover-sections-actions`), so the heading's button keeps that room clear and its
  * label never runs under them, however long or spaced its text (WCAG 1.4.12). Empty, it
- * takes no room.
+ * takes no room. A section's own `actions` show there whether it is open or not; in tabs,
+ * over its content.
  */
 function Panel({
   id,
   tabs,
   labelledBy,
   hidden,
+  actions: own,
   children,
 }: {
   id: string;
   tabs: boolean;
   labelledBy: string;
   hidden: boolean;
+  actions?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const [actions, setActions] = useState<HTMLDivElement | null>(null);
-  // Measured while its section is open: closed, it is hidden, and holds nothing.
+  // Shown while its section is open, or always where it has controls of its own.
+  const shown = !hidden || Boolean(own);
+  // Measured while shown: hidden, it holds nothing.
   useIsomorphicLayoutEffect(() => {
     const section = actions?.parentElement;
-    if (hidden || !actions || !section || typeof ResizeObserver === "undefined")
+    if (!shown || !actions || !section || typeof ResizeObserver === "undefined")
       return;
     const observer = new ResizeObserver(() => {
       const width = actions.offsetWidth;
       if (width) {
         section.style.setProperty("--clover-sections-actions", `${width}px`);
+        // So its chevron keeps the end of the row, the controls before it.
+        section.setAttribute("data-actions", "");
       } else {
         section.style.removeProperty("--clover-sections-actions");
+        section.removeAttribute("data-actions");
       }
     });
     observer.observe(actions);
     return () => {
       observer.disconnect();
       section.style.removeProperty("--clover-sections-actions");
+      section.removeAttribute("data-actions");
     };
-  }, [actions, hidden]);
+  }, [actions, shown]);
   return (
     <>
       {!tabs && (
         <div
           ref={setActions}
           className="clover-sections-actions"
-          hidden={hidden}
-        />
+          hidden={!shown}
+        >
+          {own}
+        </div>
       )}
       <div
         id={id}
@@ -627,6 +630,7 @@ function Panel({
         hidden={hidden}
       >
         <SectionActionsContext.Provider value={tabs ? null : actions}>
+          {tabs && own}
           {children}
         </SectionActionsContext.Provider>
       </div>

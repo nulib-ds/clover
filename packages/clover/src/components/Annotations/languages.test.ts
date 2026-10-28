@@ -1,11 +1,8 @@
 import type { AnnotationEntry } from "../../core/annotation-sets";
 import { directionOf } from "../../core/direction";
-import {
-  autonym,
-  inLanguage,
-  languagesOf,
-  startingLanguage,
-} from "./languages";
+import { startingLanguage } from "../../core/language-choice";
+import { autonym } from "../../ui/LanguageChoice";
+import { inLanguage, languagesOf } from "./languages";
 
 const entry = (...languages: Array<string | undefined>) =>
   ({

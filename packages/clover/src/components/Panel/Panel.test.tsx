@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -7,6 +8,7 @@ import {
 } from "@testing-library/react";
 import React from "react";
 
+import articlesJson from "../../fixtures/iiif-cookbook/0025-newspaper-article-index.json";
 import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
 
@@ -161,15 +163,80 @@ describe("Panel", () => {
     expect(
       within(panel).getByRole("heading", { name: "Rights" }),
     ).toBeInTheDocument();
+    // The downloads are behind About's Download button, not in what it says.
     expect(
-      within(panel).getByRole("link", { name: "PDF (application/pdf)" }),
-    ).toHaveAttribute("href", "https://example.org/letter.pdf");
+      within(panel).queryByRole("link", { name: "PDF (application/pdf)" }),
+    ).toBeNull();
+    expect(
+      within(panel).getByRole("button", { name: "Download" }),
+    ).toBeInTheDocument();
     expect(
       within(panel).getByRole("link", { name: "The letter's page" }),
     ).toBeInTheDocument();
     expect(
       within(panel).getByRole("link", { name: manifest.id }),
     ).toBeInTheDocument();
+  });
+
+  /*
+   * About's heading offers the downloads (Mat, 2026-10-28): a button that discloses the
+   * page's and the Manifest's renderings as links, in named groups, the links next in the
+   * tab order; Escape closes it and hands focus back.
+   */
+  it("lists the downloads from a Download button beside About's heading", async () => {
+    render(
+      <Clover.Root iiifContent={manifest}>
+        <Clover.Panel layout="accordion" />
+      </Clover.Root>,
+    );
+    const button = await screen.findByRole("button", { name: "Download" });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    // Not in About's own section.
+    expect(
+      screen.queryByRole("heading", { name: "Download" }),
+    ).not.toBeInTheDocument();
+    fireEvent.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    // Its popover loads as it first opens.
+    const popover = await waitFor(() => {
+      const found = document.getElementById(
+        button.getAttribute("aria-controls")!,
+      );
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    const link = within(popover).getByRole("link", {
+      name: "PDF (application/pdf)",
+    });
+    expect(link).toHaveAttribute("href", "https://example.org/letter.pdf");
+    expect(link.closest('[role="group"]')).toHaveAccessibleName(
+      expect.stringMatching(/^(This page|All pages)$/),
+    );
+    // Groups, not headings, in a popover.
+    expect(within(popover).queryByRole("heading")).toBeNull();
+    link.focus();
+    fireEvent.keyDown(link, { key: "Escape" });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveFocus();
+
+    // Focus moving on past it closes it, so it never covers where focus went (2.4.11).
+    fireEvent.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    act(() => screen.getByRole("link", { name: manifest.id }).focus());
+    expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("leaves the Download button out with download={false}", async () => {
+    render(
+      <Clover.Root iiifContent={manifest}>
+        <Clover.Panel layout="accordion" download={false} />
+      </Clover.Root>,
+    );
+    await screen.findByRole("button", { name: "About" });
+    expect(screen.queryByRole("button", { name: "Download" })).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: "PDF (application/pdf)" }),
+    ).toBeNull();
   });
 
   it("names its row of tabs as the panel, not an action", async () => {
@@ -540,5 +607,192 @@ describe("About, for a Canvas shown on its own", () => {
       .closest(".clover-sections-item")
       ?.querySelector(".clover-sections-button");
     expect(document.activeElement).toBe(heading ?? about);
+  });
+});
+
+/*
+ * What the Manifest says of itself in several languages (Cookbook 0006): a row of their
+ * codes picks the one About reads it in, beside its heading in an accordion.
+ */
+describe("The languages to read a resource in", () => {
+  const bilingual = {
+    ...manifest,
+    label: { en: ["A letter"], fr: ["Une lettre"] },
+    summary: { en: ["Written in 1849."], fr: ["Écrite en 1849."] },
+    metadata: [
+      { label: { en: ["Date"], fr: ["Date"] }, value: { none: ["1849"] } },
+    ],
+  };
+
+  it("offers the languages, starting in the Root's, and reads the Root in the one chosen", async () => {
+    render(
+      <Clover.Root iiifContent={bilingual}>
+        <Clover.Label as="h1" />
+        <Clover.Panel />
+      </Clover.Root>,
+    );
+    const panel = await screen.findByRole("tabpanel", { name: "About" });
+    const row = await screen.findByRole("group", { name: "Language" });
+    const english = within(row).getByRole("radio", { name: /English/ });
+    const french = within(row).getByRole("radio", { name: /français/ });
+    expect(english).toBeChecked();
+    expect(within(panel).getByText("Written in 1849.")).toHaveAttribute(
+      "lang",
+      "en",
+    );
+    fireEvent.click(french);
+    expect(french).toBeChecked();
+    expect(await within(panel).findByText("Écrite en 1849.")).toHaveAttribute(
+      "lang",
+      "fr",
+    );
+    expect(
+      within(panel).getByRole("heading", { name: "Une lettre" }),
+    ).toBeInTheDocument();
+    // The choice is the Root's: the title over it reads in French too.
+    expect(
+      await screen.findByRole("heading", { name: "Une lettre", level: 1 }),
+    ).toHaveAttribute("lang", "fr");
+  });
+
+  it("lets the page's own language win again as it changes", async () => {
+    const { rerender } = render(
+      <Clover.Root iiifContent={bilingual} language="en">
+        <Clover.Label as="h1" />
+        <Clover.Panel />
+      </Clover.Root>,
+    );
+    fireEvent.click(await screen.findByRole("radio", { name: /français/ }));
+    expect(
+      await screen.findByRole("heading", { name: "Une lettre", level: 1 }),
+    ).toBeInTheDocument();
+    rerender(
+      <Clover.Root iiifContent={bilingual} language="fr">
+        <Clover.Label as="h1" />
+        <Clover.Panel />
+      </Clover.Root>,
+    );
+    rerender(
+      <Clover.Root iiifContent={bilingual} language="en">
+        <Clover.Label as="h1" />
+        <Clover.Panel />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByRole("heading", { name: "A letter", level: 1 }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /English/ })).toBeChecked();
+  });
+
+  it("holds its row beside About's heading, shown whichever section is open", async () => {
+    render(
+      <Clover.Root iiifContent={bilingual} language="fr">
+        <Clover.Panel layout="accordion">
+          <Clover.Tab value="about" label="About">
+            <Clover.About />
+          </Clover.Tab>
+          <Clover.Tab value="notes" label="Notes">
+            <p>My notes</p>
+          </Clover.Tab>
+        </Clover.Panel>
+      </Clover.Root>,
+    );
+    const row = await screen.findByRole("group", { name: "Language" });
+    expect(row.closest(".clover-about")).toBeNull();
+    expect(
+      row.closest(".clover-sections-actions")?.parentElement,
+    ).toHaveAttribute("data-value", "about");
+    expect(screen.getAllByRole("group", { name: "Language" })).toHaveLength(1);
+    // The languages furthest along the row, the Download button before them.
+    expect(row.parentElement?.lastElementChild).toBe(row);
+    expect(row.parentElement?.firstElementChild).toContainElement(
+      screen.getByRole("button", { name: "Download" }),
+    );
+    expect(within(row).getByRole("radio", { name: /français/ })).toBeChecked();
+    expect(await screen.findByText("Écrite en 1849.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Notes" }));
+    expect(await screen.findByText("My notes")).toBeVisible();
+    expect(screen.getByRole("group", { name: "Language" })).toBeVisible();
+  });
+
+  it("holds its row itself where About is alone", async () => {
+    render(
+      <Clover.Root iiifContent={bilingual}>
+        <Clover.About />
+      </Clover.Root>,
+    );
+    const row = await screen.findByRole("group", { name: "Language" });
+    expect(row.closest(".clover-about")).not.toBeNull();
+  });
+
+  it("leaves the choice out with languages={false}, alone or in a Panel", async () => {
+    const { unmount } = render(
+      <Clover.Root iiifContent={bilingual}>
+        <Clover.Panel layout="accordion" languages={false} />
+      </Clover.Root>,
+    );
+    expect(await screen.findByText("Written in 1849.")).toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "Language" })).toBeNull();
+    unmount();
+    render(
+      <Clover.Root iiifContent={bilingual}>
+        <Clover.About languages={false} />
+      </Clover.Root>,
+    );
+    expect(await screen.findByText("Written in 1849.")).toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "Language" })).toBeNull();
+  });
+
+  it("offers none where what it says is in one language", async () => {
+    render(
+      <Clover.Root
+        iiifContent={{
+          ...bilingual,
+          label: { en: ["A letter"] },
+          summary: undefined,
+          metadata: [],
+        }}
+      >
+        <Clover.Panel />
+      </Clover.Root>,
+    );
+    await screen.findByRole("tabpanel", { name: "About" });
+    expect(screen.queryByRole("group", { name: "Language" })).toBeNull();
+  });
+});
+
+// Cookbook 0025: an article's column picked on the Canvas.
+describe("A Range's region picked", () => {
+  it("opens Contents, its article current there, and moves no focus", async () => {
+    let clover: any;
+    const Spy = () => {
+      clover = Clover.useClover("Spy").clover;
+      return null;
+    };
+    render(
+      <Clover.Root iiifContent={articlesJson}>
+        <Spy />
+        <Clover.Panel layout="accordion" />
+      </Clover.Root>,
+    );
+    const about = await screen.findByRole("button", { name: "About" });
+    expect(about).toHaveAttribute("aria-expanded", "true");
+    await vi.waitFor(() => expect(clover.store.get().regions).not.toBeNull());
+    const region = clover.store
+      .get()
+      .regions.entries.find((entry: any) => entry.place?.index === 2);
+    const before = document.activeElement;
+    act(() => clover.selectAnnotation(region.id));
+    expect(
+      await screen.findByRole("button", { name: "Contents" }),
+    ).toHaveAttribute("aria-expanded", "true");
+    const nav = await screen.findByRole("navigation", { name: "Contents" });
+    expect(
+      within(nav).getByRole("button", { name: "Tagesneuigkeiten" }),
+    ).toHaveAttribute("aria-current", "true");
+    expect(nav.querySelector(".clover-steps-position")).toHaveTextContent(
+      "2 / 4",
+    );
+    expect(document.activeElement).toBe(before);
   });
 });

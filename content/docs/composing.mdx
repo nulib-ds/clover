@@ -361,7 +361,10 @@ interface language: the one set with `initCloverI18n`, else the page's `<html la
 the first of the browser's languages it has, else English, so it speaks the language of
 the page around it. It ships English, Finnish,
 French, Norwegian (Bokmål and Nynorsk), Portuguese (European) and Spanish, each complete.
-IIIF text is read in the Root's `language`, else the page's, else the browser's.
+IIIF text is read in the Root's `language`, else the page's, else the browser's. Where
+what the resource says of itself comes in several languages, the Panel's About offers
+them, and the one the reader chooses is the whole Root's until the page sets another
+`language`.
 
 ```jsx
 import { initCloverI18n } from "@nulib/clover";

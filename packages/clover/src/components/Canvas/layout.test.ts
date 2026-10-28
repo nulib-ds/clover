@@ -9,6 +9,7 @@ import continuousJson from "../../fixtures/iiif-cookbook/0011-book-3-behavior-co
 import placeholderJson from "../../fixtures/iiif-cookbook/0013-placeholderCanvas.json";
 import accompanyingJson from "../../fixtures/iiif-cookbook/0014-accompanyingcanvas.json";
 import choiceJson from "../../fixtures/iiif-cookbook/0033-choice.json";
+import operaJson from "../../fixtures/iiif-cookbook/0064-opera-one-canvas.json";
 import compositionJson from "../../fixtures/iiif-cookbook/0036-composition-from-multiple-images.json";
 import languagesJson from "../../fixtures/iiif-cookbook/0074-multiple-language-captions.json";
 import captionsJson from "../../fixtures/iiif-cookbook/0219-using-caption-file.json";
@@ -17,6 +18,7 @@ import transcriptJson from "../../fixtures/iiif-cookbook/0253-using-transcript-f
 import pagesJson from "../../fixtures/mocks/page-transcript/manifest.json";
 import {
   type IIIFCanvas,
+  animationFrames,
   arrangeCanvases,
   canvasCaptions,
   canvasScene,
@@ -363,5 +365,33 @@ describe("canvasCaptions", () => {
         language: undefined,
       },
     ]);
+  });
+});
+
+// Cookbook 0064: an opera's two acts, each a video, painted one after the other.
+describe("a Canvas's files one after another on its time", () => {
+  const [canvas] = p4(operaJson).items as IIIFCanvas[];
+
+  it("plays them as one: its segments, in order, and the Canvas's duration", () => {
+    const { media } = canvasScene([canvas], "left-to-right");
+    expect(media).toHaveLength(1);
+    expect(media[0].src).toMatch(/act_1\.mp4$/);
+    expect(media[0].duration).toBe(7278.422);
+    expect(media[0].segments).toEqual([
+      expect.objectContaining({ start: 0, duration: 3971.24 }),
+      expect.objectContaining({ start: 3971.24, duration: 3307.22 }),
+    ]);
+    expect(media[0].segments?.[1].src).toMatch(/act_2\.mp4$/);
+  });
+
+  it("is no animation, whose frames are images", () => {
+    expect(animationFrames(canvas)).toEqual([]);
+  });
+
+  it("has no segments with one file", () => {
+    const [one] = p4(videoJson).items as IIIFCanvas[];
+    expect(canvasScene([one], "left-to-right").media[0]).not.toHaveProperty(
+      "segments",
+    );
   });
 });

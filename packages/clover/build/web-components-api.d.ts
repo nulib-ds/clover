@@ -50,6 +50,8 @@ export interface CloverState {
   /** Annotation sets switched off. */
   hiddenSets: string[];
   addedSets: CloverAnnotationSet[];
+  /** The regions the Manifest's Ranges name, drawn as annotations ("contents"). */
+  regions: CloverAnnotationSet | null;
   search: {
     query: string;
     status: CloverStatus;
@@ -91,7 +93,7 @@ export interface CloverNavigation {
 export interface CloverAnnotationSet {
   id: string;
   label?: CloverLanguageMap;
-  source: "manifest" | "added" | "search";
+  source: "manifest" | "added" | "search" | "contents";
   entries: Array<{
     id: string;
     setId: string;
@@ -114,6 +116,19 @@ export interface CloverContentsEntry {
   time?: { start: number; end?: number };
   /** The region on that Canvas, when the Range names one. */
   region?: { x: number; y: number; w: number; h: number };
+  /**
+   * Its own Canvases and their regions, in the order the Range reads them, where a
+   * region is among them or its pages are out of the Manifest's order (an article's
+   * columns, page 2 then page 5); none otherwise.
+   */
+  parts?: Array<{
+    canvasId: string;
+    region?: { x: number; y: number; w: number; h: number };
+  }>;
+  /** A Range of `behavior` `sequence`: an order of its own Canvases, the first the default. */
+  sequence?: true;
+  /** Its Range's `thumbnail`, the first it gives, as the Manifest writes it. */
+  thumbnail?: Record<string, unknown>;
   children: CloverContentsEntry[];
 }
 

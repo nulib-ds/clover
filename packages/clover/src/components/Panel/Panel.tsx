@@ -8,6 +8,8 @@ import React, {
 } from "react";
 
 import { About } from "./About";
+import { AboutActions } from "./AboutActions";
+import { InPanelContext } from "./ReadingLanguages";
 import { Tip } from "../../ui/Tip";
 import { Close } from "../Body/glyphs";
 import {
@@ -124,8 +126,17 @@ export interface PanelProps
   headingLevel?: number;
   /** The element to render. Default `aside`. */
   as?: React.ElementType;
-  /** Whether the default About lists the downloads (`About`'s `download`). Default `true`. */
+  /**
+   * Whether About's heading offers the downloads, by a Download button that lists the
+   * `rendering` of the page in view and of the Manifest. Default `true`.
+   */
   download?: boolean;
+  /**
+   * Where what the resource says of itself comes in several languages, About's heading
+   * offers them, and the whole Root reads in the one chosen. Default `true`; `false`
+   * leaves the choice out, and the Root reads in its `language`, else the reader's.
+   */
+  languages?: boolean;
   /**
    * `Clover.Tab`s. Without any, the panel has the tabs Clover has data for: About,
    * Contents when the Manifest has Ranges, Search when it has a Content Search service, a
@@ -160,6 +171,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
     headingLevel = 3,
     as: Tag = "aside",
     download = true,
+    languages = true,
     className,
     children,
     onKeyDown,
@@ -223,17 +235,28 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
   // In the accordion what a section holds is a level below its heading; tabs are not
   // headings.
   const inner = layout === "accordion" ? headingLevel + 1 : headingLevel;
+  /*
+   * Beside About's heading, shown whichever section is open: its Download button and the
+   * languages to read the resource in, a choice that is the whole Root's
+   * (`AboutActions`).
+   */
+  const aboutActions =
+    languages || download ? (
+      <AboutActions languages={languages} download={download} />
+    ) : undefined;
   const tabs: SectionSpec[] = given.length
     ? given.map(({ props }) => ({
         value: props.value,
         label: props.label,
         content: props.children,
+        ...(props.value === "about" && { actions: aboutActions }),
       }))
     : [
         {
           value: "about",
           label: tabLabel("informationPanelTabsAbout"),
           content: <About headingLevel={inner} download={download} />,
+          actions: aboutActions,
         },
         ...(hasCollection
           ? [
@@ -318,6 +341,24 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
   }, [query, searchable, value]);
 
   /*
+   * A Range's region picked on the Canvas (an article's column, Cookbook 0025) opens
+   * Contents (Mat, 2026-10-28), where its entry is current and its step at that part, as
+   * a search opens Search: only the open section changes, never focus (WCAG 3.2.2), a
+   * Panel that is shut stays shut, and a `value` the host controls is the host's.
+   */
+  const pickedRegion = useCloverSelector((state) =>
+    state.annotationId &&
+    state.regions?.entries.some((entry) => entry.id === state.annotationId)
+      ? state.annotationId
+      : null,
+  );
+  const hasContentsTab = tabs.some((tab) => tab.value === "contents");
+  useEffect(() => {
+    if (pickedRegion && hasContentsTab && value === undefined)
+      setOwn("contents");
+  }, [pickedRegion, hasContentsTab, value]);
+
+  /*
    * A search's hits are drawn on the Canvas only while its section is open (Mat,
    * 2026-10-26: "search results should go away if search tab is closed"): closed, they go,
    * the query and its list kept, and they come back as it opens again.
@@ -386,18 +427,22 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
           <Tip label={t("informationPanelClose")} />
         </button>
       )}
-      <Sections
-        items={tabs}
-        layout={layout}
-        value={value !== undefined ? value : own}
-        onValueChange={(next) => {
-          if (value === undefined) setOwn(next);
-          onValueChange?.(next);
-        }}
-        label={t("informationPanelTabs")}
-        labelLang={langOf("informationPanelTabs")}
-        headingLevel={headingLevel}
-      />
+      <InPanelContext.Provider
+        value={tabs.some((section) => section.value === "about")}
+      >
+        <Sections
+          items={tabs}
+          layout={layout}
+          value={value !== undefined ? value : own}
+          onValueChange={(next) => {
+            if (value === undefined) setOwn(next);
+            onValueChange?.(next);
+          }}
+          label={t("informationPanelTabs")}
+          labelLang={langOf("informationPanelTabs")}
+          headingLevel={headingLevel}
+        />
+      </InPanelContext.Provider>
     </Tag>
   );
 });

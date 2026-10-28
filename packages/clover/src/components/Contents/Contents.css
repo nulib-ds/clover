@@ -13,10 +13,92 @@ button.clover-contents-button {
   display: block;
 }
 
-/* On a recording's time: its time, then its label, as a cue's row (`ui/Cue.css`). */
-button.clover-contents-button[data-timed="true"] {
+/*
+ * An entry and the entries under it, as far apart as the entries of a list are
+ * (`Panel.css`, "Rows"), so every entry is the same gap from the next, nested or not.
+ */
+.clover-contents-item {
   display: flex;
-  gap: var(--clover-space-s);
+  flex-direction: column;
+  gap: var(--clover-space-2xs);
+}
+
+/*
+ * An entry's row: the entry, then, where entries are under it, the button that opens and
+ * closes them, at the row's end, `l` square (past 24px, WCAG 2.5.8), its chevron the
+ * panel's own (`ui/Chevron`), in the text's color as a heading's is, tinted under the
+ * pointer as a row is.
+ */
+.clover-contents-row {
+  display: flex;
+  align-items: center;
+  gap: var(--clover-space-2xs);
+}
+
+.clover-contents-row > button.clover-contents-button {
+  flex: 1;
+  min-width: 0;
+}
+
+/*
+ * Its chevron at the end of the row, in the column the panel's headings draw theirs in
+ * (`ui/Sections.css`): the button reaches past the row by half of what it is wider than
+ * its chevron, so its target keeps its size and its chevron centered in it. Outside a
+ * panel (no `--clover-chevron`), it keeps to the row.
+ */
+button.clover-contents-toggle {
+  margin-inline-end: calc((var(--clover-chevron) - var(--clover-space-l)) / 2);
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+  padding: 0;
+  border: 0;
+  border-radius: var(--clover-radius, 3px);
+  background: none;
+  color: var(--clover-color-primary, #1a1d1e);
+  cursor: pointer;
+}
+
+button.clover-contents-toggle:hover {
+  background-color: var(--clover-color-secondary-muted, #f1f1f1);
+}
+
+/* Focused, the ring the panel's own controls take (`ui/Sections.css`). */
+button.clover-contents-toggle:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: -2px;
+}
+
+/* The entries holding the current one, in the text's weight, so the trail to it shows. */
+button.clover-contents-button[data-trail="true"] {
+  font-weight: 600;
+}
+
+/*
+ * On a recording's time: its time, then its label, as a cue's row (`ui/Cue.css`). The
+ * current entry's picture goes under them, `2xs` below, a step closer than the row's
+ * inset, as it belongs to them (Mat, 2026-10-28; `ui/EntryThumbnail.css`).
+ */
+button.clover-contents-button:is([data-timed="true"], [data-pictured="true"]) {
+  display: grid;
+  justify-items: start;
+  gap: var(--clover-space-2xs) var(--clover-space-s);
+}
+
+button.clover-contents-button[data-timed="true"] {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+/*
+ * With its picture, as much room under it as beside it, past the row's 3px edge and its
+ * `s`, so it sits square in the row (Mat, 2026-10-28: "clean up the padding").
+ */
+button.clover-contents-button[data-pictured="true"] {
+  padding-block-end: calc(var(--clover-space-s) + 3px);
 }
 
 button.clover-contents-button:disabled {
@@ -26,4 +108,56 @@ button.clover-contents-button:disabled {
 
 button.clover-contents-button[aria-current="true"] {
   font-weight: 600;
+}
+
+/*
+ * The current entry is marked by its tint and its weight, with no accent edge at its
+ * start, as the panel's other rows have (Mat, 2026-10-28: "don't add the left border full
+ * accent"). Forced colors drop the tint, so there the edge stays (`Panel.css`).
+ */
+@media (forced-colors: none) {
+  button.clover-contents-button[aria-current="true"] {
+    border-inline-start-color: transparent;
+  }
+}
+
+/*
+ * The current article's step through its parts (`ui/Steps`), in its row, after its
+ * label and before its chevron (Mat, 2026-10-28: "move this indicator into the chapter"):
+ * the row then carries the current entry's tint, so the step is inside it, `xs` from its
+ * end.
+ */
+.clover-contents-steps {
+  flex-shrink: 0;
+  /* At the label's start where it wraps under it: past the row's 3px edge and its `s`. */
+  padding-inline: calc(var(--clover-space-s) + 3px) var(--clover-space-xs);
+}
+
+/*
+ * Beside the label where both fit, else under it, inside the tint: the label keeps its
+ * words whole (it takes the line before the step does), never squeezed by the step.
+ */
+.clover-contents-row:has(> .clover-contents-steps) {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+
+.clover-contents-row:has(> .clover-contents-steps)
+  > button.clover-contents-button {
+  flex: 1 1 auto;
+  width: auto;
+}
+
+.clover-contents-row[data-current="true"]:has(> .clover-contents-steps) {
+  border-radius: var(--clover-radius, 3px);
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 8%,
+    transparent
+  );
+}
+
+.clover-contents-row[data-current="true"]:has(> .clover-contents-steps)
+  > button.clover-contents-button {
+  background-color: transparent;
 }

@@ -641,18 +641,20 @@ describe("templates", () => {
     );
   });
 
-  it("Default: a title that would be past h6 names what it heads, never an h6 beside its own", async () => {
+  it("Default: About's titles a level under it, its downloads behind its heading's button", async () => {
     render(<Templates.Default iiifContent={renderingJson} headingLevel={4} />);
     await screen.findByRole("heading", { level: 4 });
-    // About is a 5, its titles 6: its downloads' groups would be 7.
+    // About is a 5, its titles 6.
     expect(
-      await screen.findByRole("heading", { level: 6, name: "Download" }),
+      await screen.findByRole("heading", { level: 6, name: "IIIF Manifest" }),
+    ).toBeInTheDocument();
+    // The downloads: named groups in the Download button's popover, never headings.
+    fireEvent.click(screen.getByRole("button", { name: "Download" }));
+    expect(
+      await screen.findByRole("group", { name: "All pages" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("region", { name: "All pages" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("heading", { name: "All pages" }),
+      screen.queryByRole("heading", { name: /^(Download|All pages)$/ }),
     ).not.toBeInTheDocument();
   });
 

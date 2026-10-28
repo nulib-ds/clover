@@ -23,3 +23,16 @@ export function playFrom(element: HTMLMediaElement, seconds: number) {
     // Not playable here (a document without media playback).
   }
 }
+
+/** `"30"`, `"0,30"` and `"0,"` are all legal; malformed is undefined, never NaN. */
+export function parseTime(
+  t?: string,
+): { start: number; end?: number } | undefined {
+  if (!t) return undefined;
+  const [rawStart, rawEnd] = t.split(",");
+  const start = Number(rawStart);
+  if (rawStart === "" || Number.isNaN(start)) return undefined;
+  if (rawEnd === undefined || rawEnd === "") return { start };
+  const end = Number(rawEnd);
+  return Number.isNaN(end) ? { start } : { start, end };
+}

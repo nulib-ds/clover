@@ -41,8 +41,9 @@ import { PartHead } from "docs/components/Clover4/PartHead";
 ## API reference
 
 Inside a `Root`, it lists the `rendering` of the Canvases in view, under "This page", and
-of the Manifest, under "All pages", as links, each with its format. With neither, it
-renders nothing. Its other props go to the `div` around its groups; it takes no `as` or
+of the Manifest, under "All pages", as links, each with its format. Pressed, a link saves
+its file rather than opening it, where its server lets the file be fetched, and opens it
+in a new tab where not. With neither, it renders nothing. Its other props go to the `div` around its groups; it takes no `as` or
 `ref`.
 
 <ApiReference elements="clover-download">
@@ -77,8 +78,8 @@ the heading it sits under, here `4` under an `h3`.
 
 ### In the templates
 
-`Document` puts its links in its toolbar, and `Default` lists them in its Panel's About.
-In either, `download={false}` leaves them out.
+`Document` puts its links in its toolbar, and `Default` lists them from a Download button
+beside its Panel's About heading. In either, `download={false}` leaves them out.
 
 <ViewerExample
   resource="https://nulib-ds.github.io/clover/mocks/page-transcript/manifest.json"

@@ -9,6 +9,7 @@
 }
 
 .clover-download-title {
+  display: block;
   margin: 0 0 var(--clover-space-2xs);
   color: var(--clover-color-primary-muted, #26292b);
   font-size: var(--clover-text-s);

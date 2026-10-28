@@ -103,31 +103,33 @@ Everything is upgraded to IIIF Presentation 4 as it loads, so every part reads o
 The Viewer's own layout, drawn when it is given no `template`: the title over the Body,
 the thumbnails under it, and the information panel beside them, as in Clover 3.x.
 
-| Prop               | Type                                    | Default                     | Description                                                       |
-| ------------------ | --------------------------------------- | --------------------------- | ----------------------------------------------------------------- |
-| `header`           | `boolean`                               | `true`                      | The title and provider over the Body.                             |
-| `headingLevel`     | `number`                                | `2`                         | The title's level; the panel's sections are a level below.        |
-| `panel`            | `boolean`                               | `true`                      | The information panel and its toggle.                             |
-| `download`         | `boolean`                               | `true`                      | The downloads in the panel's About, where there is a `rendering`. |
-| `defaultPanelOpen` | `boolean`                               | `true`                      | Whether the panel starts open beside the Body; over it, closed.   |
-| `panelLayout`      | `"accordion" \| "tabs"`                 | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                |
-| `items`            | `"slider" \| "list" \| "grid" \| false` | `"slider"`                  | The thumbnails under the Body, or none.                           |
-| `storageKey`       | `string \| false`                       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.        |
-| `fill`             | `boolean`                               | `false`                     | Fill the box it sits in; the Body takes what the rest leave.      |
+| Prop               | Type                                    | Default                     | Description                                                                                                                        |
+| ------------------ | --------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `header`           | `boolean`                               | `true`                      | The title and provider over the Body.                                                                                              |
+| `headingLevel`     | `number`                                | `2`                         | The title's level; the panel's sections are a level below.                                                                         |
+| `panel`            | `boolean`                               | `true`                      | The information panel and its toggle.                                                                                              |
+| `download`         | `boolean`                               | `true`                      | The downloads in the panel's About, where there is a `rendering`.                                                                  |
+| `languages`        | `boolean`                               | `true`                      | The languages to read the resource in, beside the panel's About heading, where it comes in several; `false` leaves the choice out. |
+| `defaultPanelOpen` | `boolean`                               | `true`                      | Whether the panel starts open beside the Body; over it, closed.                                                                    |
+| `panelLayout`      | `"accordion" \| "tabs"`                 | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                                                                                 |
+| `items`            | `"slider" \| "list" \| "grid" \| false` | `"slider"`                  | The thumbnails under the Body, or none.                                                                                            |
+| `storageKey`       | `string \| false`                       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                                                         |
+| `fill`             | `boolean`                               | `false`                     | Fill the box it sits in; the Body takes what the rest leave.                                                                       |
 
 ### Document
 
 Reads like a PDF viewer: a toolbar with the title and Download, page thumbnails down the
 left, the pages down one column, and the information panel sliding out on the right.
 
-| Prop                 | Type                    | Default                      | Description                                                     |
-| -------------------- | ----------------------- | ---------------------------- | --------------------------------------------------------------- |
-| `defaultSidebarOpen` | `boolean`               | `true`                       | Whether the page thumbnails start shown; over the page, not.    |
-| `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the panel starts open beside the page; over it, closed. |
-| `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | The panel's sections as stacked boxes, or as tabs.              |
-| `download`           | `boolean`               | `true`                       | Download's links in the toolbar, where there is a `rendering`.  |
-| `headingLevel`       | `number`                | `2`                          | The title's level; the panel's sections are a level below.      |
-| `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.  |
+| Prop                 | Type                    | Default                      | Description                                                                                                                        |
+| -------------------- | ----------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `defaultSidebarOpen` | `boolean`               | `true`                       | Whether the page thumbnails start shown; over the page, not.                                                                       |
+| `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the panel starts open beside the page; over it, closed.                                                                    |
+| `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | The panel's sections as stacked boxes, or as tabs.                                                                                 |
+| `download`           | `boolean`               | `true`                       | Download's links in the toolbar, where there is a `rendering`.                                                                     |
+| `languages`          | `boolean`               | `true`                       | The languages to read the resource in, beside the panel's About heading, where it comes in several; `false` leaves the choice out. |
+| `headingLevel`       | `number`                | `2`                          | The title's level; the panel's sections are a level below.                                                                         |
+| `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.                                                                     |
 
 ### Gallery
 

@@ -33,13 +33,31 @@ export interface AnnotationEntry {
   bodies: AnnotationBodyEntry[];
   /** The annotation as published, for a host's own rendering. */
   annotation: Record<string, any>;
+  /**
+   * A Range's region (`range-regions.ts`): its place among the Range's parts, "1 of 4",
+   * which its hotspot shows after its name.
+   */
+  place?: { index: number; total: number };
 }
+
+/**
+ * The set of the regions the Manifest's Ranges name (`range-regions.ts`), drawn as
+ * annotations, listed by Contents.
+ */
+export const CONTENTS_SET_ID = "contents";
+
+/** The annotation a Range's part draws as, by the part's place among its own items. */
+export const regionEntryId = (rangeId: string, index: number) =>
+  `${rangeId}#region-${index + 1}`;
 
 export interface AnnotationSet {
   id: string;
   label?: LanguageMapLike;
-  /** Where it came from: the Manifest's Canvases, the host, or a Content Search. */
-  source: "manifest" | "added" | "search";
+  /**
+   * Where it came from: the Manifest's Canvases, the host, a Content Search, or the
+   * regions the Manifest's Ranges name (`contentsSet`).
+   */
+  source: "manifest" | "added" | "search" | "contents";
   entries: AnnotationEntry[];
 }
 
@@ -124,7 +142,10 @@ export function selectAnnotationSets(
   return sets;
 }
 
-const drawnSets = new WeakMap<AnnotationSet[], Map<unknown, AnnotationSet[]>>();
+const drawnSets = new WeakMap<
+  AnnotationSet[],
+  Map<unknown, Map<unknown, AnnotationSet[]>>
+>();
 
 /**
  * Every set the Canvas draws: the Manifest's, the host's, then a search's hits. The
@@ -134,15 +155,24 @@ export function selectDrawnSets(
   manifest: Manifest | null,
   added: AnnotationSet[],
   searchSet: AnnotationSet | null,
+  regions: AnnotationSet | null = null,
 ): AnnotationSet[] {
   const sets = selectAnnotationSets(manifest, added);
-  if (!searchSet?.entries.length) return sets;
-  let bySearch = drawnSets.get(sets);
-  if (!bySearch) drawnSets.set(sets, (bySearch = new Map()));
-  let drawn = bySearch.get(searchSet);
+  // The regions the Ranges name, drawn as annotations, and a search's hits over them.
+  const search = searchSet?.entries.length ? searchSet : null;
+  if (!regions && !search) return sets;
+  let byRegions = drawnSets.get(sets);
+  if (!byRegions) drawnSets.set(sets, (byRegions = new Map()));
+  let bySearch = byRegions.get(regions);
+  if (!bySearch) byRegions.set(regions, (bySearch = new Map()));
+  let drawn = bySearch.get(search);
   if (!drawn) {
-    drawn = [...sets, searchSet];
-    bySearch.set(searchSet, drawn);
+    drawn = [
+      ...sets,
+      ...(regions ? [regions] : []),
+      ...(search ? [search] : []),
+    ];
+    bySearch.set(search, drawn);
   }
   return drawn;
 }
@@ -232,7 +262,8 @@ const unlistedOf = new WeakMap<string[], { hidden: string[]; ids: string[] }>();
 
 /**
  * The sets the Canvas's menu never offers, as the Annotations list leaves them out: the
- * search's hits (`SEARCH_SET_ID`, which `Search` lists), and those that start hidden and
+ * search's hits (`SEARCH_SET_ID`, which `Search` lists), the Ranges' regions
+ * (`CONTENTS_SET_ID`, which `Contents` lists), and those that start hidden and
  * are still hidden but for the reader's own switching off (`hiddenSets`), which the menu
  * offers to show again. The same array comes back while nothing changes.
  */
@@ -247,6 +278,7 @@ export function selectUnlistedSets(
   if (cached && cached.hidden === hidden) return cached.ids;
   const ids = [
     SEARCH_SET_ID,
+    CONTENTS_SET_ID,
     ...drawnHidden.filter((id) => !hidden.includes(id)),
   ];
   unlistedOf.set(drawnHidden, { hidden, ids });

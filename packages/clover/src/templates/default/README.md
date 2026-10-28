@@ -5,7 +5,7 @@ from 4.x parts. The title and the provider's logo over the Body (the thumbnail i
 arrows are Previous and Next, headed by the titles of the view on the left (a dot
 between a spread's two) and the position on the right; and the information panel to the right of all three, the layout's
 full height, scrolling within when its sections run longer. Downloads (the page's and the
-Manifest's `rendering`) are listed in the panel's About.
+Manifest's `rendering`) are listed from a Download button beside the panel's About heading.
 
 The panel never stacks. As in 3.x it has its own space beside the Body, 24rem to start,
 and the bar between them shares the width: drag it by its grip; click or tap it to step
@@ -32,17 +32,17 @@ the Manifest starts to load, and nothing drawn on the server. Its styles are in
 `styles.css`, so it needs no `templates.css`. To have it up front and drawn on the server,
 pass it: `template={Default}`, from `@nulib/clover/templates`.
 
-| Prop               | Default                     | What it does                                                      |
-| ------------------ | --------------------------- | ----------------------------------------------------------------- |
-| `header`           | `true`                      | The title and provider over the Body.                             |
-| `headingLevel`     | `2`                         | The title's level; the panel's sections are a level below.        |
-| `panel`            | `true`                      | The information panel and its toggle.                             |
-| `download`         | `true`                      | The downloads in the panel's About, where there is a `rendering`. |
-| `defaultPanelOpen` | `true`                      | Whether the panel starts open beside the Body; over it, closed.   |
-| `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.               |
-| `items`            | `"slider"`                  | The thumbnails: `"slider"`, `"list"`, `"grid"`, or `false`.       |
-| `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.        |
-| …                  |                             | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`…   |
+| Prop               | Default                     | What it does                                                                                          |
+| ------------------ | --------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `header`           | `true`                      | The title and provider over the Body.                                                                 |
+| `headingLevel`     | `2`                         | The title's level; the panel's sections are a level below.                                            |
+| `panel`            | `true`                      | The information panel and its toggle.                                                                 |
+| `download`         | `true`                      | The downloads, from a Download button beside the panel's About heading, where there is a `rendering`. |
+| `defaultPanelOpen` | `true`                      | Whether the panel starts open beside the Body; over it, closed.                                       |
+| `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.                                                   |
+| `items`            | `"slider"`                  | The thumbnails: `"slider"`, `"list"`, `"grid"`, or `false`.                                           |
+| `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                            |
+| …                  |                             | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`…                                       |
 
 Size the Body with `--clover-body-height` (default `min(65vh, 40rem)`).
 

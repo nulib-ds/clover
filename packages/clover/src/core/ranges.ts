@@ -2,6 +2,7 @@ import { parseAnnotationTarget } from "./annotations";
 import type { Manifest } from "./presentation";
 import type { LanguageMapLike } from "./value";
 import { asArray } from "../lib/asArray";
+import { parseTime } from "../lib/time";
 
 /**
  * Chapters of a time-based Canvas, from the Manifest's Ranges: a Range whose items name
@@ -16,22 +17,17 @@ export interface Chapter {
   label?: LanguageMapLike;
   start: number;
   end?: number;
+  /**
+   * Its Range's `thumbnail` (Cookbook 0229), the first it gives, as written: what draws
+   * it asks its service as its `info.json` allows (`ui/EntryThumbnail`).
+   */
+  thumbnail?: Record<string, unknown>;
 }
 
 type Json = Record<string, any>;
 
-/** `"30"`, `"0,30"` and `"0,"` are all legal; malformed is undefined, never NaN. */
-export function parseTime(
-  t?: string,
-): { start: number; end?: number } | undefined {
-  if (!t) return undefined;
-  const [rawStart, rawEnd] = t.split(",");
-  const start = Number(rawStart);
-  if (rawStart === "" || Number.isNaN(start)) return undefined;
-  if (rawEnd === undefined || rawEnd === "") return { start };
-  const end = Number(rawEnd);
-  return Number.isNaN(end) ? { start } : { start, end };
-}
+// Kept in `lib/time.ts`, so the Canvas reads a target's time without the Ranges' reader.
+export { parseTime } from "../lib/time";
 
 /**
  * A Range item's Canvas reference, with its fragment restored.
@@ -50,6 +46,15 @@ export function rangeItemTarget(item: unknown): unknown {
 
 const restoreFragment = (id: string) =>
   id.replace(/\/((?:t|xywh)=[^/#]*)$/, "#$1");
+
+/**
+ * A Range's own `thumbnail`, the first it gives, as written; none without one. Read into
+ * a request only where it is drawn, so a page that draws none loads none of that.
+ */
+function rangeThumbnail(range: Json): { thumbnail?: Json } {
+  const first = asArray(range.thumbnail)[0] as Json | undefined;
+  return first && typeof first === "object" ? { thumbnail: first } : {};
+}
 
 const memo = new WeakMap<Manifest, Map<string, Chapter[]>>();
 const NONE: Chapter[] = [];
@@ -71,11 +76,14 @@ export function chaptersOf(
   const walk = (range: Json) => {
     if (!range || visited.has(range.id ?? range)) return;
     visited.add(range.id ?? range);
+    // A `no-nav` Range's own stretch is no chapter (Cookbook 0229), as Contents lists none.
+    const listed = !asArray(range.behavior).includes("no-nav");
     for (const item of asArray(range.items) as Json[]) {
       if (item?.type === "Range") {
         walk(item);
         continue;
       }
+      if (!listed) continue;
       const parsed = parseAnnotationTarget(rangeItemTarget(item) as any);
       if (parsed.id.split("#")[0] !== canvasId) continue;
       const time = parseTime(parsed.t);
@@ -84,6 +92,7 @@ export function chaptersOf(
           ...(range.id ? { id: range.id } : {}),
           label: range.label,
           ...time,
+          ...rangeThumbnail(range),
         });
     }
   };
@@ -113,7 +122,28 @@ export interface ContentsNode {
   time?: { start: number; end?: number };
   /** The region on that Canvas, when the Range names one. */
   region?: { x: number; y: number; w: number; h: number };
+  /**
+   * Its own Canvases and their parts, in the order the Range reads them (Cookbook 0025:
+   * an article's columns, page 2 then page 5): for a `sequence` (Cookbook 0027), where a
+   * region is among them, which the Canvas draws (`range-regions.ts`), or where its pages
+   * are out of the Manifest's order; two or more are stepped through in Contents. None on
+   * a recording's time, nor for any other run of whole pages in order, which Items steps.
+   */
+  parts?: ContentsPart[];
+  /**
+   * A Range of `behavior` `sequence` (Cookbook 0027): an order of the Canvases of its own,
+   * the first of them the default, as `currentContents` takes it.
+   */
+  sequence?: true;
+  /** Its Range's `thumbnail` (Cookbook 0229), the first it gives, as written. */
+  thumbnail?: Record<string, unknown>;
   children: ContentsNode[];
+}
+
+/** One Canvas, or a region of one, in a Range's reading order. */
+export interface ContentsPart {
+  canvasId: string;
+  region?: { x: number; y: number; w: number; h: number };
 }
 
 const tocs = new WeakMap<Manifest, ContentsNode[]>();
@@ -129,12 +159,20 @@ export function tableOfContents(manifest: Manifest | null): ContentsNode[] {
   const cached = tocs.get(manifest);
   if (cached) return cached;
 
+  // Each Canvas's place in the Manifest, to tell a Range's pages out of order.
+  const order = new Map(
+    (asArray((manifest as Json).items) as Json[]).map((canvas, index) => [
+      canvas?.id,
+      index,
+    ]),
+  );
   const visited = new Set<unknown>();
   const build = (range: Json): ContentsNode[] => {
     if (!range || visited.has(range.id ?? range)) return [];
     visited.add(range.id ?? range);
     const children: ContentsNode[] = [];
     const canvasIds: string[] = [];
+    const parts: Array<ReturnType<typeof parseAnnotationTarget>> = [];
     let first: ReturnType<typeof parseAnnotationTarget> | undefined;
     for (const item of asArray(range.items) as Json[]) {
       if (item?.type === "Range") {
@@ -146,6 +184,7 @@ export function tableOfContents(manifest: Manifest | null): ContentsNode[] {
         if (!parsed.id) continue;
         first ??= parsed;
         canvasIds.push(parsed.id);
+        parts.push(parsed);
       }
     }
     const behavior = asArray(range.behavior);
@@ -156,12 +195,24 @@ export function tableOfContents(manifest: Manifest | null): ContentsNode[] {
       label: range.label,
       canvasId: start?.id ?? children[0]?.canvasId,
       canvasIds: [...new Set(canvasIds)],
+      ...(behavior.includes("sequence") ? { sequence: true as const } : {}),
+      ...rangeThumbnail(range),
       children,
     };
     const time = parseTime(start?.t);
     if (time) node.time = time;
     else if (!start && children[0]?.time) node.time = children[0].time;
     if (start?.rect) node.region = start.rect;
+    // A sequence's pages are read in its order, whatever it is (Mat, 2026-10-28).
+    const ordered =
+      behavior.includes("sequence") &&
+      parts.length > 1 &&
+      !parts.some((part) => part.t);
+    if (ordered || worthStepping(parts, order))
+      node.parts = parts.map((part) => ({
+        canvasId: part.id!,
+        ...(part.rect ? { region: part.rect } : {}),
+      }));
     return [node];
   };
 
@@ -176,6 +227,24 @@ export function tableOfContents(manifest: Manifest | null): ContentsNode[] {
 }
 
 /**
+ * Whether a Range's own Canvases are worth keeping as its parts: none on a recording's
+ * time, and a region among them, or two or more pages not in the Manifest's order one
+ * after another (a page twice, page 2 then page 5).
+ */
+function worthStepping(
+  parts: Array<ReturnType<typeof parseAnnotationTarget>>,
+  order: Map<unknown, number>,
+): boolean {
+  if (!parts.length || parts.some((part) => part.t)) return false;
+  if (parts.some((part) => part.rect)) return true;
+  return parts.some(
+    (part, index) =>
+      index > 0 &&
+      order.get(part.id) !== (order.get(parts[index - 1].id) ?? NaN) + 1,
+  );
+}
+
+/**
  * The entry the reader is in: the deepest covering `canvasId` whose span holds `time` (or
  * that has no span). Null when none is.
  */
@@ -183,20 +252,41 @@ export function currentContents(
   nodes: ContentsNode[],
   canvasId: string | null,
   time?: number,
+  /**
+   * The entry the reader chose: it, or the deepest entry in it, is current wherever it
+   * covers the Canvas and time, over any other that does (one of two sequences).
+   */
+  chosen?: string | null,
 ): string | null {
-  let best: { id: string; depth: number } | null = null;
-  const walk = (node: ContentsNode, depth: number) => {
+  type Best = { id: string; depth: number; sequence?: true } | null;
+  let best: Best = null;
+  let inChosen: Best = null;
+  const deeper = (than: Best, node: ContentsNode, depth: number) =>
+    !than ||
+    depth > than.depth ||
+    // The later of two alike; of two sequences, the first, the default.
+    (depth === than.depth && !(than.sequence && node.sequence));
+  const walk = (node: ContentsNode, depth: number, within: boolean) => {
+    const under = within || node.id === chosen;
     if (canvasId && node.canvasIds.includes(canvasId)) {
-      const within =
+      const covers =
         !node.time ||
         (time !== undefined &&
           time >= node.time.start &&
           (node.time.end === undefined || time < node.time.end));
-      if (within && (!best || depth >= best.depth))
-        best = { id: node.id, depth };
+      if (covers) {
+        const found = {
+          id: node.id,
+          depth,
+          ...(node.sequence ? { sequence: true as const } : {}),
+        };
+        if (deeper(best, node, depth)) best = found;
+        if (under && deeper(inChosen, node, depth)) inChosen = found;
+      }
     }
-    node.children.forEach((child) => walk(child, depth + 1));
+    node.children.forEach((child) => walk(child, depth + 1, under));
   };
-  nodes.forEach((node) => walk(node, 0));
-  return best ? (best as { id: string }).id : null;
+  nodes.forEach((node) => walk(node, 0, false));
+  const result = (inChosen ?? best) as Best;
+  return result ? result.id : null;
 }

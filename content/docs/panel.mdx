@@ -49,19 +49,20 @@ around it a height and `overflow-y: auto`, as the templates do. Its other props,
 
 ### Panel
 
-| Prop            | Type                      | Default   | Description                                                     |
-| --------------- | ------------------------- | --------- | --------------------------------------------------------------- |
-| `layout`        | `"tabs" \| "accordion"`   | `"tabs"`  | A row of tabs, or sections stacked, each under its heading.     |
-| `defaultValue`  | `string`                  | The first | The section open first.                                         |
-| `value`         | `string`                  | —         | The section open, controlled.                                   |
-| `onValueChange` | `(value: string) => void` | —         | A section was opened.                                           |
-| `onClose`       | `() => void`              | —         | A close button, for a panel floating over the page.             |
-| `closeOnEscape` | `boolean`                 | `false`   | Escape closes it too; its close button moves to its inner edge. |
-| `headingLevel`  | `number`                  | `3`       | Its first headings: one below the heading over it.              |
-| `download`      | `boolean`                 | `true`    | The downloads in About; `false` leaves them out.                |
-| `as`            | element type              | `"aside"` | The element to render.                                          |
-| `children`      | `ReactNode`               | —         | `Tab`s: sections of your own, in place of the defaults.         |
-| `className`     | `string`                  | —         | Added to `clover-panel`.                                        |
+| Prop            | Type                      | Default   | Description                                                                                                                    |
+| --------------- | ------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `layout`        | `"tabs" \| "accordion"`   | `"tabs"`  | A row of tabs, or sections stacked, each under its heading.                                                                    |
+| `defaultValue`  | `string`                  | The first | The section open first.                                                                                                        |
+| `value`         | `string`                  | —         | The section open, controlled.                                                                                                  |
+| `onValueChange` | `(value: string) => void` | —         | A section was opened.                                                                                                          |
+| `onClose`       | `() => void`              | —         | A close button, for a panel floating over the page.                                                                            |
+| `closeOnEscape` | `boolean`                 | `false`   | Escape closes it too; its close button moves to its inner edge.                                                                |
+| `headingLevel`  | `number`                  | `3`       | Its first headings: one below the heading over it.                                                                             |
+| `download`      | `boolean`                 | `true`    | A Download button beside About's heading, listing the downloads; `false` leaves them out.                                      |
+| `languages`     | `boolean`                 | `true`    | About's heading offers the languages the resource comes in, the whole Root reading in the one chosen; `false` leaves them out. |
+| `as`            | element type              | `"aside"` | The element to render.                                                                                                         |
+| `children`      | `ReactNode`               | —         | `Tab`s: sections of your own, in place of the defaults.                                                                        |
+| `className`     | `string`                  | —         | Added to `clover-panel`.                                                                                                       |
 
 ### Tab
 
@@ -90,14 +91,15 @@ The panel's first section, and a part of its own: the resource's label and thumb
 metadata, required statement, rights, homepage, see also, downloads and address. For a Canvas shown
 on its own, it starts with the Manifest the Canvas is part of.
 
-| Prop            | Type      | Default | Description                                                 |
-| --------------- | --------- | ------- | ----------------------------------------------------------- |
-| `canvasSummary` | `boolean` | `false` | The current Canvas's summary too, before the resource's.    |
-| `download`      | `boolean` | `true`  | The downloads, Download's links, in a section of their own. |
-| `headingLevel`  | `number`  | `3`     | Its titles: the label, Rights, Homepage and the rest.       |
-| `label`         | `boolean` | `true`  | The resource's label first, as a heading.                   |
-| `thumbnail`     | `boolean` | `true`  | The resource's thumbnail, small, beside the label.          |
-| `className`     | `string`  | —       | Added to `clover-about`.                                    |
+| Prop            | Type      | Default | Description                                                                                                                                                       |
+| --------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `canvasSummary` | `boolean` | `false` | The current Canvas's summary too, before the resource's.                                                                                                          |
+| `download`      | `boolean` | `true`  | Alone, outside a Panel: the downloads, Download's links, in a section of their own. In a Panel, its heading's Download button lists them.                         |
+| `languages`     | `boolean` | `true`  | Alone, outside a Panel: the languages the resource comes in, over what About says, the whole Root reading in the one chosen. In a Panel, its heading offers them. |
+| `headingLevel`  | `number`  | `3`     | Its titles: the label, Rights, Homepage and the rest.                                                                                                             |
+| `label`         | `boolean` | `true`  | The resource's label first, as a heading.                                                                                                                         |
+| `thumbnail`     | `boolean` | `true`  | The resource's thumbnail, small, beside the label.                                                                                                                |
+| `className`     | `string`  | —       | Added to `clover-about`.                                                                                                                                          |
 
 </ApiReference>
 
@@ -171,6 +173,37 @@ until the reader opens it, on Search. A `value` you control is left as you set i
 
 ```jsx
 <Clover.Panel defaultValue="contents" />
+```
+
+</Example>
+
+### Languages
+
+Where what a resource says of itself comes in several languages, About's heading offers
+them, shown whichever section is open, and every part in the Root reads IIIF text in the
+one chosen, a title over it as About. It starts in the Root's `language`, which a page
+sets to read in its own, here French, else in the reader's. A reader's choice lasts until
+the page gives the Root another `language`. This painting is described in English and
+French.
+
+<Example>
+<PartDemo
+  part="Panel"
+  resource="languages"
+  rootProps={{ language: "fr" }}
+  props={{ layout: "accordion", headingLevel: 4 }}
+  body
+  box="24rem"
+/>
+
+```jsx {3,6}
+<Clover.Root
+  iiifContent="https://iiif.io/api/cookbook/recipe/0006-text-language/manifest.json"
+  language="fr"
+>
+  <Clover.Body />
+  <Clover.Panel layout="accordion" />
+</Clover.Root>
 ```
 
 </Example>

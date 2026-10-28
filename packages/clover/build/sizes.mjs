@@ -143,6 +143,12 @@ const UPGRADER = [
   /\/core\/keep-fragments\.mjs$/,
 ];
 const LOADED_CANVAS = /\/components\/Canvas\/LoadedCanvas\.mjs$/;
+/**
+ * What a Manifest whose Ranges name regions loads as it is shown: the regions, drawn as
+ * annotations (`core/range-regions.ts`), the Ranges' reader with them in its chunk.
+ */
+const REGIONS = [/\/core\/range-regions\.mjs$/];
+
 const FIRST_VIEW = {
   Canvas: [LOADED_CANVAS],
   Timeline: [
@@ -225,7 +231,12 @@ const BUNDLES = [
     key,
     "default",
     "index.mjs",
-    { also: [template, "templates/index.mjs"], draws: UPGRADER, sheets },
+    {
+      also: [template, "templates/index.mjs"],
+      // Gallery's is the catalog, whose Ranges name regions: the Root reads them.
+      draws: template === "Gallery" ? [...UPGRADER, ...REGIONS] : UPGRADER,
+      sheets,
+    },
   ]),
   // Each part a page holds alone, to its first view: what it loads as it draws.
   ...[
@@ -299,7 +310,6 @@ const ALONE = [
     [
       "src/components/Canvas/LoadedCanvas.tsx",
       "src/components/Canvas/media/MediaBody.tsx",
-      "src/core/thumbnail.ts",
     ],
   ],
   [

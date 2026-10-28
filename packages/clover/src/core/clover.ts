@@ -71,6 +71,12 @@ export interface CloverState {
   addedSets: AnnotationSet[];
   /** A Content Search of the Manifest: its query, progress and hits. */
   search: SearchState;
+  /**
+   * The regions the Manifest's Ranges name, as a set the Canvas draws (Cookbook 0025),
+   * read once a Manifest whose Ranges name one is shown, its module loaded then; null
+   * until then and for one without (`range-regions.ts`).
+   */
+  regions: AnnotationSet | null;
 }
 
 export interface SearchState {
@@ -236,6 +242,7 @@ const INITIAL: CloverState = {
   shownSets: [],
   addedSets: [],
   search: NO_SEARCH,
+  regions: null,
 };
 
 export function createClover(options: CloverOptions = {}): Clover {
@@ -339,6 +346,7 @@ export function createClover(options: CloverOptions = {}): Clover {
     store.set({
       status: "ready",
       search: NO_SEARCH,
+      regions: null,
       manifest,
       collection,
       canvasId,
@@ -346,6 +354,20 @@ export function createClover(options: CloverOptions = {}): Clover {
       addedSets: added(),
       annotationId: picked,
     });
+    /*
+     * The regions its Ranges name, read only where they name one (an `xywh=`, in a
+     * fragment or a selector): a book's table of contents never loads their code.
+     */
+    const structures = (manifest as { structures?: unknown } | null)
+      ?.structures;
+    if (
+      Array.isArray(structures) &&
+      JSON.stringify(structures).includes("xywh=")
+    )
+      void import("./range-regions").then(({ contentsSet }) => {
+        if (store.get().manifest === manifest)
+          store.set({ regions: contentsSet(manifest) });
+      });
     if (canvasId && canvasId !== initial.canvasId) {
       options.onCanvasChange?.(canvasId);
     }
@@ -566,9 +588,9 @@ export function createClover(options: CloverOptions = {}): Clover {
       if (canvasId) store.set({ canvasId });
     },
     selectAnnotation(id) {
-      const { manifest, addedSets, canvasId, search } = store.get();
+      const { manifest, addedSets, canvasId, search, regions } = store.get();
       const entry = findEntry(
-        selectDrawnSets(manifest, addedSets, search.set),
+        selectDrawnSets(manifest, addedSets, search.set, regions),
         id,
       );
       store.set({ annotationId: entry ? id : null });

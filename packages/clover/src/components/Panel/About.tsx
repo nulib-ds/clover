@@ -1,10 +1,11 @@
-import React, { Suspense, lazy, useEffect, useRef } from "react";
+import React, { Suspense, lazy, useContext, useEffect, useRef } from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
 import { isLoneCanvas } from "../../core/load";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useCloverSelector } from "../../react/context";
+import { InPanelContext, ReadingLanguages } from "./ReadingLanguages";
 import {
   Homepage,
   Id,
@@ -28,7 +29,11 @@ export interface AboutProps extends React.HTMLAttributes<HTMLElement> {
    * heading, and names its section instead (`ui/heading.ts`).
    */
   headingLevel?: number;
-  /** List the downloads, Download's links, in a section of their own. Default `true`. */
+  /**
+   * Alone, outside a Panel: list the downloads, Download's links, in a section of their
+   * own. In a Panel, its heading's Download button lists them (the Panel's `download`).
+   * Default `true`.
+   */
   download?: boolean;
   /**
    * The Manifest's thumbnail first, small, at its own shape, floated at the end of the
@@ -42,6 +47,12 @@ export interface AboutProps extends React.HTMLAttributes<HTMLElement> {
    * it (Mat, 2026-10-26: "repeat label as a heading"). Default `true`.
    */
   label?: boolean;
+  /**
+   * Alone, outside a Panel: where what the resource says of itself comes in several
+   * languages, offer them over what About says, the whole Root reading in the one chosen.
+   * In a Panel, its heading offers them (the Panel's `languages`). Default `true`.
+   */
+  languages?: boolean;
 }
 
 /*
@@ -58,8 +69,29 @@ const PartOfManifest = lazy(() => import("./PartOfManifest"));
  * Each part renders only if the Manifest has
  * it. The downloads are Download's: the `rendering` of the page in view ("This page")
  * and of the Manifest ("All pages").
+ *
+ * Where what it says comes in several languages, the languages to read the resource in
+ * (`ReadingLanguages`): over what About says, or, in a Panel's `about` section, beside
+ * its heading, where they show whichever section is open.
  */
-export function About({
+export function About({ languages = true, ...props }: AboutProps) {
+  // Outside a Panel, About holds the languages itself; in one, its section's heading does.
+  const inPanel = useContext(InPanelContext);
+  // Its downloads too: in a Panel, its heading's Download button lists them.
+  return (
+    <AboutContent
+      {...props}
+      download={!inPanel && props.download !== false}
+      choice={
+        inPanel || !languages ? null : <ReadingLanguages part="clover-about" />
+      }
+    />
+  );
+}
+
+/** What About shows; its language row first, where it holds it. */
+function AboutContent({
+  choice,
   canvasSummary = false,
   headingLevel = 3,
   download = true,
@@ -67,7 +99,7 @@ export function About({
   label = true,
   className,
   ...rest
-}: AboutProps) {
+}: AboutProps & { choice: React.ReactNode }) {
   const { t, langOf } = useCloverTranslation();
   const downloads = useDownloads();
   const manifest = useCloverSelector(
@@ -161,6 +193,7 @@ export function About({
       tabIndex={-1}
       {...rest}
     >
+      {choice}
       {(thumbnail || label) && (
         <div className="clover-about-head">
           {thumbnail && (

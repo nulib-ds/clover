@@ -11,6 +11,11 @@ import type { Clover, CloverState } from "../core/clover";
 export interface CloverContextValue {
   clover: Clover;
   language?: string;
+  /**
+   * The reader chose a language to read IIIF text in (About's languages): every part
+   * inside reads in it, until the Root is given another `language`.
+   */
+  chooseLanguage?: (tag: string) => void;
   /** Renderers of the host's own, for `Body` to draw some views with. */
   renderers?: BodyRenderer[];
 }

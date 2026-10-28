@@ -153,7 +153,10 @@ describe("Clover.Root and its parts", () => {
     await waitFor(() =>
       expect(shownCanvases()).toEqual([canvasIds[1], canvasIds[2]]),
     );
-    const status = screen.getByRole("status");
+    // The Root's announcer, among the page's status regions (each Body has its own).
+    const status = screen
+      .getAllByRole("status")
+      .find((region) => region.classList.contains("clover-announcer"))!;
     expect(status).toHaveTextContent(/^Frontispiece, Item 2 of \d+$/);
     // The label in its own language, the position in the reader's.
     expect(within(status).getByText("Frontispiece")).toHaveAttribute(

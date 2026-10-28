@@ -40,8 +40,13 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    * stacked boxes each opened by its heading, or `"tabs"`.
    */
   panelLayout?: PanelLayout;
-  /** The downloads in the panel's About, as links. Default `true`. */
+  /** The downloads, from a Download button beside the panel's About heading. Default `true`. */
   download?: boolean;
+  /**
+   * The languages to read the resource in, beside the panel's About heading, where what
+   * it says of itself comes in several (the Panel's `languages`). Default `true`.
+   */
+  languages?: boolean;
   /** The thumbnails under the Body: a layout, or `false` for none. Default `slider`. */
   items?: Exclude<ItemsLayout, "pager"> | false;
   /**
@@ -78,6 +83,7 @@ export function Default({
   defaultPanelOpen,
   panelLayout = "accordion",
   download = true,
+  languages = true,
   items = "slider",
   storageKey = "clover-template-default",
   fill = false,
@@ -268,6 +274,7 @@ export function Default({
             <Clover.Panel
               layout={panelLayout}
               download={download}
+              languages={languages}
               // With no title over them, the sections take its place in the outline.
               headingLevel={header ? below(headingLevel) : headingLevel}
               // Docked, the toggle closes it; over the Body, it carries its own close.

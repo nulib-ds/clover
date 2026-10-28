@@ -1,5 +1,5 @@
 {
-  "checked": "2026-10-25",
+  "checked": "2026-10-28",
   "recipes": [
     {
       "slug": "0001-mvm-image",
@@ -132,14 +132,6 @@
       "thumbnail": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001/full/96,132/0/default.jpg"
     },
     {
-      "slug": "0232-image-thumbnail-canvas",
-      "title": "Implementation discussion: Thumbnails on Canvases",
-      "section": "Building a manifest in stages, adding more complexity at each stage",
-      "resource": "https://iiif.io/api/cookbook/recipe/0232-image-thumbnail-canvas/manifest-image.json",
-      "type": "Manifest",
-      "thumbnail": "https://fixtures.iiif.io/other/level0/Glen/photos/gottingen/full/252,189/0/default.jpg"
-    },
-    {
       "slug": "0013-placeholderCanvas",
       "title": "Load a Preview Image Before the Main Content",
       "section": "Building a manifest in stages, adding more complexity at each stage",
@@ -208,14 +200,6 @@
       "resource": "https://iiif.io/api/cookbook/recipe/0032-collection/collection.json",
       "type": "Collection",
       "thumbnail": "https://iiif.io/api/image/3.0/example/reference/329817fc8a251a01c393f517d8a17d87-Winslow_Homer_-_The_Gulf_Stream_-_Metropolitan_Museum_of_Art/full/160,96/0/default.jpg"
-    },
-    {
-      "slug": "0464-reuse-manifest",
-      "title": "Reuse parts of a Manifest",
-      "section": "Building a manifest in stages, adding more complexity at each stage",
-      "resource": "https://iiif.io/api/cookbook/recipe/0464-reuse-manifest/manifest.json",
-      "type": "Manifest",
-      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg"
     },
     {
       "slug": "0017-transcription-av",
@@ -374,14 +358,6 @@
       "thumbnail": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/213,96/0/default.jpg"
     },
     {
-      "slug": "0561-text-on-image",
-      "title": "Visible Text Resource on a Canvas",
-      "section": "Other kinds of annotations",
-      "resource": "https://iiif.io/api/cookbook/recipe/0561-text-on-image/manifest.json",
-      "type": "Manifest",
-      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/213,96/0/default.jpg"
-    },
-    {
       "slug": "0024-book-4-toc",
       "title": "Table of Contents for Book Chapters",
       "section": "Internal structure",
@@ -460,14 +436,6 @@
       "thumbnail": "https://iiif.io/api/image/3.0/example/reference/899da506920824588764bc12b10fc800-bnf_chateauroux/full/128,96/0/default.jpg"
     },
     {
-      "slug": "0560-resources-on-a-timeline",
-      "title": "Rendering Resources Sequentially on a Timeline",
-      "section": "Segmentation and complex resources",
-      "resource": "https://iiif.io/api/cookbook/recipe/0560-resources-on-a-timeline/manifest.json",
-      "type": "Manifest",
-      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/329817fc8a251a01c393f517d8a17d87-Northeaster_by_Winslow_Homer_1895/full/140,96/0/default.jpg"
-    },
-    {
       "slug": "0489-multimedia-canvas",
       "title": "Rendering Multiple Media Types on a Time-Based Canvas",
       "section": "Segmentation and complex resources",
@@ -529,13 +497,6 @@
       "thumbnail": "https://iiif.io/api/image/3.0/example/reference/329817fc8a251a01c393f517d8a17d87-Whistlers_Mother/full/108,96/0/default.jpg"
     },
     {
-      "slug": "0057-publishing-v2-and-v3",
-      "title": "Making IIIF Presentation API v2 and v3 manifests available at the same URL",
-      "section": "Technical",
-      "resource": "https://iiif.io/api/cookbook/recipe/0057-publishing-v2-and-v3/manifest.json",
-      "type": "Manifest"
-    },
-    {
       "slug": "0434-choice-av",
       "title": "Multiple Choice of Audio Formats in a Single View (Canvas)",
       "section": "Real-world complex objects (ideally taken from actual collections)",
@@ -557,14 +518,6 @@
       "resource": "https://iiif.io/api/cookbook/recipe/0065-opera-multiple-canvases/manifest.json",
       "type": "Manifest",
       "thumbnail": "https://fixtures.iiif.io/video/indiana/donizetti-elixir/act1-thumbnail.png"
-    },
-    {
-      "slug": "0068-newspaper",
-      "title": "Basic Newspaper",
-      "section": "Real-world complex objects (ideally taken from actual collections)",
-      "resource": "https://iiif.io/api/cookbook/recipe/0068-newspaper/newspaper_title-collection.json",
-      "type": "Collection",
-      "thumbnail": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=https%3A%2F%2Fiiif.europeana.eu%2Fimage%2F2YMIN6YXMQ6COVM5AO2XKB5KMCKPMT2YKEKNMAGHVRBIHOOY4AVA%2Fpresentation_images%2F9340afd0-ffe2-11e5-b68d-fa163e60dd72%2Fnode-2%2Fimage%2FSBB%2FBerliner_Tageblatt%2F1925%2F02%2F16%2F0%2FF_SBB_00001_19250216_054_079_0_001%2Ffull%2Ffull%2F0%2Fdefault.jpg&type=TEXT"
     },
     {
       "slug": "0074-multiple-language-captions",

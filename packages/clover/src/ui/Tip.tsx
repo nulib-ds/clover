@@ -61,6 +61,8 @@ export function Tip({
   shortcut,
   scrolls = false,
   image,
+  lead,
+  after,
 }: {
   label: string;
   /** The language of `label`, where it is not its control's. */
@@ -77,6 +79,18 @@ export function Tip({
    * shows, and named by them, as the control is.
    */
   image?: string;
+  /**
+   * A line over the words, set apart from them: the time under the pointer, over a
+   * chapter's title in the seek bar's popover (`ui/Tip.css`). Shown only: its control
+   * says it for assistive technology.
+   */
+  lead?: string;
+  /**
+   * A figure after the words, smaller, as the step through a list sets its place (a
+   * Range's region's "1 / 4", `ui/Steps.css`). Shown only: its control says it for
+   * assistive technology.
+   */
+  after?: React.ReactNode;
 }) {
   const { t } = useCloverTranslation();
   const ref = useRef<HTMLSpanElement>(null);
@@ -88,7 +102,7 @@ export function Tip({
   useEffect(() => {
     const tip = ref.current;
     if (tip && isShown(tip)) keepInside(tip);
-  }, [text]);
+  }, [text, lead]);
   return (
     <span
       ref={ref}
@@ -116,7 +130,11 @@ export function Tip({
           }}
         />
       )}
+      {lead && <span className="clover-tip-lead">{lead}</span>}
       {text}
+      {after != null && after !== false && (
+        <span className="clover-tip-after">{after}</span>
+      )}
     </span>
   );
 }

@@ -10,7 +10,165 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **The reader can choose the language a resource reads in.** Where what a Manifest says
+  of itself comes in several languages, one of its label, summary, metadata or required
+  statement given in two or more (Cookbook 0006, 0118), the information panel offers
+  their codes ("EN", "FR") beside About's heading, drawn as an annotation set's languages
+  are, and shown whichever section is open. The Root's `language` is chosen to start,
+  else the reader's. A choice is the whole Root's: the title over the Viewer, Items, About
+  and every other part read IIIF text in it, each marked with its `lang`. `About` placed
+  outside a Panel offers the row itself. Nothing changes for a resource in one language.
+
+  `languages={false}` on `Panel`, `About`, or a Viewer in its Default or Document
+  template (`languages="false"` on `<clover-panel>`, `<clover-about>` or
+  `<clover-viewer>`) leaves the choice out. A Root's `language` still wins: a reader's
+  choice lasts until the page gives the Root another `language`. The row is
+  `.clover-about-languages`, each choice `.clover-about-language`, styled as the
+  Transcript's and Annotations' rows are. Its name, "Language", is the new string
+  `readingLanguage`. The check runs for every resource, and the row loads only for one
+  with languages to offer: the Viewer in its Default template loads 0.5 kB more to its
+  first view (89.4 to 89.9 kB), and its budgets are raised to match. A page with strings
+  of its own for Clover adds the new one:
+
+  ```ts
+  initCloverI18n({
+    resources: { de: { clover: { readingLanguage: "Sprache" } } },
+  });
+  ```
+
+- **A Body says when what it draws could not be loaded.** An image whose address answers
+  with an error (Cookbook 0118's, a Wikimedia thumbnail at a size Wikimedia no longer
+  serves), a video or recording the browser cannot load, or a model that will not load
+  showed an empty Body, or for a model an alert at its foot with the error's own English
+  words. Each now shows a small note in the middle of the Body, "This image could not be
+  loaded." (or video, audio, model), in a live region, so it is announced (WCAG 4.1.3).
+  A Scene whose graphics the browser takes back keeps its alert. The note is
+  `.clover-body-unloadable`; its strings are `bodyUnloadableImage`,
+  `bodyUnloadableVideo`, `bodyUnloadableAudio` and `bodyUnloadableModel`, which a page
+  with strings of its own for Clover adds. It adds 0.3 kB to a Canvas's first view (41.5
+  to 41.8 kB) and 0.4 kB to the Viewer's in its Default template (89.9 to 90.3 kB), and
+  the budgets are raised to match.
+
+- **Contents' nested entries open and close.** An entry with entries under it (a book's
+  chapter of sections, an opera's act of scenes) has a button at the end of its row, a
+  disclosure (`aria-expanded`) named "Sections in" and the entry's own label, that opens
+  and closes them. They start closed, but for the entries holding the current one: those
+  are open from the top down to it, and set in bold, so the way to it shows. A branch
+  opens again as the current entry comes into it, by choosing, by Items or by playback;
+  one the reader closed stays closed while the current entry moves within it. Every
+  nested entry was shown before: a layout that counted on that sees the top level first.
+  New classes: `.clover-contents-row` around each entry and its button,
+  `.clover-contents-toggle`, and `data-trail` on the entries holding the current one. The
+  button's words are the new string `contentsSectionsIn`. An entry and the entries under
+  it are now as far apart as any two entries, and the current entry is marked by its tint
+  and weight, without the accent edge at its start (kept in forced colors).
+- **Contents steps through an article in parts, and the Canvas draws its regions.** A
+  Range that reads parts of pages, or pages out of the Manifest's order (Cookbook 0025:
+  a newspaper's article in two columns on page 2, then two on page 5), has, while it is
+  the current entry, a step in its row, after its label (under it where the panel is too
+  narrow for both): its place among its parts ("2 / 4", read so too, in no language) and
+  Previous and Next, drawn as Search's are. Each step goes to the next part in the
+  Range's order, its region selected, framed and marked as a search's hit is; a region
+  picked on the Canvas is the place too. The regions any Range names are drawn on their
+  Canvases as annotations, each named for its Range and, in its tag, its place
+  ("Tagesneuigkeiten 1 / 4", its name too), in a set of their own (`CONTENTS_SET_ID`,
+  `"contents"`), which the Annotations list and the Canvas's menu leave out, as they
+  leave a search's hits; `clover.setSetVisible(CONTENTS_SET_ID, false)` hides them. Of
+  two Ranges of `behavior` `sequence` that cover the same pages (Cookbook 0027), the
+  first is current to start, the default, and the one the reader chooses stays current
+  while its pages are shown, stepping through its own order (`currentContents` takes the
+  chosen entry, its fourth argument; `ContentsNode`'s `sequence` marks one). A region
+  picked on the Canvas opens the Panel's Contents section, its article current there and
+  its step at that part, as a search opens Search: only the open section changes, never
+  focus, and a shut Panel stays shut. The Root reads them only for a Manifest whose
+  Ranges name one, loading their code then (`regions` in its state). A `Tip` takes
+  `after`, a figure after its words. `tableOfContents`' entries have `parts` (type
+  `ContentsPart`; and `root.clover.contents()`'s, on `<clover-root>`), and
+  `AnnotationSet`'s `source` may be `"contents"`. It adds 0.5 kB to the Viewer's first
+  view in its Default template (90.6 to 91.1 kB) and 0.3 kB to a page of a
+  `<clover-root>` and a `<clover-label>` (32.4 to 32.7 kB), the Ranges' reader grown by
+  its parts. A Manifest whose Ranges name regions loads their code, 2 kB, as it is
+  shown: the Gallery's figure, measured on the catalog, goes from 51.4 to 53.4 kB. The
+  budgets are raised to match.
+- **The information panel's chevrons are one, in one column.** A box's heading in the
+  accordion and an entry in Contents draw the same chevron (`.clover-chevron`, its
+  heading's still `.clover-sections-chevron`), at the end of the row, so every chevron
+  in the panel lines up. The open box now shows its chevron too, pointing up, in the
+  accent of the line under its heading, its button disabled (one box is always open).
+  Controls beside a heading, About's languages and the Transcript's, now sit before its
+  chevron rather than after it. Together with Contents' toggles, they add 0.3 kB to the
+  Viewer's first view in its Default template (90.3 to 90.6 kB), most of it the
+  stylesheet, and 0.5 kB to Contents as it loads; the budgets are raised to match.
+- **A chapter shows its Range's `thumbnail`.** A Range with a `thumbnail` (Cookbook
+  0229's `thumbnail-nav`, a frame of each stretch of the opera) shows it over its title
+  in the seek bar's popover as the pointer crosses it or the bar has focus, and
+  under the chapter playing, at the same size, in Contents and the chapters' menu, the
+  other entries keeping to their words (`--clover-picture`, a new measure in the scale,
+  four `xl`). The picture is decorative, its words naming it, and is asked of its image
+  service only as its `info.json` allows, as every thumbnail is. `chaptersOf`' chapters
+  and `tableOfContents`' entries carry the Range's first `thumbnail` as written (and
+  `root.clover.contents()`'s, on `<clover-root>`), and the Canvas's `chapters` take one, a
+  URL or a IIIF image. A picture with an entry's words in a list, an annotation's region
+  too, is `.clover-entry-thumbnail` now; an annotation's keeps
+  `.clover-annotations-thumbnail`, which no longer styles it. The popover now gives, under
+  the picture, the time under the pointer (or the time playing while the bar has focus)
+  rather than the chapter's start, in bold, and the chapter's title under it, muted
+  (`--clover-color-secondary-alt`; `Tip` takes that line as `lead`). The chapters' menu
+  is drawn as the Canvas's other menus are, the annotations' among them, on Clover's
+  ground (`.clover-canvas-menu`), each chapter's time muted in a column and its title at
+  the page's size. The chosen option there and in the captions' menu is marked as
+  Contents marks its current entry, by a tint of the accent and bold words, no longer the
+  accent's full fill; the chapter
+  playing beside the time is muted (85% of the bar's white, as far as 4.5:1 allows over
+  a white frame); and where a chapter begins the seek bar has a gap cut out of it,
+  `--clover-space-2xs` wide, through which the picture shows, in place of a white notch
+  over it (`.clover-canvas-transport-chapter-marker` is gone; a page that styled it can
+  set `--clover-transport-gap` on `.clover-canvas-transport-seek-area` instead). The seek
+  bar's and volume's tracks are `--clover-space-xs` high now, a step of the scale (they
+  were 4px; `--clover-transport-track` on `.clover-canvas-transport`), and a chapter's
+  stretch drawn out over the seek bar `--clover-space-s`, a step above it. With them,
+  the Viewer's first view in its Default template is 91.7 kB (91.1 before), a Timeline
+  alone 40.7 kB (40.1) and the stylesheet 16.3 kB (15.9); the budgets are raised to
+  match.
+
+- **About's downloads are a button beside its heading, and a press saves the file.** In a
+  Panel, About's heading now holds a Download button (`.clover-about-download-button`,
+  round, named "Download"), before the languages, which keep the end of the row. It
+  opens a popover under it, drawn as the Canvas's menus are (`.clover-canvas-menu`),
+  listing the `rendering` of the page in view ("This page") and of the Manifest ("All
+  pages"); Escape, a press outside or focus moving on closes it, Escape handing focus
+  back. About in a Panel no longer lists them in a section of its own; alone, it still
+  does. The Panel's `download` (and the Default template's) now says whether the button
+  is offered. Wherever Download's links are, a press on one saves its file, fetched with
+  the Root's `request`, rather than opening it, and opens it in a new tab only where its
+  server does not let it be fetched (no CORS); a press with a key held stays the
+  browser's.
+  `DownloadGroups` takes `inPopover`, its groups then named groups rather than sections.
+  The button adds 1.0 kB to the Viewer's first view in its Default template (91.7 to
+  92.7 kB); its popover and the saving load only when first used. The budgets are raised
+  to match.
+
+- **A recording in several files plays as one.** A Canvas that paints two or more videos
+  or sounds one after another on its time (Cookbook 0064: an opera's two acts, the second
+  from where the first ends) plays them through its one element as one recording: its
+  time, duration, seek bar, buffered stretch and chapters run across them all, seeking
+  into a later file loads it and goes there, a file's end runs on into the next, and only
+  the last one's `ended` is heard (`onEnded`). Its captions keep their moments on the
+  Canvas's time. The element itself reads the Canvas's time (its `currentTime`, `duration`
+  and `buffered`), so a host's own controls see the same. Before, only the first file
+  played, the second taken for an animation's frame. HLS keeps to its first file. It
+  adds 0.4 kB to a Canvas's first view alone (42.0 to 42.4 kB) and to the Viewer's in its
+  Default template (92.7 to 93.1 kB); the code that plays the files in turn loads only for
+  a Canvas that has them. The budgets are raised to match.
+
 ### Fixed
+
+- **A `no-nav` Range is no chapter.** Contents left a Range of `behavior` `no-nav` out
+  (Cookbook 0229: a video's first 9 seconds), but the seek bar and its Chapters menu
+  offered its stretch as an unnamed chapter at 0:00. `chaptersOf` now leaves it out too,
+  keeping any Ranges under it, as Contents does. Nothing to change on a page.
 
 - **`root.clover.contents()` is typed.** A `<clover-root>`'s `root.clover` has had
   `contents()`, the Manifest's table of contents as `Contents` draws it, but

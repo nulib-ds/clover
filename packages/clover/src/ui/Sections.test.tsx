@@ -122,7 +122,10 @@ describe("Sections", () => {
       const about = screen.getByRole("button", { name: "About" });
       expect(about).toHaveAttribute("aria-expanded", "true");
       expect(about).toHaveAttribute("aria-disabled", "true");
-      expect(container.querySelector(".clover-sections-chevron")).toBeNull();
+      // Its chevron points up, dimmed with its button, which cannot close it.
+      expect(
+        container.querySelector(".clover-sections-chevron"),
+      ).toHaveAttribute("data-open", "true");
       fireEvent.click(about);
       expect(about).toHaveAttribute("aria-expanded", "true");
       expect(screen.getByRole("region", { name: "About" })).toBeVisible();
@@ -433,8 +436,13 @@ describe("Sections", () => {
       // The open one cannot be closed: pressing it keeps it open, and it says so.
       expect(contents).toHaveAttribute("aria-disabled", "true");
       expect(about).not.toHaveAttribute("aria-disabled");
-      expect(contents.querySelector(".clover-sections-chevron")).toBeNull();
-      expect(about.querySelector(".clover-sections-chevron")).not.toBeNull();
+      // The open one's chevron points up, a closed one's down: told by shape, not color.
+      expect(
+        contents.querySelector(".clover-sections-chevron"),
+      ).toHaveAttribute("data-open", "true");
+      expect(
+        about.querySelector(".clover-sections-chevron"),
+      ).not.toHaveAttribute("data-open");
       fireEvent.click(contents);
       expect(contents).toHaveAttribute("aria-expanded", "true");
       expect(screen.getAllByRole("region")).toHaveLength(1);

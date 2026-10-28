@@ -39,6 +39,7 @@ export function useRangeChapters(
           lang: value.lang,
           start: chapter.start,
           end: chapter.end,
+          ...(chapter.thumbnail ? { thumbnail: chapter.thumbnail } : {}),
         };
       }),
     [manifest, playing, language, read],

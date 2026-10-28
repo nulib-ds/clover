@@ -9,7 +9,7 @@
   },
   "summary": {
     "en": [
-      "Every recipe the IIIF Cookbook publishes, each by the resource it is about."
+      "Every recipe on the IIIF Cookbook's viewer matrix, each by the resource it is about."
     ]
   },
   "items": [
@@ -584,42 +584,6 @@
       ]
     },
     {
-      "id": "https://iiif.io/api/cookbook/recipe/0232-image-thumbnail-canvas/manifest-image.json",
-      "type": "Manifest",
-      "label": {
-        "en": [
-          "Implementation discussion: Thumbnails on Canvases"
-        ]
-      },
-      "summary": {
-        "none": [
-          "0232-image-thumbnail-canvas"
-        ]
-      },
-      "thumbnail": [
-        {
-          "id": "https://fixtures.iiif.io/other/level0/Glen/photos/gottingen/full/252,189/0/default.jpg",
-          "type": "Image",
-          "format": "image/jpeg"
-        }
-      ],
-      "homepage": [
-        {
-          "id": "https://iiif.io/api/cookbook/recipe/0232-image-thumbnail-canvas/",
-          "type": "Text",
-          "label": {
-            "en": [
-              "Implementation discussion: Thumbnails on Canvases"
-            ]
-          },
-          "format": "text/html",
-          "language": [
-            "en"
-          ]
-        }
-      ]
-    },
-    {
       "id": "https://iiif.io/api/cookbook/recipe/0013-placeholderCanvas/manifest.json",
       "type": "Manifest",
       "label": {
@@ -920,42 +884,6 @@
           "label": {
             "en": [
               "Simple Collection"
-            ]
-          },
-          "format": "text/html",
-          "language": [
-            "en"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "https://iiif.io/api/cookbook/recipe/0464-reuse-manifest/manifest.json",
-      "type": "Manifest",
-      "label": {
-        "en": [
-          "Reuse parts of a Manifest"
-        ]
-      },
-      "summary": {
-        "none": [
-          "0464-reuse-manifest"
-        ]
-      },
-      "thumbnail": [
-        {
-          "id": "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen/full/128,96/0/default.jpg",
-          "type": "Image",
-          "format": "image/jpeg"
-        }
-      ],
-      "homepage": [
-        {
-          "id": "https://iiif.io/api/cookbook/recipe/0464-reuse-manifest/",
-          "type": "Text",
-          "label": {
-            "en": [
-              "Reuse parts of a Manifest"
             ]
           },
           "format": "text/html",
@@ -1658,42 +1586,6 @@
       ]
     },
     {
-      "id": "https://iiif.io/api/cookbook/recipe/0561-text-on-image/manifest.json",
-      "type": "Manifest",
-      "label": {
-        "en": [
-          "Visible Text Resource on a Canvas"
-        ]
-      },
-      "summary": {
-        "none": [
-          "0561-text-on-image"
-        ]
-      },
-      "thumbnail": [
-        {
-          "id": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/213,96/0/default.jpg",
-          "type": "Image",
-          "format": "image/jpeg"
-        }
-      ],
-      "homepage": [
-        {
-          "id": "https://iiif.io/api/cookbook/recipe/0561-text-on-image/",
-          "type": "Text",
-          "label": {
-            "en": [
-              "Visible Text Resource on a Canvas"
-            ]
-          },
-          "format": "text/html",
-          "language": [
-            "en"
-          ]
-        }
-      ]
-    },
-    {
       "id": "https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json",
       "type": "Manifest",
       "label": {
@@ -2040,42 +1932,6 @@
       ]
     },
     {
-      "id": "https://iiif.io/api/cookbook/recipe/0560-resources-on-a-timeline/manifest.json",
-      "type": "Manifest",
-      "label": {
-        "en": [
-          "Rendering Resources Sequentially on a Timeline"
-        ]
-      },
-      "summary": {
-        "none": [
-          "0560-resources-on-a-timeline"
-        ]
-      },
-      "thumbnail": [
-        {
-          "id": "https://iiif.io/api/image/3.0/example/reference/329817fc8a251a01c393f517d8a17d87-Northeaster_by_Winslow_Homer_1895/full/140,96/0/default.jpg",
-          "type": "Image",
-          "format": "image/jpeg"
-        }
-      ],
-      "homepage": [
-        {
-          "id": "https://iiif.io/api/cookbook/recipe/0560-resources-on-a-timeline/",
-          "type": "Text",
-          "label": {
-            "en": [
-              "Rendering Resources Sequentially on a Timeline"
-            ]
-          },
-          "format": "text/html",
-          "language": [
-            "en"
-          ]
-        }
-      ]
-    },
-    {
       "id": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/manifest.json",
       "type": "Manifest",
       "label": {
@@ -2278,35 +2134,6 @@
       ]
     },
     {
-      "id": "https://iiif.io/api/cookbook/recipe/0057-publishing-v2-and-v3/manifest.json",
-      "type": "Manifest",
-      "label": {
-        "en": [
-          "Making IIIF Presentation API v2 and v3 manifests available at the same URL"
-        ]
-      },
-      "summary": {
-        "none": [
-          "0057-publishing-v2-and-v3"
-        ]
-      },
-      "homepage": [
-        {
-          "id": "https://iiif.io/api/cookbook/recipe/0057-publishing-v2-and-v3/",
-          "type": "Text",
-          "label": {
-            "en": [
-              "Making IIIF Presentation API v2 and v3 manifests available at the same URL"
-            ]
-          },
-          "format": "text/html",
-          "language": [
-            "en"
-          ]
-        }
-      ]
-    },
-    {
       "id": "https://iiif.io/api/cookbook/recipe/0434-choice-av/manifest.json",
       "type": "Manifest",
       "label": {
@@ -2398,41 +2225,6 @@
           "label": {
             "en": [
               "Table of Contents for Multiple A/V files on Multiple Canvases"
-            ]
-          },
-          "format": "text/html",
-          "language": [
-            "en"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "https://iiif.io/api/cookbook/recipe/0068-newspaper/newspaper_title-collection.json",
-      "type": "Collection",
-      "label": {
-        "en": [
-          "Basic Newspaper"
-        ]
-      },
-      "summary": {
-        "none": [
-          "0068-newspaper"
-        ]
-      },
-      "thumbnail": [
-        {
-          "id": "https://api.europeana.eu/api/v2/thumbnail-by-url.json?uri=https%3A%2F%2Fiiif.europeana.eu%2Fimage%2F2YMIN6YXMQ6COVM5AO2XKB5KMCKPMT2YKEKNMAGHVRBIHOOY4AVA%2Fpresentation_images%2F9340afd0-ffe2-11e5-b68d-fa163e60dd72%2Fnode-2%2Fimage%2FSBB%2FBerliner_Tageblatt%2F1925%2F02%2F16%2F0%2FF_SBB_00001_19250216_054_079_0_001%2Ffull%2Ffull%2F0%2Fdefault.jpg&type=TEXT",
-          "type": "Image"
-        }
-      ],
-      "homepage": [
-        {
-          "id": "https://iiif.io/api/cookbook/recipe/0068-newspaper/",
-          "type": "Text",
-          "label": {
-            "en": [
-              "Basic Newspaper"
             ]
           },
           "format": "text/html",

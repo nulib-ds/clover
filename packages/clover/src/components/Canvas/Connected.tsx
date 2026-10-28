@@ -81,7 +81,12 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
   );
   const target = useCloverSelector((state) => state.target);
   const sets = useCloverSelector((state) =>
-    selectDrawnSets(state.manifest, state.addedSets, state.search.set),
+    selectDrawnSets(
+      state.manifest,
+      state.addedSets,
+      state.search.set,
+      state.regions,
+    ),
   );
   /*
    * What the menu never offers, as the Annotations list leaves it out (Mat, 2026-10-26):
@@ -135,6 +140,7 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
           targetIndex: shown.indexOf(entry.canvasId),
           pageId: set.id,
           ...(set.label ? { pageLabel: set.label } : {}),
+          ...(entry.place ? { place: entry.place } : {}),
         })),
     );
   }, [givenAnnotations, sets, canvases]);

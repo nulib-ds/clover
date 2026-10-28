@@ -295,6 +295,44 @@ describe("CanvasRenderer", () => {
     renderer.dispose();
   });
 
+  it("says when nothing it paints can be loaded, and again once something draws", async () => {
+    mockedLoad.mockRejectedValue(new Error("400"));
+    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    const unloadable = vi.fn();
+    renderer.on("unloadable", unloadable);
+    // A Canvas's world, as the Canvas gives it: the renderer opens on it all the same.
+    const world = { x: 0, y: 0, width: 400, height: 300 };
+    await renderer.setImages([{ id: "a", url: "missing.jpg" }], { world });
+    expect(unloadable).toHaveBeenLastCalledWith(true);
+
+    mockedLoad.mockResolvedValue(bitmap(400, 300));
+    await renderer.setImages([{ id: "b", url: "found.jpg" }], { world });
+    expect(unloadable).toHaveBeenLastCalledWith(false);
+    renderer.dispose();
+  });
+
+  it("says so too when every tile an image service is asked for fails for good", async () => {
+    serveInfo(GOTTINGEN_V3);
+    mockedLoad.mockRejectedValue(
+      Object.assign(new Error("404"), { status: 404 }),
+    );
+    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    const unloadable = vi.fn();
+    renderer.on("unloadable", unloadable);
+    await renderer
+      .setImages([
+        {
+          id: "g",
+          service:
+            "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen",
+        },
+      ])
+      .catch(() => undefined);
+    await frames(6);
+    expect(unloadable).toHaveBeenLastCalledWith(true);
+    renderer.dispose();
+  });
+
   it("gives the context back and cleans up on dispose", async () => {
     mockedLoad.mockResolvedValue(bitmap(100, 100));
     const el = host();

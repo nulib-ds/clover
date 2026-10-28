@@ -1,0 +1,35 @@
+/*
+ * What a Body was to draw could not be loaded (`BodyUnloadable`): a small note in the
+ * middle of the Body, on the page's own ground in its muted text, so it reads on the
+ * Body's tint in either mode, clear of the transport where there is one (`data-room`).
+ * It takes no pointer, and its live region, always there, takes no room while it says
+ * nothing.
+ */
+.clover-body-unloadable {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--clover-inset);
+  pointer-events: none;
+}
+
+.clover-body-unloadable[data-room] {
+  inset-block-end: var(--clover-transport-room, 0);
+}
+
+.clover-body-unloadable:empty {
+  display: none;
+}
+
+.clover-body-unloadable > p {
+  margin: 0;
+  padding: var(--clover-space-xs) var(--clover-space-s);
+  border-radius: var(--clover-radius-pill, 2rem);
+  background-color: var(--clover-color-secondary, #fff);
+  color: var(--clover-color-primary-muted, #26292b);
+  font-size: var(--clover-text-s);
+  text-align: center;
+}

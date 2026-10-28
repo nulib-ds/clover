@@ -1,5 +1,4 @@
 import type { AnnotationEntry } from "../../core/annotation-sets";
-import { localize } from "../../core/value";
 
 /** The languages an entry's text is in, as its bodies give them (never `none`). */
 export function entryLanguages(entry: AnnotationEntry): string[] {
@@ -26,37 +25,9 @@ export function languagesOf(entries: AnnotationEntry[]): string[] {
   return split ? all : [];
 }
 
-/**
- * The language a choice shows: the reader's pick (`picked`) where the set has it, else the
- * one the Root reads IIIF text in (`language`), or else the reader's, as IIIF text is
- * chosen (`localize`); else the first given.
- */
-export function startingLanguage(
-  languages: string[],
-  language?: string,
-  picked?: string,
-): string | undefined {
-  if (picked && languages.includes(picked)) return picked;
-  if (!languages.length) return undefined;
-  const map = Object.fromEntries(languages.map((tag) => [tag, [tag]]));
-  return localize(map, language).lang ?? languages[0];
-}
-
 /** Whether an entry shows in a language: it is in it, or in none at all. */
 export function inLanguage(entry: AnnotationEntry, chosen?: string): boolean {
   if (!chosen) return true;
   const tags = entryLanguages(entry);
   return !tags.length || tags.includes(chosen);
-}
-
-/**
- * A language's name in itself ("العربية", "English", "Français"), for a reader of that
- * language to find it by; the tag where the browser cannot name it.
- */
-export function autonym(tag: string): string {
-  try {
-    return new Intl.DisplayNames([tag], { type: "language" }).of(tag) ?? tag;
-  } catch {
-    return tag;
-  }
 }

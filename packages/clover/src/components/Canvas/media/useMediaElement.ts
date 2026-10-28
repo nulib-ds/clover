@@ -49,6 +49,10 @@ export interface MediaElementOptions {
  *   `useCaptionTracks`' to keep, with those the media carries itself.
  * - It asks for no CORS: the browser shows the element itself (the renderer's DOM layer),
  *   reading none of its pixels.
+ * - A Canvas's files painted one after another on its time play through it as one, in
+ *   the Canvas's time (`playInSequence`; Cookbook 0064), its code loaded only for such
+ *   a Canvas, the element handed out once it is set, so its listener is the first. HLS
+ *   keeps to its first file.
  */
 export function useMediaElement(
   media: MediaPlacement,
@@ -56,6 +60,7 @@ export function useMediaElement(
 ): HTMLVideoElement | null {
   const [element, setElement] = useState<HTMLVideoElement | null>(null);
   const captionsKey = JSON.stringify(media.captions);
+  const segmentsKey = JSON.stringify(media.segments ?? null);
   const posterKey = media.poster
     ? (media.poster.src ?? media.poster.service ?? "")
     : "";
@@ -144,10 +149,26 @@ export function useMediaElement(
       track.mode = "hidden";
     }
 
-    setElement(video);
+    const segments = media.segments;
+    let undoSequence: (() => void) | undefined;
+    if (
+      segments &&
+      segments.length > 1 &&
+      !segments.some((segment) => isHls(segment.src, segment.format))
+    ) {
+      void import("./sequence").then(({ playInSequence }) => {
+        if (canceled) return;
+        undoSequence = playInSequence(video, segments, media.duration);
+        setElement(video);
+      });
+    } else {
+      setElement(video);
+    }
+
     return () => {
       canceled = true;
       video.pause();
+      undoSequence?.();
       hls?.destroy();
       video.removeAttribute("src");
       video.load();
@@ -155,9 +176,17 @@ export function useMediaElement(
       blobs.forEach((url) => URL.revokeObjectURL(url));
       setElement(null);
     };
-    // `captionsKey` stands in for `media.captions`, whose identity changes every render.
+    // `captionsKey` and `segmentsKey` stand in for `media.captions` and `media.segments`,
+    // whose identity changes every render; `media.duration` goes with the segments.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [media.src, media.format, posterKey, captionsKey, requestKey(request)]);
+  }, [
+    media.src,
+    media.format,
+    posterKey,
+    captionsKey,
+    segmentsKey,
+    requestKey(request),
+  ]);
 
   return element;
 }

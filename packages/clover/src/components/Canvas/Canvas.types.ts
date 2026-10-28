@@ -275,6 +275,12 @@ export interface CloverCanvasProps {
     lang?: string;
     start: number;
     end?: number;
+    /**
+     * A picture of it, over it on the seek bar and under it in the menu while it plays:
+     * a URL, shown as it is, or a IIIF image (a Range's `thumbnail`), asked of its
+     * service as its `info.json` allows. Inside a `Root`, its Range's `thumbnail`.
+     */
+    thumbnail?: string | Record<string, unknown>;
   }>;
   /** A chapter (by its `id`) to mark on the seek bar, as hovering it in a list does. */
   highlightedChapter?: string | null;

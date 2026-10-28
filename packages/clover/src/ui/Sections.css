@@ -498,8 +498,9 @@ button.clover-sections-scroll-next {
  * is the color of a split's bar at rest (`Split.css`), `secondary-alt` at half
  * strength: it marks nothing, its chevron does. The open one's is the accent, 3:1 beside
  * the panel (WCAG 1.4.11), and a closed one's under the pointer the accent at half
- * strength, a preview, as Items' hover is; focus is the button's own ring. The open one
- * has no chevron, so which is open is told by more than color. A label wraps, never cut short, however narrow the panel or
+ * strength, a preview, as Items' hover is; focus is the button's own ring. The open one's
+ * chevron points up, a closed one's down, so which is open is told by more than color. A
+ * label wraps, never cut short, however narrow the panel or
  * wide its spaced text (WCAG 1.4.12): onto more lines, breaking a long word where it
  * must, the line under them all. The stacks measure it.
  */
@@ -560,8 +561,34 @@ button.clover-sections-scroll-next {
   cursor: default;
 }
 
-.clover-sections-chevron {
-  flex-shrink: 0;
+/*
+ * Every chevron in an information panel in one column, at the end of its row (Mat,
+ * 2026-10-28: "accordion up downs should always line up"): a heading's, and Contents'
+ * own (`Contents.css`). Where a section has controls beside its heading (About's
+ * languages), they go before the chevron, which keeps the end; the controls leave its
+ * room, `m` from it. The chevron itself is `ui/Chevron.css`'s; the open box's points up,
+ * in the accent of the line under its heading (Mat, 2026-10-28), its button disabled (an
+ * open box cannot close).
+ */
+.clover-sections[data-layout="accordion"]
+  button.clover-sections-button[aria-disabled="true"]
+  .clover-sections-chevron {
+  color: var(--clover-color-accent, #0065c3);
+}
+
+.clover-sections[data-layout="accordion"]
+  .clover-sections-item[data-actions]
+  .clover-sections-chevron {
+  position: absolute;
+  inset-inline-end: var(--clover-space-s);
+}
+
+.clover-sections[data-layout="accordion"]
+  .clover-sections-item[data-actions]
+  .clover-sections-actions {
+  padding-inline-end: calc(
+    var(--clover-space-s) + var(--clover-chevron) + var(--clover-space-m)
+  );
 }
 
 /*

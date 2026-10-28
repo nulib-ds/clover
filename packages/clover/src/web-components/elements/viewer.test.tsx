@@ -126,17 +126,17 @@ describe("<clover-viewer>", () => {
     expect(element.querySelector(".clover-items")).toBeNull();
   });
 
-  it("download=false leaves the downloads out of About", async () => {
+  it("download=false leaves out About's Download button", async () => {
     const shown = mount({}, renderingJson);
     expect(
-      await within(shown).findByRole("heading", { name: "Download" }),
+      await within(shown).findByRole("button", { name: "Download" }),
     ).toBeInTheDocument();
     shown.remove();
 
     const element = mount({ download: "false" }, renderingJson);
     await within(element).findByRole("heading", { name: "About" });
     expect(
-      within(element).queryByRole("heading", { name: "Download" }),
+      within(element).queryByRole("button", { name: "Download" }),
     ).toBeNull();
     expect(within(element).queryByRole("link", { name: /PDF/ })).toBeNull();
   });

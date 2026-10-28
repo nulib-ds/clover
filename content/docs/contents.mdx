@@ -37,8 +37,14 @@ import { PartHead } from "docs/components/Clover4/PartHead";
 
 Inside a `Root`, it lists the Manifest's Ranges (`structures`), nested as they nest, in a
 `nav` named "Contents": choosing an entry goes to its Canvas, framed to its region or at
-its time, and the entry the reader is in is `aria-current`. It renders nothing without
-Ranges. Its other props, and its `ref`, go to its element. For the view itself, see
+its time, and the entry the reader is in is `aria-current`. An entry with entries under
+it opens and closes them by the button at the end of its row; they start closed, but for
+the entries holding the one the reader is in, open from the top down to it and set in
+bold, so the way to it shows. An entry in parts, columns or pages out of order, steps
+through them in its Range's order while it is the current one, and the regions any Range
+names are drawn on the Canvas as annotations are. The entry the reader is in shows its
+Range's `thumbnail` under its words, as a chapter's shows over the seek bar and under it
+in the chapters' menu. It renders nothing without Ranges. Its other props, and its `ref`, go to its element. For the view itself, see
 [`Body`](/docs/body).
 
 <ApiReference elements="clover-contents">
@@ -70,6 +76,41 @@ follows playback, and pointing at either marks the other.
 
 </Example>
 
+### Articles in parts
+
+A Range may read parts of pages, in an order of its own: a newspaper's article in columns,
+continued pages later. Its regions are drawn on the Canvas, and while it is the current
+entry it steps through them, each framed and marked. This article starts in two columns
+on page 2 and goes on in two on page 5.
+
+<Example>
+<PartDemo part="Contents" resource="articles" body />
+
+```jsx {3}
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0025-newspaper-article-index/manifest.json">
+  <Clover.Body />
+  <Clover.Contents />
+</Clover.Root>
+```
+
+</Example>
+
+### Without regions
+
+The regions are drawn as the annotation set `CONTENTS_SET_ID`. Hide it, and Contents still
+steps through them.
+
+```jsx
+clover.setSetVisible(Clover.CONTENTS_SET_ID, false);
+```
+
+```html twin
+<script type="module">
+  // The Ranges' regions are the set "contents".
+  document.querySelector("clover-root").clover.setSetVisible("contents", false);
+</script>
+```
+
 ### In the Viewer
 
 The Viewer's Panel shows it as its Contents section, for a Manifest with Ranges.
@@ -85,7 +126,8 @@ The Viewer's Panel shows it as its Contents section, for a Manifest with Ranges.
 ### Your own
 
 Use `tableOfContents` for the same entries, in a table of your own: each has its `label`,
-the `canvasId` it goes to, its `time` or `region`, and its `children`. `currentContents`
+the `canvasId` it goes to, its `time` or `region`, its `parts` where it has some, and its
+`children`. `currentContents`
 names the entry the reader is in, and `chaptersOf` gives a recording's chapters.
 
 ```jsx

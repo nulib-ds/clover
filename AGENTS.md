@@ -1153,7 +1153,8 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   `npm run build:mocks` fetches it from the Lab only when it is missing, and the live
   copy (`pages/api/mocks/esu-shrine/`) serves that file. The photograph is linked, never
   copied. It is the playground's Model; `cookbook`, the IIIF Cookbook's recipes as one
-  Collection, each a member by the resource the Cookbook publishes for it, its title,
+  Collection, only those on its viewer matrix (`https://iiif.io/api/cookbook/recipe/matrix/`,
+  which `npm run build:cookbook` reads; Mat, 2026-10-28), each a member by the resource the Cookbook publishes for it, its title,
   its folder's name on iiif.io as its summary ("0047-homepage", `none`; Mat,
   2026-10-25), its thumbnail and its page on iiif.io (its homepage),
   curated in its generator (its words, and `LEFT_OUT`: a resource another recipe owns is

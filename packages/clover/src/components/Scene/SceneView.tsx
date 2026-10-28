@@ -21,6 +21,7 @@ import { Caret, RotatePad, showOrientation } from "./RotatePad";
 import type { IIIFCanvas } from "../Canvas/layout";
 import Caption, { captionLabelId, hasInformation } from "../Body/Caption";
 import { BodyAlert } from "../Body/BodyAlert";
+import { BodyUnloadable } from "../../ui/BodyUnloadable";
 import { Information } from "../Body/glyphs";
 import { useControlsVisibility } from "../Body/useControlsVisibility";
 import { useNearViewport } from "../Body/useNearViewport";
@@ -149,7 +150,8 @@ type Status =
   | { state: "waiting" }
   | { state: "loading" }
   | { state: "ready" }
-  | { state: "error"; error: Error };
+  /** `load`: its models could not be loaded, which the Body says plainly. */
+  | { state: "error"; error: Error; load?: boolean };
 
 /**
  * `Scene` drawing exactly what it is handed: a Presentation 4 Scene, its models lit and
@@ -360,6 +362,7 @@ function SceneBody({
         setStatus({
           state: "error",
           error: error instanceof Error ? error : new Error(String(error)),
+          load: true,
         });
       });
     return () => {
@@ -735,7 +738,13 @@ function SceneBody({
         >
           {t("sceneKeys")}
         </span>
-        {status.state === "error" && (
+        {/* Its models could not be loaded: said in the middle of the Body. */}
+        <BodyUnloadable
+          kind="model"
+          shown={status.state === "error" && Boolean(status.load)}
+        />
+        {/* Anything else that stops it (the browser took its graphics back), in full. */}
+        {status.state === "error" && !status.load && (
           <BodyAlert error={status.error} className="clover-scene-error" />
         )}
         {loading && <Loading overlay />}

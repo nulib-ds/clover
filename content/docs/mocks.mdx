@@ -560,9 +560,10 @@ It answers no query, so it is static only. The homepage reads it twice: its View
 lists the members under "IIIF Cookbook recipes", and its Natural story's select (the same
 field) lists them alone, each opening in the playground's Viewer. Its generator is
 `docs/mocks/cookbook/index.mjs`, and what it lists is `docs/mocks/cookbook/recipes.json`,
-written by `npm run build:cookbook`, which reads every recipe's resource from iiif.io
-(leaving out, and saying, one that no longer answers) and says which recipes iiif.io's
-index lists that the docs' own list (`cookbookSections.ts`) does not. When the Cookbook
+written by `npm run build:cookbook`, which lists only the recipes on the Cookbook's
+[viewer matrix](https://iiif.io/api/cookbook/recipe/matrix/), reads each one's resource
+from iiif.io (leaving out, and saying, one that no longer answers) and says which recipes
+iiif.io's index or matrix lists that the docs' own list (`cookbookSections.ts`) does not. When the Cookbook
 changes, run `npm run build:cookbook`, then `npm run build:mocks`.
 
 ## Esu Shrine: a 3D model

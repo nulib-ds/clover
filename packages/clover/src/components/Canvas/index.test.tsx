@@ -105,6 +105,22 @@ describe("Canvas", () => {
     expect(await screen.findByTestId("clover-canvas")).toBeInTheDocument();
   });
 
+  it("says in the middle of the Body when its image could not be loaded", async () => {
+    render(<Canvas iiifContent={book as never} />);
+    const status = await waitFor(() => {
+      const region = document.querySelector(".clover-body-unloadable");
+      expect(region).not.toBeNull();
+      return region!;
+    });
+    // Always there, so its words are announced as they come.
+    expect(status).toHaveAttribute("role", "status");
+    expect(status).toBeEmptyDOMElement();
+    act(() => listeners.unloadable(true));
+    expect(status).toHaveTextContent("This image could not be loaded.");
+    act(() => listeners.unloadable(false));
+    expect(status).toBeEmptyDOMElement();
+  });
+
   it("renders nothing without a source, as Image does", () => {
     const { container } = render(<Canvas src={[]} />);
     expect(container).toBeEmptyDOMElement();

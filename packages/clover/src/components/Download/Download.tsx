@@ -1,6 +1,7 @@
 import React from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
+import type { CloverRequest } from "../../core/request";
 import { selectVisibleCanvases } from "../../core/selectors";
 import { type LanguageMapLike, localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
@@ -23,6 +24,31 @@ export interface Rendering {
   label: string;
   lang?: string;
   format?: string;
+}
+
+// Origins whose files could not be fetched (no CORS): their links then open as links do.
+const unfetchable = new Set<string>();
+
+const originOf = (url: string) => {
+  try {
+    return new URL(url, globalThis.location?.href).origin;
+  } catch {
+    return url;
+  }
+};
+
+/**
+ * Saves a file pressed rather than opening it (`core/save-file.ts`, loaded on the first
+ * press), else opens it in a new tab, its origin remembered.
+ */
+function save(url: string, request: CloverRequest | undefined) {
+  void import("../../core/save-file")
+    .then(({ saveFile }) => saveFile(url, request))
+    .then((saved) => {
+      if (saved) return;
+      unfetchable.add(originOf(url));
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
 }
 
 function renderingsOf(
@@ -72,6 +98,12 @@ export interface DownloadGroupsProps {
   all: Rendering[];
   /** The level of each group's title ("This page", "All pages"). Default 3. */
   headingLevel?: number;
+  /**
+   * In a popover (About's Download button, `Panel/AboutActions.tsx`): each group a named
+   * group, its title no heading, as a menu's groups are, rather than a section of the
+   * page's outline.
+   */
+  inPopover?: boolean;
 }
 
 /**
@@ -82,15 +114,19 @@ export function DownloadGroups({
   page,
   all,
   headingLevel = 3,
+  inPopover = false,
 }: DownloadGroupsProps) {
   const { t, langOf } = useCloverTranslation();
+  const { clover } = useClover("Download");
   const id = useUniqueId();
   // Past 6 not a heading (`ui/heading.ts`): each group is named by it either way.
-  const Heading = titleTag(headingLevel) as "h3";
+  const Heading = (inPopover ? "span" : titleTag(headingLevel)) as "h3";
+  const Group = inPopover ? "div" : "section";
   const list = (titleKey: string, items: Rendering[], key: string) =>
     items.length > 0 && (
-      <section
+      <Group
         className="clover-download-group"
+        role={inPopover ? "group" : undefined}
         aria-labelledby={`${id}-${key}`}
       >
         <Heading
@@ -108,7 +144,23 @@ export function DownloadGroups({
                 href={item.id}
                 target="_blank"
                 rel="noopener noreferrer"
+                download=""
                 lang={item.lang}
+                onClick={(event) => {
+                  // A press with a key (a new tab, a window) is the browser's, and so is
+                  // a file whose origin would not let it be fetched.
+                  if (
+                    event.button !== 0 ||
+                    event.metaKey ||
+                    event.ctrlKey ||
+                    event.shiftKey ||
+                    event.altKey ||
+                    unfetchable.has(originOf(item.id))
+                  )
+                    return;
+                  event.preventDefault();
+                  save(item.id, clover.request);
+                }}
               >
                 {item.label}
                 {item.format && item.format !== item.label && (
@@ -121,7 +173,7 @@ export function DownloadGroups({
             </li>
           ))}
         </ul>
-      </section>
+      </Group>
     );
   return (
     <div className="clover-download-groups">
@@ -135,7 +187,9 @@ export function DownloadGroups({
  * Downloads, as 3.x's Viewer offers them: the `rendering` of the Canvases in view ("This
  * page") and of the Manifest ("All pages") — a PDF, a text, a high-resolution file —
  * each a link, as Homepage lists a resource's pages (Mat, 2026-10-21: links, not a
- * button that opens them). Renders nothing when there is nothing to download.
+ * button that opens them). Pressed, a link saves its file rather than opening it, where
+ * its server lets the file be fetched (`saveFile`), and opens it in a new tab where not.
+ * Renders nothing when there is nothing to download.
  */
 export function Download({
   className,

@@ -1,4 +1,11 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  within,
+  waitFor,
+} from "@testing-library/react";
 import { p4 } from "../../../fixtures/presentation4";
 import React from "react";
 
@@ -258,12 +265,14 @@ describe("Canvas media", () => {
     act(() => {
       element.dispatchEvent(new Event("durationchange"));
     });
-    // A notch where the second chapter begins; none for the first.
-    const markers = container.querySelectorAll(
-      ".clover-canvas-transport-chapter-marker",
-    );
-    expect(markers).toHaveLength(1);
-    expect((markers[0] as HTMLElement).style.left).toBe("50%");
+    // A gap cut in the seek bar where the second chapter begins; none for the first.
+    const seek = container.querySelector<HTMLElement>(
+      ".clover-canvas-transport-seek",
+    )!;
+    expect(seek).toHaveAttribute("data-gaps");
+    const mask = seek.style.getPropertyValue("--clover-transport-gaps");
+    expect(mask.match(/transparent/g)).toHaveLength(1);
+    expect(mask).toContain("calc(50% - var(--clover-transport-gap) / 2)");
     expect(screen.getByText("Opening")).toHaveClass(
       "clover-canvas-transport-chapter",
     );
@@ -277,10 +286,11 @@ describe("Canvas media", () => {
   });
 
   /*
-   * The chapter under the pointer on the seek bar: its stretch drawn out, its start and
-   * title in a popover over it, and the host told, once a chapter, not once a move. The
-   * bar's value names the chapter playing, for a screen reader. One a list beside the
-   * Canvas marks (`highlightedChapter`) has its stretch drawn out, and no popover.
+   * The chapter under the pointer on the seek bar: its stretch drawn out, the time under
+   * the pointer and its title in a popover over it, and the host told, once a chapter, not
+   * once a move. The bar's value names the chapter playing, for a screen reader. One a
+   * list beside the Canvas marks (`highlightedChapter`) has its stretch drawn out, and no
+   * popover.
    */
   it("shows the chapter under the pointer on the seek bar, and tells the host", async () => {
     const onMediaElement = vi.fn();
@@ -324,17 +334,19 @@ describe("Canvas media", () => {
       );
     move(150);
     expect(onChapterHighlight).toHaveBeenLastCalledWith("range/2");
-    expect(area.querySelector(":scope > .clover-tip")).toHaveTextContent(
-      "0:10 Lunch",
-    );
+    // The time under the pointer, over the chapter's title, in its popover.
+    const tip = () => area.querySelector(":scope > .clover-tip");
+    expect(tip()?.querySelector(".clover-tip-lead")).toHaveTextContent("0:15");
+    expect(tip()).toHaveTextContent(/Lunch$/);
     expect(area.style.getPropertyValue("--clover-transport-preview")).toBe(
       "75%",
     );
     expect(stretch()!.style.left).toBe("50%");
     expect(stretch()!.style.width).toBe("50%");
-    // Along the same chapter, nothing more is said.
+    // Along the same chapter, nothing more is said; its time follows the pointer.
     move(170);
     expect(onChapterHighlight).toHaveBeenCalledTimes(1);
+    expect(tip()?.querySelector(".clover-tip-lead")).toHaveTextContent("0:17");
     fireEvent.pointerLeave(area);
     expect(onChapterHighlight).toHaveBeenLastCalledWith(null);
     expect(area.querySelector(".clover-tip")).toBeNull();
@@ -349,6 +361,68 @@ describe("Canvas media", () => {
     expect(stretch()!.style.left).toBe("0%");
     expect(stretch()!.style.width).toBe("50%");
     expect(area.querySelector(".clover-tip")).toBeNull();
+  });
+
+  // Cookbook 0229: a chapter's picture beside it in the menu, and over it on the seek bar.
+  it("shows a chapter's picture in its menu and its popover", async () => {
+    const onMediaElement = vi.fn();
+    const { container } = render(
+      <Canvas
+        canvases={video.items as any}
+        onMediaElement={onMediaElement}
+        chapters={[
+          { label: "Opening", start: 0, end: 10, thumbnail: "opening.png" },
+          {
+            label: "Lunch",
+            start: 10,
+            end: 20,
+            thumbnail: { src: "lunch.png" },
+          },
+        ]}
+      />,
+    );
+    await transport();
+    const element = onMediaElement.mock.calls.at(-1)?.[0] as HTMLVideoElement;
+    Object.defineProperty(element, "duration", {
+      configurable: true,
+      value: 20,
+    });
+    act(() => {
+      element.dispatchEvent(new Event("durationchange"));
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Chapters" }));
+    // The chapter playing has its picture under it; the others none.
+    const opening = screen
+      .getByRole("radio", { name: /Opening/ })
+      .closest("label")!;
+    await waitFor(() =>
+      expect(
+        opening.querySelector("img.clover-entry-thumbnail"),
+      ).toHaveAttribute("src", "opening.png"),
+    );
+    const lunch = screen
+      .getByRole("radio", { name: /Lunch/ })
+      .closest("label")!;
+    expect(lunch.querySelector("img")).toBeNull();
+    // Named by its words alone.
+    expect(
+      screen.getByRole("radio", { name: "0:00 Opening" }),
+    ).toBeInTheDocument();
+
+    const area = container.querySelector<HTMLElement>(
+      ".clover-canvas-transport-seek-area",
+    )!;
+    area.getBoundingClientRect = () =>
+      ({ left: 0, width: 200, top: 0, height: 26 }) as DOMRect;
+    fireEvent(
+      area,
+      new MouseEvent("pointermove", { bubbles: true, clientX: 20 }),
+    );
+    await waitFor(() =>
+      expect(
+        area.querySelector(":scope > .clover-tip img.clover-tip-image"),
+      ).toHaveAttribute("src", "opening.png"),
+    );
   });
 
   it("keeps a menu open while the arrow keys move through it", async () => {

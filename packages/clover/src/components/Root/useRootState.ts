@@ -162,9 +162,26 @@ export function useRootState<Props extends RootStateOptions>({
   const kept = useRef(renderers);
   if (!sameRenderers(kept.current, renderers)) kept.current = renderers;
   const stableRenderers = kept.current;
+  /*
+   * The language the reader chose to read IIIF text in (the Panel's languages), until the
+   * page gives the Root another `language`, which wins again (React's state adjusted as
+   * it renders, so no frame shows the old choice).
+   */
+  const [chosen, setChosen] = useState<string>();
+  const [chosenUnder, setChosenUnder] = useState(language);
+  if (chosenUnder !== language) {
+    setChosenUnder(language);
+    setChosen(undefined);
+  }
+  const reading = chosen ?? language;
   const context = useMemo(
-    () => ({ clover, language, renderers: stableRenderers }),
-    [clover, language, stableRenderers],
+    () => ({
+      clover,
+      language: reading,
+      renderers: stableRenderers,
+      chooseLanguage: setChosen,
+    }),
+    [clover, reading, stableRenderers],
   );
   return [context, status, rest];
 }

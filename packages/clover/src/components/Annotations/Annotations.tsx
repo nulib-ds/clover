@@ -19,7 +19,7 @@ import type { Manifest } from "../../core/presentation";
 import { selectSequence, selectVisibleCanvases } from "../../core/selectors";
 import { parseTime } from "../../core/ranges";
 import { regionSource } from "../../core/region";
-import { resolveThumbnail } from "../../core/thumbnail";
+import type { ThumbnailSource } from "../../core/thumbnail";
 import {
   type LanguageMapLike,
   type LocalizedValue,
@@ -33,17 +33,12 @@ import { useClover, useCloverSelector } from "../../react/context";
 import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { titleTag } from "../../ui/heading";
 import { CueTime } from "../../ui/Cue";
+import { EntryThumbnail } from "../../ui/EntryThumbnail";
 import { HideToggle } from "../../ui/HideToggle";
-import { languageCode } from "../../ui/languageCode";
-import { Tip } from "../../ui/Tip";
-import { useContainerName } from "../../ui/useContainerName";
 import { visuallyHidden } from "../../ui/visuallyHidden";
-import {
-  autonym,
-  inLanguage,
-  languagesOf,
-  startingLanguage,
-} from "./languages";
+import { startingLanguage } from "../../core/language-choice";
+import { LanguageChoice } from "../../ui/LanguageChoice";
+import { inLanguage, languagesOf } from "./languages";
 
 export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
   /**
@@ -275,6 +270,8 @@ function AnnotationGroup({
             languages={languages}
             chosen={chosen}
             onChange={setPicked}
+            nameKey="annotationsLanguage"
+            part="clover-annotations"
           />
         )}
         <HideToggle
@@ -620,6 +617,8 @@ const AnnotationLayers = forwardRef<
                   onChange={(tag) =>
                     setPicked((current) => ({ ...current, [layer.key]: tag }))
                   }
+                  nameKey="annotationsLanguage"
+                  part="clover-annotations"
                 />
               )}
               <HideToggle
@@ -703,89 +702,21 @@ const AnnotationLayers = forwardRef<
 });
 
 /**
- * A set's languages, where its annotations come one per language: a row of their codes
- * ("AR", "EN"), drawn as the Transcript's are, one chosen. Native radios, one stop in the
- * tab order, the arrow keys moving between them; the row named "Language", each radio by
- * its code and then its language's own name in that language (WCAG 2.5.3, 3.1.2), which
- * its popover shows.
+ * Where the picture of what an entry marks comes from: its region of the Canvas, cut small
+ * by the image server once its `info.json` is read (`regionSource`, `ui/EntryThumbnail`).
+ * None for an entry that shows an image of its own (0377), one with no rectangle, or an
+ * image the server cannot cut.
  */
-function LanguageChoice({
-  languages,
-  chosen,
-  onChange,
-}: {
-  languages: string[];
-  chosen: string;
-  onChange: (tag: string) => void;
-}) {
-  const { t, langOf } = useCloverTranslation();
-  const id = useUniqueId();
-  const name = useContainerName(
-    t("annotationsLanguage"),
-    langOf("annotationsLanguage"),
-  );
-  return (
-    <>
-      {name.node}
-      <fieldset {...name.props} className="clover-annotations-languages">
-        {languages.map((tag) => {
-          const own = autonym(tag);
-          return (
-            <label key={tag} className="clover-annotations-language">
-              <input
-                type="radio"
-                name={`${id}-language`}
-                checked={tag === chosen}
-                onChange={() => onChange(tag)}
-              />
-              <span className="clover-annotations-language-code">
-                {languageCode(tag)}
-              </span>{" "}
-              <span style={visuallyHidden} lang={tag}>
-                {own}
-              </span>
-              <Tip label={own} lang={tag} />
-            </label>
-          );
-        })}
-      </fieldset>
-    </>
-  );
-}
-
-/** A region's picture: an `l` square (about a line), fetched at twice that for dense screens. */
-const THUMBNAIL_SIZE = 52;
-
-/**
- * The picture of what an entry marks: its region of the Canvas, cut small by the image
- * server once its `info.json` is read (`regionSource`, `resolveThumbnail`). None for an
- * entry that shows an image of its own (0377), one with no rectangle, or an image the
- * server cannot cut.
- */
-function useRegionThumbnail(
+function useRegionSource(
   entry: AnnotationEntry,
   canvas?: Record<string, any>,
-): string | undefined {
-  const { clover } = useClover("Annotations");
-  const source = useMemo(() => {
+): ThumbnailSource | null {
+  return useMemo(() => {
     const rect = entry.target.rect;
     if (!rect || !canvas || entry.bodies.some((body) => body.image))
       return null;
     return regionSource(canvas, rect);
   }, [entry, canvas]);
-  const [src, setSrc] = useState<string>();
-  useEffect(() => {
-    setSrc(undefined);
-    if (!source) return;
-    let live = true;
-    void resolveThumbnail(source, THUMBNAIL_SIZE, clover.request).then(
-      (url) => live && setSrc(url),
-    );
-    return () => {
-      live = false;
-    };
-  }, [source, clover]);
-  return src;
 }
 
 /**
@@ -834,7 +765,8 @@ function AnnotationItem({
   // Clover's words and the annotation's: both in the page's language, or each in its own.
   const oneLanguage = !show.lang && !langWithin(text.lang, hostLanguage);
   const name = text.text ? `${show.text}: ${text.text}` : show.text;
-  const thumbnail = useRegionThumbnail(entry, canvas);
+  const { clover } = useClover("Annotations");
+  const thumbnail = useRegionSource(entry, canvas);
   return (
     <li
       className="clover-annotations-entry"
@@ -855,17 +787,11 @@ function AnnotationItem({
       {time && (
         <CueTime start={time.start} className="clover-annotations-time" />
       )}
-      {thumbnail && (
-        <img
-          className="clover-annotations-thumbnail"
-          src={thumbnail}
-          alt=""
-          width={THUMBNAIL_SIZE / 2}
-          height={THUMBNAIL_SIZE / 2}
-          loading="lazy"
-          decoding="async"
-        />
-      )}
+      <EntryThumbnail
+        className="clover-annotations-thumbnail"
+        source={thumbnail}
+        request={clover.request}
+      />
       <div className="clover-annotations-body clover-cue-text">
         {renderEntry ? (
           renderEntry(entry)

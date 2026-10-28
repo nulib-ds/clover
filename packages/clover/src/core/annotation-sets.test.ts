@@ -2,17 +2,21 @@ import htmlJson from "../fixtures/iiif-cookbook/0019-html-in-annotations.json";
 import imageJson from "../fixtures/iiif-cookbook/0377-image-in-annotation.json";
 import captionsJson from "../fixtures/iiif-cookbook/0219-using-caption-file.json";
 import simpleJson from "../fixtures/iiif-cookbook/simple-annotation.json";
+import articlesJson from "../fixtures/iiif-cookbook/0025-newspaper-article-index.json";
 import { p4 } from "../fixtures/presentation4";
 import { loadAnnotationSets } from "./annotation-collection";
 import {
+  CONTENTS_SET_ID,
   readPage,
   selectAnnotationSets,
+  selectDrawnSets,
   selectHiddenSets,
   selectListedSets,
   selectManifestSets,
   selectUnlistedSets,
 } from "./annotation-sets";
 import { createClover } from "./clover";
+import { contentsSet } from "./range-regions";
 import { SEARCH_SET_ID } from "./search-service";
 import { buildContentState } from "./content-state";
 import {
@@ -141,18 +145,21 @@ describe("annotation sets", () => {
       ]);
     });
 
-    it("is never offered by the Canvas's menu, nor are a search's hits, unless shown", () => {
+    it("is never offered by the Canvas's menu, nor are a search's hits or the Ranges' regions, unless shown", () => {
       const page = "https://example.org/page/ocr";
       expect(selectUnlistedSets(manifest, [], [], [])).toEqual([
         SEARCH_SET_ID,
+        CONTENTS_SET_ID,
         page,
       ]);
       // Shown by the host, the menu offers it, to hide again; hidden again, too.
       expect(selectUnlistedSets(manifest, [], [], [page])).toEqual([
         SEARCH_SET_ID,
+        CONTENTS_SET_ID,
       ]);
       expect(selectUnlistedSets(manifest, [], [page], [])).toEqual([
         SEARCH_SET_ID,
+        CONTENTS_SET_ID,
       ]);
     });
 
@@ -340,5 +347,28 @@ describe("content state output", () => {
       w: 30,
       h: 40,
     });
+  });
+});
+
+// Cookbook 0025: the articles' columns, drawn as annotations, though nothing lists them.
+describe("the Ranges' regions", () => {
+  it("are drawn with the Manifest's own sets, and listed by none", () => {
+    const manifest = p4(articlesJson);
+    const regions = contentsSet(manifest);
+    const drawn = selectDrawnSets(manifest, [], null, regions);
+    expect(drawn.map((set) => set.id)).toContain(CONTENTS_SET_ID);
+    expect(selectListedSets(manifest, []).map((set) => set.id)).not.toContain(
+      CONTENTS_SET_ID,
+    );
+    // The same array while nothing changes.
+    expect(selectDrawnSets(manifest, [], null, regions)).toBe(drawn);
+  });
+
+  it("are read by the Root once a Manifest with Ranges is shown", async () => {
+    const clover = createClover();
+    await clover.load(articlesJson as never);
+    await vi.waitFor(() =>
+      expect(clover.store.get().regions?.id).toBe(CONTENTS_SET_ID),
+    );
   });
 });

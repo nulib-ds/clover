@@ -6,8 +6,8 @@
  * ("0047-homepage") as its summary, its thumbnail, and its page there as its homepage.
  *
  * What it lists is read from `recipes.json`, written by `npm run build:cookbook` from
- * iiif.io (`scripts/build-cookbook.mjs`: every recipe's resource read, its type kept and
- * its thumbnail found). What is curated is here: the Collection's own words, and the
+ * iiif.io (`scripts/build-cookbook.mjs`: the recipes on the Cookbook's viewer matrix
+ * alone, each one's resource read, its type kept and its thumbnail found). What is curated is here: the Collection's own words, and the
  * recipes it leaves out (`LEFT_OUT`, each with why).
  *
  * Static only: `scripts/build-mocks.mjs` writes it to `public/mocks/cookbook/`,
@@ -76,7 +76,7 @@ export const collection = (base) => ({
   type: "Collection",
   label: en("IIIF Cookbook recipes"),
   summary: en(
-    "Every recipe the IIIF Cookbook publishes, each by the resource it is about.",
+    "Every recipe on the IIIF Cookbook's viewer matrix, each by the resource it is about.",
   ),
   // No `homepage` of its own: the list would show it as "View all" (Mat, 2026-10-25:
   // "we can remove the view all link"), and the story's words link the Cookbook.

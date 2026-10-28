@@ -19,6 +19,7 @@ export const viewer: ElementSpec = {
     header: { prop: "header", type: "boolean" },
     panel: { prop: "panel", type: "boolean" },
     download: { prop: "download", type: "boolean" },
+    languages: { prop: "languages", type: "boolean" },
     // The templates' own (`templates/`): each one's, where it has it.
     "panel-open": { prop: "defaultPanelOpen", type: "boolean" },
     "panel-layout": { prop: "panelLayout", type: ["accordion", "tabs"] },
@@ -92,7 +93,12 @@ export const viewerDocs: ElementDocs = {
     },
     download: {
       description:
-        "Default and Document: \"false\" leaves out the downloads: Default's in its panel's About, Document's in its toolbar (its panel's About lists none).",
+        "Default and Document: \"false\" leaves out the downloads: Default's from a Download button beside its panel's About heading, Document's in its toolbar (its panel's About offers none).",
+      default: "true",
+    },
+    languages: {
+      description:
+        'Default and Document: where what the resource says of itself comes in several languages, the panel\'s About heading offers them, and the whole Viewer reads in the one chosen. "false" leaves the choice out.',
       default: "true",
     },
     "panel-open": {

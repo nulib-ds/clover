@@ -1,0 +1,25 @@
+/*
+ * The panel's chevron (`Chevron`), one for a section's heading and an entry in Contents:
+ * the text's color, 12px square (`--clover-chevron`, which the panel's column of
+ * chevrons is reckoned by), turned to point up while what it opens is open, a turn that
+ * eases where motion is welcome.
+ */
+.clover-sections {
+  --clover-chevron: 12px;
+}
+
+.clover-chevron {
+  flex-shrink: 0;
+  color: inherit;
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clover-chevron[data-open] {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-chevron {
+    transition: none;
+  }
+}

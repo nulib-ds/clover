@@ -9,7 +9,7 @@ import type { Status } from "docs/components/CookbookRecipes/cookbookCatalog";
  * for playback, since Playwright's Chromium cannot decode H.264), and looking for what the
  * recipe is about: drawn, listed, navigable, played. A note says what is missing.
  */
-export const CHECKED = "2026-10-10";
+export const CHECKED = "2026-10-28";
 
 export interface Progress {
   status: Status;
@@ -30,6 +30,8 @@ export const progress4: Record<string, Progress> = {
   "0004-canvas-size": yes,
   "0005-image-service": yes,
   "0006-text-language": yes,
+  // 2026-10-28: its painted image (a Wikimedia thumbnail) answers 400 at its source; the
+  // values the recipe is about show.
   "0118-multivalue": yes,
   "0007-string-formats": yes,
   "0029-metadata-anywhere": yes,
@@ -52,7 +54,8 @@ export const progress4: Record<string, Progress> = {
   ),
   "0154-geo-extension": yes,
   "0240-navPlace-on-canvases": yes,
-  "0234-provider": no("provider is not shown in About"),
+  // 2026-10-28: its logo and name over the Viewer, and under Provider in About.
+  "0234-provider": yes,
   "0032-collection": yes,
   "0464-reuse-manifest": yes,
   // 2026-10-19: its plain-text transcript shows in the panel's Transcript.
@@ -90,22 +93,25 @@ export const progress4: Record<string, Progress> = {
   "0346-multilingual-annotation-body": yes,
   "0561-text-on-image": no("Text painted on the Canvas is not drawn"),
   "0024-book-4-toc": yes,
+  // 2026-10-28: Contents steps through an article's regions in its Range's order, each
+  // drawn and selected on the Canvas.
   "0025-newspaper-article-index": yes,
   "0026-toc-opera": yes,
-  "0229-behavior-ranges": partial(
-    "no-nav is honored; thumbnail-nav ranges are listed as chapters, not as thumbnails",
-  ),
-  "0027-alternative-page-order": partial(
-    "The other orders are listed in Contents; Previous and Next keep the Manifest's",
-  ),
+  // 2026-10-28: no-nav is honored, and each thumbnail-nav Range shows its thumbnail in
+  // Contents, the chapters' menu and the seek bar's popover.
+  "0229-behavior-ranges": yes,
+  // 2026-10-28: Contents steps through each sequence in its own order, the first the
+  // default, the one chosen current.
+  "0027-alternative-page-order": yes,
   "0030-multi-volume": yes,
   "0031-bound-multivolume": yes,
   "0033-choice": yes,
   "0035-foldouts": yes,
   "0036-composition-from-multiple-images": yes,
   "0560-resources-on-a-timeline": yes,
+  // 2026-10-28: the image now shows while it is timed to (11s to 42s).
   "0489-multimedia-canvas": partial(
-    "The image and the video are drawn, but not when they are timed to; its painted text is not shown",
+    "The image shows while it is timed to; the video painted on it and its painted text are not drawn",
   ),
   "0040-image-rotation-service": no(
     "Rotation by the Image API selector, or by CSS, is not applied",
@@ -122,6 +128,7 @@ export const progress4: Record<string, Progress> = {
   ),
   "0057-publishing-v2-and-v3": yes,
   "0434-choice-av": yes,
+  // 2026-10-28: its two files play as one, in the Canvas's time (`media/sequence.ts`).
   "0064-opera-one-canvas": yes,
   "0065-opera-multiple-canvases": yes,
   "0068-newspaper": yes,

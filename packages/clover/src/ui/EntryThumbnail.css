@@ -1,0 +1,25 @@
+/*
+ * The picture beside an entry's words (`ui/EntryThumbnail.tsx`): an `l` square (about its
+ * first line's height) at the line's start, cropped to fill, with the radius the header's
+ * thumbnail has. Muted behind it while it loads.
+ */
+.clover-entry-thumbnail {
+  flex: none;
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+  object-fit: cover;
+  border-radius: var(--clover-radius, 3px);
+  background-color: var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+/*
+ * The current chapter's, large (Mat, 2026-10-28: "netflix style where only the active
+ * thumbnail is shown and larger"): under its time and title, across the row, as wide as
+ * the seek bar's popover draws it (`--clover-picture`), its own shape, uncropped.
+ */
+.clover-entry-thumbnail[data-large] {
+  grid-column: 1 / -1;
+  width: var(--clover-picture);
+  max-width: 100%;
+  height: auto;
+}

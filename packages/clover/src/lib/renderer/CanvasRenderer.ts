@@ -75,6 +75,11 @@ export type CanvasRendererEvent =
   /** A new set of images replaced the previous one. */
   | "change"
   | "error"
+  /**
+   * Whether nothing the scene paints could be loaded (its detail): every image failed to
+   * prepare, or every tile it wanted failed for good. Fires as that changes.
+   */
+  | "unloadable"
   /** The backend changed (fallback, or a context released and reacquired). */
   | "backend"
   /** A click that is not a zoom, with click-to-zoom turned off. */
@@ -204,6 +209,7 @@ export class CanvasRenderer implements GestureTarget {
   private lastEmitted: CameraState | null = null;
   private generation = 0;
   private listeners = new Map<CanvasRendererEvent, Set<Listener>>();
+  private unloadable = false;
 
   private resizeObserver: ResizeObserver | null = null;
   private intersectionObserver: IntersectionObserver | null = null;
@@ -338,6 +344,9 @@ export class CanvasRenderer implements GestureTarget {
     this.contentVersion++;
 
     if (errors.length) this.emit("error", errors);
+    // Nothing to draw at all where every image failed to prepare (an address that answers
+    // with an error, before its size is known).
+    this.setUnloadable(images.length > 0 && !items.length && errors.length > 0);
 
     if (!this.worldBounds) {
       this.invalidate();
@@ -366,6 +375,7 @@ export class CanvasRenderer implements GestureTarget {
    * scene, framed afresh. A swap within one resource keeps the old scene up instead.
    */
   clear(): void {
+    this.setUnloadable(false);
     this.generation++;
     this.items = [];
     this.watchMedia([]);
@@ -703,9 +713,14 @@ export class CanvasRenderer implements GestureTarget {
       // Fetch for where the camera lands, not for each view on the way.
       destination: animating ? this.camera.destination : undefined,
     });
-    this.cache.update(
-      plan.wants.filter((want) => !want.url.startsWith(MEDIA_KEY_PREFIX)),
+    const wants = plan.wants.filter(
+      (want) => !want.url.startsWith(MEDIA_KEY_PREFIX),
     );
+    this.cache.update(wants);
+    // Something drawn, or else every tile wanted failed for good: whether it can be shown.
+    if (plan.draws.length) this.setUnloadable(false);
+    else if (wants.length && wants.every((want) => this.cache.failed(want.url)))
+      this.setUnloadable(true);
     this.paint(plan.draws);
     this.overlays?.position(camera, this.viewport);
     this.navigator?.render(
@@ -1093,6 +1108,12 @@ export class CanvasRenderer implements GestureTarget {
     this.measure();
     this.watchPixelRatio();
   };
+
+  private setUnloadable(unloadable: boolean): void {
+    if (unloadable === this.unloadable) return;
+    this.unloadable = unloadable;
+    this.emit("unloadable", unloadable);
+  }
 
   private emit(event: CanvasRendererEvent, detail?: unknown): void {
     this.listeners.get(event)?.forEach((listener) => listener(detail));

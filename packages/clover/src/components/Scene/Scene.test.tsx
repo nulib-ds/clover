@@ -215,12 +215,16 @@ describe("Scene", () => {
     await waitFor(() => expect(createEngine).toHaveBeenCalled());
   });
 
-  it("says why a model will not draw, in an alert, and never shows a broken view", async () => {
+  it("says a model could not be loaded, in the middle of the Body, and never shows a broken view", async () => {
     engine.load.mockRejectedValue(new Error("Unexpected end of GLB"));
     render(<Clover.Scene scene={scene as never} />);
-    const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent("This could not be loaded.");
-    expect(alert).toHaveTextContent("Unexpected end of GLB");
+    expect(
+      await screen.findByText("This model could not be loaded."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("This model could not be loaded.").closest("[role]"),
+    ).toHaveAttribute("role", "status");
+    expect(screen.queryByRole("alert")).toBeNull();
     expect(engine.dispose).toHaveBeenCalled();
   });
 

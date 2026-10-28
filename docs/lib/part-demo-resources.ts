@@ -46,6 +46,18 @@ export const RESOURCES = {
    * glTF model at its origin, for `Scene`.
    */
   model: "https://iiif.io/api/cookbook/recipe/0608-mvm-3d/v4/manifest.json",
+  /**
+   * The IIIF Cookbook's recipe 0006 (not a mock): a Manifest saying everything of itself
+   * in English and French, for the languages About's heading offers.
+   */
+  languages:
+    "https://iiif.io/api/cookbook/recipe/0006-text-language/manifest.json",
+  /**
+   * The IIIF Cookbook's recipe 0025 (not a mock): a newspaper whose Ranges are its
+   * articles, each in columns, one on page 2 and then page 5, for Contents' parts.
+   */
+  articles:
+    "https://iiif.io/api/cookbook/recipe/0025-newspaper-article-index/manifest.json",
 } as const;
 
 export type PartDemoResource = keyof typeof RESOURCES;

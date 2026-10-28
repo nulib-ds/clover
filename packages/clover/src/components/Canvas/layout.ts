@@ -2,6 +2,7 @@ import { isSound, parseAnnotationTarget } from "../../core/annotations";
 import { bodiesOf, isPainting } from "../../core/painting";
 import type { Rect, SceneImage } from "../../lib/renderer";
 import { findImageServiceId } from "../../lib/renderer/sources/imageService";
+import { parseTime } from "../../lib/time";
 import { type ViewingDirection, resolveDirection } from "../../core/sequence";
 import type { ThumbnailSource } from "../../core/thumbnail";
 import { asArray } from "../../lib/asArray";
@@ -83,6 +84,21 @@ export interface PaintedMedia {
   body: Record<string, any>;
   /** Canvas coordinates. The whole Canvas when the target names no region. */
   target: Rect;
+  /** Where on the Canvas's time it is painted (`#t=3971.24`), when its target says. */
+  time?: { start: number; end?: number };
+}
+
+/**
+ * One of the files a Canvas paints one after another on its time (Cookbook 0064: an
+ * opera's two acts, each a video, the second from where the first ends).
+ */
+export interface MediaSegment {
+  src: string;
+  format?: string;
+  /** Where on the Canvas's time it starts, in seconds. */
+  start: number;
+  /** Its own length, as its body or its target gives it. */
+  duration?: number;
 }
 
 /** A WebVTT file supplementing a Canvas: captions or subtitles. */
@@ -102,6 +118,12 @@ export interface MediaPlacement {
   /** World units. */
   placement: Rect;
   duration?: number;
+  /**
+   * Its files one after another on the Canvas's time, where it paints two or more at
+   * different starts: one element plays them as one (`media/sequence.ts`), `src` the
+   * first, `duration` the Canvas's.
+   */
+  segments?: MediaSegment[];
   /**
    * A still to show before playback: the placeholder Canvas's first image, its URL made
    * once its service's `info.json` is read (`useMediaElement`).
@@ -229,11 +251,26 @@ export interface AnimationFrame {
 const framesOf = new WeakMap<object, AnimationFrame[]>();
 const NO_FRAMES: AnimationFrame[] = [];
 
+/** Whether a painting paints video or sound, its `Choice`'s items among its bodies. */
+function paintsMedia(annotation: IIIFAnnotation): boolean {
+  return bodiesOf(annotation as Record<string, any>).some((body) => {
+    const items =
+      (body as Record<string, any>)?.type === "Choice"
+        ? asArray((body as Record<string, any>).items)
+        : [body];
+    return (items as Array<Record<string, any>>).some(
+      (item) => item?.type === "Video" || isSound(item?.type),
+    );
+  });
+}
+
 /**
  * An animation Canvas's frames: its painting annotations that target a time
- * (`canvas#t=0,0.5`), in time order. Fewer than two is no animation. Read as a timeline:
- * each frame shows from its start until the next one starts, and the last until the
- * Canvas's `duration` ends (or its own end, or an even share).
+ * (`canvas#t=0,0.5`), in time order. Fewer than two is no animation, nor are a Canvas's
+ * timed paintings when every one is video or sound: those are its recording in files,
+ * played one after another (`mediaSegments`; Cookbook 0064). Read as a timeline: each
+ * frame shows from its start until the next one starts, and the last until the Canvas's
+ * `duration` ends (or its own end, or an even share).
  */
 export function animationFrames(canvas: IIIFCanvas): AnimationFrame[] {
   const cached = framesOf.get(canvas);
@@ -250,6 +287,10 @@ export function animationFrames(canvas: IIIFCanvas): AnimationFrame[] {
       if (!Number.isFinite(start)) continue;
       frames.push({ annotation, start, end: Number.isFinite(end) ? end : NaN });
     }
+  }
+  if (frames.every((frame) => paintsMedia(frame.annotation))) {
+    framesOf.set(canvas, NO_FRAMES);
+    return NO_FRAMES;
   }
   frames.sort((a, b) => a.start - b.start);
   // A timeline: each frame shows until the next starts, the last until the Canvas ends.
@@ -324,24 +365,57 @@ export function paintedImages(
 /**
  * The video or sound a Canvas or Timeline paints: `Video`, and `Audio` (Presentation 4's
  * name) or `Sound` (Presentation 3's, which the upgrader keeps). A `Choice` of sources (two
- * qualities, say) plays the selected one. Only the first is played: one Canvas, one media
- * element.
+ * qualities, say) plays the selected one. One Canvas, one media element: the first is
+ * played, or, where they are painted one after another on its time, each in turn
+ * (`mediaSegments`).
  */
 export function paintedMedia(
   canvas: IIIFCanvas,
   selections: ChoiceSelections = {},
 ): PaintedMedia[] {
   const media: PaintedMedia[] = [];
-  eachPainted(canvas, selections, (resolved, target) => {
+  eachPainted(canvas, selections, (resolved, target, _frame, t) => {
     const type = resolved.body.type;
     if (type !== "Video" && !isSound(type)) return;
+    const time = parseTime(t);
     media.push({
       kind: type === "Video" ? "video" : "audio",
       body: resolved.body,
       target,
+      ...(time ? { time } : {}),
     });
   });
   return media;
+}
+
+/**
+ * The files a Canvas paints one after another on its time, in order: two or more, each
+ * with an address and a start of its own (Cookbook 0064). None for a Canvas that paints
+ * one, or several at once.
+ */
+export function mediaSegments(
+  media: PaintedMedia[],
+): MediaSegment[] | undefined {
+  const timed = media.filter(
+    (item) => item.time && typeof item.body.id === "string",
+  );
+  const starts = new Set(timed.map((item) => item.time!.start));
+  if (timed.length < 2 || starts.size !== timed.length) return undefined;
+  return timed
+    .sort((a, b) => a.time!.start - b.time!.start)
+    .map((item) => {
+      const own =
+        Number(item.body.duration) ||
+        (item.time!.end !== undefined
+          ? item.time!.end - item.time!.start
+          : undefined);
+      return {
+        src: item.body.id,
+        ...(item.body.format ? { format: item.body.format } : {}),
+        start: item.time!.start,
+        ...(own ? { duration: own } : {}),
+      };
+    });
 }
 
 function eachPainted(
@@ -352,6 +426,8 @@ function eachPainted(
     target: Rect,
     /** The frame it belongs to, or -1 when it is no animation's frame. */
     frame: number,
+    /** Its target's time fragment, as written (`0,3971.24`). */
+    time?: string,
   ) => void,
   allFrames = false,
 ) {
@@ -384,6 +460,7 @@ function eachPainted(
             height: height || Number(resolved.body.height) || 0,
           },
       frame,
+      parsed?.t,
     );
   });
 }
@@ -602,13 +679,19 @@ export function canvasScene(
 
     const [first] = sounds;
     if (first?.body.id) {
+      // Files one after another on its time play as one, from the earliest.
+      const segments = mediaSegments(sounds);
+      const lead = segments ? segments[0] : undefined;
       media.push({
         id: `${canvas.id}|media|${first.body.id}`,
         kind: first.kind,
-        src: first.body.id,
-        format: first.body.format,
+        src: lead?.src ?? first.body.id,
+        format: lead ? lead.format : first.body.format,
         placement: toWorld(first.target),
-        duration: Number(first.body.duration ?? canvas.duration) || undefined,
+        duration: segments
+          ? Number(canvas.duration) || undefined
+          : Number(first.body.duration ?? canvas.duration) || undefined,
+        ...(segments ? { segments } : {}),
         poster: posterFor(canvas),
         captions: canvasCaptions(canvas),
       });

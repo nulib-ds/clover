@@ -102,20 +102,6 @@ label.clover-annotations-entry > input {
   pointer-events: none;
 }
 
-/*
- * What an entry marks, beside what it says: its region, an `l` square (about its first
- * line's height) at the line's start, cropped to fill, with the radius the header's
- * thumbnail has. Muted behind it while it loads.
- */
-.clover-annotations-thumbnail {
-  flex: none;
-  width: var(--clover-space-l);
-  height: var(--clover-space-l);
-  object-fit: cover;
-  border-radius: var(--clover-radius, 3px);
-  background-color: var(--clover-color-secondary-muted, #e6e8eb);
-}
-
 .clover-annotations-body {
   flex: 1 1 auto;
   min-width: 0;

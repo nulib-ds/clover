@@ -30,6 +30,11 @@ export type DocumentProps = Omit<RootProps, "children"> & {
   /** The downloads in the toolbar, as links: the page's and the Manifest's `rendering`. Default `true`. */
   download?: boolean;
   /**
+   * The languages to read the resource in, beside the panel's About heading, where what
+   * it says of itself comes in several (the Panel's `languages`). Default `true`.
+   */
+  languages?: boolean;
+  /**
    * The title's heading level, to fit the outline of the page around the layout (under
    * an `h2`, 3). The panel's sections, and the downloads' groups, are a level below
    * it. Default 2.
@@ -57,6 +62,7 @@ export function Document({
   defaultPanelOpen = false,
   panelLayout = "accordion",
   download = true,
+  languages = true,
   headingLevel = 2,
   storageKey = "clover-template-document",
   ...root
@@ -80,6 +86,7 @@ export function Document({
         defaultPanelOpen={defaultPanelOpen}
         panelLayout={panelLayout}
         download={download}
+        languages={languages}
         headingLevel={headingLevel}
         storageKey={storageKey}
       />
@@ -110,6 +117,7 @@ function DocumentLayout({
   defaultSidebarOpen,
   defaultPanelOpen,
   download,
+  languages,
   headingLevel = 2,
   storageKey,
   panelLayout,
@@ -119,6 +127,7 @@ function DocumentLayout({
   | "defaultSidebarOpen"
   | "defaultPanelOpen"
   | "download"
+  | "languages"
   | "headingLevel"
   | "storageKey"
   | "panelLayout"
@@ -362,13 +371,14 @@ function DocumentLayout({
         >
           {/*
            * Over the page it floats, so Escape and its own button put it away too. Its
-           * About lists no downloads: the toolbar has them.
+           * About offers no downloads: the toolbar has them.
            */}
           {PanelPart && (
             <PanelPart
               layout={panelLayout}
               headingLevel={below(headingLevel)}
               download={false}
+              languages={languages}
               onClose={over ? panel.close : undefined}
               closeOnEscape={over}
             />
