@@ -1,6 +1,6 @@
 {
   "@context": "http://iiif.io/api/presentation/3/context.json",
-  "id": "https://nulib-ds.github.io/clover/mocks/cookbook/collection.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/cookbook/collection.json",
   "type": "Collection",
   "label": {
     "en": [

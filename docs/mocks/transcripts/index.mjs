@@ -13,12 +13,12 @@
  * video, the captions and the transcript are the Cookbook's own fixtures, served by
  * fixtures.iiif.io (CORS open). Static only (it answers no query):
  * `scripts/build-mocks.mjs` writes it to `public/mocks/transcripts/`, published at
- * https://nulib-ds.github.io/clover/mocks/transcripts/. Documented at /docs/mocks.
+ * https://clover.iiif.library.northwestern.edu/mocks/transcripts/. Documented at /docs/mocks.
  */
 import source from "./source.json";
 
 export const PUBLIC_BASE =
-  "https://nulib-ds.github.io/clover/mocks/transcripts";
+  "https://clover.iiif.library.northwestern.edu/mocks/transcripts";
 
 /** The film's transcript as plain text, as Cookbook recipe 0253 provides it. */
 export const TRANSCRIPT = {

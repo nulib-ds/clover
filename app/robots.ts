@@ -3,8 +3,8 @@ import { siteUrl } from "docs/lib/site";
 
 /*
  * Everything open to crawlers, and where the sitemap is. A crawler reads `robots.txt` only
- * at a host's root: on nulib-ds.github.io the site is under `/clover`, so this one is not
- * read there, but it is on a domain of the site's own.
+ * at a host's root, which the site has on its own domain, so this one is read. Served
+ * under a path instead (`/clover` on nulib-ds.github.io), it would not be.
  */
 export const dynamic = "force-static";
 

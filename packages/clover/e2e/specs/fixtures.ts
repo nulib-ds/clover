@@ -8,7 +8,7 @@ const FIXTURES = resolve(__dirname, "../../src/fixtures/iiif-cookbook");
 
 /** Copies of the docs' published mocks, served at their own addresses. */
 const MOCKS = resolve(__dirname, "../../src/fixtures/mocks");
-const MOCKS_URL = "https://nulib-ds.github.io/clover/mocks/";
+const MOCKS_URL = "https://clover.iiif.library.northwestern.edu/mocks/";
 
 /** A 64 × 64 gray PNG, for every image any part asks for. */
 const PNG = Buffer.from(

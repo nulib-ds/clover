@@ -316,7 +316,7 @@ describe("canvasTextTranscripts", () => {
     const [page] = p4(pagesJson).items;
     expect(canvasTextTranscripts(page)).toEqual([
       {
-        id: "https://nulib-ds.github.io/clover/mocks/page-transcript/text/p1.txt",
+        id: "https://clover.iiif.library.northwestern.edu/mocks/page-transcript/text/p1.txt",
         label: { en: ["Text (OCR)"] },
         language: "de",
       },

@@ -14,13 +14,13 @@
  *
  * Static only (it answers no query): `scripts/build-mocks.mjs` writes it to
  * `public/mocks/standalone-canvas/`, published at
- * https://nulib-ds.github.io/clover/mocks/standalone-canvas/. The image is served by
+ * https://clover.iiif.library.northwestern.edu/mocks/standalone-canvas/. The image is served by
  * Northwestern's IIIF Image API (level 2, CORS open). Documented at /docs/mocks.
  */
 import source from "./source.json";
 
 export const PUBLIC_BASE =
-  "https://nulib-ds.github.io/clover/mocks/standalone-canvas";
+  "https://clover.iiif.library.northwestern.edu/mocks/standalone-canvas";
 
 /** Ireland on the map, in the Canvas's own coordinates (6262 × 8582). */
 export const IRELAND = { x: 600, y: 4160, w: 2180, h: 2800 };

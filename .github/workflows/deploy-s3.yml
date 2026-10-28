@@ -1,0 +1,94 @@
+name: Deploy to S3
+
+on:
+  # Deploy only after the Tests workflow passes on main; allow manual dispatch.
+  workflow_run:
+    workflows: ["Tests"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  # Required for the OIDC token that configure-aws-credentials exchanges for a role.
+  id-token: write
+
+concurrency:
+  group: deploy-s3
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    # If triggered by workflow_run, require success on main; always allow manual dispatch.
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.DOCS_SITE_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # When triggered by workflow_run, check out the tested commit.
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          # The whole history: each page's last change is its file's last commit
+          # (`docs/lib/last-changed.ts`, for the sitemap and the pages' metadata).
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build site
+        env:
+          # CloudFront serves the site at the root of its own host, so there is no
+          # base path. It must be set, empty: `next.config.mjs` falls back to
+          # `/clover` when it is unset.
+          DOCS_BASE_PATH: ""
+          # Its address, for canonical links and the sitemap (`docs/lib/site.ts`).
+          NEXT_PUBLIC_SITE_URL: ${{ vars.DOCS_SITE_URL }}
+        run: npm run build:docs
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      # Two passes, so a page is never served from cache after a deploy while the
+      # assets it names are still the old ones: the hashed, immutable files go up
+      # first and are kept a year; everything else follows and is revalidated.
+      - name: Upload hashed assets
+        run: |
+          aws s3 sync out "s3://${DOCS_BUCKET}" \
+            --no-progress \
+            --delete \
+            --exclude "*" \
+            --include "_next/static/*" \
+            --cache-control "public, max-age=31536000, immutable"
+        env:
+          DOCS_BUCKET: ${{ vars.DOCS_BUCKET }}
+
+      - name: Upload the rest of the site
+        run: |
+          aws s3 sync out "s3://${DOCS_BUCKET}" \
+            --no-progress \
+            --delete \
+            --exclude "_next/static/*" \
+            --cache-control "public, max-age=0, must-revalidate"
+        env:
+          DOCS_BUCKET: ${{ vars.DOCS_BUCKET }}
+
+      - name: Invalidate CloudFront
+        if: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID != '' }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${DISTRIBUTION_ID}" \
+            --paths "/*"
+        env:
+          DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}

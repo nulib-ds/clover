@@ -2,7 +2,7 @@
  * Writes the published mocks to `public/mocks/`, from their generators in `docs/mocks/`.
  * Run with `npm run build:mocks` (vite-node, which reads the generators' JSON imports)
  * after changing a generator, and commit the output: the files are served as they are
- * by the docs site, at https://nulib-ds.github.io/clover/mocks/.
+ * by the docs site, at https://clover.iiif.library.northwestern.edu/mocks/.
  */
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";

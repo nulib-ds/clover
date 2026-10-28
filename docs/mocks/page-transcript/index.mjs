@@ -11,7 +11,7 @@
  * from the boxes). Nothing is typed by hand.
  *
  * Static only: `scripts/build-mocks.mjs` writes it to `public/mocks/page-transcript/`,
- * published at https://nulib-ds.github.io/clover/mocks/page-transcript/. The images are
+ * published at https://clover.iiif.library.northwestern.edu/mocks/page-transcript/. The images are
  * the IIIF reference image server's (level 1, CORS open). Documented at /docs/mocks.
  */
 import {
@@ -21,7 +21,7 @@ import {
 } from "../content-search/index.mjs";
 
 export const PUBLIC_BASE =
-  "https://nulib-ds.github.io/clover/mocks/page-transcript";
+  "https://clover.iiif.library.northwestern.edu/mocks/page-transcript";
 
 /** Where a page's text is published, under `base`. */
 export const textUrl = (base, n) => `${base}/text/p${n}.txt`;

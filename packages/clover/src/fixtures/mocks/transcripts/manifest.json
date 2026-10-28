@@ -1,24 +1,24 @@
 {
   "@context": "http://iiif.io/api/presentation/3/context.json",
-  "id": "https://nulib-ds.github.io/clover/mocks/transcripts/manifest.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/transcripts/manifest.json",
   "type": "Manifest",
   "label": {
     "en": ["Lunchroom Manners"]
   },
   "items": [
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/transcripts/canvas/1",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/transcripts/canvas/1",
       "type": "Canvas",
       "height": 360,
       "width": 480,
       "duration": 572.034,
       "items": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/transcripts/canvas/1/page/1",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/transcripts/canvas/1/page/1",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/transcripts/canvas/1/page/1/1",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/transcripts/canvas/1/page/1/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -29,18 +29,18 @@
                 "duration": 572.034,
                 "format": "video/mp4"
               },
-              "target": "https://nulib-ds.github.io/clover/mocks/transcripts/canvas/1"
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/transcripts/canvas/1"
             }
           ]
         }
       ],
       "annotations": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/transcripts/canvas/1/annotations/1",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/transcripts/canvas/1/annotations/1",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/transcripts/canvas/1/annotations/1/1",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/transcripts/canvas/1/annotations/1/1",
               "type": "Annotation",
               "motivation": "supplementing",
               "body": {
@@ -52,7 +52,7 @@
                 },
                 "language": "en"
               },
-              "target": "https://nulib-ds.github.io/clover/mocks/transcripts/canvas/1"
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/transcripts/canvas/1"
             }
           ]
         }

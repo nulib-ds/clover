@@ -26,13 +26,13 @@ with a position for every word, so search hits and text land where the print is.
 
 | Resource        | Published (static)                                                                                                                                            |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Manifest        | [`/mocks/content-search/manifest.json`](https://nulib-ds.github.io/clover/mocks/content-search/manifest.json)                                                 |
-| OCR, by line    | [`/mocks/content-search/ocr/p1-lines.json`](https://nulib-ds.github.io/clover/mocks/content-search/ocr/p1-lines.json), `p2-lines.json`                        |
-| OCR, by word    | [`/mocks/content-search/ocr/p1-words.json`](https://nulib-ds.github.io/clover/mocks/content-search/ocr/p1-words.json), `p2-words.json`                        |
-| Example answers | [`/mocks/content-search/search/examples/nicht.json`](https://nulib-ds.github.io/clover/mocks/content-search/search/examples/nicht.json) and others: see below |
+| Manifest        | [`/mocks/content-search/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/content-search/manifest.json)                                                 |
+| OCR, by line    | [`/mocks/content-search/ocr/p1-lines.json`](https://clover.iiif.library.northwestern.edu/mocks/content-search/ocr/p1-lines.json), `p2-lines.json`                        |
+| OCR, by word    | [`/mocks/content-search/ocr/p1-words.json`](https://clover.iiif.library.northwestern.edu/mocks/content-search/ocr/p1-words.json), `p2-words.json`                        |
+| Example answers | [`/mocks/content-search/search/examples/nicht.json`](https://clover.iiif.library.northwestern.edu/mocks/content-search/search/examples/nicht.json) and others: see below |
 | Search service  | `/mocks/content-search/search`: answered live by `npm run dev` or `mockFetch`, not by the static site                                                         |
 
-All under `https://nulib-ds.github.io/clover`.
+All under `https://clover.iiif.library.northwestern.edu`.
 
 ### What is in it
 
@@ -89,7 +89,7 @@ itself. Two ways to search any query:
   import { mockFetch } from "docs/mocks/content-search/index.mjs";
 
   <Clover.Viewer
-    iiifContent="https://nulib-ds.github.io/clover/mocks/content-search/manifest.json"
+    iiifContent="https://clover.iiif.library.northwestern.edu/mocks/content-search/manifest.json"
     request={{ fetch: mockFetch() }}
   />;
   ```
@@ -102,7 +102,7 @@ itself. Two ways to search any query:
   </script>
 
   <clover-viewer
-    iiif-content="https://nulib-ds.github.io/clover/mocks/content-search/manifest.json"
+    iiif-content="https://clover.iiif.library.northwestern.edu/mocks/content-search/manifest.json"
   ></clover-viewer>
   ```
 
@@ -133,7 +133,7 @@ County, Illinois_, as a Manifest of one Canvas, with:
 
 | Resource | Published (static)                                                                                        |
 | -------- | --------------------------------------------------------------------------------------------------------- |
-| Manifest | [`/mocks/georeference/manifest.json`](https://nulib-ds.github.io/clover/mocks/georeference/manifest.json) |
+| Manifest | [`/mocks/georeference/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/georeference/manifest.json) |
 
 It answers no query, so it is static only. The [Map](/docs/map) page draws it, warped
 onto the map, and in a Viewer's Map tab. Its generator is
@@ -163,7 +163,7 @@ Navaho_ (1904), plate 1 of _The North American Indian_, as a Manifest of one Can
 
 | Resource | Published (static)                                                                              |
 | -------- | ----------------------------------------------------------------------------------------------- |
-| Manifest | [`/mocks/tagging/manifest.json`](https://nulib-ds.github.io/clover/mocks/tagging/manifest.json) |
+| Manifest | [`/mocks/tagging/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/tagging/manifest.json) |
 
 It answers no query, so it is static only. The homepage opens on it. Its generator is
 `docs/mocks/tagging/index.mjs`, and the record as fetched is
@@ -188,7 +188,7 @@ one Canvas, with:
 
 | Resource | Published (static)                                                                                |
 | -------- | ------------------------------------------------------------------------------------------------- |
-| Manifest | [`/mocks/navplace/manifest.json`](https://nulib-ds.github.io/clover/mocks/navplace/manifest.json) |
+| Manifest | [`/mocks/navplace/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/navplace/manifest.json) |
 
 It answers no query, so it is static only. The homepage's playground shows it as Photo,
 its place in a Viewer's Map tab. Its generator is `docs/mocks/navplace/index.mjs`, and
@@ -233,8 +233,8 @@ carrier, with:
 
 | Resource | Published (static)                                                                                    |
 | -------- | ----------------------------------------------------------------------------------------------------- |
-| Manifest | [`/mocks/hindenburg/manifest.json`](https://nulib-ds.github.io/clover/mocks/hindenburg/manifest.json) |
-| Captions | [`/mocks/hindenburg/captions.vtt`](https://nulib-ds.github.io/clover/mocks/hindenburg/captions.vtt)   |
+| Manifest | [`/mocks/hindenburg/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/hindenburg/manifest.json) |
+| Captions | [`/mocks/hindenburg/captions.vtt`](https://clover.iiif.library.northwestern.edu/mocks/hindenburg/captions.vtt)   |
 
 It answers no query. In `npm run dev` it is live under `/api/mocks/hindenburg/`, so its
 captions answer before they are deployed. The homepage's playground shows it as
@@ -290,10 +290,10 @@ Manifest of 31 Canvases (its covers and 29 pages), with:
 
 | Resource       | Published (static)                                                                                                                                                                                                                                                               | Live (`npm run dev`)                     |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Manifest       | [`/mocks/paged/manifest.json`](https://nulib-ds.github.io/clover/mocks/paged/manifest.json)                                                                                                                                                                                      | `/api/mocks/paged/manifest.json`         |
-| A page's lines | [`/mocks/paged/ocr/7-lines.json`](https://nulib-ds.github.io/clover/mocks/paged/ocr/7-lines.json) (its Canvas's place)                                                                                                                                                           | `/api/mocks/paged/ocr/7-lines.json`      |
-| A page's words | [`/mocks/paged/ocr/7-words.json`](https://nulib-ds.github.io/clover/mocks/paged/ocr/7-words.json)                                                                                                                                                                                | `/api/mocks/paged/ocr/7-words.json`      |
-| Search         | Example answers: [`steel`](https://nulib-ds.github.io/clover/mocks/paged/search/examples/steel.json), [`model d`](https://nulib-ds.github.io/clover/mocks/paged/search/examples/model-d.json), [`zzzz`](https://nulib-ds.github.io/clover/mocks/paged/search/examples/zzzz.json) | `/api/mocks/paged/search?q=steel&page=2` |
+| Manifest       | [`/mocks/paged/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json)                                                                                                                                                                                      | `/api/mocks/paged/manifest.json`         |
+| A page's lines | [`/mocks/paged/ocr/7-lines.json`](https://clover.iiif.library.northwestern.edu/mocks/paged/ocr/7-lines.json) (its Canvas's place)                                                                                                                                                           | `/api/mocks/paged/ocr/7-lines.json`      |
+| A page's words | [`/mocks/paged/ocr/7-words.json`](https://clover.iiif.library.northwestern.edu/mocks/paged/ocr/7-words.json)                                                                                                                                                                                | `/api/mocks/paged/ocr/7-words.json`      |
+| Search         | Example answers: [`steel`](https://clover.iiif.library.northwestern.edu/mocks/paged/search/examples/steel.json), [`model d`](https://clover.iiif.library.northwestern.edu/mocks/paged/search/examples/model-d.json), [`zzzz`](https://clover.iiif.library.northwestern.edu/mocks/paged/search/examples/zzzz.json) | `/api/mocks/paged/search?q=steel&page=2` |
 
 The published copy cannot read a query, so the docs answer the search in the browser
 (`docs/lib/mock-search.ts`), and `npm run dev` answers any query live. The homepage's
@@ -330,7 +330,7 @@ text: Clover's Transcript lists them as "EN" and "TXT".
 
 | Resource | Published (static)                                                                                      |
 | -------- | ------------------------------------------------------------------------------------------------------- |
-| Manifest | [`/mocks/transcripts/manifest.json`](https://nulib-ds.github.io/clover/mocks/transcripts/manifest.json) |
+| Manifest | [`/mocks/transcripts/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/transcripts/manifest.json) |
 
 It answers no query, so it is static only. Its generator is
 `docs/mocks/transcripts/index.mjs`, and recipe 0219's Manifest as fetched is
@@ -456,9 +456,9 @@ soft and dark: about a head's width either way.
 
 | Resource   | Published (static)                                                                                                            |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Manifest   | [`/mocks/rudolf-hess-nuremberg/manifest.json`](https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/manifest.json)   |
-| Captions   | [`/mocks/rudolf-hess-nuremberg/captions.vtt`](https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/captions.vtt)     |
-| Transcript | [`/mocks/rudolf-hess-nuremberg/transcript.txt`](https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/transcript.txt) |
+| Manifest   | [`/mocks/rudolf-hess-nuremberg/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/manifest.json)   |
+| Captions   | [`/mocks/rudolf-hess-nuremberg/captions.vtt`](https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/captions.vtt)     |
+| Transcript | [`/mocks/rudolf-hess-nuremberg/transcript.txt`](https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/transcript.txt) |
 
 In `npm run dev` it is live too, at
 [`/api/mocks/rudolf-hess-nuremberg/manifest.json`](http://localhost:3000/api/mocks/rudolf-hess-nuremberg/manifest.json),
@@ -493,9 +493,9 @@ misreadings included.
 
 | Resource        | Published (static)                                                                                              |
 | --------------- | --------------------------------------------------------------------------------------------------------------- |
-| Manifest        | [`/mocks/page-transcript/manifest.json`](https://nulib-ds.github.io/clover/mocks/page-transcript/manifest.json) |
-| Page 1, as text | [`/mocks/page-transcript/text/p1.txt`](https://nulib-ds.github.io/clover/mocks/page-transcript/text/p1.txt)     |
-| Page 2, as text | [`/mocks/page-transcript/text/p2.txt`](https://nulib-ds.github.io/clover/mocks/page-transcript/text/p2.txt)     |
+| Manifest        | [`/mocks/page-transcript/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/page-transcript/manifest.json) |
+| Page 1, as text | [`/mocks/page-transcript/text/p1.txt`](https://clover.iiif.library.northwestern.edu/mocks/page-transcript/text/p1.txt)     |
+| Page 2, as text | [`/mocks/page-transcript/text/p2.txt`](https://clover.iiif.library.northwestern.edu/mocks/page-transcript/text/p2.txt)     |
 
 In `npm run dev` it is live too, at
 [`/api/mocks/page-transcript/manifest.json`](http://localhost:3000/api/mocks/page-transcript/manifest.json),
@@ -528,7 +528,7 @@ fetched on October 19, 2026), with:
 
 | Resource | Published (static)                                                                                              |
 | -------- | --------------------------------------------------------------------------------------------------------------- |
-| Canvas   | [`/mocks/standalone-canvas/canvas.json`](https://nulib-ds.github.io/clover/mocks/standalone-canvas/canvas.json) |
+| Canvas   | [`/mocks/standalone-canvas/canvas.json`](https://clover.iiif.library.northwestern.edu/mocks/standalone-canvas/canvas.json) |
 
 It answers no query, so it is static only. The Canvas page shows it, loaded by a `Canvas`
 on its own. Its generator is `docs/mocks/standalone-canvas/index.mjs`, and the Canvas as
@@ -554,7 +554,7 @@ out and why (`LEFT_OUT`), are curated in its generator.
 
 | Resource   | Published (static)                                                                                    |
 | ---------- | ----------------------------------------------------------------------------------------------------- |
-| Collection | [`/mocks/cookbook/collection.json`](https://nulib-ds.github.io/clover/mocks/cookbook/collection.json) |
+| Collection | [`/mocks/cookbook/collection.json`](https://clover.iiif.library.northwestern.edu/mocks/cookbook/collection.json) |
 
 It answers no query, so it is static only. The homepage reads it twice: its Viewing field
 lists the members under "IIIF Cookbook recipes", and its Natural story's select (the same
@@ -594,8 +594,8 @@ The Manifest has:
 
 | Resource | Published (static)                                                                                    | Live (`npm run dev`)                  |
 | -------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| Manifest | [`/mocks/esu-shrine/manifest.json`](https://nulib-ds.github.io/clover/mocks/esu-shrine/manifest.json) | `/api/mocks/esu-shrine/manifest.json` |
-| Model    | [`/mocks/esu-shrine/model.glb`](https://nulib-ds.github.io/clover/mocks/esu-shrine/model.glb)         | `/api/mocks/esu-shrine/model.glb`     |
+| Manifest | [`/mocks/esu-shrine/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/esu-shrine/manifest.json) | `/api/mocks/esu-shrine/manifest.json` |
+| Model    | [`/mocks/esu-shrine/model.glb`](https://clover.iiif.library.northwestern.edu/mocks/esu-shrine/model.glb)         | `/api/mocks/esu-shrine/model.glb`     |
 
 The homepage's playground shows it as Model. Its generator is
 `docs/mocks/esu-shrine/index.mjs`, and the Voyager scene as fetched is

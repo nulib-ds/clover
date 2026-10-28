@@ -11,14 +11,14 @@
  * recipes it leaves out (`LEFT_OUT`, each with why).
  *
  * Static only: `scripts/build-mocks.mjs` writes it to `public/mocks/cookbook/`,
- * published at https://nulib-ds.github.io/clover/mocks/cookbook/collection.json. The
+ * published at https://clover.iiif.library.northwestern.edu/mocks/cookbook/collection.json. The
  * homepage reads it twice: its Viewing field lists the members under "IIIF Cookbook
  * recipes", and its Natural story's select (the same field) lists them alone, each
  * opening in the playground's Viewer. Documented at /docs/mocks.
  */
 import source from "./recipes.json";
 
-export const PUBLIC_BASE = "https://nulib-ds.github.io/clover/mocks/cookbook";
+export const PUBLIC_BASE = "https://clover.iiif.library.northwestern.edu/mocks/cookbook";
 
 const COOKBOOK = "https://iiif.io/api/cookbook/";
 

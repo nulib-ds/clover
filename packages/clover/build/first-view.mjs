@@ -31,7 +31,7 @@ const sizes = JSON.parse(readFileSync(join(root, "build/sizes.json"), "utf8"));
 const app = resolve(root, "../../node_modules/.cache/clover-first-view");
 const PORT = 4499;
 const HERE = `http://localhost:${PORT}`;
-const MOCKS = "https://nulib-ds.github.io/clover/mocks";
+const MOCKS = "https://clover.iiif.library.northwestern.edu/mocks";
 
 /** The plainest resources: an image (written here), MP4 audio, a model, a navPlace point. */
 const IMAGE = `${HERE}/image.json`;

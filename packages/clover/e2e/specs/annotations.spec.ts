@@ -7,7 +7,8 @@ import { serveIIIF } from "./fixtures";
  * template, on the docs' `paged` mock: the catalog's "Then" and "Now" tags, a page of
  * them on each of eight plates, unlabeled, so one layer, by Canvas.
  */
-const CATALOG = "https://nulib-ds.github.io/clover/mocks/paged/manifest.json";
+const CATALOG =
+  "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json";
 
 async function open(page: Page) {
   await serveIIIF(page);

@@ -1,6 +1,6 @@
 {
   "@context": "http://iiif.io/api/presentation/3/context.json",
-  "id": "https://nulib-ds.github.io/clover/mocks/standalone-canvas/canvas.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/standalone-canvas/canvas.json",
   "type": "Canvas",
   "height": 8582,
   "width": 6262,
@@ -43,14 +43,14 @@
   ],
   "items": [
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/standalone-canvas/canvas.json/page",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/standalone-canvas/canvas.json/page",
       "type": "AnnotationPage",
       "items": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/standalone-canvas/canvas.json/page/1",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/standalone-canvas/canvas.json/page/1",
           "type": "Annotation",
           "motivation": "painting",
-          "target": "https://nulib-ds.github.io/clover/mocks/standalone-canvas/canvas.json",
+          "target": "https://clover.iiif.library.northwestern.edu/mocks/standalone-canvas/canvas.json",
           "body": {
             "id": "https://iiif.dc.library.northwestern.edu/iiif/3/b9e19ed9-70f2-45eb-8c1f-ef0e5e86890f/full/600,/0/default.jpg",
             "type": "Image",
@@ -126,11 +126,11 @@
   ],
   "annotations": [
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/standalone-canvas/canvas.json/tags",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/standalone-canvas/canvas.json/tags",
       "type": "AnnotationPage",
       "items": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/standalone-canvas/canvas.json/tags/1",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/standalone-canvas/canvas.json/tags/1",
           "type": "Annotation",
           "motivation": "tagging",
           "body": {
@@ -139,7 +139,7 @@
             "language": "it",
             "format": "text/plain"
           },
-          "target": "https://nulib-ds.github.io/clover/mocks/standalone-canvas/canvas.json#xywh=600,4160,2180,2800"
+          "target": "https://clover.iiif.library.northwestern.edu/mocks/standalone-canvas/canvas.json#xywh=600,4160,2180,2800"
         }
       ]
     }

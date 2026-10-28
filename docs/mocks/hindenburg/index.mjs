@@ -30,7 +30,7 @@
  *   what happens there, in the broadcast's own terms.
  *
  * `scripts/build-mocks.mjs` writes it to `public/mocks/hindenburg/` (the Manifest and
- * `captions.vtt`), published at https://nulib-ds.github.io/clover/mocks/hindenburg/;
+ * `captions.vtt`), published at https://clover.iiif.library.northwestern.edu/mocks/hindenburg/;
  * `npm run dev` serves it live under `/api/mocks/hindenburg/`, its captions with it. The
  * sound is Northwestern's HLS stream and the images its IIIF Image API (level 2), both
  * CORS open. Documented at /docs/mocks.
@@ -38,7 +38,7 @@
 import cues from "./captions.json";
 import source from "./source.json";
 
-export const PUBLIC_BASE = "https://nulib-ds.github.io/clover/mocks/hindenburg";
+export const PUBLIC_BASE = "https://clover.iiif.library.northwestern.edu/mocks/hindenburg";
 
 /** The photograph the Canvas of sound is accompanied by: the enclosure's back, its label. */
 export const ACCOMPANYING = "enclosure back";

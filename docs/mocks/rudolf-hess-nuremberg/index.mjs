@@ -40,7 +40,7 @@
  *
  * `scripts/build-mocks.mjs` writes it to `public/mocks/rudolf-hess-nuremberg/` (the
  * Manifest, `captions.vtt` and `transcript.txt`), published at
- * https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/; `npm run dev` serves it
+ * https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/; `npm run dev` serves it
  * live under `/api/mocks/rudolf-hess-nuremberg/`, its files with it. The video and the
  * still are served by Wikimedia (CORS open). Documented at /docs/mocks.
  */
@@ -48,7 +48,7 @@ import cues from "./captions.json";
 import tracks from "./tracks.json";
 
 export const PUBLIC_BASE =
-  "https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg";
+  "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg";
 
 const COMMONS =
   "https://commons.wikimedia.org/wiki/File:Sentencing_of_Nazi_Leaders_at_Nuremberg.webm";

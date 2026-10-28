@@ -1,6 +1,6 @@
 {
   "@context": "http://iiif.io/api/presentation/3/context.json",
-  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/manifest.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/manifest.json",
   "type": "Manifest",
   "label": {
     "none": [
@@ -255,7 +255,7 @@
   ],
   "items": [
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
       "type": "Canvas",
       "duration": 856.611,
       "label": {
@@ -265,11 +265,11 @@
       },
       "items": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/page",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/page/1",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -283,14 +283,14 @@
                   ]
                 }
               },
-              "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1"
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1"
             }
           ]
         }
       ],
       "annotations": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/annotations/notes",
           "type": "AnnotationPage",
           "label": {
             "en": [
@@ -299,7 +299,7 @@
           },
           "items": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/1",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/annotations/notes/1",
               "type": "Annotation",
               "motivation": "describing",
               "body": {
@@ -311,7 +311,7 @@
               "target": {
                 "type": "SpecificResource",
                 "source": {
-                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
                   "type": "Canvas"
                 },
                 "selector": {
@@ -322,7 +322,7 @@
               }
             },
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/2",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/annotations/notes/2",
               "type": "Annotation",
               "motivation": "describing",
               "body": {
@@ -334,7 +334,7 @@
               "target": {
                 "type": "SpecificResource",
                 "source": {
-                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
                   "type": "Canvas"
                 },
                 "selector": {
@@ -345,7 +345,7 @@
               }
             },
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/3",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/annotations/notes/3",
               "type": "Annotation",
               "motivation": "describing",
               "body": {
@@ -357,7 +357,7 @@
               "target": {
                 "type": "SpecificResource",
                 "source": {
-                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
                   "type": "Canvas"
                 },
                 "selector": {
@@ -368,7 +368,7 @@
               }
             },
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/4",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/annotations/notes/4",
               "type": "Annotation",
               "motivation": "describing",
               "body": {
@@ -380,7 +380,7 @@
               "target": {
                 "type": "SpecificResource",
                 "source": {
-                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
                   "type": "Canvas"
                 },
                 "selector": {
@@ -391,7 +391,7 @@
               }
             },
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/5",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/annotations/notes/5",
               "type": "Annotation",
               "motivation": "describing",
               "body": {
@@ -403,7 +403,7 @@
               "target": {
                 "type": "SpecificResource",
                 "source": {
-                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
                   "type": "Canvas"
                 },
                 "selector": {
@@ -414,7 +414,7 @@
               }
             },
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/6",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/annotations/notes/6",
               "type": "Annotation",
               "motivation": "describing",
               "body": {
@@ -426,7 +426,7 @@
               "target": {
                 "type": "SpecificResource",
                 "source": {
-                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
                   "type": "Canvas"
                 },
                 "selector": {
@@ -437,7 +437,7 @@
               }
             },
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/7",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/annotations/notes/7",
               "type": "Annotation",
               "motivation": "describing",
               "body": {
@@ -449,7 +449,7 @@
               "target": {
                 "type": "SpecificResource",
                 "source": {
-                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
                   "type": "Canvas"
                 },
                 "selector": {
@@ -460,7 +460,7 @@
               }
             },
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/notes/8",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/annotations/notes/8",
               "type": "Annotation",
               "motivation": "describing",
               "body": {
@@ -472,7 +472,7 @@
               "target": {
                 "type": "SpecificResource",
                 "source": {
-                  "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
                   "type": "Canvas"
                 },
                 "selector": {
@@ -485,15 +485,15 @@
           ]
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/captions",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/annotations/captions",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/annotations/captions/1",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/annotations/captions/1",
               "type": "Annotation",
               "motivation": "supplementing",
               "body": {
-                "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/captions.vtt",
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/captions.vtt",
                 "type": "Text",
                 "format": "text/vtt",
                 "label": {
@@ -503,7 +503,7 @@
                 },
                 "language": "en"
               },
-              "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1"
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1"
             }
           ]
         }
@@ -535,11 +535,11 @@
         ],
         "items": [
           {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/accompanying/page",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/accompanying/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/accompanying/page/1",
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/accompanying/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -561,16 +561,16 @@
                     }
                   ]
                 },
-                "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/accompanying"
+                "target": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/accompanying"
               }
             ]
           }
         ],
-        "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1/accompanying"
+        "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1/accompanying"
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/2",
       "type": "Canvas",
       "height": 3005,
       "width": 2989,
@@ -597,11 +597,11 @@
       ],
       "items": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2/page",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/2/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2/page/1",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/2/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -623,23 +623,23 @@
                   }
                 ]
               },
-              "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2"
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/2"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2/placeholder",
+        "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/2/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 643,
         "items": [
           {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2/placeholder/page",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/2/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2/placeholder/page/1",
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/2/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -656,7 +656,7 @@
                     }
                   ]
                 },
-                "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/2/placeholder"
+                "target": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/2/placeholder"
               }
             ]
           }
@@ -664,7 +664,7 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/3",
       "type": "Canvas",
       "height": 3020,
       "width": 2980,
@@ -691,11 +691,11 @@
       ],
       "items": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3/page",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/3/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3/page/1",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/3/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -717,23 +717,23 @@
                   }
                 ]
               },
-              "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3"
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/3"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3/placeholder",
+        "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/3/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 648,
         "items": [
           {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3/placeholder/page",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/3/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3/placeholder/page/1",
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/3/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -750,7 +750,7 @@
                     }
                   ]
                 },
-                "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/3/placeholder"
+                "target": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/3/placeholder"
               }
             ]
           }
@@ -758,7 +758,7 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/4",
       "type": "Canvas",
       "height": 3088,
       "width": 3593,
@@ -785,11 +785,11 @@
       ],
       "items": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4/page",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/4/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4/page/1",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/4/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -811,23 +811,23 @@
                   }
                 ]
               },
-              "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4"
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/4"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4/placeholder",
+        "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/4/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 550,
         "items": [
           {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4/placeholder/page",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/4/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4/placeholder/page/1",
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/4/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -844,7 +844,7 @@
                     }
                   ]
                 },
-                "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/4/placeholder"
+                "target": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/4/placeholder"
               }
             ]
           }
@@ -852,7 +852,7 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/5",
       "type": "Canvas",
       "height": 3052,
       "width": 3082,
@@ -879,11 +879,11 @@
       ],
       "items": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5/page",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/5/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5/page/1",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/5/page/1",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -905,23 +905,23 @@
                   }
                 ]
               },
-              "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5"
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/5"
             }
           ]
         }
       ],
       "placeholderCanvas": {
-        "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5/placeholder",
+        "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/5/placeholder",
         "type": "Canvas",
         "width": 640,
         "height": 633,
         "items": [
           {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5/placeholder/page",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/5/placeholder/page",
             "type": "AnnotationPage",
             "items": [
               {
-                "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5/placeholder/page/1",
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/5/placeholder/page/1",
                 "type": "Annotation",
                 "motivation": "painting",
                 "body": {
@@ -938,7 +938,7 @@
                     }
                   ]
                 },
-                "target": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/5/placeholder"
+                "target": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/5/placeholder"
               }
             ]
           }
@@ -992,7 +992,7 @@
   ],
   "structures": [
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/1",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/range/1",
       "type": "Range",
       "label": {
         "en": [
@@ -1003,7 +1003,7 @@
         {
           "type": "SpecificResource",
           "source": {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
             "type": "Canvas"
           },
           "selector": {
@@ -1015,7 +1015,7 @@
       ]
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/2",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/range/2",
       "type": "Range",
       "label": {
         "en": [
@@ -1026,7 +1026,7 @@
         {
           "type": "SpecificResource",
           "source": {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
             "type": "Canvas"
           },
           "selector": {
@@ -1038,7 +1038,7 @@
       ]
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/3",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/range/3",
       "type": "Range",
       "label": {
         "en": [
@@ -1049,7 +1049,7 @@
         {
           "type": "SpecificResource",
           "source": {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
             "type": "Canvas"
           },
           "selector": {
@@ -1061,7 +1061,7 @@
       ]
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/4",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/range/4",
       "type": "Range",
       "label": {
         "en": [
@@ -1072,7 +1072,7 @@
         {
           "type": "SpecificResource",
           "source": {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
             "type": "Canvas"
           },
           "selector": {
@@ -1084,7 +1084,7 @@
       ]
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/5",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/range/5",
       "type": "Range",
       "label": {
         "en": [
@@ -1095,7 +1095,7 @@
         {
           "type": "SpecificResource",
           "source": {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
             "type": "Canvas"
           },
           "selector": {
@@ -1107,7 +1107,7 @@
       ]
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/6",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/range/6",
       "type": "Range",
       "label": {
         "en": [
@@ -1118,7 +1118,7 @@
         {
           "type": "SpecificResource",
           "source": {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
             "type": "Canvas"
           },
           "selector": {
@@ -1130,7 +1130,7 @@
       ]
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/7",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/range/7",
       "type": "Range",
       "label": {
         "en": [
@@ -1141,7 +1141,7 @@
         {
           "type": "SpecificResource",
           "source": {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
             "type": "Canvas"
           },
           "selector": {
@@ -1153,7 +1153,7 @@
       ]
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/8",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/range/8",
       "type": "Range",
       "label": {
         "en": [
@@ -1164,7 +1164,7 @@
         {
           "type": "SpecificResource",
           "source": {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
             "type": "Canvas"
           },
           "selector": {
@@ -1176,7 +1176,7 @@
       ]
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/range/9",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/range/9",
       "type": "Range",
       "label": {
         "en": [
@@ -1187,7 +1187,7 @@
         {
           "type": "SpecificResource",
           "source": {
-            "id": "https://nulib-ds.github.io/clover/mocks/hindenburg/canvas/1",
+            "id": "https://clover.iiif.library.northwestern.edu/mocks/hindenburg/canvas/1",
             "type": "Canvas"
           },
           "selector": {

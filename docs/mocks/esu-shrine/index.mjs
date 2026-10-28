@@ -22,12 +22,12 @@
  * `public/mocks/esu-shrine/model.glb` is missing, and keeps it as it came.
  *
  * Static: `scripts/build-mocks.mjs` writes it to `public/mocks/esu-shrine/`, published at
- * https://nulib-ds.github.io/clover/mocks/esu-shrine/; live in `npm run dev`, its ids under
+ * https://clover.iiif.library.northwestern.edu/mocks/esu-shrine/; live in `npm run dev`, its ids under
  * the dev server, from `pages/api/mocks/esu-shrine/`. Documented at /docs/mocks.
  */
 import source from "./source.json";
 
-export const PUBLIC_BASE = "https://nulib-ds.github.io/clover/mocks/esu-shrine";
+export const PUBLIC_BASE = "https://clover.iiif.library.northwestern.edu/mocks/esu-shrine";
 
 /** Where the Lab's Voyager scene is, and so its model. */
 const VOYAGER =

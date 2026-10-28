@@ -1,6 +1,6 @@
 {
   "@context": "http://iiif.io/api/presentation/4/context.json",
-  "id": "https://nulib-ds.github.io/clover/mocks/esu-shrine/manifest.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/esu-shrine/manifest.json",
   "type": "Manifest",
   "label": {
     "en": [
@@ -205,7 +205,7 @@
   ],
   "items": [
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/esu-shrine/scene/1",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/esu-shrine/scene/1",
       "type": "Scene",
       "label": {
         "en": [
@@ -214,11 +214,11 @@
       },
       "items": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/esu-shrine/scene/1/page",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/esu-shrine/scene/1/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/esu-shrine/scene/1/page/1",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/esu-shrine/scene/1/page/1",
               "type": "Annotation",
               "motivation": [
                 "painting"
@@ -226,7 +226,7 @@
               "body": {
                 "type": "SpecificResource",
                 "source": {
-                  "id": "https://nulib-ds.github.io/clover/mocks/esu-shrine/model.glb",
+                  "id": "https://clover.iiif.library.northwestern.edu/mocks/esu-shrine/model.glb",
                   "type": "Model",
                   "format": "model/gltf-binary"
                 },
@@ -240,7 +240,7 @@
                 ]
               },
               "target": {
-                "id": "https://nulib-ds.github.io/clover/mocks/esu-shrine/scene/1",
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/esu-shrine/scene/1",
                 "type": "Scene"
               }
             }

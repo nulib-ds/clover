@@ -677,7 +677,8 @@ export const textOf = (lines: Line[]) =>
 
 /** Where the published site serves its mocks: what an example's HTML points to. */
 const SITE = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://nulib-ds.github.io/clover"
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  "https://clover.iiif.library.northwestern.edu"
 ).replace(/\/$/, "");
 
 /** A resource's published address: an address as it is, a mock's under the site. */

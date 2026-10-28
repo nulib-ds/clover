@@ -12,8 +12,9 @@
 
 /** Where each mock is published, as its generator's `PUBLIC_BASE` (`mock-search.test.ts`). */
 export const SEARCHABLE = {
-  "content-search": "https://nulib-ds.github.io/clover/mocks/content-search",
-  paged: "https://nulib-ds.github.io/clover/mocks/paged",
+  "content-search":
+    "https://clover.iiif.library.northwestern.edu/mocks/content-search",
+  paged: "https://clover.iiif.library.northwestern.edu/mocks/paged",
 } as const;
 
 const load = {
