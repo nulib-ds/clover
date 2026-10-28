@@ -11,7 +11,7 @@ import {
   selectHiddenSets,
 } from "../../core/annotation-sets";
 import { annotationName } from "../../core/annotation-name";
-import { readLink } from "../../core/link";
+import { readLink, readTagSource } from "../../core/link";
 import { showLink } from "../../core/show-link";
 import type { Clover } from "../../core/clover";
 import { loadManifest } from "../../core/load";
@@ -34,9 +34,11 @@ import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { titleTag } from "../../ui/heading";
 import { CueTime } from "../../ui/Cue";
 import { EntryThumbnail } from "../../ui/EntryThumbnail";
+import { useLoaded } from "../../hooks/useLoaded";
 import { HideToggle } from "../../ui/HideToggle";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { startingLanguage } from "../../core/language-choice";
+import { useReadingLanguages } from "../../react/readingLanguages";
 import { LanguageChoice } from "../../ui/LanguageChoice";
 import { inLanguage, languagesOf } from "./languages";
 
@@ -246,7 +248,11 @@ function AnnotationGroup({
   const headingLevel = title.text ? setLevel + 1 : setLevel;
   const languages = useMemo(() => languagesOf(entries), [entries]);
   const [picked, setPicked] = useState<string>();
-  const chosen = startingLanguage(languages, language, picked);
+  // Where the Root offers the languages, its choice is this set's, and the set offers none.
+  const offered = useReadingLanguages();
+  const chosen = offered
+    ? startingLanguage(languages, offered.chosen)
+    : startingLanguage(languages, language, picked);
   const listed = entries.filter((entry) => inLanguage(entry, chosen));
   return (
     <section
@@ -265,7 +271,7 @@ function AnnotationGroup({
             {title.text}
           </Heading>
         )}
-        {chosen && (
+        {chosen && !offered && (
           <LanguageChoice
             languages={languages}
             chosen={chosen}
@@ -510,6 +516,8 @@ const AnnotationLayers = forwardRef<
   const elsewhere = useElsewhere(layers, canvasById);
   // Each layer's language, where it offers a choice: the reader's, by layer, once picked.
   const [picked, setPicked] = useState<Record<string, string>>({});
+  // Where the Root offers the languages, its choice is each layer's, and they offer none.
+  const offered = useReadingLanguages();
   const manifestLabel = useCloverSelector((state) => state.manifest?.label);
   const title = useMemo(
     () => localize(manifestLabel as LanguageMapLike, language),
@@ -591,7 +599,9 @@ const AnnotationLayers = forwardRef<
         const languages = languagesOf(
           layer.canvases.flatMap((group) => group.entries),
         );
-        const chosen = startingLanguage(languages, language, picked[layer.key]);
+        const chosen = offered
+          ? startingLanguage(languages, offered.chosen)
+          : startingLanguage(languages, language, picked[layer.key]);
         return (
           <section
             key={layer.key}
@@ -610,7 +620,7 @@ const AnnotationLayers = forwardRef<
                   {layer.title.text}
                 </Title>
               )}
-              {chosen && (
+              {chosen && !offered && (
                 <LanguageChoice
                   languages={languages}
                   chosen={chosen}
@@ -702,22 +712,30 @@ const AnnotationLayers = forwardRef<
 });
 
 /**
- * Where the picture of what an entry marks comes from: its region of the Canvas, cut small
- * by the image server once its `info.json` is read (`regionSource`, `ui/EntryThumbnail`).
- * None for an entry that shows an image of its own (0377), one with no rectangle, or an
- * image the server cannot cut.
+ * Where the picture of what an entry marks comes from: its region of the Canvas, or the box
+ * its shape fills, cut small by the image server once its `info.json` is read
+ * (`regionSource`, `ui/EntryThumbnail`). None for an entry that shows an image of its own
+ * (0377), one with neither, or an image the server cannot cut.
  */
 function useRegionSource(
   entry: AnnotationEntry,
   canvas?: Record<string, any>,
 ): ThumbnailSource | null {
+  // A shape (an SvgSelector, Cookbook 0261) by the box it fills, its reader loaded for one.
+  const svg = entry.target.rect ? undefined : entry.target.svg;
+  const reader = useLoaded(loadSvgShape, Boolean(svg));
   return useMemo(() => {
-    const rect = entry.target.rect;
+    const box = svg ? reader?.readSvgShape(svg)?.box : undefined;
+    const rect =
+      entry.target.rect ??
+      (box ? { x: box.x, y: box.y, w: box.width, h: box.height } : undefined);
     if (!rect || !canvas || entry.bodies.some((body) => body.image))
       return null;
-    return regionSource(canvas, rect);
-  }, [entry, canvas]);
+    return regionSource(canvas, rect, entry.layer?.image);
+  }, [entry, canvas, svg, reader]);
 }
+
+const loadSvgShape = () => import("../../core/svg-shape");
 
 /**
  * One annotation in the list: its content, pressed anywhere to frame it, and, for the
@@ -843,7 +861,11 @@ function AnnotationItem({
 function FollowLink({ annotation }: { annotation: Record<string, any> }) {
   const { clover } = useClover("Annotations");
   const { t, langOf } = useCloverTranslation();
-  const link = useMemo(() => readLink(annotation), [annotation]);
+  // Where it leads (a linking annotation), or what a tag names on the web (0258).
+  const link = useMemo(
+    () => readLink(annotation) ?? readTagSource(annotation),
+    [annotation],
+  );
   if (!link) return null;
   const text = t("annotationsOpenLink");
   const lang = langOf("annotationsOpenLink");

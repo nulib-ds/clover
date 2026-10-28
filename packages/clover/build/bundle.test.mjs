@@ -56,6 +56,8 @@ const LAZY_MODULES = [
   "/lib/renderer/overlays/Navigator.ts",
   // Annotations as the content, an AnnotationPage or AnnotationCollection.
   "/core/annotations-content.ts",
+  // A Manifest's images' own annotations (Cookbook 0326), for one whose images carry some.
+  "/core/image-layers.ts",
   // A standalone Canvas loading its own (`iiifContent`).
   "/components/Canvas/LoadedCanvas.tsx",
   // Presentation 4's Timeline and Scene, in a Root (and `Body`) or loading their own;

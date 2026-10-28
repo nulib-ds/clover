@@ -16,16 +16,28 @@ import type { Json } from "./json";
  * there is found, and the region read as shares of it (scaled from where it is painted),
  * so the service's own `info.json` decides how it is asked for, never more than the
  * region has, and from a server that cannot cut a region, nothing (no fallback: all of
- * the image is not the region). Null where no image with a service is painted there.
+ * the image is not the region). A `Choice`'s first image stands for it, or the one named
+ * (`image`: a layer's annotation is cut from its own layer, Cookbook 0326). Null where no
+ * image with a service is painted there.
  */
 export function regionSource(
   canvas: Json | undefined,
   rect: { x: number; y: number; w: number; h: number },
+  image?: string,
 ): ThumbnailSource | null {
   for (const page of asArray(canvas?.items) as Json[]) {
     for (const annotation of asArray(page?.items) as Json[]) {
       if (!isPainting(annotation)) continue;
-      for (const body of asArray(annotation?.body) as Json[]) {
+      const bodies = (asArray(annotation?.body) as Json[]).flatMap((body) =>
+        body?.type === "Choice"
+          ? (asArray(body.items) as Json[]).filter((item, index) =>
+              image ? item?.id === image : index === 0,
+            )
+          : image && body?.id !== image
+            ? []
+            : [body],
+      );
+      for (const body of bodies) {
         if (body?.type !== "Image" || !body.width || !body.height) continue;
         const service = findImageServiceId(body.service);
         if (!service) continue;

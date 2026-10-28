@@ -34,6 +34,11 @@ export interface CanvasAnnotation {
   pageId?: string;
   /** A Range's region: its place among the Range's parts (`AnnotationEntry`'s). */
   place?: { index: number; total: number };
+  /**
+   * An annotation of one item of a `Choice` (Cookbook 0326): drawn while that item is the
+   * one chosen, by the choice's key and the item's place (`AnnotationEntry`'s).
+   */
+  layer?: { key: string; item: number };
 }
 
 /**

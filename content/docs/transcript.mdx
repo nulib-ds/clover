@@ -39,7 +39,10 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 ## API reference
 
 Inside a `Root`, it reads the view's WebVTT captions and any transcript as plain text,
-with a choice where there are several, and renders nothing where there is neither. Over
+with a choice where there are several, and renders nothing where there is neither. It
+reads the file in the Root's language where there is one, the Canvas's captions with it,
+and where the Root offers the languages to read the resource in (About's), it offers none
+of its own: the page has one choice of language. Over
 the captions, a field finds words as they are typed: the cues with them marked and
 counted, the first current, and Previous, Next or Enter going through them, each seeking
 the recording there. A long transcript is drawn a chunk of cues at a time, more as the

@@ -10,6 +10,7 @@ import React, { useState } from "react";
 
 import bookJson from "../../fixtures/iiif-cookbook/0009-book-1.json";
 import rtlJson from "../../fixtures/iiif-cookbook/0010-book-2-viewing-direction-rtl.json";
+import operaJson from "../../fixtures/iiif-cookbook/0065-opera-multiple-canvases.json";
 import { initCloverI18n } from "../../i18n";
 import { useClover } from "../../react/context";
 import { stubViewport } from "../Canvas/testing/viewport";
@@ -249,6 +250,47 @@ describe("Clover.Root and its parts", () => {
     // Consumed: a later layout does not frame it again.
     emit("change");
     expect(renderer.fitBounds).toHaveBeenCalledTimes(1);
+  });
+
+  /*
+   * Cookbook 0065: a chapter on the other Canvas. Its time and its playing go to that
+   * Canvas's element, never to the one left, emptied as it goes.
+   */
+  it("takes a target's time to the new Canvas's element, not the one left", async () => {
+    let clover: ReturnType<typeof useClover>["clover"] | null = null;
+    function Spy() {
+      clover = useClover().clover;
+      return null;
+    }
+    const play = vi
+      .spyOn(HTMLMediaElement.prototype, "play")
+      .mockResolvedValue(undefined);
+    render(
+      <Clover.Root iiifContent={operaJson}>
+        <Spy />
+        <Clover.Body />
+      </Clover.Root>,
+    );
+    const first = await waitFor(() => {
+      const element = clover!.media.get();
+      expect(element).not.toBeNull();
+      return element!;
+    });
+    act(() =>
+      clover!.goTo(operaJson.items[1].id, { time: 30, autoplay: true }),
+    );
+    const second = await waitFor(() => {
+      const element = clover!.media.get();
+      expect(element).not.toBeNull();
+      expect(element).not.toBe(first);
+      return element!;
+    });
+    act(() => {
+      second.dispatchEvent(new Event("loadedmetadata"));
+    });
+    expect(second.currentTime).toBe(30);
+    expect(play).toHaveBeenCalled();
+    play.mockRestore();
   });
 
   it("sends viewport updates through a channel, writing nothing to the store", async () => {

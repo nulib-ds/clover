@@ -112,6 +112,21 @@
   pointer-events: auto;
 }
 
+/*
+ * What a press finds it by: an `l` circle around the dot, past 24px however few
+ * points are near (WCAG 2.5.8), the dot drawn as it is.
+ */
+.clover-canvas-annotation-point::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  content: "";
+}
+
 /* Active, an accent band around the light ring, and the dark edge around that. */
 .clover-canvas-annotation[data-shape="point"]:is(
     [data-active="true"],

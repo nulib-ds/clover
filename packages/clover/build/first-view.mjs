@@ -5,7 +5,9 @@
  * keys); this builds each page as an app would, opens it in Chrome until it draws, gzips
  * every file of Clover's it fetched, as `sizes.mjs` counts them, and fails where the two
  * disagree, naming what was fetched. Locally only: it needs Chrome and the network (the
- * resources' images and the published mocks).
+ * resources' images). The mocks it opens are the docs' own, answered from `public/mocks`
+ * at their published addresses (`MOCKS`), as the package's end-to-end suite answers its
+ * copies (Mat, 2026-10-28: "lean on local mocks"): what is deployed is no part of it.
  *
  *     npm run build -w @nulib/clover && npm run check:first-view -w @nulib/clover
  */
@@ -32,6 +34,8 @@ const app = resolve(root, "../../node_modules/.cache/clover-first-view");
 const PORT = 4499;
 const HERE = `http://localhost:${PORT}`;
 const MOCKS = "https://clover.iiif.library.northwestern.edu/mocks";
+/** The mocks' files, as `npm run build:mocks` writes them for the docs. */
+const LOCAL_MOCKS = resolve(root, "../../public/mocks");
 
 /** The plainest resources: an image (written here), MP4 audio, a model, a navPlace point. */
 const IMAGE = `${HERE}/image.json`;
@@ -188,6 +192,14 @@ const TYPES = {
   ".json": "application/json",
   ".html": "text/html",
 };
+/** The kinds of the mocks' files. */
+const MOCK_TYPES = {
+  ".json": "application/json",
+  ".glb": "model/gltf-binary",
+  ".txt": "text/plain",
+  ".vtt": "text/vtt",
+};
+
 const server = createServer((request, response) => {
   const path = decodeURIComponent(request.url.split("?")[0]);
   if (path === "/image.json") {
@@ -224,6 +236,20 @@ async function fetched(prefix) {
     viewport: { width: 1400, height: 900 },
   });
   const page = await context.newPage();
+  // A mock, from its file: its Manifest and everything it names under its address.
+  await page.route(`${MOCKS}/**`, async (route) => {
+    const path = new URL(route.request().url()).pathname.slice(
+      new URL(MOCKS).pathname.length + 1,
+    );
+    const file = join(LOCAL_MOCKS, decodeURIComponent(path));
+    if (!existsSync(file)) return route.fulfill({ status: 404 });
+    return route.fulfill({
+      status: 200,
+      contentType: MOCK_TYPES[extname(file)] ?? "application/octet-stream",
+      headers: { "access-control-allow-origin": "*" },
+      body: readFileSync(file),
+    });
+  });
   const files = new Set();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));

@@ -37,3 +37,25 @@ export function readLink(
   }
   return undefined;
 }
+
+/**
+ * What a tag names on the web (Cookbook 0258: a Wikidata entity beside its name): a
+ * `tagging` or `identifying` annotation's body that is a resource of its own, a
+ * `SpecificResource`'s `source` or a bare `id`, by http(s) only. The list offers it as a
+ * link; on the image the tag stays a tag, framed when pressed, never followed.
+ */
+export function readTagSource(
+  annotation: Record<string, any>,
+): AnnotationLink | undefined {
+  const motivation = asArray(annotation?.motivation);
+  if (!motivation.includes("tagging") && !motivation.includes("identifying"))
+    return undefined;
+  for (const body of bodiesOf(annotation)) {
+    if (body?.type === "TextualBody" || typeof body?.value === "string")
+      continue;
+    const source: any = body?.type === "SpecificResource" ? body.source : body;
+    const id = typeof source === "string" ? source : source?.id;
+    if (typeof id === "string" && /^https?:\/\//i.test(id)) return { id };
+  }
+  return undefined;
+}

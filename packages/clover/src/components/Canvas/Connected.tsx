@@ -3,13 +3,14 @@ import React, {
   useEffect,
   useMemo,
   useRef,
+  useState,
   useSyncExternalStore,
 } from "react";
 
 import type { CanvasHandle, CloverCanvasProps } from "./Canvas.types";
 import CanvasView, { type CanvasViewProps } from "./CanvasView";
 import { applyTarget as apply, useRangeChapters } from "./fromManifest";
-import { type IIIFCanvas, paintedMedia } from "./layout";
+import { type IIIFCanvas, canvasCaptions, paintedMedia } from "./layout";
 import {
   selectDrawnSets,
   selectHiddenSets,
@@ -20,6 +21,7 @@ import { showLink } from "../../core/show-link";
 import { chaptersOf } from "../../core/ranges";
 import { hasBehavior } from "../../core/selectors";
 import type { CanvasAnnotation } from "./Annotations";
+import { sameLanguage } from "../../i18n/config";
 import { useClover, useCloverSelector } from "../../react/context";
 import {
   useActiveCanvas,
@@ -110,6 +112,21 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
     ),
   );
   const selectedAnnotation = useCloverSelector((state) => state.annotationId);
+  /*
+   * The annotation selected already, asked for again ("Find on the image" once the view
+   * has moved, Cookbook 0021): framed again (`refind`), as a new one is framed as it is
+   * selected, focus staying where the reader asked.
+   */
+  const selectedRef = useRef(selectedAnnotation);
+  selectedRef.current = selectedAnnotation;
+  const [refind, setRefind] = useState(0);
+  useEffect(
+    () =>
+      clover.found.subscribe((id) => {
+        if (id && id === selectedRef.current) setRefind((count) => count + 1);
+      }),
+    [clover],
+  );
   const highlighted = useSyncExternalStore(
     clover.highlight.subscribe,
     clover.highlight.get,
@@ -141,6 +158,9 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
           pageId: set.id,
           ...(set.label ? { pageLabel: set.label } : {}),
           ...(entry.place ? { place: entry.place } : {}),
+          ...(entry.layer
+            ? { layer: { key: entry.layer.key, item: entry.layer.item } }
+            : {}),
         })),
     );
   }, [givenAnnotations, sets, canvases]);
@@ -178,6 +198,26 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
   const hasMediaRef = useRef(hasMedia);
   hasMediaRef.current = hasMedia;
 
+  /*
+   * The Root's language wins (Mat, 2026-10-28: "always let root win"): as it changes, or
+   * another recording plays, the caption file in it is the one shown while captions are
+   * on, the Transcript's with it (`clover.captions`). A file chosen in the Captions menu
+   * holds until then. Only the Root's: a Canvas given a `caption` keeps it.
+   */
+  const rootLanguage =
+    givenCaption === undefined ? context.language : undefined;
+  const mediaCanvasId = mediaCanvas?.id;
+  useEffect(() => {
+    if (!rootLanguage || !mediaCanvas) return;
+    const file = canvasCaptions(mediaCanvas).find(
+      (track) => track.language && sameLanguage(track.language, rootLanguage),
+    );
+    if (file && clover.captions.get() !== file.id)
+      clover.captions.emit(file.id);
+    // By the Canvas's id, as its object is made again each render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rootLanguage, mediaCanvasId, clover]);
+
   /** Apply what can be applied of the pending target; consume it once all of it is. */
   const applyTarget = useCallback(() => {
     const pending = clover.store.get().target;
@@ -189,7 +229,17 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
     clover.consumeTarget();
   }, [clover]);
 
+  /*
+   * The element of the Canvas left is let go as the Canvas changes: a target's time
+   * waits for the new Canvas's own (`handleMediaElement`), never set on one being emptied
+   * (Cookbook 0065: a chapter on the other Canvas arrived at 0:00).
+   */
+  const lastCanvas = useRef(canvasKey);
   useEffect(() => {
+    if (lastCanvas.current !== canvasKey) {
+      lastCanvas.current = canvasKey;
+      media.current = null;
+    }
     if (target) applyTarget();
   }, [target, canvasKey, applyTarget]);
 
@@ -306,6 +356,7 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
       highlightedChapter={highlightedChapter}
       onChapterHighlight={(id) => clover.chapter.emit(id)}
       selectedAnnotation={selectedAnnotation}
+      refind={refind}
       highlightedAnnotation={highlighted}
       onAnnotationSelect={(id) => clover.selectAnnotation(id)}
       onAnnotationLink={rest.onAnnotationLink ?? followLink}

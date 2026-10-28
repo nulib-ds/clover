@@ -2,6 +2,7 @@ import {
   type AnnotationSet,
   findEntry,
   manifestOfAnnotation,
+  paintsLayers,
   selectDrawnSets,
   selectHiddenSets,
   readPage,
@@ -67,7 +68,11 @@ export interface CloverState {
    * drawn is `selectHiddenSets`'s.
    */
   shownSets: string[];
-  /** Sets the host added through `annotations`, beside the Manifest's own. */
+  /**
+   * Sets beside the Manifest's own pages: its images' own (Cookbook 0326, read once it is
+   * shown, their module loaded then), the host's through `annotations`, and a content
+   * state's note.
+   */
   addedSets: AnnotationSet[];
   /** A Content Search of the Manifest: its query, progress and hits. */
   search: SearchState;
@@ -123,6 +128,12 @@ export interface Clover {
   highlight: Channel<string | null>;
   /** The chapter (its Range's id) under the pointer on a seek bar, or in `Contents`. */
   chapter: Channel<string | null>;
+  /**
+   * The annotation the reader asked to find (`selectAnnotation`), each time they ask, the
+   * one selected already among them: the Canvas frames it again, after the reader has
+   * moved the view away (Cookbook 0021).
+   */
+  found: Channel<string | null>;
   readonly request: CloverRequest | undefined;
   setRequest(request: CloverRequest | undefined): void;
   /** Load content. `canvasId` wins over everything; `defaultCanvasId` over `start`. */
@@ -252,19 +263,24 @@ export function createClover(options: CloverOptions = {}): Clover {
   const captions = createChannel<string | null>(null);
   const highlight = createChannel<string | null>(null);
   const chapter = createChannel<string | null>(null);
+  const found = createChannel<string | null>(null);
   let annotating: AbortController | null = null;
   let searching: AbortController | null = null;
   /*
-   * The added sets: the host's (`annotations`), and a content state's note. Each changes
-   * without the other, so the store holds the two together.
+   * The added sets: the Manifest's images' own (Cookbook 0326, `image-layers.ts`), the
+   * host's (`annotations`), and a content state's note. Each changes without the others,
+   * so the store holds them together.
    */
+  let layerSets: AnnotationSet[] = [];
   let hostSets: AnnotationSet[] = [];
   let stateSets: AnnotationSet[] = [];
+  /** Manifests shown so far, so a module that arrives late reads the one still shown. */
+  let arrivals = 0;
   /** One of those to pick once a host that holds the Manifest moves to it. */
   let pending: string | null = null;
   const added = () =>
-    hostSets.length || stateSets.length
-      ? [...hostSets, ...stateSets]
+    layerSets.length || hostSets.length || stateSets.length
+      ? [...layerSets, ...hostSets, ...stateSets]
       : INITIAL.addedSets;
   let request = options.request;
   let loading: AbortController | null = null;
@@ -343,6 +359,8 @@ export function createClover(options: CloverOptions = {}): Clover {
       pick && findEntry(stateSets, pick)?.canvasId === canvasId ? pick : null;
     const arrival =
       target && picked ? { ...target, region: undefined } : target;
+    const at = ++arrivals;
+    layerSets = [];
     store.set({
       status: "ready",
       search: NO_SEARCH,
@@ -365,8 +383,14 @@ export function createClover(options: CloverOptions = {}): Clover {
       JSON.stringify(structures).includes("xywh=")
     )
       void import("./range-regions").then(({ contentsSet }) => {
-        if (store.get().manifest === manifest)
-          store.set({ regions: contentsSet(manifest) });
+        if (arrivals === at) store.set({ regions: contentsSet(manifest) });
+      });
+    // Its images' own annotations, read only where an image carries some.
+    if (paintsLayers(manifest))
+      void import("./image-layers").then(({ imageLayers }) => {
+        if (arrivals !== at) return;
+        layerSets = imageLayers(manifest);
+        store.set({ addedSets: added() });
       });
     if (canvasId && canvasId !== initial.canvasId) {
       options.onCanvasChange?.(canvasId);
@@ -527,6 +551,7 @@ export function createClover(options: CloverOptions = {}): Clover {
     captions,
     highlight,
     chapter,
+    found,
     get request() {
       return request;
     },
@@ -595,6 +620,7 @@ export function createClover(options: CloverOptions = {}): Clover {
       );
       store.set({ annotationId: entry ? id : null });
       if (!entry) return;
+      found.emit(id);
       /*
        * One of a hidden page, chosen, shows its page again, so what was chosen is drawn
        * (Mat, 2026-10-26: "clicking a hidden annotation should unhide the annotation

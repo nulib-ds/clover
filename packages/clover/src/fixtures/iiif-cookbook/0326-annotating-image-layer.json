@@ -1,0 +1,97 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://iiif.io/api/cookbook/recipe/0326-annotating-image-layer/manifest.json",
+  "type": "Manifest",
+  "label": {
+    "en": ["Choice Example with layer specific annotation"]
+  },
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0326-annotating-image-layer/canvas/p1",
+      "type": "Canvas",
+      "height": 1271,
+      "width": 2000,
+      "items": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0326-annotating-image-layer/page/p1/1",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0326-annotating-image-layer/annotation/p0001-image",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "type": "Choice",
+                "items": [
+                  {
+                    "id": "https://iiif.io/api/image/3.0/example/reference/421e65be2ce95439b3ad6ef1f2ab87a9-dee-natural/full/max/0/default.jpg",
+                    "type": "Image",
+                    "label": {
+                      "en": ["Natural Light"]
+                    },
+                    "format": "image/jpeg",
+                    "height": 1271,
+                    "width": 2000,
+                    "service": [
+                      {
+                        "id": "https://iiif.io/api/image/3.0/example/reference/421e65be2ce95439b3ad6ef1f2ab87a9-dee-natural",
+                        "type": "ImageService3",
+                        "profile": "level1"
+                      }
+                    ]
+                  },
+                  {
+                    "id": "https://iiif.io/api/image/3.0/example/reference/421e65be2ce95439b3ad6ef1f2ab87a9-dee-xray/full/2000,1271/0/default.jpg",
+                    "type": "Image",
+                    "label": {
+                      "en": ["X-ray"]
+                    },
+                    "format": "image/jpeg",
+                    "height": 1271,
+                    "width": 2000,
+                    "service": [
+                      {
+                        "id": "https://iiif.io/api/image/3.0/example/reference/421e65be2ce95439b3ad6ef1f2ab87a9-dee-xray",
+                        "type": "ImageService3",
+                        "profile": "level1"
+                      }
+                    ],
+                    "annotations": [
+                      {
+                        "id": "https://iiif.io/api/cookbook/recipe/0326-annotating-image-layer/page/p2/1",
+                        "type": "AnnotationPage",
+                        "items": [
+                          {
+                            "id": "https://iiif.io/api/cookbook/recipe/0326-annotating-image-layer/annotation/p0002-tag",
+                            "type": "Annotation",
+                            "motivation": "tagging",
+                            "body": {
+                              "type": "TextualBody",
+                              "value": "A group of skulls.",
+                              "language": "en",
+                              "format": "text/plain"
+                            },
+                            "target": {
+                              "type": "SpecificResource",
+                              "source": "https://iiif.io/api/image/3.0/example/reference/421e65be2ce95439b3ad6ef1f2ab87a9-dee-xray",
+                              "selector": {
+                                "type": "ImageApiSelector",
+                                "region": "810,900,260,370",
+                                "size": "2000,1271"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0326-annotating-image-layer/canvas/p1"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

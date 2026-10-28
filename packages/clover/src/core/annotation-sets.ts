@@ -38,6 +38,13 @@ export interface AnnotationEntry {
    * which its hotspot shows after its name.
    */
   place?: { index: number; total: number };
+  /**
+   * An annotation of one image of a `Choice` (Cookbook 0326: an X-ray's tag), not of the
+   * Canvas: the choice's key (`core/choice-key.ts`), the item's place in it, and the
+   * image's id. It is drawn while that item is the one chosen, and its `target` is given
+   * here in the Canvas's terms, placed through the image's painting.
+   */
+  layer?: { key: string; item: number; image: string };
 }
 
 /**
@@ -95,6 +102,23 @@ export function readPage(
   return entries;
 }
 
+/**
+ * Whether an image a Canvas paints, or an item of a `Choice` it paints, carries
+ * annotations of its own (Cookbook 0326), which the Root then reads (`image-layers.ts`).
+ */
+export const paintsLayers = (manifest: Manifest): boolean =>
+  (selectSequence(manifest).canvases as Json[]).some((canvas) =>
+    (asArray(canvas.items) as Json[]).some((page) =>
+      (asArray(page?.items) as Json[]).some((painting) =>
+        (asArray(painting?.body) as Json[]).some((body) =>
+          [body, ...(asArray(body?.items) as Json[])].some(
+            (image) => asArray(image?.annotations).length > 0,
+          ),
+        ),
+      ),
+    ),
+  );
+
 const manifestSets = new WeakMap<Manifest, AnnotationSet[]>();
 
 /** The sets the Manifest's Canvases carry, merged by page id across Canvases. */
@@ -136,7 +160,16 @@ export function selectAnnotationSets(
   if (!byAdded) allSets.set(key, (byAdded = new Map()));
   let sets = byAdded.get(added);
   if (!sets) {
-    sets = [...own, ...added];
+    /*
+     * A page once, however it came: one the host adds that the Manifest holds already
+     * (Cookbook 0306, opened by its Annotation Page, whose Canvas names that page) keeps
+     * the Manifest's place, and is not listed twice.
+     */
+    const seen = new Set(own.map((set) => set.id));
+    sets = [
+      ...own,
+      ...added.filter((set) => !seen.has(set.id) && Boolean(seen.add(set.id))),
+    ];
     byAdded.set(added, sets);
   }
   return sets;

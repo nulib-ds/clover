@@ -3,10 +3,12 @@ import imageJson from "../fixtures/iiif-cookbook/0377-image-in-annotation.json";
 import captionsJson from "../fixtures/iiif-cookbook/0219-using-caption-file.json";
 import simpleJson from "../fixtures/iiif-cookbook/simple-annotation.json";
 import articlesJson from "../fixtures/iiif-cookbook/0025-newspaper-article-index.json";
+import layersJson from "../fixtures/iiif-cookbook/0326-annotating-image-layer.json";
 import { p4 } from "../fixtures/presentation4";
 import { loadAnnotationSets } from "./annotation-collection";
 import {
   CONTENTS_SET_ID,
+  paintsLayers,
   readPage,
   selectAnnotationSets,
   selectDrawnSets,
@@ -16,6 +18,7 @@ import {
   selectUnlistedSets,
 } from "./annotation-sets";
 import { createClover } from "./clover";
+import { imageLayers } from "./image-layers";
 import { contentsSet } from "./range-regions";
 import { SEARCH_SET_ID } from "./search-service";
 import { buildContentState } from "./content-state";
@@ -213,6 +216,46 @@ describe("annotation sets", () => {
     it("leaves caption files alone: they are never a set", () => {
       expect(selectHiddenSets(p4(captionsJson), [], [], [])).toEqual([]);
     });
+  });
+
+  // Cookbook 0326: an image of a Choice carries its own annotations.
+  it("reads an image's own annotations, placed on its Canvas and marked with its layer", () => {
+    const manifest = p4(layersJson);
+    // Not the Canvas's pages: the Root reads them apart, once it has loaded their code.
+    expect(selectManifestSets(manifest)).toEqual([]);
+    expect(paintsLayers(manifest)).toBe(true);
+    expect(paintsLayers(p4(simpleJson))).toBe(false);
+    const [set] = imageLayers(manifest);
+    expect(set.label).toEqual({ en: ["X-ray"] });
+    const [entry] = set.entries;
+    expect(entry.target.rect).toEqual({ x: 810, y: 900, w: 260, h: 370 });
+    expect(entry.canvasId).toBe(layersJson.items[0].id);
+    expect(entry.layer).toMatchObject({ item: 1 });
+    expect(entry.layer?.image).toMatch(/dee-xray/);
+  });
+
+  it("are read by the Root, beside its own, once a Manifest whose images carry some is shown", async () => {
+    const clover = createClover();
+    await clover.load(layersJson as never);
+    await vi.waitFor(() => {
+      const { manifest, addedSets } = clover.store.get();
+      expect(
+        selectAnnotationSets(manifest, addedSets).map((set) => set.label),
+      ).toEqual([{ en: ["X-ray"] }]);
+    });
+    // The next Manifest's are its own.
+    await clover.load(simpleJson);
+    expect(clover.store.get().addedSets).toEqual([]);
+  });
+
+  // Cookbook 0306, opened by its Annotation Page: the page added is one the Manifest holds.
+  it("lists a page once, the Manifest's, when it is added again", () => {
+    const manifest = p4(simpleJson);
+    const own = selectAnnotationSets(manifest, []);
+    const again = { ...own[0], source: "added" as const };
+    const sets = selectAnnotationSets(manifest, [again]);
+    expect(sets.filter((set) => set.id === own[0].id)).toHaveLength(1);
+    expect(sets.find((set) => set.id === own[0].id)?.source).toBe("manifest");
   });
 
   it("returns the same arrays while nothing changes", () => {

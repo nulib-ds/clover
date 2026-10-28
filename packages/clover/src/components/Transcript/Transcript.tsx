@@ -29,7 +29,9 @@ import {
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { playFrom } from "../../lib/time";
+import { sameLanguage } from "../../i18n/config";
 import { useClover, useCloverSelector } from "../../react/context";
+import { useReadingLanguages } from "../../react/readingLanguages";
 import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { CueTime } from "../../ui/Cue";
 import { FieldPill } from "../../ui/FieldPill";
@@ -106,7 +108,10 @@ type TranscriptFile =
  * "IT") picks one: native radios, each named by its code and its file's label, in that
  * label's language. In an information panel's accordion the row sits beside the
  * Transcript's heading (`useSectionActions`), where it is not lost in the cues; elsewhere
- * it is over them.
+ * it is over them. The Root's language wins (Mat, 2026-10-28: "there should be one
+ * language toggle. always let root win"): the file in it is the one read, and where the
+ * Root offers the languages to read the resource in (`useReadingLanguages`), the
+ * Transcript offers none of its own.
  */
 export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
   function Transcript(
@@ -149,6 +154,23 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
     );
     const [choice, setChoice] = useState(0);
     const track = tracks[choice] ?? tracks[0];
+    // The Root's language, as the reader chose it there, else as the Root reads.
+    const offered = useReadingLanguages();
+    const rootLanguage = offered?.chosen ?? language;
+    useEffect(() => {
+      if (!rootLanguage) return;
+      const index = tracks.findIndex(
+        (option) =>
+          option.language &&
+          option.language !== "none" &&
+          sameLanguage(option.language, rootLanguage),
+      );
+      if (index < 0) return;
+      setChoice(index);
+      const file = tracks[index];
+      if (file.kind === "captions" && clover.captions.get() !== file.id)
+        clover.captions.emit(file.id);
+    }, [rootLanguage, tracks, clover]);
     /*
      * One choice of language for the captions and the transcript, through the Root
      * (`clover.captions`): a caption file chosen in the Canvas's own Captions menu is the
@@ -330,7 +352,7 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
     const lang =
       track.language && track.language !== "none" ? track.language : undefined;
 
-    const languages = tracks.length > 1 && (
+    const languages = tracks.length > 1 && !offered && (
       <>
         {name.node}
         <fieldset {...name.props} className="clover-transcript-languages">
@@ -388,8 +410,12 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
         else element.currentTime = cue.start;
         return;
       }
-      // Not playing yet (behind a placeholder, say): go there, opening at that time.
-      clover.goTo(canvas.id, { time: cue.start });
+      // Not playing yet (behind a placeholder, say): go there, opening at that time, and
+      // playing from it when pressed.
+      clover.goTo(canvas.id, {
+        time: cue.start,
+        ...(play && { autoplay: true }),
+      });
     };
 
     const go = (index: number) => {

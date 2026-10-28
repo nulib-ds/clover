@@ -1,4 +1,4 @@
-import { readLink } from "./link";
+import { readLink, readTagSource } from "./link";
 import { showLink } from "./show-link";
 import { createClover } from "./clover";
 import hotspotJson from "../fixtures/iiif-cookbook/0022-linking-with-a-hotspot.json";
@@ -54,5 +54,40 @@ describe("showLink", () => {
     expect(clover.store.get().canvasId).toBe(`${BASE}/canvas/p2`);
     // A Canvas of no Manifest it can reach: nowhere.
     expect(showLink(clover, { id: "x", canvasId: "x" })).toBe(false);
+  });
+});
+
+// Cookbook 0258: a tag beside the Wikidata entity it names.
+describe("readTagSource", () => {
+  const tag = {
+    type: "Annotation",
+    motivation: "tagging",
+    body: [
+      {
+        type: "SpecificResource",
+        source: "http://www.wikidata.org/entity/Q18624915",
+      },
+      { type: "TextualBody", value: "Gänseliesel-Brunnen", language: "de" },
+    ],
+  };
+
+  it("reads what a tag names on the web", () => {
+    expect(readTagSource(tag)).toEqual({
+      id: "http://www.wikidata.org/entity/Q18624915",
+    });
+  });
+
+  it("is no link to follow on the image", () => {
+    expect(readLink(tag)).toBeUndefined();
+  });
+
+  it("reads nothing from a tag of words alone, or an address that is no web page", () => {
+    expect(readTagSource({ ...tag, body: tag.body[1] })).toBeUndefined();
+    expect(
+      readTagSource({
+        ...tag,
+        body: { type: "SpecificResource", source: "javascript:alert(1)" },
+      }),
+    ).toBeUndefined();
   });
 });

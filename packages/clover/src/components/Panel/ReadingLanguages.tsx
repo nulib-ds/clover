@@ -1,10 +1,8 @@
-import React, { Suspense, createContext, lazy, useMemo } from "react";
+import React, { Suspense, createContext, lazy } from "react";
 
-import {
-  descriptionLanguages,
-  startingLanguage,
-} from "../../core/language-choice";
-import { useClover, useCloverSelector } from "../../react/context";
+import { useReadingLanguages } from "../../react/readingLanguages";
+
+export { useReadingLanguages };
 
 /*
  * The row itself, loaded only for a resource that has languages to offer: most come in
@@ -35,17 +33,4 @@ export function ReadingLanguages({ part }: { part: string }) {
       <LanguageChoice {...choice} nameKey="readingLanguage" part={part} />
     </Suspense>
   );
-}
-
-/** The languages to read the resource in, and the one chosen; null where there is no choice. */
-export function useReadingLanguages() {
-  const { language, chooseLanguage } = useClover("About");
-  const manifest = useCloverSelector(
-    (state) => state.manifest as Record<string, any> | null,
-  );
-  const languages = useMemo(() => descriptionLanguages(manifest), [manifest]);
-  const chosen = startingLanguage(languages, language);
-  return chosen && chooseLanguage
-    ? { languages, chosen, onChange: chooseLanguage }
-    : null;
 }

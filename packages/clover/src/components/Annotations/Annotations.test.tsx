@@ -26,6 +26,8 @@ vi.mock("../../lib/renderer", async (importOriginal) => ({
   CanvasRenderer: vi.fn().mockImplementation(() => renderer),
 }));
 
+import layersJson from "../../fixtures/iiif-cookbook/0326-annotating-image-layer.json";
+
 const canvasId = imageJson.items[0].id;
 const annotationId = imageJson.items[0].annotations[0].items[0].id;
 
@@ -144,6 +146,61 @@ describe("Annotations", () => {
     expect(document.getElementById(annotationId)).toHaveAttribute(
       "aria-current",
       "true",
+    );
+  });
+
+  // Cookbook 0021: the view moved away, "Find on the image" finds it again.
+  it("frames the picked annotation again when it is asked for again", async () => {
+    await renderWithBody();
+    const find = screen.getByRole("button", { name: /Find on the image/ });
+    fireEvent.click(find);
+    expect(renderer.fitAnnotation).toHaveBeenCalledTimes(1);
+    find.focus();
+    fireEvent.click(find);
+    expect(renderer.fitAnnotation).toHaveBeenCalledTimes(2);
+    expect(find).toHaveAttribute("aria-pressed", "true");
+    // Focus stays where the reader asked.
+    expect(find).toHaveFocus();
+  });
+
+  /*
+   * Cookbook 0326: the X-ray of a Choice carries its own tag. Listed under its image, it is
+   * drawn while the X-ray is the image chosen; chosen in the list, the X-ray is chosen and
+   * the tag framed there.
+   */
+  it("draws a layer's annotation while its layer is chosen, and chooses it when picked", async () => {
+    render(
+      <Clover.Root iiifContent={layersJson}>
+        <Clover.Body />
+        <Clover.Annotations scope="view" />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
+    emit("open");
+    await act(async () => {
+      await import("../Canvas/AnnotationState");
+    });
+    const tag = (layersJson as any).items[0].items[0].items[0].body.items[1]
+      .annotations[0].items[0].id;
+    expect(
+      await screen.findByRole("heading", { name: "X-ray" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("A group of skulls.")).toBeInTheDocument();
+    // Natural Light first: the X-ray's tag is not drawn.
+    expect(document.getElementById(tag)).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /Find on the image/ }));
+    // The X-ray is drawn, and its tag over it, framed where it is on the Canvas.
+    await waitFor(() =>
+      expect(
+        JSON.stringify(renderer.setImages.mock.calls.at(-1)?.[0]),
+      ).toContain("dee-xray"),
+    );
+    emit("open");
+    await waitFor(() => expect(document.getElementById(tag)).not.toBeNull());
+    expect(renderer.fitAnnotation).toHaveBeenCalledWith(
+      { x: 810, y: 900, width: 260, height: 370 },
+      expect.anything(),
     );
   });
 
@@ -665,6 +722,99 @@ describe("Annotations, every Canvas's (scope all)", () => {
     expect(
       container.querySelector("img.clover-annotations-thumbnail"),
     ).toHaveAttribute("alt", "");
+  });
+
+  // Cookbook 0261: a shape's picture is the box it fills.
+  it("pictures a shape's annotation by the box the shape fills", async () => {
+    const service = "https://iiif.example/image/shape";
+    const fetch = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            "@context": "http://iiif.io/api/image/3/context.json",
+            id: service,
+            type: "ImageService3",
+            protocol: "http://iiif.io/api/image",
+            profile: "level1",
+            width: 1000,
+            height: 1000,
+          }),
+        ),
+    );
+    const shaped = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: `${service}/manifest`,
+      type: "Manifest",
+      label: { en: ["A shape"] },
+      items: [
+        {
+          id: `${service}/canvas/1`,
+          type: "Canvas",
+          width: 1000,
+          height: 1000,
+          items: [
+            {
+              id: `${service}/canvas/1/page`,
+              type: "AnnotationPage",
+              items: [
+                {
+                  id: `${service}/canvas/1/page/1`,
+                  type: "Annotation",
+                  motivation: "painting",
+                  target: `${service}/canvas/1`,
+                  body: {
+                    id: `${service}/full/max/0/default.jpg`,
+                    type: "Image",
+                    width: 1000,
+                    height: 1000,
+                    service: [
+                      { id: service, type: "ImageService3", profile: "level1" },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+          annotations: [
+            {
+              id: `${service}/canvas/1/notes`,
+              type: "AnnotationPage",
+              items: [
+                {
+                  id: `${service}/canvas/1/notes/1`,
+                  type: "Annotation",
+                  motivation: "tagging",
+                  body: { type: "TextualBody", value: "Shaped" },
+                  target: {
+                    type: "SpecificResource",
+                    source: `${service}/canvas/1`,
+                    selector: {
+                      type: "SvgSelector",
+                      value:
+                        "<svg xmlns='http://www.w3.org/2000/svg'><path d='M100,200 L400,200 L250,600 Z'/></svg>",
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const { container } = render(
+      <Clover.Root iiifContent={shaped} request={{ fetch }}>
+        <Clover.Annotations scope="all" />
+      </Clover.Root>,
+    );
+    await screen.findByText("Shaped");
+    await waitFor(() =>
+      expect(
+        container.querySelector("img.clover-annotations-thumbnail"),
+      ).toHaveAttribute(
+        "src",
+        expect.stringContaining(`${service}/100,200,300,400/`),
+      ),
+    );
   });
 
   it("lists a Manifest of one Canvas by layer alone, with no Canvas to name", async () => {

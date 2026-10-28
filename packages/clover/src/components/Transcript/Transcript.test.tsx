@@ -18,6 +18,15 @@ import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
 import { useClover } from "../../react/context";
 
+/*
+ * Cookbook 0074 with its label in one language: with the label in two, the Root offers
+ * the languages, and the Transcript follows it with no row of its own.
+ */
+const oneLanguage = {
+  ...languagesJson,
+  label: { en: (languagesJson as any).label.en },
+};
+
 const VTT = `WEBVTT
 
 00:00:01.000 --> 00:00:03.000
@@ -104,7 +113,7 @@ describe("Transcript", () => {
 
   it("offers its caption files by their language codes, each named by its label in that label's language", async () => {
     render(
-      <Clover.Root iiifContent={languagesJson} request={{ fetch }}>
+      <Clover.Root iiifContent={oneLanguage} request={{ fetch }}>
         <Clover.Transcript />
       </Clover.Root>,
     );
@@ -141,7 +150,7 @@ describe("Transcript", () => {
 
   it("sits beside its heading in the information panel's accordion", async () => {
     render(
-      <Clover.Root iiifContent={languagesJson} request={{ fetch }}>
+      <Clover.Root iiifContent={oneLanguage} request={{ fetch }}>
         <Clover.Panel layout="accordion" />
       </Clover.Root>,
     );
@@ -160,7 +169,7 @@ describe("Transcript", () => {
 
   it("follows the caption file chosen in the Canvas's menu, and leads it; Off leaves it as it is", async () => {
     render(
-      <Clover.Root iiifContent={languagesJson} request={{ fetch }}>
+      <Clover.Root iiifContent={oneLanguage} request={{ fetch }}>
         <Spy />
         <Clover.Transcript />
       </Clover.Root>,
@@ -178,6 +187,29 @@ describe("Transcript", () => {
       .items;
     fireEvent.click(screen.getByRole("radio", { name: /^EN / }));
     expect(clover.captions.get()).toBe(en.id);
+  });
+
+  // Mat, 2026-10-28: "there should be one language toggle. always let root win".
+  it("offers no languages of its own where the Root offers them, and reads in the Root's", async () => {
+    const files = (languagesJson as any).items[0].annotations[0].items[0].body
+      .items;
+    render(
+      <Clover.Root
+        iiifContent={languagesJson}
+        language="it"
+        request={{ fetch }}
+      >
+        <Spy />
+        <Clover.Transcript />
+      </Clover.Root>,
+    );
+    // The Italian file, the Canvas's captions too.
+    await waitFor(() => expect(clover.captions.get()).toBe(files[1].id));
+    await waitFor(() =>
+      expect(fetch).toHaveBeenCalledWith(files[1].id, expect.anything()),
+    );
+    expect(screen.queryByRole("radio", { name: /^IT / })).toBeNull();
+    expect(screen.queryByRole("radio", { name: /^EN / })).toBeNull();
   });
 
   it("shows a transcript as plain text in its paragraphs, read as the file is encoded (Cookbook 0017)", async () => {

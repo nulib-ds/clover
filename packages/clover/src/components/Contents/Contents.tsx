@@ -132,13 +132,13 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
         return;
       }
       // On the Canvas playing: play from there (`playFrom`). Elsewhere: go, arriving at
-      // the moment or region.
+      // the moment, and playing from it, as a press on a time does, or at the region.
       if (node.canvasId === canvasId && node.time && element) {
         playFrom(element, node.time.start);
         return;
       }
       clover.goTo(node.canvasId, {
-        ...(node.time ? { time: node.time.start } : {}),
+        ...(node.time ? { time: node.time.start, autoplay: true } : {}),
         ...(node.region ? { region: node.region } : {}),
       });
     };

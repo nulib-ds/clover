@@ -150,6 +150,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   92.7 kB); its popover and the saving load only when first used. The budgets are raised
   to match.
 
+- **One choice of language.** Where the Root offers the languages to read the resource
+  in (About's, beside its heading in a Panel), the Transcript and an annotation set offer
+  none of their own: the Transcript reads its file in the chosen language, and the set
+  shows its annotations in it, so a page has one choice (Cookbook 0074 showed About's IT
+  | EN beside the Transcript's EN | IT). The Root's language also picks the Canvas's
+  caption file, as it changes or another recording plays, while captions are on; one
+  chosen in the Captions menu holds until then. Where the Root offers no choice, each
+  keeps its own row, as before.
 - **A recording in several files plays as one.** A Canvas that paints two or more videos
   or sounds one after another on its time (Cookbook 0064: an opera's two acts, the second
   from where the first ends) plays them through its one element as one recording: its
@@ -163,8 +171,51 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Default template (92.7 to 93.1 kB); the code that plays the files in turn loads only for
   a Canvas that has them. The budgets are raised to match.
 
+- **An image's own annotations, shown with their layer.** An annotation an image carries
+  itself (Cookbook 0326: the X-ray of a `Choice` of two images, tagged "A group of
+  skulls."), on a region of that image (an `ImageApiSelector`'s `region` or an `xywh`), is
+  read, placed on the Canvas through where the image is painted, and listed in Annotations
+  under its page's label or else the image's ("X-ray"), with a thumbnail cut from that
+  image. One on an item of a `Choice` is drawn while that item is the one chosen, and
+  chosen in the list, it chooses it, so it is drawn and framed. Its entry's `layer` says
+  which (`AnnotationEntry`), and its `target` is given in the Canvas's terms. A `Choice`'s
+  first image now gives a region's thumbnail too. The Root holds such sets among
+  `addedSets`, after the Manifest's own pages, their `source` still `"manifest"`, and reads
+  them with code that loads only for a Manifest whose images carry annotations. With the
+  fixes below for Cookbook 0021, 0135, 0258, 0261 and 0306, it adds 0.5 kB to the Viewer's
+  first view in its Default template (93.1 to 93.6 kB) and 0.2 kB to a Canvas's alone
+  (42.4 to 42.6 kB). The budgets are raised to match.
+
 ### Fixed
 
+- **A chapter on another Canvas arrives at its moment, playing.** Choosing an entry in
+  Contents that starts on a Canvas other than the one shown (Cookbook 0065: an opera's
+  acts on two Canvases) went there at 0:00: its time was set on the element of the
+  Canvas being left, emptied as it went. It now waits for the new Canvas's own, and plays
+  from there, as a press on a time does on the Canvas already playing. A Transcript cue
+  pressed behind a placeholder plays from its time too. Nothing to change on a page.
+- **A point annotation is pressed within 24px.** A `PointSelector`'s marker on the Canvas
+  (Cookbook 0135) is a 16px dot, which was all a press could find; it now takes presses in
+  an `l` circle around it (25.9px at the default size, a `::before` on
+  `.clover-canvas-annotation-point`), however close another point is (WCAG 2.5.8). It
+  looks the same.
+- **"Find on the image" finds the annotation again.** Pressed for the annotation picked
+  already, once the view had moved (zoomed, panned, reset), it did nothing; it frames it
+  again, as the first press did, focus staying on it (Cookbook 0021). The Root has a
+  channel for it, `found` (`clover.found`, on `<clover-root>` too): the annotation asked
+  for, each time it is asked for (`selectAnnotation`), the one picked already among them.
+- **A tag links to what it names.** A `tagging` (or `identifying`) annotation with a body
+  that is a resource on the web, as Cookbook 0258 tags a fountain with its Wikidata
+  entity beside its name, lists that resource as a link ("Open the link", in a new tab),
+  as a linking annotation's web page is. On the image the tag stays a tag.
+- **A shape's annotation has its picture.** In Annotations, an annotation on a region
+  shows a thumbnail of it; one on a shape (an `SvgSelector`, Cookbook 0261's outline of a
+  fountain) had none. It now shows the box the shape fills, cut by the image server as a
+  region is; the shape's reader loads only for one.
+- **An Annotation Page added that the Manifest holds is listed once.** Opened by its
+  Annotation Page (Cookbook 0306), whose Canvas's Manifest names that page too, Clover
+  listed and drew every annotation twice: the page as added, and as the Manifest's. A page
+  the Manifest holds already keeps its place there and is not added again.
 - **A `no-nav` Range is no chapter.** Contents left a Range of `behavior` `no-nav` out
   (Cookbook 0229: a video's first 9 seconds), but the seek bar and its Chapters menu
   offered its stretch as an unnamed chapter at 0:00. `chaptersOf` now leaves it out too,

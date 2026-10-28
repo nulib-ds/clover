@@ -447,6 +447,9 @@ every rule below.
   stay, as budgets on what a page imports. After a change to what a view loads, run
   `npm run check:first-view -w @nulib/clover` (Chrome and the network, locally): it
   builds and opens each page and fails, naming what it fetched, where a figure differs.
+  The mocks it opens are answered from `public/mocks` at their published addresses, as
+  the end-to-end suite answers its copies, never from the deployed site (Mat, 2026-10-28:
+  "lean on local mocks"); after `npm run build:mocks`, it measures what was written.
 - The sizes are measured as a Vite app builds for production (`build/consumer-bundle.mjs`:
   Rollup, minified, React external), not with esbuild. Through the package entry,
   esbuild's code splitting counts a module as reachable by its re-export alone, even
@@ -641,7 +644,10 @@ every rule below.
 - **Annotations.** `core/annotation-sets.ts` reads the Manifest's non-painting pages
   (and `addedSets`, from `core/annotation-collection.ts`, which the core imports on demand,
   only for a Root given `annotations`: keep it out of `clover.ts`'s static imports) into
-  sets of entries, memoized on the Manifest. The store holds `annotationId`, `hiddenSets` and `addedSets`; hover is
+  sets of entries, memoized on the Manifest. A painted image's own annotations (Cookbook 0326)
+  are `core/image-layers.ts`'s, imported likewise, only for a Manifest whose images
+  carry some (`paintsLayers`), and held among `addedSets` (`layerSets` in `clover.ts`),
+  their sets still `source: "manifest"`. The store holds `annotationId`, `hiddenSets` and `addedSets`; hover is
   the `highlight` channel. Selection is controlled on the Canvas (`selectedAnnotation`),
   which frames a new id once its hotspot is placed. Presentation 4 groups several bodies
   in `Independents`/`Composite`/`List`; read bodies through `bodiesOf()`. What a

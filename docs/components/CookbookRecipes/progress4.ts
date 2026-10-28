@@ -80,9 +80,8 @@ export const progress4: Record<string, Progress> = {
   "0258-tagging-external-resource": yes,
   // 2026-10-19: the hotspot, and the list's "Open the link", show the close-up.
   "0022-linking-with-a-hotspot": yes,
-  "0326-annotating-image-layer": partial(
-    "The choice of layers works; the annotation on one layer is not shown",
-  ),
+  // 2026-10-28: the X-ray's own tag is listed under it, drawn while it is chosen.
+  "0326-annotating-image-layer": yes,
   "0135-annotating-point-in-canvas": yes,
   "0139-geolocate-canvas-fragment": yes,
   "0269-embedded-or-referenced-annotations": yes,
@@ -130,6 +129,7 @@ export const progress4: Record<string, Progress> = {
   "0434-choice-av": yes,
   // 2026-10-28: its two files play as one, in the Canvas's time (`media/sequence.ts`).
   "0064-opera-one-canvas": yes,
+  // 2026-10-28: a chapter on the other Canvas now arrives at its moment, playing.
   "0065-opera-multiple-canvases": yes,
   "0068-newspaper": yes,
   "0074-multiple-language-captions": yes,

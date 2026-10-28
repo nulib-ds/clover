@@ -74,6 +74,8 @@ export interface AnnotationStateProps {
   /** The viewport, which a followed link gives focus to. */
   host: React.RefObject<HTMLDivElement | null>;
   onModel: (model: AnnotationModel | null) => void;
+  /** Counts the asks for the selected annotation again: each frames it again. */
+  refind?: number;
 }
 
 /**
@@ -99,6 +101,7 @@ export function AnnotationState({
   openMedia,
   host,
   onModel,
+  refind = 0,
 }: AnnotationStateProps) {
   const {
     canvases,
@@ -377,10 +380,16 @@ export function AnnotationState({
    * hotspot, but is framed, or gone to on its recording, all the same, from where the
    * menu lists it: hiding a page hides only what is drawn.
    */
+  // Asked for again, the selected one is framed again (Cookbook 0021: once the view moved).
+  const lastRefind = useRef(refind);
   useEffect(() => {
     if (!selectedAnnotation) {
       framed.current = null;
       return;
+    }
+    if (lastRefind.current !== refind) {
+      lastRefind.current = refind;
+      framed.current = null;
     }
     if (framed.current === selectedAnnotation) return;
     const find = (list: PlacedAnnotation[]) =>
@@ -401,6 +410,7 @@ export function AnnotationState({
     allPlaced,
     mediaElement,
     renderer,
+    refind,
   ]);
   /*
    * Annotations on a stretch of the recording's time (Cookbook 0103): cues while it plays,

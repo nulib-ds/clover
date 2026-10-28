@@ -120,6 +120,11 @@ const ANNOTATION_KEYS = {
 export type CanvasViewProps = CloverCanvasProps & {
   /** What it draws on: Canvas's renderer, or a Timeline's surface (`surface.ts`). */
   surface: MakeSurface;
+  /**
+   * Counts the asks for the annotation selected already ("Find on the image" again, the
+   * Root's `found`): each one frames it again (`AnnotationState`).
+   */
+  refind?: number;
 };
 
 /**
@@ -242,6 +247,28 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   const [selections, setSelections] = useState<ChoiceSelections>({});
   const selectChoice = (key: string, index: number) =>
     setSelections((current) => ({ ...current, [key]: index }));
+  /*
+   * An annotation of one image of a `Choice` (Cookbook 0326: the X-ray's tag) is drawn
+   * while that image is the one chosen; one chosen elsewhere (the Annotations list)
+   * chooses its image, so it is drawn and framed.
+   */
+  const layered = useMemo(
+    () =>
+      allAnnotations?.filter(
+        (each) =>
+          !each.layer || (selections[each.layer.key] ?? 0) === each.layer.item,
+      ),
+    [allAnnotations, selections],
+  );
+  const pickedLayer = allAnnotations?.find(
+    (each) => each.layer && each.annotation.id === props.selectedAnnotation,
+  )?.layer;
+  useEffect(() => {
+    if (pickedLayer && (selections[pickedLayer.key] ?? 0) !== pickedLayer.item)
+      selectChoice(pickedLayer.key, pickedLayer.item);
+    // Only as another is picked: the reader may choose another image meanwhile.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pickedLayer?.key, pickedLayer?.item, props.selectedAnnotation]);
   /*
    * The shown Canvases with a `summary` or `metadata`, for the caption the information
    * control slides out. It stays open as the host moves between Canvases, wherever there
@@ -902,7 +929,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         {hotspots && hasAnnotations && allAnnotations && (
           <hotspots.AnnotationState
             given={props}
-            annotations={allAnnotations}
+            annotations={layered ?? allAnnotations}
             scene={scene}
             renderer={renderer}
             sceneVersion={sceneVersion}
@@ -915,6 +942,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             openMedia={setMediaOpenedFor}
             host={hostRef}
             onModel={setAnnotationModel}
+            refind={props.refind ?? 0}
           />
         )}
         {loading && <Loading overlay />}

@@ -49,6 +49,10 @@ export interface CloverState {
   annotationId: string | null;
   /** Annotation sets switched off. */
   hiddenSets: string[];
+  /**
+   * Sets beside the Manifest's own pages: its images' own, the host's (`annotations`),
+   * and a content state's note.
+   */
   addedSets: CloverAnnotationSet[];
   /** The regions the Manifest's Ranges name, drawn as annotations ("contents"). */
   regions: CloverAnnotationSet | null;
@@ -99,8 +103,13 @@ export interface CloverAnnotationSet {
     setId: string;
     canvasId: string;
     motivation: string[];
-    /** The annotation as published. */
+    /**
+     * The annotation as published; an image's own (Cookbook 0326) with its `target`
+     * restated on the Canvas.
+     */
     annotation: Record<string, unknown>;
+    /** An annotation of one image of a `Choice`: drawn while that image is chosen. */
+    layer?: { key: string; item: number; image: string };
   }>;
 }
 
@@ -211,6 +220,8 @@ export interface CloverRootApi {
   readonly captions: CloverChannel<string | null>;
   readonly highlight: CloverChannel<string | null>;
   readonly chapter: CloverChannel<string | null>;
+  /** The annotation asked to be found, each time it is asked for, the selected one again among them. */
+  readonly found: CloverChannel<string | null>;
 }
 
 /**

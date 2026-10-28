@@ -3,6 +3,7 @@ import { bodiesOf, isPainting } from "../../core/painting";
 import type { Rect, SceneImage } from "../../lib/renderer";
 import { findImageServiceId } from "../../lib/renderer/sources/imageService";
 import { parseTime } from "../../lib/time";
+import { choiceKey as keyOf } from "../../core/choice-key";
 import { type ViewingDirection, resolveDirection } from "../../core/sequence";
 import type { ThumbnailSource } from "../../core/thumbnail";
 import { asArray } from "../../lib/asArray";
@@ -213,7 +214,7 @@ function choiceKey(
   index: number,
   body: number,
 ): string {
-  return `${canvas.id}|${annotation.id ?? `${page}:${index}`}|${body}`;
+  return keyOf(canvas.id, annotation.id, page, index, body);
 }
 
 /** Every painting annotations' `Choice` across the Canvases, in painting order. */
