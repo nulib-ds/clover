@@ -411,9 +411,12 @@ describe("Map", () => {
         <CloverMap />
       </Clover.Root>,
     );
-    const button = await screen.findByRole("button", {
-      name: "Township map Georeferenced image",
-    });
+    // Listed once its georeference loads, on demand: past a second on CI.
+    const button = await screen.findByRole(
+      "button",
+      { name: "Township map Georeferenced image" },
+      { timeout: 4000 },
+    );
     expect(within(button).getByText("Township map")).toHaveAttribute(
       "lang",
       "en",
@@ -433,7 +436,7 @@ describe("Map", () => {
     render(<CloverMap georeferences={[georeferenceOnService()]} />);
     await waitFor(() => expect(maps).toHaveLength(1));
     const [map] = maps;
-    // The overlay's warp loads on demand: past a second while the whole suite runs.
+    // The overlay's warp loads on demand: past a second on CI and under the whole suite.
     await waitFor(
       () =>
         expect(
