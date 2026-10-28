@@ -28,15 +28,20 @@ import { NoLastUpdated } from "docs/components/NoLastUpdated";
 import React from "react";
 
 import AgentTools from "docs/components/AgentTools";
+import GoogleTagManager from "docs/components/GoogleTagManager";
 import Logo from "docs/components/Logo";
 import SiteEffects from "docs/components/SiteEffects";
 import Subheader from "docs/components/Subheader";
-import { pageMetadata, siteTitle } from "docs/lib/site";
+import { pageMetadata, siteTitle, siteUrl } from "docs/lib/site";
+import { tagManagerId } from "docs/lib/tag-manager";
 import { WEBMCP_ORIGIN_TRIAL } from "docs/lib/webmcp/origin-trial";
 import { agentTools } from "docs/lib/webmcp/tools";
 
 export const metadata: Metadata = {
   ...pageMetadata({ route: "/" }),
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION?.trim() || undefined,
+  },
   // The name a phone gives the site on its home screen.
   appleWebApp: { title: siteTitle },
 };
@@ -46,6 +51,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const containerId = tagManagerId(process.env.NEXT_PUBLIC_GTM_ID);
   return (
     /*
      * The page's language, for screen readers and translation tools (WCAG 3.1.1). The site
@@ -84,6 +90,9 @@ export default async function RootLayout({
         )}
       </Head>
       <body>
+        {process.env.NODE_ENV === "production" && containerId && (
+          <GoogleTagManager containerId={containerId} siteUrl={siteUrl} />
+        )}
         <Layout
           /*
            * Nextra's navbar, held at the top as ever, and under it the line saying whose

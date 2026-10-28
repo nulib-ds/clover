@@ -8,7 +8,7 @@
   "scripts": {
     "build": "npm run build -w @nulib/clover",
     "build:docs": "next build",
-    "postbuild:docs": "pagefind --site .next/server/app --output-path out/_pagefind && node scripts/build-agent-docs.mjs",
+    "postbuild:docs": "node scripts/check-site.mjs && pagefind --site .next/server/app --output-path out/_pagefind && node scripts/build-agent-docs.mjs",
     "build:mocks": "vite-node scripts/build-mocks.mjs",
     "build:paged-ocr": "node scripts/build-paged-ocr.mjs",
     "build:cookbook": "vite-node -c vitest.config.mjs scripts/build-cookbook.mjs",

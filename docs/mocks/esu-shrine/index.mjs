@@ -27,7 +27,8 @@
  */
 import source from "./source.json";
 
-export const PUBLIC_BASE = "https://clover.iiif.library.northwestern.edu/mocks/esu-shrine";
+export const PUBLIC_BASE =
+  "https://clover.iiif.library.northwestern.edu/mocks/esu-shrine";
 
 /** Where the Lab's Voyager scene is, and so its model. */
 const VOYAGER =

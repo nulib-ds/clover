@@ -32,7 +32,8 @@ import { ocrSearch, union } from "../ocr-search.mjs";
 import ocr from "./ocr.json";
 import source from "./source.json";
 
-export const PUBLIC_BASE = "https://clover.iiif.library.northwestern.edu/mocks/paged";
+export const PUBLIC_BASE =
+  "https://clover.iiif.library.northwestern.edu/mocks/paged";
 
 /**
  * The Manifest's summary: who issued the catalog, where and when, and what is in it, in

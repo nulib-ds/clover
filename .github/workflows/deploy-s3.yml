@@ -49,11 +49,13 @@ jobs:
       - name: Build site
         env:
           # CloudFront serves the site at the root of its own host, so there is no
-          # base path. It must be set, empty: `next.config.mjs` falls back to
-          # `/clover` when it is unset.
+          # base path, matching the default in `next.config.mjs`.
           DOCS_BASE_PATH: ""
           # Its address, for canonical links and the sitemap (`docs/lib/site.ts`).
           NEXT_PUBLIC_SITE_URL: ${{ vars.DOCS_SITE_URL }}
+          # Public identifiers, configured as repository or production environment variables.
+          GOOGLE_SITE_VERIFICATION: ${{ vars.GOOGLE_SITE_VERIFICATION }}
+          NEXT_PUBLIC_GTM_ID: ${{ vars.NEXT_PUBLIC_GTM_ID }}
         run: npm run build:docs
 
       - name: Configure AWS credentials
@@ -64,12 +66,11 @@ jobs:
 
       # Two passes, so a page is never served from cache after a deploy while the
       # assets it names are still the old ones: the hashed, immutable files go up
-      # first and are kept a year; everything else follows and is revalidated.
+      # first and stay available for cached pages; everything else is revalidated.
       - name: Upload hashed assets
         run: |
           aws s3 sync out "s3://${DOCS_BUCKET}" \
             --no-progress \
-            --delete \
             --exclude "*" \
             --include "_next/static/*" \
             --cache-control "public, max-age=31536000, immutable"
@@ -78,6 +79,13 @@ jobs:
 
       - name: Upload the rest of the site
         run: |
+          # Replace cache metadata even when a file's contents did not change.
+          # Then sync to remove files that are no longer in the export.
+          aws s3 cp out "s3://${DOCS_BUCKET}" \
+            --recursive \
+            --no-progress \
+            --exclude "_next/static/*" \
+            --cache-control "public, max-age=0, must-revalidate"
           aws s3 sync out "s3://${DOCS_BUCKET}" \
             --no-progress \
             --delete \

@@ -18,7 +18,8 @@
  */
 import source from "./source.json";
 
-export const PUBLIC_BASE = "https://clover.iiif.library.northwestern.edu/mocks/navplace";
+export const PUBLIC_BASE =
+  "https://clover.iiif.library.northwestern.edu/mocks/navplace";
 
 /** The corner of Michigan Avenue and Washington Street, Chicago: [longitude, latitude]. */
 export const PLACE = {

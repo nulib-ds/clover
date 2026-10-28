@@ -19,7 +19,8 @@
  */
 import source from "./source.json";
 
-export const PUBLIC_BASE = "https://clover.iiif.library.northwestern.edu/mocks/tagging";
+export const PUBLIC_BASE =
+  "https://clover.iiif.library.northwestern.edu/mocks/tagging";
 
 /**
  * The words printed on the plate, top to bottom and left to right, each with the box

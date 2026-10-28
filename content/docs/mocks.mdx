@@ -24,13 +24,13 @@ Two pages of the _Berliner Tageblatt_ of February 16, 1925, with their OCR and a
 Content Search 2.0 service. The OCR is the newspaper's own (Fraktur, errors included),
 with a position for every word, so search hits and text land where the print is.
 
-| Resource        | Published (static)                                                                                                                                            |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Resource        | Published (static)                                                                                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Manifest        | [`/mocks/content-search/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/content-search/manifest.json)                                                 |
 | OCR, by line    | [`/mocks/content-search/ocr/p1-lines.json`](https://clover.iiif.library.northwestern.edu/mocks/content-search/ocr/p1-lines.json), `p2-lines.json`                        |
 | OCR, by word    | [`/mocks/content-search/ocr/p1-words.json`](https://clover.iiif.library.northwestern.edu/mocks/content-search/ocr/p1-words.json), `p2-words.json`                        |
 | Example answers | [`/mocks/content-search/search/examples/nicht.json`](https://clover.iiif.library.northwestern.edu/mocks/content-search/search/examples/nicht.json) and others: see below |
-| Search service  | `/mocks/content-search/search`: answered live by `npm run dev` or `mockFetch`, not by the static site                                                         |
+| Search service  | `/mocks/content-search/search`: answered live by `npm run dev` or `mockFetch`, not by the static site                                                                    |
 
 All under `https://clover.iiif.library.northwestern.edu`.
 
@@ -131,8 +131,8 @@ County, Illinois_, as a Manifest of one Canvas, with:
 - a [navPlace](https://iiif.io/api/extension/navplace/) point naming Evanston, Illinois;
 - the image from Northwestern's IIIF Image API (level 2, 7337 × 9833, CORS open).
 
-| Resource | Published (static)                                                                                        |
-| -------- | --------------------------------------------------------------------------------------------------------- |
+| Resource | Published (static)                                                                                                   |
+| -------- | -------------------------------------------------------------------------------------------------------------------- |
 | Manifest | [`/mocks/georeference/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/georeference/manifest.json) |
 
 It answers no query, so it is static only. The [Map](/docs/map) page draws it, warped
@@ -161,8 +161,8 @@ Navaho_ (1904), plate 1 of _The North American Indian_, as a Manifest of one Can
 | Photogravure John Andrew & Son                 | `3702,3144,424,44`         |
 | The Vanishing Race - Navaho                    | `219,3257,779,44`          |
 
-| Resource | Published (static)                                                                              |
-| -------- | ----------------------------------------------------------------------------------------------- |
+| Resource | Published (static)                                                                                         |
+| -------- | ---------------------------------------------------------------------------------------------------------- |
 | Manifest | [`/mocks/tagging/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/tagging/manifest.json) |
 
 It answers no query, so it is static only. The homepage opens on it. Its generator is
@@ -186,8 +186,8 @@ one Canvas, with:
   2026, apart from the ids of the Manifest and its Canvas, which are the mock's own;
 - the image from Northwestern's IIIF Image API (level 2, 3968 × 2685, CORS open).
 
-| Resource | Published (static)                                                                                |
-| -------- | ------------------------------------------------------------------------------------------------- |
+| Resource | Published (static)                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------------------ |
 | Manifest | [`/mocks/navplace/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/navplace/manifest.json) |
 
 It answers no query, so it is static only. The homepage's playground shows it as Photo,
@@ -231,8 +231,8 @@ carrier, with:
 - the sound from Northwestern's HLS stream (14 minutes), and the images from its IIIF
   Image API (level 2, CORS open).
 
-| Resource | Published (static)                                                                                    |
-| -------- | ----------------------------------------------------------------------------------------------------- |
+| Resource | Published (static)                                                                                               |
+| -------- | ---------------------------------------------------------------------------------------------------------------- |
 | Manifest | [`/mocks/hindenburg/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/hindenburg/manifest.json) |
 | Captions | [`/mocks/hindenburg/captions.vtt`](https://clover.iiif.library.northwestern.edu/mocks/hindenburg/captions.vtt)   |
 
@@ -288,11 +288,11 @@ Manifest of 31 Canvases (its covers and 29 pages), with:
   2026, apart from the ids of the Manifest and its Canvases, which are the mock's own;
 - the images from Northwestern's IIIF Image API (level 2, CORS open).
 
-| Resource       | Published (static)                                                                                                                                                                                                                                                               | Live (`npm run dev`)                     |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Manifest       | [`/mocks/paged/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json)                                                                                                                                                                                      | `/api/mocks/paged/manifest.json`         |
-| A page's lines | [`/mocks/paged/ocr/7-lines.json`](https://clover.iiif.library.northwestern.edu/mocks/paged/ocr/7-lines.json) (its Canvas's place)                                                                                                                                                           | `/api/mocks/paged/ocr/7-lines.json`      |
-| A page's words | [`/mocks/paged/ocr/7-words.json`](https://clover.iiif.library.northwestern.edu/mocks/paged/ocr/7-words.json)                                                                                                                                                                                | `/api/mocks/paged/ocr/7-words.json`      |
+| Resource       | Published (static)                                                                                                                                                                                                                                                                                                | Live (`npm run dev`)                     |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Manifest       | [`/mocks/paged/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json)                                                                                                                                                                                                            | `/api/mocks/paged/manifest.json`         |
+| A page's lines | [`/mocks/paged/ocr/7-lines.json`](https://clover.iiif.library.northwestern.edu/mocks/paged/ocr/7-lines.json) (its Canvas's place)                                                                                                                                                                                 | `/api/mocks/paged/ocr/7-lines.json`      |
+| A page's words | [`/mocks/paged/ocr/7-words.json`](https://clover.iiif.library.northwestern.edu/mocks/paged/ocr/7-words.json)                                                                                                                                                                                                      | `/api/mocks/paged/ocr/7-words.json`      |
 | Search         | Example answers: [`steel`](https://clover.iiif.library.northwestern.edu/mocks/paged/search/examples/steel.json), [`model d`](https://clover.iiif.library.northwestern.edu/mocks/paged/search/examples/model-d.json), [`zzzz`](https://clover.iiif.library.northwestern.edu/mocks/paged/search/examples/zzzz.json) | `/api/mocks/paged/search?q=steel&page=2` |
 
 The published copy cannot read a query, so the docs answer the search in the browser
@@ -328,8 +328,8 @@ _Lunchroom Manners_, a Manifest of one video Canvas (9 min 32 s), with:
 So a viewer has both kinds of transcript to offer, the timed captions and the untimed
 text: Clover's Transcript lists them as "EN" and "TXT".
 
-| Resource | Published (static)                                                                                      |
-| -------- | ------------------------------------------------------------------------------------------------------- |
+| Resource | Published (static)                                                                                                 |
+| -------- | ------------------------------------------------------------------------------------------------------------------ |
 | Manifest | [`/mocks/transcripts/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/transcripts/manifest.json) |
 
 It answers no query, so it is static only. Its generator is
@@ -454,8 +454,8 @@ the fewest stretches that keep within 3 px of every frame, and each shot's frame
 checked with its regions drawn on them. They are as good as the film allows, which is
 soft and dark: about a head's width either way.
 
-| Resource   | Published (static)                                                                                                            |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Resource   | Published (static)                                                                                                                       |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | Manifest   | [`/mocks/rudolf-hess-nuremberg/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/manifest.json)   |
 | Captions   | [`/mocks/rudolf-hess-nuremberg/captions.vtt`](https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/captions.vtt)     |
 | Transcript | [`/mocks/rudolf-hess-nuremberg/transcript.txt`](https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/transcript.txt) |
@@ -491,8 +491,8 @@ line jumps up a column or steps down more than 1.6 times the page's usual line p
 new block). Nothing in it is typed by hand, so it reads as the OCR does, long s (ſ) and
 misreadings included.
 
-| Resource        | Published (static)                                                                                              |
-| --------------- | --------------------------------------------------------------------------------------------------------------- |
+| Resource        | Published (static)                                                                                                         |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | Manifest        | [`/mocks/page-transcript/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/page-transcript/manifest.json) |
 | Page 1, as text | [`/mocks/page-transcript/text/p1.txt`](https://clover.iiif.library.northwestern.edu/mocks/page-transcript/text/p1.txt)     |
 | Page 2, as text | [`/mocks/page-transcript/text/p2.txt`](https://clover.iiif.library.northwestern.edu/mocks/page-transcript/text/p2.txt)     |
@@ -526,8 +526,8 @@ fetched on October 19, 2026), with:
 - everything else as published, its label, summary, thumbnail and placeholder included;
 - the image from Northwestern's IIIF Image API (level 2, CORS open).
 
-| Resource | Published (static)                                                                                              |
-| -------- | --------------------------------------------------------------------------------------------------------------- |
+| Resource | Published (static)                                                                                                         |
+| -------- | -------------------------------------------------------------------------------------------------------------------------- |
 | Canvas   | [`/mocks/standalone-canvas/canvas.json`](https://clover.iiif.library.northwestern.edu/mocks/standalone-canvas/canvas.json) |
 
 It answers no query, so it is static only. The Canvas page shows it, loaded by a `Canvas`
@@ -552,8 +552,8 @@ A resource is listed once, under the recipe it belongs to: 0466 and 0599, which 
 0001's and 0006's Manifests, are left out. The Collection's own words, and what it leaves
 out and why (`LEFT_OUT`), are curated in its generator.
 
-| Resource   | Published (static)                                                                                    |
-| ---------- | ----------------------------------------------------------------------------------------------------- |
+| Resource   | Published (static)                                                                                               |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- |
 | Collection | [`/mocks/cookbook/collection.json`](https://clover.iiif.library.northwestern.edu/mocks/cookbook/collection.json) |
 
 It answers no query, so it is static only. The homepage reads it twice: its Viewing field
@@ -592,8 +592,8 @@ The Manifest has:
   beside the Manifest as `model.glb`, as it came: the Lab's server sends no CORS headers,
   so a viewer on another site could not fetch it from there.
 
-| Resource | Published (static)                                                                                    | Live (`npm run dev`)                  |
-| -------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| Resource | Published (static)                                                                                               | Live (`npm run dev`)                  |
+| -------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
 | Manifest | [`/mocks/esu-shrine/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/esu-shrine/manifest.json) | `/api/mocks/esu-shrine/manifest.json` |
 | Model    | [`/mocks/esu-shrine/model.glb`](https://clover.iiif.library.northwestern.edu/mocks/esu-shrine/model.glb)         | `/api/mocks/esu-shrine/model.glb`     |
 

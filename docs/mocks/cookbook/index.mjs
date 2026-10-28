@@ -18,7 +18,8 @@
  */
 import source from "./recipes.json";
 
-export const PUBLIC_BASE = "https://clover.iiif.library.northwestern.edu/mocks/cookbook";
+export const PUBLIC_BASE =
+  "https://clover.iiif.library.northwestern.edu/mocks/cookbook";
 
 const COOKBOOK = "https://iiif.io/api/cookbook/";
 

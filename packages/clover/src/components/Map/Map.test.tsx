@@ -17,6 +17,7 @@ import {
 } from "../../fixtures/georef";
 import canvasesJson from "../../fixtures/iiif-cookbook/0240-navPlace-on-canvases.json";
 import { initCloverI18n } from "../../i18n";
+import { clearInfoCache } from "../../lib/renderer/sources/imageService";
 import * as Clover from "../../index";
 import { Map as CloverMap } from "../../map";
 import { stubViewport } from "../Canvas/testing/viewport";
@@ -157,12 +158,31 @@ beforeAll(() => {
 // Every map on screen, as the suite's own observer reports none: MapLibre loads near view.
 let viewport: ReturnType<typeof stubViewport>;
 beforeEach(() => {
+  clearInfoCache();
+  // The overlay reads its service's capabilities; the unit suite never needs the network.
+  vi.spyOn(globalThis, "fetch").mockImplementation(async (url) => {
+    expect(url).toBe(`${DC_IMAGE_SERVICE_V3_ID}/info.json`);
+    return new Response(
+      JSON.stringify({
+        "@context": "http://iiif.io/api/image/3/context.json",
+        id: DC_IMAGE_SERVICE_V3_ID,
+        type: "ImageService3",
+        profile: "level2",
+        width: 7337,
+        height: 9833,
+      }),
+    );
+  });
   initCloverI18n({ lng: "en" });
   maps.length = 0;
   popups.length = 0;
   viewport = stubViewport();
 });
-afterEach(() => viewport.restore());
+afterEach(() => {
+  viewport.restore();
+  vi.mocked(globalThis.fetch).mockRestore();
+  clearInfoCache();
+});
 
 const placeData = (map: FakeMap) =>
   map.sources["geomap-navplace"].setData.mock.calls.at(-1)?.[0];

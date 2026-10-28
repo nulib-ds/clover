@@ -9,8 +9,13 @@ import { siteUrl } from "docs/lib/site";
 export const dynamic = "force-static";
 
 export default function robots(): MetadataRoute.Robots {
+  const basePath = new URL(siteUrl).pathname.replace(/\/+$/, "");
   return {
-    rules: { userAgent: "*", allow: "/" },
+    rules: {
+      userAgent: "*",
+      allow: "/",
+      disallow: [`${basePath}/mocks/`, `${basePath}/test/`],
+    },
     sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

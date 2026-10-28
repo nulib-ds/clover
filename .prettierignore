@@ -9,6 +9,8 @@ out
 public/script.js
 public/script.js.map
 public/index.html
+# Keep Google's ownership verification file exactly as downloaded.
+public/google821f438205104875.html
 coverage/
 html/
 

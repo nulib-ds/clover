@@ -18,7 +18,8 @@ const root = path.resolve(
 
 /** Where the published site's mocks are. */
 const SITE = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://clover.iiif.library.northwestern.edu"
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  "https://clover.iiif.library.northwestern.edu"
 ).replace(/\/$/, "");
 const addressOf = (resource) =>
   /^https?:/.test(resource) ? resource : `${SITE}/mocks/${resource}`;

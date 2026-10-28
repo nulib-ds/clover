@@ -38,7 +38,8 @@
 import cues from "./captions.json";
 import source from "./source.json";
 
-export const PUBLIC_BASE = "https://clover.iiif.library.northwestern.edu/mocks/hindenburg";
+export const PUBLIC_BASE =
+  "https://clover.iiif.library.northwestern.edu/mocks/hindenburg";
 
 /** The photograph the Canvas of sound is accompanied by: the enclosure's back, its label. */
 export const ACCOMPANYING = "enclosure back";

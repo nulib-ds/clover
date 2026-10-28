@@ -4,7 +4,8 @@
  * origin access control serves keys, not directories, so it resolves no index of its
  * own the way GitHub Pages did. This puts a page's address back to its key: a trailing
  * slash comes off, the site root becomes `index.html`, and a path whose last segment
- * has no extension takes `.html`. Anything with an extension (`/llms.txt`,
+ * has no extension takes `.html`, as does the version group's `/docs/3.x` page.
+ * Anything with a file extension (`/llms.txt`,
  * `/docs/items.md`, `/_next/static/…`, the mocks' JSON) is left alone.
  */
 function handler(event) {
@@ -21,7 +22,7 @@ function handler(event) {
   }
 
   var last = uri.slice(uri.lastIndexOf("/") + 1);
-  if (last.indexOf(".") === -1) {
+  if (last.indexOf(".") === -1 || uri === "/docs/3.x") {
     uri = uri + ".html";
   }
 
