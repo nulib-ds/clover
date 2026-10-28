@@ -1,38 +1,38 @@
 {
   "@context": "http://iiif.io/api/search/2/context.json",
-  "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/steel-2.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/examples/steel-2.json",
   "type": "AnnotationPage",
   "partOf": {
-    "id": "https://nulib-ds.github.io/clover/mocks/paged/search?q=steel",
+    "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search?q=steel",
     "type": "AnnotationCollection",
     "total": 39,
     "first": {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/steel.json",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/examples/steel.json",
       "type": "AnnotationPage"
     },
     "last": {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/steel-2.json",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/examples/steel-2.json",
       "type": "AnnotationPage"
     }
   },
   "startIndex": 25,
   "prev": {
-    "id": "https://nulib-ds.github.io/clover/mocks/paged/search/examples/steel.json",
+    "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/examples/steel.json",
     "type": "AnnotationPage"
   },
   "items": [
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/13-w222",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/13-w222",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/13",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -45,17 +45,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/13-w251",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/13-w251",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/13",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/13",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -68,17 +68,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w15",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w15",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/15",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -91,17 +91,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w41",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w41",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/15",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -114,17 +114,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w48",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w48",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/15",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -137,17 +137,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w73",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w73",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/15",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -160,17 +160,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w155",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w155",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/15",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -183,17 +183,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w170",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w170",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/15",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -206,17 +206,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w198",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w198",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/15",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -229,17 +229,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w228",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w228",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/15",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -252,17 +252,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w260",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w260",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/15",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/15",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -275,17 +275,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/17-w33",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/17-w33",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/17",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/17",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -298,17 +298,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/18-w145",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/18-w145",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/18",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -321,17 +321,17 @@
       }
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/18-w223",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/18-w223",
       "type": "Annotation",
       "motivation": "highlighting",
       "target": {
         "type": "SpecificResource",
         "source": {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/canvas/18",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/18",
           "type": "Canvas",
           "partOf": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/paged/manifest.json",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
               "type": "Manifest"
             }
           ]
@@ -349,12 +349,12 @@
       "type": "AnnotationPage",
       "items": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/13-w222/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/13-w222/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/13-w222",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/13-w222",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -366,12 +366,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/13-w251/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/13-w251/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/13-w251",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/13-w251",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -383,12 +383,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w15/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w15/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w15",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w15",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -400,12 +400,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w41/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w41/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w41",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w41",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -417,12 +417,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w48/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w48/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w48",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w48",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -434,12 +434,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w73/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w73/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w73",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w73",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -451,12 +451,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w155/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w155/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w155",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w155",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -468,12 +468,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w170/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w170/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w170",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w170",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -485,12 +485,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w198/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w198/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w198",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w198",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -502,12 +502,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w228/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w228/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w228",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w228",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -519,12 +519,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w260/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w260/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/15-w260",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/15-w260",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -536,12 +536,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/17-w33/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/17-w33/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/17-w33",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/17-w33",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -553,12 +553,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/18-w145/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/18-w145/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/18-w145",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/18-w145",
             "selector": [
               {
                 "type": "TextQuoteSelector",
@@ -570,12 +570,12 @@
           }
         },
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/18-w223/context",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/18-w223/context",
           "type": "Annotation",
           "motivation": "contextualizing",
           "target": {
             "type": "SpecificResource",
-            "source": "https://nulib-ds.github.io/clover/mocks/paged/search/hit/18-w223",
+            "source": "https://clover.iiif.library.northwestern.edu/mocks/paged/search/hit/18-w223",
             "selector": [
               {
                 "type": "TextQuoteSelector",

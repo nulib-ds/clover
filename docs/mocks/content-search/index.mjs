@@ -4,7 +4,7 @@
  * One generator, three ways out, so every copy of the mock says the same thing:
  *
  * - `scripts/build-mocks.mjs` writes the static files to `public/mocks/content-search/`,
- *   published with the docs at https://nulib-ds.github.io/clover/mocks/content-search/
+ *   published with the docs at https://clover.iiif.library.northwestern.edu/mocks/content-search/
  *   (the manifest, OCR annotation pages by line and by word, and example search answers).
  * - `pages/api/mocks/content-search/[...path].ts` answers any query in `npm run dev`, at
  *   http://localhost:3000/api/mocks/content-search/.
@@ -21,7 +21,7 @@ import ocr from "./ocr.json";
 
 /** Where the static files are published. */
 export const PUBLIC_BASE =
-  "https://nulib-ds.github.io/clover/mocks/content-search";
+  "https://clover.iiif.library.northwestern.edu/mocks/content-search";
 
 export { PAGE_SIZE };
 
@@ -107,7 +107,7 @@ export function manifest(base) {
         label: { en: ["Mock"] },
         value: {
           en: [
-            '<a href="https://nulib-ds.github.io/clover/docs/mocks">About this mock</a>',
+            '<a href="https://clover.iiif.library.northwestern.edu/docs/mocks">About this mock</a>',
           ],
         },
       },

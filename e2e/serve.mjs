@@ -1,9 +1,9 @@
 /**
- * The built docs (`out/`, `npm run build:docs`), served as GitHub Pages serves them, for
+ * The built docs (`out/`, `npm run build:docs`), served as CloudFront serves them, for
  * the e2e suite against a build: a page by its address with or without `.html`, a
  * folder's `index.html`, `404.html` for what is missing. The site is built for its base
- * path (`/clover`), which is taken off here too, so the suite's addresses (`/docs/…`)
- * and the pages' own (`/clover/docs/…`) both answer.
+ * path, none by default, and a base path is taken off here too, so with one the suite's
+ * addresses (`/docs/…`) and the pages' own (`/clover/docs/…`) both answer.
  *
  *   node e2e/serve.mjs [port]
  *   DOCS_URL=http://localhost:4400 npm run e2e:docs
@@ -15,7 +15,7 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../out/", import.meta.url));
 const port = Number(process.argv[2] ?? 4400);
-const BASE = process.env.DOCS_BASE_PATH ?? "/clover";
+const BASE = process.env.DOCS_BASE_PATH ?? "";
 
 const TYPES = {
   ".html": "text/html; charset=utf-8",

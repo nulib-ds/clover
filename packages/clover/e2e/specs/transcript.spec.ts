@@ -147,7 +147,7 @@ test("a film's captions and its transcript share the row, the transcript as TXT 
   await serveIIIF(page);
   // The docs' `transcripts` mock: English captions, and the film's plain-text transcript.
   await page.goto(
-    "/?content=https://nulib-ds.github.io/clover/mocks/transcripts/manifest.json",
+    "/?content=https://clover.iiif.library.northwestern.edu/mocks/transcripts/manifest.json",
   );
   const panel = page.getByRole("button", { name: "More information" });
   if ((await panel.getAttribute("aria-expanded")) !== "true")
@@ -174,7 +174,7 @@ test("an image's transcript shows for the page in view, in its language, and fol
   await serveIIIF(page);
   // The docs' `page-transcript` mock: a newspaper's two pages, each with its OCR as text.
   await page.goto(
-    "/?content=https://nulib-ds.github.io/clover/mocks/page-transcript/manifest.json",
+    "/?content=https://clover.iiif.library.northwestern.edu/mocks/page-transcript/manifest.json",
   );
   const panel = page.getByRole("button", { name: "More information" });
   if ((await panel.getAttribute("aria-expanded")) !== "true")

@@ -60,11 +60,12 @@ const liveMocks = () => fs.readdirSync(path.join(root, "pages/api/mocks"));
 export default function config(phase) {
   const isDev = phase === PHASE_DEVELOPMENT_SERVER;
   /*
-   * Where GitHub Pages serves the site. The deploy workflow passes the path Pages reports
-   * (`/clover` on nulib-ds.github.io, nothing on a private Pages domain); a build without
-   * it is for nulib-ds.github.io.
+   * Where the site is served from, under its host. CloudFront serves it at the root of
+   * `clover.iiif.library.northwestern.edu`, so there is none; the deploy workflow passes
+   * it empty, and a build without it is for that host too. Set it to serve the site
+   * under a path (`/clover` on nulib-ds.github.io).
    */
-  const basePath = isDev ? "" : (process.env.DOCS_BASE_PATH ?? "/clover");
+  const basePath = isDev ? "" : (process.env.DOCS_BASE_PATH ?? "");
 
   const config = withNextra({
     webpack,

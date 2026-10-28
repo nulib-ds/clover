@@ -11,7 +11,8 @@ import {
   textOf,
 } from "./live-code";
 
-const URL = "https://nulib-ds.github.io/clover/mocks/paged/manifest.json";
+const URL =
+  "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json";
 
 const code = (
   tree: CodeTree,

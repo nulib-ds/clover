@@ -1,6 +1,6 @@
 {
   "@context": "http://iiif.io/api/presentation/3/context.json",
-  "id": "https://nulib-ds.github.io/clover/mocks/content-search/manifest.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/content-search/manifest.json",
   "type": "Manifest",
   "label": {
     "de": [
@@ -33,7 +33,7 @@
       },
       "value": {
         "en": [
-          "<a href=\"https://nulib-ds.github.io/clover/docs/mocks\">About this mock</a>"
+          "<a href=\"https://clover.iiif.library.northwestern.edu/docs/mocks\">About this mock</a>"
         ]
       }
     }
@@ -54,13 +54,13 @@
   "navDate": "1925-02-16T00:00:00Z",
   "service": [
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/content-search/search",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/content-search/search",
       "type": "SearchService2"
     }
   ],
   "items": [
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p1",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/content-search/canvas/p1",
       "type": "Canvas",
       "label": {
         "none": [
@@ -71,11 +71,11 @@
       "height": 5000,
       "items": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p1/page",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/content-search/canvas/p1/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p1/page/image",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/content-search/canvas/p1/page/image",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -92,14 +92,14 @@
                   }
                 ]
               },
-              "target": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p1"
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/content-search/canvas/p1"
             }
           ]
         }
       ],
       "annotations": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/content-search/ocr/p1-lines.json",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/content-search/ocr/p1-lines.json",
           "type": "AnnotationPage",
           "label": {
             "en": [
@@ -110,7 +110,7 @@
       ]
     },
     {
-      "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/content-search/canvas/p2",
       "type": "Canvas",
       "label": {
         "none": [
@@ -121,11 +121,11 @@
       "height": 4999,
       "items": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2/page",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/content-search/canvas/p2/page",
           "type": "AnnotationPage",
           "items": [
             {
-              "id": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2/page/image",
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/content-search/canvas/p2/page/image",
               "type": "Annotation",
               "motivation": "painting",
               "body": {
@@ -142,14 +142,14 @@
                   }
                 ]
               },
-              "target": "https://nulib-ds.github.io/clover/mocks/content-search/canvas/p2"
+              "target": "https://clover.iiif.library.northwestern.edu/mocks/content-search/canvas/p2"
             }
           ]
         }
       ],
       "annotations": [
         {
-          "id": "https://nulib-ds.github.io/clover/mocks/content-search/ocr/p2-lines.json",
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/content-search/ocr/p2-lines.json",
           "type": "AnnotationPage",
           "label": {
             "en": [

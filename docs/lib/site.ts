@@ -61,11 +61,13 @@ export const shareImage = {
 };
 
 /*
- * The site's address, for canonical links. The deploy workflow passes it as Pages reports
- * it (`NEXT_PUBLIC_SITE_URL`); a build without it is for nulib-ds.github.io.
+ * The site's address, for canonical links. The deploy workflow passes it from the
+ * `DOCS_SITE_URL` repository variable (`NEXT_PUBLIC_SITE_URL`); a build without it is
+ * for the site's own host.
  */
 export const siteUrl = (
-  process.env.NEXT_PUBLIC_SITE_URL || "https://nulib-ds.github.io/clover"
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  "https://clover.iiif.library.northwestern.edu"
 ).replace(/\/+$/, "");
 
 /*

@@ -6,7 +6,7 @@ Clover builds accessible viewers for IIIF Manifests and Collections, in React or
 components: a ready-made `Viewer`, and the parts it is made of, to compose your own. It is
 a project of [Northwestern University Libraries](https://www.library.northwestern.edu/).
 
-[Documentation](https://nulib-ds.github.io/clover/docs) ·
+[Documentation](https://clover.iiif.library.northwestern.edu/docs) ·
 [Repository](https://github.com/nulib-ds/clover) ·
 [Issues](https://github.com/nulib-ds/clover/issues)
 
@@ -104,16 +104,16 @@ If you serve Clover's files yourself, copy the whole `dist/web-components` folde
 
 ## Learn more
 
-- [Get started](https://nulib-ds.github.io/clover/docs): a quick start, either way.
-- [Viewer](https://nulib-ds.github.io/clover/docs/viewer): its templates, and every prop.
-- [Composing layouts](https://nulib-ds.github.io/clover/docs/composing): layouts of your
+- [Get started](https://clover.iiif.library.northwestern.edu/docs): a quick start, either way.
+- [Viewer](https://clover.iiif.library.northwestern.edu/docs/viewer): its templates, and every prop.
+- [Composing layouts](https://clover.iiif.library.northwestern.edu/docs/composing): layouts of your
   own, from the parts and hooks.
-- [Styling](https://nulib-ds.github.io/clover/docs/styling): colors, sizes and classes.
-- [Technical overview](https://nulib-ds.github.io/clover/docs/technical): events,
+- [Styling](https://clover.iiif.library.northwestern.edu/docs/styling): colors, sizes and classes.
+- [Technical overview](https://clover.iiif.library.northwestern.edu/docs/technical): events,
   languages, types, what each part loads, and coming from Clover 3.x.
 
 Clover 3.x, `@samvera/clover-iiif`, is documented on the same site, under
-[Clover 3.x](https://nulib-ds.github.io/clover/docs/3.x).
+[Clover 3.x](https://clover.iiif.library.northwestern.edu/docs/3.x).
 
 ## License
 

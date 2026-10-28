@@ -66,7 +66,7 @@ describe("the rudolf-hess-nuremberg mock", () => {
   it("gives the captions' words as a plain-text transcript, as Cookbook 0017 does", () => {
     expect(canvasTextTranscripts(film)).toEqual([
       {
-        id: "https://nulib-ds.github.io/clover/mocks/rudolf-hess-nuremberg/transcript.txt",
+        id: "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/transcript.txt",
         label: { en: ["Transcript in plain text format"] },
         language: "en",
       },

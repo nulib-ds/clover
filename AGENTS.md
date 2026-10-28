@@ -49,14 +49,20 @@ deadline.
     `viewer` and drops out of the sidebar.
   - Links inside 3.x pages point within `/docs/3.x/`. Keep 4.x features out of the 3.x
     pages, and 3.x's API out of the 4.x ones. `Canvas` is documented in 4.x only.
-  - The site deploys to GitHub Pages through GitHub Actions
-    (`.github/workflows/deploy-pages.yml`), after the Tests workflow passes on `main`, or
-    by hand. `actions/configure-pages` reports where Pages serves it, and the build reads
-    that as `DOCS_BASE_PATH` (`next.config.mjs`) and `NEXT_PUBLIC_SITE_URL` (canonical
-    links, `docs/lib/site.ts`). Without them, a build is for `nulib-ds.github.io/clover`.
+  - The site deploys to S3, behind CloudFront, through GitHub Actions
+    (`.github/workflows/deploy-s3.yml`), after the Tests workflow passes on `main`, or
+    by hand. The job assumes a role by OIDC (`aws-actions/configure-aws-credentials`,
+    `vars.AWS_ROLE_ARN`) and syncs `out/` to `vars.DOCS_BUCKET`, hashed assets first and
+    kept a year, the rest revalidated, then invalidates
+    `vars.CLOUDFRONT_DISTRIBUTION_ID` where one is set. The build reads
+    `DOCS_BASE_PATH` (`next.config.mjs`, empty: CloudFront serves the site at its host's
+    root) and `NEXT_PUBLIC_SITE_URL` (canonical links, `docs/lib/site.ts`, from
+    `vars.DOCS_SITE_URL`). Without them, a build is for
+    `clover.iiif.library.northwestern.edu` at its root. The infrastructure itself is
+    `terraform/`.
   - The site is a static export, so there are no server redirects. URLs that moved
     (3.x pages from `/docs/…`, 4.x pages from `/docs/4.x/…`, the demo, the Panel's page)
-    are sent on by the 404 page (`app/not-found.tsx`, exported as `404.html`, which Pages
+    are sent on by the 404 page (`app/not-found.tsx`, exported as `404.html`, which CloudFront
     serves for any missing path), from the table in `docs/components/Moved.tsx`, query
     and hash kept. Move a page
     again, and add its old URL there. A 3.x page whose name 4.x now uses (`viewer`,
@@ -802,19 +808,19 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     names. Every page is `noimageindex` (its pictures are the samples'; the site's marks
     are inline), the unlisted and the test mocks `noindex` too (`pageMetadata`'s
     `indexed`), and the share card's alt says it is a sample image from the examples.
-    `robots.txt` cannot help on `nulib-ds.github.io/clover` (read only at a host's root);
+    `robots.txt` cannot help on `clover.iiif.library.northwestern.edu` (read only at a host's root);
     on a domain of its own, disallow `/mocks/` and `/test/`. The Mocks page stays as it
     is: its tables are the mocks' addresses and queries, documentation a developer needs.
   - What agents and crawlers read (Mat, 2026-10-21) is built with the site, from what it
     already holds (`docs/lib/agents.ts`: the docs' menu, each page's front matter, and
-    `figures.ts`), and, the site being a static export on GitHub Pages, each is a file:
+    `figures.ts`), and, the site being a static export, each is a file:
     `llms.txt` (`app/llms.txt/route.ts`; what Clover is, at a glance with its figures,
     then the docs as their menu lists them, each linked to its Markdown, 3.x under
     "Optional"), `sitemap.xml` (`app/sitemap.ts`, every page but the unlisted and
     `/test/`, with its file's last commit's time, from Git, `docs/lib/last-changed.ts`, as
     the pages' `dateModified` is: Nextra's own `timestamp` was not always the file's, and
-    the deploy fetches the whole history for it) and `robots.txt` (`app/robots.ts`; Pages reads
-    one only at a host's root, so it counts on a domain of the site's own). After
+    the deploy fetches the whole history for it) and `robots.txt` (`app/robots.ts`; a crawler reads
+    one only at a host's root, which the site now has, so it counts). After
     Pagefind, `scripts/build-agent-docs.mjs` writes each of the sitemap's pages as
     Markdown beside its HTML (`/docs/items.md`, converted from the built page, its
     examples' code and tables included, each fence with its language, from its block's
@@ -1079,7 +1085,7 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   generator in `docs/mocks/<name>/` and three outputs that must agree:
   - static files in `public/mocks/<name>/`, written by `npm run build:mocks`
     (`scripts/build-mocks.mjs`, run with vite-node) and committed, published with the
-    docs at `https://nulib-ds.github.io/clover/mocks/<name>/`;
+    docs at `https://clover.iiif.library.northwestern.edu/mocks/<name>/`;
   - a live copy for `npm run dev` under `pages/api/mocks/<name>/`, ids under the dev
     server and CORS open. In `next dev` its Manifest is given at the static path too
     (`/mocks/<name>/manifest.json`, a rewrite in `next.config.js`), so the homepage and
@@ -1248,9 +1254,9 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   it in an origin trial (149 to 156; Edge 147 behind a flag): its token,
   `WEBMCP_ORIGIN_TRIAL` (`docs/lib/webmcp/origin-trial.ts`), is empty until Mat registers
   one (https://developer.chrome.com/origintrials) for the origin the site is served from
-  (`https://nulib-ds.github.io` today), and every page then gives it as
-  `<meta http-equiv="origin-trial">` (`app/layout.tsx`). A domain of the site's own needs a
-  token of its own.
+  (`https://clover.iiif.library.northwestern.edu`), and every page then gives it as
+  `<meta http-equiv="origin-trial">` (`app/layout.tsx`). A token works only on its origin, so a
+  move to another host needs one of its own.
 - Built to grow (Mat, 2026-10-26). When Clover grows, the tests named fail until each step
   is done:
   - A new part: its element spec, as every part has, puts it in the catalog. Then a page in

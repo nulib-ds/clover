@@ -39,7 +39,7 @@ describe("A page's examples in both flavors", () => {
 
 \`\`\`html
 <clover-root
-  iiif-content="https://nulib-ds.github.io/clover/mocks/tagging/manifest.json">
+  iiif-content="https://clover.iiif.library.northwestern.edu/mocks/tagging/manifest.json">
   <clover-items></clover-items>
 </clover-root>
 \`\`\`

@@ -23,7 +23,7 @@
  *   (Mat, 2026-10-26), by the engine the newspaper's mock shares (`../ocr-search.mjs`).
  *
  * `scripts/build-mocks.mjs` writes it to `public/mocks/paged/` (the Manifest, the OCR
- * pages and example searches), published at https://nulib-ds.github.io/clover/mocks/paged/;
+ * pages and example searches), published at https://clover.iiif.library.northwestern.edu/mocks/paged/;
  * `npm run dev` answers any query live under `/api/mocks/paged/`, and the docs answer in
  * the browser (`mockFetch`), as a static site cannot read `?q=`. The images are served by
  * Northwestern's IIIF Image API (level 2, CORS open). Documented at /docs/mocks.
@@ -32,7 +32,7 @@ import { ocrSearch, union } from "../ocr-search.mjs";
 import ocr from "./ocr.json";
 import source from "./source.json";
 
-export const PUBLIC_BASE = "https://nulib-ds.github.io/clover/mocks/paged";
+export const PUBLIC_BASE = "https://clover.iiif.library.northwestern.edu/mocks/paged";
 
 /**
  * The Manifest's summary: who issued the catalog, where and when, and what is in it, in
