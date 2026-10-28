@@ -10,6 +10,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.0.0-beta.1] - 2026-10-28
+
 ### Documentation
 
 - **Sizes are now what a page fetches to its first view.** The figures the docs state
