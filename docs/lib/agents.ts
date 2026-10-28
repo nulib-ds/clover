@@ -231,7 +231,7 @@ export async function llmsTxt() {
     "",
     "## Tools for agents",
     "",
-    "Every page of these docs offers its tools to an agent in the reader's browser, through WebMCP (`document.modelContext`), where the browser supports it. They answer about Clover itself, never the examples' sample data, and change nothing.",
+    "Every page of these docs offers its tools to an agent in the reader's browser, through WebMCP (`document.modelContext`), where the browser supports it. They answer about Clover itself, never the examples' sample data; only a preview changes anything, and only the page the reader has open.",
     "",
     // What Clover is, said above, is left off each description.
     ...agentTools().map(

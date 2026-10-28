@@ -11,10 +11,11 @@ import {
 } from "docs/lib/webmcp/preview-store";
 
 /**
- * An example frame as a host for an agent's preview (WEBMCP.md, phase 4): every frame on a
- * docs page registers, and the first on the page draws a preview in place of its own
- * example (`AgentPreview.tsx`, loaded only when one is shown). A frame spreads `ref` on
- * its `figure` and draws `<AgentPreview shown={preview} />` while `preview` is set.
+ * An example frame as a host for an agent's preview (AGENTS.md, "Agent tools
+ * (WebMCP)"): every frame on a docs page registers, and the first on the page draws a
+ * preview in place of its own example (`AgentPreview.tsx`, loaded only when one is
+ * shown). A frame spreads `ref` on its `figure` and draws `<AgentPreview
+ * shown={preview} />` while `preview` is set.
  */
 export function usePreviewHost<T extends Element = HTMLElement>() {
   const ref = useRef<T>(null);

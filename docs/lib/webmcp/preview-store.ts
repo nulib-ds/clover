@@ -1,11 +1,12 @@
 import type { PreviewPlan } from "docs/lib/compose/preview";
 
 /**
- * Where an agent's preview is drawn (WEBMCP.md, phase 4), shared by the tool, which shows
- * it (`run.ts`), and the page's example frames, which draw it (`usePreviewHost`). Every
- * example frame on a page is a host; the first on the page draws the preview in place of
- * its own example until the reader brings that back, or leaves the page. Plain, with no
- * React, so the tool's chunk and the page's frames share the one store.
+ * Where an agent's preview is drawn (AGENTS.md, "Agent tools (WebMCP)"), shared by the
+ * tool, which shows it (`run.ts`), and the page's example frames, which draw it
+ * (`usePreviewHost`). Every example frame on a page is a host; the first on the page
+ * draws the preview in place of its own example until the reader brings that back, or
+ * leaves the page. Plain, with no React, so the tool's chunk and the page's frames share
+ * the one store.
  */
 
 export interface Shown {
@@ -60,13 +61,55 @@ export function registerHost(
   };
 }
 
-/** The first example frame on the page, by its place in it: where a preview is drawn. */
+/**
+ * Whether the page shows an element: never one in a part the page hides, as Get started
+ * hides the setups not chosen (`display: none`), where a preview drawn would be announced
+ * and never seen (WCAG 4.1.3). `checkVisibility` where the browser has it; else, as in
+ * jsdom, no ancestor of it set to `display: none`.
+ */
+function isShown(element: Element) {
+  if (typeof element.checkVisibility === "function")
+    return element.checkVisibility();
+  for (let at: Element | null = element; at; at = at.parentElement)
+    if (getComputedStyle(at).display === "none") return false;
+  return true;
+}
+
+const HEADINGS = "h1, h2, h3, h4, h5, h6, [role='heading']";
+
+/**
+ * The level a preview's titles take in its frame: one under the heading the frame sits
+ * under, as the docs' demos take theirs (AGENTS.md: 3 under an `h2`, 4 under an `h3`), so
+ * the page's outline stays true (WCAG 1.3.1); a level under the page's title where none
+ * comes before it. Only the headings the page shows count, in its `main`.
+ */
+export function levelUnder(element: Element) {
+  const scope = element.closest("main") ?? element.ownerDocument;
+  const before = [...scope.querySelectorAll(HEADINGS)].filter(
+    (heading) =>
+      !element.contains(heading) &&
+      heading.compareDocumentPosition(element) &
+        Node.DOCUMENT_POSITION_FOLLOWING &&
+      isShown(heading),
+  );
+  const under = before.at(-1);
+  if (!under) return 2;
+  const level = Number(
+    under.getAttribute("aria-level") ?? under.localName.slice(1),
+  );
+  return Number.isInteger(level) && level > 0 ? level + 1 : 2;
+}
+
+/**
+ * The first example frame the page shows, by its place in it: where a preview is drawn,
+ * and the level its titles take there.
+ */
 export function firstHost() {
   const placed = [...hosts]
     .map(([key, host]) => ({ key, route: host.route, element: host.element() }))
     .filter(
       (host): host is { key: symbol; route: string; element: Element } =>
-        host.element?.isConnected === true,
+        host.element?.isConnected === true && isShown(host.element),
     );
   placed.sort((a, b) =>
     a.element.compareDocumentPosition(b.element) &
@@ -74,7 +117,8 @@ export function firstHost() {
       ? -1
       : 1,
   );
-  return placed[0];
+  const first = placed[0];
+  return first && { ...first, level: levelUnder(first.element) };
 }
 
 /** A preview, drawn by the host. */

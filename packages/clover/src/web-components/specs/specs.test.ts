@@ -1,15 +1,15 @@
 /*
- * Parity (WEB-COMPONENTS.md): every part `@nulib/clover` exports is an element too, or is
+ * Parity (AGENTS.md, "Parity"): every part `@nulib/clover` exports is an element too, or is
  * named here with the reason it is not yet, or not at all. A new part fails this until it
  * has its element, or its reason.
  */
 import * as parts from "../../parts";
 import { DOCS, SPECS } from ".";
 
-/** Parts whose elements are planned, by the phase that brings them. */
+/** Parts whose elements are planned, each with when it will come. */
 const LATER: Record<string, string> = {};
 
-/** Parts that stay inside the others, never elements of their own: none since phase 7. */
+/** Parts that stay inside the others, never elements of their own: none since 2026-10-22. */
 const NEVER: Record<string, string> = {};
 
 const kebab = (name: string) =>

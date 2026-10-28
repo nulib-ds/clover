@@ -1,6 +1,6 @@
 /*
  * `@nulib/clover/web-components/viewer` without the files the main element build already
- * has (Mat, 2026-10-27, `DRY.md`: "The viewer entry repeats … the main folder's files").
+ * has (Mat, 2026-10-27: its entry repeated the main folder's files).
  *
  * The two element builds are apart, so the lazy code both use (MapLibre and its worker,
  * hls.js, DOMPurify, the upgrader, the languages, a few small modules) was written into

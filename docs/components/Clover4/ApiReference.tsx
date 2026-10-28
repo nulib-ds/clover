@@ -9,12 +9,12 @@ import type {
 } from "../../../packages/clover/src/web-components/spec";
 
 /**
- * A component page's "API reference" in both of the docs' flavors (WEB-COMPONENTS.md,
- * phase 7): the page's own tables for React (its children), and for web components the
- * tables of the elements it names, written from their specs and docs, as the elements'
- * types and Custom Elements Manifest are, so the three never disagree. Drawn on the
- * server, with the components a page's Markdown is drawn with, so its tables are the
- * page's own; the reader's choice shows one (`data-code-flavor`, `layout.css`).
+ * A component page's "API reference" in both of the docs' flavors (AGENTS.md: every page
+ * in both flavors): the page's own tables for React (its children), and for web
+ * components the tables of the elements it names, written from their specs and docs, as
+ * the elements' types and Custom Elements Manifest are, so the three never disagree.
+ * Drawn on the server, with the components a page's Markdown is drawn with, so its tables
+ * are the page's own; the reader's choice shows one (`data-code-flavor`, `layout.css`).
  *
  * ```mdx
  * <ApiReference elements="clover-items">

@@ -8,8 +8,8 @@ import { kB } from "docs/lib/sizes";
  * What Clover 3.x's web component loads up front, measured from the release the 3.x pages
  * pin (`@samvera/clover-iiif`): its module and what it imports statically, gzipped one by
  * one, as the package's build measures Clover 4's pages (`build/element-size.mjs`). Read
- * on the server as the docs build, so Get started compares with the code, never a figure
- * written down. Not for a page's script: it reads files.
+ * on the server as the docs build, so the Technical overview compares with the code,
+ * never a figure written down. Not for a page's script: it reads files.
  */
 const DIR = path.join(
   process.cwd(),

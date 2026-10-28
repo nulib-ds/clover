@@ -1,7 +1,8 @@
 /*
- * The compose helpers (WEBMCP.md): Clover's catalog, a layout's checks and its code, in
- * React or as HTML, for the docs' agent tools. Plain modules with no React and no DOM, so
- * the tools load them when first called, and tests run them as they are.
+ * The compose helpers (AGENTS.md, "Agent tools (WebMCP)"): Clover's catalog, a layout's
+ * checks and its code, in React or as HTML, for the docs' agent tools. Plain modules with
+ * no React and no DOM, so the tools load them when first called, and tests run them as
+ * they are.
  */
 export {
   type Catalog,

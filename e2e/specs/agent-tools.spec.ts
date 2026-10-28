@@ -5,10 +5,11 @@ import { expect, test } from "@playwright/test";
 import { call, described, open, standIn } from "./stand-in";
 
 /*
- * The docs' tools for agents (WEBMCP.md): registered on every page, each answering as
- * its definition says, and the preview drawn in the page's first example, by keyboard
- * and against the accessibility tree (WCAG 2.2 AA). The resources are the docs' own
- * mocks, served by the dev server; what the checks read of them is their own JSON.
+ * The docs' tools for agents (AGENTS.md, "Agent tools (WebMCP)"): registered on every
+ * page, each answering as its definition says, and the preview drawn in the page's
+ * first example, by keyboard and against the accessibility tree (WCAG 2.2 AA). The
+ * resources are the docs' own mocks, served by the dev server; what the checks read
+ * of them is their own JSON.
  */
 
 const axePath = createRequire(__filename).resolve("axe-core/axe.min.js");
@@ -297,4 +298,40 @@ test("previews the Viewer on its page, and refuses a page with no example", asyn
     ok: false,
     says: expect.stringMatching(/no example to draw in/),
   });
+});
+
+test("previews in the example the page shows, its titles under the heading before it", async ({
+  page,
+}) => {
+  // Composing's first example sits under "A layout of your own", an h2: its titles are h3s.
+  await open(page, "/docs/composing");
+  expect(
+    await call(page, "clover_preview_layout", {
+      layout: {
+        parts: [{ part: "Label" }, { part: "Body" }, { part: "Panel" }],
+      },
+    }),
+  ).toMatchObject({
+    ok: true,
+    notes: expect.arrayContaining([
+      "Gave Panel headingLevel 3: the preview sits under the level 2 heading before its frame.",
+    ]),
+  });
+  const preview = page.getByRole("group", { name: "Preview from your agent" });
+  await expect(
+    preview.getByRole("heading", { level: 3 }).first(),
+  ).toBeVisible();
+  await expect(preview.getByRole("heading", { level: 2 })).toHaveCount(0);
+
+  // Get started keeps every setup's example, showing the one chosen: the preview goes there.
+  await open(page, "/docs");
+  await page.getByRole("radio", { name: /Web components \(npm\)/ }).check();
+  expect(
+    await call(page, "clover_preview_layout", {
+      layout: { parts: [{ part: "Label" }, { part: "Body" }] },
+    }),
+  ).toMatchObject({ ok: true });
+  await expect(
+    page.getByRole("group", { name: "Preview from your agent" }),
+  ).toBeVisible();
 });

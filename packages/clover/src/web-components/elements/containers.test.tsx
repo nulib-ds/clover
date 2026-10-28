@@ -1,5 +1,5 @@
 /*
- * The containers as elements (phase 4 of WEB-COMPONENTS.md), under Preact as they ship:
+ * The containers as elements (AGENTS.md, "The containers"), under Preact as they ship:
  * the panel and its tabs, the toggle that shows and hides it, the Split's three, and what
  * the page hands a part as markup (slots) or as functions that return a node.
  */

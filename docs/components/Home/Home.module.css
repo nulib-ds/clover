@@ -784,8 +784,16 @@
   margin-inline-start: -0.12em;
 }
 
-/* Where a story has several figures, each is a little smaller. */
-.storyFigures:has(> .figure + .figure) .figureValue {
+/*
+ * Where a story shows several figures, each is a little smaller. A figure for each code
+ * flavor (Lightweight's) shows one at a time, so it keeps the full size (Mat, 2026-10-28:
+ * "make same font size, the larger one"); `:where` keeps this as specific as before.
+ */
+.storyFigures:has(
+    > .figure:where(:not([data-code-flavor]))
+      + .figure:where(:not([data-code-flavor]))
+  )
+  .figureValue {
   font-size: clamp(2.5rem, 9cqi, 4.5rem);
 }
 

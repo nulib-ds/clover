@@ -17,12 +17,13 @@ import { pageAddress } from "docs/lib/live-code";
 
 /**
  * What a page needs, in a reader's words ("3D", "captions", "a map", "metadata"), as
- * Clover's parts (WEBMCP.md): which part handles each need, each part's props and docs,
- * and a layout to start from, which `compose` checks and writes as code. With no needs,
- * everything Clover handles. Its words are `capabilities.ts`', and the parts' and IIIF
- * properties' names, so a capability or part Clover gains is one a need can name.
+ * Clover's parts (AGENTS.md, "Agent tools (WebMCP)"): which part handles each need,
+ * each part's props and docs, and a layout to start from, which `compose` checks and
+ * writes as code. With no needs, everything Clover handles. Its words are
+ * `capabilities.ts`', and the parts' and IIIF properties' names, so a capability or
+ * part Clover gains is one a need can name.
  *
- * Given a resource's structure (`read-resource.ts`, phase 3), it says what the resource
+ * Given a resource's structure (`read-resource.ts`), it says what the resource
  * has, in Clover's terms, each with its evidence in counts and checked tokens, and starts
  * the layout from it. The resource is untrusted, and said so: its words never reach here.
  */

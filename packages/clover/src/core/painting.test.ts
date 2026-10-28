@@ -80,7 +80,7 @@ describe("paintedBodies", () => {
 });
 
 /*
- * What reads the painting reads it one way (DRY.md, A2): a Canvas painting its image
+ * What reads the painting reads it one way (2026-10-27): a Canvas painting its image
  * inside a group has that image as its still, and Items knows it for an image.
  */
 describe("a Canvas painting its image inside a Presentation 4 group", () => {

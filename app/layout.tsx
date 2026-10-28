@@ -76,7 +76,8 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: CODE_FLAVOR_SCRIPT }} />
         {/*
          * Chrome's origin trial for WebMCP, once its token is registered: readers' Chrome
-         * then offers the page `document.modelContext`, for the agent tools (WEBMCP.md).
+         * then offers the page `document.modelContext`, for the agent tools (AGENTS.md,
+         * "Agent tools (WebMCP)").
          */}
         {WEBMCP_ORIGIN_TRIAL && (
           <meta httpEquiv="origin-trial" content={WEBMCP_ORIGIN_TRIAL} />
@@ -147,9 +148,9 @@ export default async function RootLayout({
         </Layout>
         <SiteEffects />
         {/*
-         * Tools for agents in the reader's browser (WebMCP; WEBMCP.md), registered where
-         * it offers them: their definitions from the catalog here, what they do loaded
-         * when first called.
+         * Tools for agents in the reader's browser (WebMCP; AGENTS.md, "Agent tools
+         * (WebMCP)"), registered where it offers them: their definitions from the
+         * catalog here, what they do loaded when first called.
          */}
         <AgentTools tools={agentTools()} />
       </body>

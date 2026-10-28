@@ -1,15 +1,16 @@
 /**
- * An example's JSX as the HTML of Clover's elements (WEB-COMPONENTS.md, phase 7), for the
- * docs' "Web components" code: each part as its element (`<Clover.Label as="h2" />` is
- * `<clover-label as="h2"></clover-label>`), each prop as the attribute its element's spec
- * reads it from, an object a property takes set by a module script, a style object as CSS
- * text, `{url}` as the example's resource, and the package's imports as the one import of
- * `@nulib/clover/web-components`. What HTML cannot say (a function, a hook, a component of
- * the page's, a prop the element has no attribute or property for) is not turned: the
- * reason comes back instead, and the example keeps a twin written by hand, or React alone.
+ * An example's JSX as the HTML of Clover's elements (AGENTS.md: every page in both
+ * flavors), for the docs' "Web components" code: each part as its element
+ * (`<Clover.Label as="h2" />` is `<clover-label as="h2"></clover-label>`), each prop as
+ * the attribute its element's spec reads it from, an object a property takes set by a
+ * module script, a style object as CSS text, `{url}` as the example's resource, and the
+ * package's imports as the one import of `@nulib/clover/web-components`. What HTML cannot
+ * say (a function, a hook, a component of the page's, a prop the element has no attribute
+ * or property for) is not turned: the reason comes back instead, and the example keeps a
+ * twin written by hand, or React alone.
  *
- * Plain JavaScript, so `next.config.mjs` (`remark-code-flavors.mjs`) runs it as the docs
- * build; its tests are `jsx-to-html.test.ts`.
+ * Plain JavaScript, so `next.config.mjs` (`mdx-code-flavors-loader.cjs`, through
+ * `code-flavors.mjs`) runs it as the docs build; its tests are `jsx-to-html.test.ts`.
  */
 import ts from "typescript";
 

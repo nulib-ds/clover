@@ -238,6 +238,36 @@ test('a bundler keeps `import "@nulib/clover/web-components"`, which defines the
   }
 });
 
+/*
+ * `root.clover`'s own methods (`own()` in `elements/api.ts`) are typed by hand in
+ * `web-components-api.d.ts`, which no compiler holds to the code: one left out there is
+ * one a typed page cannot call (`contents()` was, until 4.0.0-beta.1).
+ */
+test("every method root.clover adds is in CloverRootApi", () => {
+  const api = readFileSync(
+    join(root, "src/web-components/elements/api.ts"),
+    "utf8",
+  );
+  const body = api.slice(api.indexOf("function own("), api.indexOf("\n}\n"));
+  const names = [...body.matchAll(/^ {4}(?:get )?([a-zA-Z]+)\(/gm)].map(
+    ([, name]) => name,
+  );
+  assert.ok(names.length > 10, `read ${names.length} methods from own()`);
+  const types = readFileSync(
+    join(root, "build/web-components-api.d.ts"),
+    "utf8",
+  );
+  const from = types.indexOf("export interface CloverRootApi {");
+  const typed = types.slice(from, types.indexOf("\n}\n", from));
+  for (const name of names) {
+    assert.match(
+      typed,
+      new RegExp(`\\n  (?:readonly )?${name}[?(:]`),
+      `root.clover.${name} is not in CloverRootApi (build/web-components-api.d.ts): add its type`,
+    );
+  }
+});
+
 test("the types and the manifest are the specs', every element, attribute and event", async () => {
   const { SPECS, DOCS, HANDLE } = await readSpecs();
   const written = JSON.parse(

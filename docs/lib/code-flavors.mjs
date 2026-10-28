@@ -1,17 +1,9 @@
 /**
  * A Clover 4 page's MDX with each React example's "Web components" twin beside it
- * (WEB-COMPONENTS.md, phase 7). Each ```jsx or ```tsx fence is turned by `jsx-to-html.mjs`
- * into the HTML of Clover's elements, or followed by one written by hand (```html twin);
- * the two are marked `data-code-flavor`, which the site's CSS shows by the reader's choice
- * (`code-flavor.ts`, `layout.css`), and both stay in the page for agents. A fence HTML
- * cannot say stays React's, shown in both; one marked ```jsx react shows to React's readers
- * alone (a stylesheet's import, which elements need not write). In a frame
- * (`Example` with a `PartDemo`, `ViewerExample`, `OptionsExample`), `{url}` is the frame's
- * resource. Clover's names in the prose turn too (`inline-names.mjs`): `Root` is shown as
- * `<clover-root>` to those who chose web components, beside it in the page, but in
- * headings (their ids and the table of contents are their text) and in React's own API
- * tables (`ApiReference`, whose other flavor the specs write). Only the fences' and those
- * names' text changes: everything else is left as written.
+ * (AGENTS.md: every page in both flavors). Each
+ * ```jsx or ```tsx fence is turned by `jsx-to-html.mjs` into the HTML of Clover's elements, or followed by one written by hand (```html twin); the two are marked `data-code-flavor`, which the site's CSS shows by the reader's choice (`code-flavor.ts`, `layout.css`), and both stay in the page for agents. A fence HTML cannot say stays React's, shown in both; one marked ```jsx react shows to React's readers alone (a stylesheet's import, which elements need not write). In a frame (`Example` with a `PartDemo`, `ViewerExample`, `OptionsExample`), `{url}` is the frame's resource. Clover's names in the prose turn too (`inline-names.mjs`): `Root` is shown as `<clover-root>` to those who chose web components, beside it in the page, but in headings (their ids and the table of contents are their text) and in React's own API tables (`ApiReference`,
+ * whose other flavor the specs write). Only the fences' and those names' text changes:
+ * everything else is left as written.
  *
  * Run on the page's text before Nextra compiles it (`mdx-code-flavors-loader.cjs`), so it
  * works under Turbopack, which takes no plugin functions.

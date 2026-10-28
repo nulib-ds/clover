@@ -1,11 +1,12 @@
 import type { PartDemoResource } from "docs/lib/part-demo-resources";
 
 /**
- * What Clover handles, by what a reader or an agent would ask for ("3D", "captions",
- * "a map"), each with the parts that handle it and a sample to show it on. It is the one
- * table the compose helpers keep by hand (WEBMCP.md): nothing else in the code says what a
- * part is for in these words. The IIIF properties each property part reads (`label`,
- * `requiredStatement`) are not here: `catalog.ts` reads them from the parts' specs.
+ * What Clover handles, by what a reader or an agent would ask for ("3D", "captions", "a
+ * map"), each with the parts that handle it and a sample to show it on. It is the one
+ * table the compose helpers keep by hand (AGENTS.md, "Agent tools (WebMCP)"): nothing
+ * else in the code says what a part is for in these words. The IIIF properties each
+ * property part reads (`label`, `requiredStatement`) are not here: `catalog.ts` reads
+ * them from the parts' specs.
  *
  * It grows with Clover: `catalog.test.ts` fails while a part is in no capability, or a
  * capability names a part or a sample Clover does not have. A new part gets a line here,

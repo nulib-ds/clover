@@ -78,7 +78,7 @@ export interface AnnotationStateProps {
 
 /**
  * The Canvas's annotation state, in the hotspots' chunk with them: only a Canvas with
- * annotations loads it (`DRY.md` B8). It holds what was the Canvas's own: which pages
+ * annotations loads it (Mat, 2026-10-27). It holds what was the Canvas's own: which pages
  * show, the hotspots' placing, the hovered and the picked annotation, framing a pick
  * once its view is drawn, going to one on a recording's time, and opening the Canvas
  * past its placeholder for a pick. It draws the hotspots, and hands the Canvas the

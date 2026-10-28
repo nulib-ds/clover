@@ -15,12 +15,13 @@ import { useMock } from "docs/lib/useMock";
 import { type Shown, closePreview } from "docs/lib/webmcp/preview-store";
 
 /**
- * An agent's preview, in a page's first example frame (WEBMCP.md, phase 4): what it is,
- * and the way back to the page's own example, over the layout drawn live and its code in
- * both flavors, as every example on the docs is (`LiveCode`), marked as an example. It
- * draws a checked layout (`docs/lib/compose/preview.ts`) with the package itself: the
- * Root and its parts, the page's own elements, the Viewer in a template, or `Map` with its
- * worker. Loaded the first time a preview is shown (`PreviewHost.tsx`).
+ * An agent's preview, in a page's first example frame (AGENTS.md, "Agent tools
+ * (WebMCP)"): what it is, and the way back to the page's own example, over the layout
+ * drawn live and its code in both flavors, as every example on the docs is (`LiveCode`),
+ * marked as an example. It draws a checked layout (`docs/lib/compose/preview.ts`) with
+ * the package itself: the Root and its parts, the page's own elements, the Viewer in a
+ * template, or `Map` with its worker. Loaded the first time a preview is shown
+ * (`PreviewHost.tsx`).
  */
 
 type Component = React.ComponentType<Record<string, unknown>>;

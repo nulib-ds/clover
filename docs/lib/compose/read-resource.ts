@@ -5,12 +5,13 @@ import {
 } from "../../../packages/clover/src/core/content-state-reader";
 
 /**
- * A IIIF resource, read for its structure only (WEBMCP.md, phase 3): from the address an
- * agent gives, or the content state, as Clover reads one (`core/content-state.ts`).
- * Bounded, as what an agent asks the reader's browser to fetch should be: an address on
- * the web only (`http:` or `https:`), sent without the reader's cookies or the page's
- * address, waited for so long, and read to so many bytes. What comes back is untrusted:
- * only its structure leaves this module (`structure.ts`), never its words.
+ * A IIIF resource, read for its structure only (AGENTS.md, "Agent tools (WebMCP)"):
+ * from the address an agent gives, or the content state, as Clover reads one
+ * (`core/content-state-reader.ts`). Bounded, as what an agent asks the reader's browser
+ * to fetch should be: an address on the web only (`http:` or `https:`), sent without the
+ * reader's cookies or the page's address, waited for so long, and read to so many bytes.
+ * What comes back is untrusted: only its structure leaves this module (`structure.ts`),
+ * never its words.
  */
 
 /** How long to wait for it, in ms, and how much of it to read, in bytes. */

@@ -1,7 +1,8 @@
 /*
- * The standalone elements and the viewer's templates (phase 5 of WEB-COMPONENTS.md), under
- * Preact as they ship: a Canvas alone or in a root, Items and a Map alone, and a
- * `<clover-viewer>` in the template it names, its stylesheet loading beside it.
+ * The standalone elements and the viewer's templates (AGENTS.md, "Standalone, and the
+ * templates"), under Preact as they ship: a Canvas alone or in a root, Items and a Map
+ * alone, and a `<clover-viewer>` in the template it names, its stylesheet loading beside
+ * it.
  */
 import { fireEvent, waitFor, within } from "@testing-library/dom";
 

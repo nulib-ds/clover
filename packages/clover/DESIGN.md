@@ -21,8 +21,8 @@ schedule excuses a failure.
   2.4.3, 2.4.7, 2.4.11), names, roles and states (4.1.2, 2.5.3), contrast (1.4.3,
   1.4.11), target size (2.5.8), gestures and dragging (2.5.1, 2.5.7), motion (2.2.2,
   2.3.1, `prefers-reduced-motion`), reflow and text spacing (1.4.10, 1.4.12), content on
-  hover or focus (1.4.13), status messages (4.1.3), language of parts (3.1.2), media
-  (1.2, 1.4.2).
+  hover or focus (1.4.13), status messages (4.1.3), language of parts (3.1.2), consistent
+  identification (3.2.4), media (1.2, 1.4.2).
 - Every drag has a single-pointer alternative. A keyboard path alone does not meet 2.5.7.
 - A control that moves when clicked (a split's bar stepping a pane) moves out from under
   the pointer, so the second click of a double click would land on what it uncovered.
@@ -55,7 +55,11 @@ schedule excuses a failure.
 - Color never carries meaning alone, and every default token pair meets its contrast
   ratio: a page's own tokens are the page's responsibility, Clover's defaults are ours.
   The pairs a page must check are in the docs' "Colors and contrast"
-  (`pages/docs/composing.mdx`); a part that draws a token on a new ground adds its row.
+  (`content/docs/styling.mdx`); a part that draws a token on a new ground adds its row.
+- One thing looks and is named alike wherever it shows (3.2.4): the transport draws the
+  controls' full-screen glyphs, and `annotationName` names an annotation in its hotspot,
+  the Canvas's menu and the list. Two copies of one pattern made one keep every name,
+  state, key and focus move of both.
 - `e2e/specs/axe.spec.ts` catches some failures. Most need a keyboard, a screen reader
   and a look. Known failures and the plan to clear them are in the repository's
   `ACCESSIBILITY.md`.
@@ -73,6 +77,12 @@ schedule excuses a failure.
   font. One rule in `src/styles/scale.css` hands them the page's
   (`:where(...) :where(button, input, select, textarea) { font: inherit }`). It has no
   specificity, so any part's own size wins.
+- **No shadow root.** Clover's web components render into their own children, light
+  DOM, as its React parts render into the page: the page's CSS reaches every part, its
+  font, size and custom properties with it, Clover's rules stay in `@layer clover` under
+  the page's own, and ids, `aria-*` references and the page's `lang` work as they do in
+  React. A shadow root would cut the page's CSS and its `aria` references off from the
+  parts (2026-10-21).
 
 ## 2. The scale
 
@@ -226,6 +236,8 @@ The stylesheet's size is part of the design.
   | Fields               | `styles/scale.css` | a field pill's query (Search's and the Transcript's find), a Collection's menu                                    |
   | Popovers             | `ui/Tip.css`       | every control that shows an icon alone (§7), the Canvas's hotspots, a split's handle                              |
   | Controls             | `Canvas.css`       | the Canvas's cluster, navigator, a placeholder's toggle, the media transport, its captions                        |
+  | Language codes       | `ui/Codes.css`     | an annotation set's languages, a Transcript's files                                                               |
+  | Panes over the page  | `Default.css`      | Default's panel, Document's panel and thumbnails, their washes (`clover-template-drawer`, `-scrim`)               |
 
   A family meant to be refined by its members is `:where()`, with no specificity. A
   family that sets a look its members keep is `:is()`.
@@ -249,8 +261,9 @@ The stylesheet's size is part of the design.
   (`:has(:focus-visible)`), hold them. One pointer can always zoom back out: at the
   largest zoom, a click, a double click or a double tap goes home (WCAG 2.5.1).
 - **The viewport lies beneath everything else in the figure**: `z-index: -1` in an
-  isolated figure, inline as well as in the stylesheet. The controls, in the flow or
-  positioned, then take their own presses with or without the stylesheet (WCAG 2.5.8).
+  isolated figure, inline, never in the stylesheet (`CanvasView`, `SceneView`). The
+  controls, in the flow or positioned, then take their own presses with or without the
+  stylesheet (WCAG 2.5.8).
 - **A hotspot is as large as its region**, however small: a line of OCR can be a few
   pixels tall at the zoom shown. It meets WCAG 2.5.8 by the Equivalent exception: the
   Canvas's annotations menu lists the view's annotations, each a row at least 24px tall,
@@ -268,7 +281,7 @@ The stylesheet's size is part of the design.
 - **Everything is in `@layer clover`**, so a page's own unlayered rules win, a reset's
   included. Where a reset removes a look that carries meaning, as with the markers on a
   Markdown body's lists (and with them VoiceOver's list semantics in Safari), the docs
-  give the override, in the Styles section of `composing.mdx`.
+  give the override, on Styling (`content/docs/styling.mdx`).
 
 ## 5. What is not on the scale
 
@@ -292,6 +305,8 @@ Some values are not space between things, and stay as they are:
 
 1. Name the component's root class; select its insides by structure.
 2. Is it a member of a family? Add it to the family's list and keep only what differs.
+   Add its module to the family sheet's owners too (`OWNERS` in
+   `build/clover-sheets.mjs`), or its element loses the family's rules.
 3. For each space, ask what the two things belong to and take that step (§3). For a
    place, add up steps with `calc()`.
 4. Leave its text at the page's size, or use one of the four text steps (`xs`, `s`, `m`,
@@ -353,7 +368,9 @@ does it faster.
   `Previous` and `Next` shown as arrows alone take `iconOnly`, which hides their name for
   sight inline and adds the popover, so the name never shows twice.
 - **For a control of your own:** give it the `aria-label` (and `aria-keyshortcuts`), and
-  put `<Clover.Tip label={label} shortcut={shortcut} />` inside it, last.
+  put `<Clover.Tip label={label} shortcut={shortcut} />` inside it, last. On a page of web
+  components, `<clover-tip label="…" keys="…">` goes inside it, last (`keys` as
+  `aria-keyshortcuts` names the key, `glyph` as the popover shows it).
 
 ## 8. Words in sentence case
 

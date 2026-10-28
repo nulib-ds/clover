@@ -12,12 +12,12 @@ import { type CodeTree, publishedAddress } from "docs/lib/live-code";
 import { type PartDemoResource, RESOURCES } from "docs/lib/part-demo-resources";
 
 /**
- * What an agent's preview draws (WEBMCP.md, phase 4), worked out before the page draws it:
- * the layout, checked; the resource it is drawn over, the agent's own or a sample that has
- * what was asked for (`capabilities.ts`); and its code. It knows the page it is on: on a
- * part's page, given nothing, it shows that part, and on the Viewer's, the Viewer
- * (Mat, 2026-10-26: "would show_capability not help for primitives? context of each
- * page?"). Plain data, so the tool works it out and the page draws it
+ * What an agent's preview draws (AGENTS.md, "Agent tools (WebMCP)"), worked out before
+ * the page draws it: the layout, checked; the resource it is drawn over, the agent's own
+ * or a sample that has what was asked for (`capabilities.ts`); and its code. It knows the
+ * page it is on: on a part's page, given nothing, it shows that part, and on the
+ * Viewer's, the Viewer (Mat, 2026-10-26: "would show_capability not help for primitives?
+ * context of each page?"). Plain data, so the tool works it out and the page draws it
  * (`AgentPreview.tsx`).
  */
 
@@ -69,13 +69,33 @@ const listed = (names: string[]) =>
     ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`
     : (names[0] ?? "");
 
+const under = (level: number) =>
+  level === 2
+    ? "the page's title"
+    : `the level ${level - 1} heading before its frame`;
+
 /**
- * The layout as the page draws it: a part that titles what it holds takes the level one
- * below the page's title (`headingLevel` 2), where the preview sits, so the page's outline
- * stays true (AGENTS.md), unless the layout set it.
+ * The layout as the page draws it: a part that titles what it holds, and the Viewer, take
+ * the level one below the heading the preview's frame sits under (`level`, 2 under the
+ * page's title; `levelUnder`, `preview-store.ts`), so the page's outline stays true
+ * (AGENTS.md; WCAG 1.3.1), unless the layout set it.
  */
-function outlined(layout: Layout, notes: string[]): Layout {
-  if (isViewer(layout)) return layout;
+function outlined(layout: Layout, notes: string[], level: number): Layout {
+  if (isViewer(layout)) {
+    // The Viewer titles at 2 by default: only another level is written in.
+    if (level === 2 || layout.viewer.props?.headingLevel !== undefined)
+      return layout;
+    notes.push(
+      `Gave the Viewer headingLevel ${level}: the preview sits under ${under(level)}.`,
+    );
+    return {
+      ...layout,
+      viewer: {
+        ...layout.viewer,
+        props: { ...layout.viewer.props, headingLevel: level },
+      },
+    };
+  }
   const inRoot = layout.root !== false;
   const set: string[] = [];
   const walk = (nodes: LayoutNode[]): LayoutNode[] =>
@@ -91,20 +111,21 @@ function outlined(layout: Layout, notes: string[]): Layout {
       const reads = info && !(where === "Alone" && inRoot);
       if (!reads || node.props?.headingLevel !== undefined) return node;
       set.push(node.part);
-      return { ...node, props: { ...node.props, headingLevel: 2 } };
+      return { ...node, props: { ...node.props, headingLevel: level } };
     });
   const parts = walk(layout.parts);
   if (set.length)
     notes.push(
-      `Gave ${listed(set)} headingLevel 2: the preview sits under the page's title.`,
+      `Gave ${listed(set)} headingLevel ${level}: the preview sits under ${under(level)}.`,
     );
   return { ...layout, parts };
 }
 
 /**
- * A preview, from what an agent gives (`layout`, `capability`) on the page at `route`.
+ * A preview, from what an agent gives (`layout`, `capability`) on the page at `route`, in
+ * a frame whose titles take `level` (`levelUnder`; 2 under the page's title).
  */
-export function planPreview(input: unknown, route: string): Planned {
+export function planPreview(input: unknown, route: string, level = 2): Planned {
   const given =
     input && typeof input === "object"
       ? (input as Record<string, unknown>)
@@ -185,7 +206,7 @@ export function planPreview(input: unknown, route: string): Planned {
     sample = placed.map(sampleOfPart).find(Boolean);
   }
   if (!layout.resource) sample ??= "paged";
-  const drawn = outlined(layout, notes);
+  const drawn = outlined(layout, notes, level);
   const address = layout.resource ?? publishedAddress(RESOURCES[sample!]);
   const shows = isViewer(drawn)
     ? `the Viewer${drawn.viewer.template ? ` (${drawn.viewer.template})` : ""}`

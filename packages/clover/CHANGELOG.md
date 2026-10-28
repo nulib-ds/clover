@@ -10,6 +10,20 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **`root.clover.contents()` is typed.** A `<clover-root>`'s `root.clover` has had
+  `contents()`, the Manifest's table of contents as `Contents` draws it, but
+  `@nulib/clover/web-components`' types left it out of `CloverRootApi`, so a typed page
+  that called it failed to compile. It is declared now, with its entries' type,
+  `CloverContentsEntry`: each Range's `id`, `label`, `canvasId`, `canvasIds`, its `time`
+  or `region`, and its `children`. A page that calls it has nothing to change:
+
+  ```ts
+  const { clover } = document.querySelector("clover-root")!;
+  for (const entry of clover?.contents() ?? []) console.log(entry.canvasId);
+  ```
+
 ## [4.0.0-beta.1] - 2026-10-28
 
 ### Documentation

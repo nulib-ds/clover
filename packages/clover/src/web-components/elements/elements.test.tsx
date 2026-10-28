@@ -1,7 +1,9 @@
 /*
- * Clover's elements under Preact, as they ship (`vitest.preact.config.mjs`): what phase
- * 1 of WEB-COMPONENTS.md must prove of one host tree for the page. Upgrade order and
- * properties set early are in `upgrade.test.tsx`, which needs a page of its own.
+ * Clover's elements under Preact, as they ship (`vitest.preact.config.mjs`): what one
+ * host tree for the page must hold: the page's markup kept, every context through the
+ * portals, ids unique across roots, styles once, only what changed re-rendered. Upgrade
+ * order and properties set early are in `upgrade.test.tsx`, which needs a page of its
+ * own.
  */
 import { fireEvent, waitFor, within } from "@testing-library/dom";
 

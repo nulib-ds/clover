@@ -212,7 +212,7 @@ test("MapLibre loads only on demand; the parts reach the map only lazily", async
 });
 
 /*
- * The Scene's three.js engine is opt-in (`DRY.md` decision 1): only `@nulib/clover/three`
+ * The Scene's three.js engine is opt-in (Mat, 2026-10-27): only `@nulib/clover/three`
  * reaches it, and three.js with it, on demand; the parts never do, up front or later.
  */
 test("three.js only through the opt-in entry, and only on demand", async () => {

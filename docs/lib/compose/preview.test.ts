@@ -50,6 +50,29 @@ describe("planPreview", () => {
     );
   });
 
+  it("titles what it shows a level under the heading its frame sits under", () => {
+    const result = planPreview({}, "/docs/annotations", 3);
+    if (!result.ok) throw new Error(result.says);
+    expect(result.plan.layout).toEqual({
+      parts: [
+        { part: "Body" },
+        { part: "Annotations", props: { headingLevel: 3 } },
+      ],
+    });
+    expect(result.plan.notes).toContain(
+      "Gave Annotations headingLevel 3: the preview sits under the level 2 heading before its frame.",
+    );
+    // The Viewer too, where its own 2 would not fit.
+    const viewer = planPreview({}, "/docs/viewer", 4);
+    if (!viewer.ok) throw new Error(viewer.says);
+    expect(viewer.plan.layout).toMatchObject({
+      viewer: { props: { headingLevel: 4 } },
+    });
+    const own = planPreview({}, "/docs/viewer");
+    if (!own.ok) throw new Error(own.says);
+    expect(own.plan.layout).toEqual({ viewer: {} });
+  });
+
   it("shows the Viewer on the Viewer's page", () => {
     expect(planned({}, "/docs/viewer")).toMatchObject({
       page: "Viewer",

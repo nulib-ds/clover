@@ -23,15 +23,16 @@ every rule below.
   `components/Body/`, `useControlsVisibility`, `MediaBody`); a template's `-body` class on
   its `Clover.Body` alone, `-panes` on its `Split`, and Document's scrolling pages its
   column (`.clover-template-document-column`).
-- **Specs speak for the docs' agent helpers** (`WEBMCP.md`; Mat, 2026-10-26). The docs
-  read every part, prop and template from the element specs (`src/web-components/specs/`)
-  to check and write layouts for agents (`docs/lib/compose/`), so keep each spec's words
-  in their patterns: a Viewer prop only some templates read opens its description with
-  their names ("Default and Document: …"), the Viewer's description names each template
-  with what it is ("Gallery (a grid, …)"), and a prop read only alone or only in a Root
-  opens "Alone: …" or "Inside a root: …". A new part or template is in the catalog once
-  its spec is; `docs/lib/compose/catalog.test.ts` says what else it needs (a line in
-  `capabilities.ts`, a docs page).
+- **Specs speak for the docs' agent helpers** (the root `AGENTS.md`, "Agent tools
+  (WebMCP)"; Mat, 2026-10-26). The docs read every part, prop and template from the
+  element specs (`src/web-components/specs/`) to check and write layouts for agents
+  (`docs/lib/compose/`), so keep each spec's words in their patterns: a Viewer prop only
+  some templates read opens its description with their names ("Default and Document: …"),
+  the Viewer's description names each template with what it is ("Gallery (a grid, …)"),
+  and a prop read only alone or only in a Root opens "Alone: …" or "Inside a root: …". A
+  new part or template is in the catalog once its spec is;
+  `docs/lib/compose/catalog.test.ts` says what else it needs (a line in `capabilities.ts`,
+  a docs page).
 - **Relative imports only.** Nothing in `src/` imports `src/...`, `docs/...` or
   `@samvera/clover-iiif`; ESLint forbids it. The Vite build throws on any bare import that
   is not a declared dependency or peer, so OpenSeadragon, Radix and the like cannot slip
@@ -39,16 +40,23 @@ every rule below.
   purpose, and the copies may drift.
 - **Dependencies:** peers `react` and `react-dom` (18 or 19). Dependencies are
   `@iiif/parser@4` (the Presentation 4 upgrader, loaded on demand, and P4 types),
-  `@iiif/helpers@4` (`i18n` only, 0.6 kB), `@iiif/presentation-3` (types), and
-  `dompurify`, `hls.js` and `maplibre-gl`, all loaded on demand. The docs keep helpers 1.x, and
-  the 3.x docs' `@samvera/clover-iiif` parser 2, at the root; npm nests the package's own
-  copies under `packages/clover/node_modules`. No
-  Vault: it is 19.5 kB gzip. Add a dependency only when a milestone needs it.
+  `@iiif/presentation-3` (types), and `dompurify`, `hls.js` and `maplibre-gl`, all loaded
+  on demand. `three` is an optional peer, needed only by a page importing
+  `@nulib/clover/three` (Mat, 2026-10-27). `@iiif/helpers` is a devDependency, for
+  `core/value.test.ts`'s parity with Clover's `closestLanguage` alone (Mat, 2026-10-27).
+  The docs keep helpers 1.x, and the 3.x docs' `@samvera/clover-iiif` parser 2, at the
+  root; npm nests the package's own copies under `packages/clover/node_modules`. No Vault:
+  it is 19.5 kB gzip. Add a dependency only when a milestone needs it.
 - **ES modules only**, one file per source module (`preserveModules`), named exports
-  only. `import * as Clover from "@nulib/clover"` gives dot notation and still
-  tree-shakes; `build/consumer.test.mjs` asserts that. Never an aggregate object or
-  `Root.Item = …` statics. A CommonJS build beside it would let an app load two copies and
-  split the React context the parts share.
+  only. Every public export is documented, or not exported (Mat, 2026-10-27, as 4.0 fixes
+  the API): the helpers (`readAs`, `toPlainText`, `thumbnailSource`, `regionSource`,
+  `resolveThumbnail`, `buildContentState`) in the Technical overview's Helpers.
+  `createClover` and `isPresentation4` are not exported (a page reads a Root through
+  `useClover` and the hooks); `toPresentation4` is.
+  `import * as Clover from "@nulib/clover"` gives dot notation and still tree-shakes;
+  `build/consumer.test.mjs` asserts that. Never an aggregate object or `Root.Item = …`
+  statics. A CommonJS build beside it would let an app load two copies and split the React
+  context the parts share.
 - **Styles:** colocated `.css` files, listed by hand in `src/styles/clover.css` and built
   into `dist/styles.css` (esbuild), which `build/styles.mjs` wraps in `@layer clover`.
   Keep the aggregate's imports plain: the docs import it from source, and Next 14 reads
@@ -74,11 +82,11 @@ every rule below.
 - **Full screen** is offered only where `isFullscreenSupported()` says an element can have
   it. Read it with `useFullscreenSupported()`, which assumes support on the server, so
   hydration matches. Where elements cannot go full screen (iPhone), a video goes to the
-  system player: pass it to `toggleFullscreen(from, video)`. A `texture` video is not on
-  the page, so it is placed first in its Canvas at full size, under the viewport, until
-  `webkitendfullscreen`. The player is handed it a frame later. Handed over at once, a
-  video that has never been laid out shows as black. Safari still honors the press.
-  Checked in the iOS 26 Simulator.
+  system player: pass it to `toggleFullscreen(from, video)`. Sound's `<video>` is never on
+  the page (the scene does not place it), so `lib/fullscreen.ts` places it first in its
+  Canvas at full size, under the viewport, until `webkitendfullscreen`. The player is
+  handed it a frame later. Handed over at once, a video that has never been laid out shows
+  as black. Safari still honors the press. Checked in the iOS 26 Simulator.
 - **Class names** are `clover-*`, and never one 3.x uses: both stylesheets load on the
   docs pages, and an app moving to 4.x may load both too. The Viewer's are its template's
   (`clover-template-default*`), not `clover-viewer*`. Before adding a class, grep `src/` for it. Copied 3.x classes were renamed (`clover-canvas-controls`,
@@ -186,6 +194,8 @@ every rule below.
   description: `CAMERA_KEYS` and `MEDIA_KEYS` in `CanvasView.tsx`, with the strings
   `canvasKeysImage` and `canvasKeysMedia`. When the viewport starts or stops handling a
   key, change both. The arrows stay out of `SHORTCUT_KEYS`, because controls use them.
+  `SHORTCUT_KEYS` is its own list, never derived from `CAMERA_KEYS`, which would make
+  `ui/` import the Canvas.
 
 ## Split
 
@@ -241,6 +251,11 @@ every rule below.
   `templates/shared/useSlide.ts` holds `useSlide`, `panelFocus` (where focus goes in an
   opened panel) and `useWideEnough` (a layout's own width, not the window's, measured
   before paint; `undefined` until measured, so arriving is never read as narrowing).
+- `Split` never stacks its panes: each holds its `min` at any width, and at 320px two
+  panes' minimums never fit side by side. A layout of its own stacks them there, or
+  floats one, as `Default` floats its panel on a phone, or the page scrolls across
+  (WCAG 1.4.10). `e2e/elements` stacks its `<clover-split>` under 40rem and hides the
+  handle.
 
 ## Templates
 
@@ -313,7 +328,9 @@ every rule below.
   over the page's top left, `--clover-inset` in, level with the Canvas's controls.
   `e2e/specs/document.spec.ts` checks every move with `settled()`, and where the toggle
   sits. The panel slides with `useSlide` (`hidden` once out of sight, so it reads
-  plainly without CSS).
+  plainly without CSS). `Sheets` stays Document's own, never an Items layout or a Body
+  renderer: either would put a second listbox of the same views on the page, or make every
+  page with Items or a Body carry Sheets' code.
 - **Toggles on the spine** (Mat, 2026-10-16). While a pane is open beside the page, its
   toggle sits on the bar between them: `Default`'s and `Document`'s `PanelToggle`,
   centered on the panel's bar, and `Document`'s thumbnails' toggle, over the thumbnails
@@ -321,8 +338,8 @@ every rule below.
   `SplitHandle` (not in the handle, whose `separator` role makes its contents
   presentational; not in a pane, which clips or scrolls it), in a spine: a box of no
   width in the Split's row, which the toggle hangs from, placed by the template's
-  stylesheet alone (2026-10-27, `DRY.md` A28), so it follows a dragged bar and right to
-  left with nothing measured. Default's `useSpineTop` (`shared/useSpine.ts`) writes only
+  stylesheet alone (2026-10-27), so it follows a dragged bar and right to left with
+  nothing measured. Default's `useSpineTop` (`shared/useSpine.ts`) writes only
   `--clover-template-spine-top`, the Body's top, level with its controls; Document's is 0. Where the bar is hidden (`Document`'s thumbnails floating over a phone's page), the
   spine sits at their edge (`--clover-template-sidebar-width`), and `useDragToClose`'s
   `alongside` drags it with the pane by its `translate`, which the toggle's own
@@ -334,28 +351,34 @@ every rule below.
   one time in five there), and a Canvas draws its controls a frame later. It focuses the
   control only once focus has gone (on `body`, or in something `hidden`), never taking
   it from somewhere the reader put it.
-- **Panes over the page** (Mat, 2026-10-27, Decision 7 in `DRY.md`): one rule for
-  Default's panel and Document's panel and thumbnails. Beside the page, each opens as the
-  host asks (`defaultPanelOpen`, `defaultSidebarOpen`), then as the reader chooses. Over
-  it, each starts closed whatever the host asks, and closes as the layout narrows under
-  it, focus in it or on its toggle following the toggle to its new place (read as the
-  narrowing render begins, before the commit takes the toggle off its spine); widening
-  brings it back beside. Opened over the
+- **Panes over the page** (Mat, 2026-10-27): one rule for Default's panel and Document's
+  panel and thumbnails. Beside the page, each opens as the host asks (`defaultPanelOpen`,
+  `defaultSidebarOpen`), then as the reader chooses. Over it, each starts closed whatever
+  the host asks, and closes as the layout narrows under it, focus in it or on its toggle
+  following the toggle to its new place (read as the narrowing render begins, before the
+  commit takes the toggle off its spine); widening brings it back beside. Opened over the
   page, it takes focus (the panel's open section, the thumbnail of the page the reader is
   on); Escape anywhere, the wash, a drag or its toggle puts it away, focus in it to the
   toggle and focus elsewhere left there (WCAG 2.4.11). Document's two are
-  `shared/useDrawer.ts`, one `useFollowFocus` for both; Default writes the same rule in
-  its own code: through the hook it weighed 74 B more, and Default loads (lazily) on
-  Document's page, so whatever it takes from `shared/` lands there up front too. Document
-  decides where its thumbnails go by its own width (`data-narrow` under 40rem), never the
-  window's. The drag is `shared/useDragToClose.ts`, its code `shared/dragToClose.ts`,
-  loaded and attached the first time a drawer floats (Mat, 2026-10-27, `DRY.md` decision
-  4): a wide layout never loads it.
-- **The panel over the page** (2026-10-27, `DRY.md` A27): Default's and Document's
-  drawer, the wash beside it and their reduced-motion rule are `Default.css`'s, in
-  `styles.css`, on `clover-template-panes`, `clover-template-drawer` and
-  `clover-template-scrim`, which both templates set beside their own classes. Change them
-  there, for both; a template's own sheet keeps what is its alone.
+  `shared/useDrawer.ts`, one `useFollowFocus` for both (two raced: the panel's follow took
+  the focus the thumbnails' toggle was owed); Default writes the same rule in its own
+  code: through the hook it weighed 74 B more, and Default loads (lazily) on Document's
+  page, so whatever it takes from `shared/` lands there up front too , and in
+  `<clover-viewer>`'s entry: a helper both templates need goes in a module both load
+  anyway (`panelFocus` in `useSlide.ts`; imported from `useDrawer.ts`, it brought the hook
+  into that entry). Document decides where its thumbnails go by its own width
+  (`data-narrow` under 40rem), never the window's. The drag is `shared/useDragToClose.ts`,
+  its code `shared/dragToClose.ts`, loaded and attached the first time a drawer floats
+  (Mat, 2026-10-27: kept, loaded when needed): a wide layout never loads it.
+- **The panel over the page** (2026-10-27): Default's and Document's drawer, the wash
+  beside it and their reduced-motion rule are `Default.css`'s, in `styles.css`, on
+  `clover-template-panes`, `clover-template-drawer` and `clover-template-scrim`, which
+  both templates set beside their own classes. Not a sheet of their own
+  (`templates/shared/Drawer.css` was tried first): every `templates/` sheet but Default's
+  rides apart from the elements' shared styles, so it cost each element page more than it
+  saved. Never a `<dialog>` either: its top layer covers the window, not the Viewer's box,
+  and moving the pane into one remounts it at the snap point. Change them there, for both;
+  a template's own sheet keeps what is its alone.
 - **Closing the information panel** is `Panel`'s job, not a template's. Only
   a panel floating over the page gets `onClose` (a close button, and focus handed back to
   the `aria-controls` control) and `closeOnEscape`, which also puts the button at the
@@ -364,14 +387,17 @@ every rule below.
   (Mat). A floating one (`Default` on a phone, `Document`) also takes focus when it
   opens. Any new layout with a panel does the same. `shared/Lightbox.tsx` is a native `<dialog>`; jsdom lacks
   `showModal()`, so tests polyfill it.
-- **What starts hidden loads when first wanted** (Mat, 2026-10-27, `DRY.md` B1, B2): the
-  Gallery's lightbox Body (`shared/LightboxBody.tsx`, lazy, a busy box in its place
-  meanwhile) and Document's Panel (`document/DocumentPanel.tsx`, loaded by hand: a first
-  press waits for it, then opens the pane whole, so focus finds its section). Each starts
-  loading as the reader reaches for it (pointer or focus on the gallery, on the panel's
-  toggle). A template's lazy piece is a module of its own, imported only dynamically: a
-  dynamic import of the parts barrel, which the template imports statically, would keep
-  everything. `build/bundle.test.mjs` checks both.
+- **What starts hidden loads when first wanted** (Mat, 2026-10-27): the Gallery's lightbox
+  Body (`shared/LightboxBody.tsx`, lazy, a busy box in its place meanwhile) and Document's
+  Panel (`document/DocumentPanel.tsx`, loaded by hand: a first press waits for it, then
+  opens the pane whole, so focus finds its section). The lightbox's title, Close and pager
+  stay up front, so the dialog is named and focus lands on Close at once; its busy box is
+  `clover-template-lightbox-pending`, in `Lightbox.css`, so the elements' sheets bring it
+  with Gallery. A server render with `defaultPanelOpen` draws Document's pane without its
+  sections. Each starts loading as the reader reaches for it (pointer or focus on the
+  gallery, on the panel's toggle). A template's lazy piece is a module of its own,
+  imported only dynamically: a dynamic import of the parts barrel, which the template
+  imports statically, would keep everything. `build/bundle.test.mjs` checks both.
 - **The panel's landmark** (`Panel`'s `aside`) is named "Information panel"
   (`informationPanelTabs`, as its tabs are), through `useContainerName`, so a list of
   landmarks tells it from another (`Document`'s thumbnails, "Items"). A name the host
@@ -380,9 +406,10 @@ every rule below.
 
 ## Build and test
 
-- `npm run build -w @nulib/clover` builds `dist/` (Vite with three entries: the parts,
-  `templates/index` and `map/index`; then `build/styles.mjs` for `styles.css` and
-  `templates.css`, then `dts-bundle-generator` for each entry's `.d.mts`). The root `npm run build` runs it.
+- `npm run build -w @nulib/clover` builds `dist/` (Vite with four entries: the parts,
+  `templates/index`, `map/index` and `three/index`; then `build/styles.mjs` for
+  `styles.css` and `templates.css`, then `dts-bundle-generator` for each entry's
+  `.d.mts`). The root `npm run build` runs it.
 - `npm run test -w @nulib/clover`, or the root `npm test`, which runs every Vitest
   project (`vitest.workspace.mjs`): the docs', the package's, the package's again on
   React 18 (`vitest.react18.config.mjs`), and the web components' under Preact. The
@@ -393,10 +420,11 @@ every rule below.
   (`.github/workflows/test.yml`); a checkout without it runs the rest, and says so.
   `src/react.test.tsx` checks each project runs the React it names (`provide`).
 - `npm run test:build -w @nulib/clover` checks the built package, so build first.
-  `build/bundle.test.mjs` checks the emitted graph (three entries, only package source,
+  `build/bundle.test.mjs` checks the emitted graph (four entries, only package source,
   externals within dependencies and peers, a forbidden list, lazy modules) and the size a
   consumer ships against `build/size-budget.json`. Raise a budget only on purpose, and
-  say so in the changelog.
+  say so in the changelog. Lower one a change shrinks to its measured size and about 250 B
+  more, so the win holds, and say so too.
 - After the budgets, the test prints what each `<Viewer template={X} />` page is made
   of: the Viewer shell, the parts the template uses, and the template's own code. The
   total is exact; gzip does not add up module by module, so it is split by each group's
@@ -427,6 +455,40 @@ every rule below.
   even a lone `Canvas`, is the whole Default template (62 kB). Rollup and webpack (Next)
   split by what is used. It is a real cost for apps bundled with esbuild, not only a
   measuring artifact.
+- **Share code only where both copies load on one page** (the DRY pass before 4.x,
+  measured 2026-10-27). gzip folds a copy within one chunk, and within the one
+  stylesheet, so merging there saves tens of bytes; bytes come back by removing logic no
+  caller reaches, loading code only when it is needed, or dropping a feature. A page draws
+  one view, through one entry router and one Loaded part, so sharing what only different
+  pages hold takes no copy off any page and adds the shared piece's prop and field names,
+  which minifying keeps, to every page: Canvas's and Scene's frames, Connected and Loaded
+  parts, control specs, key decoders, drawing surfaces and wheel stay apart for that
+  reason, as do Search's and the Transcript's find (two lazy chunks). Measure a merge
+  (`npm run build`, `build/sizes.json`), undo one that does not pay, and hold copies that
+  must agree with a test instead (`Body/frame.parity.test.tsx`). Fold small repeats
+  (`useIsomorphicLayoutEffect`, `prefersReducedMotion`, `below()`,
+  `useUniqueId().replace(…)`) as their files are touched.
+- **What sharing does to chunks.** A lazy chunk that imports a helper from the entry makes
+  the entry keep and export it, so a helper tree-shaken away comes back up front: split a
+  shared module so its lazy-only half stays lazy (`core/painting.ts`'s rules apart from
+  `core/painted-bodies.ts`'s walk). A dynamic `import()` of a module also imported
+  statically keeps every export of it, even through a one-line re-export. In the
+  elements' build a piece several elements share becomes a chunk of its own, which every
+  element page pays for. Chunks are named by content hash, so a change renames the chunks
+  that import it: element-page differences under about 50 B are noise. A "dead" export
+  may be public API: check the CHANGELOG, `parts.ts` and the elements' entry before
+  removing one.
+- **Weighed for size and kept** (Mat, 2026-10-27; reopen one only with him): accordion
+  headings stacked in sight, the wheel redirect too; `useSlide`'s mount and lag states,
+  not a CSS slide (`@starting-style`, `transition-behavior: allow-discrete`), which
+  browsers before Chrome 117, Safari 17.4 and Firefox 129 would show and hide without
+  sliding; Timeline on `CanvasView`, one view for recordings; `Annotations`'
+  `scope="view"` with a header and hide toggle per page, never merged by label as
+  `scope="all"`'s layers are; `Timeline/Connected.tsx` a chunk of its own, as it carries
+  `playerSurface`, which every Body page would carry otherwise; Vite's default build
+  target, no browser floor raised (`build/consumer-bundle.mjs` lowers syntax again on its
+  own, so the budgets move only if it does too); Norwegian's three locale files (root
+  `AGENTS.md`, i18n).
 - The docs import `@nulib/clover`, `@nulib/clover/templates`, `@nulib/clover/map` and the
   stylesheets, which the root `tsconfig.json` maps to this package's source. Its pages are `content/docs/*` (3.x's in `content/docs/3.x/`), its demos in
   `docs/components/Clover4/`, and the homepage shows it (`docs/components/Home/`).
@@ -521,9 +583,11 @@ every rule below.
   targets). Never add a P2/P3 branch to a part; upgrade at the boundary instead.
   `selectSequence` holds Canvases, Timelines and Scenes, each drawn by its own part
   (below, "Timeline and Scene"). Look one up by id with `selectCanvas(manifest, id)` (a
-  map made once per Manifest), never a search of the sequence. Sound's body is `Audio` in Presentation 4 and `Sound`
-  as the upgrader keeps Presentation 3's: test it with `isSound` (`core/annotations.ts`),
-  never one name.
+  map made once per Manifest), never a search of the sequence. The React hooks and the
+  elements' API read the same selectors (`core/selectors.ts`), and `navigationOf`
+  (`core/clover.ts`) builds `Navigation` for both (2026-10-27). Sound's body is `Audio` in
+  Presentation 4 and `Sound` as the upgrader keeps Presentation 3's: test it with
+  `isSound` (`core/annotations.ts`), never one name.
 - `createClover()` (`core/clover.ts`) is one Root's state: a small store (`core/store.ts`)
   holding only `status`, `error`, `manifest`, `collection`, `canvasId` and `target`.
   Per-frame and per-tick values (viewport, media element) go through channels, never the
@@ -533,8 +597,10 @@ every rule below.
   to it. A selector must return the same object for the same input (an empty result is a
   shared constant), or `useSyncExternalStore` loops.
 - `target` is a pending deep link (content state, `start`, auto-advance). The connected
-  Canvas applies it once the Canvas is laid out (`fitCanvasRect` returns false until then)
-  and consumes it. The view it opened keeps its placeholder away afterwards.
+  Canvas applies it with `applyTarget` (`Canvas/fromManifest.ts`, as a standalone Canvas
+  does) and consumes it: a region once the Canvas is laid out (`fitCanvasRect` returns
+  false until then), a time once its media element is made. The view it opened keeps its
+  placeholder away afterwards.
 - Content state is decoded by Clover (`core/content-state.ts`), not `@iiif/helpers`
   (14 kB). `groupViews` must match `@iiif/helpers`' `getManifestSequence`;
   `core/sequence.parity.test.ts` checks that with a Vault used only in the test (the
@@ -567,15 +633,11 @@ every rule below.
   costs a template 0.2–0.3 kB, the least two lazy references and a type check take
   (measured 2026-10-23; a static Timeline route measured 29 B more). A host's renderer
   (`renderers`) still goes first.
-- **Measuring size.** `initialGzip` starts from the output whose `entryPoint` is the stdin
-  `sourcefile` (`entry.mjs`), never "the first output with an entryPoint": esbuild marks
-  every lazy chunk an entry point too, and which comes first depends on the graph.
-- `build/bundle.test.mjs` bundles through the barrel with esbuild,
-  the conservative case: esbuild hoists modules shared by a lazy chunk and anything the
-  barrel reaches (`selectors`, `hooks`, `core/value`) into the initial chunk, about 1.1 kB
-  for a standalone Canvas (32.7 kB imported directly, 33.8 through the barrel). Rollup
-  (Vite) splits it correctly; its library-mode numbers look larger only because Vite
-  does not strip whitespace from ES library output.
+- **Measuring size.** `build/sizes.mjs` and `bundle.test.mjs` build a consumer's app as
+  Vite builds one for production (`build/consumer-bundle.mjs`), never with esbuild ("Build
+  and test"): what a page imports, up front (`initialGzip`), and to its first view the
+  lazy chunks that view loads (`draws`, found by the modules they hold, as Rollup gives
+  some lazy chunks no facade).
 - **Annotations.** `core/annotation-sets.ts` reads the Manifest's non-painting pages
   (and `addedSets`, from `core/annotation-collection.ts`, which the core imports on demand,
   only for a Root given `annotations`: keep it out of `clover.ts`'s static imports) into
@@ -735,10 +797,11 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   from `Canvas/index.tsx`, reads it with `loadContent`, as a `Root` does (a Manifest
   gives its first Canvas, a Collection its first Manifest's, a content state the Canvas
   it names, read by `core/content-state-reader.ts`, which `loadContent` loads only for
-  one, `DRY.md` B6), showing the loading bar until then and an alert (`clover-status`) with the
-  reason if it fails or has no Canvas; never an empty box. What a Root's Canvas reads
-  from the Manifest around it, a standalone one reads the same way, from
-  `Canvas/fromManifest.ts` (2026-10-27): its chapters from the Ranges
+  one, 2026-10-27; not in `bundle.test.mjs`'s `LAZY_MODULES`, as `decodeContentState`, a
+  public export, comes from it statically), showing the loading bar until then and an
+  alert (`clover-status`) with the reason if it fails or has no Canvas; never an empty
+  box. What a Root's Canvas reads from the Manifest around it, a standalone one reads the
+  same way, from `Canvas/fromManifest.ts` (2026-10-27): its chapters from the Ranges
   (`useRangeChapters`), and a content state's region or time (`applyTarget`), which
   opens it past its placeholder. Only a region waits for the Canvas to be laid out
   (`onReady`): a recording with nothing to draw never is, and its time still applies.
@@ -819,7 +882,10 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   or on focus, not when on or open: on is the bar under the glyph.
 - **Upstream bug:** `@iiif/parser` 4.0.3's upgrader rewrites a Range item's Canvas id
   `…#t=0,30` as `…/t=0,30` (and `#xywh=` likewise). Read Range items through
-  `rangeItemTarget()`, which restores the fragment. Drop it once the parser is fixed.
+  `rangeItemTarget()`, which restores the fragment. It stays after the upgrade: the
+  upgrader turns a Presentation 2 range's `canvases` strings into objects, and no rewrite
+  before it (as `keepFragments` does for targets) can say that in Presentation 2's shape
+  (checked 2026-10-27). Drop it once the parser is fixed.
 - **Items** (`components/Items/`) lists `core/items.ts` models, never resources: one item
   per view of a Manifest (a spread is one item), or one per Collection member. Inside a
   `Root` it is a listbox (`ui/useRovingFocus.ts`): its views' selection follows focus
@@ -827,33 +893,33 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `onSelect` stays a choice (Enter, a click), which the Gallery opens on. A Collection's
   members stay manual, since each selection loads a Manifest. Standalone it is a
   list of links (`core/load.ts` `fetchResource`, which does not open a Collection),
-  drawn by `StandaloneItems.tsx`, lazy (`DRY.md` B9): no template has Items outside a
-  Root, so none carries it.
+  drawn by `StandaloneItems.tsx`, lazy (2026-10-27): no template has Items outside a Root,
+  so none carries it. Given `items`, it no longer draws in a server's first pass.
   Thumbnails come from `core/thumbnail.ts`: a service's `info.json` is read first (the
   renderer's cached `fetchInfo`), then the picture asked as it allows (`sizedImageUrl`),
-  and only once the item is near (`useNearViewport` against the box that scrolls it), so
-  a strip of a thousand reads a strip's worth (`e2e/specs/scale.spec.ts` counts them).
-  Items is the one part for a sequence and where the reader is in it (Mat, 2026-10-16: the
-  Pager was to become an abstraction of Items). `layout="pager"` is the count, then
-  `Previous` and `Next`, with no thumbnails, over whatever the source lists (views,
-  members, a standalone list); each source builds its `Steps` (`stepsOf`) and hands them
-  to `ItemsPager`. `Previous`, `Next` and `Position` are the same pieces read from the
-  Root (`of`). They live in `Items/Pager.tsx`, which imports no thumbnails or `Items.tsx`,
-  so a layout with a pager and no strip carries none of the strip. A step is a selection,
-  as the slider's arrows' are (`followFocus`, else `onActivate` for members). Position
-  keeps its widest count's room (`.clover-pager-room`, `hidden` without the stylesheet),
-  so nothing beside it moves. Its gap is the Canvas cluster's `s`, so a pager over a Body
-  lines up with the controls; don't override it in a template.
-  A step with nowhere to go shows disabled, never hidden (Mat, 2026-10-16): faded, taking
-  no pointer, whole again while focused. One rule in `ui/Button.css` covers the pager's,
-  the strip's and an animation's frames' steps; a new Previous or Next joins it.
-  A slider's or grid's title is clamped (`--clover-items-lines`, 3) on
-  `.clover-items-label-text`. `Items/clamped.ts` watches every title with one
-  ResizeObserver (and the page's styles and fonts, for text spacing), and a title cut short
-  gets `data-clamped` and a hidden, `aria-hidden` copy, shown over the picture while its
-  item is hovered or focused (WCAG 1.4.12; Mat chose it over unclamping, 2026-10-16). Its
-  Escape hides the copy until the pointer returns or focus leaves (1.4.13). Keep the copy
-  out of the item's name, and the item's box the same whether it shows or not.
+  and only once the item is near (`useNearViewport` against the box that scrolls it), so a
+  strip of a thousand reads a strip's worth (`e2e/specs/scale.spec.ts` counts them). Items
+  is the one part for a sequence and where the reader is in it (Mat, 2026-10-16: the Pager
+  was to become an abstraction of Items). `layout="pager"` is the count, then `Previous`
+  and `Next`, with no thumbnails, over whatever the source lists (views, members, a
+  standalone list); each source builds its `Steps` (`stepsOf`) and hands them to
+  `ItemsPager`. `Previous`, `Next` and `Position` are the same pieces read from the Root
+  (`of`). They live in `Items/Pager.tsx`, which imports no thumbnails or `Items.tsx`, so a
+  layout with a pager and no strip carries none of the strip. A step is a selection, as
+  the slider's arrows' are (`followFocus`, else `onActivate` for members). Position keeps
+  its widest count's room (`.clover-pager-room`, `hidden` without the stylesheet), so
+  nothing beside it moves. Its gap is the Canvas cluster's `s`, so a pager over a Body
+  lines up with the controls; don't override it in a template. A step with nowhere to go
+  shows disabled, never hidden (Mat, 2026-10-16): faded, taking no pointer, whole again
+  while focused. One rule in `ui/Button.css` covers the pager's, the strip's and an
+  animation's frames' steps; a new Previous or Next joins it. A slider's or grid's title
+  is clamped (`--clover-items-lines`, 3) on `.clover-items-label-text`. `Items/clamped.ts`
+  watches every title with one ResizeObserver (and the page's styles and fonts, for text
+  spacing), and a title cut short gets `data-clamped` and a hidden, `aria-hidden` copy,
+  shown over the picture while its item is hovered or focused (WCAG 1.4.12; Mat chose it
+  over unclamping, 2026-10-16). Its Escape hides the copy until the pointer returns or
+  focus leaves (1.4.13). Keep the copy out of the item's name, and the item's box the same
+  whether it shows or not.
 - **Content Search.** `core/search-service.ts` finds the Manifest's service (type
   `SearchService1`/`2`, or a `search/N/` profile or context, as Presentation 2 has it;
   version 2 preferred). `core/search.ts` asks it (following `next`, at most 10 pages)
@@ -916,11 +982,13 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
 - **Cue times** (Mat, 2026-10-26: "make sure cues in vtt transcripts and annotations on
   time use the same component. DRY"): `ui/Cue.tsx`'s `CueTime` and `ui/Cue.css`, the one
   time element wherever a row starts on a recording's time (Transcript cues, annotations
-  in the list and the Canvas's menu), `formatTime` (`lib/time.ts`, the transport's; whole
-  seconds, rounded down), the words beside it `clover-cue-text`, both baseline-aligned
-  in a flex or grid row. The rows themselves stay their hosts' (a cue a `button`, an
-  entry an `li` with rich content and a hidden button, a menu item a radio's `label`, a
-  timed Contents Range a `button`, `data-timed`).
+  in the list and the Canvas's menu, the player's tracks: `PlayerChapters`, in the
+  player's muted white, a rule a step more specific than `Cue.css`, which loads after
+  `Player.css`; Mat, 2026-10-26: "time ranges should be rendered like cues"), `formatTime`
+  (`lib/time.ts`, the transport's; whole seconds, rounded down), the words beside it
+  `clover-cue-text`, both baseline-aligned in a flex or grid row. The rows themselves stay
+  their hosts' (a cue a `button`, an entry an `li` with rich content and a hidden button,
+  a menu item a radio's `label`, a timed Contents Range a `button`, `data-timed`).
 - **A press on a time plays** (Mat, 2026-10-26): `playFrom` (`lib/time.ts`) sets the
   time and plays if paused, a refused play left paused; used by a cue's press, a timed
   Range's on the Canvas playing, an annotation's in `Annotations` (on a Canvas in view,
@@ -968,8 +1036,9 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   - `maplibre-gl` is a dependency (Mat: the Viewer shows the map by itself, no prop, so
     the default path must resolve it), imported only inside the Map's mount effect, and
     only once its box comes within half a screen of view (`useNearViewport`, as a
-    Canvas's images; Mat, 2026-10-27, `DRY.md` B5): a map far down a page, or in a tab
-    not yet open, loads none of it.
+    Canvas's images; Mat, 2026-10-27): a map far down a page, or in a tab not yet open,
+    loads none of it. The map keeps its own loading status and alert, not the Body's
+    `Loading` and `BodyAlert`, which would change how it looks and add bytes (2026-10-27).
     `bundle.test.mjs` asserts no entry imports it statically and that the parts reach the
     map only lazily; `@allmaps/*` is on the forbidden list (422 kB gzip). The size table
     has "Map, before MapLibre" and "MapLibre, on a map" (MapLibre's chunks only).
@@ -1011,23 +1080,27 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   - `.clover-geomap` is a grid wrapper: the map's sized box is its first child `div`,
     and `style`/`className` land on the wrapper. Size the map with
     `--clover-map-height`, never `height`.
-  - No bundled worker (3.x's is ~500 kB): the host serves it if its bundler moves
-    MapLibre's files. The docs build a blob from the worker
-    `scripts/build-maplibre-worker.mjs` bundles into `docs/lib/` and call
-    `setMapWorkerUrl`. MapLibre's CSS is the host's import too.
+  - MapLibre's worker comes bundled (`build/maplibre-worker.mjs` fills
+    `components/Map/maplibre-worker.ts`), started from a `blob:` URL the first time a map
+    shows, unless the page set one with `setMapWorkerUrl`, as a page whose Content
+    Security Policy refuses `blob:` workers does (root `AGENTS.md`, "MapLibre's worker").
+    The docs set their own (`docs/lib/map-worker.ts`). MapLibre's CSS is the host's import
+    too.
   - Wheel zoom off by default; default basemap as 3.x (Liberty, roads removed,
     hillshade); classes `clover-geomap*` (3.x has `clover-map*`); layer ids `geomap-*`.
   - Tests mock `maplibre-gl` (`components/Map/Map.test.tsx`): the module has no
     `default`, so the Map reads `"Map" in module`.
 - **Collections.** The store's `collection` is the Collection the shown Manifest was
   reached through; `core/load.ts` `withMembers()` fills a paged Collection's `items` from
-  `first`/`next`. `clover.goToManifest(id)` shows a member (fetched by `loadManifest`), or
-  `load`s a nested Collection, which then replaces `collection` (there is no way back up
-  yet). With a controlled `manifestId` it only asks (`onManifestChange`), and `Root`
-  hands the id back through `syncManifest`, as `canvasId` does with `syncCanvas`.
-  `defaultManifestId` only opens a member first, and the reader moves on from it: an
-  element maps an attribute to it, never to `manifestId`, which held the reader on one
-  member of a page that did not answer `clover-manifest-change`.
+  `first`/`next`. Every pager (that one, `core/annotation-collection.ts`'s,
+  `core/search.ts`'s) follows a page at most once, within its cap: a `next` that leads
+  back ends it. A new pager does the same (2026-10-27). `clover.goToManifest(id)` shows a
+  member (fetched by `loadManifest`), or `load`s a nested Collection, which then replaces
+  `collection` (there is no way back up yet). With a controlled `manifestId` it only asks
+  (`onManifestChange`), and `Root` hands the id back through `syncManifest`, as `canvasId`
+  does with `syncCanvas`. `defaultManifestId` only opens a member first, and the reader
+  moves on from it: an element maps an attribute to it, never to `manifestId`, which held
+  the reader on one member of a page that did not answer `clover-manifest-change`.
   `isShown()` treats the Collection just entered as shown, so a host naming it does not
   reload it in a loop. `CollectionSelect` commits a keyboard step only on Enter. Escape
   and blur take the step back, because a Manifest loaded after focus has moved on could
@@ -1064,25 +1137,27 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   name waits for Canvas's renaming. `CanvasView` and `SceneView` each write the frame
   (the figure, the viewport's name, role, keys and focus, the way out of full screen, the
   caption last) themselves: a page draws one of them, so a shared frame component only
-  added its props to every page (`DRY.md`, A1, measured 2026-10-27).
-  `Body/frame.parity.test.tsx` holds the two to each other; change both together.
+  added its props to every page (measured 2026-10-27). `Body/frame.parity.test.tsx` holds
+  the two to each other; change both together. A Body part is never an empty box while its
+  piece loads: a Root's `Canvas`, as one loading its own, shows `CanvasPending`
+  (`Body/Pending.tsx`) meanwhile (2026-10-27).
 - **Timeline** (`components/Timeline/`) is Canvas's view for a Timeline:
   `Timeline.tsx` renders `CanvasView` with the Timeline as its one Canvas (no
   navigator), `Connected.tsx` renders the connected Canvas for a Root's Timeline view
   and nothing for another, and `iiifContent` goes to `LoadedCanvas` with `of="Timeline"`
-  (a Manifest's first Timeline). Each hands the view `playerSurface` (2026-10-27,
-  `DRY.md` A3), not Canvas's renderer: `CanvasView` draws on the surface its caller
-  makes (`Canvas/surface.ts`; `Canvas` and `Body` hand it `rendererSurface`), and reads
-  the camera's parts (zoom, rotation and reset, hotspots, the navigator, frames,
-  `onReady`'s handle) only from one that `hasCamera`. So a Timeline loads no tiles,
-  camera or gestures and holds no WebGL context; `build/bundle.test.mjs` fails if it
-  can reach `CanvasRenderer`. Its surface reports `open` and `change` as the renderer
-  does, takes a mouse's tap for `tap` (a finger's is the controls'), and shows a video
-  fitted should a Timeline paint one. So every audio recipe that played on Canvas plays the
-  same (0002, 0014, 0103, 0434). A lone recording of sound (`player` in `CanvasView`:
-  a lone Canvas whose media is audio, so a Timeline always) plays as a music app plays
-  one (Mat, 2026-10-24: Apple Music's and Spotify's players), drawn by `MediaBody` in
-  the media chunk (`media/Player.tsx`, `Player.css`), the figure `data-player`:
+  (a Manifest's first Timeline). Each hands the view `playerSurface` (2026-10-27), not
+  Canvas's renderer: `CanvasView` draws on the surface its caller makes
+  (`Canvas/surface.ts`; `Canvas` and `Body` hand it `rendererSurface`), and reads the
+  camera's parts (zoom, rotation and reset, hotspots, the navigator, frames, `onReady`'s
+  handle) only from one that `hasCamera`. So a Timeline loads no tiles, camera or gestures
+  and holds no WebGL context; `build/bundle.test.mjs` fails if it can reach
+  `CanvasRenderer`. Its surface reports `open` and `change` as the renderer does, takes a
+  mouse's tap for `tap` (a finger's is the controls'), and shows a video fitted should a
+  Timeline paint one. So every audio recipe that played on Canvas plays the same (0002,
+  0014, 0103, 0434). A lone recording of sound (`player` in `CanvasView`: a lone Canvas
+  whose media is audio, so a Timeline always) plays as a music app plays one (Mat,
+  2026-10-24: Apple Music's and Spotify's players), drawn by `MediaBody` in the media
+  chunk (`media/Player.tsx`, `Player.css`), the figure `data-player`:
   - its artwork is its placeholder Canvas until it first plays, then its accompanying
     Canvas, each standing in for the other, else its thumbnail (`stillSource`), at its
     own shape (`--clover-player-art-ratio`), asked as its service's `info.json` allows
@@ -1117,14 +1192,15 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   `turned`/`zoomed`. `gestures.ts` is the viewport's pointers (a plain wheel stays the
   page's, as on Canvas). `engine.ts` is the only module that imports three.js (its
   `WebGLRenderer`, `GLTFLoader` and `RoomEnvironment` for default light), reached only
-  through the opt-in entry (Mat, 2026-10-27, `DRY.md` decision 1): `@nulib/clover/three`'s
+  through the opt-in entry (Mat, 2026-10-27): `@nulib/clover/three`'s
   `registerThreeEngine()`, or the elements' `web-components/three.mjs`, registers it in
   `Scene/engines.ts` (on `globalThis`, so every Clover build on the page sees it), and
   `SceneView` `import()`s it once a Scene with `engine="three"` is near the window; an
-  engine no one registered draws with Clover's and warns once. Never import three.js
-  anywhere else,
-  and keep `bundle.test.mjs`'s `LAZY_PACKAGES` and `LAZY_MODULES` saying so. It draws on
-  demand (a frame per change, coalesced; a resize draws at once), never in a loop.
+  engine no one registered draws with Clover's and warns once. `engine` is the Scene
+  part's own: a Scene that `Body` or the Viewer draws uses Clover's engine. Never import
+  three.js anywhere else, and keep `bundle.test.mjs`'s `LAZY_PACKAGES` and `LAZY_MODULES`
+  saying so. It draws on demand (a frame per change, coalesced; a resize draws at once),
+  never in a loop.
 - **Clover's own glTF renderer** (`lib/gltf/`, framework-free as `lib/renderer/` is, and
   no part of it: Canvas stays 2D) is the Scene's drawing by default (Mat, 2026-10-23:
   "engine is clover by default; three.js is an optional engine", lazy):
@@ -1216,17 +1292,19 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
 - Painters sit behind one `Backend` interface. WebGL2 is primary and Canvas2D is a
   full-fidelity fallback. `DomLayers` positions real `<img>`/`<video>` elements with the same
   camera transform.
-- **A Canvas's annotations' state is in the hotspots' chunk** (Mat, 2026-10-27,
-  `DRY.md` B8): `Canvas/AnnotationState.tsx` holds which pages show, the placing, hover
-  and pick, framing, seeking and the placeholder's quiet open, draws the hotspots, and
-  reports a model CanvasView reads (through a ref where a callback outlives a render).
-  New annotation behavior goes there, not in CanvasView; CanvasView sees only the model.
-- **What a renderer may never need loads when it first does** (Mat, 2026-10-27, `DRY.md`
-  B3, B7): Canvas2D's code (one promise for the page; its canvas waits as `pending`,
-  dropped if the renderer releases meanwhile), the DOM layer (with the first frame holding
-  an element) and the hotspots' layer (`overlaysOf`, with the first hotspot; `overlays`
-  is `null` until then). Their order in the host holds: the canvas, then the DOM layer,
-  then the hotspots'. A new layer joins in that order, and loads with what needs it.
+- **A Canvas's annotations' state is in the hotspots' chunk** (Mat, 2026-10-27):
+  `Canvas/AnnotationState.tsx` holds which pages show, the placing, hover and pick,
+  framing, seeking and the placeholder's quiet open, draws the hotspots, and reports a
+  model CanvasView reads (through a ref where a callback outlives a render). New
+  annotation behavior goes there, not in CanvasView; CanvasView sees only the model.
+- **What a renderer may never need loads when it first does** (Mat, 2026-10-27):
+  Canvas2D's code (one promise for the page; its canvas waits as `pending`, dropped if the
+  renderer releases meanwhile), the DOM layer (with the first frame holding an element)
+  and the hotspots' layer (`overlaysOf`, with the first hotspot; `overlays` is `null`
+  until then , never absent: `hasCamera` (`Canvas/surface.ts`) tells the renderer from a
+  Timeline's surface by `"overlays" in surface`). Their order in the host holds: the
+  canvas, then the DOM layer, then the hotspots'. A new layer joins in that order, and
+  loads with what needs it.
 - **WebGL contexts are rationed** (Mat, 2026-10-19: Chrome's face-in-a-box showed on the
   Canvas page). Browsers cap a page's contexts (about 16, 8 on Android) and kill the
   oldest past it, and Chrome paints a killed one with that picture. So a renderer takes a
@@ -1255,9 +1333,11 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   server's.
   `sources/tilePyramid.ts` builds levels from `tiles`, from `sizes`, or from tiles Clover
   derives itself.
-- Each frame is decided by `scene/planFrame.ts`, which is pure. `io/TileCache.ts` follows
-  its required set: abort on supersede, a priority window, one retry, a negative cache,
-  and a byte LRU. Tiles are keyed by URL and shared across items.
+- Each frame is decided by `scene/planFrame.ts`, which is pure. Its rectangle math stays
+  inline: it runs per tile per frame, where a helper returning a rectangle would allocate
+  (2026-10-27). `io/TileCache.ts` follows its required set: abort on supersede, a priority
+  window, one retry, a negative cache, and a byte LRU. Tiles are keyed by URL and shared
+  across items.
   - While the camera animates, `planFrame` wants the target level for its `destination`
     (where it lands), and for the views on the way only the coarsest level and one
     `IN_FLIGHT_LEVELS` (2) coarser than their target. Planning every in-between view at
@@ -1328,11 +1408,10 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     not (older iOS). Do not go back to "`canPlayType` says HLS, so play natively":
     Chromium plays HLS natively now, and on that path a video stalled at its first frame.
   - A video is a `SceneImage` with `media: { element }`, positioned as the real element
-    in the DOM layer, never uploaded (Mat, 2026-10-27, `DRY.md` decision 2: `texture`,
-    which drew frames into the canvas, was dropped). So it asks for no CORS. Should a
-    recipe ever need a painting over a video, stack it in the DOM layer; if frames are
-    ever uploaded again, use `texImage2D`, never `texSubImage2D`, which uploads a video
-    black in Chrome.
+    in the DOM layer, never uploaded (Mat, 2026-10-27: `texture`, which drew frames into
+    the canvas, was dropped). So it asks for no CORS. Should a recipe ever need a painting
+    over a video, stack it in the DOM layer; if frames are ever uploaded again, use
+    `texImage2D`, never `texSubImage2D`, which uploads a video black in Chrome.
   - Captions are fetched with CORS and handed to `<track>` as blob URLs, because a
     cross-origin track is refused on a video without `crossorigin`. `useCaptionTracks`
     lists the Manifest's tracks first, then any the media adds (hls.js, in-band). Clover
@@ -1349,13 +1428,17 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     `addTextTrack` does.
   - `MediaBody` is not keyed by the media: the transport stays mounted from one
     recording to the next, so focus stays on it (WCAG 2.4.3). Per-recording state is
-    keyed by `media.id` or `media.src` inside the hooks (the caption choice, the CORS
-    fallback). Never put a `key` back on it. If the focused control goes with the
-    recording (Captions, Chapters, Full screen), `Transport` hands focus to Play/Pause,
-    but only while focus was on the page itself.
+    keyed by `media.id` or `media.src` inside the hooks (the caption choice). Never put a
+    `key` back on it. If the focused control goes with the recording (Captions, Chapters,
+    Full screen), `Transport` hands focus to Play/Pause, but only while focus was on the
+    page itself.
   - `useMediaController` is the headless state; `Transport.tsx` is native range inputs
-    and buttons styled as 3.x's Player bar. Sound has no waveform, and `wavesurfer.js`
-    and `@vidstack/react` are on the build's forbidden list.
+    and buttons styled as 3.x's Player bar. The transport's and the animation bar's
+    buttons are `media/TransportButton.tsx`, the chapter at a time `chapterAt`
+    (`Transport.tsx`, the player's too), a caption track's name `captionName`
+    (`useMediaElement.ts`, the menu's and the system player's), and whether a source is
+    HLS `lib/hls.ts`'s one pattern (`lib/hls.test.ts`) (2026-10-27). Sound has no
+    waveform, and `wavesurfer.js` and `@vidstack/react` are on the build's forbidden list.
   - With media, `clickToZoom` is off, and a mouse click or a hovering pen's (renderer
     `"tap"`) plays and pauses. A finger's tap, or a pen's that has not hovered, only
     toggles the controls.
@@ -1420,8 +1503,8 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   - The viewport is `z-index: -1`, inline (its geometry is never in `Canvas.css`), in a
     figure isolated inline, so without the stylesheet the controls in the flow still sit
     above it (WCAG
-    2.5.8). Anything placed in the figure to lie beneath the viewport (the iPhone
-    `texture` video) goes first, at `z-index: -1`.
+    2.5.8). Anything placed in the figure to lie beneath the viewport (sound's `<video>`,
+    while the iPhone's system player has it) goes first, at `z-index: -1`.
   - The transport fades with the rest of the controls, through the single reveal rule
     in `Canvas.css`, all but its Play while paused, which never fades (above). Do not add
     "stay visible while paused" or other overrides beyond that one. The
@@ -1466,9 +1549,19 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     YouTube"). Opening passes `autoPlay` to `MediaBody`, because that press was a
     press of play. Once open, the toggle is the × in the top right. Safari may refuse
     the deferred `play()`; it is swallowed, leaving the transport ready.
-- **Web components** (`src/web-components/`, `@nulib/clover/web-components`;
-  `WEB-COMPONENTS.md` holds the plan, its phases and what each found). Every element is
-  `<clover-viewer>` or a part's, drawn by the React parts themselves under Preact.
+- **Web components** (`src/web-components/`, `@nulib/clover/web-components`; built
+  2026-10-21 to 2026-10-22, its plan and what each phase found in Git's history,
+  `WEB-COMPONENTS.md`). Mat, 2026-10-21: React or web components at every level, every
+  part a custom element too, composed the same way, so a page builds in HTML the layouts
+  it builds in JSX. Every element is `<clover-viewer>` or a part's, drawn by the React
+  parts themselves under Preact: one implementation, never a second copy, so a part
+  changes once, for both, and keeps its markup, names, states and keys. Its choices were
+  the plan's recommendations, taken as the work went (2026-10-21 and 2026-10-22; Mat,
+  2026-10-22: "go with recommendations"): Preact, as React would cost about 40 kB more;
+  one tree for the page, its parts portaled (below); light DOM, never a shadow root
+  (`DESIGN.md` §1); `clover-` events; properties, and JSON attributes for data; one entry
+  of lazy stubs for every element, and the Viewer's own; the docs' code generated, with
+  twins by hand.
   - **One table per element** (`specs/<name>.ts`, `spec.ts`): its attributes (each the
     prop it sets and how it is read: `string`, `number` with a `min`, `boolean` HTML's
     way with `"false"` in any case turning it off, `data` as a URL or JSON, or a list of
@@ -1485,12 +1578,22 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     Map's) is typed as either. A new element is a spec and its docs (`specs/`) and a
     loader in `define.ts`: `part(load, name)` draws a part as it is, with the element's
     props (`elements/part.tsx`); only an element that needs more of its element (the
-    root, the Body's box, the viewer) has a module in `elements/`.
+    root, the Body's box, the viewer) has a module in `elements/`. Its tag is `clover-`
+    and the part's name in kebab case (`specs.test.ts` derives it). An attribute is its
+    prop's name in kebab case (`iiif-content`, `heading-level`), but React's `defaultX` is
+    the element's `x` (`canvas-id`, `manifest-id`, `panel-open`), as an attribute is both
+    where it opens and what moves it later: changed later, `canvas-id` and `manifest-id`
+    move the reader, while `panel-open` and `sidebar-open` only say how the panes start;
+    `tiled` (`isTiledImage`) is the one other exception. A value its type cannot read is
+    warned of once and ignored, so the part keeps its default. 3.x defines
+    `clover-viewer`, `clover-image`, `clover-slider` and `clover-map`, in light DOM too,
+    and a tag takes one definition, so a page runs one version's elements, never both.
   - **Parity** (`specs/specs.test.ts`): every part `parts.ts` exports has an element, or
-    a reason why not yet (`LATER`, empty since phase 5) or not at all (`NEVER`, empty
-    since phase 7: `Tip` is `<clover-tip>`, `ReadMore` `<clover-read-more>`). A new part fails it until it has either, and an element's slots, like
-    its attributes, fail it without docs.
-  - **The containers** (phase 4, `specs/containers.ts`). `<clover-panel>` (`elements/
+    a reason why not yet (`LATER`, empty since 2026-10-22) or not at all (`NEVER`, empty
+    since 2026-10-22: `Tip` is `<clover-tip>`, `ReadMore` `<clover-read-more>`). A new
+    part fails it until it has either, and an element's slots, like its attributes, fail
+    it without docs.
+  - **The containers** (`specs/containers.ts`). `<clover-panel>` (`elements/
 panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     `elements/nodes.tsx`, one observer on the element, the same value until what is read
     changes), and draws a `Tab` for each; a tab's own nodes move into its section when the
@@ -1509,52 +1612,69 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     attributes and inline styles `Split` gives its own, so a handle's panes are its
     siblings, and the handle runs `components/Split/splitting.ts`, as `SplitHandle` does.
     A handle hides with the pane it sizes, and comes back with it, never from a `hidden`
-    of the page's. ARIA on a `native` element is the page's to give, unwarned.
-  - **Standalone, and the templates** (phase 5). `<clover-canvas>` (`specs/canvas.ts`,
+    of the page's. Elements draw in their own order, each as its code arrives, so one that
+    reads another (a handle its pane) reads it again when that one is drawn: measured
+    once, the handle had no `aria-valuenow` (WCAG 4.1.2; `containers.test.tsx`, "whichever
+    element draws first"). ARIA on a `native` element is the page's to give, unwarned.
+  - **Standalone, and the templates.** `<clover-canvas>` (`specs/canvas.ts`,
     `elements/canvas.tsx`): alone, what it is given; in a root, given nothing, the root's
     view, as `Canvas` is. Its renderer
     (`LoadedCanvas`) loads when it draws. `onAnnotationLink` is no event of it: given,
     it stops the Canvas showing a link itself. `<clover-viewer template>`
     (`elements/viewer.tsx`) has Default with the element and Document and Gallery each
-    `lazy`, loaded the first time one is shown (a `Suspense` with no fallback). `ONLY`
+    `lazy`, loaded the first time one is shown (a `Suspense` with no fallback). It draws
+    its template directly, not through the Viewer's shell; its entry holds Default, and
+    with it the Panel, so Document's lazy Panel saves its page nothing, and loading
+    Default lazily there would cost the default viewer a request (2026-10-27). `ONLY`
     lists the props only some templates take, by the templates that do: each is handed
     its own and none of another's, which it would pass on to its root's element as an
-    attribute. `storage-key="false"` is `storageKey={false}`.
-  - **Parts of your own** (phase 6). `root.clover` (`elements/api.ts`) is the root's
-    Clover itself, through its prototype, as `useClover()` hands a React part (store,
-    actions, channels, getters live), with each of Clover's hooks as a method of the same
-    name (`navigation()`, `visibleCanvases()`), `state`, `subscribe`, `language`,
-    `localize`, `t` and `langOf`. An event's `keeps` (`spec.ts`) makes the element keep
-    its callback's first argument as a read-only property: the root's `clover` (its
-    module calls `onReady(api)`, and `onReady(null)` when it goes) and the Body's
-    `handle` (`onReady` of `Canvas` and `Body`, let go with the Body, `useHandle`).
-    Such an event (`clover-ready`) does not bubble, as `load` does not: the Body's ran
-    into its root's listener. The handle's methods are not forwarded onto the element: a
-    second way React does not have, at 0.25 kB in the entry. A page's renderers
-    (`elements/renderers.tsx`, `{ canvasId, format, match, render(container, view) }`)
-    and control buttons (`elements/controls.tsx`, a function returning the page's button)
-    are adapted to React's, one component per page object (WeakMaps), and load only on
-    a page that gives them (`elements/later.ts`), what needs them waiting, so nothing is
-    drawn one way and then another. The page's button goes in the cluster right after a
-    hidden mark Clover draws there, as do a `<clover-body>`'s own `<button>`s
-    (`Placed`, `elements/nodes.tsx`): the cluster's `> *` rules fade each control and
-    take its clicks while hidden, and a box of `display: contents` would pass on the
-    clicks rule but not the fade. Clover keeps the button's name, keys and state on it,
-    presses the control with it, portals its icon (live, the full screen's turns) into a
-    box the page places, and its popover into the button, last. `<clover-tip>`
-    (`elements/tip.tsx`) portals `Tip` into its parent, since Tip takes its parent for its
-    control; the element shows nothing (`ELEMENT_CSS`). `class="clover-canvas-button"`
-    gives a page's button Clover's control look, in React too.
-  - **React's helpers on the elements** (phase 7). `<clover-read-more>`
-    (`elements/read-more.tsx`) runs `ReadMore`'s measuring (`useReadMore`, shared, as
-    `ReadMore` cannot clone the page's node) on its first child, marking it and drawing
-    the button after it. `root.clover.oneOpen(close)` is `useOneOpen` without React
-    (`openOne`, shared): call it as a popup of the page's opens; it returns what to call
-    as it closes. `controls` is a property of `<clover-body>`, `<clover-canvas>`,
-    `<clover-timeline>` and `<clover-scene>` too (Canvas's object form), and
-    `<clover-viewer>` takes `annotations` and `request`. The docs' transformer
-    (`docs/lib/jsx-to-html.mjs`) refuses a React prop an element has no attribute or
-    property for: run it over the docs after adding a prop, to find such gaps.
+    attribute. `ONLY` stays a table: moving it into the spec costs the spec what it saves.
+    `storage-key="false"` is `storageKey={false}`. A template is offered whole, never
+    rebuilt from elements: its geometry (spines, slides, drag to close, the focus that
+    follows) is React state over its own DOM.
+  - **Parts of your own.** `root.clover` (`elements/api.ts`) is the root's Clover itself,
+    through its prototype, as `useClover()` hands a React part (store, actions, channels,
+    getters live), with each of Clover's hooks as a method of the same name
+    (`navigation()`, `visibleCanvases()`), `state`, `subscribe`, `language`, `localize`,
+    `t` and `langOf`. An event's `keeps` (`spec.ts`) makes the element keep its callback's
+    first argument as a read-only property: the root's `clover` (its module calls
+    `onReady(api)`, and `onReady(null)` when it goes) and the Body's `handle` (`onReady`
+    of `Canvas` and `Body`, let go with the Body, `useHandle`). Such an event
+    (`clover-ready`) does not bubble, as `load` does not: the Body's ran into its root's
+    listener. The handle's methods are not forwarded onto the element: a second way React
+    does not have, at 0.25 kB in the entry. A page's renderers (`elements/renderers.tsx`,
+    `{ canvasId, format, match, render(container, view) }`) and control buttons
+    (`elements/controls.tsx`, a function returning the page's button) are adapted to
+    React's, one component per page object (WeakMaps), and load only on a page that gives
+    them (`elements/later.ts`), what needs them waiting, so nothing is drawn one way and
+    then another. The page's button goes in the cluster right after a hidden mark Clover
+    draws there, as do a `<clover-body>`'s own `<button>`s (`Placed`,
+    `elements/nodes.tsx`): the cluster's `> *` rules fade each control and take its clicks
+    while hidden, and a box of `display: contents` would pass on the clicks rule but not
+    the fade. Clover keeps the button's name, keys and state on it, presses the control
+    with it, portals its icon (live, the full screen's turns) into a box the page places,
+    and its popover into the button, last. `<clover-tip>` (`elements/tip.tsx`) portals
+    `Tip` into its parent, since Tip takes its parent for its control; the element shows
+    nothing (`ELEMENT_CSS`). `class="clover-canvas-button"` gives a page's button Clover's
+    control look, in React too. What a page's script reaches is typed in
+    `build/web-components-api.d.ts` (`CloverRootApi`, `CloverRenderer`,
+    `CloverControlButtons`, the handle's geometry), structurally, importing nothing of
+    React's, so a page of elements needs no React types; `custom-elements.mjs` puts it at
+    the head of `index.d.mts`, beside `CloverCanvasHandle`, which it writes from the
+    handle's methods' docs. It is kept by hand (`web-components.test.mjs` checks only that
+    the interfaces are there): each hook `parts.ts` exports for parts of your own has its
+    `root.clover` method (`elements/api.ts`), and a method added there gets its line in
+    this file in the same change.
+  - **React's helpers on the elements.** `<clover-read-more>` (`elements/read-more.tsx`)
+    runs `ReadMore`'s measuring (`useReadMore`, shared, as `ReadMore` cannot clone the
+    page's node) on its first child, marking it and drawing the button after it.
+    `root.clover.oneOpen(close)` is `useOneOpen` without React (`openOne`, shared): call
+    it as a popup of the page's opens; it returns what to call as it closes. `controls` is
+    a property of `<clover-body>`, `<clover-canvas>`, `<clover-timeline>` and
+    `<clover-scene>` too (Canvas's object form), and `<clover-viewer>` takes `annotations`
+    and `request`. The docs' transformer (`docs/lib/jsx-to-html.mjs`) refuses a React prop
+    an element has no attribute or property for: run it over the docs after adding a prop,
+    to find such gaps.
   - **Slots and function properties.** A spec's `slots` are children it reads by their
     `slot`, shown as copies kept in step (`<clover-status>`'s `loading` and `error`);
     hidden where written (`ELEMENT_CSS`), so assistive technology reads one. A function
@@ -1626,7 +1746,9 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     (`addSheet`, `styles.ts`) before anything they draw, and the registry puts it in its
     place by its index in that order (`data-clover-index`), first in `<head>`, so every
     rule keeps its place in the one `clover` layer. Never sublayers: a later sublayer
-    beats an earlier one's more specific rule.
+    beats an earlier one's more specific rule. The elements take no stylesheet from the
+    page (`defineCloverElements` has no `styles`; Mat, 2026-10-27): a page styles Clover
+    with its own, which outranks the `clover` layer.
     - Where they ride: the light parts' sheets (`APART`: the scale, Label, Primitives,
       ReadMore, Status) in `shared`, so a page of labels or of properties loads only
       those; media's, maps' and the other templates' (`LAZY`) in their lazy code's
@@ -1662,7 +1784,7 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     measuring. `index.umd.js` loads the module from beside itself and says in the
     console when it cannot. The package's `sideEffects` names `dist/web-components/**`,
     so `import "@nulib/clover/web-components"` defines the elements in any bundler.
-  - **The Viewer's own entry** (phase 8; `@nulib/clover/web-components/viewer`,
+  - **The Viewer's own entry** (`@nulib/clover/web-components/viewer`,
     `src/web-components/viewer.ts`) defines `<clover-viewer>` alone, for a page that
     shows a Viewer and nothing else of Clover's. `build/web-components-viewer.config.mjs`
     builds it after the main element build (which empties `dist/web-components`), into
@@ -1688,34 +1810,31 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     Technical overview tells hosts; its own entry files (`index.mjs`, `index.umd.js`,
     `index.d.mts`) always stay.
   - **Two copies on a page.** Each entry brings its own copy of Clover, so a page loads
-    one. A page that loads both has two hosts, each with its own translator, popups and
-    style registry; the first to define a tag keeps it (`defineElement`). Their ids must
-    still never meet (WCAG 4.1.2), nor those of a page with React's Clover beside the
-    elements': every copy counts the page's elements in one count kept on the document
+    one. Every element comes from one build, so what Clover keeps once (the translator,
+    the WebGL contexts' ration, `useOneOpen`, the Tip's listeners) is one for all of them:
+    never an entry per element. A page that loads both entries has two hosts, each with
+    its own translator, popups, style registry and ration (`backends/contexts.ts`'s
+    `holders` is its module's: two copies may hold 12 contexts, past the 8 Android keeps);
+    the first to define a tag keeps it (`defineElement`). Their ids must still never meet
+    (WCAG 4.1.2), nor those of a page with React's Clover beside the elements': every copy
+    counts the page's elements in one count kept on the document
     (`Symbol.for("clover.elements")`, `hostOf` in `host.tsx`), and the second host says
     in the console that Clover is loaded twice (`host.test.tsx`). Checked in Chrome with
     both entries on one page: no id twice, every `aria` reference one element's.
   - **Sizes** (`build/element-size.mjs`, from the chunk map): each page in `PAGES`, the
-    files it loads gzipped one by one, recorded in `sizes.json` and held to
-    `size-budget.json`: the entry, a `<clover-viewer>` (`webComponentsGzip`, which Get
-    started states), labels alone and the four parts. Loading per element has a price
-    that grows with the elements: Rollup cuts the code the parts share by which elements
-    reach it, so a `<clover-viewer>` page loads 39 files, 107.5 kB gzipped one by one
-    against 97.6 kB as one (2026-10-22, its sheets by part; 107.3 kB and 97.3 kB with the
-    stylesheet whole, 38 elements, with `<clover-read-more>` since phase 7 and the page's
-    one count of its elements since phase 8; 107.1 kB and 97.1 kB
-    at 37, the root's API among the shared chunk since phase 6; 106.3 kB before it, 36
-    elements: `<clover-canvas>` shares the Canvas with the Body and the viewer; 36 files
-    and 104.5 kB at 35, 31 and 102.3 kB at 29: the
-    containers share Panel, Split and the toggle with Default, so those came in chunks of
-    their own; Brotli the same). A layout of the containers, as Default's, loads 103.7 kB
-    (`layoutPageGzip`), 106.3 kB since phase 6. A `<clover-viewer>` in Document loads
-    113.5 kB (`documentElementGzip`, its template and the `templates` run, named by
-    their keys in the chunk map, which `pageFiles` takes beside tags), and a
-    `<clover-canvas>` alone, once it draws, 76.5 kB (`canvasElementGzip`, `LoadedCanvas`
-    with it). A second shared
-    chunk for the light parts, and `experimentalMinChunkSize` at 1, 3 and 8 kB, were each
-    tried and made the entry or the pages larger.
+    files it loads to its first view gzipped one by one (the Viewer's pages with the
+    upgrader, `UPGRADER`), recorded in `sizes.json` and held to `size-budget.json`: the
+    entry, a `<clover-viewer>` (`webComponentsGzip`), labels alone, the four parts, a
+    layout of the containers as Default's (`layoutPageGzip`), a `<clover-viewer>` in
+    Document (`documentElementGzip`, its template and the `templates` run, named by their
+    keys in the chunk map, which `pageFiles` takes beside tags) and a `<clover-canvas>`
+    alone once it draws (`canvasElementGzip`, `LoadedCanvas` with it). Loading per element
+    has a price that grows with the elements: Rollup cuts the code the parts share by
+    which elements reach it, so a `<clover-viewer>` page loads about 40 files, some 10%
+    more gzipped one by one than as one (2026-10-22; Brotli the same), the containers
+    sharing Panel, Split and the toggle with Default in chunks of their own. A second
+    shared chunk for the light parts, and `experimentalMinChunkSize` at 1, 3 and 8 kB,
+    were each tried and made the entry or the pages larger.
   - `build/web-components.test.mjs` asserts Preact not React, that a page of labels
     loads no Canvas or template and a Canvas alone no template (the template known by
     its class, quoted, as its code writes it: its stylesheet has it as a selector, and
@@ -1733,7 +1852,10 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     `e2e/elements` is a page of them (two roots, a layout of the containers, the
     standalone elements and templates, and parts of your own), served over the source as the element build makes
     them, by `e2e/vite.elements.config.mjs` (port 4323; `?many=N` adds N roots and
-    times them).
+    times them). It is checked by hand (keyboard, the accessibility tree, axe, 320px,
+    light and dark): no Playwright spec opens it, and CI runs no end-to-end tests. axe
+    reads a page that paints no ground as white, so the page paints its own
+    (`background: Canvas`), or a dark mode's text reads as failing 1.4.3.
 - **Renderers** (`components/Body/renderers.ts`): `renderers` on `Root` go into the
   context (kept while `sameRenderers`, so an inline array does not change the context
   value), and every `Body` asks `pickRenderer` with the view's Canvases and

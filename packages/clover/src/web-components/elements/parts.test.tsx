@@ -1,6 +1,6 @@
 /*
- * The parts that read their root's state, as elements (phase 3 of WEB-COMPONENTS.md),
- * under Preact as they ship: each draws its part from the `<clover-root>` it is in, or
+ * The parts that read their root's state, as elements, under
+ * Preact as they ship: each draws its part from the `<clover-root>` it is in, or
  * the value it is given; a part that needs a root draws nothing without one, and says so.
  */
 import { fireEvent, waitFor, within } from "@testing-library/dom";

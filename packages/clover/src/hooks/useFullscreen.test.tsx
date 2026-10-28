@@ -5,7 +5,7 @@ import useFullscreen from "./useFullscreen";
 import useWithinFullscreen from "./useWithinFullscreen";
 
 /*
- * Two hooks, not one answering both (DRY.md, A8, measured 2026-10-27): gzip folds the
+ * Two hooks, not one answering both (measured 2026-10-27): gzip folds the
  * second into the first, and the one written to answer both weighed more in every
  * template.
  */

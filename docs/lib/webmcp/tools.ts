@@ -4,14 +4,15 @@ import { layoutSchema } from "docs/lib/compose/layout";
 import { MOST_NEEDS } from "docs/lib/compose/suggest";
 
 /**
- * The tools the docs offer agents through WebMCP (WEBMCP.md): what each is called, says
- * and takes, written on the server from the catalog, so they name the parts, templates
- * and capabilities Clover has today. The page registers them (`AgentTools.tsx`), and
- * `llms.txt` lists them (`docs/lib/agents.ts`). What each does is `run.ts`, which the page
- * loads the first time one is called.
+ * The tools the docs offer agents through WebMCP (AGENTS.md, "Agent tools (WebMCP)"):
+ * what each is called, says and takes, written on the server from the catalog, so they
+ * name the parts, templates and capabilities Clover has today. The page registers them
+ * (`AgentTools.tsx`), and `llms.txt` lists them (`docs/lib/agents.ts`). What each does is
+ * `run.ts`, which the page loads the first time one is called.
  *
- * A new helper folds into one of these first (WEBMCP.md, "Built to grow"); a new tool is
- * a name here, a definition below, a case in `run.ts`, and Mat's agreement.
+ * A new helper folds into one of these first (AGENTS.md, "Agent tools (WebMCP)",
+ * "Built to grow"); a new tool is a name here, a definition below, a case in
+ * `run.ts`, and Mat's agreement.
  */
 
 export const TOOL_NAMES = [

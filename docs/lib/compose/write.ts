@@ -25,10 +25,10 @@ import {
 } from "docs/lib/live-code";
 
 /**
- * A checked layout's code, in React or as HTML (WEBMCP.md), written by the docs' own
- * writer (`live-code.ts`), as every live example's code is: what an agent is handed is
- * what a reader copies from the docs. A whole module, its imports and its resource's
- * address written out, so it runs as it is.
+ * A checked layout's code, in React or as HTML (AGENTS.md, "Agent tools (WebMCP)"),
+ * written by the docs' own writer (`live-code.ts`), as every live example's code is:
+ * what an agent is handed is what a reader copies from the docs. A whole module, its
+ * imports and its resource's address written out, so it runs as it is.
  */
 
 /**

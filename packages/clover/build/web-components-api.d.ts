@@ -28,7 +28,10 @@ export interface CloverCamera {
 }
 
 /** A IIIF resource as Clover holds it: Presentation 4, upgraded as it loaded. */
-export type CloverResource = Record<string, unknown> & { id: string; type: string };
+export type CloverResource = Record<string, unknown> & {
+  id: string;
+  type: string;
+};
 
 export type CloverStatus = "idle" | "loading" | "ready" | "error";
 
@@ -50,7 +53,13 @@ export interface CloverState {
   search: {
     query: string;
     status: CloverStatus;
-    hits: Array<{ id: string; canvasId: string; match: string; before?: string; after?: string }>;
+    hits: Array<{
+      id: string;
+      canvasId: string;
+      match: string;
+      before?: string;
+      after?: string;
+    }>;
   };
 }
 
@@ -58,7 +67,11 @@ export interface CloverState {
 export interface CloverSequence {
   canvases: CloverResource[];
   views: number[][];
-  direction: "left-to-right" | "right-to-left" | "top-to-bottom" | "bottom-to-top";
+  direction:
+    | "left-to-right"
+    | "right-to-left"
+    | "top-to-bottom"
+    | "bottom-to-top";
 }
 
 /** Moving between views (`useNavigation()`): a spread moves two pages at a time. */
@@ -87,6 +100,21 @@ export interface CloverAnnotationSet {
     /** The annotation as published. */
     annotation: Record<string, unknown>;
   }>;
+}
+
+/** An entry of the Manifest's table of contents: a Range, as `Contents` draws it. */
+export interface CloverContentsEntry {
+  id: string;
+  label?: CloverLanguageMap;
+  /** The first Canvas the Range (or its first descendant) names; none for an empty Range. */
+  canvasId?: string;
+  /** Every Canvas the Range covers, its own and its descendants'. */
+  canvasIds: string[];
+  /** The span on that Canvas, for time-based media. */
+  time?: { start: number; end?: number };
+  /** The region on that Canvas, when the Range names one. */
+  region?: { x: number; y: number; w: number; h: number };
+  children: CloverContentsEntry[];
 }
 
 /** A IIIF language map, or a plain string. */
@@ -123,6 +151,8 @@ export interface CloverRootApi {
   activeCanvas(): CloverResource | null;
   navigation(): CloverNavigation;
   annotationSets(): CloverAnnotationSet[];
+  /** The Manifest's table of contents, as `Contents` draws it; none before it loads. */
+  contents(): CloverContentsEntry[];
   /** A language map as text in the root's language, with the tag it is in. */
   localize(value: CloverLanguageMap): { text: string; lang?: string };
   /** One of Clover's own strings, in its language now: `t("commonClose")`. */
@@ -141,7 +171,10 @@ export interface CloverRootApi {
   };
   goTo(
     canvasId: string,
-    target?: { region?: { x: number; y: number; w: number; h: number }; time?: number },
+    target?: {
+      region?: { x: number; y: number; w: number; h: number };
+      time?: number;
+    },
   ): void;
   goToManifest(id: string, canvasId?: string): Promise<void>;
   openCollection(id: string): Promise<void>;
@@ -175,7 +208,10 @@ export interface CloverRenderer {
   /** …or painting a body of one of these formats (`model/gltf-binary`)… */
   format?: string[];
   /** …or any view this says yes to. */
-  match?: (view: { canvases: CloverResource[]; bodies: Array<Record<string, unknown>> }) => boolean;
+  match?: (view: {
+    canvases: CloverResource[];
+    bodies: Array<Record<string, unknown>>;
+  }) => boolean;
   render(
     container: HTMLElement,
     view: {

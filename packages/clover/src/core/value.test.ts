@@ -4,7 +4,7 @@ import { closestLanguage, localize } from "./value";
 
 /*
  * Clover's `closestLanguage` is `@iiif/helpers`' `getClosestLanguage` as Clover calls it
- * (`DRY.md` decision 10): the same answer for every reader, fallback and language map
+ * (Mat, 2026-10-27): the same answer for every reader, fallback and language map
  * here, so which language a IIIF value shows in, and so its `lang`, never changes.
  */
 const TAG_SETS = [

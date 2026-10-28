@@ -6,11 +6,12 @@ import {
 } from "docs/lib/compose/catalog";
 
 /**
- * A layout, as the compose helpers take it (WEBMCP.md): plain data an agent can write, from
- * which `write.ts` writes the code in either flavor. Either the Viewer in a template, or a
- * layout of the reader's own: parts in a Root, in the page's own elements where it needs
- * them (an `aside`). Every name and prop is checked against the catalog, which reads
- * Clover's specs, so a part or prop Clover gains is one a layout can name.
+ * A layout, as the compose helpers take it (AGENTS.md, "Agent tools (WebMCP)"): plain
+ * data an agent can write, from which `write.ts` writes the code in either flavor. Either
+ * the Viewer in a template, or a layout of the reader's own: parts in a Root, in the
+ * page's own elements where it needs them (an `aside`). Every name and prop is checked
+ * against the catalog, which reads Clover's specs, so a part or prop Clover gains is one
+ * a layout can name.
  *
  * ```json
  * { "resource": "https://…/manifest.json",

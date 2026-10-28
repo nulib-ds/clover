@@ -4,10 +4,10 @@ import { defineConfig, devices } from "@playwright/test";
  * The docs site end to end (`npm run e2e:docs`, and with the package's in `npm run e2e`):
  * what only the site does, in Chromium, over `npm run dev`, a running one reused; or,
  * with `DOCS_URL`, over a site already served there, a built one (its pages at the
- * address's root, its base path taken off by the server: WEBMCP.md). First, the tools
- * the site offers agents through WebMCP (WEBMCP.md), with a stand-in for the browser's
- * `document.modelContext` (`specs/stand-in.ts`), since no browser offers it to the site
- * until its origin trial does. The package's own suite is `packages/clover/e2e/`.
+ * address's root, its base path taken off by the server: `e2e/serve.mjs`). First, the
+ * tools the site offers agents through WebMCP (AGENTS.md, "Agent tools (WebMCP)"), with
+ * a stand-in for the browser's `document.modelContext` (`specs/stand-in.ts`), since no
+ * browser offers it to the site until its origin trial does. The package's own suite is `packages/clover/e2e/`.
  */
 const served = process.env.DOCS_URL;
 

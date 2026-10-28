@@ -35,14 +35,14 @@ export async function run(
       return compose(layout, flavor === "html" ? "html" : "react");
     }
     case "clover_preview_layout": {
-      // The page's first example frame, where the preview is drawn.
+      // The first example frame the page shows, where the preview is drawn, its level too.
       const host = firstHost();
       if (!host)
         return {
           ok: false,
           says: `This page has no example to draw in. Composing (${pageAddress("/docs/composing")}) and each component's page have one.`,
         };
-      const planned = planPreview(given, host.route);
+      const planned = planPreview(given, host.route, host.level);
       if (!planned.ok) return planned;
       const { plan } = planned;
       showPreview(plan, host.key, given.reveal === true);

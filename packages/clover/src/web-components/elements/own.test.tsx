@@ -1,5 +1,5 @@
 /*
- * Parts of your own, as elements (phase 6 of WEB-COMPONENTS.md), under Preact as they
+ * Parts of your own, as elements (AGENTS.md, "Parts of your own"), under Preact as they
  * ship: `root.clover`, the page's renderers, its control buttons and its own buttons in
  * the Body, `<clover-tip>`, and the Canvas's handle on `<clover-canvas>` and
  * `<clover-body>`.

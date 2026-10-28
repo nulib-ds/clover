@@ -4,6 +4,7 @@ import type { PreviewPlan } from "docs/lib/compose/preview";
 import {
   closePreview,
   firstHost,
+  levelUnder,
   registerHost,
   showPreview,
   snapshot,
@@ -39,6 +40,43 @@ describe("the preview store", () => {
     expect(firstHost()).toMatchObject({ key: b, route: "/docs/items" });
     goneA();
     goneB();
+  });
+
+  it("draws only in a frame the page shows, never one it hides", () => {
+    // Get started keeps every setup's example, showing the one chosen.
+    document.body.innerHTML = `<div style="display: none"><figure id="react"></figure></div>
+      <div><figure id="elements"></figure></div>`;
+    const [react, elements] = [Symbol("react"), Symbol("elements")];
+    const goneA = registerHost(
+      react,
+      () => document.getElementById("react"),
+      "/docs",
+    );
+    const goneB = registerHost(
+      elements,
+      () => document.getElementById("elements"),
+      "/docs",
+    );
+    expect(firstHost()).toMatchObject({ key: elements });
+    goneA();
+    goneB();
+  });
+
+  it("titles a level under the heading its frame sits under", () => {
+    document.body.innerHTML = `<main><h1>Composing layouts</h1>
+      <h2>A layout of your own</h2>
+      <div style="display: none"><h3>Another setup</h3></div>
+      <figure id="frame"><h2>The example's own</h2></figure></main>`;
+    const frame = document.getElementById("frame")!;
+    expect(levelUnder(frame)).toBe(3);
+    const gone = registerHost(Symbol("frame"), () => frame, "/docs/composing");
+    expect(firstHost()).toMatchObject({ level: 3 });
+    gone();
+    document.body.innerHTML = `<main><figure id="first"></figure><h2>Later</h2></main>`;
+    expect(levelUnder(document.getElementById("first")!)).toBe(2);
+    document.body.innerHTML = `<main><div role="heading" aria-level="3">Add it to a page</div>
+      <figure id="step"></figure></main>`;
+    expect(levelUnder(document.getElementById("step")!)).toBe(4);
   });
 
   it("says when a preview comes, and when the page's example is back", () => {

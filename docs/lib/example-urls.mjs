@@ -1,6 +1,6 @@
 /**
  * The address each example's resource has, for the "Web components" code of an example
- * (`remark-code-flavors.mjs`): an HTML attribute takes the address itself, where the React
+ * (`code-flavors.mjs`): an HTML attribute takes the address itself, where the React
  * code says `{url}`. Read from where the examples get them, as written there: a part
  * demo's `resource` (`RESOURCES` in `docs/lib/part-demo-resources.ts`) and a Viewer
  * example's (`resources` in `docs/components/Playground/playground-config.ts`). A mock is

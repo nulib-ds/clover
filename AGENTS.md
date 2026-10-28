@@ -160,7 +160,9 @@ deadline.
     throughout (Mat, 2026-10-24), shown as Timeline's player, its artwork the box. A size in a page's prose is `<Measured size="…" />`
     (`docs/components/Clover4/Measured.tsx`), the build's own figure. Scene's "Customizing
     engine" says Clover's own engine is the default for its size, giving both engines'
-    (Mat, 2026-10-23), and shows the two side by side: demos side by side are figures in a
+    (Mat, 2026-10-23), and shows the two side by side (its three.js side registered as a
+    page would, `registerThreeEngine()` in `docs/components/DynamicImports/Scene.tsx`,
+    `three` being opt-in; Mat, 2026-10-27): demos side by side are figures in a
     `.docs-compare` row, each captioned over it ("Scene with `clover` as engine."), a name
     in a caption drawn as a part head's is, in the accent, its view's accessible name the
     caption's words (WCAG 2.5.3). "Scene or Body" says Body handles every container the
@@ -206,19 +208,20 @@ deadline.
     `#templates`), Composing, Styling (the menu's names, short; "Composing" for the page
     titled "Composing layouts"; Mat, 2026-10-23), Technical overview (`/docs/technical`;
     Mat, 2026-10-26: the package's entry points, the Viewer, events, languages, parts,
-    layouts, parts of your own, types, what it loads, styles, and coming from 3.x, in
-    React and as web components, the two at parity: each section says it in the reader's
-    flavor, `<div data-code-flavor>`, or once for both, as the events' table does; the
-    web components' detail Get started held, and `/docs/web-component`'s forward, are
-    here). Build with an agent (`/docs/agents`;
-    Mat, 2026-10-26) is hidden for now (Mat, 2026-10-26: "let's hide this page for now"):
-    out of the menu (`display: "hidden"` in `content/docs/_meta.ts`, its place after
-    Styling kept) and of search, the sitemap, `llms.txt` and the Markdown
-    (`searchable: false`), at its address still. It is for a reader with an AI agent in the browser, in
-    plain sentences to that reader, what to ask, what happens on the page, what it reads
-    and never sends, and what they need, with an example of its own (under the lede, so
-    a preview there sits under the page's title) for an agent's preview to take the
-    place of. It never names the tools or says how they work (`WEBMCP.md` does).
+    layouts, parts of your own, helpers (every public function, each documented there;
+    Mat, 2026-10-27), types, what it loads, styles, and coming from 3.x, in React and as
+    web components, the two at parity: each section says it in the reader's flavor,
+    `<div data-code-flavor>`, or once for both, as the events' table does; the web
+    components' detail Get started held, and `/docs/web-component`'s forward, are here).
+    Build with an agent (`/docs/agents`; Mat, 2026-10-26) is hidden for now (Mat,
+    2026-10-26: "let's hide this page for now"): out of the menu (`display: "hidden"` in
+    `content/docs/_meta.ts`, its place after Styling kept) and of search, the sitemap,
+    `llms.txt` and the Markdown (`searchable: false`), at its address still. It is for a
+    reader with an AI agent in the browser, in plain sentences to that reader, what to
+    ask, what happens on the page, what it reads and never sends, and what they need, with
+    an example of its own (under the lede, so a preview there sits under the page's title)
+    for an agent's preview to take the place of. It never names the tools or says how they
+    work ("Agent tools (WebMCP)", below, does).
   - Get started (Mat, 2026-10-26) is a quick start: its title, a lede of two lines (what
     Clover is: no renderer named), then Install, in steps (`<div className="docs-steps">`,
     numbered by `layout.css`; not Nextra's `Steps`, which numbers every heading in it, an
@@ -704,8 +707,8 @@ deadline.
     mock's copy of that site. No style sets a heading, menu item or call to action in
     capitals; the stories' one-word mono labels (`.storyLabel`) are type, not headings.
     The 3.x pages keep the earlier version's own headings; their menu follows the rule.
-  - Every Clover 4 page holds its examples in both flavors (WEB-COMPONENTS.md, phase 7).
-    Each `jsx or `tsx fence gets its "Web components" twin as the page compiles
+  - Every Clover 4 page holds its examples in both flavors (2026-10-22). Each `jsx or `tsx
+    fence gets its "Web components" twin as the page compiles
     (`docs/lib/code-flavors.mjs`, run by `docs/lib/mdx-code-flavors-loader.cjs`, a loader
     before Nextra's in `next.config.mjs`, as Turbopack takes no plugin functions):
     `jsx-to-html.mjs` turns the JSX into the elements' HTML through their specs, `{url}`
@@ -733,21 +736,21 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
   - Titles and share cards are `pageMetadata` (`docs/lib/site.ts`), the root layout's
     `metadata` and each page's `generateMetadata` (`app/[[...mdxPath]]/page.tsx`): the
     homepage's title is "Clover IIIF – A viewer as distinctive as your collections" and the site's
-    description says what Clover is, plainly, in Get started's words, in React or as a web
-    component (Mat, 2026-10-21: so an agent or a search result can tell; every
-    description of Clover, the READMEs' and the packages' too, names both, and only what
-    each does today). The hero's headline and line are written once (`homeHeadline`,
-    `homeTagline` in `site.ts`), for the hero and the footer, and carried wherever the
-    brand speaks (Mat, 2026-10-22): the homepage's description and share text open with
-    the line, then say what Clover is, as plainly (`homeDescription`); its structured
-    data gives them as `headline` and `alternativeHeadline`; `llms.txt` (and so
-    `llms-full.txt`) and the README carry both. A page
-    takes its `title` (front matter, else its first `h1`, Nextra's rule) and its
-    `description`. Give every page a `description`: agents read it in `llms.txt`, the
-    parts' list and the Markdown. Every page's card picture is a 1200 × 630 band of
-    the White catalog's cover, cut by Northwestern's IIIF Image server and linked from
-    there, never copied into `public/` (Mat, 2026-10-16: the record's attribution does
-    not permit further distribution of its images).
+    description says what Clover is, plainly, in Get started's words, in React or as web
+    components (Mat, 2026-10-21: so an agent or a search result can tell; plural since
+    2026-10-22, when every part became one, never "a web component"; every description of
+    Clover, the READMEs' and the packages' too, names both, and only what each does
+    today). The hero's headline and line are written once (`homeHeadline`, `homeTagline`
+    in `site.ts`), for the hero and the footer, and carried wherever the brand speaks
+    (Mat, 2026-10-22): the homepage's description and share text open with the line, then
+    say what Clover is, as plainly (`homeDescription`); its structured data gives them as
+    `headline` and `alternativeHeadline`; `llms.txt` (and so `llms-full.txt`) and the
+    README carry both. A page takes its `title` (front matter, else its first `h1`,
+    Nextra's rule) and its `description`. Give every page a `description`: agents read it
+    in `llms.txt`, the parts' list and the Markdown. Every page's card picture is a 1200 ×
+    630 band of the White catalog's cover, cut by Northwestern's IIIF Image server and
+    linked from there, never copied into `public/` (Mat, 2026-10-16: the record's
+    attribution does not permit further distribution of its images).
   - Under the navbar on the homepage alone (Mat, 2026-10-22: not on interior pages, whose
     footer says it), a small acknowledgment in the corner, on the page's
     ground with no band or edge of its own (Mat, 2026-10-20; a gray band and hairline
@@ -787,7 +790,8 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     "Example Viewer", the 3.x "Example items"), is a control (the select), or sits in a
     named example already (a demo inside `<Example>`, whose frame marks it; never two).
     Where: the docs' example frames (`ViewerDocs.tsx`'s `preview`, `LiveCode.tsx`,
-    `ComposeExample.tsx`), `LanguagesDemo`, the 3.x wrappers (`DynamicImports/*`,
+    `ComposeExample.tsx`, `StartExample.tsx`) and an agent's preview in one
+    (`AgentPreview.tsx`), `LanguagesDemo`, the 3.x wrappers (`DynamicImports/*`,
     `GermanViewer`, the Cookbook panel, `FeaturedGrid`), the test mocks ("Example page"),
     and on the homepage the playground's Viewer, its select, the held viewer's faces and
     each tile's live part (its head, the part's name and docs link, unmarked). A new live
@@ -824,39 +828,13 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     sight and out of search) until the live parts take its place, for a reader without
     the page's scripts. Agent-facing words say what Clover does as released
     (`npm install @nulib/clover`; Mat, 2026-10-21: "assume my product will be live").
-  - Agents' helpers (WebMCP; Mat, 2026-10-25 and 2026-10-26) are planned in `WEBMCP.md`:
-    tools about Clover (its parts, what it handles, and code that builds with it), never
-    the examples' sample material, and lean ("let's also try to be lean and not overload
-    tools"): three tools, `clover_suggest_layout`, `clover_compose_layout` and
-    `clover_preview_layout`, which knows the page it is on. Fold a new helper into one of
-    them before adding a tool; a new tool needs Mat's agreement. Phase 2 (2026-10-26)
-    registers the first two on every page (`docs/components/AgentTools.tsx`, in the root
-    layout; `docs/lib/webmcp/`: their definitions from the catalog, `run.ts` loaded on
-    the first call), and `llms.txt` lists them. Phase 3 (2026-10-26) lets
-    `clover_suggest_layout` read a resource's structure (`structure.ts`,
-    `read-resource.ts`): counts and tokens checked against what IIIF defines, never a
-    string the resource wrote, fetched without the reader's cookies, bounded, and marked
-    untrusted. Phase 4 (2026-10-26) adds `clover_preview_layout`, which draws a layout in
-    the page's first example frame, in place of the page's own until the reader brings
-    it back ("Show this page's example"), its code under it, over a sample that has what
-    was asked for, and, given nothing on a part's page, that part. Every example frame
-    takes `usePreviewHost()` (`docs/components/Clover4/PreviewHost.tsx`); a new frame
-    component takes it too. Phase 5 (2026-10-26): the docs' e2e suite checks them
-    (`e2e/specs/agent-tools.spec.ts`), and Chrome's origin-trial token, once Mat
-    registers it, goes in `docs/lib/webmcp/origin-trial.ts`. Readers meet the tools on
-    Build with an agent (`content/docs/agents.mdx`, under Use Clover, hidden for now),
-    written for a
-    reader with an AI agent in the browser, never as notes on the tools (Mat,
-    2026-10-26: "it reads like notes to a developer"); how they work is `WEBMCP.md`'s,
-    its example of a layout and its code held to `compose`'s by a test. Their engine is
-    `docs/lib/compose/` (phase 1, built 2026-10-26), written to grow as Clover's templates,
-    components and helpers do (Mat, 2026-10-26): it reads the element specs, the docs'
-    menus, `sizes.json` and the docs' own code writer (`live-code.ts`), and keeps by hand
-    only `capabilities.ts` (what each part handles, in a reader's words, with a sample)
-    and three small tables in `catalog.ts` (`ENTRY`, `INSIDE`, `DOCUMENTED_ON`), each
-    held by `catalog.test.ts`, which fails saying what to add. A new part, template, prop,
-    format or helper: follow "Built to grow" in `WEBMCP.md`. `nulib-labs/clover-mcp`, 3.x's
-    MCP server, is context only, and updating it is separate work.
+  - Agents' helpers (WebMCP; Mat, 2026-10-25 and 2026-10-26): three tools every docs page
+    offers an agent in the reader's browser, about Clover and never the examples' sample
+    material, one of them drawing a preview in the page's first example frame. Readers meet
+    them on Build with an agent (`content/docs/agents.mdx`, hidden for now), written for a
+    reader with an AI agent in the browser, never as notes on the tools (Mat, 2026-10-26:
+    "it reads like notes to a developer"). What they may do and read, their engine and how
+    they grow are under "Agent tools (WebMCP)" below.
   - `/test/…` (`content/test/`) holds unlisted mocks of host pages, for trying Clover 4
     where it is meant to live: raw layout, no docs navbar or footer, out of search.
     `/test/dc-item` is a Digital Collections item page (`docs/components/DcItemMock/`),
@@ -942,7 +920,9 @@ e2e:docs`.
 
 ## Coding Style & Naming Conventions
 
-- Language: TypeScript + React (Next for docs; Preact for UMD WC build).
+- Language: TypeScript + React (Next for docs; Preact for the web components' build,
+  `packages/clover/build/web-components.config.mjs`: ES modules with a classic-script
+  loader).
 - Formatting: Prettier (semicolons enabled). Use `npm run prettier:fix` to format.
 - Linting: ESLint with `next/core-web-vitals` and `@typescript-eslint` rules.
 - Naming: React components in PascalCase, files `*.tsx`; utilities in camelCase `*.ts`.
@@ -979,6 +959,8 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   not stage changes — leave the working tree for a human to review and commit.
 - Do not assign a version number or edit `version` in `package.json`.
 - Leave completed work as unstaged changes and describe what changed.
+- A dated decision (Mat, …) stands until Mat changes it. A change that would reverse one
+  is put to him, with the reason it was made, never made quietly.
 
 ## Changelog
 
@@ -1046,6 +1028,10 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   the browser first). After that come `fallbackLng`, and English last. IIIF text without
   a Root `language` follows the same order (`readerLanguages`, `src/i18n/reader.ts`, which Clover's strings read too; `closestLanguage` in `core/value.ts` picks the tag, IIIF's rule, held to `@iiif/helpers`' by `value.test.ts`). Each regional tag also tries its base
   language (`pt-BR` → `pt`).
+- The chain is made once and read by every string, Items' hundreds of tiles each asking
+  (`lookupChain`, `i18n/config.ts`; Mat, 2026-10-27, kept at its cost); it is made again
+  only as the strings or settings (`version`), the page's `<html lang>` or the browser's
+  languages change. Anything new it reads joins that key.
 - Components call `useCloverTranslation()` and use `t` and `langOf`. It re-renders through
   `useSyncExternalStore` when `initCloverI18n` changes the language or the strings.
 - Any element that shows one of Clover's strings, or is named by one (an `aria-label`, an
@@ -1176,6 +1162,130 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   it). The package's tests use copies of
   `page-transcript`, `paged`, `rudolf-hess-nuremberg` and `transcripts`, in
   `packages/clover/src/fixtures/mocks/<name>/`.
+
+## Agent tools (WebMCP)
+
+- Every docs page offers an agent in the reader's browser three tools through WebMCP
+  (`docs/lib/webmcp/`, registered by `docs/components/AgentTools.tsx` in the root layout;
+  Mat, 2026-10-25 and 2026-10-26): about Clover itself, what it is, what it handles across
+  the IIIF specifications and how to build with it, helpers that guide implementation
+  first, above all those that compose a Clover example as they go, and never the examples'
+  sample material. They are lean (Mat, 2026-10-26: "let's also try to be lean and not
+  overload tools") and written to grow with Clover ("Built to grow", below).
+  `nulib-labs/clover-mcp`, 3.x's MCP server, is context only; updating it is separate work.
+- `clover_suggest_layout` finds the parts for needs, in a reader's words or by name ("3d",
+  "captions", "Items"), for a resource's address, or both: each part with its props and
+  docs, and a layout to start from; it answers "does Clover handle…?" too.
+  `clover_compose_layout` checks a layout (the Viewer in a template, or parts in a Root, in
+  the page's own `div`, `section`, `aside`, `header`, `footer` and `nav`) and writes it as
+  a whole module, with its install and each part's docs and size, one flavor a call, React
+  unless the call asks for `html`; a layout that does not hold gets what is wrong at each
+  place and how to put it right, and no code. Both are read-only, the first marked
+  `untrustedContentHint`. `clover_preview_layout` draws a layout, or a capability over a
+  sample that has it, in the page's first example frame, and knows its page: given
+  nothing, a part's page shows its part, and the Viewer's page the Viewer (Mat,
+  2026-10-26). It changes that page and nothing else (`readOnlyHint: false`), and a page
+  with no frame (Styling) is refused, naming pages that have one.
+- Cut, and kept out (Mat, 2026-10-26): searching or fetching the docs (`llms.txt`,
+  `llms-full.txt` and each page's Markdown give them), listing parts, checking support and
+  describing a resource (`clover_suggest_layout` answers all three, and
+  `clover_compose_layout`'s errors list a part's props), checking code (an agent composes
+  again; a JSX parser in the browser would weigh more than it helps), setting a template
+  or opening a resource in the Viewer (a Viewer layout is one compose writes and preview
+  draws), reading the Viewer's state (it would hand agents the samples' content), and
+  `show_capability` (folded into the preview). Fold a new helper into one of the three, as
+  a new input or a new answer; a new tool needs Mat's agreement.
+- Every agent on the page reads every tool's schema, so each stays small: part, template
+  and capability names, never every prop (props come back from `clover_suggest_layout`, or
+  in `clover_compose_layout`'s errors). Answers are bounded: lists name things, detail
+  comes when asked for. A tool answers in plain data, which WebMCP serializes as JSON, a
+  failure too (`ok: false`, and what is wrong), never a thrown error (`run.ts`).
+- What a tool says comes from what Clover already states: the element specs, the docs'
+  menus, `sizes.json` and the docs' own code writer (`live-code.ts`), so its code, in
+  either flavor, is what a reader copies from the docs, and its sizes are the build's
+  (`write.test.ts` holds the module `clover_compose_layout` writes). Kept by hand, each
+  small and held by a test that fails saying what to add: `capabilities.ts` (what Clover
+  handles, in a reader's words, the parts for each, and a sample from
+  `part-demo-resources.ts`) and, in `catalog.ts`, `ENTRY`, `INSIDE` and `DOCUMENTED_ON`.
+- The engine, `docs/lib/compose/`, is plain modules, no React and no DOM. A page carries
+  only the tools' definitions, written on the server from the catalog (`agentTools()`,
+  which `app/layout.tsx` hands to `AgentTools.tsx`, and `llms.txt` lists under "Tools for
+  agents"), and the code that registers them. What they do (`run.ts`) and the engine load
+  on the first call, the preview's renderer (`AgentPreview.tsx`) on the first preview; the
+  docs' e2e suite (`e2e/specs/agent-tools.spec.ts`, with a stand-in
+  `document.modelContext`) checks that neither loads sooner, so keep it so.
+- A resource is read for its structure alone, and what is read is untrusted
+  (`docs/lib/compose/read-resource.ts`, `structure.ts`): an `http:` or `https:` address,
+  or a content state as the package decodes one (`core/content-state-reader.ts`), fetched
+  without the reader's cookies (`credentials: "omit"`) or the page's address
+  (`referrerPolicy: "no-referrer"`; its origin still goes with a request to another site,
+  as CORS needs), waited for and read only so far (`WAIT`, `MOST_BYTES`), and stopped by
+  the caller's cancel. `structure.ts` is a reader of its own, by `type` and `motivation` in
+  Presentation 2, 3 and 4, not `@iiif/parser`: only counts, and tokens checked against
+  what IIIF defines, come through, never a string the resource wrote, and past its
+  `LIMITS` it says so (`truncated`). The answer marks the resource `untrusted: true` and
+  says what it did not read.
+- A preview is an example, held to WCAG 2.2 AA as every example is. It takes the place of
+  the first example frame the page shows, in document order, never one it hides, as Get
+  started hides the setups not chosen (`preview-store.ts`), until the reader presses "Show
+  this page's example", which brings the page's own back with focus on the frame (2.4.3),
+  or leaves the page. It is marked as an example (`example()`), its code under it in both
+  flavors (`LiveCode`). A tool never moves focus, and scrolls the page only when asked
+  (`reveal`, at once where the reader asks for less motion). The status region
+  `AgentTools.tsx` keeps out of sight says as a preview comes and goes (4.1.3), and a
+  layout that throws as it is drawn says so rather than taking the page with it. Its
+  titles, the Viewer's too, take the level one below the heading its frame sits under
+  (`levelUnder`), as the docs' demos take theirs (1.3.1), and the answer says which.
+- WebMCP is as the W3C Web Machine Learning Community Group's draft of 2026-10-20 has it,
+  checked again on 2026-10-26 (`register.ts`, and the e2e suite's stand-in,
+  `e2e/specs/stand-in.ts`; check both against a later draft): `document.modelContext`, on
+  `navigator` in earlier drafts, so both are looked for, whose
+  `registerTool(tool, { signal })` keeps a tool until the signal aborts and refuses a name
+  already taken (the page then leaves that tool out, quietly). A name is 1 to 128 of ASCII
+  letters, digits, `_`, `-` and `.`, unique in a document (`tools.test.ts`). It needs a
+  secure context, and its `tools` Permissions Policy is `'self'` by default. Chrome offers
+  it in an origin trial (149 to 156; Edge 147 behind a flag): its token,
+  `WEBMCP_ORIGIN_TRIAL` (`docs/lib/webmcp/origin-trial.ts`), is empty until Mat registers
+  one (https://developer.chrome.com/origintrials) for the origin the site is served from
+  (`https://nulib-ds.github.io` today), and every page then gives it as
+  `<meta http-equiv="origin-trial">` (`app/layout.tsx`). A domain of the site's own needs a
+  token of its own.
+- Built to grow (Mat, 2026-10-26). When Clover grows, the tests named fail until each step
+  is done:
+  - A new part: its element spec, as every part has, puts it in the catalog. Then a page in
+    the docs' menu, or a line in `DOCUMENTED_ON`, and a line in `capabilities.ts`; in
+    `INSIDE` if it sits only inside another part; in `ENTRY`, with its entry point's source
+    in `catalog.test.ts`, if it comes from a new entry point. A property part (in the
+    Primitives menu, its `of` reading the Manifest) is named for the IIIF property it reads
+    (`RequiredStatement` reads `requiredStatement`). `catalog.test.ts` says which is
+    missing.
+  - A new template: its word in the Viewer spec's `template`, its name and what it is in
+    the spec's description ("Gallery (a grid, …)"), each of its props' descriptions opening
+    with its name ("Default and Document: …"), and its sizes measured (`build/sizes.mjs`:
+    `<word>TemplateGzip`, and `<word>TemplateFirstViewGzip`, which the catalog reads).
+  - A new prop: its spec's attribute is enough; its description opens "Alone:" or "Inside a
+    root:" where it is read in one place only. A prop only code can give (a function) goes
+    in the spec's `properties`, and a layout leaves it out with a note.
+  - A new format or feature: an entry in `capabilities.ts`, with a sample that has it. A
+    new word for a need: its capability's `words`.
+  - Something new to find in a resource (a format, a service, a motivation): a count in
+    `structure.ts`, or a token checked against what IIIF defines, never a string as the
+    resource wrote it, and in `hasOf` (`suggest.ts`) the capability it shows, with its
+    evidence in Clover's words. `structure.test.ts`'s resource of marked words must still
+    come through clean.
+  - A new tool, with Mat's agreement: a name in `TOOL_NAMES`, a definition in
+    `agentTools()` (`tools.ts`), its description and schema from the catalog, never lists
+    written into it, and a case in `run.ts` that works through the engine
+    (`tools.test.ts` fails while a name has no runner). It registers itself, and
+    `llms.txt` lists it. The e2e stand-in's `open` waits for the tools by count (three),
+    and the suite's first test lists their names, titles and hints.
+  - A new tool or answer: check it in `e2e/specs/agent-tools.spec.ts`, and say what a
+    reader can now ask, in a reader's words, on Build with an agent, which never names the
+    tools or says how they work.
+  - A new example frame: the component that draws a docs example's `figure` takes
+    `usePreviewHost()` (`docs/components/Clover4/PreviewHost.tsx`), its `ref` on the
+    figure, and draws `<AgentPreview shown={preview} />` in place of its own content while
+    `preview` is set.
 
 ## Environment & Tooling
 

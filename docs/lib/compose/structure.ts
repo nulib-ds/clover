@@ -1,10 +1,11 @@
 /**
- * A IIIF resource's structure, never its words (WEBMCP.md, phase 3): what kind of
- * resource it is, its containers and what paints them, its formats and services, its
- * annotations by motivation, its Ranges, and which properties it has. Counts, and tokens
- * checked against what IIIF defines (a media type's shape, a motivation, a behavior, a
- * service's kind), so nothing the resource wrote (a label, a summary, a value, a URL)
- * comes through, however it is written. Any Presentation version: 2's `sequences`,
+ * A IIIF resource's structure, never its words (AGENTS.md, "Agent tools (WebMCP)"): what
+ * kind of resource it is, its containers and what paints them, its formats and services,
+ * its annotations by motivation, its Ranges, and which properties it has. Counts, and
+ * tokens checked against what IIIF defines (a media type's shape, a motivation, a
+ * behavior, a service's kind), so nothing the resource wrote (a label, a summary, a
+ * value, a URL) comes through, however it is written. Any Presentation version: 2's
+ * `sequences`,
  * `images`, `@type` and `viewingHint`, 3's and 4's `items`, `type` and `behavior`.
  *
  * Bounded: so many containers, annotations and Ranges are read, and the rest counted, or

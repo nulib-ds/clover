@@ -10,9 +10,9 @@ import type {
 import { DOCS, SPECS } from "../../../packages/clover/src/web-components/specs";
 
 /**
- * What the compose helpers know of Clover (WEBMCP.md): its parts, the Root, the Viewer and
- * its templates, and what each part handles, read from where Clover already says it, so the
- * catalog grows as Clover does:
+ * What the compose helpers know of Clover (AGENTS.md, "Agent tools (WebMCP)"): its parts,
+ * the Root, the Viewer and its templates, and what each part handles, read from where
+ * Clover already says it, so the catalog grows as Clover does:
  *
  * - each part and its props: its element's spec (`SPECS`, with its docs, `DOCS()`), which
  *   every part has for its web component. A new element is a new part here.

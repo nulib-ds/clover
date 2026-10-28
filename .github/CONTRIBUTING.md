@@ -9,7 +9,7 @@ If you have questions about Clover, be sure to check out the docs where we have 
 There are many ways to contribute to the project. Code is just one possible means of contribution.
 
 - **Feedback.** Tell us what we're doing well or where we can improve.
-- **Support.** Please reach out to `@mat` or `@adam.arling` in the [IIIF Slack workspace](iiif.slack.com) or submit a new issue in [open issues](https://github.com/nulib-ds/clover/issues).
+- **Support.** Please reach out to `@mat` in the [IIIF Slack workspace](https://iiif.slack.com) or submit a new issue in [open issues](https://github.com/nulib-ds/clover/issues).
 - **Write.** If you come up with an interesting example, write about it. Post it to your blog and share it with us. We'd love to see what folks in the community build with Clover!
 - **Report.** Create issues with bug reports so we can make Clover even better.
 

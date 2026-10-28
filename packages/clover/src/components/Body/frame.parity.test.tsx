@@ -10,7 +10,7 @@ import * as Clover from "../../index";
 /*
  * Canvas (and so Timeline) and Scene each write the Body's frame themselves: on a page,
  * only one of them loads, so a shared frame component would add its props to every page
- * and take no copy away (DRY.md, A1, measured 2026-10-27). This holds the two frames to
+ * and take no copy away (measured 2026-10-27). This holds the two frames to
  * one another instead: the figure, the viewport's name, role, keys and focus, the way
  * out of full screen, and the caption, last, closed by Escape where focus is.
  */

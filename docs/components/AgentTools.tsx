@@ -9,11 +9,12 @@ import { modelContextOf, registerTools } from "docs/lib/webmcp/register";
 import type { ToolDefinition } from "docs/lib/webmcp/tools";
 
 /**
- * The docs' tools for agents (WEBMCP.md), registered with WebMCP on every page where the
- * browser offers it, and taken back as the page goes. It draws nothing but the status
- * region that says when a preview comes and goes, out of sight. The definitions
- * come from the server (`agentTools()` in the root layout); what the tools do, and the
- * compose engine behind them, load the first time an agent calls one.
+ * The docs' tools for agents (AGENTS.md, "Agent tools (WebMCP)"), registered with
+ * WebMCP on every page where the browser offers it, and taken back as the page goes.
+ * It draws nothing but the status region that says when a preview comes and goes, out
+ * of sight. The definitions come from the server (`agentTools()` in the root layout);
+ * what the tools do, and the compose engine behind them, load the first time an agent
+ * calls one.
  */
 export default function AgentTools({ tools }: { tools: ToolDefinition[] }) {
   useEffect(() => {
