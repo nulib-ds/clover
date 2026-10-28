@@ -139,12 +139,12 @@ export type {
 } from "./core/clover";
 export { toPresentation4 } from "./core/presentation";
 export type {
-  Canvas as Presentation4Canvas,
-  Collection as Presentation4Collection,
   Container,
   Manifest,
-  Scene as Presentation4Scene,
-  Timeline as Presentation4Timeline,
+  Presentation4Canvas,
+  Presentation4Collection,
+  Presentation4Scene,
+  Presentation4Timeline,
 } from "./core/presentation";
 export type { IIIFContent } from "./core/load";
 export type { CloverRequest } from "./core/request";

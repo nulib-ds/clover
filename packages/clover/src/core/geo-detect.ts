@@ -1,4 +1,4 @@
-import type { Collection, Manifest } from "./presentation";
+import type { Presentation4Collection, Manifest } from "./presentation";
 import { selectSequence } from "./selectors";
 import { asArray } from "../lib/asArray";
 
@@ -10,7 +10,7 @@ import { asArray } from "../lib/asArray";
  */
 export function hasMapData(
   manifest: Manifest | null,
-  collection: Collection | null = null,
+  collection: Presentation4Collection | null = null,
 ): boolean {
   if (!manifest) return false;
   if ((collection as Json | null)?.navPlace || (manifest as Json).navPlace) {

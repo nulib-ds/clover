@@ -989,6 +989,12 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   bundler that rewrites that module (Next does) breaks it: the basemap still draws but
   every GeoJSON layer silently vanishes. The docs bundle the worker themselves and hand it
   to the package with `setMapWorkerUrl` (`docs/lib/map-worker.ts`).
+- The package brings the same worker to its consumers: its build fills
+  `src/components/Map/maplibre-worker.ts`, empty in source, with the bundled worker
+  (`packages/clover/build/maplibre-worker.mjs`, a plugin in its `vite.config.mjs`), which
+  `MapView` starts from a `blob:` URL when the page sets none. It must match the MapLibre
+  running, so `maplibre-gl` is pinned exactly in the package's `dependencies`: bump the
+  two together.
 - `scripts/build-maplibre-worker.mjs` bundles `maplibre-gl-worker.mjs` (it imports
   `maplibre-gl-shared.mjs` by relative path, which a blob URL cannot resolve, so it must
   be bundled rather than copied) into `docs/lib/maplibre-worker.generated.ts`, which is

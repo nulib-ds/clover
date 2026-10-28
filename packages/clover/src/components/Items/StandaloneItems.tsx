@@ -9,7 +9,10 @@ import {
 } from "./Items";
 import { itemsOf } from "../../core/items";
 import { fetchResource } from "../../core/load";
-import type { Collection, Manifest } from "../../core/presentation";
+import type {
+  Presentation4Collection,
+  Manifest,
+} from "../../core/presentation";
 import type { LanguageMapLike } from "../../core/value";
 
 /** Items of a resource the component loads itself, or of a list it is handed. */
@@ -23,7 +26,9 @@ export default function StandaloneItems({
   forwardedRef,
   ...rest
 }: ItemsProps & Forwarded) {
-  const [resource, setResource] = useState<Manifest | Collection | null>(null);
+  const [resource, setResource] = useState<
+    Manifest | Presentation4Collection | null
+  >(null);
   const [selected, setSelected] = useState(0);
   const key =
     typeof iiifContent === "string"

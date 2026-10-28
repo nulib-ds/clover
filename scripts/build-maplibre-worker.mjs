@@ -1,40 +1,13 @@
-import { build } from "vite";
-import { transform } from "esbuild";
 import { mkdirSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { bundleMapLibreWorker } from "../packages/clover/build/maplibre-worker.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const ENTRY = join(
-  ROOT,
-  "node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs",
-);
 const OUT = join(ROOT, "docs/lib/maplibre-worker.generated.ts");
 
-const result = await build({
-  logLevel: "error",
-  configFile: false,
-  mode: "production",
-  build: {
-    write: false,
-    target: "es2020",
-    lib: {
-      entry: ENTRY,
-      formats: ["es"],
-      fileName: () => "maplibre-worker.js",
-    },
-    rollupOptions: { output: { inlineDynamicImports: true } },
-  },
-});
-
-const chunk = [result].flat()[0].output.find((o) => o.type === "chunk");
-if (!chunk) throw new Error("No chunk produced for the MapLibre worker");
-
-const { code } = await transform(chunk.code, {
-  minify: true,
-  target: "es2020",
-  legalComments: "none",
-});
+// The docs run the package from source, whose worker is empty: bundle it as its build does.
+const { code } = await bundleMapLibreWorker();
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(

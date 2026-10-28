@@ -80,15 +80,15 @@ export function useReadMore(ref: React.RefObject<HTMLElement | null>) {
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
+    // Resized or restyled, measured a frame later: a measure sets state, which Preact (the
+    // elements') renders at once, mid-report (`templates/shared/useSlide.ts`).
     let frame = 0;
     const again = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(measure);
     };
     const resized =
-      typeof ResizeObserver === "undefined"
-        ? null
-        : new ResizeObserver(measure);
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(again);
     resized?.observe(node);
     const styled =
       typeof MutationObserver === "undefined"

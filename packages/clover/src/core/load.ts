@@ -1,6 +1,6 @@
 import { type Target, isContentState } from "./content-state";
 import {
-  type Collection,
+  type Presentation4Collection,
   type Manifest,
   preloadUpgrader,
   toPresentation4,
@@ -27,7 +27,7 @@ const readContentState = () => import("./content-state-reader");
 export interface Loaded {
   manifest: Manifest;
   /** The Collection the Manifest was reached through, when there was one. */
-  collection?: Collection;
+  collection?: Presentation4Collection;
   /** Where a content state, or a Canvas given directly, points. */
   target?: Target;
   /** A content state's note, as an annotation to show and pick (`resolveContentState`). */
@@ -121,9 +121,9 @@ const MAX_COLLECTION_PAGES = 50;
  * members are on CollectionPages, followed from `first` through `next`.
  */
 export async function withMembers(
-  collection: Collection,
+  collection: Presentation4Collection,
   options: LoadOptions,
-): Promise<Collection> {
+): Promise<Presentation4Collection> {
   const json = collection as unknown as Record<string, any>;
   if (Array.isArray(json.items) && json.items.length) return collection;
   if (!json.first) return collection;
@@ -147,7 +147,7 @@ export async function withMembers(
     items.push(...((upgraded.items as unknown[]) ?? []));
     next = fetched.next;
   }
-  return { ...json, items } as unknown as Collection;
+  return { ...json, items } as unknown as Presentation4Collection;
 }
 
 /** A Collection member as a Manifest: fetched if only referenced, and upgraded. */
@@ -162,7 +162,7 @@ type Json = Record<string, any>;
 
 /** The first Manifest in a Collection, depth first, fetching what is only referenced. */
 async function firstManifest(
-  collection: Collection,
+  collection: Presentation4Collection,
   options: LoadOptions,
   depth = 0,
 ): Promise<Manifest | null> {
@@ -172,7 +172,9 @@ async function firstManifest(
     }
     if (item.type === "Collection" && depth < 8) {
       const nested = await withMembers(
-        await toPresentation4<Collection>(await dereference(item, options)),
+        await toPresentation4<Presentation4Collection>(
+          await dereference(item, options),
+        ),
         options,
       );
       const found = await firstManifest(nested, options, depth + 1);
@@ -189,15 +191,17 @@ async function firstManifest(
 export async function fetchResource(
   input: IIIFContent,
   { request, signal }: LoadOptions = {},
-): Promise<Manifest | Collection> {
+): Promise<Manifest | Presentation4Collection> {
   void preloadUpgrader();
   const json =
     typeof input === "string"
       ? await fetchJson(request, input.trim(), signal)
       : input;
-  const resource = await toPresentation4<Manifest | Collection>(json);
+  const resource = await toPresentation4<Manifest | Presentation4Collection>(
+    json,
+  );
   return resource.type === "Collection"
-    ? withMembers(resource as Collection, { request, signal })
+    ? withMembers(resource as Presentation4Collection, { request, signal })
     : resource;
 }
 
@@ -260,7 +264,10 @@ export async function loadContent(
     case "Manifest":
       return { manifest: resource as Manifest, target, annotation };
     case "Collection": {
-      const collection = await withMembers(resource as Collection, options);
+      const collection = await withMembers(
+        resource as Presentation4Collection,
+        options,
+      );
       // The host's choice, or the content state's, or else the first member.
       const pick = options.manifestId ?? member;
       const chosen = pick

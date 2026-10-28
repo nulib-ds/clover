@@ -1,7 +1,8 @@
 /**
  * Where MapLibre's worker is served from, for every map: MapLibre's own `setWorkerUrl` is
- * global, and so is this. Needed only when a bundler moves MapLibre's files (webpack, Next),
- * which breaks the relative import its worker makes; see the Map docs.
+ * global, and so is this. Clover brings the worker itself (`components/Map/worker.ts`), so
+ * a page sets one only to serve its own, as a Content Security Policy that refuses `blob:`
+ * workers needs; see the Map docs.
  */
 let workerUrl: string | undefined;
 

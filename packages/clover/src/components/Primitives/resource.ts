@@ -2,11 +2,11 @@ import { createContext, useContext } from "react";
 
 import type { CloverState } from "../../core/clover";
 import { selectCanvas } from "../../core/selectors";
+export type { Json } from "../../core/json";
+import type { Json } from "../../core/json";
 
 /** Whose property a part reads: the Root's Manifest, or the Canvas in view. */
 export type Of = "manifest" | "canvas";
-
-export type Json = Record<string, any>;
 
 /** The resource a property part reads, in a Root. */
 export const resourceOf = (state: CloverState, of: Of): Json | null =>

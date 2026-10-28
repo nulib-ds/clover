@@ -131,6 +131,7 @@ vi.mock("maplibre-gl", () => ({
   Popup: FakePopup,
   NavigationControl: class {},
   setWorkerUrl: vi.fn(),
+  getVersion: () => "6.11.1",
 }));
 
 // jsdom has no 2D canvas, and loads no images: give the overlay both.

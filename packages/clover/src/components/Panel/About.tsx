@@ -91,19 +91,30 @@ export function About({
     if (!about || !image || typeof ResizeObserver === "undefined") return;
     const heading = about.querySelector<HTMLElement>(".clover-about-label");
     const write = () => {
-      about.style.setProperty(
-        "--clover-about-label-height",
-        `${heading?.offsetHeight ?? 0}px`,
-      );
-      about.style.setProperty(
-        "--clover-about-thumbnail-width",
-        `${image.offsetWidth}px`,
-      );
+      const height = `${heading?.offsetHeight ?? 0}px`;
+      const width = `${image.offsetWidth}px`;
+      const style = about.style;
+      if (style.getPropertyValue("--clover-about-label-height") !== height)
+        style.setProperty("--clover-about-label-height", height);
+      if (style.getPropertyValue("--clover-about-thumbnail-width") !== width)
+        style.setProperty("--clover-about-thumbnail-width", width);
     };
-    const observer = new ResizeObserver(write);
+    /*
+     * Measured now, then a frame after each resize: what is written wraps the label
+     * again, so writing as the observer reports would resize what it watches in the
+     * same frame, and the browser reports "ResizeObserver loop completed with
+     * undelivered notifications" to the page's error handlers.
+     */
+    write();
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(write);
+    });
     observer.observe(image);
     if (heading) observer.observe(heading);
     return () => {
+      cancelAnimationFrame(frame);
       observer.disconnect();
       about.style.removeProperty("--clover-about-label-height");
       about.style.removeProperty("--clover-about-thumbnail-width");

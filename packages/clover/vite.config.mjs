@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, isAbsolute, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
+import { inlineMapLibreWorker } from "./build/maplibre-worker.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
@@ -24,6 +25,8 @@ const packageName = (id) =>
 export default defineConfig({
   root,
   publicDir: false,
+  // MapLibre's worker, bundled, so a consumer's bundler need not find it.
+  plugins: [inlineMapLibreWorker()],
   esbuild: { jsx: "automatic" },
   json: { stringify: true },
   build: {

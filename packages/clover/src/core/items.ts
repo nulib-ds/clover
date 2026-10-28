@@ -1,4 +1,8 @@
-import type { Collection, Container, Manifest } from "./presentation";
+import type {
+  Presentation4Collection,
+  Container,
+  Manifest,
+} from "./presentation";
 import { selectSequence } from "./selectors";
 import { type LanguageMapLike, localize } from "./value";
 import { paintedBodies } from "./painted-bodies";
@@ -90,7 +94,9 @@ export function itemsOfManifest(manifest: Manifest | null): ItemModel[] {
 const memberItems = new WeakMap<object, ItemModel[]>();
 
 /** One item per Manifest or Collection in a Collection, linking to each. */
-export function itemsOfCollection(collection: Collection | null): ItemModel[] {
+export function itemsOfCollection(
+  collection: Presentation4Collection | null,
+): ItemModel[] {
   if (!collection) return [];
   let items = memberItems.get(collection);
   if (!items) {
@@ -111,13 +117,15 @@ export function itemsOfCollection(collection: Collection | null): ItemModel[] {
 
 /** Items from any resource: a Manifest's views, a Collection's members, or a list. */
 export function itemsOf(
-  resource: Manifest | Collection | Container[] | null,
+  resource: Manifest | Presentation4Collection | Container[] | null,
 ): ItemModel[] {
   if (!resource) return [];
   if (Array.isArray(resource)) {
-    return itemsOfCollection({ items: resource } as unknown as Collection);
+    return itemsOfCollection({
+      items: resource,
+    } as unknown as Presentation4Collection);
   }
   return resource.type === "Collection"
-    ? itemsOfCollection(resource as Collection)
+    ? itemsOfCollection(resource as Presentation4Collection)
     : itemsOfManifest(resource as Manifest);
 }

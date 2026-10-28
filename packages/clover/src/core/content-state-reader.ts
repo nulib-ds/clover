@@ -1,14 +1,13 @@
 import { parseAnnotationTarget } from "./annotations";
 import type { ResolvedContentState, Target } from "./content-state";
 import { asArray } from "../lib/asArray";
+import type { Json } from "./json";
 
 /**
  * Reading a content state: what a Root handed one (JSON or base64url, not a URL) loads
  * and where it goes. Its own chunk, loaded only for a content state (`loadContent`): a
  * page that opens a URL never carries it. Writing one stays in `content-state.ts`.
  */
-
-type Json = Record<string, any>;
 
 /** A base64url string as text, undoing the spec's `encodeURIComponent` step. */
 function decodeBase64Url(encoded: string): string {

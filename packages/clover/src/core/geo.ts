@@ -1,6 +1,6 @@
 import { parseAnnotationTarget } from "./annotations";
 import { bodiesOf, isPainting } from "./painting";
-import type { Collection, Manifest } from "./presentation";
+import type { Presentation4Collection, Manifest } from "./presentation";
 import { selectSequence } from "./selectors";
 import { toPlainText } from "./text";
 import { type LanguageMapLike, localize } from "./value";
@@ -153,7 +153,7 @@ const navPlaces = new WeakMap<object, Map<string, MapFeatureCollection>>();
  */
 export function navPlaceOf(
   manifest: Manifest | null,
-  collection: Collection | null = null,
+  collection: Presentation4Collection | null = null,
   language?: string,
 ): MapFeatureCollection {
   if (!manifest) return NO_FEATURES;

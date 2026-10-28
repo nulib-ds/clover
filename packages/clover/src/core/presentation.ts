@@ -1,10 +1,4 @@
-import type {
-  Canvas,
-  Collection,
-  Manifest,
-  Scene,
-  Timeline,
-} from "@iiif/parser/presentation-4/types";
+import type * as P4 from "@iiif/parser/presentation-4/types";
 
 /**
  * Clover's one data shape: IIIF Presentation 4.
@@ -15,13 +9,25 @@ import type {
  * the first resource that needs it arrives.
  */
 
-export type { Canvas, Collection, Manifest, Scene, Timeline };
+/*
+ * Declared here under the names Clover exports them by, never `Canvas` or `Collection`:
+ * the parts have those names, and the bundled declarations (`build:types`) would hold
+ * both, which TypeScript rejects.
+ */
+export type Manifest = P4.Manifest;
+export type Presentation4Canvas = P4.Canvas;
+export type Presentation4Collection = P4.Collection;
+export type Presentation4Scene = P4.Scene;
+export type Presentation4Timeline = P4.Timeline;
 
 /**
  * A IIIF resource Clover can show directly, a Manifest's item: a Canvas (`Canvas`), a
  * Timeline (`Timeline`, sound) or a Scene (`Scene`, 3D).
  */
-export type Container = Canvas | Timeline | Scene;
+export type Container =
+  | Presentation4Canvas
+  | Presentation4Timeline
+  | Presentation4Scene;
 
 const PRESENTATION_4 = /iiif\.io\/api\/presentation\/4\/context\.json/;
 
@@ -51,9 +57,9 @@ export function preloadUpgrader() {
  * `resource` as Presentation 4: a Manifest, Collection, Canvas, Timeline or Scene from any
  * supported version. Presentation 4 input is returned as it is.
  */
-export async function toPresentation4<T = Manifest | Collection | Container>(
-  resource: unknown,
-): Promise<T> {
+export async function toPresentation4<
+  T = Manifest | Presentation4Collection | Container,
+>(resource: unknown): Promise<T> {
   if (isPresentation4(resource)) return resource as T;
   // With the upgrader, a fix for its reading of fragmented targets (`keep-fragments.ts`).
   const [{ upgradeToPresentation4 }, { keepFragments }] = await Promise.all([

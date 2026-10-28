@@ -19,7 +19,7 @@ import {
   loadManifest,
 } from "./load";
 import { embedPage, fetchPage, referencedPages } from "./pages";
-import type { Collection, Manifest } from "./presentation";
+import type { Presentation4Collection, Manifest } from "./presentation";
 import type { CloverRequest } from "./request";
 import {
   canvasOfView,
@@ -53,7 +53,7 @@ export interface CloverState {
   /** The Manifest shown, in Presentation 4. */
   manifest: Manifest | null;
   /** The Collection it was reached through, if any. */
-  collection: Collection | null;
+  collection: Presentation4Collection | null;
   /** The Canvas the reader is on: the first of the view that shows it. */
   canvasId: string | null;
   /** Where to go once the view is drawn: a region, a time. Consumed once applied. */
@@ -302,7 +302,7 @@ export function createClover(options: CloverOptions = {}): Clover {
    */
   const arrive = (
     manifest: Manifest,
-    collection: Collection | null,
+    collection: Presentation4Collection | null,
     deepLink: Target | undefined,
     initial: Initial,
     /** An annotation of the content's own (`stateSets`) to pick, on the Canvas opened. */
@@ -520,7 +520,7 @@ export function createClover(options: CloverOptions = {}): Clover {
         const collection = await fetchResource(id, { request });
         if (collection.type !== "Collection") return;
         if (store.get().manifest !== shown) return;
-        store.set({ collection: collection as Collection });
+        store.set({ collection: collection as Presentation4Collection });
       } catch {
         // A Collection that will not load leaves the Manifest as it was.
       }

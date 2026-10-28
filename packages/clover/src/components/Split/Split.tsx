@@ -249,9 +249,22 @@ export const SplitHandle = forwardRef<HTMLDivElement, SplitHandleProps>(
       const container = split?.element.current;
       update();
       if (!container || typeof ResizeObserver === "undefined") return;
-      const observer = new ResizeObserver(update);
+      /*
+       * A frame after each resize, not as the observer reports: the value is state, and
+       * Preact (the elements') renders it at once, which changes the layout mid-report,
+       * and the browser tells the page's error handlers "ResizeObserver loop completed
+       * with undelivered notifications".
+       */
+      let frame = 0;
+      const observer = new ResizeObserver(() => {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(update);
+      });
       observer.observe(container);
-      return () => observer.disconnect();
+      return () => {
+        cancelAnimationFrame(frame);
+        observer.disconnect();
+      };
     }, [update, split, split?.sizes]);
 
     const percent = (px: number) =>

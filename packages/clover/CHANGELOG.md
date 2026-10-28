@@ -10,6 +10,45 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **A map draws its places in any bundler, with no setup.** In an app built with Vite,
+  webpack, Next or Turbopack, `Map` and the Viewer's Map section drew only the basemap,
+  at world zoom: MapLibre's worker could not find the module it imports once the
+  bundler had moved MapLibre's files, so every navPlace place and georeferenced overlay
+  silently went missing. Clover now brings the worker, bundled into one script, and
+  starts it from a `blob:` URL the first time a map shows (it loads with MapLibre, never
+  before). Remove the `setMapWorkerUrl` call and the worker files you copied, unless
+  your Content Security Policy refuses `blob:` workers, in which case keep serving the
+  worker yourself as before:
+
+  ```js
+  // Only where `worker-src` does not allow blob:
+  import { setMapWorkerUrl } from "@nulib/clover";
+  setMapWorkerUrl("/static/maplibre-gl-worker.mjs");
+  ```
+
+- **The Document template's page count stays on one line.** The thumbnails' toggle
+  broke "1 / 17" in two and grew over the first thumbnail.
+- **The type declarations compile with `skipLibCheck: false`.** They declared `Canvas`,
+  `Collection` and `Json` twice, and `@nulib/clover/map`'s used `Manifest` and
+  `Collection` without importing them, so a project that skips library checks read
+  `hasMapData`, `navPlaceOf` and `georeferencesOf`'s arguments as `any`. The
+  `Presentation4Canvas`, `Presentation4Collection`, `Presentation4Scene` and
+  `Presentation4Timeline` types, documented but missing from the declarations, are now
+  exported.
+- **No more "ResizeObserver loop completed with undelivered notifications."** A Viewer's
+  pages raised that error as they loaded, so error trackers logged it: the Panel's About
+  and `ReadMore` rewrote their layout within the browser's resize report, and `Split`'s
+  separator set its value there, which the web components (Preact) render at once. All
+  three now measure a frame later.
+
+### Changed
+
+- **`maplibre-gl` is pinned to 6.11.1**, the MapLibre the bundled worker is built from,
+  whose messages it reads. A page that brings another MapLibre serves that one's worker
+  with `setMapWorkerUrl`; Clover says so in the console.
+
 ## [4.0.0-beta.0] - 2026-10-27
 
 ### Added

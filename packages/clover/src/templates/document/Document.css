@@ -122,11 +122,13 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 /*
  * The count in the control's light color, small, right beside the glyph. It keeps no
  * room for its widest ("17 / 17"): nothing sits after the toggle to be moved as it
- * grows, so it is only as wide as the count it shows.
+ * grows, so it is only as wide as the count it shows. On one line: the toggle sits on
+ * the spine, which has no width, so it is sized to fit and would break "1 / 17" in two.
  */
 .clover-template-document-sidebar-toggle .clover-template-document-position {
   color: inherit;
   font-size: var(--clover-text-xs);
+  white-space: nowrap;
 }
 
 .clover-template-document-sidebar-toggle

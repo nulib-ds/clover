@@ -60,7 +60,7 @@ other props, and its `ref`, go to its element.
 | `overlay`        | `boolean`                         | `true`           | Draw the georeferenced images.                             |
 | `overlayOpacity` | `number`                          | `0.75`           | Their opacity, from 0 to 1.                                |
 | `styleUrl`       | `string`                          | Clover's basemap | A MapLibre style, used as it is.                           |
-| `workerUrl`      | `string`                          | —                | Where MapLibre's worker is served from.                    |
+| `workerUrl`      | `string`                          | Clover's own     | Where MapLibre's worker is served from, to serve your own. |
 | `scrollZoom`     | `boolean`                         | `false`          | Zoom with the wheel or trackpad.                           |
 | `onSelect`       | `(feature) => void`               | —                | A place was chosen, on the map or in its list.             |
 | `request`        | `{ credentials, headers, fetch }` | —                | With `iiifContent`: for every request.                     |
@@ -125,8 +125,10 @@ to the box around the map and its list.
 
 ### MapLibre's worker
 
-A bundler that moves MapLibre's files, as Next and webpack do, leaves the map without its
-places. Serve its worker yourself, and tell Clover where, once, for every map.
+Clover brings MapLibre's worker, bundled, and starts it from a `blob:` URL, so a map draws
+its places in any bundler with no setup. A page whose Content Security Policy refuses
+`blob:` workers (`worker-src`) serves the worker itself, and tells Clover where, once,
+for every map.
 
 ```js
 import { setMapWorkerUrl } from "@nulib/clover";
@@ -136,12 +138,8 @@ import { setMapWorkerUrl } from "@nulib/clover";
 setMapWorkerUrl("/static/maplibre-gl-worker.mjs");
 ```
 
-```js
-// Vite bundles the worker with its imports.
-import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
-
-setMapWorkerUrl(workerUrl);
-```
+The worker is the one built for the MapLibre Clover depends on. A page that brings
+another MapLibre serves that one's worker the same way; Clover says so in the console.
 
 ## Previous versions
 
@@ -150,4 +148,4 @@ setMapWorkerUrl(workerUrl);
 - `Map` is a named export of `@nulib/clover/map`.
 - A Viewer shows it in its Panel by itself: no `options.map`.
 - `georefAnnotation` is `georeferences`, and overlays draw by default.
-- Clover bundles no worker: serve MapLibre's where your bundler moves it.
+- MapLibre's worker comes with Clover: no `workerUrl` to set.

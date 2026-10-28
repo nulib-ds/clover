@@ -3,13 +3,12 @@ import type { ThumbnailSource } from "./thumbnail";
 import { findImageServiceId } from "../lib/renderer/sources/imageService";
 import { isPainting } from "./painting";
 import { asArray } from "../lib/asArray";
+import type { Json } from "./json";
 
 /*
  * Apart from `thumbnail.ts`, which every page loads for its strip: this reads annotation
  * targets, and only the Annotations list (loaded on demand) needs it.
  */
-
-type Json = Record<string, any>;
 
 /**
  * A small picture of a region of a Canvas (an annotation's `xywh`, in the Canvas's own

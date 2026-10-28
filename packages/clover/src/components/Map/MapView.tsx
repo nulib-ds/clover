@@ -46,8 +46,8 @@ export interface MapProps
   /** A MapLibre style URL, used as it is. Default: Clover's relief basemap (OpenFreeMap). */
   styleUrl?: string;
   /**
-   * Where MapLibre's worker is served from, if your bundler moves MapLibre's files (see
-   * the Map docs). By default MapLibre finds its own.
+   * Where MapLibre's worker is served from, to serve your own (see the Map docs). By
+   * default Clover brings it, from a `blob:` URL.
    */
   workerUrl?: string;
   /** Zoom with the wheel or trackpad. Default false, so an embedded map never traps page scroll. */
@@ -252,13 +252,17 @@ function MapView({
     let live = true;
     let instance: any = null;
     let observer: ResizeObserver | null = null;
-    import("maplibre-gl")
-      .then((module) => {
+    // MapLibre and its worker together: a page that sets no worker gets Clover's.
+    Promise.all([import("maplibre-gl"), import("./worker")])
+      .then(([module, bundled]) => {
         // ES builds export `Map` by name; a CommonJS interop may wrap it in `default`.
         const maplibre: any =
           "Map" in module ? module : (module as any).default;
         if (!live || !container.current) return;
-        const worker = workerUrl ?? getMapWorkerUrl();
+        const worker =
+          workerUrl ??
+          getMapWorkerUrl() ??
+          bundled.bundledWorkerUrl(maplibre.getVersion?.());
         if (worker) maplibre.setWorkerUrl(worker);
         const { t } = latest.current;
         instance = new maplibre.Map({
