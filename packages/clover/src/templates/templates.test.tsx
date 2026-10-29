@@ -717,7 +717,10 @@ describe("templates", () => {
       )!;
       const info = () =>
         screen.getByRole("button", { name: "More information" });
-      fireEvent.click(info());
+      // The title can appear before the Canvas has mounted its controls.
+      fireEvent.click(
+        await screen.findByRole("button", { name: "More information" }),
+      );
       await waitFor(() => expect(panel).toHaveAttribute("data-open", "true"));
       // Over the page there is no bar for it, nor for the thumbnails.
       expect(screen.queryAllByRole("separator")).toHaveLength(0);
@@ -748,7 +751,9 @@ describe("templates", () => {
       const panel = document.querySelector<HTMLElement>(
         ".clover-template-document-panel",
       )!;
-      fireEvent.click(screen.getByRole("button", { name: "More information" }));
+      fireEvent.click(
+        await screen.findByRole("button", { name: "More information" }),
+      );
       await waitFor(() => expect(panel).toHaveAttribute("data-open", "true"));
       // Tabbing back from the panel reaches the thumbnails' toggle it covers.
       const under = screen.getByRole("button", { name: /^Show items/ });
@@ -813,7 +818,9 @@ describe("templates", () => {
       });
       const sidebar = await openThumbnails();
       // Tabbing on from the thumbnails reaches the page they cover.
-      const under = screen.getByRole("button", { name: "More information" });
+      const under = await screen.findByRole("button", {
+        name: "More information",
+      });
       under.focus();
       fireEvent.keyDown(under, { key: "Escape" });
       expect(sidebar).toHaveAttribute("hidden");

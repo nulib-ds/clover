@@ -474,7 +474,9 @@ describe("A long transcript", () => {
     const drawn = () =>
       document.querySelectorAll(".clover-transcript-cue").length;
     expect(drawn()).toBe(40);
-    act(() => observers.at(-1)?.([{ isIntersecting: true }]));
+    // The cues can render before the effect starts observing their end.
+    await waitFor(() => expect(observers).not.toHaveLength(0));
+    act(() => observers.at(-1)!([{ isIntersecting: true }]));
     await waitFor(() => expect(drawn()).toBe(80));
     fireEvent.focus(screen.getByRole("button", { name: /Line 77/ }));
     await waitFor(() => expect(drawn()).toBe(100));
