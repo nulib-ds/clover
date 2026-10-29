@@ -3,6 +3,7 @@ import React from "react";
 import home from "docs/components/Home/Home.module.css";
 import styles from "docs/components/Home/SectionIntro.module.css";
 import { Swoosh } from "docs/components/Home/Swoosh";
+import type { CtaSection } from "docs/lib/tag-manager";
 
 /**
  * A section's intro on the homepage: its title, under the hero's stroke, one sentence,
@@ -21,7 +22,7 @@ export function SectionIntro({
 }: {
   title: React.ReactNode;
   note: React.ReactNode;
-  cta: { href: string; label: string; primary?: boolean };
+  cta: { href: string; label: string; primary?: boolean; section?: CtaSection };
   beside?: React.ReactNode;
   as?: "h2" | "h3";
   className?: string;
@@ -30,6 +31,7 @@ export function SectionIntro({
   const link = (
     <Link
       href={cta.href}
+      data-cta-section={cta.section}
       className={`${cta.primary ? "cta-solid" : "cta-outline"} ${styles.cta}`}
     >
       {cta.label}

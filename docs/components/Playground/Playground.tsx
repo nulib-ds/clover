@@ -545,7 +545,11 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
                   </span>
                 )}
               </span>
-              <Link href="/docs" className="cta-solid">
+              <Link
+                href="/docs"
+                className="cta-solid"
+                data-cta-section="templates"
+              >
                 Get started
                 <span className="cta-arrow" aria-hidden="true">
                   →
@@ -574,7 +578,11 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
               </p>
             </div>
             <div className={styles.buildActions}>
-              <Link href="/docs/body" className="cta-outline">
+              <Link
+                href="/docs/body"
+                className="cta-outline"
+                data-cta-section="components"
+              >
                 {/* The parts counted here, not in the note (Mat, 2026-10-25). */}
                 See all {partCount} components
                 <span className="cta-arrow" aria-hidden="true">

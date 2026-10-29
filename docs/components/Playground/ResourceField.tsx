@@ -10,6 +10,9 @@ import { resources } from "docs/components/Playground/playground-config";
 
 import styles from "docs/components/Playground/Playground.module.css";
 import { example } from "docs/lib/example";
+import { loadable, rootAddress, webAddress } from "docs/lib/resource-content";
+
+export { loadable } from "docs/lib/resource-content";
 
 /** The reader's own resource, where a resource's key would be. */
 export const OWN = "own";
@@ -28,67 +31,6 @@ const COOKBOOK_NAME = "IIIF Cookbook recipes";
  * story draws too (`docs/mocks/cookbook/`).
  */
 type Recipe = CatalogRecipe;
-
-/*
- * Not `validIiifContent` from `docs/lib/iiif-content`: it brings `@iiif/helpers`, an ESM
- * external on the server, and that makes this module async, so the homepage's import of
- * it is undefined while the page is rendered there. These two checks are its own.
- */
-const webAddress = (value: string) => {
-  try {
-    const { protocol, hostname } = new URL(value);
-    return (protocol === "http:" || protocol === "https:") && hostname
-      ? value
-      : undefined;
-  } catch {
-    return undefined;
-  }
-};
-
-/** A IIIF Content State as a link carries it, base64url of the URI-encoded JSON, read. */
-const decodeContentState = (value: string): Record<string, any> | undefined => {
-  if (!/^[A-Za-z0-9_-]+$/.test(value)) return undefined;
-  try {
-    const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
-    const state = JSON.parse(
-      decodeURIComponent(
-        atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, "=")),
-      ),
-    );
-    return typeof state === "object" && state !== null ? state : undefined;
-  } catch {
-    return undefined;
-  }
-};
-
-/** What Clover can open: a web address, or an encoded content state. */
-export const loadable = (value: string) => {
-  const trimmed = value.trim();
-  return (
-    webAddress(trimmed) ?? (decodeContentState(trimmed) ? trimmed : undefined)
-  );
-};
-
-const ROOTS = ["Manifest", "Collection", "sc:Manifest", "sc:Collection"];
-
-/**
- * The address of the Manifest or Collection a reader's resource opens: the address itself,
- * or a content state's target where it is one, else the one its target is part of.
- */
-const rootAddress = (content: string) => {
-  const direct = webAddress(content);
-  if (direct) return direct;
-  const state = decodeContentState(content);
-  if (!state) return undefined;
-  const targets = state.target ?? state;
-  const target = Array.isArray(targets) ? targets[0] : targets;
-  if (typeof target === "string") return webAddress(target.split("#")[0]);
-  const root = ROOTS.includes(target?.type)
-    ? target
-    : (target?.partOf ?? []).find((part: any) => ROOTS.includes(part?.type));
-  const id = root?.id ?? root?.["@id"];
-  return typeof id === "string" ? webAddress(id.split("#")[0]) : undefined;
-};
 
 /** The first picture a `thumbnail` names, as Presentation 3 writes it or 2. */
 const firstThumbnail = (thumbnail: unknown) => {

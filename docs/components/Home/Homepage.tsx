@@ -317,7 +317,12 @@ const Homepage: React.FC<{
             // One sentence of why, never the title's words or the stories' again (Mat, 2026-10-22).
             note="Clover is designed with the full spectrum of user experience in mind, for every visitor, every layout and every IIIF resource."
             // In the accent, the solid call to action (Mat, 2026-10-25).
-            cta={{ href: "/docs", label: "Read the docs", primary: true }}
+            cta={{
+              href: "/docs",
+              label: "Read the docs",
+              primary: true,
+              section: "why_clover",
+            }}
           />
 
           {/*
@@ -463,7 +468,12 @@ const Homepage: React.FC<{
           <SectionIntro
             title="Install is easy."
             note="Use it in React or as web components, and you’re up and running in seconds."
-            cta={{ href: "/docs", label: "Get started", primary: true }}
+            cta={{
+              href: "/docs",
+              label: "Get started",
+              primary: true,
+              section: "install",
+            }}
             beside={<InstallCommand />}
           />
         </Parts>

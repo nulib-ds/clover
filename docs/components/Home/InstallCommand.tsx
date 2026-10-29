@@ -18,7 +18,7 @@ export function InstallCommand() {
     return () => clearTimeout(timer);
   }, [copied]);
   return (
-    <div className={styles.install}>
+    <div className={styles.install} id="install">
       <pre className={styles.installCode}>
         <code>{COMMAND}</code>
       </pre>
