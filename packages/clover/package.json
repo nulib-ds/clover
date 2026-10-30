@@ -26,6 +26,11 @@
     "directory": "packages/clover"
   },
   "license": "MIT",
+  "author": {
+    "name": "Mat Jordan",
+    "email": "mat@northwestern.edu",
+    "url": "https://github.com/mathewjordan"
+  },
   "sideEffects": [
     "*.css",
     "./dist/web-components/**"

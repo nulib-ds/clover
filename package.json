@@ -2,6 +2,11 @@
   "name": "clover",
   "private": true,
   "description": "Clover: @nulib/clover, composable IIIF components and viewer, in React or as web components, and its documentation site.",
+  "author": {
+    "name": "Mat Jordan",
+    "email": "mat@northwestern.edu",
+    "url": "https://github.com/mathewjordan"
+  },
   "workspaces": [
     "packages/clover"
   ],
