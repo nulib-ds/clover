@@ -12,7 +12,7 @@ import React from "react";
 import Canvas from "..";
 import { containAspect } from "./MediaBody";
 import { chapterAt } from "./Transport";
-import { gapsOf } from "./seekGaps";
+import { alongBar, gapsOf, lengthOnBar } from "./seekGaps";
 import { type FakeTrack, FakeTrackList } from "../testing/textTracks";
 import { stubViewport } from "../testing/viewport";
 import { formatTime } from "./useMediaController";
@@ -346,11 +346,12 @@ describe("Canvas media", () => {
     const tip = () => area.querySelector(":scope > .clover-tip");
     expect(tip()?.querySelector(".clover-tip-lead")).toHaveTextContent("0:15");
     expect(tip()).toHaveTextContent(/Lunch$/);
+    // Each placed as the thumb travels the bar, as its gaps are (`alongBar`).
     expect(area.style.getPropertyValue("--clover-transport-preview")).toBe(
-      "75%",
+      alongBar(75),
     );
-    expect(stretch()!.style.left).toBe("50%");
-    expect(stretch()!.style.width).toBe("50%");
+    expect(stretch()!.style.left).toBe(alongBar(50));
+    expect(stretch()!.style.width).toBe(lengthOnBar(50));
     // Along the same chapter, nothing more is said; its time follows the pointer.
     move(170);
     expect(onChapterHighlight).toHaveBeenCalledTimes(1);
@@ -366,8 +367,8 @@ describe("Canvas media", () => {
     );
 
     rerender(canvas("range/1"));
-    expect(stretch()!.style.left).toBe("0%");
-    expect(stretch()!.style.width).toBe("50%");
+    expect(stretch()!.style.left).toBe(alongBar(0));
+    expect(stretch()!.style.width).toBe(lengthOnBar(50));
     expect(area.querySelector(".clover-tip")).toBeNull();
   });
 

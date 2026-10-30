@@ -4,13 +4,14 @@ import { resolve } from "node:path";
 import { canvasTextTranscripts } from "../components/Canvas/layout";
 import hessJson from "../fixtures/mocks/rudolf-hess-nuremberg/manifest.json";
 import { p4 } from "../fixtures/presentation4";
-import { chaptersOf } from "./ranges";
+import { chaptersOf, tableOfContents } from "./ranges";
 import { parseVtt } from "./vtt";
 
 /*
  * The docs' `rudolf-hess-nuremberg` mock carries its film's chapters, as Ranges titled with
- * the National Archives' description, and its English captions, as a WebVTT file and as a
- * plain-text transcript.
+ * the National Archives' description, each with a still, in a `thumbnail-nav` Range
+ * (Cookbook 0229), and its English captions, as a WebVTT file and as a plain-text
+ * transcript.
  */
 describe("the rudolf-hess-nuremberg mock", () => {
   const manifest = p4(hessJson);
@@ -36,6 +37,21 @@ describe("the rudolf-hess-nuremberg mock", () => {
     chapters.slice(1).forEach((chapter, index) => {
       expect(chapter.start).toBe(chapters[index].end);
     });
+  });
+
+  it("gives each chapter a still, its leaders no-nav, as Cookbook 0229 does", () => {
+    const [thumbnails] = manifest.structures as any[];
+    expect(thumbnails.behavior).toEqual(["thumbnail-nav"]);
+    const chapters = chaptersOf(manifest, film.id, film.duration);
+    chapters.forEach((chapter) =>
+      expect(chapter.thumbnail).toMatchObject({ type: "Image", width: 250 }),
+    );
+    // The leaders are no chapters, and the one Range around them is unwrapped.
+    const contents = tableOfContents(manifest);
+    expect(contents.map((node) => node.id)).toEqual(
+      chapters.map((chapter) => chapter.id),
+    );
+    expect(contents.every((node) => node.thumbnail)).toBe(true);
   });
 
   it("names its captions as Cookbook 0219 does, and they read as WebVTT", () => {

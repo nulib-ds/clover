@@ -1175,7 +1175,8 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   and an "Other Defendants" page, English captions from the trial's record
   (`captions.json`, the Russian and French interpretation in the record's English), the
   same words as a plain-text transcript (the Canvas's `rendering`), and chapters titled
-  with the archive's description (static, and live in `npm run dev` under
+  with the archive's description, each with a still of its own in a `thumbnail-nav` Range,
+  the leaders `no-nav` (Cookbook 0229; Mat, 2026-10-30) (static, and live in `npm run dev` under
   `pages/api/mocks/rudolf-hess-nuremberg/`, since its captions and transcript are its
   own). It is the playground's Footage; `esu-shrine`, Northwestern's Material History
   Lab's scan of an Esu shrine (IBD12-AD-2-1), which the Lab publishes in Smithsonian

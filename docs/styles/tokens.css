@@ -528,12 +528,26 @@ pre {
  * at half strength under the pointer, whole while chosen; focused, its own ring. Each
  * solid fill reads these, its own colors where they are not set.
  */
-:root[data-high-contrast] {
+:root[data-high-contrast],
+:root[data-high-contrast] [data-page-theme] {
   --solid-fill: var(--clover-color-control, #1a1d1e);
   --solid-text: var(--clover-color-control-glyph, #fff);
   --solid-ring: 3px solid var(--accent-9);
   --solid-ring-hover: 3px solid
     color-mix(in srgb, var(--accent-9) 50%, transparent);
+}
+
+/*
+ * A ring is built from the accent where it is declared: the site's above on the root,
+ * Clover's (`packages/clover/src/styles/contrast.css`, as written there) on what carries
+ * `data-high-contrast`, the root or a Clover root around a preview. So where the Seamless
+ * story previews an accent within (`data-page-theme`), they are built again from its
+ * accent, or its rings stay the stored accent's (Mat, 2026-10-30).
+ */
+:where([data-high-contrast]) [data-page-theme] {
+  --clover-accent-ring: 3px solid var(--clover-color-accent);
+  --clover-accent-ring-hover: 3px solid
+    color-mix(in srgb, var(--clover-color-accent) 50%, transparent);
 }
 
 .cta-solid {

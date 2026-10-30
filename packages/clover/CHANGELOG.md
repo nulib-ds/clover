@@ -459,6 +459,14 @@ layout="pager"` anywhere takes the same count, and its `nav` is named "Collectio
 
 ### Fixed
 
+- **A chapter's stretch meets its gaps on the seek bar.** The stretch drawn out for the
+  chapter under the pointer, or marked from `Contents`, and the popover over it were
+  placed across the whole bar, while the gaps between chapters, and the time read under
+  the pointer, follow the thumb's travel (the bar less the thumb's width). The two parted
+  toward either end, up to half a thumb, so late chapters were marked short of their gaps
+  and early ones past them. All of them are now placed as the thumb travels, as is the
+  popover a frame animation's bar shows for keyboard focus. Nothing to change on a page.
+
 - **A start time is kept.** A Manifest's `start` that points into a recording with a
   `PointSelector` (Cookbook 0015: `"t": 120.5`, which the upgrader writes as Presentation
   4's `instant`) opened at the beginning, as a `PointSelector` was read as a point in space

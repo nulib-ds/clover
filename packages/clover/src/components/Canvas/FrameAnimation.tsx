@@ -37,7 +37,7 @@ import {
   VolumeMutedIcon,
 } from "../../ui/mediaIcons";
 import { formatTime } from "../../lib/time";
-import { gapMask, gapsOf, seekShare } from "./media/seekGaps";
+import { alongBar, gapMask, gapsOf, seekShare } from "./media/seekGaps";
 import { placeMenu } from "./media/placeMenu";
 
 export interface AnimationState {
@@ -374,12 +374,12 @@ export function FrameControls({
   // Which frame shows, as a figure, "5 / 5", shown and read alike: no word, as Search's
   // place among its hits shows (Mat, 2026-10-29).
   const position = `${frame + 1} / ${frames.length}`;
-  // With no pointer over it, the popover is over where it is, for keyboard focus.
+  // With no pointer over it, the popover is over the thumb, for keyboard focus.
   useLayoutEffect(() => {
     if (pointedAt === null)
       seekArea.current?.style.setProperty(
         "--clover-transport-preview",
-        `${progress}%`,
+        alongBar(progress),
       );
   }, [pointedAt, progress]);
   // Its menu, placed from its button within the Body, as the chapters' is (WCAG 1.4.10).

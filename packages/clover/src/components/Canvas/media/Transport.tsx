@@ -9,7 +9,7 @@ import React, {
 import { TransportButton } from "./TransportButton";
 import { useBarHeight } from "./useBarHeight";
 import { type MediaController, formatTime } from "./useMediaController";
-import { gapMask, gapsOf, seekShare } from "./seekGaps";
+import { alongBar, gapMask, gapsOf, lengthOnBar, seekShare } from "./seekGaps";
 import { placeMenu } from "./placeMenu";
 import type { CloverRequest } from "../../../core/request";
 import { type ThumbnailSource, imageSource } from "../../../core/thumbnail";
@@ -451,7 +451,7 @@ const Transport: React.FC<TransportProps> = ({
       figure.style.removeProperty(top);
     };
   }, [previewed]);
-  // Where a chapter lies along the bar, in percent of it.
+  // Where a chapter lies along the bar, in percent of the thumb's travel (`alongBar`).
   const along = (index: number) => {
     const { start, end = duration } = chapters[index];
     return {
@@ -538,11 +538,11 @@ const Transport: React.FC<TransportProps> = ({
           tipShown
             ? ({
                 // Over a chapter's middle; with none there, over the time it shows.
-                "--clover-transport-preview": `${
+                "--clover-transport-preview": alongBar(
                   previewed >= 0
                     ? along(previewed).left + along(previewed).width / 2
-                    : ((pointing ? pointedAt : currentTime) / duration) * 100
-                }%`,
+                    : ((pointing ? pointedAt : currentTime) / duration) * 100,
+                ),
               } as React.CSSProperties)
             : undefined
         }
@@ -581,8 +581,8 @@ const Transport: React.FC<TransportProps> = ({
             aria-hidden="true"
             className="clover-canvas-transport-chapter-span"
             style={{
-              left: `${along(marked).left}%`,
-              width: `${along(marked).width}%`,
+              left: alongBar(along(marked).left),
+              width: lengthOnBar(along(marked).width),
             }}
           />
         )}

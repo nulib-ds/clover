@@ -451,7 +451,12 @@ IIIF publisher, so the Manifest is the mock's own, made from the file's Commons 
   Ribbentrop, in dock" (6:19.7), "Justice Francis Biddle in speaking of von Ribbentrop"
   (7:53.4) and "Camera on prisoners' dock as Justice Lawrence speaks about the
   defendant, Ernst Kaltenbrunner" (8:48.2, to 10:00.4). Each is a SpecificResource on
-  the Canvas with a `t=start,end` FragmentSelector.
+  the Canvas with a `t=start,end` FragmentSelector, and has a `thumbnail`, the still
+  Wikimedia Commons cuts from the film at a frame that shows what its title names. They
+  are held in one Range of `behavior` `thumbnail-nav`, as
+  [Cookbook recipe 0229](https://iiif.io/api/cookbook/recipe/0229-behavior-ranges/)
+  gives a video's, with the leaders before and after (to 0:12.5, from 10:00.4) as Ranges
+  of their own, `no-nav`, so that Range covers the whole film.
 - **Each annotation's targets** are the stretches of the film he is in view, each a
   SpecificResource on the Canvas with a FragmentSelector of both Media Fragment
   dimensions, `xywh=x,y,w,h&t=start,end`: the region of his head and shoulders (Hess

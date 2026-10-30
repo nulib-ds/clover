@@ -1,3 +1,19 @@
+/*
+ * Where the thumb's middle is at a share of the seek bar (in percent): it travels the bar
+ * less its own width. The gaps, a chapter's stretch and the popover over it are all placed
+ * so, as the pointer is read (`seekShare`); placed across the whole bar instead, they
+ * drifted from the gaps by up to half a thumb toward either end.
+ */
+const along = (share: number) =>
+  `var(--clover-transport-thumb) / 2 + (100% - var(--clover-transport-thumb)) * ${share / 100}`;
+
+/** Where a share of the seek bar (in percent) lies along it, as the thumb stands there. */
+export const alongBar = (share: number) => `calc(${along(share)})`;
+
+/** How long a stretch of the seek bar is, `share` (in percent) of the thumb's travel. */
+export const lengthOnBar = (share: number) =>
+  `calc((100% - var(--clover-transport-thumb)) * ${share / 100})`;
+
 /**
  * The seek bar's mask: opaque but for a gap `--clover-transport-gap` wide at each share of
  * it (a chapter's start, or a frame's, in percent), cut out of the bar (`Transport.css`),
@@ -6,9 +22,6 @@
  */
 export function gapMask(at: number[]): string {
   const half = "var(--clover-transport-gap) / 2";
-  // Where the thumb's middle is at that share: it travels the bar less its own width.
-  const along = (share: number) =>
-    `var(--clover-transport-thumb) / 2 + (100% - var(--clover-transport-thumb)) * ${share / 100}`;
   const stops = at.flatMap((share) => [
     `#000 0 calc(${along(share)} - ${half})`,
     `transparent 0 calc(${along(share)} + ${half})`,

@@ -36,7 +36,10 @@
  * - the same words as a plain-text transcript, the Canvas's `rendering`, as Cookbook
  *   recipe 0017 gives one (`transcript()`);
  * - chapters (`structures`), a Range for each part of the film the National Archives'
- *   description names, titled with its words and timed to the film's cuts (`CHAPTERS`).
+ *   description names, titled with its words and timed to the film's cuts (`CHAPTERS`),
+ *   each with a still of its own as its `thumbnail`, inside one Range of `behavior`
+ *   `thumbnail-nav`, as Cookbook recipe 0229 gives a video's; the leaders before and after
+ *   are Ranges of their own, `no-nav`, so the thumbnails' Range covers the whole film.
  *
  * `scripts/build-mocks.mjs` writes it to `public/mocks/rudolf-hess-nuremberg/` (the
  * Manifest, `captions.vtt` and `transcript.txt`), published at
@@ -98,30 +101,34 @@ const DESCRIPTION =
 
 /**
  * The film's parts as the National Archives' description names them, in its own words
- * (each cut to the clause that names the shot), and where each runs, to the film's cuts:
- * `[start, end, title]`. The leaders before and after are no part.
+ * (each cut to the clause that names the shot), where each runs, to the film's cuts, and
+ * the second of its still, a frame that shows what its title names:
+ * `[start, end, title, still]`. The leaders before and after are no part.
  */
 const CHAPTERS = [
-  [12.5, 85.6, "Sitting in prisoners' dock listening to testimony"],
-  [85.6, 117.2, "Hess taken ill leaves prisoners' dock"],
-  [117.2, 158.1, "Shots of English and US prosecution tables"],
+  [12.5, 85.6, "Sitting in prisoners' dock listening to testimony", 40],
+  [85.6, 117.2, "Hess taken ill leaves prisoners' dock", 100],
+  [117.2, 158.1, "Shots of English and US prosecution tables", 135],
   [
     158.1,
     197.8,
     "Scenes of Justice Kravechenko, Russian Justice, reading statement from bench",
+    168,
   ],
-  [197.8, 297.5, "Pan of prisoners' dock and courtroom"],
-  [297.5, 379.7, "Court adjourns"],
+  [197.8, 297.5, "Pan of prisoners' dock and courtroom", 210],
+  [297.5, 379.7, "Court adjourns", 335],
   [
     379.7,
     473.4,
     "MS of Erich Raeder, Fritz Sauckel, Hess, Goering, von Ribbentrop, in dock",
+    425,
   ],
-  [473.4, 528.2, "Justice Francis Biddle in speaking of von Ribbentrop"],
+  [473.4, 528.2, "Justice Francis Biddle in speaking of von Ribbentrop", 500],
   [
     528.2,
     600.4,
     "Camera on prisoners' dock as Justice Lawrence speaks about the defendant, Ernst Kaltenbrunner",
+    565,
   ],
 ];
 
@@ -389,21 +396,58 @@ export function manifest(base = PUBLIC_BASE) {
         ],
       },
     ],
-    structures: CHAPTERS.map(([start, end, title], index) => ({
-      id: `${base}/range/${index + 1}`,
-      type: "Range",
-      label: { en: [title] },
-      items: [
-        {
-          type: "SpecificResource",
-          source: { id: canvas, type: "Canvas" },
-          selector: {
-            type: "FragmentSelector",
-            conformsTo: "http://www.w3.org/TR/media-frags/",
-            value: `t=${start},${end}`,
-          },
-        },
-      ],
-    })),
+    // The chapters, each with its still, in one Range of thumbnails, as recipe 0229
+    // gives a video's; the leaders are Ranges of their own, out of its navigation.
+    structures: [
+      {
+        id: `${base}/range/thumbnails`,
+        type: "Range",
+        label: { en: ["Sentencing of Nazi Leaders at Nuremberg"] },
+        behavior: ["thumbnail-nav"],
+        items: [
+          leader(`${base}/range/leader/start`, canvas, 0, CHAPTERS[0][0]),
+          ...CHAPTERS.map(([start, end, title, seconds], index) => ({
+            id: `${base}/range/${index + 1}`,
+            type: "Range",
+            label: { en: [title] },
+            items: [span(canvas, start, end)],
+            thumbnail: [
+              {
+                id: still(250, seconds),
+                type: "Image",
+                format: "image/jpeg",
+                width: 250,
+                height: 183,
+              },
+            ],
+          })),
+          leader(
+            `${base}/range/leader/end`,
+            canvas,
+            CHAPTERS.at(-1)[1],
+            DURATION,
+          ),
+        ],
+      },
+    ],
   };
 }
+
+/** A stretch of the Canvas's time, `t=start,end`. */
+const span = (canvas, start, end) => ({
+  type: "SpecificResource",
+  source: { id: canvas, type: "Canvas" },
+  selector: {
+    type: "FragmentSelector",
+    conformsTo: "http://www.w3.org/TR/media-frags/",
+    value: `t=${start},${end}`,
+  },
+});
+
+/** A leader, before the first chapter or after the last: `no-nav`, as recipe 0229's. */
+const leader = (id, canvas, start, end) => ({
+  id,
+  type: "Range",
+  behavior: ["no-nav"],
+  items: [span(canvas, start, end)],
+});

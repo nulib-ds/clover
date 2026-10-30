@@ -14585,197 +14585,326 @@
   ],
   "structures": [
     {
-      "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/1",
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/thumbnails",
       "type": "Range",
       "label": {
-        "en": ["Sitting in prisoners' dock listening to testimony"]
+        "en": ["Sentencing of Nazi Leaders at Nuremberg"]
       },
+      "behavior": ["thumbnail-nav"],
       "items": [
         {
-          "type": "SpecificResource",
-          "source": {
-            "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
-            "type": "Canvas"
-          },
-          "selector": {
-            "type": "FragmentSelector",
-            "conformsTo": "http://www.w3.org/TR/media-frags/",
-            "value": "t=12.5,85.6"
-          }
-        }
-      ]
-    },
-    {
-      "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/2",
-      "type": "Range",
-      "label": {
-        "en": ["Hess taken ill leaves prisoners' dock"]
-      },
-      "items": [
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/leader/start",
+          "type": "Range",
+          "behavior": ["no-nav"],
+          "items": [
+            {
+              "type": "SpecificResource",
+              "source": {
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
+                "type": "Canvas"
+              },
+              "selector": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://www.w3.org/TR/media-frags/",
+                "value": "t=0,12.5"
+              }
+            }
+          ]
+        },
         {
-          "type": "SpecificResource",
-          "source": {
-            "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
-            "type": "Canvas"
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/1",
+          "type": "Range",
+          "label": {
+            "en": ["Sitting in prisoners' dock listening to testimony"]
           },
-          "selector": {
-            "type": "FragmentSelector",
-            "conformsTo": "http://www.w3.org/TR/media-frags/",
-            "value": "t=85.6,117.2"
-          }
-        }
-      ]
-    },
-    {
-      "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/3",
-      "type": "Range",
-      "label": {
-        "en": ["Shots of English and US prosecution tables"]
-      },
-      "items": [
+          "items": [
+            {
+              "type": "SpecificResource",
+              "source": {
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
+                "type": "Canvas"
+              },
+              "selector": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://www.w3.org/TR/media-frags/",
+                "value": "t=12.5,85.6"
+              }
+            }
+          ],
+          "thumbnail": [
+            {
+              "id": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sentencing_of_Nazi_Leaders_at_Nuremberg.webm/250px-seek%3D40-Sentencing_of_Nazi_Leaders_at_Nuremberg.webm.jpg",
+              "type": "Image",
+              "format": "image/jpeg",
+              "width": 250,
+              "height": 183
+            }
+          ]
+        },
         {
-          "type": "SpecificResource",
-          "source": {
-            "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
-            "type": "Canvas"
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/2",
+          "type": "Range",
+          "label": {
+            "en": ["Hess taken ill leaves prisoners' dock"]
           },
-          "selector": {
-            "type": "FragmentSelector",
-            "conformsTo": "http://www.w3.org/TR/media-frags/",
-            "value": "t=117.2,158.1"
-          }
-        }
-      ]
-    },
-    {
-      "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/4",
-      "type": "Range",
-      "label": {
-        "en": [
-          "Scenes of Justice Kravechenko, Russian Justice, reading statement from bench"
-        ]
-      },
-      "items": [
+          "items": [
+            {
+              "type": "SpecificResource",
+              "source": {
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
+                "type": "Canvas"
+              },
+              "selector": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://www.w3.org/TR/media-frags/",
+                "value": "t=85.6,117.2"
+              }
+            }
+          ],
+          "thumbnail": [
+            {
+              "id": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sentencing_of_Nazi_Leaders_at_Nuremberg.webm/250px-seek%3D100-Sentencing_of_Nazi_Leaders_at_Nuremberg.webm.jpg",
+              "type": "Image",
+              "format": "image/jpeg",
+              "width": 250,
+              "height": 183
+            }
+          ]
+        },
         {
-          "type": "SpecificResource",
-          "source": {
-            "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
-            "type": "Canvas"
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/3",
+          "type": "Range",
+          "label": {
+            "en": ["Shots of English and US prosecution tables"]
           },
-          "selector": {
-            "type": "FragmentSelector",
-            "conformsTo": "http://www.w3.org/TR/media-frags/",
-            "value": "t=158.1,197.8"
-          }
-        }
-      ]
-    },
-    {
-      "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/5",
-      "type": "Range",
-      "label": {
-        "en": ["Pan of prisoners' dock and courtroom"]
-      },
-      "items": [
+          "items": [
+            {
+              "type": "SpecificResource",
+              "source": {
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
+                "type": "Canvas"
+              },
+              "selector": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://www.w3.org/TR/media-frags/",
+                "value": "t=117.2,158.1"
+              }
+            }
+          ],
+          "thumbnail": [
+            {
+              "id": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sentencing_of_Nazi_Leaders_at_Nuremberg.webm/250px-seek%3D135-Sentencing_of_Nazi_Leaders_at_Nuremberg.webm.jpg",
+              "type": "Image",
+              "format": "image/jpeg",
+              "width": 250,
+              "height": 183
+            }
+          ]
+        },
         {
-          "type": "SpecificResource",
-          "source": {
-            "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
-            "type": "Canvas"
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/4",
+          "type": "Range",
+          "label": {
+            "en": [
+              "Scenes of Justice Kravechenko, Russian Justice, reading statement from bench"
+            ]
           },
-          "selector": {
-            "type": "FragmentSelector",
-            "conformsTo": "http://www.w3.org/TR/media-frags/",
-            "value": "t=197.8,297.5"
-          }
-        }
-      ]
-    },
-    {
-      "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/6",
-      "type": "Range",
-      "label": {
-        "en": ["Court adjourns"]
-      },
-      "items": [
+          "items": [
+            {
+              "type": "SpecificResource",
+              "source": {
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
+                "type": "Canvas"
+              },
+              "selector": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://www.w3.org/TR/media-frags/",
+                "value": "t=158.1,197.8"
+              }
+            }
+          ],
+          "thumbnail": [
+            {
+              "id": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sentencing_of_Nazi_Leaders_at_Nuremberg.webm/250px-seek%3D168-Sentencing_of_Nazi_Leaders_at_Nuremberg.webm.jpg",
+              "type": "Image",
+              "format": "image/jpeg",
+              "width": 250,
+              "height": 183
+            }
+          ]
+        },
         {
-          "type": "SpecificResource",
-          "source": {
-            "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
-            "type": "Canvas"
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/5",
+          "type": "Range",
+          "label": {
+            "en": ["Pan of prisoners' dock and courtroom"]
           },
-          "selector": {
-            "type": "FragmentSelector",
-            "conformsTo": "http://www.w3.org/TR/media-frags/",
-            "value": "t=297.5,379.7"
-          }
-        }
-      ]
-    },
-    {
-      "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/7",
-      "type": "Range",
-      "label": {
-        "en": [
-          "MS of Erich Raeder, Fritz Sauckel, Hess, Goering, von Ribbentrop, in dock"
-        ]
-      },
-      "items": [
+          "items": [
+            {
+              "type": "SpecificResource",
+              "source": {
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
+                "type": "Canvas"
+              },
+              "selector": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://www.w3.org/TR/media-frags/",
+                "value": "t=197.8,297.5"
+              }
+            }
+          ],
+          "thumbnail": [
+            {
+              "id": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sentencing_of_Nazi_Leaders_at_Nuremberg.webm/250px-seek%3D210-Sentencing_of_Nazi_Leaders_at_Nuremberg.webm.jpg",
+              "type": "Image",
+              "format": "image/jpeg",
+              "width": 250,
+              "height": 183
+            }
+          ]
+        },
         {
-          "type": "SpecificResource",
-          "source": {
-            "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
-            "type": "Canvas"
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/6",
+          "type": "Range",
+          "label": {
+            "en": ["Court adjourns"]
           },
-          "selector": {
-            "type": "FragmentSelector",
-            "conformsTo": "http://www.w3.org/TR/media-frags/",
-            "value": "t=379.7,473.4"
-          }
-        }
-      ]
-    },
-    {
-      "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/8",
-      "type": "Range",
-      "label": {
-        "en": ["Justice Francis Biddle in speaking of von Ribbentrop"]
-      },
-      "items": [
+          "items": [
+            {
+              "type": "SpecificResource",
+              "source": {
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
+                "type": "Canvas"
+              },
+              "selector": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://www.w3.org/TR/media-frags/",
+                "value": "t=297.5,379.7"
+              }
+            }
+          ],
+          "thumbnail": [
+            {
+              "id": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sentencing_of_Nazi_Leaders_at_Nuremberg.webm/250px-seek%3D335-Sentencing_of_Nazi_Leaders_at_Nuremberg.webm.jpg",
+              "type": "Image",
+              "format": "image/jpeg",
+              "width": 250,
+              "height": 183
+            }
+          ]
+        },
         {
-          "type": "SpecificResource",
-          "source": {
-            "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
-            "type": "Canvas"
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/7",
+          "type": "Range",
+          "label": {
+            "en": [
+              "MS of Erich Raeder, Fritz Sauckel, Hess, Goering, von Ribbentrop, in dock"
+            ]
           },
-          "selector": {
-            "type": "FragmentSelector",
-            "conformsTo": "http://www.w3.org/TR/media-frags/",
-            "value": "t=473.4,528.2"
-          }
-        }
-      ]
-    },
-    {
-      "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/9",
-      "type": "Range",
-      "label": {
-        "en": [
-          "Camera on prisoners' dock as Justice Lawrence speaks about the defendant, Ernst Kaltenbrunner"
-        ]
-      },
-      "items": [
+          "items": [
+            {
+              "type": "SpecificResource",
+              "source": {
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
+                "type": "Canvas"
+              },
+              "selector": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://www.w3.org/TR/media-frags/",
+                "value": "t=379.7,473.4"
+              }
+            }
+          ],
+          "thumbnail": [
+            {
+              "id": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sentencing_of_Nazi_Leaders_at_Nuremberg.webm/250px-seek%3D425-Sentencing_of_Nazi_Leaders_at_Nuremberg.webm.jpg",
+              "type": "Image",
+              "format": "image/jpeg",
+              "width": 250,
+              "height": 183
+            }
+          ]
+        },
         {
-          "type": "SpecificResource",
-          "source": {
-            "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
-            "type": "Canvas"
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/8",
+          "type": "Range",
+          "label": {
+            "en": ["Justice Francis Biddle in speaking of von Ribbentrop"]
           },
-          "selector": {
-            "type": "FragmentSelector",
-            "conformsTo": "http://www.w3.org/TR/media-frags/",
-            "value": "t=528.2,600.4"
-          }
+          "items": [
+            {
+              "type": "SpecificResource",
+              "source": {
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
+                "type": "Canvas"
+              },
+              "selector": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://www.w3.org/TR/media-frags/",
+                "value": "t=473.4,528.2"
+              }
+            }
+          ],
+          "thumbnail": [
+            {
+              "id": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sentencing_of_Nazi_Leaders_at_Nuremberg.webm/250px-seek%3D500-Sentencing_of_Nazi_Leaders_at_Nuremberg.webm.jpg",
+              "type": "Image",
+              "format": "image/jpeg",
+              "width": 250,
+              "height": 183
+            }
+          ]
+        },
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/9",
+          "type": "Range",
+          "label": {
+            "en": [
+              "Camera on prisoners' dock as Justice Lawrence speaks about the defendant, Ernst Kaltenbrunner"
+            ]
+          },
+          "items": [
+            {
+              "type": "SpecificResource",
+              "source": {
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
+                "type": "Canvas"
+              },
+              "selector": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://www.w3.org/TR/media-frags/",
+                "value": "t=528.2,600.4"
+              }
+            }
+          ],
+          "thumbnail": [
+            {
+              "id": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Sentencing_of_Nazi_Leaders_at_Nuremberg.webm/250px-seek%3D565-Sentencing_of_Nazi_Leaders_at_Nuremberg.webm.jpg",
+              "type": "Image",
+              "format": "image/jpeg",
+              "width": 250,
+              "height": 183
+            }
+          ]
+        },
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/range/leader/end",
+          "type": "Range",
+          "behavior": ["no-nav"],
+          "items": [
+            {
+              "type": "SpecificResource",
+              "source": {
+                "id": "https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/canvas/1",
+                "type": "Canvas"
+              },
+              "selector": {
+                "type": "FragmentSelector",
+                "conformsTo": "http://www.w3.org/TR/media-frags/",
+                "value": "t=600.4,671.164"
+              }
+            }
+          ]
         }
       ]
     }
