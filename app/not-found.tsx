@@ -4,7 +4,7 @@ import { Moved } from "docs/components/Moved";
 import { pageMetadata } from "docs/lib/site";
 
 /*
- * The static export writes this as `404.html`, which GitHub Pages serves for any missing
+ * The static export writes this as `404.html`, which CloudFront serves for any missing
  * path: a page that moved is sent on from here (`docs/components/Moved.tsx`).
  */
 export const metadata: Metadata = pageMetadata({

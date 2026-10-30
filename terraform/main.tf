@@ -152,8 +152,10 @@ data "aws_cloudfront_cache_policy" "optimized" {
   name = "Managed-CachingOptimized"
 }
 
+# The security headers, and CORS open to any origin: the mocks and the 3.x fixtures are
+# IIIF resources published for any viewer to open, which needs CORS.
 data "aws_cloudfront_response_headers_policy" "security" {
-  name = "Managed-SecurityHeadersPolicy"
+  name = "Managed-CORS-and-SecurityHeadersPolicy"
 }
 
 resource "aws_cloudfront_distribution" "site" {

@@ -675,6 +675,14 @@ deadline.
     wordmark keep that; measure a new one against them. A stroke draws from one end to
     the other, as a pen draws it, never stretched (Mat, 2026-10-22): a window slides
     open over ink that slides back as far, both transforms, so it holds still. A stroke never draws again for a color: its ink eases to a new accent (a registered `--stroke-ink`, 480ms, none where the reader asks for reduced motion; Mat, 2026-10-25).
+  - The site's icon (Mat, 2026-10-30) is Clover's Next control, as Items' Next and the
+    playground's Open draw it: the accent's round fill and its white caret, the caret
+    larger and heavier so it holds in a 16px tab. `app/icon.svg` is its source, and
+    `npm run build:icons` (`scripts/build-icons.mjs`) draws `app/favicon.ico` (16, 32 and
+    48px) and `app/apple-icon.png` (180px, square, the accent to its edges) from it; run
+    it after changing the SVG, and commit all three. Tried and set aside that day: the
+    wordmark's C on the accent (it read as a crescent moon) and the stroke across a black
+    tile (at 16px, the "thin blue line" symbol).
   - Every card, container, call to action and code block on the site has one radius,
     `--radius-4` (12px), Nextra's code blocks, callouts and search field too
     (`layout.css`); what sits inside one takes a smaller step (`--radius-2`,

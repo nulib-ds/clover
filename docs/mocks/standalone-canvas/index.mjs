@@ -1,7 +1,7 @@
 /**
  * A Canvas on its own: the one Canvas of Northwestern University Libraries' record of
  * Bartolomeo Borghi's map of the British Isles, L'Isole Britanniche, as Clover 3.x's site
- * publishes it at https://samvera-labs.github.io/clover-iiif/canvas/standalone-canvas.json
+ * published it, now at https://clover.iiif.library.northwestern.edu/canvas/standalone-canvas.json
  * (`source.json`, kept as fetched on October 19, 2026), with these changes:
  *
  * - the Canvas, its painting page and annotation take ids under the mock's own address;

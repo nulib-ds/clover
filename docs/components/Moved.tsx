@@ -54,8 +54,8 @@ export function movedTo(path: string): string | null {
 }
 
 /**
- * The 404 page. The docs are a static export, so there are no server redirects; GitHub
- * Pages serves this page for any missing path instead, and it sends a moved one on.
+ * The 404 page. The docs are a static export, so there are no server redirects;
+ * CloudFront serves this page for any missing path instead, and it sends a moved one on.
  */
 export function Moved() {
   const router = useRouter();

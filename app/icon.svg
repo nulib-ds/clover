@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!--
+    The site's icon (Mat, 2026-10-30): Clover's Next control, Items' Next and the
+    playground's Open, the accent's round fill and its caret, the caret larger and
+    heavier so it holds at 16px. `npm run build:icons` draws favicon.ico and
+    apple-icon.png from it.
+  -->
+  <circle cx="16" cy="16" r="16" fill="#0f62fe"/>
+  <path d="M13.6 10l6 6-6 6" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.4"/>
+</svg>
