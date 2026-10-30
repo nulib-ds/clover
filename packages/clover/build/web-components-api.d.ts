@@ -113,6 +113,23 @@ export interface CloverAnnotationSet {
   }>;
 }
 
+/**
+ * Annotations walked as one whole (Cookbook 0309): the AnnotationPage or
+ * AnnotationCollection given as the content, else the AnnotationCollection the
+ * Manifest's annotation pages are part of.
+ */
+export interface CloverAnnotationCollection {
+  id: string;
+  type: "AnnotationPage" | "AnnotationCollection";
+  label?: CloverLanguageMap;
+  /** The number of its annotations, where it says. */
+  total?: number;
+  /** The Manifest's pages of it, in the Canvases' order; none for the content's. */
+  pages: Array<{ id: string; canvasId: string; fetched: boolean }>;
+  /** Its annotations on the Manifest's Canvases, in their order, as far as fetched. */
+  entries: CloverAnnotationSet["entries"];
+}
+
 /** An entry of the Manifest's table of contents: a Range, as `Contents` draws it. */
 export interface CloverContentsEntry {
   id: string;
@@ -175,6 +192,8 @@ export interface CloverRootApi {
   activeCanvas(): CloverResource | null;
   navigation(): CloverNavigation;
   annotationSets(): CloverAnnotationSet[];
+  /** The annotations walked as one whole; null where there are none. */
+  annotationCollection(): CloverAnnotationCollection | null;
   /** The Manifest's table of contents, as `Contents` draws it; none before it loads. */
   contents(): CloverContentsEntry[];
   /** A language map as text in the root's language, with the tag it is in. */

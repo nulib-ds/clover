@@ -87,6 +87,7 @@ test("a page loads the sheets of what it draws, and most of the stylesheet with 
   const labels = sheetsOf(LABELS);
   assert.deepEqual(labels, [
     "styles/scale",
+    "styles/contrast",
     "ui/ReadMore",
     "components/Primitives/Primitives",
     "components/Label/Label",
