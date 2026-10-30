@@ -157,6 +157,7 @@ export const SHEETS = [
  */
 const APART = new Set([
   "styles/scale",
+  "styles/contrast",
   "components/Label/Label",
   "components/Primitives/Primitives",
   "ui/ReadMore",

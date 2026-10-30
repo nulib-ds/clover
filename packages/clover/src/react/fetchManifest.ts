@@ -10,7 +10,10 @@ import type { Manifest } from "../core/presentation";
  */
 const fetched = new WeakMap<Clover, Map<string, Promise<Manifest | null>>>();
 
-export function fetchManifest(clover: Clover, id: string) {
+export function fetchManifest(
+  clover: Clover,
+  id: string,
+): Promise<Manifest | null> {
   let byId = fetched.get(clover);
   if (!byId) fetched.set(clover, (byId = new Map()));
   let manifest = byId.get(id);
