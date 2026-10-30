@@ -231,10 +231,13 @@ const stories: Story[] = [
     body: (
       <>
         {/*
-         * Clover as itself, never "we", and active ("gains", never "comes from"): its
-         * IIIF fluency first, from building blocks native to open specifications, then
-         * its code and components, named, never "it’s" or "its", and "IIIF" said once
-         * (Mat, 2026-10-25). No date, no range of recipes; the link one word.
+         * Clover as itself, never "we", and active ("builds on", never "comes from"):
+         * open specifications from the ground up, then its code and components designed
+         * in parity with IIIF (Mat's words; "designed", a claim about how they are
+         * made, never that they cover all of it), never "every", "it’s" or "its", and
+         * "IIIF" said once (Mat, 2026-10-25; reworded 2026-10-30, as "designed natively
+         * to open specifications" read "to open" as a verb). No date, no range of
+         * recipes; the link one word.
          */}
         {/*
          * What Clover handles in its sentence, not a column of its own (Mat,
@@ -243,12 +246,12 @@ const stories: Story[] = [
          * total or count in part (Mat, 2026-10-21). "cookbook" goes to the IIIF
          * Cookbook itself (Mat, 2026-10-25).
          */}
-        Clover gains IIIF fluency from building blocks designed natively to open
-        specifications. Code and components are crafted toward recipes, with{" "}
+        Clover builds on open specifications from the ground up. Code and
+        components are designed in parity with IIIF, handling{" "}
         <strong className={styles.inlineFigure}>
           <Swoosh className={styles.figureMark}>{cookbook.handled}</Swoosh>
         </strong>{" "}
-        handled in the <a href="https://iiif.io/api/cookbook/">cookbook</a>.
+        recipes in the <a href="https://iiif.io/api/cookbook/">cookbook</a>.
       </>
     ),
     figures: [],
