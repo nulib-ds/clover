@@ -96,6 +96,11 @@ const OWNERS = {
     "components/Items/Items.tsx",
     "components/Items/Pager.tsx",
   ],
+  // The pager's, and `Position`'s, which counts views where no pager draws.
+  "components/Items/Pager": [
+    "components/Items/Pager.tsx",
+    "components/Items/Position.tsx",
+  ],
   // The panel's own, and the lists of its sections and About's, anywhere.
   "components/Panel/Panel": [
     "components/Panel/Panel.tsx",
@@ -157,6 +162,10 @@ export const SHEETS = [
  */
 const APART = new Set([
   "styles/scale",
+  /*
+   * Every element's, as the scale is (the higher-contrast mode's values, `OWNERS`):
+   * grouped, it brought every run to every page, a page of labels 14 kB (2026-10-30).
+   */
   "styles/contrast",
   "components/Label/Label",
   "components/Primitives/Primitives",

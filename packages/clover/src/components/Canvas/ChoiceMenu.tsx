@@ -3,8 +3,8 @@ import React from "react";
 import ControlMenu from "./ControlMenu";
 import { type ChoiceGroup, type ChoiceSelections, playsHere } from "./layout";
 import { localize } from "../../core/value";
-import { useContainerName } from "../../ui/useContainerName";
-import { languageProps } from "../../core/direction";
+import { useContainerName } from "../../i18n/useContainerName";
+import { languageProps } from "../../i18n/direction";
 
 interface ChoiceMenuProps {
   id: string;

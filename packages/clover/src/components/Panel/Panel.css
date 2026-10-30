@@ -137,7 +137,8 @@
 /*
  * Rows: what a reader picks from a list in the panel (an annotation, a Range, a cue, a
  * search hit, a place on the map), written once. `xs` by `s` inside, an accent edge at
- * the start when it is the current one. Each part keeps only its own layout.
+ * the start when it is the current one. Each part keeps only its own layout. A Contents
+ * entry's toggle, beside its row, takes the rows' tint under the pointer.
  */
 :is(
   .clover-annotations-entry,
@@ -165,7 +166,8 @@
     button.clover-contents-button,
     .clover-transcript-cue > button,
     button.clover-content-search-hit,
-    .clover-geomap-places button
+    .clover-geomap-places button,
+    button.clover-contents-toggle
   ):is(:hover, [data-highlighted="true"]):not(:disabled) {
   background-color: var(--clover-color-secondary-muted, #f1f1f1);
 }

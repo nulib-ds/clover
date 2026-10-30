@@ -1,4 +1,6 @@
 import { cookbookSections } from "docs/components/CookbookRecipes/cookbookSections";
+import { readDate } from "../../packages/clover/src/core/dates";
+import { formatDate } from "../../packages/clover/src/core/dates-format";
 import {
   CHECKED,
   progressFor,
@@ -67,10 +69,6 @@ export const cookbook = {
   inPart: recipes.filter(
     (recipe) => progressFor(recipe.slug).status === "partial",
   ).length,
-  checked: new Date(`${CHECKED}T12:00:00Z`).toLocaleDateString("en-US", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  }),
+  // A day, as Clover reads and writes one (`core/dates.ts`), in the site's US English.
+  checked: formatDate(readDate(CHECKED, "day")!, "en-US"),
 };

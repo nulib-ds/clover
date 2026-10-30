@@ -1,8 +1,8 @@
 import type React from "react";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
-import { HostLanguageContext } from "../i18n/hostLanguage";
-import { useCloverTranslation } from "../i18n/useCloverTranslation";
+import { HostLanguageContext } from "./hostLanguage";
+import { useCloverTranslation } from "./useCloverTranslation";
 
 /**
  * A Clover root's reading of the page's language (a `Root`, or a part shown outside one),

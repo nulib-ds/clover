@@ -9,7 +9,7 @@ import {
 import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { visuallyHidden } from "../../ui/visuallyHidden";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 /**
  * Says where the reader has moved to — the Canvas's label and its position — in a polite

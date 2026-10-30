@@ -45,7 +45,7 @@ import {
   claimContext,
   returnContext,
 } from "../../lib/renderer/backends/contexts";
-import { useRootLanguage } from "../../react/language";
+import { useRootLanguage } from "../../i18n/useRootLanguage";
 import Button from "../../ui/Button";
 import ControlCluster, {
   type ControlSpec,
@@ -63,11 +63,11 @@ import { ErrorBoundary } from "../../ui/ErrorBoundary";
 import ExitFullscreen from "../../ui/ExitFullscreen";
 import { Loading } from "../../ui/Loading";
 import { SHORTCUTS, forwardShortcut } from "../../ui/Tip";
-import { useContainerName } from "../../ui/useContainerName";
+import { useContainerName } from "../../i18n/useContainerName";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { engineFor } from "./engines";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 /** Which of the Scene's controls to show. All are on by default. */
 export interface SceneControlsConfig {

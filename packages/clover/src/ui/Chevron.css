@@ -23,3 +23,18 @@
     transition: none;
   }
 }
+
+/*
+ * The panel's disclosures, written once (DESIGN.md §5): a section's button, a tab or a
+ * box's heading with this chevron (`ui/Sections.css`), and the button that opens and
+ * closes a Contents entry's entries, with it too (`Contents.css`). Focused, the accent's
+ * ring, 2px, inside its box. Each keeps its own look at rest; a Contents toggle takes its
+ * row's tint under the pointer (`Panel.css`'s rows).
+ */
+:is(
+  button.clover-sections-button,
+  button.clover-contents-toggle
+):focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: -2px;
+}

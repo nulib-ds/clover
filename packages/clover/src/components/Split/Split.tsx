@@ -24,7 +24,7 @@ import {
   toPixels,
   writeSizes,
 } from "./splitting";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 export { toPixels, type SplitLength };
 

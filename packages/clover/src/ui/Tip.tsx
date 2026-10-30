@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
-import { languageProps } from "../core/direction";
+import { languageProps } from "../i18n/direction";
 
 /**
  * A key a control answers to: as `aria-keyshortcuts` names it (WAI-ARIA key names, `Plus`

@@ -5,7 +5,7 @@ import { join } from "../lib/classnames";
 import { Steps, type StepsModel } from "./Steps";
 import { Tip } from "./Tip";
 import { visuallyHidden } from "./visuallyHidden";
-import { languageProps } from "../core/direction";
+import { languageProps } from "../i18n/direction";
 
 export interface FieldPillProps {
   /** The field's id, for its label. */

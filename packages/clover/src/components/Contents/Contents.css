@@ -63,15 +63,10 @@ button.clover-contents-toggle {
   cursor: pointer;
 }
 
-button.clover-contents-toggle:hover {
-  background-color: var(--clover-color-secondary-muted, #f1f1f1);
-}
-
-/* Focused, the ring the panel's own controls take (`ui/Sections.css`). */
-button.clover-contents-toggle:focus-visible {
-  outline: 2px solid var(--clover-color-accent, #0065c3);
-  outline-offset: -2px;
-}
+/*
+ * Under the pointer, its row's tint (`Panel.css`'s rows); focused, the ring of the
+ * panel's disclosures (`ui/Chevron.css`).
+ */
 
 /* The entries holding the current one, in the text's weight, so the trail to it shows. */
 button.clover-contents-button[data-trail="true"] {

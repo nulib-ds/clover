@@ -51,15 +51,21 @@
 }
 
 /*
- * A picture above the words (a hotspot's image, Cookbook 0377), as wide as the popover
- * lets it be and no taller than Items' pictures (Mat, 2026-10-29), as in Annotations.
+ * A picture over an annotation's words (Cookbook 0377), written once (DESIGN.md §5): a
+ * hotspot's in its popover, and an annotation's in the Annotations list and the Canvas's
+ * menu (`Annotations.css`). As wide as there is room, at its own aspect, and no taller
+ * than Items' pictures (Mat, 2026-10-29): `--clover-items-height`, where a page sets it,
+ * else its default. Each keeps its own corners and the gap to its words.
  */
-.clover-tip-image {
+:is(.clover-tip-image, .clover-annotations-image) {
   display: block;
   width: auto;
   max-width: 100%;
   height: auto;
   max-height: var(--clover-items-height, 8rem);
+}
+
+.clover-tip-image {
   /* Over its words, as the parts of one item are (Mat, 2026-10-29). */
   margin-block-end: var(--clover-space-xs);
   border-radius: calc(var(--clover-radius, 3px) / 2);

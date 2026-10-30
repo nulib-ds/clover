@@ -1,5 +1,7 @@
 import { execFileSync } from "node:child_process";
 
+import { dateTimeOf } from "../../packages/clover/src/core/dates-format";
+
 /*
  * When a file last changed: its last commit's time, from Git, as ISO 8601, for a page's
  * structured data and Open Graph (`app/[[...mdxPath]]/page.tsx`) and for the sitemap
@@ -7,7 +9,8 @@ import { execFileSync } from "node:child_process";
  * the Panel's page gave the day before its last commit, i18n's the day after), so the
  * site asks Git itself. The deploy checks out the whole history (`fetch-depth: 0`,
  * `deploy-pages.yml`); with one commit, every page would carry its time. A file Git does
- * not know (a new page in `next dev`) has none. Server only.
+ * not know (a new page in `next dev`) has none. Written in UTC, as Clover writes a moment
+ * for a machine (`dateTimeOf`, `core/dates-format.ts`). Server only.
  */
 const times = new Map<string, string | undefined>();
 
@@ -23,7 +26,10 @@ export function lastChanged(file?: string) {
     } catch {
       time = undefined;
     }
-    times.set(file, time ? new Date(time).toISOString() : undefined);
+    times.set(
+      file,
+      time ? dateTimeOf({ at: new Date(time), precision: "time" }) : undefined,
+    );
   }
   return times.get(file);
 }

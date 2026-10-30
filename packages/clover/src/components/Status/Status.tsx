@@ -5,7 +5,7 @@ import { join } from "../../lib/classnames";
 import { useStatus } from "../../react/hooks";
 import { Loading } from "../../ui/Loading";
 import { visuallyHidden } from "../../ui/visuallyHidden";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 export interface StatusProps {
   className?: string;

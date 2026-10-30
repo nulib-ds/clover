@@ -4,7 +4,7 @@ import { useCloverTranslation } from "../i18n/useCloverTranslation";
 import { join } from "../lib/classnames";
 import { Tip } from "./Tip";
 import { visuallyHidden } from "./visuallyHidden";
-import { languageProps } from "../core/direction";
+import { languageProps } from "../i18n/direction";
 
 /** Where the reader is among matches, and the way to step through them. */
 export interface StepsModel {

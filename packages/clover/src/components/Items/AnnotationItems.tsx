@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { type Forwarded, type ItemsProps, ItemsView, Pager } from "./Items";
 import { CountMenu } from "./CountMenu";
-import type { Steps } from "./Pager";
+import type { Steps } from "./Position";
 import { annotationName } from "../../core/annotation-name";
 import {
   type AnnotationEntry,

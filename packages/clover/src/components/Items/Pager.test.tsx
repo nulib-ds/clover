@@ -106,7 +106,8 @@ describe("Items' pager", () => {
       </Clover.Root>,
     );
     await screen.findByRole("heading", { name: "Simple Manifest - Book" });
-    const pager = screen.getByRole("navigation", { name: "Collection" });
+    // The pager's own chunk, loaded as it first draws.
+    const pager = await screen.findByRole("navigation", { name: "Collection" });
     expect(shown(pager)).toBe("1 / 2");
     // Its count opens the members, listed as the Panel lists them, the one shown selected.
     const count = within(pager).getByRole("button", { name: "1 / 2" });

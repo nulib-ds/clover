@@ -9,7 +9,7 @@ import {
   useOptionalCloverSelector,
 } from "../../react/context";
 import { useProvider } from "../Primitives/resource";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 export interface LabelProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "lang"> {

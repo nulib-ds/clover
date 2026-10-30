@@ -2,7 +2,7 @@ import React from "react";
 
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 /**
  * What a Body could not load, said: Clover's words, then the error's own, in English as

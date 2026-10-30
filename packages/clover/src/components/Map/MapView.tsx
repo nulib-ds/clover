@@ -29,13 +29,14 @@ import {
   useOptionalCloverSelector,
 } from "../../react/context";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
-import { useRootLanguage } from "../../react/language";
+import { useRootLanguage } from "../../i18n/useRootLanguage";
 import { getMapWorkerUrl } from "../../core/map-config";
 import { useNearViewport } from "../Body/useNearViewport";
-import { directionOf, languageProps } from "../../core/direction";
+import { directionOf, languageProps } from "../../i18n/direction";
 import { Tip } from "../../ui/Tip";
 import { NavDate } from "../../ui/NavDate";
-import { formatNavDate, navDateTime, readNavDate } from "../../core/nav-date";
+import { readDate } from "../../core/dates";
+import { dateTimeOf, formatDate } from "../../core/dates-format";
 import { cloverI18n, langWithin } from "../../i18n/config";
 
 export interface MapProps
@@ -475,16 +476,16 @@ function MapView({
             marked(text, nameLang);
             // Its owner's date under it, as the list gives it (Cookbook 0318), marked
             // where its language is not the name's.
-            const date = readNavDate(feature.properties?.navDate);
+            const date = readDate(feature.properties?.navDate);
             if (date) {
               const locale = cloverI18n.language;
               const time = document.createElement("time");
               time.className = "clover-geomap-popup-date";
-              time.dateTime = navDateTime(
+              time.dateTime = dateTimeOf(
                 date,
                 String(feature.properties.navDate),
               );
-              time.textContent = formatNavDate(date, locale);
+              time.textContent = formatDate(date, locale);
               marked(time, langWithin(locale, nameLang ?? latest.current.host));
               text.append(time);
             }

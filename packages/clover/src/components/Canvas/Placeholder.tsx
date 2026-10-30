@@ -6,7 +6,7 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import type { CloverRequest } from "../../core/request";
 import type { ThumbnailSource } from "../../core/thumbnail";
 import { STILL_SIZE } from "./layout";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 export interface PlaceholderStill {
   /** Its image, or its image service, asked as its `info.json` allows (`placeholderStill`). */
@@ -44,7 +44,9 @@ interface PlaceholderProps {
 /**
  * A still's URL: the image itself, or its service's, made once its `info.json` is read
  * (`resolveThumbnail`), never written from the service's id. The resolver is loaded with
- * the first placeholder that needs it, so a Canvas with none never carries it.
+ * the first placeholder that needs it, so a Canvas with none never carries it. Apart from
+ * `useThumbnail` (`ui/EntryThumbnail.tsx`) for that reason: every Canvas draws this up
+ * front, and that hook imports the resolver.
  */
 function useStill(
   source: ThumbnailSource,

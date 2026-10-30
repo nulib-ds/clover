@@ -19,7 +19,7 @@ import {
   useThumbnail,
 } from "../../../ui/EntryThumbnail";
 import { join } from "../../../lib/classnames";
-import { languageCode } from "../../../ui/languageCode";
+import { languageCode } from "../../../i18n/languageCode";
 import { SHORTCUTS, Tip } from "../../../ui/Tip";
 import { useOneOpen } from "../../../ui/useOneOpen";
 import {
@@ -32,11 +32,11 @@ import {
   VolumeHighIcon,
   VolumeMutedIcon,
 } from "../../../ui/mediaIcons";
-import { useContainerName } from "../../../ui/useContainerName";
+import { useContainerName } from "../../../i18n/useContainerName";
 import { useCloverTranslation } from "../../../i18n/useCloverTranslation";
 import { toggleFullscreen } from "../../../lib/fullscreen";
 import useFullscreenSupported from "../../../hooks/useFullscreenSupported";
-import { languageProps } from "../../../core/direction";
+import { languageProps } from "../../../i18n/direction";
 
 interface TransportProps {
   instance: string;

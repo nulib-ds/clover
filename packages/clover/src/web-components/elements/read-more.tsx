@@ -1,12 +1,12 @@
 import React, { useLayoutEffect, useRef } from "react";
 
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
-import { useRootLanguage } from "../../react/language";
+import { useRootLanguage } from "../../i18n/useRootLanguage";
 import { useReadMore } from "../../ui/ReadMore";
 import { useUniqueId } from "../../ui/useUniqueId";
 import type { HostedProps } from "../host";
 import { useWatched } from "./nodes";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 /** The text it opens: its first child of the page's, never its own button. */
 const textOf = (element: Element) =>

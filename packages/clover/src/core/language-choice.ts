@@ -1,9 +1,10 @@
+import { languageToRead } from "../i18n/languages";
 import { localize, type LanguageMapLike } from "./value";
 
 /**
  * The language a choice shows: the reader's pick (`picked`) where the set has it, else the
  * one the Root reads IIIF text in (`language`), or else the reader's, as IIIF text is
- * chosen (`localize`); else the first given.
+ * chosen (`languageToRead`); else the first given.
  */
 export function startingLanguage(
   languages: string[],
@@ -12,8 +13,9 @@ export function startingLanguage(
 ): string | undefined {
   if (picked && languages.includes(picked)) return picked;
   if (!languages.length) return undefined;
-  const map = Object.fromEntries(languages.map((tag) => [tag, [tag]]));
-  return localize(map, language).lang ?? languages[0];
+  const tag = languageToRead(languages, language);
+  // `none` is no language to show, as IIIF text in it carries none (`localize`).
+  return tag === "none" ? languages[0] : tag;
 }
 
 /** A language map's languages, as its keys give them (never `none`). */

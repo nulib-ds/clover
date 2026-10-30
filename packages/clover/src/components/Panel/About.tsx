@@ -16,13 +16,22 @@ import {
   Summary,
   Thumbnail,
 } from "../Primitives/Primitives";
-import { DownloadGroups, useDownloads } from "../Download/Download";
+import { useDownloads } from "../Download/downloads";
 import { Provider } from "../Provider/Provider";
 import { titleTag, titled } from "../../ui/heading";
 import { Label } from "../Label/Label";
-import { languageProps } from "../../core/direction";
-import { readNavDate } from "../../core/nav-date";
-import { NavDate } from "../../ui/NavDate";
+import { languageProps } from "../../i18n/direction";
+import { readDate } from "../../core/dates";
+// Alone, outside a Panel, its downloads' links in a section of their own, drawn then.
+const DownloadGroups = lazy(() =>
+  import("../Download/Download").then(({ DownloadGroups }) => ({
+    default: DownloadGroups,
+  })),
+);
+// Its date, written only where it has one (Cookbook 0318): About carries no writing else.
+const NavDate = lazy(() =>
+  import("../../ui/NavDate").then(({ NavDate }) => ({ default: NavDate })),
+);
 
 export interface AboutProps extends React.HTMLAttributes<HTMLElement> {
   /** Also show the current Canvas's summary, for Manifests that describe each image. */
@@ -229,8 +238,10 @@ function AboutContent({
       {/* Its date for navigation, as its metadata says its others (Cookbook 0318). */}
       {section(
         "aboutDate",
-        readNavDate(manifest.navDate),
-        <NavDate value={manifest.navDate} className="clover-about-date" />,
+        readDate(manifest.navDate),
+        <Suspense fallback={null}>
+          <NavDate value={manifest.navDate} className="clover-about-date" />
+        </Suspense>,
       )}
       {section("aboutProvider", hasAny("provider"), <Provider />)}
       {section("aboutRights", manifest.rights, <Rights />)}
@@ -239,11 +250,13 @@ function AboutContent({
       {section(
         "download",
         download && downloads.page.length + downloads.all.length > 0,
-        <DownloadGroups
-          page={downloads.page}
-          all={downloads.all}
-          headingLevel={headingLevel + 1}
-        />,
+        <Suspense fallback={null}>
+          <DownloadGroups
+            page={downloads.page}
+            all={downloads.all}
+            headingLevel={headingLevel + 1}
+          />
+        </Suspense>,
       )}
       {section(
         isLoneCanvas(manifest) ? "aboutCanvas" : "aboutManifest",

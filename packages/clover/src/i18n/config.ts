@@ -1,5 +1,5 @@
 import { en, loaders } from "./locales";
-import { readerLanguages } from "./reader";
+import { baseLanguage, readerLanguages, sameLanguage } from "./languages";
 
 /**
  * Clover's translations, without a translation library.
@@ -56,7 +56,7 @@ function notify() {
 
 /** `pt-BR` → `pt-BR`, `pt`: a regional tag falls back to its base language. */
 function withBase(lng: string): string[] {
-  const base = lng.split("-")[0];
+  const base = baseLanguage(lng);
   return base && base !== lng ? [lng, base] : [lng];
 }
 
@@ -133,12 +133,6 @@ export interface CloverString {
   text: string;
   /** The language the string came from; undefined when no language has the key. */
   lang?: string;
-}
-
-/** Whether two language tags name the same language: `pt-BR` and `pt` do. */
-export function sameLanguage(a: string, b: string): boolean {
-  const base = (tag: string) => tag.split("-")[0].toLowerCase();
-  return base(a) === base(b);
 }
 
 /**

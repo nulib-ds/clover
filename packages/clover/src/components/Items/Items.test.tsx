@@ -1,4 +1,11 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import React from "react";
 
 import audioJson from "../../fixtures/iiif-cookbook/0002-mvm-audio.json";
@@ -325,7 +332,7 @@ describe("Items standalone", () => {
   });
 
   // Cookbook 0318: a Collection's members, each with a date for navigation.
-  it("shows a member's date under its label, then its summary", () => {
+  it("shows a member's date under its label, then its summary", async () => {
     const [castel, colosseum] = romeJson.items;
     render(
       <Clover.Items
@@ -336,7 +343,12 @@ describe("Items standalone", () => {
       />,
     );
     const [first, second] = screen.getAllByRole("link");
-    const date = first.querySelector("time")!;
+    // Written as it arrives: the dates' writing loads where there is a date.
+    const date = await waitFor(() => {
+      const found = first.querySelector("time");
+      expect(found).toBeTruthy();
+      return found!;
+    });
     // Written as its year's first moment, it is that year.
     expect(date).toHaveTextContent(/^1776$/);
     expect(date).toHaveAttribute("datetime", "1776");

@@ -232,9 +232,11 @@ The stylesheet's size is part of the design.
   | -------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
   | Round controls       | `ui/Button.css`    | the Canvas's cluster, the media transport, Items' arrows, `Previous` and `Next` (Items' pager), the Panel's close |
   | Text buttons         | `ui/Button.css`    | Search's button                                                                                                   |
-  | Rows and their lists | `Panel.css`        | annotations, Ranges, cues, search hits, places on the map                                                         |
+  | Rows and their lists | `Panel.css`        | annotations, Ranges, cues, search hits, places on the map (a Range's toggle takes their tint under the pointer)   |
+  | Disclosures          | `ui/Chevron.css`   | a section's button (a tab, or a box's heading), a Contents entry's toggle: their chevron and focus ring           |
   | Fields               | `styles/scale.css` | a field pill's query (Search's and the Transcript's find), a Collection's menu                                    |
   | Popovers             | `ui/Tip.css`       | every control that shows an icon alone (§7), the Canvas's hotspots, a split's handle                              |
+  | Pictures over words  | `ui/Tip.css`       | an annotation's image in a hotspot's popover, the Annotations list and the Canvas's menu (Cookbook 0377)          |
   | Controls             | `Canvas.css`       | the Canvas's cluster, navigator, a placeholder's toggle, the media transport, its captions                        |
   | Language codes       | `ui/Codes.css`     | an annotation set's languages, a Transcript's files                                                               |
   | Panes over the page  | `Default.css`      | Default's panel, Document's panel and thumbnails, their washes (`clover-template-drawer`, `-scrim`)               |

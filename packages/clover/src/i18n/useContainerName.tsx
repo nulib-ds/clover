@@ -1,9 +1,9 @@
 import React from "react";
-import { useUniqueId } from "./useUniqueId";
+import { useUniqueId } from "../ui/useUniqueId";
 
-import { langWithin } from "../i18n/config";
-import { useCloverTranslation } from "../i18n/useCloverTranslation";
-import { languageProps } from "../core/direction";
+import { langWithin } from "./config";
+import { useCloverTranslation } from "./useCloverTranslation";
+import { languageProps } from "./direction";
 
 /**
  * Props that name a container (a `nav`, a list, a group), and the element they may need.

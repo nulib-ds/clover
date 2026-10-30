@@ -30,8 +30,8 @@ import {
   type SectionsLayout,
   Sections,
 } from "../../ui/Sections";
-import { useContainerName } from "../../ui/useContainerName";
-import { languageProps } from "../../core/direction";
+import { useContainerName } from "../../i18n/useContainerName";
+import { languageProps } from "../../i18n/direction";
 
 /*
  * The map, and MapLibre with it, load only when a Manifest with places or georeferences

@@ -8,7 +8,10 @@
  * `s` in.
  */
 
-/* `button.x`: one class ties with a reset's `[type="button"]`. See `ui/Button.css`. */
+/*
+ * `button.x`: one class ties with a reset's `[type="button"]`. See `ui/Button.css`.
+ * Focused, the ring of the panel's disclosures (`ui/Chevron.css`).
+ */
 button.clover-sections-button {
   display: flex;
   align-items: center;
@@ -21,11 +24,6 @@ button.clover-sections-button {
   font-weight: 600;
   text-align: start;
   cursor: pointer;
-}
-
-button.clover-sections-button:focus-visible {
-  outline: 2px solid var(--clover-color-accent, #0065c3);
-  outline-offset: -2px;
 }
 
 .clover-sections-panel {

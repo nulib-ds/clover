@@ -23,7 +23,9 @@ every rule below.
   reader's `prefers-contrast: more`, followed as it changes. Styles key on the attribute
   around them (`:where([data-high-contrast])`), so the parts inside follow without being
   told, and a page may set it on an element around Clover. Its values are in
-  `styles/contrast.css`. In it the accent paints only rings, outlines, lines and marks;
+  `styles/contrast.css`, which as elements rides apart with the scale's (`APART`,
+  `build/clover-sheets.mjs`), as every element loads it: grouped, it brought the whole
+  stylesheet to every page (2026-10-30). In it the accent paints only rings, outlines, lines and marks;
   a fill of the accent under a glyph or words takes `--clover-accent-fill` (the controls'
   dark fill), with no ring at rest, `--clover-accent-ring-hover` under the pointer and
   `--clover-accent-ring` while chosen or open, 3px and 1px clear as Items rings an item,
@@ -74,7 +76,7 @@ every rule below.
   `@iiif/presentation-3` (types), and `dompurify`, `hls.js` and `maplibre-gl`, all loaded
   on demand. `three` is an optional peer, needed only by a page importing
   `@nulib/clover/three` (Mat, 2026-10-27). `@iiif/helpers` is a devDependency, for
-  `core/value.test.ts`'s parity with Clover's `closestLanguage` alone (Mat, 2026-10-27).
+  `i18n/languages.test.ts`'s parity with Clover's `closestLanguage` alone (Mat, 2026-10-27).
   The docs keep helpers 1.x, and the 3.x docs' `@samvera/clover-iiif` parser 2, at the
   root; npm nests the package's own copies under `packages/clover/node_modules`. No Vault:
   it is 19.5 kB gzip. Add a dependency only when a milestone needs it.
@@ -144,6 +146,16 @@ every rule below.
   select-on-arrow; or headings, `aria-expanded`, `region`, arrow keys that only move focus)
   and the layout CSS under `[data-layout]`. A panel keeps its place in the tree across a
   layout switch, so its content does not remount.
+- **The panel's disclosures** (Mat, 2026-10-28, the post-Cookbook DRY pass): a section's
+  button and a Contents entry's toggle stay two components, as they are two WAI-ARIA
+  patterns: an accordion's heading, which is the whole row and moves focus by arrow
+  keys, and a disclosure beside an entry that is a button of its own
+  (`clover-contents-toggle`, named "Sections in" and the entry). What they share is
+  written once: the chevron (`ui/Chevron.tsx`), its size, turn and column
+  (`--clover-chevron`, its end `s` in from the panel's edge, where both a heading and a
+  section's content are inset) and their focus ring, a family in `ui/Chevron.css`, which
+  both load; a toggle takes the rows' tint under the pointer (`Panel.css`'s rows family).
+  A new control that opens and closes something in the panel joins that family.
 - Tabs keep to one row, never wrapping (Mat, 2026-10-20). The tab list is
   `useScrollTrack`'s viewport (`dragFree`, its tabs the slides), in
   `.clover-sections-tabs` (the rule under the row, the Panel's room for its close
@@ -219,6 +231,19 @@ every rule below.
   its name, the same string as its `aria-label` (never different words), and its key. Do
   not give a control `title`, or an icon an SVG `<title>`: both make a second, native
   tooltip. DESIGN.md §7 has the rule and the WCAG reasons.
+- **An annotation's picture over its words** (Mat, 2026-10-29, Cookbook 0377: "I'm curious
+  if these elements are not dry"): a hotspot's popover (`Tip`'s `image`), the Annotations
+  list (`EntryBodies.tsx`) and the Canvas's annotations menu (`AnnotationMenu.tsx`) draw
+  one look, written once: the picture's size, a family in `ui/Tip.css`, which all three
+  load (`.clover-tip-image`, `.clover-annotations-image`), each keeping its corners and
+  its gap to the words. Their markup stays three (weighed 2026-10-29): the menu's is a
+  radio's `label`, which may hold only phrasing content, so its body is a `span` with the
+  annotation's name; the list's holds the annotation's own sanitized markup and links in
+  a `div`, its images with their text alternatives; the popover is `aria-hidden`, its
+  picture placed again once it loads. They load in three chunks, the menu with the
+  hotspots and the list with its panel section, and a component shared by chunks that
+  load apart cost each element page more than it took off (as `SummaryText` and a shared
+  picture hook did the same day).
 - A key goes in `SHORTCUTS` (with `aria-keyshortcuts`' spelling and the glyph shown) only
   once the Canvas handles it, and in `SHORTCUT_KEYS` so `forwardShortcut` sends it from
   the Canvas's controls to the viewport. A new key the viewport does not handle would make
@@ -620,19 +645,70 @@ every rule below.
   sets `<html lang="en">` before each test, as a page declares its language. A test of
   another page language sets its own.
 
+## Languages
+
+- **One home** (Mat, 2026-10-29: "DRY all internationalization rules"): `src/i18n/` holds
+  every rule for how Clover chooses a language and marks text with it, for Clover's
+  strings and IIIF text alike. The root `AGENTS.md`'s i18n section says how the strings
+  are looked up and translated, and how an element is marked; this is the map. Its
+  modules split by what loads with what, as "What sharing does to chunks" asks: a rule
+  only a part loaded on demand uses never goes in a module every page loads (2026-10-29:
+  `languageProps` beside the translator's rules took a lone `Root` 65 B up, `autonym`
+  beside `languageCode` every media element page 80 B).
+  - `languages.ts`, which the translator and every IIIF value read up front: whose
+    languages (`readerLanguages`: the page's `<html lang>`, then the browser's), what a
+    tag says (`baseLanguage`, the one way to take `pt` from `pt-BR`; `sameLanguage`), and
+    which of a set to read (`closestLanguage`, IIIF's rule, held to `@iiif/helpers`' by
+    `languages.test.ts`; `languageToRead`, it for a Root's `language` or else the
+    reader's).
+  - `direction.ts`, with the parts that draw text: `directionOf` and `languageProps`.
+  - `config.ts`: Clover's strings, their lookup chain, and `langWithin`, the `lang` text
+    needs on a page in another language (it reads the interface language, so it is here).
+  - `useCloverTranslation.ts` (`t`, `langOf`), `hostLanguage.ts` (`HostLanguageContext`),
+    `useRootLanguage.ts` (a root's reading of the page's language) and
+    `useContainerName.tsx` (a container named in another language than the page's).
+  - `languageCode.ts` ("EN") and `autonym.ts` ("العربية"), what a language is called,
+    only where a choice of languages is offered (the Transcript's files, the Captions
+    menu, `ui/LanguageChoice.tsx`), each its own module, as the Captions menu needs only
+    the code.
+- **What reads IIIF applies them** beside what it reads, and loads with it: `localize`
+  and `hrefLangOf` (`core/value.ts`), `bodyInLanguage` and `annotationName`
+  (`core/annotation-name.ts`), `descriptionLanguages` and `startingLanguage`
+  (`core/language-choice.ts`), `useReadingLanguages` (`react/readingLanguages.ts`),
+  `languagesOf` (`components/Annotations/languages.ts`). Each chooses through
+  `languageToRead`, never a language map made up to borrow `localize`'s choice.
+- **Direction.** Text in a right-to-left language or script gets `dir="rtl"` beside its
+  `lang` (`languageProps`, through `directionOf`: two patterns, a language's and a
+  script's, the script's deciding), and nothing otherwise, so other text takes the
+  page's. `Intl.Locale(tag).maximize()` would also find a script a region implies
+  (`pa-PK`, `az-IR`), but it changes which text is marked; weighed and left for Mat
+  (2026-10-29). The Map's popup marks its DOM by hand with the same helpers, until the
+  Map's own DRY pass.
+
 ## Data and state
 
 - **One shape: Presentation 4.** `core/load.ts` fetches `iiifContent` once (with the
-  request settings) and `core/presentation.ts` upgrades it with
-  `upgradeToPresentation4()`. Every part and `Canvas` read P4 only (`placeholderContainer`,
+  request settings) and `core/presentation.ts` upgrades it through `@iiif/parser`, as
+  its `upgradeToPresentation4()` does, in the steps that function takes
+  (`core/upgrade.ts`, loaded with the upgrader; Mat, 2026-10-30, "the upgrader
+  normalizes our paradigm"): `keepFragments`, then for Presentation 2 alone
+  `convertPresentation2` (its reader of 2, 19.7 kB, loaded only for it), then
+  `upgradePresentation3To4`. Splitting them took 5.1 kB gzip off every template's first
+  view. `core/presentation.test.ts` holds the two to the same Presentation 4, and the
+  caller's object unchanged, for every resource the repository holds;
+  `build/upgrade-resources.mjs` fetches Mirador's fixtures and the Universal Viewer's
+  examples (Mat: "we should be testing against real world presentation 2 resources too")
+  for the same test (`CLOVER_UPGRADE_RESOURCES`): on 2026-10-30, 151 resources from many
+  institutions, about 100 in Presentation 2, all alike. Run it after an `@iiif/parser`
+  upgrade. Every part and `Canvas` read P4 only (`placeholderContainer`,
   `accompanyingContainer`, `Timeline` for sound, `motivation` arrays, `{ id, type }`
   targets). Never add a P2/P3 branch to a part; upgrade at the boundary instead.
   `selectSequence` holds Canvases, Timelines and Scenes, each drawn by its own part
   (below, "Timeline and Scene"). Look one up by id with `selectCanvas(manifest, id)` (a
   map made once per Manifest), never a search of the sequence. The React hooks and the
   elements' API read the same selectors (`core/selectors.ts`), and `navigationOf`
-  (`core/clover.ts`) builds `Navigation` for both (2026-10-27). Sound's body is `Audio` in
-  Presentation 4 and `Sound` as the upgrader keeps Presentation 3's: test it with
+  (`core/clover.ts`) builds `Navigation` for both (2026-10-27). Sound's body is `Audio`
+  in Presentation 4 and `Sound` as the upgrader keeps Presentation 3's: test it with
   `isSound` (`core/annotations.ts`), never one name.
 - `createClover()` (`core/clover.ts`) is one Root's state: a small store (`core/store.ts`)
   holding only `status`, `error`, `manifest`, `collection`, `canvasId` and `target`.
@@ -908,9 +984,21 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `Markup` keeps its line breaks as `<br>` and never loads the sanitizer. The Markdown
   converter (`core/markdown.ts`, footnotes included, 1.7 kB gzip, loaded with the
   sanitizer) is Clover's own; no GFM library (Mat: package size).
-- **Direction.** `Markup` gives IIIF text in a right-to-left language or script
-  `dir="rtl"` beside its `lang` (`directionOf`, `core/direction.ts`: two patterns, as
-  every value reads it), and nothing otherwise, so other text takes the page's.
+- **What a value is drawn in** (Mat, 2026-10-29, Cookbook 0007: "make this DRY across
+  all primitives"): one rule, in `ui/Markup.tsx`, which every primitive's value and every
+  copy of one passes through. A part's element (`as`) holds its value: Summary's `p`,
+  Value's `span`, Metadata's and RequiredStatement's `dd` (`MetadataList`), an
+  annotation's text a `div` (`Annotations/EntryBodies.tsx`), an animation's text frames
+  (`Canvas/FrameAnimation.tsx`). A value that brings blocks of its own (IIIF HTML's `p`,
+  Markdown's lists) is never put in an element that may hold only inline content
+  (`INLINE_ONLY`: a `p`, a `span`, a heading…): a `div` stands in, its class and props
+  kept. Plain text keeps its line breaks as `<br>` in the part's element. A label is
+  never markup (IIIF), so Label, the links' words and an image's `alt` are its plain text
+  (`toPlainText`). The Canvas's information box draws its summary with a copy of
+  Summary's, in the Canvas's `language` (`Body/CaptionDetails.tsx`), held to the same
+  markup by `Primitives.test.tsx`: a shared `SummaryText` cost every page with a Summary
+  33 B and every primitive element page 250 B (2026-10-29), so it was undone. A new
+  primitive passes its value to `Markup` with its element, never a wrapper of its own.
 - **Markdown.** `core/markdown.ts` escapes `& < > "` before it writes any markup, so no
   source text can close an attribute. Headings are `p[role=heading][aria-level]`, never
   `h1`–`h6`. Levels come from a stack (each heading goes one level under the nearest
@@ -938,7 +1026,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `Transcript` follows the media element from the `media` channel (`timeupdate`, `seeked`)
   in component state, never the store. Chapters come from `core/ranges.ts`.
 - **Caption languages** (Mat, 2026-10-19). Several caption files are offered by their
-  language codes first ("EN", "IT", `ui/languageCode.ts`), each named by its code and its
+  language codes first ("EN", "IT", `i18n/languageCode.ts`), each named by its code and its
   file's label: in the Captions menu the label follows the code; in the Transcript the
   code alone shows, the label its `Tip` (a `<label>` around a radio can hold one), and
   the row sits beside the Transcript's heading in an accordion (`useSectionActions` in
@@ -955,40 +1043,62 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   upgrader turns a Presentation 2 range's `canvases` strings into objects, and no rewrite
   before it (as `keepFragments` does for targets) can say that in Presentation 2's shape
   (checked 2026-10-27). Drop it once the parser is fixed.
-- **Items** (`components/Items/`) lists `core/items.ts` models, never resources: one item
-  per view of a Manifest (a spread is one item), or one per Collection member. Inside a
-  `Root` it is a listbox (`ui/useRovingFocus.ts`): its views' selection follows focus
-  (`followFocus`, through `onMove`, a held arrow selecting where it stops), while
+- **Resolving a picture** (Mat, 2026-10-28: "make this one dry too"). `useThumbnail`
+  (`ui/EntryThumbnail.tsx`) is the one hook where an entry's picture loads: an entry's
+  (`EntryThumbnail`: Annotations' regions, Contents' current chapter, the chapters'
+  menu), a chapter's in the seek bar's popover (`Tip`'s `image`), and a player's artwork
+  and ground (`Player.tsx`), which load with the transport and its chapters. An image of
+  its own shows at once; a service's once its `info.json` is read. A picture of the words
+  beside it goes at once for another's, so none shows under words it is not of; the
+  Player holds its last (`hold`), so its note never flashes as the artwork turns from the
+  placeholder Canvas to the accompanying one. Four keep their own, measured 2026-10-29:
+  Items and the `Thumbnail` part (they load where no entry's picture does, and as
+  elements a shared hook became a chunk of its own: 180 B more on a page with Items,
+  171 B on each primitive's), a Canvas's placeholder stills (every Canvas draws them up
+  front, and they load the resolver only when a still needs it), and Document's sheets
+  (a template imports only the parts; exporting the hook would make it public API, Mat's
+  call). The merge took a recording's first view 45 B down, 123 B as an element.
+- **Items** (`components/Items/`) lists `core/items.ts` models, never resources: one
+  item per view of a Manifest (a spread is one item), or one per Collection member.
+  Inside a `Root` it is a listbox (`ui/useRovingFocus.ts`): its views' selection follows
+  focus (`followFocus`, through `onMove`, a held arrow selecting where it stops), while
   `onSelect` stays a choice (Enter, a click), which the Gallery opens on. A Collection's
-  members stay manual, since each selection loads a Manifest. Standalone it is a
-  list of links (`core/load.ts` `fetchResource`, which does not open a Collection),
-  drawn by `StandaloneItems.tsx`, lazy (2026-10-27): no template has Items outside a Root,
-  so none carries it. Given `items`, it no longer draws in a server's first pass.
+  members stay manual, since each selection loads a Manifest. Standalone it is a list of
+  links (`core/load.ts` `fetchResource`, which does not open a Collection), drawn by
+  `StandaloneItems.tsx`, lazy (2026-10-27): no template has Items outside a Root, so
+  none carries it. Given `items`, it no longer draws in a server's first pass.
   Thumbnails come from `core/thumbnail.ts`: a service's `info.json` is read first (the
   renderer's cached `fetchInfo`), then the picture asked as it allows (`sizedImageUrl`),
-  and only once the item is near (`useNearViewport` against the box that scrolls it), so a
-  strip of a thousand reads a strip's worth (`e2e/specs/scale.spec.ts` counts them). Items
-  is the one part for a sequence and where the reader is in it (Mat, 2026-10-16: the Pager
-  was to become an abstraction of Items). `layout="pager"` is the count, then `Previous`
-  and `Next`, with no thumbnails, over whatever the source lists (views, members, a
-  standalone list); each source builds its `Steps` (`stepsOf`) and hands them to
-  `ItemsPager`. `Previous`, `Next` and `Position` are the same pieces read from the Root
-  (`of`). They live in `Items/Pager.tsx`, which imports no thumbnails or `Items.tsx`, so a
-  layout with a pager and no strip carries none of the strip. A step is a selection, as
-  the slider's arrows' are (`followFocus`, else `onActivate` for members). Position keeps
+  and only once the item is near (`useNearViewport` against the box that scrolls it), so
+  a strip of a thousand reads a strip's worth (`e2e/specs/scale.spec.ts` counts them).
+  Items is the one part for a sequence and where the reader is in it (Mat, 2026-10-16:
+  the Pager was to become an abstraction of Items). `layout="pager"` is the count, then
+  `Previous` and `Next`, with no thumbnails, over whatever the source lists (views,
+  members, a standalone list); each source builds its `Steps` (`stepsOf`) and hands them
+  to `ItemsPager`. `Previous`, `Next` and `Position` are the same pieces read from the
+  Root (`of`). They live in `Items/Pager.tsx`, which imports no thumbnails or
+  `Items.tsx`, so a layout with a pager and no strip carries none of the strip;
+  `Position`, and the steps the three read from a Root (`useRootSteps`), in
+  `Items/Position.tsx`, so a rail that counts its views carries none of the pager. The
+  `pager` layout itself, with its count's menu (`CountMenu`), is a chunk of its own
+  (`Items/PagerLayout.tsx`), loaded where one draws (Mat, 2026-10-30: the Default
+  template's pagers draw only for a content state's targets, a Collection's members or
+  an AnnotationCollection's pages, and its first view carried them, 2 kB, for every
+  resource). Never import `Pager.tsx` where a strip loads. A step is a selection, as the
+  slider's arrows' are (`followFocus`, else `onActivate` for members). Position keeps
   its widest count's room (`.clover-pager-room`, `hidden` without the stylesheet), so
   nothing beside it moves. Its gap is the Canvas cluster's `s`, so a pager over a Body
   lines up with the controls; don't override it in a template. A step with nowhere to go
   shows disabled, never hidden (Mat, 2026-10-16): faded, taking no pointer, whole again
   while focused. One rule in `ui/Button.css` covers the pager's, the strip's and an
   animation's frames' steps; a new Previous or Next joins it. A slider's or grid's title
-  is clamped (`--clover-items-lines`, 3) on `.clover-items-label-text`. `Items/clamped.ts`
-  watches every title with one ResizeObserver (and the page's styles and fonts, for text
-  spacing), and a title cut short gets `data-clamped` and a hidden, `aria-hidden` copy,
-  shown over the picture while its item is hovered or focused (WCAG 1.4.12; Mat chose it
-  over unclamping, 2026-10-16). Its Escape hides the copy until the pointer returns or
-  focus leaves (1.4.13). Keep the copy out of the item's name, and the item's box the same
-  whether it shows or not.
+  is clamped (`--clover-items-lines`, 3) on `.clover-items-label-text`.
+  `Items/clamped.ts` watches every title with one ResizeObserver (and the page's styles
+  and fonts, for text spacing), and a title cut short gets `data-clamped` and a hidden,
+  `aria-hidden` copy, shown over the picture while its item is hovered or focused (WCAG
+  1.4.12; Mat chose it over unclamping, 2026-10-16). Its Escape hides the copy until the
+  pointer returns or focus leaves (1.4.13). Keep the copy out of the item's name, and
+  the item's box the same whether it shows or not.
 - **Content Search.** `core/search-service.ts` finds the Manifest's service (type
   `SearchService1`/`2`, or a `search/N/` profile or context, as Presentation 2 has it;
   version 2 preferred). `core/search.ts` asks it (following `next`, at most 10 pages)
@@ -1058,6 +1168,28 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `clover-cue-text`, both baseline-aligned in a flex or grid row. The rows themselves stay
   their hosts' (a cue a `button`, an entry an `li` with rich content and a hidden button,
   a menu item a radio's `label`, a timed Contents Range a `button`, `data-timed`).
+- **Dates and times, one way** (Mat, 2026-10-29: "make sure these helpers are global for
+  the whole project"). A date is `core/dates.ts` and `core/dates-format.ts`,
+  framework-free: `readDate` reads an `xsd:date` or `xsd:dateTime` as written, every
+  part kept at UTC, to the precision given or else to the one a `navDate` is likely
+  written to (midnight on January 1 a year, on the 1st a month, any other midnight a
+  day, else a moment); then, apart so a page loads them only where there is a date (Mat,
+  2026-10-30), `formatDate` shows it in a language (`Intl.DateTimeFormat` at
+  `timeZone: "UTC"`, in Clover's interface language, `cloverI18n.language`);
+  `dateTimeOf` gives a machine the same (`datetime`, the sitemap, the Cookbook's JSON).
+  `ui/NavDate.tsx` draws a `navDate` as a `time`, loaded on demand (`lazy`) by Items and
+  About once `readDate` finds one, marked with its language where it is not the page's
+  (`langWithin`); the Map's popup builds the same by hand until its own DRY pass. A time
+  on a recording is `formatTime` (`lib/time.ts`): the transport, cues, chapters, an
+  animation's frames, and Items' durations (their own copy until 2026-10-29, which
+  rounded to the nearest second; they now count as the transport does). The two stay
+  apart: every Canvas loads `lib/time.ts` up front, and only a place, an item or About
+  shows a date (in one module, every player's first view carried the date's rules, 116
+  B; on its own, the clock took one more request). The docs read `core/dates.ts` by
+  relative path, as `docs/lib/compose/read-resource.ts` reads the content-state reader,
+  never a copy: `docs/lib/figures.ts` (the Cookbook's checked day),
+  `docs/lib/last-changed.ts` and `scripts/build-cookbook.mjs`. A new date or time
+  anywhere in the project goes through these.
 - **A press on a time plays** (Mat, 2026-10-26): `playFrom` (`lib/time.ts`) sets the
   time and plays if paused, a refused play left paused; used by a cue's press, a timed
   Range's on the Canvas playing, an annotation's in `Annotations` (on a Canvas in view,
@@ -1375,14 +1507,17 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   framing, seeking and the placeholder's quiet open, draws the hotspots, and reports a
   model CanvasView reads (through a ref where a callback outlives a render). New
   annotation behavior goes there, not in CanvasView; CanvasView sees only the model.
-- **What a renderer may never need loads when it first does** (Mat, 2026-10-27):
-  Canvas2D's code (one promise for the page; its canvas waits as `pending`, dropped if the
-  renderer releases meanwhile), the DOM layer (with the first frame holding an element)
-  and the hotspots' layer (`overlaysOf`, with the first hotspot; `overlays` is `null`
-  until then , never absent: `hasCamera` (`Canvas/surface.ts`) tells the renderer from a
-  Timeline's surface by `"overlays" in surface`). Their order in the host holds: the
-  canvas, then the DOM layer, then the hotspots'. A new layer joins in that order, and
-  loads with what needs it.
+- **What a renderer may never need loads when it first does** (Mat, 2026-10-27; and
+  2026-10-30, the placeholder's still and toggle, `Canvas/Placeholder.tsx`, lazy in
+  `CanvasView`, where only a Canvas with a `placeholderContainer` draws it, 430 B of
+  every Canvas page; the Canvas stays held back until it arrives): Canvas2D's code (one
+  promise for the page; its canvas waits as `pending`, dropped if the renderer releases
+  meanwhile), the DOM layer (with the first frame holding an element) and the hotspots'
+  layer (`overlaysOf`, with the first hotspot; `overlays` is `null` until then , never
+  absent: `hasCamera` (`Canvas/surface.ts`) tells the renderer from a Timeline's surface
+  by `"overlays" in surface`). Their order in the host holds: the canvas, then the DOM
+  layer, then the hotspots'. A new layer joins in that order, and loads with what needs
+  it.
 - **WebGL contexts are rationed** (Mat, 2026-10-19: Chrome's face-in-a-box showed on the
   Canvas page). Browsers cap a page's contexts (about 16, 8 on Android) and kill the
   oldest past it, and Chrome paints a killed one with that picture. So a renderer takes a

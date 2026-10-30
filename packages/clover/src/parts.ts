@@ -17,12 +17,10 @@ export { Label } from "./components/Label/Label";
 export type { LabelProps } from "./components/Label/Label";
 export { Items } from "./components/Items/Items";
 export type { ItemsLayout, ItemsProps } from "./components/Items/Items";
-export { Next, Position, Previous } from "./components/Items/Pager";
-export type {
-  PositionProps,
-  StepProps,
-  StepsOf,
-} from "./components/Items/Pager";
+export { Next, Previous } from "./components/Items/Pager";
+export { Position } from "./components/Items/Position";
+export type { StepProps } from "./components/Items/Pager";
+export type { PositionProps, StepsOf } from "./components/Items/Position";
 export { Status } from "./components/Status/Status";
 export {
   Homepage,

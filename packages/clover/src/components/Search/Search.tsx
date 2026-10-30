@@ -18,7 +18,7 @@ import { titleTag } from "../../ui/heading";
 import { useSectionOpened } from "../../ui/Sections";
 import { FieldPill } from "../../ui/FieldPill";
 import type { StepsModel } from "../../ui/Steps";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 export interface SearchProps extends React.HTMLAttributes<HTMLElement> {
   /** The heading level of each Canvas's group of hits. Default 3. */

@@ -1,4 +1,5 @@
 import type { AnnotationBodyEntry } from "./annotation-bodies";
+import { languageToRead } from "../i18n/languages";
 import { markdownToPlainText, readAs, toPlainText } from "./text";
 import { localize } from "./value";
 
@@ -11,18 +12,15 @@ const tagOf = (body: AnnotationBodyEntry) =>
 
 /**
  * Of these bodies, the first in the language to read, chosen between as any IIIF text is
- * (`localize`, the reader's languages by default): an annotation's name, and which item of
- * a `Choice` shows (Cookbook 0346).
+ * (`languageToRead`, the reader's languages by default): an annotation's name, and which
+ * item of a `Choice` shows (Cookbook 0346).
  */
 export function bodyInLanguage<T extends AnnotationBodyEntry>(
   bodies: T[],
   language?: string,
 ): T | undefined {
-  const first: Record<string, string[]> = {};
-  bodies.forEach((body, index) => {
-    first[tagOf(body)] ??= [String(index)];
-  });
-  return bodies[Number(localize(first, language).text) || 0];
+  const tag = languageToRead([...new Set(bodies.map(tagOf))], language);
+  return bodies.find((body) => tagOf(body) === tag);
 }
 
 /**

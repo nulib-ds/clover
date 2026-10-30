@@ -19,7 +19,7 @@ import type {
   CloverCanvasProps,
 } from "./Canvas.types";
 import Controls from "./Controls";
-import Placeholder, { type PlaceholderStill } from "./Placeholder";
+import type { PlaceholderStill } from "./Placeholder";
 import {
   type AnimationFrame,
   type ChoiceSelections,
@@ -54,13 +54,13 @@ import { type LanguageMapLike, localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { BodyNote, BodyUnloadable } from "../../ui/BodyUnloadable";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
-import { useRootLanguage } from "../../react/language";
-import { useContainerName } from "../../ui/useContainerName";
+import { useRootLanguage } from "../../i18n/useRootLanguage";
+import { useContainerName } from "../../i18n/useContainerName";
 import type { CanvasRenderer, SceneImage } from "../../lib/renderer";
 import { type Rect, union } from "../../lib/renderer/math/rect";
 import { findImageServiceId } from "../../lib/renderer/sources/imageService";
 import { type CanvasSurface, type MakeSurface, hasCamera } from "./surface";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 type CanvasStatus = "loading" | "ready" | "error";
 
@@ -91,6 +91,12 @@ const NO_MODEL: AnnotationModel = {
 const FrameAnimation = lazy(() => import("./FrameAnimation"));
 // A picked annotation's place, on its map (Cookbook 0139): MapLibre with it, on demand.
 const PlaceBox = lazy(() => import("./PlaceBox"));
+/*
+ * A placeholder Canvas's still, and its toggle: only a Canvas that has one draws it, so a
+ * page of images never carries it (Mat, 2026-10-30: the Default template's first view
+ * under 95 kB). Until it arrives the Canvas stays held back, as the placeholder holds it.
+ */
+const Placeholder = lazy(() => import("./Placeholder"));
 
 const ALL_CONTROLS: Required<CanvasControlsConfig> = {
   zoom: true,
@@ -1012,18 +1018,20 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             </p>
           )}
         {stills.length > 0 && !player && (
-          <Placeholder
-            instance={instance}
-            stills={stills}
-            vertical={
-              direction === "top-to-bottom" || direction === "bottom-to-top"
-            }
-            media={Boolean(media)}
-            active={showPlaceholder}
-            lingering={status === "loading" && !cleared}
-            onToggle={togglePlaceholder}
-            request={options?.request}
-          />
+          <Suspense fallback={null}>
+            <Placeholder
+              instance={instance}
+              stills={stills}
+              vertical={
+                direction === "top-to-bottom" || direction === "bottom-to-top"
+              }
+              media={Boolean(media)}
+              active={showPlaceholder}
+              lingering={status === "loading" && !cleared}
+              onToggle={togglePlaceholder}
+              request={options?.request}
+            />
+          </Suspense>
         )}
         {surface && media && nearViewport && !showPlaceholder && (
           <Suspense fallback={null}>

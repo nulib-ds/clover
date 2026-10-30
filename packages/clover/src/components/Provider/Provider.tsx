@@ -25,7 +25,7 @@ import {
   resourceOf,
   useProvider,
 } from "../Primitives/resource";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 /**
  * `provider` and the `logo` on each: who provided the resource, IIIF's Agents, each with

@@ -9,7 +9,7 @@ import {
 import type { Clover } from "../../core/clover";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { CloverContext } from "../../react/context";
-import { useRootLanguage } from "../../react/language";
+import { useRootLanguage } from "../../i18n/useRootLanguage";
 import type { HostedProps } from "../host";
 import { CloverApiContext, cloverApi } from "./api";
 import { loadRenderers, useLoaded } from "./later";

@@ -26,6 +26,7 @@ import prettier from "prettier";
 import { cookbookSections } from "docs/components/CookbookRecipes/cookbookSections";
 import { resourceFor } from "docs/components/CookbookRecipes/cookbookCatalog";
 import { regionThumbnailFrom, thumbnailFrom } from "docs/lib/iiif-image-sizes";
+import { dateTimeOf } from "../packages/clover/src/core/dates-format";
 
 const INDEX = "https://iiif.io/api/cookbook/";
 const MATRIX = "https://iiif.io/api/cookbook/recipe/matrix/";
@@ -233,7 +234,8 @@ const recipes = (
   )
 ).filter(Boolean);
 
-const checked = new Date().toISOString().slice(0, 10);
+// Today, as Clover writes a day for a machine (`core/dates-format.ts`).
+const checked = dateTimeOf({ at: new Date(), precision: "day" });
 const json = await prettier.format(JSON.stringify({ checked, recipes }), {
   parser: "json",
 });

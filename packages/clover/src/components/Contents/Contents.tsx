@@ -24,10 +24,10 @@ import { EntryThumbnail } from "../../ui/EntryThumbnail";
 import { Steps } from "../../ui/Steps";
 import { CueTime } from "../../ui/Cue";
 import { useClover, useCloverSelector } from "../../react/context";
-import { useContainerName } from "../../ui/useContainerName";
+import { useContainerName } from "../../i18n/useContainerName";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 export interface ContentsProps extends React.HTMLAttributes<HTMLElement> {
   as?: React.ElementType;

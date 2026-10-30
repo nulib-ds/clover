@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
 
 import type { ItemModel, ItemPart } from "../../core/items";
 import { isSound } from "../../core/annotations";
@@ -7,23 +7,22 @@ import { resolveThumbnail, thumbnailSource } from "../../core/thumbnail";
 import { localize } from "../../core/value";
 import { NEAR_VIEWPORT_MARGIN, useNearViewport } from "../Body/useNearViewport";
 import { watchClamp } from "./clamped";
-import { languageProps } from "../../core/direction";
-import { readNavDate } from "../../core/nav-date";
-import { NavDate } from "../../ui/NavDate";
-
-/** `h:mm:ss`, or `m:ss` under an hour. */
-export function formatDuration(seconds: number): string {
-  const total = Math.max(0, Math.round(seconds));
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = String(total % 60).padStart(2, "0");
-  return h ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
-}
+import { languageProps } from "../../i18n/direction";
+import { readDate } from "../../core/dates";
+import { formatTime } from "../../lib/time";
+// A member's date, written only where one has a date (Cookbook 0318), so a strip never
+// carries its writing.
+const NavDate = lazy(() =>
+  import("../../ui/NavDate").then(({ NavDate }) => ({ default: NavDate })),
+);
 
 /**
  * A part's thumbnail URL: the image itself, or its service's once its `info.json` is read,
  * which waits until the item comes `near` (a strip of a thousand reads a strip's worth).
- * `none` when the resource has no image to ask for at all (sound with no picture).
+ * `none` when the resource has no image to ask for at all (sound with no picture). Its
+ * own, not `ui/EntryThumbnail.tsx`'s `useThumbnail`: a strip loads where no entry's
+ * picture does, and as elements the shared hook was a chunk of its own, 180 B more on a
+ * page with Items (2026-10-29).
  */
 function useThumbnail(
   part: ItemPart,
@@ -141,7 +140,7 @@ function Picture({
       )}
       {part.duration ? (
         <span className="clover-items-duration">
-          {formatDuration(part.duration)}
+          {formatTime(part.duration)}
         </span>
       ) : null}
     </span>
@@ -233,7 +232,7 @@ export function ItemFigure({
   );
   const summary = showSummary ? localize(item.summary, language) : null;
   // A member's date and summary, under its label (Cookbook 0318).
-  const navDate = showSummary ? readNavDate(item.navDate) : null;
+  const navDate = showSummary ? readDate(item.navDate) : null;
   const labeled = labels.some((label) => label.text);
   return (
     <figure
@@ -271,7 +270,9 @@ export function ItemFigure({
             />
           ))}
           {navDate && (
-            <NavDate value={item.navDate} className="clover-items-date" />
+            <Suspense fallback={null}>
+              <NavDate value={item.navDate} className="clover-items-date" />
+            </Suspense>
           )}
           {summary?.text && (
             <span

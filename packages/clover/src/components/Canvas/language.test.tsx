@@ -169,7 +169,7 @@ describe("the Canvas's languages", () => {
     );
   });
 
-  it("gives a placeholder's still the language of its alt", () => {
+  it("gives a placeholder's still the language of its alt", async () => {
     const [first] = edited(p4(bookJson).items as any[], (node) => {
       if (node.label?.en) node.label = { fr: ["Page blanche"] };
     });
@@ -199,8 +199,9 @@ describe("the Canvas's languages", () => {
       },
     };
     render(<Canvas canvases={[canvas]} />);
+    // The placeholder's own chunk, loaded as a Canvas with one first draws.
     const still = within(
-      screen.getByTestId("clover-canvas-placeholder"),
+      await screen.findByTestId("clover-canvas-placeholder"),
     ).getByRole("img", { name: "Page blanche" });
     expect(still).toHaveAttribute("lang", "fr");
   });

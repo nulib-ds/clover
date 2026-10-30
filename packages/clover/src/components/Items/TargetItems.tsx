@@ -18,7 +18,7 @@ import { useClover, useCloverSelector } from "../../react/context";
 import { fetchManifest } from "../../react/fetchManifest";
 import { Steps } from "../../ui/Steps";
 import { titleTag } from "../../ui/heading";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 /**
  * A content state's targets (Cookbook 0540: two Canvases from two Manifests, to compare),

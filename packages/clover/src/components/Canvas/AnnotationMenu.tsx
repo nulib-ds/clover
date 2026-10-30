@@ -4,8 +4,8 @@ import { type ListedAnnotation, startOf } from "./Annotations";
 import ControlMenu from "./ControlMenu";
 import { CueTime } from "../../ui/Cue";
 import { HideToggle } from "../../ui/HideToggle";
-import { useContainerName } from "../../ui/useContainerName";
-import { languageProps } from "../../core/direction";
+import { useContainerName } from "../../i18n/useContainerName";
+import { languageProps } from "../../i18n/direction";
 
 interface AnnotationMenuProps {
   id: string;

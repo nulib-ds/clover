@@ -23,7 +23,7 @@ import { type LanguageMapLike, localize } from "../../core/value";
 import { Tip } from "../../ui/Tip";
 import type { CanvasRenderer, Rect } from "../../lib/renderer";
 import { overlaysOf } from "../../lib/renderer/overlays/OverlayLayer";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 export interface CanvasAnnotation {
   annotation: Annotation;

@@ -6,7 +6,7 @@ import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 export interface CollectionSelectProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "onChange"> {

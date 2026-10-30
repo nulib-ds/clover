@@ -2,8 +2,8 @@ import React, { Suspense, forwardRef, lazy, useEffect, useRef } from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
 import { ItemFigure } from "./Item";
-import { ItemsPager, type Steps } from "./Pager";
-import { CountMenu } from "./CountMenu";
+import type { Steps } from "./Position";
+import type { PagerProps } from "./PagerLayout";
 import { Tip } from "../../ui/Tip";
 import {
   type ItemModel,
@@ -20,13 +20,13 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useCloverSelector, useOptionalClover } from "../../react/context";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
-import { useRootLanguage } from "../../react/language";
-import { useContainerName } from "../../ui/useContainerName";
+import { useRootLanguage } from "../../i18n/useRootLanguage";
+import { useContainerName } from "../../i18n/useContainerName";
 import { titleTag } from "../../ui/heading";
 import { useRovingFocus } from "../../ui/useRovingFocus";
 import { useScrollTrack } from "../../ui/useScrollTrack";
 import { visuallyHidden } from "../../ui/visuallyHidden";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 import {
   highContrastProps,
   useHighContrast,
@@ -316,46 +316,23 @@ export function stepsOf(
   };
 }
 
-/**
- * Items' `pager` layout, standalone or in a Root: Items' own props that are not the
- * `nav`'s are left behind, and the page's language is read as the strip reads it.
+/*
+ * The `pager` layout, with its count's menu: their own chunk, loaded where a pager draws
+ * (a content state's targets, a Collection's members, an AnnotationCollection's pages, a
+ * lightbox), so a page whose Items draw a strip never carries them (Mat, 2026-10-30: the
+ * Default template's first view under 95 kB; they were 2 kB of it).
  */
-export function Pager({
-  steps,
-  forwardedRef,
-  /* eslint-disable @typescript-eslint/no-unused-vars -- Items' own, not the nav's */
-  layout,
-  thumbnailSize,
-  renderItem,
-  header,
-  headingLevel,
-  request,
-  language,
-  navigation,
-  of,
-  /* eslint-enable @typescript-eslint/no-unused-vars */
-  highContrast,
-  ...rest
-}: Omit<ItemsProps, "onSelect" | "iiifContent" | "items"> &
-  Forwarded & {
-    steps: Steps;
-    /** In place of the count: one that opens a menu of the items. */
-    position?: React.ReactNode;
-    /** The string naming its `nav`, where it is not Items'. */
-    nameKey?: string;
-  }) {
-  const root = useRootLanguage(forwardedRef, rest.lang);
-  const contrast = useHighContrast(highContrast);
+const PagerLayout = lazy(() => import("./PagerLayout"));
+const CountMenu = lazy(() =>
+  import("./PagerLayout").then(({ CountMenu }) => ({ default: CountMenu })),
+);
+
+/** Items' `pager` layout, standalone or in a Root, as it arrives (`PagerLayout`). */
+export function Pager(props: PagerProps) {
   return (
-    <HostLanguageContext.Provider value={root.hostLanguage}>
-      <ItemsPager
-        {...highContrastProps(contrast)}
-        {...rest}
-        steps={steps}
-        forwardedRef={root.ref}
-        hostLanguage={root.hostLanguage}
-      />
-    </HostLanguageContext.Provider>
+    <Suspense fallback={null}>
+      <PagerLayout {...props} />
+    </Suspense>
   );
 }
 

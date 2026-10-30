@@ -7,15 +7,18 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { Markup, MetadataList } from "../../ui/Markup";
 import { ReadMore } from "../../ui/ReadMore";
 import { EntryBodies } from "../Annotations/EntryBodies";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 /**
  * A Canvas's `summary` and `metadata`: IIIF's limited HTML is kept, everything else is
  * sanitized away. Lazy, through `Caption`, so the sanitizer loads only when it opens.
  *
  * Rendered as the Summary and Metadata parts render them, but in the Canvas's `language`,
- * which those parts cannot know outside a Root. Then the comments on the whole Canvas
- * (Cookbook 0266, 0019), as the Annotations list shows them, under its "Annotations".
+ * which those parts cannot know outside a Root: its summary a copy of `Summary`'s, which
+ * `Primitives.test.tsx` holds to the same markup (a shared component cost every page with
+ * a Summary 33 B, and each primitive element 250 B; 2026-10-29), its metadata
+ * `MetadataList`. Then the comments on the whole Canvas (Cookbook 0266, 0019), as the
+ * Annotations list shows them, under its "Annotations".
  */
 const CaptionDetails: React.FC<
   Pick<IIIFCanvas, "summary" | "metadata"> & {

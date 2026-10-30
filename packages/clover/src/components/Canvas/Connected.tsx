@@ -21,7 +21,7 @@ import { showLink } from "../../core/show-link";
 import { chaptersOf } from "../../core/ranges";
 import { hasBehavior } from "../../core/selectors";
 import type { CanvasAnnotation } from "./Annotations";
-import { sameLanguage } from "../../i18n/config";
+import { sameLanguage } from "../../i18n/languages";
 import { useClover, useCloverSelector } from "../../react/context";
 import {
   useActiveCanvas,

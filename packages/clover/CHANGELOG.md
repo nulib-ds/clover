@@ -337,6 +337,43 @@ layout="pager"` anywhere takes the same count, and its `nav` is named "Collectio
 
 ### Changed
 
+- **A lighter first view.** The Viewer with its Default template loads 94.6 kB gzip to
+  its first view, from 101.5 (Document 90.8, from 97.3; Gallery 53.5, from 60.1; a
+  `<clover-viewer>` page 101.2, from 108.4). What only some resources need now loads
+  with the first of them:
+  - Presentation 2's reader. Presentation 3 is upgraded by `@iiif/parser`'s
+    `upgradePresentation3To4` alone, and Presentation 2 is read as 3 first
+    (`convertPresentation2`), the steps its `upgradeToPresentation4` takes, so every
+    resource is upgraded exactly as before (checked against `upgradeToPresentation4` for
+    every fixture and over a hundred Presentation 2 resources from Mirador's and the
+    Universal Viewer's examples). `toPresentation4` is unchanged.
+  - Items' `pager` layout and its count's menu (a Collection's members, a content
+    state's targets, an AnnotationCollection's pages, the Gallery's lightbox), a
+    placeholder Canvas's still and toggle, a `navDate`'s written date in Items and
+    About, and Download's links where About offers them in its popover.
+
+  Each shows a moment after the rest on the first resource that has one, as its code
+  arrives. Nothing to change on a page; a test that looks for one at once waits for it
+  (`findBy…`).
+
+- **Size budgets set to the sizes measured on 2026-10-30** (`build/size-budget.json`,
+  each the measured size and about 250 B more). Raised where this release's features
+  grew a page: a Canvas up front to 39.4 kB (from 37.2), a Timeline to 24.6, the Viewer
+  with Default to 94.9 to first view (from 94.0, which it had passed at 101.5), the
+  stylesheet to 19.0 (from 16.6), a Map to 25.0 to first view, and the element pages.
+  Lowered where the lighter first view took bytes off: the Gallery to first view to
+  53.8 (from 54.7), the web components' entry to 121.7 (from 122.2) and a
+  `<clover-viewer>` page to 101.5 (from 101.9). The higher-contrast mode's sheet, which
+  every element loads, rides apart as the scale's does, so a page of web components
+  loads only the sheets of what it draws (it had brought the whole stylesheet to a page
+  of labels, 14 kB).
+
+- **Items' durations count as the player does.** A sound or video item's duration in
+  `Items` (`.clover-items-duration`) is now its whole seconds, rounded down, as the
+  transport writes the same recording's length and every time on it: a recording of
+  59.6 seconds reads "0:59" in both places, where Items said "1:00". Nothing to change on
+  a page.
+
 - **Links away from the viewer open in a new tab.** The links the property parts draw,
   `homepage`, `rendering`, `seeAlso` and `partOf` (Homepage, Rendering, SeeAlso, PartOf,
   as About shows them), a resource's own `id` (Id: "IIIF Manifest") and a provider's link

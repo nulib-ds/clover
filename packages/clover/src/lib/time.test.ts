@@ -1,13 +1,6 @@
 import { formatTime, playFrom } from "./time";
 
 describe("times", () => {
-  it("counts from the whole second a time is in, as a player does", () => {
-    expect(formatTime(12.7)).toBe("0:12");
-    expect(formatTime(85.67)).toBe("1:25");
-    expect(formatTime(3725)).toBe("1:02:05");
-    expect(formatTime(-3)).toBe("0:00");
-  });
-
   it("goes to a time and plays from it, once, where it is paused", () => {
     const element = document.createElement("video");
     const play = vi
@@ -29,5 +22,15 @@ describe("times", () => {
     expect(() => playFrom(element, 3)).not.toThrow();
     expect(element.currentTime).toBe(3);
     await Promise.resolve();
+  });
+});
+
+describe("formatTime", () => {
+  it("counts from the whole second a time is in, as a player does", () => {
+    expect(formatTime(12.7)).toBe("0:12");
+    expect(formatTime(85.67)).toBe("1:25");
+    expect(formatTime(3725)).toBe("1:02:05");
+    expect(formatTime(-3)).toBe("0:00");
+    expect(formatTime(NaN)).toBe("0:00");
   });
 });

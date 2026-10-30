@@ -275,9 +275,10 @@ const DcItemMock: React.FC = () => {
                 />
                 <div>
                   <h2>{work.collection.title}</h2>
+                  {/* The count in the page's US English, never the browser's own format. */}
                   {count !== null && (
                     <p className={styles.count}>
-                      {count.toLocaleString()} Works
+                      {count.toLocaleString("en-US")} Works
                     </p>
                   )}
                   {/* Clamped to three lines until Show More, so none of it is out of reach. */}

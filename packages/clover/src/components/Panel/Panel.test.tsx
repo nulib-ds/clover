@@ -248,7 +248,12 @@ describe("Panel", () => {
       </Clover.Root>,
     );
     const date = await screen.findByRole("heading", { name: "Date" });
-    const time = date.parentElement!.querySelector("time")!;
+    // Written as it arrives: the dates' writing loads where there is a date.
+    const time = await waitFor(() => {
+      const found = date.parentElement!.querySelector("time");
+      expect(found).toBeTruthy();
+      return found!;
+    });
     expect(time).toHaveTextContent("12 juin 1849");
     expect(time).toHaveAttribute("datetime", "1849-06-12");
   });

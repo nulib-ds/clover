@@ -1,3 +1,9 @@
+/*
+ * Which way text in a language is written, and what an element holding it carries. Apart
+ * from `languages.ts`, which the translator and every IIIF value read up front: a page
+ * marks text only as its parts draw it, so this loads with them.
+ */
+
 /**
  * Languages written right to left, by their primary subtag (Arabic, Aramaic, Sorani,
  * Dhivehi, Persian, Hebrew, Kashmiri, Pashto, Sindhi, Syriac, Uyghur, Urdu, Yiddish), and

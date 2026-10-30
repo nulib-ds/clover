@@ -6,7 +6,7 @@ import Button from "../../ui/Button";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { type LanguageMapLike, localize } from "../../core/value";
 import { useOneOpen } from "../../ui/useOneOpen";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 
 /**

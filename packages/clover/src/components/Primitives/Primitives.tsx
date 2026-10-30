@@ -18,7 +18,7 @@ import {
   resourceOf,
   useProvider,
 } from "./resource";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 export type { Of } from "./resource";
 
@@ -331,6 +331,8 @@ export function Thumbnail({
   const key = source?.src ?? source?.service ?? source?.fallback;
   const [src, setSrc] = useState(source?.src);
   const request = useOptionalClover()?.clover.request;
+  // Its own, not `ui/EntryThumbnail.tsx`'s `useThumbnail`, which as elements was a chunk
+  // of its own every primitive's page loaded, 171 B more (2026-10-29).
   useEffect(() => {
     if (!source) return setSrc(undefined);
     if (source.src) return setSrc(source.src);

@@ -138,10 +138,7 @@ const gzip = (file) => gzipSync(readFileSync(file), { level: 9 }).length;
  * `styles.css` being every part's at once. `build/first-view.mjs` checks each against
  * what a browser fetches.
  */
-const UPGRADER = [
-  /\/presentation-4\/upgrader\.js$/,
-  /\/core\/keep-fragments\.mjs$/,
-];
+const UPGRADER = [/\/presentation-4\/upgrader\.js$/, /\/core\/upgrade\.mjs$/];
 const LOADED_CANVAS = /\/components\/Canvas\/LoadedCanvas\.mjs$/;
 /**
  * What a Manifest whose Ranges name regions loads as it is shown: the regions, drawn as

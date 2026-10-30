@@ -1,7 +1,7 @@
 import React from "react";
 import { toggleFullscreen } from "../lib/fullscreen";
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
-import { languageProps } from "../core/direction";
+import { languageProps } from "../i18n/direction";
 
 /**
  * The way out of full screen. `hidden` unless its root is full screen, so it stays out of

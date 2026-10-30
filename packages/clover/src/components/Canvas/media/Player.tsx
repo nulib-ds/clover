@@ -1,19 +1,19 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import type { CloverRequest } from "../../../core/request";
 import {
   type ThumbnailSource,
-  resolveThumbnail,
   stillSource,
   thumbnailSource,
 } from "../../../core/thumbnail";
 import { type LanguageMapLike, localize } from "../../../core/value";
 import { useCloverTranslation } from "../../../i18n/useCloverTranslation";
-import { useContainerName } from "../../../ui/useContainerName";
+import { useContainerName } from "../../../i18n/useContainerName";
 import type { IIIFCanvas } from "../layout";
 import type { TransportChapter } from "./Transport";
 import { CueTime } from "../../../ui/Cue";
-import { languageProps } from "../../../core/direction";
+import { useThumbnail } from "../../../ui/EntryThumbnail";
+import { languageProps } from "../../../i18n/direction";
 
 /*
  * A lone recording of sound, played as a music app plays one (Mat, 2026-10-24: Apple
@@ -68,32 +68,6 @@ function artworkOf(
   };
 }
 
-/** A source's URL at about `size` pixels, once its service's `info.json` is read. */
-function useResolved(
-  source: ThumbnailSource | null | undefined,
-  size: number,
-  request: CloverRequest | undefined,
-) {
-  const key = source
-    ? `${source.src ?? source.service ?? source.fallback}|${size}`
-    : "";
-  const [src, setSrc] = useState(source?.src);
-  useEffect(() => {
-    if (!source) return setSrc(undefined);
-    if (source.src) return setSrc(source.src);
-    let live = true;
-    void resolveThumbnail(source, size, request).then(
-      (url) => live && setSrc(url),
-    );
-    return () => {
-      live = false;
-    };
-    // `key` stands in for `source`, a new object each render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, size]);
-  return src;
-}
-
 /** A note, for a recording with no artwork, as a music app shows one. */
 const Note = () => (
   <svg
@@ -141,8 +115,9 @@ export function PlayerFace({
     const source = thumbnailSource({ thumbnail });
     return source ? { source } : null;
   }, [shown, canvas, language]);
-  const src = useResolved(art?.source, ART_SIZE, request);
-  const ground = useResolved(art?.source, GROUND_SIZE, request);
+  // The last artwork held (`hold`) while the next is made, so the note never flashes.
+  const src = useThumbnail(art?.source, ART_SIZE, request, true);
+  const ground = useThumbnail(art?.source, GROUND_SIZE, request, true);
   const [loaded, setLoaded] = useState<string>();
   return (
     <>

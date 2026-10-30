@@ -1,15 +1,11 @@
 import React, { Suspense, lazy, useCallback, useState } from "react";
 
-import {
-  DownloadGroups,
-  type Rendering,
-  useDownloads,
-} from "../Download/Download";
+import { type Rendering, useDownloads } from "../Download/downloads";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { Tip } from "../../ui/Tip";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { useReadingLanguages } from "./ReadingLanguages";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 // The language row, loaded only for a resource that has languages to offer.
 const LanguageChoice = lazy(() =>
@@ -20,6 +16,12 @@ const LanguageChoice = lazy(() =>
 
 // The popover's ways to close, loaded as it first opens: no first view needs them.
 const ControlMenu = lazy(() => import("../Canvas/ControlMenu"));
+// The links, with the popover that shows them: a press brings both.
+const DownloadGroups = lazy(() =>
+  import("../Download/Download").then(({ DownloadGroups }) => ({
+    default: DownloadGroups,
+  })),
+);
 
 /**
  * What About's heading holds in a Panel, at the end of its row, shown whichever section

@@ -2,14 +2,14 @@ import React from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
 import type { CloverRequest } from "../../core/request";
-import { selectVisibleCanvases } from "../../core/selectors";
-import { type LanguageMapLike, hrefLangOf, localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
-import { useClover, useCloverSelector } from "../../react/context";
+import { useClover } from "../../react/context";
 import { titleTag } from "../../ui/heading";
-import { asArray } from "../../lib/asArray";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
+import { type Rendering, useDownloads } from "./downloads";
+
+export { type Rendering, useDownloads } from "./downloads";
 
 export interface DownloadProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "children"> {
@@ -18,15 +18,6 @@ export interface DownloadProps
    * heading it sits beneath. Default 3.
    */
   headingLevel?: number;
-}
-
-export interface Rendering {
-  id: string;
-  label: string;
-  lang?: string;
-  format?: string;
-  /** The file's own language, where its `language` gives one. */
-  hrefLang?: string;
 }
 
 // Origins whose files could not be fetched (no CORS): their links then open as links do.
@@ -52,49 +43,6 @@ function save(url: string, request: CloverRequest | undefined) {
       unfetchable.add(originOf(url));
       window.open(url, "_blank", "noopener,noreferrer");
     });
-}
-
-function renderingsOf(
-  resources: Array<Record<string, any> | null | undefined>,
-  language: string | undefined,
-): Rendering[] {
-  const seen = new Set<string>();
-  const out: Rendering[] = [];
-  for (const resource of resources) {
-    for (const item of asArray(resource?.rendering) as Array<
-      Record<string, any>
-    >) {
-      const id = item?.id ?? item?.["@id"];
-      if (typeof id !== "string" || seen.has(id)) continue;
-      seen.add(id);
-      const label = localize(item.label as LanguageMapLike, language);
-      out.push({
-        id,
-        label: label.text || item.format || id,
-        // A format or an address in place of a label is in no language.
-        lang: label.text ? label.lang : undefined,
-        format: item.format,
-        hrefLang: hrefLangOf(item),
-      });
-    }
-  }
-  return out;
-}
-
-/**
- * What there is to download: the `rendering` of the Canvases in view (`page`) and of the
- * Manifest (`all`), each once, labeled in the reader's language.
- */
-export function useDownloads() {
-  const { language } = useClover("Download");
-  const manifest = useCloverSelector((state) => state.manifest);
-  const shown = useCloverSelector((state) =>
-    selectVisibleCanvases(state.manifest, state.canvasId),
-  );
-  return {
-    page: renderingsOf(shown as never, language),
-    all: renderingsOf([manifest as never], language),
-  };
 }
 
 export interface DownloadGroupsProps {

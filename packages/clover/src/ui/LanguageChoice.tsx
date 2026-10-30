@@ -1,24 +1,13 @@
 import React from "react";
 
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
-import { languageCode } from "./languageCode";
+import { autonym } from "../i18n/autonym";
+import { languageCode } from "../i18n/languageCode";
 import { Tip } from "./Tip";
-import { useContainerName } from "./useContainerName";
+import { useContainerName } from "../i18n/useContainerName";
 import { useUniqueId } from "./useUniqueId";
 import { visuallyHidden } from "./visuallyHidden";
-import { languageProps } from "../core/direction";
-
-/**
- * A language's name in itself ("العربية", "English", "Français"), for a reader of that
- * language to find it by; the tag where the browser cannot name it.
- */
-export function autonym(tag: string): string {
-  try {
-    return new Intl.DisplayNames([tag], { type: "language" }).of(tag) ?? tag;
-  } catch {
-    return tag;
-  }
-}
+import { languageProps } from "../i18n/direction";
 
 /**
  * A row of languages' codes ("AR", "EN"), drawn as the Transcript's are (`ui/Codes.css`),

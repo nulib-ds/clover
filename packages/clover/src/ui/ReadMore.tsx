@@ -2,8 +2,8 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useUniqueId } from "./useUniqueId";
 
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
-import { useRootLanguage } from "../react/language";
-import { languageProps } from "../core/direction";
+import { useRootLanguage } from "../i18n/useRootLanguage";
+import { languageProps } from "../i18n/direction";
 
 /** A layout effect in the browser, an effect on the server (where there is no layout). */
 const useIsomorphicLayoutEffect =

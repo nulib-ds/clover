@@ -44,7 +44,7 @@ import { startingLanguage } from "../../core/language-choice";
 import { useReadingLanguages } from "../../react/readingLanguages";
 import { LanguageChoice } from "../../ui/LanguageChoice";
 import { inLanguage, languagesOf } from "./languages";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
   /**

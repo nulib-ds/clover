@@ -224,8 +224,9 @@ describe("templates", () => {
     expect(row).toHaveClass("clover-template-default-collection-row");
     expect(row.firstElementChild).toHaveTextContent("Shelf");
     expect(row.firstElementChild?.tagName).toBe("P");
+    // The pager's own chunk, loaded as it first draws.
     expect(
-      within(row as HTMLElement).getByRole("navigation", {
+      await within(row as HTMLElement).findByRole("navigation", {
         name: "Collection",
       }),
     ).toBeInTheDocument();

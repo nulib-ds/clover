@@ -14,7 +14,7 @@ import type { CanvasSurface } from "../surface";
 import type { Rect } from "../../../lib/renderer";
 import { useOptionalClover } from "../../../react/context";
 import { BodyUnloadable } from "../../../ui/BodyUnloadable";
-import { languageProps } from "../../../core/direction";
+import { languageProps } from "../../../i18n/direction";
 
 const SKIP_SECONDS = 10;
 /** A moment's annotation (`#t=` with no end) shows this long, to read a few words. */

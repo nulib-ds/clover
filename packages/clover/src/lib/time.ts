@@ -1,4 +1,15 @@
-/** `m:ss`, or `h:mm:ss` past an hour, from the whole second it is in, as a player counts. */
+/*
+ * A recording's time: written as a player counts it (`formatTime`), read from a
+ * fragment's `t=`, and played from on a press. Every Canvas reads it up front, so a time
+ * on a recording costs no request of its own wherever it shows. A date is
+ * `core/dates.ts`.
+ */
+
+/**
+ * A time on a recording, `m:ss`, or `h:mm:ss` past an hour, from the whole second it is
+ * in, as a player counts: where the transport is and how long it runs, a cue's start, an
+ * item's duration (`Items`), so a recording's length reads the same wherever it shows.
+ */
 export function formatTime(seconds: number): string {
   const total = Math.max(0, Math.floor(seconds || 0));
   const h = Math.floor(total / 3600);

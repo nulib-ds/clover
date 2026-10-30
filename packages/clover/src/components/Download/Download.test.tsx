@@ -111,8 +111,12 @@ describe("Download", () => {
     );
     const heading = await screen.findByRole("heading", { name: "Download" });
     const section = heading.closest("section")!;
+    // Its links' own chunk, loaded as About alone first draws them.
     expect(
-      within(section).getByRole("heading", { name: "This page", level: 4 }),
+      await within(section).findByRole("heading", {
+        name: "This page",
+        level: 4,
+      }),
     ).toBeInTheDocument();
     expect(
       within(section).getByRole("link", { name: /Full-size image/ }),

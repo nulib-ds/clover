@@ -5,7 +5,7 @@ import { bodyInLanguage } from "../../core/annotation-name";
 import { type LocalizedValue, localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { Markup } from "../../ui/Markup";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 /**
  * What an annotation says, as the Annotations list shows it and the Canvas's caption: each

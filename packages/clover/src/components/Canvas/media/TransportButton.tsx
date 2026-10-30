@@ -2,7 +2,7 @@ import React from "react";
 
 import { useCloverTranslation } from "../../../i18n/useCloverTranslation";
 import { type Shortcut, Tip } from "../../../ui/Tip";
-import { languageProps } from "../../../core/direction";
+import { languageProps } from "../../../i18n/direction";
 
 /**
  * One of a transport's buttons (a recording's, an animation's): named by Clover's words,

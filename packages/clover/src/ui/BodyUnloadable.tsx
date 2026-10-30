@@ -1,7 +1,7 @@
 import React from "react";
 
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
-import { languageProps } from "../core/direction";
+import { languageProps } from "../i18n/direction";
 
 /** What a Body draws: an image, a video, a recording, or a 3D model. */
 export type BodyMediaKind = "image" | "video" | "audio" | "model";

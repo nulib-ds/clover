@@ -1044,8 +1044,14 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
 - Lookup order: the set `lng`, or else the page's `<html lang>` and then the browser's
   languages (Mat, 2026-10-16: Clover speaks the language of the page around it; 3.x put
   the browser first). After that come `fallbackLng`, and English last. IIIF text without
-  a Root `language` follows the same order (`readerLanguages`, `src/i18n/reader.ts`, which Clover's strings read too; `closestLanguage` in `core/value.ts` picks the tag, IIIF's rule, held to `@iiif/helpers`' by `value.test.ts`). Each regional tag also tries its base
+  a Root `language` follows the same order (`readerLanguages`, which Clover's strings read
+  too; `closestLanguage` picks the tag, IIIF's rule, held to `@iiif/helpers`' by
+  `languages.test.ts`; both `src/i18n/languages.ts`). Each regional tag also tries its base
   language (`pt-BR` → `pt`).
+- Every rule for how Clover chooses a language and marks text with it lives in
+  `packages/clover/src/i18n/` (Mat, 2026-10-29: "DRY all internationalization rules"),
+  each module loading where its callers do; `packages/clover/AGENTS.md`, "Languages", has
+  the map. A new rule goes there, never beside the part that first needs it.
 - The chain is made once and read by every string, Items' hundreds of tiles each asking
   (`lookupChain`, `i18n/config.ts`; Mat, 2026-10-27, kept at its cost); it is made again
   only as the strings or settings (`version`), the page's `<html lang>` or the browser's
@@ -1055,17 +1061,17 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
 - Any element that shows one of Clover's strings, or is named by one (an `aria-label`, an
   icon button with a `Tip`), carries `lang={langOf(key)}`: the string's language where it
   differs from the page's, and nothing otherwise (WCAG 3.1.2). An element showing text,
-  Clover's or a IIIF value's, spreads `{...languageProps(lang)}` (`src/core/direction.ts`)
+  Clover's or a IIIF value's, spreads `{...languageProps(lang)}` (`src/i18n/direction.ts`)
   in place of `lang`, which adds `dir="rtl"` where the language is written right to left
   (Mat, 2026-10-29: "carry this through on labels/text"); a component's own `lang` prop
   (`Tip`, `Button`) stays a prop, and a field (`input`, `textarea`) keeps `lang` alone, its
   direction the reader's typing. A container named by a
   string or a IIIF label (a `nav`, a list, a group) takes its name from
-  `useContainerName(text, lang)` (`src/ui/useContainerName.tsx`), which, where the name's
+  `useContainerName(text, lang)` (`src/i18n/useContainerName.tsx`), which, where the name's
   language differs from the page's, uses `aria-labelledby` and a hidden element carrying
   `lang`.
 - Each Clover root reads the page's language with `useRootLanguage`
-  (`src/react/language.ts`). The roots are a `Root`, and a `Canvas`, `Items` or `Map`
+  (`src/i18n/useRootLanguage.ts`). The roots are a `Root`, and a `Canvas`, `Items` or `Map`
   outside one. The page's language is a `lang` given to the root, else the nearest `lang`
   around it, read after mount; until it is known, or where the page declares none, the
   interface language stands in. The root provides it through `HostLanguageContext`

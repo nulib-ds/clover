@@ -114,9 +114,10 @@ export interface CloverAnnotationSet {
 }
 
 /**
- * Annotations walked as one whole (Cookbook 0309): the AnnotationPage or
- * AnnotationCollection given as the content, else the AnnotationCollection the
- * Manifest's annotation pages are part of.
+ * Annotations walked as one whole, as React's `useAnnotationCollection()` gives them: the
+ * AnnotationPage or AnnotationCollection given as the content, all in hand, else an
+ * AnnotationCollection the Manifest's annotation pages are part of (Cookbook 0309), whose
+ * pages load as the reader reaches them.
  */
 export interface CloverAnnotationCollection {
   id: string;
@@ -124,7 +125,10 @@ export interface CloverAnnotationCollection {
   label?: CloverLanguageMap;
   /** The number of its annotations, where it says. */
   total?: number;
-  /** The Manifest's pages of it, in the Canvases' order; none for the content's. */
+  /**
+   * The Manifest's pages of it, in the Canvases' order, each by its Canvas and whether it
+   * is fetched; none for the content's.
+   */
   pages: Array<{ id: string; canvasId: string; fetched: boolean }>;
   /** Its annotations on the Manifest's Canvases, in their order, as far as fetched. */
   entries: CloverAnnotationSet["entries"];
@@ -192,7 +196,7 @@ export interface CloverRootApi {
   activeCanvas(): CloverResource | null;
   navigation(): CloverNavigation;
   annotationSets(): CloverAnnotationSet[];
-  /** The annotations walked as one whole; null where there are none. */
+  /** Annotations walked as one whole (an AnnotationCollection); null where there is none. */
   annotationCollection(): CloverAnnotationCollection | null;
   /** The Manifest's table of contents, as `Contents` draws it; none before it loads. */
   contents(): CloverContentsEntry[];

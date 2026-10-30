@@ -10,11 +10,11 @@ import { useUniqueId } from "./useUniqueId";
 
 import { titleTag } from "./heading";
 import { Tip } from "./Tip";
-import { useContainerName } from "./useContainerName";
+import { useContainerName } from "../i18n/useContainerName";
 import { useScrollTrack } from "./useScrollTrack";
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
 import { Chevron } from "./Chevron";
-import { languageProps } from "../core/direction";
+import { languageProps } from "../i18n/direction";
 
 /** A layout effect in the browser, an effect on the server (where there is no layout). */
 const useIsomorphicLayoutEffect =

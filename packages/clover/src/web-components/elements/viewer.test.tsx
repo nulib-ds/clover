@@ -69,11 +69,13 @@ const drawn = (element: HTMLElement) =>
 describe("<clover-viewer>", () => {
   it("renders the Viewer in its light DOM, from a IIIF object set as a property", async () => {
     const element = mount();
+    // The file's first Viewer loads it all cold: ~0.8s alone, more beside other files.
     expect(
-      await within(element).findByRole("heading", {
-        level: 2,
-        name: "Simple Manifest - Book",
-      }),
+      await within(element).findByRole(
+        "heading",
+        { level: 2, name: "Simple Manifest - Book" },
+        { timeout: 5000 },
+      ),
     ).toBeInTheDocument();
     expect(element.shadowRoot).toBeNull();
     // The stylesheet is in the document once, however many elements there are.

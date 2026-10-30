@@ -77,7 +77,8 @@ describe("Clover.Root and its parts", () => {
     expect(
       await screen.findByRole("heading", { name: "Simple Manifest - Book" }),
     ).toHaveAttribute("lang", "en");
-    expect(screen.getByText(/Item 1 of/)).toBeInTheDocument();
+    // The pager's own chunk, loaded as it first draws.
+    expect(await screen.findByText(/Item 1 of/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Previous" })).toHaveAttribute(
       "aria-disabled",
       "true",

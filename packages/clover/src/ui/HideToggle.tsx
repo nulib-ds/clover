@@ -3,7 +3,7 @@ import { useUniqueId } from "./useUniqueId";
 
 import { Tip } from "./Tip";
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
-import { languageProps } from "../core/direction";
+import { languageProps } from "../i18n/direction";
 
 /**
  * Hides a page of annotations from the picture, or shows it again: a checkbox, checked

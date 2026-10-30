@@ -207,7 +207,7 @@ describe("Clover i18n", () => {
   it("treats a regional tag and its base language as one language", async () => {
     preferLanguages(["pt-BR"]);
     document.documentElement.lang = "";
-    const { cloverI18n, initCloverI18n, sameLanguage } = await load();
+    const { cloverI18n, initCloverI18n } = await load();
     initCloverI18n({
       resources: { "pt-BR": { clover: { download: "Baixar" } } },
     });
@@ -217,8 +217,6 @@ describe("Clover i18n", () => {
       lang: "pt",
     });
     expect(cloverI18n.langOf("readMore")).toBeUndefined();
-    expect(sameLanguage("pt-BR", "PT")).toBe(true);
-    expect(sameLanguage("nb", "nn")).toBe(false);
   });
 
   it("marks a string against the page's language, where it is known", async () => {

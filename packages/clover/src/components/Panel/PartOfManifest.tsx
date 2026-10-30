@@ -6,7 +6,7 @@ import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { useClover } from "../../react/context";
 import { titled } from "../../ui/heading";
-import { languageProps } from "../../core/direction";
+import { languageProps } from "../../i18n/direction";
 
 /**
  * A Canvas shown on its own (given as the content) says what it is part of, and opens

@@ -115,7 +115,7 @@ export const VIEWER_DIR = join(root, "dist/web-components/viewer");
  */
 export const UPGRADER = [
   "node_modules/@iiif/parser/dist/presentation-4/upgrader.js",
-  "src/core/keep-fragments.ts",
+  "src/core/upgrade.ts",
 ];
 
 /**

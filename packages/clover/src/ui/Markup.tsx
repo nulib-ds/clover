@@ -8,7 +8,7 @@ import {
   toPlainText,
 } from "../core/text";
 import { type LanguageMapLike, localize } from "../core/value";
-import { languageProps } from "../core/direction";
+import { languageProps } from "../i18n/direction";
 
 /**
  * A IIIF value, which may hold the HTML the Presentation API allows.

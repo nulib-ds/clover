@@ -186,16 +186,11 @@ label.clover-annotations-entry > input {
 }
 
 /*
- * An image an annotation gives (Cookbook 0377), no taller than Items' pictures (Mat,
- * 2026-10-29): `--clover-items-height`, where a page sets it around the list, else its
- * default. Its width follows, at its own aspect, never past the list's.
+ * An image an annotation gives (Cookbook 0377): sized as every picture over an
+ * annotation's words is (`ui/Tip.css`), no taller than Items' pictures, with the list's
+ * corners.
  */
 .clover-annotations-image {
-  display: block;
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  max-height: var(--clover-items-height, 8rem);
   border-radius: var(--clover-radius, 3px);
 }
 

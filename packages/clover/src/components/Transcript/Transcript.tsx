@@ -29,19 +29,19 @@ import {
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { playFrom } from "../../lib/time";
-import { sameLanguage } from "../../i18n/config";
+import { sameLanguage } from "../../i18n/languages";
+import { languageProps } from "../../i18n/direction";
 import { useClover, useCloverSelector } from "../../react/context";
 import { useReadingLanguages } from "../../react/readingLanguages";
 import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { CueTime } from "../../ui/Cue";
 import { FieldPill } from "../../ui/FieldPill";
-import { languageCode } from "../../ui/languageCode";
+import { languageCode } from "../../i18n/languageCode";
 import { useSectionActions } from "../../ui/Sections";
 import type { StepsModel } from "../../ui/Steps";
 import { Tip } from "../../ui/Tip";
-import { useContainerName } from "../../ui/useContainerName";
+import { useContainerName } from "../../i18n/useContainerName";
 import { visuallyHidden } from "../../ui/visuallyHidden";
-import { languageProps } from "../../core/direction";
 
 export interface TranscriptProps extends React.HTMLAttributes<HTMLElement> {
   as?: React.ElementType;

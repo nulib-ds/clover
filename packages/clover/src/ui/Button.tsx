@@ -2,7 +2,7 @@ import React from "react";
 
 import { join } from "../lib/classnames";
 import { type Shortcut, Tip } from "./Tip";
-import { languageProps } from "../core/direction";
+import { languageProps } from "../i18n/direction";
 
 interface ButtonProps {
   className?: string;

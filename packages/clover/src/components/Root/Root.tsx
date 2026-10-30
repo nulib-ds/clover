@@ -12,7 +12,7 @@ import type { CloverRequest } from "../../core/request";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { join } from "../../lib/classnames";
 import { CloverContext } from "../../react/context";
-import { useRootLanguage } from "../../react/language";
+import { useRootLanguage } from "../../i18n/useRootLanguage";
 import type { BodyRenderer } from "../Body/renderers";
 import { Announcer } from "./Announcer";
 import { useRootState } from "./useRootState";
