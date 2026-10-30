@@ -514,6 +514,76 @@
 }
 
 /*
+ * High contrast, under the swatches (Mat, 2026-10-29): a native checkbox and its words in
+ * a box drawn as the Font family select is (its height, edge, corners, padding and type),
+ * the whole box its target (WCAG 2.5.8). Checked, the accent's ring round it, 3px and 1px
+ * clear, as Clover's Items rings a chosen item, at half strength under the pointer;
+ * focused, the site's ring. Held on (by the accent or the system), it is checked and
+ * disabled.
+ */
+.brandToggle {
+  align-items: center;
+  background: var(--color-background);
+  border: 1px solid
+    color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
+  border-radius: var(--radius-4);
+  color: var(--gray-12);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: 0.382rem;
+  justify-self: start;
+  min-height: 2.25rem;
+  outline: 3px solid transparent;
+  outline-offset: 1px;
+  padding: 0.236rem 0.618rem;
+  transition: outline-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* At once in the mode, as the site's controls are (`tokens.css`). */
+:where(:root[data-high-contrast]) .brandToggle {
+  transition: none;
+}
+
+.brandToggle:hover {
+  outline-color: color-mix(in srgb, var(--accent-9) 50%, transparent);
+}
+
+.brandToggle:has(input:checked) {
+  outline-color: var(--accent-9);
+}
+
+.brandToggle:has(input:focus-visible) {
+  box-shadow: var(--focus-ring);
+}
+
+.brandToggle input {
+  accent-color: var(--gray-12);
+  height: 1rem;
+  margin: 0;
+  width: 1rem;
+}
+
+.brandToggle input:focus-visible {
+  outline: none;
+}
+
+.brandToggle:has(input:disabled) {
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brandToggle {
+    transition: none;
+  }
+}
+
+/* Under the colors, on a line of its own wherever the controls sit side by side. */
+.brandAccess {
+  flex-basis: 100%;
+}
+
+/*
  * A swatch: 28px, its color, and pressed, a ring in the page's text color around a gap of
  * the page's ground, so the choice shows by more than color (WCAG 1.4.1).
  */

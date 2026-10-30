@@ -60,24 +60,25 @@ every template is built on.
 
 ### Viewer
 
-| Prop                   | Type                                 | Default              | Description                                                                        |
-| ---------------------- | ------------------------------------ | -------------------- | ---------------------------------------------------------------------------------- |
-| `iiifContent`          | `string \| object`                   | Required             | What to show: a URL, or a IIIF resource or content state as an object.             |
-| `template`             | `Template`                           | `Default`, on demand | The layout: one from `@nulib/clover/templates`, or your own.                       |
-| `canvasId`             | `string`                             | —                    | The Canvas to show, controlled: moving asks `onCanvasChange` to change it.         |
-| `defaultCanvasId`      | `string`                             | —                    | The Canvas to start on. A content state or the Manifest's `start` still wins.      |
-| `onCanvasChange`       | `(canvasId: string) => void`         | —                    | The reader moved to a Canvas.                                                      |
-| `manifestId`           | `string`                             | —                    | In a Collection, the Manifest to show, controlled, with `onManifestChange`.        |
-| `defaultManifestId`    | `string`                             | —                    | In a Collection, the Manifest to open first.                                       |
-| `onManifestChange`     | `(manifestId: string) => void`       | —                    | In a Collection, the reader moved, or asks to move, to a Manifest.                 |
-| `searchQuery`          | `string`                             | —                    | A Content Search query, run once the Manifest shows and whenever it changes.       |
-| `annotations`          | `string \| object \| array`          | —                    | Annotation pages or collections to show beside the Manifest's own.                 |
-| `annotationPages`      | `"view" \| "all"`                    | `"view"`             | Whose referenced annotation pages to fetch: the view's, or every Canvas's at once. |
-| `onContentStateChange` | `(state: { json, encoded }) => void` | —                    | Where the reader is, as a content state, whenever it settles.                      |
-| `onStatusChange`       | `(status, error) => void`            | —                    | The resource is `"loading"`, `"ready"`, or met an `"error"`.                       |
-| `request`              | `{ credentials, headers, fetch }`    | —                    | Credentials, headers and a `fetch` of your own, for every request.                 |
-| `language`             | `string`                             | The reader's         | The language to read IIIF text in.                                                 |
-| `renderers`            | `BodyRenderer[]`                     | —                    | Components of your own for views Clover does not draw.                             |
+| Prop                   | Type                                 | Default              | Description                                                                                                                                                             |
+| ---------------------- | ------------------------------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `iiifContent`          | `string \| object`                   | Required             | What to show: a URL, or a IIIF resource or content state as an object.                                                                                                  |
+| `template`             | `Template`                           | `Default`, on demand | The layout: one from `@nulib/clover/templates`, or your own.                                                                                                            |
+| `canvasId`             | `string`                             | —                    | The Canvas to show, controlled: moving asks `onCanvasChange` to change it.                                                                                              |
+| `defaultCanvasId`      | `string`                             | —                    | The Canvas to start on. A content state or the Manifest's `start` still wins.                                                                                           |
+| `onCanvasChange`       | `(canvasId: string) => void`         | —                    | The reader moved to a Canvas.                                                                                                                                           |
+| `manifestId`           | `string`                             | —                    | In a Collection, the Manifest to show, controlled, with `onManifestChange`.                                                                                             |
+| `defaultManifestId`    | `string`                             | —                    | In a Collection, the Manifest to open first.                                                                                                                            |
+| `onManifestChange`     | `(manifestId: string) => void`       | —                    | In a Collection, the reader moved, or asks to move, to a Manifest.                                                                                                      |
+| `searchQuery`          | `string`                             | —                    | A Content Search query, run once the Manifest shows and whenever it changes.                                                                                            |
+| `annotations`          | `string \| object \| array`          | —                    | Annotation pages or collections to show beside the Manifest's own.                                                                                                      |
+| `annotationPages`      | `"view" \| "all"`                    | `"view"`             | Whose referenced annotation pages to fetch: the view's, or every Canvas's at once.                                                                                      |
+| `onContentStateChange` | `(state: { json, encoded }) => void` | —                    | Where the reader is, as a content state, whenever it settles.                                                                                                           |
+| `onStatusChange`       | `(status, error) => void`            | —                    | The resource is `"loading"`, `"ready"`, or met an `"error"`.                                                                                                            |
+| `request`              | `{ credentials, headers, fetch }`    | —                    | Credentials, headers and a `fetch` of your own, for every request.                                                                                                      |
+| `language`             | `string`                             | The reader's         | The language to read IIIF text in.                                                                                                                                      |
+| `highContrast`         | `boolean`                            | `false`              | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. On wherever the reader's system asks for more contrast, too. |
+| `renderers`            | `BodyRenderer[]`                     | —                    | Components of your own for views Clover does not draw.                                                                                                                  |
 
 `iiifContent` can be:
 

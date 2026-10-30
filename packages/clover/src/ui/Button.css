@@ -84,6 +84,40 @@ button.clover-canvas-button svg {
 }
 
 /*
+ * In the higher-contrast mode (`styles/contrast.css`), the controls' dark fill, ringed in
+ * the accent as Items rings an item, 1px clear: at half strength under the pointer. Focused,
+ * its own ring.
+ */
+:where([data-high-contrast])
+  :is(
+    button.clover-canvas-button,
+    button.clover-items-scroll-prev,
+    button.clover-items-scroll-next,
+    button.clover-pager-previous,
+    button.clover-pager-next,
+    button.clover-panel-close,
+    button.clover-sections-scroll-prev,
+    button.clover-sections-scroll-next
+  ):is(:hover, :focus-visible) {
+  background-color: var(--clover-accent-fill);
+}
+
+:where([data-high-contrast])
+  :is(
+    button.clover-canvas-button,
+    button.clover-items-scroll-prev,
+    button.clover-items-scroll-next,
+    button.clover-pager-previous,
+    button.clover-pager-next,
+    button.clover-panel-close,
+    button.clover-sections-scroll-prev,
+    button.clover-sections-scroll-next
+  ):hover:not(:focus-visible) {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
+}
+
+/*
  * A step with nowhere to go: Previous or Next at an end (the pager's, the strip's arrows),
  * an animation's frame at its first or last. Shown disabled, faded, taking no pointer, so
  * it never lights up under one and nothing beside it moves. The press that reaches the end

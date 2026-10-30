@@ -197,7 +197,16 @@
 }
 
 .nextra-sidebar > .nextra-sidebar-footer > button:is(:hover, :focus-visible) {
-  background-color: var(--clover-color-accent);
+  /* As Clover's controls take it, in the higher-contrast mode too (`tokens.css`). */
+  background-color: var(--clover-accent-fill, var(--clover-color-accent));
+}
+
+:where(:root[data-high-contrast])
+  .nextra-sidebar
+  > .nextra-sidebar-footer
+  > button:hover:not(:focus-visible) {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
 }
 
 .nextra-sidebar > .nextra-sidebar-footer > button > svg {
@@ -706,9 +715,9 @@ nav.nextra-toc:empty ~ article {
  * example's card under it is.
  */
 .docs-part-badge {
-  background: var(--accent-9);
+  background: var(--solid-fill, var(--accent-9));
   border-radius: var(--radius-4);
-  color: var(--accent-contrast);
+  color: var(--solid-text, var(--accent-contrast));
   line-height: 1.5;
   padding: var(--clover-space-2xs, 0.236rem) var(--clover-space-s, 0.618rem);
   white-space: nowrap;
@@ -1012,8 +1021,16 @@ nav.nextra-toc:empty ~ article {
 :root
   .code-switch
   > .code-switch-option[data-option]:has(> input:focus-visible) {
-  background: var(--accent-9);
-  color: var(--accent-contrast);
+  background: var(--solid-fill, var(--accent-9));
+  color: var(--solid-text, var(--accent-contrast));
+}
+
+/* In the higher-contrast mode, ringed under the pointer (`tokens.css`). */
+:where(:root[data-high-contrast])
+  .code-switch
+  > .code-switch-option[data-option]:hover:not(:has(> input:focus-visible)) {
+  outline: var(--solid-ring-hover);
+  outline-offset: 1px;
 }
 
 /* Focused, ringed besides, off its edge (2.4.7), as the Transcript's is. */

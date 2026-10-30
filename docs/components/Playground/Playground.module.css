@@ -430,10 +430,10 @@
 /* Open: the primary action, the accent's fill, round at the pill's end, 40px. */
 .openButton {
   align-items: center;
-  background: var(--accent-9);
+  background: var(--solid-fill, var(--accent-9));
   border: 0;
   border-radius: 50%;
-  color: var(--accent-contrast);
+  color: var(--solid-text, var(--accent-contrast));
   cursor: pointer;
   display: flex;
   flex: none;
@@ -449,7 +449,18 @@
 }
 
 .openButton:hover {
-  background: var(--accent-10);
+  background: var(--solid-fill, var(--accent-10));
+}
+
+/* In the higher-contrast mode, ringed under the pointer (`tokens.css`). */
+:where(:root[data-high-contrast]) .openButton {
+  /* At once in the mode (Mat, 2026-10-29): eased, its ring blinks in. */
+  transition: none;
+}
+
+:where(:root[data-high-contrast]) .openButton:hover:not(:focus-visible) {
+  outline: var(--solid-ring-hover);
+  outline-offset: 1px;
 }
 
 .openButton:hover svg {
@@ -1009,9 +1020,16 @@
 }
 
 .layoutOption[data-selected="true"] {
-  background: var(--accent-9);
-  color: var(--accent-contrast);
+  background: var(--solid-fill, var(--accent-9));
+  color: var(--solid-text, var(--accent-contrast));
   font-weight: var(--weight-bold);
+}
+
+/* In the higher-contrast mode, chosen, ringed whole (`tokens.css`). */
+:where(:root[data-high-contrast])
+  .layoutOption[data-selected="true"]:not(:has(.choiceInput:focus-visible)) {
+  outline: var(--solid-ring);
+  outline-offset: 1px;
 }
 
 /* The radio is the accessible control; the row is its label, and shows its focus. */

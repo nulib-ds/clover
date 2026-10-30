@@ -12,6 +12,30 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **A higher-contrast mode, `highContrast`.** For an accent that cannot carry white text
+  at 4.5:1 (an orange such as Princeton's, 3.0:1), set `highContrast` on the `Root`, the
+  Viewer, or a part standing alone (`Canvas`, `Timeline`, `Scene`, `Items`, `Map`); as web
+  components, the `high-contrast` attribute. Default `false`. The parts inside follow it.
+  In it, the accent paints only rings, outlines, lines and marks: what it filled under a
+  glyph or words (a control under the pointer or focused, the chosen language code, the
+  search field's submit, a Download menu open) takes the round controls' dark fill and
+  glyph color (`--clover-color-control`, `--clover-color-control-glyph`), with no ring at
+  rest; under the pointer, the accent's ring at half strength, 3px, 1px clear, as Items
+  rings an item; chosen or open, the ring whole; focused, the control's own focus ring.
+  Nothing eases in it: its controls change at once (`--clover-transition` is `none`).
+  Text in the accent is `--clover-color-accent-text` where the page sets it, else the
+  text's own color. Clover turns the mode on by itself where the reader's system asks for
+  more contrast (`prefers-contrast: more`), following it as it changes. It is written as
+  `data-high-contrast` on the root's element.
+
+  ```jsx
+  <Viewer iiifContent={url} highContrast />
+  ```
+
+  ```html
+  <clover-viewer iiif-content="…" high-contrast></clover-viewer>
+  ```
+
 - **Timed text is what its annotation `provides`.** Presentation 4 puts `provides` on a
   `supplementing` annotation to say what its file is for, and Clover now reads it for
   WebVTT (Cookbook 0219): `closedCaptions` is a captions track, as before; `subtitles` or

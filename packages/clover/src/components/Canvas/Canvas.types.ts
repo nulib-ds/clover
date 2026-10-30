@@ -167,6 +167,13 @@ export interface CloverCanvasProps {
    * default; inside a `Root`, the Root's.
    */
   language?: string;
+  /**
+   * Clover's higher-contrast mode: the accent kept to rings, outlines and marks, and never
+   * under words or a glyph, where the controls' dark fill takes its place, edged in the
+   * accent. Inside a `Root`, the Root's too; on wherever the reader's system asks for more
+   * contrast. Default `false`.
+   */
+  highContrast?: boolean;
   /** Stable id for this instance. A new id remounts the renderer. */
   instanceId?: string;
   className?: string;

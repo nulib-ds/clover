@@ -126,6 +126,34 @@ button.clover-canvas-placeholder-toggle {
 }
 
 /*
+ * In the higher-contrast mode (`styles/contrast.css`), the controls' dark fill, ringed in
+ * the accent as Items rings an item, 1px clear: at half strength under the pointer. Focused,
+ * its own ring.
+ */
+:where([data-high-contrast])
+  .clover-canvas[data-placeholder="true"][data-media]
+  > button.clover-canvas-placeholder-toggle:is(:hover, :focus-visible),
+:where([data-high-contrast])
+  .clover-canvas[data-placeholder="true"][data-media]:has(
+    > .clover-canvas-placeholder[data-media="true"]:hover
+  )
+  > button.clover-canvas-placeholder-toggle {
+  background-color: var(--clover-accent-fill);
+}
+
+:where([data-high-contrast])
+  .clover-canvas[data-placeholder="true"][data-media]
+  > button.clover-canvas-placeholder-toggle:hover:not(:focus-visible),
+:where([data-high-contrast])
+  .clover-canvas[data-placeholder="true"][data-media]:has(
+    > .clover-canvas-placeholder[data-media="true"]:hover
+  )
+  > button.clover-canvas-placeholder-toggle:not(:focus-visible) {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
+}
+
+/*
  * Over the placeholder the cluster holds only the information control, which stays to
  * hand beside the toggle rather than fading.
  */

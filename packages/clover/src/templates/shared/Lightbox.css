@@ -61,3 +61,19 @@ button.clover-template-lightbox-close:is(:hover, :focus-visible) {
   background: var(--clover-color-accent, #0065c3);
   color: var(--clover-color-control-glyph, #fff);
 }
+
+/*
+ * In the higher-contrast mode (`styles/contrast.css`), the controls' dark fill, ringed in
+ * the accent as Items rings an item, 1px clear: at half strength under the pointer. Focused,
+ * its own ring.
+ */
+:where([data-high-contrast])
+  button.clover-template-lightbox-close:is(:hover, :focus-visible) {
+  background: var(--clover-accent-fill);
+}
+
+:where([data-high-contrast])
+  button.clover-template-lightbox-close:hover:not(:focus-visible) {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
+}

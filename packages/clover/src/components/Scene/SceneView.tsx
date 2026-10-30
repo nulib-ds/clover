@@ -32,6 +32,10 @@ import useFullscreen from "../../hooks/useFullscreen";
 import useFullscreenSupported from "../../hooks/useFullscreenSupported";
 import useWithinFullscreen from "../../hooks/useWithinFullscreen";
 import useFullscreenExit from "../../hooks/useFullscreenExit";
+import {
+  highContrastProps,
+  useHighContrast,
+} from "../../hooks/useHighContrast";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
@@ -92,6 +96,13 @@ export interface SceneProps {
   label?: unknown;
   /** The language to read IIIF text in. The reader's, by default; inside a `Root`, the Root's. */
   language?: string;
+  /**
+   * Clover's higher-contrast mode: the accent kept to rings, outlines and marks, and never
+   * under words or a glyph, where the controls' dark fill takes its place, edged in the
+   * accent. Inside a `Root`, the Root's too; on wherever the reader's system asks for more
+   * contrast. Default `false`.
+   */
+  highContrast?: boolean;
   className?: string;
   /** All of Clover's controls (`true`, the default), none (`false`), or all but those set `false`. */
   controls?: boolean | SceneControlsConfig;
@@ -174,6 +185,7 @@ function SceneBody({
   scene,
   label,
   language,
+  highContrast,
   className,
   controls = true,
   controlButtons,
@@ -185,6 +197,8 @@ function SceneBody({
   const { t } = useCloverTranslation();
   const [wrapper, setWrapper] = useState<HTMLElement | null>(null);
   const root = useRootLanguage(setWrapper as React.RefCallback<HTMLElement>);
+  // Standalone, the higher-contrast mode is the Scene's own: the page's, or the reader's.
+  const contrast = useHighContrast(highContrast);
   const hostRef = useRef<HTMLDivElement>(null);
   const isFullscreen = useFullscreen(wrapper);
   // The way out shown at its top left: full screen itself, or first in its Root that is.
@@ -640,6 +654,7 @@ function SceneBody({
         aria-labelledby={figureLabel}
         className={join("clover-canvas", "clover-scene", className)}
         data-testid="clover-scene"
+        {...highContrastProps(contrast)}
         data-status={
           status.state === "ready"
             ? "ready"

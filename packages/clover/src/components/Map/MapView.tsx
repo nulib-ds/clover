@@ -1,6 +1,10 @@
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useUniqueId } from "../../ui/useUniqueId";
+import {
+  highContrastProps,
+  useHighContrast,
+} from "../../hooks/useHighContrast";
 
 import { DEFAULT_STYLE_URL, applyDefaultBasemap } from "./basemap";
 import {
@@ -67,6 +71,13 @@ export interface MapProps
   request?: CloverRequest;
   /** Standalone: the language to read IIIF text in. */
   language?: string;
+  /**
+   * Clover's higher-contrast mode: the accent kept to rings, outlines and marks, and never
+   * under words or a glyph, where the controls' dark fill takes its place, edged in the
+   * accent. Inside a `Root`, the Root's too; on wherever the reader's system asks for more
+   * contrast. Default `false`.
+   */
+  highContrast?: boolean;
   /**
    * The basemap's credits, behind an ⓘ in the map's lower corner. Default true. A basemap's license
    * may ask for its credits: give them on the page yourself before setting this false.
@@ -285,6 +296,7 @@ function MapView({
   list = true,
   credits = true,
   language,
+  highContrast,
   landmark = true,
   overlay = true,
   overlayOpacity = 0.75,
@@ -304,6 +316,8 @@ function MapView({
   // Outside a Root, the map reads the page's language itself, for its strings to mark.
   const root = useRootLanguage(forwardedRef, rest.lang);
   const { langOf } = root;
+  // Standalone, the higher-contrast mode is the map's own: the page's, or the reader's.
+  const contrast = useHighContrast(highContrast);
   const container = useRef<HTMLDivElement>(null);
   /*
    * MapLibre (290 kB) loads only as the map comes within half a screen of view, as a
@@ -794,6 +808,7 @@ function MapView({
         className={join("clover-geomap", className)}
         data-status={failed ? "error" : map ? "ready" : "loading"}
         style={style}
+        {...highContrastProps(contrast)}
         {...rest}
       >
         {/* Functional: the map needs a box to draw in, with or without the stylesheet. */}

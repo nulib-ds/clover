@@ -451,8 +451,15 @@ deadline.
     story's figure strokes draw as its line reaches it too (`data-drawn`), and elsewhere
     once they come into view past a point; every stroke draws once and stays drawn until
     the page loads again, never by the scroll's own position (`Swoosh.tsx`; Mat, 2026-10-22). Seamless has the site's Font family and Color (`BrandPicker.tsx`),
-    which set the whole site and are remembered (`page-theme.ts`), in the column the other
-    stories give their figures, and under its words its figures, smaller and side by
+    which set the whole site and are remembered (`page-theme.ts`), Princeton's orange ahead
+    of Texas A&M's maroon (Mat, 2026-10-29), and under the colors High contrast, a native
+    checkbox (Mat, 2026-10-29), the site's higher-contrast mode, remembered too: on the
+    document root as `data-high-contrast`, which the site's solid fills read (`--solid-*`,
+    `tokens.css`) and every Clover on the page follows, as its styles key on the attribute
+    around it. It is held on, checked and disabled with the reason under it, while the accent
+    cannot carry white text at 4.5:1 (`carriesWhite`, `docs/lib/accent-contrast.ts`:
+    Princeton's orange) or the reader's system asks for more contrast. In the column the
+    other stories give their figures, and under its words its figures, smaller and side by
     side, then the CSS a page would write (Mat, 2026-10-21): `1rem` ("Inherited sizing") and `CSS` ("Variables for
     styling"), a word, never a count (Mat, 2026-10-21). The navbar's one
     control is the code switch (below); it has no settings (its gear was removed on

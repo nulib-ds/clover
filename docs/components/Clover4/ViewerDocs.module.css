@@ -111,9 +111,16 @@
 }
 
 .segment[aria-pressed="true"] {
-  background: var(--accent-9);
-  color: var(--accent-contrast);
+  background: var(--solid-fill, var(--accent-9));
+  color: var(--solid-text, var(--accent-contrast));
   font-weight: var(--weight-bold);
+}
+
+/* In the higher-contrast mode, chosen, ringed whole (`tokens.css`). */
+:where(:root[data-high-contrast])
+  .segment[aria-pressed="true"]:not(:focus-visible) {
+  outline: var(--solid-ring);
+  outline-offset: 1px;
 }
 
 .segment:focus-visible {

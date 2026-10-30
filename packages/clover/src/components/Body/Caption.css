@@ -77,7 +77,10 @@
 }
 
 .clover-canvas-caption a {
-  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+  color: var(
+    --clover-color-accent-text,
+    var(--clover-accent-text-fallback, var(--clover-color-accent, #0065c3))
+  );
 }
 
 /*

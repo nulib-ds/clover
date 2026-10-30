@@ -77,10 +77,10 @@
 
 /* The primary action: the accent fill the homepage uses for a selected tab. */
 .submit {
-  background: var(--accent-9);
+  background: var(--solid-fill, var(--accent-9));
   border: 0;
   border-radius: var(--radius-4);
-  color: var(--accent-contrast);
+  color: var(--solid-text, var(--accent-contrast));
   cursor: pointer;
   flex: none;
   font: inherit;
@@ -92,7 +92,18 @@
 }
 
 .submit:hover {
-  background: var(--accent-10);
+  background: var(--solid-fill, var(--accent-10));
+}
+
+/* In the higher-contrast mode, ringed under the pointer (`tokens.css`). */
+:where(:root[data-high-contrast]) .submit {
+  /* At once in the mode (Mat, 2026-10-29): eased, its ring blinks in. */
+  transition: none;
+}
+
+:where(:root[data-high-contrast]) .submit:hover:not(:focus-visible) {
+  outline: var(--solid-ring-hover);
+  outline-offset: 1px;
 }
 
 .submit:focus-visible {

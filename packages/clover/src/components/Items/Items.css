@@ -46,7 +46,10 @@
 
 .clover-items-homepage {
   margin-inline-start: auto;
-  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+  color: var(
+    --clover-color-accent-text,
+    var(--clover-accent-text-fallback, var(--clover-color-accent, #0065c3))
+  );
 }
 
 /* ---------- tracks ---------- */
@@ -525,7 +528,10 @@
 }
 
 .clover-items-item[aria-selected="true"] .clover-items-label {
-  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+  color: var(
+    --clover-color-accent-text,
+    var(--clover-accent-text-fallback, var(--clover-color-accent, #0065c3))
+  );
   font-weight: 600;
 }
 

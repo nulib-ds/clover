@@ -25,7 +25,10 @@
 .clover-download-link {
   display: block;
   padding: var(--clover-space-2xs) 0;
-  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+  color: var(
+    --clover-color-accent-text,
+    var(--clover-accent-text-fallback, var(--clover-color-accent, #0065c3))
+  );
   overflow-wrap: anywhere;
 }
 

@@ -308,6 +308,37 @@ button.clover-about-download-button:is(
   color: var(--clover-color-control-glyph, #fff);
 }
 
+/*
+ * In the higher-contrast mode (`styles/contrast.css`), the controls' dark fill, ringed in
+ * the accent as Items rings an item, 1px clear: whole while its menu is open, at half
+ * strength under the pointer. Focused, its own ring.
+ */
+:where([data-high-contrast])
+  button.clover-about-download-button:is(
+    :hover,
+    :focus-visible,
+    [aria-expanded="true"]
+  ) {
+  background-color: var(--clover-accent-fill);
+}
+
+:where([data-high-contrast])
+  button.clover-about-download-button:hover:not(
+    :focus-visible,
+    [aria-expanded="true"]
+  ) {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
+}
+
+:where([data-high-contrast])
+  button.clover-about-download-button[aria-expanded="true"]:not(
+    :focus-visible
+  ) {
+  outline: var(--clover-accent-ring);
+  outline-offset: 1px;
+}
+
 button.clover-about-download-button:focus-visible {
   outline: 2px solid var(--clover-color-accent, #0065c3);
   outline-offset: 2px;
@@ -443,7 +474,10 @@ button.clover-about-download-button:focus-visible {
 }
 
 .clover-about a {
-  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+  color: var(
+    --clover-color-accent-text,
+    var(--clover-accent-text-fallback, var(--clover-color-accent, #0065c3))
+  );
   overflow-wrap: anywhere;
 }
 
@@ -464,7 +498,10 @@ button.clover-about-open {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+  color: var(
+    --clover-color-accent-text,
+    var(--clover-accent-text-fallback, var(--clover-color-accent, #0065c3))
+  );
   font-size: var(--clover-text-s);
   text-decoration: underline 1px;
   text-decoration-color: color-mix(in srgb, currentColor 20%, transparent);

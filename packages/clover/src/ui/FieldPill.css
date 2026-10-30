@@ -187,6 +187,25 @@ button.clover-field-pill-submit:is(:hover, :focus-visible) {
   );
 }
 
+/*
+ * In the higher-contrast mode (`styles/contrast.css`), the controls' dark fill, at rest
+ * and under the pointer alike, with no ring at rest (Mat, 2026-10-29): under the pointer,
+ * the accent's ring at half strength, 1px clear, as Items rings an item. Focused, its own
+ * ring.
+ */
+:where([data-high-contrast]) button.clover-field-pill-submit,
+:where([data-high-contrast])
+  button.clover-field-pill-submit:is(:hover, :focus-visible) {
+  background-color: var(--clover-accent-fill);
+  transition: none;
+}
+
+:where([data-high-contrast])
+  button.clover-field-pill-submit:hover:not(:focus-visible) {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
+}
+
 button.clover-field-pill-submit:is(:hover, :focus-visible) svg {
   scale: 1.1;
 }

@@ -74,7 +74,10 @@
  */
 :is(.clover-homepage, .clover-rendering, .clover-see-also, .clover-part-of) a,
 a:is(.clover-id, .clover-rights) {
-  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+  color: var(
+    --clover-color-accent-text,
+    var(--clover-accent-text-fallback, var(--clover-color-accent, #0065c3))
+  );
   overflow-wrap: anywhere;
   text-decoration-line: underline;
   text-underline-offset: var(--clover-space-3xs);

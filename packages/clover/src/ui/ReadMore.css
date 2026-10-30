@@ -17,7 +17,10 @@ button.clover-read-more-button {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+  color: var(
+    --clover-color-accent-text,
+    var(--clover-accent-text-fallback, var(--clover-color-accent, #0065c3))
+  );
   font-size: var(--clover-text-s);
   text-decoration: underline 1px;
   text-decoration-color: color-mix(in srgb, currentColor 20%, transparent);

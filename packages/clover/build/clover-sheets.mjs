@@ -28,6 +28,8 @@ const REGISTRY = resolve(src, "web-components/styles.ts");
 const OWNERS = {
   // Every element's: the scale's custom properties, and its controls' font.
   "styles/scale": ["web-components/host.tsx"],
+  // Every element's too: the higher-contrast mode's values, which its parts' rules read.
+  "styles/contrast": ["web-components/host.tsx"],
   // The Body's box while its code loads, then the Canvas, a Timeline's or a Scene's.
   "components/Canvas/Canvas": [
     "components/Canvas/CanvasView.tsx",

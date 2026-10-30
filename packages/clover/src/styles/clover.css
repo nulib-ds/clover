@@ -15,6 +15,7 @@
  */
 
 @import "./scale.css";
+@import "./contrast.css";
 @import "../ui/ErrorBoundary.css";
 @import "../ui/ExitFullscreen.css";
 @import "../ui/Loading.css";

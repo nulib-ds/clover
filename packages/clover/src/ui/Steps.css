@@ -58,6 +58,24 @@ button.clover-steps-step:is(:hover, :focus-visible):not(
   color: var(--clover-color-control-glyph, #fff);
 }
 
+/*
+ * In the higher-contrast mode (`styles/contrast.css`), the controls' dark fill, ringed in
+ * the accent as Items rings an item, 1px clear: at half strength under the pointer. Focused,
+ * its own ring.
+ */
+:where([data-high-contrast])
+  button.clover-steps-step:is(:hover, :focus-visible):not(
+    [aria-disabled="true"]
+  ) {
+  background-color: var(--clover-accent-fill);
+}
+
+:where([data-high-contrast])
+  button.clover-steps-step:hover:not(:focus-visible, [aria-disabled="true"]) {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
+}
+
 button.clover-steps-step:focus-visible {
   outline: 2px solid var(--clover-color-accent, #0065c3);
   outline-offset: 2px;

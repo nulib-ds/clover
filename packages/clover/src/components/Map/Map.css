@@ -137,6 +137,26 @@
   box-shadow: none !important;
 }
 
+/*
+ * In the higher-contrast mode (`styles/contrast.css`), the controls' dark fill, ringed in
+ * the accent as Items rings an item, 1px clear: at half strength under the pointer. Focused,
+ * its own ring.
+ */
+:where([data-high-contrast])
+  .clover-geomap
+  .maplibregl-ctrl-group
+  button:is(:hover, :focus-visible) {
+  background-color: var(--clover-accent-fill) !important;
+}
+
+:where([data-high-contrast])
+  .clover-geomap
+  .maplibregl-ctrl-group
+  button:hover:not(:focus-visible) {
+  outline: var(--clover-accent-ring-hover) !important;
+  outline-offset: 1px !important;
+}
+
 .clover-geomap .maplibregl-ctrl-group button .maplibregl-ctrl-icon,
 .clover-geomap .maplibregl-ctrl-attrib-button::before {
   width: 1rem !important;
@@ -228,6 +248,35 @@
   ) {
   background-color: var(--clover-color-accent, #0065c3) !important;
   box-shadow: none !important;
+}
+
+/*
+ * In the higher-contrast mode (`styles/contrast.css`), the controls' dark fill, ringed in
+ * the accent as Items rings an item, 1px clear: at half strength under the pointer, whole
+ * while the credits are open. Focused, its own ring.
+ */
+:where([data-high-contrast])
+  .clover-geomap
+  :is(
+    .maplibregl-ctrl-attrib-button:is(:hover, :focus-visible),
+    .maplibregl-compact-show > .maplibregl-ctrl-attrib-button
+  ) {
+  background-color: var(--clover-accent-fill) !important;
+}
+
+:where([data-high-contrast])
+  .clover-geomap
+  .maplibregl-ctrl-attrib-button:hover:not(:focus-visible) {
+  outline: var(--clover-accent-ring-hover) !important;
+  outline-offset: 1px !important;
+}
+
+:where([data-high-contrast])
+  .clover-geomap
+  .maplibregl-compact-show
+  > .maplibregl-ctrl-attrib-button:not(:focus-visible) {
+  outline: var(--clover-accent-ring) !important;
+  outline-offset: 1px !important;
 }
 
 .clover-geomap

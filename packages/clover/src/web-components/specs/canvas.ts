@@ -22,6 +22,7 @@ export const canvas: ElementSpec = {
     tiled: { prop: "isTiledImage", type: "boolean" },
     label: { prop: "label", type: "string" },
     language: { prop: "language", type: "string" },
+    "high-contrast": { prop: "highContrast", type: "boolean" },
     controls: { prop: "controls", type: "boolean" },
     navigator: { prop: "navigator", type: "boolean" },
     placeholder: { prop: "placeholder", type: "boolean" },
@@ -219,6 +220,11 @@ export const canvasDocs: ElementDocs = {
         "The viewport's name, for an image given by src. A Canvas names it by its own label.",
     },
     language: { description: "The language to read IIIF text in." },
+    "high-contrast": {
+      description:
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+      default: "false",
+    },
     controls: {
       description: '"false" leaves out the controls over the Body.',
       default: "true",

@@ -42,11 +42,14 @@ const pill: React.CSSProperties = {
   cursor: "pointer",
 };
 
-/* Pressed is a solid fill: white on the accent keeps 4.5:1, and shows by more than hue. */
+/*
+ * Pressed is a solid fill: white on the accent keeps 4.5:1, and shows by more than hue.
+ * In the higher-contrast mode, the controls' dark fill, its edge the accent (`tokens.css`).
+ */
 const pillPressed: React.CSSProperties = {
-  background: "var(--accent-9)",
+  background: "var(--solid-fill, var(--accent-9))",
   border: "1px solid var(--accent-9)",
-  color: "var(--accent-contrast)",
+  color: "var(--solid-text, var(--accent-contrast))",
 };
 
 export function LanguagesDemo() {

@@ -27,6 +27,10 @@ import { useRovingFocus } from "../../ui/useRovingFocus";
 import { useScrollTrack } from "../../ui/useScrollTrack";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { languageProps } from "../../core/direction";
+import {
+  highContrastProps,
+  useHighContrast,
+} from "../../hooks/useHighContrast";
 
 /**
  * A scrolling row of thumbnails (`slider`), a column, a wrapping grid, or one item at a
@@ -86,6 +90,13 @@ export interface ItemsProps
   request?: CloverRequest;
   /** Standalone: the language to read IIIF text in. */
   language?: string;
+  /**
+   * Clover's higher-contrast mode: the accent kept to rings, outlines and marks, and never
+   * under words or a glyph, where the controls' dark fill takes its place, edged in the
+   * accent. Inside a `Root`, the Root's too; on wherever the reader's system asks for more
+   * contrast. Default `false`.
+   */
+  highContrast?: boolean;
   /** Replace an item's figure with your own. */
   renderItem?: (
     item: ItemModel,
@@ -323,6 +334,7 @@ export function Pager({
   navigation,
   of,
   /* eslint-enable @typescript-eslint/no-unused-vars */
+  highContrast,
   ...rest
 }: Omit<ItemsProps, "onSelect" | "iiifContent" | "items"> &
   Forwarded & {
@@ -333,9 +345,11 @@ export function Pager({
     nameKey?: string;
   }) {
   const root = useRootLanguage(forwardedRef, rest.lang);
+  const contrast = useHighContrast(highContrast);
   return (
     <HostLanguageContext.Provider value={root.hostLanguage}>
       <ItemsPager
+        {...highContrastProps(contrast)}
         {...rest}
         steps={steps}
         forwardedRef={root.ref}
@@ -390,6 +404,7 @@ export function ItemsView({
   // The pager's, not a list's.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   size,
+  highContrast,
   ...rest
 }: ItemsViewProps) {
   const { t } = useCloverTranslation();
@@ -397,6 +412,8 @@ export function ItemsView({
   // Outside a Root, Items reads the page's language itself, for its strings to mark.
   const root = useRootLanguage(forwardedRef, rest.lang);
   const { langOf } = root;
+  // Standalone, the higher-contrast mode is Items' own: the page's, or the reader's.
+  const contrast = useHighContrast(highContrast);
 
   const slider = layout === "slider";
   const listbox = navigation === "id";
@@ -598,6 +615,7 @@ export function ItemsView({
         className={join("clover-items", className)}
         data-layout={layout}
         data-navigation={navigation}
+        {...highContrastProps(contrast)}
         {...rest}
       >
         {heading && (headingLabel?.text || headingSummary?.text) && (

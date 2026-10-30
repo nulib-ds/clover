@@ -16,6 +16,23 @@ staging, `git mv`, versions or publishing.
 WCAG 2.2 AA, as the root `AGENTS.md` and `DESIGN.md` §0 state: non-negotiable, above
 every rule below.
 
+- **The higher-contrast mode** (`highContrast`; Mat, 2026-10-29: for an accent that cannot
+  carry white text, never a second accent color). A root (a `Root`, or a part standing
+  alone: `CanvasView`, `SceneView`, `MapView`, Items' views) writes `data-high-contrast` on
+  its element from `useHighContrast` (`hooks/useHighContrast.ts`): its prop, or the
+  reader's `prefers-contrast: more`, followed as it changes. Styles key on the attribute
+  around them (`:where([data-high-contrast])`), so the parts inside follow without being
+  told, and a page may set it on an element around Clover. Its values are in
+  `styles/contrast.css`. In it the accent paints only rings, outlines, lines and marks;
+  a fill of the accent under a glyph or words takes `--clover-accent-fill` (the controls'
+  dark fill), with no ring at rest, `--clover-accent-ring-hover` under the pointer and
+  `--clover-accent-ring` while chosen or open, 3px and 1px clear as Items rings an item,
+  never over a control's focus ring (`:not(:focus-visible)`). Nothing eases in it (Mat,
+  2026-10-29: eased, a ring blinked in from the glyph's color): `--clover-transition` is
+  `none` there, and a control with a transition of its own stops it in its mode rule. Text in the accent falls back
+  through `--clover-accent-text-fallback`. A new accent fill under a glyph or words gets
+  its mode rule beside it, in its part's stylesheet: `styles/contrast.test.tsx` fails
+  naming it otherwise, and a fill that is decoration alone goes on its `DECORATION` list.
 - **What a resource `provides`** (Mat, 2026-10-29: "an important inclusion in
   presentation 4.0 … valuable for accessibility reasons and annotation guidance going
   forward"). Presentation 4 puts `provides` on a `supplementing` annotation to say what

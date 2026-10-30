@@ -2,7 +2,12 @@ import React, { useId } from "react";
 import styles from "docs/components/Home/Home.module.css";
 import { accentPresets } from "docs/components/Playground/playground-config";
 import { fontPresets } from "docs/lib/preview-fonts";
-import { setPageTheme, usePageTheme } from "docs/lib/page-theme";
+import {
+  setHighContrast,
+  setPageTheme,
+  usePageTheme,
+  useSiteContrast,
+} from "docs/lib/page-theme";
 
 /** The site's accent (`--accent-9` in `tokens.css`), for the code to name. */
 const SITE_ACCENT = "#0F62FE";
@@ -34,6 +39,9 @@ const useAccent = () => {
 export function BrandControls() {
   const id = useId();
   const { font, named, hex } = useAccent();
+  const contrast = useSiteContrast();
+  // Held on by the accent (one that cannot carry white text) or the reader's system.
+  const held = contrast.why === "accent" || contrast.why === "system";
   return (
     <div className={styles.brandControls}>
       <div className={styles.brandControl}>
@@ -81,6 +89,29 @@ export function BrandControls() {
             />
           ))}
         </div>
+      </div>
+      {/*
+       * The higher-contrast mode (`highContrast`), for the whole site, as a page sets it on
+       * Clover (Mat, 2026-10-29): the accent kept to rings and lines. Under the colors, its
+       * own group, named as the others are.
+       */}
+      <div
+        role="group"
+        aria-labelledby={`${id}-access`}
+        className={`${styles.brandControl} ${styles.brandAccess}`}
+      >
+        <span className={styles.brandLabel} id={`${id}-access`}>
+          Accessibility
+        </span>
+        <label className={styles.brandToggle}>
+          <input
+            type="checkbox"
+            checked={contrast.on}
+            disabled={held}
+            onChange={(event) => setHighContrast(event.target.checked)}
+          />
+          High contrast
+        </label>
       </div>
     </div>
   );

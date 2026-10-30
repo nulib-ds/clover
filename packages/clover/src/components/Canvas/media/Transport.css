@@ -183,6 +183,22 @@
 }
 
 /*
+ * In the higher-contrast mode (`styles/contrast.css`), the controls' dark fill, ringed in
+ * the accent as Items rings an item, 1px clear: at half strength under the pointer. Focused,
+ * its own ring.
+ */
+:where([data-high-contrast])
+  .clover-canvas-transport-button:is(:hover, :focus-visible) {
+  background-color: var(--clover-accent-fill);
+}
+
+:where([data-high-contrast])
+  .clover-canvas-transport-button:hover:not(:focus-visible) {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
+}
+
+/*
  * Pressed (Repeat): a bar under the glyph, in the glyph's color, the state's one mark,
  * never a fill of its own, so it is not told by color (WCAG 1.4.1). Its Tip positions
  * the button. A border, not a fill: forced colors keep a border in the text's color,

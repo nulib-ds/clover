@@ -308,6 +308,7 @@ export const map: ElementSpec = {
     "scroll-zoom": { prop: "scrollZoom", type: "boolean" },
     credits: { prop: "credits", type: "boolean" },
     language: { prop: "language", type: "string" },
+    "high-contrast": { prop: "highContrast", type: "boolean" },
   },
   properties: ["iiifContent", "navPlace", "georeferences", "request"],
   events: { "clover-select": { prop: "onSelect", detail: ["feature"] } },
@@ -342,6 +343,11 @@ export const mapDocs: ElementDocs = {
       default: "true",
     },
     language: { description: "Alone: the language to read IIIF text in." },
+    "high-contrast": {
+      description:
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+      default: "false",
+    },
   },
   properties: {
     iiifContent: {

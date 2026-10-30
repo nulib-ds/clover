@@ -56,6 +56,22 @@ button.clover-canvas-exit-full-screen {
 }
 
 /*
+ * In the higher-contrast mode (`styles/contrast.css`), the controls' dark fill, ringed in
+ * the accent as Items rings an item, 1px clear: at half strength under the pointer. Focused,
+ * its own ring.
+ */
+:where([data-high-contrast])
+  .clover-canvas-exit-full-screen:is(:hover, :focus-visible) {
+  background-color: var(--clover-accent-fill);
+}
+
+:where([data-high-contrast])
+  .clover-canvas-exit-full-screen:hover:not(:focus-visible) {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
+}
+
+/*
  * A Root in full screen (`getCloverRoot`: a Canvas's full screen takes the Root it is in,
  * a template's Viewer or a page's own layout; Mat, 2026-10-29): on Clover's ground, and
  * scrolling where the screen is too short for what it holds.

@@ -14,6 +14,7 @@ export const timeline: ElementSpec = {
     "iiif-content": { prop: "iiifContent", type: "string" },
     label: { prop: "label", type: "string" },
     language: { prop: "language", type: "string" },
+    "high-contrast": { prop: "highContrast", type: "boolean" },
     controls: { prop: "controls", type: "boolean" },
     placeholder: { prop: "placeholder", type: "boolean" },
   },
@@ -37,6 +38,11 @@ export const timelineDocs: ElementDocs = {
       description: "The Body's name. A Timeline names it by its own label.",
     },
     language: { description: "The language to read IIIF text in." },
+    "high-contrast": {
+      description:
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+      default: "false",
+    },
     controls: {
       description:
         '"false" leaves out the controls over the Body; the transport stays.',
@@ -94,6 +100,7 @@ export const scene: ElementSpec = {
     "iiif-content": { prop: "iiifContent", type: "string" },
     label: { prop: "label", type: "string" },
     language: { prop: "language", type: "string" },
+    "high-contrast": { prop: "highContrast", type: "boolean" },
     controls: { prop: "controls", type: "boolean" },
     engine: { prop: "engine", type: ["clover", "three"] },
   },
@@ -113,6 +120,11 @@ export const sceneDocs: ElementDocs = {
       description: "The view's name. A Scene names it by its own label.",
     },
     language: { description: "The language to read IIIF text in." },
+    "high-contrast": {
+      description:
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+      default: "false",
+    },
     controls: {
       description: '"false" leaves out the controls over the Body.',
       default: "true",

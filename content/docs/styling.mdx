@@ -157,10 +157,28 @@ again with a dark mode's. Names drop `--clover-color-`.
     "The search field’s placeholder, `primary` 65% into `secondary`, is 4.5:1 on `secondary`.",
     "Rings, and the marks that show a state, are 3:1: `accent` against `secondary`.",
     "The round controls’ glyphs are 4.5:1 on their fill: `control-glyph` on `control`, and on `accent`, which fills them under the pointer.",
+    "An accent that cannot carry `control-glyph` at 4.5:1 takes `highContrast`, and then needs 3:1 against `secondary`, as a ring.",
     "Over a picture, `primary` and `secondary` are 9:1 apart, so one of the two keeps 3:1 against any picture.",
     "A dark mode passes every check above with its own values.",
   ]}
 />
+
+### High contrast
+
+An accent that cannot carry white text at 4.5:1, such as an orange, a yellow or a light
+blue, can still be yours. Set `highContrast` on the `Root`, or on a part that stands
+alone, and the accent goes only where nothing has to be read on it: rings, outlines, the
+line under an open heading, the marks of a state. What it would fill under a glyph or
+words takes the round controls' dark fill instead, `control-glyph` on `control`. At rest
+that is all; under the pointer it is ringed in the accent at half strength, 1px clear, as
+Items rings an item, and chosen (the language read, a menu open), ringed whole. Focus keeps
+its own ring. Text in the accent is your `accent-text` where you set one, else the text's
+own color. Clover turns the mode on by itself for a reader whose system asks for more
+contrast (`prefers-contrast: more`), whatever the page sets.
+
+```jsx
+<Viewer iiifContent={url} highContrast />
+```
 
 ### Do
 
@@ -265,12 +283,12 @@ On the transport's dark scrim, in every theme.
 
 ### Shape and motion
 
-| Variable               | Default                                   | What it sets                                                                |
-| ---------------------- | ----------------------------------------- | --------------------------------------------------------------------------- |
-| `--clover-radius`      | `3px` (`6px` for the Body's menus)        | The corners of Clover's boxes: tips, menus, the panel, the Body, thumbnails |
-| `--clover-radius-pill` | `2rem`                                    | The corners of the round controls and of pills                              |
-| `--clover-transition`  | `all 200ms cubic-bezier(0.16, 1, 0.3, 1)` | How a control changes under the pointer and in focus                        |
-| `--clover-field-edge`  | The muted text mixed 80% into the ground  | The edge of a field: Search's, a menu's. Keep it 3:1 against the ground     |
+| Variable               | Default                                   | What it sets                                                                   |
+| ---------------------- | ----------------------------------------- | ------------------------------------------------------------------------------ |
+| `--clover-radius`      | `3px` (`6px` for the Body's menus)        | The corners of Clover's boxes: tips, menus, the panel, the Body, thumbnails    |
+| `--clover-radius-pill` | `2rem`                                    | The corners of the round controls and of pills                                 |
+| `--clover-transition`  | `all 200ms cubic-bezier(0.16, 1, 0.3, 1)` | How a control changes under the pointer and in focus; at once in high contrast |
+| `--clover-field-edge`  | The muted text mixed 80% into the ground  | The edge of a field: Search's, a menu's. Keep it 3:1 against the ground        |
 
 ### The Body
 

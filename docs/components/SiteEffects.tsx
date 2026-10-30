@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { restorePageTheme } from "docs/lib/page-theme";
+import { restorePageTheme, watchReaderContrast } from "docs/lib/page-theme";
 import { basePath } from "docs/lib/router";
 
 const SIDEBARS = ".nextra-sidebar, .nextra-mobile-nav";
@@ -55,6 +55,9 @@ export default function SiteEffects() {
   useEffect(() => {
     restorePageTheme();
   }, []);
+
+  // The site's higher-contrast mode, as the reader's system asks for more contrast.
+  useEffect(watchReaderContrast, []);
 
   /*
    * Nextra's search takes a bare "/" page-wide, a single-key shortcut that cannot be

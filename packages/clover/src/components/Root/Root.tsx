@@ -4,6 +4,10 @@ import type { CloverStatus } from "../../core/clover";
 import type { AnnotationsInput } from "../../core/annotation-collection";
 import type { ContentStateOutput } from "../../core/content-state";
 import type { IIIFContent } from "../../core/load";
+import {
+  highContrastProps,
+  useHighContrast,
+} from "../../hooks/useHighContrast";
 import type { CloverRequest } from "../../core/request";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { join } from "../../lib/classnames";
@@ -46,6 +50,14 @@ export interface RootProps
   /** The language to read IIIF text in. The reader's, by default. */
   language?: string;
   /**
+   * Clover's higher-contrast mode, for every part inside: the accent kept to rings,
+   * outlines and marks, and never under words or a glyph, where the controls' dark fill
+   * takes its place, edged in the accent. For an accent that cannot carry white text at
+   * 4.5:1. It is on wherever the reader's system asks for more contrast, too. Default
+   * `false`.
+   */
+  highContrast?: boolean;
+  /**
    * Renderers of your own for some views — by Canvas id, painting format, or a test —
    * drawn by every `Body` inside in place of `Canvas` (3.x's `customDisplays`).
    */
@@ -76,7 +88,7 @@ export interface RootProps
  * `Clover.Label`, `Clover.Items` — anywhere within it, in any layout.
  */
 export const Root = forwardRef<HTMLElement, RootProps>(function Root(
-  { as: Tag = "div", className, children, ...props },
+  { as: Tag = "div", className, children, highContrast, ...props },
   ref,
 ) {
   // What it holds: its Clover, the effects that keep it in step, its parts' context.
@@ -86,6 +98,8 @@ export const Root = forwardRef<HTMLElement, RootProps>(function Root(
    * The Root carries none of its own: what the host puts in it is in the page's.
    */
   const root = useRootLanguage(ref, rest.lang);
+  // The mode for every part inside, by its styles: the page's, or the reader's.
+  const contrast = useHighContrast(highContrast);
 
   return (
     <CloverContext.Provider value={context}>
@@ -94,6 +108,7 @@ export const Root = forwardRef<HTMLElement, RootProps>(function Root(
           ref={root.ref}
           className={join("clover-root", className)}
           data-status={status}
+          {...highContrastProps(contrast)}
           {...rest}
         >
           {children}

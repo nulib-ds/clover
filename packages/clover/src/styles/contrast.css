@@ -1,0 +1,37 @@
+/*
+ * The higher-contrast mode (`highContrast`, `hooks/useHighContrast.ts`; Mat, 2026-10-29).
+ * The accent paints only what carries no words: rings, outlines, the lines under a
+ * heading, the marks of a state, the loading line. So an accent that cannot carry white
+ * text at 4.5:1 (Princeton's orange, 3.0:1) still serves, as long as it keeps 3:1 against
+ * the ground (WCAG 1.4.11; 3.0:1 on white).
+ *
+ * What it fills under a glyph or words (a control under the pointer or focused, the
+ * chosen language, the submit) takes the controls' own dark fill instead, `control-glyph`
+ * on `control`, 4.5:1 in either mode (WCAG 1.4.3), and keeps the accent as its ring. Each
+ * part sets that beside its own fill, under `[data-high-contrast]`, from these. Text in
+ * the accent is the page's `accent-text` where it sets one, which a page keeps at 4.5:1,
+ * else the text's own color.
+ *
+ * Clover sets `data-high-contrast` on the root of what it draws (a `Root`, or a part
+ * standing alone) where the page asks for the mode, or the reader's system does
+ * (`prefers-contrast: more`); everything inside reads these.
+ */
+:where([data-high-contrast]) {
+  --clover-accent-fill: var(--clover-color-control, #1a1d1e);
+  /*
+   * Its ring, as Items rings an item (Mat, 2026-10-29): 3px, 1px clear (the rules give the
+   * offset), at half strength under the pointer, a preview, and whole while it is chosen
+   * or held (the language read, a menu open). At rest, none, even where the accent filled
+   * it at rest: it is the dark fill alone. Focus keeps each control's own ring.
+   */
+  --clover-accent-ring: 3px solid var(--clover-color-accent, #0065c3);
+  --clover-accent-ring-hover: 3px solid
+    color-mix(in srgb, var(--clover-color-accent, #0065c3) 50%, transparent);
+  --clover-accent-text-fallback: var(--clover-color-primary, #1a1d1e);
+  /*
+   * At once (Mat, 2026-10-29): eased, a ring blinks in from the glyph's color, an
+   * outline's own. The controls that ease by `--clover-transition` stop here; those with
+   * a transition of their own stop beside their mode's fill.
+   */
+  --clover-transition: none;
+}

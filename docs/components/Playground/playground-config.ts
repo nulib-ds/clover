@@ -240,14 +240,15 @@ export const accentPresets: AccentPreset[] = [
   /* The site's own accent (`--accent-9` in tokens.css), so choosing it clears the override. */
   { name: "Clover blue", value: "" },
   { name: "Northwestern purple", value: "#4E2A84" },
-  /* Its text step at 62% is 3.7:1 on a dark page; at 50%, 5.4:1 (4.5:1 on `--gray-3`). */
-  { name: "Texas A&M maroon", value: "#500000", darkText: "50%" },
   /*
-   * Not yet 4.5:1 under white (3.0:1; 4.2:1 darkened for hover), which
-   * `accent-presets.test.ts` says, until a higher-contrast mode keeps the accent off what
-   * carries text (Mat, 2026-10-29). Its text step holds: 4.9:1 light, 9.9:1 dark.
+   * White on it is 3.0:1 (4.2:1 darkened for hover), short of 4.5:1, so the site takes the
+   * higher-contrast mode with it (`page-theme.ts`, `accent-contrast.ts`; Mat, 2026-10-29):
+   * the accent kept to rings and lines, 3.0:1 on white. Its text step holds: 4.9:1 light,
+   * 9.9:1 dark. Ahead of Texas A&M's (Mat, 2026-10-29).
    */
   { name: "Princeton orange", value: "#E77500" },
+  /* Its text step at 62% is 3.7:1 on a dark page; at 50%, 5.4:1 (4.5:1 on `--gray-3`). */
+  { name: "Texas A&M maroon", value: "#500000", darkText: "50%" },
   { name: "Tulane green", value: "#006747" },
   { name: "UCLA blue", value: "#2774AE" },
 ];

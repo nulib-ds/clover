@@ -298,6 +298,31 @@
     z-index 0s;
 }
 
+/*
+ * In the higher-contrast mode, only their coming and going eases (Mat, 2026-10-29): eased
+ * by the controls' spring, a fill and its ring blinked in from the glyph's color, an
+ * outline's own (`styles/contrast.css`).
+ */
+:where([data-high-contrast])
+  :is(
+    .clover-canvas > .clover-canvas-controls > *,
+    .clover-canvas > .clover-canvas-navigator,
+    .clover-canvas
+      > .clover-canvas-media
+      > .clover-canvas-transport
+      > .clover-canvas-transport-seek-area,
+    .clover-canvas
+      > .clover-canvas-media
+      > .clover-canvas-transport
+      > .clover-canvas-transport-bar
+      > *
+  ) {
+  transition:
+    opacity var(--clover-controls-timing),
+    translate var(--clover-controls-timing),
+    z-index 0s;
+}
+
 /* Not a click target while away. The transport's own box never is: only its controls. */
 .clover-canvas > .clover-canvas-controls > *,
 .clover-canvas > .clover-canvas-navigator,

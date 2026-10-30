@@ -126,8 +126,11 @@
    * it), falling off to a darker rim on its lower right, a faint highlight where the
    * light is, and a soft shadow cast beneath it. Its lit side stays dark enough for the
    * globe's white lines to keep 3:1 there (WCAG 1.4.11). The globe's lines lie on its face.
+   * Its hue is the accent (`--clover-scene-ball`), or in the higher-contrast mode the
+   * controls' dark fill, edged in the accent (`styles/contrast.css`).
    */
-  background-color: var(--clover-color-accent, #0065c3);
+  --clover-scene-ball: var(--clover-color-accent, #0065c3);
+  background-color: var(--clover-scene-ball);
   background-image:
     radial-gradient(
       circle at 34% 30%,
@@ -136,15 +139,34 @@
     ),
     radial-gradient(
       circle at 34% 30%,
-      color-mix(in srgb, var(--clover-color-accent, #0065c3) 84%, #fff) 0,
-      var(--clover-color-accent, #0065c3) 48%,
-      color-mix(in srgb, var(--clover-color-accent, #0065c3) 62%, #000) 100%
+      color-mix(in srgb, var(--clover-scene-ball) 84%, #fff) 0,
+      var(--clover-scene-ball) 48%,
+      color-mix(in srgb, var(--clover-scene-ball) 62%, #000) 100%
     );
   box-shadow: 0 0.236rem 0.618rem rgb(0 0 0 / 22%);
   color: var(--clover-color-control-glyph, #fff);
   cursor: grab;
   isolation: isolate;
   transition: scale 200ms ease;
+}
+
+:where([data-high-contrast]) .clover-scene-rotate-disc {
+  --clover-scene-ball: var(--clover-accent-fill);
+  transition: none;
+}
+
+/*
+ * Ringed in the accent as Items rings an item, 1px clear: at half strength under the
+ * pointer, whole while it is held (Mat, 2026-10-29); at rest, none.
+ */
+:where([data-high-contrast]) .clover-scene-rotate-disc:hover {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
+}
+
+:where([data-high-contrast]) .clover-scene-rotate-disc:active {
+  outline: var(--clover-accent-ring);
+  outline-offset: 1px;
 }
 
 .clover-scene-rotate-disc:active {

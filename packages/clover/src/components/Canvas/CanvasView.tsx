@@ -40,6 +40,10 @@ import useFullscreen from "../../hooks/useFullscreen";
 import useWithinFullscreen from "../../hooks/useWithinFullscreen";
 import useFullscreenExit from "../../hooks/useFullscreenExit";
 import { useLoaded } from "../../hooks/useLoaded";
+import {
+  highContrastProps,
+  useHighContrast,
+} from "../../hooks/useHighContrast";
 import { ErrorBoundary } from "../../ui/ErrorBoundary";
 import { Loading } from "../../ui/Loading";
 import { SHORTCUTS, forwardShortcut } from "../../ui/Tip";
@@ -164,6 +168,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     label,
     partOf,
     language,
+    highContrast,
     instanceId,
     className,
     options,
@@ -197,6 +202,8 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   const root = useRootLanguage(
     setWrapperElement as React.RefCallback<HTMLElement>,
   );
+  // Standalone, the higher-contrast mode is the Canvas's own: the page's, or the reader's.
+  const contrast = useHighContrast(highContrast);
   // Controls and navigator show on a mouse's activity and fade after a pause, as the
   // Player's bar does; under a finger, or a pen that does not hover, a tap on the
   // picture shows and hides them. Focus that no press brought holds them.
@@ -827,6 +834,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         className={join("clover-canvas", className)}
         data-testid="clover-canvas"
         data-status={status}
+        {...highContrastProps(contrast)}
         data-unloadable={unloadable || undefined}
         data-has-navigator={showNavigator}
         data-fullscreen={isFullscreen}

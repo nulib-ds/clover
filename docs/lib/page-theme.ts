@@ -4,6 +4,7 @@ import {
   accentPresets,
   hexToHueSaturation,
 } from "docs/components/Playground/playground-config";
+import { carriesWhite } from "docs/lib/accent-contrast";
 import { fontPresets } from "docs/lib/preview-fonts";
 
 /**
@@ -92,7 +93,97 @@ export interface PageTheme {
 export const applyPageTheme = (theme: Partial<PageTheme>) => {
   if (typeof document === "undefined") return;
   applyTo(document.documentElement, theme);
+  if (theme.accent !== undefined) {
+    siteAccent =
+      theme.accent && isHexColor(theme.accent)
+        ? normalizeHex(theme.accent)
+        : "";
+    markContrast();
+  }
 };
+
+/*
+ * The site's higher-contrast mode, on the document root (`data-high-contrast`): the site's
+ * own solid fills read it (`tokens.css`), and so does every Clover on the page, whose
+ * styles key on the same attribute around them. On while the accent cannot carry white
+ * text at 4.5:1 (`carriesWhite`: Princeton's orange), or the reader's system asks for more
+ * contrast, as Clover's own roots follow it, or the reader turns it on (High contrast, in
+ * the Seamless story; remembered, as the accent is; Mat, 2026-10-29). What turns it on
+ * first is `why`: the accent and the system leave the reader nothing to turn off.
+ */
+export interface SiteContrast {
+  on: boolean;
+  why: "accent" | "system" | "chosen" | null;
+}
+
+const CONTRAST_KEY = "clover-docs-high-contrast";
+const MORE_CONTRAST = "(prefers-contrast: more)";
+const CONTRAST_OFF: SiteContrast = { on: false, why: null };
+
+let siteAccent = "";
+let chosenContrast = false;
+let siteContrast = CONTRAST_OFF;
+const contrastListeners = new Set<() => void>();
+
+const readerAsks = () =>
+  typeof matchMedia === "function" && matchMedia(MORE_CONTRAST).matches;
+
+const markContrast = () => {
+  const why =
+    siteAccent !== "" && !carriesWhite(siteAccent)
+      ? "accent"
+      : readerAsks()
+        ? "system"
+        : chosenContrast
+          ? "chosen"
+          : null;
+  document.documentElement.toggleAttribute("data-high-contrast", why !== null);
+  if (why === siteContrast.why) return;
+  siteContrast = { on: why !== null, why };
+  contrastListeners.forEach((listener) => listener());
+};
+
+/** Follows the reader's contrast setting as it changes, from the root layout. */
+export const watchReaderContrast = () => {
+  try {
+    chosenContrast = localStorage.getItem(CONTRAST_KEY) === "true";
+  } catch {
+    chosenContrast = false;
+  }
+  if (typeof matchMedia !== "function") {
+    markContrast();
+    return () => {};
+  }
+  const list = matchMedia(MORE_CONTRAST);
+  list.addEventListener?.("change", markContrast);
+  markContrast();
+  return () => list.removeEventListener?.("change", markContrast);
+};
+
+/** The reader turns the mode on or off, where nothing else holds it on; remembered. */
+export const setHighContrast = (on: boolean) => {
+  chosenContrast = on;
+  try {
+    if (on) localStorage.setItem(CONTRAST_KEY, "true");
+    else localStorage.removeItem(CONTRAST_KEY);
+  } catch {
+    // Not remembered where storage is refused; the page still shows it.
+  }
+  markContrast();
+};
+
+/** The site's mode, and what holds it on, re-rendering as either changes. */
+export const useSiteContrast = (): SiteContrast =>
+  useSyncExternalStore(
+    (listener) => {
+      contrastListeners.add(listener);
+      return () => {
+        contrastListeners.delete(listener);
+      };
+    },
+    () => siteContrast,
+    () => CONTRAST_OFF,
+  );
 
 /** Applies both overrides to one element (the root, or a preview's), clearing either if empty. */
 const applyTo = (root: HTMLElement, { accent, font }: Partial<PageTheme>) => {

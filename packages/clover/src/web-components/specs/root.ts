@@ -9,6 +9,7 @@ export const root: ElementSpec = {
     "canvas-id": { prop: "canvasId", type: "string" },
     "manifest-id": { prop: "manifestId", type: "string" },
     language: { prop: "language", type: "string" },
+    "high-contrast": { prop: "highContrast", type: "boolean" },
     "search-query": { prop: "searchQuery", type: "string" },
     annotations: { prop: "annotations", type: "data" },
     "annotation-pages": { prop: "annotationPages", type: ["view", "all"] },
@@ -53,6 +54,11 @@ export const rootDocs: ElementDocs = {
     language: {
       description:
         "The language to read IIIF text in. The page's, then the reader's, by default.",
+    },
+    "high-contrast": {
+      description:
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+      default: "false",
     },
     "search-query": {
       description:

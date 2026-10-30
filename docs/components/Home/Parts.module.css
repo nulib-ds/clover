@@ -954,9 +954,9 @@
 }
 
 .regionName {
-  background: var(--accent-9);
+  background: var(--solid-fill, var(--accent-9));
   border-radius: var(--radius-2);
-  color: #fff;
+  color: var(--solid-text, #fff);
   font-family: var(--font-mono);
   font-size: 0.75rem;
   left: 0.618rem;
@@ -982,8 +982,20 @@
  * fades, by opacity.
  */
 .viewer :global(button.clover-items-scroll-next[data-hovered]) {
-  background-color: var(--clover-color-accent, #0065c3);
+  /* As Clover draws it under the pointer, in the higher-contrast mode too. */
+  background-color: var(
+    --clover-accent-fill,
+    var(--clover-color-accent, #0065c3)
+  );
   transition: none;
+}
+
+/* In the higher-contrast mode, ringed as under the pointer (`tokens.css`). */
+:where(:root[data-high-contrast])
+  .viewer
+  :global(button.clover-items-scroll-next[data-hovered]) {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
 }
 
 .viewer :global(button.clover-items-scroll-next[data-hovered] > .clover-tip) {

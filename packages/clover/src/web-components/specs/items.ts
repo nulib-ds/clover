@@ -14,6 +14,7 @@ export const items: ElementSpec = {
     "heading-level": { prop: "headingLevel", type: "number", min: 2 },
     "thumbnail-size": { prop: "thumbnailSize", type: "number", min: 1 },
     language: { prop: "language", type: "string" },
+    "high-contrast": { prop: "highContrast", type: "boolean" },
   },
   properties: ["iiifContent", "items", "request", "renderItem"],
   events: {
@@ -65,6 +66,11 @@ export const itemsDocs: ElementDocs = {
     },
     language: {
       description: "Alone: the language to read IIIF text in.",
+    },
+    "high-contrast": {
+      description:
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+      default: "false",
     },
   },
   properties: {

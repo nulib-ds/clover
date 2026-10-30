@@ -32,6 +32,22 @@ label.clover-hide:is(:hover, :has(input:focus-visible)) {
   color: var(--clover-color-control-glyph, #fff);
 }
 
+/*
+ * In the higher-contrast mode (`styles/contrast.css`), the controls' dark fill, ringed in
+ * the accent as Items rings an item, 1px clear: at half strength under the pointer. Focused,
+ * its own ring.
+ */
+:where([data-high-contrast])
+  label.clover-hide:is(:hover, :has(input:focus-visible)) {
+  background-color: var(--clover-accent-fill);
+}
+
+:where([data-high-contrast])
+  label.clover-hide:hover:not(:has(input:focus-visible)) {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
+}
+
 label.clover-hide:has(input:focus-visible) {
   outline: 2px solid var(--clover-color-accent, #0065c3);
   outline-offset: 2px;

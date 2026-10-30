@@ -11,6 +11,7 @@ export const viewer: ElementSpec = {
     // Where it opens, not held there: a reader moves on through the Collection.
     "manifest-id": { prop: "defaultManifestId", type: "string" },
     language: { prop: "language", type: "string" },
+    "high-contrast": { prop: "highContrast", type: "boolean" },
     "search-query": { prop: "searchQuery", type: "string" },
     annotations: { prop: "annotations", type: "data" },
     // Past 6 the titles name what they head instead (`ui/heading.ts`).
@@ -65,6 +66,11 @@ export const viewerDocs: ElementDocs = {
         "In a Collection, the Manifest to open first. The reader moves on from it.",
     },
     language: { description: "The language to read IIIF text in." },
+    "high-contrast": {
+      description:
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+      default: "false",
+    },
     "search-query": {
       description: "A Content Search to run as the Manifest opens.",
     },

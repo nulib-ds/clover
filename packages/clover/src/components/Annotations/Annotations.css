@@ -149,7 +149,10 @@ label.clover-annotations-entry > input {
 }
 
 .clover-annotations-body a {
-  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+  color: var(
+    --clover-color-accent-text,
+    var(--clover-accent-text-fallback, var(--clover-color-accent, #0065c3))
+  );
 }
 
 /* Where a linking annotation leads (Cookbook 0022), under what it says. */
@@ -160,7 +163,10 @@ label.clover-annotations-entry > input {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+  color: var(
+    --clover-color-accent-text,
+    var(--clover-accent-text-fallback, var(--clover-color-accent, #0065c3))
+  );
   font: inherit;
   font-size: var(--clover-text-s);
   text-decoration: underline 1px;

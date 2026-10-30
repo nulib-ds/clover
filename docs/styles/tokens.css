@@ -519,11 +519,28 @@ pre {
  * homepage's section intros, `SectionIntro.tsx`).
  */
 
+/*
+ * The higher-contrast mode (`page-theme.ts`: an accent that cannot carry white text at
+ * 4.5:1, or a reader whose system asks for more contrast), as Clover's own takes it
+ * (`packages/clover/src/styles/contrast.css`; Mat, 2026-10-29): what the accent fills
+ * under words or a glyph takes the controls' dark fill and glyph color instead, 4.5:1,
+ * at rest with no ring. Ringed in the accent as Clover's Items rings an item, 1px clear:
+ * at half strength under the pointer, whole while chosen; focused, its own ring. Each
+ * solid fill reads these, its own colors where they are not set.
+ */
+:root[data-high-contrast] {
+  --solid-fill: var(--clover-color-control, #1a1d1e);
+  --solid-text: var(--clover-color-control-glyph, #fff);
+  --solid-ring: 3px solid var(--accent-9);
+  --solid-ring-hover: 3px solid
+    color-mix(in srgb, var(--accent-9) 50%, transparent);
+}
+
 .cta-solid {
   align-items: center;
-  background: var(--accent-9);
+  background: var(--solid-fill, var(--accent-9));
   border-radius: var(--radius-4);
-  color: var(--accent-contrast);
+  color: var(--solid-text, var(--accent-contrast));
   display: inline-flex;
   font-size: var(--text-sm);
   font-weight: var(--weight-regular);
@@ -537,7 +554,17 @@ pre {
 }
 
 .cta-solid:hover {
-  background: var(--accent-10);
+  background: var(--solid-fill, var(--accent-10));
+}
+
+:where(:root[data-high-contrast]) .cta-solid {
+  /* At once in the mode (Mat, 2026-10-29): eased, its ring blinks in. */
+  transition: none;
+}
+
+:where(:root[data-high-contrast]) .cta-solid:hover:not(:focus-visible) {
+  outline: var(--solid-ring-hover);
+  outline-offset: 1px;
 }
 
 .cta-solid:focus-visible {
