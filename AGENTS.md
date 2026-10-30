@@ -396,8 +396,14 @@ deadline.
     the viewer's middle and lights every part it shows, each tag giving, after the
     part's name, what it adds to a page with a `Root` (`sizes.json`'s `parts`, measured by
     `build/sizes.mjs`, through `docs/lib/sizes.ts`; `data-weighed` on the viewer; in words
-    for assistive technology in the story), its one figure the Viewer's in its Default template, to first view,
-    captioned "All the Viewer needs" (Mat, 2026-10-22 and 2026-10-27); Accessible (`data-turn`) shows the viewer's
+    for assistive technology in the story, the parts its tags show, so no Thumbnail), its one figure the Viewer's in its Default template, to first view,
+    captioned "Engineered lean", a little asterisk after its number and, last of the story's
+    words, the note it marks, its asterisk then "Viewer default template size." ("default"
+    lowercase on purpose: the Viewer's default template said plainly, never the Default
+    template's name), the two asterisks alike, semibold at `--text-lg`, muted as the note
+    is, each its top on the capitals beside it (`--mark-cap`), the note's clear of its
+    first word (the story's `note`; Mat, 2026-10-30: "All the Viewer needs" before, from
+    2026-10-22); Accessible (`data-turn`) shows the viewer's
     inspector (`AccessibilityTree.tsx`: WCAG checks measured on the viewer (names and
     ARIA, the keyboard, targets, contrast and text size, captions, language, motion),
     each with its mark, in the standard's order (1.1.1, 1.2.2…), then an ARIA snapshot with tab stops,

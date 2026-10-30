@@ -84,6 +84,11 @@ interface Story {
     flavor?: CodeFlavor;
   }[];
   /**
+   * What its figures measure, under its words, each figure marked with an asterisk after
+   * its number (Lightweight's; Mat, 2026-10-30).
+   */
+  note?: string;
+  /**
    * Whether the example viewer's code is shown across the story's foot, the composer
    * itself, moved here where the viewer is held (`PartsLive.tsx`), which makes a change
    * of its own as the story passes (`data-compose`).
@@ -176,22 +181,28 @@ const stories: Story[] = [
     /*
      * Only what draws something: a Viewer before its template draws nothing (Mat,
      * 2026-10-21). The parts have their own figures, on their tags (Mat, 2026-10-22).
+     * "Engineered lean", what it measures in the note (Mat, 2026-10-30).
      */
     figures: [
       {
         value: loads.defaultTemplate,
         unit: "kB",
-        caption: "All the Viewer needs",
+        caption: "Engineered lean",
         flavor: "react",
       },
       // A page with a Viewer alone, from the Viewer's own entry (`web-components/viewer`).
       {
         value: loads.viewerEntry,
         unit: "kB",
-        caption: "All the Viewer needs",
+        caption: "Engineered lean",
         flavor: "web-components",
       },
     ],
+    /*
+     * "default" lowercase on purpose (Mat, 2026-10-30): the Viewer's default template, said
+     * plainly, not the Default template's name, which the sentence-case rule would capitalize.
+     */
+    note: "Viewer default template size.",
   },
   {
     // Natural, not "Native", which can read as about people (Mat, 2026-10-25).
@@ -343,6 +354,14 @@ const Homepage: React.FC<{
                         {/* The stroke under it, set as every mark's is (`.mark`), drawn once. */}
                         <Swoosh className={styles.figureMark}>
                           {figure.value}
+                          {/* Read as text, so its tie to the note is in the words too. */}
+                          {story.note && (
+                            <span
+                              className={`${styles.noteMark} ${styles.figureNote}`}
+                            >
+                              *
+                            </span>
+                          )}
                           {figure.unit && (
                             <span className={styles.figureUnit}>
                               {" "}
@@ -403,6 +422,13 @@ const Homepage: React.FC<{
                             )
                             .join(", ")}.`}
                         />
+                      </p>
+                    )}
+                    {/* Last of its words, so it is read just before the figure it notes. */}
+                    {story.note && (
+                      <p className={styles.storyNote}>
+                        <span className={styles.noteMark}>*</span>
+                        {story.note}
                       </p>
                     )}
                     {story.brand && figures}

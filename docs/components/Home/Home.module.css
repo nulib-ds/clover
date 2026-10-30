@@ -888,6 +888,70 @@
 }
 
 /*
+ * The capitals' height where an asterisk is set (`1cap` of the figure or the note), kept
+ * as a length as it is inherited, so the asterisk inside can meet it.
+ */
+@property --mark-cap {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+.figureMark,
+.storyNote {
+  --mark-cap: 1cap;
+}
+
+/*
+ * The asterisk tying a story's figures to its note, one look in both (Mat, 2026-10-30:
+ * "not too bold", then "a bit bolder/larger"), muted as the note is. Its baseline is
+ * raised (or lowered) by the difference of the two cap heights, so its top meets the
+ * capitals beside it, the figure's digits or the note's words (Google Sans Flex's asterisk
+ * tops out at its cap height, 0.02em over); with no line height of its own, it never
+ * changes the line's.
+ */
+.noteMark {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: 0;
+  vertical-align: calc(var(--mark-cap) - 1cap);
+}
+
+.story[data-tone="page"] .noteMark {
+  color: var(--gray-11);
+}
+
+.story[data-tone="code"] .noteMark {
+  color: var(--code-faint);
+}
+
+/* After a figure's number, the note's own size (Mat, 2026-10-30: "exactly"). */
+.figureNote {
+  letter-spacing: 0;
+  margin-inline: 0.1em 0.15em;
+}
+
+/* Clear of the note's first word (Mat, 2026-10-30: "give it gap"). */
+.storyNote .noteMark {
+  margin-inline-end: 0.25em;
+}
+
+/* What a story's figures measure, under its words, set and muted as their captions are. */
+.storyNote {
+  font-size: var(--text-md);
+  line-height: 1.4;
+  margin: 1rem 0 0;
+}
+
+.story[data-tone="page"] .storyNote {
+  color: var(--gray-11);
+}
+
+.story[data-tone="code"] .storyNote {
+  color: var(--code-faint);
+}
+
+/*
  * Figures under a story's words (Seamless's): side by side, each its share of the
  * column, and smaller than a figure in a column of its own (Mat, 2026-10-21).
  */

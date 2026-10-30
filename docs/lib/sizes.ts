@@ -48,9 +48,11 @@ export const elementLoads = {
 /** The parts measured alone, with no `Root` around them. */
 export const aloneParts = new Set(Object.keys(sizes.partsAlone));
 
-/** The homepage's example viewer's parts, whose sizes its Lightweight story names. */
+/**
+ * The homepage's example viewer's parts, whose sizes its Lightweight story names, as its
+ * tags do (no Thumbnail since Mat, 2026-10-27).
+ */
 export const viewerParts = [
-  "Thumbnail",
   "Label",
   "Body",
   "Items",
