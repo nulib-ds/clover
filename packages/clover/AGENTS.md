@@ -6,7 +6,7 @@ The composable 4.x Clover, used two ways: the ready-made `Viewer` (the default e
 built only from the parts. It is an npm workspace of the
 repository, set up to publish (see "Publishing" in the root `AGENTS.md`), its version and
 its publishing Mat's. The repository root is its documentation site. The
-3.x line, `@samvera/clover-iiif`, is maintained separately, in `samvera-labs/clover-iiif`.
+3.x line, `@samvera/clover-iiif`, is kept separately, on the repository's `v3` branch.
 
 The root `AGENTS.md` applies here too, including the agents' scope of work: no commits,
 staging, `git mv`, versions or publishing.

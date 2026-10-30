@@ -1534,7 +1534,7 @@ The `Viewer` component will pass the following props to your custom display comp
 }
 ```
 
-[See a complete recipe for a PDF Viewer](https://github.com/samvera-labs/clover-iiif/blob/main/docs/components/CustomDisplays/PDFViewer.tsx) using custom canvas displays.
+[See a complete recipe for a PDF Viewer](https://github.com/nulib-ds/clover/blob/v3/docs/components/CustomDisplays/PDFViewer.tsx) using custom canvas displays.
 
 ---
 
@@ -1616,11 +1616,11 @@ Clover offers these features to support plugins:
 - Gives plugins the ability to access and change the state of the Clover Viewer via props
 - Pass in props to the plugin components
 
-| Prop                | Description                                                                                                                           |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `canvas`            | active canvas object                                                                                                                  |
-| `useViewerDispatch` | React hook to update the [Viewer context store](https://github.com/samvera-labs/clover-iiif/blob/main/src/context/viewer-context.tsx) |
-| `useViewerState`    | React hook to access the [Viewer context store](https://github.com/samvera-labs/clover-iiif/blob/main/src/context/viewer-context.tsx) |
+| Prop                | Description                                                                                                                |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `canvas`            | active canvas object                                                                                                       |
+| `useViewerDispatch` | React hook to update the [Viewer context store](https://github.com/nulib-ds/clover/blob/v3/src/context/viewer-context.tsx) |
+| `useViewerState`    | React hook to access the [Viewer context store](https://github.com/nulib-ds/clover/blob/v3/src/context/viewer-context.tsx) |
 
 Here is an example plugin that has both `imageViewer.controls` and `informationPanel`. Plugin components have access to canvas, useViewerDispatch, and useViewerState via props.
 

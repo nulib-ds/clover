@@ -45,7 +45,7 @@ deadline.
     `version` filter and half the weight of Clover 4's pages (`app/[[...mdxPath]]/page.tsx`,
     `docs/lib/site.ts`). `llms.txt` (`docs/lib/agents.ts`) tells agents the same. A new 3.x page gets all
     of it from its place under `content/docs/deprecated-versions/`.
-  - 3.x's source is not in this repository: it is `samvera-labs/clover-iiif`. The 3.x
+  - 3.x's source is not on `main`: it is on this repository's `v3` branch. The 3.x
     pages' live examples import the published `@samvera/clover-iiif` (a devDependency,
     pinned to `4.0.0-rc.2`, the release the pages were written against), through
     `docs/components/DynamicImports/` and the entry points (`/viewer`, `/primitives`,
@@ -1018,17 +1018,22 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   Its own rules are in `packages/clover/AGENTS.md`.
 - Publishing (Mat, 2026-10-27: a beta first, 4.0.0 later that week): the package is
   public and ready to publish, but for its `version`, which is Mat's, as publishing is.
-  `publishConfig` gives `access: public` and `tag: beta`; take the tag out before 4.0.0,
-  or that release goes to `beta` and leaves `latest` on a beta (a `--tag` given to
-  `npm publish` wins over it). npm 11's "Publishing … with tag latest" notice reads the
-  command line only: the publish itself takes `publishConfig`'s tag. `prepublishOnly`
+  `publishConfig` gives `access: public`; its `tag: beta`, which held the betas off
+  `latest`, came out for 4.0.0 (2026-10-30), so a release goes to `latest`. A later
+  prerelease takes `npm publish --tag beta` (or `next`), or it becomes `latest`. npm 11's
+  "Publishing … with tag latest" notice reads the command line only: the publish itself
+  takes `publishConfig`'s tag where one is set. A release is tagged in Git by its package
+  and version, `@nulib/clover@4.0.0` (Mat, 2026-10-30), apart from the `v…` tags 3.x and
+  `@samvera/clover-iiif`'s release candidates (`v4.0.0-rc.0`, `v4.0.0-rc.2`) left; the
+  betas have none. `prepublishOnly`
   builds from clean and runs `test:build`, so no stale `dist/` ships, and `files` leaves
   out the build's chunk maps (`.vite/`). Its README (`packages/clover/README.md`) is the
   npm page, its links absolute; its `LICENSE` is a copy of the root's, kept the same.
 - The package never imports the docs or 3.x (`@samvera/clover-iiif`): ESLint forbids it,
   and the package's build rejects undeclared imports. Only the 3.x docs pages import 3.x.
-- 3.x is maintained in `samvera-labs/clover-iiif`, apart from this repository. Code the
-  package copied from it (fullscreen, hls, i18n, the control cluster) may drift.
+- 3.x is kept on this repository's `v3` branch (3.17.0, `d0f457f`; it was
+  `samvera-labs/clover-iiif`'s `main` until the move of 2026-10-28), apart from `main`.
+  Code the package copied from it (fullscreen, hls, i18n, the control cluster) may drift.
 
 ## i18n
 

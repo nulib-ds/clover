@@ -74,8 +74,7 @@
     "!dist/**/.vite"
   ],
   "publishConfig": {
-    "access": "public",
-    "tag": "beta"
+    "access": "public"
   },
   "scripts": {
     "prepublishOnly": "npm run build && npm run test:build",

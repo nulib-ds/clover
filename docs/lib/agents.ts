@@ -249,7 +249,7 @@ export async function llmsTxt() {
     "",
     ...(earlier
       ? [
-          `- [${earlier.title}](${markdownUrl(earlier.route)}): the docs of \`@samvera/clover-iiif\`, the earlier version, kept for reference only; its source is https://github.com/samvera-labs/clover-iiif`,
+          `- [${earlier.title}](${markdownUrl(earlier.route)}): the docs of \`@samvera/clover-iiif\`, the earlier version, kept for reference only; its source is https://github.com/nulib-ds/clover/tree/v3`,
         ]
       : []),
     `- [All of Clover 4's docs](${siteUrl}/llms-full.txt): every page above, as Markdown, in one file`,

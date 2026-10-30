@@ -198,7 +198,7 @@ export function structuredData({
           "@type": "SoftwareSourceCode",
           name: "@samvera/clover-iiif",
           version: "3.x",
-          codeRepository: "https://github.com/samvera-labs/clover-iiif",
+          codeRepository: "https://github.com/nulib-ds/clover/tree/v3",
         }
       : {
           "@type": "SoftwareSourceCode",

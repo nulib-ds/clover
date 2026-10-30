@@ -153,7 +153,7 @@ Mat, October 16, 2026: the docs plan below waits until 4.x is being readied for 
 - **Edge token** (D83): a 3:1 edge is darker than the design's hairlines. The playground's field and Template button now use `--gray-11` at 75% over the page (`--pg-edge`, `Playground.module.css`). Only on controls (Mat, October 16, 2026: the playground's Viewer and the parts' tiles keep their hairlines; matching them to the field was tried and put back). Still open: make it the token for the site's other fields (D83's textareas)?
 - **Nav headings** (D90): should four sidebar headings come before every page's h1?
 
-Also: D60, D77, D89, mark German, Arabic and tile-fact text with `lang` (3.1.2, S). D23, failures in @samvera/clover-iiif itself, to report to samvera-labs/clover-iiif.
+Also: D60, D77, D89, mark German, Arabic and tile-fact text with `lang` (3.1.2, S). D23, failures in @samvera/clover-iiif itself, to report against its `v3` branch in nulib-ds/clover.
 
 ## Open findings
 

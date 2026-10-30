@@ -6,7 +6,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 `@nulib/clover` is the composable 4.x Clover. The 3.x line,
-`@samvera/clover-iiif`, keeps its own changelog in `samvera-labs/clover-iiif`.
+`@samvera/clover-iiif`, keeps its own changelog on the repository's
+[`v3` branch](https://github.com/nulib-ds/clover/blob/v3/CHANGELOG.md).
 
 ## Unreleased
 

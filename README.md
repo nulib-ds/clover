@@ -8,9 +8,9 @@ Clover builds accessible viewers for IIIF Manifests and Collections, in React or
 components: a ready-made `Viewer`, and the parts it is made of, to compose your own. This repository holds the package,
 `@nulib/clover` (in [`packages/clover`](./packages/clover)), and its documentation site.
 
-Clover 3.x, `@samvera/clover-iiif`, is maintained at
-[samvera-labs/clover-iiif](https://github.com/samvera-labs/clover-iiif). Its documentation
-is kept on this site, under "Earlier versions".
+Clover 3.x, `@samvera/clover-iiif`, is kept on this repository's
+[`v3` branch](https://github.com/nulib-ds/clover/tree/v3). Its documentation is kept on
+this site, under "Earlier versions".
 
 ## Development
 
