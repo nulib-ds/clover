@@ -51,9 +51,8 @@ export const progress4: Record<string, Progress> = {
   "0015-start": yes,
   // 2026-10-29: each map's date shows under its label in the Collection, and in About;
   // the second map opens fitted, though both Canvases are `…/canvas/p1`.
-  "0230-navdate": partial(
-    "Its maps open from the Collection, each with its date; no ordering or filtering by date",
-  ),
+  // 2026-10-30: full (Mat), as on the Cookbook's matrix.
+  "0230-navdate": yes,
   "0154-geo-extension": yes,
   "0240-navPlace-on-canvases": yes,
   // 2026-10-28: its logo and name over the Viewer, and under Provider in About.
@@ -131,9 +130,8 @@ export const progress4: Record<string, Progress> = {
   "0466-link-for-loading-manifest": yes,
   "0485-contentstate-canvas-region": yes,
   // 2026-10-29: both targets, in turn: counted and stepped in the header, listed in Views.
-  "0540-link-for-opening-multiple-canvases": partial(
-    "Opens each Canvas in turn, counted and stepped in the header and listed in a Views section; not side by side",
-  ),
+  // 2026-10-30: full (Mat), as on the Cookbook's matrix.
+  "0540-link-for-opening-multiple-canvases": yes,
   // 2026-10-29: left on purpose (Mat): opening by dragging alone fails WCAG 2.5.7, and a
   // link (0466) already opens a resource in Clover for everyone.
   "0599-drag-and-drop": no(
@@ -150,9 +148,8 @@ export const progress4: Record<string, Progress> = {
   "0074-multiple-language-captions": yes,
   // 2026-10-29: every member's place on one Map, each opening its Manifest; their dates
   // under their labels in the Collection, and the Manifest's in About.
-  "0318-navPlace-navDate": partial(
-    "Its members' places are on one Map, each opening its Manifest, and their dates show; no ordering or filtering by date",
-  ),
+  // 2026-10-30: full (Mat), as on the Cookbook's matrix.
+  "0318-navPlace-navDate": yes,
 };
 
 /** A recipe not in the list yet has not been checked: not handled, as far as anyone knows. */
