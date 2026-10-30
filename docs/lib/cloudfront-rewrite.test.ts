@@ -16,9 +16,14 @@ describe("CloudFront's static page addresses", () => {
     ["/", "/index.html"],
     ["/docs", "/docs.html"],
     ["/docs/", "/docs.html"],
-    ["/docs/3.x", "/docs/3.x.html"],
-    ["/docs/3.x/", "/docs/3.x.html"],
-    ["/docs/3.x/viewer", "/docs/3.x/viewer.html"],
+    ["/docs/deprecated-versions", "/docs/deprecated-versions.html"],
+    ["/docs/deprecated-versions/", "/docs/deprecated-versions.html"],
+    [
+      "/docs/deprecated-versions/viewer",
+      "/docs/deprecated-versions/viewer.html",
+    ],
+    // The earlier versions' old address is no file: the 404 page sends it on.
+    ["/docs/3.x", "/docs/3.x"],
     ["/sitemap.xml", "/sitemap.xml"],
     ["/robots.txt", "/robots.txt"],
     ["/docs/viewer.md", "/docs/viewer.md"],
@@ -30,9 +35,9 @@ describe("CloudFront's static page addresses", () => {
 
   it("preserves query parameters when it rewrites a page", () => {
     const querystring = { code: { value: "web-components" } };
-    const request = { uri: "/docs/3.x/", querystring };
+    const request = { uri: "/docs/deprecated-versions/", querystring };
     expect(handler({ request })).toEqual({
-      uri: "/docs/3.x.html",
+      uri: "/docs/deprecated-versions.html",
       querystring,
     });
   });

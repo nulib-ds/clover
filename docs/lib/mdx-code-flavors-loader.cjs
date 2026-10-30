@@ -2,7 +2,7 @@
  * A Clover 4 docs page's MDX with each React example's "Web components" twin beside it
  * (`code-flavors.mjs`), before Nextra compiles it. A loader, named by its path in
  * `next.config.mjs`, so Turbopack runs it as webpack does: neither takes a plugin function
- * through Nextra's options. The earlier version's pages, under `content/docs/3.x/`, are
+ * through Nextra's options. The earlier version's pages, under `content/docs/deprecated-versions/`, are
  * left as written.
  */
 /* eslint-disable @typescript-eslint/no-require-imports -- a CommonJS loader, as webpack and Turbopack load one */
@@ -26,7 +26,10 @@ const HELPERS = [
 module.exports = function codeFlavorsLoader(source) {
   const callback = this.async();
   const file = (this.resourcePath ?? "").split(path.sep).join("/");
-  if (!file.includes("/content/docs/") || file.includes("/content/docs/3.x/"))
+  if (
+    !file.includes("/content/docs/") ||
+    file.includes("/content/docs/deprecated-versions/")
+  )
     return callback(null, source);
   for (const helper of HELPERS)
     this.addDependency(path.join(__dirname, helper));

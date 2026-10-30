@@ -210,7 +210,9 @@ function markdownOf(html, url) {
     rule: "-",
   }).trim();
   const route = routeOf(url);
-  const earlier = route === "/docs/3.x" || route.startsWith("/docs/3.x/");
+  const earlier =
+    route === "/docs/deprecated-versions" ||
+    route.startsWith("/docs/deprecated-versions/");
   const title = unescape(
     meta(html, /<meta property="og:title" content="([^"]*)"/) ?? "",
   ).replace(/ – Clover IIIF$/, "");

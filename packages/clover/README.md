@@ -113,7 +113,7 @@ If you serve Clover's files yourself, copy the whole `dist/web-components` folde
   languages, types, what each part loads, and coming from Clover 3.x.
 
 Clover 3.x, `@samvera/clover-iiif`, is documented on the same site, under
-[Clover 3.x](https://clover.iiif.library.northwestern.edu/docs/3.x).
+[Clover 3.x](https://clover.iiif.library.northwestern.edu/docs/deprecated-versions).
 
 ## License
 

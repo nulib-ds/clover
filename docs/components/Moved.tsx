@@ -5,15 +5,18 @@ import { useRouter } from "docs/lib/router";
 import React, { useEffect, useState } from "react";
 
 /**
- * Where a page went when Clover 4 became the docs' focus: 3.x moved under /docs/3.x, and
- * 4.x up from /docs/4.x. A 3.x page whose name 4.x now uses (/docs/viewer, /docs/map,
- * /docs/composing) shows the 4.x page instead, which links back to its 3.x version.
+ * Where a page went when Clover 4 became the docs' focus: 3.x moved under /docs/3.x, then
+ * /docs/deprecated-versions, and 4.x up from /docs/4.x. A 3.x page whose name 4.x now uses
+ * (/docs/viewer, /docs/map, /docs/composing) shows the 4.x page instead, which links back
+ * to its 3.x version.
  */
 const MOVES: [RegExp, string][] = [
+  // The earlier versions, at a name that holds the next one too (Mat, 2026-10-30).
+  [/^\/docs\/3\.x(\/.*)?$/, "/docs/deprecated-versions$1"],
   [/^\/docs\/4\.x(\/.*)?$/, "/docs$1"],
   [
     /^\/docs\/(image|scroll|slider|homepage|label|metadata|partOf|rendering|requiredStatement|seeAlso|summary|thumbnail|i18n)(\/.*)?$/,
-    "/docs/3.x/$1$2",
+    "/docs/deprecated-versions/$1$2",
   ],
   /*
    * Clover 4's demo is the homepage now: its playground opens what `?iiif-content=` names,
@@ -26,7 +29,7 @@ const MOVES: [RegExp, string][] = [
   // The Default template's walk-through, taken down for now (Mat, 2026-10-22).
   [/^\/docs\/viewer\/default$/, "/docs/viewer#templates"],
   // The 3.x Viewer's own pages: content state, search and prefetched content.
-  [/^\/docs\/viewer\/(.+)$/, "/docs/3.x/viewer/$1"],
+  [/^\/docs\/viewer\/(.+)$/, "/docs/deprecated-versions/viewer/$1"],
   // The component's page, from when the Panel was the InformationPanel.
   [/^\/docs\/information-panel$/, "/docs/panel"],
   // Pages folded into others: the templates under the Viewer, the element into Get started.
@@ -84,7 +87,7 @@ export function Moved() {
           </h1>
           <p style={{ marginTop: "1rem" }}>
             Start from the <Link href="/docs">docs</Link>, or the{" "}
-            <Link href="/docs/3.x">Clover 3.x docs</Link>.
+            <Link href="/docs/deprecated-versions">Clover 3.x docs</Link>.
           </p>
         </>
       )}

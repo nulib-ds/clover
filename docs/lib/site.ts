@@ -140,13 +140,14 @@ export function pageMetadata({
 
 /*
  * Clover 3.x, `@samvera/clover-iiif`, is the earlier version: its docs are kept under
- * `/docs/3.x/` for reference. Every
+ * `/docs/deprecated-versions/` for reference. Every
  * page there says so to a reader, to search engines (its description and structured
  * data) and to the site's own search (its results are titled "(3.x)" and rank below
  * Clover 4's): see `app/[[...mdxPath]]/page.tsx`.
  */
 export const isEarlierVersion = (route: string) =>
-  route === "/docs/3.x" || route.startsWith("/docs/3.x/");
+  route === "/docs/deprecated-versions" ||
+  route.startsWith("/docs/deprecated-versions/");
 
 const EARLIER = "(3.x)";
 

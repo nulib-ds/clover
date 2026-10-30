@@ -46,7 +46,7 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Earlier versions",
   },
-  "3.x": "Clover 3.x",
+  "deprecated-versions": "Clover 3.x",
 };
 
 export default meta;

@@ -30,8 +30,10 @@ deadline.
   routes (`pages/api/`).
   - The docs lead with Clover 4, `@nulib/clover` (`packages/clover`): its pages are
     `content/docs/*` (URLs `/docs/…`), and the homepage shows it. Clover 3.x,
-    `@samvera/clover-iiif`, is kept at `content/docs/3.x/` (URLs `/docs/3.x/…`), one
-    sidebar group titled "Clover 3.x", collapsed, under "Earlier versions" at the bottom.
+    `@samvera/clover-iiif`, is kept at `content/docs/deprecated-versions/` (URLs
+    `/docs/deprecated-versions/…`, `/docs/3.x/…` until 2026-10-30: Mat, a name that holds
+    the next earlier version too), one sidebar group titled "Clover 3.x", collapsed, under
+    "Earlier versions" at the bottom.
     Its page titles end in "(3.x)" so search results tell the two apart.
   - The 3.x pages are for reference, never the standard (Mat, 2026-10-20). They document
     an earlier version: never take their API, behavior, wording or patterns as how
@@ -42,7 +44,7 @@ deadline.
     `creativeWorkStatus: "Superseded"`), and in the site's search a "(3.x)" title, a
     `version` filter and half the weight of Clover 4's pages (`app/[[...mdxPath]]/page.tsx`,
     `docs/lib/site.ts`). `llms.txt` (`docs/lib/agents.ts`) tells agents the same. A new 3.x page gets all
-    of it from its place under `content/docs/3.x/`.
+    of it from its place under `content/docs/deprecated-versions/`.
   - 3.x's source is not in this repository: it is `samvera-labs/clover-iiif`. The 3.x
     pages' live examples import the published `@samvera/clover-iiif` (a devDependency,
     pinned to `4.0.0-rc.2`, the release the pages were written against), through
@@ -50,9 +52,9 @@ deadline.
     `/i18n`…). Its components inject their own styles. Data those pages need lives in
     `docs/fixtures/`.
   - Keep 3.x as a nested group, not flattened with `"display": "children"`: Nextra 2
-    keys sidebar items by file name, so a flattened `3.x/viewer` collides with 4.x's
+    keys sidebar items by file name, so a flattened `deprecated-versions/viewer` collides with 4.x's
     `viewer` and drops out of the sidebar.
-  - Links inside 3.x pages point within `/docs/3.x/`. Keep 4.x features out of the 3.x
+  - Links inside 3.x pages point within `/docs/deprecated-versions/`. Keep 4.x features out of the 3.x
     pages, and 3.x's API out of the 4.x ones. `Canvas` is documented in 4.x only.
   - The site deploys to S3, behind CloudFront, through GitHub Actions
     (`.github/workflows/deploy-s3.yml`), after the Tests workflow passes on `main`, or
@@ -66,7 +68,7 @@ deadline.
     `clover.iiif.library.northwestern.edu` at its root. The infrastructure itself is
     `terraform/`.
   - The site is a static export, so there are no server redirects. URLs that moved
-    (3.x pages from `/docs/…`, 4.x pages from `/docs/4.x/…`, the demo, the Panel's page)
+    (3.x pages from `/docs/…` and `/docs/3.x/…`, 4.x pages from `/docs/4.x/…`, the demo, the Panel's page)
     are sent on by the 404 page (`app/not-found.tsx`, exported as `404.html`, which CloudFront
     serves for any missing path), from the table in `docs/components/Moved.tsx`, query
     and hash kept. Move a page

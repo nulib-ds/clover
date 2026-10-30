@@ -561,7 +561,7 @@ every rule below.
   own, so the budgets move only if it does too); Norwegian's three locale files (root
   `AGENTS.md`, i18n).
 - The docs import `@nulib/clover`, `@nulib/clover/templates`, `@nulib/clover/map` and the
-  stylesheets, which the root `tsconfig.json` maps to this package's source. Its pages are `content/docs/*` (3.x's in `content/docs/3.x/`), its demos in
+  stylesheets, which the root `tsconfig.json` maps to this package's source. Its pages are `content/docs/*` (3.x's in `content/docs/deprecated-versions/`), its demos in
   `docs/components/Clover4/`, and the homepage shows it (`docs/components/Home/`).
 
 ### End to end (`e2e/`)

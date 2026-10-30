@@ -489,7 +489,7 @@ This example adds Manifest-level navPlace to Northwestern's _Crossing the Pend d
 | `options.map.showControlPoints`   | `boolean`                                                       | No       | true     |
 | `options.map.overlayScope`        | `manifest \| canvas`                                            | No       | manifest |
 
-When `showImageOverlay` is enabled, Clover auto-discovers [Georeference Extension](https://iiif.io/api/extension/georef/) annotations (`motivation: "georeferencing"`) on the in-scope canvases and warps the source images onto the map via [@allmaps/maplibre](https://allmaps.org/). Canvas-sourced annotations are adapted to each canvas's painting image service automatically. `overlayScope: "manifest"` (default) renders every georeferenced sheet in the manifest at once; `"canvas"` follows the active canvas. See [Combining navPlace and Georeference](/docs/3.x/map#combining-navplace-and-georeference) in the Map docs for a worked example combining georeferenced sheets with navPlace geometry.
+When `showImageOverlay` is enabled, Clover auto-discovers [Georeference Extension](https://iiif.io/api/extension/georef/) annotations (`motivation: "georeferencing"`) on the in-scope canvases and warps the source images onto the map via [@allmaps/maplibre](https://allmaps.org/). Canvas-sourced annotations are adapted to each canvas's painting image service automatically. `overlayScope: "manifest"` (default) renders every georeferenced sheet in the manifest at once; `"canvas"` follows the active canvas. See [Combining navPlace and Georeference](/docs/deprecated-versions/map#combining-navplace-and-georeference) in the Map docs for a worked example combining georeferenced sheets with navPlace geometry.
 
 ### Annotation Motivations
 
