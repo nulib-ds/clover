@@ -34,13 +34,15 @@ deadline.
     `/docs/deprecated-versions/…`, `/docs/3.x/…` until 2026-10-30: Mat, a name that holds
     the next earlier version too), one sidebar group titled "Clover 3.x", collapsed, under
     "Earlier versions" at the bottom.
-    Its page titles end in "(3.x)" so search results tell the two apart.
+    Its page titles end in "(3.x)" so search results tell the two apart (its overview's,
+    "Clover 3.x", says it already).
   - The 3.x pages are for reference, never the standard (Mat, 2026-10-20). They document
     an earlier version: never take their API, behavior, wording or patterns as how
     Clover 4 works or should work. The package's source, its tests, its own AGENTS.md
     and DESIGN.md, and the 4.x pages are the authority. Every 3.x page says so to
     readers, search engines and agents: a notice opening the page and a "(3.x)" title,
-    a description saying what it documents, schema.org data (`version: "3.x"`,
+    a description in its own words, then what it documents (Mat, 2026-10-30: its own
+    words first, so its search result opens with them), schema.org data (`version: "3.x"`,
     `creativeWorkStatus: "Superseded"`), and in the site's search a "(3.x)" title, a
     `version` filter and half the weight of Clover 4's pages (`app/[[...mdxPath]]/page.tsx`,
     `docs/lib/site.ts`). `llms.txt` (`docs/lib/agents.ts`) tells agents the same. A new 3.x page gets all
@@ -775,7 +777,14 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     `headline` and `alternativeHeadline`; `llms.txt` (and so `llms-full.txt`) and the
     README carry both. A page takes its `title` (front matter, else its first `h1`,
     Nextra's rule) and its `description`. Give every page a `description`: agents read it
-    in `llms.txt`, the parts' list and the Markdown. Every page's card picture is a 1200 ×
+    in `llms.txt`, the parts' list and the Markdown, and a search result shows it under the
+    title, so it is the page's own and at most 155 characters, a 3.x page's with what it
+    documents added (Mat, 2026-10-30: `DESCRIPTION_MOST`, held by `docs/lib/site.test.ts`;
+    the site's and the homepage's too, so "Accessible, composable and light." is said by
+    `aboutClover` alone). Each page's structured data names its publisher and gives its
+    breadcrumbs, the site, the menu's folders around it (`trailOf`, `docs/lib/agents.ts`)
+    and the page, which a desktop search result shows in place of its address; no page
+    draws them. Every page's card picture is a 1200 ×
     630 band of the White catalog's cover, cut by Northwestern's IIIF Image server and
     linked from there, never copied into `public/` (Mat, 2026-10-16: the record's
     attribution does not permit further distribution of its images).

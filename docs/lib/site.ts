@@ -19,9 +19,13 @@ export const homeTagline = "Design a user experience rooted in IIIF.";
 /* The homepage's title, and any page's without one of its own: the name and the headline. */
 export const homeTitle = `${siteTitle} – ${homeHeadline.replace(/\.$/, "")}`;
 
-/** What Clover does and its two ways, plainly, in the Get started page's words. */
+/*
+ * What Clover does and its two ways, plainly, in the Get started page's words: short
+ * enough that the homepage's description, the hero's line before it, fits a search
+ * result (`DESCRIPTION_MOST`; Mat, 2026-10-30).
+ */
 const whatItDoes =
-  "builds interfaces for IIIF content in React or as web components: a ready-made Viewer with templates, or parts to compose your own. Accessible, composable and light.";
+  "builds IIIF interfaces in React or as web components: a ready-made Viewer, or parts to compose your own.";
 
 /*
  * The site's description, for any page without one of its own: what Clover is, plainly
@@ -31,6 +35,12 @@ export const siteDescription = `Clover ${whatItDoes}`;
 
 /* The homepage's: the hero's line, then what Clover is, as plainly. */
 export const homeDescription = `${homeTagline} ${siteDescription}`;
+
+/*
+ * The most a page's description holds: about what a search result shows before it cuts
+ * the snippet off (Mat, 2026-10-30). `site.test.ts` holds every page to it.
+ */
+export const DESCRIPTION_MOST = 155;
 
 /*
  * What Clover is, at more length, in the Get started page's words
@@ -69,6 +79,14 @@ export const siteUrl = (
   process.env.NEXT_PUBLIC_SITE_URL ||
   "https://clover.iiif.library.northwestern.edu"
 ).replace(/\/+$/, "");
+
+/* Who publishes the site and Clover, in every page's structured data. */
+const publisher = {
+  "@type": "Organization",
+  "@id": `${siteUrl}#publisher`,
+  name: "Northwestern University Libraries",
+  url: "https://www.library.northwestern.edu/",
+};
 
 /*
  * A page as Markdown, for agents: its address with `.md` added, which
@@ -132,9 +150,8 @@ export function pageMetadata({
     robots: indexed
       ? { noimageindex: true }
       : { index: false, follow: true, noimageindex: true },
-    // X reads the title, description and picture from Open Graph; its alt it does not.
+    // X reads the title, description and picture from Open Graph, its alt too, as Next writes it.
     twitter: { card: "summary_large_image" },
-    other: { "twitter:image:alt": shareImage.alt },
   };
 }
 
@@ -151,61 +168,101 @@ export const isEarlierVersion = (route: string) =>
 
 const EARLIER = "(3.x)";
 
-/** A 3.x page's title, always ending "(3.x)", so a result says which version it is. */
+/**
+ * A 3.x page's title, always ending "(3.x)", so a result says which version it is; but
+ * not "Clover 3.x (3.x)", its overview's, which says it already.
+ */
 export const earlierTitle = (title: string) =>
-  title.endsWith(EARLIER) ? title : `${title} ${EARLIER}`;
+  title.endsWith(EARLIER) || title.endsWith("3.x")
+    ? title
+    : `${title} ${EARLIER}`;
 
-/** A 3.x page's description: its own, after what it documents. */
+/* What every 3.x page's description says it documents. */
+const EARLIER_DESCRIPTION =
+  "Clover 3.x (@samvera/clover-iiif), the earlier version, kept for reference.";
+
+/**
+ * A 3.x page's description: its own, then what it documents, so a search result opens
+ * with the page's own words (Mat, 2026-10-30; the other way about, all 3.x pages' results
+ * read alike).
+ */
 export const earlierDescription = (description?: string) =>
-  [
-    "Clover 3.x (@samvera/clover-iiif), the earlier version, documented for reference.",
-    description,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  [description, EARLIER_DESCRIPTION].filter(Boolean).join(" ");
+
+/** A place in the docs' menu, for a page's breadcrumbs: its name and its route. */
+export interface Crumb {
+  name: string;
+  route: string;
+}
 
 /**
  * A page's structured data (schema.org, as JSON-LD): what it documents, which version,
- * and, for a 3.x page, that it is superseded, so a search engine or an agent reading the
- * page knows Clover 4's docs are the current ones.
+ * who publishes it, and, for a 3.x page, that it is superseded, so a search engine or an
+ * agent reading the page knows Clover 4's docs are the current ones. Then its
+ * breadcrumbs, the site, the folders the menu holds it in (`trail`) and the page, which a
+ * search result shows in place of its address (Mat, 2026-10-30): the sidebar shows the
+ * same, though no page draws breadcrumbs.
  */
 export function structuredData({
   title,
   description,
   route,
   modified,
+  trail = [],
 }: {
   title: string;
   description: string;
   route: string;
   /** When the page last changed (ISO 8601), its last commit's time. */
   modified?: string;
+  /** The folders the docs' menu holds the page in, outermost first (`trailOf`). */
+  trail?: Crumb[];
 }) {
   const earlier = isEarlierVersion(route);
+  const address = (to: string) => `${siteUrl}${to === "/" ? "" : to}`;
+  const crumbs: Crumb[] = [
+    { name: siteTitle, route: "/" },
+    ...trail,
+    { name: title, route },
+  ];
   return {
     "@context": "https://schema.org",
-    "@type": "TechArticle",
-    headline: title,
-    description,
-    url: `${siteUrl}${route === "/" ? "" : route}`,
-    inLanguage: "en",
-    ...(modified && { dateModified: modified }),
-    version: earlier ? "3.x" : "4",
-    ...(earlier && { creativeWorkStatus: "Superseded" }),
-    isPartOf: { "@type": "WebSite", name: siteTitle, url: siteUrl },
-    about: earlier
-      ? {
-          "@type": "SoftwareSourceCode",
-          name: "@samvera/clover-iiif",
-          version: "3.x",
-          codeRepository: "https://github.com/nulib-ds/clover/tree/v3",
-        }
-      : {
-          "@type": "SoftwareSourceCode",
-          name: "@nulib/clover",
-          version: "4",
-          codeRepository: "https://github.com/nulib-ds/clover",
-        },
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        headline: title,
+        description,
+        url: address(route),
+        inLanguage: "en",
+        ...(modified && { dateModified: modified }),
+        version: earlier ? "3.x" : "4",
+        ...(earlier && { creativeWorkStatus: "Superseded" }),
+        isPartOf: { "@type": "WebSite", name: siteTitle, url: siteUrl },
+        publisher,
+        about: earlier
+          ? {
+              "@type": "SoftwareSourceCode",
+              name: "@samvera/clover-iiif",
+              version: "3.x",
+              codeRepository: "https://github.com/nulib-ds/clover/tree/v3",
+            }
+          : {
+              "@type": "SoftwareSourceCode",
+              name: "@nulib/clover",
+              version: "4",
+              codeRepository: "https://github.com/nulib-ds/clover",
+            },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: crumbs.map((crumb, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: crumb.name,
+          item: address(crumb.route),
+        })),
+      },
+    ],
   };
 }
 
@@ -222,12 +279,6 @@ export function homeStructuredData({
   /** The React it runs with, as its package asks for it (`peerDependencies`). */
   react: string;
 }) {
-  const publisher = {
-    "@type": "Organization",
-    "@id": `${siteUrl}#publisher`,
-    name: "Northwestern University Libraries",
-    url: "https://www.library.northwestern.edu/",
-  };
   return {
     "@context": "https://schema.org",
     "@graph": [

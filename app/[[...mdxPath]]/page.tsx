@@ -4,7 +4,7 @@ import { Callout } from "nextra/components";
 import { generateStaticParamsFor, importPage } from "nextra/pages";
 import React from "react";
 
-import { homeData } from "docs/lib/agents";
+import { homeData, trailOf } from "docs/lib/agents";
 import { lastChanged } from "docs/lib/last-changed";
 import {
   earlierDescription,
@@ -109,6 +109,7 @@ export default async function Page(props: Props) {
             : (metadata.description ?? siteDescription),
           route,
           modified: modifiedOf(metadata),
+          trail: await trailOf(route),
         });
   return (
     <Wrapper toc={toc} metadata={metadata} sourceCode={sourceCode}>

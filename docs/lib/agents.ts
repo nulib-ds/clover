@@ -15,6 +15,7 @@ import {
   primitiveCount,
 } from "docs/lib/figures";
 import {
+  type Crumb,
   aboutClover,
   homeHeadline,
   homeTagline,
@@ -73,6 +74,52 @@ async function frontMatters() {
   };
   walk(await getPageMap());
   return byRoute;
+}
+
+/*
+ * Every folder in the docs by route, named as the menu names it: its parent's `_meta.ts`,
+ * else its front matter's title. Read once for the build.
+ */
+let folderNames: Promise<Map<string, string>> | undefined;
+const namesOfFolders = () =>
+  (folderNames ??= getPageMap().then((root) => {
+    const names = new Map<string, string>();
+    const walk = (items: PageMapItem[]) => {
+      const meta = items.find((item) => "data" in item);
+      const titles = meta && "data" in meta ? meta.data : {};
+      for (const item of items) {
+        if (!("children" in item)) continue;
+        const named = titles[item.name] as Entry | undefined;
+        // A folder with an index page has its front matter too (`asIndexPage`).
+        const matter = (item as { frontMatter?: { title?: unknown } })
+          .frontMatter;
+        const title =
+          (named && titleOf(named)) ||
+          (typeof matter?.title === "string" ? matter.title : "");
+        if (title) names.set(item.route, title);
+        walk(item.children);
+      }
+    };
+    walk(root);
+    return names;
+  }));
+
+/**
+ * The folders the docs' menu holds a page in, outermost first, each by its menu name, for
+ * the page's breadcrumbs (`structuredData`): Primitives for a primitive's page, Clover
+ * 3.x and the Viewer for a 3.x Viewer demo. Not the docs' own folder, whose page is Get
+ * started, and not the page itself.
+ */
+export async function trailOf(route: string): Promise<Crumb[]> {
+  const names = await namesOfFolders();
+  const parts = route.split("/").filter(Boolean);
+  const trail: Crumb[] = [];
+  for (let end = 2; end < parts.length; end++) {
+    const folder = `/${parts.slice(0, end).join("/")}`;
+    const name = names.get(folder);
+    if (name) trail.push({ name, route: folder });
+  }
+  return trail;
 }
 
 /* The folders whose pages the menu lists after their own. */
