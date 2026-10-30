@@ -21,12 +21,16 @@ import {
   animationFrames,
   arrangeCanvases,
   canvasCaptions,
+  canvasTimedText,
   canvasScene,
   canvasTextTranscripts,
   findChoices,
   paintedImages,
+  startingChoices,
+  playsHere,
   resolveDirection,
 } from "./layout";
+import choiceAvJson from "../../fixtures/iiif-cookbook/0434-choice-av.json";
 
 // Published fixtures, upgraded to Presentation 4 as Clover holds them.
 const audio = p4(audioJson);
@@ -38,6 +42,7 @@ const ttb = p4(ttbJson);
 const continuous = p4(continuousJson);
 const placeholder = p4(placeholderJson);
 const accompanying = p4(accompanyingJson);
+const choiceAv = p4(choiceAvJson);
 const choice = p4(choiceJson);
 const composition = p4(compositionJson);
 const languages = p4(languagesJson);
@@ -170,6 +175,43 @@ describe("paintedImages", () => {
     expect(paintedImages(canvas)[0].region).toBe("0,0,500,500");
   });
 
+  it("turns an image as its Image API selector's rotation says (Cookbook 0040)", () => {
+    const canvas: IIIFCanvas = {
+      id: "c",
+      width: 2105,
+      height: 1523,
+      items: [
+        {
+          items: [
+            {
+              motivation: "painting",
+              body: {
+                type: "SpecificResource",
+                source: {
+                  id: "https://example.org/i.jpg",
+                  type: "Image",
+                  width: 1523,
+                  height: 2105,
+                },
+                selector: { type: "ImageApiSelector", rotation: "90" },
+              },
+              target: "c",
+            },
+          ],
+        },
+      ],
+    };
+    expect(paintedImages(canvas)[0]).toMatchObject({
+      rotation: "90",
+      target: { x: 0, y: 0, width: 2105, height: 1523 },
+    });
+    expect(canvasScene([canvas], "left-to-right").images[0]).toMatchObject({
+      rotation: "90",
+      width: 1523,
+      height: 2105,
+    });
+  });
+
   it("skips bodies that are not images", () => {
     const canvas: IIIFCanvas = {
       id: "c",
@@ -276,6 +318,7 @@ describe("canvasScene media", () => {
         id: "https://fixtures.iiif.io/video/indiana/lunchroom_manners/lunchroom_manners.vtt",
         label: { en: ["Captions in WebVTT format"] },
         language: "en",
+        kind: "captions",
       },
     ]);
     expect(
@@ -363,8 +406,59 @@ describe("canvasCaptions", () => {
         id: "https://example.org/captions.vtt",
         label: undefined,
         language: undefined,
+        kind: "captions",
       },
     ]);
+  });
+
+  // Presentation 4's `provides`, on the annotation (Cookbook 0219's v4: closedCaptions).
+  it("reads what each file is for from what its annotation provides", () => {
+    const file = (name: string, provides?: string[]) => ({
+      id: `https://example.org/canvas/1/${name}`,
+      type: "Annotation",
+      motivation: ["supplementing"],
+      ...(provides ? { provides } : {}),
+      body: {
+        id: `https://example.org/${name}.vtt`,
+        type: "Text",
+        format: "text/vtt",
+      },
+      target: "https://example.org/canvas/1",
+    });
+    const canvas = {
+      id: "https://example.org/canvas/1",
+      type: "Canvas",
+      annotations: [
+        {
+          id: "https://example.org/canvas/1/text",
+          type: "AnnotationPage",
+          items: [
+            file("none"),
+            file("captions", ["closedCaptions"]),
+            file("subtitles", ["subtitles"]),
+            file("translation", ["translation"]),
+            file("both", ["closedCaptions", "transcript"]),
+            file("transcript", ["transcript"]),
+            file("other", ["audioDescription"]),
+          ],
+        },
+      ],
+    } as unknown as IIIFCanvas;
+    const kinds = (tracks: { id: string; kind: string }[]) =>
+      tracks.map((each) => [each.id.split("/").pop(), each.kind]);
+    expect(kinds(canvasTimedText(canvas))).toEqual([
+      ["none.vtt", "captions"],
+      ["captions.vtt", "captions"],
+      ["subtitles.vtt", "subtitles"],
+      ["translation.vtt", "subtitles"],
+      ["both.vtt", "captions"],
+      ["transcript.vtt", "transcript"],
+      ["other.vtt", "captions"],
+    ]);
+    // A transcript alone is never offered as captions.
+    expect(kinds(canvasCaptions(canvas)).map(([name]) => name)).not.toContain(
+      "transcript.vtt",
+    );
   });
 });
 
@@ -393,5 +487,58 @@ describe("a Canvas's files one after another on its time", () => {
     expect(canvasScene([one], "left-to-right").media[0]).not.toHaveProperty(
       "segments",
     );
+  });
+});
+
+describe("startingChoices", () => {
+  // As Chrome answers: no ALAC, MP3 and the rest.
+  const answer = (format: string) =>
+    format === "audio/alac" ? "" : ("probably" as const);
+  let canPlay: ReturnType<typeof vi.spyOn>;
+  beforeEach(() => {
+    canPlay = vi
+      .spyOn(HTMLMediaElement.prototype, "canPlayType")
+      .mockImplementation(answer);
+  });
+  afterEach(() => canPlay.mockRestore());
+
+  it("starts a Choice on its first item, or walks down past those disabled (Cookbook 0434)", () => {
+    const groups = findChoices(items(choiceAv));
+    expect(groups[0].items.map((item) => item.format)).toEqual([
+      "audio/alac",
+      "audio/mpeg",
+      "audio/flac",
+      "audio/ogg",
+      "audio/mpeg",
+      "audio/wav",
+    ]);
+    // ALAC first, as published, and disabled here: the next, MP3, starts.
+    expect(startingChoices(groups)).toEqual({ [groups[0].key]: 1 });
+  });
+
+  it("leaves a Choice of images, and one whose first is offered, on its first", () => {
+    canPlay.mockImplementation(() => "maybe");
+    expect(startingChoices(findChoices(items(choiceAv)))).toEqual({});
+    expect(startingChoices(findChoices(items(choice)))).toEqual({});
+  });
+
+  it("says a recording plays where its format is maybe or probably, and not where it is none", () => {
+    const [mp3, alac] = [
+      { type: "Sound", format: "audio/mpeg" },
+      { type: "Sound", format: "audio/alac" },
+    ];
+    expect(playsHere(mp3)).toBe(true);
+    expect(playsHere(alac)).toBe(false);
+    // An image, a recording with no format, and HLS are never held back.
+    expect(playsHere({ type: "Image", format: "image/jpeg" })).toBe(true);
+    expect(playsHere({ type: "Sound" })).toBe(true);
+    expect(
+      playsHere({ type: "Sound", format: "application/vnd.apple.mpegurl" }),
+    ).toBe(true);
+  });
+
+  it("leaves it on its first where every item is disabled", () => {
+    canPlay.mockImplementation(() => "");
+    expect(startingChoices(findChoices(items(choiceAv)))).toEqual({});
   });
 });

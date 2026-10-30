@@ -1,0 +1,159 @@
+{
+  "@context": [
+    "http://iiif.io/api/extension/navplace/context.json",
+    "http://iiif.io/api/presentation/3/context.json"
+  ],
+  "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/collection.json",
+  "type": "Collection",
+  "label": {
+    "en": ["NavPlace and NavDate Collection"]
+  },
+  "summary": {
+    "en": ["A collection of items related to Rome."]
+  },
+  "requiredStatement": {
+    "label": {
+      "en": ["Attribution"]
+    },
+    "value": {
+      "en": ["Objects from the Yale Center for British Art"]
+    }
+  },
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/manifest-1.json",
+      "type": "Manifest",
+      "label": {
+        "en": ["Castel Sant'Angelo, Rome"]
+      },
+      "navDate": "1776-01-01T00:00:00Z",
+      "navPlace": {
+        "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature-collection/1",
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature/1",
+            "type": "Feature",
+            "properties": {
+              "label": {
+                "en": ["Castel Sant'Angelo, Rome"]
+              }
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [12.4663, 41.9031]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/manifest-2.json",
+      "type": "Manifest",
+      "label": {
+        "en": ["The Colosseum"]
+      },
+      "navDate": "1776-01-01T00:00:00Z",
+      "navPlace": {
+        "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature-collection/2",
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature/2",
+            "type": "Feature",
+            "properties": {
+              "label": {
+                "en": ["The Colosseum"]
+              }
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [12.492222, 41.890278]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/manifest-3.json",
+      "type": "Manifest",
+      "label": {
+        "en": ["The Arch of Titus from the Forum, Rome, ca. 1725"]
+      },
+      "navDate": "1725-01-01T00:00:00Z",
+      "navPlace": {
+        "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature-collection/3",
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature/3",
+            "type": "Feature",
+            "properties": {
+              "label": {
+                "en": ["The Arch of Titus from the Forum, Rome, ca. 1725"]
+              }
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [12.488585, 41.890717]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/manifest-4.json",
+      "type": "Manifest",
+      "label": {
+        "en": ["The Temple of Vesta, Rome, 1849"]
+      },
+      "navDate": "1849-01-01T00:00:00Z",
+      "navPlace": {
+        "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature-collection/4",
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature/4",
+            "type": "Feature",
+            "properties": {
+              "label": {
+                "en": ["The Temple of Vesta, Rome, 1849"]
+              }
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [12.4862, 41.8917]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/manifest-5.json",
+      "type": "Manifest",
+      "label": {
+        "en": ["A View of Trajan's Forum, Rome, 1821"]
+      },
+      "navDate": "1821-01-01T00:00:00Z",
+      "navPlace": {
+        "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature-collection/5",
+        "type": "FeatureCollection",
+        "features": [
+          {
+            "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature/5",
+            "type": "Feature",
+            "properties": {
+              "label": {
+                "en": ["A View of Trajan's Forum, Rome, 1821"]
+              }
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [12.485869, 41.895419]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

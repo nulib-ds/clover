@@ -29,6 +29,7 @@ import {
   canvasScene,
   canvasSize,
   findChoices,
+  startingChoices,
   placeholderStill,
   resolveDirection,
 } from "./layout";
@@ -36,6 +37,8 @@ import ExitFullscreen from "../../ui/ExitFullscreen";
 import { useControlsVisibility } from "../Body/useControlsVisibility";
 import { useNearViewport } from "../Body/useNearViewport";
 import useFullscreen from "../../hooks/useFullscreen";
+import useWithinFullscreen from "../../hooks/useWithinFullscreen";
+import useFullscreenExit from "../../hooks/useFullscreenExit";
 import { useLoaded } from "../../hooks/useLoaded";
 import { ErrorBoundary } from "../../ui/ErrorBoundary";
 import { Loading } from "../../ui/Loading";
@@ -43,9 +46,9 @@ import { SHORTCUTS, forwardShortcut } from "../../ui/Tip";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { join } from "../../lib/classnames";
-import { localize } from "../../core/value";
+import { type LanguageMapLike, localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
-import { BodyUnloadable } from "../../ui/BodyUnloadable";
+import { BodyNote, BodyUnloadable } from "../../ui/BodyUnloadable";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useRootLanguage } from "../../react/language";
 import { useContainerName } from "../../ui/useContainerName";
@@ -53,6 +56,7 @@ import type { CanvasRenderer, SceneImage } from "../../lib/renderer";
 import { type Rect, union } from "../../lib/renderer/math/rect";
 import { findImageServiceId } from "../../lib/renderer/sources/imageService";
 import { type CanvasSurface, type MakeSurface, hasCamera } from "./surface";
+import { languageProps } from "../../core/direction";
 
 type CanvasStatus = "loading" | "ready" | "error";
 
@@ -81,6 +85,8 @@ const NO_MODEL: AnnotationModel = {
 };
 // Few Canvases are animations: their clock and bar load when one is shown.
 const FrameAnimation = lazy(() => import("./FrameAnimation"));
+// A picked annotation's place, on its map (Cookbook 0139): MapLibre with it, on demand.
+const PlaceBox = lazy(() => import("./PlaceBox"));
 
 const ALL_CONTROLS: Required<CanvasControlsConfig> = {
   zoom: true,
@@ -89,6 +95,7 @@ const ALL_CONTROLS: Required<CanvasControlsConfig> = {
   reset: true,
   annotations: true,
   information: true,
+  map: true,
 };
 
 /**
@@ -182,6 +189,10 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     null,
   );
   const isFullscreen = useFullscreen(wrapperElement);
+  // Inside whatever is full screen: the Canvas itself, or a host's element around it.
+  const withinFullscreen = useWithinFullscreen(wrapperElement);
+  // The way out shown at its top left: full screen itself, or first in its Root that is.
+  const exitShown = useFullscreenExit(wrapperElement);
   // Standalone, the Canvas reads the page's language itself, for its strings to mark.
   const root = useRootLanguage(
     setWrapperElement as React.RefCallback<HTMLElement>,
@@ -240,11 +251,17 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    */
   const direction = resolveDirection(viewingDirection);
   /*
-   * A Canvas's `Choice`s, and which item of each to paint: the first until the reader
-   * picks another from the control. A new set of Canvases starts from the first again.
+   * A Canvas's `Choice`s, and which item of each to paint: the first, or the next not
+   * disabled where the first is (`startingChoices`), until the reader picks another
+   * from the control. A new set of Canvases starts from the first again.
    */
   const choices = useMemo(() => findChoices(canvases ?? []), [canvases]);
-  const [selections, setSelections] = useState<ChoiceSelections>({});
+  const starting = useMemo(() => startingChoices(choices), [choices]);
+  const [picked, setSelections] = useState<ChoiceSelections>({});
+  const selections = useMemo(
+    () => ({ ...starting, ...picked }),
+    [starting, picked],
+  );
   const selectChoice = (key: string, index: number) =>
     setSelections((current) => ({ ...current, [key]: index }));
   /*
@@ -285,6 +302,60 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   const [annotationModel, setAnnotationModel] =
     useState<AnnotationModel | null>(null);
   const model = (hasAnnotations && annotationModel) || NO_MODEL;
+  /*
+   * The picked annotation's place, where its body is a GeoJSON `Feature` (Cookbook 0139):
+   * shown on a map in a box, as the information is, while it is picked.
+   */
+  const pickedPlace = useMemo(() => {
+    const picked = allAnnotations?.find(
+      (each) => each.annotation.id === model.selected,
+    )?.annotation as Record<string, any> | undefined;
+    const body = (
+      Array.isArray(picked?.body) ? picked?.body : [picked?.body]
+    ).find((each: any) => each?.type === "Feature");
+    return picked && body
+      ? {
+          id: String(picked.id),
+          feature: body as Record<string, unknown>,
+          name: (body.properties?.label ?? picked.label) as
+            | LanguageMapLike
+            | undefined,
+        }
+      : null;
+  }, [allAnnotations, model.selected]);
+  // Its box open while it is picked, until closed; open again as it is picked again.
+  const pickKey = pickedPlace ? `${pickedPlace.id}:${props.refind ?? 0}` : null;
+  const [closedPick, setClosedPick] = useState<string | null>(null);
+  const pickOpen = pickKey !== null && closedPick !== pickKey;
+  /*
+   * Where the shown Canvases are, else their Manifest (`navPlace`, Cookbook 0154 and 0240):
+   * a map control opens a box of it, as the information control does. Its box is made the
+   * first time it opens, MapLibre with it.
+   */
+  const places = useMemo(() => {
+    const own = (canvases ?? [])
+      .map((canvas) => (canvas as { navPlace?: any }).navPlace)
+      .filter(Boolean);
+    const source = own.length ? own : props.navPlace ? [props.navPlace] : [];
+    if (!source.length) return null;
+    const features = source.flatMap((place: any) =>
+      place?.type === "FeatureCollection"
+        ? (place.features ?? [])
+        : place?.type === "Feature"
+          ? [place]
+          : [],
+    );
+    if (!features.length) return null;
+    const named =
+      features.length === 1 ? features[0]?.properties?.label : undefined;
+    return {
+      feature: { type: "FeatureCollection", features },
+      name: (named ?? props.label) as LanguageMapLike | undefined,
+    };
+  }, [canvases, props.navPlace, props.label]);
+  const placeId = `place-box-${instance}`;
+  const [placeOpen, setPlaceOpen] = useState(false);
+  const [placeShown, setPlaceShown] = useState(false);
   const modelRef = useRef(model);
   modelRef.current = model;
   const releaseAnnotation = useCallback(() => modelRef.current.release(), []);
@@ -367,10 +438,29 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    * and its chapters as tracks, drawn by `MediaBody` (`media/Player.tsx`), never a picture.
    */
   const player = mediaOnly && media?.kind === "audio";
-  /** The reader can move the camera: not a lone recording, nor held still by the host. */
-  const navigable = !mediaOnly && options?.gestures?.navigable !== false;
-  /** The Canvases last drawn: when the host hands over others, frame them afresh. */
-  const canvasKey = canvases?.map((canvas) => canvas.id).join("|") ?? null;
+  /*
+   * A lone Canvas that paints nothing (Cookbook 0283: a page missing from a book, its
+   * `items` empty) is not a picture to explore either: the camera stays put, no zoom,
+   * rotation, reset or full screen is offered, and its name shows in its Body (Mat,
+   * 2026-10-29).
+   */
+  const empty =
+    canvases?.length === 1 && !media && !animated && baseImages.length === 0;
+  /**
+   * The reader can move the camera: not a lone recording, nor a Canvas that paints
+   * nothing, nor one held still by the host.
+   */
+  const navigable =
+    !mediaOnly && !empty && options?.gestures?.navigable !== false;
+  /*
+   * The Canvases last drawn: when the host hands over others, frame them afresh. Told
+   * apart by their Manifest too, as two Manifests may give their Canvases one id (Cookbook
+   * 0230's maps are each `…/canvas/p1`, one 1286 wide, the other 5212): the second would
+   * open in the first's view, zoomed in four times (Mat, 2026-10-29).
+   */
+  const canvasKey = canvases
+    ? `${manifestId ?? ""}\n${canvases.map((canvas) => canvas.id).join("|")}`
+    : null;
   /*
    * The shown Canvases' `placeholderContainer`s, as the Viewer shows them: a still fitted
    * in place of the Canvas, with a toggle to open it. Until then the Canvas is held back
@@ -408,18 +498,26 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    * A lone media Canvas carries all its controls in the transport at the bottom: full
    * screen moves there, and the top cluster (and the scrim behind it) is shown only for a
    * `Choice` to pick from or information to read. Over a placeholder, only information.
+   * A Canvas that paints nothing likewise, with nothing to zoom, turn or see full screen
+   * (Mat, 2026-10-29).
    */
   const onlyInformation = (
     config: Required<CanvasControlsConfig>,
-    { annotations = false } = {},
+    { annotations = false, fullPage = false } = {},
   ): Required<CanvasControlsConfig> => ({
     ...config,
     zoom: false,
     rotation: false,
     reset: false,
-    fullPage: false,
+    fullPage: fullPage && config.fullPage,
     annotations: annotations && config.annotations,
   });
+  /*
+   * Reached in full screen, a Canvas that paints nothing keeps full screen, and its way
+   * out among its controls: it offers no way in, but never puts a reader out of it
+   * (Mat, 2026-10-29).
+   */
+  const fullscreenExit = empty && withinFullscreen;
   /*
    * A host's own controls (the information panel's toggle) are kept wherever the cluster
    * would otherwise go: over a placeholder and over a lone video or sound, where Clover's
@@ -437,9 +535,16 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
       ? captioned.length || hostControls || listedCount
         ? onlyInformation(controlsConfig, { annotations: true })
         : null
-      : mediaOnly
-        ? choices.length || captioned.length || hostControls || listedCount
-          ? onlyInformation(controlsConfig, { annotations: true })
+      : mediaOnly || empty
+        ? choices.length ||
+          captioned.length ||
+          hostControls ||
+          listedCount ||
+          (fullscreenExit && controlsConfig.fullPage)
+          ? onlyInformation(controlsConfig, {
+              annotations: true,
+              fullPage: fullscreenExit,
+            })
           : null
         : controlsConfig;
   /*
@@ -458,8 +563,13 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    */
   const [fitted, setFitted] = useState<Rect | null>(null);
   const videoPlacement = media ? (fitted ?? media.placement) : null;
-  const images = useMemo<SceneImage[]>(
-    () =>
+  /*
+   * An animation's frames that are not images (Cookbook 0489: a video in a region, and
+   * text), made by `FrameAnimation` and drawn in the scene as itself, shown with its frame.
+   */
+  const [frameItems, setFrameItems] = useState<SceneImage[]>(NO_ITEMS);
+  const images = useMemo<SceneImage[]>(() => {
+    const withVideo =
       media?.kind === "video" && mediaElement && videoPlacement
         ? [
             ...baseImages,
@@ -471,9 +581,9 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
               media: { element: mediaElement },
             },
           ]
-        : baseImages,
-    [baseImages, media, mediaElement, videoPlacement],
-  );
+        : baseImages;
+    return frameItems.length ? [...withVideo, ...frameItems] : withVideo;
+  }, [baseImages, media, mediaElement, videoPlacement, frameItems]);
   // A lone video is framed by the video itself, so it fills the Body.
   const world =
     mediaOnly && media?.kind === "video" && fitted
@@ -487,6 +597,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     baseImages,
     world,
     images.length !== baseImages.length && [media?.id, videoPlacement],
+    frameItems.map((item) => item.id),
   ]);
   const shownCanvases = useRef<string | null>(null);
   /** Back at the placeholder since last drawn: reopening frames the Canvas afresh. */
@@ -650,6 +761,26 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     return renderer.attachNavigator(navigatorElement);
   }, [renderer, navigatorElement]);
 
+  // Held still over nothing: no drag, wheel, pinch or key moves the camera.
+  useEffect(() => {
+    if (!surface || !empty) return;
+    surface.setGestures({ navigable: false });
+    return () => surface.setGestures({});
+  }, [surface, empty]);
+
+  /*
+   * Its way out goes with full screen: had it focus, focus moves to the viewport rather
+   * than to the page's body (WCAG 2.4.3).
+   */
+  const exitFocused = useRef(false);
+  useEffect(() => {
+    if (fullscreenExit) return;
+    const lost =
+      !document.activeElement || document.activeElement === document.body;
+    if (exitFocused.current && lost) hostRef.current?.focus();
+    exitFocused.current = false;
+  }, [fullscreenExit]);
+
   useEffect(() => {
     const surface = surfaceRef.current;
     if (showPlaceholder) placeholderShown.current = true;
@@ -699,6 +830,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         data-unloadable={unloadable || undefined}
         data-has-navigator={showNavigator}
         data-fullscreen={isFullscreen}
+        data-exit={exitShown || undefined}
         data-controls={controlsVisible ? "visible" : "hidden"}
         data-media={media?.kind}
         data-player={player ? "" : undefined}
@@ -708,6 +840,10 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
           stills.length && !player ? showPlaceholder : undefined
         }
         ref={root.ref}
+        onFocus={(event) => {
+          exitFocused.current =
+            fullscreenExit && event.target.id === `fullPage-${instance}`;
+        }}
         onKeyDown={(event) => {
           /*
            * Escape closes the open caption from anywhere in the figure, leaving focus
@@ -757,8 +893,8 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         {(shownControls || showNavigator) && (
           <div className="clover-canvas-scrim" aria-hidden="true" />
         )}
-        {/* Revealed by CSS only while this wrapper is the full-screen element. */}
-        <ExitFullscreen hidden={!isFullscreen} />
+        {/* Revealed while this Canvas is full screen, or first in its Root that is. */}
+        <ExitFullscreen hidden={!exitShown} />
         {surface && shownControls && (
           <Controls
             renderer={renderer}
@@ -778,6 +914,12 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             captionId={hasCaption ? captionId : undefined}
             captionOpen={isCaptionOpen}
             onCaptionToggle={() => setCaptionOpen((open) => !open)}
+            placeId={places ? placeId : undefined}
+            placeOpen={placeOpen}
+            onPlaceToggle={() => {
+              setPlaceShown(true);
+              setPlaceOpen((open) => !open);
+            }}
             language={language}
           >
             {children}
@@ -826,13 +968,23 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             {viewportKeys.map(({ description }, index) => (
               <React.Fragment key={description}>
                 {index > 0 && " "}
-                <span lang={root.langOf(description)}>{t(description)}</span>
+                <span {...languageProps(root.langOf(description))}>
+                  {t(description)}
+                </span>
               </React.Fragment>
             ))}
           </span>
         )}
         {/* Nothing it paints could be loaded: said in the middle of the Body. */}
         <BodyUnloadable kind="image" shown={unloadable && !showPlaceholder} />
+        {/*
+         * A Canvas that paints nothing shows its name in the middle of its Body, as a Body
+         * that could not load says so: its label, else its Manifest's, and nothing where
+         * neither has one. For the eye alone: the viewport carries the same name.
+         */}
+        {empty && !showPlaceholder && ownName?.text && (
+          <BodyNote text={ownName.text} lang={ownName.lang || undefined} />
+        )}
         {/*
          * Sound with no picture of its own, nor one shown for it, names itself in its
          * empty Body (Mat, 2026-10-23: "label these"), for the eye alone: the viewport
@@ -846,7 +998,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             <p
               className="clover-canvas-sound-label"
               aria-hidden="true"
-              lang={ownName.lang || undefined}
+              {...languageProps(ownName.lang || undefined)}
             >
               {ownName.text}
             </p>
@@ -882,7 +1034,8 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
               caption={caption}
               navigable={navigable}
               fullscreen={mediaOnly && Boolean(controlsConfig?.fullPage)}
-              isFullscreen={isFullscreen}
+              // Inside full screen, the Canvas's or its Root's: the way out to name.
+              isFullscreen={withinFullscreen}
               onEnded={onEnded}
               chapters={chapters}
               highlightedChapter={highlightedChapter}
@@ -922,6 +1075,10 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
                 loop={options?.animation?.loop}
                 onEnded={onEnded}
                 language={language}
+                duration={Number((animated as { duration?: number }).duration)}
+                canvas={animated}
+                place={scene.placements[canvases!.indexOf(animated)]}
+                onItems={setFrameItems}
               />
             </Suspense>
           )}
@@ -946,6 +1103,38 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
           />
         )}
         {loading && <Loading overlay />}
+        {pickedPlace && (
+          <Suspense fallback={null}>
+            <PlaceBox
+              id={`place-of-${instance}`}
+              open={pickOpen}
+              onClose={(restoreFocus) => {
+                setClosedPick(pickKey);
+                if (restoreFocus)
+                  document.getElementById(pickedPlace.id)?.focus();
+              }}
+              feature={pickedPlace.feature}
+              name={pickedPlace.name}
+              language={language}
+            />
+          </Suspense>
+        )}
+        {places && placeShown && (
+          <Suspense fallback={null}>
+            <PlaceBox
+              id={placeId}
+              open={placeOpen}
+              onClose={(restoreFocus) => {
+                setPlaceOpen(false);
+                if (restoreFocus)
+                  document.getElementById(`place-${instance}`)?.focus();
+              }}
+              feature={places.feature}
+              name={places.name}
+              language={language}
+            />
+          </Suspense>
+        )}
         {/* Last, as a `<figcaption>` must be first or last in its `<figure>`. */}
         {hasCaption && (
           <Caption
@@ -1023,6 +1212,7 @@ function canvasHandle(
 }
 
 const NO_FRAMES: AnimationFrame[] = [];
+const NO_ITEMS: SceneImage[] = [];
 
 /**
  * Painting bodies (or plain sources) as scene images. A body with an image service is

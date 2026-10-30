@@ -278,14 +278,15 @@ On `.clover-canvas`, but for `--clover-body-height`, which you can set on Body o
 element that contains it. Clover sets the controls' durations to `0s` for a reader who prefers reduced
 motion: set yours inside `@media (prefers-reduced-motion: no-preference)`.
 
-| Variable                         | Default                                                              | What it sets                                      |
-| -------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------- |
-| `--clover-body-height`           | `60vh` (Default `min(65vh, 40rem)`, the lightbox `min(70vh, 48rem)`) | The Body's height                                 |
-| `--clover-canvas-inset`          | `0px` (Document: `var(--clover-inset)`)                              | A margin around the picture at home               |
-| `--clover-canvas-controls-inset` | `var(--clover-inset)`                                                | How far the controls sit in from the Body's edges |
-| `--clover-controls-leave`        | `180ms cubic-bezier(0.4, 0, 1, 1)`                                   | How the controls leave when the reader is idle    |
-| `--clover-controls-enter`        | `340ms cubic-bezier(0.34, 1.56, 0.64, 1)`                            | How they come back                                |
-| `--clover-controls-tuck`         | `var(--clover-space-s)`                                              | How far they tuck toward their edge as they leave |
+| Variable                         | Default                                                              | What it sets                                                   |
+| -------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `--clover-body-height`           | `60vh` (Default `min(65vh, 40rem)`, the lightbox `min(70vh, 48rem)`) | The Body's height                                              |
+| `--clover-canvas-wash`           | `#0001`                                                              | The Body's ground, a wash over the page's, kept in full screen |
+| `--clover-canvas-inset`          | `0px` (Document: `var(--clover-inset)`)                              | A margin around the picture at home                            |
+| `--clover-canvas-controls-inset` | `var(--clover-inset)`                                                | How far the controls sit in from the Body's edges              |
+| `--clover-controls-leave`        | `180ms cubic-bezier(0.4, 0, 1, 1)`                                   | How the controls leave when the reader is idle                 |
+| `--clover-controls-enter`        | `340ms cubic-bezier(0.34, 1.56, 0.64, 1)`                            | How they come back                                             |
+| `--clover-controls-tuck`         | `var(--clover-space-s)`                                              | How far they tuck toward their edge as they leave              |
 
 ### Items, Summary, Logo, Map and Search
 

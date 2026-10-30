@@ -1,5 +1,9 @@
 import { parseAnnotationTarget } from "./annotations";
-import type { ResolvedContentState, Target } from "./content-state";
+import type {
+  ContentTarget,
+  ResolvedContentState,
+  Target,
+} from "./content-state";
 import { asArray } from "../lib/asArray";
 import type { Json } from "./json";
 
@@ -57,14 +61,56 @@ const collectionOf = (resource: Json | undefined) =>
  * `partOf`, then goes to the Canvas (and its region or time); one naming a Manifest or
  * Collection loads it. A Manifest that is itself `partOf` a Collection, the target's or
  * its Canvas's, loads that Collection and opens on the Manifest, so the reader arrives
- * among its members. The first target is used when there are several.
+ * among its members. Where there are several targets it opens on the first, and holds
+ * them all (`targets`), each resolved the same way, so the reader can go to each in turn
+ * (Cookbook 0540).
  */
 export function resolveContentState(json: Json): ResolvedContentState | null {
-  const target = (
-    json.type === "Annotation" ? asArray(json.target)[0] : json
-  ) as Json | string | undefined;
-  if (!target) return null;
+  const all = (
+    json.type === "Annotation" ? asArray(json.target) : [json]
+  ) as Array<Json | string>;
+  const first = all[0] ? resolveTarget(all[0], json) : null;
+  if (!first || all.length < 2) return first;
+  const base = typeof json.id === "string" ? json.id : "content-state";
+  const items = all.flatMap((target, index): ContentTarget[] => {
+    const resolved = index === 0 ? first : resolveTarget(target, json);
+    // A target it can open: a Manifest, or a place in one (directly, or in a Collection).
+    const manifestId =
+      resolved?.type === "Manifest" ? resolved.id : resolved?.manifestId;
+    if (!resolved || !manifestId) return [];
+    return [
+      {
+        id: `${base}#target-${index + 1}`,
+        manifestId,
+        ...(resolved.target?.canvasId && {
+          canvasId: resolved.target.canvasId,
+        }),
+        ...(resolved.target?.region && { region: resolved.target.region }),
+        ...(resolved.target?.time !== undefined && {
+          time: resolved.target.time,
+        }),
+      },
+    ];
+  });
+  return items.length > 1
+    ? {
+        ...first,
+        targets: {
+          id: base,
+          ...(json.label && typeof json.label === "object"
+            ? { label: json.label }
+            : {}),
+          items,
+        },
+      }
+    : first;
+}
 
+/** One target as what to load and where to go (`resolveContentState`). */
+function resolveTarget(
+  target: Json | string,
+  json: Json,
+): ResolvedContentState | null {
   const parsed = parseAnnotationTarget(target as any);
   const resource: Json =
     typeof target === "string"

@@ -1,0 +1,1610 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28.json",
+  "type": "AnnotationPage",
+  "partOf": [
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/collection.json",
+      "type": "AnnotationCollection"
+    }
+  ],
+  "next": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/29.json",
+  "prev": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/27.json",
+  "items": [
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/1",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "IRE GUARANTEES.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=929,502,1240,118"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/2",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "* X",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1501,646,131,76"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/3",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "On tires we will give our customers the same protection accorded us by tire manu-",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1101,749,3071,102"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/4",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "facturers.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=977,867,434,62"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/5",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "Defective tires should be returned direct to the tire manufacturers and not",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1404,853,2768,76"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/6",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "to us.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=977,970,214,62"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/7",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "The manufacturers of tires have ample facilities for repairing same and do so",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1184,950,2981,89"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/8",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "under their guarantee free of charge. Always prepay express charges.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=991,1060,2629,83"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/9",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "THE FOLLOWING ARE COPIES OF GUARANTEES GIVEN BY TIRE MANUFACTURERS.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=929,1204,2892,76"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/10",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "MORGAN & WRIGHT TIRES.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1955,1334,847,56"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/11",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "We shall continue in 1896 our custom of repairing all tires of our manufacture free of charge.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=681,1417,2761,63"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/12",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "We shall replace defective parts when, in our judgment, the defect is from our fault. In no case will we replace when worn",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=681,1478,3491,79"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/13",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "out in service or injured by accident. Make your request direct to us, and not through the makers of your wheel.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=571,1548,2851,69"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/14",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "Express charges on tires must be prepaid in every instance. If return by mail is desired, postage at the rate of one cent per",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=668,1608,3504,80"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/15",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "ounce must come with the request for repairs. Do not send the wheel with the tire.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,1686,2472,62"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/16",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "See that every package sent has your address securely fastened to the package.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=681,1761,2017,55"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/17",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "MORGAN & WRIGHT, 331 to 339 Lake Street, Chicago, Ills.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2437,1809,1645,78"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/18",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "VIM TIRES.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2210,1954,358,56"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/19",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "We guarantee all our tires to be of perfect manufacture. We guarantee to repair all 1896 Vim tires free at any of our",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=681,2024,3491,90"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/20",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "repair departments during the season, but express charges must be prepaid. Tires sent by mail are at the owner's risk,",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,2086,3601,100"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/21",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "and postage at one cent per ounce must be sent for return mailing. To save time send the tire direct to our nearest repair",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,2155,3601,91"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/22",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "department, not to the bicycle manufacturer. See that your address is properly attached to the bundle.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,2226,3284,95"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/23",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "We do not",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3855,2229,323,49"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/24",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "receive tires from express companies unless the name of the sender is on them. Write us a letter under separate cover",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,2297,3601,83"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/25",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "stating how the tire is sent.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,2388,819,55"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/26",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "BOSTON WOVEN HOSE AND RUBBER Co., 275 Devonshire Street, Boston.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1969,2366,2078,63"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/27",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "63 Reade Street, New York.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2031,2442,826,56"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/28",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "205 Lake Street, Chicago.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3146,2428,764,63"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/29",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "10 South Water Street, Cleveland.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2024,2504,1039,63"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/30",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "14 Fremont Street, San Francisco.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3105,2498,1066,55"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/31",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "PALMER TIRES.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2134,2642,502,56"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/32",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "We guarantee the Palmer tires against defects in material and workmanship, and will repair, free of charge, every",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=681,2712,3491,94"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/33",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "tire that can be repaired, no matter how the injury may have been caused, if delivered at 65 Reade Street, New York City.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,2780,3601,88"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/34",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "or 133 South Clinton Street, Chicago, transportation charges prepaid.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=585,2862,2031,70"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/35",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "We will replace all tires that cannot be repaired, if",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2650,2848,1529,63"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/36",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "on examination we find material or workmanship defective.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,2929,1818,66"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/37",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "We will not replace or credit tires that have become un-",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2389,2924,1789,56"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/38",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "serviceable from any cause for which we are not responsible.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,3000,1811,62"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/39",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "PALMER PNEUMATIC TIRE CO.,",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3036,2986,888,56"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/40",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "NEW YORK TIRES.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2086,3130,578,56"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/41",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "We guarantee all our tires to be free from all imperfections in material and manufacture, and agree to make good",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=681,3195,3484,95"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/42",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "within the calendar year any tires returned to us, charges prepaid, that are defective.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=585,3273,2541,83"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/43",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "We will repair free of charge all",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3160,3268,1012,56"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/44",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "punctures or other damage caused by accident to our tires, if delivered to us at 63 Franklin Street, Boston, 59 Reade Street,",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,3329,3594,91"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/45",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "New York, 334 Dearborn Street, Chicago, or 1510 Market Street, San Francisco.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,3409,2292,83"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/46",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "NEW YORK TIRE CO.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3462,3386,614,76"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/47",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "NORTH AMERICAN TIRES.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1976,3544,798,62"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/48",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "All our single tube tires are guaranteed to be free from imperfections in material and workmanship, and when defect-",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=688,3615,3477,90"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/49",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "ive will be replaced free of charge, if delivered prepaid at factory of the North American Rubber Co., Setauket, N. Y.,",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,3681,3594,93"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/50",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "or 81 Reade Street, New York City, or 146 Kinzie Street, Chicago.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=578,3770,1887,70"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/51",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "PARKHURST & WILKINSON.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3284,3756,784,56"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/52",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "GOODRICH TIRES.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2100,3901,557,63"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/53",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "These tires are guaranteed against defective workmanship and material to December 31, 1896. All tires will be repaired",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=681,3969,3485,94"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/54",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "free of charge, if delivered at our factory, prepaid, in Chicago, 159 Lake Street.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=585,4049,2334,83"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/28/55",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "THE COLUMBIA RUBBER WORKS Co.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/28",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=3035,4038,1033,64"
+        }
+      }
+    }
+  ]
+}

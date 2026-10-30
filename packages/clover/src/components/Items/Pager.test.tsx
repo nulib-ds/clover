@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import React from "react";
 
 import bookJson from "../../fixtures/iiif-cookbook/0009-book-1.json";
@@ -48,9 +54,11 @@ function mockFetch() {
 /** The book is `paged`: its five pages are three views, the cover and two spreads. */
 const VIEWS = 3;
 
-/** What the Position shows, its count for sight. */
+/** What the Position shows, its count for sight; for members, the count's button. */
 const shown = (pager: HTMLElement) =>
-  pager.querySelector(".clover-pager-position > [aria-hidden]")?.textContent;
+  pager.querySelector(
+    ".clover-pager-position > [aria-hidden]:not(.clover-pager-room), .clover-pager-count-button .clover-pager-position > span:first-child",
+  )?.textContent;
 
 beforeEach(() => initCloverI18n({ lng: "en" }));
 
@@ -98,13 +106,42 @@ describe("Items' pager", () => {
       </Clover.Root>,
     );
     await screen.findByRole("heading", { name: "Simple Manifest - Book" });
-    const pager = screen.getByRole("navigation", { name: "Items" });
+    const pager = screen.getByRole("navigation", { name: "Collection" });
     expect(shown(pager)).toBe("1 / 2");
+    // Its count opens the members, listed as the Panel lists them, the one shown selected.
+    const count = within(pager).getByRole("button", { name: "1 / 2" });
+    fireEvent.click(count);
+    await waitFor(() =>
+      expect(count.getAttribute("aria-controls")).toBeTruthy(),
+    );
+    const popup = await waitFor(() => {
+      const found = document.getElementById(
+        count.getAttribute("aria-controls")!,
+      );
+      expect(found?.querySelector("[role=listbox]")).toBeTruthy();
+      return found!;
+    });
+    expect(within(popup).getAllByRole("option")[0]).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
 
-    fireEvent.click(within(pager).getByRole("button", { name: "Next" }));
+    // It opens over the pager: a step taken with it open keeps it open, and it follows.
+    const next = within(pager).getByRole("button", { name: "Next" });
+    fireEvent.pointerDown(next);
+    fireEvent.click(next);
     expect(
       await screen.findByRole("heading", { name: "A letter" }),
     ).toBeInTheDocument();
+    expect(document.getElementById(popup.id)).not.toBeNull();
+    await waitFor(() =>
+      expect(within(popup).getAllByRole("option")[1]).toHaveAttribute(
+        "aria-selected",
+        "true",
+      ),
+    );
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(document.getElementById(popup.id)).toBeNull();
     expect(onSelect).toHaveBeenCalledWith(
       expect.objectContaining({ id: LETTER }),
       expect.anything(),

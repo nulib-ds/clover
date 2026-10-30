@@ -115,6 +115,15 @@ const ControlCluster: React.FC<ControlClusterProps> = ({
   const isFullscreen = useWithinFullscreen(element);
   // How far it reaches, wrapped on a small Body, for the popups it opens to clear.
   useClusterReach(element);
+  /*
+   * Full screen ends the view's controls, over every picture alike, whichever of them a
+   * Canvas offers: left of what follows them, the `i` among it (Mat, 2026-10-29).
+   */
+  const specs = controls(isFullscreen);
+  const ordered = [
+    ...specs.filter((spec) => spec.key !== "fullPage"),
+    ...specs.filter((spec) => spec.key === "fullPage"),
+  ];
 
   return (
     <div
@@ -124,9 +133,7 @@ const ControlCluster: React.FC<ControlClusterProps> = ({
       data-testid="clover-canvas-controls"
       ref={setElement}
     >
-      {controls(isFullscreen).map((spec) =>
-        renderControl(spec, controlButtons),
-      )}
+      {ordered.map((spec) => renderControl(spec, controlButtons))}
       {children}
     </div>
   );

@@ -24,6 +24,7 @@ import {
   toPixels,
   writeSizes,
 } from "./splitting";
+import { languageProps } from "../../core/direction";
 
 export { toPixels, type SplitLength };
 
@@ -304,9 +305,9 @@ export const SplitHandle = forwardRef<HTMLDivElement, SplitHandleProps>(
         role="separator"
         aria-orientation="vertical"
         aria-label={label}
-        lang={
-          rest["aria-label"] === undefined ? langOf("splitHandle") : undefined
-        }
+        {...languageProps(
+          rest["aria-label"] === undefined ? langOf("splitHandle") : undefined,
+        )}
         aria-valuenow={value ? percent(value.now) : undefined}
         aria-valuemin={value ? percent(value.min) : undefined}
         aria-valuemax={value ? percent(value.max) : undefined}

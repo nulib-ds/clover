@@ -95,7 +95,8 @@ export function useMediaElement(
     const blobs: string[] = [];
     media.captions.forEach((caption, index) => {
       const track = document.createElement("track");
-      track.kind = "captions";
+      // Captions or subtitles, as its annotation `provides` it.
+      track.kind = caption.kind;
       if (caption.language) track.srclang = caption.language;
       // Named as Clover's menu names it, for the system player's own menu.
       track.label = captionName(caption, index, languageRef.current).text;

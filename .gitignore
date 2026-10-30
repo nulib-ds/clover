@@ -1,6 +1,8 @@
 # dev
 .build
 .next
+# Written by Next itself, by `next dev` and `next build` each their own way.
+next-env.d.ts
 .tool-versions
 .vscode/
 dist

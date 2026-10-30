@@ -3,6 +3,7 @@ import { useUniqueId } from "./useUniqueId";
 
 import { langWithin } from "../i18n/config";
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
+import { languageProps } from "../core/direction";
 
 /**
  * Props that name a container (a `nav`, a list, a group), and the element they may need.
@@ -32,7 +33,7 @@ export function useContainerName(
   return {
     props: { "aria-labelledby": id },
     node: (
-      <span hidden id={id} lang={other}>
+      <span hidden id={id} {...languageProps(other)}>
         {text}
       </span>
     ),

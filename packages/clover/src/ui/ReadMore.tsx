@@ -3,6 +3,7 @@ import { useUniqueId } from "./useUniqueId";
 
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
 import { useRootLanguage } from "../react/language";
+import { languageProps } from "../core/direction";
 
 /** A layout effect in the browser, an effect on the server (where there is no layout). */
 const useIsomorphicLayoutEffect =
@@ -52,7 +53,7 @@ export function ReadMore({ children }: { children: React.ReactElement }) {
           aria-controls={id}
           onClick={toggle}
           ref={own.ref}
-          lang={own.langOf(open ? "readLess" : "readMore")}
+          {...languageProps(own.langOf(open ? "readLess" : "readMore"))}
         >
           {open ? t("readLess") : t("readMore")}
         </button>

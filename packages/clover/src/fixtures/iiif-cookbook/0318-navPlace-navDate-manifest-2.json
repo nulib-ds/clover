@@ -1,0 +1,70 @@
+{
+  "@context": [
+    "http://iiif.io/api/extension/navplace/context.json",
+    "http://iiif.io/api/presentation/3/context.json"
+  ],
+  "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/manifest-2.json",
+  "type": "Manifest",
+  "label": {
+    "en": ["The Colosseum"]
+  },
+  "navDate": "1776-01-01T00:00:00Z",
+  "navPlace": {
+    "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature-collection/2",
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature/2",
+        "type": "Feature",
+        "properties": {
+          "label": {
+            "en": ["The Colosseum"]
+          }
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [12.492222, 41.890278]
+        }
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/canvas/2",
+      "type": "Canvas",
+      "height": 1529,
+      "width": 2048,
+      "label": {
+        "en": ["The Colosseum"]
+      },
+      "items": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/anno-page/2",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/anno/2",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.io/api/image/3.0/example/reference/71b9228e087f15c75b628214cd9f647d-The_Colosseum/full/max/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "height": 1529,
+                "width": 2048,
+                "service": [
+                  {
+                    "id": "https://iiif.io/api/image/3.0/example/reference/71b9228e087f15c75b628214cd9f647d-The_Colosseum",
+                    "profile": "level1",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/canvas/2"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

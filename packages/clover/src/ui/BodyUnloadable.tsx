@@ -1,6 +1,7 @@
 import React from "react";
 
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
+import { languageProps } from "../core/direction";
 
 /** What a Body draws: an image, a video, a recording, or a 3D model. */
 export type BodyMediaKind = "image" | "video" | "audio" | "model";
@@ -37,7 +38,20 @@ export function BodyUnloadable({
       data-room={room || undefined}
       role="status"
     >
-      {shown && <p lang={langOf(key)}>{t(key)}</p>}
+      {shown && <p {...languageProps(langOf(key))}>{t(key)}</p>}
+    </div>
+  );
+}
+
+/**
+ * Words of the resource's own in the middle of a Body, drawn as the note above is: the
+ * name of a Canvas that paints nothing (Cookbook 0283, a page missing from a book). For
+ * the eye alone, as the viewport carries the same name.
+ */
+export function BodyNote({ text, lang }: { text: string; lang?: string }) {
+  return (
+    <div className="clover-body-note" aria-hidden="true">
+      <p {...languageProps(lang)}>{text}</p>
     </div>
   );
 }

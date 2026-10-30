@@ -6,6 +6,7 @@ import { Tip } from "./Tip";
 import { useContainerName } from "./useContainerName";
 import { useUniqueId } from "./useUniqueId";
 import { visuallyHidden } from "./visuallyHidden";
+import { languageProps } from "../core/direction";
 
 /**
  * A language's name in itself ("العربية", "English", "Français"), for a reader of that
@@ -62,7 +63,7 @@ export function LanguageChoice({
               <span className={`${part}-language-code`}>
                 {languageCode(tag)}
               </span>{" "}
-              <span style={visuallyHidden} lang={tag}>
+              <span style={visuallyHidden} {...languageProps(tag)}>
                 {own}
               </span>
               <Tip label={own} lang={tag} />

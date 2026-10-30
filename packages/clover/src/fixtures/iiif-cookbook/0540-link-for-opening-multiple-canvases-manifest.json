@@ -1,0 +1,70 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/manifest.json/manifest.json",
+  "type": "Manifest",
+  "label": {
+    "en": ["Two monuments in Rome"]
+  },
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/canvas/p1",
+      "type": "Canvas",
+      "label": {
+        "en": ["The Temple of Vesta Rome"]
+      },
+      "height": 1464,
+      "width": 2048,
+      "items": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/page/p1/1",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/annotation/p0001-image",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://fixtures.iiif.io/images/Yale/ycba/The_Temple_of_Vesta_Rome.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "height": 1464,
+                "width": 2048
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/canvas/p1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/canvas/p2",
+      "type": "Canvas",
+      "label": {
+        "en": ["The Colosseum"]
+      },
+      "height": 1302,
+      "width": 2048,
+      "items": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/page/p2/1",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/annotation/p0002-image",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://fixtures.iiif.io/images/Yale/ycba/The_Colosseum_Rome2.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "height": 1302,
+                "width": 2048
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/canvas/p2"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

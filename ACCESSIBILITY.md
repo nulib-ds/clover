@@ -5,6 +5,34 @@ package and the docs site alike (`AGENTS.md`, `packages/clover/DESIGN.md` §0). 
 holds what is known to fail and the plan to clear it. Fixing any of it is always in
 scope; when you do, delete its row below and its id from the plan.
 
+## What a resource provides
+
+Presentation 4 lets a `supplementing` annotation say what its file is for: `provides`,
+an array of values from IIIF's
+[registry of accessibility values](https://iiif.io/api/registry/accessibility/), and
+clients "should process" it. It is the publisher's own word on which accessibility
+features a resource offers, and how a viewer should offer them, so it carries weight for
+WCAG here and for how annotations are written from now on (Mat, October 29, 2026). Clover
+reads it wherever it offers such a feature, and never lets a file's label, name or
+extension stand in for it.
+
+| Value                                      | What it is for                                                 | Criterion                    | In Clover                                                                          |
+| ------------------------------------------ | -------------------------------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------- |
+| `closedCaptions`                           | What is heard: speech, and the sounds that carry meaning       | 1.2.2 Captions (Prerecorded) | A captions track (October 29, 2026); also where nothing is provided, as in P3      |
+| `subtitles`, `translation`                 | What is said, in a language, for a reader who hears it         | None; its language, 3.1.2    | A subtitles track, offered beside the captions (October 29, 2026)                  |
+| `transcript`                               | The words, without the sounds captions describe                | 1.2.1, 1.2.8                 | The Transcript only; never offered as captions, which it is not (October 29, 2026) |
+| `audioDescription`                         | A recording's visual information, spoken                       | 1.2.3, 1.2.5                 | Not read yet: a sound to offer beside the video                                    |
+| `alternativeText`, `longDescription`       | A text alternative for an image, sound or video, short or long | 1.1.1                        | Not read yet                                                                       |
+| `signLanguage`                             | The recording interpreted in a sign language                   | 1.2.6 (AAA)                  | Not read yet                                                                       |
+| `highContrastAudio`, `highContrastDisplay` | A version easier to hear, or to see                            | 1.4.7, 1.4.6 (AAA)           | Not read yet                                                                       |
+| `braille`, `tactileGraphic`                | Forms for touch                                                | 1.1.1                        | Not read yet                                                                       |
+
+A WebVTT file whose annotation provides only what timed text is not is offered as
+captions, as before. The reader is `timedTextKind` (`packages/clover/src/components/Canvas/layout.ts`);
+a feature that offers another value reads it the same way. The docs' mocks are
+Presentation 3, which has no `provides`; one in Presentation 4 that offers such a file
+gives it, as the Cookbook's Presentation 4 recipes do (0219, 0253).
+
 ## Audit of October 15, 2026
 
 Fifteen auditors read the package and the site against the 55 A and AA criteria, two of
@@ -80,7 +108,7 @@ Mat, October 16, 2026: the docs plan below waits until 4.x is being readied for 
 
 ### Fixed
 
-- Clover's accent text reads `--accent-11` (`--clover-color-accent-text`, `tokens.css`): under every accent preset, 7.05:1 or more on the page in light and 4.98:1 or more in dark, with white 4.59:1 or more on the accent's fills. axe finds nothing on the homepage, the Viewer's pages or Annotations in either mode (1.4.3; D1). October 21, 2026.
+- Clover's accent text reads `--accent-11` (`--clover-color-accent-text`, `tokens.css`): under every accent preset, 7.05:1 or more on the page in light and 4.98:1 or more in dark, with white 4.59:1 or more on the accent's fills. axe finds nothing on the homepage, the Viewer's pages or Annotations in either mode (1.4.3; D1). October 21, 2026. Texas A&M's maroon (October 29, 2026), too dark for the usual dark text step (3.7:1), takes 50% of the accent there (`darkText`, 5.4:1); `docs/lib/accent-presets.test.ts` now holds every preset to these pairs. Princeton's orange (#E77500, October 29, 2026, in Texas's burnt orange's place) does not hold the white pair (N12).
 - Focus rings drawn in `--accent-11` and no longer clipped or covered. Hidden sidebar and menu links are out of the tab order (2.4.7, 1.4.11; D2, D6, D21, D42).
 - Text reaches 4.5:1: Nextra links, syntax colors, editor text, search, placeholders, demo labels, the dark hover accent, the DC mock. The "Not yet" icon reaches 3:1 (1.4.3, 1.4.11; D7, D12, D15, D26, D27, D38, D49, D59, D61, D76, D86).
 - Names added: the logo link, image demos, rights badge, homepage Items, textareas, demo field, the "Your own" state, Cookbook and Mocks links (1.1.1, 2.4.4, 2.5.3, 4.1.2; D8, D13, D17, D18, D19, D20, D24, D46, D52, D58, D62, D68, D82).
@@ -118,6 +146,8 @@ Mat, October 16, 2026: the docs plan below waits until 4.x is being readied for 
 
 8. **Field label** (3.3.2). The IIIF field's only label is a placeholder that disappears. Show a visible label. `CustomManifest.tsx`. S. (D47)
 
+9. **Princeton orange** (1.4.3). White on the homepage's Princeton orange preset (#E77500) is 3.0:1, and 4.2:1 on its hover, where text needs 4.5:1: the solid calls to action and badges, and in Clover what it draws on the accent (the chosen language code, the steps' numbers, a text button under the pointer). Its text step holds (4.9:1 light, 9.9:1 dark). Mat, October 29, 2026: a higher-contrast mode, which uses the accent more sparingly, never a second accent color made for it. In it the accent paints only what needs no text's legibility (borders, outlines, rings, decorative glyphs; rings and outlines still 3:1, 1.4.11, and Princeton's orange is 3.0:1 on white), and what carries text, a fill under words or the glyph's ground, takes the neutral colors in its place. What the accent filled keeps it as its outline: a control that takes the accent under the pointer turns black there, outlined in the accent (Mat, October 29, 2026). A prop that can be set on any element that needs it, named after CSS's own `prefers-contrast: more` (`contrast="more"`, the name to confirm). The homepage sets it with Princeton's orange, and the site's own solid calls to action follow it. Not built yet (Mat, October 29, 2026: "don't do that accent color alt yet"); it comes after the Cookbook walk and the DRY run that follows it. In the package, each of the 87 uses of the accent in 31 stylesheets is sorted into decoration or text. `accent-presets.test.ts` fails on the preset until the mode is built and the test checks it, which keeps it from deploying. `packages/clover/src/**/*.css`, the specs, `styling.mdx`, `playground-config.ts`, `page-theme.ts`, `tokens.css`, the changelog. M. (N12)
+
 ### Decisions needed
 
 - **Film** (D64): describe a shortened Reel 1 published as a mock, or swap in a film that already has a description?
@@ -148,6 +178,7 @@ The audit's ids, cited by the plans, and N for those found since. Most severe fi
 | D14 | 2.1.1 Keyboard                         | serious  | Picking coordinates in the 3.x Map demo works only with a pointer                                              | `docs/components/Map/CoordinatePickingDemo.tsx:26`, `docs/components/Map/CoordinatePickingDemo.tsx:40` …                                      |
 | D23 | 4.1.2 Name                             | serious  | Out of scope: @samvera/clover-iiif's own components fail several A criteria on these pages                     | `node_modules/@samvera/clover-iiif/dist/primitives/index.mjs:691`, `node_modules/@samvera/clover-iiif/dist/primitives/index.mjs:651` …        |
 | D25 | 2.3.1 Three Flashes or Below Threshold | serious  | The Animation resource may pass the general flash threshold, and it starts and loops by itself                 | `docs/components/Playground/playground-config.ts:129`, `docs/components/Home/PartsLive.tsx:269` …                                             |
+| N12 | 1.4.3 Contrast (Minimum)               | serious  | White text on the Princeton orange accent preset is 3.0:1 (4.2:1 on hover)                                     | `docs/components/Playground/playground-config.ts`, `docs/styles/tokens.css`                                                                   |
 | D36 | 2.4.11 Focus Not Obscured              | moderate | The open phone menu leaves the page behind it focusable                                                        | `node_modules/nextra-theme-docs/dist/index.js:1896`, `node_modules/nextra-theme-docs/dist/index.js:3001`                                      |
 | D37 | 4.1.2 Name                             | moderate | The menu and folder toggles don't expose their state                                                           | `node_modules/nextra-theme-docs/dist/index.js:1536`, `node_modules/nextra-theme-docs/dist/index.js:1700` …                                    |
 | D39 | 4.1.3 Status Messages                  | moderate | Search results, and their absence, are not announced                                                           | `node_modules/nextra-theme-docs/dist/index.js:780`, `node_modules/nextra-theme-docs/dist/index.js:813` …                                      |

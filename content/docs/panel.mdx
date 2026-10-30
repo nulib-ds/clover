@@ -88,7 +88,8 @@ Canvas's controls.
 ### About
 
 The panel's first section, and a part of its own: the resource's label and thumbnail, summary,
-metadata, required statement, rights, homepage, see also, downloads and address. For a Canvas shown
+metadata, required statement, its date (`navDate`, in the reader's language), provider, rights,
+homepage, see also, downloads and address. For a Canvas shown
 on its own, it starts with the Manifest the Canvas is part of.
 
 | Prop            | Type      | Default | Description                                                                                                                                                       |
@@ -108,6 +109,8 @@ on its own, it starts with the Manifest the Canvas is part of.
 ### Sections
 
 With no `Tab`s, it shows [About](#about), then each section the resource has data for:
+Views (a content state's targets, where it names two or more, as
+[Items](/docs/items) lists them, with steps between them),
 [Collection](/docs/collection), [Contents](/docs/contents), [Search](/docs/search),
 [Map](/docs/map), [Transcript](/docs/transcript) and [Annotations](/docs/annotations).
 This newspaper has a Content Search service, and its OCR as annotations, which a search
@@ -156,7 +159,7 @@ sight, at its top and its foot.
 ### The open section
 
 Use `defaultValue` to choose the section open first, or `value` and `onValueChange` to
-control it. The default sections are `about`, `collection`, `contents`, `search`, `map`,
+control it. The default sections are `about`, `targets`, `collection`, `contents`, `search`, `map`,
 `transcript` and `annotations`. A search started outside the Search section (the Root's
 `searchQuery`, or your own `clover.search()`) opens it, ahead of `defaultValue`, so its
 hits come with their list. Focus stays where it is, and a Panel that is shut stays shut

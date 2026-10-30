@@ -6,6 +6,7 @@ import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { useClover } from "../../react/context";
 import { titled } from "../../ui/heading";
+import { languageProps } from "../../core/direction";
 
 /**
  * A Canvas shown on its own (given as the content) says what it is part of, and opens
@@ -35,7 +36,7 @@ export default function PartOfManifest({
     <section className="clover-about-section" {...group}>
       <Title
         className="clover-about-heading"
-        lang={langOf("aboutPartOf")}
+        {...languageProps(langOf("aboutPartOf"))}
         {...title}
       >
         {t("aboutPartOf")}
@@ -46,14 +47,14 @@ export default function PartOfManifest({
           return (
             <li key={part.id}>
               {label.text && (
-                <span id={`${id}-${index}`} lang={label.lang}>
+                <span id={`${id}-${index}`} {...languageProps(label.lang)}>
                   {label.text}
                 </span>
               )}
               <button
                 type="button"
                 className="clover-about-open"
-                lang={langOf("aboutOpenManifest")}
+                {...languageProps(langOf("aboutOpenManifest"))}
                 // Which Manifest it opens, where there could be several.
                 aria-describedby={label.text ? `${id}-${index}` : undefined}
                 onClick={() =>

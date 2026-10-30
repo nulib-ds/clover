@@ -63,6 +63,36 @@ export async function upgradePage(
   return canvas.items?.[0] ?? page;
 }
 
+type Part = { id?: string; [key: string]: unknown };
+
+/**
+ * The fetched page, with what the Manifest's reference to it says that the page does not:
+ * its `label`, and its `partOf` (Cookbook 0309: its AnnotationCollection's `label`, given
+ * in the Manifest so a viewer can name the group before fetching anything), each part
+ * the page names filled in from the reference's.
+ */
+function withReference(page: Page, reference: Page): Page {
+  const own = page as Page & { label?: unknown; partOf?: unknown };
+  const given = reference as Page & { label?: unknown; partOf?: unknown };
+  const listed = (value: unknown): Part[] =>
+    Array.isArray(value) ? value : value ? [value as Part] : [];
+  const parts = listed(own.partOf);
+  const told = listed(given.partOf);
+  const partOf = [
+    ...parts.map((part) => ({
+      ...told.find((each) => each.id && each.id === part.id),
+      ...part,
+    })),
+    ...told.filter((each) => !parts.some((part) => part.id === each.id)),
+  ];
+  return {
+    ...page,
+    ...(own.label === undefined &&
+      given.label !== undefined && { label: given.label }),
+    ...(partOf.length && { partOf }),
+  } as Page;
+}
+
 /** The Manifest with one page embedded in place of its reference. */
 export function embedPage(
   manifest: Manifest,
@@ -77,7 +107,7 @@ export function embedPage(
       const pages = (canvas[list] as Page[]).map((existing) => {
         if (existing.id !== page.id || !isReference(existing)) return existing;
         changed = true;
-        return page;
+        return withReference(page, existing);
       });
       return changed ? { ...canvas, [list]: pages } : canvas;
     },

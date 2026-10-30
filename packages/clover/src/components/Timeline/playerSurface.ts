@@ -82,7 +82,8 @@ export const playerSurface: MakeSurface = (host) => {
       return () => set.delete(listener);
     },
     async setImages(images, { world } = {}) {
-      show(images.find((image) => image.media)?.media?.element ?? null);
+      const element = images.find((image) => image.media)?.media?.element;
+      show(element instanceof HTMLVideoElement ? element : null);
       if (!world && !images.length) return;
       emit(open ? "change" : "open");
       open = true;

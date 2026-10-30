@@ -9,6 +9,8 @@ import React, {
 import { TransportButton } from "./TransportButton";
 import { useBarHeight } from "./useBarHeight";
 import { type MediaController, formatTime } from "./useMediaController";
+import { gapMask, gapsOf, seekShare } from "./seekGaps";
+import { placeMenu } from "./placeMenu";
 import type { CloverRequest } from "../../../core/request";
 import { type ThumbnailSource, imageSource } from "../../../core/thumbnail";
 import {
@@ -34,6 +36,7 @@ import { useContainerName } from "../../../ui/useContainerName";
 import { useCloverTranslation } from "../../../i18n/useCloverTranslation";
 import { toggleFullscreen } from "../../../lib/fullscreen";
 import useFullscreenSupported from "../../../hooks/useFullscreenSupported";
+import { languageProps } from "../../../core/direction";
 
 interface TransportProps {
   instance: string;
@@ -84,25 +87,16 @@ const chapterPicture = (chapter?: TransportChapter) =>
     : imageSource(chapter?.thumbnail as Record<string, any> | undefined);
 
 /**
- * The seek bar's mask: opaque but for a gap `--clover-transport-gap` wide at each share of
- * it (a chapter's start, in percent), cut out of the bar (`Transport.css`).
+ * The chapter playing at `time`: the last to start at or before it, or -1; none past its
+ * end where no other has begun since (a film's last Range ending before the film does).
  */
-function gapMask(at: number[]): string {
-  const half = "var(--clover-transport-gap) / 2";
-  const stops = at.flatMap((share) => [
-    `#000 0 calc(${share}% - ${half})`,
-    `transparent 0 calc(${share}% + ${half})`,
-  ]);
-  return `linear-gradient(to right, ${[...stops, "#000 0"].join(", ")})`;
-}
-
-/** The chapter playing at `time`: the last to start at or before it, or -1. */
 export function chapterAt(chapters: TransportChapter[], time: number): number {
   let found = -1;
   chapters.forEach((candidate, index) => {
     if (candidate.start <= time) found = index;
   });
-  return found;
+  const end = chapters[found]?.end;
+  return end !== undefined && time >= end ? -1 : found;
 }
 
 /** An option of a transport menu: its name, its language, and a time to show before it. */
@@ -129,38 +123,6 @@ function canSetVolume(): boolean {
     volumeSettable = probe.volume === 0.5;
   }
   return volumeSettable;
-}
-
-/**
- * Places an open menu from where its button is, whichever row of the bar it wrapped
- * onto: no taller than the Body leaves above the button, and moved along, if it must
- * be, to lie within the transport's inset from the Body's sides (WCAG 1.4.10). What
- * nothing scrolls to, off the Body, cannot be read.
- */
-function placeMenu(
-  options: HTMLElement,
-  wrapper: HTMLElement,
-  transport: HTMLElement,
-  bodyBox: HTMLElement,
-) {
-  const room = bodyBox.getBoundingClientRect();
-  // At rest: the transport stands on the Body's foot, and tucks (`Canvas.css`) with
-  // its button, so the distance between them holds while it moves.
-  const above =
-    room.height -
-    (transport.getBoundingClientRect().bottom -
-      wrapper.getBoundingClientRect().top);
-  options.style.setProperty("--clover-transport-menu-above", `${above}px`);
-  options.style.removeProperty("--clover-transport-menu-shift");
-  const box = options.getBoundingClientRect();
-  const inset = parseFloat(getComputedStyle(transport).paddingRight) || 0;
-  const shift = Math.max(
-    room.left + inset - box.left,
-    Math.min(0, room.right - inset - box.right),
-  );
-  if (shift) {
-    options.style.setProperty("--clover-transport-menu-shift", `${shift}px`);
-  }
 }
 
 /**
@@ -279,7 +241,7 @@ function TransportMenu({
         aria-describedby={current ? `${id}-current` : undefined}
         aria-expanded={open}
         aria-label={label}
-        lang={labelLang}
+        {...languageProps(labelLang)}
         className="clover-canvas-transport-button"
         data-active={active ? "" : undefined}
         data-button={button}
@@ -292,7 +254,7 @@ function TransportMenu({
       </button>
       {current && (
         // Hidden, yet still read as the description: the name stays the Tip's.
-        <span hidden id={`${id}-current`} lang={current.lang}>
+        <span hidden id={`${id}-current`} {...languageProps(current.lang)}>
           {current.label}
         </span>
       )}
@@ -358,7 +320,10 @@ function TransportMenu({
                     />
                   ))}
                 {/* Only the name carries its language: the time is in digits. */}
-                <span className="clover-cue-text" lang={option.lang}>
+                <span
+                  className="clover-cue-text"
+                  {...languageProps(option.lang)}
+                >
                   {option.label}
                 </span>
                 {/* The chosen one's picture under it, as Contents shows the current one's. */}
@@ -444,7 +409,10 @@ const Transport: React.FC<TransportProps> = ({
     onChapterHighlight?.(chapters[index]?.id ?? null);
   };
   const [seekFocused, setSeekFocused] = useState(false);
-  const previewed = pointed >= 0 ? pointed : seekFocused ? chapter : -1;
+  // Over the bar, or keyboard focus on it: its popover shows, a chapter's or the time alone.
+  const [pointing, setPointing] = useState(false);
+  const previewed = pointing ? pointed : seekFocused ? chapter : -1;
+  const tipShown = (pointing || seekFocused) && duration > 0;
   // Its picture over its words, as a hotspot's popover shows its image.
   const preview = useThumbnail(
     chapterPicture(chapters[previewed]),
@@ -502,16 +470,12 @@ const Transport: React.FC<TransportProps> = ({
     ? "imageExitFullScreen"
     : "imageFullScreen";
   const progress = duration ? (currentTime / duration) * 100 : 0;
-  // A gap in the seek bar where each chapter after the first begins (Mat, 2026-10-28).
-  const gaps = useMemo(
-    () =>
-      duration > 0 && chapters.length > 1
-        ? gapMask(
-            chapters.slice(1).map((item) => (item.start / duration) * 100),
-          )
-        : undefined,
-    [chapters, duration],
-  );
+  // A gap in the seek bar where a chapter begins or ends (Mat, 2026-10-28), and none
+  // follows: past the last one's end, a film runs on outside any (Mat, 2026-10-29).
+  const gaps = useMemo(() => {
+    const at = gapsOf(chapters, duration);
+    return at.length ? gapMask(at) : undefined;
+  }, [chapters, duration]);
   const loaded = duration ? (buffered / duration) * 100 : 0;
   const hasFullscreen = fullscreen && canFullscreen;
 
@@ -561,20 +525,23 @@ const Transport: React.FC<TransportProps> = ({
           // Over its popover, the chapter it shows stays.
           if (!duration || (event.target as Element).closest(".clover-tip"))
             return;
-          const box = event.currentTarget.getBoundingClientRect();
-          const at = Math.min(
-            duration,
-            Math.max(0, ((event.clientX - box.left) / box.width) * duration),
-          );
+          const at = seekShare(event.currentTarget, event.clientX) * duration;
+          setPointing(true);
           setPointedAt(Math.floor(at));
           point(chapterAt(chapters, at));
         }}
-        onPointerLeave={() => point(-1)}
+        onPointerLeave={() => {
+          setPointing(false);
+          point(-1);
+        }}
         style={
-          previewed >= 0 && duration > 0
+          tipShown
             ? ({
+                // Over a chapter's middle; with none there, over the time it shows.
                 "--clover-transport-preview": `${
-                  along(previewed).left + along(previewed).width / 2
+                  previewed >= 0
+                    ? along(previewed).left + along(previewed).width / 2
+                    : ((pointing ? pointedAt : currentTime) / duration) * 100
                 }%`,
               } as React.CSSProperties)
             : undefined
@@ -619,14 +586,14 @@ const Transport: React.FC<TransportProps> = ({
             }}
           />
         )}
-        {previewed >= 0 && duration > 0 && (
+        {tipShown && (
           // Made anew for each chapter, so it measures itself into the Body each time.
           <Tip
             key={previewed}
-            lead={formatTime(pointed >= 0 ? pointedAt : currentTime)}
-            label={chapters[previewed].label}
-            lang={chapters[previewed].lang}
-            image={preview}
+            lead={formatTime(pointing ? pointedAt : currentTime)}
+            label={chapters[previewed]?.label ?? ""}
+            lang={chapters[previewed]?.lang}
+            image={previewed >= 0 ? preview : undefined}
           />
         )}
       </div>
@@ -680,14 +647,14 @@ const Transport: React.FC<TransportProps> = ({
           <span className="clover-canvas-transport-time">
             <span
               aria-label={t("playerCurrentTime")}
-              lang={langOf("playerCurrentTime")}
+              {...languageProps(langOf("playerCurrentTime"))}
             >
               {formatTime(currentTime)}
             </span>
             <span aria-hidden="true"> / </span>
             <span
               aria-label={t("playerDuration")}
-              lang={langOf("playerDuration")}
+              {...languageProps(langOf("playerDuration"))}
             >
               {formatTime(duration)}
             </span>
@@ -695,7 +662,7 @@ const Transport: React.FC<TransportProps> = ({
           {chapter >= 0 && (
             <span
               className="clover-canvas-transport-chapter"
-              lang={chapters[chapter].lang}
+              {...languageProps(chapters[chapter].lang)}
             >
               {chapters[chapter].label}
             </span>

@@ -7,6 +7,9 @@ import { resolveThumbnail, thumbnailSource } from "../../core/thumbnail";
 import { localize } from "../../core/value";
 import { NEAR_VIEWPORT_MARGIN, useNearViewport } from "../Body/useNearViewport";
 import { watchClamp } from "./clamped";
+import { languageProps } from "../../core/direction";
+import { readNavDate } from "../../core/nav-date";
+import { NavDate } from "../../ui/NavDate";
 
 /** `h:mm:ss`, or `m:ss` under an hour. */
 export function formatDuration(seconds: number): string {
@@ -28,7 +31,8 @@ function useThumbnail(
   request: CloverRequest | undefined,
   near: boolean,
 ) {
-  const source = thumbnailSource(part.resource);
+  const source =
+    part.source !== undefined ? part.source : thumbnailSource(part.resource);
   const [src, setSrc] = useState(source?.src);
   const key = source?.src ?? source?.service ?? source?.fallback;
   useEffect(() => {
@@ -124,7 +128,7 @@ function Picture({
         <img
           src={src}
           alt={alt}
-          lang={alt ? altLang : undefined}
+          {...languageProps(alt ? altLang : undefined)}
           // Sized here so a picture never fills its container without the stylesheet.
           width={size}
           height={Math.round(size / ratio)}
@@ -176,14 +180,14 @@ function ItemLabel({
       <span
         ref={ref}
         className="clover-items-label-text"
-        lang={text ? lang : undefined}
+        {...languageProps(text ? lang : undefined)}
       >
         {text}
       </span>
       {cut && (
         <span
           className="clover-items-label-full"
-          lang={lang}
+          {...languageProps(lang)}
           aria-hidden="true"
           hidden
         >
@@ -228,6 +232,8 @@ export function ItemFigure({
     localize(item.parts.length === 1 ? item.label : part.label, language),
   );
   const summary = showSummary ? localize(item.summary, language) : null;
+  // A member's date and summary, under its label (Cookbook 0318).
+  const navDate = showSummary ? readNavDate(item.navDate) : null;
   const labeled = labels.some((label) => label.text);
   return (
     <figure
@@ -254,7 +260,7 @@ export function ItemFigure({
           );
         })}
       </span>
-      {(labeled || summary?.text) && (
+      {(labeled || navDate || summary?.text) && (
         <figcaption className="clover-items-caption">
           {labels.map((label, index) => (
             <ItemLabel
@@ -264,8 +270,14 @@ export function ItemFigure({
               first={index === 0}
             />
           ))}
+          {navDate && (
+            <NavDate value={item.navDate} className="clover-items-date" />
+          )}
           {summary?.text && (
-            <span className="clover-items-summary" lang={summary.lang}>
+            <span
+              className="clover-items-summary"
+              {...languageProps(summary.lang)}
+            >
               {/* IIIF allows a little HTML here; shown as text, its tags go. */}
               {summary.text.replace(/<[^>]*>/g, "")}
             </span>

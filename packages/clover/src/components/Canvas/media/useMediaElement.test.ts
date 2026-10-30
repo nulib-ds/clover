@@ -119,7 +119,7 @@ describe("useMediaElement", () => {
     expect(result.current?.crossOrigin).toBeNull();
   });
 
-  it("names each caption track in the reader's language, for the system player's menu", async () => {
+  it("names each caption track in the reader's language, of its kind, for the system player's menu", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("WEBVTT\n"));
     const { result } = renderHook(() =>
       useMediaElement(
@@ -130,6 +130,7 @@ describe("useMediaElement", () => {
               id: "https://example.org/film.vtt",
               label: { en: ["Captions"], it: ["Sottotitoli"] },
               language: "it",
+              kind: "subtitles",
             },
           ],
         },
@@ -138,5 +139,6 @@ describe("useMediaElement", () => {
     );
     await waitFor(() => expect(result.current).not.toBeNull());
     expect(result.current?.querySelector("track")?.label).toBe("Sottotitoli");
+    expect(result.current?.querySelector("track")?.kind).toBe("subtitles");
   });
 });

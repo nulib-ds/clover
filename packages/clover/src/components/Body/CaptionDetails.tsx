@@ -7,6 +7,7 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { Markup, MetadataList } from "../../ui/Markup";
 import { ReadMore } from "../../ui/ReadMore";
 import { EntryBodies } from "../Annotations/EntryBodies";
+import { languageProps } from "../../core/direction";
 
 /**
  * A Canvas's `summary` and `metadata`: IIIF's limited HTML is kept, everything else is
@@ -45,7 +46,7 @@ const CaptionDetails: React.FC<
         <div className="clover-canvas-caption-annotations">
           <p
             className="clover-canvas-caption-annotations-label"
-            lang={langOf("informationPanelTabsAnnotations")}
+            {...languageProps(langOf("informationPanelTabsAnnotations"))}
           >
             {t("informationPanelTabsAnnotations")}
           </p>

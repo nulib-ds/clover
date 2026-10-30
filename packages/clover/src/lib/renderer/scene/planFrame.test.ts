@@ -3,15 +3,15 @@ import { fitCamera } from "../camera/Camera";
 import type { LoadedImage } from "../io/decode";
 import { apply } from "../math/affine";
 import { planFrame } from "./planFrame";
-import { parseRegion } from "./regions";
+import { parseRegion, parseRotation } from "./regions";
 import { uploadBudget } from "./uploadBudget";
-import { type SceneItem, layoutItems } from "./sceneItem";
+import { type SceneItem, itemToWorld, layoutItems, turnOf } from "./sceneItem";
 import { parseInfo } from "../sources/imageService";
 import { servicePyramid } from "../sources/tilePyramid";
 
 const viewport = { width: 800, height: 600 };
 
-function gottingen(region?: string): SceneItem {
+function gottingen(region?: string, rotation?: string): SceneItem {
   const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3));
   const size = { width: 4032, height: 3024 };
   const clip = parseRegion(region, 4032, 3024) ?? {
@@ -28,6 +28,8 @@ function gottingen(region?: string): SceneItem {
     contentClip: clip,
     rect: { x: 0, y: 0, width: 0, height: 0 },
   };
+  const turn = parseRotation(rotation);
+  if (turn) item.turn = turnOf(clip, turn);
   layoutItems([item]);
   return item;
 }
@@ -203,6 +205,88 @@ describe("planFrame", () => {
       expect(p.x).toBeGreaterThanOrEqual(-1e-6);
       expect(p.y).toBeGreaterThanOrEqual(-1e-6);
     }
+  });
+
+  describe("a turned picture (Cookbook 0040)", () => {
+    it("reads the Image API's rotation, mirrored first where it starts with !", () => {
+      expect(parseRotation("90")).toEqual({ degrees: 90, mirror: false });
+      expect(parseRotation("!0")).toEqual({ degrees: 0, mirror: true });
+      expect(parseRotation("22.5")).toEqual({ degrees: 22.5, mirror: false });
+      for (const none of ["0", "360", "", "-90", "400", "90deg", undefined])
+        expect(parseRotation(none)).toBeNull();
+    });
+
+    it("turns a quarter clockwise into its place, from tiles as they are", () => {
+      const item = gottingen(undefined, "90");
+      // A landscape image, turned upright: its bounding box fills the world.
+      expect(item.rect).toEqual({ x: 0, y: 0, width: 3024, height: 4032 });
+      const toWorld = itemToWorld(item);
+      // Its top edge is now its right one.
+      expect(apply(toWorld, { x: 0, y: 0 })).toEqual({ x: 3024, y: 0 });
+      expect(apply(toWorld, { x: 4032, y: 0 })).toEqual({ x: 3024, y: 4032 });
+      expect(apply(toWorld, { x: 0, y: 3024 })).toEqual({ x: 0, y: 0 });
+
+      const camera = fitCamera(item.rect, viewport);
+      const plan = planFrame({
+        items: [item],
+        camera,
+        viewport,
+        pixelRatio: 1,
+        getTile: everything(item),
+      });
+      expect(plan.draws.length).toBeGreaterThan(0);
+      // Never a rotation asked of the server.
+      for (const want of plan.wants) expect(want.url).toMatch(/\/0\/default\./);
+      // Each tile lands inside the turned picture, on screen.
+      const screen = {
+        x: (viewport.width - 3024 * camera.zoom) / 2,
+        width: 3024 * camera.zoom,
+      };
+      for (const draw of plan.draws) {
+        const { crop } = draw;
+        for (const corner of [
+          { x: crop.x, y: crop.y },
+          { x: crop.x + crop.width, y: crop.y + crop.height },
+        ]) {
+          const p = apply(draw.transform, corner);
+          expect(p.x).toBeGreaterThanOrEqual(screen.x - 1e-6);
+          expect(p.x).toBeLessThanOrEqual(screen.x + screen.width + 1e-6);
+          expect(p.y).toBeGreaterThanOrEqual(-1e-6);
+          expect(p.y).toBeLessThanOrEqual(viewport.height + 1e-6);
+        }
+      }
+    });
+
+    it("wants the tiles under the view, read back through the turn", () => {
+      const item = gottingen(undefined, "90");
+      // Zoomed in at the turned picture's top right: the image's top left.
+      const camera = { x: 2924, y: 100, zoom: 1, rotation: 0 };
+      const plan = planFrame({
+        items: [item],
+        camera,
+        viewport,
+        pixelRatio: 1,
+        getTile: () => undefined,
+      });
+      const full = plan.wants
+        .map((want) => want.url.match(/\/(\d+),(\d+),(\d+),(\d+)\/(\d+),/))
+        .filter((m): m is RegExpMatchArray => !!m && +m[3] === +m[5])
+        .map((m) => [+m[1], +m[2]]);
+      expect(full.length).toBeGreaterThan(0);
+      // The image's top left, never its far corner.
+      for (const [x, y] of full) {
+        expect(x).toBeLessThan(1024);
+        expect(y).toBeLessThan(1024);
+      }
+    });
+
+    it("mirrors before it turns", () => {
+      const item = gottingen(undefined, "!0");
+      expect(apply(itemToWorld(item), { x: 0, y: 0 })).toEqual({
+        x: 4032,
+        y: 0,
+      });
+    });
   });
 
   describe("while the camera animates", () => {

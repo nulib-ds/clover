@@ -10,11 +10,11 @@ import { useUniqueId } from "../../ui/useUniqueId";
 import { createPortal } from "react-dom";
 
 import {
-  type CaptionTrack,
   type IIIFCanvas,
   type TextTranscript,
-  canvasCaptions,
+  type TimedText,
   canvasTextTranscripts,
+  canvasTimedText,
 } from "../Canvas/layout";
 import { selectVisibleCanvases } from "../../core/selectors";
 import { localize } from "../../core/value";
@@ -41,6 +41,7 @@ import type { StepsModel } from "../../ui/Steps";
 import { Tip } from "../../ui/Tip";
 import { useContainerName } from "../../ui/useContainerName";
 import { visuallyHidden } from "../../ui/visuallyHidden";
+import { languageProps } from "../../core/direction";
 
 export interface TranscriptProps extends React.HTMLAttributes<HTMLElement> {
   as?: React.ElementType;
@@ -89,10 +90,17 @@ function marked(text: string, query: string): React.ReactNode {
   return parts;
 }
 
-/** A file the transcript reads: a caption track's timed cues, or a plain-text transcript. */
+/**
+ * A file the transcript reads: WebVTT's timed cues (a caption track's, or a transcript's
+ * alone, `kind`), or a plain-text transcript.
+ */
 type TranscriptFile =
-  | (CaptionTrack & { kind: "captions" })
-  | (TextTranscript & { kind: "text" });
+  | (TimedText & { read: "cues" })
+  | (TextTranscript & { read: "text" });
+
+/** A caption track the Canvas shows, whose choice the Transcript and the Canvas share. */
+const isCaptionTrack = (file: TranscriptFile) =>
+  file.read === "cues" && file.kind !== "transcript";
 
 /**
  * The words of the video or sound in view. From its WebVTT captions: one entry per cue,
@@ -133,20 +141,20 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
     ) as unknown as IIIFCanvas[];
     const canvas = canvases.find(
       (candidate) =>
-        canvasCaptions(candidate).length > 0 ||
+        canvasTimedText(candidate).length > 0 ||
         canvasTextTranscripts(candidate).length > 0,
     );
     const tracks = useMemo<TranscriptFile[]>(
       () =>
         canvas
           ? [
-              ...canvasCaptions(canvas).map((each) => ({
+              ...canvasTimedText(canvas).map((each) => ({
                 ...each,
-                kind: "captions" as const,
+                read: "cues" as const,
               })),
               ...canvasTextTranscripts(canvas).map((each) => ({
                 ...each,
-                kind: "text" as const,
+                read: "text" as const,
               })),
             ]
           : [],
@@ -168,7 +176,7 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
       if (index < 0) return;
       setChoice(index);
       const file = tracks[index];
-      if (file.kind === "captions" && clover.captions.get() !== file.id)
+      if (isCaptionTrack(file) && clover.captions.get() !== file.id)
         clover.captions.emit(file.id);
     }, [rootLanguage, tracks, clover]);
     /*
@@ -180,7 +188,7 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
     useEffect(() => {
       const follow = (id: string | null) => {
         const index = tracks.findIndex(
-          (option) => option.kind === "captions" && option.id === id,
+          (option) => isCaptionTrack(option) && option.id === id,
         );
         if (index >= 0) setChoice(index);
       };
@@ -195,7 +203,7 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
       setParagraphs([]);
       if (!track) return;
       let live = true;
-      (track.kind === "captions"
+      (track.read === "cues"
         ? loadVtt(track.id, clover.request).then(
             (text) => live && setCues(parseVtt(text)),
           )
@@ -328,7 +336,7 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
     const id = useUniqueId();
     const actions = useSectionActions();
     // The row is named for what it picks among: caption files, or transcripts of any kind.
-    const nameKey = tracks.every((each) => each.kind === "captions")
+    const nameKey = tracks.every(isCaptionTrack)
       ? "playerCaptions"
       : "transcriptLabel";
     const name = useContainerName(t(nameKey), langOf(nameKey));
@@ -338,10 +346,10 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
      * "TXT" after them (with its language's, "TXT EN", where there are several). A code
      * shows only where it tells its file apart: two that would show the same show labels.
      */
-    const texts = tracks.filter((each) => each.kind === "text").length;
+    const texts = tracks.filter((each) => each.read === "text").length;
     const shown = tracks.map((each) => {
       const code = languageCode(each.language);
-      if (each.kind === "captions") return code;
+      if (each.read === "cues") return code;
       return texts > 1 && code ? `TXT ${code}` : "TXT";
     });
     const codes = shown.map((code) =>
@@ -368,9 +376,8 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
                   checked={index === choice}
                   onChange={() => {
                     setChoice(index);
-                    // A caption file is the captions' choice too; plain text is not one.
-                    if (option.kind === "captions")
-                      clover.captions.emit(option.id);
+                    // A caption track is the captions' choice too; a transcript is not one.
+                    if (isCaptionTrack(option)) clover.captions.emit(option.id);
                   }}
                 />
                 {/*
@@ -385,7 +392,7 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
                 )}
                 <span
                   style={code ? visuallyHidden : undefined}
-                  lang={label.text ? label.lang : undefined}
+                  {...languageProps(label.text ? label.lang : undefined)}
                 >
                   {text}
                 </span>
@@ -438,7 +445,7 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
         : count === 1
           ? "contentSearchResult"
           : "contentSearchResults";
-    const finding = find && track.kind === "captions" && cues.length > 0 && (
+    const finding = find && track.read === "cues" && cues.length > 0 && (
       <div className="clover-transcript-find">
         {/* The same field as Search's (Mat, 2026-10-26). */}
         <FieldPill
@@ -464,7 +471,7 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
         <p
           className="clover-transcript-find-status"
           role="status"
-          lang={statusKey ? langOf(statusKey) : undefined}
+          {...languageProps(statusKey ? langOf(statusKey) : undefined)}
         >
           {statusKey ? t(statusKey, { count }) : ""}
         </p>
@@ -480,9 +487,9 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
       >
         {languages && (actions ? createPortal(languages, actions) : languages)}
         {finding}
-        {track.kind === "text" ? (
+        {track.read === "text" ? (
           // Untimed: the words alone, a paragraph each, nothing to press.
-          <div className="clover-transcript-body" lang={lang}>
+          <div className="clover-transcript-body" {...languageProps(lang)}>
             {paragraphs.map((paragraph, index) => (
               <p key={index}>{paragraph}</p>
             ))}
@@ -492,7 +499,7 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
             ref={list}
             className="clover-transcript-cues"
             id={`${id}-cues`}
-            lang={lang}
+            {...languageProps(lang)}
           >
             {cues.slice(0, drawn).map((cue, index) => (
               <li
@@ -532,7 +539,7 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
           </ol>
         )}
         {/* Where the next chunk of cues is asked for, as it nears the view. */}
-        {track.kind === "captions" && drawn < cues.length && (
+        {track.read === "cues" && drawn < cues.length && (
           <div
             ref={end}
             className="clover-transcript-more"

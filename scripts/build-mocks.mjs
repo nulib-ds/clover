@@ -70,6 +70,13 @@ import {
   PUBLIC_BASE as COOKBOOK_BASE,
   collection as cookbookCollection,
 } from "../docs/mocks/cookbook/index.mjs";
+import {
+  PUBLIC_BASE as LINES_BASE,
+  collection as linesCollection,
+  linesPage,
+  manifest as linesManifest,
+  pageKeys as linePageKeys,
+} from "../docs/mocks/annotation-collection/index.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const out = join(root, "public/mocks/content-search");
@@ -192,6 +199,23 @@ for (const q of PAGED_EXAMPLES) {
 }
 console.log(
   `paged: manifest.json, ocr/ (${read.length} pages), search/examples/ (${PAGED_EXAMPLES.join(", ")})`,
+);
+
+// The catalog's lines as one AnnotationCollection: the Manifest, the Collection and each
+// page of lines, referenced from its Canvas (Cookbook 0309's way).
+const lines = join(root, "public/mocks/annotation-collection");
+rmSync(lines, { recursive: true, force: true });
+const writeLines = (path, json) => {
+  const file = join(lines, path);
+  mkdirSync(dirname(file), { recursive: true });
+  writeFileSync(file, `${JSON.stringify(json, null, 2)}\n`);
+};
+writeLines("manifest.json", linesManifest(LINES_BASE));
+writeLines("collection.json", linesCollection(LINES_BASE));
+for (const key of linePageKeys())
+  writeLines(`lines/${key}.json`, linesPage(LINES_BASE, key));
+console.log(
+  `annotation-collection: manifest.json, collection.json, lines/ (${linePageKeys().length} pages)`,
 );
 
 // The film with its captions and its transcript: one static Manifest.

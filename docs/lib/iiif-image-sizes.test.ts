@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { chooseSize, thumbnailFrom } from "./iiif-image-sizes";
+import {
+  chooseSize,
+  regionThumbnailFrom,
+  thumbnailFrom,
+} from "./iiif-image-sizes";
 
 const service = "https://example.org/iiif/abc/";
 
@@ -132,5 +136,73 @@ describe("thumbnailFrom", () => {
         96,
       )?.id,
     ).toBe("https://example.org/iiif/abc/full/40,30/0/default.jpg");
+  });
+});
+
+describe("regionThumbnailFrom", () => {
+  // Cookbook 0299's newspaper page, and the article its painting cuts out.
+  const page = {
+    type: "ImageService3",
+    profile: "level1",
+    width: 3536,
+    height: 4999,
+  };
+
+  it("asks for the region in pixels, at a size of its own, on its shorter side", () => {
+    expect(
+      regionThumbnailFrom(service, page, "1768,2423,1768,2080", 96),
+    ).toEqual({
+      id: "https://example.org/iiif/abc/1768,2423,1768,2080/96,113/0/default.jpg",
+      width: 96,
+      height: 113,
+    });
+  });
+
+  it("writes a pct: region in pixels, its canonical form", () => {
+    expect(regionThumbnailFrom(service, page, "pct:50,50,50,50", 96)?.id).toBe(
+      "https://example.org/iiif/abc/1768,2500,1768,2499/96,136/0/default.jpg",
+    );
+  });
+
+  it("asks a version 2 server by w,", () => {
+    expect(
+      regionThumbnailFrom(
+        service,
+        {
+          "@context": "http://iiif.io/api/image/2/context.json",
+          profile: ["http://iiif.io/api/image/2/level1.json"],
+          width: 1000,
+          height: 2000,
+        },
+        "0,0,500,500",
+        96,
+      )?.id,
+    ).toBe("https://example.org/iiif/abc/0,0,500,500/96,/0/default.jpg");
+  });
+
+  it("never enlarges a region smaller than wanted", () => {
+    expect(regionThumbnailFrom(service, page, "10,10,40,60", 96)).toMatchObject(
+      { width: 40, height: 60 },
+    );
+  });
+
+  it("asks a level 0 server for none, so the whole image is taken", () => {
+    expect(
+      regionThumbnailFrom(
+        service,
+        { ...page, profile: "level0", sizes: [{ width: 96, height: 136 }] },
+        "1768,2423,1768,2080",
+        96,
+      ),
+    ).toBeUndefined();
+  });
+
+  it("takes the whole image for a region that is all of it, and none for one off it", () => {
+    expect(regionThumbnailFrom(service, page, "0,0,3536,4999", 96)?.id).toBe(
+      "https://example.org/iiif/abc/full/96,136/0/default.jpg",
+    );
+    expect(
+      regionThumbnailFrom(service, page, "4000,0,100,100", 96),
+    ).toBeUndefined();
   });
 });

@@ -19,19 +19,22 @@
  * `fill`: as tall as the box it sits in, and the Body takes what the header and the strip
  * leave (flex, rather than `--clover-body-height`), so the layout never runs below it.
  * Never a Body under 16rem, the width it keeps beside the panel: in a box too short for
- * that, the layout grows past the box, for the box to scroll.
+ * that, the layout grows past the box, for the box to scroll. Full screen, the Viewer
+ * fills the screen so (`lib/fullscreen.ts`).
  */
-.clover-template-default[data-fill] {
+.clover-template-default:is([data-fill], :fullscreen) {
   --clover-body-height: auto;
   height: 100%;
   min-height: min-content;
 }
 
-.clover-template-default[data-fill] > .clover-template-default-panes {
+.clover-template-default:is([data-fill], :fullscreen)
+  > .clover-template-default-panes {
   flex: 1 1 auto;
 }
 
-.clover-template-default[data-fill] .clover-template-default-body {
+.clover-template-default:is([data-fill], :fullscreen)
+  .clover-template-default-body {
   flex: 1 1 0;
   min-height: 16rem;
 }
@@ -52,6 +55,71 @@
    */
   line-height: 1.25;
   font-weight: 400;
+}
+
+/*
+ * The header's pagers, small (`size="small"`): a content state's targets' after the
+ * title, in its line, right after it on one baseline; on a line too short for both, under
+ * the title, rather than past the header's inset (WCAG 1.4.10).
+ */
+.clover-template-default-pager {
+  flex: none;
+  padding-block: 0;
+}
+
+.clover-template-default-header:has(> .clover-template-default-pager) {
+  flex-wrap: wrap;
+  row-gap: var(--clover-space-xs);
+}
+
+.clover-template-default-header:has(> .clover-template-default-pager)
+  > :is(.clover-template-default-title, .clover-template-default-pager) {
+  align-self: last baseline;
+}
+
+/*
+ * Opened on a Collection: under the title, `xs` below it, a line of the Collection's
+ * own, its title, muted, at the page's size, then its members' pager, `s` after it (under
+ * it on a line too short for both); the provider's logo at the end, beside both lines,
+ * its foot on the Collection's line's (Mat, 2026-10-29: "bottom align").
+ */
+.clover-template-default-header:has(> .clover-template-default-collection-row) {
+  display: grid;
+  /* The logo's share as on one line: as wide as it is, at most 38.2%. */
+  grid-template-columns: minmax(0, 1fr) fit-content(38.2%);
+  row-gap: var(--clover-space-xs);
+}
+
+.clover-template-default-header
+  > :is(
+    .clover-template-default-title,
+    .clover-template-default-collection-row
+  ) {
+  grid-column: 1;
+}
+
+.clover-template-default-header:has(> .clover-template-default-collection-row)
+  > .clover-template-default-provider {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: end;
+  max-width: none;
+}
+
+.clover-template-default-collection-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--clover-space-xs) var(--clover-space-s);
+  min-width: 0;
+}
+
+.clover-template-default-collection {
+  min-width: 0;
+  margin: 0;
+  color: var(--clover-color-primary-muted, #26292b);
+  /* The page's own size, `1rem` where the page sets none (Mat, 2026-10-29). */
+  font-size: inherit;
 }
 
 /*

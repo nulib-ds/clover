@@ -27,6 +27,7 @@ import { useClover, useCloverSelector } from "../../react/context";
 import { useContainerName } from "../../ui/useContainerName";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
+import { languageProps } from "../../core/direction";
 
 export interface ContentsProps extends React.HTMLAttributes<HTMLElement> {
   as?: React.ElementType;
@@ -205,11 +206,11 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
                   // the current one's picture goes under them.
                   data-timed={node.time ? "true" : undefined}
                   data-pictured={picture ? "true" : undefined}
-                  lang={
+                  {...languageProps(
                     label.text && !node.time && !picture
                       ? label.lang
-                      : undefined
-                  }
+                      : undefined,
+                  )}
                   onClick={() => choose(node)}
                 >
                   {node.time || picture ? (
@@ -222,7 +223,7 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
                       )}
                       <span
                         className="clover-cue-text"
-                        lang={label.text ? label.lang : undefined}
+                        {...languageProps(label.text ? label.lang : undefined)}
                       >
                         {label.text || node.id}
                       </span>
@@ -259,7 +260,7 @@ export const Contents = forwardRef<HTMLElement, ContentsProps>(
                     <span
                       id={`${key}-toggle`}
                       style={visuallyHidden}
-                      lang={langOf("contentsSectionsIn")}
+                      {...languageProps(langOf("contentsSectionsIn"))}
                     >
                       {t("contentsSectionsIn")}
                     </span>

@@ -6,6 +6,7 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import type { CloverRequest } from "../../core/request";
 import type { ThumbnailSource } from "../../core/thumbnail";
 import { STILL_SIZE } from "./layout";
+import { languageProps } from "../../core/direction";
 
 export interface PlaceholderStill {
   /** Its image, or its image service, asked as its `info.json` allows (`placeholderStill`). */
@@ -83,7 +84,7 @@ function Still({
     // eslint-disable-next-line @next/next/no-img-element -- This library also renders outside Next.js.
     <img
       alt={still.alt}
-      lang={still.alt ? still.lang : undefined}
+      {...languageProps(still.alt ? still.lang : undefined)}
       src={src}
       style={style}
     />

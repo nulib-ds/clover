@@ -14,6 +14,7 @@ import type { CanvasSurface } from "../surface";
 import type { Rect } from "../../../lib/renderer";
 import { useOptionalClover } from "../../../react/context";
 import { BodyUnloadable } from "../../../ui/BodyUnloadable";
+import { languageProps } from "../../../core/direction";
 
 const SKIP_SECONDS = 10;
 /** A moment's annotation (`#t=` with no end) shows this long, to read a few words. */
@@ -302,23 +303,23 @@ const MediaBody: React.FC<MediaBodyProps> = ({
           {note.page && (
             <span
               className="clover-canvas-captions-cue-label"
-              lang={note.page.lang}
+              {...languageProps(note.page.lang)}
             >
               {note.page.text}
             </span>
           )}
-          <span lang={note.lang}>{note.label}</span>
+          <span {...languageProps(note.lang)}>{note.label}</span>
         </span>
       ))}
       {cues.map((text, index) => (
         <span
           className="clover-canvas-captions-cue"
           key={index}
-          lang={
+          {...languageProps(
             captionLanguage && captionLanguage !== "none"
               ? captionLanguage
-              : undefined
-          }
+              : undefined,
+          )}
         >
           {text}
         </span>
@@ -428,13 +429,18 @@ function useVideoSize(element: HTMLVideoElement | null) {
   return size;
 }
 
-/** The largest rectangle of `size`'s aspect centered inside `box`; `box` until it is known. */
-
+/**
+ * The largest rectangle of `size`'s aspect centered inside `box`; `box` until it is known.
+ * A box of no area (a Canvas that gives a `duration` and no `width` or `height`, Cookbook
+ * 0015) has nothing to fit inside: the video at its own frame size, where the box starts.
+ */
 export function containAspect(
   box: Rect,
   size: { width: number; height: number } | null,
 ): Rect {
-  if (!size || !box.width || !box.height) return box;
+  if (!size) return box;
+  if (!box.width || !box.height)
+    return { x: box.x, y: box.y, width: size.width, height: size.height };
   const scale = Math.min(box.width / size.width, box.height / size.height);
   const width = size.width * scale;
   const height = size.height * scale;

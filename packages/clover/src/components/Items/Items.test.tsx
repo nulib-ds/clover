@@ -4,6 +4,7 @@ import React from "react";
 import audioJson from "../../fixtures/iiif-cookbook/0002-mvm-audio.json";
 import bookJson from "../../fixtures/iiif-cookbook/0009-book-1.json";
 import rtlJson from "../../fixtures/iiif-cookbook/0010-book-2-viewing-direction-rtl.json";
+import romeJson from "../../fixtures/iiif-cookbook/0318-navPlace-navDate-collection.json";
 import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
 
@@ -247,6 +248,33 @@ describe("Items in a Root", () => {
 });
 
 describe("Items standalone", () => {
+  // A Collection read right to left runs leftward, as a Manifest's views do (Cookbook 0010).
+  it("runs a Collection's members right to left where it is read so", async () => {
+    const shelf = { ...collection, viewingDirection: "right-to-left" };
+    const fetch = vi.fn(async () => new Response(JSON.stringify(shelf)));
+    const { container } = render(
+      <Clover.Items iiifContent={shelf.id} request={{ fetch }} />,
+    );
+    await screen.findByRole("link", { name: /First book/ });
+    expect(container.querySelector(".clover-items-frame")).toHaveAttribute(
+      "dir",
+      "rtl",
+    );
+  });
+
+  // Clover's own strings in a language written right to left, as a page may give it one.
+  it("writes Clover's strings right to left in a language written so", async () => {
+    initCloverI18n({
+      lng: "ar",
+      resources: { ar: { clover: { commonViewAll: "عرض الكل" } } },
+    });
+    const fetch = vi.fn(async () => new Response(JSON.stringify(collection)));
+    render(<Clover.Items iiifContent={collection.id} request={{ fetch }} />);
+    const all = await screen.findByRole("link", { name: "عرض الكل" });
+    expect(all).toHaveAttribute("lang", "ar");
+    expect(all).toHaveAttribute("dir", "rtl");
+  });
+
   it("lists a Collection's members as links, with its header", async () => {
     const fetch = vi.fn(async () => new Response(JSON.stringify(collection)));
     render(
@@ -294,6 +322,34 @@ describe("Items standalone", () => {
     expect(title.tagName).toBe("H4");
     // Not passed on to the list's element.
     expect(title.closest(".clover-items")).not.toHaveAttribute("headingLevel");
+  });
+
+  // Cookbook 0318: a Collection's members, each with a date for navigation.
+  it("shows a member's date under its label, then its summary", () => {
+    const [castel, colosseum] = romeJson.items;
+    render(
+      <Clover.Items
+        items={[
+          castel,
+          { ...colosseum, summary: { en: ["Rome's great amphitheater."] } },
+        ]}
+      />,
+    );
+    const [first, second] = screen.getAllByRole("link");
+    const date = first.querySelector("time")!;
+    // Written as its year's first moment, it is that year.
+    expect(date).toHaveTextContent(/^1776$/);
+    expect(date).toHaveAttribute("datetime", "1776");
+    // Under the label, before the summary, and part of the member's name.
+    const caption = second.querySelector("figcaption")!;
+    expect([...caption.children].map((child) => child.className)).toEqual([
+      "clover-items-label",
+      "clover-items-date",
+      "clover-items-summary",
+    ]);
+    expect(second).toHaveAccessibleName(
+      "The Colosseum 1776 Rome's great amphitheater.",
+    );
   });
 
   it("hands a link's click to onSelect, which may keep the reader on the page", async () => {

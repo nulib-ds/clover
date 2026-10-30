@@ -1,0 +1,885 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17.json",
+  "type": "AnnotationPage",
+  "partOf": [
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/collection.json",
+      "type": "AnnotationCollection"
+    }
+  ],
+  "next": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/18.json",
+  "prev": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/16.json",
+  "items": [
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/1",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "Probably the most important single feature",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2303,650,1850,104"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/2",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "- \"WHITE\" BEARINGS.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=629,776,1437,170"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/3",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "in the construction of a bicycle, to insure",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2289,760,1851,110"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/4",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "easy running, is its bearings. Those found",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=2289,883,1844,103"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/5",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "in the \"White\" are made of special high-grade tool steel, turned from a solid",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=548,993,3585,111"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/6",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "bar, hardened to the extreme, and at the same time sufficiently tough to insure",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=555,1116,3577,104"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/7",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "against breakages from brittleness. They are ground (not simply polished) on a",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=548,1225,3584,110"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/8",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "machine especially built for the purpose, thereby insuring absolute uniformity.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=555,1341,3570,110"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/9",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "They are cf the three-point contact type which have been proved to be the",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=548,1459,3584,110"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/10",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "easiest in operation on account of the balls running on three theoretical lines,",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=548,1575,3578,103"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/11",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "instead of between two surfaces, thus reducing the friction to a minimum. Each",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=541,1685,3584,111"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/12",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "bearing is protected against",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=548,1801,1303,103"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/13",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "dirt and dust as far as is pos-",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=547,1904,1305,120"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/14",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "sible. We rely upon close",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=541,2033,1303,104"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/15",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "workmanship and perfection",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=548,2150,1296,103"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/16",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "rather than upon ineffective",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=541,2267,1303,96"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/17",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "devices called \"dust protect-",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=541,2383,1310,104"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/18",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "ors,\" and which have only",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=541,2486,1296,110"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/19",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "proven dust traps.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=541,2616,830,97"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/20",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "All necessary adjustments",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=733,2732,1118,97"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/21",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "of the bearings to be made by",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=541,2842,1302,103"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/22",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "riders are from the left-hand",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=541,2958,1303,83"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/23",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "side.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=541,3054,212,110"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/24",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "Crank Bearing.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=816,3219,774,96"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/25",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "As will be noticed from",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=733,3356,1103,83"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/26",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "illustrations, we have a very",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=541,3465,1303,104"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/27",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "superior and novel arrange-",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=541,3580,1310,112"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/28",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "ment by which we are enabled",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=548,3698,1289,103"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/29",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "to make the dust caps separ-",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=547,3800,1298,126"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/17/30",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "ate from the cones, and the",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/17",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=548,3930,1296,96"
+        }
+      }
+    }
+  ]
+}

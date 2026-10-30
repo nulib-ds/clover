@@ -34,6 +34,36 @@ export interface ResolvedContentState {
    * Canvas as an annotation, and picked.
    */
   annotation?: Json;
+  /**
+   * Every target, where a content state names two or more (Cookbook 0540: two Canvases
+   * from two Manifests, to compare): opened on the first, each to be gone to in turn.
+   */
+  targets?: ContentTargets;
+}
+
+/** One of a content state's several targets: a Manifest, and a place in it. */
+export interface ContentTarget {
+  /** Its own id: the content state's, with its place among the targets. */
+  id: string;
+  /** Where its Manifest is: the address it is loaded from. */
+  manifestId: string;
+  /**
+   * The id its Manifest gives itself, once loaded, where it is not that address (Cookbook
+   * 0540's are `…/manifest.json/manifest.json`, served at `…/manifest.json`).
+   */
+  manifestAs?: string;
+  canvasId?: string;
+  /** In the Canvas's own coordinates. */
+  region?: { x: number; y: number; w: number; h: number };
+  /** Seconds into a time-based Canvas. */
+  time?: number;
+}
+
+/** A content state's targets, in its order, and its own `label` where it gives one. */
+export interface ContentTargets {
+  id: string;
+  label?: Record<string, string[]>;
+  items: ContentTarget[];
 }
 
 type Json = Record<string, any>;

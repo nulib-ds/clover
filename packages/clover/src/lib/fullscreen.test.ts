@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { toggleFullscreen } from "./fullscreen";
+import { getCloverRoot, toggleFullscreen } from "./fullscreen";
 
 /** iPhone Safari: no element full screen, and a video that has its own. */
 function iphone() {
@@ -26,6 +26,26 @@ afterEach(() => {
   Object.defineProperty(document, "fullscreenEnabled", {
     configurable: true,
     value: true,
+  });
+});
+
+describe("getCloverRoot", () => {
+  it("finds the Root a Canvas is in, else the Canvas on its own", () => {
+    document.body.innerHTML = `<div class="clover-root" id="root"><p>Label</p><figure class="clover-canvas"><button id="in"></button></figure></div><figure class="clover-canvas" id="alone"><button id="out"></button></figure>`;
+    expect(getCloverRoot(document.getElementById("in"))).toBe(
+      document.getElementById("root"),
+    );
+    expect(getCloverRoot(document.getElementById("out"))).toBe(
+      document.getElementById("alone"),
+    );
+    expect(getCloverRoot(null)).toBeNull();
+  });
+
+  it("takes a Canvas in a dialog inside the Root alone, as the dialog would hide", () => {
+    document.body.innerHTML = `<div class="clover-root"><dialog><figure class="clover-canvas" id="lightbox"><button id="in"></button></figure></dialog></div>`;
+    expect(getCloverRoot(document.getElementById("in"))).toBe(
+      document.getElementById("lightbox"),
+    );
   });
 });
 

@@ -1,5 +1,28 @@
 import type { RegionRect } from "../sources/imageService";
 
+/** A turn of the picture: degrees clockwise, after a mirror along its upright axis. */
+export interface Rotation {
+  degrees: number;
+  mirror: boolean;
+}
+
+/**
+ * A rotation, as the Image API writes it (§4.3): degrees clockwise, 0 to 360, mirrored
+ * first along the vertical axis where it starts with `!` (`!90`).
+ *
+ * Returns null for none (`0`, `360`) and for anything else, so a malformed rotation shows
+ * the image as it is.
+ */
+export function parseRotation(rotation: string | undefined): Rotation | null {
+  const match = /^(!)?(\d+(?:\.\d+)?)$/.exec(rotation?.trim() ?? "");
+  if (!match) return null;
+  const turned = Number(match[2]);
+  if (turned > 360) return null;
+  const degrees = turned % 360;
+  const mirror = Boolean(match[1]);
+  return degrees || mirror ? { degrees, mirror } : null;
+}
+
 /**
  * A region of an image, as IIIF writes it — `x,y,w,h` in pixels or `pct:x,y,w,h` in
  * percent, optionally prefixed `xywh=` as a media fragment — clamped to the image.

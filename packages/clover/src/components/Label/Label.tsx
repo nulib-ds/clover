@@ -9,6 +9,7 @@ import {
   useOptionalCloverSelector,
 } from "../../react/context";
 import { useProvider } from "../Primitives/resource";
+import { languageProps } from "../../core/direction";
 
 export interface LabelProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "lang"> {
@@ -47,7 +48,7 @@ export const Label = forwardRef<HTMLElement, LabelProps>(function Label(
     <Tag
       ref={ref}
       className={join("clover-label", className)}
-      lang={lang}
+      {...languageProps(lang)}
       {...rest}
     >
       {toPlainText(text)}

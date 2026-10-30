@@ -1,11 +1,11 @@
 /*
- * The way out of full screen, for whichever Clover root is in it.
+ * The way out of full screen, at a Body's top left.
  *
- * Hidden here and revealed by the host: the `Viewer` shows it when its own root is full
- * screen, and a standalone `Canvas` when it is. Keeping the reveal with the host is what
- * lets a `Canvas` nested inside a full-screen `Viewer` stay quiet — only one root is ever
- * full screen, and only that one should offer a way back. Hosts scope the reveal to a
- * direct child (`& > .clover-canvas-exit-full-screen`) for the same reason.
+ * Hidden here and revealed by the Canvas (or Scene) that offers it (`data-exit`,
+ * `useFullscreenExit`): full screen itself, or first in the Root that is, as full screen
+ * takes the Root a Canvas is in (`getCloverRoot`). One shows, however many Bodies the
+ * Root holds. Hosts scope the reveal to a direct child
+ * (`& > .clover-canvas-exit-full-screen`), so a nested one stays quiet.
  *
  * `Escape` exits too. This exists because an unadvertised keystroke is not an affordance: a
  * reader who entered by clicking looks for something to click.
@@ -53,4 +53,15 @@ button.clover-canvas-exit-full-screen {
 .clover-canvas-exit-full-screen:hover,
 .clover-canvas-exit-full-screen:focus-visible {
   background-color: var(--clover-color-accent, #0065c3);
+}
+
+/*
+ * A Root in full screen (`getCloverRoot`: a Canvas's full screen takes the Root it is in,
+ * a template's Viewer or a page's own layout; Mat, 2026-10-29): on Clover's ground, and
+ * scrolling where the screen is too short for what it holds.
+ */
+.clover-root:fullscreen {
+  overflow: auto;
+  background-color: var(--clover-color-secondary, #fff);
+  color: var(--clover-color-primary, #1a1d1e);
 }

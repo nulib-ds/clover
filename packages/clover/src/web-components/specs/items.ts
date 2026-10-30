@@ -6,7 +6,8 @@ export const items: ElementSpec = {
   kind: "part",
   attributes: {
     layout: { prop: "layout", type: ["slider", "list", "grid", "pager"] },
-    of: { prop: "of", type: ["views", "members"] },
+    size: { prop: "size", type: ["large", "small"] },
+    of: { prop: "of", type: ["views", "members", "targets", "annotations"] },
     navigation: { prop: "navigation", type: ["id", "homepage"] },
     "iiif-content": { prop: "iiifContent", type: "string" },
     header: { prop: "header", type: "boolean" },
@@ -30,9 +31,14 @@ export const itemsDocs: ElementDocs = {
         "A scrolling row, a column, a wrapping grid, or a pager: Previous, the position and Next, with no thumbnails.",
       default: "slider",
     },
+    size: {
+      description:
+        "The pager's size: large, round controls; or small, its steps and count as Search's are, for a header's line.",
+      default: "large",
+    },
     of: {
       description:
-        "Inside a root: its views, or the members of the Collection it belongs to.",
+        "Inside a root: its views, the members of the Collection it belongs to, a content state's targets, where it names two or more, each opening its Manifest at its place, or annotations walked as one whole (the AnnotationPage or AnnotationCollection given as the content, else the AnnotationCollection its annotation pages are part of), each picked and framed on its Canvas.",
       default: "views",
     },
     navigation: {

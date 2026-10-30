@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 import { resolveThumbnail, thumbnailSource } from "../../core/thumbnail";
 import { toPlainText } from "../../core/text";
-import { type LanguageMapLike, localize } from "../../core/value";
+import { type LanguageMapLike, hrefLangOf, localize } from "../../core/value";
 import { join } from "../../lib/classnames";
 import {
   useOptionalClover,
@@ -18,6 +18,7 @@ import {
   resourceOf,
   useProvider,
 } from "./resource";
+import { languageProps } from "../../core/direction";
 
 export type { Of } from "./resource";
 
@@ -205,6 +206,9 @@ export function Id({
   return (
     <a
       href={id}
+      // Its IIIF JSON, in a tab of its own, as every link away from the viewer opens.
+      target="_blank"
+      rel="noopener noreferrer"
       className={join("clover-id", className)}
       {...(rest as React.AnchorHTMLAttributes<HTMLAnchorElement>)}
     >
@@ -241,7 +245,16 @@ function Links({
         const label = localize(resource.label, language);
         return (
           <li key={resource.id}>
-            <a href={resource.id} lang={label.text ? label.lang : undefined}>
+            <a
+              href={resource.id}
+              // Away from the viewer: in a tab of its own, as Download's files open (Mat,
+              // 2026-10-29), told nothing of this page.
+              target="_blank"
+              rel="noopener noreferrer"
+              // The page's own language, where it gives one; the label's marks the words.
+              hrefLang={hrefLangOf(resource)}
+              {...languageProps(label.text ? label.lang : undefined)}
+            >
               {label.text ? toPlainText(label.text) : resource.id}
             </a>
             {resource.format && (
@@ -336,11 +349,11 @@ export function Thumbnail({
       src={src}
       alt={toPlainText(label.text)}
       // The label's language, while the alt is the label.
-      lang={
+      {...languageProps(
         (rest as { alt?: string }).alt === undefined && label.text
           ? label.lang
-          : undefined
-      }
+          : undefined,
+      )}
       width={size}
       loading="lazy"
       decoding="async"

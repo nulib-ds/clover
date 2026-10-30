@@ -1,0 +1,126 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/anno_p1.json",
+  "type": "AnnotationPage",
+  "partOf": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/anno_coll.json",
+      "type": "AnnotationCollection"
+    }
+  ],
+  "next": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/anno_p2.json",
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/anno_p1.json-1",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "format": "text/plain",
+        "value": "text-1-1"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/canvas/p1",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=88,957,2768,248"
+        }
+      }
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/anno_p1.json-2",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "format": "text/plain",
+        "value": "text-1-2"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/canvas/p1",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=80,1181,928,3384"
+        }
+      }
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/anno_p1.json-3",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "format": "text/plain",
+        "value": "text-1-3"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/canvas/p1",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1000,2693,1880,1824"
+        }
+      }
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/anno_p1.json-4",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "format": "text/plain",
+        "value": "text-2"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/canvas/p1",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=992,1213,1904,1472"
+        }
+      }
+    }
+  ]
+}

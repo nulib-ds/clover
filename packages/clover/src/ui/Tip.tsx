@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
+import { languageProps } from "../core/direction";
 
 /**
  * A key a control answers to: as `aria-keyshortcuts` names it (WAI-ARIA key names, `Plus`
@@ -108,7 +109,7 @@ export function Tip({
       ref={ref}
       className="clover-tip"
       aria-hidden="true"
-      lang={lang}
+      {...languageProps(lang)}
       {...(scrolls && {
         tabIndex: -1,
         onMouseDown: (event: React.MouseEvent<HTMLSpanElement>) => {

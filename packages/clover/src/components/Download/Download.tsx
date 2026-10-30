@@ -3,12 +3,13 @@ import { useUniqueId } from "../../ui/useUniqueId";
 
 import type { CloverRequest } from "../../core/request";
 import { selectVisibleCanvases } from "../../core/selectors";
-import { type LanguageMapLike, localize } from "../../core/value";
+import { type LanguageMapLike, hrefLangOf, localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
 import { titleTag } from "../../ui/heading";
 import { asArray } from "../../lib/asArray";
+import { languageProps } from "../../core/direction";
 
 export interface DownloadProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "children"> {
@@ -24,6 +25,8 @@ export interface Rendering {
   label: string;
   lang?: string;
   format?: string;
+  /** The file's own language, where its `language` gives one. */
+  hrefLang?: string;
 }
 
 // Origins whose files could not be fetched (no CORS): their links then open as links do.
@@ -71,6 +74,7 @@ function renderingsOf(
         // A format or an address in place of a label is in no language.
         lang: label.text ? label.lang : undefined,
         format: item.format,
+        hrefLang: hrefLangOf(item),
       });
     }
   }
@@ -132,7 +136,7 @@ export function DownloadGroups({
         <Heading
           className="clover-download-title"
           id={`${id}-${key}`}
-          lang={langOf(titleKey)}
+          {...languageProps(langOf(titleKey))}
         >
           {t(titleKey)}
         </Heading>
@@ -145,7 +149,8 @@ export function DownloadGroups({
                 target="_blank"
                 rel="noopener noreferrer"
                 download=""
-                lang={item.lang}
+                hrefLang={item.hrefLang}
+                {...languageProps(item.lang)}
                 onClick={(event) => {
                   // A press with a key (a new tab, a window) is the browser's, and so is
                   // a file whose origin would not let it be fetched.

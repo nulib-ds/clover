@@ -39,3 +39,191 @@
   display: block;
   visibility: hidden;
 }
+
+/*
+ * A Collection's members' or a content state's targets' count (`CountMenu.tsx`): a
+ * button, the count with a chevron, opening them all as a list. No fill; the accent's
+ * text under the pointer or focused, and focused, the accent's ring. At least `l` tall
+ * (past 24px, WCAG 2.5.8). Its popup opens over the pager from its corner, `m` around it
+ * (Mat, 2026-10-29), the count and steps on top and the list under them, as wide as a
+ * Collection's list in the Panel, and scrolls past its height.
+ */
+/*
+ * Over what follows, and open, the count and steps over their popup: the pager is its
+ * own stacking context, the popup at its foot, the count and steps a layer up.
+ */
+.clover-pager:has(> .clover-pager-count) {
+  position: relative;
+  z-index: 5;
+}
+
+.clover-pager-count {
+  position: relative;
+}
+
+.clover-pager:has(> .clover-pager-count) > button,
+.clover-pager-count > .clover-pager-count-button {
+  position: relative;
+  z-index: 1;
+}
+
+.clover-pager-count-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--clover-space-2xs);
+  min-height: var(--clover-space-l);
+  padding: 0 var(--clover-space-xs);
+  border: 0;
+  border-radius: var(--clover-radius-pill, 2rem);
+  background: none;
+  color: var(--clover-color-primary-muted, #26292b);
+  font: inherit;
+  cursor: pointer;
+}
+
+.clover-pager-count-button .clover-pager-position {
+  color: inherit;
+}
+
+.clover-pager-count-button .clover-pager-position > span {
+  grid-area: 1 / 1;
+}
+
+.clover-pager-count-button:is(:hover, :focus-visible, [aria-expanded="true"]) {
+  color: var(--clover-color-accent-text, var(--clover-color-accent, #0065c3));
+}
+
+.clover-pager-count-button:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+}
+
+.clover-pager-count > .clover-pager-menu {
+  z-index: 0;
+  top: calc(-1 * var(--clover-space-m));
+  inset-inline-start: calc(-1 * var(--clover-space-m));
+  width: min(20rem, calc(100vw - 2 * var(--clover-space-m)));
+  max-height: min(24rem, 60vh);
+  /*
+   * The pager's row over its list: as tall as a step (`l`), `m` above the list (Mat,
+   * 2026-10-29: "put a little more gap between this action/header and the items list").
+   */
+  --clover-pager-menu-head: calc(
+    var(--clover-space-m) + var(--clover-space-l) + var(--clover-space-m)
+  );
+  padding: var(--clover-space-m);
+  padding-block: var(--clover-pager-menu-head) 0;
+}
+
+/*
+ * The list scrolls, under the pager's row, never the popup with it: a long one would pass
+ * under the count and steps. Its rings keep their room inside the scrolling box, which
+ * runs to the popup's foot (Mat, 2026-10-29: "just allow it to scroll to edge").
+ */
+.clover-pager-count > .clover-pager-menu {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.clover-pager-count > .clover-pager-menu > .clover-pager-list {
+  min-height: 0;
+  /*
+   * Its rings' room, reaching out past the popup's padding; at its foot, the popup's edge,
+   * the popup's own `m` of room inside it, so it scrolls with the list (Mat, 2026-10-29:
+   * "we still need a padding bottom, it should just affect the scroll").
+   */
+  margin: calc(-1 * var(--clover-items-ring-room, 4px));
+  margin-block-end: 0;
+  padding: var(--clover-items-ring-room, 4px);
+  padding-block-end: var(--clover-space-m);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/*
+ * Members passing under the list's top show that they do, as a slider's thumbnails do at
+ * its ends (`Items.css`; Mat, 2026-10-29): a shadow on the list's own scrolling edge once
+ * it has scrolled, `s` tall, as wide as the list, its ends faded over `s`. The edge is
+ * the list's box, which reaches out by its rings' room past the popup's padding. The
+ * list's scroll drives it, no script; where scroll-driven animation is not supported,
+ * there is none.
+ */
+@supports (timeline-scope: --clover-pager-list) {
+  .clover-pager-count > .clover-pager-menu {
+    timeline-scope: --clover-pager-list;
+  }
+
+  .clover-pager-count > .clover-pager-menu > .clover-pager-list {
+    scroll-timeline: --clover-pager-list block;
+  }
+
+  .clover-pager-count > .clover-pager-menu::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: calc(
+      var(--clover-pager-menu-head) - var(--clover-items-ring-room, 4px)
+    );
+    inset-inline: calc(
+      var(--clover-space-m) - var(--clover-items-ring-room, 4px)
+    );
+    height: var(--clover-space-s);
+    background: linear-gradient(rgb(0 0 0 / 0.16), transparent);
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--clover-space-s),
+      #000 calc(100% - var(--clover-space-s)),
+      transparent
+    );
+    /* Hidden unless the list has scrolled: one at its top has nothing passing under it. */
+    opacity: 0;
+    pointer-events: none;
+    animation: clover-shade linear both;
+    animation-timeline: --clover-pager-list;
+    animation-range: 0 var(--clover-space-m);
+  }
+}
+
+/* A mirrored pager's count is at its end: it opens from that corner. */
+.clover-pager[data-direction="right-to-left"]
+  .clover-pager-count
+  > .clover-pager-menu {
+  inset-inline: auto calc(-1 * var(--clover-space-m));
+}
+
+/* Open, its chevron points up, to close it. */
+.clover-pager-count-button[aria-expanded="true"] svg {
+  rotate: 180deg;
+}
+
+/*
+ * The list in it, as the Collection's in the Panel, with no room of its own around it
+ * (the Collection's margin over its list), its items `m` apart (Mat, 2026-10-29).
+ */
+.clover-pager-list.clover-collection > .clover-items {
+  /* `m` between the items' own boxes: their rings' room is given back already. */
+  --clover-items-gap: var(--clover-space-m);
+  margin: 0;
+}
+
+/*
+ * `small` (a header's line): its steps and count as Search's and Contents' are
+ * (`ui/Steps`, whose styles draw its steps): its count in `xs` text, semibold, everything
+ * `2xs` apart, with no room over or under it.
+ */
+.clover-pager[data-size="small"] {
+  gap: var(--clover-space-2xs);
+  padding-block: 0;
+}
+
+/* The count alone: the list its popup opens keeps the page's size and spacing. */
+.clover-pager[data-size="small"] .clover-pager-count-button {
+  font-size: var(--clover-text-xs);
+  line-height: 1;
+}
+
+.clover-pager[data-size="small"] .clover-pager-position {
+  font-weight: 600;
+}

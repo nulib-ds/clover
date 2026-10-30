@@ -2,6 +2,7 @@ import React from "react";
 
 import { useCloverTranslation } from "../../../i18n/useCloverTranslation";
 import { type Shortcut, Tip } from "../../../ui/Tip";
+import { languageProps } from "../../../core/direction";
 
 /**
  * One of a transport's buttons (a recording's, an animation's): named by Clover's words,
@@ -35,7 +36,7 @@ export function TransportButton({
   return (
     <button
       aria-label={label}
-      lang={langOf(words)}
+      {...languageProps(langOf(words))}
       aria-keyshortcuts={shortcut?.keys}
       aria-disabled={disabled || undefined}
       aria-pressed={pressed}

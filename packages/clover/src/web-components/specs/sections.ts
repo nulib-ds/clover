@@ -15,11 +15,13 @@ const headingLevelDocs = (what: string) => ({
     default: "3",
   },
 });
-const OF_STEPS = { of: { prop: "of", type: ["views", "members"] } } as const;
+const OF_STEPS = {
+  of: { prop: "of", type: ["views", "members", "targets"] },
+} as const;
 const ofStepsDocs = {
   of: {
     description:
-      "What it steps through: the root's views, or its Collection's members.",
+      "What it steps through: the root's views, its Collection's members, or a content state's targets.",
     default: "views",
   },
 };
@@ -163,7 +165,7 @@ export const transcript: ElementSpec = {
 export const transcriptDocs: ElementDocs = {
   name: "CloverTranscriptElement",
   description:
-    "The recording's captions as a transcript, following where it plays, and any plain-text transcript after them. Each cue goes to its time; a field over the captions finds words in them, with steps through the cues that have them.",
+    "The recording's captions as a transcript (or its WebVTT transcript, as its annotation provides one), following where it plays, and any plain-text transcript after them. Each cue goes to its time; a field over the captions finds words in them, with steps through the cues that have them.",
   attributes: {
     follow: {
       description:
@@ -304,6 +306,7 @@ export const map: ElementSpec = {
     "overlay-opacity": { prop: "overlayOpacity", type: "number", min: 0 },
     "style-url": { prop: "styleUrl", type: "string" },
     "scroll-zoom": { prop: "scrollZoom", type: "boolean" },
+    credits: { prop: "credits", type: "boolean" },
     language: { prop: "language", type: "string" },
   },
   properties: ["iiifContent", "navPlace", "georeferences", "request"],
@@ -332,6 +335,11 @@ export const mapDocs: ElementDocs = {
       description:
         "Zoom with the wheel or a trackpad, which can trap the page's scroll.",
       default: "false",
+    },
+    credits: {
+      description:
+        "\"false\" leaves out the basemap's credits, the ⓘ in the map's lower corner, which a basemap's license may ask for: give them on the page yourself.",
+      default: "true",
     },
     language: { description: "Alone: the language to read IIIF text in." },
   },

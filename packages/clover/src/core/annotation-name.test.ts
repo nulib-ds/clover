@@ -20,6 +20,47 @@ const annotation = (...body: unknown[]) => ({
  * Annotations list alike (WCAG 3.2.4).
  */
 describe("annotationName", () => {
+  // Cookbook 0139: a place, named by its feature's label.
+  it("names a place by its feature's label", () => {
+    const bodies = readBodies(
+      annotation({
+        type: "Feature",
+        properties: { label: { en: ["Targeted Map"] } },
+        geometry: { type: "Point", coordinates: [0, 0] },
+      }),
+    );
+    expect(annotationName(bodies, "en")).toEqual({
+      text: "Targeted Map",
+      lang: "en",
+    });
+    // One with no name of its own, nor its annotation's, is no entry's body.
+    expect(
+      readBodies(annotation({ type: "Feature", properties: {}, geometry: {} })),
+    ).toEqual([]);
+  });
+
+  // Cookbook 0346: the same words in English and in Japanese, a Choice of the two.
+  it("names a Choice of languages by the item in the reader's", () => {
+    const bodies = readBodies(
+      annotation({
+        type: "Choice",
+        items: [
+          text("Koto with a cover being carried", "en"),
+          text("袋に収められた琴", "ja"),
+        ],
+      }),
+    );
+    expect(bodies.map((body) => body.choice)).toEqual([0, 0]);
+    expect(annotationName(bodies, "en")).toEqual({
+      text: "Koto with a cover being carried",
+      lang: "en",
+    });
+    expect(annotationName(bodies, "ja")).toEqual({
+      text: "袋に収められた琴",
+      lang: "ja",
+    });
+  });
+
   it("takes the first body in the language closest to the reader's", () => {
     const bodies = readBodies(
       annotation(

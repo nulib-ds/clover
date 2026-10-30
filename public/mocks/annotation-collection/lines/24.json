@@ -1,0 +1,479 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24.json",
+  "type": "AnnotationPage",
+  "partOf": [
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/collection.json",
+      "type": "AnnotationCollection"
+    }
+  ],
+  "next": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/25.json",
+  "prev": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/23.json",
+  "items": [
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/1",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "The special features of our patented reversible handle bars are entitled to more",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=717,454,3389,97"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/2",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "than ordinary attention.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=510,572,1040,96"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/3",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "They are constructed on new principles, making them",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1647,564,2452,104"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/4",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "the simplest and most effective yet introduced. No addi-",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1605,682,2501,103"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/5",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "«White\" Handle Bars.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=605,737,912,111"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/6",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "tional weight is added as is the rule with almost all other",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1605,792,2501,110"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/7",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "reversible bars. Reversible to four positions. High and low drop, and high and",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=517,916,3589,104"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/8",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "low upright, giving absolute rigidity at every angle, with no screws or other un-",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=510,1032,3603,104"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/9",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "sightly looking protuberances to interfere with clothing of the rider.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=517,1136,3031,118"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/10",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "As will be noticed the appearance of this handle bar is that of the stationary,",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=730,3237,3369,104"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/11",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "and the difference can only be discerned by close inspection; while in neat and",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=517,3347,3582,111"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/12",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "trim appearance it is without doubt the handsomest yet devised.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=516,3454,2764,136"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/13",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "We furnish this reversible handle bar on Models \"A\" and \"B,\" while on",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=723,3567,3376,112"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/14",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "Models \"C\" and \"D\" the stationary bar in upright and drop positions is furnished.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=524,3699,3582,104"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/15",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "For road and track racing we will furnish the drop bar in ram's horn style.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=717,3829,3375,111"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/24/16",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "All these bars are fitted with our white tipped English pattern corkaline grips.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/24",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=517,3946,3376,103"
+        }
+      }
+    }
+  ]
+}

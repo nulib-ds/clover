@@ -1,0 +1,73 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/12.json",
+  "type": "AnnotationPage",
+  "partOf": [
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/collection.json",
+      "type": "AnnotationCollection"
+    }
+  ],
+  "next": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/13.json",
+  "prev": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/11.json",
+  "items": [
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/12/1",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "\"WHITE\" MODEL \"C\"-PRICE $75",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/12",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1660,3447,1531,98"
+        }
+      }
+    },
+    {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/12/2",
+      "type": "Annotation",
+      "motivation": "tagging",
+      "body": {
+        "type": "TextualBody",
+        "value": "SEE SPECIFICATIONS OPPOSITE PAGE.",
+        "format": "text/plain",
+        "language": "en"
+      },
+      "target": {
+        "type": "SpecificResource",
+        "source": {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/canvas/12",
+          "type": "Canvas",
+          "partOf": [
+            {
+              "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json",
+              "type": "Manifest"
+            }
+          ]
+        },
+        "selector": {
+          "type": "FragmentSelector",
+          "conformsTo": "http://www.w3.org/TR/media-frags/",
+          "value": "xywh=1942,3572,968,41"
+        }
+      }
+    }
+  ]
+}

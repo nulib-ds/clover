@@ -41,6 +41,11 @@ export interface CanvasControlsConfig {
    * Shown only when a Canvas has either.
    */
   information?: boolean;
+  /**
+   * A map control that shows where the Canvas, else its Manifest, is (its `navPlace`), on a
+   * map in a box, as the information is. Shown only when one of them has a place.
+   */
+  map?: boolean;
 }
 
 export interface CloverCanvasOptions {
@@ -186,6 +191,11 @@ export interface CloverCanvasProps {
    * targets are drawn; coordinates are the target image's own.
    */
   annotations?: CanvasAnnotation[];
+  /**
+   * The Manifest's `navPlace`, a GeoJSON FeatureCollection: where it is, which the map
+   * control shows where the Canvases shown have none of their own.
+   */
+  navPlace?: unknown;
   /**
    * The AnnotationPages (each annotation's `pageId`) whose annotations are hidden: none
    * of them is drawn, but the annotations menu still lists them under their page, with

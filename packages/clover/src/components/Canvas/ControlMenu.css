@@ -71,7 +71,7 @@
   max-width: none;
 }
 
-.clover-canvas[data-popups="beside"][data-fullscreen="true"]
+.clover-canvas[data-popups="beside"][data-exit]
   > :is(.clover-canvas-caption, .clover-canvas-menu) {
   --top: calc(
     var(--clover-canvas-controls-inset) + var(--clover-control) +
@@ -127,6 +127,17 @@
 .clover-canvas-menu label:hover,
 .clover-canvas-menu label[data-active="true"] {
   background: var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+/*
+ * An item that cannot be chosen (a recording this browser cannot play, Cookbook 0434):
+ * faded, taking no pointer, as a step with nowhere to go is (`Button.css`). An inactive
+ * control needs no contrast (WCAG 1.4.3); its radio tells assistive technology so.
+ */
+.clover-canvas-menu label[data-disabled] {
+  cursor: default;
+  opacity: 0.38;
+  pointer-events: none;
 }
 
 .clover-canvas-menu input {

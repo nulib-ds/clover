@@ -103,18 +103,18 @@ Everything is upgraded to IIIF Presentation 4 as it loads, so every part reads o
 The Viewer's own layout, drawn when it is given no `template`: the title over the Body,
 the thumbnails under it, and the information panel beside them, as in Clover 3.x.
 
-| Prop               | Type                                    | Default                     | Description                                                                                                                        |
-| ------------------ | --------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `header`           | `boolean`                               | `true`                      | The title and provider over the Body.                                                                                              |
-| `headingLevel`     | `number`                                | `2`                         | The title's level; the panel's sections are a level below.                                                                         |
-| `panel`            | `boolean`                               | `true`                      | The information panel and its toggle.                                                                                              |
-| `download`         | `boolean`                               | `true`                      | The downloads in the panel's About, where there is a `rendering`.                                                                  |
-| `languages`        | `boolean`                               | `true`                      | The languages to read the resource in, beside the panel's About heading, where it comes in several; `false` leaves the choice out. |
-| `defaultPanelOpen` | `boolean`                               | `true`                      | Whether the panel starts open beside the Body; over it, closed.                                                                    |
-| `panelLayout`      | `"accordion" \| "tabs"`                 | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                                                                                 |
-| `items`            | `"slider" \| "list" \| "grid" \| false` | `"slider"`                  | The thumbnails under the Body, or none.                                                                                            |
-| `storageKey`       | `string \| false`                       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                                                         |
-| `fill`             | `boolean`                               | `false`                     | Fill the box it sits in; the Body takes what the rest leave.                                                                       |
+| Prop               | Type                                    | Default                     | Description                                                                                                                                                                                        |
+| ------------------ | --------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `header`           | `boolean`                               | `true`                      | The title and provider over the Body; opened on a Collection, the Collection's title over the Manifest's and a pager among its members; for a content state's several targets, a pager among them. |
+| `headingLevel`     | `number`                                | `2`                         | The title's level; the panel's sections are a level below.                                                                                                                                         |
+| `panel`            | `boolean`                               | `true`                      | The information panel and its toggle.                                                                                                                                                              |
+| `download`         | `boolean`                               | `true`                      | The downloads in the panel's About, where there is a `rendering`.                                                                                                                                  |
+| `languages`        | `boolean`                               | `true`                      | The languages to read the resource in, beside the panel's About heading, where it comes in several; `false` leaves the choice out.                                                                 |
+| `defaultPanelOpen` | `boolean`                               | `true`                      | Whether the panel starts open beside the Body; over it, closed.                                                                                                                                    |
+| `panelLayout`      | `"accordion" \| "tabs"`                 | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                                                                                                                                                 |
+| `items`            | `"slider" \| "list" \| "grid" \| false` | `"slider"`                  | The thumbnails under the Body, or none.                                                                                                                                                            |
+| `storageKey`       | `string \| false`                       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                                                                                                                         |
+| `fill`             | `boolean`                               | `false`                     | Fill the box it sits in; the Body takes what the rest leave.                                                                                                                                       |
 
 ### Document
 
@@ -460,9 +460,14 @@ captions and chapters beside it.
 
 ### Animation
 
-A Canvas whose images are timed, one per frame, plays as an animation, with a frame bar to
-step, scrub and pause it. `auto-advance` plays it on arrival and `repeat` loops it.
-Nothing plays for a reader who asks for reduced motion.
+A Canvas whose images are timed, one per frame, plays as an animation over the Canvas's
+own `duration`: a seek bar over its time, each frame's start marked as a chapter's is, the
+time, Previous and Next to step from one frame to the next, and the frames listed by their
+labels. Each frame shows for its own span, so frames timed together show together. A
+frame may be a video or sound, which plays from its own start in its region, or text,
+drawn in its region and read by screen readers outside the picture.
+`auto-advance` plays it on arrival and `repeat` loops it. Nothing plays for a reader who
+asks for reduced motion.
 
 <ViewerExample resource="animation">
 

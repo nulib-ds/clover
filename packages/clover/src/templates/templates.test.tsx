@@ -14,7 +14,14 @@ import bookJson from "../fixtures/iiif-cookbook/0009-book-1.json";
 import singleJson from "../fixtures/iiif-cookbook/0004-canvas-size.json";
 import renderingJson from "../fixtures/iiif-cookbook/0046-rendering.json";
 import rtlJson from "../fixtures/iiif-cookbook/0010-book-2-viewing-direction-rtl.json";
+import compareJson from "../fixtures/iiif-cookbook/0540-link-for-opening-multiple-canvases-annotation.json";
+import layoutJson from "../fixtures/iiif-cookbook/0309-annotation-collection.json";
+import layoutPage1 from "../fixtures/iiif-cookbook/0309-annotation-collection-anno_p1.json";
+import layoutPage2 from "../fixtures/iiif-cookbook/0309-annotation-collection-anno_p2.json";
+import monumentsJson from "../fixtures/iiif-cookbook/0540-link-for-opening-multiple-canvases-manifest.json";
+import colosseumJson from "../fixtures/iiif-cookbook/0540-link-for-opening-multiple-canvases-manifest-2.json";
 import { initCloverI18n } from "../i18n";
+import { getCloverRoot } from "../lib/fullscreen";
 import * as Templates from "./index";
 import { SLIDE_MS } from "./shared/useSlide";
 
@@ -92,6 +99,257 @@ describe("templates", () => {
   });
 
   // `fill` lays it out in the box it is given; without it, the Body keeps its height.
+  // Cookbook 0540: one content state naming two Canvases, each in its own Manifest.
+  it("Default: a content state's targets, counted and stepped in the header, listed in Views", async () => {
+    const table: Record<string, unknown> = {
+      [compareJson.target[0].partOf[0].id]: colosseumJson,
+      [compareJson.target[1].partOf[0].id]: monumentsJson,
+    };
+    const fetch = vi.fn(async (url: string) =>
+      table[url] === undefined
+        ? new Response("missing", { status: 404 })
+        : new Response(JSON.stringify(table[url]), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+    );
+    render(
+      <Templates.Default
+        iiifContent={JSON.stringify(compareJson)}
+        request={{ fetch }}
+      />,
+    );
+    await screen.findByRole("heading", { level: 2, name: "The Colosseum" });
+    const views = await screen.findByRole("navigation", { name: "Views" });
+    expect(
+      within(views).getByRole("button", { name: "1 / 2" }),
+    ).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(within(views).getByRole("button", { name: "Next" }));
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "Two monuments in Rome",
+    });
+    expect(within(views).getByRole("button", { name: "Next" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+
+    // The count opens them all, listed as Views lists them, the one shown selected;
+    // choosing one goes there and closes it.
+    const count = within(views).getByRole("button", { name: "2 / 2" });
+    fireEvent.click(count);
+    expect(count).toHaveAttribute("aria-expanded", "true");
+    const popup = await waitFor(() => {
+      const found = document.getElementById(
+        count.getAttribute("aria-controls")!,
+      );
+      expect(found?.querySelector("[role=listbox]")).toBeTruthy();
+      return found!;
+    });
+    const [first, second] = within(popup).getAllByRole("option");
+    expect(second).toHaveAttribute("aria-selected", "true");
+    // Both Canvases are "The Colosseum": each item says its Manifest's title under it.
+    await waitFor(() =>
+      expect(second).toHaveTextContent("Two monuments in Rome"),
+    );
+    fireEvent.click(first);
+    await screen.findByRole("heading", { level: 2, name: "The Colosseum" });
+
+    // The Panel lists them too, in a section of their own, with steps between them.
+    fireEvent.click(screen.getByRole("button", { name: "Views" }));
+    const list = await screen.findByRole("listbox", { name: "Items" });
+    const options = within(list).getAllByRole("option");
+    expect(options).toHaveLength(2);
+    expect(options[0]).toHaveAttribute("aria-selected", "true");
+    const section = list.closest(".clover-targets") as HTMLElement;
+    fireEvent.click(
+      within(section).getAllByRole("button", { name: "Next" })[0],
+    );
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "Two monuments in Rome",
+    });
+    await waitFor(() =>
+      expect(options[1]).toHaveAttribute("aria-selected", "true"),
+    );
+  });
+
+  // Cookbook 0032: a Collection as the content, its members moved between.
+  it("Default: opened on a Collection, its title over the Manifest's and its members stepped in the header", async () => {
+    const letter = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/letter",
+      type: "Manifest",
+      label: { en: ["A letter"] },
+      items: [
+        {
+          id: "https://example.org/letter/canvas/1",
+          type: "Canvas",
+          width: 100,
+          height: 100,
+          items: [],
+        },
+      ],
+    };
+    const shelf = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/shelf",
+      type: "Collection",
+      label: { en: ["Shelf"] },
+      items: [
+        { id: bookJson.id, type: "Manifest", label: { en: ["The book"] } },
+        { id: letter.id, type: "Manifest", label: { en: ["A letter"] } },
+      ],
+    };
+    const table: Record<string, unknown> = {
+      [bookJson.id]: bookJson,
+      [letter.id]: letter,
+    };
+    const fetch = vi.fn(async (url: string) =>
+      table[url] === undefined
+        ? new Response("missing", { status: 404 })
+        : new Response(JSON.stringify(table[url]), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+    );
+    render(<Templates.Default iiifContent={shelf} request={{ fetch }} />);
+    const title = await screen.findByRole("heading", {
+      level: 2,
+      name: "Simple Manifest - Book",
+    });
+    // Under it, the Collection's title, smaller, then the members' pager.
+    const row = title.nextElementSibling!;
+    expect(row).toHaveClass("clover-template-default-collection-row");
+    expect(row.firstElementChild).toHaveTextContent("Shelf");
+    expect(row.firstElementChild?.tagName).toBe("P");
+    expect(
+      within(row as HTMLElement).getByRole("navigation", {
+        name: "Collection",
+      }),
+    ).toBeInTheDocument();
+
+    const members = screen.getByRole("navigation", { name: "Collection" });
+    expect(
+      within(members).getByRole("button", { name: "1 / 2" }),
+    ).toBeInTheDocument();
+    fireEvent.click(within(members).getByRole("button", { name: "Next" }));
+    await screen.findByRole("heading", { level: 2, name: "A letter" });
+    expect(
+      within(members).getByRole("button", { name: "2 / 2" }),
+    ).toBeInTheDocument();
+    // The Collection section stays, as it says of the Manifest shown.
+    expect(
+      screen.getByRole("button", { name: "Collection" }),
+    ).toBeInTheDocument();
+  });
+
+  it("Default: an AnnotationCollection named in the header, its annotations stepped there (Cookbook 0309)", async () => {
+    const pages: Record<string, unknown> = {
+      [layoutPage1.id]: layoutPage1,
+      [layoutPage2.id]: layoutPage2,
+    };
+    const fetch = vi.fn(
+      async (url: string) => new Response(JSON.stringify(pages[url])),
+    );
+    render(<Templates.Default iiifContent={layoutJson} request={{ fetch }} />);
+    // Named from the Manifest's references, under the Manifest's title.
+    const name = await screen.findByText("Newspaper layout markup", {
+      selector: ".clover-template-default-collection",
+    });
+    const row = name.closest(".clover-template-default-collection-row")!;
+    const steps = await within(row as HTMLElement).findByRole("navigation", {
+      name: "Annotations",
+    });
+    // Its first annotation picked as it opens, of the eight its Collection counts.
+    await waitFor(() => expect(steps).toHaveTextContent("1 / 8"));
+    // Only the page in view is fetched; the next as a step goes past it.
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual([layoutPage1.id]);
+    const next = within(steps).getByRole("button", { name: "Next" });
+    for (const place of [2, 3, 4]) {
+      fireEvent.click(next);
+      await waitFor(() => expect(steps).toHaveTextContent(`${place} / 8`));
+    }
+    fireEvent.click(next);
+    await waitFor(() => expect(steps).toHaveTextContent("5 / 8"));
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+      layoutPage1.id,
+      layoutPage2.id,
+    ]);
+  });
+
+  it("Default: an AnnotationPage given as the content, named in the header and walked across its Manifests", async () => {
+    // James Turner's way: tags on Canvases of two Manifests, in a page of their own.
+    const tag = (
+      n: number,
+      manifest: { id: string; items: { id: string }[] },
+    ) => ({
+      id: `https://example.org/tags.json#${n}`,
+      type: "Annotation",
+      motivation: "tagging",
+      body: { type: "TextualBody", value: `Tag ${n}`, format: "text/plain" },
+      target: {
+        type: "SpecificResource",
+        source: {
+          id: manifest.items[0].id,
+          type: "Canvas",
+          partOf: [{ id: manifest.id, type: "Manifest" }],
+        },
+        selector: {
+          type: "FragmentSelector",
+          conformsTo: "http://www.w3.org/TR/media-frags/",
+          value: "xywh=0,0,100,100",
+        },
+      },
+    });
+    const tags = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/tags.json",
+      type: "AnnotationPage",
+      label: { en: ["Two tags"] },
+      items: [tag(1, bookJson), tag(2, singleJson)],
+    };
+    const manifests: Record<string, unknown> = {
+      [bookJson.id]: bookJson,
+      [singleJson.id]: singleJson,
+    };
+    const fetch = vi.fn(
+      async (url: string) => new Response(JSON.stringify(manifests[url])),
+    );
+    render(<Templates.Default iiifContent={tags} request={{ fetch }} />);
+    const name = await screen.findByText("Two tags", {
+      selector: ".clover-template-default-collection",
+    });
+    const steps = await within(
+      name.closest(".clover-template-default-collection-row") as HTMLElement,
+    ).findByRole("navigation", { name: "Annotations" });
+    // Opened on the first tag's Manifest, the tag picked.
+    await waitFor(() => expect(steps).toHaveTextContent("1 / 2"));
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Simple Manifest - Book" }),
+    ).toBeInTheDocument();
+    // On to the second: its own Manifest opens, the tag picked there.
+    fireEvent.click(within(steps).getByRole("button", { name: "Next" }));
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "Still image from an opera performance at Indiana University",
+    });
+    await waitFor(() => expect(steps).toHaveTextContent("2 / 2"));
+  });
+
+  it("Default: a Manifest on its own has no Collection's title or members in its header", async () => {
+    render(<Templates.Default iiifContent={bookJson} />);
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "Simple Manifest - Book",
+    });
+    expect(
+      document.querySelector(".clover-template-default-collection"),
+    ).toBeNull();
+    expect(screen.queryByRole("navigation", { name: "Collection" })).toBeNull();
+  });
+
   it("Default: fill marks the layout to fill its box, and is off by default", async () => {
     const { rerender, container } = render(
       <Templates.Default iiifContent={bookJson} />,
@@ -104,6 +362,53 @@ describe("templates", () => {
     expect(layout()).not.toHaveAttribute("data-fill");
     rerender(<Templates.Default iiifContent={bookJson} fill />);
     expect(layout()).toHaveAttribute("data-fill", "true");
+  });
+
+  it("Default and Document: full screen takes the whole Viewer, Items and Panel too", async () => {
+    const { container, rerender } = render(
+      <Templates.Default iiifContent={bookJson} />,
+    );
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "Simple Manifest - Book",
+    });
+    // Asked from the Canvas's control, the Viewer goes, not the Canvas alone.
+    const viewer = container.querySelector(".clover-template-default");
+    expect(getCloverRoot(container.querySelector(".clover-canvas"))).toBe(
+      viewer,
+    );
+    // Full screen, its Body offers the way out at its top left, as a Canvas alone does.
+    Object.defineProperty(document, "fullscreenElement", {
+      configurable: true,
+      get: () => viewer,
+    });
+    try {
+      act(() => {
+        document.dispatchEvent(new Event("fullscreenchange"));
+      });
+      const body = container.querySelector(".clover-canvas")!;
+      expect(body).toHaveAttribute("data-exit");
+      expect(
+        within(body as HTMLElement).getByText("Exit full screen", {
+          selector: ".clover-canvas-exit-full-screen",
+        }),
+      ).toBeVisible();
+    } finally {
+      Object.defineProperty(document, "fullscreenElement", {
+        configurable: true,
+        get: () => null,
+      });
+      act(() => {
+        document.dispatchEvent(new Event("fullscreenchange"));
+      });
+    }
+    rerender(<Templates.Document iiifContent={bookJson} />);
+    await waitFor(() =>
+      expect(container.querySelector(".clover-canvas")).not.toBeNull(),
+    );
+    expect(getCloverRoot(container.querySelector(".clover-canvas"))).toBe(
+      container.querySelector(".clover-template-document"),
+    );
   });
 
   it("Default: the strip's arrows step the view; its header names the pages", async () => {

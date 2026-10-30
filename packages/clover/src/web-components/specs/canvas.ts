@@ -186,7 +186,7 @@ export const handleDocs = {
       "The view is laid out and fitted: its handle is here, and works from now on.",
   },
   controls: {
-    type: "boolean | { zoom?: boolean; fullPage?: boolean; rotation?: boolean; reset?: boolean; annotations?: boolean; information?: boolean; [option: string]: unknown } | null",
+    type: "boolean | { zoom?: boolean; fullPage?: boolean; rotation?: boolean; reset?: boolean; annotations?: boolean; information?: boolean; map?: boolean; [option: string]: unknown } | null",
     description:
       "Which of the Body's controls it shows, as Canvas's controls takes it: false for none, or some ({ rotation: false }), in place of the attribute.",
   },

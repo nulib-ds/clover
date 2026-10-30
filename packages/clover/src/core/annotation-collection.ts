@@ -1,4 +1,4 @@
-import { type AnnotationSet, readPage } from "./annotation-sets";
+import { type AnnotationSet, pageLabel, readPage } from "./annotation-sets";
 import { upgradePage } from "./pages";
 import { type CloverRequest, fetchJson } from "./request";
 import { asArray } from "../lib/asArray";
@@ -71,7 +71,10 @@ export async function loadAnnotationSets(
       if (entries.length) {
         sets.push({
           id,
-          label: page.label ?? json.label,
+          // Its own name, its Collection's (from the reference too), or the content's.
+          label:
+            pageLabel(page, raw === json ? (item as Json) : undefined) ??
+            json.label,
           source: "added",
           entries,
         });

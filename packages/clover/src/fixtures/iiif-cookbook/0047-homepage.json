@@ -1,0 +1,58 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://iiif.io/api/cookbook/recipe/0047-homepage/manifest.json",
+  "type": "Manifest",
+  "label": {
+    "none": ["Laocöon"]
+  },
+  "homepage": [
+    {
+      "id": "https://www.getty.edu/art/collection/object/103RQQ",
+      "type": "Text",
+      "label": {
+        "en": ["Home page at the Getty Museum Collection"]
+      },
+      "format": "text/html",
+      "language": ["en"]
+    }
+  ],
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0047-homepage/canvas/1",
+      "type": "Canvas",
+      "label": {
+        "none": ["Front"]
+      },
+      "height": 3000,
+      "width": 2315,
+      "items": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0047-homepage/canvas/1/page/1",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0047-homepage/canvas/1/page/1/annotation/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.io/api/image/3.0/example/reference/28473c77da3deebe4375c3a50572d9d3-laocoon/full/!500,500/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "service": [
+                  {
+                    "id": "https://iiif.io/api/image/3.0/example/reference/28473c77da3deebe4375c3a50572d9d3-laocoon",
+                    "type": "ImageService3",
+                    "profile": "level1"
+                  }
+                ],
+                "height": 3000,
+                "width": 2315
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0047-homepage/canvas/1"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

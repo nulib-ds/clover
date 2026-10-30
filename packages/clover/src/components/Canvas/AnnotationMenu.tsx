@@ -5,6 +5,7 @@ import ControlMenu from "./ControlMenu";
 import { CueTime } from "../../ui/Cue";
 import { HideToggle } from "../../ui/HideToggle";
 import { useContainerName } from "../../ui/useContainerName";
+import { languageProps } from "../../core/direction";
 
 interface AnnotationMenuProps {
   id: string;
@@ -92,17 +93,21 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
         );
         return (
           <fieldset
+            /*
+             * Its key before the spread: after one, Next's compiler makes the element with
+             * `createElement` and its children an array, which React wants keys in.
+             */
+            key={g}
             // Named by its page's label alone: its legend holds the toggle too.
             {...(group.page ? { "aria-labelledby": labelId } : name.props)}
             className="clover-canvas-menu-group clover-annotations-set"
-            key={g}
           >
             {group.page ? (
               <legend className="clover-canvas-menu-legend clover-annotations-set-header">
                 <span
                   className="clover-annotations-title"
                   id={labelId}
-                  lang={group.page.lang}
+                  {...languageProps(group.page.lang)}
                 >
                   {group.page.text}
                 </span>
@@ -118,6 +123,8 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
                 const annotation = annotations[index];
                 const start = startOf(annotation);
                 const picked = selected === annotation.id;
+                const image =
+                  "image" in annotation ? annotation.image : undefined;
                 return (
                   <label
                     className="clover-canvas-menu-item clover-annotations-entry"
@@ -142,11 +149,28 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
                         className="clover-annotations-time"
                       />
                     )}
-                    <span
-                      className="clover-annotations-body clover-cue-text"
-                      lang={annotation.label ? annotation.lang : undefined}
-                    >
-                      {annotation.label ?? String(index + 1)}
+                    <span className="clover-annotations-body clover-cue-text">
+                      {/*
+                       * An image it carries (Cookbook 0377) over its words, as the
+                       * Annotations list and its popover show it (Mat, 2026-10-29); the
+                       * words beside it name it, so it is not read again.
+                       */}
+                      {image && (
+                        <img
+                          className="clover-annotations-image"
+                          src={image}
+                          alt=""
+                          loading="lazy"
+                        />
+                      )}
+                      <span
+                        className="clover-annotations-text"
+                        {...languageProps(
+                          annotation.label ? annotation.lang : undefined,
+                        )}
+                      >
+                        {annotation.label ?? String(index + 1)}
+                      </span>
                     </span>
                   </label>
                 );

@@ -1,0 +1,107 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://iiif.io/api/cookbook/recipe/0045-css/manifest.json",
+  "type": "Manifest",
+  "label": {
+    "en": ["Koto, chess, calligraphy, and painting"],
+    "ja": ["琴棋書画図屏風"]
+  },
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0045-css/canvas/p1",
+      "type": "Canvas",
+      "height": 3966,
+      "width": 8800,
+      "items": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0045-css/page/p1/1",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0045-css/annotation/p0001-image",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/max/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "height": 3966,
+                "width": 8800,
+                "service": [
+                  {
+                    "id": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004",
+                    "profile": "level1",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0045-css/canvas/p1"
+            }
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0045-css/page/p2/1",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0045-css/page/p2/anno-1",
+              "type": "Annotation",
+              "motivation": "commenting",
+              "stylesheet": "https://iiif.io/api/cookbook/recipe/0045-css/style.css",
+              "body": {
+                "id": "https://iiif.io/api/cookbook/recipe/0045-css/body/sr1",
+                "type": "SpecificResource",
+                "styleClass": "author1note",
+                "source": {
+                  "id": "https://iiif.io/api/cookbook/recipe/0045-css/body/text1",
+                  "type": "TextualBody",
+                  "language": "en",
+                  "format": "text/html",
+                  "value": "<p>Three of the four pursuits of refined and noble men named in the screen's title are shown on this side of the screen: go, the koto, and tools for calligraphy. Each is in a container or wrapper. (GR)</p>"
+                }
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": "https://iiif.io/api/cookbook/recipe/0045-css/canvas/p1",
+                "styleClass": "author2highlight",
+                "selector": {
+                  "type": "FragmentSelector",
+                  "value": "xywh=700,1250,1850,1150"
+                }
+              }
+            },
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0045-css/page/p2/anno-2",
+              "type": "Annotation",
+              "motivation": "commenting",
+              "stylesheet": "https://iiif.io/api/cookbook/recipe/0045-css/style.css",
+              "body": {
+                "id": "https://iiif.io/api/cookbook/recipe/0045-css/body/sr2",
+                "type": "SpecificResource",
+                "styleClass": "author2note",
+                "source": {
+                  "id": "https://iiif.io/api/cookbook/recipe/0045-css/body/text2",
+                  "type": "TextualBody",
+                  "language": "en",
+                  "format": "text/html",
+                  "value": "<p>The detail in the natural beauty of the setting could be seen as a contrast (or balance) to the manufactured pursuits of noble men. (TK)</p>"
+                }
+              },
+              "target": {
+                "type": "SpecificResource",
+                "source": "https://iiif.io/api/cookbook/recipe/0045-css/canvas/p1",
+                "styleClass": "author2highlight",
+                "selector": {
+                  "type": "FragmentSelector",
+                  "value": "xywh=170,160,2200,1000"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

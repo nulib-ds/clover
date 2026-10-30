@@ -9,7 +9,7 @@ import React, {
 } from "react";
 
 import { toPlainText } from "../../core/text";
-import { type LanguageMapLike, localize } from "../../core/value";
+import { type LanguageMapLike, hrefLangOf, localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import {
@@ -25,6 +25,7 @@ import {
   resourceOf,
   useProvider,
 } from "../Primitives/resource";
+import { languageProps } from "../../core/direction";
 
 /**
  * `provider` and the `logo` on each: who provided the resource, IIIF's Agents, each with
@@ -59,9 +60,13 @@ const isAgent = (value: unknown): value is Json =>
 const isImage = (value: unknown): value is Json =>
   Boolean(value) && typeof (value as Json).id === "string";
 
-/** An Agent's homepage: the first with an address. */
-const homepageOf = (agent: Json): string | undefined =>
-  asArray<Json>(agent.homepage).find(isImage)?.id;
+/** An Agent's homepage: the first with an address, and its page's language. */
+const homepageOf = (
+  agent: Json,
+): { id: string; hrefLang?: string } | undefined => {
+  const page = asArray<Json>(agent.homepage).find(isImage);
+  return page ? { id: page.id, hrefLang: hrefLangOf(page) } : undefined;
+};
 
 /** What names an Agent: its label, else its homepage's. */
 const nameOf = (agent: Json | null, language?: string) => {
@@ -153,7 +158,7 @@ function ProviderItem({
   children,
 }: {
   agent: Json;
-  homepage: string | undefined;
+  homepage: { id: string; hrefLang?: string } | undefined;
   children: React.ReactNode;
 }) {
   // Its link, or its span where it has no homepage.
@@ -169,7 +174,15 @@ function ProviderItem({
       <ProviderContext.Provider value={agent}>
         <LogoFailed.Provider value={failed}>
           {homepage ? (
-            <a ref={content} href={homepage} className="clover-provider-link">
+            <a
+              ref={content}
+              href={homepage.id}
+              // In a tab of its own, as the other links away from the viewer open.
+              target="_blank"
+              rel="noopener noreferrer"
+              hrefLang={homepage.hrefLang}
+              className="clover-provider-link"
+            >
               {children}
             </a>
           ) : (
@@ -241,9 +254,9 @@ export function Logo({
             src={image.id}
             alt={alt ?? name?.text ?? t("logo")}
             // The language its alt is in, while the alt is Clover's or the provider's.
-            lang={
-              alt !== undefined ? undefined : name ? name.lang : langOf("logo")
-            }
+            {...languageProps(
+              alt !== undefined ? undefined : name ? name.lang : langOf("logo"),
+            )}
             width={image.width}
             height={image.height}
             loading="lazy"

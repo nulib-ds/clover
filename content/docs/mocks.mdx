@@ -307,6 +307,38 @@ into `source.json` again and run `npm run build:mocks`. The package's tests use 
 `packages/clover/src/fixtures/mocks/paged/`; copy the published file there again after a
 change.
 
+## Annotation collection: a catalog's lines, at scale
+
+A scaled AnnotationCollection example: many annotations on many Canvases, managed as one
+whole, as [Cookbook recipe 0309](https://iiif.io/api/cookbook/recipe/0309-annotation-collection/)
+groups a newspaper's layout markup, but large enough to try a viewer whose pages load as
+the reader reaches them. It is the catalog of [Paged](#paged-a-catalog-in-spreads) (its
+31 Canvases, their images, spreads and sections), with:
+
+- each line of text the machine read on a page (the same OCR, Apple's Vision framework,
+  not corrected by hand) as a `tagging` annotation on the box it was read from, its words
+  as its body: 569 annotations on 28 pages (the inside covers and Page 1 have none);
+- one AnnotationPage of lines for each of those pages, referenced from its Canvas, each
+  `partOf` the one AnnotationCollection and giving its `next` and `prev`;
+- the AnnotationCollection, "Lines of text, read by machine", with its `total` (569),
+  `first` and `last`, as a document of its own and in each of the Manifest's references,
+  as the recipe advises, so a viewer names and counts it before it fetches a page;
+- none of Paged's own annotations (its tags, its OCR by line and by word) and no Content
+  Search service, so the lines are its only annotations.
+
+| Resource             | Published (static)                                                                                                                                        | Live (`npm run dev`)                               |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| Manifest             | [`/mocks/annotation-collection/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/manifest.json)                    | `/api/mocks/annotation-collection/manifest.json`   |
+| AnnotationCollection | [`/mocks/annotation-collection/collection.json`](https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/collection.json)                | `/api/mocks/annotation-collection/collection.json` |
+| A page's lines       | [`/mocks/annotation-collection/lines/7.json`](https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/7.json) (its Canvas's place) | `/api/mocks/annotation-collection/lines/7.json`    |
+
+In Clover, the Default template names the Collection under the Manifest's title, with a
+pager among its annotations that opens on the first ("1 / 569"); the pages load as the
+pager or its list reaches them, as do the Panel's Annotations. Its generator is
+`docs/mocks/annotation-collection/index.mjs`, which builds on Paged's: run
+`npm run build:mocks` after either changes. The images are Northwestern's, as Paged's
+are.
+
 ## Transcripts: a film's captions and its transcript
 
 The IIIF Cookbook's [recipe 0219](https://iiif.io/api/cookbook/recipe/0219-using-caption-file/),

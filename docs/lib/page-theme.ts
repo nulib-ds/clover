@@ -1,6 +1,9 @@
 import { useSyncExternalStore } from "react";
 
-import { hexToHueSaturation } from "docs/components/Playground/playground-config";
+import {
+  accentPresets,
+  hexToHueSaturation,
+} from "docs/components/Playground/playground-config";
 import { fontPresets } from "docs/lib/preview-fonts";
 
 /**
@@ -42,6 +45,7 @@ const FONT_PROPERTIES = ["--font-sans"];
 
 const ACCENT_PROPERTIES = [
   "--accent-9",
+  "--accent-text-share",
   "--nextra-primary-hue",
   "--nextra-primary-saturation",
 ];
@@ -96,6 +100,12 @@ const applyTo = (root: HTMLElement, { accent, font }: Partial<PageTheme>) => {
     if (accent && isHexColor(accent)) {
       const { hue, saturation } = hexToHueSaturation(accent);
       root.style.setProperty("--accent-9", accent);
+      // A preset too dark for its usual text step on a dark page mixes in more white.
+      const darkText = accentPresets.find(
+        (preset) => preset.value.toLowerCase() === accent.toLowerCase(),
+      )?.darkText;
+      if (darkText) root.style.setProperty("--accent-text-share", darkText);
+      else root.style.removeProperty("--accent-text-share");
       root.style.setProperty("--nextra-primary-hue", `${hue}deg`);
       root.style.setProperty("--nextra-primary-saturation", `${saturation}%`);
     } else {

@@ -6,6 +6,7 @@ import { useReadMore } from "../../ui/ReadMore";
 import { useUniqueId } from "../../ui/useUniqueId";
 import type { HostedProps } from "../host";
 import { useWatched } from "./nodes";
+import { languageProps } from "../../core/direction";
 
 /** The text it opens: its first child of the page's, never its own button. */
 const textOf = (element: Element) =>
@@ -56,7 +57,7 @@ export function ReadMoreElement({ hosted }: HostedProps) {
       aria-controls={text.id || fallbackId}
       onClick={toggle}
       ref={own.ref}
-      lang={own.langOf(open ? "readLess" : "readMore")}
+      {...languageProps(own.langOf(open ? "readLess" : "readMore"))}
     >
       {open ? t("readLess") : t("readMore")}
     </button>

@@ -5,6 +5,7 @@ import { join } from "../../lib/classnames";
 import { useStatus } from "../../react/hooks";
 import { Loading } from "../../ui/Loading";
 import { visuallyHidden } from "../../ui/visuallyHidden";
+import { languageProps } from "../../core/direction";
 
 export interface StatusProps {
   className?: string;
@@ -46,7 +47,10 @@ export function Status({
       >
         {busy && (own ? loading : loading === undefined && <Loading />)}
         {busy && !own && (
-          <span style={visuallyHidden} lang={langOf("statusLoading")}>
+          <span
+            style={visuallyHidden}
+            {...languageProps(langOf("statusLoading"))}
+          >
             {t("statusLoading")}
           </span>
         )}
@@ -61,7 +65,9 @@ export function Status({
             renderError(error)
           ) : (
             <>
-              <p lang={langOf("statusError")}>{t("statusError")}</p>
+              <p {...languageProps(langOf("statusError"))}>
+                {t("statusError")}
+              </p>
               {/* The error's own words: English, as the browser and Clover write them. */}
               <p className="clover-status-detail" lang="en">
                 {error.message}

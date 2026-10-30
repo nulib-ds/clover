@@ -50,12 +50,18 @@
     visibility 0s linear 120ms;
 }
 
-/* A picture above the words (a hotspot's image), as wide as the popover lets it be. */
+/*
+ * A picture above the words (a hotspot's image, Cookbook 0377), as wide as the popover
+ * lets it be and no taller than Items' pictures (Mat, 2026-10-29), as in Annotations.
+ */
 .clover-tip-image {
   display: block;
+  width: auto;
   max-width: 100%;
   height: auto;
-  margin-block-end: var(--clover-space-2xs);
+  max-height: var(--clover-items-height, 8rem);
+  /* Over its words, as the parts of one item are (Mat, 2026-10-29). */
+  margin-block-end: var(--clover-space-xs);
   border-radius: calc(var(--clover-radius, 3px) / 2);
 }
 
@@ -204,6 +210,12 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
  * `xs` border on the hotspot's side, clear (`background-clip`), rather than `::before`.
  */
 :is(button, a).clover-canvas-annotation > .clover-tip {
+  /*
+   * Its words from the start of their line, as text reads: left, or right in a language
+   * written right to left (its `dir`). Never centered, as the button around it would
+   * have them (Mat, 2026-10-29).
+   */
+  text-align: start;
   --clover-tip-x: clamp(
     var(--clover-space-xs) - var(--clover-overlay-x, 50cqw),
     -50%,

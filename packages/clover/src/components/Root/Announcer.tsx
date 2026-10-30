@@ -9,6 +9,7 @@ import {
 import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { visuallyHidden } from "../../ui/visuallyHidden";
+import { languageProps } from "../../core/direction";
 
 /**
  * Says where the reader has moved to — the Canvas's label and its position — in a polite
@@ -65,11 +66,13 @@ export function Announcer({
     >
       {message?.label ? (
         <>
-          <span lang={message.lang}>{message.label}</span>,{" "}
+          <span {...languageProps(message.lang)}>{message.label}</span>,{" "}
         </>
       ) : null}
       {message && (
-        <span lang={langOf("canvasPosition")}>{message.position}</span>
+        <span {...languageProps(langOf("canvasPosition"))}>
+          {message.position}
+        </span>
       )}
     </div>
   );

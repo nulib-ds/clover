@@ -1,6 +1,7 @@
 import React from "react";
 import { toggleFullscreen } from "../lib/fullscreen";
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
+import { languageProps } from "../core/direction";
 
 /**
  * The way out of full screen. `hidden` unless its root is full screen, so it stays out of
@@ -13,7 +14,7 @@ const ExitFullscreen: React.FC<{ hidden?: boolean }> = ({ hidden }) => {
   return (
     <button
       aria-label={label}
-      lang={langOf("imageExitFullScreen")}
+      {...languageProps(langOf("imageExitFullScreen"))}
       className="clover-canvas-exit-full-screen"
       hidden={hidden}
       onClick={(event) => void toggleFullscreen(event.currentTarget)}

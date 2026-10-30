@@ -87,9 +87,11 @@ describe("the scale", () => {
       for (const { property, value } of declarations(
         readFileSync(file, "utf8"),
       )) {
+        // `inherit`, `!important` or not (over MapLibre's own on its map), is the page's.
         if (
           property === "font-family" ||
-          (property === "font" && value !== "inherit")
+          (property === "font" &&
+            value.replace(/\s*!important$/, "") !== "inherit")
         )
           set.push(`${relative(SRC, file)}: ${property}: ${value}`);
       }

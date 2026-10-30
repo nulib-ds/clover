@@ -9,6 +9,7 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { Tip } from "../../ui/Tip";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { useReadingLanguages } from "./ReadingLanguages";
+import { languageProps } from "../../core/direction";
 
 // The language row, loaded only for a resource that has languages to offer.
 const LanguageChoice = lazy(() =>
@@ -96,7 +97,7 @@ function DownloadButton({
         id={button}
         className="clover-about-download-button"
         aria-label={t("download")}
-        lang={langOf("download")}
+        {...languageProps(langOf("download"))}
         aria-expanded={open}
         aria-controls={open ? `${button}-menu` : undefined}
         onClick={() => setOpen((was) => !was)}

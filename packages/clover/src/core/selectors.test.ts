@@ -1,5 +1,7 @@
 import { navigationOf } from "./clover";
-import { partOfCollection, selectCanvas } from "./selectors";
+import { partOfCollection, selectCanvas, selectStart } from "./selectors";
+import { p4 } from "../fixtures/presentation4";
+import startJson from "../fixtures/iiif-cookbook/0015-start.json";
 
 const collection = {
   id: "https://example.org/collection",
@@ -80,5 +82,16 @@ describe("navigationOf", () => {
     at.goTo("https://example.org/2");
     expect(clover.next).toHaveBeenCalled();
     expect(clover.goTo).toHaveBeenCalledWith("https://example.org/2");
+  });
+});
+
+describe("selectStart", () => {
+  it("starts a recording at the time its Manifest's start gives (Cookbook 0015)", () => {
+    // Its PointSelector's `t`, as the upgrader writes it in Presentation 4 (`instant`).
+    expect(selectStart(p4(startJson as any) as any)).toEqual({
+      canvasId:
+        "https://iiif.io/api/cookbook/recipe/0015-start/canvas/segment1",
+      time: 120.5,
+    });
   });
 });

@@ -28,7 +28,8 @@
 }
 
 /*
- * Their titles at the panel's own size; the line under each stays the caption's `s`. Each
+ * Their titles at the panel's own size; the lines under each, its date and summary, stay
+ * the caption's `s`, a step down. Each
  * wraps, never cut short: the words that tell members apart (a date, a volume) often come
  * last, and must still show at 320 CSS px and under a reader's own text spacing (WCAG
  * 1.4.10, 1.4.12). A long one makes its member taller than its thumbnail.
@@ -38,11 +39,27 @@
   font-size: inherit;
 }
 
-.clover-collection .clover-items-summary {
+.clover-collection :is(.clover-items-date, .clover-items-summary) {
   font-size: var(--clover-text-s);
 }
 
 .clover-collection :is(.clover-items-label, .clover-items-summary) {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+/*
+ * A content state's targets, listed as its members are (`TargetsSection`, the Panel's
+ * Views): their label, where the content state gives one, and the steps between them on
+ * one line, the steps at its end; on a narrow one, the steps under it.
+ */
+.clover-targets-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--clover-space-s);
+}
+
+.clover-targets-head > .clover-targets-steps {
+  margin-inline-start: auto;
 }

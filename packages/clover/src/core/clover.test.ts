@@ -1,6 +1,13 @@
 import bookJson from "../fixtures/iiif-cookbook/0009-book-1.json";
+import compareJson from "../fixtures/iiif-cookbook/0540-link-for-opening-multiple-canvases-annotation.json";
+import monumentsJson from "../fixtures/iiif-cookbook/0540-link-for-opening-multiple-canvases-manifest.json";
+import colosseumJson from "../fixtures/iiif-cookbook/0540-link-for-opening-multiple-canvases-manifest-2.json";
 import { createClover } from "./clover";
-import { selectSequence, selectVisibleCanvases } from "./selectors";
+import {
+  selectSequence,
+  selectTargetIndex,
+  selectVisibleCanvases,
+} from "./selectors";
 
 const BOOK = bookJson.id;
 const canvasIds = bookJson.items.map((canvas) => canvas.id);
@@ -683,5 +690,69 @@ describe("createClover: annotations as the content", () => {
     const clover = createClover({ request: { fetch: mockFetch({}) } });
     await clover.load(lone);
     expect(clover.store.get().status).toBe("error");
+  });
+});
+
+// Cookbook 0540: one content state naming two Canvases, each from its own Manifest.
+describe("createClover: a content state's several targets", () => {
+  const [colosseum, monuments] = compareJson.target;
+  const table = {
+    [colosseum.partOf[0].id]: colosseumJson,
+    [monuments.partOf[0].id]: monumentsJson,
+  };
+  const current = (clover: ReturnType<typeof createClover>) => {
+    const { targets, targetIndex, manifest, canvasId } = clover.store.get();
+    return selectTargetIndex(targets, targetIndex, manifest, canvasId);
+  };
+
+  it("opens on the first, holding them all, each to be gone to in turn", async () => {
+    const onManifestChange = vi.fn();
+    const clover = createClover({
+      request: { fetch: mockFetch(table) },
+      onManifestChange,
+    });
+    await clover.load(encode(compareJson));
+    const { targets, manifest, canvasId } = clover.store.get();
+    expect(targets?.items.map((target) => target.canvasId)).toEqual([
+      colosseum.id,
+      monuments.id,
+    ]);
+    expect(manifest?.id).toBe(colosseumJson.id);
+    expect(canvasId).toBe(colosseum.id);
+    // Current, though the Manifest's own id is not the address it was named by.
+    expect(current(clover)).toBe(0);
+
+    clover.goToTarget(1);
+    await vi.waitFor(() =>
+      expect(clover.store.get().manifest?.id).toBe(monumentsJson.id),
+    );
+    // At its Canvas, the second of its two, not its first.
+    expect(clover.store.get().canvasId).toBe(monuments.id);
+    expect(current(clover)).toBe(1);
+    expect(onManifestChange).toHaveBeenLastCalledWith(monuments.partOf[0].id);
+    // The set holds through the move.
+    expect(clover.store.get().targets?.items).toHaveLength(2);
+
+    clover.goToTarget(0);
+    await vi.waitFor(() => expect(current(clover)).toBe(0));
+    expect(clover.store.get().canvasId).toBe(colosseum.id);
+  });
+
+  it("holds no set for one target, nor for other content", async () => {
+    const clover = createClover({ request: { fetch: mockFetch(table) } });
+    await clover.load(encode({ ...compareJson, target: [colosseum] }));
+    expect(clover.store.get().targets).toBeNull();
+    await clover.load(colosseum.partOf[0].id);
+    expect(clover.store.get().targets).toBeNull();
+  });
+
+  it("names none current where the reader moves to a view none names", async () => {
+    const clover = createClover({ request: { fetch: mockFetch(table) } });
+    await clover.load(encode(compareJson));
+    clover.goToTarget(1);
+    await vi.waitFor(() => expect(current(clover)).toBe(1));
+    // The Manifest's other Canvas, the Temple of Vesta, is not a target.
+    clover.goTo(selectSequence(clover.store.get().manifest).canvases[0].id);
+    expect(current(clover)).toBe(-1);
   });
 });

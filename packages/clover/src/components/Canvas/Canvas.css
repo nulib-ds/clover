@@ -34,7 +34,8 @@
   /* A <figure>, whose caption is the Canvases' information: no browser margins. */
   margin: 0;
   /* The Viewer's default canvas ground: a translucent wash, for images and media alike. */
-  background-color: #0001;
+  --clover-canvas-wash: #0001;
+  background-color: var(--clover-canvas-wash);
   width: 100%;
   height: 100%;
   min-height: inherit;
@@ -43,20 +44,26 @@
 }
 
 /*
- * Full screen, for a `Canvas` used on its own — as `Image` does it: the page's background
- * and type color set together, the exit control revealed (direct child only, so a nested
- * one stays quiet), and the navigator dropped below it.
+ * Full screen, for a `Canvas` used on its own: its wash kept, over the page's ground it
+ * lay on, so it looks as it did on the page (Mat, 2026-10-29), and the type color set
+ * with it. The exit control is revealed where the Canvas offers it (`data-exit`: full
+ * screen itself, or first in its Root that is; direct child only, so a nested one stays
+ * quiet), and the navigator dropped below it.
  */
 .clover-canvas[data-fullscreen="true"] {
+  background-image: linear-gradient(
+    var(--clover-canvas-wash),
+    var(--clover-canvas-wash)
+  );
   background-color: var(--clover-color-secondary, #fff);
   color: var(--clover-color-primary, #1a1d1e);
 }
 
-.clover-canvas[data-fullscreen="true"] > .clover-canvas-exit-full-screen {
+.clover-canvas[data-exit] > .clover-canvas-exit-full-screen {
   display: flex;
 }
 
-.clover-canvas[data-fullscreen="true"] > .clover-canvas-navigator {
+.clover-canvas[data-exit] > .clover-canvas-navigator {
   top: calc(
     var(--clover-canvas-controls-inset) + var(--clover-control) +
       var(--clover-space-s)
@@ -124,6 +131,23 @@
 .clover-canvas-dom-media {
   display: block;
   -webkit-user-drag: none;
+}
+
+/*
+ * Text an animation paints at a time (Cookbook 0489), in its region: laid out in the
+ * scene's units, its size fitted to the region (`FrameAnimation`), and set in the page's
+ * own face and color.
+ */
+.clover-canvas-dom-media.clover-canvas-painted-text {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  color: var(--clover-color-primary, currentColor);
+  line-height: 1.2;
+}
+
+.clover-canvas-painted-text > * {
+  margin: 0;
 }
 
 /* ============================ Controls ============================= */

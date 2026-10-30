@@ -104,6 +104,19 @@ export const CAPABILITIES = {
     parts: ["Annotations", "Body"],
     resource: "tagging",
   },
+  annotationCollections: {
+    says: "AnnotationCollections: annotation pages across Canvases read as one named layer, their annotations stepped and listed as a Collection's members are.",
+    words: [
+      "annotation collection",
+      "annotationcollection",
+      "layer",
+      "layers",
+      "markup",
+      "crowdsourcing",
+    ],
+    parts: ["Items", "Annotations", "Body"],
+    resource: "layers",
+  },
   transcripts: {
     says: "Captions and plain-text transcripts, following a recording as it plays.",
     words: ["transcript", "captions", "subtitles", "webvtt", "vtt"],

@@ -118,6 +118,13 @@ named by it, carries its language as `lang`, so a screen reader pronounces it co
 the `Root`. A part of your own does the same with `useT` and `useLangOf`, as
 [Languages](/docs/composing#languages) in Composing layouts shows.
 
+Text in a language written right to left (Arabic, Hebrew, Persian, Urdu…) carries
+`dir="rtl"` beside its `lang`, so its words run and its punctuation sits as they are
+written on a page written either way: Clover's own strings in such a language, and the
+resource's labels, summaries, metadata and annotations alike. Text in a language written
+left to right takes the page's direction. Fields are the exception: a search field's
+direction is the reader's typing, not its placeholder's.
+
 ## Adding a language to Clover
 
 A language added to Clover itself ships to everyone. In

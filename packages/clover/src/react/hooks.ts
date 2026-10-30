@@ -1,7 +1,9 @@
 import { useMemo } from "react";
 
 import {
+  type AnnotationCollection,
   type AnnotationSet,
+  selectAnnotationCollection,
   selectAnnotationSets,
 } from "../core/annotation-sets";
 import {
@@ -75,6 +77,18 @@ export function useNavigation(): Navigation {
   return useMemo(
     () => navigationOf(clover, position, total),
     [clover, position, total],
+  );
+}
+
+/**
+ * Annotations walked as one whole: the AnnotationPage or AnnotationCollection given as
+ * the content, else the AnnotationCollection the Manifest's annotation pages are part of
+ * (Cookbook 0309). Its `id`, `type`, `label`, `total`, `pages` and its annotations so far
+ * (`entries`); null where there are none. `Items of="annotations"` walks them.
+ */
+export function useAnnotationCollection(): AnnotationCollection | null {
+  return useCloverSelector((state) =>
+    selectAnnotationCollection(state.manifest, state.addedSets),
   );
 }
 

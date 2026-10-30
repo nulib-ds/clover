@@ -8,12 +8,13 @@ import {
   stepsOf,
 } from "./Items";
 import { itemsOf } from "../../core/items";
+import { resolveDirection } from "../../core/sequence";
 import { fetchResource } from "../../core/load";
 import type {
   Presentation4Collection,
   Manifest,
 } from "../../core/presentation";
-import type { LanguageMapLike } from "../../core/value";
+import { type LanguageMapLike, hrefLangOf } from "../../core/value";
 
 /** Items of a resource the component loads itself, or of a list it is handed. */
 export default function StandaloneItems({
@@ -58,6 +59,10 @@ export default function StandaloneItems({
   if (!items.length) return null;
 
   const isViews = !provided && resource?.type === "Manifest";
+  // The resource's own `viewingDirection` orders its views or members.
+  const direction = resolveDirection(
+    (resource as { viewingDirection?: unknown } | null)?.viewingDirection,
+  );
   const mode = navigation ?? (isViews ? "id" : "homepage");
   // A pager steps a selection over the list, and tells `onSelect` of each step.
   if (rest.layout === "pager") {
@@ -65,15 +70,16 @@ export default function StandaloneItems({
       <Pager
         {...rest}
         forwardedRef={forwardedRef}
-        steps={stepsOf(items, selected, "left-to-right", (item, event) => {
+        steps={stepsOf(items, selected, direction, (item, event) => {
           onSelect?.(item, event);
           setSelected(items.indexOf(item));
         })}
       />
     );
   }
-  const homepage = (resource as { homepage?: Array<{ id?: string }> } | null)
-    ?.homepage?.[0]?.id;
+  const page = (resource as { homepage?: Array<{ id?: string }> } | null)
+    ?.homepage?.[0];
+  const homepage = page?.id;
 
   return (
     <ItemsView
@@ -82,6 +88,7 @@ export default function StandaloneItems({
       items={items}
       selected={mode === "id" ? selected : -1}
       navigation={mode}
+      rtl={direction === "right-to-left"}
       request={request}
       showSummary={!isViews}
       heading={
@@ -90,6 +97,7 @@ export default function StandaloneItems({
               label: resource.label as LanguageMapLike,
               summary: (resource as { summary?: LanguageMapLike }).summary,
               homepage,
+              homepageLang: hrefLangOf(page),
             }
           : undefined
       }

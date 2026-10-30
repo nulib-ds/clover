@@ -19,7 +19,17 @@ export async function annotationsContent(
   json: Record<string, any>,
   options: LoadContentOptions,
 ): Promise<Loaded> {
-  const annotationSets = await loadAnnotationSets(json, options);
+  // Walked as one whole (`selectAnnotationCollection`), under its own name.
+  const content = {
+    id: String(json.id ?? ""),
+    type: /Collection/.test(String(json.type ?? json["@type"]))
+      ? ("AnnotationCollection" as const)
+      : ("AnnotationPage" as const),
+    ...(json.label ? { label: json.label } : {}),
+  };
+  const annotationSets = (await loadAnnotationSets(json, options)).map(
+    (set) => ({ ...set, content }),
+  );
   const entries = annotationSets.flatMap((set) => set.entries);
   const first =
     entries.find(

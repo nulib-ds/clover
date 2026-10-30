@@ -20,6 +20,9 @@ import { DownloadGroups, useDownloads } from "../Download/Download";
 import { Provider } from "../Provider/Provider";
 import { titleTag, titled } from "../../ui/heading";
 import { Label } from "../Label/Label";
+import { languageProps } from "../../core/direction";
+import { readNavDate } from "../../core/nav-date";
+import { NavDate } from "../../ui/NavDate";
 
 export interface AboutProps extends React.HTMLAttributes<HTMLElement> {
   /** Also show the current Canvas's summary, for Manifests that describe each image. */
@@ -172,7 +175,7 @@ function AboutContent({
       <section className="clover-about-section" {...group}>
         <Title
           className="clover-about-heading"
-          lang={langOf(titleKey)}
+          {...languageProps(langOf(titleKey))}
           {...title}
         >
           {t(titleKey)}
@@ -223,6 +226,12 @@ function AboutContent({
       <Summary className="clover-about-summary" />
       <Metadata className="clover-about-metadata" />
       <RequiredStatement className="clover-about-metadata" />
+      {/* Its date for navigation, as its metadata says its others (Cookbook 0318). */}
+      {section(
+        "aboutDate",
+        readNavDate(manifest.navDate),
+        <NavDate value={manifest.navDate} className="clover-about-date" />,
+      )}
       {section("aboutProvider", hasAny("provider"), <Provider />)}
       {section("aboutRights", manifest.rights, <Rights />)}
       {section("aboutHomepage", hasAny("homepage"), <Homepage />)}

@@ -1,4 +1,5 @@
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useUniqueId } from "../../ui/useUniqueId";
 
 import { DEFAULT_STYLE_URL, applyDefaultBasemap } from "./basemap";
@@ -27,6 +28,11 @@ import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useRootLanguage } from "../../react/language";
 import { getMapWorkerUrl } from "../../core/map-config";
 import { useNearViewport } from "../Body/useNearViewport";
+import { directionOf, languageProps } from "../../core/direction";
+import { Tip } from "../../ui/Tip";
+import { NavDate } from "../../ui/NavDate";
+import { formatNavDate, navDateTime, readNavDate } from "../../core/nav-date";
+import { cloverI18n, langWithin } from "../../i18n/config";
 
 export interface MapProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "onSelect"> {
@@ -61,6 +67,11 @@ export interface MapProps
   request?: CloverRequest;
   /** Standalone: the language to read IIIF text in. */
   language?: string;
+  /**
+   * The basemap's credits, behind an ⓘ in the map's lower corner. Default true. A basemap's license
+   * may ask for its credits: give them on the page yourself before setting this false.
+   */
+  credits?: boolean;
   as?: React.ElementType;
 }
 
@@ -113,10 +124,35 @@ export function ConnectedMap({
           ),
     [scope, all, shown],
   );
-  // Only a view's Canvases are current: standalone, nothing shows the Root's first one.
+  // The annotations pointed at and picked, as the Canvas's hotspots show them.
+  const picked = useOptionalCloverSelector((state) => state.annotationId, null);
+  const highlighted = React.useSyncExternalStore(
+    context.clover.highlight.subscribe,
+    context.clover.highlight.get,
+    context.clover.highlight.get,
+  );
+  const active = useMemo(
+    () =>
+      [picked, highlighted].filter(
+        (id): id is string => typeof id === "string",
+      ),
+    [picked, highlighted],
+  );
+  // Only a view's Canvases are current, with the member open among its Collection's:
+  // standalone, nothing shows the Root's first one.
+  const manifestId = useOptionalCloverSelector(
+    (state) => state.manifest?.id ?? null,
+    null,
+  );
   const current = useMemo(
-    () => (scope === "view" ? shown.map((canvas) => canvas.id) : undefined),
-    [scope, shown],
+    () =>
+      scope === "view"
+        ? [
+            ...shown.map((canvas) => canvas.id),
+            ...(manifestId ? [manifestId] : []),
+          ]
+        : undefined,
+    [scope, shown, manifestId],
   );
   return (
     <MapView
@@ -124,12 +160,31 @@ export function ConnectedMap({
       features={features}
       overlays={overlays}
       current={current}
+      activeAnnotations={active}
+      onHighlight={(feature) =>
+        context.clover.highlight.emit(feature?.properties.annotationId ?? null)
+      }
       language={context.language}
       request={context.clover.request}
       onSelect={(feature) => {
         onSelect?.(feature);
-        const canvasId = feature.properties.canvasId;
-        if (canvasId) context.clover.goTo(canvasId);
+        // An annotation's place: the annotation, so its region is framed (Cookbook 0139).
+        // One the annotations do not list (it has no name): its Canvas, as before.
+        const {
+          annotationId,
+          canvasId,
+          manifestId: member,
+        } = feature.properties;
+        // Another member's place: that member, as its row in the Collection opens it.
+        if (member && member !== context.clover.store.get().manifest?.id) {
+          void context.clover.goToManifest(member);
+          return;
+        }
+        if (annotationId) context.clover.selectAnnotation(annotationId);
+        const selected =
+          annotationId !== undefined &&
+          context.clover.store.get().annotationId === annotationId;
+        if (!selected && canvasId) context.clover.goTo(canvasId);
       }}
     />
   );
@@ -144,7 +199,14 @@ export function GivenMap({
   navPlace,
   georeferences,
   ...rest
-}: Omit<MapProps, "iiifContent" | "request" | "language"> & Forwarded) {
+}: Omit<MapProps, "iiifContent" | "request" | "language"> &
+  Forwarded & {
+    /** A region of its own; false inside a box that names it (`Canvas/PlaceBox`). */
+    landmark?: boolean;
+    language?: string;
+    /** Its places listed under it; false where what holds it names its one place. */
+    list?: boolean;
+  }) {
   const features = useGiven(navPlace, (value) =>
     navPlaceOf(
       {
@@ -183,8 +245,11 @@ const NAVPLACE = "geomap-navplace";
 const FILL = "geomap-navplace-fill";
 const LINE = "geomap-navplace-line";
 const CASING = "geomap-navplace-casing";
+const ACCENT = "geomap-navplace-accent";
 const POINT = "geomap-navplace-point";
-const CLICKABLE = [FILL, LINE, POINT];
+const POINT_EDGE = "geomap-navplace-point-edge";
+const POINT_HIT = "geomap-navplace-point-hit";
+const CLICKABLE = [FILL, CASING, LINE, POINT_HIT, POINT];
 
 interface ViewProps
   extends Omit<
@@ -194,18 +259,31 @@ interface ViewProps
     Forwarded {
   features: MapFeatureCollection;
   overlays: Georeference[];
-  /** The Canvases in view: their places are the current ones. */
+  /** The Canvases in view, and the Manifest open among its Collection's: their places are the current ones. */
   current?: string[];
   /** The language to name overlays in. */
   language?: string;
   /** A region of its own. Default true; false in a panel, whose section is one. */
   landmark?: boolean;
+  /** The annotations pointed at or picked beside it: their places show active. */
+  activeAnnotations?: string[];
+  /**
+   * Its places listed under it, the map's text and the keyboard's way to each. Default
+   * true; false where what holds the map names its one place (`Canvas/PlaceBox`).
+   */
+  list?: boolean;
+  /** The place pointed at on the map, and null as the pointer leaves the places. */
+  onHighlight?: (feature: MapFeature | null) => void;
 }
 
 function MapView({
   features,
   overlays,
   current,
+  activeAnnotations,
+  onHighlight,
+  list = true,
+  credits = true,
   language,
   landmark = true,
   overlay = true,
@@ -234,15 +312,31 @@ function MapView({
   const [box, setBox] = useState<HTMLDivElement | null>(null);
   const near = useNearViewport(box);
   const [map, setMap] = useState<any>(null);
+  // MapLibre's controls, each with Clover's popover in it.
+  const [tips, setTips] = useState<{ element: Element; key: string }[]>([]);
   const [failed, setFailed] = useState(false);
   // The overlays on the map, by id, once their images are drawn.
   const [drawnIds, setDrawnIds] = useState<ReadonlySet<string>>(NO_IDS);
-  const latest = useRef({ onSelect, t });
-  latest.current = { onSelect, t };
+  const latest = useRef({
+    onSelect,
+    onHighlight,
+    t,
+    features,
+    host: root.hostLanguage,
+  });
+  latest.current = {
+    onSelect,
+    onHighlight,
+    t,
+    features,
+    host: root.hostLanguage,
+  };
   // Names a place in a popup at a point, once MapLibre is up.
   const name = useRef<((feature: MapFeature, at: unknown) => void) | null>(
     null,
   );
+  // Reads new places: what was named, pointed at or picked among the old ones let go.
+  const reread = useRef<((next: MapFeatureCollection) => void) | null>(null);
   // The extent last framed.
   const framed = useRef("");
 
@@ -252,6 +346,8 @@ function MapView({
     let live = true;
     let instance: any = null;
     let observer: ResizeObserver | null = null;
+    // Its listener on the page for Escape, let go with the map.
+    let letGo: (() => void) | null = null;
     // MapLibre and its worker together: a page that sets no worker gets Clover's.
     Promise.all([import("maplibre-gl"), import("./worker")])
       .then(([module, bundled]) => {
@@ -273,7 +369,8 @@ function MapView({
           maxPitch: 0,
           dragRotate: false,
           scrollZoom,
-          attributionControl: { compact: true },
+          // Its credits behind their ⓘ, in the lower corner; none where left out.
+          attributionControl: credits ? { compact: true } : false,
           // MapLibre's own names, in Clover's words; kept current below.
           locale: {
             "Map.Title": t("mapLabel"),
@@ -283,40 +380,176 @@ function MapView({
           },
         });
         if (!landmark) instance.getCanvas().setAttribute("role", "group");
+        // Zoom in and out in a row at its lower left, the credits' ⓘ at its lower right
+        // (Mat, 2026-10-29: "move these controls to bottom left. align them
+        // horizontally").
         instance.addControl(
           new maplibre.NavigationControl({ showCompass: false }),
-          "top-right",
+          "bottom-left",
         );
         instance.on("load", () => {
           if (!live) return;
           if (!styleUrl) applyDefaultBasemap(instance);
-          // Credits behind their ⓘ, so they do not cover a small map; one press away.
-          // Closed as well as hidden, so the toggle says it is collapsed.
+          /*
+           * Credits behind their ⓘ, one press away, as the Canvas's information is: closed
+           * as well as hidden, so the toggle says it is collapsed.
+           */
           const attrib = container.current?.querySelector(
             ".maplibregl-ctrl-attrib",
           );
           attrib?.classList.remove("maplibregl-compact-show");
           attrib?.removeAttribute("open");
-          addPlaceLayers(instance, accentOf(container.current));
+          addPlaceLayers(instance, colorsOf(container.current));
+          /*
+           * A place's name, as a hotspot's on the Canvas names it (`ui/Tip.css`, "A
+           * hotspot's"): the popover's look, no arrow, hung `xs` off the side of the place
+           * with more room, below or above, centered on it and kept `xs` inside the map as
+           * it moves. Shown while the pointer is over the place; the one picked (pressed,
+           * or chosen from the list) stays named until another is pointed at, a press off
+           * the places, or Escape (WCAG 1.4.13).
+           */
           let popup: any = null;
-          name.current = (feature, at) => {
+          let picked: MapFeature | null = null;
+          let shown = "";
+          // Which place is pointed at, and which picked, by its place in the data.
+          let hovered: number | undefined;
+          let pickedId: number | undefined;
+          const idOf = (feature: MapFeature) =>
+            typeof feature.id === "number" && feature.id >= 0
+              ? feature.id
+              : latest.current.features.features.indexOf(feature);
+          const mark = (id: number | undefined, key: string, on: boolean) => {
+            if (id !== undefined && id >= 0)
+              instance.setFeatureState?.(
+                { source: NAVPLACE, id },
+                { [key]: on },
+              );
+          };
+          const pick = (feature: MapFeature | null) => {
+            mark(pickedId, "picked", false);
+            pickedId = feature ? idOf(feature) : undefined;
+            mark(pickedId, "picked", true);
+          };
+          const keyOf = (feature: MapFeature) =>
+            JSON.stringify(feature.properties ?? {});
+          const gap = () =>
+            0.382 *
+            (parseFloat(getComputedStyle(document.documentElement).fontSize) ||
+              16);
+          const unname = () => {
             popup?.remove();
             popup = null;
+            shown = "";
+          };
+          const show = (feature: MapFeature) => {
+            if (shown === keyOf(feature) && popup) return;
+            unname();
             const title = feature.properties?.title;
-            if (!title) return;
+            const bounds = boundsOf([feature]);
+            if (!title || !bounds) return;
             // Text in a span, never markup, so the title can carry its language.
             const text = document.createElement("span");
             text.textContent = String(title);
             const lang = feature.properties?.titleLang;
-            if (lang !== undefined) text.lang = String(lang);
+            const marked = (element: HTMLElement, tag: string | undefined) => {
+              if (tag === undefined) return;
+              element.lang = tag;
+              const dir = directionOf(tag);
+              if (dir) element.dir = dir;
+            };
+            const nameLang = lang === undefined ? undefined : String(lang);
+            marked(text, nameLang);
+            // Its owner's date under it, as the list gives it (Cookbook 0318), marked
+            // where its language is not the name's.
+            const date = readNavDate(feature.properties?.navDate);
+            if (date) {
+              const locale = cloverI18n.language;
+              const time = document.createElement("time");
+              time.className = "clover-geomap-popup-date";
+              time.dateTime = navDateTime(
+                date,
+                String(feature.properties.navDate),
+              );
+              time.textContent = formatNavDate(date, locale);
+              marked(time, langWithin(locale, nameLang ?? latest.current.host));
+              text.append(time);
+            }
+            const [[west, south], [east, north]] = bounds;
+            const middle = (west + east) / 2;
+            const room = instance.getContainer?.()?.clientHeight ?? 0;
+            const top = instance.project?.([middle, north])?.y ?? 0;
+            const foot = instance.project?.([middle, south])?.y ?? 0;
+            const below = room - foot >= top;
+            const away = gap();
+            hangs = below ? away : -away;
             popup = new maplibre.Popup({
               closeButton: false,
-              offset: 8,
+              closeOnClick: false,
+              anchor: below ? "top" : "bottom",
+              offset: [0, hangs],
+              maxWidth: "none",
               className: "clover-geomap-popup",
             })
-              .setLngLat(at)
+              .setLngLat(below ? [middle, south] : [middle, north])
               .setDOMContent(text)
               .addTo(instance);
+            shown = keyOf(feature);
+            keepInside();
+          };
+          /*
+           * `xs` inside the map, wherever the place is moved to: across, and down, where
+           * the side it hangs on has too little room (a place as tall as the map), over
+           * the place, to its edge in sight, as a hotspot's name moves.
+           */
+          let hangs = 0;
+          const keepInside = () => {
+            const element = popup?.getElement?.();
+            const box = instance.getContainer?.()?.getBoundingClientRect?.();
+            if (!element || !box || !popup.setOffset) return;
+            const away = gap();
+            popup.setOffset([0, hangs]);
+            const own = element.getBoundingClientRect();
+            const across =
+              own.left < box.left + away
+                ? box.left + away - own.left
+                : own.right > box.right - away
+                  ? box.right - away - own.right
+                  : 0;
+            const down =
+              own.top < box.top + away
+                ? box.top + away - own.top
+                : own.bottom > box.bottom - away
+                  ? box.bottom - away - own.bottom
+                  : 0;
+            if (across || down) popup.setOffset([across, hangs + down]);
+          };
+          instance.on("move", keepInside);
+          /*
+           * New places (another Canvas, another member): a name, a pointer's place and a
+           * pick belong to the places they were made for (Mat, 2026-10-29: "toggling between
+           * collection items still leaves remnant popover. clear these on canvas
+           * changes"). Every place's state goes, as ids are their places in the data; the
+           * one picked is kept only where the new places hold it, the same place under the
+           * same name, picked again there, its name as it was.
+           */
+          reread.current = (next) => {
+            instance.removeFeatureState?.({ source: NAVPLACE });
+            hovered = undefined;
+            const placeOf = (feature: MapFeature) =>
+              JSON.stringify([feature.properties, feature.geometry]);
+            const kept = picked
+              ? next.features.find((f) => placeOf(f) === placeOf(picked!))
+              : undefined;
+            picked = kept ?? null;
+            pickedId = undefined;
+            if (!kept) return unname();
+            pick(kept);
+            show(kept);
+          };
+          name.current = (feature) => {
+            picked = feature;
+            pick(feature);
+            show(feature);
           };
           for (const layer of CLICKABLE) {
             instance.on("click", layer, (event: any) => {
@@ -325,13 +558,45 @@ function MapView({
               name.current?.(feature, event.lngLat);
               latest.current.onSelect?.(feature);
             });
-            instance.on("mouseenter", layer, () => {
+            instance.on("mousemove", layer, (event: any) => {
               instance.getCanvas().style.cursor = "pointer";
+              const feature = event.features?.[0] as MapFeature | undefined;
+              if (!feature) return;
+              show(feature);
+              const id = idOf(feature);
+              if (id === hovered) return;
+              mark(hovered, "hover", false);
+              hovered = id;
+              mark(hovered, "hover", true);
+              latest.current.onHighlight?.(feature);
             });
             instance.on("mouseleave", layer, () => {
               instance.getCanvas().style.cursor = "";
+              mark(hovered, "hover", false);
+              hovered = undefined;
+              latest.current.onHighlight?.(null);
+              if (picked) show(picked);
+              else unname();
             });
           }
+          // A press off the places lets go of the one picked.
+          instance.on("click", (event: any) => {
+            const under = instance.queryRenderedFeatures?.(event.point, {
+              layers: CLICKABLE.filter((layer) => instance.getLayer?.(layer)),
+            });
+            if (under?.length) return;
+            picked = null;
+            pick(null);
+            unname();
+          });
+          const escape = (event: KeyboardEvent) => {
+            if (event.key !== "Escape" || !popup) return;
+            picked = null;
+            pick(null);
+            unname();
+          };
+          document.addEventListener("keydown", escape);
+          letGo = () => document.removeEventListener("keydown", escape);
           setMap(instance);
         });
         // A map in a tab or panel is sized late: keep MapLibre's canvas in step.
@@ -345,9 +610,11 @@ function MapView({
       });
     return () => {
       live = false;
+      letGo?.();
       observer?.disconnect();
       instance?.remove();
       name.current = null;
+      reread.current = null;
       framed.current = "";
       setMap(null);
     };
@@ -355,17 +622,40 @@ function MapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [near]);
 
-  // The places.
+  // The places, and what was named among the last ones let go.
   useEffect(() => {
     map?.getSource(NAVPLACE)?.setData(features);
+    reread.current?.(features);
   }, [map, features]);
 
+  /*
+   * A place whose annotation is pointed at or picked beside the map (its hotspot, the
+   * Annotations list) shows active, as that hotspot does (Mat, 2026-10-29: "make it so
+   * hover/active rules apply for annotations on maps too").
+   */
+  const linked = useRef<number[]>([]);
+  const activeKey = activeAnnotations?.join("\n") ?? "";
+  useEffect(() => {
+    if (!map?.setFeatureState) return;
+    const ids = features.features.flatMap((feature, index) =>
+      feature.properties.annotationId &&
+      activeKey.split("\n").includes(feature.properties.annotationId)
+        ? [index]
+        : [],
+    );
+    for (const id of linked.current)
+      map.setFeatureState({ source: NAVPLACE, id }, { linked: false });
+    for (const id of ids)
+      map.setFeatureState({ source: NAVPLACE, id }, { linked: true });
+    linked.current = ids;
+  }, [map, features, activeKey]);
   // What the list names: every place, and each overlay drawn.
   const listed = overlay
     ? overlays.filter((item) => drawnIds.has(item.id))
     : NONE;
   const count = features.features.length + listed.length;
-  const described = count > 0;
+  // Its places listed under it, but where what holds it names them (`list={false}`).
+  const described = list && count > 0;
 
   // MapLibre's canvas is the map's one region (in a panel, a group in its section's):
   // named in the reader's language, and described by how many places follow it.
@@ -382,21 +672,30 @@ function MapView({
     mark(canvas, langOf("mapLabel"));
     if (described) canvas.setAttribute("aria-describedby", aboutId);
     else canvas.removeAttribute("aria-describedby");
+    /*
+     * Named in Clover's words, its popover Clover's (`Tip`, below) rather than the
+     * browser's tooltip, which MapLibre's `title` would show (Mat, 2026-10-29: "override
+     * all maplibre labels in favor of Clover flavored ones").
+     */
+    const part = container.current?.closest(".clover-geomap");
     const rename = (selector: string, key: string) => {
-      const control = container.current?.querySelector(selector);
-      if (!control) return;
+      const control = part?.querySelector(selector);
+      if (!control) return null;
       control.setAttribute("aria-label", t(key));
-      if (control.hasAttribute("title")) control.setAttribute("title", t(key));
+      control.removeAttribute("title");
       mark(control, langOf(key));
+      return { element: control, key };
     };
-    rename(".maplibregl-ctrl-zoom-in", "imageZoomIn");
-    rename(".maplibregl-ctrl-zoom-out", "imageZoomOut");
-    rename(".maplibregl-ctrl-attrib-button", "mapAttribution");
-    // The credits are the basemap's: English for Clover's own, unknown for yours.
-    const credits = container.current?.querySelector(
-      ".maplibregl-ctrl-attrib-inner",
+    setTips(
+      [
+        rename(".maplibregl-ctrl-zoom-in", "imageZoomIn"),
+        rename(".maplibregl-ctrl-zoom-out", "imageZoomOut"),
+        rename(".maplibregl-ctrl-attrib-button", "mapAttribution"),
+      ].filter((tip): tip is { element: Element; key: string } => tip !== null),
     );
-    if (credits) mark(credits, styleUrl ? undefined : "en");
+    // The credits are the basemap's: English for Clover's own, unknown for yours.
+    const words = part?.querySelector(".maplibregl-ctrl-attrib-inner");
+    if (words) mark(words, styleUrl ? undefined : "en");
   }, [map, t, langOf, described, aboutId, landmark, styleUrl]);
 
   // The overlays: one canvas source each, under the places.
@@ -510,11 +809,19 @@ function MapView({
             className="clover-geomap-canvas"
             style={{ position: "absolute", inset: 0 }}
           />
+          {map &&
+            tips.map(({ element, key }) =>
+              createPortal(
+                <Tip label={t(key)} lang={langOf(key)} />,
+                element,
+                key,
+              ),
+            )}
           {failed && (
             <p
               className="clover-geomap-error"
               role="alert"
-              lang={langOf("mapUnavailable")}
+              {...languageProps(langOf("mapUnavailable"))}
             >
               {t("mapUnavailable")}
             </p>
@@ -523,26 +830,38 @@ function MapView({
         {described && (
           <>
             {/* The map's description: a count, not the names, which the list reads next. */}
-            <span id={aboutId} hidden lang={langOf("mapPlacesListed")}>
+            <span
+              id={aboutId}
+              hidden
+              {...languageProps(langOf("mapPlacesListed"))}
+            >
               {t("mapPlacesListed", { count })}
             </span>
             {/* What the map shows, as text, and the keyboard's way to each place. */}
             <ul className="clover-geomap-places">
               {features.features.map((feature, index) => {
-                const { title, titleLang, canvasId } = feature.properties;
+                const { title, titleLang, canvasId, manifestId, navDate } =
+                  feature.properties;
+                const nameLang = title ? titleLang : langOf("mapPlaceUntitled");
                 return (
                   <li key={`place-${index}`}>
                     <button
                       type="button"
-                      lang={title ? titleLang : langOf("mapPlaceUntitled")}
+                      {...languageProps(nameLang)}
                       aria-current={
-                        canvasId && current?.includes(canvasId)
+                        current?.includes(canvasId ?? manifestId ?? "")
                           ? "true"
                           : undefined
                       }
                       onClick={() => choose(feature)}
                     >
                       {title || t("mapPlaceUntitled", { number: index + 1 })}
+                      {/* Its owner's date, under its name (Cookbook 0318). */}
+                      <NavDate
+                        value={navDate}
+                        className="clover-geomap-place-date"
+                        within={nameLang}
+                      />
                     </button>
                   </li>
                 );
@@ -554,10 +873,14 @@ function MapView({
                     <button type="button" onClick={() => show(item)}>
                       {label.text && (
                         <>
-                          <span lang={label.lang}>{label.text}</span>{" "}
+                          <span {...languageProps(label.lang)}>
+                            {label.text}
+                          </span>{" "}
                         </>
                       )}
-                      <span lang={langOf("mapOverlay")}>{t("mapOverlay")}</span>
+                      <span {...languageProps(langOf("mapOverlay"))}>
+                        {t("mapOverlay")}
+                      </span>
                     </button>
                   </li>
                 );
@@ -585,19 +908,46 @@ function center([[west, south], [east, north]]: [Position, Position]) {
   return [(west + east) / 2, (south + north) / 2];
 }
 
-/** The accent token, resolved: MapLibre paints with WebGL, which cannot read `var()`. */
-function accentOf(element: Element | null): string {
-  const value = element
-    ? getComputedStyle(element).getPropertyValue("--clover-color-accent").trim()
-    : "";
-  return value || "#0065c3";
+/** Clover's colors, resolved: MapLibre paints with WebGL, which cannot read `var()`. */
+function colorsOf(element: Element | null) {
+  const token = (name: string, fallback: string) =>
+    (element ? getComputedStyle(element).getPropertyValue(name).trim() : "") ||
+    fallback;
+  const unit =
+    parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  return {
+    accent: token("--clover-color-accent", "#0065c3"),
+    dark: token("--clover-color-primary", "#1a1d1e"),
+    light: token("--clover-color-secondary", "#ffffff"),
+    // A point's dot, `m` across, as a hotspot's is.
+    dot: unit / 2,
+  };
 }
 
-/** The places' source and layers: areas, lines and points, honouring simplestyle. */
-function addPlaceLayers(map: any, color: string) {
+/** Whether a place is active: pointed at, picked, or its annotation so elsewhere. */
+const ACTIVE = [
+  "any",
+  ["boolean", ["feature-state", "hover"], false],
+  ["boolean", ["feature-state", "picked"], false],
+  ["boolean", ["feature-state", "linked"], false],
+];
+
+/**
+ * The places' source and layers: areas, lines and points, drawn as the Canvas draws a
+ * hotspot (`Canvas/Annotations.css`): at rest a dark edge under a light line, nothing laid
+ * over what it marks; active (pointed at, picked, or its annotation pointed at or picked
+ * beside it) a wider dark edge, a wider light line, and the accent on it. A point is an
+ * accent dot in a light ring with a dark edge, an accent band round the ring while active,
+ * and a circle of 24px around it that a press finds (WCAG 2.5.8). Simplestyle's keys
+ * (`fill`, `stroke`, `marker-color`) still color what they name.
+ */
+function addPlaceLayers(map: any, colors: ReturnType<typeof colorsOf>) {
+  const { accent, dark, light, dot } = colors;
   map.addSource(NAVPLACE, {
     type: "geojson",
     data: { type: "FeatureCollection", features: [] },
+    // Each feature its place in the data as its id, for its state (`ACTIVE`).
+    generateId: true,
   });
   map.addLayer({
     id: FILL,
@@ -611,8 +961,14 @@ function addPlaceLayers(map: any, color: string) {
       false,
     ],
     paint: {
-      "fill-color": ["coalesce", ["get", "fill"], color],
-      "fill-opacity": ["coalesce", ["get", "fill-opacity"], 0.18],
+      // Clear but for a fill its feature asks for: still found by the pointer inside.
+      "fill-color": ["coalesce", ["get", "fill"], accent],
+      "fill-opacity": [
+        "case",
+        ["has", "fill"],
+        ["coalesce", ["get", "fill-opacity"], 0.18],
+        0,
+      ],
     },
   });
   const lines = [
@@ -622,18 +978,16 @@ function addPlaceLayers(map: any, color: string) {
     true,
     false,
   ];
-  // A white casing under each line and outline, as points have a white ring, so the
-  // accent holds its contrast over water, relief or a scan.
+  const round = { "line-join": "round", "line-cap": "round" };
   map.addLayer({
     id: CASING,
     type: "line",
     source: NAVPLACE,
     filter: lines,
-    layout: { "line-join": "round", "line-cap": "round" },
+    layout: round,
     paint: {
-      "line-color": "#ffffff",
-      "line-width": ["+", ["coalesce", ["get", "stroke-width"], 2], 2],
-      "line-opacity": ["coalesce", ["get", "stroke-opacity"], 1],
+      "line-color": dark,
+      "line-width": ["case", ACTIVE, 6, 3],
     },
   });
   map.addLayer({
@@ -641,22 +995,68 @@ function addPlaceLayers(map: any, color: string) {
     type: "line",
     source: NAVPLACE,
     filter: lines,
+    layout: round,
     paint: {
-      "line-color": ["coalesce", ["get", "stroke"], color],
-      "line-width": ["coalesce", ["get", "stroke-width"], 2],
+      "line-color": light,
+      "line-width": ["case", ACTIVE, 4, 1],
+    },
+  });
+  map.addLayer({
+    id: ACCENT,
+    type: "line",
+    source: NAVPLACE,
+    filter: lines,
+    layout: round,
+    paint: {
+      "line-color": ["coalesce", ["get", "stroke"], accent],
+      "line-width": [
+        "case",
+        ACTIVE,
+        2,
+        ["has", "stroke"],
+        ["coalesce", ["get", "stroke-width"], 2],
+        0,
+      ],
       "line-opacity": ["coalesce", ["get", "stroke-opacity"], 1],
+    },
+  });
+  const points = [
+    "match",
+    ["geometry-type"],
+    ["Point", "MultiPoint"],
+    true,
+    false,
+  ];
+  map.addLayer({
+    id: POINT_HIT,
+    type: "circle",
+    source: NAVPLACE,
+    filter: points,
+    paint: { "circle-radius": 12, "circle-opacity": 0 },
+  });
+  map.addLayer({
+    id: POINT_EDGE,
+    type: "circle",
+    source: NAVPLACE,
+    filter: points,
+    paint: {
+      // Active, the accent band round the light ring, then the dark edge round that.
+      "circle-radius": ["case", ACTIVE, dot + 2 + 2, dot + 2],
+      "circle-color": accent,
+      "circle-stroke-width": 1,
+      "circle-stroke-color": dark,
     },
   });
   map.addLayer({
     id: POINT,
     type: "circle",
     source: NAVPLACE,
-    filter: ["match", ["geometry-type"], ["Point", "MultiPoint"], true, false],
+    filter: points,
     paint: {
-      "circle-radius": 6,
-      "circle-color": ["coalesce", ["get", "marker-color"], color],
+      "circle-radius": dot,
+      "circle-color": ["coalesce", ["get", "marker-color"], accent],
       "circle-stroke-width": 2,
-      "circle-stroke-color": "#ffffff",
+      "circle-stroke-color": light,
     },
   });
 }

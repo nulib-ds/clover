@@ -53,7 +53,10 @@ transcription of the whole page, captions and a recording's text show as ever. I
 that scrolls, the Canvases in view come to its top as the
 reader moves. Where a layer gives the same words as separate annotations, one per language,
 it lists one language at a time, offered by their codes in its header: the Root's
-`language` to start, else the reader's. Its other props, and its `ref`, go to its element.
+`language` to start, else the reader's. An annotation that tags a place (a GeoJSON
+feature, as a map on a page is tagged with where it shows) is listed by the place's name,
+and picked, the Canvas opens a box of it, as it opens its information: the name over a
+[Map](/docs/map) of the place. Its other props, and its `ref`, go to its element.
 
 <ApiReference elements="clover-annotations">
 
@@ -98,7 +101,9 @@ Where a page gives its words once per language, a transcription and its translat
 an annotation of its own, Annotations offers their languages by code and lists one at a
 time. It starts on the Root's `language`, here Arabic, and Arabic text is written right to
 left. Where the Root offers the languages to read the resource in (About's), the set
-offers none of its own and follows that one choice. This manuscript's English is Ariela Marcus-Sells's translation.
+offers none of its own and follows that one choice. One annotation that gives its words in
+several languages at once, a `Choice` of them, shows the one in the Root's language. This
+manuscript's English is Ariela Marcus-Sells's translation.
 
 <Example>
 <PartDemo
@@ -147,7 +152,9 @@ its annotations are listed with the Manifest's.
 
 Use `renderEntry` to draw an entry's content yourself, from its read `bodies` or the
 `annotation` as published. The entry keeps its picture, its link, its button and its
-highlight.
+highlight. The items of a `Choice`, the same words in several languages, are each a body
+with the same `choice`: draw one of them. A place (a GeoJSON feature) is a body with
+`place` and its name as `label`.
 
 ```jsx
 const renderEntry = (entry) =>

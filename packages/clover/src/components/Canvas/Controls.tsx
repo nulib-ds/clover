@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 
 import type { CanvasControlsConfig } from "./Canvas.types";
 import type { ListedAnnotation } from "./Annotations";
-import { Comment, Information } from "../Body/glyphs";
+import { Comment, Information, Place } from "../Body/glyphs";
 import Button from "../../ui/Button";
 import type { ChoiceGroup, ChoiceSelections } from "./layout";
 import ControlCluster, { type ControlSpec } from "../../ui/ControlCluster";
@@ -60,6 +60,13 @@ interface CanvasControlsProps {
   captionId?: string;
   captionOpen?: boolean;
   onCaptionToggle?: () => void;
+  /**
+   * The id of the box of the Canvas's place (its `navPlace`, else its Manifest's) when it
+   * has one (`PlaceBox`), whether it is open, and the toggle.
+   */
+  placeId?: string;
+  placeOpen?: boolean;
+  onPlaceToggle?: () => void;
   /** The language to read the Choices' labels in. The reader's, by default. */
   language?: string;
   children?: React.ReactNode;
@@ -88,6 +95,9 @@ const Controls: React.FC<CanvasControlsProps> = ({
   captionId,
   captionOpen = false,
   onCaptionToggle,
+  placeId,
+  placeOpen = false,
+  onPlaceToggle,
   language,
   children,
 }) => {
@@ -110,6 +120,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
   const showAnnotations =
     config.annotations && annotations.length > 0 && onAnnotationSelect;
   const showInformation = config.information && captionId && onCaptionToggle;
+  const showPlace = config.map && placeId && onPlaceToggle;
   const choiceId = `choice-${instance}`;
   /*
    * The control is named by the Manifest where it can be: the Choice's own `label` when
@@ -247,6 +258,18 @@ const Controls: React.FC<CanvasControlsProps> = ({
             controls={annotationsMenuId}
           >
             <Comment />
+          </Button>
+        )}
+        {showPlace && (
+          <Button
+            id={`place-${instance}`}
+            label={t("mapLabel")}
+            lang={langOf("mapLabel")}
+            onClick={onPlaceToggle}
+            expanded={placeOpen}
+            controls={placeId}
+          >
+            <Place />
           </Button>
         )}
         {showInformation && (

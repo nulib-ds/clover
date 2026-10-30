@@ -1,0 +1,95 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/manifest.json",
+  "type": "Manifest",
+  "label": {
+    "en": ["Multimedia Canvas"]
+  },
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/canvas",
+      "type": "Canvas",
+      "height": 31722,
+      "width": 70399,
+      "duration": 180.0,
+      "items": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/page/p1/1",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/annotation/p0001-image",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004/full/max/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "height": 31722,
+                "width": 70399,
+                "service": [
+                  {
+                    "id": "https://iiif.io/api/image/3.0/example/reference/36ca0a3370db128ec984b33d71a1543d-100320001004",
+                    "profile": "level1",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/canvas#t=11,42"
+            },
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/annotation/p0002-video",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://fixtures.iiif.io/video/indiana/30-minute-clock/medium/30-minute-clock.mp4",
+                "type": "Video",
+                "height": 360,
+                "width": 640,
+                "duration": 1801.055,
+                "format": "video/mp4"
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/canvas#xywh=1000,500,5000,6000&t=11,42"
+            },
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/annotation/p0004-text",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "type": "TextualBody",
+                "format": "text/html",
+                "value": "<p style='font-size:2000px'>Press Play</p>",
+                "language": "en"
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/canvas#xywh=30200,10200,15000,5000&t=0,1"
+            },
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/annotation/p0005-text",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "type": "TextualBody",
+                "format": "text/html",
+                "value": "<p style='font-size:1500px'>In 10 seconds, this text will be replaced by a clock and an image. You will have 30 seconds (shown on the clock) in which to take notes on the image you see. After 30 seconds, the image will be replaced by the start screen. You will not be responsible for the part of the image covered by the clock.</p>",
+                "language": "en"
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/canvas#xywh=20220,5000,30000,5000&t=1,11"
+            },
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/annotation/p0006-text",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "type": "TextualBody",
+                "format": "text/html",
+                "value": "<p style='font-size:2000px'>Close your browser</p>",
+                "language": "en"
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0489-multimedia-canvas/canvas#xywh=27000,10200,25000,5000&t=42,180"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

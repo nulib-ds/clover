@@ -37,6 +37,12 @@ export interface MapFeature {
     title?: string;
     titleLang?: string;
     canvasId?: string;
+    /** The annotation it is a body of (Cookbook 0139), which a press on it selects. */
+    annotationId?: string;
+    /** The Collection's member it locates (Cookbook 0318), which a press on it opens. */
+    manifestId?: string;
+    /** Its owner's `navDate`, as written, shown with its name (Cookbook 0318). */
+    navDate?: string;
   };
 }
 
@@ -99,9 +105,42 @@ function featuresOf(geo: unknown): Json[] {
   return [];
 }
 
+/**
+ * A polygon's rings, each ending where it began, as GeoJSON asks: one written open (Cookbook
+ * 0139 lists four corners) is closed, so its edge is drawn all the way round, as its fill
+ * already is. Other geometries as they are, a collection's each so.
+ */
+function closed(geometry: GeoGeometry): GeoGeometry {
+  const ring = (points: unknown) => {
+    if (!Array.isArray(points) || points.length < 3) return points;
+    const [first, last] = [points[0], points[points.length - 1]];
+    const same =
+      Array.isArray(first) &&
+      Array.isArray(last) &&
+      first[0] === last[0] &&
+      first[1] === last[1];
+    return same ? points : [...points, first];
+  };
+  const rings = (polygon: unknown) =>
+    Array.isArray(polygon) ? polygon.map(ring) : polygon;
+  if (geometry?.type === "Polygon")
+    return { ...geometry, coordinates: rings(geometry.coordinates) };
+  if (geometry?.type === "MultiPolygon" && Array.isArray(geometry.coordinates))
+    return { ...geometry, coordinates: geometry.coordinates.map(rings) };
+  if (geometry?.type === "GeometryCollection" && geometry.geometries)
+    return { ...geometry, geometries: geometry.geometries.map(closed) };
+  return geometry;
+}
+
 function flatten(
   feature: Json,
-  owner: { label?: unknown; canvasId?: string },
+  owner: {
+    label?: unknown;
+    canvasId?: string;
+    annotationId?: string;
+    manifestId?: string;
+    navDate?: unknown;
+  },
   language: string | undefined,
 ): MapFeature {
   const own = (feature.properties ?? {}) as Json;
@@ -123,10 +162,13 @@ function flatten(
     if (title.lang) properties.titleLang = title.lang;
   }
   if (owner.canvasId) properties.canvasId = owner.canvasId;
+  if (owner.annotationId) properties.annotationId = owner.annotationId;
+  if (owner.manifestId) properties.manifestId = owner.manifestId;
+  if (typeof owner.navDate === "string") properties.navDate = owner.navDate;
   return {
     type: "Feature",
     ...(feature.id != null ? { id: feature.id } : {}),
-    geometry: feature.geometry,
+    geometry: closed(feature.geometry),
     properties,
   };
 }
@@ -146,10 +188,13 @@ function annotationsOf(canvas: Json): Json[] {
 const navPlaces = new WeakMap<object, Map<string, MapFeatureCollection>>();
 
 /**
- * Every navPlace feature of the Root's resource: the Collection's, the Manifest's, each
+ * Every navPlace feature of the Root's resource: the Collection's, each of its members'
+ * (Cookbook 0318: a Collection of Manifests, each where it is), the Manifest's, each
  * Canvas's, and each loaded annotation's (its `navPlace`, or a GeoJSON body as Cookbook
- * 0139 has). A feature from a Canvas or annotation names that Canvas. Memoized on the
- * Manifest (and the Collection), so the same collection comes back while nothing changes.
+ * 0139 has). A feature from a member names that member, the open one's place its own
+ * Manifest's where it gives one, in the member's place in the Collection's order; one
+ * from a Canvas or annotation names that Canvas. Memoized on the Manifest (and the
+ * Collection), so the same collection comes back while nothing changes.
  */
 export function navPlaceOf(
   manifest: Manifest | null,
@@ -164,23 +209,56 @@ export function navPlaceOf(
   if (cached) return cached;
 
   const features: MapFeature[] = [];
-  const add = (geo: unknown, owner: { label?: unknown; canvasId?: string }) =>
+  const add = (
+    geo: unknown,
+    owner: {
+      label?: unknown;
+      canvasId?: string;
+      annotationId?: string;
+      manifestId?: string;
+      navDate?: unknown;
+    },
+  ) =>
     features.push(...featuresOf(geo).map((f) => flatten(f, owner, language)));
 
   const c = collection as Json | null;
-  if (c?.navPlace) add(c.navPlace, { label: c.label });
+  if (c?.navPlace) add(c.navPlace, { label: c.label, navDate: c.navDate });
   const m = manifest as Json;
-  if (m.navPlace) add(m.navPlace, { label: m.label });
+  let own = false;
+  for (const member of asArray(c?.items) as Json[]) {
+    if (typeof member?.id !== "string") continue;
+    const open = member.id === m.id;
+    const place = open && m.navPlace ? m.navPlace : member.navPlace;
+    if (!place) continue;
+    own ||= open && place === m.navPlace;
+    add(place, {
+      label: open ? m.label : member.label,
+      manifestId: member.id,
+      navDate: open ? (m.navDate ?? member.navDate) : member.navDate,
+    });
+  }
+  if (m.navPlace && !own)
+    add(m.navPlace, { label: m.label, navDate: m.navDate });
   for (const canvas of selectSequence(manifest).canvases as Json[]) {
     if (canvas.navPlace) {
-      add(canvas.navPlace, { label: canvas.label, canvasId: canvas.id });
+      add(canvas.navPlace, {
+        label: canvas.label,
+        canvasId: canvas.id,
+        navDate: canvas.navDate,
+      });
     }
     for (const annotation of annotationsOf(canvas)) {
       if (motivations(annotation).includes(GEOREFERENCING)) continue;
       const canvasId =
         parseAnnotationTarget(asArray(annotation.target)[0] as never).id ||
         canvas.id;
-      const owner = { label: annotation.label ?? canvas.label, canvasId };
+      const owner = {
+        label: annotation.label ?? canvas.label,
+        canvasId,
+        ...(typeof annotation.id === "string"
+          ? { annotationId: annotation.id }
+          : {}),
+      };
       if (annotation.navPlace) add(annotation.navPlace, owner);
       for (const body of bodiesOf(annotation)) {
         if (body?.type === "Feature" || body?.type === "FeatureCollection") {

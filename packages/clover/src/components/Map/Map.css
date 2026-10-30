@@ -1,6 +1,6 @@
 /*
- * Map: MapLibre's own stylesheet (`maplibre-gl/dist/maplibre-gl.css`) styles the map, its
- * controls and popups; this frames it, over its places. Size it with
+ * Map: MapLibre's own stylesheet (`maplibre-gl/dist/maplibre-gl.css`) styles the map; this
+ * frames it, over its places, and draws its controls and popups as Clover's own. Size it with
  * `--clover-map-height`. The places are the panel's rows (`Panel.css`,
  * "Rows"), `s` under the map: two parts of one.
  */
@@ -10,7 +10,7 @@
 }
 
 /* The map's box: its first child. */
-.clover-geomap > div {
+.clover-geomap > div:first-child {
   overflow: hidden;
   border-radius: var(--clover-radius, 3px);
   background-color: var(--clover-color-secondary-muted, #e6e8eb);
@@ -47,18 +47,250 @@
 }
 
 /*
- * The controls' focus, inside each on its white: MapLibre's own is a pale glow that falls
- * under 3:1 over the map and is lost in forced colors. On the icon, and on the credits'
- * box, which MapLibre's stylesheet leaves alone, so it holds whatever the layer order.
+ * MapLibre's controls, drawn as Clover's (Mat, 2026-10-29: "restyled as Clover"): its zoom
+ * buttons and its credits' ⓘ are the round controls (`ui/Button.css`), in the controls'
+ * fill and glyph, the accent under the pointer or focused, each glyph Clover's own (its
+ * zoom and information glyphs, as masks the glyph's color fills) and each named by
+ * Clover's popover (`Tip`, from `MapView`). MapLibre's stylesheet is unlayered and
+ * Clover's layered, so what MapLibre sets is set here `!important`.
  */
+/*
+ * The page's type in the map, as in every part: MapLibre sets its own (12px Helvetica) on
+ * the map, which its credits and popups would take (Mat, 2026-10-29: "font family/sizes/
+ * accent colors should apply and inherit the same as well").
+ */
+.clover-geomap .maplibregl-map {
+  font: inherit !important;
+}
+
+.clover-geomap {
+  /*
+   * How far its controls sit in from the map's edges, as the Canvas's are from the Body's
+   * (`--clover-canvas-controls-inset`): the region's inset, the controls `s` apart. Zoom
+   * in and out are a row at its lower left, the credits' ⓘ at its lower right (Mat,
+   * 2026-10-29: "move these controls to bottom left. align them horizontally").
+   */
+  --clover-map-controls-inset: var(--clover-inset);
+  /* The room its controls take: at the top (none, but what holds it puts there), and the
+   * zoom row's at the lower left, with its `s` beside it. */
+  --clover-map-controls-top: 0px;
+  --clover-map-controls-start: calc(
+    2 * var(--clover-control) + 2 * var(--clover-space-s)
+  );
+}
+
+.clover-geomap :is(.maplibregl-ctrl-top-right, .maplibregl-ctrl-bottom-right) {
+  right: var(--clover-map-controls-inset);
+}
+
+.clover-geomap .maplibregl-ctrl-top-right {
+  top: var(--clover-map-controls-inset);
+}
+
 .clover-geomap
-  .maplibregl-ctrl-group
-  button:focus-visible
-  > .maplibregl-ctrl-icon,
+  :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right) {
+  bottom: var(--clover-map-controls-inset);
+}
+
+.clover-geomap .maplibregl-ctrl-bottom-left {
+  left: var(--clover-map-controls-inset);
+}
+
 .clover-geomap
-  .maplibregl-ctrl-attrib:has(> .maplibregl-ctrl-attrib-button:focus-visible) {
-  outline: 2px solid var(--clover-color-accent, #0065c3);
-  outline-offset: -2px;
+  :is(
+    .maplibregl-ctrl-top-right,
+    .maplibregl-ctrl-bottom-left,
+    .maplibregl-ctrl-bottom-right
+  )
+  > .maplibregl-ctrl {
+  float: none !important;
+  margin: 0 !important;
+}
+
+.clover-geomap .maplibregl-ctrl-group {
+  display: flex;
+  gap: var(--clover-space-s);
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+.clover-geomap .maplibregl-ctrl-group button {
+  position: relative !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--clover-control) !important;
+  height: var(--clover-control) !important;
+  border: 0 !important;
+  border-radius: var(--clover-radius-pill, 2rem) !important;
+  background-color: var(--clover-color-control, #1a1d1e) !important;
+  background-image: none !important;
+  color: var(--clover-color-control-glyph, #fff);
+  cursor: pointer;
+  transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.clover-geomap .maplibregl-ctrl-group button:is(:hover, :focus-visible) {
+  background-color: var(--clover-color-accent, #0065c3) !important;
+  box-shadow: none !important;
+}
+
+.clover-geomap .maplibregl-ctrl-group button .maplibregl-ctrl-icon,
+.clover-geomap .maplibregl-ctrl-attrib-button::before {
+  width: 1rem !important;
+  height: 1rem !important;
+  background-color: currentColor !important;
+  background-image: none !important;
+  mask: var(--clover-map-glyph) center / contain no-repeat;
+  content: "";
+}
+
+.clover-geomap .maplibregl-ctrl-zoom-in {
+  --clover-map-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M256 112v288M400 256H112' fill='none' stroke='%23000' stroke-width='45' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.clover-geomap .maplibregl-ctrl-zoom-out {
+  --clover-map-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M400 256H112' fill='none' stroke='%23000' stroke-width='45' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+.clover-geomap .maplibregl-ctrl-attrib-button {
+  --clover-map-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M256 72A48 48 0 1 1 256 168A48 48 0 1 1 256 72Z M192 216H296V384H328V432H184V384H216V264H192Z'/%3E%3C/svg%3E");
+}
+
+/*
+ * The credits: over the map, in its lower corner, the controls' inset in from its edges
+ * (Mat, 2026-10-29: "move it back to over the map. still lower right. retain the small
+ * size"), their ⓘ the size of About's Download (`Panel.css`, `l`, past 24px, WCAG 2.5.8)
+ * with its glyph at the smaller size. Over a basemap it keeps the controls' fill, so the
+ * glyph holds 3:1 over any map (WCAG 1.4.11); the accent under the pointer, focused or
+ * open. Opened, their words beside it, `xs` away and level with its foot, on a popover's
+ * ground (`ui/Tip.css`) at the smaller size, wrapping toward it, its links underlined;
+ * its own popover put away meanwhile, as the words name it.
+ */
+/* Its box is sized by its width and `--clover-map-height`, never by what it holds. */
+.clover-geomap > div:first-child {
+  container-type: size;
+}
+
+.clover-geomap .maplibregl-ctrl-attrib.maplibregl-compact {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+  gap: var(--clover-space-xs);
+  box-sizing: border-box;
+  min-height: 0 !important;
+  max-width: calc(
+    100cqi - 2 * var(--clover-map-controls-inset) -
+      var(--clover-map-controls-start)
+  );
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  color: inherit;
+}
+
+.clover-geomap .maplibregl-ctrl-attrib-button {
+  position: relative !important;
+  inset: auto !important;
+  display: inline-flex !important;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--clover-space-l) !important;
+  height: var(--clover-space-l) !important;
+  border: 0 !important;
+  border-radius: var(--clover-radius-pill, 2rem) !important;
+  background-color: var(--clover-color-control, #1a1d1e) !important;
+  background-image: none !important;
+  color: var(--clover-color-control-glyph, #fff);
+  cursor: pointer;
+  list-style: none;
+  transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.clover-geomap .maplibregl-ctrl-attrib-button::-webkit-details-marker {
+  display: none;
+}
+
+.clover-geomap .maplibregl-ctrl-attrib-button::before {
+  width: var(--clover-text-s) !important;
+  height: var(--clover-text-s) !important;
+}
+
+.clover-geomap
+  :is(
+    .maplibregl-ctrl-attrib-button:is(:hover, :focus-visible),
+    .maplibregl-compact-show > .maplibregl-ctrl-attrib-button
+  ) {
+  background-color: var(--clover-color-accent, #0065c3) !important;
+  box-shadow: none !important;
+}
+
+.clover-geomap
+  .maplibregl-compact-show
+  > .maplibregl-ctrl-attrib-button
+  > .clover-tip {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/*
+ * The words keep `s` clear of the zoom row beside them (`--clover-map-controls-start`)
+ * and of what is over them (`--clover-map-controls-top`), scrolling past that on a short
+ * map (their links take focus, so the keyboard reaches them), never under two lines.
+ */
+.clover-geomap .maplibregl-compact-show .maplibregl-ctrl-attrib-inner {
+  box-sizing: border-box;
+  min-width: 0;
+  max-height: max(
+    calc(
+      100cqb - 2 * var(--clover-map-controls-inset) -
+        var(--clover-map-controls-top)
+    ),
+    calc(2lh + 2 * var(--clover-space-2xs))
+  );
+  overflow-y: auto;
+  padding: var(--clover-space-2xs) var(--clover-space-xs);
+  border-radius: var(--clover-radius, 3px);
+  background-color: var(--clover-color-primary, #1a1d1e);
+  color: var(--clover-color-secondary, #fff);
+  font-size: var(--clover-text-s);
+  line-height: inherit;
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+.clover-geomap .maplibregl-ctrl-attrib-inner a {
+  color: inherit !important;
+  text-decoration: underline !important;
+}
+
+/* A control over the map's top keeps its popover inside it, below it. */
+.clover-geomap .maplibregl-ctrl-top-right .clover-tip {
+  top: calc(100% + var(--clover-space-xs));
+  bottom: auto;
+}
+
+.clover-geomap .maplibregl-ctrl-top-right .clover-tip::before {
+  top: auto;
+  bottom: 100%;
+}
+
+/* Where forced colors paint the ground, the glyph takes the button's text. */
+@media (forced-colors: active) {
+  .clover-geomap .maplibregl-ctrl-group button .maplibregl-ctrl-icon,
+  .clover-geomap .maplibregl-ctrl-attrib-button::before {
+    background-color: ButtonText !important;
+  }
+
+  .clover-geomap
+    :is(.maplibregl-ctrl-group button, .maplibregl-ctrl-attrib-button) {
+    border: 1px solid ButtonText !important;
+  }
 }
 
 @media (forced-colors: active) {
@@ -70,43 +302,49 @@
 }
 
 /*
- * A place's popup in the theme's colors, its tip with it. MapLibre's stylesheet is
- * unlayered and Clover's layered (`dist`), so MapLibre's white ground would win under the
- * theme's text, unreadable where that text is light: hence `!important`, on the ground
- * and the tip only.
+ * A place's name over the map, as Clover's popover (`ui/Tip.css`) names a hotspot: the
+ * text's color for a ground, the ground's for its words, its tip with it. MapLibre's
+ * stylesheet is unlayered and Clover's layered (`dist`), so MapLibre's white ground would
+ * win: hence `!important`, on the ground and the tip only.
  */
 .clover-geomap-popup .maplibregl-popup-content {
-  padding: var(--clover-space-xs) var(--clover-space-s);
+  padding: var(--clover-space-2xs) var(--clover-space-xs);
   border-radius: var(--clover-radius, 3px);
-  background-color: var(--clover-color-secondary, #fff) !important;
-  color: var(--clover-color-primary, #1a1d1e);
+  background-color: var(--clover-color-primary, #1a1d1e) !important;
+  box-shadow: none !important;
+  color: var(--clover-color-secondary, #fff);
   font: inherit;
   font-size: var(--clover-text-s);
 }
 
-.clover-geomap-popup[class*="maplibregl-popup-anchor-top"]
-  .maplibregl-popup-tip {
-  border-bottom-color: var(--clover-color-secondary, #fff) !important;
+/* No arrow, as a hotspot's has none; never under the pointer, which reads the map. */
+.clover-geomap-popup {
+  pointer-events: none;
 }
 
-.clover-geomap-popup[class*="maplibregl-popup-anchor-bottom"]
-  .maplibregl-popup-tip {
-  border-top-color: var(--clover-color-secondary, #fff) !important;
+.clover-geomap-popup .maplibregl-popup-tip {
+  display: none !important;
 }
 
-.clover-geomap-popup.maplibregl-popup-anchor-left .maplibregl-popup-tip {
-  border-right-color: var(--clover-color-secondary, #fff) !important;
-}
-
-.clover-geomap-popup.maplibregl-popup-anchor-right .maplibregl-popup-tip {
-  border-left-color: var(--clover-color-secondary, #fff) !important;
+.clover-geomap-popup .maplibregl-popup-content {
+  max-width: min(18rem, 100cqi - 2 * var(--clover-space-xs));
 }
 
 /*
- * An overlay's row: its Canvas's name, and under it, in secondary text, what it is; one
- * caption's lines, `3xs` apart.
+ * A place's date under its name, as a popover's words under its lead are (`ui/Tip.css`):
+ * in the popover's quieter light, `--clover-color-secondary-alt`, 10:1 on its ground.
  */
-.clover-geomap-places span + span {
+.clover-geomap-popup-date {
+  display: block;
+  color: var(--clover-color-secondary-alt, #c1c8cd);
+}
+
+/*
+ * An overlay's row: its Canvas's name, and under it, in secondary text, what it is; a
+ * place's: its name, and under it so, its owner's date (Cookbook 0318). One caption's
+ * lines, `3xs` apart.
+ */
+.clover-geomap-places :is(span + span, .clover-geomap-place-date) {
   display: block;
   margin-block-start: var(--clover-space-3xs);
   color: var(--clover-color-primary-muted, #26292b);

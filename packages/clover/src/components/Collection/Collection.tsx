@@ -9,6 +9,7 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
 import { titled } from "../../ui/heading";
+import { languageProps } from "../../core/direction";
 
 export interface CollectionProps extends React.HTMLAttributes<HTMLElement> {
   /**
@@ -55,7 +56,7 @@ export const Collection = forwardRef<HTMLDivElement, CollectionProps>(
         <section className="clover-about-section" {...group}>
           <Title
             className="clover-about-heading"
-            lang={langOf(titleKey)}
+            {...languageProps(langOf(titleKey))}
             {...title}
           >
             {t(titleKey)}

@@ -318,7 +318,15 @@
   --accent-6: color-mix(in oklab, var(--accent-9) 45%, var(--gray-1));
   /* Hover darkens, as in light mode, so white text on it keeps 4.5:1. */
   --accent-10: color-mix(in oklab, var(--accent-9) 85%, #000);
-  --accent-11: color-mix(in oklab, var(--accent-9) 62%, #fff);
+  /*
+   * The text step, 62% of the accent, or less of an accent too dark for that to keep
+   * 4.5:1 here (`--accent-text-share`, a preset's `darkText`, set by `page-theme.ts`).
+   */
+  --accent-11: color-mix(
+    in oklab,
+    var(--accent-9) var(--accent-text-share, 62%),
+    #fff
+  );
   --accent-contrast: #ffffff;
   --red-11: #ff9592;
 
@@ -350,7 +358,11 @@
     --accent-3: color-mix(in oklab, var(--accent-9) 22%, var(--gray-1));
     --accent-6: color-mix(in oklab, var(--accent-9) 45%, var(--gray-1));
     --accent-10: color-mix(in oklab, var(--accent-9) 85%, #000);
-    --accent-11: color-mix(in oklab, var(--accent-9) 62%, #fff);
+    --accent-11: color-mix(
+      in oklab,
+      var(--accent-9) var(--accent-text-share, 62%),
+      #fff
+    );
     --red-11: #ff9592;
 
     --surface: var(--gray-3);

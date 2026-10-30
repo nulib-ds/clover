@@ -38,9 +38,11 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 
 ## API reference
 
-Inside a `Root`, it reads the view's WebVTT captions and any transcript as plain text,
-with a choice where there are several, and renders nothing where there is neither. It
-reads the file in the Root's language where there is one, the Canvas's captions with it,
+Inside a `Root`, it reads the view's WebVTT files and any transcript as plain text,
+with a choice where there are several, and renders nothing where there is neither. A
+WebVTT file is what its annotation `provides` (Presentation 4): captions or subtitles,
+which the Canvas shows too, or a transcript alone, which the Transcript reads and the
+Canvas never offers as captions. It reads the file in the Root's language where there is one, the Canvas's captions with it,
 and where the Root offers the languages to read the resource in (About's), it offers none
 of its own: the page has one choice of language. Over
 the captions, a field finds words as they are typed: the cues with them marked and
@@ -175,4 +177,5 @@ const words = index >= 0 ? cues[index].text : "";
 
 - The transcript is a part, `Transcript`, and a Panel section of its own.
 - `informationPanel.vtt.autoScroll: false` is `follow={false}`.
-- `ignoreCaptionLabels` is gone: every WebVTT `supplementing` body is a caption file.
+- `ignoreCaptionLabels` is gone: every WebVTT `supplementing` body is read, as what its
+  annotation `provides`.

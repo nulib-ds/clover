@@ -214,23 +214,40 @@ export const templateSpecs: Record<TemplateKey, TemplateSpec> = {
 
 export const templateOrder: TemplateKey[] = ["default", "document", "gallery"];
 
+export interface AccentPreset {
+  name: string;
+  value: string;
+  /**
+   * The accent's share of its text step on a dark page (`--accent-text-share`,
+   * `tokens.css`), where the usual 62% would keep under 4.5:1 there: a very dark accent
+   * mixes more white into its text.
+   */
+  darkText?: string;
+}
+
 /**
  * Accent presets for the page-theme knob.
  *
  * The site's own blue first, then university brand colors, because that is who runs
- * IIIF: a reader can pick their own institution and see Clover wearing it. Every value is the institution's published
- * brand color, and each clears 4.5:1 against the white text Clover puts on a solid
- * accent — burnt orange is the tightest at 4.59:1.
+ * IIIF: a reader can pick their own institution and see Clover wearing it. Every value is
+ * the institution's published brand color, and each clears 4.5:1 against the white text
+ * Clover puts on a solid accent, and, as its text step, on the page in either mode
+ * (`darkText`, for Texas A&M's maroon), but for Princeton's orange (below).
  *
- * The picker beside them accepts any hex, so these are a starting point rather than a
- * menu.
+ * They are the choices: the page has no field for a color of the reader's own.
  */
-export const accentPresets = [
+export const accentPresets: AccentPreset[] = [
   /* The site's own accent (`--accent-9` in tokens.css), so choosing it clears the override. */
   { name: "Clover blue", value: "" },
   { name: "Northwestern purple", value: "#4E2A84" },
-  { name: "Harvard crimson", value: "#A51C30" },
-  { name: "Texas burnt orange", value: "#BF5700" },
+  /* Its text step at 62% is 3.7:1 on a dark page; at 50%, 5.4:1 (4.5:1 on `--gray-3`). */
+  { name: "Texas A&M maroon", value: "#500000", darkText: "50%" },
+  /*
+   * Not yet 4.5:1 under white (3.0:1; 4.2:1 darkened for hover), which
+   * `accent-presets.test.ts` says, until a higher-contrast mode keeps the accent off what
+   * carries text (Mat, 2026-10-29). Its text step holds: 4.9:1 light, 9.9:1 dark.
+   */
+  { name: "Princeton orange", value: "#E77500" },
   { name: "Tulane green", value: "#006747" },
   { name: "UCLA blue", value: "#2774AE" },
 ];

@@ -9,6 +9,8 @@ import {
 import React from "react";
 
 import articlesJson from "../../fixtures/iiif-cookbook/0025-newspaper-article-index.json";
+import stringFormats from "../../fixtures/iiif-cookbook/0007-string-formats.json";
+import homepageJson from "../../fixtures/iiif-cookbook/0047-homepage.json";
 import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
 
@@ -96,6 +98,90 @@ describe("primitives", () => {
     expect(await screen.findByText("1849")).toContainHTML("<b>1849</b>");
   });
 
+  it("never put a value's own paragraph in a paragraph (Cookbook 0007)", async () => {
+    const { container } = render(
+      <Clover.Summary value={stringFormats.summary as any} />,
+    );
+    const link = await screen.findByRole("link", {
+      name: "IIIF Technical Coordinator",
+    });
+    expect(link).toHaveAttribute("href", "https://github.com/glenrobson");
+    // Its <p> in a <div>, never a <p> in a <p>.
+    const summary = container.querySelector(".clover-summary")!;
+    expect(summary.tagName).toBe("DIV");
+    const own = [...summary.children].find((child) => child.tagName === "P");
+    expect(own).toContainElement(link);
+    expect(container.querySelector("p p")).toBeNull();
+  });
+
+  it("never put a value's own paragraph in a span or a heading either", async () => {
+    const { container } = render(
+      <>
+        <Clover.Value value={{ none: ["<p>In a span</p>"] }} />
+        <Clover.Summary as="h3" value={{ none: ["<p>In a heading</p>"] }} />
+        <Clover.Value value={{ none: ["<b>Inline stays in a span</b>"] }} />
+      </>,
+    );
+    await screen.findByText("In a span");
+    expect(screen.getByText("In a span").parentElement!.tagName).toBe("DIV");
+    expect(screen.getByText("In a heading").parentElement!.tagName).toBe("DIV");
+    expect(
+      screen.getByText("Inline stays in a span").parentElement!.tagName,
+    ).toBe("SPAN");
+    expect(container.querySelector(":is(span, h3, p) p")).toBeNull();
+  });
+
+  it("mark a homepage link's words by its label, and its page by its own language (Cookbook 0047)", () => {
+    render(<Clover.Homepage value={homepageJson.homepage as any} />);
+    const link = screen.getByRole("link", {
+      name: "Home page at the Getty Museum Collection",
+    });
+    expect(link).toHaveAttribute(
+      "href",
+      "https://www.getty.edu/art/collection/object/103RQQ",
+    );
+    // The words: the label's `en`. The page: the entry's `language`, ["en"].
+    expect(link).toHaveAttribute("lang", "en");
+    expect(link).toHaveAttribute("hreflang", "en");
+    // A page away from the viewer: in a tab of its own, told nothing of this one.
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    // An entry that gives no language says nothing of its page.
+    const { container } = render(
+      <Clover.Homepage
+        value={[{ id: "https://example.org/", type: "Text" }] as any}
+      />,
+    );
+    expect(container.querySelector("a")).not.toHaveAttribute("hreflang");
+  });
+
+  it("open partOf's Collections and the resource's own id in a tab of their own", () => {
+    render(
+      <>
+        <Clover.PartOf
+          value={
+            [
+              {
+                id: "https://example.org/collection.json",
+                type: "Collection",
+                label: { en: ["The collection"] },
+              },
+            ] as any
+          }
+        />
+        <Clover.Id value="https://example.org/manifest.json" />
+      </>,
+    );
+    for (const name of [
+      "The collection",
+      "https://example.org/manifest.json",
+    ]) {
+      const link = screen.getByRole("link", { name });
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    }
+  });
+
   // Strictly by format: plain text is shown as written, its line breaks kept.
   it("show a value declared plain as written, markup and all, its lines kept", () => {
     const { container } = render(
@@ -151,6 +237,22 @@ describe("primitives", () => {
 });
 
 describe("Panel", () => {
+  // Cookbook 0318: a Manifest's date for navigation, among what About says of it.
+  it("gives the Manifest's navDate a section of its own, in the reader's language", async () => {
+    await initCloverI18n({ lng: "fr" }).ready();
+    render(
+      <Clover.Root
+        iiifContent={{ ...manifest, navDate: "1849-06-12T00:00:00Z" }}
+      >
+        <Clover.Panel />
+      </Clover.Root>,
+    );
+    const date = await screen.findByRole("heading", { name: "Date" });
+    const time = date.parentElement!.querySelector("time")!;
+    expect(time).toHaveTextContent("12 juin 1849");
+    expect(time).toHaveAttribute("datetime", "1849-06-12");
+  });
+
   it("shows About by default: summary, metadata, statement, rights, links and id", async () => {
     render(
       <Clover.Root iiifContent={manifest}>

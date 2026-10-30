@@ -8,7 +8,7 @@ import type { Rect } from "../../math/rect";
 
 export interface DomLayerItem {
   key: string;
-  element: HTMLImageElement | HTMLVideoElement;
+  element: HTMLImageElement | HTMLVideoElement | HTMLElement;
   width: number;
   height: number;
   /** Source pixels → the Body's CSS pixels: the same transform the GPU path is given. */

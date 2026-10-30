@@ -1,4 +1,8 @@
-import { type Target, isContentState } from "./content-state";
+import {
+  type ContentTargets,
+  type Target,
+  isContentState,
+} from "./content-state";
 import {
   type Presentation4Collection,
   type Manifest,
@@ -39,6 +43,8 @@ export interface Loaded {
   annotationSets?: AnnotationSet[];
   /** The annotation to pick on arrival: the first of those, on the Canvas opened. */
   pick?: string;
+  /** A content state's several targets, opened on the first (Cookbook 0540). */
+  targets?: ContentTargets;
 }
 
 /** What a Canvas says of itself that a Manifest can say too, for one shown on its own. */
@@ -218,6 +224,8 @@ export async function loadContent(
   let member: string | undefined;
   /** A content state's note. */
   let annotation: Record<string, any> | undefined;
+  /** A content state's several targets. */
+  let targets: ContentTargets | undefined;
   let json: unknown;
 
   /** A content state names what to load and where to go in it. */
@@ -228,6 +236,7 @@ export async function loadContent(
     target = resolved.target ?? target;
     member = resolved.manifestId ?? member;
     annotation = resolved.annotation ?? annotation;
+    targets = resolved.targets ?? targets;
     return fetchJson(request, resolved.id, signal);
   };
 
@@ -262,7 +271,7 @@ export async function loadContent(
 
   switch (resource.type) {
     case "Manifest":
-      return { manifest: resource as Manifest, target, annotation };
+      return { manifest: resource as Manifest, target, annotation, targets };
     case "Collection": {
       const collection = await withMembers(
         resource as Presentation4Collection,
@@ -281,7 +290,7 @@ export async function loadContent(
       if (!manifest) {
         throw new CloverContentError("The Collection holds no Manifest");
       }
-      return { manifest, collection, target, annotation };
+      return { manifest, collection, target, annotation, targets };
     }
     case "Canvas":
     case "Timeline":

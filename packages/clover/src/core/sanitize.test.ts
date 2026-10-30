@@ -16,7 +16,7 @@ describe("sanitizeHTML", () => {
     [
       "an event handler",
       '<img src="https://example.org/a.jpg" onerror="alert(1)">',
-      (out) => expect(out).toBe('<img src="https://example.org/a.jpg">'),
+      (out) => expect(out).toBe('<img src="https://example.org/a.jpg" alt="">'),
     ],
     [
       "a javascript: link",
@@ -34,9 +34,9 @@ describe("sanitizeHTML", () => {
       (out) => expect(out).toBe("<a>x</a>"),
     ],
     [
-      "a data: image",
+      "a data: image, and the image its address leaves empty",
       '<img src="data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=">',
-      (out) => expect(out).toBe("<img>"),
+      (out) => expect(out).toBe(""),
     ],
     [
       "inline SVG with a script",
@@ -98,13 +98,71 @@ describe("sanitizeHTML", () => {
       sanitizeHTML(
         '<ul><li>a</li></ul><ol start="2"><li>b</li></ol><p role="heading" aria-level="2">c</p>',
       ),
-    ).toBe("ab<p>c</p>");
+    ).toBe("a b <p>c</p>");
     // And Markdown's groups past h6.
     expect(
       sanitizeHTML(
         '<div role="group" aria-labelledby="clover-md-1"><p id="clover-md-1">t</p></div>',
       ),
     ).toBe("<p>t</p>");
+  });
+
+  it("repairs a malformed value as the browser does, and tidies what that leaves (Cookbook 0007)", () => {
+    // Closings missing: closed.
+    expect(sanitizeHTML("<p>Missing its close <b>and bold")).toBe(
+      "<p>Missing its close <b>and bold</b></p>",
+    );
+    expect(sanitizeHTML("<p>One<p>Two")).toBe("<p>One</p><p>Two</p>");
+    // Closings extra: a stray </p> makes no empty paragraph, a stray </span> nothing.
+    expect(sanitizeHTML("<p>One</p></p></span>Two")).toBe("<p>One</p>Two");
+    // A dropped block keeps its words apart from the next.
+    expect(sanitizeHTML("<div><h1>Heading</h1><em>emph</em></div>")).toBe(
+      "Heading emph",
+    );
+    // An image whose address is removed goes, and the paragraph it emptied with it.
+    expect(sanitizeHTML('<p><img src="x"></p><p>Kept</p>')).toBe("<p>Kept</p>");
+    // A line break or an image alone still makes its paragraph.
+    expect(sanitizeHTML("<p><br></p>")).toBe("<p><br></p>");
+  });
+
+  it("marks an image given no alt decorative, and keeps an alt given (Cookbook 0007)", () => {
+    const badge = "https://licensebuttons.net/l/by-sa/3.0/88x31.png";
+    expect(
+      sanitizeHTML(
+        `<a href="https://example.org">CC BY-SA 3.0</a> <img src="${badge}"/>`,
+      ),
+    ).toBe(
+      `<a href="https://example.org">CC BY-SA 3.0</a> <img src="${badge}" alt="">`,
+    );
+    expect(sanitizeHTML(`<img src="${badge}" alt="CC BY-SA 3.0">`)).toBe(
+      `<img src="${badge}" alt="CC BY-SA 3.0">`,
+    );
+  });
+
+  it("names a link an image alone fills, never leaving it without a name (Cookbook 0008)", () => {
+    const badge = "https://licensebuttons.net/l/by-sa/3.0/88x31.png";
+    const license = "https://creativecommons.org/licenses/by-sa/3.0";
+    // By the link's title, which IIIF does not allow and is dropped.
+    expect(
+      sanitizeHTML(
+        `<a href="${license}" title="CC BY-SA 3.0"><img src="${badge}"/></a>`,
+      ),
+    ).toBe(`<a href="${license}"><img src="${badge}" alt="CC BY-SA 3.0"></a>`);
+    // Without one, by where it goes.
+    expect(sanitizeHTML(`<a href="${license}"><img src="${badge}"/></a>`)).toBe(
+      `<a href="${license}"><img src="${badge}" alt="creativecommons.org"></a>`,
+    );
+    expect(
+      sanitizeHTML(
+        `<a href="mailto:info@example.org"><img src="${badge}"/></a>`,
+      ),
+    ).toContain('alt="info@example.org"');
+    // A link its words name: the image beside them is decorative.
+    expect(
+      sanitizeHTML(
+        `<a href="${license}">CC BY-SA 3.0 <img src="${badge}"/></a>`,
+      ),
+    ).toContain('alt=""');
   });
 
   it("keeps Markdown's lists and headings, with only the values it writes", () => {

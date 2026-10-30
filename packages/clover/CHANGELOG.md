@@ -12,6 +12,122 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Timed text is what its annotation `provides`.** Presentation 4 puts `provides` on a
+  `supplementing` annotation to say what its file is for, and Clover now reads it for
+  WebVTT (Cookbook 0219): `closedCaptions` is a captions track, as before; `subtitles` or
+  `translation` a subtitles track (`<track kind="subtitles">`), still in the Captions
+  menu; a `transcript` alone is read in the Transcript, which lists its cues as ever, and
+  is no longer shown or offered as captions, which a transcript is not. A file whose
+  annotation provides nothing, as in Presentation 3, or only what timed text is not, is
+  captions, so nothing changes for it.
+
+- **An image turned by its Image API selector.** A painted image whose
+  `ImageApiSelector` gives a `rotation` (Cookbook 0040: a page scanned sideways, `"90"`,
+  painted on a landscape Canvas) is drawn turned: degrees clockwise, mirrored first where
+  it starts with `!` (`"!90"`), after its `region`, the turned picture's bounding box
+  filling its target. Before, it was drawn as served, stretched to the target. Clover turns
+  it itself, from the tiles as the server gives them (rotation `0` in every request), so it
+  works with any image server, whatever its `info.json` offers, and deep zoom, Rotate and
+  Reset are unchanged. A resource's CSS is still never applied (`styleClass`, 0045's rule),
+  so the recipe's other way, a stylesheet's `transform`, draws the image as served. The
+  renderer's `SceneImage` takes the same `rotation`, as the Image API writes it. A
+  thumbnail of such a Canvas (Items, the Panel) still shows the image as served.
+
+- **Links say their page's language.** A link Clover draws to an external resource, a
+  `homepage` (Homepage, a provider's link, Items' links to a member's or a Collection's
+  homepage), a `rendering` (Rendering, Download), `seeAlso` or `partOf`, now carries
+  `hreflang` where the resource's `language` gives one tag (Cookbook 0047: the Getty's
+  page, `["en"]`), the language Presentation 3.0 says its content is in. The link's words
+  keep the label's language as their `lang`, as before; the label never stands in for the
+  page's. Where `language` gives none, or several, there is no `hreflang`.
+
+- **AnnotationCollections, and annotations given as the content, are walked as
+  Collections are.** Where a Manifest's annotation pages are `partOf` an
+  AnnotationCollection (Cookbook 0309: layout markup across a newspaper's pages), or the
+  Root's content is an AnnotationPage (tags across several Manifests) or an
+  AnnotationCollection, Clover reads it as one whole. The difference: a Manifest's
+  Collection loads its pages as the reader reaches them, while the content's are in hand.
+  - its annotations are one layer in Annotations and the Body's annotations menu, named by
+    the Collection's `label` (where the page has none of its own) and hidden or shown
+    together. The label is read from the Manifest's references too, as the recipe gives
+    it, so it shows before a page is fetched;
+  - `Items of="annotations"` lists or steps them, each a picture of its region, what it
+    says and its Canvas's label (its Manifest's title, where they are on several);
+    choosing one picks it, and the Root goes to its Canvas, opening its Manifest where it
+    is in another, and frames it. A list reads the other Manifests it names, for their
+    pictures and titles; a pager reads none. Its count is the Collection's `total`, and its pages load as the reader
+    reaches them, never all at once: in order up to the one in view (or the one picked),
+    the next as a step goes past the last loaded, or as its list's end comes into view;
+  - the Default template's header gives, under the Manifest's title, the Collection's
+    label and a small pager among its annotations, its count opening their list, as for a
+    Collection's members, and picks the first as the Manifest opens on its Canvas
+    ("1 / 569");
+  - `useAnnotationCollection()` gives it to a part of your own (its `id`, `type`, `label`,
+    `total`, `pages` and `entries`, or `null`), and `root.clover.annotationCollection()` to a page's
+    script; `clover.fetchAnnotationPages(ids)` fetches the pages a part of your own reaches.
+
+  ```jsx
+  <Clover.Items of="annotations" layout="pager" size="small" />
+  ```
+
+- **The Default template shows a Collection it was opened on.** Where the Root's content is
+  a Collection (Cookbook 0032, 0030), the header gives, under the Manifest's title, a
+  line of the Collection's own: its title, muted, at the page's size
+  (`.clover-template-default-collection`, in `.clover-template-default-collection-row`),
+  then a pager among its members, small: where the reader is ("1 / 2"), Previous and
+  Next, the count opening the members listed as the Panel's Collection section lists
+  them, the one shown selected and given focus. The list opens over the pager, from its
+  corner, the count and steps staying on top of it and the list scrolling under them;
+  stepping keeps it open, and it follows. Choosing one opens it and closes the list, focus
+  back on the count. The provider's logo sits beside both lines. The Collection
+  section stays. A Collection read only from the Manifest's `partOf` changes nothing in
+  the header (`state.throughCollection`, new, says which). `Items of="members"
+layout="pager"` anywhere takes the same count, and its `nav` is named "Collection" (it
+  was "Items"); a content state's targets' count opens their list the same way. Items
+  takes `size="small"` (`<clover-items size="small">`): the pager's steps and count as
+  Search's are (`ui/Steps`), for a header's line, as the Default header's pagers are.
+
+- **A content state's several targets are a set to go through.** A content state naming two
+  or more targets (Cookbook 0540: two Canvases from two Manifests, to compare) opened on the
+  first and dropped the rest. It now opens on the first and holds them all, in order
+  (`state.targets`, `clover.goToTarget(index)`), each going to its Manifest's Canvas and
+  its region or time. The Default template's header gives where the reader is among them,
+  "1 / 2", after the title, with Previous and Next; the count opens a menu of them all, as
+  an animation's frames' count does, each by its Canvas's name and, where that is not
+  enough to tell two apart, its Manifest's title. The Panel lists them in a section of its
+  own, Views (`targets`, after About; the new string `informationPanelTabsTargets`), as a
+  Collection's members are listed, with a picture of each target's region, and Previous,
+  the place and Next beside its label. Both are `Items of="targets"` (`layout="pager"` and
+  `layout="list"`, `<clover-items of="targets">`), and `Previous`, `Next` and `Position`
+  take `of="targets"`, for a layout of your own. A target is matched to its Manifest by the
+  address it names as well as the id the Manifest gives itself, as 0540's differ. Nothing
+  changes for a content state with one target, or any other content, whose code loads
+  only for one with two or more. Annotations given as the content (an Annotation Page of
+  tags across Manifests) are unchanged.
+
+- **Dates for navigation are shown.** A resource's `navDate` (Cookbook 0230, 0318) is
+  shown in the reader's language, to the precision it is likely written to: an
+  `xsd:dateTime` must give a time, so exactly midnight on January 1 shows as its year
+  ("1776"), midnight on the 1st as its month ("February 1925"), any other midnight as its
+  day ("February 16, 1925"), and any other moment as its day and time. Every part is read
+  as written, never moved to the reader's time zone, in a `time` whose `datetime` says
+  the same ("1776"). It shows under each of a Collection's members' labels, a step
+  smaller and muted, before its summary (`.clover-items-date`), and in About, a section
+  of its own after the required statement (`.clover-about-date`, its heading the new
+  string `aboutDate`, "Date"), and on a Map, under a place's name in its list and on
+  its popup, the date of what it locates: its member, Manifest or Canvas
+  (`.clover-geomap-place-date`, `.clover-geomap-popup-date`; `navDate` in the feature's
+  `properties`). A value that is not a date shows nothing. Nothing to
+  change on a page.
+
+- **A Map maps a Collection's members.** Inside a `Root` opened on a Collection, the Map
+  shows each member's `navPlace` as well as the Manifest's (Cookbook 0318: five views of
+  Rome, each where it is), listed in the Collection's order, the member open the current
+  one (`aria-current`), its place its own Manifest's where it gives one. Pressing another
+  member's place, on the map or in the list, opens that member, as its row in the
+  Collection does, and focus stays on the place pressed. A member's feature carries its id
+  (`manifestId` in its `properties`). Nothing to change on a page.
+
 - **The reader can choose the language a resource reads in.** Where what a Manifest says
   of itself comes in several languages, one of its label, summary, metadata or required
   statement given in two or more (Cookbook 0006, 0118), the information panel offers
@@ -186,7 +302,320 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   first view in its Default template (93.1 to 93.6 kB) and 0.2 kB to a Canvas's alone
   (42.4 to 42.6 kB). The budgets are raised to match.
 
+- **A Map control, where a Canvas or its Manifest has a place.** A Canvas whose
+  `navPlace` (else its Manifest's, Cookbook 0154: the Laocoön bronze at the Getty Center)
+  names where it is offers a Map control among its controls, a map pin, which opens a box
+  as its information does: a Map of the place, the whole box, its name out of sight naming
+  the box, and its Close in the map's top corner, the map's controls' inset in from it. It
+  closes by its Close (focus back on the control), by Escape, or as another popup opens. Its code and MapLibre load
+  only as it first opens. `controls` takes `map: false` to leave it out; a Canvas outside a
+  Root reads its Manifest's place too (`navPlace`, a new prop on `Canvas`).
+
+### Changed
+
+- **Links away from the viewer open in a new tab.** The links the property parts draw,
+  `homepage`, `rendering`, `seeAlso` and `partOf` (Homepage, Rendering, SeeAlso, PartOf,
+  as About shows them), a resource's own `id` (Id: "IIIF Manifest") and a provider's link
+  to its homepage, now open in a tab of their own (`target="_blank"`, with
+  `rel="noopener noreferrer"`), as Download's files and an annotation's links to the web
+  already did. Items' links to members' homepages, a page's own navigation, open where
+  they are, as before. Nothing to change on a page.
+
+- **An annotation's image is no taller than Items' pictures.** In Annotations and in its
+  hotspot's popover, an image an annotation gives (Cookbook 0377: a fountain at night)
+  was shown as wide as there was room, at any height; it is now held to the height of
+  Items' pictures, `--clover-items-height` (8rem by default), its width following at its
+  own aspect (`.clover-annotations-image`, `.clover-tip-image`). An annotation's bodies
+  (the picture and its caption) are now `xs` apart in the list, and the popover's picture
+  `xs` over its words, where it was `2xs`. The Body's annotations menu now shows the
+  picture over its words too, its words in `.clover-annotations-text`, which carries their
+  `lang`. A hotspot's popover sets its words from the start of the line (left, or right in
+  a language written right to left), where the hotspot's button had centered them. Set
+  `--clover-items-height` around the list to change both:
+
+  ```css
+  .clover-panel {
+    --clover-items-height: 10rem;
+  }
+  ```
+
+- **Annotations loads its pages as the reader reaches them.** With `scope="all"` (the
+  default, and the Panel's), Annotations fetched every Canvas's referenced annotation
+  pages as it mounted, which for a Manifest of many pages is many requests at once. It now
+  fetches them in order up to the Canvas in view (or the annotation picked), and the next
+  as the list's end comes into view, so the list grows as it is read. A page whose own
+  script needs every annotation at once can still call `clover.holdAllAnnotationPages()`,
+  or give the Root `annotationPages="all"`.
+
+- **Full screen ends the view's controls.** In the control cluster over a Canvas, Full
+  screen now comes after Zoom, Rotate, Reset and Choice, left of the Canvas's own
+  (Annotations, Place, About) and a page's own; it came after Zoom out. A stylesheet or
+  test that reads the controls by their order (`.clover-canvas-controls > :nth-child(…)`)
+  should read them by `data-button` instead:
+
+  ```css
+  .clover-canvas-controls > [data-button="full-page"] {
+    /* … */
+  }
+  ```
+
+- **A member's summary is muted.** Under a Collection member's label, in Items' lists (the
+  Panel's Collection section, a pager's popup, a content state's targets), its summary now
+  takes the muted text color (`--clover-color-primary-muted`), as its date does; it was
+  the text's own color. Nothing to change on a page.
+
+- **A list's pictures sit at the top of their rows.** In `Items layout="list"` (a
+  Collection's members, Document's pages) each picture now lines up with the top of its
+  label, where it was centered beside it, so a long label, or a member's date and summary,
+  runs down beside it. Nothing to change on a page.
+
+- **An animation runs on its Canvas's time.** A Canvas whose paintings are timed (a
+  Muybridge plate's frames; Cookbook 0489's image, video and texts over three minutes) now
+  plays over its own `duration`, as a recording does: its bar's slider seeks over that
+  time ("Seek", where it was "Frame", saying the time and the frame showing), each frame's
+  start is a gap in it, as a chapter's is, and the time shows beside the buttons. The bar
+  reads as a video's: Play first, then Repeat, Mute where a frame plays sound, and the
+  time; at its end which frame shows, as a figure ("4 / 5", shown and read alike, its
+  menu, named Chapters, opening within the Body as the chapters' does), then Previous and
+  Next, named so (Clover's `commonPrevious` and `commonNext`, as Search's steps are), which
+  step to where the frame before or after starts. Over the seek bar, the time under the
+  pointer shows in the chapters' popover, alone; where the whole runs under ten seconds (a
+  Muybridge plate's second), times show their tenths ("0:00.6 / 0:01.0"). The word
+  "frame" is gone from the bar:
+  so are the `framePosition`, `framePrevious`, `frameNext` and `frameSeek` strings from
+  Clover's locales; a page that gave its own can drop them. Each frame shows for its own
+  span (`#t=start,end`), so frames timed together show together (0489's image and video,
+  11 s to 42 s); one with no end shows until the next starts, as before. The frames menu is
+  unchanged. A frame that paints a video or sound plays on that clock, from its own start
+  when its frame begins, and in its region (0489's clock over the image), with a Mute in
+  the bar; one that starts itself (`auto-advance`) starts muted (WCAG 1.4.2). Text painted
+  at a time (0489's "Press Play") is drawn in its region, as large as fits it, since IIIF's
+  HTML keeps no `style`, and is read outside the picture by assistive technology. Nothing
+  to change on a page; a test that looked for the slider named "Frame" looks for "Seek".
+  It adds 0.1 kB to the Viewer's first view in its Default template (93.8 to 93.9 kB) and
+  less to a Canvas's (42.9 kB still); the video and the text load with the animation's own
+  code. The budgets are raised to match.
+
 ### Fixed
+
+- **A start time is kept.** A Manifest's `start` that points into a recording with a
+  `PointSelector` (Cookbook 0015: `"t": 120.5`, which the upgrader writes as Presentation
+  4's `instant`) opened at the beginning, as a `PointSelector` was read as a point in space
+  only. Its time is now read, with or without `x` and `y`, so the recording opens there,
+  as a `start` naming a Canvas opens that Canvas. An annotation's `PointSelector` with a
+  time keeps it too. Nothing to change on a page.
+
+- **A video on a Canvas with no size shows.** A Canvas that gives a `duration` and no
+  `width` or `height` (Cookbook 0015, which Presentation 4 reads as a Timeline) gave its
+  video nowhere to be drawn: its sound played over an empty Body. It is now drawn at its
+  own frame size, framed in the Body as any video is. Nothing to change on a page.
+
+- **No paragraph inside a paragraph, a span or a heading.** Where a part drew a value in
+  an element that may hold only inline content (Summary's `p`, Value's `span`, a heading
+  given as `as`) and the value, IIIF HTML or Markdown, brought blocks of its own
+  (Cookbook 0007: a summary of `<p>…</p>`), the page held a `p` inside a `p` or a `span`.
+  Such a value is now drawn in a `div`, its class and props unchanged (`.clover-summary`,
+  `.clover-value`), its paragraphs inside; a value of inline markup keeps its element. A
+  page styling the element by its tag (`p.clover-summary`) styles the class instead:
+
+  ```css
+  .clover-summary {
+    /* … */
+  }
+  ```
+
+- **Malformed IIIF HTML is tidied after it is repaired.** Clover's sanitizer reads a value
+  with the browser's own HTML parser, which closes what is left open and drops stray
+  closings, then keeps only IIIF's allowed markup. Three things that left behind are now
+  tidied: a stray `</p>` no longer makes an empty paragraph; where a block IIIF does not
+  allow is dropped (`<h1>`, `<div>`, a list), a space keeps its words apart from the next
+  ("Heading emph", not "Headingemph"); and an image whose address was removed (not
+  `http(s)`) goes, with a paragraph it alone filled. Space runs are one space, and a value
+  has none at either end. An image its publisher gave no `alt` (Cookbook 0007: a license
+  badge beside its link) is given an empty one, decorative, so a screen reader no longer
+  reads it by its file name; an `alt` given is kept. But an image that is all a link
+  holds (Cookbook 0008: the badge as the license's link) names the link, so it is never
+  decorative: it takes the link's `title` (which IIIF does not allow, and which is then
+  dropped), else the host the link goes to (a mail link's address), so no link is left
+  without a name. Nothing to change on a page.
+
+- **A Choice of recordings skips the formats the browser cannot play.** Where a Canvas
+  paints a `Choice` of recordings of one sound or film (Cookbook 0434: ALAC, MP3, FLAC,
+  Ogg, MPEG-2 and WAV), its control now lists disabled, faded (`label[data-disabled]`),
+  each item the browser says it cannot play (`canPlayType` on its `format` answering
+  neither "probably" nor "maybe": ALAC, in Chrome), and the Choice starts on its first
+  item, or, where that one is disabled, walks down to the next that is not (MP3 here),
+  where it started on the first and said "This audio could not be loaded." An item with
+  no `format`, HLS (which Clover plays itself) and every item where the browser has no
+  `canPlayType` stay offered. An item the browser says it can play may still fail (0434's
+  MPEG-2, given as `audio/mpeg`); it says so when chosen, as before. Nothing to change on
+  a page.
+
+- **No key warning from the annotations menu.** Opening the Body's annotations menu in a
+  page built with Next logged React's "Each child in a list should have a unique key"
+  warning, as Next's compiler made each of its groups with `createElement`. Nothing to
+  change on a page.
+
+- **Full screen takes the whole Viewer again.** Since 4.0.0-beta.0, Full screen over a
+  Canvas in a template put the Canvas alone in full screen, so the reader could not go on
+  to other pages in Items or read the Panel there. It now takes the Root the Canvas (or a
+  Scene, or a recording's transport) is in: a template's Viewer, its header, Items and
+  Panel included, or a page's own layout. A Canvas on its own goes full screen itself, as
+  before, and a Canvas in a dialog in the Root (the Gallery's lightbox) too. In full
+  screen the Root has Clover's background and scrolls where the screen is too short, the
+  Default template fills the screen, and the first Body in it shows "Exit full screen" at
+  its top left, as a Canvas full screen on its own does (marked `data-exit` on the
+  Canvas's figure, which reveals it). A recording's Full screen in its transport now
+  reads "Exit full screen" in full screen there too. A page that styles its full-screen
+  Canvas (`.clover-canvas:fullscreen`, `[data-fullscreen="true"]`) inside a Root styles
+  the Root instead:
+
+  ```css
+  .clover-root:fullscreen {
+    /* … */
+  }
+  ```
+
+- **A Canvas full screen keeps its ground.** A Canvas full screen on its own took the
+  page's plain background, losing the translucent wash it has on the page. It keeps the
+  wash now, over the page's background, as it looks on the page. The wash is a custom
+  property, `--clover-canvas-wash` (default `#0001`), set on `.clover-canvas`: a page
+  that sets the Canvas's `background-color` can set it there instead, so full screen
+  keeps that too:
+
+  ```css
+  .clover-canvas {
+    --clover-canvas-wash: #0002;
+  }
+  ```
+
+- **A Canvas that paints nothing is held still and named in its Body.** A lone Canvas with
+  nothing painted on it (Cookbook 0283: a page missing from a book, its `items` empty) was
+  offered as a picture to explore: a "zoomable image" with the camera's keys, and Zoom,
+  Rotate and Reset over nothing. It is now held still, as a lone recording is: no camera
+  keys, gestures or role description, and only About and Annotations among its controls:
+  no way into full screen. Reached in full screen, it keeps full screen, and its control
+  as the way out; pressed, the control goes and focus moves to the Canvas. Its name, its label else its Manifest's, shows in the middle of the Body,
+  drawn as the note a Body that could not load shows (a new class, `clover-body-note`),
+  and nothing shows where it has none. Nothing to change on a page.
+
+- **An annotation whose body is a `SpecificResource` shows its words.** Where an
+  annotation's body is a `SpecificResource` holding its words as its `source` (Cookbook
+  0045: each comment given a `styleClass`), the words were not read, so the annotation was
+  neither listed nor drawn. They are now read as any `TextualBody` is (and an image or
+  place so held, as one given directly). Its `styleClass` and the annotation's
+  `stylesheet` are not applied, on purpose: a resource's CSS could override Clover's
+  interface, and the page around it, and with them the accessibility the interface keeps.
+  Nothing to change on a page.
+
+- **Another Manifest's Canvas opens fitted, though it shares an id.** Two Manifests may
+  give their Canvases one id (Cookbook 0230's two maps are each `…/canvas/p1`, one 1286
+  pixels wide, the other 5212): moving from one to the other kept the first's view, so the
+  second opened zoomed in four times. A Canvas is now told apart by its Manifest too, and
+  framed afresh. Nothing to change on a page.
+
+- **A place an annotation tags is listed and framed on its page.** An annotation whose body
+  is a GeoJSON `Feature` (Cookbook 0139: a map in a pamphlet, tagged with where it shows)
+  drew on the Map alone: no text, so the Annotations list and the Canvas left it out. It
+  is now an entry named by its feature's `label` (else its annotation's), its region drawn
+  and named on the Canvas, and pressing its place on the Map, or in the list under it,
+  selects it, so the Canvas frames its region. Picked on the Canvas (or anywhere), the
+  Canvas opens a box of it as it opens its information, one popup at a time: its name
+  over a Map of just its place, framed on it, closed by its Close, by Escape, or as
+  another popup opens, and open again as a place is picked, the same one too; its code and MapLibre
+  load only as a first place is picked. Its body reads as a place
+  (`AnnotationBodyEntry`'s new `place`, with its `label`); a feature without a name stays
+  the Map's alone. A Map's feature carries its annotation's id (`annotationId` in its
+  `properties`). Nothing to change on a page.
+
+- **The Map's controls are Clover's.** MapLibre's zoom buttons, its credits' ⓘ and a
+  place's popup were MapLibre's own (white squares, the browser's tooltips): they are now
+  drawn as Clover's round controls, each with Clover's glyph and popover (`Tip`, in the
+  reader's language, in place of MapLibre's `title`), the credits and a place's name on a
+  popover's ground, and the controls `--clover-inset` in from the map's edges and `s`
+  apart, as the Canvas's are: zoom in and out in a row at its lower left (they were a
+  column at its upper right), the credits' ⓘ at its lower right. The credits' ⓘ is smaller, About's Download's size, in the
+  map's lower right corner at that inset; opened, their words show beside it on a
+  popover's ground, level with its foot, so the ⓘ never moves, and its own popover is put
+  away meanwhile. A new `credits` prop (`credits="false"` on `<clover-map>`) leaves them
+  out: a basemap's license may ask for its credits, so give them on the page yourself
+  first. A place's name behaves
+  as a hotspot's on the Canvas: shown while the pointer is over the place, hung `xs` off
+  the side of it with more room, with no arrow, kept inside the map, and held for the
+  place picked until another is pointed at, a press off the places, or Escape (WCAG
+  1.4.13), or until the places change (another Canvas or member opened), but for a place
+  the new ones still hold; where neither side has room, it moves over the place, to its edge in sight. A
+  place is drawn as a hotspot is: at rest a dark edge under a light line, with nothing laid
+  over it (simplestyle's `fill` and `stroke` still color what they name); active (pointed
+  at, picked, or its annotation pointed at or picked on the Canvas or in Annotations) a
+  wider dark edge and light line with the accent on them, and a point an accent dot in a
+  light ring, banded in the accent while active, found by a press within 24px (WCAG 2.5.8).
+  Pointing at a place points at its annotation too, so its hotspot and its entry light.
+  The map takes the page's type, as every part does, over MapLibre's own 12px
+  Helvetica, and its links the accent's text. A polygon's ring written open (0139's four
+  corners) is closed, so its edge goes all the way round. Nothing to change on a page.
+
+- **A chapter ends where its Range does.** A recording's chapter stayed the one playing
+  until the next began, so past the last one's end (the Nuremberg reel's last Range ends
+  at 10:00.4, the film at 11:11) the seek bar's title, its popover and the stretch drawn
+  out, and the entry marked in Contents, all named it still. Past its end, with no other
+  begun, none plays now: the popover over that stretch shows its time alone, and the seek
+  bar is cut where a chapter begins or ends with none to follow, so the stretch no chapter
+  covers stands apart (the reel's first, before 0:12.5, too). A chapter with no end of its
+  own plays until the next begins, as before. Nothing to change on a page. With the seek
+  bar's reading of the pointer (below), it adds 0.2 kB to the transport a Canvas or
+  Timeline draws for its recording, loaded with it: measured, a Timeline's first view
+  (41.6 to 41.8 kB), whose transport draws at once; a Canvas's, measured on an image,
+  loads none. The budget is raised to match.
+
+- **The seek bar reads the time under the pointer where its thumb would stand.** A
+  recording's seek bar read the pointer across its whole width, while its thumb travels
+  it less its own width, so the time and chapter in its popover ran a little early toward
+  the end. Its chapters' gaps are placed the same way now, and the disk kept around the
+  thumb is the thumb's own size (its focus ring's while focused), so a gap no longer
+  narrows as the thumb comes near. Nothing to change on a page.
+
+- **Text in a language written right to left is written so.** Wherever Clover marks
+  text with its `lang`, its own strings in a language it is given (through
+  `initCloverI18n`'s `resources`) and IIIF text alike (the parts' labels, summaries and
+  metadata, Items, Contents, annotations, chapters, the Map's names), a language written
+  right to left (Arabic, Hebrew, Persian, Urdu…, or a script so written, `ku-Arab`) now
+  carries `dir="rtl"` too. Only Markup's values did before. Text in a language written left
+  to right still takes the page's direction, and fields (the search field, the seek and
+  volume sliders) keep theirs. Nothing to change on a page. It adds up to 0.2 kB where
+  parts show text (a page of a `<clover-root>` and a `<clover-label>`, 33.3 to 33.5 kB; a
+  Canvas's first view 42.7 to 42.9 kB; the Viewer's in its Default template 93.7 to
+  93.8 kB); the budgets are raised to match.
+
+- **A Collection's `viewingDirection` orders its members.** Items listing a Collection's
+  members, in a `Root` or alone, ran them left to right whatever the Collection said; a
+  standalone Items ignored a Manifest's too. They now run right to left where the
+  resource is read so, as a Root's views do, the arrow keys and the pager's steps with
+  them.
+
+- **An annotation written in several languages reads in the reader's.** A body that is a
+  `Choice` of the same words in several languages (Cookbook 0346: a comment in English and
+  in Japanese) showed its first item, whatever the language. It now shows the item in the
+  Root's language, chosen as any IIIF text is: in the Annotations list, the hotspot's name
+  and tip, and the Canvas's caption, each marked with its `lang`. `entry.bodies` now holds
+  every item of a `Choice`, each with the choice's place (`choice`, on
+  `AnnotationBodyEntry`). A `renderEntry` that draws every body now draws each language;
+  draw one body of each `choice`:
+
+  ```jsx
+  const renderEntry = (entry) =>
+    entry.bodies
+      .filter((body) => body.value)
+      .filter(
+        (body, index, all) =>
+          body.choice === undefined ||
+          all.findIndex((each) => each.choice === body.choice) === index,
+      )
+      .map((body, index) => <p key={index}>{body.value}</p>);
+  ```
+
+  Keeping the items adds less than 0.1 kB to every first view (the Viewer's in its Default
+  template 93.6 to 93.7 kB); the budgets are raised to match.
 
 - **A chapter on another Canvas arrives at its moment, playing.** Choosing an entry in
   Contents that starts on a Canvas other than the one shown (Cookbook 0065: an opera's

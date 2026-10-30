@@ -8,7 +8,13 @@ import type { LoadedImage } from "../io/decode";
 import type { TileWant } from "../io/TileCache";
 import { type Affine, compose, scale, translate } from "../math/affine";
 import { type Rect, intersects } from "../math/rect";
-import { type SceneItem, pixelsToWorld } from "./sceneItem";
+import {
+  type SceneItem,
+  orientOf,
+  pixelsToWorld,
+  shownPointToPixels,
+  shownToPixels,
+} from "./sceneItem";
 import type { RegionRect } from "../sources/imageService";
 import {
   type TileAddress,
@@ -185,7 +191,7 @@ export function planFrame(input: PlanInput): FramePlan {
       view,
       translate(rect.x, rect.y),
       scale(k.x, k.y),
-      translate(-clip.x, -clip.y),
+      orientOf(item),
     );
 
     for (const level of paintLevels) {
@@ -224,7 +230,7 @@ function itemView(
   viewport: ViewportSize,
   pixelRatio: number,
 ): ItemView | null {
-  const { pyramid, clip, rect } = item;
+  const { pyramid, rect } = item;
   const visible = visibleWorldRect(camera, viewport);
   if (!intersects(visible, rect)) return null;
   const k = pixelsToWorld(item);
@@ -235,16 +241,16 @@ function itemView(
   // Full-size image pixels under one device pixel.
   const imagePerDevice = 1 / (k.x * camera.zoom * pixelRatio);
   return {
-    area: {
-      x: clip.x + (x0 - rect.x) / k.x,
-      y: clip.y + (y0 - rect.y) / k.y,
+    area: shownToPixels(item, {
+      x: (x0 - rect.x) / k.x,
+      y: (y0 - rect.y) / k.y,
       width: (x1 - x0) / k.x,
       height: (y1 - y0) / k.y,
-    },
-    center: {
-      x: clip.x + (camera.x - rect.x) / k.x,
-      y: clip.y + (camera.y - rect.y) / k.y,
-    },
+    }),
+    center: shownPointToPixels(item, {
+      x: (camera.x - rect.x) / k.x,
+      y: (camera.y - rect.y) / k.y,
+    }),
     target: chooseLevel(pyramid, imagePerDevice),
   };
 }

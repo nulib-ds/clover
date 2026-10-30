@@ -1,0 +1,13 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/collection.json",
+  "type": "AnnotationCollection",
+  "label": {
+    "en": [
+      "Lines of text, read by machine"
+    ]
+  },
+  "total": 569,
+  "first": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/1.json",
+  "last": "https://clover.iiif.library.northwestern.edu/mocks/annotation-collection/lines/31.json"
+}

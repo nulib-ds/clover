@@ -101,3 +101,30 @@
   padding: 0;
   list-style: none;
 }
+
+/*
+ * A picked annotation's place (`Canvas/PlaceBox.tsx`): a map of it, the whole box to its
+ * inner padding, no wider than the information, as tall as its name and map were; its
+ * name is out of sight (Mat, 2026-10-29: "don't show the label of manifest/canvas. extend
+ * map to the top"). Close is in the map's top corner, the map's controls' inset in from
+ * it, as the map's own are from theirs; the credits' words keep `s` clear of it.
+ */
+.clover-canvas-place {
+  width: min(22rem, 100%);
+}
+
+.clover-canvas-place .clover-geomap {
+  --clover-map-height: 16rem;
+  --clover-map-controls-top: calc(
+    var(--clover-control) + var(--clover-space-s)
+  );
+}
+
+.clover-canvas-place > button.clover-canvas-caption-close {
+  position: absolute;
+  z-index: 3;
+  top: calc(var(--clover-space-m) + var(--clover-inset));
+  right: calc(var(--clover-space-m) + var(--clover-inset));
+  float: none;
+  margin: 0;
+}

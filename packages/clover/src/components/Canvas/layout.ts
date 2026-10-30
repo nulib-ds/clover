@@ -7,6 +7,7 @@ import { choiceKey as keyOf } from "../../core/choice-key";
 import { type ViewingDirection, resolveDirection } from "../../core/sequence";
 import type { ThumbnailSource } from "../../core/thumbnail";
 import { asArray } from "../../lib/asArray";
+import { isHls } from "../../lib/hls";
 
 export { type ViewingDirection, resolveDirection };
 
@@ -61,8 +62,17 @@ export interface ChoiceGroup {
   canvasId: string;
   /** The Choice's own `label`, when the Manifest gives it one. */
   label?: unknown;
-  /** Each item, and a small picture of it where its menu shows one (a frame's). */
-  items: Array<{ label?: unknown; id?: string; image?: string }>;
+  /**
+   * Each item, and a small picture of it where its menu shows one (a frame's); its
+   * `type` and `format`, by which a recording's first playable item is found.
+   */
+  items: Array<{
+    label?: unknown;
+    id?: string;
+    image?: string;
+    type?: string;
+    format?: string;
+  }>;
 }
 
 /** Which item of each Choice to paint, by `ChoiceGroup.key`. Missing means the first. */
@@ -75,6 +85,8 @@ export interface PaintedImage {
   target: Rect;
   /** A region of the image itself (an Image API selector or `body.region`). */
   region?: string;
+  /** Its turn, as an Image API selector's `rotation` writes it (`90`, `!180`). */
+  rotation?: string;
   /** Which frame it is, on an animation Canvas painted with every frame. */
   frame?: number;
 }
@@ -107,6 +119,13 @@ export interface CaptionTrack {
   id: string;
   label?: unknown;
   language?: string;
+  /** What it is for, as its annotation `provides` it (`timedTextKind`): a track's kind. */
+  kind: "captions" | "subtitles";
+}
+
+/** A WebVTT file supplementing a Canvas: a caption track, or a transcript alone. */
+export interface TimedText extends Omit<CaptionTrack, "kind"> {
+  kind: CaptionTrack["kind"] | "transcript";
 }
 
 /** The media of the Canvases handed in, placed in the world. */
@@ -233,12 +252,51 @@ export function findChoices(canvases: IIIFCanvas[]): ChoiceGroup[] {
           key,
           canvasId: canvas.id,
           label: body.label,
-          items: items.map((item) => ({ label: item.label, id: item.id })),
+          items: items.map((item) => ({
+            label: item.label,
+            id: item.id,
+            ...(typeof item.type === "string" ? { type: item.type } : {}),
+            ...(typeof item.format === "string" ? { format: item.format } : {}),
+          })),
         });
       }
     });
   }
   return groups;
+}
+
+/** One `audio` and one `video` element, made once, to ask what this browser plays. */
+const testers: Partial<Record<"audio" | "video", HTMLMediaElement>> = {};
+
+/**
+ * Whether a Choice's item is offered: not a recording this browser says it cannot play
+ * (`canPlayType` answering "", neither "probably" nor "maybe"; Mat, 2026-10-29), which
+ * the Choice menu lists disabled. Where nothing can be asked (no `format`, no
+ * `canPlayType`, a server), it is offered; and HLS, which Clover's own player plays
+ * whatever the browser answers.
+ */
+export function playsHere(item: ChoiceGroup["items"][number]): boolean {
+  if (item.type !== "Video" && !isSound(item.type)) return true;
+  if (!item.format || isHls(item.id, item.format)) return true;
+  if (typeof document === "undefined") return true;
+  const kind = item.type === "Video" ? "video" : "audio";
+  const tester = (testers[kind] ??= document.createElement(kind));
+  if (typeof tester.canPlayType !== "function") return true;
+  return tester.canPlayType(item.format) !== "";
+}
+
+/**
+ * Which item of each Choice starts: its first, as the Choice orders them; where that one
+ * is disabled (`playsHere`), the next that is not, walking the menu down (Cookbook 0434;
+ * Mat, 2026-10-29). Only those not the first, by key; none where every item is disabled.
+ */
+export function startingChoices(groups: ChoiceGroup[]): ChoiceSelections {
+  const chosen: ChoiceSelections = {};
+  for (const group of groups) {
+    const first = group.items.findIndex(playsHere);
+    if (first > 0) chosen[group.key] = first;
+  }
+  return chosen;
 }
 
 /** One frame of an animation Canvas: a painting annotation shown for a span of time. */
@@ -270,8 +328,9 @@ function paintsMedia(annotation: IIIFAnnotation): boolean {
  * (`canvas#t=0,0.5`), in time order. Fewer than two is no animation, nor are a Canvas's
  * timed paintings when every one is video or sound: those are its recording in files,
  * played one after another (`mediaSegments`; Cookbook 0064). Read as a timeline: each
- * frame shows from its start until the next one starts, and the last until the Canvas's
- * `duration` ends (or its own end, or an even share).
+ * frame shows from its start until its own end, so several may show at once (Cookbook
+ * 0489: an image and a video over it, from 11 s to 42 s); one with no end until the next
+ * one starts, and the last until the Canvas's `duration` ends (or an even share).
  */
 export function animationFrames(canvas: IIIFCanvas): AnimationFrame[] {
   const cached = framesOf.get(canvas);
@@ -299,6 +358,7 @@ export function animationFrames(canvas: IIIFCanvas): AnimationFrame[] {
   const share = (Number.isFinite(duration) && duration / frames.length) || 0.5;
   frames.forEach((frame, index) => {
     const next = frames[index + 1]?.start;
+    if (frame.end > frame.start) return;
     if (next != null) {
       frame.end = next > frame.start ? next : frame.start + share;
     } else if (Number.isFinite(duration) && duration > frame.start) {
@@ -354,6 +414,7 @@ export function paintedImages(
       images.push({
         body: resolved.body,
         region: resolved.region,
+        ...(resolved.rotation ? { rotation: resolved.rotation } : {}),
         target,
         ...(frame >= 0 ? { frame } : {}),
       });
@@ -423,7 +484,7 @@ function eachPainted(
   canvas: IIIFCanvas,
   selections: ChoiceSelections,
   visit: (
-    resolved: { body: Record<string, any>; region?: string },
+    resolved: ResolvedBody,
     target: Rect,
     /** The frame it belongs to, or -1 when it is no animation's frame. */
     frame: number,
@@ -467,11 +528,40 @@ function eachPainted(
 }
 
 /**
- * WebVTT captions supplementing a Canvas, from its `annotations` (and, leniently, its
- * `items`). A `Choice` of caption files — one per language — offers them all.
+ * WebVTT captions and subtitles supplementing a Canvas, which its media shows and its
+ * Captions menu offers: its timed text, but a transcript alone.
  */
 export function canvasCaptions(canvas: IIIFCanvas): CaptionTrack[] {
-  const tracks: CaptionTrack[] = [];
+  return canvasTimedText(canvas).filter(
+    (each): each is CaptionTrack => each.kind !== "transcript",
+  );
+}
+
+/**
+ * What a WebVTT file is for, as its annotation `provides` it (Presentation 4: clients
+ * "should process" it): `subtitles` (or `translation`), what is said, in a language, for
+ * a reader who hears it; `closedCaptions`, what is heard, for one who does not, speech
+ * and the sounds that carry meaning; `transcript` alone, the words without those sounds,
+ * read in the Transcript and never offered as captions, which they are not. Where it
+ * provides nothing (Presentation 3), or only what timed text is not (`audioDescription`),
+ * captions, as before.
+ */
+function timedTextKind(annotation: Record<string, any>): TimedText["kind"] {
+  const provides = asArray(annotation.provides);
+  if (provides.includes("closedCaptions")) return "captions";
+  if (provides.includes("subtitles") || provides.includes("translation"))
+    return "subtitles";
+  if (provides.includes("transcript")) return "transcript";
+  return "captions";
+}
+
+/**
+ * The WebVTT files supplementing a Canvas, from its `annotations` (and, leniently, its
+ * `items`), each with what it is for (`timedTextKind`). A `Choice` of files, one per
+ * language, offers them all.
+ */
+export function canvasTimedText(canvas: IIIFCanvas): TimedText[] {
+  const tracks: TimedText[] = [];
   const pages = [...(canvas.annotations ?? []), ...(canvas.items ?? [])];
   for (const page of pages) {
     for (const annotation of page.items ?? []) {
@@ -489,6 +579,7 @@ export function canvasCaptions(canvas: IIIFCanvas): CaptionTrack[] {
             id,
             label: candidate.label,
             language: asArray(candidate.language)[0] as string | undefined,
+            kind: timedTextKind(annotation),
           });
         }
       }
@@ -538,10 +629,14 @@ export function canvasTextTranscripts(canvas: IIIFCanvas): TextTranscript[] {
   return found;
 }
 
-export function resolveBody(
-  raw: unknown,
-  choice = 0,
-): { body: Record<string, any>; region?: string } | null {
+/** A painting body, as painted: the resource, and the part of it shown and how turned. */
+type ResolvedBody = {
+  body: Record<string, any>;
+  region?: string;
+  rotation?: string;
+};
+
+export function resolveBody(raw: unknown, choice = 0): ResolvedBody | null {
   if (!raw || typeof raw !== "object") return null;
   const body = raw as Record<string, any>;
 
@@ -553,12 +648,18 @@ export function resolveBody(
     const source =
       typeof body.source === "string" ? { id: body.source } : body.source;
     const selector = asArray(body.selector).find(
-      (s: any) => s?.type === "ImageApiSelector" && s.region,
-    ) as { region?: string } | undefined;
+      (s: any) => s?.type === "ImageApiSelector",
+    ) as { region?: string; rotation?: string | number } | undefined;
     const inner = resolveBody({ type: "Image", ...source });
-    return inner
-      ? { ...inner, region: selector?.region ?? inner.region }
-      : null;
+    if (!inner) return null;
+    // Turned by the selector (Cookbook 0040), never by a stylesheet (0045's rule).
+    const rotation =
+      selector?.rotation != null ? String(selector.rotation) : undefined;
+    return {
+      ...inner,
+      region: selector?.region || inner.region,
+      ...(rotation ? { rotation } : {}),
+    };
   }
   if (body.type !== "Image" && body.type !== "Video" && !isSound(body.type)) {
     return null;
@@ -651,32 +752,35 @@ export function canvasScene(
     }
 
     const selectedFrame = selections[frameKey(canvas)] ?? 0;
-    painted.forEach(({ body, target, region, frame, canvas: owner }, n) => {
-      const service = findImageServiceId(body.service);
-      if (!service && !body.id) return;
-      const id = `${owner.id}|${n}|${body.id ?? service}|${region ?? ""}`;
-      /*
-       * A region read through a service is in the service's own coordinates (Image API
-       * §4.1), so the service's size counts, not the body's: a body may declare the size
-       * of a cropped derivative while carrying the whole image's service (Cookbook-style
-       * 0688, a stereo card cropped to each eye).
-       */
-      const declared = !(service && region);
-      images.push({
-        id,
-        service,
-        url: body.id,
-        width: (declared && Number(body.width)) || undefined,
-        height: (declared && Number(body.height)) || undefined,
-        region,
-        placement: toWorld(target),
-        ...(frame != null && frame !== selectedFrame ? { hidden: true } : {}),
-      });
-      if (frame != null) {
-        const list = (frames[frameKey(canvas)] ??= []);
-        (list[frame] ??= []).push(id);
-      }
-    });
+    painted.forEach(
+      ({ body, target, region, rotation, frame, canvas: owner }, n) => {
+        const service = findImageServiceId(body.service);
+        if (!service && !body.id) return;
+        const id = `${owner.id}|${n}|${body.id ?? service}|${region ?? ""}|${rotation ?? ""}`;
+        /*
+         * A region read through a service is in the service's own coordinates (Image API
+         * §4.1), so the service's size counts, not the body's: a body may declare the size
+         * of a cropped derivative while carrying the whole image's service (Cookbook-style
+         * 0688, a stereo card cropped to each eye).
+         */
+        const declared = !(service && region);
+        images.push({
+          id,
+          service,
+          url: body.id,
+          width: (declared && Number(body.width)) || undefined,
+          height: (declared && Number(body.height)) || undefined,
+          region,
+          ...(rotation ? { rotation } : {}),
+          placement: toWorld(target),
+          ...(frame != null && frame !== selectedFrame ? { hidden: true } : {}),
+        });
+        if (frame != null) {
+          const list = (frames[frameKey(canvas)] ??= []);
+          (list[frame] ??= []).push(id);
+        }
+      },
+    );
 
     const [first] = sounds;
     if (first?.body.id) {

@@ -360,9 +360,20 @@
   }
 }
 
-/* A member's summary runs under all of it, in the text's own color, not muted. */
+/*
+ * A member's date runs under its label, a step smaller and muted (Mat, 2026-10-29: "step
+ * down and make muted"); its summary under all of it, muted too (Mat, 2026-10-29: "make
+ * this muted"), in a Collection's list, a pager's popup and a content state's targets.
+ */
+.clover-items-date {
+  grid-column: 1 / -1;
+  color: var(--clover-color-primary-muted, #26292b);
+  font-size: var(--clover-text-xs);
+}
+
 .clover-items-summary {
   grid-column: 1 / -1;
+  color: var(--clover-color-primary-muted, #26292b);
 }
 
 /* Slider: a common picture height, each picture at its own aspect. */
@@ -395,11 +406,12 @@
 
 /*
  * List: the pictures (stitched) beside the labels, `s` from them, the labels stacked in
- * the order of the pictures.
+ * the order of the pictures, both from the top (Mat, 2026-10-29: "align thumbs top, not
+ * vertically centered"), so a long label or its date and summary run down beside it.
  */
 .clover-items[data-layout="list"] .clover-items-figure {
   grid-template-columns: auto 1fr;
-  align-items: center;
+  align-items: start;
   gap: 0 var(--clover-space-s);
 }
 

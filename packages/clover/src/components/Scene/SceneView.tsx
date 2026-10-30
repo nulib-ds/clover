@@ -31,6 +31,7 @@ import { localize } from "../../core/value";
 import useFullscreen from "../../hooks/useFullscreen";
 import useFullscreenSupported from "../../hooks/useFullscreenSupported";
 import useWithinFullscreen from "../../hooks/useWithinFullscreen";
+import useFullscreenExit from "../../hooks/useFullscreenExit";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
@@ -62,6 +63,7 @@ import { useContainerName } from "../../ui/useContainerName";
 import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { engineFor } from "./engines";
+import { languageProps } from "../../core/direction";
 
 /** Which of the Scene's controls to show. All are on by default. */
 export interface SceneControlsConfig {
@@ -185,6 +187,8 @@ function SceneBody({
   const root = useRootLanguage(setWrapper as React.RefCallback<HTMLElement>);
   const hostRef = useRef<HTMLDivElement>(null);
   const isFullscreen = useFullscreen(wrapper);
+  // The way out shown at its top left: full screen itself, or first in its Root that is.
+  const exitShown = useFullscreenExit(wrapper);
   const canFullscreen = useFullscreenSupported();
   const controlsVisible = useControlsVisibility(
     wrapper,
@@ -644,6 +648,7 @@ function SceneBody({
               : "loading"
         }
         data-fullscreen={isFullscreen}
+        data-exit={exitShown || undefined}
         data-controls={controlsVisible ? "visible" : "hidden"}
         data-navigable="true"
         ref={root.ref}
@@ -671,7 +676,7 @@ function SceneBody({
           isolation: "isolate",
         }}
       >
-        <ExitFullscreen hidden={!isFullscreen} />
+        <ExitFullscreen hidden={!exitShown} />
         {(captioned.length > 0 || React.Children.count(children) > 0) && (
           <ControlCluster controls={() => []} controlButtons={controlButtons}>
             {captioned.length > 0 && (
@@ -734,7 +739,7 @@ function SceneBody({
         <span
           id={keysId}
           style={visuallyHidden}
-          lang={root.langOf("sceneKeys")}
+          {...languageProps(root.langOf("sceneKeys"))}
         >
           {t("sceneKeys")}
         </span>

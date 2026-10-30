@@ -225,17 +225,18 @@ ties it to any part.
 
 Hooks read from the nearest `Root`. Each re-renders only when what it reads changes.
 
-| Hook                   | Returns                                                                        |
-| ---------------------- | ------------------------------------------------------------------------------ |
-| `useStatus()`          | `{ status, error }`                                                            |
-| `useManifest()`        | The Manifest, in Presentation 4.                                               |
-| `useSequence()`        | `{ canvases, views, direction }`                                               |
-| `useVisibleCanvases()` | The Canvases of the current view.                                              |
-| `useActiveCanvas()`    | The Canvas the reader is on.                                                   |
-| `useNavigation()`      | `{ position, total, hasPrevious, hasNext, previous, next, first, last, goTo }` |
-| `useLocalized(value)`  | `{ text, lang }` for a IIIF language map, in the Root's language.              |
-| `useT()`               | `t(key, values)`: Clover's strings, in its interface language.                 |
-| `useLangOf()`          | `langOf(key)`: a string's `lang` where it is not the page's language.          |
+| Hook                        | Returns                                                                                                                                                        |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useStatus()`               | `{ status, error }`                                                                                                                                            |
+| `useManifest()`             | The Manifest, in Presentation 4.                                                                                                                               |
+| `useSequence()`             | `{ canvases, views, direction }`                                                                                                                               |
+| `useVisibleCanvases()`      | The Canvases of the current view.                                                                                                                              |
+| `useActiveCanvas()`         | The Canvas the reader is on.                                                                                                                                   |
+| `useNavigation()`           | `{ position, total, hasPrevious, hasNext, previous, next, first, last, goTo }`                                                                                 |
+| `useAnnotationCollection()` | Annotations walked as one whole, the content's AnnotationPage or the Manifest's AnnotationCollection: `{ id, type, label, total, pages, entries }`, or `null`. |
+| `useLocalized(value)`       | `{ text, lang }` for a IIIF language map, in the Root's language.                                                                                              |
+| `useT()`                    | `t(key, values)`: Clover's strings, in its interface language.                                                                                                 |
+| `useLangOf()`               | `langOf(key)`: a string's `lang` where it is not the page's language.                                                                                          |
 
 ```jsx
 function PageCount() {

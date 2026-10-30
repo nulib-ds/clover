@@ -246,6 +246,48 @@ describe("Transcript", () => {
     expect(screen.queryByRole("group")).toBeNull();
   });
 
+  it("reads a WebVTT file that provides a transcript alone, never as the captions (Presentation 4)", async () => {
+    // Cookbook 0219, its file a transcript: what is said, without the sounds captions give.
+    const provided = (provides: string[]) => {
+      const manifest = structuredClone(captionsJson) as any;
+      manifest.items[0].annotations[0].items[0].provides = provides;
+      return manifest;
+    };
+    const { unmount } = render(
+      <Clover.Root
+        iiifContent={provided(["transcript"])}
+        language="en"
+        request={{ fetch }}
+      >
+        <Spy />
+        <Clover.Transcript />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findAllByRole("button", { name: /Good manners|at lunch/ }),
+    ).toHaveLength(2);
+    // Not a caption track: the Root's language does not choose it for the captions.
+    expect(clover.captions.get()).toBeNull();
+    unmount();
+
+    render(
+      <Clover.Root
+        iiifContent={provided(["closedCaptions"])}
+        language="en"
+        request={{ fetch }}
+      >
+        <Spy />
+        <Clover.Transcript />
+      </Clover.Root>,
+    );
+    await screen.findAllByRole("button", { name: /Good manners|at lunch/ });
+    await waitFor(() =>
+      expect(clover.captions.get()).toBe(
+        captionsJson.items[0].annotations[0].items[0].body.id,
+      ),
+    );
+  });
+
   it("offers a plain-text transcript after the captions, as TXT; choosing it leaves the captions as they are", async () => {
     // The docs' `transcripts` mock: English captions, and the film's transcript.
     const files = vi.fn(

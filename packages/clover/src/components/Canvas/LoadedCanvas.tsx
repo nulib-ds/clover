@@ -8,7 +8,11 @@ import { type IIIFCanvas, paintedMedia } from "./layout";
 import { CanvasPending } from "../Body/Pending";
 import { BodyAlert } from "../Body/BodyAlert";
 import { loadAnnotationSets } from "../../core/annotation-collection";
-import { type AnnotationSet, readPage } from "../../core/annotation-sets";
+import {
+  type AnnotationSet,
+  pageLabel,
+  readPage,
+} from "../../core/annotation-sets";
 import type { Target } from "../../core/content-state";
 import type { AnnotationLink } from "../../core/link";
 import { type Loaded, loadContent } from "../../core/load";
@@ -204,6 +208,10 @@ export default function LoadedCanvas({
           props.partOf ??
           (view.content.manifest.label as CloverCanvasProps["partOf"])
         }
+        navPlace={
+          props.navPlace ??
+          (view.content.manifest as { navPlace?: unknown }).navPlace
+        }
         annotations={props.annotations ?? annotations}
         onAnnotationLink={onAnnotationLink ?? follow}
         chapters={props.chapters ?? chapters}
@@ -239,7 +247,7 @@ async function annotationsOf(
   const sets: Array<Pick<AnnotationSet, "id" | "label" | "entries">> = [
     ...embedded.map((page, index) => ({
       id: page.id ?? `annotations-${index}`,
-      label: page.label,
+      label: pageLabel(page),
       entries: readPage(page, page.id ?? `annotations-${index}`, canvas.id),
     })),
     ...(referenced.length

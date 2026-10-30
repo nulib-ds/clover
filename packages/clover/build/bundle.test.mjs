@@ -58,6 +58,8 @@ const LAZY_MODULES = [
   "/core/annotations-content.ts",
   // A Manifest's images' own annotations (Cookbook 0326), for one whose images carry some.
   "/core/image-layers.ts",
+  // A picked annotation's place on its map (Cookbook 0139), MapLibre with it.
+  "/components/Canvas/PlaceBox.tsx",
   // A standalone Canvas loading its own (`iiifContent`).
   "/components/Canvas/LoadedCanvas.tsx",
   // Presentation 4's Timeline and Scene, in a Root (and `Body`) or loading their own;
@@ -78,6 +80,10 @@ const LAZY_MODULES = [
   "/lib/renderer/backends/canvas2d/Canvas2DBackend.ts",
   // Items outside a Root, which no template has.
   "/components/Items/StandaloneItems.tsx",
+  // A content state's several targets (Cookbook 0540), listed and counted.
+  "/components/Items/TargetItems.tsx",
+  // An AnnotationCollection's annotations (Cookbook 0309), listed and counted.
+  "/components/Items/AnnotationItems.tsx",
   // A floating drawer's drag, loaded as one first floats.
   "/templates/shared/dragToClose.ts",
   // Every language but English, the first time Clover is to speak it.

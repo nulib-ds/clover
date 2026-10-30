@@ -1,0 +1,94 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://iiif.io/api/cookbook/recipe/0434-choice-av/manifest.json",
+  "type": "Manifest",
+  "label": {
+    "en": ["Excerpt from Egbe Iyawo"]
+  },
+  "summary": {
+    "en": [
+      "Excerpt from a performance of Egbe Iyawo recorded in Kabba Division, Kwara State. "
+    ]
+  },
+  "rights": "http://creativecommons.org/publicdomain/zero/1.0/",
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0434-choice-av/canvas/1",
+      "type": "Canvas",
+      "duration": 16.0,
+      "items": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0434-choice-av/canvas/1/annotation_page/1",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0434-choice-av/canvas/1/annotation_page/1/annotation/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "target": "https://iiif.io/api/cookbook/recipe/0434-choice-av/canvas/1",
+              "body": {
+                "type": "Choice",
+                "items": [
+                  {
+                    "id": "https://fixtures.iiif.io/audio/ucla/egbe-iyawo-ucla.m4a",
+                    "type": "Sound",
+                    "format": "audio/alac",
+                    "duration": 16.0,
+                    "label": {
+                      "en": ["ALAC"]
+                    }
+                  },
+                  {
+                    "id": "https://fixtures.iiif.io/audio/ucla/egbe-iyawo-ucla.mp3",
+                    "type": "Sound",
+                    "format": "audio/mpeg",
+                    "duration": 16.0,
+                    "label": {
+                      "en": ["MP3"]
+                    }
+                  },
+                  {
+                    "id": "https://fixtures.iiif.io/audio/ucla/egbe-iyawo-ucla.flac",
+                    "type": "Sound",
+                    "format": "audio/flac",
+                    "duration": 16.0,
+                    "label": {
+                      "en": ["FLAC"]
+                    }
+                  },
+                  {
+                    "id": "https://fixtures.iiif.io/audio/ucla/egbe-iyawo-ucla.ogg",
+                    "type": "Sound",
+                    "format": "audio/ogg",
+                    "duration": 16.0,
+                    "label": {
+                      "en": ["OGG Vorbis OGG"]
+                    }
+                  },
+                  {
+                    "id": "https://fixtures.iiif.io/audio/ucla/egbe-iyawo-ucla.mpeg",
+                    "type": "Sound",
+                    "format": "audio/mpeg",
+                    "duration": 16.0,
+                    "label": {
+                      "en": ["MPEG2"]
+                    }
+                  },
+                  {
+                    "id": "https://fixtures.iiif.io/audio/ucla/egbe-iyawo-ucla.wav",
+                    "type": "Sound",
+                    "format": "audio/wav",
+                    "duration": 16.0,
+                    "label": {
+                      "en": ["WAV"]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

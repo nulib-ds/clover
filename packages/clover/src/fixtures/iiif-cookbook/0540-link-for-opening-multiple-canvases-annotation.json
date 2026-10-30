@@ -1,0 +1,28 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/annotation.json",
+  "type": "Annotation",
+  "motivation": ["contentState"],
+  "target": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/canvas/2",
+      "type": "Canvas",
+      "partOf": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/manifest-2.json",
+          "type": "Manifest"
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/canvas/p2",
+      "type": "Canvas",
+      "partOf": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0540-link-for-opening-multiple-canvases/manifest.json",
+          "type": "Manifest"
+        }
+      ]
+    }
+  ]
+}

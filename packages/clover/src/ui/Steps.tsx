@@ -4,6 +4,7 @@ import { useCloverTranslation } from "../i18n/useCloverTranslation";
 import { join } from "../lib/classnames";
 import { Tip } from "./Tip";
 import { visuallyHidden } from "./visuallyHidden";
+import { languageProps } from "../core/direction";
 
 /** Where the reader is among matches, and the way to step through them. */
 export interface StepsModel {
@@ -54,7 +55,7 @@ export function Steps({
           {total} / {total}
         </span>
         {sentence && current > 0 && (
-          <span style={visuallyHidden} lang={langOf(sentence)}>
+          <span style={visuallyHidden} {...languageProps(langOf(sentence))}>
             {t(sentence, { index: current, total })}
           </span>
         )}
@@ -88,7 +89,7 @@ function Step({
       type="button"
       className="clover-steps-step"
       data-step={step}
-      lang={langOf(key)}
+      {...languageProps(langOf(key))}
       aria-disabled={!available || undefined}
       tabIndex={available ? undefined : -1}
       onClick={() => {

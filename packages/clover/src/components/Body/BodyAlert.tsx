@@ -2,6 +2,7 @@ import React from "react";
 
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
+import { languageProps } from "../../core/direction";
 
 /**
  * What a Body could not load, said: Clover's words, then the error's own, in English as
@@ -22,7 +23,7 @@ export function BodyAlert({
       data-status="error"
       role="alert"
     >
-      <p lang={langOf("statusError")}>{t("statusError")}</p>
+      <p {...languageProps(langOf("statusError"))}>{t("statusError")}</p>
       <p className="clover-status-detail" lang="en">
         {error.message}
       </p>

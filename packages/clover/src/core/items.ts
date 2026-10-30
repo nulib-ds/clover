@@ -4,9 +4,10 @@ import type {
   Manifest,
 } from "./presentation";
 import { selectSequence } from "./selectors";
-import { type LanguageMapLike, localize } from "./value";
+import { type LanguageMapLike, hrefLangOf, localize } from "./value";
 import { paintedBodies } from "./painted-bodies";
 import { asArray } from "../lib/asArray";
+import type { ThumbnailSource } from "./thumbnail";
 
 /**
  * What `Items` shows: light models of a Manifest's views or a Collection's members, never
@@ -25,6 +26,11 @@ export interface ItemPart {
   duration?: number;
   /** What it mostly paints: `Image`, `Video`, `Audio` (`Sound` in Presentation 3) or `Model`. */
   media?: string;
+  /**
+   * Its picture, where it is not the resource's own: a region of its Canvas (a content
+   * state's target, Cookbook 0540). Null for none.
+   */
+  source?: ThumbnailSource | null;
 }
 
 export interface ItemModel {
@@ -34,8 +40,12 @@ export interface ItemModel {
   parts: ItemPart[];
   label?: LanguageMapLike;
   summary?: LanguageMapLike;
+  /** A member's date for navigation, as written (Cookbook 0318). */
+  navDate?: string;
   /** Where a link to a member goes: its `homepage`, else its id. */
   href?: string;
+  /** That homepage's own language, where its `language` gives one. */
+  hrefLang?: string;
 }
 
 type Json = Record<string, any>;
@@ -107,8 +117,14 @@ export function itemsOfCollection(
         parts: [part(member)],
         label: member.label,
         summary: member.summary,
+        ...(typeof member.navDate === "string"
+          ? { navDate: member.navDate }
+          : {}),
         href:
           (asArray(member.homepage)[0] as Json | undefined)?.id ?? member.id,
+        ...(hrefLangOf(asArray(member.homepage)[0])
+          ? { hrefLang: hrefLangOf(asArray(member.homepage)[0]) }
+          : {}),
       }));
     memberItems.set(collection, items);
   }

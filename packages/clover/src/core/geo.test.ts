@@ -1,6 +1,9 @@
 import annotationJson from "../fixtures/iiif-cookbook/0139-geolocate-canvas-fragment.json";
 import manifestJson from "../fixtures/iiif-cookbook/0154-geo-extension.json";
 import canvasesJson from "../fixtures/iiif-cookbook/0240-navPlace-on-canvases.json";
+import romeJson from "../fixtures/iiif-cookbook/0318-navPlace-navDate-collection.json";
+import castelJson from "../fixtures/iiif-cookbook/0318-navPlace-navDate-manifest-1.json";
+import colosseumJson from "../fixtures/iiif-cookbook/0318-navPlace-navDate-manifest-2.json";
 import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
@@ -50,6 +53,29 @@ describe("navPlaceOf", () => {
       }),
     );
     expect(features[0].properties.title).toBe("Getty Villa & Museum");
+  });
+
+  // Cookbook 0318: a Collection of five views of Rome, each Manifest where it is.
+  it("reads every member's place, in the Collection's order, each naming its member", () => {
+    const collection = p4(romeJson);
+    const { features } = navPlaceOf(p4(colosseumJson), collection);
+    expect(features.map((f) => f.properties.manifestId)).toEqual(
+      romeJson.items.map((member) => member.id),
+    );
+    expect(features.map((f) => f.properties.title)).toEqual(
+      romeJson.items.map((member) => member.label.en[0]),
+    );
+    // Each with its member's date, as written.
+    expect(features.map((f) => f.properties.navDate)).toEqual(
+      romeJson.items.map((member) => member.navDate),
+    );
+    // The open member's place is its own Manifest's, once.
+    expect(
+      features.filter((f) => f.properties.manifestId === colosseumJson.id),
+    ).toHaveLength(1);
+    expect(navPlaceOf(p4(castelJson), collection).features[0].geometry).toEqual(
+      castelJson.navPlace.features[0].geometry,
+    );
   });
 
   it("names the Canvas a Canvas's navPlace belongs to", () => {
@@ -116,6 +142,14 @@ describe("navPlaceOf", () => {
     const { features } = navPlaceOf(p4(annotationJson));
     expect(features.length).toBeGreaterThan(0);
     expect(features[0].properties.canvasId).toBe(annotationJson.items[0].id);
+    // Its ring, written open (four corners), closed, so its edge goes all the way round.
+    const [ring] = features[0].geometry.coordinates as number[][][];
+    expect(ring).toHaveLength(5);
+    expect(ring.at(-1)).toEqual(ring[0]);
+    // And the annotation it is the body of, which a press on the place selects.
+    expect(features[0].properties.annotationId).toBe(
+      annotationJson.items[0].annotations[0].items[0].id,
+    );
   });
 
   it("is memoized on the Manifest, and shared when empty", () => {

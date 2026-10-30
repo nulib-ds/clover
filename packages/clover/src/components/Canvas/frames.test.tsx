@@ -8,7 +8,11 @@ import {
 } from "@testing-library/react";
 import React from "react";
 
-import FrameAnimation, { FrameControls, useAnimation } from "./FrameAnimation";
+import FrameAnimation, {
+  FrameControls,
+  framesAt,
+  useAnimation,
+} from "./FrameAnimation";
 import {
   type IIIFCanvas,
   animationFrames,
@@ -18,16 +22,45 @@ import {
 } from "./layout";
 import muybridgeJson from "../../fixtures/muybridge-626-annie-g-galloping.json";
 import stereoJson from "../../fixtures/iiif-cookbook/0688-stereogram-timeline.json";
+import multimediaJson from "../../fixtures/iiif-cookbook/0489-multimedia-canvas.json";
 import { p4 } from "../../fixtures/presentation4";
 import { initCloverI18n } from "../../i18n";
 
 const stereo = () => (p4(stereoJson) as any).items[0] as IIIFCanvas;
+const multimedia = () => (p4(multimediaJson) as any).items[0] as IIIFCanvas;
 
 beforeEach(() => initCloverI18n({ lng: "en" }));
 
 describe("animationFrames", () => {
-  it("reads Cookbook 0688's two frames as a timeline: each until the next, the last until the end", () => {
+  it("reads Cookbook 0688's two frames as a timeline, each for its own span", () => {
     const frames = animationFrames(stereo());
+    // The first is written `#t=0,1` on a Canvas of 0.2 s: kept, the second paints over it.
+    expect(frames.map((f) => [f.start, f.end])).toEqual([
+      [0, 1],
+      [0.1, 0.2],
+    ]);
+  });
+
+  it("shows a frame with no end until the next one starts, the last until the end", () => {
+    const painting = (t: string) => ({
+      id: `https://example.org/annotation/${t}`,
+      type: "Annotation",
+      motivation: "painting",
+      body: { id: `https://example.org/${t}.jpg`, type: "Image" },
+      target: `https://example.org/canvas#t=${t}`,
+    });
+    const frames = animationFrames({
+      id: "https://example.org/canvas",
+      type: "Canvas",
+      duration: 0.2,
+      items: [
+        {
+          id: "https://example.org/page",
+          type: "AnnotationPage",
+          items: [painting("0"), painting("0.1")],
+        },
+      ],
+    } as unknown as IIIFCanvas);
     expect(frames.map((f) => [f.start, f.end])).toEqual([
       [0, 0.1],
       [0.1, 0.2],
@@ -55,6 +88,28 @@ describe("animationFrames", () => {
       expect(image.width).toBeUndefined();
       expect(image.height).toBeUndefined();
     }
+  });
+
+  // Cookbook 0489: an image and a video over it, from 11 s to 42 s, among timed texts.
+  it("keeps each frame's own end, so frames due at once show together", () => {
+    const canvas = multimedia();
+    const frames = animationFrames(canvas);
+    expect(frames.map((f) => [f.start, f.end])).toEqual([
+      [0, 1],
+      [1, 11],
+      [11, 42],
+      [11, 42],
+      [42, 180],
+    ]);
+    const kinds = (at: number) =>
+      framesAt(frames, at, 180).map(
+        (index) => (frames[index].annotation.body as any).type,
+      );
+    expect(kinds(0.5)).toEqual(["TextualBody"]);
+    expect(kinds(14).sort()).toEqual(["Image", "Video"]);
+    expect(kinds(100)).toEqual(["TextualBody"]);
+    // At the end, what lasts to it still shows.
+    expect(kinds(180)).toEqual(["TextualBody"]);
   });
 
   it("is no animation with a single timed annotation", () => {
@@ -108,7 +163,7 @@ describe("useAnimation", () => {
   it("plays each frame for its span, loops when asked, and stops at the end when not", () => {
     const frames = animationFrames(stereo());
     const looping = renderHook(() =>
-      useAnimation(frames, "a", { autoplay: true, loop: true }),
+      useAnimation(frames, "a", { autoplay: true, loop: true, duration: 0.2 }),
     );
     expect(looping.result.current.playing).toBe(true);
     act(() => vi.advanceTimersByTime(100));
@@ -117,7 +172,7 @@ describe("useAnimation", () => {
     expect(looping.result.current.frame).toBe(0);
 
     const once = renderHook(() =>
-      useAnimation(frames, "b", { autoplay: true }),
+      useAnimation(frames, "b", { autoplay: true, duration: 0.2 }),
     );
     act(() => vi.advanceTimersByTime(100));
     act(() => vi.advanceTimersByTime(100));
@@ -132,6 +187,7 @@ describe("useAnimation", () => {
       useAnimation(frames, "d", {
         autoplay: true,
         loop: true,
+        duration: 0.2,
         isReady: () => loaded,
       }),
     );
@@ -145,12 +201,34 @@ describe("useAnimation", () => {
   it("hands on at the end when not looping, so a Root can auto-advance", () => {
     const onEnded = vi.fn();
     const { result } = renderHook(() =>
-      useAnimation(animationFrames(stereo()), "e", { autoplay: true, onEnded }),
+      useAnimation(animationFrames(stereo()), "e", {
+        autoplay: true,
+        duration: 0.2,
+        onEnded,
+      }),
     );
     act(() => vi.advanceTimersByTime(100));
     act(() => vi.advanceTimersByTime(100));
     expect(onEnded).toHaveBeenCalledTimes(1);
     expect(result.current.playing).toBe(false);
+  });
+
+  it("runs over the Canvas's duration, showing every frame due at its time", () => {
+    const frames = animationFrames(multimedia());
+    const { result } = renderHook(() =>
+      useAnimation(frames, "f", { autoplay: true, duration: 180 }),
+    );
+    expect(result.current.total).toBe(180);
+    expect(result.current.shown).toEqual([0]);
+    act(() => vi.advanceTimersByTime(14_000));
+    expect(Math.round(result.current.time)).toBe(14);
+    expect(result.current.shown).toEqual([2, 3]);
+    // A move by the reader goes on from there, playing.
+    act(() => result.current.seek(100));
+    act(() => vi.advanceTimersByTime(1_000));
+    expect(Math.round(result.current.time)).toBe(101);
+    expect(result.current.shown).toEqual([4]);
+    expect(result.current.playing).toBe(true);
   });
 
   it("never autoplays for a reader who asks for reduced motion", () => {
@@ -167,11 +245,15 @@ describe("useAnimation", () => {
 });
 
 describe("FrameControls", () => {
-  const state = (frame: number) => ({
+  const state = (frame: number, frames = animationFrames(stereo())) => ({
     frame,
+    shown: [frame],
+    time: frames[frame]?.start ?? 0,
+    total: frames.at(-1)?.end ?? 0,
     playing: true,
     repeat: false,
     setFrame: vi.fn(),
+    seek: vi.fn(),
     setPlaying: vi.fn(),
     setRepeat: vi.fn(),
   });
@@ -180,34 +262,87 @@ describe("FrameControls", () => {
     const frames = animationFrames(stereo());
     const animation = state(0);
     render(<FrameControls frames={frames} animation={animation} />);
-    expect(screen.getByText("Frame 1 of 2")).toBeInTheDocument();
+    // Which frame shows, as a figure, no word, as Search shows its place.
+    expect(screen.getByRole("button", { name: "1 / 2" })).toBeInTheDocument();
     // At the first frame there is no previous one, as the pager has none. The button
     // says so but stays focusable, and a press does nothing.
-    const previous = screen.getByRole("button", { name: "Previous frame" });
+    const previous = screen.getByRole("button", { name: "Previous" });
     expect(previous).toHaveAttribute("aria-disabled", "true");
     expect(previous).toBeEnabled();
     fireEvent.click(previous);
     expect(animation.setFrame).not.toHaveBeenCalled();
     expect(animation.setPlaying).not.toHaveBeenCalled();
-    expect(
-      screen.getByRole("button", { name: "Next frame" }),
-    ).not.toHaveAttribute("aria-disabled");
-    fireEvent.click(screen.getByRole("button", { name: "Next frame" }));
+    expect(screen.getByRole("button", { name: "Next" })).not.toHaveAttribute(
+      "aria-disabled",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(animation.setFrame).toHaveBeenCalledWith(1);
     expect(animation.setPlaying).toHaveBeenCalledWith(false);
     expect(screen.getByRole("button", { name: "Pause" })).toBeInTheDocument();
-    expect(screen.getByRole("slider", { name: "Frame" })).toHaveAttribute(
+    // A seek bar over the Canvas's time, saying where it is and which frame shows.
+    expect(screen.getByRole("slider", { name: "Seek" })).toHaveAttribute(
       "aria-valuetext",
-      "Frame 1 of 2",
+      // Tenths, the whole under ten seconds.
+      "0:00.0 / 0:00.2, 1 / 2",
     );
+  });
+
+  it("seeks over the Canvas's time, its frames' starts marked as a chapter's are", async () => {
+    const frames = animationFrames(multimedia());
+    const animation = { ...state(3, frames), time: 14, total: 180 };
+    render(<FrameControls frames={frames} animation={animation} />);
+    const seek = screen.getByRole("slider", { name: "Seek" });
+    expect(seek).toHaveAttribute("max", "180");
+    expect(seek).toHaveAttribute("aria-valuetext", "0:14 / 3:00, 4 / 5");
+    // A gap where each step after the first begins: 1 s, 11 s and 42 s.
+    expect(seek).toHaveAttribute("data-gaps");
+    expect(seek.style.getPropertyValue("--clover-transport-gaps")).toMatch(
+      /^linear-gradient/,
+    );
+    fireEvent.change(seek, { target: { value: "60" } });
+    expect(animation.seek).toHaveBeenCalledWith(60);
+    // Previous goes to the step before, 1 s, the countdown; Next to 42 s.
+    fireEvent.click(screen.getByRole("button", { name: "Previous" }));
+    expect(animation.setFrame).toHaveBeenLastCalledWith(1);
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(animation.setFrame).toHaveBeenLastCalledWith(4);
+    expect(screen.getByText("0:14 / 3:00")).toBeInTheDocument();
+    // Over the seek bar, the time under the pointer, in the chapters' popover, alone.
+    const area = seek.parentElement!;
+    for (const box of [area, seek])
+      vi.spyOn(box, "getBoundingClientRect").mockReturnValue({
+        left: 0,
+        width: 600,
+      } as DOMRect);
+    // jsdom has no PointerEvent: a mouse event of its name carries the pointer's place.
+    act(() => {
+      area.dispatchEvent(
+        new MouseEvent("pointermove", { clientX: 300, bubbles: true }),
+      );
+    });
+    const tip = area.querySelector(".clover-tip")!;
+    expect(tip).toHaveTextContent("1:30");
+    expect(tip.querySelector(".clover-tip-image")).toBeNull();
+    expect(area.style.getPropertyValue("--clover-transport-preview")).toBe(
+      "50%",
+    );
+    fireEvent.pointerLeave(area);
+    expect(area.querySelector(".clover-tip")).toBeNull();
+    // Its menu pictures images alone: the video's frame goes by its number.
+    fireEvent.click(screen.getByRole("button", { name: "4 / 5" }));
+    const video = screen.getByRole("radio", { name: "4" });
+    expect(video).toBeChecked();
+    await new Promise((done) => setTimeout(done, 0));
+    expect(video.closest("label")?.querySelector("img")).toBeNull();
+    expect(video.closest("label")).toHaveTextContent("4");
   });
 
   it("lists the frames by their labels, as a Choice's menu, pausing to choose one", async () => {
     const [canvas] = (p4(muybridgeJson) as any).items as IIIFCanvas[];
     const frames = animationFrames(canvas);
-    const animation = state(3);
+    const animation = state(3, frames);
     render(<FrameControls frames={frames} animation={animation} />);
-    const trigger = screen.getByRole("button", { name: "Frame 4 of 16" });
+    const trigger = screen.getByRole("button", { name: "4 / 16" });
     expect(trigger).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(trigger);
     expect(trigger).toHaveAttribute("aria-expanded", "true");
@@ -244,7 +379,7 @@ describe("FrameControls", () => {
         animation={animation}
       />,
     );
-    expect(screen.getByRole("button", { name: "Next frame" })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: "Next" })).toHaveAttribute(
       "aria-disabled",
       "true",
     );
@@ -289,5 +424,74 @@ describe("FrameAnimation", () => {
       "",
     );
     height.mockRestore();
+  });
+
+  // Cookbook 0489: a video in a region over the image, and texts, each at its time.
+  it("draws its video and text in the scene, each with its frame, the video on its clock", async () => {
+    const play = vi
+      .spyOn(HTMLMediaElement.prototype, "play")
+      .mockResolvedValue(undefined);
+    const pause = vi
+      .spyOn(HTMLMediaElement.prototype, "pause")
+      .mockImplementation(() => {});
+    const canvas = multimedia();
+    const scene = canvasScene([canvas], "left-to-right");
+    const frames = animationFrames(canvas);
+    const renderer = { setHidden: vi.fn(), isReady: () => true };
+    const onItems = vi.fn();
+    render(
+      <figure className="clover-canvas">
+        <FrameAnimation
+          renderer={renderer as any}
+          frames={frames}
+          byFrame={scene.frames[frameKey(canvas)]}
+          animationKey={canvas.id}
+          sceneVersion={1}
+          duration={180}
+          canvas={canvas}
+          place={scene.placements[0]}
+          onItems={onItems}
+        />
+      </figure>,
+    );
+    await waitFor(() =>
+      expect(onItems).toHaveBeenLastCalledWith(expect.any(Array)),
+    );
+    const items = onItems.mock.calls.at(-1)![0] as any[];
+    // The video and the three texts, never shown until their frames are.
+    expect(items).toHaveLength(4);
+    expect(items.every((item) => item.hidden)).toBe(true);
+    const video = items.find(
+      (item) => item.media.element instanceof HTMLVideoElement,
+    );
+    expect(video.placement).toEqual({
+      x: 1000,
+      y: 500,
+      width: 5000,
+      height: 6000,
+    });
+    expect(video.media.element.src).toMatch(/30-minute-clock/);
+    // At 0 s the first text shows, and is read outside the picture.
+    const hidden = () => renderer.setHidden.mock.calls.at(-1)![0] as string[];
+    const textIds = items
+      .filter((item) => !(item.media.element instanceof HTMLMediaElement))
+      .map((item) => item.id);
+    expect(hidden()).not.toContain(textIds[0]);
+    expect(hidden()).toContain(textIds[1]);
+    expect(hidden()).toContain(video.id);
+    expect(document.querySelector(".clover-canvas-media")).toHaveTextContent(
+      "Press Play",
+    );
+    // At 11 s the video shows, from its own start, and a Mute is offered.
+    fireEvent.change(screen.getByRole("slider", { name: "Seek" }), {
+      target: { value: "14" },
+    });
+    await waitFor(() => expect(hidden()).not.toContain(video.id));
+    expect(video.media.element.currentTime).toBeCloseTo(3);
+    expect(screen.getByRole("button", { name: "Mute" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Play" }));
+    await waitFor(() => expect(play).toHaveBeenCalled());
+    play.mockRestore();
+    pause.mockRestore();
   });
 });

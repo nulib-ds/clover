@@ -454,7 +454,7 @@
       },
       "thumbnail": [
         {
-          "id": "https://iiif.io/api/image/3.0/example/reference/4ce82cef49fb16798f4c2440307c3d6f-newspaper-p2/full/96,136/0/default.jpg",
+          "id": "https://iiif.io/api/image/3.0/example/reference/4ce82cef49fb16798f4c2440307c3d6f-newspaper-p2/1768,2423,1768,2080/96,113/0/default.jpg",
           "type": "Image",
           "format": "image/jpeg"
         }

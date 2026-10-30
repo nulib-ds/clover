@@ -45,6 +45,28 @@ describe("parseAnnotationTarget", () => {
         selector: [{ type: "PointSelector", x: 5, y: 6 }],
       }),
     ).toEqual({ id: canvas, point: { x: 5, y: 6 } });
+    // A point in time: Presentation 3's `t`, Presentation 4's `instant` (Cookbook 0015).
+    expect(
+      parseAnnotationTarget({
+        type: "SpecificResource",
+        source: canvas,
+        selector: { type: "PointSelector", t: 120.5 },
+      }),
+    ).toEqual({ id: canvas, t: "120.5" });
+    expect(
+      parseAnnotationTarget({
+        type: "SpecificResource",
+        source: canvas,
+        selector: { type: "PointSelector", instant: 120.5 },
+      }),
+    ).toEqual({ id: canvas, t: "120.5" });
+    expect(
+      parseAnnotationTarget({
+        type: "SpecificResource",
+        source: canvas,
+        selector: { type: "PointSelector", x: 5, y: 6, t: 2 },
+      }),
+    ).toEqual({ id: canvas, point: { x: 5, y: 6 }, t: "2" });
     expect(
       parseAnnotationTarget({
         type: "SpecificResource",

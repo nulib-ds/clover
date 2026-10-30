@@ -14,6 +14,7 @@ import { useContainerName } from "./useContainerName";
 import { useScrollTrack } from "./useScrollTrack";
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
 import { Chevron } from "./Chevron";
+import { languageProps } from "../core/direction";
 
 /** A layout effect in the browser, an effect on the server (where there is no layout). */
 const useIsomorphicLayoutEffect =
@@ -411,7 +412,7 @@ export function Sections({
         aria-hidden="true"
         tabIndex={-1}
         hidden={!more}
-        lang={langOf(key)}
+        {...languageProps(langOf(key))}
         onMouseDown={(event) => event.preventDefault()}
         onClick={step === "prev" ? track.scrollPrev : track.scrollNext}
       >

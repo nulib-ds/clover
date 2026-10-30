@@ -4,17 +4,19 @@ import { useUniqueId } from "../../ui/useUniqueId";
 import { EntryBodies } from "./EntryBodies";
 import {
   type AnnotationEntry,
+  type AnnotationPageRef,
   type AnnotationSet,
   findEntry,
   manifestOfAnnotation,
+  selectAnnotationPages,
   selectListedSets,
   selectHiddenSets,
 } from "../../core/annotation-sets";
+import { usePagesReached } from "../../react/usePagesReached";
+import { ListEnd } from "../../ui/ListEnd";
 import { annotationName } from "../../core/annotation-name";
 import { readLink, readTagSource } from "../../core/link";
 import { showLink } from "../../core/show-link";
-import type { Clover } from "../../core/clover";
-import { loadManifest } from "../../core/load";
 import type { Manifest } from "../../core/presentation";
 import { selectSequence, selectVisibleCanvases } from "../../core/selectors";
 import { parseTime } from "../../core/ranges";
@@ -30,6 +32,7 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { playFrom } from "../../lib/time";
 import { useClover, useCloverSelector } from "../../react/context";
+import { fetchManifest } from "../../react/fetchManifest";
 import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { titleTag } from "../../ui/heading";
 import { CueTime } from "../../ui/Cue";
@@ -41,6 +44,7 @@ import { startingLanguage } from "../../core/language-choice";
 import { useReadingLanguages } from "../../react/readingLanguages";
 import { LanguageChoice } from "../../ui/LanguageChoice";
 import { inLanguage, languagesOf } from "./languages";
+import { languageProps } from "../../core/direction";
 
 export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
   /**
@@ -79,6 +83,8 @@ export interface AnnotationsProps extends React.HTMLAttributes<HTMLElement> {
  *   and lists one at a time: the Root's `language` to start, else the reader's
  *   (`LanguageChoice`). Annotations in no language show whichever is chosen.
  */
+const NO_PAGES: AnnotationPageRef[] = [];
+
 export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
   function Annotations(
     {
@@ -131,10 +137,15 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
       clover.selectAnnotation(id);
     };
 
-    // Every annotation needs every Canvas's pages: held while the listing shows.
-    useEffect(() => {
-      if (scope === "all") return clover.holdAllAnnotationPages();
-    }, [clover, scope]);
+    /*
+     * Every annotation, as far as the reader has reached: the Canvases' pages load in
+     * order up to the one in view (or the one picked), and the next as the list's end
+     * comes into view, never all at once (Mat, 2026-10-29). The view's own load anyway.
+     */
+    const pages = useCloverSelector((state) =>
+      scope === "all" ? selectAnnotationPages(state.manifest) : NO_PAGES,
+    );
+    const reach = usePagesReached(pages);
 
     const visible = (set: AnnotationSet) =>
       set.entries.filter((entry) =>
@@ -171,6 +182,7 @@ export const Annotations = forwardRef<HTMLElement, AnnotationsProps>(
           onVisible={(ids, on) =>
             ids.forEach((id) => clover.setSetVisible(id, on))
           }
+          end={reach.more && <ListEnd onReached={reach.reachNext} />}
         />
       );
     if (!groups.length) return null;
@@ -266,7 +278,7 @@ function AnnotationGroup({
           <Heading
             className="clover-annotations-title"
             id={`${id}-title`}
-            lang={title.lang}
+            {...languageProps(title.lang)}
           >
             {title.text}
           </Heading>
@@ -382,22 +394,6 @@ function inOrder<T>(groups: Array<[string, T]>, order: Map<string, number>) {
     : groups;
 }
 
-/** Manifests the annotations name, fetched once a Root, as the listing first needs them. */
-const fetched = new WeakMap<Clover, Map<string, Promise<Manifest | null>>>();
-function fetchManifest(clover: Clover, id: string) {
-  let byId = fetched.get(clover);
-  if (!byId) fetched.set(clover, (byId = new Map()));
-  let manifest = byId.get(id);
-  if (!manifest) {
-    manifest = loadManifest(
-      { id, type: "Manifest" },
-      { request: clover.request },
-    ).catch(() => null);
-    byId.set(id, manifest);
-  }
-  return manifest;
-}
-
 /**
  * The Canvases of other Manifests the listing's annotations are on (`partOf`), as
  * annotations given as the content name them: each Manifest fetched once, when the listing
@@ -480,6 +476,8 @@ const AnnotationLayers = forwardRef<
     onSelect: (id: string) => void;
     onHighlight: (id: string | null) => void;
     onVisible: (setIds: string[], visible: boolean) => void;
+    /** After the layers: where more of them load as the reader reaches it. */
+    end?: React.ReactNode;
   }
 >(function AnnotationLayers(
   {
@@ -498,6 +496,7 @@ const AnnotationLayers = forwardRef<
     onSelect,
     onHighlight,
     onVisible,
+    end,
   },
   ref,
 ) {
@@ -615,7 +614,7 @@ const AnnotationLayers = forwardRef<
                 <Title
                   className="clover-annotations-title"
                   id={`${id}-${layerIndex}`}
-                  lang={layer.title.lang}
+                  {...languageProps(layer.title.lang)}
                 >
                   {layer.title.text}
                 </Title>
@@ -671,14 +670,18 @@ const AnnotationLayers = forwardRef<
                     <Label
                       className="clover-annotations-canvas-label"
                       id={labelId}
-                      lang={label.length === 1 ? label[0].lang : undefined}
+                      {...languageProps(
+                        label.length === 1 ? label[0].lang : undefined,
+                      )}
                     >
                       {label.length === 1
                         ? label[0].text
                         : label.map((part, index) => (
                             <React.Fragment key={index}>
                               {index > 0 && ", "}
-                              <span lang={part.lang}>{part.text}</span>
+                              <span {...languageProps(part.lang)}>
+                                {part.text}
+                              </span>
                             </React.Fragment>
                           ))}
                     </Label>
@@ -707,6 +710,7 @@ const AnnotationLayers = forwardRef<
           </section>
         );
       })}
+      {end}
     </Tag>
   );
 });
@@ -836,14 +840,14 @@ function AnnotationItem({
       >
         {!oneLanguage && (
           <>
-            <span lang={show.lang}>
+            <span {...languageProps(show.lang)}>
               {show.text}
               {text.text && ":"}
             </span>
             {text.text && (
               <>
                 {" "}
-                <span lang={text.lang}>{text.text}</span>
+                <span {...languageProps(text.lang)}>{text.text}</span>
               </>
             )}
           </>
@@ -876,7 +880,7 @@ function FollowLink({ annotation }: { annotation: Record<string, any> }) {
         href={link.id}
         target="_blank"
         rel="noopener noreferrer"
-        lang={lang}
+        {...languageProps(lang)}
       >
         {text}
       </a>
@@ -885,7 +889,7 @@ function FollowLink({ annotation }: { annotation: Record<string, any> }) {
     <button
       type="button"
       className="clover-annotations-link"
-      lang={lang}
+      {...languageProps(lang)}
       onClick={(event) => {
         const root = event.currentTarget.closest(".clover-root");
         if (!showLink(clover, link)) return;

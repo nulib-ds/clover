@@ -6,6 +6,7 @@ import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
+import { languageProps } from "../../core/direction";
 
 export interface CollectionSelectProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "onChange"> {
@@ -95,7 +96,9 @@ export const CollectionSelect = forwardRef<HTMLElement, CollectionSelectProps>(
         <label
           htmlFor={`${id}-select`}
           className="clover-collection-select-label"
-          lang={label.text ? label.lang : langOf("collectionLabel")}
+          {...languageProps(
+            label.text ? label.lang : langOf("collectionLabel"),
+          )}
         >
           {label.text || t("collectionLabel")}
         </label>
@@ -130,7 +133,7 @@ export const CollectionSelect = forwardRef<HTMLElement, CollectionSelectProps>(
               <option
                 key={item.id}
                 value={item.id}
-                lang={text.text ? text.lang : undefined}
+                {...languageProps(text.text ? text.lang : undefined)}
               >
                 {text.text || item.id}
               </option>

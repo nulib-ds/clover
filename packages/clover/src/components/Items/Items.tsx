@@ -3,16 +3,18 @@ import { useUniqueId } from "../../ui/useUniqueId";
 
 import { ItemFigure } from "./Item";
 import { ItemsPager, type Steps } from "./Pager";
+import { CountMenu } from "./CountMenu";
 import { Tip } from "../../ui/Tip";
 import {
   type ItemModel,
   itemsOfCollection,
   itemsOfManifest,
 } from "../../core/items";
+import { selectAnnotationCollection } from "../../core/annotation-sets";
 import type { IIIFContent } from "../../core/load";
 import type { CloverRequest } from "../../core/request";
 import { selectPosition, selectSequence } from "../../core/selectors";
-import type { ViewingDirection } from "../../core/sequence";
+import { type ViewingDirection, resolveDirection } from "../../core/sequence";
 import { type LanguageMapLike, localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
@@ -24,6 +26,7 @@ import { titleTag } from "../../ui/heading";
 import { useRovingFocus } from "../../ui/useRovingFocus";
 import { useScrollTrack } from "../../ui/useScrollTrack";
 import { visuallyHidden } from "../../ui/visuallyHidden";
+import { languageProps } from "../../core/direction";
 
 /**
  * A scrolling row of thumbnails (`slider`), a column, a wrapping grid, or one item at a
@@ -39,10 +42,19 @@ export interface ItemsProps
    */
   layout?: ItemsLayout;
   /**
-   * Inside a `Root`: the Manifest's views (default), or the members of the Collection it
-   * belongs to, choosing one to show.
+   * The pager's size: `large` (the default), round controls; or `small`, its steps and
+   * count as Search's are, for a header's line. Default `"large"`.
    */
-  of?: "views" | "members";
+  size?: "large" | "small";
+  /**
+   * Inside a `Root`: the Manifest's views (default), the members of the Collection it
+   * belongs to, choosing one to show, a content state's targets, where it names two or
+   * more (Cookbook 0540), each opening its Manifest at its place, or annotations walked as
+   * one whole: the AnnotationPage or AnnotationCollection given as the content, else the
+   * AnnotationCollection its annotation pages are part of (Cookbook 0309), each picked
+   * and framed on its Canvas.
+   */
+  of?: "views" | "members" | "targets" | "annotations";
   /**
    * Standalone: a Collection (its members), a Manifest (its views) or a URL to one. Inside
    * a `Root`, leave it out to list the Root's views.
@@ -117,13 +129,54 @@ export type Forwarded = { forwardedRef: React.ForwardedRef<HTMLElement> };
  */
 const StandaloneItems = lazy(() => import("./StandaloneItems"));
 
-/** Inside a Root: its views, or its Collection's members. */
+/**
+ * Inside a Root: its views, its Collection's members, a content state's targets, or an
+ * AnnotationCollection's annotations.
+ */
 function ConnectedItems({ of = "views", ...props }: ItemsProps & Forwarded) {
-  return of === "members" ? (
+  return of === "targets" ? (
+    <SomeTargets {...props} />
+  ) : of === "annotations" ? (
+    <SomeAnnotations {...props} />
+  ) : of === "members" ? (
     <MemberItems {...props} />
   ) : (
     <ViewItems {...props} />
   );
+}
+
+/*
+ * A content state's targets: their own chunk, loaded only where one names two or more,
+ * as its reader is, so a Root opened on anything else carries none of it.
+ */
+const TargetItems = lazy(() => import("./TargetItems"));
+
+function SomeTargets(props: ItemsProps & Forwarded) {
+  const several = useCloverSelector(
+    (state) => (state.targets?.items.length ?? 0) > 1,
+  );
+  return several ? (
+    <Suspense fallback={null}>
+      <TargetItems {...props} />
+    </Suspense>
+  ) : null;
+}
+
+/*
+ * An AnnotationCollection's annotations: their own chunk, loaded only for a Manifest whose
+ * pages name one, so a Root opened on anything else carries none of it.
+ */
+const AnnotationItems = lazy(() => import("./AnnotationItems"));
+
+function SomeAnnotations(props: ItemsProps & Forwarded) {
+  const named = useCloverSelector((state) =>
+    Boolean(selectAnnotationCollection(state.manifest, state.addedSets)),
+  );
+  return named ? (
+    <Suspense fallback={null}>
+      <AnnotationItems {...props} />
+    </Suspense>
+  ) : null;
 }
 
 /** The Collection's members, as a listbox choosing the Manifest shown. */
@@ -136,6 +189,10 @@ function MemberItems({
   const collection = useCloverSelector((state) => state.collection);
   const manifestId = useCloverSelector((state) => state.manifest?.id ?? null);
   const items = itemsOfCollection(collection);
+  // The Collection's own `viewingDirection` orders its members, as a Manifest's its views.
+  const direction = resolveDirection(
+    (collection as { viewingDirection?: unknown } | null)?.viewingDirection,
+  );
   if (!items.length) return null;
   const choose = (item: ItemModel, event: React.SyntheticEvent) => {
     onSelect?.(item, event);
@@ -143,11 +200,26 @@ function MemberItems({
   };
   if (rest.layout === "pager") {
     const position = items.findIndex((item) => item.id === manifestId);
+    // Its count opens a menu of the members, as a content state's targets' does.
     return (
       <Pager
         {...rest}
         forwardedRef={forwardedRef}
-        steps={stepsOf(items, position, "left-to-right", choose)}
+        steps={stepsOf(items, position, direction, choose)}
+        nameKey="informationPanelTabsCollection"
+        position={
+          <CountMenu
+            position={position}
+            total={items.length}
+            list={(chosen) => (
+              <MemberItems
+                layout="list"
+                forwardedRef={null}
+                onSelect={chosen}
+              />
+            )}
+          />
+        }
       />
     );
   }
@@ -158,6 +230,7 @@ function MemberItems({
       items={items}
       selected={items.findIndex((item) => item.id === manifestId)}
       navigation="id"
+      rtl={direction === "right-to-left"}
       language={language}
       request={clover.request}
       showSummary
@@ -252,7 +325,13 @@ export function Pager({
   /* eslint-enable @typescript-eslint/no-unused-vars */
   ...rest
 }: Omit<ItemsProps, "onSelect" | "iiifContent" | "items"> &
-  Forwarded & { steps: Steps }) {
+  Forwarded & {
+    steps: Steps;
+    /** In place of the count: one that opens a menu of the items. */
+    position?: React.ReactNode;
+    /** The string naming its `nav`, where it is not Items'. */
+    nameKey?: string;
+  }) {
   const root = useRootLanguage(forwardedRef, rest.lang);
   return (
     <HostLanguageContext.Provider value={root.hostLanguage}>
@@ -277,6 +356,8 @@ interface ItemsViewProps extends Omit<ItemsProps, "navigation" | "items"> {
     label?: LanguageMapLike;
     summary?: LanguageMapLike;
     homepage?: string;
+    /** That homepage's own language, where its `language` gives one. */
+    homepageLang?: string;
   };
   onActivate: (item: ItemModel, event: React.SyntheticEvent) => void;
   /**
@@ -306,6 +387,9 @@ export function ItemsView({
   as: Tag = "section",
   className,
   "aria-label": ariaLabel,
+  // The pager's, not a list's.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  size,
   ...rest
 }: ItemsViewProps) {
   const { t } = useCloverTranslation();
@@ -480,7 +564,7 @@ export function ItemsView({
         type="button"
         className={`clover-items-scroll-${step}`}
         aria-controls={stepping ? undefined : `${id}-viewport`}
-        lang={langOf(labelKey)}
+        {...languageProps(langOf(labelKey))}
         aria-disabled={!can || undefined}
         tabIndex={can ? undefined : -1}
         onClick={onClick}
@@ -522,7 +606,7 @@ export function ItemsView({
               <Title
                 className="clover-items-title"
                 id={`${id}-title`}
-                lang={headingLabel.lang}
+                {...languageProps(headingLabel.lang)}
               >
                 {headingLabel.text}
               </Title>
@@ -530,7 +614,7 @@ export function ItemsView({
             {headingSummary?.text && (
               <p
                 className="clover-items-description"
-                lang={headingSummary.lang}
+                {...languageProps(headingSummary.lang)}
               >
                 {headingSummary.text.replace(/<[^>]*>/g, "")}
               </p>
@@ -539,7 +623,8 @@ export function ItemsView({
               <a
                 className="clover-items-homepage"
                 href={heading.homepage}
-                lang={langOf("commonViewAll")}
+                hrefLang={heading.homepageLang}
+                {...languageProps(langOf("commonViewAll"))}
               >
                 {t("commonViewAll")}
               </a>
@@ -576,7 +661,7 @@ export function ItemsView({
                       role="option"
                       aria-selected={isSelected}
                       aria-label={positionName(item, index)}
-                      lang={positionLang(item)}
+                      {...languageProps(positionLang(item))}
                       className="clover-items-item"
                       data-track-index={index}
                       style={slideStyle}
@@ -604,8 +689,9 @@ export function ItemsView({
                     <a
                       className="clover-items-link"
                       href={item.href}
+                      hrefLang={item.hrefLang}
                       aria-label={positionName(item, index)}
-                      lang={positionLang(item)}
+                      {...languageProps(positionLang(item))}
                       draggable={false}
                       onClick={(event) => onActivate(item, event)}
                     >

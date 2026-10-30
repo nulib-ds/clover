@@ -7,7 +7,7 @@ import {
   resolveDirection,
   viewOf,
 } from "./sequence";
-import type { Target } from "./content-state";
+import type { ContentTargets, Target } from "./content-state";
 import { parseAnnotationTarget } from "./annotations";
 
 /**
@@ -155,3 +155,30 @@ export const partOfCollection = (manifest: unknown) =>
       label?: unknown;
     }>
   ).find((part) => part?.id && part.type === "Collection");
+
+/**
+ * Which of a content state's targets is shown (Cookbook 0540): the one last gone to,
+ * while it is in view, else the first in view (its Manifest shown, and its Canvas in the
+ * view, where it names one); -1 where the reader has moved to a view none names.
+ */
+export function selectTargetIndex(
+  targets: ContentTargets | null,
+  targetIndex: number | null,
+  manifest: Manifest | null,
+  canvasId: string | null,
+): number {
+  const items = targets?.items;
+  if (!items?.length || !manifest) return -1;
+  const visible = selectVisibleCanvases(manifest, canvasId);
+  const here = (index: number) => {
+    const target = items[index];
+    return (
+      (target?.manifestId === manifest.id ||
+        target?.manifestAs === manifest.id) &&
+      (!target.canvasId ||
+        visible.some((canvas) => canvas.id === target.canvasId))
+    );
+  };
+  if (targetIndex !== null && here(targetIndex)) return targetIndex;
+  return items.findIndex((_, index) => here(index));
+}

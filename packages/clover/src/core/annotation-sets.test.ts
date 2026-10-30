@@ -4,6 +4,8 @@ import captionsJson from "../fixtures/iiif-cookbook/0219-using-caption-file.json
 import simpleJson from "../fixtures/iiif-cookbook/simple-annotation.json";
 import articlesJson from "../fixtures/iiif-cookbook/0025-newspaper-article-index.json";
 import layersJson from "../fixtures/iiif-cookbook/0326-annotating-image-layer.json";
+import placeJson from "../fixtures/iiif-cookbook/0139-geolocate-canvas-fragment.json";
+import cssJson from "../fixtures/iiif-cookbook/0045-css.json";
 import { p4 } from "../fixtures/presentation4";
 import { loadAnnotationSets } from "./annotation-collection";
 import {
@@ -48,6 +50,25 @@ describe("annotation sets", () => {
     const [entry] = selectManifestSets(p4(imageJson))[0].entries;
     expect(entry.bodies[0].image).toMatch(/fountain/);
     expect(entry.target.rect).toEqual({ x: 138, y: 550, w: 1477, h: 1710 });
+  });
+
+  // Cookbook 0045: each comment's words held by a SpecificResource, given a styleClass.
+  it("reads the words a SpecificResource body holds, and where they point", () => {
+    const [set] = selectManifestSets(p4(cssJson));
+    expect(set.entries).toHaveLength(2);
+    expect(set.entries[0].bodies).toEqual([
+      expect.objectContaining({
+        format: "text/html",
+        language: "en",
+        value: expect.stringContaining("Three of the four pursuits"),
+      }),
+    ]);
+    expect(set.entries[0].target.rect).toEqual({
+      x: 700,
+      y: 1250,
+      w: 1850,
+      h: 1150,
+    });
   });
 
   it("keeps an image body's label, else its annotation's, for its text alternative", () => {
@@ -216,6 +237,21 @@ describe("annotation sets", () => {
     it("leaves caption files alone: they are never a set", () => {
       expect(selectHiddenSets(p4(captionsJson), [], [], [])).toEqual([]);
     });
+  });
+
+  // Cookbook 0139: a map on the page, tagged with where it shows, a GeoJSON Feature.
+  it("lists a place by its feature's label, on the region it tags", () => {
+    const [set] = selectManifestSets(p4(placeJson));
+    const [entry] = set.entries;
+    expect(entry.bodies).toEqual([
+      {
+        label: {
+          en: ["Targeted Map from Chesapeake and Ohio Canal Pamphlet"],
+        },
+        place: true,
+      },
+    ]);
+    expect(entry.target.rect).toEqual({ x: 920, y: 3600, w: 1510, h: 3000 });
   });
 
   // Cookbook 0326: an image of a Choice carries its own annotations.

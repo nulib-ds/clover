@@ -1,9 +1,10 @@
 import React from "react";
 
 import ControlMenu from "./ControlMenu";
-import type { ChoiceGroup, ChoiceSelections } from "./layout";
+import { type ChoiceGroup, type ChoiceSelections, playsHere } from "./layout";
 import { localize } from "../../core/value";
 import { useContainerName } from "../../ui/useContainerName";
+import { languageProps } from "../../core/direction";
 
 interface ChoiceMenuProps {
   id: string;
@@ -57,25 +58,39 @@ const ChoiceMenu: React.FC<ChoiceMenuProps> = ({
         const heading = localize(group.label as any, language);
         return (
           <fieldset
+            // Its key before the spread, so Next's compiler keeps it out of `createElement`.
+            key={group.key}
             {...(heading.text ? {} : fallbackName.props)}
             className="clover-canvas-menu-group"
-            key={group.key}
           >
             {heading.text && (
-              <legend className="clover-canvas-menu-legend" lang={heading.lang}>
+              <legend
+                className="clover-canvas-menu-legend"
+                {...languageProps(heading.lang)}
+              >
                 {heading.text}
               </legend>
             )}
             {group.items.map((item, index) => {
               const text = localize(item.label as any, language);
               const shown = text.text || (item.image ? "" : String(index + 1));
+              /*
+               * A recording this browser says it cannot play is listed, but cannot be
+               * chosen (`playsHere`; Mat, 2026-10-29).
+               */
+              const unplayable = !playsHere(item);
               return (
-                <label className="clover-canvas-menu-item" key={index}>
+                <label
+                  className="clover-canvas-menu-item"
+                  key={index}
+                  data-disabled={unplayable || undefined}
+                >
                   <input
                     type="radio"
                     name={`${id}-${g}`}
                     aria-label={shown ? undefined : String(index + 1)}
                     checked={(selections[group.key] ?? 0) === index}
+                    disabled={unplayable}
                     onChange={() => onSelect(group.key, index)}
                   />
                   {item.image && (
@@ -89,7 +104,7 @@ const ChoiceMenu: React.FC<ChoiceMenuProps> = ({
                     />
                   )}
                   {shown && (
-                    <span lang={text.text ? text.lang : undefined}>
+                    <span {...languageProps(text.text ? text.lang : undefined)}>
                       {shown}
                     </span>
                   )}

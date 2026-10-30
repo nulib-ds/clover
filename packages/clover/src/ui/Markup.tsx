@@ -8,7 +8,7 @@ import {
   toPlainText,
 } from "../core/text";
 import { type LanguageMapLike, localize } from "../core/value";
-import { directionOf } from "../core/direction";
+import { languageProps } from "../core/direction";
 
 /**
  * A IIIF value, which may hold the HTML the Presentation API allows.
@@ -65,6 +65,27 @@ type MarkupProps = {
   "dangerouslySetInnerHTML" | "lang" | "dir"
 >;
 
+/** Elements that may hold only inline content, which a value of blocks is never put in. */
+const INLINE_ONLY = new Set([
+  "p",
+  "span",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "a",
+  "b",
+  "i",
+  "em",
+  "strong",
+  "small",
+  "sub",
+  "sup",
+  "label",
+]);
+
 /** A IIIF language map, in the closest language, as sanitized HTML. Nothing when empty. */
 export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
   { as: Tag = "span", markup, language, format, headingLevel, ...rest },
@@ -72,7 +93,7 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
 ) {
   const { text, lang } = localize(markup, language);
   // Written right to left where its language is (Arabic, Hebrew…), else as the page is.
-  const dir = directionOf(lang);
+  const written = languageProps(lang);
   const kind = readAs(format, text);
   const markdown = kind === "markdown";
   // Plain text is never markup: nothing is sanitized, so nothing loads for it.
@@ -84,7 +105,7 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
   if (!text) return null;
   if (kind === "plain")
     return (
-      <Tag ref={ref} {...rest} lang={lang} dir={dir}>
+      <Tag ref={ref} {...rest} {...written}>
         {text.split(/\r?\n/).map((line, index) => (
           <React.Fragment key={index}>
             {index > 0 && <br />}
@@ -93,17 +114,29 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
         ))}
       </Tag>
     );
+  /*
+   * A value of blocks of its own (IIIF HTML wraps its text in an element, often a `p`;
+   * Cookbook 0007; Markdown's lists) is never put in an element that may only hold inline
+   * content (a `p`, a `span`, a heading): a `div` stands in for it, its class and props
+   * kept, so no paragraph sits in a paragraph or a span (Mat, 2026-10-29).
+   */
+  const Box =
+    typeof Tag === "string" &&
+    INLINE_ONLY.has(Tag) &&
+    html &&
+    /<(p|ul|ol|div)[\s>]/i.test(html)
+      ? "div"
+      : Tag;
   return html !== null ? (
-    <Tag
+    <Box
       ref={ref}
       {...rest}
-      lang={lang}
-      dir={dir}
+      {...written}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   ) : (
     // Until the sanitizer arrives, Markdown shows without its syntax.
-    <Tag ref={ref} {...rest} lang={lang} dir={dir}>
+    <Tag ref={ref} {...rest} {...written}>
       {markdown ? markdownToPlainText(text) : toPlainText(text)}
     </Tag>
   );
@@ -137,7 +170,7 @@ export const MetadataList: React.FC<MetadataListProps> = ({
               .text.replace(/\s+/g, "-")
               .toLowerCase()}
           >
-            <dt lang={label.lang}>{label.text}</dt>
+            <dt {...languageProps(label.lang)}>{label.text}</dt>
             {custom !== undefined ? (
               <dd>{custom}</dd>
             ) : (

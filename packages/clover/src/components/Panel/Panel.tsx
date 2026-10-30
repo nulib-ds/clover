@@ -13,7 +13,7 @@ import { InPanelContext } from "./ReadingLanguages";
 import { Tip } from "../../ui/Tip";
 import { Close } from "../Body/glyphs";
 import {
-  canvasCaptions,
+  canvasTimedText,
   canvasTextTranscripts,
   type IIIFCanvas,
 } from "../Canvas/layout";
@@ -31,6 +31,7 @@ import {
   Sections,
 } from "../../ui/Sections";
 import { useContainerName } from "../../ui/useContainerName";
+import { languageProps } from "../../core/direction";
 
 /*
  * The map, and MapLibre with it, load only when a Manifest with places or georeferences
@@ -48,6 +49,9 @@ const RootMap = lazy(() =>
  */
 const Collection = lazy(() =>
   import("../Collection/Collection").then((m) => ({ default: m.Collection })),
+);
+const Targets = lazy(() =>
+  import("../Items/TargetItems").then((m) => ({ default: m.TargetsSection })),
 );
 const Contents = lazy(() =>
   import("../Contents/Contents").then((m) => ({ default: m.Contents })),
@@ -196,7 +200,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
   // A tab's name, marked where it is not in the page's language (WCAG 3.1.2).
   const tabLabel = (key: string) => {
     const lang = langOf(key);
-    return lang ? <span lang={lang}>{t(key)}</span> : t(key);
+    return lang ? <span {...languageProps(lang)}>{t(key)}</span> : t(key);
   };
   const hasAnnotations = useCloverSelector(
     (state) => selectListedSets(state.manifest, state.addedSets).length > 0,
@@ -209,7 +213,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
       ) as unknown as IIIFCanvas[]
     ).some(
       (canvas) =>
-        canvasCaptions(canvas).length > 0 ||
+        canvasTimedText(canvas).length > 0 ||
         canvasTextTranscripts(canvas).length > 0,
     ),
   );
@@ -221,6 +225,10 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
   );
   const hasMap = useCloverSelector((state) =>
     hasMapData(state.manifest, state.collection),
+  );
+  // A content state's several targets (Cookbook 0540), listed as a Collection's members are.
+  const hasTargets = useCloverSelector(
+    (state) => (state.targets?.items.length ?? 0) > 1,
   );
   // Reached through a Collection, or part of one: offered either way, fetched only when opened.
   const hasCollection = useCloverSelector(
@@ -258,6 +266,15 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
           content: <About headingLevel={inner} download={download} />,
           actions: aboutActions,
         },
+        ...(hasTargets
+          ? [
+              {
+                value: "targets",
+                label: tabLabel("informationPanelTabsTargets"),
+                content: later(<Targets headingLevel={inner} />),
+              },
+            ]
+          : []),
         ...(hasCollection
           ? [
               {
@@ -411,7 +428,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
           type="button"
           className="clover-panel-close"
           aria-label={t("informationPanelClose")}
-          lang={langOf("informationPanelClose")}
+          {...languageProps(langOf("informationPanelClose"))}
           onClick={close}
         >
           {/* The Canvas controls' cross, at their size, so it reads as one of them. */}

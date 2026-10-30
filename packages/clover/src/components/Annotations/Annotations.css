@@ -113,6 +113,21 @@ label.clover-annotations-entry > input {
 }
 
 /*
+ * An annotation's bodies, one after another (Cookbook 0377: a picture and its caption),
+ * `xs` apart, as the parts of one item are (DESIGN.md §3; Mat, 2026-10-29).
+ */
+.clover-annotations-body > * + * {
+  margin-block-start: var(--clover-space-xs);
+}
+
+/* The menu's words under its picture: a block, as the list's are, for that gap. */
+.clover-annotations-body
+  > .clover-annotations-image
+  + .clover-annotations-text {
+  display: block;
+}
+
+/*
  * A Markdown body's lists: flush with its paragraphs, their markers in `l`. Each entry is
  * itself a list item, so a body's bullets are set as a list's own, not a nested one's.
  */
@@ -164,10 +179,17 @@ label.clover-annotations-entry > input {
   border-radius: var(--clover-radius, 3px);
 }
 
+/*
+ * An image an annotation gives (Cookbook 0377), no taller than Items' pictures (Mat,
+ * 2026-10-29): `--clover-items-height`, where a page sets it around the list, else its
+ * default. Its width follows, at its own aspect, never past the list's.
+ */
 .clover-annotations-image {
   display: block;
+  width: auto;
   max-width: 100%;
   height: auto;
+  max-height: var(--clover-items-height, 8rem);
   border-radius: var(--clover-radius, 3px);
 }
 

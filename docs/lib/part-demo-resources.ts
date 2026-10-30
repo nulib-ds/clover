@@ -58,6 +58,12 @@ export const RESOURCES = {
    */
   articles:
     "https://iiif.io/api/cookbook/recipe/0025-newspaper-article-index/manifest.json",
+  /**
+   * The IIIF Cookbook's recipe 0309 (not a mock): a newspaper's layout markup, its pages
+   * of tags on two Canvases part of one AnnotationCollection, for `Items of="annotations"`.
+   */
+  layers:
+    "https://iiif.io/api/cookbook/recipe/0309-annotation-collection/manifest.json",
 } as const;
 
 export type PartDemoResource = keyof typeof RESOURCES;

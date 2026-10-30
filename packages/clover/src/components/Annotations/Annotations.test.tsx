@@ -27,6 +27,10 @@ vi.mock("../../lib/renderer", async (importOriginal) => ({
 }));
 
 import layersJson from "../../fixtures/iiif-cookbook/0326-annotating-image-layer.json";
+import languagesJson from "../../fixtures/iiif-cookbook/0346-multilingual-annotation-body.json";
+import collectionJson from "../../fixtures/iiif-cookbook/0309-annotation-collection.json";
+import collectionPage1 from "../../fixtures/iiif-cookbook/0309-annotation-collection-anno_p1.json";
+import collectionPage2 from "../../fixtures/iiif-cookbook/0309-annotation-collection-anno_p2.json";
 
 const canvasId = imageJson.items[0].id;
 const annotationId = imageJson.items[0].annotations[0].items[0].id;
@@ -161,6 +165,29 @@ describe("Annotations", () => {
     expect(find).toHaveAttribute("aria-pressed", "true");
     // Focus stays where the reader asked.
     expect(find).toHaveFocus();
+  });
+
+  // Cookbook 0346: a comment as a Choice of English and Japanese follows the Root's language.
+  it("shows the item of a Choice of languages in the Root's", async () => {
+    const { rerender } = render(
+      <Clover.Root iiifContent={languagesJson} language="en">
+        <Clover.Annotations scope="view" />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByText("Koto with a cover being carried"),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("袋に収められた琴")).toBeNull();
+    rerender(
+      <Clover.Root iiifContent={languagesJson} language="ja">
+        <Clover.Annotations scope="view" />
+      </Clover.Root>,
+    );
+    // Its text, and the name of its Find button, both in Japanese.
+    const ja = await screen.findAllByText("袋に収められた琴");
+    for (const each of ja)
+      expect(each.closest("[lang]")).toHaveAttribute("lang", "ja");
+    expect(screen.queryByText("Koto with a cover being carried")).toBeNull();
   });
 
   /*
@@ -579,6 +606,63 @@ describe("Annotations, every Canvas's (scope all)", () => {
     return null;
   }
 
+  it("names pages by the AnnotationCollection they are part of, one layer across Canvases (Cookbook 0309)", async () => {
+    // The Collection's label is in the Manifest's references alone, not the pages fetched.
+    const pages: Record<string, unknown> = {
+      [collectionPage1.id]: collectionPage1,
+      [collectionPage2.id]: collectionPage2,
+    };
+    const fetch = vi.fn(
+      async (url: string) => new Response(JSON.stringify(pages[url])),
+    );
+    render(
+      <Clover.Root iiifContent={collectionJson} request={{ fetch }}>
+        <Clover.Annotations scope="all" />
+      </Clover.Root>,
+    );
+    await screen.findByText("text-4");
+    // One layer, named by the Collection, with one toggle for both pages.
+    expect(
+      screen.getByRole("checkbox", { name: "Hide Newspaper layout markup" }),
+    ).toBeInTheDocument();
+    const layer = screen.getByRole("region", {
+      name: "Newspaper layout markup",
+    });
+    expect(
+      within(layer)
+        .getAllByRole("heading")
+        .map((heading) => heading.textContent),
+    ).toEqual(["Newspaper layout markup", "p. 1", "p. 2"]);
+    expect(within(layer).getAllByRole("button")).toHaveLength(8);
+  });
+
+  it("fetches the pages up to the one in view, and the next only as the list's end comes into view", async () => {
+    viewport.restore();
+    const away = stubViewport({ onScreen: false });
+    try {
+      const fetch = vi.fn(async () => new Response(JSON.stringify(referenced)));
+      const { container } = render(
+        <Clover.Root iiifContent={manifest} request={{ fetch }}>
+          <Clover.Annotations scope="all" />
+        </Clover.Root>,
+      );
+      await screen.findByText("Comment 2");
+      // Page 3's page is only referenced, past the view and the list's end: not fetched.
+      expect(fetch).not.toHaveBeenCalled();
+      expect(screen.queryByText("Comment 3")).toBeNull();
+      act(() =>
+        away.scrollIntoView(container.querySelector(".clover-list-end")!),
+      );
+      await screen.findByText("Comment 3");
+      expect(fetch).toHaveBeenCalledWith(
+        `${base}/page/comments-3`,
+        expect.anything(),
+      );
+    } finally {
+      away.restore();
+    }
+  });
+
   it("lists them by layer, one hide toggle each, then by Canvas under its label, those in view current", async () => {
     const fetch = vi.fn(async () => new Response(JSON.stringify(referenced)));
     render(
@@ -587,7 +671,7 @@ describe("Annotations, every Canvas's (scope all)", () => {
         <Clover.Annotations scope="all" />
       </Clover.Root>,
     );
-    // Every Canvas's pages are fetched for it: page 3's Comments, only referenced.
+    // Its end in view (the stub shows everything): page 3's Comments, only referenced.
     await screen.findByText("Comment 3");
     expect(fetch).toHaveBeenCalledWith(
       `${base}/page/comments-3`,

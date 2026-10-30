@@ -23,9 +23,11 @@ export type LoadedImage =
       /**
        * A video element, playing, shown as a DOM layer: a positioned `<video>` the
        * browser composites itself, so PiP, AirPlay and HDR keep working. Never uploaded.
+       * Or text an animation paints at a time (Cookbook 0489), laid out in the Canvas's
+       * units and placed the same way.
        */
       kind: "media";
-      source: HTMLVideoElement;
+      source: HTMLVideoElement | HTMLElement;
       width: number;
       height: number;
       naturalWidth: number;

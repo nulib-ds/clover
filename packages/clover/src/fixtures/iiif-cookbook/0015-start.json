@@ -1,0 +1,55 @@
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://iiif.io/api/cookbook/recipe/0015-start/manifest.json",
+  "type": "Manifest",
+  "label": {
+    "en": ["Video of a 30-minute digital clock"]
+  },
+  "start": {
+    "id": "https://iiif.io/api/cookbook/recipe/0015-start/canvas-start/segment1",
+    "type": "SpecificResource",
+    "source": "https://iiif.io/api/cookbook/recipe/0015-start/canvas/segment1",
+    "selector": {
+      "type": "PointSelector",
+      "t": 120.5
+    }
+  },
+  "rights": "http://creativecommons.org/licenses/by/3.0/",
+  "requiredStatement": {
+    "label": {
+      "en": ["Attribution"]
+    },
+    "value": {
+      "en": [
+        "<span>The video was created by <a href='https://www.youtube.com/watch?v=Lsq0FiXjGHg'>DrLex1</a> and was released using a <a href='https://creativecommons.org/licenses/by/3.0/'>Creative Commons Attribution license</a></span>"
+      ]
+    }
+  },
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0015-start/canvas/segment1",
+      "type": "Canvas",
+      "duration": 1801.055,
+      "items": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0015-start/annotation/segment1/page",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0015-start/annotation/segment1-video",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://fixtures.iiif.io/video/indiana/30-minute-clock/medium/30-minute-clock.mp4",
+                "type": "Video",
+                "duration": 1801.055,
+                "format": "video/mp4"
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0015-start/canvas/segment1"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

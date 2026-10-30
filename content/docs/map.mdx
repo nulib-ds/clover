@@ -47,26 +47,29 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 Draws a resource's [navPlace](https://iiif.io/api/extension/navplace/) places and its
 [georeferenced](https://iiif.io/api/extension/georef/) images on a
 [MapLibre GL](https://maplibre.org/) map, and lists them under it. MapLibre loads when a
-map is first shown. Inside a `Root`, it maps the Root's resource and follows the view; its
-other props, and its `ref`, go to its element.
+map is first shown. Inside a `Root`, it maps the Root's resource and follows the view: a
+Collection's members too, each opening its Manifest as it is pressed. A place is named with the
+date of what it locates (its `navDate`), in its list and on the map. Its other props, and
+its `ref`, go to its element.
 
 <ApiReference elements="clover-map">
 
-| Prop             | Type                              | Default          | Description                                                |
-| ---------------- | --------------------------------- | ---------------- | ---------------------------------------------------------- |
-| `iiifContent`    | `string \| object`                | —                | On its own: a resource to map. In a `Root`, leave it out.  |
-| `navPlace`       | `object`                          | —                | GeoJSON to draw: a FeatureCollection, Feature or geometry. |
-| `georeferences`  | `object[]`                        | —                | Georeference Extension annotations to lay over the map.    |
-| `overlay`        | `boolean`                         | `true`           | Draw the georeferenced images.                             |
-| `overlayOpacity` | `number`                          | `0.75`           | Their opacity, from 0 to 1.                                |
-| `styleUrl`       | `string`                          | Clover's basemap | A MapLibre style, used as it is.                           |
-| `workerUrl`      | `string`                          | Clover's own     | Where MapLibre's worker is served from, to serve your own. |
-| `scrollZoom`     | `boolean`                         | `false`          | Zoom with the wheel or trackpad.                           |
-| `onSelect`       | `(feature) => void`               | —                | A place was chosen, on the map or in its list.             |
-| `request`        | `{ credentials, headers, fetch }` | —                | With `iiifContent`: for every request.                     |
-| `language`       | `string`                          | The reader's     | With `iiifContent`: the language to read IIIF text in.     |
-| `as`             | element type                      | `"div"`          | The element to render.                                     |
-| `className`      | `string`                          | —                | Added to `clover-geomap`.                                  |
+| Prop             | Type                              | Default          | Description                                                                                                                                           |
+| ---------------- | --------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `iiifContent`    | `string \| object`                | —                | On its own: a resource to map. In a `Root`, leave it out.                                                                                             |
+| `navPlace`       | `object`                          | —                | GeoJSON to draw: a FeatureCollection, Feature or geometry.                                                                                            |
+| `georeferences`  | `object[]`                        | —                | Georeference Extension annotations to lay over the map.                                                                                               |
+| `overlay`        | `boolean`                         | `true`           | Draw the georeferenced images.                                                                                                                        |
+| `overlayOpacity` | `number`                          | `0.75`           | Their opacity, from 0 to 1.                                                                                                                           |
+| `styleUrl`       | `string`                          | Clover's basemap | A MapLibre style, used as it is.                                                                                                                      |
+| `workerUrl`      | `string`                          | Clover's own     | Where MapLibre's worker is served from, to serve your own.                                                                                            |
+| `scrollZoom`     | `boolean`                         | `false`          | Zoom with the wheel or trackpad.                                                                                                                      |
+| `credits`        | `boolean`                         | `true`           | The basemap's credits, behind an ⓘ in the map's corner. A basemap's license may ask for them: give them on the page yourself before leaving them out. |
+| `onSelect`       | `(feature) => void`               | —                | A place was chosen, on the map or in its list.                                                                                                        |
+| `request`        | `{ credentials, headers, fetch }` | —                | With `iiifContent`: for every request.                                                                                                                |
+| `language`       | `string`                          | The reader's     | With `iiifContent`: the language to read IIIF text in.                                                                                                |
+| `as`             | element type                      | `"div"`          | The element to render.                                                                                                                                |
+| `className`      | `string`                          | —                | Added to `clover-geomap`.                                                                                                                             |
 
 </ApiReference>
 
@@ -102,7 +105,9 @@ georeference.
 ### In a layout of your own
 
 Inside a `Root`, it lays the view's georeferenced images over the map, and choosing a
-place goes to its Canvas.
+place goes to its Canvas. A place an annotation tags on part of a Canvas (a map on a page,
+Cookbook 0139) is that annotation too: choosing it selects it, and the Canvas frames its
+region.
 
 ```jsx
 import * as Clover from "@nulib/clover";

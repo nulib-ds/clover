@@ -15,9 +15,12 @@ import rtlJson from "../../fixtures/iiif-cookbook/0010-book-2-viewing-direction-
 import placeholderVideoJson from "../../fixtures/iiif-cookbook/0013-placeholderCanvas.json";
 import metadataAnywhereJson from "../../fixtures/iiif-cookbook/0029-metadata-anywhere.json";
 import choiceJson from "../../fixtures/iiif-cookbook/0033-choice.json";
+import choiceAvJson from "../../fixtures/iiif-cookbook/0434-choice-av.json";
 import audioJson from "../../fixtures/iiif-cookbook/0002-mvm-audio.json";
 import hotspotJson from "../../fixtures/iiif-cookbook/0022-linking-with-a-hotspot.json";
 import fullCanvasJson from "../../fixtures/iiif-cookbook/0266-full-canvas-annotation.json";
+import navPlaceJson from "../../fixtures/iiif-cookbook/0154-geo-extension.json";
+import missingImageJson from "../../fixtures/iiif-cookbook/0283-missing-image.json";
 import { initCloverI18n } from "../../i18n";
 import { IdPrefixContext } from "../../ui/useUniqueId";
 import { CanvasRenderer } from "../../lib/renderer";
@@ -30,6 +33,8 @@ const rtl = p4(rtlJson);
 const placeholderVideo = p4(placeholderVideoJson);
 const metadataAnywhere = p4(metadataAnywhereJson);
 const choice = p4(choiceJson);
+const choiceAv = p4(choiceAvJson);
+const missingImage = p4(missingImageJson);
 
 const listeners: Record<string, (detail?: unknown) => void> = {};
 let renderer: Record<string, any>;
@@ -339,6 +344,35 @@ describe("Canvas", () => {
     );
   });
 
+  // Cookbook 0154: a Manifest's navPlace, on a map, from the Canvas's controls.
+  it("offers a Map control where the Manifest has a place, opening it on a map", async () => {
+    render(<Canvas iiifContent={navPlaceJson as any} />);
+    await waitFor(
+      () =>
+        expect(
+          screen.getByTestId("clover-canvas-viewport"),
+        ).toBeInTheDocument(),
+      { timeout: 3000 },
+    );
+    await open();
+    const control = await screen.findByRole("button", { name: "Map" });
+    expect(control).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(control);
+    await loaded();
+    const box = await screen.findByRole("group", {
+      name: "The Laocoön Bronze",
+    });
+    expect(box).toHaveAttribute("data-open", "true");
+    expect(control).toHaveAttribute("aria-expanded", "true");
+    expect(control).toHaveAttribute("aria-controls", box.id);
+    // Closed, focus back on the control; and open again from it.
+    fireEvent.click(within(box).getByRole("button", { name: "Close" }));
+    expect(box).toHaveAttribute("data-open", "false");
+    expect(control).toHaveFocus();
+    fireEvent.click(control);
+    expect(box).toHaveAttribute("data-open", "true");
+  });
+
   it("renders an accessible, focusable viewport", () => {
     render(<Canvas src="https://example.org/a.jpg" label="A letter" />);
     const viewport = screen.getByRole("img", { name: "A letter" });
@@ -406,6 +440,85 @@ describe("Canvas", () => {
       "data-navigable",
       "false",
     );
+  });
+
+  it("holds a Canvas that paints nothing still, its name in its Body (Cookbook 0283)", () => {
+    // f. 1v, a page missing from the book: `items` empty, a label saying so.
+    render(<Canvas canvases={[missingImage.items[1]]} instanceId="x" />);
+    const viewport = screen.getByRole("img", { name: "f. 1v — MISSING" });
+    expect(viewport).not.toHaveAttribute("aria-roledescription");
+    expect(viewport).not.toHaveAttribute("aria-keyshortcuts");
+    expect(screen.getByTestId("clover-canvas")).toHaveAttribute(
+      "data-navigable",
+      "false",
+    );
+    expect(renderer.setGestures).toHaveBeenCalledWith({ navigable: false });
+    // Nothing to zoom, turn, reset or see full screen: the Canvas's own information alone.
+    const buttons = screen
+      .getByTestId("clover-canvas-controls")
+      .querySelectorAll("button");
+    expect([...buttons].map((b) => b.dataset.button)).toEqual(["information"]);
+    // Its name in the middle of the Body, for the eye: the viewport says it already.
+    const note = document.querySelector(".clover-body-note");
+    expect(note).toHaveTextContent("f. 1v — MISSING");
+    expect(note).toHaveAttribute("aria-hidden", "true");
+    expect(note?.querySelector("p")).toHaveAttribute("lang", "en");
+  });
+
+  it("keeps full screen, and its way out, on a Canvas that paints nothing reached in it", () => {
+    let shown: Element | null = null;
+    Object.defineProperty(document, "fullscreenElement", {
+      configurable: true,
+      get: () => shown,
+    });
+    try {
+      const { container } = render(
+        <div id="viewer">
+          <Canvas canvases={[missingImage.items[1]]} instanceId="x" />
+        </div>,
+      );
+      // Full screen on another page, then on to the missing one: still full screen.
+      act(() => {
+        shown = container.querySelector("#viewer");
+        document.dispatchEvent(new Event("fullscreenchange"));
+      });
+      const exit = screen.getByRole("button", { name: "Exit full screen" });
+      expect(exit).toHaveAttribute("data-button", "full-page");
+      // Left, by its control: no way back in here, and focus on the Canvas, not lost.
+      exit.focus();
+      act(() => {
+        shown = null;
+        document.dispatchEvent(new Event("fullscreenchange"));
+      });
+      expect(screen.queryByRole("button", { name: /full screen/i })).toBeNull();
+      expect(document.activeElement).toBe(
+        screen.getByTestId("clover-canvas-viewport"),
+      );
+    } finally {
+      Object.defineProperty(document, "fullscreenElement", {
+        configurable: true,
+        get: () => null,
+      });
+    }
+  });
+
+  it("shows nothing in the Body of a Canvas that paints nothing and has no name", () => {
+    const unnamed = { ...missingImage.items[1], label: undefined };
+    render(<Canvas canvases={[unnamed as any]} />);
+    expect(document.querySelector(".clover-body-note")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Zoom in" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Full screen" })).toBeNull();
+  });
+
+  it("keeps a picture's controls beside a missing page in a spread", () => {
+    render(
+      <Canvas
+        canvases={[missingImage.items[0], missingImage.items[1]]}
+        instanceId="x"
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Zoom in" })).toBeVisible();
+    expect(document.querySelector(".clover-body-note")).toBeNull();
   });
 
   it("names no keys behind a placeholder, where none does anything", () => {
@@ -548,13 +661,14 @@ describe("Canvas", () => {
       const buttons = screen
         .getByTestId("clover-canvas-controls")
         .querySelectorAll("button");
+      // Full screen ends the view's controls (Mat, 2026-10-29).
       expect([...buttons].map((b) => b.dataset.button)).toEqual([
         "zoom-in",
         "zoom-out",
-        "full-page",
         "rotate-right",
         "rotate-left",
         "reset",
+        "full-page",
       ]);
       expect(buttons[0]).toHaveAttribute("id", "zoomIn-x");
     });
@@ -998,6 +1112,20 @@ describe("Canvas", () => {
       expect(renderer.clear).toHaveBeenCalledTimes(1);
     });
 
+    // Cookbook 0230: two Manifests whose Canvases share one id, at two sizes.
+    it("frames afresh for another Manifest's Canvas, though its id is the same", () => {
+      const { rerender } = render(
+        <Canvas canvases={[pages[1]]} manifestId="https://example.org/a" />,
+      );
+      expect(lastScene()[1].fit).toBe(false);
+      renderer.isOpen = true;
+      const larger = { ...pages[2], id: pages[1].id };
+      rerender(
+        <Canvas canvases={[larger]} manifestId="https://example.org/b" />,
+      );
+      expect(lastScene()[1].fit).toBe(true);
+    });
+
     it("never says it is loading for sound alone, which has no image to wait for", () => {
       render(<Canvas canvases={[(p4(audioJson) as any).items[0]]} />);
       expect(document.querySelector(".clover-loading")).toBeNull();
@@ -1052,6 +1180,24 @@ describe("Canvas", () => {
       const control = screen.getByRole("button", { name: "Choice" });
       expect(control).toHaveAttribute("data-button", "choice");
       expect(control).toHaveAttribute("aria-expanded", "false");
+    });
+
+    it("starts a recording's Choice on a format the browser plays, the rest it cannot play disabled (Cookbook 0434)", async () => {
+      // As Chrome answers: no ALAC, MP3 and the rest.
+      const canPlay = vi
+        .spyOn(HTMLMediaElement.prototype, "canPlayType")
+        .mockImplementation((type) => (type === "audio/alac" ? "" : "maybe"));
+      try {
+        render(<Canvas canvases={[choiceAv.items[0]] as any} />);
+        fireEvent.click(screen.getByRole("button", { name: "Choice" }));
+        const alac = await screen.findByRole("radio", { name: "ALAC" });
+        expect(alac).toBeDisabled();
+        expect(alac).not.toBeChecked();
+        expect(screen.getByRole("radio", { name: "MP3" })).toBeChecked();
+        expect(screen.getByRole("radio", { name: "WAV" })).toBeEnabled();
+      } finally {
+        canPlay.mockRestore();
+      }
     });
 
     it("lists the items, first selected, and paints the one picked", () => {

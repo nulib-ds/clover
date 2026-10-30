@@ -5,6 +5,7 @@ import { join } from "../lib/classnames";
 import { Steps, type StepsModel } from "./Steps";
 import { Tip } from "./Tip";
 import { visuallyHidden } from "./visuallyHidden";
+import { languageProps } from "../core/direction";
 
 export interface FieldPillProps {
   /** The field's id, for its label. */
@@ -67,7 +68,7 @@ export const FieldPill = forwardRef<HTMLInputElement, FieldPillProps>(
         <label
           htmlFor={id}
           style={visuallyHidden}
-          lang={langOf("informationPanelTabsSearch")}
+          {...languageProps(langOf("informationPanelTabsSearch"))}
         >
           {t("informationPanelTabsSearch")}
         </label>
@@ -89,7 +90,7 @@ export const FieldPill = forwardRef<HTMLInputElement, FieldPillProps>(
             <span
               className="clover-field-pill-note"
               aria-hidden="true"
-              lang={langOf("contentSearchResultsNone")}
+              {...languageProps(langOf("contentSearchResultsNone"))}
             >
               {t("contentSearchResultsNone")}
             </span>
@@ -98,7 +99,7 @@ export const FieldPill = forwardRef<HTMLInputElement, FieldPillProps>(
           <button
             type="button"
             className={join("clover-field-pill-clear", classes.clear)}
-            lang={langOf("contentSearchClear")}
+            {...languageProps(langOf("contentSearchClear"))}
             onClick={onClear}
           >
             <svg
@@ -123,7 +124,7 @@ export const FieldPill = forwardRef<HTMLInputElement, FieldPillProps>(
         <button
           type="submit"
           className={join("clover-field-pill-submit", classes.submit)}
-          lang={langOf("commonSearch")}
+          {...languageProps(langOf("commonSearch"))}
         >
           <svg
             aria-hidden="true"

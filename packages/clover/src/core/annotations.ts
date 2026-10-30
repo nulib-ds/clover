@@ -93,10 +93,22 @@ function readTarget(target: Target): ParsedAnnotationTarget {
 
   for (const raw of asArray(target.selector)) {
     const selector = raw as Record<string, any>;
+    /*
+     * A point in space (`x`, `y`), in time (Cookbook 0015's `start` at 120.5 seconds:
+     * Presentation 4's `instant`, as the upgrader writes Presentation 3's `t`), or both:
+     * each read where it is given.
+     */
     if (selector?.type === "PointSelector") {
+      const [x, y, t] = [
+        selector.x,
+        selector.y,
+        selector.instant ?? selector.t,
+      ].map(Number);
+      const placed = Number.isFinite(x) && Number.isFinite(y);
       return {
         id: source.id,
-        point: { x: Number(selector.x), y: Number(selector.y) },
+        ...(placed ? { point: { x, y } } : {}),
+        ...(Number.isFinite(t) ? { t: String(t) } : {}),
       };
     }
     if (selector?.type === "SvgSelector" && selector.value) {

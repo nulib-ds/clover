@@ -37,11 +37,18 @@ export const isFullscreenSupported = (): boolean => {
 };
 
 /**
- * What goes full screen, found from an element inside it: the Canvas, in a template as
- * on its own, as 3.x's Viewer full-screens its image and not the page around it.
+ * What goes full screen, found from an element inside it: the Root a Canvas is in, a
+ * template's Viewer or a page's own layout, so a reader goes on through the resource
+ * there, its Items and Panel too (Mat, 2026-10-29); else the Canvas, on its own. Not
+ * across a dialog in the Root (the Gallery's lightbox, a modal one): full screen over
+ * it would hide the dialog, so its Canvas goes alone.
  */
-export const getCloverRoot = (from: Element | null): HTMLElement | null =>
-  from?.closest(".clover-canvas") as HTMLElement | null;
+export const getCloverRoot = (from: Element | null): HTMLElement | null => {
+  const root = from?.closest(".clover-root");
+  const dialog = from?.closest("dialog");
+  if (root && !(dialog && root.contains(dialog))) return root as HTMLElement;
+  return (from?.closest(".clover-canvas") as HTMLElement | null) ?? null;
+};
 
 /**
  * Hand `video` to the system player (iPhone Safari), which takes only a video on the page.

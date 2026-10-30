@@ -367,12 +367,42 @@ button.clover-canvas-transport-time:focus-visible {
   outline: 2px solid var(--clover-player-text, #fff);
 }
 
-/* An animation's frames open their menu up from their bar, at its start. */
+/*
+ * Which frame shows, as a figure ("5 / 5"), in the numbers' even widths, and the widest,
+ * unseen, holding its room, as Search's place does (`ui/Steps.css`).
+ */
+.clover-canvas-transport-place {
+  display: inline-grid;
+  justify-items: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.clover-canvas-transport-place > * {
+  grid-area: 1 / 1;
+}
+
+.clover-canvas-transport-place > .clover-canvas-transport-place-room[hidden] {
+  display: block;
+  visibility: hidden;
+}
+
+/*
+ * An animation's frames open their menu up from their button, at its end. Placed on
+ * opening as the captions' and chapters' menus are (`placeMenu`): no taller than the room
+ * above the button, and moved along to lie within the bar's inset (WCAG 1.4.10).
+ */
 .clover-canvas-transport-frames > .clover-canvas-menu {
+  right: 0;
   bottom: calc(100% + var(--clover-space-s));
-  left: 0;
-  max-width: min(20rem, 80vw);
-  max-height: min(24rem, 70vh, var(--clover-transport-menu-room));
+  left: auto;
+  max-width: min(20rem, 100cqi - 2 * var(--clover-canvas-controls-inset));
+  max-height: min(
+    24rem,
+    var(--clover-transport-menu-room),
+    var(--clover-transport-menu-above, 100cqb) - var(--clover-space-s) -
+      var(--clover-space-xs)
+  );
+  translate: var(--clover-transport-menu-shift, 0px) 0;
 }
 
 /* ── captions menu ───────────────────────────────────────────────────────── */
@@ -633,14 +663,18 @@ button.clover-canvas-transport-time:focus-visible {
 /* ---------- chapters ---------- */
 
 /*
- * Where each chapter after the first begins, a gap cut out of the seek bar, as by a mask:
+ * Where a chapter begins, or ends with none to follow, a gap cut out of the seek bar, as
+ * by a mask (`gapsOf`):
  * the scrim and the picture show through (Mat, 2026-10-28: "treat steps more like masks
  * of the seek bar"). `--clover-transport-gaps` is the mask (`Transport.tsx`), opaque but
- * for `--clover-transport-gap` at each chapter's start, a step under the track. A disk at
- * the thumb, as wide as its focus ring, is never cut. The gaps only mark what the
- * chapters' menu and the popover name.
+ * for `--clover-transport-gap` at each chapter's start, a step under the track, each
+ * where the thumb stands at that time. A disk the thumb's own size, its focus ring's while
+ * focused, is never cut, so a gap narrows only where the thumb covers it (Mat,
+ * 2026-10-29: "the seek bar gaps seem to shrink as the current time get's closer to the
+ * gap"). The gaps only mark what the chapters' menu and the popover name.
  */
 .clover-canvas-transport-seek[data-gaps] {
+  --clover-transport-disk: calc(var(--clover-transport-thumb) / 2 + 1px);
   mask-image:
     radial-gradient(
       circle at
@@ -650,10 +684,14 @@ button.clover-canvas-transport-time:focus-visible {
             var(--clover-transport-at, 0)
         )
         50%,
-      #000 var(--clover-transport-thumb),
-      transparent var(--clover-transport-thumb)
+      #000 var(--clover-transport-disk),
+      transparent var(--clover-transport-disk)
     ),
     var(--clover-transport-gaps);
+}
+
+.clover-canvas-transport-seek[data-gaps]:focus-visible {
+  --clover-transport-disk: calc(var(--clover-transport-thumb) / 2 + 6px);
 }
 
 /*
@@ -696,6 +734,8 @@ button.clover-canvas-transport-time:focus-visible {
 
 .clover-canvas-transport-seek-area > .clover-tip .clover-tip-image {
   width: var(--clover-picture);
+  /* A chapter's picture keeps its own size, at its width, never held to Items' height. */
+  max-height: none;
   margin-block-end: var(--clover-space-xs);
 }
 

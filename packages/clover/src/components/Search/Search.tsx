@@ -18,6 +18,7 @@ import { titleTag } from "../../ui/heading";
 import { useSectionOpened } from "../../ui/Sections";
 import { FieldPill } from "../../ui/FieldPill";
 import type { StepsModel } from "../../ui/Steps";
+import { languageProps } from "../../core/direction";
 
 export interface SearchProps extends React.HTMLAttributes<HTMLElement> {
   /** The heading level of each Canvas's group of hits. Default 3. */
@@ -226,7 +227,7 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
       className="clover-content-search-status"
       role="status"
       data-status={search.status}
-      lang={statusKey ? langOf(statusKey) : undefined}
+      {...languageProps(statusKey ? langOf(statusKey) : undefined)}
     >
       {status}
     </p>
@@ -279,7 +280,7 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
             <Heading
               id={`${id}-${index}`}
               className="clover-content-search-canvas"
-              lang={label.text ? label.lang : undefined}
+              {...languageProps(label.text ? label.lang : undefined)}
             >
               {label.text || canvasId}
             </Heading>

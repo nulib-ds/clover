@@ -3,9 +3,10 @@
  * middle of the Body, on the page's own ground in its muted text, so it reads on the
  * Body's tint in either mode, clear of the transport where there is one (`data-room`).
  * It takes no pointer, and its live region, always there, takes no room while it says
- * nothing.
+ * nothing. A Canvas that paints nothing names itself in the same note (`BodyNote`).
  */
-.clover-body-unloadable {
+.clover-body-unloadable,
+.clover-body-note {
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -24,7 +25,8 @@
   display: none;
 }
 
-.clover-body-unloadable > p {
+.clover-body-unloadable > p,
+.clover-body-note > p {
   margin: 0;
   padding: var(--clover-space-xs) var(--clover-space-s);
   border-radius: var(--clover-radius-pill, 2rem);

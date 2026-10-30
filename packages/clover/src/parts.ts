@@ -100,6 +100,7 @@ export type { ControlButtonProps, ControlButtons } from "./ui/controlButtons";
 // Hooks, for parts of your own
 export {
   useActiveCanvas,
+  useAnnotationCollection,
   useAnnotationSets,
   useLocalized,
   useManifest,
@@ -153,6 +154,7 @@ export { buildContentState, encodeContentState } from "./core/content-state";
 export { decodeContentState } from "./core/content-state-reader";
 export type {
   AnnotationBodyEntry,
+  AnnotationCollection,
   AnnotationEntry,
   AnnotationSet,
 } from "./core/annotation-sets";

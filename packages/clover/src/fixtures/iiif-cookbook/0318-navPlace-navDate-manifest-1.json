@@ -1,0 +1,70 @@
+{
+  "@context": [
+    "http://iiif.io/api/extension/navplace/context.json",
+    "http://iiif.io/api/presentation/3/context.json"
+  ],
+  "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/manifest-1.json",
+  "type": "Manifest",
+  "label": {
+    "en": ["Castel Sant'Angelo, Rome"]
+  },
+  "navDate": "1776-01-01T00:00:00Z",
+  "navPlace": {
+    "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature-collection/1",
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/feature/1",
+        "type": "Feature",
+        "properties": {
+          "label": {
+            "en": ["Castel Sant'Angelo, Rome"]
+          }
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [12.4663, 41.9031]
+        }
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/canvas/1",
+      "type": "Canvas",
+      "height": 1516,
+      "width": 2048,
+      "label": {
+        "en": ["Castel Sant'Angelo, Rome"]
+      },
+      "items": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/anno-page/1",
+          "type": "AnnotationPage",
+          "items": [
+            {
+              "id": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/anno/1",
+              "type": "Annotation",
+              "motivation": "painting",
+              "body": {
+                "id": "https://iiif.io/api/image/3.0/example/reference/71b9228e087f15c75b628214cd9f647d-Castel_Sant_Angelo_Rome/full/max/0/default.jpg",
+                "type": "Image",
+                "format": "image/jpeg",
+                "height": 1516,
+                "width": 2048,
+                "service": [
+                  {
+                    "id": "https://iiif.io/api/image/3.0/example/reference/71b9228e087f15c75b628214cd9f647d-Castel_Sant_Angelo_Rome",
+                    "profile": "level1",
+                    "type": "ImageService3"
+                  }
+                ]
+              },
+              "target": "https://iiif.io/api/cookbook/recipe/0318-navPlace-navDate/canvas/1"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -66,6 +66,47 @@ export interface AnnotationSet {
    */
   source: "manifest" | "added" | "search" | "contents";
   entries: AnnotationEntry[];
+  /** The AnnotationCollection its page is `partOf`, by id (Cookbook 0309). */
+  collection?: string;
+  /**
+   * The AnnotationPage or AnnotationCollection it was given as, where it is the Root's
+   * content (James Turner's tags across Manifests), walked as one whole.
+   */
+  content?: {
+    id: string;
+    type: "AnnotationPage" | "AnnotationCollection";
+    label?: LanguageMapLike;
+  };
+}
+
+/** An annotation page a Canvas names: by id, its Canvas, and whether it is fetched. */
+export interface AnnotationPageRef {
+  id: string;
+  canvasId: string;
+  fetched: boolean;
+}
+
+/**
+ * Annotations walked as one whole, as a viewer walks a Collection's members: the
+ * AnnotationPage or AnnotationCollection given as the content (James Turner's tags across
+ * Manifests, all in hand), else an AnnotationCollection the Manifest's annotation pages
+ * are part of (Cookbook 0309: layout markup across a newspaper's pages, managed as one
+ * whole), whose pages load as the reader reaches them.
+ */
+export interface AnnotationCollection {
+  id: string;
+  type: "AnnotationPage" | "AnnotationCollection";
+  label?: LanguageMapLike;
+  /** The number of its annotations, where it says. */
+  total?: number;
+  /**
+   * The Manifest's pages of it, in the Canvases' order, so a listing loads them as the
+   * reader reaches them (`usePagesReached`, `clover.fetchAnnotationPages`). None for the
+   * content's, whose annotations are all in hand.
+   */
+  pages: AnnotationPageRef[];
+  /** Its annotations on the Manifest's Canvases, in their order, as far as fetched. */
+  entries: AnnotationEntry[];
 }
 
 type Json = Record<string, any>;
@@ -119,6 +160,36 @@ export const paintsLayers = (manifest: Manifest): boolean =>
     ),
   );
 
+/**
+ * What names a page's set: its own `label`, else that of the AnnotationCollection it is
+ * `partOf` (Cookbook 0309: pages on several Canvases grouped, and named, as one), read
+ * from the page, then from a reference to it that may say more of the Collection. Sets
+ * with one name are one layer, listed and hidden together.
+ */
+export function pageLabel(
+  page: Json | undefined,
+  reference?: Json,
+): LanguageMapLike | undefined {
+  for (const each of [page, reference]) if (each?.label) return each.label;
+  for (const each of [page, reference]) {
+    const collection = (asArray(each?.partOf) as Json[]).find(
+      (part) =>
+        /AnnotationCollection/.test(String(part?.type ?? part?.["@type"])) &&
+        part.label,
+    );
+    if (collection) return collection.label;
+  }
+  return undefined;
+}
+
+/** The AnnotationCollections a page (or a reference to one) is `partOf`. */
+const collectionsOf = (page: Json | undefined): Json[] =>
+  (asArray(page?.partOf) as Json[]).filter(
+    (part) =>
+      part?.id &&
+      /AnnotationCollection/.test(String(part?.type ?? part?.["@type"])),
+  );
+
 const manifestSets = new WeakMap<Manifest, AnnotationSet[]>();
 
 /** The sets the Manifest's Canvases carry, merged by page id across Canvases. */
@@ -133,7 +204,14 @@ export function selectManifestSets(manifest: Manifest | null): AnnotationSet[] {
         const id = page.id ?? `${canvas.id}#annotations`;
         let set = byId.get(id);
         if (!set) {
-          set = { id, label: page.label, source: "manifest", entries: [] };
+          const collection = collectionsOf(page)[0]?.id;
+          set = {
+            id,
+            label: pageLabel(page),
+            source: "manifest",
+            entries: [],
+            ...(collection ? { collection } : {}),
+          };
           byId.set(id, set);
         }
         set.entries.push(...readPage(page, id, canvas.id));
@@ -143,6 +221,115 @@ export function selectManifestSets(manifest: Manifest | null): AnnotationSet[] {
     manifestSets.set(manifest, sets);
   }
   return sets;
+}
+
+const manifestPages = new WeakMap<Manifest, AnnotationPageRef[]>();
+const NO_PAGES: AnnotationPageRef[] = [];
+
+/** Every annotation page the Manifest's Canvases name, in their order, fetched or not. */
+export function selectAnnotationPages(
+  manifest: Manifest | null,
+): AnnotationPageRef[] {
+  if (!manifest) return NO_PAGES;
+  let pages = manifestPages.get(manifest);
+  if (!pages) {
+    pages = (selectSequence(manifest).canvases as Json[]).flatMap((canvas) =>
+      (asArray(canvas.annotations) as Json[])
+        .filter((page) => page?.id)
+        .map((page) => ({
+          id: String(page.id),
+          canvasId: String(canvas.id),
+          fetched: Array.isArray(page.items),
+        })),
+    );
+    manifestPages.set(manifest, pages);
+  }
+  return pages;
+}
+
+const manifestCollections = new WeakMap<
+  Manifest,
+  AnnotationCollection | null
+>();
+
+const contentCollections = new WeakMap<
+  AnnotationSet[],
+  AnnotationCollection | null
+>();
+
+/**
+ * The annotations walked as one whole: those given as the content (`addedSets` marked
+ * `content`), else the first AnnotationCollection the Manifest's annotation pages are
+ * part of; null where there are neither.
+ */
+export function selectAnnotationCollection(
+  manifest: Manifest | null,
+  added: AnnotationSet[] = NO_SETS_ADDED,
+): AnnotationCollection | null {
+  if (!contentCollections.has(added)) {
+    const sets = added.filter((set) => set.content);
+    const content = sets[0]?.content;
+    contentCollections.set(
+      added,
+      content
+        ? {
+            id: content.id,
+            type: content.type,
+            ...(content.label ? { label: content.label } : {}),
+            pages: NO_PAGES,
+            entries: sets.flatMap((set) => set.entries),
+          }
+        : null,
+    );
+  }
+  return contentCollections.get(added) ?? manifestCollection(manifest);
+}
+const NO_SETS_ADDED: AnnotationSet[] = [];
+
+/**
+ * The first AnnotationCollection the Manifest's annotation pages are part of, named and
+ * counted as its pages, or the Manifest's references to them, describe it (the Manifest
+ * should, so a viewer names it before fetching a page), with its annotations fetched so
+ * far; null where none is.
+ */
+function manifestCollection(
+  manifest: Manifest | null,
+): AnnotationCollection | null {
+  if (!manifest) return null;
+  if (manifestCollections.has(manifest))
+    return manifestCollections.get(manifest)!;
+  const pages = (selectSequence(manifest).canvases as Json[]).flatMap(
+    (canvas) =>
+      (asArray(canvas.annotations) as Json[]).flatMap((page) =>
+        collectionsOf(page).map((part) => ({ part, page, canvas })),
+      ),
+  );
+  const id = pages[0]?.part.id as string | undefined;
+  const found = id
+    ? (() => {
+        const own = pages.filter(({ part }) => part.id === id);
+        const label = own.find(({ part }) => part.label)?.part.label;
+        const total = Number(own.find(({ part }) => part.total)?.part.total);
+        const sets = selectManifestSets(manifest);
+        return {
+          id,
+          type: "AnnotationCollection" as const,
+          ...(label ? { label } : {}),
+          ...(total > 0 ? { total } : {}),
+          pages: own.map(({ page, canvas }) => ({
+            id: String(page.id),
+            canvasId: String(canvas.id),
+            fetched: Array.isArray(page.items),
+          })),
+          // In the pages' order: a page's set is listed where its Canvas first names it.
+          entries: own.flatMap(
+            ({ page }) => sets.find((set) => set.id === page.id)?.entries ?? [],
+          ),
+        };
+      })()
+    : null;
+  manifestCollections.set(manifest, found);
+  return found;
 }
 
 const allSets = new WeakMap<object, Map<unknown, AnnotationSet[]>>();

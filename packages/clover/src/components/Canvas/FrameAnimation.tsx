@@ -1,14 +1,28 @@
 import React, {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
+import { createPortal } from "react-dom";
+
 import ChoiceMenu from "./ChoiceMenu";
-import { type AnimationFrame, resolveBody } from "./layout";
+import {
+  type AnimationFrame,
+  type IIIFCanvas,
+  canvasSize,
+  resolveBody,
+} from "./layout";
+import { isSound, parseAnnotationTarget } from "../../core/annotations";
+import { bodiesOf } from "../../core/painting";
+import type { Rect, SceneImage } from "../../lib/renderer";
+import { Markup } from "../../ui/Markup";
+import { Tip } from "../../ui/Tip";
+import { visuallyHidden } from "../../ui/visuallyHidden";
 import { useBarHeight } from "./media/useBarHeight";
 import { imageSource, resolveThumbnail } from "../../core/thumbnail";
 import type { CloverRequest } from "../../core/request";
@@ -16,20 +30,96 @@ import { useOptionalClover } from "../../react/context";
 import { TransportButton } from "./media/TransportButton";
 import type { CanvasRenderer } from "../../lib/renderer";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
-import { PauseIcon, PlayIcon } from "../../ui/mediaIcons";
+import {
+  PauseIcon,
+  PlayIcon,
+  VolumeHighIcon,
+  VolumeMutedIcon,
+} from "../../ui/mediaIcons";
+import { formatTime } from "../../lib/time";
+import { gapMask, gapsOf, seekShare } from "./media/seekGaps";
+import { placeMenu } from "./media/placeMenu";
 
 export interface AnimationState {
+  /** The frame last to start by the clock's time: the one the bar names, its menu checks. */
   frame: number;
+  /** The frames showing at that time: each one whose span holds it, so several at once. */
+  shown: number[];
+  /** Where the clock is, in seconds of the Canvas's time. */
+  time: number;
+  /** How long it runs: the Canvas's `duration`, else its last frame's end. */
+  total: number;
   playing: boolean;
   /** Loop at the end: the `repeat` behavior to start with, then the reader's choice. */
   repeat: boolean;
+  /** Go to a frame: to its start. */
   setFrame: (frame: number) => void;
+  /** Go to a time, playing on from it if it plays. */
+  seek: (seconds: number) => void;
   setPlaying: (playing: boolean) => void;
   setRepeat: (repeat: boolean) => void;
 }
 
+/**
+ * A time on the bar, as a player counts it, a whole second; with its tenth where the whole
+ * runs under ten seconds (a Muybridge plate's second), where whole seconds say nothing.
+ */
+export const clockTime = (seconds: number, total: number) =>
+  total < 10
+    ? `${formatTime(seconds)}.${Math.min(9, Math.floor(((seconds || 0) % 1) * 10))}`
+    : formatTime(seconds);
+
+/** Whether keyboard focus is on an element: where `:focus-visible` is unknown, not. */
+const focusVisible = (element: Element) => {
+  try {
+    return element.matches(":focus-visible");
+  } catch {
+    return false;
+  }
+};
+
 /** How long a frame not yet loaded is waited for before it is looked at again. */
 const HOLD_MS = 50;
+
+/** How often the bar's time is brought up to date as it plays, as a player's is. */
+const TICK_MS = 250;
+
+/** The frame last to start at or before a time: the bar's, and its menu's. */
+const frameAt = (frames: AnimationFrame[], time: number) => {
+  let found = 0;
+  frames.forEach((frame, index) => {
+    if (frame.start <= time) found = index;
+  });
+  return found;
+};
+
+/** The frames whose span holds a time; at the end, those that last to it. */
+export function framesAt(
+  frames: AnimationFrame[],
+  time: number,
+  total: number,
+): number[] {
+  const at = Math.min(time, total);
+  const shown: number[] = [];
+  frames.forEach((frame, index) => {
+    if (
+      frame.start <= at &&
+      (at < frame.end || (at >= total && frame.end >= total))
+    )
+      shown.push(index);
+  });
+  return shown;
+}
+
+/** The next time after this one at which a frame starts or ends, or the end. */
+const nextChange = (frames: AnimationFrame[], time: number, total: number) => {
+  let next = total;
+  for (const frame of frames) {
+    if (frame.start > time && frame.start < next) next = frame.start;
+    if (frame.end > time && frame.end < next) next = frame.end;
+  }
+  return next;
+};
 
 /** The frames menu's pictures: about this many pixels on their longer side. */
 const FRAME_IMAGE = 128;
@@ -50,7 +140,11 @@ function useFrameImages(
       frames.map((frame) => {
         const { body } = frame.annotation;
         const resolved = resolveBody(Array.isArray(body) ? body[0] : body);
-        const source = resolved && imageSource(resolved.body, resolved.region);
+        // A picture of an image only: a video's or text's frame is named by its number.
+        const source =
+          resolved?.body.type === "Image"
+            ? imageSource(resolved.body, resolved.region)
+            : undefined;
         return source
           ? resolveThumbnail(source, FRAME_IMAGE, request)
           : undefined;
@@ -64,14 +158,15 @@ function useFrameImages(
 }
 
 /**
- * An animation's clock: the frame shown and whether it plays. Each frame stays for its
- * own span; at the end it loops when asked, and stops otherwise. A new animation (`key`)
- * starts from its first frame, playing if `autoplay` — never for a reader who asks the
- * system for reduced motion.
+ * An animation's clock, over the Canvas's own time (its `duration`; Mat, 2026-10-29: "as
+ * this manifest has a duration. this should be reflected on the canvas"): where it is,
+ * whether it plays, and the frames that show there, each for its own span, so several may
+ * show at once. At the end it loops when asked, and stops otherwise. A new animation
+ * (`key`) starts from its beginning, playing if `autoplay` — never for a reader who asks
+ * the system for reduced motion.
  *
- * A frame that `isReady` says cannot be drawn yet is not shown: the current one holds,
- * and the next is looked at again shortly, so a first pass over frames still loading
- * never blinks empty.
+ * A frame that `isReady` says cannot be drawn yet is not shown: the clock holds before it,
+ * and looks again shortly, so a first pass over frames still loading never blinks empty.
  */
 export function useAnimation(
   frames: AnimationFrame[],
@@ -79,26 +174,48 @@ export function useAnimation(
   {
     autoplay = false,
     loop = false,
+    duration,
     isReady,
     onEnded,
   }: {
     autoplay?: boolean;
     loop?: boolean;
+    /** The Canvas's `duration`, which the clock runs over. */
+    duration?: number;
     isReady?: (frame: number) => boolean;
-    /** The last frame has had its time, not looping: a Root's auto-advance moves on. */
+    /** The end has come, not looping: a Root's auto-advance moves on. */
     onEnded?: () => void;
   },
 ): AnimationState {
-  const [frame, setFrame] = useState(0);
+  const total = useMemo(() => {
+    if (duration && Number.isFinite(duration) && duration > 0) return duration;
+    const ends = frames.map((frame) => frame.end).filter(Number.isFinite);
+    return ends.length ? Math.max(...ends) : 0;
+  }, [frames, duration]);
+  const [time, setTime] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [repeat, setRepeat] = useState(loop);
+  // A move by the reader, so a clock playing goes on from there.
+  const [moved, setMoved] = useState(0);
+  const now = useRef(0);
   const ready = useRef(isReady);
   ready.current = isReady;
   const ended = useRef(onEnded);
   ended.current = onEnded;
 
+  const seek = useCallback(
+    (seconds: number) => {
+      const at = Math.max(0, Math.min(total, seconds));
+      now.current = at;
+      setTime(at);
+      setMoved((count) => count + 1);
+    },
+    [total],
+  );
+
   useEffect(() => {
-    setFrame(0);
+    now.current = 0;
+    setTime(0);
     setRepeat(loop);
     const reduced =
       typeof matchMedia === "function" &&
@@ -109,27 +226,72 @@ export function useAnimation(
   }, [key]);
 
   useEffect(() => {
-    if (!playing || frames.length < 2) return;
-    const current = frames[Math.min(frame, frames.length - 1)];
-    const ms = Math.max(40, (current.end - current.start) * 1000);
-    let timer = setTimeout(function advance() {
-      const atEnd = frame + 1 >= frames.length;
-      if (atEnd && !repeat) {
-        setPlaying(false);
-        ended.current?.();
+    if (!playing || frames.length < 2 || !(total > 0)) return;
+    // Played from the end, it starts again.
+    let from = { at: Date.now(), time: now.current >= total ? 0 : now.current };
+    let timer: ReturnType<typeof setTimeout>;
+    const go = (seconds: number) => {
+      now.current = seconds;
+      setTime(seconds);
+    };
+    // Up to date each tick, and at each moment a frame comes or goes.
+    const wait = (time: number) =>
+      Math.max(
+        0,
+        Math.min(TICK_MS, (nextChange(frames, time, total) - time) * 1000),
+      );
+    const tick = () => {
+      const before = now.current;
+      let time = from.time + (Date.now() - from.at) / 1000;
+      if (time >= total) {
+        if (!repeat) {
+          go(total);
+          setPlaying(false);
+          ended.current?.();
+          return;
+        }
+        time = 0;
+        from = { at: Date.now(), time: 0 };
+      }
+      const showing = framesAt(frames, before, total);
+      const coming = framesAt(frames, time, total).filter(
+        (index) => !showing.includes(index),
+      );
+      if (ready.current && coming.some((index) => !ready.current!(index))) {
+        from = { at: Date.now(), time: before };
+        timer = setTimeout(tick, HOLD_MS);
         return;
       }
-      const next = atEnd ? 0 : frame + 1;
-      if (ready.current && !ready.current(next)) {
-        timer = setTimeout(advance, HOLD_MS);
-        return;
-      }
-      setFrame(next);
-    }, ms);
+      go(time);
+      timer = setTimeout(tick, wait(time));
+    };
+    if (from.time !== now.current) go(from.time);
+    timer = setTimeout(tick, wait(from.time));
     return () => clearTimeout(timer);
-  }, [playing, frame, frames, repeat]);
+  }, [playing, frames, total, repeat, moved]);
 
-  return { frame, playing, repeat, setFrame, setPlaying, setRepeat };
+  const frame = frameAt(frames, time);
+  const shownKey = framesAt(frames, time, total).join(",");
+  const shown = useMemo(
+    () => (shownKey ? shownKey.split(",").map(Number) : []),
+    [shownKey],
+  );
+  const setFrame = useCallback(
+    (index: number) => seek(frames[index]?.start ?? 0),
+    [frames, seek],
+  );
+  return {
+    frame,
+    shown,
+    time,
+    total,
+    playing,
+    repeat,
+    setFrame,
+    seek,
+    setPlaying,
+    setRepeat,
+  };
 }
 
 /**
@@ -145,15 +307,42 @@ export function FrameControls({
   frames,
   animation,
   language,
+  sound,
 }: {
   frames: AnimationFrame[];
   animation: AnimationState;
   /** The language to read the frames' labels in. The reader's, by default. */
   language?: string;
+  /** Frames that play sound (a video, Cookbook 0489): whether it is muted, and a switch. */
+  sound?: { muted: boolean; toggle: () => void };
 }) {
   const { t, langOf } = useCloverTranslation();
-  const { frame, playing, repeat, setFrame, setPlaying, setRepeat } = animation;
-  const last = frames.length - 1;
+  const {
+    frame,
+    time,
+    total,
+    playing,
+    repeat,
+    setFrame,
+    seek,
+    setPlaying,
+    setRepeat,
+  } = animation;
+  // Where frames start, each once: the steps, as a recording's chapters are.
+  const starts = useMemo(
+    () => [...new Set(frames.map((each) => each.start))].sort((a, b) => a - b),
+    [frames],
+  );
+  let here = 0;
+  starts.forEach((start, index) => {
+    if (start <= time) here = index;
+  });
+  const progress = total > 0 ? (Math.min(time, total) / total) * 100 : 0;
+  // A gap in the seek bar where a frame begins or ends with none to follow, as a chapter's.
+  const gaps = useMemo(() => {
+    const at = gapsOf(frames, total);
+    return at.length ? gapMask(at) : undefined;
+  }, [frames, total]);
   const triggerId = `${useUniqueId().replace(/:/g, "")}-frames`;
   const menuId = `${triggerId}-menu`;
   const [open, setOpen] = useState(false);
@@ -179,18 +368,44 @@ export function FrameControls({
     }),
     [frames, images],
   );
-  const position = t("framePosition", {
-    index: frame + 1,
-    total: frames.length,
-  });
-  // Stepping by hand pauses, and stops at the ends, as the pager does. At an end the
-  // button is only `aria-disabled`, so it keeps focus (WCAG 2.4.3), and a press there
-  // does nothing.
+  const [pointedAt, setPointedAt] = useState<string | null>(null);
+  const [seekFocused, setSeekFocused] = useState(false);
+  const seekArea = useRef<HTMLDivElement>(null);
+  // Which frame shows, as a figure, "5 / 5", shown and read alike: no word, as Search's
+  // place among its hits shows (Mat, 2026-10-29).
+  const position = `${frame + 1} / ${frames.length}`;
+  // With no pointer over it, the popover is over where it is, for keyboard focus.
+  useLayoutEffect(() => {
+    if (pointedAt === null)
+      seekArea.current?.style.setProperty(
+        "--clover-transport-preview",
+        `${progress}%`,
+      );
+  }, [pointedAt, progress]);
+  // Its menu, placed from its button within the Body, as the chapters' is (WCAG 1.4.10).
+  const holder = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const wrapper = holder.current;
+    const options = wrapper?.querySelector<HTMLElement>(".clover-canvas-menu");
+    const transport = wrapper?.closest<HTMLElement>(".clover-canvas-transport");
+    const bodyBox = wrapper?.closest<HTMLElement>(".clover-canvas-media");
+    if (!open || !wrapper || !options || !transport || !bodyBox) return;
+    const place = () => placeMenu(options, wrapper, transport, bodyBox);
+    place();
+    const observer = new ResizeObserver(place);
+    observer.observe(bodyBox);
+    observer.observe(transport);
+    observer.observe(options);
+    return () => observer.disconnect();
+  }, [open]);
+  // Stepping by hand goes to where the step before or after starts, pausing, and stops
+  // at the ends, as the pager does. At an end the button is only `aria-disabled`, so it
+  // keeps focus (WCAG 2.4.3), and a press there does nothing.
   const step = (by: number) => {
-    const next = Math.min(last, Math.max(0, frame + by));
-    if (next === frame) return;
+    const to = starts[here + by];
+    if (to === undefined) return;
     setPlaying(false);
-    setFrame(next);
+    setFrame(frames.findIndex((each) => each.start === to));
   };
   return (
     <div
@@ -198,84 +413,76 @@ export function FrameControls({
       data-kind="frames"
       data-testid="clover-canvas-frames"
     >
-      <div className="clover-canvas-transport-seek-area">
+      {/*
+       * The time under the pointer, in the chapters' popover (`Tip`), its time alone: over
+       * the pointer, kept inside the Body, put away by Escape (WCAG 1.4.13); while keyboard
+       * focus is on the seek bar, the time it is at, over the thumb.
+       */}
+      <div
+        className="clover-canvas-transport-seek-area"
+        onPointerMove={(event) => {
+          if (!total || (event.target as Element).closest(".clover-tip"))
+            return;
+          const box = event.currentTarget.getBoundingClientRect();
+          setPointedAt(
+            clockTime(
+              seekShare(event.currentTarget, event.clientX) * total,
+              total,
+            ),
+          );
+          // Moved under the pointer as it goes, without a render for each move.
+          event.currentTarget.style.setProperty(
+            "--clover-transport-preview",
+            `${((event.clientX - box.left) / box.width) * 100}%`,
+          );
+        }}
+        onPointerLeave={() => setPointedAt(null)}
+        ref={seekArea}
+      >
+        {(pointedAt !== null || seekFocused) && (
+          <Tip label="" lead={pointedAt ?? clockTime(time, total)} />
+        )}
         <input
-          aria-label={t("frameSeek")}
-          aria-valuetext={position}
-          lang={langOf("frameSeek")}
+          aria-label={t("playerSeek")}
+          // Where it is, and which frame shows, as the bar shows them to the eye.
+          aria-valuetext={`${clockTime(time, total)} / ${clockTime(total, total)}, ${position}`}
+          onFocus={(event) => setSeekFocused(focusVisible(event.currentTarget))}
+          onBlur={() => setSeekFocused(false)}
+          lang={langOf("playerSeek")}
           className="clover-canvas-transport-seek"
-          max={last}
+          max={total}
           min={0}
-          step={1}
+          step="any"
           type="range"
-          value={frame}
-          onChange={(event) => {
-            setPlaying(false);
-            setFrame(Number(event.target.value));
-          }}
+          value={Math.min(time, total)}
+          onChange={(event) => seek(Number(event.target.value))}
+          data-gaps={gaps ? "" : undefined}
           style={
             {
-              "--clover-transport-progress": `${last ? (frame / last) * 100 : 0}%`,
+              "--clover-transport-progress": `${progress}%`,
+              ...(gaps && {
+                "--clover-transport-gaps": gaps,
+                "--clover-transport-at": progress / 100,
+              }),
             } as React.CSSProperties
           }
         />
       </div>
-      {/* On a narrow Body, which frame shows wraps below the buttons. */}
+      {/*
+       * One row while it fits. On a narrow Body, the time over the buttons, and which
+       * frame shows with its steps at the end of their row, or a row lower (`Transport.css`).
+       */}
       <div className="clover-canvas-transport-bar" ref={bar}>
-        <TransportButton
-          words="framePrevious"
-          disabled={frame === 0}
-          onClick={() => step(-1)}
-        >
-          <svg
-            aria-hidden="true"
-            focusable="false"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M10 3L5 8l5 5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </TransportButton>
         <TransportButton
           words={playing ? "playerPause" : "playerPlay"}
           button={playing ? "pause" : "play"}
           onClick={() => {
-            // Playing from the last frame starts again.
-            if (!playing && frame === last) setFrame(0);
+            // Playing from the end starts again.
+            if (!playing && time >= total) seek(0);
             setPlaying(!playing);
           }}
         >
           {playing ? <PauseIcon /> : <PlayIcon />}
-        </TransportButton>
-        <TransportButton
-          words="frameNext"
-          disabled={frame === last}
-          onClick={() => step(1)}
-        >
-          <svg
-            aria-hidden="true"
-            focusable="false"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M6 3l5 5-5 5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
         </TransportButton>
         <TransportButton
           words="frameRepeat"
@@ -300,58 +507,247 @@ export function FrameControls({
             />
           </svg>
         </TransportButton>
-        <span className="clover-canvas-transport-frames">
-          <button
-            type="button"
-            id={triggerId}
-            className="clover-canvas-transport-time"
-            aria-controls={open ? menuId : undefined}
-            aria-expanded={open}
-            onClick={() => {
-              // Opening pauses: the frames are there to choose from, not to chase.
-              if (!open) setPlaying(false);
-              setOpen(!open);
-            }}
+        {sound && (
+          <TransportButton
+            words={sound.muted ? "playerUnmute" : "playerMute"}
+            button="mute"
+            onClick={sound.toggle}
           >
-            <span aria-live="off" lang={langOf("framePosition")}>
-              {position}
-            </span>
+            {sound.muted ? <VolumeMutedIcon /> : <VolumeHighIcon />}
+          </TransportButton>
+        )}
+        {/* Where it is, as a recording's transport shows it; the seek bar says it too. */}
+        <span className="clover-canvas-transport-status" aria-hidden="true">
+          <span className="clover-canvas-transport-time">
+            {clockTime(time, total)} / {clockTime(total, total)}
+          </span>
+        </span>
+        {/*
+         * Which frame shows and its steps, together at the end, as Search's place among
+         * its hits and its steps are; Play keeps its place first, as a video's does.
+         */}
+        <div className="clover-canvas-transport-end">
+          <span className="clover-canvas-transport-frames" ref={holder}>
+            <button
+              type="button"
+              id={triggerId}
+              className="clover-canvas-transport-time"
+              aria-controls={open ? menuId : undefined}
+              aria-expanded={open}
+              onClick={() => {
+                // Opening pauses: the frames are there to choose from, not to chase.
+                if (!open) setPlaying(false);
+                setOpen(!open);
+              }}
+            >
+              <span className="clover-canvas-transport-place" aria-live="off">
+                <span>{position}</span>
+                {/*
+                 * The widest place, unseen in the same spot: it keeps the room, so nothing
+                 * beside it moves as the place grows. Without the stylesheet, `hidden`.
+                 */}
+                <span
+                  className="clover-canvas-transport-place-room"
+                  aria-hidden="true"
+                  hidden
+                >
+                  {frames.length} / {frames.length}
+                </span>
+              </span>
+              <svg
+                aria-hidden="true"
+                focusable="false"
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+              >
+                <path
+                  d="M3 7.5l3-3 3 3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            {open && (
+              <ChoiceMenu
+                id={menuId}
+                triggerId={triggerId}
+                label={t("playerChapters")}
+                labelLang={langOf("playerChapters")}
+                language={language}
+                choices={[group]}
+                selections={{ frame }}
+                onSelect={(_key, index) => {
+                  setPlaying(false);
+                  setFrame(index);
+                }}
+                onClose={close}
+              />
+            )}
+          </span>
+          <TransportButton
+            words="commonPrevious"
+            disabled={here === 0}
+            onClick={() => step(-1)}
+          >
             <svg
               aria-hidden="true"
               focusable="false"
-              width="12"
-              height="12"
-              viewBox="0 0 12 12"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
             >
               <path
-                d="M3 7.5l3-3 3 3"
+                d="M10 3L5 8l5 5"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.5"
+                strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
-          </button>
-          {open && (
-            <ChoiceMenu
-              id={menuId}
-              triggerId={triggerId}
-              label={t("frameSeek")}
-              labelLang={langOf("frameSeek")}
-              language={language}
-              choices={[group]}
-              selections={{ frame }}
-              onSelect={(_key, index) => {
-                setPlaying(false);
-                setFrame(index);
-              }}
-              onClose={close}
-            />
-          )}
-        </span>
+          </TransportButton>
+          <TransportButton
+            words="commonNext"
+            disabled={here === starts.length - 1}
+            onClick={() => step(1)}
+          >
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M6 3l5 5-5 5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </TransportButton>
+        </div>
       </div>
     </div>
+  );
+}
+
+/** A frame that is no image (Cookbook 0489): video or sound, or text, drawn as itself. */
+interface FrameItem {
+  /** Its frame's place among the frames. */
+  index: number;
+  id: string;
+  kind: "video" | "audio" | "text";
+  body: Record<string, any>;
+  /** Where it is in the scene's world, as the Canvas's images are placed. */
+  placement: Rect;
+}
+
+/** The frames that paint video, sound or text, where the scene puts each. */
+function itemsOf(
+  frames: AnimationFrame[],
+  canvas: IIIFCanvas,
+  place: Rect,
+): FrameItem[] {
+  const size = canvasSize(canvas);
+  const kx = place.width / (size.width || 1);
+  const ky = place.height / (size.height || 1);
+  return frames.flatMap((frame, index) => {
+    const body = bodiesOf(frame.annotation as Record<string, any>)[0] as
+      | Record<string, any>
+      | undefined;
+    const type = body?.type;
+    const kind =
+      type === "Video"
+        ? "video"
+        : isSound(type)
+          ? "audio"
+          : type === "TextualBody" && typeof body?.value === "string"
+            ? "text"
+            : null;
+    if (!kind || !body || (kind !== "text" && typeof body.id !== "string"))
+      return [];
+    const rect = parseAnnotationTarget(frame.annotation.target as any)?.rect;
+    const target = rect
+      ? { x: rect.x, y: rect.y, width: rect.w, height: rect.h }
+      : { x: 0, y: 0, width: size.width, height: size.height };
+    return [
+      {
+        index,
+        id: `${frame.annotation.id ?? index}#${kind}`,
+        kind,
+        body,
+        placement: {
+          x: place.x + target.x * kx,
+          y: place.y + target.y * ky,
+          width: target.width * kx,
+          height: target.height * ky,
+        },
+      },
+    ];
+  });
+}
+
+/**
+ * Painted text (Cookbook 0489: "Press Play"), in its region, as large as fits it: IIIF's
+ * HTML keeps no `style`, so the size the text was written at is not read, and the box
+ * the annotation targets decides it. Laid out in the scene's units, so it scales with the
+ * view as the images do. Hidden from assistive technology, which reads it outside the
+ * picture (`FrameAnimation`).
+ */
+function PaintedText({
+  host,
+  item,
+  shown,
+  language,
+}: {
+  host: HTMLElement;
+  item: FrameItem;
+  shown: boolean;
+  language?: string;
+}) {
+  useEffect(() => {
+    if (!shown || host.dataset.fitted) return;
+    let frame = 0;
+    const fit = () => {
+      if (!host.isConnected) {
+        frame = requestAnimationFrame(fit);
+        return;
+      }
+      const { width, height } = item.placement;
+      const fits = (size: number) => {
+        host.style.fontSize = `${size}px`;
+        return host.scrollWidth <= width + 1 && host.scrollHeight <= height + 1;
+      };
+      let low = 1;
+      let high = height * 0.8;
+      if (!fits(high))
+        for (let step = 0; step < 16; step += 1) {
+          const middle = (low + high) / 2;
+          if (fits(middle)) low = middle;
+          else high = middle;
+        }
+      else low = high;
+      host.style.fontSize = `${low}px`;
+      host.dataset.fitted = "";
+    };
+    frame = requestAnimationFrame(fit);
+    return () => cancelAnimationFrame(frame);
+  }, [host, item, shown]);
+  return createPortal(
+    <Markup
+      as="div"
+      markup={{ [item.body.language ?? "none"]: [item.body.value] }}
+      format={item.body.format}
+      language={language}
+    />,
+    host,
   );
 }
 
@@ -369,6 +765,10 @@ export default function FrameAnimation({
   loop,
   onEnded,
   language,
+  duration,
+  canvas,
+  place,
+  onItems,
 }: {
   renderer: CanvasRenderer;
   frames: AnimationFrame[];
@@ -381,28 +781,159 @@ export default function FrameAnimation({
   loop?: boolean;
   onEnded?: () => void;
   language?: string;
+  /** The Canvas's `duration`, which its clock runs over. */
+  duration?: number;
+  /** The Canvas, and where the scene puts it, to place frames that are no image. */
+  canvas?: IIIFCanvas;
+  place?: Rect;
+  /** Frames that are no image, as scene items to draw, each shown with its frame. */
+  onItems?: (items: SceneImage[]) => void;
 }) {
   const animation = useAnimation(frames, animationKey, {
     autoplay,
     loop,
+    duration,
     onEnded,
     isReady: (frame) =>
       (byFrame[frame] ?? []).every((id) => renderer.isReady(id)),
   });
+  // Its video, sound and text: each made once, and let go with the animation.
+  const items = useMemo(
+    () => (canvas && place ? itemsOf(frames, canvas, place) : []),
+    [frames, canvas, place],
+  );
+  const [made, setMade] = useState<{ item: FrameItem; element: HTMLElement }[]>(
+    [],
+  );
   useEffect(() => {
-    const shown = new Set(byFrame[animation.frame] ?? []);
-    renderer.setHidden(byFrame.flat().filter((id) => !shown.has(id)));
-  }, [renderer, byFrame, animation.frame, sceneVersion]);
+    const elements = items.map((item) => {
+      if (item.kind === "text") {
+        const host = document.createElement("div");
+        host.className = "clover-canvas-painted-text";
+        host.setAttribute("aria-hidden", "true");
+        return { item, element: host };
+      }
+      const media = document.createElement(item.kind);
+      media.preload = "auto";
+      (media as HTMLVideoElement).playsInline = true;
+      media.src = item.body.id;
+      return { item, element: media as HTMLElement };
+    });
+    setMade(elements);
+    return () => {
+      for (const { element } of elements) {
+        if (!(element instanceof HTMLMediaElement)) continue;
+        element.pause();
+        element.removeAttribute("src");
+        element.load();
+      }
+    };
+  }, [items]);
+  // Drawn in the scene: the video and the text, never sound, which has no picture.
+  const report = useRef(onItems);
+  report.current = onItems;
+  useEffect(() => {
+    report.current?.(
+      made
+        .filter(({ item }) => item.kind !== "audio")
+        .map(({ item, element }) => ({
+          id: item.id,
+          placement: item.placement,
+          width: item.placement.width,
+          height: item.placement.height,
+          media: { element },
+          hidden: true,
+        })),
+    );
+    return () => report.current?.([]);
+  }, [made]);
+
+  /*
+   * Played on the animation's clock (Cookbook 0489: the video from its own start, 11 s
+   * in): playing while its frame shows and the clock runs, else paused, and put back on
+   * the clock where the two drift apart, or as the reader seeks. Muted to start where it
+   * starts itself (`autoplay`), so no sound plays unasked (WCAG 1.4.2).
+   */
+  const [muted, setMuted] = useState(Boolean(autoplay));
+  useEffect(() => {
+    for (const { item, element } of made) {
+      if (!(element instanceof HTMLMediaElement)) continue;
+      element.muted = muted;
+      if (!animation.shown.includes(item.index)) {
+        if (!element.paused) element.pause();
+        continue;
+      }
+      const own = Math.max(0, animation.time - frames[item.index].start);
+      const drift = Math.abs(element.currentTime - own);
+      if (drift > (animation.playing ? 1 : 0.1)) {
+        try {
+          element.currentTime = own;
+        } catch {
+          // Not seekable yet: it is put on the clock once it is.
+        }
+      }
+      if (animation.playing && element.paused)
+        void element.play()?.catch(() => undefined);
+      else if (!animation.playing && !element.paused) element.pause();
+    }
+  }, [made, frames, animation.shown, animation.time, animation.playing, muted]);
+
+  useEffect(() => {
+    const shown = new Set([
+      ...animation.shown.flatMap((frame) => byFrame[frame] ?? []),
+      ...made
+        .filter(({ item }) => animation.shown.includes(item.index))
+        .map(({ item }) => item.id),
+    ]);
+    renderer.setHidden(
+      [...byFrame.flat(), ...made.map(({ item }) => item.id)].filter(
+        (id) => !shown.has(id),
+      ),
+    );
+  }, [renderer, byFrame, made, animation.shown, sceneVersion]);
+  const texts = made.filter(({ item }) => item.kind === "text");
+  const sound = made.some(({ item }) => item.kind !== "text");
   /*
    * In the media layer, as a video's transport is: it fades with the rest of the
    * controls, and sizes its menu against the Body (`MediaBody.css`).
    */
   return (
     <div className="clover-canvas-media" data-kind="frames">
+      {/*
+       * The text showing, read here, outside the picture, which assistive technology
+       * reads as one image (WCAG 1.1.1, 1.3.1).
+       */}
+      {texts.some(({ item }) => animation.shown.includes(item.index)) && (
+        <div style={visuallyHidden}>
+          {texts
+            .filter(({ item }) => animation.shown.includes(item.index))
+            .map(({ item }) => (
+              <Markup
+                key={item.id}
+                as="p"
+                markup={{ [item.body.language ?? "none"]: [item.body.value] }}
+                format={item.body.format}
+                language={language}
+              />
+            ))}
+        </div>
+      )}
+      {texts.map(({ item, element }) => (
+        <PaintedText
+          key={item.id}
+          host={element}
+          item={item}
+          shown={animation.shown.includes(item.index)}
+          language={language}
+        />
+      ))}
       <FrameControls
         frames={frames}
         animation={animation}
         language={language}
+        sound={
+          sound ? { muted, toggle: () => setMuted((was) => !was) } : undefined
+        }
       />
     </div>
   );

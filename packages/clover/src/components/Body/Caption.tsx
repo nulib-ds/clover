@@ -6,6 +6,7 @@ import Button from "../../ui/Button";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { localize } from "../../core/value";
 import { useOneOpen } from "../../ui/useOneOpen";
+import { languageProps } from "../../core/direction";
 
 /**
  * The summary and metadata, sanitized by the Primitives. Fetched the first time the
@@ -101,7 +102,7 @@ const Caption: React.FC<CaptionProps> = ({
               <p
                 className="clover-canvas-caption-label"
                 id={captionLabelId(id, index)}
-                lang={label.lang}
+                {...languageProps(label.lang)}
               >
                 {label.text}
               </p>

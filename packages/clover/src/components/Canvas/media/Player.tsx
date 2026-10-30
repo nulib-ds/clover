@@ -13,6 +13,7 @@ import { useContainerName } from "../../../ui/useContainerName";
 import type { IIIFCanvas } from "../layout";
 import type { TransportChapter } from "./Transport";
 import { CueTime } from "../../../ui/Cue";
+import { languageProps } from "../../../core/direction";
 
 /*
  * A lone recording of sound, played as a music app plays one (Mat, 2026-10-24: Apple
@@ -170,7 +171,7 @@ export function PlayerFace({
             // Anew for another picture, so the one coming in fades in over the ground.
             key={src}
             alt={art?.alt?.text ?? ""}
-            lang={art?.alt?.lang || undefined}
+            {...languageProps(art?.alt?.lang || undefined)}
             decoding="async"
             onLoad={() => setLoaded(src)}
             src={src}
@@ -184,7 +185,7 @@ export function PlayerFace({
           <p
             className="clover-canvas-player-title"
             aria-hidden="true"
-            lang={title.lang || undefined}
+            {...languageProps(title.lang || undefined)}
           >
             {title.text}
           </p>
@@ -192,7 +193,7 @@ export function PlayerFace({
         {partOf?.text && (
           <p
             className="clover-canvas-player-part-of"
-            lang={partOf.lang || undefined}
+            {...languageProps(partOf.lang || undefined)}
           >
             {partOf.text}
           </p>
@@ -243,7 +244,7 @@ export function PlayerChapters({
               </span>
               <span
                 className="clover-canvas-player-chapter-label"
-                lang={chapter.lang || undefined}
+                {...languageProps(chapter.lang || undefined)}
               >
                 {chapter.label}
               </span>{" "}

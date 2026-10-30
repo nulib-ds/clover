@@ -25,7 +25,7 @@ import prettier from "prettier";
 
 import { cookbookSections } from "docs/components/CookbookRecipes/cookbookSections";
 import { resourceFor } from "docs/components/CookbookRecipes/cookbookCatalog";
-import { thumbnailFrom } from "docs/lib/iiif-image-sizes";
+import { regionThumbnailFrom, thumbnailFrom } from "docs/lib/iiif-image-sizes";
 
 const INDEX = "https://iiif.io/api/cookbook/";
 const MATRIX = "https://iiif.io/api/cookbook/recipe/matrix/";
@@ -58,10 +58,16 @@ const serviceOf = (resource) => {
   return idOf(service);
 };
 
-/** The whole image at a size its server keeps, where it has a service. */
-async function fromService(service) {
+/**
+ * The whole image at a size its server keeps, where it has a service; or the region of it
+ * a painting cuts out (Cookbook 0299), where the server cuts regions.
+ */
+async function fromService(service, region) {
   const info = await fetchJson(`${service.replace(/\/$/, "")}/info.json`);
-  return thumbnailFrom(service, info, WANTED)?.id;
+  return (
+    (region && regionThumbnailFrom(service, info, region, WANTED)) ??
+    thumbnailFrom(service, info, WANTED)
+  )?.id;
 }
 
 /** A `thumbnail` as given, sized by its service where it has one. */
@@ -81,7 +87,10 @@ const firstCanvas = (manifest) =>
   asArray(manifest.items)[0] ??
   asArray(asArray(manifest.sequences)[0]?.canvases)[0];
 
-/** The first image painted on a Canvas: its body, the first of a Choice, a region's source. */
+/**
+ * The first image painted on a Canvas: its body, the first of a Choice, a region's source,
+ * with the region of it painted (its `ImageApiSelector`'s), where one is.
+ */
 const paintedImage = (canvas) => {
   const page = asArray(canvas?.items)[0];
   const annotation = asArray(page?.items)[0];
@@ -89,9 +98,17 @@ const paintedImage = (canvas) => {
     asArray(annotation?.body)[0] ?? asArray(canvas?.images)[0]?.resource;
   if (body?.type === "Choice" || body?.["@type"] === "oa:Choice")
     body = asArray(body.items)[0] ?? body.default;
-  if (body?.type === "SpecificResource") body = body.source;
+  let region;
+  if (body?.type === "SpecificResource") {
+    region = asArray(body.selector).find(
+      (selector) =>
+        selector?.type === "ImageApiSelector" &&
+        typeof selector.region === "string",
+    )?.region;
+    body = body.source;
+  }
   const type = body?.type ?? body?.["@type"] ?? "";
-  return /Image/i.test(type) ? body : undefined;
+  return /Image/i.test(type) ? { image: body, region } : undefined;
 };
 
 /**
@@ -102,8 +119,10 @@ const paintedImage = (canvas) => {
 async function canvasThumbnail(canvas) {
   if (!canvas) return undefined;
   if (canvas.thumbnail) return fromThumbnail(canvas.thumbnail);
-  const service = serviceOf(paintedImage(canvas));
-  if (service) return fromService(service).catch(() => undefined);
+  const painted = paintedImage(canvas);
+  const service = serviceOf(painted?.image);
+  if (service)
+    return fromService(service, painted.region).catch(() => undefined);
   for (const other of [canvas.placeholderCanvas, canvas.accompanyingCanvas]) {
     const found = other && (await canvasThumbnail(other));
     if (found) return found;

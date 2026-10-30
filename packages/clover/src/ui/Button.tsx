@@ -2,6 +2,7 @@ import React from "react";
 
 import { join } from "../lib/classnames";
 import { type Shortcut, Tip } from "./Tip";
+import { languageProps } from "../core/direction";
 
 interface ButtonProps {
   className?: string;
@@ -52,7 +53,7 @@ const Button: React.FC<ButtonProps> = ({
       aria-label={label}
       aria-keyshortcuts={shortcut?.keys}
       // On the button, so its name and its popover share it.
-      lang={lang}
+      {...languageProps(lang)}
       type="button"
     >
       <svg

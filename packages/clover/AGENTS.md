@@ -16,6 +16,20 @@ staging, `git mv`, versions or publishing.
 WCAG 2.2 AA, as the root `AGENTS.md` and `DESIGN.md` §0 state: non-negotiable, above
 every rule below.
 
+- **What a resource `provides`** (Mat, 2026-10-29: "an important inclusion in
+  presentation 4.0 … valuable for accessibility reasons and annotation guidance going
+  forward"). Presentation 4 puts `provides` on a `supplementing` annotation to say what
+  its file is for, from IIIF's registry of accessibility values (`closedCaptions`,
+  `subtitles`, `transcript`, `audioDescription`, `signLanguage`, `alternativeText`,
+  `longDescription`…), and clients "should process" it. It is the publisher's own word on
+  a resource's accessibility features, so Clover reads it, and every feature that offers
+  one of them reads it too: never a file's label, name or extension in its place, and
+  never against it. Today WebVTT (Cookbook 0219, `timedTextKind` in `Canvas/layout.ts`):
+  `closedCaptions` a captions track; `subtitles` or `translation` a subtitles track; a
+  `transcript` alone the Transcript's, never offered as captions, which it is not; nothing
+  (Presentation 3), or only what timed text is not, captions, as before. What is not read
+  yet, and why it counts, is in `ACCESSIBILITY.md` ("What a resource provides").
+
 ## Package rules
 
 - **Vocabulary** (Mat, 2026-10-23), as the root `AGENTS.md` sets it: the Body, never
@@ -79,6 +93,18 @@ every rule below.
   goes in the stylesheet. The Canvas's figure, viewport, surface and DOM layers set their
   geometry inline. Without it, WebKit grows the canvas without bound.
   `e2e/specs/plain.spec.ts` checks this layout in every engine.
+- **What goes full screen** is the Root a Canvas, Scene or player is in, a template's Viewer
+  or a page's own layout, so a reader goes on through the resource there, its Items and
+  Panel too; a Canvas on its own goes itself (`getCloverRoot`, `lib/fullscreen.ts`; Mat,
+  2026-10-29: a regression of 2026-10-10 had taken the Canvas alone). Not across a dialog
+  in the Root (the Gallery's lightbox, modal), which full screen over it would hide. A
+  control names its state by containment (`useWithinFullscreen`), never by the Canvas
+  being the full-screen element (`useFullscreen`). The pill, "Exit full screen", shows on
+  the Canvas or Scene full screen itself, or first in the Root that is
+  (`useFullscreenExit`, `data-exit`; Mat, 2026-10-29: "we still need that exit
+  button"), at its Body's top left. A Root in full screen is on Clover's ground and
+  scrolls (`ExitFullscreen.css`), with no padding of its own; the Default template
+  fills the screen as `fill` fills its box.
 - **Full screen** is offered only where `isFullscreenSupported()` says an element can have
   it. Read it with `useFullscreenSupported()`, which assumes support on the server, so
   hydration matches. Where elements cannot go full screen (iPhone), a video goes to the
@@ -658,7 +684,24 @@ every rule below.
   - The `Panel` lists every annotation (Mat, 2026-10-19), as `Annotations` does by
     default (`scope="all"`, since 2026-10-21: handled at the part, so one placed alone
     lists what the panel would, and no template passes it): `AnnotationLayers`, by layer (`layersOf`: sets sharing a localized label
-    are one layer, the unlabeled ones another) and then by Canvas, in sequence order;
+    are one layer, the unlabeled ones another) and then by Canvas, in sequence order. A
+    page's label is its own, else its AnnotationCollection's (`pageLabel`; Cookbook 0309,
+    Mat, 2026-10-29: "treat them like collections to a degree"), read from the Manifest's
+    reference too (`embedPage` keeps what the reference says that the page does not), so
+    a Collection's pages across Canvases are one layer. `selectAnnotationCollection` gives
+    the first such Collection, its pages and its entries; `Items of="annotations"` (its own
+    chunk, `AnnotationItems.tsx`) lists and steps them, and the Default header names it
+    under the title with a pager, as a Collection's members, picking the first as the
+    Manifest opens on its Canvas. Pages load as the reader reaches them, never all at once
+    (Mat, 2026-10-29: "we don't want to load all"; `usePagesReached`, shared with
+    `Annotations`' `scope="all"`): in order up to the view's (or the picked one's), the
+    next as a step passes the last loaded or a list's end (`ui/ListEnd.tsx`) comes into
+    view. Try it on the `annotation-collection` mock (569 lines on 28 pages). An AnnotationPage (or AnnotationCollection) given as the content, James Turner's
+    tags across Manifests, is walked the same way (Mat, 2026-10-29: "let's handle a
+    annotation page this way as well"), its sets marked `content` as they load
+    (`annotations-content.ts`) and taken first; its annotations are in hand, so only a
+    Manifest's Collection loads lazily, and a list reads the other Manifests it names for
+    their pictures and titles;
     a Manifest of one Canvas gets no Canvas labels or `aria-current` (`grouped`), which
     would only repeat the item and push a note's headings a level deeper.
     The Canvases in view are `aria-current`; on a move the list scrolls their group to
@@ -871,7 +914,10 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   language codes (Mat, 2026-10-19), "TXT EN" where there are several, and any code that
   would show twice shows its label instead. The docs' `transcripts` mock has both kinds. `decodeText` reads UTF-8, else Windows-1252 with its
   0x80–0x9F mapped by hand: Node's decoder reads that label as Latin-1. Only caption
-  files take part in the captions' one choice (`clover.captions`).
+  files take part in the captions' one choice (`clover.captions`). Every WebVTT file is
+  timed text (`canvasTimedText`), the Transcript's; what its annotation `provides` makes it
+  a caption track or not (`canvasCaptions`, above): a `transcript` alone is read in the
+  Transcript and never shown or offered as captions (`isCaptionTrack` in `Transcript.tsx`).
   `Transcript` follows the media element from the `media` channel (`timeupdate`, `seeked`)
   in component state, never the store. Chapters come from `core/ranges.ts`.
 - **Caption languages** (Mat, 2026-10-19). Several caption files are offered by their
@@ -1298,6 +1344,15 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
 - Painters sit behind one `Backend` interface. WebGL2 is primary and Canvas2D is a
   full-fidelity fallback. `DomLayers` positions real `<img>`/`<video>` elements with the same
   camera transform.
+- **An image is turned by the renderer, never by its server** (Cookbook 0040, 2026-10-29):
+  an `ImageApiSelector`'s `rotation` (`resolveBody`, `Canvas/layout.ts`) reaches
+  `SceneImage.rotation` as written, and `prepareItem` makes it a `turn`
+  (`scene/sceneItem.ts`): the clip turned about its middle, mirrored first after `!`, into
+  its bounding box, which fills `placement`. Tiles are asked unturned (rotation `0`, which
+  every server gives, whatever its `info.json` offers), and the turn is one more affine in
+  each draw's transform. What reads an item's pixels from the world goes through
+  `orientOf`, `shownToPixels` and `itemToWorld`, never `clip` and `rect` alone, so a turned
+  item wants the tiles under the view. A resource's CSS never turns it (0045's rule).
 - **A Canvas's annotations' state is in the hotspots' chunk** (Mat, 2026-10-27):
   `Canvas/AnnotationState.tsx` holds which pages show, the placing, hover and pick,
   framing, seeking and the placeholder's quiet open, draws the hotspots, and reports a
@@ -1497,8 +1552,21 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     only to offer a `Choice`, the `i` or its annotations (those on its time), or to hold
     a host's own controls (the panel toggle), which must never disappear with the image
     controls.
+  - A lone Canvas that paints nothing (`empty`: no image, media or animation; Cookbook
+    0283's missing page; Mat, 2026-10-29) is held still as a lone recording is: no camera
+    keys, gestures (`setGestures({ navigable: false })`) or role description, and its
+    cluster only the `i` and its annotations, or none: no way into full screen. Reached
+    in full screen, it keeps full screen and its control, named as the way out
+    (`fullscreenExit`); pressed, the control goes, and focus moves to the viewport (WCAG
+    2.4.3). Its name (`ownName`: its label, else its Manifest's) shows in the middle of
+    the Body as `BodyNote`, drawn as `BodyUnloadable`'s note, `aria-hidden` as the
+    viewport carries it, and nothing where it has none. A spread with a missing page
+    beside a picture stays navigable.
+  - Full screen ends the view's controls (`ControlCluster`; Mat, 2026-10-29): after zoom,
+    rotation, reset and Choice, left of the Canvas's own (annotations, place, the `i`)
+    and a host's, over every Canvas.
   - Navigability is one value in `CanvasView`:
-    `navigable = !mediaOnly && options.gestures.navigable !== false`. It gates
+    `navigable = !mediaOnly && !empty && options.gestures.navigable !== false`. It gates
     `CAMERA_KEYS` and the role description on the viewport, `data-navigable` on the
     figure (grab cursor, `panClearOfControls`), and the `navigable` that `MediaBody`
     passes to `setGestures`. Never let `MediaBody` turn a host's

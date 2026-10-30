@@ -1,6 +1,7 @@
 import React, { forwardRef } from "react";
 
 import { itemsOfCollection } from "../../core/items";
+import { selectTargetIndex } from "../../core/selectors";
 import type { ViewingDirection } from "../../core/sequence";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
@@ -9,6 +10,7 @@ import { useNavigation, useSequence } from "../../react/hooks";
 import { Tip } from "../../ui/Tip";
 import { useContainerName } from "../../ui/useContainerName";
 import { visuallyHidden } from "../../ui/visuallyHidden";
+import { languageProps } from "../../core/direction";
 
 /**
  * Stepping through Items one at a time: `Previous`, `Next` and `Position`, and the three
@@ -36,8 +38,11 @@ export interface Steps {
   step: (by: -1 | 1, event: React.SyntheticEvent) => void;
 }
 
-/** What the pieces step through inside a Root: its views, or its Collection's members. */
-export type StepsOf = "views" | "members";
+/**
+ * What the pieces step through inside a Root: its views, its Collection's members, or a
+ * content state's targets (Cookbook 0540).
+ */
+export type StepsOf = "views" | "members" | "targets";
 
 /** The Root's views, or its Collection's members, as `Steps`. */
 function useRootSteps(of: StepsOf, part: string): Steps {
@@ -46,6 +51,28 @@ function useRootSteps(of: StepsOf, part: string): Steps {
   const { direction } = useSequence();
   const collection = useCloverSelector((state) => state.collection);
   const shown = useCloverSelector((state) => state.manifest?.id ?? null);
+  const targets = useCloverSelector(
+    (state) => state.targets?.items.length ?? 0,
+  );
+  const target = useCloverSelector((state) =>
+    selectTargetIndex(
+      state.targets,
+      state.targetIndex,
+      state.manifest,
+      state.canvasId,
+    ),
+  );
+  if (of === "targets") {
+    return {
+      position: target,
+      total: targets,
+      direction: "left-to-right",
+      step: (by) => {
+        const to = target + by;
+        if (to >= 0 && to < targets) clover.goToTarget(to);
+      },
+    };
+  }
   if (of === "members") {
     const members = itemsOfCollection(collection);
     const position = members.findIndex((item) => item.id === shown);
@@ -81,13 +108,13 @@ const NEXT_ROTATION: Record<ViewingDirection, number> = {
 };
 
 /** A chevron with its own size, so it never fills its button without the stylesheet. */
-function Chevron({ rotate }: { rotate: number }) {
+function Chevron({ rotate, size = 16 }: { rotate: number; size?: number }) {
   return (
     <svg
       aria-hidden="true"
       focusable="false"
-      width="16"
-      height="16"
+      width={size}
+      height={size}
       viewBox="0 0 16 16"
       className="clover-pager-icon"
     >
@@ -106,9 +133,14 @@ function Chevron({ rotate }: { rotate: number }) {
 
 const StepButton = forwardRef<
   HTMLButtonElement,
-  ButtonProps & { steps: Steps; step: "previous" | "next" }
+  ButtonProps & {
+    steps: Steps;
+    step: "previous" | "next";
+    /** Drawn as Search's and Contents' steps are (`ui/Steps`), not a round control. */
+    small?: boolean;
+  }
 >(function StepButton(
-  { steps, step, className, disabled, onClick, ...rest },
+  { steps, step, small = false, className, disabled, onClick, ...rest },
   ref,
 ) {
   const { t, langOf } = useCloverTranslation();
@@ -129,9 +161,13 @@ const StepButton = forwardRef<
     <button
       ref={ref}
       type="button"
-      className={join(`clover-pager-${step}`, className)}
+      className={join(
+        small ? "clover-steps-step" : `clover-pager-${step}`,
+        className,
+      )}
+      data-step={small ? step : undefined}
       data-direction={direction}
-      lang={langOf(labelKey)}
+      {...languageProps(langOf(labelKey))}
       disabled={disabled}
       aria-disabled={!available || undefined}
       tabIndex={available ? undefined : -1}
@@ -142,7 +178,7 @@ const StepButton = forwardRef<
       }}
       {...rest}
     >
-      <Chevron rotate={rotate} />
+      <Chevron rotate={rotate} size={small ? 12 : 16} />
       <span style={visuallyHidden}>{label}</span>
       <Tip label={label} />
     </button>
@@ -201,7 +237,7 @@ const PositionText = forwardRef<
       <span className="clover-pager-room" aria-hidden="true" hidden>
         {total} / {total}
       </span>
-      <span style={visuallyHidden} lang={langOf("canvasPosition")}>
+      <span style={visuallyHidden} {...languageProps(langOf("canvasPosition"))}>
         {t("canvasPosition", { index, total })}
       </span>
     </Tag>
@@ -232,17 +268,29 @@ export function ItemsPager({
   className,
   forwardedRef,
   hostLanguage,
+  position,
+  nameKey = "itemsLabel",
+  size = "large",
   ...rest
 }: React.HTMLAttributes<HTMLElement> & {
   steps: Steps;
   as?: React.ElementType;
   forwardedRef?: React.Ref<HTMLElement>;
   hostLanguage?: string;
+  /** In place of the count: one that opens a menu of the items (a content state's targets). */
+  position?: React.ReactNode;
+  /** The string naming its `nav`, where it is not Items' ("Views", for the targets). */
+  nameKey?: string;
+  /**
+   * `large` (the default): round controls, as the strip's arrows are. `small`: its steps
+   * and count as Search's and Contents' are (`ui/Steps`), for a header's line.
+   */
+  size?: "large" | "small";
 }) {
   const { t, langOf } = useCloverTranslation(undefined, hostLanguage);
   const name = useContainerName(
-    t("itemsLabel"),
-    langOf("itemsLabel"),
+    t(nameKey),
+    langOf(nameKey),
     rest["aria-label"] !== undefined || rest["aria-labelledby"] !== undefined,
     hostLanguage,
   );
@@ -255,14 +303,23 @@ export function ItemsPager({
       className={join("clover-items clover-pager", className)}
       data-layout="pager"
       data-direction={steps.direction}
+      data-size={size === "small" ? "small" : undefined}
       {...rest}
     >
       {name.node}
       {/* A right-to-left book reads leftwards: "next" on the left, the count on the right. */}
-      {!rtl && <PositionText steps={steps} />}
-      <StepButton steps={steps} step={rtl ? "next" : "previous"} />
-      <StepButton steps={steps} step={rtl ? "previous" : "next"} />
-      {rtl && <PositionText steps={steps} />}
+      {!rtl && (position ?? <PositionText steps={steps} />)}
+      <StepButton
+        steps={steps}
+        step={rtl ? "next" : "previous"}
+        small={size === "small"}
+      />
+      <StepButton
+        steps={steps}
+        step={rtl ? "previous" : "next"}
+        small={size === "small"}
+      />
+      {rtl && (position ?? <PositionText steps={steps} />)}
     </Tag>
   );
 }

@@ -225,10 +225,17 @@ export function Default({
         >
           {header && (
             <header className="clover-template-default-header">
-              <Clover.Label
-                as={title.as}
-                className="clover-template-default-title"
-                {...title.title}
+              <HeaderTitle title={title} />
+              {/*
+               * A content state's several targets (Cookbook 0540): where the reader is
+               * among them, a list of them all, and the steps between (Mat, 2026-10-29).
+               * Nothing for any other content.
+               */}
+              <Clover.Items
+                of="targets"
+                layout="pager"
+                size="small"
+                className="clover-template-default-pager"
               />
               {/*
                * Who provided it: each provider's logo at the line's end, linked to its
@@ -302,6 +309,88 @@ export function Default({
       </Clover.Split>
     </Clover.Root>
   );
+}
+
+/**
+ * The header's title: the Manifest's label, and under it, where the Root was opened on a
+ * Collection, a line of the Collection's own, so it is plain the reader is among its
+ * members (Mat, 2026-10-29: "it should be obvious the user is moving between items in the
+ * collection"): the Collection's title, smaller and muted, then a pager among them,
+ * small (where the reader is, "1 / 2", opening them all, then Previous and Next): "place
+ * the collection title under the manifest title", "collection title first. then pager".
+ */
+function HeaderTitle({ title }: { title: ReturnType<typeof Clover.titled> }) {
+  const collection = Clover.useCloverSelector((state) =>
+    state.throughCollection ? state.collection?.label : undefined,
+  );
+  /*
+   * An AnnotationCollection the Manifest's pages are part of (Cookbook 0309), walked as a
+   * Collection's members are: its name, then its annotations stepped, the count opening
+   * their list (Mat, 2026-10-29).
+   */
+  const annotations = Clover.useAnnotationCollection();
+  usePickFirst(annotations?.entries[0]);
+  return (
+    <>
+      <Clover.Label
+        as={title.as}
+        className="clover-template-default-title"
+        {...title.title}
+      />
+      {collection && (
+        <div className="clover-template-default-collection-row">
+          <Clover.Label
+            as="p"
+            label={collection as Clover.LabelProps["label"]}
+            className="clover-template-default-collection"
+          />
+          <Clover.Items
+            of="members"
+            layout="pager"
+            size="small"
+            className="clover-template-default-pager"
+          />
+        </div>
+      )}
+      {/* Named from the Manifest at once; its steps come as its pages are fetched. */}
+      {annotations && (
+        <div className="clover-template-default-collection-row">
+          {annotations.label && (
+            <Clover.Label
+              as="p"
+              label={annotations.label as Clover.LabelProps["label"]}
+              className="clover-template-default-collection"
+            />
+          )}
+          <Clover.Items
+            of="annotations"
+            layout="pager"
+            size="small"
+            className="clover-template-default-pager"
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
+/**
+ * An AnnotationCollection's first annotation, picked as its Manifest opens (Mat,
+ * 2026-10-29: "automatically load in the first annotation"), so its pager starts at
+ * "1 / 8": once a Manifest, and only where it opened on that annotation's Canvas with
+ * nothing picked, so a link to another place keeps its place.
+ */
+function usePickFirst(first: Clover.AnnotationEntry | undefined) {
+  const { clover } = Clover.useClover();
+  const manifestId = Clover.useCloverSelector((state) => state.manifest?.id);
+  const started = useRef<string | null>(null);
+  useEffect(() => {
+    if (!first || !manifestId || started.current === manifestId) return;
+    started.current = manifestId;
+    const { annotationId, canvasId } = clover.store.get();
+    if (!annotationId && canvasId === first.canvasId)
+      clover.selectAnnotation(first.id);
+  }, [clover, first, manifestId]);
 }
 
 /** The heading level under another. Past 6, the parts' titles name what they head. */

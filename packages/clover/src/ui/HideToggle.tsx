@@ -3,6 +3,7 @@ import { useUniqueId } from "./useUniqueId";
 
 import { Tip } from "./Tip";
 import { useCloverTranslation } from "../i18n/useCloverTranslation";
+import { languageProps } from "../core/direction";
 
 /**
  * Hides a page of annotations from the picture, or shows it again: a checkbox, checked
@@ -51,7 +52,7 @@ export function HideToggle({
         <circle cx={256} cy={256} r={72} />
         {hidden && <path d="M80 80l352 352" />}
       </svg>
-      <span id={id} hidden lang={langOf(key)}>
+      <span id={id} hidden {...languageProps(langOf(key))}>
         {t(key)}
       </span>
       <Tip

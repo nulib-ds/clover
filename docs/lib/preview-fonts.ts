@@ -1,10 +1,10 @@
 import {
-  DM_Sans,
   EB_Garamond,
   Inter,
+  Libre_Franklin,
   Lora,
   Merriweather,
-  Roboto,
+  Open_Sans,
 } from "next/font/google";
 
 /**
@@ -34,13 +34,9 @@ import {
  * fetch the files — so a spread would not survive, and each family also types `weight`
  * and `subsets` as its own literal union.
  */
+const openSans = Open_Sans({ subsets: ["latin"], display: "swap" });
+const libreFranklin = Libre_Franklin({ subsets: ["latin"], display: "swap" });
 const inter = Inter({ subsets: ["latin"], display: "swap" });
-const dmSans = DM_Sans({ subsets: ["latin"], display: "swap" });
-const roboto = Roboto({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "700"],
-});
 const lora = Lora({ subsets: ["latin"], display: "swap" });
 const ebGaramond = EB_Garamond({ subsets: ["latin"], display: "swap" });
 const merriweather = Merriweather({
@@ -58,9 +54,17 @@ export interface FontPreset {
 export const fontPresets: FontPreset[] = [
   /* The site's own face (`--font-sans`, self-hosted), so choosing it clears the override. */
   { name: "Google Sans", value: "", category: "Sans serif" },
+  {
+    name: "Open Sans",
+    value: openSans.style.fontFamily,
+    category: "Sans serif",
+  },
+  {
+    name: "Libre Franklin",
+    value: libreFranklin.style.fontFamily,
+    category: "Sans serif",
+  },
   { name: "Inter", value: inter.style.fontFamily, category: "Sans serif" },
-  { name: "Roboto", value: roboto.style.fontFamily, category: "Sans serif" },
-  { name: "DM Sans", value: dmSans.style.fontFamily, category: "Sans serif" },
   {
     name: "System UI",
     value: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',

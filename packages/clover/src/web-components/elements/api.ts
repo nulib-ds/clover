@@ -1,6 +1,9 @@
 import { createContext } from "react";
 
-import { selectAnnotationSets } from "../../core/annotation-sets";
+import {
+  selectAnnotationCollection,
+  selectAnnotationSets,
+} from "../../core/annotation-sets";
 import { type Clover, type CloverState, navigationOf } from "../../core/clover";
 import { tableOfContents } from "../../core/ranges";
 import {
@@ -71,6 +74,9 @@ function own(
     },
     annotationSets() {
       return selectAnnotationSets(state().manifest, state().addedSets);
+    },
+    annotationCollection() {
+      return selectAnnotationCollection(state().manifest, state().addedSets);
     },
     /**
      * The Manifest's table of contents (Mat, 2026-10-22), the entries React's

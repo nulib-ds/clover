@@ -40,17 +40,19 @@ export const progress4: Record<string, Progress> = {
   "0011-book-3-behavior": yes,
   "0299-region": yes,
   "0010-book-2-viewing-direction": yes,
+  // 2026-10-29: the missing page is held still, its label in the middle of its Body.
   "0283-missing-image": yes,
   "0117-add-image-thumbnail": yes,
   "0232-image-thumbnail-canvas": yes,
   "0013-placeholderCanvas": yes,
   "0014-accompanyingcanvas": yes,
   "0202-start-canvas": yes,
-  "0015-start": no(
-    "Plays from the beginning; the Manifest's start time is not applied",
-  ),
-  "0230-navdate": no(
-    "Its maps open from the Collection menu; no navigation by date",
+  // 2026-10-29: its start's PointSelector time is read, so it opens 120.5 seconds in.
+  "0015-start": yes,
+  // 2026-10-29: each map's date shows under its label in the Collection, and in About;
+  // the second map opens fitted, though both Canvases are `…/canvas/p1`.
+  "0230-navdate": partial(
+    "Its maps open from the Collection, each with its date; no ordering or filtering by date",
   ),
   "0154-geo-extension": yes,
   "0240-navPlace-on-canvases": yes,
@@ -67,6 +69,8 @@ export const progress4: Record<string, Progress> = {
   "0231-transcript-meta-recipe": no(
     "General considerations, with no resource to open",
   ),
+  // 2026-10-29: walked, in both versions: on from the start, and listed as a transcript;
+  // Presentation 4's `provides` read (closedCaptions, subtitles, transcript).
   "0219-using-caption-file": yes,
   // 2026-10-19: its plain-text transcript shows in the panel's Transcript.
   "0253-using-transcript-file": yes,
@@ -74,7 +78,12 @@ export const progress4: Record<string, Progress> = {
   "0266-full-canvas-annotation": yes,
   // 2026-10-19: its HTML (link and image) in the caption too, sanitized.
   "0019-html-in-annotations": yes,
-  "0045-css": no("The annotation styled by CSS is neither shown nor styled"),
+  // 2026-10-29: not supported, on purpose (Mat): a resource's stylesheet could override
+  // Clover's interface, and with it the accessibility the whole interface keeps. Its
+  // comments are still read (through their SpecificResource bodies), listed and drawn.
+  "0045-css": no(
+    "Not supported, on purpose: a resource's CSS could override the interface and its accessibility; its comments show, unstyled",
+  ),
   "0021-tagging": yes,
   "0261-non-rectangular-commenting": yes,
   "0258-tagging-external-resource": yes,
@@ -86,6 +95,8 @@ export const progress4: Record<string, Progress> = {
   "0139-geolocate-canvas-fragment": yes,
   "0269-embedded-or-referenced-annotations": yes,
   "0306-linking-annotations-to-manifests": yes,
+  // 2026-10-29: its pages are one layer named by their AnnotationCollection, walked in
+  // the Default header as a Collection's members are.
   "0309-annotation-collection": yes,
   // 2026-10-19: the image shows in the hotspot's popover too.
   "0377-image-in-annotation": yes,
@@ -108,24 +119,28 @@ export const progress4: Record<string, Progress> = {
   "0035-foldouts": yes,
   "0036-composition-from-multiple-images": yes,
   "0560-resources-on-a-timeline": yes,
-  // 2026-10-28: the image now shows while it is timed to (11s to 42s).
-  "0489-multimedia-canvas": partial(
-    "The image shows while it is timed to; the video painted on it and its painted text are not drawn",
-  ),
-  "0040-image-rotation-service": no(
-    "Rotation by the Image API selector, or by CSS, is not applied",
+  // 2026-10-29: played over its duration, the video in its region and the texts drawn.
+  "0489-multimedia-canvas": yes,
+  // 2026-10-29: turned by its Image API selector, by Clover from unturned tiles; the CSS
+  // way is left on purpose (Mat: no CSS from IIIF resources, as 0045).
+  "0040-image-rotation-service": partial(
+    "Turns an image by its Image API selector's rotation, itself, from the tiles as served; a stylesheet's rotation is not applied, on purpose, as 0045's CSS is not",
   ),
   "0047-homepage": yes,
   "0053-seeAlso": yes,
   "0466-link-for-loading-manifest": yes,
   "0485-contentstate-canvas-region": yes,
-  "0540-link-for-opening-multiple-canvases": no(
-    "A content state opens one Canvas; two or more are not opened together",
+  // 2026-10-29: both targets, in turn: counted and stepped in the header, listed in Views.
+  "0540-link-for-opening-multiple-canvases": partial(
+    "Opens each Canvas in turn, counted and stepped in the header and listed in a Views section; not side by side",
   ),
+  // 2026-10-29: left on purpose (Mat): opening by dragging alone fails WCAG 2.5.7, and a
+  // link (0466) already opens a resource in Clover for everyone.
   "0599-drag-and-drop": no(
-    "Dropping a IIIF link on the Viewer is not supported",
+    "Not supported, on purpose: dragging alone is not accessible, and a link with iiif-content (0466) opens a resource instead",
   ),
   "0057-publishing-v2-and-v3": yes,
+  // 2026-10-29: starts on the first format the browser can play (MP3 where ALAC will not).
   "0434-choice-av": yes,
   // 2026-10-28: its two files play as one, in the Canvas's time (`media/sequence.ts`).
   "0064-opera-one-canvas": yes,
@@ -133,8 +148,10 @@ export const progress4: Record<string, Progress> = {
   "0065-opera-multiple-canvases": yes,
   "0068-newspaper": yes,
   "0074-multiple-language-captions": yes,
+  // 2026-10-29: every member's place on one Map, each opening its Manifest; their dates
+  // under their labels in the Collection, and the Manifest's in About.
   "0318-navPlace-navDate": partial(
-    "Its place is on the Map tab; no navigation by date",
+    "Its members' places are on one Map, each opening its Manifest, and their dates show; no ordering or filtering by date",
   ),
 };
 

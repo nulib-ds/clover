@@ -29,7 +29,7 @@ import { type LoadedImage, loadImage } from "./io/decode";
 import { FrameLoop } from "./loop/FrameLoop";
 import { uploadBudget } from "./scene/uploadBudget";
 import { type Point, apply, compose, rotate, scale } from "./math/affine";
-import { type Rect, clamp, union } from "./math/rect";
+import { type Rect, clamp, transformRect, union } from "./math/rect";
 import type { Navigator } from "./overlays/Navigator";
 import type { OverlayLayer } from "./overlays/OverlayLayer";
 import { planFrame } from "./scene/planFrame";
@@ -37,6 +37,7 @@ import {
   type SceneImage,
   type SceneItem,
   MEDIA_KEY_PREFIX,
+  itemToWorld,
   layoutItems,
   pixelsToWorld,
   prepareItem,
@@ -627,7 +628,19 @@ export class CanvasRenderer implements GestureTarget {
   itemRectToWorld(index: number, rect: Rect): Rect | null {
     const item = this.items[index];
     if (!item) return null;
-    const { contentClip } = item;
+    const { contentClip, clip } = item;
+    // Turned (Cookbook 0040), its own coordinates are turned with the picture.
+    if (item.turn)
+      return transformRect(
+        compose(
+          itemToWorld(item),
+          scale(
+            clip.width / contentClip.width,
+            clip.height / contentClip.height,
+          ),
+        ),
+        rect,
+      );
     const kx = item.rect.width / contentClip.width;
     const ky = item.rect.height / contentClip.height;
     return {

@@ -23,6 +23,7 @@ import { type LanguageMapLike, localize } from "../../core/value";
 import { Tip } from "../../ui/Tip";
 import type { CanvasRenderer, Rect } from "../../lib/renderer";
 import { overlaysOf } from "../../lib/renderer/overlays/OverlayLayer";
+import { languageProps } from "../../core/direction";
 
 export interface CanvasAnnotation {
   annotation: Annotation;
@@ -588,7 +589,7 @@ const AnnotationButton: React.FC<{
       // A command (zoom to it), not a toggle: pressing the picked one again frames it
       // again, so it is current rather than pressed.
       aria-current={selected ? "true" : undefined}
-      lang={lang}
+      {...languageProps(lang)}
       style={
         {
           "--clover-annotation-depth": depth,

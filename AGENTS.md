@@ -12,6 +12,11 @@ deadline.
   §0 lists the usual ones) with a keyboard and against the accessibility tree.
 - Known failures and the plan to clear them are in `ACCESSIBILITY.md`. Fixing one is
   always in scope.
+- Presentation 4's `provides` (Mat, 2026-10-29) is how a resource names the
+  accessibility features its `supplementing` annotations offer (captions, subtitles, a
+  transcript, an audio description…). Clover reads it wherever it offers such a feature,
+  and a Presentation 4 mock or example that offers one gives it (`packages/clover/AGENTS.md`,
+  "What a resource `provides`"; `ACCESSIBILITY.md`, "What a resource provides").
 
 ## Project Structure & Module Organization
 
@@ -1042,7 +1047,12 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   `useSyncExternalStore` when `initCloverI18n` changes the language or the strings.
 - Any element that shows one of Clover's strings, or is named by one (an `aria-label`, an
   icon button with a `Tip`), carries `lang={langOf(key)}`: the string's language where it
-  differs from the page's, and nothing otherwise (WCAG 3.1.2). A container named by a
+  differs from the page's, and nothing otherwise (WCAG 3.1.2). An element showing text,
+  Clover's or a IIIF value's, spreads `{...languageProps(lang)}` (`src/core/direction.ts`)
+  in place of `lang`, which adds `dir="rtl"` where the language is written right to left
+  (Mat, 2026-10-29: "carry this through on labels/text"); a component's own `lang` prop
+  (`Tip`, `Button`) stays a prop, and a field (`input`, `textarea`) keeps `lang` alone, its
+  direction the reader's typing. A container named by a
   string or a IIIF label (a `nav`, a list, a group) takes its name from
   `useContainerName(text, lang)` (`src/ui/useContainerName.tsx`), which, where the name's
   language differs from the page's, uses `aria-labelledby` and a hidden element carrying
@@ -1121,7 +1131,15 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   a Content Search 2.0 service by word or phrase (static, and live in `npm run dev` under
   `pages/api/mocks/paged/`; the docs answer its searches in the browser,
   `docs/lib/mock-search.ts`), the playground's Catalog. Its OCR and search, and the
-  newspaper's, are one engine, `docs/mocks/ocr-search.mjs`; `hindenburg`, Northwestern's record of WLS-AM's
+  newspaper's, are one engine, `docs/mocks/ocr-search.mjs`; `annotation-collection`, a scaled AnnotationCollection
+  example (Mat, 2026-10-29: "document it as a scaled annotation collection example"): the
+  `paged` catalog's Canvases with each line its OCR read a `tagging` annotation on its box,
+  569 on 28 pages, a page of lines referenced from each Canvas, every page `partOf` one
+  AnnotationCollection ("Lines of text, read by machine", its `total`, `first` and `last`
+  in the Manifest's references too, as Cookbook 0309 advises), and none of `paged`'s own
+  annotations or search, for trying pages that load as the reader reaches them (static,
+  and live in `npm run dev` under `pages/api/mocks/annotation-collection/`, its pages'
+  ids under the dev server); `hindenburg`, Northwestern's record of WLS-AM's
   Hindenburg broadcast, kept as fetched, its Canvas of sound given an
   `accompanyingCanvas` painting the reel's box (the record's "enclosure back", its label; Mat,
   2026-10-24), English captions transcribed by speech recognition and corrected by hand

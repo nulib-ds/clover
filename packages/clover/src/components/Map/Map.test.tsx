@@ -16,6 +16,10 @@ import {
   evanston,
 } from "../../fixtures/georef";
 import canvasesJson from "../../fixtures/iiif-cookbook/0240-navPlace-on-canvases.json";
+import placeJson from "../../fixtures/iiif-cookbook/0139-geolocate-canvas-fragment.json";
+import romeJson from "../../fixtures/iiif-cookbook/0318-navPlace-navDate-collection.json";
+import castelJson from "../../fixtures/iiif-cookbook/0318-navPlace-navDate-manifest-1.json";
+import colosseumJson from "../../fixtures/iiif-cookbook/0318-navPlace-navDate-manifest-2.json";
 import { initCloverI18n } from "../../i18n";
 import { clearInfoCache } from "../../lib/renderer/sources/imageService";
 import * as Clover from "../../index";
@@ -35,6 +39,8 @@ class FakeMap {
   fitBounds = vi.fn();
   jumpTo = vi.fn();
   setPaintProperty = vi.fn();
+  setFeatureState = vi.fn();
+  removeFeatureState = vi.fn();
   constructor(options: any) {
     if (failNext) {
       failNext = false;
@@ -216,6 +222,25 @@ describe("Map", () => {
     expect(screen.getByRole("button", { name: "Place 1" })).toBeInTheDocument();
   });
 
+  it("keeps its credits over the map, and none where asked to leave them out", async () => {
+    const place = {
+      type: "Feature",
+      properties: {},
+      geometry: { type: "Point", coordinates: [-87.69, 42.04] },
+    };
+    const { container, unmount } = render(<CloverMap navPlace={place} />);
+    await waitFor(() => expect(maps).toHaveLength(1));
+    expect(maps[0].options.attributionControl).toEqual({ compact: true });
+    // In the map's own box, where MapLibre puts it, over the map.
+    const attrib = container.querySelector(".maplibregl-ctrl-attrib");
+    expect(attrib).not.toBeNull();
+    expect(maps[0].options.container).toContainElement(attrib as HTMLElement);
+    unmount();
+    render(<CloverMap navPlace={place} credits={false} />);
+    await waitFor(() => expect(maps).toHaveLength(2));
+    expect(maps[1].options.attributionControl).toBe(false);
+  });
+
   it("loads MapLibre only as it comes near the window", async () => {
     viewport.restore();
     viewport = stubViewport({ onScreen: false });
@@ -292,6 +317,108 @@ describe("Map", () => {
     );
   });
 
+  // Cookbook 0318: a Collection of Manifests, each with its place.
+  it("maps a Collection's members; pressing another's place opens that member", async () => {
+    const table: Record<string, unknown> = {
+      [castelJson.id]: castelJson,
+      [colosseumJson.id]: colosseumJson,
+    };
+    const fetch = vi.fn(async (url: string) =>
+      table[url] === undefined
+        ? new Response("missing", { status: 404 })
+        : new Response(JSON.stringify(table[url]), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+    );
+    render(
+      <Clover.Root iiifContent={romeJson} request={{ fetch }}>
+        <Clover.Label as="h1" />
+        <CloverMap />
+      </Clover.Root>,
+    );
+    await screen.findByRole("heading", { name: "Castel Sant'Angelo, Rome" });
+    const list = await screen.findByRole("list");
+    const places = within(list).getAllByRole("button");
+    // Each named, its member's date under the name.
+    expect(places.map((place) => place.textContent)).toEqual(
+      romeJson.items.map(
+        (member) => member.label.en[0] + member.navDate.slice(0, 4),
+      ),
+    );
+    expect(places[2].querySelector("time")).toHaveAttribute("datetime", "1725");
+    // The member open is the current place.
+    expect(places[0]).toHaveAttribute("aria-current", "true");
+    expect(places[1]).not.toHaveAttribute("aria-current");
+
+    places[1].focus();
+    fireEvent.click(places[1]);
+    // Named on the map as in the list: its name, and its date under it.
+    const named = popups.at(-1)!.node!;
+    expect(named).toHaveAttribute("lang", "en");
+    expect(named.firstChild).toHaveTextContent("The Colosseum");
+    expect(
+      named.querySelector("time.clover-geomap-popup-date"),
+    ).toHaveTextContent(/^1776$/);
+    await screen.findByRole("heading", { name: "The Colosseum" });
+    // The same list, so focus stays on the place pressed (WCAG 2.4.3), now current.
+    const after = within(list).getAllByRole("button");
+    expect(after[1]).toBe(places[1]);
+    expect(after[1]).toHaveFocus();
+    expect(after[1]).toHaveAttribute("aria-current", "true");
+    expect(after[0]).not.toHaveAttribute("aria-current");
+  });
+
+  it("lets go of a name and a pick as its places change, keeping one still there", async () => {
+    const [castel, colosseum, arch] = romeJson.items.map(
+      (member) => member.navPlace,
+    );
+    const { rerender } = render(<CloverMap navPlace={arch} />);
+    await waitFor(() => expect(maps).toHaveLength(1));
+    const [map] = maps;
+    await waitFor(() => expect(placeData(map)?.features).toHaveLength(1));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: arch.features[0].properties.label.en[0],
+      }),
+    );
+    const named = popups.at(-1)!;
+    expect(named.removed).toBe(false);
+
+    // Another Canvas's place (Cookbook 0318, a member opened): the old name goes with it,
+    // and every place's state, kept by its place in the data.
+    rerender(<CloverMap navPlace={castel} />);
+    await waitFor(() => expect(named.removed).toBe(true));
+    expect(map.removeFeatureState).toHaveBeenCalledWith({
+      source: "geomap-navplace",
+    });
+    expect(popups.filter((popup) => !popup.removed)).toHaveLength(0);
+
+    // A place the new places still hold stays picked, and named.
+    const both = {
+      type: "FeatureCollection",
+      features: [...castel.features, ...colosseum.features],
+    };
+    rerender(<CloverMap navPlace={both} />);
+    fireEvent.click(screen.getByRole("button", { name: "The Colosseum" }));
+    const kept = popups.at(-1)!;
+    rerender(
+      <CloverMap
+        navPlace={{
+          ...both,
+          features: [colosseum.features[0], arch.features[0]],
+        }}
+      />,
+    );
+    await waitFor(() =>
+      expect(map.setFeatureState).toHaveBeenLastCalledWith(
+        { source: "geomap-navplace", id: 0 },
+        { picked: true },
+      ),
+    );
+    expect(kept.removed).toBe(false);
+  });
+
   it("lists its places; pressing one frames and names it, and opens its Canvas", async () => {
     const onSelect = vi.fn();
     render(
@@ -341,6 +468,64 @@ describe("Map", () => {
     // One popup at a time.
     fireEvent.click(bronze);
     expect(popups.at(-2)?.removed).toBe(true);
+  });
+
+  // Cookbook 0139: a map on the page tagged with where it shows.
+  it("selects the annotation whose place is pressed, so its region is framed", async () => {
+    let root: any;
+    const Spy = () => {
+      root = Clover.useClover("test");
+      return null;
+    };
+    render(
+      <Clover.Root iiifContent={placeJson}>
+        <Spy />
+        <CloverMap />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
+    const list = await screen.findByRole("list");
+    fireEvent.click(
+      within(list).getByRole("button", {
+        name: "Targeted Map from Chesapeake and Ohio Canal Pamphlet",
+      }),
+    );
+    expect(root.clover.store.get().annotationId).toBe(
+      placeJson.items[0].annotations[0].items[0].id,
+    );
+  });
+
+  // As a hotspot does: active while its annotation is pointed at or picked beside it.
+  it("shows a place active while its annotation is pointed at elsewhere", async () => {
+    let root: any;
+    const Spy = () => {
+      root = Clover.useClover("test");
+      return null;
+    };
+    render(
+      <Clover.Root iiifContent={placeJson}>
+        <Spy />
+        <CloverMap />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
+    await screen.findByRole("list");
+    const [map] = maps;
+    const id = placeJson.items[0].annotations[0].items[0].id;
+    act(() => root.clover.highlight.emit(id));
+    await waitFor(() =>
+      expect(map.setFeatureState).toHaveBeenLastCalledWith(
+        { source: "geomap-navplace", id: 0 },
+        { linked: true },
+      ),
+    );
+    act(() => root.clover.highlight.emit(null));
+    await waitFor(() =>
+      expect(map.setFeatureState).toHaveBeenLastCalledWith(
+        { source: "geomap-navplace", id: 0 },
+        { linked: false },
+      ),
+    );
   });
 
   it("standalone, marks no place current: nothing shows a Canvas", async () => {
@@ -420,7 +605,11 @@ describe("Map", () => {
     await waitFor(() => expect(region).toHaveAccessibleName("Carte"));
     const credits = container.querySelector(".maplibregl-ctrl-attrib-button")!;
     expect(credits).toHaveAttribute("aria-label", "Crédits");
-    expect(credits).toHaveAttribute("title", "Crédits");
+    // Named by Clover's popover, not the browser's tooltip.
+    expect(credits).not.toHaveAttribute("title");
+    await waitFor(() =>
+      expect(credits.querySelector(".clover-tip")).toHaveTextContent("Crédits"),
+    );
   });
 
   it("lists the georeferenced images it draws, by their Canvas's name", async () => {
@@ -503,18 +692,20 @@ describe("Map", () => {
     expect(screen.getByRole("button", { name: "Place 1" })).toBeInTheDocument();
   });
 
-  it("holds a popup's ground and tip to the theme over MapLibre's unlayered white", () => {
+  it("draws a popup as Clover's popover, over MapLibre's unlayered white", () => {
     // Layered (`dist`), only `!important` beats MapLibre's own `background: #fff`.
     const css = readFileSync(resolve(__dirname, "Map.css"), "utf8");
     expect(css).toMatch(
-      /\.clover-geomap-popup \.maplibregl-popup-content \{[^}]*background-color: var\(--clover-color-secondary, #fff\) !important;[^}]*color: var\(--clover-color-primary, #1a1d1e\);/,
+      /\.clover-geomap-popup \.maplibregl-popup-content \{[^}]*background-color: var\(--clover-color-primary, #1a1d1e\) !important;[^}]*color: var\(--clover-color-secondary, #fff\);/,
     );
-    for (const side of ["top", "bottom", "left", "right"])
-      expect(css).toMatch(
-        new RegExp(
-          `border-${side}-color: var\\(--clover-color-secondary, #fff\\) !important;`,
-        ),
-      );
+    // No arrow, as a hotspot's popover has none.
+    expect(css).toMatch(
+      /\.clover-geomap-popup \.maplibregl-popup-tip \{[^}]*display: none !important;/,
+    );
+    // The page's type, over MapLibre's own on the map.
+    expect(css).toMatch(
+      /\.clover-geomap \.maplibregl-map \{[^}]*font: inherit !important;/,
+    );
   });
 });
 

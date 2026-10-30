@@ -11,6 +11,8 @@ import React from "react";
 
 import Canvas from "..";
 import { containAspect } from "./MediaBody";
+import { chapterAt } from "./Transport";
+import { gapsOf } from "./seekGaps";
 import { type FakeTrack, FakeTrackList } from "../testing/textTracks";
 import { stubViewport } from "../testing/viewport";
 import { formatTime } from "./useMediaController";
@@ -272,7 +274,10 @@ describe("Canvas media", () => {
     expect(seek).toHaveAttribute("data-gaps");
     const mask = seek.style.getPropertyValue("--clover-transport-gaps");
     expect(mask.match(/transparent/g)).toHaveLength(1);
-    expect(mask).toContain("calc(50% - var(--clover-transport-gap) / 2)");
+    // Where the thumb stands halfway: it travels the bar less its own width.
+    expect(mask).toContain(
+      "calc(var(--clover-transport-thumb) / 2 + (100% - var(--clover-transport-thumb)) * 0.5 - var(--clover-transport-gap) / 2)",
+    );
     expect(screen.getByText("Opening")).toHaveClass(
       "clover-canvas-transport-chapter",
     );
@@ -323,6 +328,9 @@ describe("Canvas media", () => {
     )!;
     area.getBoundingClientRect = () =>
       ({ left: 0, width: 200, top: 0, height: 26 }) as DOMRect;
+    // The time is read along the bar itself, as its thumb travels it (no thumb in jsdom).
+    area.querySelector("input")!.getBoundingClientRect = () =>
+      ({ left: 0, width: 200, top: 0, height: 26 }) as DOMRect;
     const stretch = () =>
       area.querySelector<HTMLElement>(".clover-canvas-transport-chapter-span");
 
@@ -361,6 +369,43 @@ describe("Canvas media", () => {
     expect(stretch()!.style.left).toBe("0%");
     expect(stretch()!.style.width).toBe("50%");
     expect(area.querySelector(".clover-tip")).toBeNull();
+  });
+
+  // The Nuremberg reel's last Range ends at 10:00.4, the film at 11:11.
+  it("plays no chapter past the end of the last, and shows the time alone there", () => {
+    const chapters = [
+      { label: "Opening", start: 0, end: 5 },
+      { label: "Lunch", start: 5, end: 10 },
+    ];
+    expect(chapterAt(chapters, 7)).toBe(1);
+    expect(chapterAt(chapters, 10)).toBe(-1);
+    expect(chapterAt(chapters, 15)).toBe(-1);
+    // A chapter with no end of its own plays until the next begins, or the end.
+    expect(chapterAt([{ label: "All", start: 0 }], 15)).toBe(0);
+  });
+
+  it("cuts the seek bar where a chapter begins, or ends with none to follow", () => {
+    // The reel's Ranges: 0:12.5 to 10:00.4, in nine, the film 11:11.
+    const ends = [
+      12.5, 85.6, 117.2, 158.1, 197.8, 297.5, 379.7, 473.4, 528.2, 600.4,
+    ];
+    const chapters = ends
+      .slice(0, -1)
+      .map((start, n) => ({ label: String(n), start, end: ends[n + 1] }));
+    const at = gapsOf(chapters, 671.164).map(
+      (share) => (share * 671.164) / 100,
+    );
+    expect(at.map((each) => Math.round(each * 10) / 10)).toEqual(ends);
+    // Chapters from the start to the end: a gap between them alone.
+    expect(
+      gapsOf(
+        [
+          { start: 0, end: 10 },
+          { start: 10, end: 20 },
+        ],
+        20,
+      ),
+    ).toEqual([50]);
   });
 
   // Cookbook 0229: a chapter's picture beside it in the menu, and over it on the seek bar.
@@ -1354,6 +1399,18 @@ describe("containAspect", () => {
       height: 112.5,
     });
     expect(containAspect(box, null)).toBe(box);
+  });
+
+  it("gives a video its own frame size on a Canvas of no area (Cookbook 0015)", () => {
+    // A Canvas with a duration and no width or height: nothing to fit inside.
+    const none = { x: 0, y: 0, width: 0, height: 0 };
+    expect(containAspect(none, { width: 640, height: 360 })).toEqual({
+      x: 0,
+      y: 0,
+      width: 640,
+      height: 360,
+    });
+    expect(containAspect(none, null)).toBe(none);
   });
 });
 

@@ -325,6 +325,7 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
     <CanvasView
       {...rest}
       manifestId={manifestId}
+      navPlace={(manifest as { navPlace?: unknown } | null)?.navPlace}
       canvases={canvases}
       viewingDirection={direction}
       language={language}
