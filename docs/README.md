@@ -117,12 +117,14 @@ resource events or page views. Returning to a different resource does count.
 
 Each resource event supplies:
 
-- `page_location`: the homepage URL with only `iiif-content`, containing the
-  opened resource's URL. Resource URL query parameters are kept; credentials
-  and fragments are removed. For an encoded IIIF Content State, this is its
-  target's Manifest or Collection URL, without the encoded annotation or its
-  text. This uses GA4's built-in Page location dimension, which allows up to
-  1,000 characters, instead of a custom parameter's 100-character limit.
+- `resource_url`: the opened resource's URL. Resource URL query parameters are
+  kept; credentials and fragments are removed. For an encoded IIIF Content
+  State, this is its target's Manifest or Collection URL, without the encoded
+  annotation or its text. GA4 keeps a custom parameter's first 100 characters.
+- `page_location`: the homepage URL with only `iiif-content`, holding the same
+  URL as written (`…/?iiif-content=https://…?as=iiif`; only `%`, `&` and `+`
+  are escaped). This uses GA4's built-in Page location dimension, which allows
+  up to 1,000 characters, for a URL longer than `resource_url` can hold.
 - `resource_host`: the resource's hostname.
 - `resource_input`: `url` or `content_state`.
 
@@ -133,11 +135,18 @@ URL. Development, previews on another origin, and `noindex` pages do not track.
 After deploying the site, import the updated file using **Merge → Overwrite
 conflicting tags, triggers and variables**, then Preview and **Submit → Publish**.
 Open a resource and check for one `iiif_resource_open` in Analytics Realtime or
-DebugView. For a report of which resources were used, create an Exploration,
-filter **Event name** to `iiif_resource_open`, and use **Page location** with
-**Event count**. Register `resource_host` and `resource_input` as event-scoped
-custom dimensions under **Admin → Data display → Custom definitions** to group
-by provider or input type. Custom dimensions can take 24–48 hours to appear.
+DebugView. Register `resource_url`, `resource_host` and `resource_input` as
+event-scoped custom dimensions under **Admin → Data display → Custom
+definitions**, each with its parameter's name. GA4 reports only parameters
+registered this way, and only from the time they are registered: earlier events
+cannot be grouped by them. They can take 24–48 hours to appear in reports.
+
+For counts, create a free-form Exploration, filter **Event name** to
+`iiif_resource_open`, and put **Event count** against `resource_host` (each
+provider, `api.dc.library.northwestern.edu`) or `resource_url` (each resource).
+For a URL over 100 characters, use **Page location** instead, which holds it
+whole. Explorations suit these many distinct values better than standard
+reports, which fold rare values into "(other)".
 See Google's [custom dimension guide](https://support.google.com/analytics/answer/14240153)
 and [event parameter limits](https://support.google.com/analytics/answer/9267744).
 

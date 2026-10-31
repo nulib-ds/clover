@@ -31,11 +31,15 @@ export function resourceOpen(content: string, siteUrl: string) {
   const location = new URL(siteUrl);
   location.search = "";
   location.hash = "";
-  location.searchParams.set("iiif-content", resource.href);
+  // Escape only what would change the value as it is read back, so GA4 shows the
+  // address as written (`?iiif-content=https://…?as=iiif`), as iiif.io's links give it.
+  const value = resource.href.replace(/[%&+]/g, encodeURIComponent);
   return {
     // GA4 allows 1,000 characters for page_location, versus 100 for custom parameters.
     // Use this only on the resource event; the page-view URL stays free of queries.
-    resource_location: location.href,
+    resource_location: `${location.href}?iiif-content=${value}`,
+    // The address alone, a dimension to count each resource by (GA4 keeps 100 characters).
+    resource_url: resource.href,
     resource_host: resource.hostname,
     resource_input: /^https?:/i.test(content) ? "url" : "content_state",
   };
