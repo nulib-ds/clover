@@ -107,6 +107,8 @@
   inset-inline-start: calc(-1 * var(--clover-space-m));
   width: min(20rem, calc(100vw - 2 * var(--clover-space-m)));
   max-height: min(24rem, 60vh);
+  /* Within the window as it shows now, a phone's toolbars and all. */
+  max-height: min(24rem, 60dvh);
   /*
    * The pager's row over its list: as tall as a step (`l`), `m` above the list (Mat,
    * 2026-10-29: "put a little more gap between this action/header and the items list").

@@ -16,6 +16,16 @@
 }
 
 /*
+ * Of the window's smallest height (`svh`), where a browser knows it: a phone's `vh` is
+ * the window with its toolbars away, so a Body of it ran on under them while they show.
+ */
+@supports (height: 1svh) {
+  .clover-template-default {
+    --clover-body-height: min(65svh, 40rem);
+  }
+}
+
+/*
  * `fill`: as tall as the box it sits in, and the Body takes what the header and the strip
  * leave (flex, rather than `--clover-body-height`), so the layout never runs below it.
  * Never a Body under 16rem, the width it keeps beside the panel: in a box too short for
@@ -46,14 +56,22 @@
   padding: var(--clover-inset);
 }
 
-.clover-template-default-title {
+/*
+ * Every template's title (Default's, Document's, Gallery's and its lightbox's, which set
+ * `clover-template-title` beside their own): the large step, its lines closer than
+ * running text's (Mat, 2026-10-26), as a heading's are, and all of it wrapped, between
+ * any letters where a word is longer than the line (a file's name, an address), so on a
+ * phone, zoomed or spaced out it is never cut short or run past its box (WCAG 1.4.10,
+ * 1.4.12; a reader's own spacing still wins). Each template keeps its own weight.
+ */
+.clover-template-title {
   margin: 0;
   font-size: var(--clover-text-l);
-  /*
-   * A title's lines closer than running text's (Mat, 2026-10-26), as a heading's are;
-   * a reader's own spacing (WCAG 1.4.12) still wins and wraps it, never cutting it.
-   */
   line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.clover-template-default-title {
   font-weight: 400;
 }
 
@@ -117,6 +135,8 @@
 .clover-template-default-collection {
   min-width: 0;
   margin: 0;
+  /* Wrapped, as the title is: a Collection's name may be one long word too. */
+  overflow-wrap: anywhere;
   color: var(--clover-color-primary-muted, #26292b);
   /* The page's own size, `1rem` where the page sets none (Mat, 2026-10-29). */
   font-size: inherit;
@@ -133,14 +153,58 @@
   margin-inline-start: auto;
 }
 
+/*
+ * Narrower, the header collapses by the layout's own width (Mat, 2026-10-31: "a better
+ * job of collapsing this header … tuck the logo away at a certain width"). Under 36rem,
+ * the logo keeps to the title's line, at its end, and the Collection's line runs the
+ * whole width under both, so its title is not squeezed beside the logo.
+ */
+@container clover-template-default-main (width < 36rem) {
+  .clover-template-default-header:has(> .clover-template-default-collection-row)
+    > .clover-template-default-provider {
+    grid-row: 1;
+    align-self: start;
+  }
+
+  .clover-template-default-header > .clover-template-default-collection-row {
+    grid-column: 1 / -1;
+  }
+}
+
+/*
+ * Under 26rem (a phone, or a narrow column beside the panel), the logo is tucked away,
+ * so the title and the Collection's line have the whole width: the panel's About shows
+ * it still, its name and its link, one press away. With no panel, nothing else shows it,
+ * so it keeps to the title's line.
+ */
+@container clover-template-default-main (width < 26rem) {
+  .clover-template-default:has(.clover-template-default-panel)
+    .clover-template-default-provider {
+    display: none;
+  }
+}
+
 /* A `Clover.Split`: the main pane (header, Body, strip), the bar, and the panel's pane. */
 .clover-template-default-panes {
   position: relative;
 }
 
+/* Its own width, as a container, decides how its header collapses (above). */
 .clover-template-default-main {
   display: flex;
   flex-direction: column;
+  container: clover-template-default-main / inline-size;
+}
+
+/*
+ * What floats over it lies over everything in it (Mat, 2026-10-31: the header's pager,
+ * `z-index: 5`, drew over the panel): while the panel floats, it is a stacking context of
+ * its own, so nothing a part raises inside it reaches over the panel or its wash. Only
+ * then: docked, a list the page opens (the pager's) still reaches over the bar beside it.
+ * (A container is no stacking context: `container-type` contains no layout.)
+ */
+.clover-template-panes[data-panel="over"] > .clover-template-default-main {
+  isolation: isolate;
 }
 
 /*
@@ -225,35 +289,60 @@
   inset-block: 0;
   inset-inline-end: 0;
   z-index: 4;
+  /*
+   * Its inset `m` rather than `l` (Mat, 2026-10-31: "trim on phones"): it shares a phone's
+   * width with the page beside it. All in it steps from the inset (its sections' headings
+   * and rows, the room over them, its close button), so all of it follows.
+   */
+  --clover-inset: var(--clover-space-m);
   width: min(24rem, calc(100% - var(--clover-space-2xl)));
   max-width: none;
   max-height: none;
   border-inline-start: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
+  /* At the page's end, its inner edge on the left (below), the right right to left. */
+  --clover-template-inner: left;
+  --clover-template-toward: -1;
   /*
-   * It can be dragged back off (`useDragToClose`): a grip on its inner edge says so, and
-   * a sideways drag is its own, not the page's. Up and down still scroll it.
+   * Where it waits, off its edge: `xl` past it, so its close button, mostly over the page,
+   * and its shadow go out of sight with it, rather than linger at the layout's edge until
+   * it is hidden. A drag let go goes there too (`dragToClose.ts`), so the two meet.
    */
-  background:
-    linear-gradient(var(--clover-grip), var(--clover-grip)) no-repeat left
-      var(--clover-space-2xs) center / 4px var(--clover-space-xl),
-    var(--clover-color-secondary, #fff);
+  --clover-template-out: translateX(calc(100% + var(--clover-space-xl)));
+  transform: var(--clover-template-out);
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clover-template-panes[data-panel="over"] > .clover-template-drawer:dir(rtl) {
+  --clover-template-out: translateX(calc(-100% - var(--clover-space-xl)));
+  --clover-template-inner: right;
+  --clover-template-toward: 1;
+}
+
+/*
+ * A pane over the page (the panel, and Document's thumbnails on a narrow page, which set
+ * `clover-template-float` while they float), written once: its inner edge, the one
+ * toward the page, carries a grip that says it can be dragged back off
+ * (`useDragToClose`), 3px wide and no taller than a control (Mat, 2026-10-31: the close
+ * button's height), and its shadow falls on the page. A sideways drag is its own, not
+ * the page's; up and down still scroll it. Which edge is inner each pane says, by its
+ * side and the page's direction: `--clover-template-inner` (`left` or `right`), and its
+ * shadow's way along the row, `--clover-template-toward` (-1 or 1).
+ */
+.clover-template-panes[data-panel="over"] > .clover-template-drawer,
+.clover-template-float {
   --clover-grip: color-mix(
     in srgb,
     var(--clover-color-primary-muted, #26292b) 30%,
     transparent
   );
+  background:
+    linear-gradient(var(--clover-grip), var(--clover-grip)) no-repeat
+      var(--clover-template-inner) var(--clover-space-2xs) center / 3px
+      var(--clover-control),
+    var(--clover-color-secondary, #fff);
   touch-action: pan-y;
-  box-shadow: calc(-1 * var(--clover-space-s)) 0 var(--clover-space-l)
-    rgb(0 0 0 / 0.12);
-  transform: translateX(100%);
-  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.clover-template-panes[data-panel="over"] > .clover-template-drawer:dir(rtl) {
-  transform: translateX(-100%);
-  background-position:
-    right var(--clover-space-2xs) center,
-    0 0;
+  box-shadow: calc(var(--clover-template-toward) * var(--clover-space-s)) 0
+    var(--clover-space-l) rgb(0 0 0 / 0.12);
 }
 
 .clover-template-panes[data-panel="over"]

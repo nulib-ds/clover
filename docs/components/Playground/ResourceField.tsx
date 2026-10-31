@@ -328,8 +328,6 @@ export default function ResourceField({
   const [active, setActive] = useState<string | null>(null);
   const [error, setError] = useState<string>();
   const inputRef = useRef<HTMLInputElement>(null);
-  /* How the field was last pressed: a touch keeps its label unselected. */
-  const pointer = useRef<string>("");
 
   const listName = onlyRecipes ? COOKBOOK_NAME : "IIIF resources";
   const query = filter.trim().toLowerCase();
@@ -357,6 +355,44 @@ export default function ResourceField({
     setFilter("");
     setError(undefined);
   }, [current, own]);
+
+  /** What the reader types, narrowing the list as it goes. */
+  const edit = (value: string) => {
+    setDraft(value);
+    setFilter(value);
+    setError(undefined);
+    setOpen(true);
+    setActive(null);
+  };
+
+  /*
+   * Untouched, the field's label is ours, not the reader's to edit: what is typed, pasted,
+   * dropped or dictated takes the place of all of it, and a deletion empties it, as if it
+   * were selected (Mat, 2026-10-30: never selected, so it stays legible). Each way of
+   * entering text says so before it lands (`beforeinput`), a key or not. An IME's
+   * composing, which cannot be stopped, goes in as typed.
+   */
+  const untouched = draft === null;
+  useEffect(() => {
+    const input = inputRef.current;
+    if (!input || !untouched) return;
+    const replace = (event: InputEvent) => {
+      const { inputType } = event;
+      const typed = inputType.startsWith("delete")
+        ? ""
+        : /^insert(Text|ReplacementText|FromPaste|FromDrop|FromYank)$/.test(
+              inputType,
+            )
+          ? (event.data ?? event.dataTransfer?.getData("text/plain") ?? "")
+          : null;
+      if (typed === null || !event.cancelable) return;
+      event.preventDefault();
+      // One line, as the field keeps it.
+      edit(typed.replace(/[\r\n]+/g, ""));
+    };
+    input.addEventListener("beforeinput", replace);
+    return () => input.removeEventListener("beforeinput", replace);
+  }, [untouched]);
 
   useEffect(() => {
     if (active)
@@ -422,6 +458,28 @@ export default function ResourceField({
     setActive(null);
   };
 
+  /*
+   * A press anywhere on the pill but its buttons (Mat, 2026-10-30: the thumbnail, the
+   * label, the field and the room between them) lists ours, as a select's does; the
+   * chevron toggles the list itself, and Open opens. Focus goes to the field, the one
+   * control: a keyboard opens the list there with Down. The label is left as it is, never
+   * selected, so it stays legible (Mat, 2026-10-30); what is typed or pasted takes its
+   * place all the same (below). Typed over, the list opens as narrowed.
+   */
+  const onPress = (event: React.MouseEvent) => {
+    const input = inputRef.current;
+    const target = event.target as Element;
+    if (!input || target.closest("button")) return;
+    if (target !== input) {
+      // A label's press would focus the field again, and click it.
+      event.preventDefault();
+      // The pill is in view as it is pressed, held under the navbar too: no scroll.
+      input.focus({ preventScroll: true });
+    }
+    if (draft !== null) return setOpen(true);
+    if (!expanded) show(null);
+  };
+
   const choose = (choice: Choice) => {
     if (choice.key === COOKBOOK) return toggleCookbook();
     close();
@@ -438,7 +496,7 @@ export default function ResourceField({
       if (input) {
         input.inputMode = "url";
         input.blur();
-        input.focus();
+        input.focus({ preventScroll: true });
       }
       return;
     }
@@ -527,7 +585,7 @@ export default function ResourceField({
       }}
       onSubmit={submit}
     >
-      <div className={styles.resourceRow}>
+      <div className={styles.resourceRow} data-open={expanded || undefined}>
         <div className={styles.combo} {...example()}>
           {/*
            * One pill, as Airbnb's search is (Mat, 2026-10-25): the resource's thumbnail,
@@ -535,7 +593,17 @@ export default function ResourceField({
            * its end. The label is a `<label>`, so it names the field (WCAG 1.3.1, 3.3.2),
            * and the name holds the words shown (2.5.3).
            */}
-          <div className={styles.fieldGroup}>
+          <div
+            className={styles.fieldGroup}
+            data-typing={draft !== null || undefined}
+            onClick={onPress}
+            onMouseDown={(event) => {
+              // Focus stays in the field, and no words are selected, but the field's own.
+              const target = event.target as Element;
+              if (target !== inputRef.current && !target.closest("button"))
+                event.preventDefault();
+            }}
+          >
             {/*
              * A Cookbook recipe in the Viewer, said plainly (Mat, 2026-10-25: "strongly
              * hint they are viewing a recipe"): IIIF's logo on the pill's top edge, in its
@@ -566,10 +634,7 @@ export default function ResourceField({
                   {onlyRecipes ? " IIIF Cookbook recipe" : " IIIF resource"}
                 </span>
               </label>
-              <span
-                className={styles.fieldLine}
-                data-hinted={recipeHint ? "" : undefined}
-              >
+              <span className={styles.fieldLine}>
                 <input
                   aria-activedescendant={
                     expanded && active ? optionId(active) : undefined
@@ -596,27 +661,7 @@ export default function ResourceField({
                   inputMode={draft === null ? "none" : "url"}
                   // The label's language, while the field shows a label in another.
                   lang={draft === null ? shown.lang : undefined}
-                  onChange={(event) => {
-                    setDraft(event.target.value);
-                    setFilter(event.target.value);
-                    setError(undefined);
-                    setOpen(true);
-                    setActive(null);
-                  }}
-                  onClick={(event) => {
-                    /*
-                     * Untouched, a press lists ours, and, by mouse, selects the label, so a
-                     * paste replaces it; by touch, it leaves it, or the phone's selection
-                     * handles would come up over it.
-                     */
-                    if (draft !== null) return;
-                    if (pointer.current !== "touch")
-                      event.currentTarget.select();
-                    if (!expanded) show(null);
-                  }}
-                  onPointerDown={(event) => {
-                    pointer.current = event.pointerType;
-                  }}
+                  onChange={(event) => edit(event.target.value)}
                   onKeyDown={onKeyDown}
                   // An address to type; for the recipes alone, a recipe to choose.
                   placeholder={onlyRecipes ? "Choose a recipe" : "https://"}
@@ -628,15 +673,7 @@ export default function ResourceField({
                 />
                 {recipeHint && (
                   // Described to assistive technology as what it is; a press lists ours.
-                  <span
-                    className={styles.fieldRecipe}
-                    id={recipeId}
-                    onMouseDown={(event) => {
-                      event.preventDefault();
-                      inputRef.current?.focus();
-                      if (!expanded) show(null);
-                    }}
-                  >
+                  <span className={styles.fieldRecipe} id={recipeId}>
                     <span className={styles.visuallyHidden}>
                       IIIF Cookbook recipe{" "}
                     </span>
@@ -656,7 +693,7 @@ export default function ResourceField({
               // Focus stays in the field.
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => {
-                inputRef.current?.focus();
+                inputRef.current?.focus({ preventScroll: true });
                 if (expanded) close();
                 else show(null);
               }}
@@ -708,108 +745,116 @@ export default function ResourceField({
             </button>
           </div>
 
-          <ul
-            aria-label={listName}
-            className={styles.resourceList}
+          {/*
+           * The list's surface opens around the pill, as a pager's popup opens around its
+           * count (Mat, 2026-10-30), the pill over it and the list under the pill.
+           */}
+          <div
+            className={styles.resourceMenu}
             hidden={!expanded}
-            id={listId}
             // A press chooses without taking focus from the field.
             onMouseDown={(event) => event.preventDefault()}
-            ref={listRef}
-            role="listbox"
           >
-            {/*
-             * Its options only while it is open: shut, the page holds none of the sample
-             * resources' names, which are not what it is about (`docs/lib/example.ts`).
-             */}
-            {expanded &&
-              options
-                .filter((choice) => !choice.key.startsWith("recipe-"))
-                .map((choice) =>
-                  choice.key === COOKBOOK ? (
-                    <li
-                      aria-selected={false}
-                      className={`${styles.option} ${styles.cookbook}`}
-                      data-active={choice.key === active || undefined}
-                      data-shown={cookbookShown || undefined}
-                      id={optionId(choice.key)}
-                      key={choice.key}
-                      onClick={() => choose(choice)}
-                      onPointerEnter={() => void readRecipes()}
-                      role="option"
-                    >
-                      <span className={styles.media} data-logo>
-                        <IIIFLogo className={styles.logo} />
-                      </span>
-                      <span className={styles.optionText}>
-                        <span className={styles.optionName}>
-                          {choice.label.text}
-                        </span>
-                        <span className={styles.optionAbout}>
-                          {choice.about}
-                        </span>
-                      </span>
-                      <svg
-                        aria-hidden="true"
-                        className={styles.disclose}
-                        fill="none"
-                        height="16"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                        width="16"
+            <ul
+              aria-label={listName}
+              className={styles.resourceList}
+              id={listId}
+              ref={listRef}
+              role="listbox"
+            >
+              {/*
+               * Its options only while it is open: shut, the page holds none of the sample
+               * resources' names, which are not what it is about (`docs/lib/example.ts`).
+               */}
+              {expanded &&
+                options
+                  .filter((choice) => !choice.key.startsWith("recipe-"))
+                  .map((choice) =>
+                    choice.key === COOKBOOK ? (
+                      <li
+                        aria-selected={false}
+                        className={`${styles.option} ${styles.cookbook}`}
+                        data-active={choice.key === active || undefined}
+                        data-shown={cookbookShown || undefined}
+                        id={optionId(choice.key)}
+                        key={choice.key}
+                        onClick={() => choose(choice)}
+                        onPointerEnter={() => void readRecipes()}
+                        role="option"
                       >
-                        <path d="m6 9 6 6 6-6" />
-                      </svg>
+                        <span className={styles.media} data-logo>
+                          <IIIFLogo className={styles.logo} />
+                        </span>
+                        <span className={styles.optionText}>
+                          <span className={styles.optionName}>
+                            {choice.label.text}
+                          </span>
+                          <span className={styles.optionAbout}>
+                            {choice.about}
+                          </span>
+                        </span>
+                        <svg
+                          aria-hidden="true"
+                          className={styles.disclose}
+                          fill="none"
+                          height="16"
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                          width="16"
+                        >
+                          <path d="m6 9 6 6 6-6" />
+                        </svg>
+                      </li>
+                    ) : (
+                      <Option
+                        active={choice.key === active}
+                        choice={choice}
+                        id={optionId(choice.key)}
+                        key={choice.key}
+                        onBroken={brake}
+                        onChoose={choose}
+                        picture={pictured(choice.thumbnail)}
+                        plus={choice.key === NEW}
+                      />
+                    ),
+                  )}
+              {expanded && listedRecipes.length > 0 && (
+                /*
+                 * The recipes, one group named for them (WAI-ARIA's grouped listbox). Under
+                 * their category its option names them; narrowed by typing, the name shows.
+                 */
+                <li className={styles.group} role="presentation">
+                  <ul aria-labelledby={`${id}-recipes`} role="group">
+                    <li
+                      className={
+                        query && !onlyRecipes
+                          ? styles.groupName
+                          : styles.visuallyHidden
+                      }
+                      id={`${id}-recipes`}
+                      role="presentation"
+                    >
+                      {COOKBOOK_NAME}
                     </li>
-                  ) : (
-                    <Option
-                      active={choice.key === active}
-                      choice={choice}
-                      id={optionId(choice.key)}
-                      key={choice.key}
-                      onBroken={brake}
-                      onChoose={choose}
-                      picture={pictured(choice.thumbnail)}
-                      plus={choice.key === NEW}
-                    />
-                  ),
-                )}
-            {expanded && listedRecipes.length > 0 && (
-              /*
-               * The recipes, one group named for them (WAI-ARIA's grouped listbox). Under
-               * their category its option names them; narrowed by typing, the name shows.
-               */
-              <li className={styles.group} role="presentation">
-                <ul aria-labelledby={`${id}-recipes`} role="group">
-                  <li
-                    className={
-                      query && !onlyRecipes
-                        ? styles.groupName
-                        : styles.visuallyHidden
-                    }
-                    id={`${id}-recipes`}
-                    role="presentation"
-                  >
-                    {COOKBOOK_NAME}
-                  </li>
-                  {listedRecipes.map((choice) => (
-                    <Option
-                      active={choice.key === active}
-                      choice={choice}
-                      id={optionId(choice.key)}
-                      key={choice.key}
-                      onBroken={brake}
-                      onChoose={choose}
-                      picture={pictured(choice.thumbnail)}
-                    />
-                  ))}
-                </ul>
-              </li>
-            )}
-          </ul>
+                    {listedRecipes.map((choice) => (
+                      <Option
+                        active={choice.key === active}
+                        choice={choice}
+                        id={optionId(choice.key)}
+                        key={choice.key}
+                        onBroken={brake}
+                        onChoose={choose}
+                        picture={pictured(choice.thumbnail)}
+                      />
+                    ))}
+                  </ul>
+                </li>
+              )}
+            </ul>
+          </div>
         </div>
       </div>
       <p className={styles.visuallyHidden} role="status">

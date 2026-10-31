@@ -2,9 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 
 import * as Clover from "../../parts";
 import type { PanelLayout, RootProps } from "../../parts";
+import { preloadDrag } from "../shared/useDragToClose";
 import { useDrawer } from "../shared/useDrawer";
 import { useFollowFocus } from "../shared/useFollowFocus";
-import { useWideEnough } from "../shared/useSlide";
+import {
+  BESIDE_REM,
+  PAGE_MIN,
+  PANEL_MIN,
+  useWideEnough,
+} from "../shared/useSlide";
 import type DocumentPanelPart from "./DocumentPanel";
 import { Sheets } from "./Sheets";
 
@@ -97,15 +103,10 @@ export function Document({
 /** The heading level under another. Past 6, the parts' titles name what they head. */
 const below = (level: number) => level + 1;
 
-/** The narrowest the page and the panel may be dragged, side by side. */
-const PAGE_MIN = "16rem";
-const PANEL_MIN = "14rem";
 /**
- * The room the page and the panel need beside each other, with the bar between them,
- * and the thumbnails' narrowest and their bar when they show. Any narrower and the panel
- * slides over the page instead.
+ * Beside the page and the panel (`BESIDE_REM`), the thumbnails' narrowest and their bar,
+ * when they show. Any narrower and the panel slides over the page instead.
  */
-const BESIDE_REM = 16 + 14 + 1;
 const SIDEBAR_REM = 8 + 1;
 /**
  * Narrower than this (a phone, or a narrow column of a wide page: the template measures
@@ -199,11 +200,12 @@ function DocumentLayout({
     if (panel.open) void loadPart();
   }, [panel.open]);
   const reach = (event: React.SyntheticEvent) => {
-    if (
-      !PanelPart &&
-      (event.target as Element).closest?.(`[aria-controls~="${id}-panel"]`)
-    )
-      void loadPart();
+    const toggle = (pane: string) =>
+      (event.target as Element).closest?.(`[aria-controls~="${id}-${pane}"]`);
+    if (!PanelPart && toggle("panel")) void loadPart();
+    // Over the page, the drag's code too (`preloadDrag`).
+    if ((over && toggle("panel")) || (sidebar.over && toggle("sidebar")))
+      preloadDrag();
   };
 
   // Over the page the thumbnails cover it: choosing a page puts them away.
@@ -267,7 +269,7 @@ function DocumentLayout({
       <header className="clover-template-document-toolbar">
         <Clover.Label
           as={title.as}
-          className="clover-template-document-title"
+          className="clover-template-document-title clover-template-title"
           {...title.title}
         />
         {download && <Clover.Download headingLevel={below(headingLevel)} />}
@@ -303,7 +305,13 @@ function DocumentLayout({
           as="aside"
           id={`${id}-sidebar`}
           name="sidebar"
-          className="clover-template-document-sidebar"
+          // Floating over a narrow page, a pane over the page (`Default.css`).
+          className={[
+            "clover-template-document-sidebar",
+            sidebar.over && "clover-template-float",
+          ]
+            .filter(Boolean)
+            .join(" ")}
           aria-label={sidebarLang ? undefined : t("templateSidebar")}
           aria-labelledby={sidebarLang ? `${id}-sidebar-name` : undefined}
           size="13rem"

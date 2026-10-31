@@ -51,7 +51,10 @@ import "@nulib/clover/templates.css";
 | `storageKey`         | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.  |
 | …                    |                              | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`… |
 
-Size it with `--clover-template-document-height` (default `min(85vh, 56rem)`). Below
+Size it with `--clover-template-document-height` (default `min(85svh, 56rem)`, the
+window's smallest height where a browser knows it, else `min(85vh, 56rem)`). In a box too
+short for its toolbar and 16rem of pages, it grows past that height, for the page around
+it to scroll, rather than crush the pages. Below
 40rem the thumbnails cover the page while open, their toggle on their inner edge, and
 choosing one puts them away; they can be dragged back off to the start, toggle and all.
 

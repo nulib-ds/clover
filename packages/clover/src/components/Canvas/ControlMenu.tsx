@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
 
 import { join } from "../../lib/classnames";
 import { useOneOpen } from "../../ui/useOneOpen";
@@ -17,6 +17,12 @@ interface ControlMenuProps {
    * and holds (a pager's steps, `Items/CountMenu.tsx`).
    */
   holds?: () => Element | null | undefined;
+  /**
+   * Moved along its row, as it opens, to lie inside what clips it, all of it showing (a
+   * pager's list, opened mid-line on a phone; WCAG 1.4.10). The transport's menus place
+   * themselves (`media/placeMenu.ts`).
+   */
+  inside?: boolean;
   children: React.ReactNode;
 }
 
@@ -38,11 +44,17 @@ const ControlMenu: React.FC<ControlMenuProps> = ({
   "data-testid": testId,
   className,
   holds,
+  inside = false,
   children,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   // Rendered only while open: another popup opening closes it.
   useOneOpen(true, () => onClose(false));
+
+  useLayoutEffect(() => {
+    const menu = ref.current;
+    if (menu && inside) keepInside(menu);
+  }, [inside]);
 
   useEffect(() => {
     const menu = ref.current;
@@ -108,5 +120,24 @@ const ControlMenu: React.FC<ControlMenuProps> = ({
     </div>
   );
 };
+
+/**
+ * Moves a menu along its row back inside the nearest box that clips it (else the window),
+ * by as much as it runs past either end, before it is drawn; never past the box's start.
+ */
+function keepInside(menu: HTMLElement) {
+  const box = menu.getBoundingClientRect();
+  let start = 0;
+  let end = document.documentElement.clientWidth;
+  for (let node = menu.parentElement; node; node = node.parentElement) {
+    if (getComputedStyle(node).overflowX === "visible") continue;
+    const clip = node.getBoundingClientRect();
+    start = Math.max(start, clip.left);
+    end = Math.min(end, clip.right);
+    break;
+  }
+  const shift = Math.max(start - box.left, Math.min(0, end - box.right));
+  if (shift) menu.style.translate = `${shift}px 0`;
+}
 
 export default ControlMenu;

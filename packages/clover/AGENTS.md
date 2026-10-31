@@ -122,7 +122,9 @@ every rule below.
   the Canvas or Scene full screen itself, or first in the Root that is
   (`useFullscreenExit`, `data-exit`; Mat, 2026-10-29: "we still need that exit
   button"), at its Body's top left. A Root in full screen is on Clover's ground and
-  scrolls (`ExitFullscreen.css`), with no padding of its own; the Default template
+  scrolls (`ExitFullscreen.css`), with no padding of its own but the screen's safe areas
+  (`env(safe-area-inset-*)`, Mat, 2026-10-31: so an iPad's home indicator never covers
+  the strip; nothing where a screen keeps nothing); the Default template
   fills the screen as `fill` fills its box.
 - **Full screen** is offered only where `isFullscreenSupported()` says an element can have
   it. Read it with `useFullscreenSupported()`, which assumes support on the server, so
@@ -351,7 +353,27 @@ every rule below.
   template can be copied into an app with `../../parts` read as `@nulib/clover`. They
   import `parts`, not `index`: the index reaches `Default` through the Viewer, so
   importing it back would be a cycle. If a template needs something, export it from `parts` first.
-- Classes are `clover-template-<name>-*`.
+- Classes are `clover-template-<name>-*`. What every template shares has a shared class
+  beside its own, its rules in `Default.css` (in `styles.css`, which every element page
+  with a template loads): `clover-template-title` (every template's title: `text-l`, lines
+  at 1.25, wrapped between letters where a word is longer than the line, WCAG 1.4.10;
+  each keeps its weight), `-panes`, `-drawer`, `-scrim` and `-float`. The panes' shared sizes, `PAGE_MIN`, `PANEL_MIN` and `BESIDE_REM`, are
+  exported once from `shared/useSlide.ts`, which both load.
+- **Default's header collapses by its own width** (Mat, 2026-10-31: "a better job of
+  collapsing this header … tuck the logo away"): its main pane is a size container,
+  `clover-template-default-main` (an unsized split pane, `flex: 1 1 0`, so containment
+  never shrinks it). Under 36rem, the provider's logo keeps to the title's line and the
+  Collection's line runs the whole width under them; under 26rem it is tucked away where
+  the template has a panel (About shows the provider), and keeps to the title's line where
+  it has none. A container is no stacking context (`container-type` no longer contains
+  layout), so nothing in the pane changes how it stacks; what floats over it is isolated
+  as above.
+- Heights from the window are of its smallest height where a browser knows it (`svh`, in
+  an `@supports` beside the `vh` one, as a custom property cannot fall back by itself),
+  and a popup's or dialog's maximum of the window as it shows now (`dvh`, after the `vh`
+  declaration): a phone's `vh` is the window with its toolbars away. Document grows past
+  its height (`min-height: min-content`, its panes 16rem at least) rather than crush its
+  pages in a short box (WCAG 1.4.10), as Default does with `fill`.
 - Current set: `Default` (3.x Viewer layout, the Viewer's own; `items` picks its
   thumbnails), `Document` (a PDF viewer: thumbnails left,
   the pages down one scrolling column, the panel sliding out right), `Gallery` (grid and lightbox).
@@ -437,7 +459,19 @@ every rule below.
   into that entry). Document decides where its thumbnails go by its own width
   (`data-narrow` under 40rem), never the window's. The drag is `shared/useDragToClose.ts`,
   its code `shared/dragToClose.ts`, loaded and attached the first time a drawer floats
-  (Mat, 2026-10-27: kept, loaded when needed): a wide layout never loads it.
+  (Mat, 2026-10-27: kept, loaded when needed): a wide layout never loads it. It starts
+  loading as the reader reaches for a floating pane's toggle (`preloadDrag`: pointed at,
+  pressed or focused, read off the layout's `onPointerOver` and `onFocus`; Mat,
+  2026-10-31), so a swipe right after the pane opens is never missed. Let go to
+  close (Mat, 2026-10-31: "that smooth app feel"), the pane goes the rest of the way at
+  the finger's speed, slowing evenly (a quadratic ease out, twice the rest of the way over
+  the finger's speed, 120ms to `SLIDE_MS`), on its own `transform`, from where it was let
+  go to where its slide ends (`--clover-template-out`), so the slide, as it closes, finds
+  that motion running and leaves it be. Never clear the drag's `translate` under the
+  slide (`reset` waits for a drag's way out to finish): it did, and the pane jumped back
+  to where it opened before sliding away. A drag follows from where it is told to be one,
+  never jumping the slop. `e2e` has no drag; the unit tests and a frame-by-frame log of a
+  synthetic touch drag in Chromium, and a real one in the iOS Simulator, checked it.
 - **The panel over the page** (2026-10-27): Default's and Document's drawer, the wash
   beside it and their reduced-motion rule are `Default.css`'s, in `styles.css`, on
   `clover-template-panes`, `clover-template-drawer` and `clover-template-scrim`, which
@@ -446,7 +480,23 @@ every rule below.
   rides apart from the elements' shared styles, so it cost each element page more than it
   saved. Never a `<dialog>` either: its top layer covers the window, not the Viewer's box,
   and moving the pane into one remounts it at the snap point. Change them there, for both;
-  a template's own sheet keeps what is its alone.
+  a template's own sheet keeps what is its alone. What floats lies over everything in the
+  page's pane: while anything floats, the pane is a stacking context (`isolation`, under
+  `data-panel="over"`, and Document's `data-narrow` too, each in its template's sheet), so
+  nothing a part raises in it (the header's pager, at `z-index: 5`, drew over the panel;
+  Mat, 2026-10-31) reaches over a drawer or its wash. Only then: docked, the pager's list
+  still reaches over the bar beside it.
+  Floating, the drawer's inset is `m` (`--clover-inset`, which everything in the panel
+  steps from; Mat, 2026-10-31: "trim on phones"), as it shares a phone's width with the
+  page. The drawer waits `xl` past its edge (`--clover-template-out`), so its close button,
+  61.8% over the page (38.2% over the panel, so it keeps clear of the heading beside it;
+  Mat, 2026-10-31), and its shadow leave with it. A pane over the page, the panel or
+  Document's thumbnails on a narrow page (`clover-template-float`, set while they float),
+  has one surface: a grip and a shadow on its inner edge, which it names by its side and
+  the page's direction (`--clover-template-inner`, `left` or `right`, and
+  `--clover-template-toward`, -1 or 1), so right to left needs only those two. The docs'
+  build rewrites `:dir(rtl)` as `:lang()` of right-to-left languages: try right to left
+  there with `lang="ar"` as well as `dir`; the package's own build keeps `:dir()`.
 - **Closing the information panel** is `Panel`'s job, not a template's. Only
   a panel floating over the page gets `onClose` (a close button, and focus handed back to
   the `aria-controls` control) and `closeOnEscape`, which also puts the button at the
@@ -1084,7 +1134,11 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   (`Items/PagerLayout.tsx`), loaded where one draws (Mat, 2026-10-30: the Default
   template's pagers draw only for a content state's targets, a Collection's members or
   an AnnotationCollection's pages, and its first view carried them, 2 kB, for every
-  resource). Never import `Pager.tsx` where a strip loads. A step is a selection, as the
+  resource). Its count's list keeps itself in view (`ControlMenu`'s `inside`, Mat,
+  2026-10-31): opened where its corner would put it past what clips it (a short
+  Collection label on a phone, the count mid-line), it is moved back in before it is drawn
+  (WCAG 1.4.10). Only the menus that ask are moved: the transport's place themselves
+  (`media/placeMenu.ts`). Never import `Pager.tsx` where a strip loads. A step is a selection, as the
   slider's arrows' are (`followFocus`, else `onActivate` for members). Position keeps
   its widest count's room (`.clover-pager-room`, `hidden` without the stylesheet), so
   nothing beside it moves. Its gap is the Canvas cluster's `s`, so a pager over a Body

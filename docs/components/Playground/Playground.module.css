@@ -41,17 +41,17 @@
 }
 
 /*
- * From a tablet's width, on a screen tall enough to spare it, the bar holds under the
- * navbar while the Viewer scrolls past, so another resource is always a press away. Not
- * on a phone, or a short screen, where with the navbar it would take too much of the
- * height. Its padding keeps the field off the navbar, and is taken back from the space
+ * On a screen tall enough to spare it, the bar holds under the navbar while the Viewer
+ * scrolls past, so another resource is always a press away: on a phone too (Mat,
+ * 2026-10-30), but not on a short screen (a phone turned, or a window zoomed far in),
+ * where with the navbar it would take too much of the height. Its padding keeps the field off the navbar, and is taken back from the space
  * above and below it, so nothing moves at rest. The rest of the space below it is the
  * Viewer's, and it is held only within the box it shares with the Viewer, so the bar's
  * foot meets the Viewer's as the Viewer leaves, and the two go up together. While it can
  * be held, the page's scroll padding reserves it (`useStuck`), so focus never lands
  * under it.
  */
-@media (min-width: 48rem) and (min-height: 36rem) {
+@media (min-height: 36rem) {
   .bar {
     margin-block: -0.618rem 0;
     padding-block: 0.618rem;
@@ -62,6 +62,16 @@
      */
     top: calc(var(--nextra-navbar-height, 4rem) - 0.382rem);
     z-index: 10;
+  }
+
+  /*
+   * Its list open, over the navbar too (Nextra's is `z-30`; Mat, 2026-10-30), so the
+   * list's surface wraps the pill whole where the bar is held, its edge and shadow over
+   * the navbar's foot, as at rest. Only while open: the phone's menu (`z-20`) takes
+   * focus from the field, which closes the list, so the bar is under the menu again.
+   */
+  .bar:has(.resourceRow[data-open]) {
+    z-index: 31;
   }
 
   .viewer {
@@ -96,37 +106,49 @@
   /*
    * With the Viewer passing under it (`data-stuck`), the bar is the navbar's lower half:
    * it takes the navbar's edge, which leaves the navbar's foot for the bar's, so the two
-   * read as one header, with one edge, where the Viewer goes under. The edge hands back
-   * as the bar goes up under the navbar.
+   * read as one header, with one edge, where the Viewer goes under. As the bar slides up
+   * under the navbar, and on past it (`data-bar-under`), the navbar takes the same edge
+   * back, over it and what follows (Mat, 2026-10-30: "match other similar ones"), so the
+   * edge never changes as it hands back.
    */
-  .bar[data-stuck]::before {
+  .bar[data-stuck]::before,
+  :global(html[data-bar-under]) :global(.nextra-navbar-blur) {
     box-shadow:
       0 2px 4px rgb(0 0 0 / 0.02),
       0 1px 0 rgb(0 0 0 / 0.06);
   }
 
-  :global(.dark) .bar[data-stuck]::before {
+  :global(.dark) .bar[data-stuck]::before,
+  :global(html.dark[data-bar-under]) :global(.nextra-navbar-blur) {
     box-shadow: 0 1px 0 rgb(255 255 255 / 0.1);
   }
 
   /*
-   * Nextra draws the navbar's edge as a border on its background (`nextra-border`).
-   * `data-bar-stuck` on `<html>`, written with the bar's `data-stuck` (`useStuck`), not
-   * `html:has(…)`, which can make a browser restyle the whole document on any change.
+   * Nextra draws the navbar's edge as a border on its background (`nextra-border`), and
+   * the edge above takes its place. `data-bar-stuck` and `data-bar-under` on `<html>`,
+   * written by `useStuck`, not `html:has(…)`, which can make a browser restyle the whole
+   * document on any change.
    */
-  :global(html[data-bar-stuck]) :global(.nextra-navbar-blur) {
+  :global(html[data-bar-stuck]) :global(.nextra-navbar-blur),
+  :global(html[data-bar-under]) :global(.nextra-navbar-blur) {
     border-bottom-color: transparent;
+  }
+
+  :global(html[data-bar-stuck]:not([data-bar-under]))
+    :global(.nextra-navbar-blur) {
     box-shadow: none;
   }
 }
 
 /* Where more contrast is asked for, the edge is drawn as Nextra draws the navbar's then. */
-@media (min-width: 48rem) and (min-height: 36rem) and (prefers-contrast: more) {
-  .bar[data-stuck]::before {
+@media (min-height: 36rem) and (prefers-contrast: more) {
+  .bar[data-stuck]::before,
+  :global(html[data-bar-under]) :global(.nextra-navbar-blur) {
     box-shadow: 0 1px 0 #000;
   }
 
-  :global(.dark) .bar[data-stuck]::before {
+  :global(.dark) .bar[data-stuck]::before,
+  :global(html.dark[data-bar-under]) :global(.nextra-navbar-blur) {
     box-shadow: 0 1px 0 #fff;
   }
 }
@@ -166,6 +188,8 @@
    */
   --pg-edge: color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
   --pg-lift: var(--card-lift);
+  /* The pill's height (`.fieldGroup`), which the list's surface opens around. */
+  --pg-pill: calc(2.5rem + 2 * 0.375rem + 2px);
   align-items: center;
   display: flex;
   flex-wrap: wrap;
@@ -201,11 +225,22 @@
 
 /* The list hangs from the row, so it is as wide as the field, its label and Open and all. */
 .resourceRow {
+  /* Its width, which the list's surface measures the window's room beside (`cqw`). */
+  container-type: inline-size;
   display: flex;
   flex: 1 1 18rem;
   gap: var(--clover-space-xs, 0.382rem);
   min-width: 0;
   position: relative;
+}
+
+/* Open, over what follows: the list's surface, and the pill over it, its shadow on it. */
+.resourceRow[data-open] {
+  z-index: 30;
+}
+
+.resourceRow[data-open] .fieldGroup {
+  z-index: 1;
 }
 
 .combo {
@@ -234,12 +269,62 @@
    * and round, sit 6px inside the edge on every side, so each one's curve follows the
    * pill's, and the words have room from the thumbnail.
    */
-  height: calc(2.5rem + 2 * 0.375rem + 2px);
+  height: var(--pg-pill);
   padding-inline: 0.375rem;
 }
 
 .fieldGroup:has(.fieldInput:focus) {
   box-shadow: var(--focus-ring), var(--pg-lift);
+}
+
+/*
+ * A press anywhere on it lists ours, as a select's does (`ResourceField.tsx`), so the
+ * pointer says so everywhere on it, its label too, but directly on the field's words,
+ * where the text's cursor is (Mat, 2026-10-30): the field is only as wide as its words
+ * (`.fieldLine`). Where a browser cannot size it so, the field keeps the pointer until
+ * the reader types. Under the pointer it is ringed as Items rings an item (`Items.css`; Mat, 2026-10-30):
+ * 3px, 1px clear, the accent at half strength, transparent at rest so only its color
+ * changes. Not over Open, which opens rather than lists, nor while focused, where the
+ * focus ring is.
+ */
+.fieldGroup {
+  cursor: pointer;
+  outline: 3px solid transparent;
+  outline-offset: 1px;
+  transition: outline-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fieldGroup :is(.fieldLabel, .fieldInput, .fieldRecipe) {
+  cursor: inherit;
+}
+
+.fieldGroup[data-typing] .fieldInput {
+  cursor: text;
+}
+
+@supports (field-sizing: content) {
+  .fieldGroup .fieldInput {
+    cursor: text;
+  }
+}
+
+.fieldGroup:hover:not(:has(.openButton:hover, .fieldInput:focus)) {
+  outline-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, var(--accent-9)) 50%,
+    transparent
+  );
+}
+
+/* In forced colors, a transparent ring would show: the ground's color at rest. */
+@media (forced-colors: active) {
+  .fieldGroup {
+    outline-color: Canvas;
+  }
+
+  .fieldGroup:hover:not(:has(.openButton:hover, .fieldInput:focus)) {
+    outline-color: Highlight;
+  }
 }
 
 /* The label over the field, as Airbnb's "Who" is over "Add guests". */
@@ -307,11 +392,12 @@
 
 /*
  * The field's line: a recipe's title, then its folder's name after it (Mat, 2026-10-25),
- * the field as wide as the title where a browser sizes it so (else the name at the end),
- * the name giving way first, to its number.
+ * the field as wide as its words where a browser sizes it so (else the line's width, and
+ * the name at its end), the name giving way first, to its number, on the title's baseline
+ * (Mat, 2026-10-30).
  */
 .fieldLine {
-  align-items: center;
+  align-items: baseline;
   container-type: inline-size;
   display: flex;
   gap: var(--clover-space-xs, 0.382rem);
@@ -323,7 +409,7 @@
 }
 
 @supports (field-sizing: content) {
-  .fieldLine[data-hinted] .fieldInput {
+  .fieldLine .fieldInput {
     field-sizing: content;
     flex: 0 1 auto;
     width: auto;
@@ -336,7 +422,6 @@
  */
 .fieldRecipe {
   color: var(--gray-11);
-  cursor: text;
   flex: 0 1000 auto;
   min-width: 5.5ch;
   font-family: var(--font-mono);
@@ -483,36 +568,68 @@
   }
 }
 
-/* Ours, under the field: a row each, scrolling within on a short screen. */
 /*
- * As wide as the whole pill at rest, its label, the field and Open (Mat, 2026-10-22),
- * and no wider while the field runs wide.
+ * Ours, on a surface that opens around the pill, as a pager's popup opens around its
+ * count (`Pager.css`; Mat, 2026-10-30: "wrap around the select as if it is a part of
+ * it"): `m` around the pill, which stays over it, its shadow on it, and the list under
+ * it, `m` below. As wide as the whole pill, its label, the field and Open (Mat,
+ * 2026-10-22). Where the window has less room beside the pill than that (a phone, the
+ * bar held), less, so the surface's edge and corners are always whole, `xs` in from the
+ * window's (Mat, 2026-10-31: "the whole left/right edge or none at all").
  */
-.resourceList {
+.resourceMenu {
+  --pg-wrap: clamp(
+    0px,
+    (100vw - 100cqw) / 2 - var(--clover-space-xs, 0.382rem),
+    var(--clover-space-m, 1rem)
+  );
   background: var(--color-background);
   border-radius: var(--radius-4);
   box-shadow:
     0 0 0 1px var(--gray-6),
     0 12px 40px rgb(0 0 0 / 0.18);
-  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  inset-inline: calc(-1 * var(--pg-wrap));
+  overflow: hidden;
+  padding-top: calc(var(--pg-wrap) + var(--pg-pill));
+  position: absolute;
+  top: calc(-1 * var(--pg-wrap));
+}
+
+.resourceMenu[hidden] {
+  display: none;
+}
+
+/*
+ * A row each, scrolling within on a short screen, under the pill, never the surface with
+ * it; its room over and under it scrolls with it, its options' edges in line with the
+ * pill's.
+ */
+.resourceList {
   display: flex;
   flex-direction: column;
   gap: var(--clover-space-2xs, 0.236rem);
-  left: 0;
   list-style: none;
   margin: 0;
-  max-width: 40rem;
   max-height: min(32rem, 55vh);
   overflow-y: auto;
-  padding: var(--clover-space-xs, 0.382rem);
-  position: absolute;
-  right: 0;
-  top: calc(100% + var(--clover-space-xs, 0.382rem));
-  z-index: 30;
-}
-
-.resourceList[hidden] {
-  display: none;
+  overscroll-behavior: contain;
+  padding: var(--pg-wrap);
+  /* Where the Cookbook's category is scrolled to from (`ResourceField.tsx`). */
+  position: relative;
+  /*
+   * Options passing under the pill fade out as they go (Mat, 2026-10-30: "as if it is
+   * moving under and disappearing"), and those still to come fade in at the surface's
+   * foot, over the list's room at its ends: at rest nothing is in that room, so nothing
+   * fades. A mask, not a shade, and nothing the scroll drives.
+   */
+  mask-image: linear-gradient(
+    transparent,
+    #000 var(--pg-wrap),
+    #000 calc(100% - var(--pg-wrap)),
+    transparent
+  );
 }
 
 /*

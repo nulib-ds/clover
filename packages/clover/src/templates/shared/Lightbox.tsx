@@ -72,7 +72,7 @@ export function Lightbox({
               of="canvas"
               as={Clover.titled(headingLevel, titleId).as}
               id={titleId}
-              className="clover-template-lightbox-title"
+              className="clover-template-lightbox-title clover-template-title"
             />
             {/* Hidden: a name still reads it, and the content does not repeat it. */}
             {named === manifestTitleId && (

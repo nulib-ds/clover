@@ -13,8 +13,14 @@ the panel from its narrowest to 24rem to its widest and around again; or focus i
 the arrow keys (Home and End for the limits). The Body keeps at least
 16rem and the panel 14rem, and the width the reader chooses is remembered. With no room
 for both (about 31rem, a phone), the panel slides over the Body instead, leaving a strip
-of the page uncovered: a click on the strip, Escape or its close button puts it away.
+of the page uncovered: a click on the strip, Escape or its close button puts it away, and
+a touch can drag it back off the way it came, flicked or past a third of its width.
 The template measures its own width, so a narrow column of a wide page behaves the same.
+So does its header: under 36rem the provider's logo keeps to the title's line, with the
+Collection's line (where there is one) the whole width under it, and under 26rem the
+logo is tucked away, as the panel's About shows the provider still (with `panel={false}`,
+it keeps to the title's line instead). It queries its main pane,
+`clover-template-default-main`, a container a page's CSS can query too.
 The panel's toggle never fades with the other controls. While the panel is open beside the
 Body it sits on the bar between them, level with the Body's controls; closed, or over
 the Body, it is in the Body's top corner. It moves as it is pressed, and focus goes
@@ -44,7 +50,8 @@ pass it: `template={Default}`, from `@nulib/clover/templates`.
 | `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                            |
 | …                  |                             | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`…                                       |
 
-Size the Body with `--clover-body-height` (default `min(65vh, 40rem)`).
+Size the Body with `--clover-body-height` (default `min(65svh, 40rem)`, the window's
+smallest height where a browser knows it, else `min(65vh, 40rem)`).
 
 The title is an `h2`, the panel's section headings `h3`s, and the headings inside them
 `h4`s. On a page where the Viewer sits under an `h2` of its own, pass `headingLevel={3}`

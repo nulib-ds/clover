@@ -13,7 +13,8 @@ const ControlMenu = lazy(() => import("../Canvas/ControlMenu"));
  * and steps staying on top of it, the list under them ("make it so this popover actually
  * opens up with the indicator/pager within it"): stepping keeps it open, and it follows.
  * Choosing one goes there and closes it, focus back on the figure; so do Escape, a press
- * outside and another popup opening (WCAG 2.4.3).
+ * outside and another popup opening (WCAG 2.4.3). Where its corner would put it past what
+ * clips it (a short Collection title on a phone, the count mid-line), it is moved back in.
  * A Collection's members (Cookbook 0032) and a content state's targets (0540), in the
  * Default template's header.
  */
@@ -86,6 +87,7 @@ export function CountMenu({
             triggerId={triggerId}
             onClose={close}
             holds={holds}
+            inside
             className="clover-pager-menu"
           >
             {/* Drawn as the Collection's list is (`Collection.css`). */}

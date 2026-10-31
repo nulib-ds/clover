@@ -2,19 +2,17 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import * as Clover from "../../parts";
 import type { PanelLayout, ItemsLayout, RootProps } from "../../parts";
-import { useDragToClose } from "../shared/useDragToClose";
-import { panelFocus, useSlide, useWideEnough } from "../shared/useSlide";
+import { preloadDrag, useDragToClose } from "../shared/useDragToClose";
+import {
+  BESIDE_REM,
+  PAGE_MIN,
+  PANEL_MIN,
+  panelFocus,
+  useSlide,
+  useWideEnough,
+} from "../shared/useSlide";
 import { useFollowFocus } from "../shared/useFollowFocus";
 import { useSpineTop } from "../shared/useSpine";
-
-/** The narrowest the Body and the panel may be dragged, side by side. */
-const BODY_MIN = "16rem";
-const PANEL_MIN = "14rem";
-/**
- * The room both need beside each other: their minimums and the bar between them. Any
- * narrower (a phone) and the panel slides over the Body instead.
- */
-const BESIDE_REM = 16 + 14 + 1;
 
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
@@ -189,6 +187,14 @@ export function Default({
     scrim,
   });
   const shown = over ? slide.mounted : open;
+  // Reaching for its toggle over the Body (pointed at or focused), the drag's code loads.
+  const reach = (event: React.SyntheticEvent) => {
+    if (
+      over &&
+      (event.target as Element).closest?.(`[aria-controls~="${panelId}"]`)
+    )
+      preloadDrag();
+  };
   return (
     <Clover.Root
       className={["clover-template-default", className]
@@ -203,6 +209,8 @@ export function Default({
         className="clover-template-default-panes clover-template-panes"
         data-panel={over ? "over" : "beside"}
         storageKey={storageKey || undefined}
+        onPointerOver={reach}
+        onFocus={reach}
         onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
           // Escape anywhere puts the floating panel away, uncovering a control focus
           // reached under it, and leaves focus there (the panel's own Escape, handled
@@ -221,7 +229,7 @@ export function Default({
         <Clover.SplitPane
           className="clover-template-default-main"
           // A minimum only while the Panel is docked beside it: over it, none.
-          min={over ? undefined : BODY_MIN}
+          min={over ? undefined : PAGE_MIN}
         >
           {header && (
             <header className="clover-template-default-header">
@@ -334,7 +342,7 @@ function HeaderTitle({ title }: { title: ReturnType<typeof Clover.titled> }) {
     <>
       <Clover.Label
         as={title.as}
-        className="clover-template-default-title"
+        className="clover-template-default-title clover-template-title"
         {...title.title}
       />
       {collection && (

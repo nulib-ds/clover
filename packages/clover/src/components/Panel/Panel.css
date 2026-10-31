@@ -86,7 +86,7 @@
 /*
  * In a pane that slides over the page and has a spine (`data-spine` on the pane, which
  * the templates set while it floats): the close button sits on the spine, the pane's
- * inner edge, half over the page, and stays there however far the panel scrolls. The pane
+ * inner edge, mostly over the page, and stays there however far the panel scrolls. The pane
  * itself does not scroll; the panel does, within it, and is left unpositioned so the
  * button is placed against the pane, outside what scrolls and is clipped. The room the
  * button would take in the panel's first row is given back.
@@ -123,7 +123,9 @@
 /*
  * Centered on the first heading's first line: it rests `inset - s` down, one line (`1lh`,
  * at the heading's `text-m`, which the button takes on; its tip keeps its own size) and
- * `s` above and below it tall. A label that wraps runs on below it.
+ * `s` above and below it tall. A label that wraps runs on below it. Across the edge by
+ * the golden ratio, 38.2% over the panel and 61.8% over the page (Mat, 2026-10-31), so it
+ * keeps clear of the heading beside it on the floating panel's `m` inset.
  */
 [data-spine] > .clover-panel > button.clover-panel-close {
   font-size: var(--clover-text-m);
@@ -131,7 +133,7 @@
     var(--clover-inset) - var(--clover-space-s) +
       (1lh + 2 * var(--clover-space-s) - var(--clover-control)) / 2
   );
-  inset-inline: calc(-0.5 * var(--clover-control)) auto;
+  inset-inline: calc(-0.618 * var(--clover-control)) auto;
 }
 
 /*

@@ -2,6 +2,8 @@
 .clover-template-lightbox {
   width: min(96vw, 72rem);
   max-height: 94vh;
+  /* Within the window as it shows now, a phone's toolbars and all, where a browser knows it. */
+  max-height: 94dvh;
   padding: 0;
   border: 0;
   border-radius: var(--clover-radius, 3px);
@@ -22,6 +24,12 @@
   --clover-body-height: min(70vh, 48rem);
 }
 
+@supports (height: 1svh) {
+  .clover-template-lightbox-content {
+    --clover-body-height: min(70svh, 48rem);
+  }
+}
+
 /* The Body's box while its code loads: its height and a Canvas's own background. */
 .clover-template-lightbox-pending {
   height: var(--clover-body-height, 60vh);
@@ -34,12 +42,13 @@
   gap: var(--clover-space-m);
 }
 
-/* Its title, at whatever level the layout gives it (past h6, no heading). */
+/*
+ * Its title, at whatever level the layout gives it (past h6, no heading): every template
+ * title's size, lines and wrapping (`Default.css`), beside Close.
+ */
 .clover-template-lightbox-title {
   flex: 1 1 auto;
   min-width: 0;
-  margin: 0;
-  font-size: var(--clover-text-l);
   font-weight: 700;
 }
 

@@ -124,17 +124,24 @@ function useStuck(
       spacer.style.height = reach;
       hold.style.marginBottom = `-${reach}`;
     };
+    const root = document.documentElement;
     const read = () => {
       frame = 0;
       stretch();
-      const { bottom } = node.getBoundingClientRect();
+      const { top, bottom } = node.getBoundingClientRect();
+      /*
+       * Gone up past the line it is held at, sliding under the navbar and then past it:
+       * the navbar takes its edge, over it and what follows (Mat, 2026-10-30).
+       */
+      const gone = line > 0 && top < line - 0.5;
+      if (gone !== root.hasAttribute("data-bar-under"))
+        root.toggleAttribute("data-bar-under", gone);
       const stuck =
         bottom > line + 1 && under.getBoundingClientRect().top < bottom;
       if (stuck === node.hasAttribute("data-stuck")) return;
       node.toggleAttribute("data-stuck", stuck);
-      document.documentElement.toggleAttribute("data-bar-stuck", stuck);
+      root.toggleAttribute("data-bar-stuck", stuck);
     };
-    const root = document.documentElement;
     const measure = () => {
       line = parseFloat(getComputedStyle(node).top) || 0;
       root.style.scrollPaddingTop = line ? `${line + node.offsetHeight}px` : "";
@@ -168,6 +175,7 @@ function useStuck(
         ?.querySelector<HTMLElement>("[data-reach]")
         ?.style.removeProperty("height");
       root.removeAttribute("data-bar-stuck");
+      root.removeAttribute("data-bar-under");
     };
   }, [bar, viewer]);
 }

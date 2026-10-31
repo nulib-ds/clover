@@ -54,7 +54,7 @@ export function Gallery({
       <header className="clover-template-gallery-header">
         <Clover.Label
           as={title.as}
-          className="clover-template-gallery-title"
+          className="clover-template-gallery-title clover-template-title"
           {...title.title}
         />
         <Clover.Summary className="clover-template-gallery-summary" />

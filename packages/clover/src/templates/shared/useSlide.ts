@@ -4,6 +4,18 @@ import React, { useEffect, useLayoutEffect, useState } from "react";
 export const SLIDE_MS = 240;
 
 /**
+ * The narrowest the page (Default's Body, Document's pages) and the panel may be dragged,
+ * side by side: one pair for both templates, so their layouts never drift apart.
+ */
+export const PAGE_MIN = "16rem";
+export const PANEL_MIN = "14rem";
+/**
+ * The room the two need beside each other: their minimums and the bar between them. Any
+ * narrower (a phone) and the panel slides over the page instead.
+ */
+export const BESIDE_REM = 16 + 14 + 1;
+
+/**
  * Present while open or sliding: `mounted` keeps it out of `hidden`, and `open` lags one
  * frame behind so the slide in has somewhere to start from.
  */

@@ -594,7 +594,8 @@ deadline.
     adding it to the reader's own: so a link from a recipe's page on iiif.io arrives
     titled, its category open. A recipe in the Viewer is said plainly in the field (Mat,
     2026-10-25: "strongly hint they are viewing a recipe"): IIIF's logo set into the pill's top edge, in its middle, clear of the thumbnail, as a fieldset's legend is: the edge breaks around it on the page's ground, with no disc, edge or shadow of its own (Mat, 2026-10-25: "meshes better with the select"; held under the navbar, a little lower, so all of it shows), and after the title its folder's name on iiif.io, in the code's face, a
-    size smaller and the title's muted gray (lighter would fail 1.4.3), the field as wide
+    size smaller and the title's muted gray (lighter would fail 1.4.3), on the title's
+    baseline (Mat, 2026-10-30), the field as wide
     as the title where a browser sizes it so (`field-sizing`; else the name at the line's
     end), the name giving way first and never below its number, and on a narrow field
     (a container query) its number alone; the field described by it ("IIIF Cookbook recipe
@@ -614,9 +615,28 @@ deadline.
     which only the parts' chips use). It is a WAI-ARIA editable combobox: typing narrows the
     list, Down and Up open and move through it, Enter opens the one marked or what is
     typed, Escape closes the list and then puts the field back; focus stays in the field.
+    A press anywhere on the pill but its chevron and Open (the thumbnail, the label, the
+    field, the room between them) lists ours, focus going to the field without a scroll,
+    which the bar held under the navbar would otherwise make (Mat, 2026-10-30), so the
+    pointer is a hand everywhere on it, its label too, but directly on the field's words,
+    where the text's cursor is, the field only as wide as its words (`field-sizing`; where
+    a browser cannot size it so, the hand until the reader types), and under the
+    pointer the pill is ringed as Items rings an item (`Items.css`: 3px, 1px clear, the
+    accent at half strength; not over Open, nor while focused; Mat, 2026-10-30). The list
+    opens on a surface around the pill, `m` around it (less where the window has less
+    room beside the pill, a phone with the bar held, so the surface's edge and corners
+    are always whole, `xs` in from the window's; Mat, 2026-10-31: "the whole left/right
+    edge or none at all"), as the Default template's header
+    pager opens around its count (`Pager.css`; Mat, 2026-10-30: "wrap around the select as
+    if it is a part of it"): the pill over it, its shadow on it, and the list under the
+    pill, scrolling within, its options fading out as they pass under the pill and in at
+    the surface's foot (a mask over the list's room at its ends, where nothing rests;
+    Mat, 2026-10-30: "as if it is moving under and disappearing", never a shade). A press
+    never selects the label, which a highlight made hard to read (Mat, 2026-10-30): the
+    first thing typed, pasted, dropped or dictated into it takes its place all the same,
+    and a deletion empties it (`beforeinput`).
     On a touch screen a press lists ours and brings no keyboard (`inputMode="none"` while
-    it shows one of ours; Mat, 2026-10-21), nor selects the label as a mouse's press does;
-    "View your own" brings the keyboard, for an address, by focusing the field again
+    it shows one of ours; Mat, 2026-10-21); "View your own" brings the keyboard, for an address, by focusing the field again
     within the press.
     Its edge, and the Template button's, is 3:1 (`--pg-edge`): controls only, while the
     Viewer and the parts' tiles keep their hairlines (Mat, 2026-10-16; the tiles at 3:1
@@ -699,15 +719,22 @@ deadline.
     hairline edge and a soft gray shadow, `--card-lift` on its own), the same on the
     homepage and in the docs (Mat, 2026-10-22).
   - Headers are solid, never frosted or translucent: the navbar (`docs/styles/layout.css`
-    overrides Nextra's blur) and the playground's bar. From 48rem wide, on a screen at
-    least 36rem tall (not a phone, where with the navbar it would take too much height),
-    it holds under the navbar as its lower half, a little up under it (0.382rem): while
+    overrides Nextra's blur) and the playground's bar. On a screen at least 36rem tall,
+    a phone's too (Mat, 2026-10-30; from 48rem wide only until then, as with the navbar it
+    takes much of a phone's height), but not a short one (a phone turned, a window zoomed
+    far in), it holds under the navbar as its lower half, a little up under it (0.382rem);
+    while its list is open it is lifted over the navbar (Nextra's `z-30`), so the list's
+    surface wraps the pill whole, over the navbar's foot (Mat, 2026-10-30), and the
+    phone's menu (`z-20`), taking focus, closes the list and covers the bar again: while
     the playground's Viewer and then the parts pass under, the navbar's edge moves to the
     bar's foot, the field runs as wide as the navbar's content, the wordmark to the
     repository's icon, never past it (Mat, 2026-10-25: "only the viewer container can do
     this"; at rest it keeps 1rem from the Viewer's edges), and the bar's foot rides on the first story's top (Adaptable,
     `data-bar-until`) as it leaves (Mat, 2026-10-25: "keep this sticky … all the way
-    through the component examples"). Its box reaches there: a spacer after the Viewer
+    through the component examples"); as it slides up under the navbar, and on past it
+    (`data-bar-under` on the root, written by `useStuck`), the navbar takes the bar's edge
+    back, the same line and shadow, in place of its border (Mat, 2026-10-30: "match other
+    similar ones"). Its box reaches there: a spacer after the Viewer
     (`.reach`) as tall as from the Viewer's foot to the story, and the same room taken
     back as the box's negative margin, both written by `useStuck` only when they change,
     never as a custom property (the Viewer would inherit it). While it is held, the

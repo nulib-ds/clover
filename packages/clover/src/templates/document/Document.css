@@ -16,9 +16,22 @@
   display: flex;
   flex-direction: column;
   height: var(--clover-template-document-height);
+  /*
+   * Never so short that the toolbar and a page will not fit (a short window, a phone on
+   * its side, a page zoomed far in): it grows past its height, for the page around it to
+   * scroll, rather than crush the pages to nothing (WCAG 1.4.10), as Default does.
+   */
+  min-height: min-content;
   overflow: hidden;
   background-color: var(--clover-color-secondary, #fff);
   color: var(--clover-color-primary, #1a1d1e);
+}
+
+/* Of the window's smallest height, where a browser knows it, as Default's Body is. */
+@supports (height: 1svh) {
+  .clover-template-document {
+    --clover-template-document-height: min(85svh, 56rem);
+  }
 }
 
 /* ---------- toolbar ---------- */
@@ -68,19 +81,11 @@
   column-gap: var(--clover-space-s);
 }
 
-/* The whole title, wrapped: zoomed, on a phone or spaced out it is never cut short. */
+/* The whole title, wrapped (`clover-template-title`, `Default.css`), sharing its row. */
 .clover-template-document-title {
   flex: 1 1 6rem;
   min-width: 0;
-  margin: 0;
-  font-size: var(--clover-text-l);
-  /*
-   * A title's lines closer than running text's (Mat, 2026-10-26), as a heading's are;
-   * a reader's own spacing (WCAG 1.4.12) still wins and wraps it, never cutting it.
-   */
-  line-height: 1.25;
   font-weight: 400;
-  overflow-wrap: anywhere;
 }
 
 /*
@@ -156,10 +161,21 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 /* ---------- panes ---------- */
 
 /* A `Clover.Split`: the thumbnails' pane, the bar, and the page's pane. */
+/* At least a page's narrowest as tall (`PAGE_MIN`, `shared/useSlide.ts`): 16rem. */
 .clover-template-document-panes {
   position: relative;
   flex: 1 1 auto;
-  min-height: 0;
+  min-height: 16rem;
+}
+
+/*
+ * What floats over the page lies over everything in it (Mat, 2026-10-31: a part's
+ * `z-index` reached over the panel): while the panel or the thumbnails float, the page's
+ * pane is a stacking context of its own. Only then: beside it, nothing needs reach out.
+ */
+.clover-template-document-panes:is([data-panel="over"], [data-narrow])
+  > .clover-template-document-main {
+  isolation: isolate;
 }
 
 /*
@@ -168,6 +184,12 @@ button.clover-template-document-sidebar-toggle:focus-visible {
  * in below the toggle, never under it (WCAG 2.4.11).
  */
 .clover-template-document-sidebar {
+  /*
+   * Its height the row's, never its list's: size containment keeps the thumbnails from
+   * making the template taller than its height (or, as it grows in a short box, as tall
+   * as all of them), as the panel's does; it scrolls within.
+   */
+  contain: size;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--clover-inset);
@@ -413,14 +435,6 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   z-index: 2;
 }
 
-.clover-template-document {
-  --clover-grip: color-mix(
-    in srgb,
-    var(--clover-color-primary-muted, #26292b) 30%,
-    transparent
-  );
-}
-
 /* ---------- narrow ---------- */
 
 /*
@@ -439,13 +453,19 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   z-index: 3;
   width: var(--clover-template-sidebar-width);
   border-inline-end: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
-  /* Dragged back off to the start (`useDragToClose`), its grip on its inner edge. */
-  background:
-    linear-gradient(var(--clover-grip), var(--clover-grip)) no-repeat right
-      var(--clover-space-2xs) center / 4px var(--clover-space-xl),
-    var(--clover-color-secondary, #fff);
-  touch-action: pan-y;
-  box-shadow: var(--clover-space-s) 0 var(--clover-space-l) rgb(0 0 0 / 0.12);
+  /*
+   * Dragged back off to the start (`useDragToClose`): a pane over the page
+   * (`clover-template-float`, `Default.css`), its inner edge on the right, the left
+   * right to left.
+   */
+  --clover-template-inner: right;
+  --clover-template-toward: 1;
+}
+
+.clover-template-document-panes[data-narrow]
+  > .clover-template-document-sidebar:dir(rtl) {
+  --clover-template-inner: left;
+  --clover-template-toward: -1;
 }
 
 /*

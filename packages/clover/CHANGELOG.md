@@ -11,6 +11,107 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **The Default template's header collapses by its own width.** Its main pane is now a
+  size container, `clover-template-default-main`, and the header follows it. Under 36rem,
+  the provider's logo keeps to the title's line and the Collection's line takes the whole
+  width under both, rather than squeezing beside the logo. Under 26rem (a phone, or a
+  narrow column beside a docked panel), the logo is tucked away when the template has a
+  panel, whose About shows the provider still, with its name and link. With
+  `panel={false}`, the logo keeps to the title's line instead. Nothing changes from
+  36rem up. A page's own CSS can query the same container:
+
+  ```css
+  @container clover-template-default-main (width < 26rem) {
+    /* … */
+  }
+  ```
+
+- **Heights from the window use its smallest height where a browser knows it.** On a
+  phone, `vh` is the window with its toolbars away, so a Body sized by it ran on under
+  them. The Default template's Body (`min(65svh, 40rem)`), the Gallery lightbox's Body
+  (`min(70svh, 48rem)`) and Document's height (`min(85svh, 56rem)`) now use `svh`. The
+  lightbox's own and the header pager's list's maximum heights use `dvh`. Browsers without these units keep `vh`. A
+  page that sets `--clover-body-height` or `--clover-template-document-height` keeps its
+  own value.
+
+- **The panel floating over the page has a narrower inset.** On a phone, or wherever the
+  panel slides over the page rather than sitting beside it, its inset is `m` (1rem)
+  rather than `l`, which gives its text about 20px more of a phone's width. Its headings,
+  rows and close button follow, as all of them step from `--clover-inset`; a page that
+  sets `--clover-inset` on the panel keeps its own. Its close button, on the panel's
+  inner edge, sits across it by the golden ratio, 38.2% over the panel and 61.8% over the
+  page (it was half and half), so it keeps clear of the first heading beside it.
+
+- **A Root in full screen keeps clear of the screen's safe areas.** It is padded by
+  `env(safe-area-inset-*)`, so on an iPad an edge the system keeps, such as the home
+  indicator's, never covers the thumbnail strip or the controls along it. On a screen
+  that keeps no edges, nothing changes.
+
+- **The drag's code starts loading as the reader reaches for the toggle.** A panel or
+  Document's thumbnails floating over the page start loading `useDragToClose`'s code as
+  the reader points at, presses or focuses their toggle (`preloadDrag`, exported beside
+  `useDragToClose` from `templates/shared/useDragToClose.ts` for a layout of your own).
+  Before, it loaded once the pane was open, so a swipe right after opening could be
+  missed on a slow connection. Layouts whose panes sit beside the page still never load
+  it.
+
+- **Size budgets raised for the phone work above** (`build/size-budget.json`, each the
+  measured size and about 250 B more): the drag's preloading, the safe areas, the
+  floating panel's inset, the header's collapse and the drawers' fixes add about 0.1 to
+  0.3 kB to a template's page. The Viewer with Default to 95.0 kB to first view (from
+  94.9; it measures 94.95, held to the 95 kB it was brought under), Document to 91.3 (from
+  91.05), `<clover-viewer>`'s own entry to 101.8 (from 101.5), the web components' entry
+  to 122.05 (from 121.7), and a Document element page to 129.5 (from 129.15).
+
+- **Template titles are one family.** Default's, Document's, Gallery's and the lightbox's
+  titles carry `clover-template-title` beside their own class. It holds their size, their
+  lines (1.25) and their wrapping. The lightbox's title now takes the same 1.25 line height
+  as the others. Each template keeps its own weight.
+
+### Fixed
+
+- **The panel over the page lies over everything in it.** In the Default and Document
+  templates, the header's pager (a Collection's members, a content state's targets)
+  drew over the panel floating over the page on a phone, and over the wash beside it.
+  The page's pane is now a stacking context while anything floats over it, so nothing a
+  part raises inside it reaches over a drawer or its wash.
+
+- **Dragging the panel closed is smooth.** Let go past a third of its width, or flicked,
+  the panel snapped back to where it had opened for a moment before sliding away. It
+  now carries on from where it was let go, at the finger's own speed, easing to rest off
+  the edge (120 to 240ms), with no jump back; where the reader asks for less motion
+  (`prefers-reduced-motion: reduce`), it finishes at once, and so does a drag that
+  springs back, as the slide itself does. The drag also no longer jumps the few pixels
+  it takes to tell a drag from a press. Closed by any means, the panel now waits `xl`
+  past its edge, so its close button (61.8% over the page) and its shadow go out of sight
+  with it rather than linger at the layout's edge. The drawer's resting place is the custom
+  property `--clover-template-out`. This applies to Default's and Document's panel
+  (`useDragToClose`, `shared/dragToClose.ts`).
+
+- **Right to left, a floating pane's grip and shadow are on its inner edge.** The panel
+  over the page cast its shadow toward the window's edge in a right-to-left page.
+  Document's thumbnails floating on a narrow page had their grip and shadow on their outer
+  edge. Both are now written once, on the drawer and on a new `clover-template-float`
+  class, which Document's thumbnails carry while they float. The grip is now 3px wide and
+  as tall as a control (`--clover-control`, the close button's height), where it was 4px
+  by `xl`.
+
+- **A title with a long word wraps.** A title or Collection label with no spaces (a file's
+  name, an address) ran past its box on a phone. Every template's title now breaks
+  between letters where a word is longer than the line (WCAG 1.4.10), as Document's
+  already did. So does the Default header's Collection label.
+
+- **Document never crushes its pages in a short box.** In a short window, a phone on its
+  side or a page zoomed far in, the toolbar left the pages almost no room. Document now
+  grows past its height when the toolbar and 16rem of pages do not fit, for the page
+  around it to scroll (WCAG 1.4.10), as Default does with `fill`.
+
+- **The header pager's list stays in view.** Opened from a count that sits mid-line (a
+  short Collection label on a phone), the list ran past the Viewer's edge and was cut
+  off. It is now moved back inside, all of it showing.
+
 ## [4.0.0] - 2026-10-30
 
 ### Added

@@ -264,22 +264,22 @@ On the transport's dark scrim, in every theme.
 
 ### Sizes and spaces
 
-| Variable             | Default                                  | What it sizes                                                      |
-| -------------------- | ---------------------------------------- | ------------------------------------------------------------------ |
-| `--clover-space-3xs` | `0.146rem`                               | The scale's smallest step, φ⁻⁴ of `1rem`                           |
-| `--clover-space-2xs` | `0.236rem`                               | φ⁻³ of `1rem`                                                      |
-| `--clover-space-xs`  | `0.382rem`                               | φ⁻²: a label over its value                                        |
-| `--clover-space-s`   | `0.618rem`                               | φ⁻¹: what is within a part                                         |
-| `--clover-space-m`   | `1rem`                                   | Your `1rem`: parts within a region                                 |
-| `--clover-space-l`   | `1.618rem`                               | φ: a region's inset                                                |
-| `--clover-space-xl`  | `2.618rem`                               | φ²                                                                 |
-| `--clover-space-2xl` | `4.236rem`                               | φ³, the scale's largest step                                       |
-| `--clover-text-xs`   | `0.764rem`                               | A badge: a duration on a thumbnail                                 |
-| `--clover-text-s`    | `0.854rem`                               | Secondary text: times, formats, captions under thumbnails, legends |
-| `--clover-text-m`    | `1.146rem`                               | A section's heading: the information panel's accordion             |
-| `--clover-text-l`    | `1.236rem`                               | A title: a layout's, Items', the lightbox's, an error's headline   |
-| `--clover-control`   | `calc(1rem + 2 * var(--clover-space-s))` | Every round control's width and height (2.236rem)                  |
-| `--clover-inset`     | `var(--clover-space-l)`                  | A region's inset, from its edge to its content                     |
+| Variable             | Default                                                                           | What it sizes                                                      |
+| -------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `--clover-space-3xs` | `0.146rem`                                                                        | The scale's smallest step, φ⁻⁴ of `1rem`                           |
+| `--clover-space-2xs` | `0.236rem`                                                                        | φ⁻³ of `1rem`                                                      |
+| `--clover-space-xs`  | `0.382rem`                                                                        | φ⁻²: a label over its value                                        |
+| `--clover-space-s`   | `0.618rem`                                                                        | φ⁻¹: what is within a part                                         |
+| `--clover-space-m`   | `1rem`                                                                            | Your `1rem`: parts within a region                                 |
+| `--clover-space-l`   | `1.618rem`                                                                        | φ: a region's inset                                                |
+| `--clover-space-xl`  | `2.618rem`                                                                        | φ²                                                                 |
+| `--clover-space-2xl` | `4.236rem`                                                                        | φ³, the scale's largest step                                       |
+| `--clover-text-xs`   | `0.764rem`                                                                        | A badge: a duration on a thumbnail                                 |
+| `--clover-text-s`    | `0.854rem`                                                                        | Secondary text: times, formats, captions under thumbnails, legends |
+| `--clover-text-m`    | `1.146rem`                                                                        | A section's heading: the information panel's accordion             |
+| `--clover-text-l`    | `1.236rem`                                                                        | A title: a layout's, Items', the lightbox's, an error's headline   |
+| `--clover-control`   | `calc(1rem + 2 * var(--clover-space-s))`                                          | Every round control's width and height (2.236rem)                  |
+| `--clover-inset`     | `var(--clover-space-l)` (a panel floating over the page: `var(--clover-space-m)`) | A region's inset, from its edge to its content                     |
 
 ### Shape and motion
 
@@ -296,15 +296,15 @@ On `.clover-canvas`, but for `--clover-body-height`, which you can set on Body o
 element that contains it. Clover sets the controls' durations to `0s` for a reader who prefers reduced
 motion: set yours inside `@media (prefers-reduced-motion: no-preference)`.
 
-| Variable                         | Default                                                              | What it sets                                                   |
-| -------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `--clover-body-height`           | `60vh` (Default `min(65vh, 40rem)`, the lightbox `min(70vh, 48rem)`) | The Body's height                                              |
-| `--clover-canvas-wash`           | `#0001`                                                              | The Body's ground, a wash over the page's, kept in full screen |
-| `--clover-canvas-inset`          | `0px` (Document: `var(--clover-inset)`)                              | A margin around the picture at home                            |
-| `--clover-canvas-controls-inset` | `var(--clover-inset)`                                                | How far the controls sit in from the Body's edges              |
-| `--clover-controls-leave`        | `180ms cubic-bezier(0.4, 0, 1, 1)`                                   | How the controls leave when the reader is idle                 |
-| `--clover-controls-enter`        | `340ms cubic-bezier(0.34, 1.56, 0.64, 1)`                            | How they come back                                             |
-| `--clover-controls-tuck`         | `var(--clover-space-s)`                                              | How far they tuck toward their edge as they leave              |
+| Variable                         | Default                                                                                                   | What it sets                                                   |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `--clover-body-height`           | `60vh` (Default `min(65svh, 40rem)`, the lightbox `min(70svh, 48rem)`, `vh` where a browser has no `svh`) | The Body's height                                              |
+| `--clover-canvas-wash`           | `#0001`                                                                                                   | The Body's ground, a wash over the page's, kept in full screen |
+| `--clover-canvas-inset`          | `0px` (Document: `var(--clover-inset)`)                                                                   | A margin around the picture at home                            |
+| `--clover-canvas-controls-inset` | `var(--clover-inset)`                                                                                     | How far the controls sit in from the Body's edges              |
+| `--clover-controls-leave`        | `180ms cubic-bezier(0.4, 0, 1, 1)`                                                                        | How the controls leave when the reader is idle                 |
+| `--clover-controls-enter`        | `340ms cubic-bezier(0.34, 1.56, 0.64, 1)`                                                                 | How they come back                                             |
+| `--clover-controls-tuck`         | `var(--clover-space-s)`                                                                                   | How far they tuck toward their edge as they leave              |
 
 ### Items, Summary, Logo, Map and Search
 
@@ -324,6 +324,6 @@ them or on any element that contains them.
 
 ### Templates
 
-| Variable                            | Default            | What it sets                                             |
-| ----------------------------------- | ------------------ | -------------------------------------------------------- |
-| `--clover-template-document-height` | `min(85vh, 56rem)` | Document's height, set on the template (its `className`) |
+| Variable                            | Default                                                 | What it sets                                             |
+| ----------------------------------- | ------------------------------------------------------- | -------------------------------------------------------- |
+| `--clover-template-document-height` | `min(85svh, 56rem)` (`vh` where a browser has no `svh`) | Document's height, set on the template (its `className`) |

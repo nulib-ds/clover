@@ -20,6 +20,18 @@ export interface DragToCloseOptions {
 /** The drag's code, loaded once for the page, the first time a pane can be dragged. */
 let drag: Promise<typeof import("./dragToClose")> | undefined;
 let loaded: typeof import("./dragToClose") | undefined;
+const load = () =>
+  (drag ??= import("./dragToClose").then((module) => (loaded = module)));
+
+/**
+ * Starts loading the drag's code as the reader reaches for a floating pane's toggle
+ * (pointed at, pressed or focused; Mat, 2026-10-31), so it is there as the pane opens: a
+ * swipe right after is never missed while it loads. A layout whose panes sit beside the
+ * page never calls it.
+ */
+export function preloadDrag() {
+  void load();
+}
 
 /**
  * A pane that slides over the page goes back the way it came when it is dragged there,
@@ -57,9 +69,7 @@ export function useDragToClose(
     if (!enabled) return;
     let live = true;
     let detach: (() => void) | undefined;
-    void (drag ??= import("./dragToClose").then(
-      (module) => (loaded = module),
-    )).then((module) => {
+    void load().then((module) => {
       if (live) detach = module.attach(element, latest);
     });
     return () => {

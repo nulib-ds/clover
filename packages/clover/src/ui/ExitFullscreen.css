@@ -80,4 +80,12 @@ button.clover-canvas-exit-full-screen {
   overflow: auto;
   background-color: var(--clover-color-secondary, #fff);
   color: var(--clover-color-primary, #1a1d1e);
+  /*
+   * Clear of what a screen keeps for itself (an iPad's home indicator, a notch; Mat,
+   * 2026-10-31), so the strip and the controls at its edges never lie under it: nothing
+   * where a screen keeps nothing. A full-screen element is border-boxed, so this is
+   * taken from its size.
+   */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
