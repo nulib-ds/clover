@@ -205,7 +205,8 @@ describe("homepage resource opens", () => {
     expect(resources()).toEqual([
       {
         event: "clover_resource_open",
-        resource_location: `${siteUrl}?iiif-content=${encodeURIComponent(manifest)}`,
+        resource_location: `${siteUrl}?iiif-content=${manifest}`,
+        resource_url: manifest,
         resource_host: "collections.example.org",
         resource_input: "url",
       },
@@ -300,6 +301,21 @@ describe("homepage resource opens", () => {
     expect(event.resource_location).not.toContain("xywh");
   });
 
+  it("sends the address as written, reading back exactly, and alone for a dimension", () => {
+    const address =
+      "https://api.dc.library.northwestern.edu/api/v2/works/69e0c3a5-6cd3-4b9d-83c6-03f7c2de17c2?as=iiif";
+    const event = resourceOpen(address, siteUrl)!;
+    expect(event.resource_location).toBe(`${siteUrl}?iiif-content=${address}`);
+    expect(event.resource_url).toBe(address);
+    expect(event.resource_host).toBe("api.dc.library.northwestern.edu");
+    const tricky = "https://example.org/a%20b/manifest?x=1&y=a+b";
+    expect(
+      new URL(
+        resourceOpen(tricky, siteUrl)!.resource_location,
+      ).searchParams.get("iiif-content"),
+    ).toBe(tricky);
+  });
+
   it("identifies the parent Manifest of an encoded content state, without sending its annotation", () => {
     const state = btoa(
       encodeURIComponent(
@@ -324,7 +340,8 @@ describe("homepage resource opens", () => {
     expect(resources()).toEqual([
       {
         event: "clover_resource_open",
-        resource_location: `${siteUrl}?iiif-content=${encodeURIComponent(manifest)}`,
+        resource_location: `${siteUrl}?iiif-content=${manifest}`,
+        resource_url: manifest,
         resource_host: "collections.example.org",
         resource_input: "content_state",
       },

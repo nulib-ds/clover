@@ -252,6 +252,21 @@
                   {
                     "type": "TEMPLATE",
                     "key": "parameter",
+                    "value": "resource_url"
+                  },
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameterValue",
+                    "value": "{{Clover - resource_url}}"
+                  }
+                ]
+              },
+              {
+                "type": "MAP",
+                "map": [
+                  {
+                    "type": "TEMPLATE",
+                    "key": "parameter",
                     "value": "resource_host"
                   },
                   {
@@ -824,6 +839,28 @@
             "type": "TEMPLATE",
             "key": "name",
             "value": "resource_location"
+          },
+          {
+            "type": "BOOLEAN",
+            "key": "setDefaultValue",
+            "value": "false"
+          }
+        ]
+      },
+      {
+        "variableId": "14",
+        "name": "Clover - resource_url",
+        "type": "v",
+        "parameter": [
+          {
+            "type": "INTEGER",
+            "key": "dataLayerVersion",
+            "value": "2"
+          },
+          {
+            "type": "TEMPLATE",
+            "key": "name",
+            "value": "resource_url"
           },
           {
             "type": "BOOLEAN",
