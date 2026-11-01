@@ -8,6 +8,7 @@ export const body: ElementSpec = {
   needsRoot: true,
   attributes: {
     controls: { prop: "controls", type: "boolean" },
+    "more-controls": { prop: "moreControls", type: ["auto", "always"] },
     navigator: { prop: "navigator", type: "boolean" },
     placeholder: { prop: "placeholder", type: "boolean" },
     "animate-annotations": { prop: "animateAnnotations", type: "boolean" },
@@ -30,6 +31,7 @@ export const bodyDocs: ElementDocs = {
       description: '"false" leaves out the controls over the Body.',
       default: "true",
     },
+    "more-controls": canvasDocs.attributes["more-controls"],
     navigator: {
       description: "A small map of the whole image, while zoomed in.",
       default: "false",

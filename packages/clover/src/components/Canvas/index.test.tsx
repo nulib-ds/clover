@@ -87,13 +87,14 @@ const open = async () => {
   act(() => listeners.open());
   await loaded();
 };
-/** Let the modules a Canvas loads on demand (hotspots, its menus) arrive. */
+/** Let the modules a Canvas loads on demand (hotspots, its menus, More) arrive. */
 const loaded = () =>
   act(async () => {
     await Promise.all([
       import("./AnnotationState"),
       import("./AnnotationMenu"),
       import("./ChoiceMenu"),
+      import("./More"),
     ]);
   });
 
@@ -1332,18 +1333,22 @@ describe("Canvas", () => {
     const closeViewer = () =>
       screen.getByRole("button", { name: "Close image viewer" });
 
-    it("shows the still fitted in place of the Canvas, with only a toggle", () => {
+    it("shows the still fitted in place of the Canvas, with only a toggle", async () => {
       render(<Canvas canvases={[first]} />);
       // The viewport shares the Canvas's name, so the still is found in its own frame.
       const still = within(
-        screen.getByTestId("clover-canvas-placeholder"),
+        await screen.findByTestId("clover-canvas-placeholder"),
       ).getByRole("img", { name: "Blank page" });
       expect(still).toHaveAttribute("src", `${first.id}/still.jpg`);
       expect(screen.getByTestId("clover-canvas")).toHaveAttribute(
         "data-placeholder",
         "true",
       );
-      expect(openViewer()).toHaveAttribute("data-button", "placeholder");
+      // One of the row's controls, from the placeholder's own chunk, as it arrives.
+      expect(
+        await screen.findByRole("button", { name: "Open image viewer" }),
+      ).toHaveAttribute("data-button", "placeholder");
+      expect(openViewer().closest(".clover-canvas-controls")).not.toBeNull();
       // Nothing of the Canvas is fetched, and no other control is shown.
       expect(renderer.setImages).not.toHaveBeenCalled();
       expect(screen.queryByRole("button", { name: "Zoom in" })).toBeNull();
@@ -1462,9 +1467,9 @@ describe("Canvas", () => {
       );
       await open();
       expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
-      expect(screen.getByTestId("clover-canvas-controls")).toHaveAttribute(
-        "data-has-placeholder",
-        "true",
+      // One of the row's controls, as the `i` and annotations are.
+      expect(closeViewer().closest(".clover-canvas-controls")).toBe(
+        screen.getByTestId("clover-canvas-controls"),
       );
 
       renderer.isOpen = true;
@@ -1697,61 +1702,337 @@ describe("Canvas", () => {
     });
   });
 
-  describe("controls that come and go", () => {
+  describe("controls that stay", () => {
     afterEach(() => vi.useRealTimers());
 
-    it("show on pointer activity and fade after the hide delay", () => {
-      vi.useFakeTimers();
-      render(<Canvas src="a.jpg" options={{ hideDelay: 500 }} />);
-      const canvas = screen.getByTestId("clover-canvas");
-      expect(canvas).toHaveAttribute("data-controls", "hidden");
-
-      fireEvent.pointerMove(canvas);
-      expect(canvas).toHaveAttribute("data-controls", "visible");
-      act(() => {
-        vi.advanceTimersByTime(600);
-      });
-      expect(canvas).toHaveAttribute("data-controls", "hidden");
-    });
-
-    it("hide a second after a mouse leaves", () => {
-      vi.useFakeTimers();
+    it("lie over an image with no wash behind them, their own fill enough (Mat, 2026-11-01)", () => {
       render(<Canvas src="a.jpg" />);
-      const canvas = screen.getByTestId("clover-canvas");
-      fireEvent.pointerMove(canvas);
-      fireEvent.pointerLeave(canvas, { pointerType: "mouse" });
-      expect(canvas).toHaveAttribute("data-controls", "visible");
-      act(() => void vi.advanceTimersByTime(1000));
-      expect(canvas).toHaveAttribute("data-controls", "hidden");
-      vi.useRealTimers();
+      expect(screen.getByRole("button", { name: "Zoom in" })).toBeVisible();
+      expect(document.querySelector(".clover-canvas-scrim")).toBeNull();
     });
 
-    it("show under a finger on a tap on the picture, and hide on the next, never on a timer", () => {
+    it("never fade, for now: no timer, and no tap on the picture to find them (Mat, 2026-11-01)", () => {
       vi.useFakeTimers();
       render(<Canvas src="a.jpg" options={{ hideDelay: 500 }} />);
       const canvas = screen.getByTestId("clover-canvas");
-      const picture = screen.getByTestId("clover-canvas-viewport");
-      const tap = () =>
-        ["pointerdown", "pointerup"].forEach((type) =>
-          act(
-            () =>
-              void picture.dispatchEvent(
-                Object.assign(
-                  new MouseEvent(type, { clientX: 5, bubbles: true }),
-                  { pointerId: 1, pointerType: "touch", isPrimary: true },
-                ),
-              ),
-          ),
-        );
-
-      tap();
-      act(() => void vi.advanceTimersByTime(300));
-      expect(canvas).toHaveAttribute("data-controls", "visible");
+      fireEvent.pointerMove(canvas);
       act(() => void vi.advanceTimersByTime(60_000));
-      expect(canvas).toHaveAttribute("data-controls", "visible");
-      tap();
-      act(() => void vi.advanceTimersByTime(300));
-      expect(canvas).toHaveAttribute("data-controls", "hidden");
+      // Their state is the stylesheet's alone, which holds a Canvas's shown.
+      expect(canvas).not.toHaveAttribute("data-controls");
+      expect(screen.getByRole("button", { name: "Zoom in" })).toBeVisible();
+    });
+  });
+
+  describe("controls on one row", () => {
+    /** The cluster's width, as the Body's sets it; each control 36px, none between. */
+    let room = 150;
+    const resized: Array<() => void> = [];
+    const spies: Array<{ mockRestore: () => void }> = [];
+    beforeEach(() => {
+      room = 150;
+      spies.push(
+        vi
+          .spyOn(HTMLElement.prototype, "offsetWidth", "get")
+          .mockImplementation(function (this: HTMLElement) {
+            if (this.closest("[hidden]")) return 0;
+            return this.matches(".clover-canvas-button") ? 36 : 0;
+          }),
+        vi
+          .spyOn(HTMLElement.prototype, "clientWidth", "get")
+          .mockImplementation(function (this: HTMLElement) {
+            return this.matches(".clover-canvas-controls") ? room : 0;
+          }),
+      );
+      vi.stubGlobal(
+        "ResizeObserver",
+        class {
+          constructor(callback: () => void) {
+            resized.push(callback);
+          }
+          observe() {}
+          unobserve() {}
+          disconnect() {}
+        },
+      );
+    });
+    afterEach(() => {
+      spies.splice(0).forEach((spy) => spy.mockRestore());
+      vi.unstubAllGlobals();
+      resized.length = 0;
+    });
+    const resize = (width: number) => {
+      room = width;
+      act(() => resized.forEach((callback) => callback()));
+    };
+    const more = () => screen.getByRole("button", { name: "More controls" });
+    const inRow = () =>
+      Array.from(
+        screen
+          .getByTestId("clover-canvas-controls")
+          .querySelectorAll(
+            ":scope > button, :scope > .clover-canvas-more > button",
+          ),
+        (button) => (button as HTMLElement).dataset.button,
+      );
+
+    it("keeps one row: where all do not fit, the view's controls wait behind More", async () => {
+      render(<Canvas src="a.jpg" instanceId="x" />);
+      await loaded();
+      expect(inRow()).toEqual(["more"]);
+      expect(more()).toHaveAttribute("aria-expanded", "false");
+      expect(more()).toHaveAttribute("aria-controls", "more-x-list");
+      expect(document.getElementById("more-x-list")).not.toBeVisible();
+      expect(screen.queryByRole("button", { name: "Zoom in" })).toBeNull();
+    });
+
+    it("puts More far right, the others before it in their order", async () => {
+      const [natural] = metadataAnywhere.items as any[];
+      render(<Canvas canvases={[natural]} />);
+      await loaded();
+      expect(inRow()).toEqual(["information", "more"]);
+    });
+
+    it("opens its tray left of the others, which stay, and More, at its end, closes it", async () => {
+      const [natural] = metadataAnywhere.items as any[];
+      render(<Canvas canvases={[natural]} instanceId="x" />);
+      await loaded();
+      fireEvent.click(more());
+      expect(more()).toHaveAttribute("aria-expanded", "true");
+      const tray = screen.getByRole("group", { name: "More controls" });
+      expect(tray).toHaveAttribute("id", "more-x-list");
+      expect(
+        within(tray)
+          .getAllByRole("button")
+          .map((button) => button.dataset.button),
+      ).toEqual([
+        "zoom-in",
+        "zoom-out",
+        "rotate-right",
+        "rotate-left",
+        "reset",
+        "full-page",
+      ]);
+      // Its own, then More, the close, at its end; the `i` before it, still in sight.
+      expect(inRow()).toEqual(["information", "more"]);
+      expect(tray.nextElementSibling).toBe(more());
+      expect(screen.getByRole("button", { name: "About" })).toBeVisible();
+      fireEvent.click(
+        within(tray).getByRole("button", { name: "Rotate right" }),
+      );
+      expect(renderer.rotateBy).toHaveBeenCalledWith(90);
+      // It stays for the next press, and as the picture is moved.
+      fireEvent.pointerDown(screen.getByTestId("clover-canvas-viewport"));
+      expect(tray).toBeVisible();
+
+      fireEvent.click(more());
+      expect(more()).toHaveAttribute("aria-expanded", "false");
+      expect(tray).not.toBeVisible();
+      expect(screen.getByRole("button", { name: "About" })).toBeVisible();
+    });
+
+    it("keeps focus on More as it goes to the tray's end and back", async () => {
+      render(<Canvas src="a.jpg" />);
+      await loaded();
+      more().focus();
+      fireEvent.click(more());
+      expect(more()).toHaveAttribute("aria-expanded", "true");
+      expect(more()).toHaveFocus();
+      fireEvent.click(more());
+      expect(more()).toHaveAttribute("aria-expanded", "false");
+      expect(more()).toHaveFocus();
+    });
+
+    it("closes its tray on Escape in it, focus to More, and nothing around it", async () => {
+      render(<Canvas src="a.jpg" />);
+      await loaded();
+      fireEvent.click(more());
+      const reset = screen.getByRole("button", { name: "Reset zoom" });
+      reset.focus();
+      expect(fireEvent.keyDown(reset, { key: "Escape" })).toBe(false);
+      expect(more()).toHaveFocus();
+      // Back on the others' row, Escape is left to what is around it.
+      expect(fireEvent.keyDown(more(), { key: "Escape" })).toBe(true);
+    });
+
+    it("scrolls its tray across only, never up and down", async () => {
+      render(<Canvas src="a.jpg" instanceId="x" />);
+      await loaded();
+      fireEvent.click(more());
+      const tray = screen.getByRole("group", { name: "More controls" });
+      // A wheel or a swipe, past a Tip wrapped tall, as a browser would scroll it.
+      Object.defineProperty(tray, "scrollTop", { value: 13, writable: true });
+      fireEvent.scroll(tray);
+      expect(tray.scrollTop).toBe(0);
+    });
+
+    it("follows the Body's width, More gone once all fit", async () => {
+      render(<Canvas src="a.jpg" />);
+      await loaded();
+      resize(400);
+      expect(inRow()).toEqual([
+        "zoom-in",
+        "zoom-out",
+        "rotate-right",
+        "rotate-left",
+        "reset",
+        "full-page",
+      ]);
+      expect(
+        screen.queryByRole("button", { name: "More controls" }),
+      ).toBeNull();
+    });
+
+    it("hands focus to More when the control that has it goes behind it (WCAG 2.4.3)", async () => {
+      render(<Canvas src="a.jpg" />);
+      await loaded();
+      resize(400);
+      screen.getByRole("button", { name: "Zoom out" }).focus();
+      resize(100);
+      expect(more()).toHaveFocus();
+      // And to it again when there is room for it.
+      fireEvent.click(more());
+      screen.getByRole("button", { name: "Zoom out" }).focus();
+      resize(400);
+      expect(screen.getByRole("button", { name: "Zoom out" })).toHaveFocus();
+    });
+
+    it("closes what is open as its row opens, as Clover's popups do", async () => {
+      const [natural] = metadataAnywhere.items as any[];
+      render(<Canvas canvases={[natural]} />);
+      await loaded();
+      fireEvent.click(screen.getByRole("button", { name: "About" }));
+      const caption = screen.getByTestId("clover-canvas-caption");
+      await waitFor(() => expect(caption).toHaveAttribute("data-open", "true"));
+      fireEvent.click(more());
+      await waitFor(() =>
+        expect(caption).toHaveAttribute("data-open", "false"),
+      );
+    });
+
+    it("puts the view's controls behind More always, where asked, room or not", async () => {
+      const [natural] = metadataAnywhere.items as any[];
+      render(<Canvas canvases={[natural]} moreControls="always" />);
+      await loaded();
+      resize(400);
+      expect(inRow()).toEqual(["information", "more"]);
+      fireEvent.click(more());
+      expect(
+        within(screen.getByRole("group", { name: "More controls" }))
+          .getAllByRole("button")
+          .map((button) => button.dataset.button),
+      ).toEqual([
+        "zoom-in",
+        "zoom-out",
+        "rotate-right",
+        "rotate-left",
+        "reset",
+        "full-page",
+      ]);
+    });
+
+    it("offers no More with no view controls to put behind it", async () => {
+      const [natural] = metadataAnywhere.items as any[];
+      render(
+        <Canvas
+          canvases={[natural]}
+          moreControls="always"
+          controls={{
+            zoom: false,
+            rotation: false,
+            reset: false,
+            fullPage: false,
+          }}
+        />,
+      );
+      await loaded();
+      expect(inRow()).toEqual(["information"]);
+    });
+
+    it("makes an image's placeholder toggle More, its tray opening and closing with the view", async () => {
+      const [natural] = metadataAnywhere.items as any[];
+      const still = `${natural.id}/placeholder`;
+      render(
+        <Canvas
+          canvases={[
+            {
+              ...natural,
+              placeholderContainer: {
+                id: still,
+                type: "Canvas",
+                width: 400,
+                height: 300,
+                items: [
+                  {
+                    items: [
+                      {
+                        motivation: "painting",
+                        body: { id: `${still}.jpg`, type: "Image" },
+                        target: still,
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ]}
+        />,
+      );
+      await loaded();
+      expect(inRow()).toEqual(["information", "placeholder"]);
+      // Opening the view opens the tray of its controls with it, the toggle at its end.
+      fireEvent.click(
+        await screen.findByRole("button", { name: "Open image viewer" }),
+      );
+      await open();
+      const tray = screen.getByRole("group", { name: "More controls" });
+      expect(tray).toBeVisible();
+      expect(
+        within(tray)
+          .getAllByRole("button")
+          .map((button) => button.dataset.button),
+      ).toEqual([
+        "zoom-in",
+        "zoom-out",
+        "rotate-right",
+        "rotate-left",
+        "reset",
+        "full-page",
+      ]);
+      expect(inRow()).toEqual(["information", "placeholder"]);
+      const close = screen.getByRole("button", { name: "Close image viewer" });
+      expect(tray.nextElementSibling).toBe(close);
+      // No More of its own, nor an Escape that closes the tray and not the view.
+      expect(
+        screen.queryByRole("button", { name: "More controls" }),
+      ).toBeNull();
+      fireEvent.keyDown(
+        within(tray).getByRole("button", { name: "Reset zoom" }),
+        {
+          key: "Escape",
+        },
+      );
+      expect(tray).toBeVisible();
+      // Closing the view closes its tray.
+      renderer.isOpen = true;
+      fireEvent.click(close);
+      expect(screen.queryByRole("group", { name: "More controls" })).toBeNull();
+      expect(inRow()).toEqual(["information", "placeholder"]);
+    });
+
+    it("leaves a host's own controls in the row, after More", async () => {
+      render(
+        <Canvas src="a.jpg">
+          <button type="button" className="clover-canvas-button">
+            Plugin
+          </button>
+        </Canvas>,
+      );
+      await loaded();
+      expect(inRow()).toEqual(["more", undefined]);
+      const cluster = screen.getByTestId("clover-canvas-controls");
+      expect(cluster.lastElementChild).toHaveTextContent("Plugin");
+      fireEvent.click(more());
+      expect(cluster.lastElementChild).toHaveTextContent("Plugin");
     });
   });
 });

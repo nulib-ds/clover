@@ -12,7 +12,8 @@ import * as Clover from "../../index";
  * only one of them loads, so a shared frame component would add its props to every page
  * and take no copy away (measured 2026-10-27). This holds the two frames to
  * one another instead: the figure, the viewport's name, role, keys and focus, the way
- * out of full screen, and the caption, last, closed by Escape where focus is.
+ * out of full screen, and the caption, last, closed by Escape where focus is. Not their
+ * controls' coming and going: a Canvas's stay in sight for now (Mat, 2026-11-01).
  */
 
 vi.mock("../../lib/renderer", async (importOriginal) => ({
@@ -80,7 +81,6 @@ async function frameOf(View: () => React.ReactElement) {
       classes: figure.classList.contains("clover-canvas"),
       status: figure.hasAttribute("data-status"),
       fullscreen: figure.getAttribute("data-fullscreen"),
-      controls: figure.getAttribute("data-controls"),
       navigable: figure.getAttribute("data-navigable"),
       style: figure.getAttribute("style"),
     },

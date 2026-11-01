@@ -693,7 +693,7 @@ function SceneBody({
       >
         <ExitFullscreen hidden={!exitShown} />
         {(captioned.length > 0 || React.Children.count(children) > 0) && (
-          <ControlCluster controls={() => []} controlButtons={controlButtons}>
+          <ControlCluster>
             {captioned.length > 0 && (
               <Button
                 id={`information-${instance}`}

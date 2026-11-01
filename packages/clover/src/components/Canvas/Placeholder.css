@@ -65,56 +65,34 @@
 }
 
 /*
- * The toggle sits in the top right, where the control cluster makes room for it
- * (`data-has-placeholder`). While the placeholder shows it is the only control, and always
- * there; once the Canvas is open it comes and goes with the rest of the controls.
+ * Its toggle is one of the row's controls (`PlaceholderToggle`, drawn by `Controls.tsx`),
+ * as the `i` and annotations are (Mat, 2026-11-01: "placeholder should not be a special
+ * case"). A video's or a sound's, before it opens, is a large play button in the middle
+ * of the still, as a video player has, drawn by the placeholder itself: over the still
+ * but under the Canvas's popups (an annotations menu, its information), so one open over
+ * the middle is never covered by it, in a layer of its own, 1.
  */
-button.clover-canvas-placeholder-toggle {
+.clover-canvas > button.clover-canvas-placeholder-toggle {
   position: absolute;
-  top: var(--clover-canvas-controls-inset);
-  right: var(--clover-canvas-controls-inset);
-  /* With the controls, over the popups they open, so its Tip shows over them. */
-  z-index: 3;
-  margin: 0;
-  transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
-}
-
-/*
- * Video or sound: a large play button in the middle of the still, as a video player
- * has. Once open, it is the close control in the top right like any other.
- */
-/*
- * There it is over the still but under the Canvas's popups (an annotations menu, its
- * information), so one open over the middle is never covered by it: no longer one of the
- * controls in their corner, it leaves their layer (3) for its own, 1.
- */
-.clover-canvas[data-placeholder="true"][data-media]
-  > button.clover-canvas-placeholder-toggle {
   z-index: 1;
   top: 50%;
   right: 50%;
   width: var(--clover-space-2xl);
   height: var(--clover-space-2xl);
+  margin: 0;
   transform: translate(50%, -50%);
   box-shadow: 0 4px 16px #0003;
+  transition: var(--clover-transition, all 200ms cubic-bezier(0.16, 1, 0.3, 1));
 }
 
 /* Its icon in proportion, as a control's: 1rem of its 1rem and `s` around it. */
-.clover-canvas[data-placeholder="true"][data-media]
-  > button.clover-canvas-placeholder-toggle
-  svg {
+.clover-canvas > button.clover-canvas-placeholder-toggle svg {
   width: calc(var(--clover-space-2xl) / (1 + 2 * 0.618));
   height: calc(var(--clover-space-2xl) / (1 + 2 * 0.618));
 }
 
 .clover-canvas-placeholder[data-media="true"] {
   cursor: pointer;
-}
-
-/* Its toggle is in the middle, so the cluster keeps no room for it in the corner. */
-.clover-canvas[data-placeholder="true"][data-media]
-  > .clover-canvas-controls[data-has-placeholder="true"] {
-  right: var(--clover-canvas-controls-inset);
 }
 
 /* The whole still plays it: pointing anywhere on it lights the play button, as on it. */
@@ -163,36 +141,7 @@ button.clover-canvas-placeholder-toggle {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  button.clover-canvas-placeholder-toggle {
+  .clover-canvas > button.clover-canvas-placeholder-toggle {
     transition: none;
   }
-}
-
-/*
- * The information panel's toggle keeps the corner (see `Canvas.css`). Where the Canvas
- * has a placeholder (`data-placeholder`, absent otherwise), its toggle sits beside it,
- * and the cluster keeps the room for both. A video's still has its toggle in the middle,
- * as a play button, so no room is kept there.
- */
-.clover-canvas:has(> .clover-canvas-controls > [data-button="panel"])
-  > .clover-canvas-controls[data-has-placeholder="true"] {
-  --top: var(--clover-canvas-controls-inset);
-  right: var(--clover-canvas-controls-inset);
-}
-
-.clover-canvas[data-placeholder]:not([data-placeholder="true"][data-media]):has(
-    > .clover-canvas-controls > [data-button="panel"]
-  )
-  > .clover-canvas-controls {
-  padding-right: calc(2 * (var(--clover-control) + var(--clover-space-s)));
-}
-
-.clover-canvas[data-placeholder]:not([data-placeholder="true"][data-media]):has(
-    > .clover-canvas-controls > [data-button="panel"]
-  )
-  > button.clover-canvas-placeholder-toggle {
-  right: calc(
-    var(--clover-canvas-controls-inset) + var(--clover-control) +
-      var(--clover-space-s)
-  );
 }

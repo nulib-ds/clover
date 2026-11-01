@@ -26,6 +26,7 @@ export default function LightboxView({
   download = true,
   languages = true,
   storageKey,
+  moreControls,
 }: Omit<LightboxProps, "open" | "onClose" | "className"> & {
   id: string;
   /**
@@ -88,7 +89,10 @@ export default function LightboxView({
         // A minimum only while the panel is docked beside it: over it, none.
         min={panel && pane.over ? undefined : PAGE_MIN}
       >
-        <Clover.Body className="clover-template-lightbox-body">
+        <Clover.Body
+          className="clover-template-lightbox-body"
+          moreControls={moreControls}
+        >
           {panel && !pane.docked && pane.toggle}
         </Clover.Body>
         {/* The view's label under it, the Manifest's over it as the lightbox's title. */}

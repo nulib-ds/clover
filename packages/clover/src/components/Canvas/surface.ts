@@ -1,3 +1,5 @@
+import type { RefObject } from "react";
+
 import type { CloverCanvasOptions } from "./Canvas.types";
 import type { CanvasRenderer } from "../../lib/renderer";
 
@@ -24,10 +26,22 @@ export type CanvasSurface = Pick<
   | "dispose"
 >;
 
-export type MakeSurface = (
+export type MakeSurface = ((
   host: HTMLElement,
   options?: CloverCanvasOptions,
-) => CanvasSurface;
+) => CanvasSurface) & {
+  /**
+   * Whether the controls over it are shown, where they come and go: a Timeline's, as they
+   * always have (`Body/useControlsVisibility.ts`), its cluster wrapping onto rows. Without
+   * it, a Canvas's stay in sight, on one row, the rest behind More (Mat, 2026-11-01:
+   * Canvas's alone, for now). A hook, the same for the life of a view.
+   */
+  controlsVisibility?: (
+    element: HTMLElement | null,
+    hideDelay?: number,
+    picture?: RefObject<HTMLElement | null>,
+  ) => boolean;
+};
 
 /** Whether the surface is the renderer, with a camera to move and overlays to pin. */
 export const hasCamera = (

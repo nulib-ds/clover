@@ -68,6 +68,7 @@
   "imageViewerOpen": "Open image viewer",
   "imageViewerClose": "Close image viewer",
   "canvasChoice": "Choice",
+  "canvasMoreControls": "More controls",
   "imageFullScreen": "Full screen",
   "imageExitFullScreen": "Exit full screen",
   "imageResetZoom": "Reset zoom",

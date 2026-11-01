@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import React from "react";
 
 import audioJson from "../../fixtures/iiif-cookbook/0002-mvm-audio.json";
@@ -128,6 +134,31 @@ describe("Timeline", () => {
     render(<Clover.Canvas canvases={[bookJson.items[0] as never]} />);
     await screen.findByTestId("clover-canvas");
     expect(CanvasRenderer).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps its controls' coming and going, and rows that wrap, as Canvas's stay (Mat, 2026-11-01)", async () => {
+    vi.useFakeTimers();
+    try {
+      render(
+        <Clover.Timeline
+          timeline={audioV4Json.items[0] as never}
+          options={{ hideDelay: 500 }}
+        >
+          <button type="button">Plugin</button>
+        </Clover.Timeline>,
+      );
+      const figure = screen.getByTestId("clover-canvas");
+      expect(figure).toHaveAttribute("data-controls", "hidden");
+      fireEvent.pointerMove(figure);
+      expect(figure).toHaveAttribute("data-controls", "visible");
+      act(() => void vi.advanceTimersByTime(600));
+      expect(figure).toHaveAttribute("data-controls", "hidden");
+      expect(screen.getByTestId("clover-canvas-controls")).not.toHaveAttribute(
+        "data-fit",
+      );
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("plays as a player, its title for the eye alone", async () => {

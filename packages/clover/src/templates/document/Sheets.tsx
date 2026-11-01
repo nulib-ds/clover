@@ -55,7 +55,14 @@ const ratioOf = (canvas: Canvas) => {
   return width > 0 && height > 0 ? width / height : undefined;
 };
 
-export function Sheets({ children }: { children?: React.ReactNode }) {
+export function Sheets({
+  moreControls,
+  children,
+}: {
+  /** The Body's, as the template is given it. */
+  moreControls?: "auto" | "always";
+  children?: React.ReactNode;
+}) {
   const { clover } = Clover.useClover("Document");
   const sequence = Clover.useSequence();
   const navigation = Clover.useNavigation();
@@ -442,6 +449,7 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
         <div ref={live} className="clover-template-document-live">
           <Clover.Body
             className="clover-template-document-body"
+            moreControls={moreControls}
             onReady={setHandle}
           >
             {children}

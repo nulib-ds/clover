@@ -44,6 +44,8 @@ export interface LightboxProps {
   languages?: boolean;
   /** Where the panel's width is remembered once dragged; `false` forgets it. */
   storageKey?: string | false;
+  /** The Body's `moreControls`: when the view's controls wait behind More. */
+  moreControls?: "auto" | "always";
   className?: string;
 }
 

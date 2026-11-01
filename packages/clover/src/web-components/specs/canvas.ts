@@ -24,6 +24,7 @@ export const canvas: ElementSpec = {
     language: { prop: "language", type: "string" },
     "high-contrast": { prop: "highContrast", type: "boolean" },
     controls: { prop: "controls", type: "boolean" },
+    "more-controls": { prop: "moreControls", type: ["auto", "always"] },
     navigator: { prop: "navigator", type: "boolean" },
     placeholder: { prop: "placeholder", type: "boolean" },
     "viewing-direction": {
@@ -228,6 +229,11 @@ export const canvasDocs: ElementDocs = {
     controls: {
       description: '"false" leaves out the controls over the Body.',
       default: "true",
+    },
+    "more-controls": {
+      description:
+        "When the view's controls (zoom, the turns, reset, full screen) wait behind More, at the end of the controls' one row: auto, only where the row cannot hold them all; always, wherever there are any. Pressed, More opens a tray of them beside the rest.",
+      default: "auto",
     },
     navigator: {
       description: "A small map of the whole image, while zoomed in.",

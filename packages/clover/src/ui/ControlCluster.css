@@ -4,8 +4,8 @@
  * wraps onto more rows below, each at the end too, rather than running past a narrow Body
  * or one at a large zoom (WCAG 1.4.10). Rows at every size, never a column: a column
  * wrapped onto columns on a short Body, out of order. Read and reached in the order they
- * show (WCAG 1.3.2, 2.4.3). The panel's toggle and a placeholder's take places of their
- * own in the corner (see `Canvas.css`, `Placeholder.css`).
+ * show (WCAG 1.3.2, 2.4.3). The panel's toggle takes a place of its own in the corner
+ * (see `Canvas.css`).
  */
 .clover-canvas-controls {
   --top: var(--clover-canvas-controls-inset);
@@ -19,12 +19,4 @@
   justify-content: flex-end;
   gap: var(--clover-space-s);
   max-height: calc(100% - var(--top) - var(--clover-canvas-controls-inset));
-}
-
-/* Room in the corner for a placeholder's toggle, beside the cluster. */
-.clover-canvas-controls[data-has-placeholder="true"] {
-  right: calc(
-    var(--clover-canvas-controls-inset) + var(--clover-control) +
-      var(--clover-space-s)
-  );
 }

@@ -772,6 +772,28 @@ describe("templates", () => {
     expect(options[0]).toHaveAttribute("aria-selected", "true");
   });
 
+  it("Default, Document and Gallery hand their Body moreControls", async () => {
+    const more = async () =>
+      within(
+        (await screen.findByRole("button", { name: "More controls" }))
+          .parentElement!,
+      ).queryByRole("button", { name: "Zoom in" });
+    const { unmount } = render(
+      <Templates.Default iiifContent={bookJson} moreControls="always" />,
+    );
+    // The view's controls behind More, the Body's row room or not.
+    expect(await more()).toBeNull();
+    unmount();
+    const document = render(
+      <Templates.Document iiifContent={bookJson} moreControls="always" />,
+    );
+    expect(await more()).toBeNull();
+    document.unmount();
+    render(<Templates.Gallery iiifContent={bookJson} moreControls="always" />);
+    fireEvent.click((await screen.findAllByRole("option"))[0]);
+    expect(await more()).toBeNull();
+  });
+
   it("Gallery: a grid even of one view, its cell opening the lightbox", async () => {
     const model = render(<Templates.Gallery iiifContent={modelJson} />);
     expect(await screen.findAllByRole("option")).toHaveLength(1);

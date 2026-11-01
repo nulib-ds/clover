@@ -68,6 +68,7 @@
   "imageViewerOpen": "Ouvrir la visionneuse d'images",
   "imageViewerClose": "Fermer la visionneuse d'images",
   "canvasChoice": "Choix",
+  "canvasMoreControls": "Plus de commandes",
   "imageFullScreen": "Plein écran",
   "imageExitFullScreen": "Quitter le plein écran",
   "imageResetZoom": "Réinitialiser le zoom",

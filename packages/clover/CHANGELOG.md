@@ -13,6 +13,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`moreControls`, on Canvas, Body and the templates.** Where a Canvas's view controls
+  (zoom in and out, the two rotations, reset, full screen) wait behind More: `"auto"`, the
+  default, only where the controls' one row cannot hold them all; `"always"`, however
+  wide the Body is. The Default, Document and Gallery templates hand it to their Body (the
+  Gallery's in its lightbox). As web components, `more-controls` on `<clover-canvas>`,
+  `<clover-body>` and `<clover-viewer>`.
+
 - **The Gallery opens annotations given as the content** (an AnnotationPage of tags across
   Manifests): their page's label heads the grid, a cell for each tag, its region cut from
   its view; choosing one shows its Manifest in the lightbox, framed on the tag, its strip
@@ -61,6 +68,29 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **A Canvas's controls stay on one row.** On a narrow Body they no longer wrap onto more
+  rows. Where they do not all fit, the view's controls (zoom in and out, the two
+  rotations, reset and full screen) wait behind More (a magnifier, as a placeholder's
+  toggle is, named "More controls", a new string in every locale), at the row's end, the
+  other controls before it in their order. Pressed, More opens a tray of them, running
+  left from where it was on one translucent ground, its close at the tray's end, the
+  other controls still in sight beside it; pressed again, it closes. A tray too narrow
+  for them all scrolls across, by wheel, trackpad or touch, never up and down.
+  A Timeline's and a Scene's controls are as they were.
+
+- **A placeholder's toggle is one of the row's controls.** The magnifier that opens and
+  closes a Canvas's `placeholderCanvas` (and a video's close once it plays) sits in the
+  controls' row after the `i`, rather than in a corner of its own, as the others there
+  are. For an image, it is More too: opening the viewer opens the tray of the view's
+  controls with it, the toggle at its end, and closing the viewer closes both. A video's
+  Play, in the middle of its still, is as it was.
+
+- **A Canvas's controls stay in sight, for now,** while their design is reviewed: they no
+  longer fade after a pause, nor wait for a tap on the picture on a touch screen, and a
+  Canvas reads no `options.hideDelay` meanwhile. Over an image, no dark wash lies behind
+  them now, their own fill enough; over a video or sound, it does. A Timeline's and a
+  Scene's still come and go.
+
 - **The Gallery** keeps its grid `l` under its header, and its lightbox's Back and Close
   are clear at rest, taking the accent under the pointer or focused.
 
@@ -103,6 +133,23 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   for a Manifest of one view, which left only its title and summary; now the one view is
   a cell, opening in the lightbox as any other. Nothing to do.
 
+- **Sizes measured as a browser fetches them.** The measurement now bundles React as an
+  app does (in a chunk of its own, still never counted), so Clover's own chunks weigh
+  what an app ships of them, and the browser check leaves the upgrade step out of a
+  part's figure with the upgrader, as the measurement does. `npm run check:first-view`
+  passes again. The React figures rise by what an app that bundles React ships of
+  Clover's chunks, and their budgets with them, in B gzip: the Default template
+  73,600 → 74,250 and to first view 95,900 → 96,300; Document 68,900 → 69,400 and
+  92,250 → 92,650; the Gallery 29,750 → 29,950 and 55,200 → 55,250.
+- **Budgets:** raised for the Canvas's one row and More (its measuring and More itself
+  load only as a Canvas draws its controls, so a Canvas's own first load is lighter than
+  before, the controls' coming and going no longer in it), its tray's look and opening,
+  and a placeholder's toggle among the controls, and its tray scrolling across only, with
+  room for a Tip wrapped to it, in B gzip: `styles.css` 19,200 → 19,600; to first view,
+  the Default template 96,300 → 96,450, Document 92,650 → 92,850 and the Gallery
+  55,250 → 55,800; `<clover-viewer>`'s own entry 102,550 → 102,600; a Timeline, which
+  keeps its coming and going and draws on Canvas's controls, 24,550 → 25,000 and to first
+  view 44,150 → 44,600.
 - **Budgets:** raised on purpose for what every template and page that draws Items now
   carries (Items' `masonry` loader and styles, `secondary` and `singleItem`, About's label
   measured afresh, the Panel's tab arrows as steps, every title's look a default the page outranks), for the information panel every

@@ -31,6 +31,7 @@ export const viewer: ElementSpec = {
     "sidebar-open": { prop: "defaultSidebarOpen", type: "boolean" },
     "storage-key": { prop: "storageKey", type: "string" },
     fill: { prop: "fill", type: "boolean" },
+    "more-controls": { prop: "moreControls", type: ["auto", "always"] },
     size: { prop: "size", type: "string" },
     height: { prop: "height", type: "string" },
     gap: { prop: "gap", type: "string" },
@@ -143,6 +144,11 @@ export const viewerDocs: ElementDocs = {
       description:
         "Default: as tall as the box it is in, the Body taking what the header and the thumbnails leave.",
       default: "false",
+    },
+    "more-controls": {
+      description:
+        "Default, Document and Gallery: when the Body's view controls (zoom, the turns, reset, full screen) wait behind More, the Gallery's in its lightbox: auto, only where the row cannot hold them all; always, wherever there are any.",
+      default: "auto",
     },
     size: {
       description: "Gallery: the size of a cell in the grid.",

@@ -46,6 +46,7 @@ export function Body({
   className,
   style,
   renderers,
+  moreControls,
   children,
   ...canvas
 }: BodyProps) {
@@ -86,7 +87,12 @@ export function Body({
           <ConnectedTimeline {...canvas}>{children}</ConnectedTimeline>
         </Suspense>
       ) : (
-        <ConnectedCanvas {...canvas} surface={rendererSurface}>
+        // Canvas's alone: a Timeline's and a Scene's controls are their own (as yet).
+        <ConnectedCanvas
+          {...canvas}
+          moreControls={moreControls}
+          surface={rendererSurface}
+        >
           {children}
         </ConnectedCanvas>
       )}

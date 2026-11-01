@@ -34,7 +34,6 @@ import {
   resolveDirection,
 } from "./layout";
 import ExitFullscreen from "../../ui/ExitFullscreen";
-import { useControlsVisibility } from "../Body/useControlsVisibility";
 import { useNearViewport } from "../Body/useNearViewport";
 import useFullscreen from "../../hooks/useFullscreen";
 import useWithinFullscreen from "../../hooks/useWithinFullscreen";
@@ -97,6 +96,12 @@ const PlaceBox = lazy(() => import("./PlaceBox"));
  * under 95 kB). Until it arrives the Canvas stays held back, as the placeholder holds it.
  */
 const Placeholder = lazy(() => import("./Placeholder"));
+// Its toggle, one of the row's controls, from the same chunk.
+const PlaceholderToggle = lazy(() =>
+  import("./Placeholder").then(({ PlaceholderToggle }) => ({
+    default: PlaceholderToggle,
+  })),
+);
 
 const ALL_CONTROLS: Required<CanvasControlsConfig> = {
   zoom: true,
@@ -106,6 +111,17 @@ const ALL_CONTROLS: Required<CanvasControlsConfig> = {
   annotations: true,
   information: true,
   map: true,
+};
+
+/** None of Clover's own: the row holds a placeholder's toggle alone. */
+const NO_CONTROLS: Required<CanvasControlsConfig> = {
+  zoom: false,
+  fullPage: false,
+  rotation: false,
+  reset: false,
+  annotations: false,
+  information: false,
+  map: false,
 };
 
 /**
@@ -133,6 +149,9 @@ const ANNOTATION_KEYS = {
   description: "canvasKeysAnnotations",
   keys: "Escape",
 };
+
+/** A Canvas's controls, always shown. */
+const inSight = () => true;
 
 export type CanvasViewProps = CloverCanvasProps & {
   /** What it draws on: Canvas's renderer, or a Timeline's surface (`surface.ts`). */
@@ -180,6 +199,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     options,
     navigator = false,
     controls = true,
+    moreControls = "auto",
     controlButtons,
     annotations: allAnnotations,
     onReady,
@@ -210,10 +230,14 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   );
   // Standalone, the higher-contrast mode is the Canvas's own: the page's, or the reader's.
   const contrast = useHighContrast(highContrast);
-  // Controls and navigator show on a mouse's activity and fade after a pause, as the
-  // Player's bar does; under a finger, or a pen that does not hover, a tap on the
-  // picture shows and hides them. Focus that no press brought holds them.
-  const controlsVisible = useControlsVisibility(
+  /*
+   * A Canvas's controls stay in sight, for now (Mat, 2026-11-01). A Timeline's come and go
+   * as they did, on a mouse's activity and after a pause, or a tap on the picture under a
+   * finger, held by focus no press brought: its surface says so (`surface.ts`).
+   */
+  const fades = Boolean(makeSurface.controlsVisibility);
+  const useVisibility = makeSurface.controlsVisibility ?? inSight;
+  const controlsVisible = useVisibility(
     wrapperElement,
     options?.hideDelay,
     hostRef,
@@ -542,6 +566,13 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    * and frames the annotation there, as a pick from a list beside it does. Over a lone
    * video or sound, it lists those on the recording's time (Cookbook 0103).
    */
+  /*
+   * The placeholder's toggle in the row, as the `i` and annotations are (Mat, 2026-11-01):
+   * an image's always, a video's once open (before, it is Play in the middle). The row is
+   * drawn for it alone where nothing else shows, `controls={false}` too: it is the way in.
+   */
+  const cornerToggle =
+    stills.length > 0 && !player && !(media && showPlaceholder);
   const shownControls = !controlsConfig
     ? null
     : showPlaceholder
@@ -845,7 +876,9 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         data-has-navigator={showNavigator}
         data-fullscreen={isFullscreen}
         data-exit={exitShown || undefined}
-        data-controls={controlsVisible ? "visible" : "hidden"}
+        data-controls={
+          fades ? (controlsVisible ? "visible" : "hidden") : undefined
+        }
         data-media={media?.kind}
         data-player={player ? "" : undefined}
         data-animated={animated ? "" : undefined}
@@ -903,19 +936,37 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
           isolation: "isolate",
         }}
       >
-        {/* A dark wash behind the controls, so they read over a bright picture. */}
-        {(shownControls || showNavigator) && (
+        {/*
+          A dark wash behind the controls over a video or a recording, so they read over a
+          bright frame; none over an image (Mat, 2026-11-01: "remove the shadow/scrim on
+          canvas for images. keep it still for video"), its controls on their own fill.
+        */}
+        {(shownControls || showNavigator) && media && (
           <div className="clover-canvas-scrim" aria-hidden="true" />
         )}
         {/* Revealed while this Canvas is full screen, or first in its Root that is. */}
         <ExitFullscreen hidden={!exitShown} />
-        {surface && shownControls && (
+        {surface && (shownControls || cornerToggle) && (
           <Controls
             renderer={renderer}
             instance={instance}
-            config={shownControls}
+            config={shownControls ?? NO_CONTROLS}
             controlButtons={controlButtons}
-            hasPlaceholder={stills.length > 0}
+            placeholderIsMore={cornerToggle && !media}
+            placeholder={
+              cornerToggle && (
+                <Suspense fallback={null}>
+                  <PlaceholderToggle
+                    instance={instance}
+                    media={Boolean(media)}
+                    active={showPlaceholder}
+                    onToggle={togglePlaceholder}
+                  />
+                </Suspense>
+              )
+            }
+            fit={!fades}
+            more={moreControls}
             choices={showPlaceholder ? [] : choices}
             selections={selections}
             onSelect={selectChoice}
@@ -936,7 +987,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             }}
             language={language}
           >
-            {children}
+            {shownControls && children}
           </Controls>
         )}
         {showNavigator && (

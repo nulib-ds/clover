@@ -52,6 +52,8 @@ const LAZY_MODULES = [
   "/components/Canvas/AnnotationState.tsx",
   "/components/Canvas/AnnotationMenu.tsx",
   "/components/Canvas/ChoiceMenu.tsx",
+  // More, as a Canvas draws its controls: never with a Timeline.
+  "/components/Canvas/More.tsx",
   // Off by default.
   "/lib/renderer/overlays/Navigator.ts",
   // Annotations as the content, an AnnotationPage or AnnotationCollection.

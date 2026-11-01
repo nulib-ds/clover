@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import Button from "./Button";
 import { type Shortcut, Tip } from "./Tip";
@@ -25,14 +25,14 @@ export interface ControlSpec {
 
 export interface ControlClusterProps {
   /**
-   * The controls to render, given whether the cluster sits inside whatever is full
-   * screen — so the full-screen control can name and draw the way out.
+   * One row that never wraps, the controls that do not fit behind More: a Canvas's
+   * (`Canvas/More.tsx`), which lays them out. Otherwise rows that wrap: a Timeline's, a
+   * Scene's.
    */
-  controls: (isFullscreen: boolean) => ControlSpec[];
-  /** Consumer replacements, keyed like `ControlSpec.key`. */
-  controlButtons?: ControlButtons;
-  hasPlaceholder?: boolean;
-  /** Rendered after the controls: a host's own controls. */
+  fit?: boolean;
+  /** The cluster's element, for a host that measures it (a Canvas, for its row). */
+  clusterRef?: (element: HTMLDivElement | null) => void;
+  /** The controls: a host's (a Canvas's, a Scene's), and a page's own after them. */
   children?: React.ReactNode;
 }
 
@@ -95,14 +95,13 @@ export function renderControl(
 }
 
 /**
- * The zoom, full-screen, rotate and reset cluster over a Canvas: its markup, its layout
- * hooks, and the `controlButtons` replacement contract — and nothing else. Presentational:
- * the host hands it click handlers.
+ * The cluster of controls over a Body, in its top end: its box, its layout hooks, and
+ * nothing else. What it holds is its host's: a Canvas's controls (`Canvas/Controls.tsx`,
+ * fitted to one row), a Scene's `i`, and the controls a page gives either.
  */
 const ControlCluster: React.FC<ControlClusterProps> = ({
-  controls,
-  controlButtons,
-  hasPlaceholder = false,
+  fit = false,
+  clusterRef,
   children,
 }) => {
   /*
@@ -115,25 +114,22 @@ const ControlCluster: React.FC<ControlClusterProps> = ({
   const isFullscreen = useWithinFullscreen(element);
   // How far it reaches, wrapped on a small Body, for the popups it opens to clear.
   useClusterReach(element);
-  /*
-   * Full screen ends the view's controls, over every picture alike, whichever of them a
-   * Canvas offers: left of what follows them, the `i` among it (Mat, 2026-10-29).
-   */
-  const specs = controls(isFullscreen);
-  const ordered = [
-    ...specs.filter((spec) => spec.key !== "fullPage"),
-    ...specs.filter((spec) => spec.key === "fullPage"),
-  ];
+  const ref = useCallback(
+    (node: HTMLDivElement | null) => {
+      setElement(node);
+      clusterRef?.(node);
+    },
+    [clusterRef],
+  );
 
   return (
     <div
       className="clover-canvas-controls"
+      data-fit={fit || undefined}
       data-fullscreen={isFullscreen}
-      data-has-placeholder={hasPlaceholder}
       data-testid="clover-canvas-controls"
-      ref={setElement}
+      ref={ref}
     >
-      {ordered.map((spec) => renderControl(spec, controlButtons))}
       {children}
     </div>
   );

@@ -1,6 +1,7 @@
 import type { CanvasRendererEvent } from "../../lib/renderer";
 import { TAP_MS, TAP_SLOP, isDirect, isHovering } from "../../lib/pointer";
 import type { MakeSurface } from "../Canvas/surface";
+import { useControlsVisibility } from "../Body/useControlsVisibility";
 
 /**
  * A Timeline's surface (`Canvas/surface.ts`): the viewport `CanvasView` renders, with no
@@ -102,3 +103,10 @@ export const playerSurface: MakeSurface = (host) => {
     },
   };
 };
+
+/*
+ * A Timeline's controls come and go as they always have, its cluster wrapping onto rows:
+ * Canvas's stay in sight, on one row, for now (Mat, 2026-11-01), and Timeline's are its
+ * own, unchanged as yet.
+ */
+playerSurface.controlsVisibility = useControlsVisibility;

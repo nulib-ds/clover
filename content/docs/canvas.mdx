@@ -38,6 +38,7 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
     },
     { prop: "placeholder", value: true },
     { prop: "controls", value: true },
+    { prop: "moreControls", value: "auto", options: ["auto", "always"] },
   ]}
 />
 
@@ -65,6 +66,7 @@ unless `options.gestures.scrollToZoom` is on.
 | `language`               | `string`                                                                        | The Root's, or the page's          | The language to read labels, Choices and annotations in.                                                                                                                                   |
 | `highContrast`           | `boolean`                                                                       | `false`                            | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. Inside a `Root`, the Root's too; on wherever the system asks for more contrast. |
 | `controls`               | `boolean \| { zoom, fullPage, rotation, reset, annotations, information, map }` | `true`                             | All of Clover's controls, none, or all but those set `false`.                                                                                                                              |
+| `moreControls`           | `"auto" \| "always"`                                                            | `"auto"`                           | When the view's controls (zoom, rotation, reset, full screen) wait behind More, at the end of the controls' one row: only where the row cannot hold them all, or always.                   |
 | `navPlace`               | `object`                                                                        | —                                  | Where it is, the Manifest's `navPlace`, which its Map control shows where its Canvases have none. In a `Root`, the Root's Manifest's.                                                      |
 | `navigator`              | `boolean`                                                                       | `false`                            | An overview of the whole image, to press or drag in.                                                                                                                                       |
 | `placeholder`            | `boolean`                                                                       | `true`                             | Open on the Canvas's `placeholderContainer`, where it has one.                                                                                                                             |
@@ -116,6 +118,33 @@ Use `src` for images that are not on a Canvas: plain URLs, or IIIF image service
   src="https://iiif.dc.library.northwestern.edu/iiif/3/bcb98b9f-4c44-4fd0-bfa9-673fb904a2b1"
   isTiledImage
   label="The Vanishing Race - Navaho"
+/>
+```
+
+</Example>
+
+### Controls behind More
+
+The controls stay on one row. Where the row cannot hold them all, the view's (zoom,
+rotation, reset and full screen) wait behind More, at its end, the others before it in their
+order. Pressed, More opens a tray of them beside the rest, and pressed again, closes it. Use `moreControls="always"` to keep them there however wide the Body is.
+
+<Example>
+<div style={{ height: 420 }}>
+  <CloverCanvas
+    src="https://iiif.dc.library.northwestern.edu/iiif/3/bcb98b9f-4c44-4fd0-bfa9-673fb904a2b1"
+    isTiledImage
+    label="The Vanishing Race - Navaho"
+    moreControls="always"
+  />
+</div>
+
+```jsx
+<Clover.Canvas
+  src="https://iiif.dc.library.northwestern.edu/iiif/3/bcb98b9f-4c44-4fd0-bfa9-673fb904a2b1"
+  isTiledImage
+  label="The Vanishing Race - Navaho"
+  moreControls="always"
 />
 ```
 

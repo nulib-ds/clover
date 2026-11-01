@@ -1,11 +1,14 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import type { CanvasControlsConfig } from "./Canvas.types";
 import type { ListedAnnotation } from "./Annotations";
 import { Comment, Information, Place } from "../Body/glyphs";
 import Button from "../../ui/Button";
 import type { ChoiceGroup, ChoiceSelections } from "./layout";
-import ControlCluster, { type ControlSpec } from "../../ui/ControlCluster";
+import ControlCluster, {
+  type ControlSpec,
+  renderControl,
+} from "../../ui/ControlCluster";
 import {
   Choice,
   Reset,
@@ -20,6 +23,7 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { localize } from "../../core/value";
 import { toggleFullscreen } from "../../lib/fullscreen";
 import useFullscreenSupported from "../../hooks/useFullscreenSupported";
+import useWithinFullscreen from "../../hooks/useWithinFullscreen";
 import { useLoaded } from "../../hooks/useLoaded";
 import { SHORTCUTS } from "../../ui/Tip";
 import type { CanvasRenderer } from "../../lib/renderer";
@@ -30,9 +34,24 @@ import type { CanvasRenderer } from "../../lib/renderer";
  */
 const loadAnnotationMenu = () => import("./AnnotationMenu");
 const loadChoiceMenu = () => import("./ChoiceMenu");
+// More, and the measuring that says when it is needed: any Canvas's, never a Timeline's.
+const loadMore = () => import("./More");
 
 /** OpenSeadragon's `zoomPerClick`. */
 const ZOOM_PER_CLICK = 2;
+
+/**
+ * The view's controls, which wait behind More where the row cannot hold them all (Mat,
+ * 2026-11-01: "the more should be + / - rotate, reset, and fullscreen controls").
+ */
+const VIEW = new Set<ControlSpec["key"]>([
+  "zoomIn",
+  "zoomOut",
+  "rotateRight",
+  "rotateLeft",
+  "reset",
+  "fullPage",
+]);
 
 interface CanvasControlsProps {
   /** The camera the zoom, rotation and reset controls move; none offers them. */
@@ -40,7 +59,13 @@ interface CanvasControlsProps {
   instance: string;
   config: Required<CanvasControlsConfig>;
   controlButtons?: ControlButtons;
-  hasPlaceholder?: boolean;
+  /** A placeholder's toggle (`PlaceholderToggle`), last of the Canvas's own. */
+  placeholder?: React.ReactNode;
+  /**
+   * That toggle is an image's, opening and closing its viewer: More, the tray of the
+   * view's controls opening and closing with it.
+   */
+  placeholderIsMore?: boolean;
   /** The Canvas's `Choice`s. With any, a control to pick among their items appears. */
   choices?: ChoiceGroup[];
   selections?: ChoiceSelections;
@@ -69,6 +94,10 @@ interface CanvasControlsProps {
   onPlaceToggle?: () => void;
   /** The language to read the Choices' labels in. The reader's, by default. */
   language?: string;
+  /** One row, the rest behind More: a Canvas's. A Timeline's wraps onto rows, as yet. */
+  fit?: boolean;
+  /** When the view's controls wait behind More: where the row is full, or always. */
+  more?: "auto" | "always";
   children?: React.ReactNode;
 }
 
@@ -76,13 +105,20 @@ interface CanvasControlsProps {
  * `Canvas`'s controls: the same cluster `Image` renders — markup, layout hooks and the
  * `controlButtons` contract — driven by click handlers instead of OpenSeadragon's id
  * binding. Ids keep the `<key>-<instance>` shape so `data-button` reads the same.
+ *
+ * One row, never wrapped (Mat, 2026-11-01): where they do not all fit, the view's (zoom,
+ * the turns, reset, full screen) wait behind More, at the end of the others (Choice and
+ * the Canvas's own: annotations, place, the `i`, a placeholder's toggle), which keep
+ * their order and stay in sight as its tray runs left from it (`More.tsx`). A host's
+ * own, after them, always keep theirs.
  */
 const Controls: React.FC<CanvasControlsProps> = ({
   renderer,
   instance,
   config,
   controlButtons,
-  hasPlaceholder,
+  placeholder,
+  placeholderIsMore = false,
   choices = [],
   selections = {},
   onSelect,
@@ -99,6 +135,8 @@ const Controls: React.FC<CanvasControlsProps> = ({
   placeOpen = false,
   onPlaceToggle,
   language,
+  fit = true,
+  more: moreWhen = "auto",
   children,
 }) => {
   const { t, langOf } = useCloverTranslation();
@@ -152,7 +190,14 @@ const Controls: React.FC<CanvasControlsProps> = ({
 
   // iPhone Safari cannot full-screen an element: the control is not offered there.
   const canFullscreen = useFullscreenSupported();
-  const controls = (isFullscreen: boolean): ControlSpec[] => {
+  const [cluster, setCluster] = useState<HTMLDivElement | null>(null);
+  /*
+   * Whether these controls are inside whatever is full screen, so the full-screen control
+   * names and draws the way out: the Viewer's element, or the Canvas's own.
+   */
+  const isFullscreen = useWithinFullscreen(cluster);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const controls = (): ControlSpec[] => {
     const specs: ControlSpec[] = [];
     const camera = renderer;
     if (config.zoom && camera) {
@@ -236,56 +281,143 @@ const Controls: React.FC<CanvasControlsProps> = ({
     }
     return specs;
   };
+  /*
+   * Full screen ends the view's controls, over every picture alike, whichever of them a
+   * Canvas offers: left of the Canvas's own, the `i` among them (Mat, 2026-10-29).
+   */
+  const specs = controls();
+  const view = [
+    ...specs.filter((spec) => spec.key !== "fullPage"),
+    ...specs.filter((spec) => spec.key === "fullPage"),
+  ].map((spec) => ({
+    id: spec.id,
+    view: VIEW.has(spec.key),
+    node: renderControl(spec, controlButtons),
+  }));
+  /*
+   * Not `ControlSpec`s: those are keyed by the Viewer's `ControlButtons`, and these
+   * controls are Canvas's alone, so they are not replaceable through `controlButtons`.
+   */
+  const own = [
+    showAnnotations && {
+      id: annotationsId,
+      view: false,
+      node: (
+        <Button
+          key="annotations"
+          id={annotationsId}
+          label={annotationsLabel}
+          lang={annotationsLang}
+          onClick={() => setAnnotationsOpen((open) => !open)}
+          expanded={annotationsOpen}
+          controls={annotationsMenuId}
+        >
+          <Comment />
+        </Button>
+      ),
+    },
+    showPlace && {
+      id: `place-${instance}`,
+      view: false,
+      node: (
+        <Button
+          key="place"
+          id={`place-${instance}`}
+          label={t("mapLabel")}
+          lang={langOf("mapLabel")}
+          onClick={onPlaceToggle}
+          expanded={placeOpen}
+          controls={placeId}
+        >
+          <Place />
+        </Button>
+      ),
+    },
+    showInformation && {
+      id: `information-${instance}`,
+      view: false,
+      node: (
+        <Button
+          key="information"
+          id={`information-${instance}`}
+          label={t("informationPanelTabsAbout")}
+          lang={langOf("informationPanelTabsAbout")}
+          onClick={onCaptionToggle}
+          expanded={captionOpen}
+          controls={captionId}
+        >
+          <Information />
+        </Button>
+      ),
+    },
+    Boolean(placeholder) && {
+      id: `placeholder-${instance}`,
+      view: false,
+      node: <React.Fragment key="placeholder">{placeholder}</React.Fragment>,
+    },
+  ].filter(
+    (item): item is { id: string; view: boolean; node: React.ReactElement } =>
+      Boolean(item),
+  );
+  const items = [...view, ...own];
+  // Whether they all fit, measured where More is, which loads for a Canvas alone.
+  const [fits, setFits] = useState(true);
+  const more = useLoaded(loadMore, fit);
+  const More = more?.More;
+  /*
+   * Behind More where the row is full, or always; until it arrives, all on the row. An
+   * image's placeholder toggle is More (Mat, 2026-11-01: "the placeholder toggle is the
+   * more controls button. it would both open the viewer … but also expand the controls
+   * at the same time … the placeholder toggle off would toggle off the viewer. likewise
+   * it would also always turn off controls deck"): its tray is open while the view is,
+   * its toggle at its end, wherever the Canvas offers the view's controls.
+   */
+  const always = moreWhen === "always" || placeholderIsMore;
+  const tucked =
+    (fits && !always) || !More ? [] : items.filter((item) => item.view);
+  const deck = placeholderIsMore && tucked.length > 0;
+  // Nothing behind it any more: it closes, so it comes back closed.
+  useEffect(() => {
+    if (!tucked.length) setMoreOpen(false);
+  }, [tucked.length]);
 
   return (
     <>
-      <ControlCluster
-        controls={controls}
-        controlButtons={controlButtons}
-        hasPlaceholder={hasPlaceholder}
-      >
+      <ControlCluster fit={fit} clusterRef={setCluster}>
         {/*
-          Not `ControlSpec`s: those are keyed by the Viewer's `ControlButtons`, and these
-          controls are Canvas's alone, so they are not replaceable through `controlButtons`.
+          The others in their order, then More, far right (Mat, 2026-11-01: "put it far
+          right"); open, its tray runs left from it, the others kept in sight beside it
+          ("make it so the other controls are still visible and don't disappear. just
+          expand the controls to the left").
         */}
-        {showAnnotations && (
-          <Button
-            id={annotationsId}
-            label={annotationsLabel}
-            lang={annotationsLang}
-            onClick={() => setAnnotationsOpen((open) => !open)}
-            expanded={annotationsOpen}
-            controls={annotationsMenuId}
+        {items
+          .filter(
+            (item) =>
+              !tucked.includes(item) &&
+              !(deck && item.id === `placeholder-${instance}`),
+          )
+          .map(({ node }) => node)}
+        {More && tucked.length > 0 && (
+          <More
+            instance={instance}
+            open={deck || moreOpen}
+            onOpenChange={setMoreOpen}
+            toggle={deck ? placeholder : undefined}
           >
-            <Comment />
-          </Button>
-        )}
-        {showPlace && (
-          <Button
-            id={`place-${instance}`}
-            label={t("mapLabel")}
-            lang={langOf("mapLabel")}
-            onClick={onPlaceToggle}
-            expanded={placeOpen}
-            controls={placeId}
-          >
-            <Place />
-          </Button>
-        )}
-        {showInformation && (
-          <Button
-            id={`information-${instance}`}
-            label={t("informationPanelTabsAbout")}
-            lang={langOf("informationPanelTabsAbout")}
-            onClick={onCaptionToggle}
-            expanded={captionOpen}
-            controls={captionId}
-          >
-            <Information />
-          </Button>
+            {tucked.map(({ node }) => node)}
+          </More>
         )}
         {children}
       </ControlCluster>
+      {more && fit && !always && cluster && (
+        <more.Fits
+          cluster={cluster}
+          ids={items.map(({ id }) => id)}
+          more={`more-${instance}`}
+          fits={fits}
+          onFits={setFits}
+        />
+      )}
       {/*
         The menus are the Canvas's own children, not the controls', as its information
         is: all three hang in one place, below the controls, and stay under them, so a

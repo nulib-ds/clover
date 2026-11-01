@@ -96,13 +96,69 @@ function Still({
 }
 
 /**
+ * The placeholder's toggle, named for what it opens and closes, as the Viewer's toggle
+ * is: "Close player", not a bare "Close" beside the caption's own (WCAG 2.4.6). An
+ * image's opens and closes with a magnifier, one of the row's controls, as the `i` and
+ * annotations are (Mat, 2026-11-01: "placeholder should not be a special case"), drawn
+ * there by `Controls.tsx`; a video's, before it opens, is Play in the middle of its
+ * still, drawn by `Placeholder`, and once open, the row's close control.
+ *
+ * Pressed, it goes from one place to the other (Play to the row, the row to Play): where
+ * it had focus, focus follows it to its new place (WCAG 2.4.3).
+ */
+export function PlaceholderToggle({
+  instance,
+  media,
+  active,
+  onToggle,
+}: Pick<PlaceholderProps, "instance" | "media" | "active" | "onToggle">) {
+  const { t, langOf } = useCloverTranslation();
+  const id = `placeholder-${instance}`;
+  const toggleKey = media
+    ? active
+      ? "playerPlay"
+      : "playerClose"
+    : active
+      ? "imageViewerOpen"
+      : "imageViewerClose";
+  return (
+    <Button
+      className="clover-canvas-placeholder-toggle"
+      id={id}
+      label={t(toggleKey)}
+      lang={langOf(toggleKey)}
+      onClick={(event) => {
+        const focused = document.activeElement === event.currentTarget;
+        onToggle();
+        if (focused)
+          requestAnimationFrame(() => document.getElementById(id)?.focus());
+      }}
+    >
+      {/* A video's opens as play; an image's opens and closes with a magnifier. */}
+      {media ? (
+        active ? (
+          <Play />
+        ) : (
+          <Close />
+        )
+      ) : active ? (
+        <OpenViewer />
+      ) : (
+        <CloseViewer />
+      )}
+    </Button>
+  );
+}
+
+/**
  * A Canvas's `placeholderContainer`, shown as the Viewer shows it: a still image fitted
  * to the Body and centered, in place of the Canvas until the reader opens it. Nothing
  * of the Canvas is fetched, and none of its controls shown, until then.
  *
- * The toggle in the top right opens the Canvas and, once open, goes back to the
- * placeholder; a click on the image opens it too. Several Canvases with placeholders (a
- * spread) are fitted together as one picture, edge to edge.
+ * Its toggle (`PlaceholderToggle`), among the row's controls, opens the Canvas and, once
+ * open, goes back to the placeholder; a click on the image opens it too. A video's is
+ * Play in the middle of the still, drawn here, until it opens. Several Canvases with
+ * placeholders (a spread) are fitted together as one picture, edge to edge.
  */
 const Placeholder: React.FC<PlaceholderProps> = ({
   instance,
@@ -114,14 +170,6 @@ const Placeholder: React.FC<PlaceholderProps> = ({
   onToggle,
   request,
 }) => {
-  const { t, langOf } = useCloverTranslation();
-  const toggleKey = media
-    ? active
-      ? "playerPlay"
-      : "playerClose"
-    : active
-      ? "imageViewerOpen"
-      : "imageViewerClose";
   // Each image's share of the run, at a common height (a row) or width (a column).
   const shares = stills.map(({ width, height }) =>
     vertical ? height / width : width / height,
@@ -131,30 +179,15 @@ const Placeholder: React.FC<PlaceholderProps> = ({
 
   return (
     <>
-      {/*
-       * Named for what it opens and closes, as the Viewer's toggle is: "Close player",
-       * not a bare "Close" beside the caption's own (WCAG 2.4.6).
-       */}
-      <Button
-        className="clover-canvas-placeholder-toggle"
-        id={`placeholder-${instance}`}
-        label={t(toggleKey)}
-        lang={langOf(toggleKey)}
-        onClick={onToggle}
-      >
-        {/* A video's opens as play; an image's opens and closes with a magnifier. */}
-        {media ? (
-          active ? (
-            <Play />
-          ) : (
-            <Close />
-          )
-        ) : active ? (
-          <OpenViewer />
-        ) : (
-          <CloseViewer />
-        )}
-      </Button>
+      {/* A video's Play, in the middle of its still, until it opens. */}
+      {media && active && (
+        <PlaceholderToggle
+          instance={instance}
+          media
+          active
+          onToggle={onToggle}
+        />
+      )}
       {(active || lingering) && (
         <div
           aria-hidden={active ? undefined : true}

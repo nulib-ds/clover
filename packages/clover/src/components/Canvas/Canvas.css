@@ -165,6 +165,9 @@
 /* ============================ Controls ============================= */
 
 /*
+ * A Canvas's controls stay in sight for now (above, Mat, 2026-11-01); what follows is how
+ * a Scene's and a Timeline's come and go, on the same figure, and how a Canvas's did.
+ *
  * The controls (the cluster, the navigator, a video or sound's transport and a scrim
  * behind them) come and go together, as the Player's control bar does: shown on pointer
  * activity (`data-controls="visible"`, from `useControlsVisibility`), faded after a pause
@@ -203,6 +206,18 @@
 }
 
 /*
+ * For now a Canvas's controls stay in sight, taking presses, never fading (Mat,
+ * 2026-11-01: "let's not [have] controls fade back away so that we can better design
+ * this"): no mystery press on the picture to find them on a phone. A Scene's and a
+ * Timeline's, on the same figure, still come and go as below (`data-controls`).
+ */
+.clover-canvas:not([data-controls]) {
+  --clover-controls-shown: 1;
+  --clover-controls-events: auto;
+  --clover-controls-timing: var(--clover-controls-enter);
+}
+
+/*
  * The cluster is the top layer, over the popups it opens (2, `ControlMenu.css`), so
  * a control's Tip is never covered by one: each control is a layer of its own (it fades
  * and tucks), so its Tip can rise no higher than the control does. The cluster's own box
@@ -212,6 +227,269 @@
 .clover-canvas > .clover-canvas-controls {
   z-index: 3;
   pointer-events: none;
+}
+
+/*
+ * A Canvas's cluster is one row, never wrapped (Mat, 2026-11-01: "I don't like when
+ * controls wrap lines"), as wide as the Body leaves it: the controls that do not fit wait
+ * behind More, at its end (`More.tsx`, which measures this row). It starts clear of what
+ * holds the Body's top start: the way out of full screen, and a navigator.
+ */
+.clover-canvas > .clover-canvas-controls[data-fit] {
+  left: var(--clover-canvas-controls-inset);
+  flex-wrap: nowrap;
+  /* `xs` apart, its tray's too (Mat, 2026-11-01: "tighter gap on controls"). */
+  gap: var(--clover-space-xs);
+}
+
+/* The panel's toggle, in its corner, as near as the rest of the row are. */
+.clover-canvas
+  > .clover-canvas-controls[data-fit]:has(> [data-button="panel"]) {
+  padding-right: calc(var(--clover-control) + var(--clover-space-xs));
+}
+
+/* Right to left, its row starts at the right, where the cluster is, all the same. */
+.clover-canvas > .clover-canvas-controls[data-fit]:dir(rtl) {
+  justify-content: flex-start;
+}
+
+.clover-canvas[data-exit] > .clover-canvas-controls[data-fit] {
+  left: calc(
+    var(--clover-canvas-controls-inset) + var(--clover-control) +
+      var(--clover-space-s)
+  );
+}
+
+.clover-canvas[data-has-navigator="true"] > .clover-canvas-controls[data-fit] {
+  left: calc(
+    var(--clover-canvas-controls-inset) + var(--clover-space-2xl) +
+      var(--clover-space-xl) + var(--clover-space-s)
+  );
+}
+
+/*
+ * More and its tray (`More.tsx`), at the end of the Canvas's controls. Open, the tray
+ * runs left from where More was, the other controls kept beside it: the view's controls,
+ * then More, the close, at its end, `xs` apart as every control on the row is (Mat,
+ * 2026-11-01: "normalize control gaps"; "tighter gap on controls"), one group on one
+ * ground, the Canvas's own, between and around them all (Mat, 2026-11-01: "a semi
+ * transparent bg between all"; "use the bg for the canvas"), its edge `2xs` out from
+ * theirs, never moving them. Too narrow for them all, its controls scroll across rather
+ * than wrap or cut one off (WCAG 1.4.10): from its start, faded at an end with more past
+ * it (`data-past`), a control reached by Tab brought clear of the fade, room kept under
+ * them for their Tips and around them for their rings, which a box that scrolls would
+ * cut. Only the controls take a press, not the ground between them.
+ */
+.clover-canvas > .clover-canvas-controls > .clover-canvas-more {
+  --tray: var(--clover-space-2xs);
+  --deck-ring: 3px;
+  display: flex;
+  flex: 0 1 auto;
+  gap: var(--clover-space-xs);
+  min-width: 0;
+  border-radius: var(--clover-radius-pill, 2rem);
+  pointer-events: none;
+}
+
+.clover-canvas > .clover-canvas-controls > .clover-canvas-more[data-open] {
+  margin: calc(-1 * var(--tray));
+  /*
+   * Its ring stands `xs` clear of the controls before it, as they stand of each other
+   * (Mat, 2026-11-01: "the other icons can push over a step further in the gap"): the
+   * row's gap, then the ring's own width before it.
+   */
+  margin-inline-start: var(--deck-ring);
+  padding: var(--tray);
+  /*
+   * The Canvas's own ground, as its Body and its full screen have (Mat, 2026-11-01:
+   * "instead of a dark background for controls deck. use the bg for the canvas"; "use
+   * the bg but retain some transparency and the bg blur"): the page's light under its
+   * wash, clear enough that the blurred picture shows through.
+   */
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-secondary, #fff) 40%,
+    transparent
+  );
+  background-image: linear-gradient(
+    var(--clover-canvas-wash),
+    var(--clover-canvas-wash)
+  );
+  /*
+   * Edged as Items edges an item under the pointer (Mat, 2026-11-01: "instead of the
+   * inset, add a light 3px outline. go half accent like we do for the items hover"): 3px
+   * of the accent at half strength, on its edge. The picture behind it blurred (Mat,
+   * 2026-11-01: "blur bg behind the control toggle deck"), so its controls stand on a
+   * calm ground, whatever is under them.
+   */
+  outline: var(--deck-ring) solid
+    color-mix(in srgb, var(--clover-color-accent, #0065c3) 50%, transparent);
+  -webkit-backdrop-filter: blur(var(--clover-space-xs));
+  backdrop-filter: blur(var(--clover-space-xs));
+}
+
+.clover-canvas-more > button,
+.clover-canvas-more-list > * {
+  pointer-events: var(--clover-controls-events);
+}
+
+/*
+ * Opening, it comes out of its toggle, swiftly (Mat, 2026-11-01: "play around with
+ * swiftly animating the opening of this"): its ground drawn out from the toggle, its
+ * controls fading in with it, never moved, so where they rest is what `More.tsx`
+ * measures. Closing, it goes at once. Right to left, the toggle is
+ * at the left, and it comes out the other way. Not where less motion is asked for.
+ */
+.clover-canvas > .clover-canvas-controls > .clover-canvas-more[data-open] {
+  animation: clover-more-open 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clover-canvas
+  > .clover-canvas-controls
+  > .clover-canvas-more[data-open]:dir(rtl) {
+  animation-name: clover-more-open-rtl;
+}
+
+.clover-canvas-more[data-open] > .clover-canvas-more-list > * {
+  animation: clover-more-in 220ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/*
+ * Drawn out to its ring, 3px past its edge, so the ring comes with it, never after.
+ */
+@keyframes clover-more-open {
+  from {
+    clip-path: inset(
+      calc(-1 * var(--deck-ring)) calc(-1 * var(--deck-ring))
+        calc(-1 * var(--deck-ring))
+        calc(100% - var(--clover-control) - 2 * var(--tray)) round
+        var(--clover-radius-pill, 2rem)
+    );
+  }
+  to {
+    clip-path: inset(
+      calc(-1 * var(--deck-ring)) round var(--clover-radius-pill, 2rem)
+    );
+  }
+}
+
+@keyframes clover-more-open-rtl {
+  from {
+    clip-path: inset(
+      calc(-1 * var(--deck-ring))
+        calc(100% - var(--clover-control) - 2 * var(--tray))
+        calc(-1 * var(--deck-ring)) calc(-1 * var(--deck-ring)) round
+        var(--clover-radius-pill, 2rem)
+    );
+  }
+  to {
+    clip-path: inset(
+      calc(-1 * var(--deck-ring)) round var(--clover-radius-pill, 2rem)
+    );
+  }
+}
+
+@keyframes clover-more-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clover-canvas > .clover-canvas-controls > .clover-canvas-more[data-open],
+  .clover-canvas-more[data-open] > .clover-canvas-more-list > * {
+    animation: none;
+  }
+}
+
+.clover-canvas-more-list:not([hidden]) {
+  --ring: var(--clover-space-2xs);
+  /*
+   * Room under its controls for a Tip, wrapped to the tray where the tray is narrow, a
+   * few lines tall: the tray never scrolls up and down to show one (below), so one taller
+   * than its room would be cut. Only the controls take a press, so the room takes none
+   * (but on a touch screen, below).
+   */
+  --tip-room: calc(2 * var(--clover-space-2xl));
+  --fade: var(--clover-space-l);
+  display: flex;
+  gap: var(--clover-space-xs);
+  min-width: 0;
+  margin: calc(-1 * var(--ring)) calc(-1 * var(--ring))
+    calc(-1 * var(--tip-room));
+  padding: var(--ring) var(--ring) var(--tip-room);
+  scrollbar-width: none;
+}
+
+/*
+ * It scrolls only while its controls run past it (`data-past`, `More.tsx`): a box that
+ * scrolls always could be nudged by the room its hidden Tips hang past the last control,
+ * its first cut off and its last short of the close (Mat, 2026-11-01: "it feels like
+ * there are pixels off here").
+ */
+.clover-canvas-more-list[data-past] {
+  /*
+   * Across only (Mat, 2026-11-01: "see how the icons shift"): a box that scrolls across
+   * would scroll down too, by a wheel or a swipe, once a Tip wrapped tall hung past its
+   * room, its controls moved up and cut off at its top.
+   */
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-padding-inline: var(--fade);
+}
+
+.clover-canvas-more-list::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * Its controls fade at an end with more past it, their rings too; a Tip under them,
+ * clear of their rings, never does.
+ */
+.clover-canvas-more-list[data-past] {
+  mask-image:
+    linear-gradient(
+      to right,
+      var(--left, #000),
+      #000 var(--fade),
+      #000 calc(100% - var(--fade)),
+      var(--right, #000)
+    ),
+    linear-gradient(#000, #000);
+  mask-position:
+    0 0,
+    0 100%;
+  mask-size:
+    100% 100%,
+    100% calc(var(--tip-room) - var(--ring));
+  mask-repeat: no-repeat;
+}
+
+.clover-canvas-more-list[data-past~="left"] {
+  --left: transparent;
+}
+
+.clover-canvas-more-list[data-past~="right"] {
+  --right: transparent;
+}
+
+/*
+ * On a touch screen (Mat, 2026-11-01: "make sure this thing works in a real world env"),
+ * where Safari on iOS scrolls only a box that takes a press itself, the tray takes them
+ * while it scrolls, and so keeps no room under its controls, which would take presses
+ * meant for the picture: nor Tips to fill it, which a touch shows only once a control is
+ * pressed, and then holds.
+ */
+@media (hover: none) {
+  .clover-canvas-more-list[data-past] {
+    --tip-room: var(--ring);
+    pointer-events: var(--clover-controls-events);
+  }
+
+  .clover-canvas-more-list[data-past] .clover-tip {
+    display: none;
+  }
 }
 
 /*
@@ -234,16 +512,21 @@
 }
 
 /*
- * Nor does the information control (the `i`), as a placeholder's toggle never does: what
- * the Canvas says of itself (its label, summary, metadata) is always a press away. Nor
- * the annotations control, over a picture or a recording: what is said of it, likewise.
+ * Nor does the information control (the `i`): what the Canvas says of itself (its label,
+ * summary, metadata) is always a press away. Nor the annotations control, over a picture
+ * or a recording: what is said of it, likewise. Nor a placeholder's toggle, the way in
+ * and back out.
  * Nor, paused, a recording's (or an animation's) Play, at the start of its bar: playing is
  * always a press away, in one place. Playing, its Pause goes with the rest (Mat,
  * 2026-10-19).
  */
 .clover-canvas
   > .clover-canvas-controls
-  > :is([data-button="information"], [data-button="annotations"]),
+  > :is(
+    [data-button="information"],
+    [data-button="annotations"],
+    [data-button="placeholder"]
+  ),
 .clover-canvas-transport-bar > [data-button="play"] {
   --clover-controls-shown: 1;
   --clover-controls-events: auto;
@@ -265,7 +548,8 @@
       > :not(
         [data-button="panel"],
         [data-button="information"],
-        [data-button="annotations"]
+        [data-button="annotations"],
+        [data-button="placeholder"]
       ):hover,
     > .clover-canvas-navigator:hover,
     .clover-canvas-transport-seek-area:hover,

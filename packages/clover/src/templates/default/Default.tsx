@@ -53,6 +53,12 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    * `--clover-body-height` tall, and the layout as tall as it needs.
    */
   fill?: boolean;
+  /**
+   * When the Body's view controls (zoom, the turns, reset, full screen) wait behind
+   * More: `"auto"` (the default), only where its row cannot hold them all; `"always"`.
+   * The Body's `moreControls`.
+   */
+  moreControls?: "auto" | "always";
 };
 
 /**
@@ -80,6 +86,7 @@ export function Default({
   singleItem = false,
   storageKey = "clover-template-default",
   fill = false,
+  moreControls,
   ...root
 }: DefaultProps) {
   const panes = useRef<HTMLElement>(null);
@@ -153,7 +160,10 @@ export function Default({
           )}
           {/* The Body shows the loading; announced here, nothing moves. */}
           <Clover.Status loading={false} />
-          <Clover.Body className="clover-template-default-body">
+          <Clover.Body
+            className="clover-template-default-body"
+            moreControls={moreControls}
+          >
             {panel && !docked && pane.toggle}
           </Clover.Body>
           <div className="clover-template-default-rail">

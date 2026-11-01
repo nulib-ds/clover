@@ -6,9 +6,12 @@ import type { CanvasRenderer } from "../../lib/renderer";
  * it, and it imports nothing, so its chunk shares nothing (1 kB).
  */
 
-/** The Canvas's own controls over the Body, which a hotspot reached by Tab is kept clear of. */
+/**
+ * The Canvas's own controls over the Body, which a hotspot reached by Tab is kept clear
+ * of: the cluster's each, never its box, which runs the Body's width as its row may.
+ */
 const CONTROLS = [
-  ".clover-canvas-controls",
+  ".clover-canvas-controls > *",
   ".clover-canvas-navigator",
   ".clover-canvas-transport",
   '.clover-canvas-caption[data-open="true"]',
@@ -23,8 +26,8 @@ const overlap = (a: number, b: number, c: number, d: number) => a < d && c < b;
 /**
  * Pan, no further than needed, so the focused hotspot sits in the part of the Body clear
  * of the controls (WCAG 2.4.11): the Body less each of the controls beside the hotspot,
- * cut away from the edge it hangs on (the cluster from the top, its column on a phone
- * from the side, the transport from the bottom). A piece cuts only once the hotspot is
+ * cut away from the edge it hangs on (the cluster from the top, the transport from the
+ * bottom). A piece cuts only once the hotspot is
  * beside it, where cutting by another has moved it: the cluster only above a hotspot
  * under it. So one clear of the controls stays where it is, and one larger than its part
  * is centered in it. An open caption may leave too little; Escape closes it without

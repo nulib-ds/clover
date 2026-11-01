@@ -64,6 +64,7 @@ export interface CloverCanvasOptions {
    * stops moving, as the Player's `hideDelay`. Default 2000; `Infinity` keeps them once
    * shown. A finger, or a pen that does not hover, has no timer: a tap on the picture
    * shows them, and another hides them. Focus that no press brought holds them too.
+   * A Timeline's: a Canvas's controls stay in sight, for now (Mat, 2026-11-01).
    */
   hideDelay?: number;
   /** A time-based Canvas's video or sound. */
@@ -191,6 +192,13 @@ export interface CloverCanvasProps {
    * the handle `onReady` passes (`home()`, `zoomBy(0.5)`) (WCAG 2.5.1).
    */
   controls?: boolean | CanvasControlsConfig;
+  /**
+   * When the view's controls (zoom in and out, the two turns, reset, full screen) wait
+   * behind More, at the end of the controls' one row: `"auto"` (the default), only where
+   * the row cannot hold them all; `"always"`, wherever the Canvas offers any, so the row
+   * holds only the rest. Pressed, More opens a tray of them beside the rest.
+   */
+  moreControls?: "auto" | "always";
   /** Replace any control with your own component — the `Viewer`'s `controlButtons`. */
   controlButtons?: ControlButtons;
   /**

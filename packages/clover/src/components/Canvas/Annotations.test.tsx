@@ -535,12 +535,21 @@ describe("a hotspot reached by Tab", () => {
     const figure = document.createElement("figure");
     figure.className = "clover-canvas";
     document.body.appendChild(figure);
+    // The cluster's controls are pieces inside the cluster's box.
+    const cluster = document.createElement("div");
+    cluster.className = "clover-canvas-controls";
+    cluster.getBoundingClientRect = () =>
+      rect({ left: 24, top: 16, width: 960, height: 36 });
+    figure.appendChild(cluster);
     for (const [className, box] of Object.entries(controls)) {
       const piece = document.createElement("div");
       piece.className = className;
       if (className === "clover-canvas-caption") piece.dataset.open = "true";
       piece.getBoundingClientRect = () => rect(box);
-      figure.appendChild(piece);
+      (className.startsWith("clover-canvas-controls")
+        ? cluster
+        : figure
+      ).appendChild(piece);
     }
     const { buttons, layer, renderer } = await renderHotspots(
       placed,
@@ -562,9 +571,14 @@ describe("a hotspot reached by Tab", () => {
   /** As a Tab to it does, at once: the hotspot loads it with its first focus. */
   const tab = ({ button, renderer }: Awaited<ReturnType<typeof setup>>) =>
     panClearOfControls(renderer, button);
-  // The cluster along the top, at its end, as on a desktop.
+  // The cluster's row along the top, at its end, as on a desktop.
   const cluster = {
-    "clover-canvas-controls": { left: 700, top: 16, width: 284, height: 36 },
+    "clover-canvas-controls-row": {
+      left: 700,
+      top: 16,
+      width: 284,
+      height: 36,
+    },
   };
 
   it("leaves the view alone when it is clear of the controls already", async () => {
@@ -586,20 +600,13 @@ describe("a hotspot reached by Tab", () => {
     expect(hotspot.panTo).toHaveBeenCalledWith({ x: 500, y: 268 });
   });
 
-  it("clears the cluster from the side when it is a column, as on a phone", async () => {
+  it("is not kept from the room the cluster's box spans beside its controls", async () => {
     const hotspot = await setup(
-      { left: 960, top: 200, width: 20, height: 20 },
-      {
-        "clover-canvas-controls": {
-          left: 948,
-          top: 16,
-          width: 36,
-          height: 300,
-        },
-      },
+      { left: 100, top: 20, width: 40, height: 20 },
+      cluster,
     );
     tab(hotspot);
-    expect(hotspot.panTo).toHaveBeenCalledWith({ x: 532, y: 300 });
+    expect(hotspot.panTo).not.toHaveBeenCalled();
   });
 
   it("leaves one clear of an open caption alone, however far the caption reaches", async () => {

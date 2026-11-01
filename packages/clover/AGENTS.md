@@ -608,7 +608,13 @@ every rule below.
   the end-to-end suite answers its copies, never from the deployed site (Mat, 2026-10-28:
   "lean on local mocks"); after `npm run build:mocks`, it measures what was written.
 - The sizes are measured as a Vite app builds for production (`build/consumer-bundle.mjs`:
-  Rollup, minified, React external), not with esbuild. Through the package entry,
+  Rollup, minified, React bundled in a chunk of its own and never counted), not with
+  esbuild. React is bundled, not left external, so Clover's chunks reach it as an app's
+  do: external, they read it by name and measured a few hundred bytes under what a
+  browser fetches (2026-11-01, found by `check:first-view`). The browser check leaves
+  out of a part's figure the upgrader and the upgrade step with it (`upgrader-`,
+  `upgrade-`, `keep-fragments-` chunks), which a Presentation 4 resource never loads;
+  a new chunk of the upgrade's own gets its name there. Through the package entry,
   esbuild's code splitting counts a module as reachable by its re-export alone, even
   once tree shaking drops it, so any lazy chunk (the Viewer's `Default`) drags the
   modules it shares up front. Measured that way, every import from `@nulib/clover`,
@@ -963,7 +969,8 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   reads embedded pages with `readPage` for that reason).
 - **The `i`, the annotations control and a paused Play never fade** (Mat, 2026-10-19),
   as the panel toggle and a placeholder's toggle do (`[data-button="information"]`,
-  `[data-button="annotations"]`, and a transport bar's `[data-button="play"]`, in
+  `[data-button="annotations"]`, `[data-button="placeholder"]`, and a transport bar's
+  `[data-button="play"]`, in
   `Canvas.css`), over a picture or a recording; playing, its Pause fades with the rest
   (Mat: only while paused). For Play, the transport fades by its parts (its
   `::before` scrim, which carries every scrim, sound's too; its seek area; each of its
@@ -1667,8 +1674,10 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     planner, which paints the coarser level beneath it, and the frame loop runs again.
     Without it, a burst of tiles cost 10–30 ms in one frame at 4–6× CPU throttling.
     Backends report residency through `has(key)`.
-- Controls render `src/ui/ControlCluster.tsx` (copied from 3.x `Image`'s controls) with
-  click handlers. `ControlButtons` (`src/ui/controlButtons.ts`) includes `choice`.
+- Controls render into `src/ui/ControlCluster.tsx`, the cluster's box and its hooks
+  (copied from 3.x `Image`'s controls), which a Scene's `i` shares: `Canvas/Controls.tsx`
+  writes the controls (`renderControl`, with click handlers) and lays them out (below).
+  `ControlButtons` (`src/ui/controlButtons.ts`) includes `choice`.
   Labels come from `useCloverTranslation` (`t`), each with `lang={langOf(key)}`: see the
   root AGENTS.md's i18n section. `useClusterReach` (`src/ui/useClusterReach.ts`) writes
   how far the cluster's controls reach, `--clover-canvas-controls-width` and `-height`,
@@ -1678,13 +1687,87 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   then hangs them from the top, beside the cluster). It measures the controls, not the
   cluster's box, which the pinned panel toggle's room is part of; the box itself takes
   no presses.
-- **Rows at every size, never a column** (Mat, 2026-10-20: a column wrapped onto columns
-  in a short Body on a phone, jumbled, the panel toggle mid-pack). The cluster is a row at
-  the top end that wraps onto more rows, each right-aligned, in DOM order (WCAG 1.3.2,
-  2.4.3). The panel toggle is out of the row (`position: absolute` at the cluster's top
-  end, `padding-right` keeping its room; twice that with a placeholder's toggle beside
-  it, `Placeholder.css`), so it is top right at every size. No column rules for phones
-  (once `@media (max-width: 575px)`) remain; do not bring one back.
+- **One row, never wrapped** (Mat, 2026-11-01: "I don't like when controls wrap lines …
+  have a (More...) style button"; and, as its column was tried that day, "make it so the
+  more expands a row out where other items are, and doesn't extend a line down. there
+  should be a back button to see other options. the more should be + / - rotate, reset,
+  and fullscreen controls"; it replaces rows that wrapped, 2026-10-20, and the column
+  before them). A Canvas's cluster (`data-fit`) spans the Body's width, less its inset,
+  the way out of full screen and a navigator, and holds one row at its end. Where the
+  Canvas's controls all fit (`Fits`, measured as the Body's width changes and as controls
+  come and go, each control's width read while it is laid out), they are the row.
+  `Canvas/More.tsx` holds More and that measuring, loaded as a Canvas draws its controls
+  (`useLoaded`), never with a Timeline's; until it arrives the row holds them all.
+  Where not, the view's (`VIEW`, `Controls.tsx`: zoom in and out, the two turns, reset,
+  full screen) wait behind More (`more-<instance>`, `canvasMoreControls`), at the end of
+  the others (Choice and the Canvas's own: annotations, place, the `i`, a placeholder's
+  toggle), which keep their order (Mat, 2026-11-01: "let's not cause other items to lose
+  their ordering"; "put it far right", after it stood at their start that day); a host's
+  own come after it and always keep their places.
+  `moreControls` says when (Mat, 2026-11-01: "only when full but add prop to
+  canvas/body/templates to allow implementer to set as `auto` (default) or `always`"):
+  `"auto"`, where they do not all fit; `"always"`, wherever the Canvas offers any (no
+  measuring then). Body hands it to Canvas alone (a Timeline's and a Scene's controls
+  take none), and Default, Document (`Sheets`) and the Gallery's lightbox
+  (`LightboxView`) to their Body; `more-controls` on `<clover-canvas>`, `<clover-body>`
+  and `<clover-viewer>`.
+  - More is a disclosure (`aria-expanded`, `aria-controls`), its glyph a placeholder's
+    toggle's, the magnifier, + to open and − while open (Mat, 2026-11-01: "make icon
+    always the placeholder toggle"; an ellipsis, plus-minus, sliders, move arrows, a pad,
+    a ring, viewfinders and a picture in one were shown that day). Pressed, by Enter or
+    Space too, its tray opens where More was, running left: the view's controls (a group
+    named as More is), then More, the close, at its end (Mat, 2026-11-01: "the close
+    should be on the right. and the controls should extend[] to [the] left side of things
+    as long as there is room"), in the DOM's order too, focus kept on More as it moves in
+    the page; the others stay in sight to its right (Mat, 2026-11-01: "make it so the
+    other controls are still visible and don't disappear. just expand the controls to the
+    left. let's see but be prepared to revert"; until then the tray took their place), the
+    tray taking what room the row has left; `xs` apart, as every control on the row is
+    (Mat, 2026-11-01: "normalize control gaps"; "tighter gap on controls"), on one ground
+    between and around them all, `2xs` past them, edged by 3px of the accent at half
+    strength, as Items edges an item under the pointer ("instead of the inset, add a light
+    3px outline. go half accent like we do for the items hover"; a soft inset shade
+    before), the ring `xs` clear of the controls before it, as they are of each other
+    ("the other icons can push over a step further in the gap"), the picture behind it
+    blurred ("blur bg behind the control toggle deck"; the tray is no header, which stay
+    solid), opening swiftly out of its toggle (`clover-more-open`, its ground drawn out
+    and its controls fading in, never moved, as `More.tsx` measures where they rest,
+    220ms, none where less motion is asked for; closing at once), on the Canvas's own
+    ground, see-through (40%; "make tray bg even more subtle. aim under 50%") ("instead of
+    a dark background for controls deck. use the bg for the canvas"; "use the bg but
+    retain some transparency and the bg blur"; the controls' fill at 40% before; Mat,
+    2026-11-01: "the more tray popping out shows the zoom/pan controls to be more
+    obviously connect[ed] … a semi transparent bg between all"; a Back with a caret, tried
+    first, "doesn't make sense"). More, or Escape in the tray, closes it, focus to More.
+    The tray stays while its controls are pressed and the picture is moved. Opening, it
+    closes the popup open (`useOneOpen`), all of them the others'; one opening leaves it
+    be. More's close is where More was, so nothing moves under the pointer (a hold-off for
+    a double click's second press, as a split's bar has, went with the tray that took the
+    row's place).
+  - A tray too narrow for them all (a phone's Body) scrolls across
+    (`.clover-canvas-more-list`), never wraps or cuts one off: faded at an end with more
+    past it (`data-past`), room kept under it for the Tips and around it for the rings,
+    and a control reached by Tab brought clear of the fade (WCAG 2.4.7, 2.4.11). Its
+    fades, the reveal and how far it scrolls are reckoned from where its controls end,
+    never from what it can scroll, which a shown Tip hanging past them adds to: so
+    reckoned, it once scrolled past full screen, into empty ground (Mat, 2026-11-01).
+    It scrolls across only (`overflow-y: hidden`, and `scrollTop` put back): a Tip
+    wrapped tall in a narrow tray once let a wheel scroll it down, its controls moved up
+    and cut off (Mat, 2026-11-01: "see how the icons shift"). Its room is a few lines
+    tall, so such a Tip shows whole, the fades never on it. A touch screen's spring past
+    an end is left to the browser, never pulled back as it springs.
+  - On a touch screen (`hover: none`), the scrolling tray takes presses itself
+    (Safari on iOS scrolls no box whose own `pointer-events` is none, its controls'
+    `auto` notwithstanding), so it keeps no room under them, which would take presses
+    meant for the picture, and shows no Tips. Tried in the iOS Simulator (Mat,
+    2026-11-01: "make sure this thing works in a real world env").
+  - A control the change of room takes away hands focus on: to itself where it is drawn
+    again, else to More (WCAG 2.4.3).
+  - `panClearOfControls` keeps a hotspot clear of each of the cluster's controls, never
+    the cluster's box, which spans the Body.
+  - The panel toggle is out of the row (`position: absolute` at the cluster's top end,
+    `padding-right` keeping its room), so it is top right at every size. A Timeline's cluster and a
+    Scene's are as they were: rows that wrap.
 - IIIF text in the Canvas (the caption's label, Choice's legend and items, the
   placeholder's alt, the viewport's name, hotspots) is read with `localize()` in the
   Canvas's `language` (Connected passes the Root's) and carries its `lang`. The viewport
@@ -1700,6 +1783,20 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   - For hosts, `src/core/sequence.ts` (`groupViews`) groups a Manifest into views by
     `behavior`. It is the only sequence implementation. `paged` must match
     `@iiif/helpers`' `getManifestSequence`.
+- **For now a Canvas's controls stay in sight** (Mat, 2026-11-01: "let's not [have]
+  controls fade back away so that we can better design this"; and "I don't like controls
+  not being visible on smaller viewports as it requires a mystery click"): `CanvasView`
+  calls `useControlsVisibility` only through its surface (`controlsVisibility` on the
+  `MakeSurface`, `Canvas/surface.ts`), which only a Timeline's gives
+  (`Timeline/playerSurface.ts`), so a Canvas's figure has no `data-controls`, reads no
+  `options.hideDelay`, and carries none of the hook's code; and `Canvas.css` holds
+  `--clover-controls-shown: 1` on `.clover-canvas:not([data-controls])`: the cluster,
+  the navigator, the scrim and a recording's transport alike. A Timeline's controls (on
+  `CanvasView`, its cluster wrapping onto rows, `fit` off) and a Scene's still come and go
+  as follows, and a Canvas's would again with the hook back on `rendererSurface`. The
+  top scrim is drawn only over video and sound (`media`): over an image, the controls'
+  own fill is enough (Mat, 2026-11-01: "remove the shadow/scrim on canvas for images.
+  keep it still for video").
 - The controls follow the Player for a mouse, or a pen that hovers (`isHovering`: a pen
   `pointermove` with `buttons === 0`). `useControlsVisibility` sets
   `data-controls="visible"` on its activity and hides them after `hideDelay`. A finger,
@@ -1866,7 +1963,20 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     asserts it.
 - A shown Canvas with a `placeholderCanvas` opens on `Placeholder.tsx`. This is a still
   (`placeholderStill()` in `layout.ts`) fitted and centered with container units, and a
-  toggle in the top right (the Viewer's magnifier, then a ×).
+  toggle (the Viewer's magnifier, then a ×, `PlaceholderToggle`). The toggle is one of
+  the row's controls, last of the Canvas's own, after the `i` (Mat, 2026-11-01:
+  "placeholder should not be a special case. it should be treated like metadata i and
+  annotations"), kept beside More's tray as they are: drawn by `Controls.tsx` from
+  the placeholder's own chunk (`React.lazy` in `CanvasView`), never a figure's corner of
+  its own, and the row is drawn for it alone where nothing else shows,
+  `controls={false}` too, as it is the way in. An image's is More as well (Mat,
+  2026-11-01: "the placeholder toggle is the more controls button. it would both open the
+  viewer … but also expand the controls at the same time … the placeholder toggle off
+  would toggle off the viewer. likewise it would also always turn off controls deck"):
+  `placeholderIsMore`, so the view's controls are always behind it, its tray open while
+  the view is, the toggle at its end in More's place (More's `toggle`), with no More,
+  Escape or `useOneOpen` of the tray's own, and no measuring. A video's is not: its
+  view's controls are its transport's.
   - Until it is opened, it holds back everything else: `setImages`, pan and zoom,
     hotspots, `Choice` and `MediaBody`. Two controls stay beside the toggle: the `i`
     control, and the annotations menu (Mat, 2026-10-19), which lists the annotations as
@@ -1878,8 +1988,10 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   - The still lingers, inert, until the renderer's `open` event. `open` fires once the
     coarsest tiles are decoded, so opening never flashes an empty Body.
   - For video and sound, the toggle is a 4rem play button in the center ("think
-    YouTube"). Opening passes `autoPlay` to `MediaBody`, because that press was a
-    press of play. Once open, the toggle is the × in the top right. Safari may refuse
+    YouTube"), drawn by `Placeholder` itself. Opening passes `autoPlay` to `MediaBody`,
+    because that press was a press of play. Once open, the toggle is the × in the row.
+    Pressed, it goes from one place to the other, and focus it had follows it there
+    (WCAG 2.4.3). Safari may refuse
     the deferred `play()`; it is swallowed, leaving the transport ready.
 - **Web components** (`src/web-components/`, `@nulib/clover/web-components`; built
   2026-10-21 to 2026-10-22, its plan and what each phase found in Git's history,
