@@ -1,10 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 
 import { useMock } from "docs/lib/useMock";
 import { EXAMPLE, example } from "docs/lib/example";
+import { ExampleSwitch } from "docs/components/Clover4/ExampleSwitch";
 
 /**
  * The languages `@nulib/clover` ships, each by its own name, switching one Viewer's
@@ -32,29 +33,10 @@ const Viewer = dynamic(
 const speak = (lng: string) =>
   import("@nulib/clover").then(({ initCloverI18n }) => initCloverI18n({ lng }));
 
-const pill: React.CSSProperties = {
-  padding: "0.25rem 0.75rem",
-  borderRadius: "999px",
-  border: "1px solid currentColor",
-  background: "transparent",
-  font: "inherit",
-  fontSize: "0.8125rem",
-  cursor: "pointer",
-};
-
-/*
- * Pressed is a solid fill: white on the accent keeps 4.5:1, and shows by more than hue.
- * In the higher-contrast mode, the controls' dark fill, its edge the accent (`tokens.css`).
- */
-const pillPressed: React.CSSProperties = {
-  background: "var(--solid-fill, var(--accent-9))",
-  border: "1px solid var(--accent-9)",
-  color: "var(--solid-text, var(--accent-contrast))",
-};
-
 export function LanguagesDemo() {
   const url = useMock("paged/manifest.json");
   const [tag, setTag] = useState("en");
+  const id = useId();
   // Back to the page's language when the reader leaves the page.
   useEffect(
     () => () => {
@@ -63,36 +45,22 @@ export function LanguagesDemo() {
     [],
   );
   return (
-    <div style={{ margin: "1.5rem 0 2rem" }} {...example(EXAMPLE)}>
-      <div
-        role="group"
-        aria-label="Clover's language"
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "0.375rem",
-          marginBottom: "1rem",
+    <div style={{ marginBottom: "2rem" }} {...example(EXAMPLE)}>
+      {/* Each language by its own name, in its own language (WCAG 3.1.2). */}
+      <ExampleSwitch
+        id={`${id}-language`}
+        label="Clover's language"
+        options={LANGUAGES.map((language) => ({
+          key: language.tag,
+          label: language.name,
+          lang: language.tag,
+        }))}
+        chosen={LANGUAGES.findIndex((language) => language.tag === tag)}
+        onChoose={(index) => {
+          setTag(LANGUAGES[index].tag);
+          void speak(LANGUAGES[index].tag);
         }}
-      >
-        {LANGUAGES.map((language) => (
-          <button
-            key={language.tag}
-            type="button"
-            lang={language.tag}
-            aria-pressed={language.tag === tag}
-            onClick={() => {
-              setTag(language.tag);
-              void speak(language.tag);
-            }}
-            style={{
-              ...pill,
-              ...(language.tag === tag ? pillPressed : undefined),
-            }}
-          >
-            {language.name}
-          </button>
-        ))}
-      </div>
+      />
       {url && (
         <Viewer
           iiifContent={url}

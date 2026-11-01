@@ -70,23 +70,6 @@
   border-radius: var(--radius-3);
 }
 
-/*
- * The Viewer's template, under its code (`LiveTemplates`; Mat, 2026-10-23): its name,
- * then the navbar's switch (`.code-switch`, `layout.css`).
- */
-.switchUnder {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--clover-space-xs, 0.382rem) var(--clover-space-s, 0.618rem);
-  margin-top: var(--clover-space-m, 1rem);
-}
-
-.switchUnderLabel {
-  color: var(--gray-11);
-  font-size: var(--text-sm);
-}
-
 /* ── A switch over the Viewer: the prop's values, one pressed ───────────────── */
 
 .switchBar {
@@ -104,61 +87,6 @@
   font-size: var(--text-sm);
 }
 
-/*
- * The buttons in one edge at 3:1, as the site's controls without a fill are; the one
- * pressed filled with the accent, its text white on it (4.5:1) and bold, so it shows by
- * more than color (WCAG 1.4.1).
- */
-.segmented {
-  border: 1px solid
-    color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
-  border-radius: var(--radius-4);
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: var(--clover-space-2xs, 0.236rem);
-  padding: var(--clover-space-2xs, 0.236rem);
-}
-
-.segment {
-  background: transparent;
-  border: 0;
-  border-radius: var(--radius-2);
-  color: var(--gray-12);
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--text-sm);
-  min-height: 2rem;
-  padding: var(--clover-space-xs, 0.382rem) var(--clover-space-m, 1rem);
-}
-
-.segment:hover {
-  background: color-mix(in srgb, var(--accent-9) 10%, transparent);
-}
-
-.segment[aria-pressed="true"] {
-  background: var(--solid-fill, var(--accent-9));
-  color: var(--solid-text, var(--accent-contrast));
-  font-weight: var(--weight-bold);
-}
-
-/* In the higher-contrast mode, chosen, ringed whole (`tokens.css`). */
-:where(:root[data-high-contrast])
-  .segment[aria-pressed="true"]:not(:focus-visible) {
-  outline: var(--solid-ring);
-  outline-offset: 1px;
-}
-
-.segment:focus-visible {
-  box-shadow: var(--focus-ring);
-  outline: none;
-}
-
-@media (forced-colors: active) {
-  .segment[aria-pressed="true"] {
-    outline: 2px solid Highlight;
-  }
-}
-
 /* The page's first example opens a little further down the page. */
 .example[data-lead] {
   margin-top: var(--clover-space-xl, 2.618rem);
@@ -167,49 +95,67 @@
 /*
  * A switch over an example, outside its card (`ExampleSwitch`; Mat, 2026-11-01: "move
  * this above the example, out of the dropshadow container … keep styling the same for all
- * segmented controls"): every example's alike, a fieldset at the example's start, its
- * legend over the buttons, small and muted as Clover's menus key theirs (Mat, 2026-11-01:
- * "make it look similar to fieldset key … don't center"), the buttons large. `m` over
- * the card it switches.
+ * segmented controls"): every example's alike, a fieldset at the example's start (Mat,
+ * 2026-11-01: "don't center"), the buttons large. The segmented control's edge is the
+ * fieldset's, its legend set into the top edge, which stops at the legend's ends (Mat,
+ * 2026-11-01: "make the hairline border … hit the left/right edges of the resource
+ * label"), clear of the corner's curve; the legend small and muted, as Clover's menus key
+ * theirs. `m` over the card it switches.
  */
+/* Its edge the midtone gray (Mat, 2026-11-01): a group's bound, not a control's. */
 .switchAbove {
-  border: 0;
-  margin: var(--clover-space-xl, 2.618rem) 0 var(--clover-space-m, 1rem);
+  border: 1px solid var(--gray-8);
+  border-radius: var(--radius-4);
+  margin: var(--clover-space-xl, 2.618rem) 0 var(--clover-space-l, 1.618rem);
+  max-width: 100%;
   min-inline-size: 0;
-  padding: 0;
+  padding: var(--clover-space-xs, 0.382rem);
+  width: fit-content;
+}
+
+/*
+ * The same room inside the edge all around (Mat, 2026-11-01): a fieldset starts its
+ * content under its legend, which hangs half its height below the edge, so the choices
+ * go back up by that much. Many choices (the languages) wrap.
+ */
+/* A block of its own: an inline one would sit on a line as tall as the page's text. */
+.switchAbove > :global(.code-switch) {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: calc(0.5px - var(--clover-text-xs, 0.764rem) / 2);
 }
 
 .switchAbove + .example {
   margin-top: 0;
 }
 
+/* Two switches over one example (a template and a resource), one under the other. */
+.switchAbove + .switchAbove {
+  margin-top: 0;
+}
+
 .switchAbove .switchLabel {
   color: var(--gray-11);
   font-family: inherit;
-  font-size: var(--text-sm);
+  font-size: var(--clover-text-xs, 0.764rem);
   font-weight: var(--weight-regular, 400);
-  padding: 0 0 var(--clover-space-xs, 0.382rem);
-}
-
-.switchAbove .segment {
-  font-size: 1rem;
-  min-height: 2.75rem;
-  min-width: 7rem;
-  padding-inline: var(--clover-space-l, 1.618rem);
+  line-height: 1;
+  margin-inline-start: var(--clover-space-s, 0.618rem);
+  padding: 0 var(--clover-space-2xs, 0.236rem);
+  /* Its letters a little over the edge, not centered on it (Mat, 2026-11-01). */
+  position: relative;
+  top: -0.2em;
 }
 
 /* On a phone, the choices share the row: one line, the label over them. */
 @media (max-width: 30rem) {
-  .switchAbove .segmented {
-    display: flex;
-    flex-wrap: nowrap;
-    width: 100%;
+  .switchAbove {
+    width: auto;
   }
 
-  .switchAbove .segment {
-    flex: 1 1 0;
-    min-width: 0;
-    padding-inline: var(--clover-space-xs, 0.382rem);
+  .switchAbove :global(.code-switch-option) {
+    flex: 1 1 auto;
+    justify-content: center;
   }
 }
 

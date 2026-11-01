@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import React, { useEffect, useId, useRef, useState } from "react";
 import { encodeContentState } from "docs/components/Clover4/Demos";
 import { LiveCode } from "docs/components/Clover4/LiveCode";
+import { ExampleSwitch } from "docs/components/Clover4/ExampleSwitch";
 import styles from "docs/components/Clover4/ViewerDocs.module.css";
 import {
   type CodeTree,
@@ -302,48 +303,6 @@ export function ViewerExample({
   );
 }
 
-/**
- * A switch over an example, outside its card (Mat, 2026-11-01: "move this above the
- * example, out of the dropshadow container … keep styling the same for all segmented
- * controls"): its name, then buttons that show which is pressed, in a group named by it.
- * One look for every example's (`switchAbove`, `ViewerDocs.module.css`).
- */
-function ExampleSwitch({
-  id,
-  label,
-  options,
-  chosen,
-  onChoose,
-}: {
-  /** The id of its legend, which names the group. */
-  id: string;
-  label: string;
-  options: { key: string; label: string }[];
-  chosen: number;
-  onChoose: (index: number) => void;
-}) {
-  return (
-    <fieldset className={styles.switchAbove}>
-      <legend className={styles.switchLabel} id={id}>
-        {label}
-      </legend>
-      <div className={styles.segmented}>
-        {options.map((option, index) => (
-          <button
-            key={option.key}
-            type="button"
-            aria-pressed={index === chosen}
-            className={styles.segment}
-            onClick={() => onChoose(index)}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-    </fieldset>
-  );
-}
-
 /** A value's name on its switch, and its `data-option`. */
 const nameOf = (value: Plain) => String(value);
 
@@ -509,11 +468,25 @@ export function LiveTemplates({
   };
   return (
     <>
+      {/*
+       * The template, over the example as every example's switch is (Mat, 2026-11-01:
+       * "look for other segmented controls. do them the same"); a template's own page
+       * shows that one alone, with nothing to switch. The code's own choice moves it too.
+       */}
+      {!preview && options.length > 1 && (
+        <ExampleSwitch
+          id={`${id}-template`}
+          label="Template"
+          options={options.map(({ name }) => ({ key: name, label: name }))}
+          chosen={options.indexOf(option)}
+          onChoose={(index) => setChosen(options[index].name)}
+        />
+      )}
       {!preview && resources && resources.length > 1 && (
         // What it opens, switched over the example.
         <ExampleSwitch
           id={`${id}-resource`}
-          label="Resource"
+          label="Resource type"
           options={resources.map((each) => ({
             key: each.resource,
             label: each.label,
@@ -569,34 +542,6 @@ export function LiveTemplates({
                 </div>
               ))}
             </CodeArea>
-            <div className={styles.switchUnder}>
-              <span className={styles.switchUnderLabel} id={`${id}-label`}>
-                Template
-              </span>
-              <div
-                className="code-switch"
-                role="radiogroup"
-                aria-labelledby={`${id}-label`}
-              >
-                {options.map(({ name }) => (
-                  <label
-                    key={name}
-                    className="code-switch-option"
-                    data-option={name}
-                    data-checked={name === option.name || undefined}
-                  >
-                    <input
-                      type="radio"
-                      name={`${id}-template`}
-                      value={name}
-                      checked={name === option.name}
-                      onChange={() => setChosen(name)}
-                    />
-                    <span>{name}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
           </>
         )}
       </figure>

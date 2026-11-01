@@ -206,10 +206,18 @@ deadline.
     its top corners clipped to the card's (Mat, 2026-11-01: "templates should not be bound
     by padding"): the frame marks it, `data-bleed` (`ViewerDocs.module.css`), so it is out
     there before the Viewer mounts. The code and every other demo keep the card's room.
-    A switch over an example (`ExampleSwitch`, `ViewerDocs.tsx`: an `OptionsExample`'s
-    values, the Gallery page's resources) sits above its card, outside it, every one in
-    one look: a fieldset at the example's start, its legend over the buttons, small and
-    muted as Clover's menus key theirs (Mat, 2026-11-01: "don't center"). Clover's labels and titles drawn as
+    A switch over an example (`ExampleSwitch.tsx`: an `OptionsExample`'s values, the Viewer
+    page's templates, the Gallery page's resources, the i18n page's languages) sits above its card, outside it, every one
+    in one look: a fieldset at the example's start, its hairline the edge (`--gray-8`), its legend set
+    into the top edge, its letters a little over the line, small (`--clover-text-xs`) and
+    muted (Mat, 2026-11-01: "don't center", "hit the left/right edges of the resource
+    label"), the same room inside the edge all around; its choices worked and drawn as the
+    header's code switch is (Mat, 2026-11-01: "work more like the react/wc toggle"): native
+    radios, one tab stop, small, the chosen one in the controls' dark fill and holding still under
+    the pointer, the others the menus' light gray under it (`--clover-color-secondary-muted`),
+    the accent when focused, their corners `--radius-2`, never pills, as every
+    `code-switch` on the site (the header's, the same size, closer on a phone so the header
+    fits at 320px); the card `l` under it. Clover's labels and titles drawn as
     headings in an example take the site's size for their level (`tokens.css`, a golden
     step a level), as a page's own do: Clover leaves a title's size to the page.
   - Every code block on the site is drawn as the homepage's editor is (`CodeBlock`,
@@ -276,10 +284,10 @@ deadline.
   - The Viewer page reads as Radix Themes' component pages do (Mat, 2026-10-21): the title
     and a lede (`docs-lede`), one example at the top (the Viewer, its code under it, live:
     each template's own knobs, `LiveViewerExample`, kept as the reader switches; Mat,
-    2026-10-22; and under the code the template's switch, drawn as the navbar's code
-    switch, radios with the chosen one `data-checked`, the code naming the template, even
-    `template={Default}`, as a choice too, each moving the other, focus kept on the code's
-    choice as its template's code replaces it; Mat, 2026-10-23; and `wide`: an example may
+    2026-10-22; and over its card the template's switch, as every example's switch is
+    (`ExampleSwitch`; Mat, 2026-11-01; under the code from 2026-10-23), the code naming the
+    template, even `template={Default}`, as a choice too, each moving the other, focus kept
+    on the code's choice as its template's code replaces it; Mat, 2026-10-23; and `wide`: an example may
     reach past the page's column into the room a wide window adds at its sides,
     `--docs-bleed`, never by default, Mat, 2026-10-23), then "API reference" (the Viewer's
     props, then each template's: Prop, Type, Default, Description), then "Examples", an
@@ -295,7 +303,8 @@ deadline.
   - Each template has a page of its own under the Viewer, in the menu under it: Default,
     Document and Gallery (`/docs/viewer/default`, `/document`, `/gallery`; Mat, 2026-10-30
     for Gallery, 2026-11-01 for the other two), built as the Viewer's is: a live example
-    (`LiveViewerExample`, that template's knobs), what it lays out and its props' table,
+    (`LiveViewerExample`, that template's knobs, with no template switch under its code:
+    there is one template to show; Mat, 2026-11-01), what it lays out and its props' table,
     then examples (`ViewerExample`, whose `vars` set custom properties on the Viewer's
     root). The Gallery's opens on its catalog's Manifest, switched at the card's top to
     the Collection it is in (`LiveViewerExample`'s `resources`, a docs example's switch,
@@ -771,8 +780,8 @@ deadline.
   - The navbar holds the docs' code switch, React or Web components (Mat, 2026-10-21;
     React by default; `docs/components/CodeSwitch.tsx`), after the search and before the
     repository's link: a pair of native radios, one tab stop, named "Code examples", drawn
-    as the Transcript's EN | TXT is (pills, no frame, small semibold text, muted until
-    chosen), the chosen one in the Viewer's controls' dark fill (light on a dark page),
+    as the examples' switches are (`ExampleSwitch.tsx`; Mat, 2026-11-01: no frame, small
+    semibold text, muted until chosen, corners `--radius-2`, never pills), the chosen one in the Viewer's controls' dark fill (light on a dark page),
     never the accent at rest (it drew the eye from the page), the accent under the pointer
     or focused. The choice is the reader's (`docs/lib/code-flavor.ts`): stored, in step
     across tabs, and set on the root as `data-code` before the page paints

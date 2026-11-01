@@ -807,22 +807,24 @@ nav.nextra-toc:empty ~ article {
  * the page's root (`data-code`, set before the page paints), so it is right before the
  * page hydrates. 28px tall (2.5.8).
  */
+/* One size for every switch, the header's and the examples' (Mat, 2026-11-01). */
 .code-switch {
   display: inline-flex;
   flex: none;
-  gap: 0.236rem;
+  gap: var(--clover-space-xs, 0.382rem);
 }
 
 .code-switch-option {
   align-items: center;
-  border-radius: var(--clover-radius-pill, 2rem);
+  /* Corners as the examples' switches' (`ExampleSwitch`; Mat, 2026-11-01), never pills. */
+  border-radius: var(--radius-2);
   color: var(--gray-11);
   cursor: pointer;
   display: inline-flex;
   font-size: var(--text-sm);
   font-weight: 600;
-  min-height: 1.75rem;
-  padding: 0 0.618rem;
+  min-height: 2rem;
+  padding: 0 var(--clover-space-m, 1rem);
   position: relative;
   white-space: nowrap;
 }
@@ -1016,21 +1018,28 @@ nav.nextra-toc:empty ~ article {
   margin-top: 0;
 }
 
-/* Under the pointer, or focused, the accent, chosen or not, as the controls take it. */
-:root .code-switch > .code-switch-option[data-option]:hover,
+/*
+ * Under the pointer, the light gray Clover's menus put under an entry (the Chapters', the
+ * captions', `--clover-color-secondary-muted`; Mat, 2026-11-01); but the chosen one, which
+ * a press would not change, holds still, with no hand (Mat, 2026-11-01: "current should
+ * not have a cursor/pointer or change on hover"). Focused, the accent, chosen or not
+ * (2.4.7).
+ */
+.code-switch-option:has(> input:checked) {
+  cursor: default;
+}
+
+:root
+  .code-switch
+  > .code-switch-option[data-option]:not(:has(> input:checked)):hover {
+  background: var(--clover-color-secondary-muted, var(--gray-3));
+}
+
 :root
   .code-switch
   > .code-switch-option[data-option]:has(> input:focus-visible) {
   background: var(--solid-fill, var(--accent-9));
   color: var(--solid-text, var(--accent-contrast));
-}
-
-/* In the higher-contrast mode, ringed under the pointer (`tokens.css`). */
-:where(:root[data-high-contrast])
-  .code-switch
-  > .code-switch-option[data-option]:hover:not(:has(> input:focus-visible)) {
-  outline: var(--solid-ring-hover);
-  outline-offset: 1px;
 }
 
 /* Focused, ringed besides, off its edge (2.4.7), as the Transcript's is. */
@@ -1046,6 +1055,15 @@ nav.nextra-toc:empty ~ article {
  * gives way, the footer linking the source, so nothing scrolls sideways (WCAG 1.4.10).
  */
 @media (max-width: 47.9375rem) {
+  /* Its choices at their old, closer room there, so the header fits at 320px (1.4.10). */
+  .nextra-navbar .code-switch {
+    gap: var(--clover-space-2xs, 0.236rem);
+  }
+
+  .nextra-navbar .code-switch-option {
+    padding: 0 var(--clover-space-s, 0.618rem);
+  }
+
   .nextra-navbar .code-switch-more {
     clip: rect(0 0 0 0);
     clip-path: inset(50%);
