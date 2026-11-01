@@ -122,6 +122,46 @@ describe("loadGltf", () => {
     expect(fetch).toHaveBeenCalledTimes(3);
   });
 
+  it("fits a texture larger than the GPU takes, and lets its full size go", async () => {
+    const bin = new Uint8Array([1, 2, 3, 4]);
+    serve(
+      glb(
+        {
+          asset: { version: "2.0" },
+          buffers: [{ byteLength: 4 }],
+          bufferViews: [{ buffer: 0, byteLength: 4 }],
+          images: [{ bufferView: 0, mimeType: "image/jpeg" }],
+        },
+        bin,
+      ),
+    );
+    const full = { width: 8192, height: 4096, close: vi.fn() };
+    const fit = { width: 4096, height: 2048, close: vi.fn() };
+    const decode = vi.fn(async (source: unknown) =>
+      source === full ? fit : full,
+    );
+    vi.stubGlobal("createImageBitmap", decode);
+    const asset = await loadGltf(
+      "https://example.org/big.glb",
+      undefined,
+      4096,
+    );
+    expect(asset.images).toEqual([fit]);
+    // Scaled whole, as the file has it: no premultiplying, no color conversion.
+    expect(decode).toHaveBeenLastCalledWith(full, {
+      premultiplyAlpha: "none",
+      colorSpaceConversion: "none",
+      resizeWidth: 4096,
+      resizeHeight: 2048,
+      resizeQuality: "high",
+    });
+    expect(full.close).toHaveBeenCalled();
+    // One the GPU takes is kept as it is.
+    decode.mockClear();
+    await loadGltf("https://example.org/big.glb", undefined, 8192);
+    expect(decode).toHaveBeenCalledTimes(1);
+  });
+
   it("says what answered when a model will not load", async () => {
     vi.stubGlobal(
       "fetch",

@@ -148,17 +148,36 @@
   opacity: 0.85;
 }
 
-/* Its title, and what it is part of, clear of the controls in the corner. */
+/*
+ * Its title, and what it is part of. Level with the controls in the corner, its first
+ * lines keep clear of them: a float as large as the controls reach (`useClusterReach`;
+ * one control's room until measured), so only the lines beside them are shorter. Beside
+ * the artwork on a phone it floats not (`--clover-player-clear-float`), and the title
+ * starts under the controls. Where the title starts lower (under the artwork, or
+ * centered in a large player), it has no height.
+ */
 .clover-canvas-player-head {
   grid-area: head;
   align-self: end;
   min-width: 0;
-  padding-inline-end: var(--clover-player-clear, 0px);
 }
 
-.clover-canvas[data-player]:has(> .clover-canvas-controls)
-  .clover-canvas-player {
-  --clover-player-clear: calc(var(--clover-control) + var(--clover-space-s));
+.clover-canvas:has(> .clover-canvas-controls)
+  .clover-canvas-player-head::before {
+  content: "";
+  display: block;
+  float: var(--clover-player-clear-float, inline-end);
+  width: calc(
+    var(--clover-canvas-controls-width, var(--clover-control)) +
+      var(--clover-space-s)
+  );
+  height: var(
+    --clover-player-clear,
+    calc(
+      var(--clover-canvas-controls-height, var(--clover-control)) +
+        var(--clover-space-s)
+    )
+  );
 }
 
 .clover-canvas-player-title,
@@ -461,6 +480,7 @@
  */
 @container (min-height: 28rem) and (min-width: 40rem) {
   .clover-canvas-player:not(:has(> .clover-canvas-player-chapters)) {
+    --clover-player-clear: 0;
     --clover-player-art-height: min(
       calc(100cqb - 2 * var(--clover-player-pad)),
       28rem
@@ -483,10 +503,12 @@
  * Narrow, whatever its height: the transport under the rest, the player's width, in three
  * rows (Play beside the seek bar and its times, then Mute, the chapter and the rest), so
  * nothing runs off its edge (WCAG 1.4.10); the title a step smaller; the volume the
- * system's, Mute staying.
+ * system's, Mute staying. Beside the artwork the title's column is too narrow to share
+ * with the controls: it starts under them.
  */
 @container (max-width: 30rem) {
   .clover-canvas-player {
+    --clover-player-clear-float: none;
     --clover-player-pad: var(--clover-space-m);
     --clover-player-art-height: min(
       calc(
@@ -527,6 +549,7 @@
 @container (max-width: 30rem) and (min-height: 26rem) {
   .clover-canvas-player,
   .clover-canvas-player:has(> .clover-canvas-player-chapters) {
+    --clover-player-clear: 0;
     --clover-player-art-height: min(38cqb, 70cqi);
     grid-template:
       "art" auto
@@ -547,19 +570,13 @@
 }
 
 /*
- * Narrow and short, too short for the artwork beside the title: it steps aside, and the
- * title and its line keep to two lines and one, which the viewport's name holds whole.
+ * Narrow and short, beside the artwork or with none (under 26rem tall): the title and its
+ * line keep to two lines and one, which the viewport's name holds whole, so a long title
+ * never runs the player past its Body, the transport's last row with it (WCAG 1.4.10;
+ * Mat, 2026-11-01). Each clamped is a box of its own: it sits beside the controls where
+ * its longest word fits there, and under them otherwise, never broken around them.
  */
-@container (max-width: 30rem) and (max-height: 16rem) {
-  .clover-canvas-player {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "head" "cues" "transport";
-  }
-
-  .clover-canvas-player-art {
-    display: none;
-  }
-
+@container (max-width: 30rem) and (height < 26rem) {
   .clover-canvas-player-title,
   .clover-canvas-player-part-of {
     display: -webkit-box;
@@ -570,6 +587,22 @@
 
   .clover-canvas-player-part-of {
     -webkit-line-clamp: 1;
+  }
+}
+
+/*
+ * Shorter still, too short for the artwork beside the title: it steps aside, and the
+ * title sits beside the controls again.
+ */
+@container (max-width: 30rem) and (max-height: 16rem) {
+  .clover-canvas-player {
+    --clover-player-clear-float: inline-end;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "head" "cues" "transport";
+  }
+
+  .clover-canvas-player-art {
+    display: none;
   }
 }
 

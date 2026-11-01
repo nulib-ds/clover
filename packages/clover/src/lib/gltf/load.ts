@@ -161,18 +161,24 @@ async function fetchBytes(
  */
 const loading = new WeakMap<object, Map<string, Promise<GltfAsset>>>();
 
-/** The model at `url`, read, its buffers and images with it. */
+/**
+ * The model at `url`, read, its buffers and images with it: each image no larger than
+ * `maxTextureSize` on its longer side, where given (the GPU's `MAX_TEXTURE_SIZE`).
+ */
 export function loadGltf(
   url: string,
   request?: CloverRequest,
+  maxTextureSize?: number,
 ): Promise<GltfAsset> {
   const run = request?.fetch ?? globalThis.fetch;
   const loads = loading.get(run) ?? new Map<string, Promise<GltfAsset>>();
   loading.set(run, loads);
-  const key = `${requestKey(request)} ${url}`;
+  const key = `${requestKey(request)} ${maxTextureSize ?? ""} ${url}`;
   let load = loads.get(key);
   if (!load) {
-    load = readGltf(url, request).finally(() => loads.delete(key));
+    load = readGltf(url, request, maxTextureSize).finally(() =>
+      loads.delete(key),
+    );
     loads.set(key, load);
   }
   return load;
@@ -181,6 +187,7 @@ export function loadGltf(
 async function readGltf(
   url: string,
   request?: CloverRequest,
+  maxTextureSize?: number,
 ): Promise<GltfAsset> {
   const data = await fetchBytes(url, location.href, request);
   const glb = new DataView(data).getUint32(0, true) === GLB;
@@ -223,10 +230,15 @@ async function readGltf(
           });
         } else return null;
         // As the file has it: no flip, no premultiplying, no color conversion.
-        return await createImageBitmap(blob, {
+        const options: ImageBitmapOptions = {
           premultiplyAlpha: "none",
           colorSpaceConversion: "none",
-        });
+        };
+        return await fitted(
+          await createImageBitmap(blob, options),
+          maxTextureSize,
+          options,
+        );
       } catch {
         // A texture that will not decode is drawn as its factor alone.
         return null;
@@ -234,6 +246,31 @@ async function readGltf(
     }),
   );
   return { json, buffers, images };
+}
+
+/**
+ * An image no larger than the GPU takes: past `MAX_TEXTURE_SIZE` it would not upload at
+ * all, and the model would draw black, as a model's 8192px texture did on a phone that
+ * takes 4096 (Mat, 2026-10-31). Scaled down whole, its shape kept, as the Canvas's images
+ * are (`renderer/io/decode.ts`), and the full size let go at once, which on a phone is
+ * a quarter of a gigabyte.
+ */
+async function fitted(
+  bitmap: ImageBitmap,
+  most: number | undefined,
+  options: ImageBitmapOptions,
+): Promise<ImageBitmap> {
+  const longest = Math.max(bitmap.width, bitmap.height);
+  if (!most || longest <= most) return bitmap;
+  const ratio = most / longest;
+  const resized = await createImageBitmap(bitmap, {
+    ...options,
+    resizeWidth: Math.max(1, Math.floor(bitmap.width * ratio)),
+    resizeHeight: Math.max(1, Math.floor(bitmap.height * ratio)),
+    resizeQuality: "high",
+  });
+  bitmap.close();
+  return resized;
 }
 
 const COMPONENTS = {

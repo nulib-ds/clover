@@ -16,7 +16,9 @@ import { serveIIIF } from "./fixtures";
  * - zoomed into or out of, the active sheet filling the column and the others dissolving,
  *   until home again or another sheet comes in;
  * - the active sheet kept at the top as the column resizes;
- * - a finger that scrolls the column until the reader zooms in.
+ * - a finger that scrolls the column until the reader zooms in;
+ * - a recording's or a Scene's sheet taking the column, as the Body takes Default's
+ *   pane, and a Scene keeping a finger's drag.
  *
  * After every move, `settled` checks the whole of it: the active sheet at its place, the
  * live Canvas exactly over it and shown, nothing on its way.
@@ -397,6 +399,31 @@ test("zoomed in or out, the active sheet fills the column and the others dissolv
   await settled(page, 1);
   await expect(column(page)).not.toHaveAttribute("data-zoomed");
   await expect(sheets(page).nth(0)).toHaveCSS("opacity", "0.618");
+});
+
+test("a recording's or a Scene's sheet takes the column, as the Body takes Default's pane, and a finger's drag is the Scene's", async ({
+  page,
+}) => {
+  await serveIIIF(page);
+  await page.setViewportSize({ width: 375, height: 812 });
+  // No width and height to fit: a Timeline (a Canvas of sound alone), then a Scene.
+  for (const name of ["0002-mvm-audio", "0608-mvm-3d-v4"]) {
+    await page.goto(
+      `/?scene=document&content=https://fixtures.test/${name}.json`,
+    );
+    await expect(sheets(page).first()).toHaveAttribute("data-fill", "true");
+    const { clientHeight } = await read(page);
+    await expect
+      .poll(async () => {
+        const now = await read(page);
+        return [now.sheets[0].height, now.live.height];
+      })
+      .toEqual([clientHeight, clientHeight]);
+  }
+  // A Scene keeps every drag, as in Default; at home a page's Canvas lets a finger scroll.
+  await expect(
+    page.locator(".clover-template-document-live .clover-canvas-viewport"),
+  ).toHaveCSS("touch-action", "none");
 });
 
 test("the active sheet stays at the top as the column resizes", async ({

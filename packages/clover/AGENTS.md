@@ -56,6 +56,8 @@ every rule below.
   `components/Body/`, `useControlsVisibility`, `MediaBody`); a template's `-body` class on
   its `Clover.Body` alone, `-panes` on its `Split`, and Document's scrolling pages its
   column (`.clover-template-document-column`).
+- **We build from the leaf-level components out** (Mat, 2026-10-31): never define
+  something in a template unless it is specific to that template's UX.
 - **Specs speak for the docs' agent helpers** (the root `AGENTS.md`, "Agent tools
   (WebMCP)"; Mat, 2026-10-26). The docs read every part, prop and template from the
   element specs (`src/web-components/specs/`) to check and write layouts for agents
@@ -386,6 +388,9 @@ every rule below.
   painted image at about 1600px, never more than it has, not the small `thumbnail`,
   its service read only within a column's height of view), each at most the column
   less `2 × --clover-inset` tall, so the next one's picture shows under the one at rest.
+  A Timeline's or a Scene's, with no width and height to fit, is that tall (`data-fill`;
+  Mat, 2026-10-31: "handling as we do for default", where the Body takes the pane; a
+  screen's 16:9 before, a strip across a phone's column).
   No CSS snap: the top of the column is the one place a sheet is active
   (Mat, 2026-10-16), and `Sheets` decides where the scroll rests (`SETTLE_MS`, 200, quiet;
   never while a finger or the scrollbar holds it): past `THRESHOLD` (a quarter of the
@@ -404,7 +409,8 @@ every rule below.
   sheet fills the column (`data-zoomed`), the others dissolve, and the Canvas takes every
   drag; another view or home puts it back. A resize keeps the active sheet at the top
   (`pin`). It relies on the Canvas leaving a plain wheel alone (`scrollToZoom: false`),
-  so the wheel scrolls the column; at home a finger does too (`touch-action: pan-y`).
+  so the wheel scrolls the column; at home a finger does too (`touch-action: pan-y`),
+  never on a Scene's viewport (`.clover-scene`), whose drag turns it, as in Default.
   The toolbar is the `Label` and Download. No pager, no `CollectionSelect` (Mat: the
   panel's Collection section does that). The page thumbnails' toggle is a pill drawn as
   the round controls are, open or shut (control fill, control glyph, accent on hover and
@@ -486,9 +492,17 @@ every rule below.
   nothing a part raises in it (the header's pager, at `z-index: 5`, drew over the panel;
   Mat, 2026-10-31) reaches over a drawer or its wash. Only then: docked, the pager's list
   still reaches over the bar beside it.
-  Floating, the drawer's inset is `m` (`--clover-inset`, which everything in the panel
-  steps from; Mat, 2026-10-31: "trim on phones"), as it shares a phone's width with the
-  page. The drawer waits `xl` past its edge (`--clover-template-out`), so its close button,
+  On a small screen (under 31rem, a phone's), every Panel's inset is `m` (`Panel.css`:
+  `--clover-inset`, which everything in it steps from; Mat, 2026-10-31: "trim on
+  phones"), as it shares the width with the page. The Canvas's controls step there too
+  (`Canvas.css`: `--clover-canvas-controls-inset`, a Canvas's, a Timeline's and a
+  Scene's, wherever it is). The templates' own pieces follow at the same breakpoint, so
+  their edges stay in line with the controls: Default's header and strip, and Document's
+  toolbar, its thumbnails' toggle over the page and the spines. It goes by the window,
+  never a part's own width (Mat, 2026-10-31: "at smaller viewports"; DESIGN.md §5). A
+  container on the Body was tried: beside a docked panel, the Body can be under 31rem, and
+  the controls then fell out of line with the panel's toggle on the spine beside them. The
+  drawer waits `xl` past its edge (`--clover-template-out`), so its close button,
   61.8% over the page (38.2% over the panel, so it keeps clear of the heading beside it;
   Mat, 2026-10-31), and its shadow leave with it. A pane over the page, the panel or
   Document's thumbnails on a narrow page (`clover-template-float`, set while they float),
@@ -1422,7 +1436,17 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     of `--clover-color-control`, which keeps white text 6.9:1 and the 80% second line
     5.1:1 whatever the picture; with no artwork, the accent darkened by that fill;
   - its title is its name (the viewport's too, so `aria-hidden`), with `partOf` under
-    it (the Manifest's label, from `Connected` and `LoadedCanvas`);
+    it (the Manifest's label, from `Connected` and `LoadedCanvas`). Level with the
+    controls in the corner, its first lines keep clear of them by a float as large as
+    they reach (`--clover-canvas-controls-width` and `-height`, `useClusterReach`), so
+    only those lines are shorter (2026-11-01: one control's padding let a phone's other
+    button cover it). Beside the artwork under 30rem wide, the column is too narrow to
+    share, so the spacer floats not (`--clover-player-clear-float: none`) and the title
+    starts under them; under the artwork, or in the centered block, it has no height.
+    Under 30rem wide and 26rem tall the title keeps to two lines and `partOf` to one
+    (Mat, 2026-11-01), so a long title never runs the player past its Body. Clamped, each
+    is a box of its own, which Chrome sets beside a float even where a word must break,
+    so beside the artwork it needs the spacer to be a block;
   - Canvas's transport, captions and annotations stay as they are, laid out by CSS
     alone (the bar's pieces on one grid by `display: contents`, never moved in the
     reading order), always shown; the cues show as lyrics; chapters are also listed as
@@ -1430,8 +1454,8 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     the player is at least 24rem tall;
   - it lays itself out by container queries on the media layer: one row when short;
     from 18rem tall, the transport across under the artwork; from 28rem × 40rem, one
-    centered block; under 30rem wide, the transport in three rows, and under 16rem tall
-    too, the artwork set aside;
+    centered block; under 30rem wide, the transport in three rows, under 26rem tall too,
+    the title clamped, and under 16rem tall, the artwork set aside;
   - the placeholder never holds it back (its still is the artwork, not a gate), and it
     never plays by itself; the viewport keeps the keys and the name, its focus ring
     drawn again over the player (`Player.css`).
@@ -1465,7 +1489,10 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   `import("three")`, so only it needs `three` installed; the elements bring theirs
   bundled in `web-components/three.mjs`, one copy for both element builds. `load.ts` reads GLB and glTF JSON (buffers and images by
   address or data URI, fetched with the request's settings; images by
-  `createImageBitmap`, unflipped), refusing a required extension it does not draw
+  `createImageBitmap`, unflipped, each scaled down whole to the GPU's `MAX_TEXTURE_SIZE`
+  the engine passes, and the full size let go: past it a texture would not upload, and
+  the Esu shrine's 8192px one drew black on a 4096 GPU in Chrome on Android, Mat,
+  2026-10-31), refusing a required extension it does not draw
   (`EXTENSIONS`), one load shared by the Scenes that ask for a model at once (Chrome fails
   one of two downloads at once of a file too large for its cache,
   `ERR_CACHE_WRITE_FAILURE`; the e2e harness's compare page draws three.js's side after

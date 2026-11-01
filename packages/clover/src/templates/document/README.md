@@ -13,7 +13,9 @@ document of one page has no page thumbnails, bar or toggle: the page takes the w
 width.
 
 Each view (a spread is one) is a sheet, fitted whole, and never taller than the column
-less a strip, so the top of the next always shows under it. Scroll through them as
+less a strip, so the top of the next always shows under it. A recording or a 3D Scene,
+which has no shape of its own to fit, takes the column (less that strip where a sheet
+follows), as the Body does in Default. Scroll through them as
 through any page, with the wheel, a trackpad, a finger or the scrollbar; past the first
 or last, the web page scrolls on. The top of the column is where a sheet is active: when
 the scroll comes to rest, the next sheet is brought there once the active one has been
@@ -65,7 +67,7 @@ menu's groups `h3`s. Under a heading of the page's own, pass the level below it 
 A page is a view: a paged Manifest's spreads are a sheet each.
 Pinch and Ctrl-wheel zoom into the current sheet; the plain wheel always scrolls the
 column. On a touch screen a finger scrolls it too, until you zoom in: then it moves
-about the page.
+about the page. A 3D Scene takes a finger's drag always, to turn it, as in Default.
 
 The information panel loads its code when it first opens, or as the reader points at its
 toggle or focuses it, so the page loads without it.

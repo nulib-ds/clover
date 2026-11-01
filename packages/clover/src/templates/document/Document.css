@@ -199,13 +199,26 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 
 /*
  * Put away, the toggle sits over the page's top left as the Canvas's controls do its
- * right: the same inset in from the corner (`--clover-canvas-controls-inset` is the inset).
+ * right: the same inset in from the corner, `m` on a small screen (below).
  */
 .clover-template-document-sidebar-closed {
   position: absolute;
   top: var(--clover-inset);
   inset-inline-start: var(--clover-inset);
   z-index: 3;
+}
+
+/*
+ * On a small screen (under 31rem, a phone's), the toolbar's ends, the thumbnails' toggle
+ * over the page and its spine are `m` in, in line with the Canvas's controls, which step
+ * there (`Canvas.css`; Mat, 2026-10-31).
+ */
+@media (width < 31rem) {
+  .clover-template-document-toolbar,
+  .clover-template-document-sidebar-closed,
+  .clover-template-document-spine {
+    --clover-inset: var(--clover-space-m);
+  }
 }
 
 .clover-template-document-sidebar[hidden] {
@@ -315,6 +328,14 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 }
 
 /*
+ * A Timeline's or a Scene's has no shape to fit (`Sheets`): it is as tall as it can be,
+ * as the Body is Default's pane (Mat, 2026-10-31), its still fitted whole inside.
+ */
+.clover-template-document-sheet[data-fill] {
+  height: calc(100cqh - var(--clover-template-document-tease));
+}
+
+/*
  * Zoomed into, moved or turned, the active sheet takes the column's whole height, pushing
  * the others down (`Sheets`), and they dissolve away; the Canvas over it shows the
  * picture, its still out of sight beneath. Home again, it is a sheet among the rest.
@@ -368,6 +389,10 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   min-width: 0;
 }
 
+.clover-template-document-sheet[data-fill] > * {
+  object-fit: contain;
+}
+
 /* The live Canvas, laid exactly over its sheet (`Sheets`): its picture on the still. */
 .clover-template-document-live {
   --clover-body-height: 100%;
@@ -401,8 +426,13 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   --clover-controls-events: none;
 }
 
-/* A finger scrolls the column; zoomed into a sheet, the Canvas takes every drag. */
-.clover-template-document-column:not([data-zoomed]) .clover-canvas-viewport {
+/*
+ * A finger scrolls the column; zoomed into a sheet, the Canvas takes every drag. A Scene
+ * takes every drag always, as in Default: a finger's drag turns it (Mat, 2026-10-31).
+ */
+.clover-template-document-column:not([data-zoomed])
+  :not(.clover-scene)
+  > .clover-canvas-viewport {
   touch-action: pan-y;
 }
 
@@ -472,9 +502,9 @@ button.clover-template-document-sidebar-toggle:focus-visible {
  * Open, the page thumbnails' toggle sits on the bar between them and the page, over them
  * but for its far rounded end, and the panel's on the bar between the page and it,
  * centered: each on its spine, a box of no width in the Split's row right after its bar,
- * which the toggle hangs from, level with the Canvas's controls (their inset,
- * `--clover-inset`, down). In the row, a spine moves with its bar as it is dragged, and
- * reads right to left with the page.
+ * which the toggle hangs from, level with the Canvas's controls (their inset down: the
+ * region's, `m` on a small screen). In the row, a spine moves with its bar as it is
+ * dragged, and reads right to left with the page.
  */
 .clover-template-document-spine {
   position: relative;

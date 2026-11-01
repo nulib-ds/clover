@@ -185,7 +185,9 @@ renderers and the loading mark too.
 Scene draws glTF 2.0, the open format for 3D on the web that the IIIF Cookbook's Scenes
 paint, as binary (`.glb`, `model/gltf-binary`) or JSON (`.gltf`, `model/gltf+json`), with
 its materials (metal and roughness), textures and node hierarchies. A model in any other
-format shows an alert saying why, never a broken view.
+format shows an alert saying why, never a broken view. A texture larger than the device's
+graphics take, as a phone's often stop at 4096 pixels across, is scaled down to fit as it
+loads, so the model keeps its colors there too.
 
 The IIIF Cookbook's [0608, Simplest Manifest: 3D](https://iiif.io/api/cookbook/recipe/0608-mvm-3d/)
 draws as it asks: one model at the Scene's origin, lit and framed by Clover, since the

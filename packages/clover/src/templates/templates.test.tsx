@@ -10,7 +10,9 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import React from "react";
 
+import audioJson from "../fixtures/iiif-cookbook/0002-mvm-audio.json";
 import bookJson from "../fixtures/iiif-cookbook/0009-book-1.json";
+import modelJson from "../fixtures/iiif-cookbook/0608-mvm-3d-v4.json";
 import singleJson from "../fixtures/iiif-cookbook/0004-canvas-size.json";
 import renderingJson from "../fixtures/iiif-cookbook/0046-rendering.json";
 import rtlJson from "../fixtures/iiif-cookbook/0010-book-2-viewing-direction-rtl.json";
@@ -885,6 +887,25 @@ describe("templates", () => {
       toggle().closest(".clover-template-document-sidebar-closed"),
     ).not.toBeNull();
     await waitFor(() => expect(toggle()).toHaveFocus());
+  });
+
+  it("Document: a Timeline's or a Scene's sheet takes the column, as the Body takes Default's pane", async () => {
+    const sheet = () =>
+      document.querySelector<HTMLElement>(".clover-template-document-sheet");
+    // A Presentation 3 Canvas of sound alone, a Timeline: no width and height to fit.
+    const timeline = render(<Templates.Document iiifContent={audioJson} />);
+    await waitFor(() => expect(sheet()).toHaveAttribute("data-fill"));
+    expect(sheet()!.style.getPropertyValue("--ratio")).toBe("");
+    timeline.unmount();
+    const scene = render(<Templates.Document iiifContent={modelJson} />);
+    await waitFor(() => expect(sheet()).toHaveAttribute("data-fill"));
+    scene.unmount();
+    // A page keeps its own shape.
+    render(<Templates.Document iiifContent={singleJson} />);
+    await waitFor(() =>
+      expect(sheet()!.style.getPropertyValue("--ratio")).not.toBe(""),
+    );
+    expect(sheet()).not.toHaveAttribute("data-fill");
   });
 
   it("Document: the title at headingLevel, the panel's sections a level under it", async () => {

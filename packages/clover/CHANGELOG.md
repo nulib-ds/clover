@@ -36,13 +36,23 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   page that sets `--clover-body-height` or `--clover-template-document-height` keeps its
   own value.
 
-- **The panel floating over the page has a narrower inset.** On a phone, or wherever the
-  panel slides over the page rather than sitting beside it, its inset is `m` (1rem)
-  rather than `l`, which gives its text about 20px more of a phone's width. Its headings,
-  rows and close button follow, as all of them step from `--clover-inset`; a page that
-  sets `--clover-inset` on the panel keeps its own. Its close button, on the panel's
-  inner edge, sits across it by the golden ratio, 38.2% over the panel and 61.8% over the
-  page (it was half and half), so it keeps clear of the first heading beside it.
+- **Every Panel has a narrower inset on a small screen.** On a screen under 31rem wide (a
+  phone's), a Panel's inset is `m` (1rem) rather than `l`, wherever it is: in any
+  template, or in a layout of your own. That gives its text about 20px more of a phone's
+  width. Its headings, rows and close button follow, as all of them step from
+  `--clover-inset`; a page that sets `--clover-inset` on `.clover-panel` keeps its own.
+  A floating panel's close button sits across its inner edge by the golden ratio, 38.2%
+  over the panel and 61.8% over the page (it was half and half), so it keeps clear of the
+  first heading beside it.
+
+- **The Body's controls step in on a small screen, and the templates' edges with them.**
+  On a screen under 31rem wide (a phone's), the controls over the Body sit `m` (1rem) in
+  from its edges rather than `l`, wherever it is. That covers a Canvas's cluster and
+  menus, a Timeline's transport and a recording's player, and a Scene's controls. In the
+  templates, what lines up with those controls steps with them: Default's header and
+  thumbnail strip, and Document's toolbar and its thumbnails' toggle, over the page or on
+  its spine. On a wider screen, everything keeps `l`. A page that sets
+  `--clover-canvas-controls-inset` on `.clover-canvas` keeps its own value.
 
 - **A Root in full screen keeps clear of the screen's safe areas.** It is padded by
   `env(safe-area-inset-*)`, so on an iPad an edge the system keeps, such as the home
@@ -58,12 +68,16 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   it.
 
 - **Size budgets raised for the phone work above** (`build/size-budget.json`, each the
-  measured size and about 250 B more): the drag's preloading, the safe areas, the
-  floating panel's inset, the header's collapse and the drawers' fixes add about 0.1 to
-  0.3 kB to a template's page. The Viewer with Default to 95.0 kB to first view (from
-  94.9; it measures 94.95, held to the 95 kB it was brought under), Document to 91.3 (from
-  91.05), `<clover-viewer>`'s own entry to 101.8 (from 101.5), the web components' entry
-  to 122.05 (from 121.7), and a Document element page to 129.5 (from 129.15).
+  measured size and about 250 B more): the drag's preloading, the safe areas, the small
+  screen's insets (the Panel's, the Body's controls', the templates' edges), the header's
+  collapse and the drawers' fixes add about 0.1 to 0.3 kB to a template's page. The
+  Viewer with Default to 95.05 kB to first view (from 94.9; it measures 95.04 with the
+  recording's title below, so the site still reads 95 kB), `styles.css` to 19.05 (from
+  19.0; it measures 19.0), with Document to 91.3 (from 91.05), with Gallery to 54.0
+  (from 53.75), `<clover-viewer>`'s own entry to 101.8 (from 101.5), the web components'
+  entry to 122.05 (from 121.7), and a Document element page to 129.5 (from 129.15).
+  `templates.css` goes to 2.15 kB (from 2.1; it measures 2.11) for Document's sheet that
+  fills the column, below.
 
 - **Template titles are one family.** Default's, Document's, Gallery's and the lightbox's
   titles carry `clover-template-title` beside their own class. It holds their size, their
@@ -71,6 +85,39 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   as the others. Each template keeps its own weight.
 
 ### Fixed
+
+- **A Scene's model draws on a phone whose GPU takes smaller textures.** A model's
+  texture larger than the GPU's `MAX_TEXTURE_SIZE` (often 4096 on a phone, where a
+  desktop takes 16384) would not upload, so the model drew black or not at all: the
+  Esu shrine's 8192px texture did so in Chrome on Android. Clover's own engine now scales
+  such a texture down, whole and to its shape, as it decodes, and lets the full size go.
+  Nothing changes where the GPU takes the texture as it is.
+
+- **Document gives a recording or a 3D Scene the whole column.** A Timeline or a Scene
+  has no width and height, so Document drew its sheet at a screen's shape (16:9). On a
+  phone that was a strip across the column's top with the rest of it empty, and a
+  recording's title ran under the controls. Its sheet now takes the column, less the
+  strip where a sheet follows, as Default's Body takes its pane; the sheet carries
+  `data-fill`. A Scene in Document also takes every drag now, as in Default, so a
+  finger's drag up or down turns the model rather than scrolling the page. The
+  thumbnails, PageUp and PageDown still move between sheets.
+
+- **A recording's title keeps clear of the controls in the corner.** The player kept one
+  control's room beside its title, so where the controls are two (on a phone, the
+  annotations' button beside the panel's toggle), the title ran under one of them. It now
+  keeps the room the controls take, as measured, beside its first lines only, so the rest
+  run the player's width. Where the artwork leaves the title too narrow a column to share
+  with them (a short player on a phone), the title starts under the controls. Under the
+  artwork, or centered in a large player, it keeps no room, so its lines run its whole
+  width there too.
+
+- **A long title no longer runs a short player past its Body.** On a phone (a player
+  under 30rem wide and 26rem tall), a title of more than about 45 characters made the
+  player taller than its Body at 320px: its first line rose under the controls and the
+  transport's last row (Mute, Full screen) was cut off (WCAG 1.4.10). There the title now
+  keeps to two lines and what it is part of to one, as the shortest player already did,
+  ending in an ellipsis. Its whole name is still the player's accessible name, and a
+  taller player shows it whole.
 
 - **The panel over the page lies over everything in it.** In the Default and Document
   templates, the header's pager (a Collection's members, a content state's targets)

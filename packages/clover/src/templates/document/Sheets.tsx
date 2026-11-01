@@ -11,7 +11,9 @@ import * as Clover from "../../parts";
 /**
  * Document's column, as a PDF reader's continuous view: every view down it, a spread to
  * a sheet, each fitted whole and as tall as the column less a strip, so the top of the
- * next always shows under it. The reader scrolls through them as through a page:
+ * next always shows under it. A Timeline or a Scene has no shape to fit (no width and
+ * height): its sheet is the column less that strip, as the Body is Default's pane (Mat,
+ * 2026-10-31). The reader scrolls through them as through a page:
  * wheel, trackpad, touch, scrollbar, PageUp and PageDown.
  *
  * The top of the column is the one place a sheet is active. Where the scroll comes to
@@ -46,11 +48,11 @@ type Canvas = Record<string, any>;
 /* Layout effects only where there is a layout: a server render has none. */
 const useLayout = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-/** A Canvas's width over its height; a recording with no size, a screen's. */
+/** A Canvas's width over its height; none for a Timeline or a Scene, which have no size. */
 const ratioOf = (canvas: Canvas) => {
   const width = Number(canvas?.width);
   const height = Number(canvas?.height);
-  return width > 0 && height > 0 ? width / height : 16 / 9;
+  return width > 0 && height > 0 ? width / height : undefined;
 };
 
 export function Sheets({ children }: { children?: React.ReactNode }) {
@@ -70,11 +72,15 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
       sequence.views.map((view) => {
         const canvases = view.map((index) => sequence.canvases[index]);
         const shown = reversed ? [...canvases].reverse() : canvases;
+        const ratios = shown.map(ratioOf);
         return {
           key: canvases.map((canvas) => canvas.id).join("|"),
           first: canvases[0]?.id as string,
           canvases: shown,
-          ratio: shown.reduce((sum, canvas) => sum + ratioOf(canvas), 0),
+          // None where one has no size: the sheet takes the column (`data-fill`).
+          ratio: ratios.every(Boolean)
+            ? ratios.reduce<number>((sum, ratio) => sum + ratio!, 0)
+            : undefined,
         };
       }),
     [sequence, reversed],
@@ -420,8 +426,13 @@ export function Sheets({ children }: { children?: React.ReactNode }) {
             aria-hidden="true"
             className="clover-template-document-sheet"
             data-active={index === position || undefined}
+            data-fill={sheet.ratio === undefined || undefined}
             onClick={() => index !== position && clover.goTo(sheet.first)}
-            style={{ "--ratio": sheet.ratio } as React.CSSProperties}
+            style={
+              sheet.ratio === undefined
+                ? undefined
+                : ({ "--ratio": sheet.ratio } as React.CSSProperties)
+            }
           >
             {sheet.canvases.map((canvas) => (
               <Still key={canvas.id} canvas={canvas} />
@@ -487,7 +498,9 @@ function Still({ canvas }: { canvas: Canvas }) {
       current = false;
     };
   }, [source, clover, near]);
-  const style = { aspectRatio: String(ratioOf(canvas)) };
+  // Its Canvas's shape; a Timeline's or a Scene's picture is fitted whole in the sheet.
+  const ratio = ratioOf(canvas);
+  const style = ratio ? { aspectRatio: String(ratio) } : undefined;
   return src ? (
     // eslint-disable-next-line @next/next/no-img-element
     <img alt="" decoding="async" loading="lazy" src={src} style={style} />

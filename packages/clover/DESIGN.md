@@ -300,8 +300,11 @@ Some values are not space between things, and stay as they are:
   `--clover-controls-enter` (340ms, springing out a touch past and back). One pair for all
   of them, so they move as one. Reduced motion sets all three to zero: the controls still
   come and go, without moving.
-- **Breakpoints**, percentages and viewport units. Breakpoints for a part over the Body
-  are container queries on the Body (`.clover-canvas-media`), not the window.
+- **Breakpoints**, percentages and viewport units. Breakpoints for a part's layout over
+  the Body are container queries on the Body (`.clover-canvas-media`), not the window. An
+  inset that steps on a small screen goes by the window instead (`width < 31rem`: the
+  Panel's, the Canvas's controls'), so every part, and a template's pieces beside them,
+  step at once (Mat, 2026-10-31: "at smaller viewports").
 
 ## 6. Adding or changing a style
 

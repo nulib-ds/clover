@@ -83,7 +83,9 @@ The Body takes its height from `--clover-body-height` (`60vh`, or its template's
 
 The picture fills the Body edge to edge at home; `--clover-canvas-inset` keeps a margin
 around it instead. The Canvas's controls sit `--clover-canvas-controls-inset` in from its
-edges, the region's inset by default, so they line up with the parts around the Body.
+edges, the region's inset by default, so they line up with the parts around the Body. On
+a screen under 31rem wide, as a phone's, they sit `m` in, as a Panel's content does there,
+and a template's header, strip and toolbar step with them.
 
 ## Colors
 
@@ -264,22 +266,22 @@ On the transport's dark scrim, in every theme.
 
 ### Sizes and spaces
 
-| Variable             | Default                                                                           | What it sizes                                                      |
-| -------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `--clover-space-3xs` | `0.146rem`                                                                        | The scale's smallest step, φ⁻⁴ of `1rem`                           |
-| `--clover-space-2xs` | `0.236rem`                                                                        | φ⁻³ of `1rem`                                                      |
-| `--clover-space-xs`  | `0.382rem`                                                                        | φ⁻²: a label over its value                                        |
-| `--clover-space-s`   | `0.618rem`                                                                        | φ⁻¹: what is within a part                                         |
-| `--clover-space-m`   | `1rem`                                                                            | Your `1rem`: parts within a region                                 |
-| `--clover-space-l`   | `1.618rem`                                                                        | φ: a region's inset                                                |
-| `--clover-space-xl`  | `2.618rem`                                                                        | φ²                                                                 |
-| `--clover-space-2xl` | `4.236rem`                                                                        | φ³, the scale's largest step                                       |
-| `--clover-text-xs`   | `0.764rem`                                                                        | A badge: a duration on a thumbnail                                 |
-| `--clover-text-s`    | `0.854rem`                                                                        | Secondary text: times, formats, captions under thumbnails, legends |
-| `--clover-text-m`    | `1.146rem`                                                                        | A section's heading: the information panel's accordion             |
-| `--clover-text-l`    | `1.236rem`                                                                        | A title: a layout's, Items', the lightbox's, an error's headline   |
-| `--clover-control`   | `calc(1rem + 2 * var(--clover-space-s))`                                          | Every round control's width and height (2.236rem)                  |
-| `--clover-inset`     | `var(--clover-space-l)` (a panel floating over the page: `var(--clover-space-m)`) | A region's inset, from its edge to its content                     |
+| Variable             | Default                                                                               | What it sizes                                                      |
+| -------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `--clover-space-3xs` | `0.146rem`                                                                            | The scale's smallest step, φ⁻⁴ of `1rem`                           |
+| `--clover-space-2xs` | `0.236rem`                                                                            | φ⁻³ of `1rem`                                                      |
+| `--clover-space-xs`  | `0.382rem`                                                                            | φ⁻²: a label over its value                                        |
+| `--clover-space-s`   | `0.618rem`                                                                            | φ⁻¹: what is within a part                                         |
+| `--clover-space-m`   | `1rem`                                                                                | Your `1rem`: parts within a region                                 |
+| `--clover-space-l`   | `1.618rem`                                                                            | φ: a region's inset                                                |
+| `--clover-space-xl`  | `2.618rem`                                                                            | φ²                                                                 |
+| `--clover-space-2xl` | `4.236rem`                                                                            | φ³, the scale's largest step                                       |
+| `--clover-text-xs`   | `0.764rem`                                                                            | A badge: a duration on a thumbnail                                 |
+| `--clover-text-s`    | `0.854rem`                                                                            | Secondary text: times, formats, captions under thumbnails, legends |
+| `--clover-text-m`    | `1.146rem`                                                                            | A section's heading: the information panel's accordion             |
+| `--clover-text-l`    | `1.236rem`                                                                            | A title: a layout's, Items', the lightbox's, an error's headline   |
+| `--clover-control`   | `calc(1rem + 2 * var(--clover-space-s))`                                              | Every round control's width and height (2.236rem)                  |
+| `--clover-inset`     | `var(--clover-space-l)` (in a Panel on a screen under 31rem: `var(--clover-space-m)`) | A region's inset, from its edge to its content                     |
 
 ### Shape and motion
 
@@ -301,7 +303,7 @@ motion: set yours inside `@media (prefers-reduced-motion: no-preference)`.
 | `--clover-body-height`           | `60vh` (Default `min(65svh, 40rem)`, the lightbox `min(70svh, 48rem)`, `vh` where a browser has no `svh`) | The Body's height                                              |
 | `--clover-canvas-wash`           | `#0001`                                                                                                   | The Body's ground, a wash over the page's, kept in full screen |
 | `--clover-canvas-inset`          | `0px` (Document: `var(--clover-inset)`)                                                                   | A margin around the picture at home                            |
-| `--clover-canvas-controls-inset` | `var(--clover-inset)`                                                                                     | How far the controls sit in from the Body's edges              |
+| `--clover-canvas-controls-inset` | `var(--clover-inset)` (on a screen under 31rem: `var(--clover-space-m)`)                                  | How far the controls sit in from the Body's edges              |
 | `--clover-controls-leave`        | `180ms cubic-bezier(0.4, 0, 1, 1)`                                                                        | How the controls leave when the reader is idle                 |
 | `--clover-controls-enter`        | `340ms cubic-bezier(0.34, 1.56, 0.64, 1)`                                                                 | How they come back                                             |
 | `--clover-controls-tuck`         | `var(--clover-space-s)`                                                                                   | How far they tuck toward their edge as they leave              |

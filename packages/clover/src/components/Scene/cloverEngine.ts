@@ -83,8 +83,10 @@ export function createEngine(
             : "The Scene paints no model.",
         );
       }
+      // Each texture no larger than this GPU takes: a phone's is often 4096.
+      const most = gl.getParameter(gl.MAX_TEXTURE_SIZE) as number;
       const assets = await Promise.all(
-        drawable.map((model) => loadGltf(model.src, request)),
+        drawable.map((model) => loadGltf(model.src, request, most)),
       );
       if (disposed) return bounds;
       assets.forEach((asset, index) =>

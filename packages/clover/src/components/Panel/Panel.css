@@ -29,6 +29,18 @@
 }
 
 /*
+ * On a small screen (under 31rem, a phone's), its inset is `m`, wherever it is (Mat,
+ * 2026-10-31: "trim on phones"; every Panel, not one template's): it shares the width with
+ * the page beside it. All in it steps from the inset (its sections' headings and rows,
+ * the room over them, its close button).
+ */
+@media (width < 31rem) {
+  .clover-panel {
+    --clover-inset: var(--clover-space-m);
+  }
+}
+
+/*
  * A closable panel (one floating over the page): the round close control `xs` in from
  * its top corner. It reaches `xs + control` (`xl`) in, `--clover-panel-clear` past the
  * panel's inset (`m`, past an inset of `l`), so the tab row keeps that clear for it;

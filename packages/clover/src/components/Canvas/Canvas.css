@@ -14,9 +14,10 @@
    */
   --clover-canvas-inset: 0px;
   /*
-   * How far the controls (the cluster, a still's toggle, the navigator) sit in from the
-   * Body's edges: the region's inset, so they line up with what is around the Body, a
-   * header's title or a strip's position.
+   * How far the controls (the cluster, a still's toggle, the navigator, a recording's
+   * transport, a Scene's) sit in from the Body's edges: the region's inset, so they line
+   * up with what is around the Body, a header's title or a strip's position; `m` on a
+   * small screen (below).
    */
   --clover-canvas-controls-inset: var(--clover-inset);
   /*
@@ -41,6 +42,17 @@
   min-height: inherit;
   overflow: hidden;
   isolation: isolate;
+}
+
+/*
+ * On a small screen (under 31rem, a phone's), the controls sit `m` in, wherever the
+ * Canvas is (Mat, 2026-10-31), as a Panel's content does there (`Panel.css`): a Canvas's,
+ * a Timeline's and a Scene's. A page's own inset, set on `.clover-canvas`, still holds.
+ */
+@media (width < 31rem) {
+  .clover-canvas {
+    --clover-canvas-controls-inset: var(--clover-space-m);
+  }
 }
 
 /*

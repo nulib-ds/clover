@@ -617,4 +617,100 @@ test.describe("transport", () => {
     await expect.poll(modes).toEqual(["hidden", "hidden", "hidden"]);
     await expect(captions).toHaveAccessibleDescription("Français");
   });
+
+  /*
+   * A recording's player, its title beside the controls in the corner: on a phone two of
+   * them, as Cookbook 0103's annotations add one to the panel's toggle (wide, the panel
+   * docks, its toggle with it). Short or long, the title never runs under them, beside
+   * the artwork or under it, narrow or wide, and nothing runs past the Body: on a short
+   * phone's player, 320px wide, a long title keeps to two lines (WCAG 1.4.10).
+   */
+  const poetry = {
+    ...JSON.parse(
+      readFileSync(
+        resolve(COOKBOOK, "0103-poetry-reading-annotations.json"),
+        "utf8",
+      ),
+    ),
+    id: "https://fixtures.test/0103-poetry-reading-annotations.json",
+  };
+  const named = {
+    ...poetry,
+    id: "https://fixtures.test/named-by-its-file.json",
+    label: { en: ["Hindenburg broadcast"] },
+    items: [
+      {
+        ...poetry.items[0],
+        label: { none: ["j1084_robe_b016_i09_v01_a.wav"] },
+      },
+    ],
+  };
+  for (const { scene, width, height } of [
+    { scene: "", width: 320, height: 488 },
+    { scene: "", width: 375, height: 488 },
+    { scene: "", width: 375, height: 812 },
+    { scene: "", width: 1280, height: 800 },
+    { scene: "scene=document&", width: 375, height: 420 },
+  ])
+    for (const manifest of [poetry, named])
+      test(`keeps a recording's title clear of the controls, ${scene ? "Document" : "Default"} at ${width} × ${height}, ${manifest === poetry ? "a long title" : "a file's name"}`, async ({
+        page,
+      }) => {
+        await page.setViewportSize({ width, height });
+        await serveIIIF(page);
+        await page.route(named.id, (route) =>
+          route.fulfill({
+            contentType: "application/json",
+            headers: { "Access-Control-Allow-Origin": "*" },
+            body: JSON.stringify(named),
+          }),
+        );
+        await page.goto(`/?${scene}content=${manifest.id}`);
+        const player = page.locator(".clover-canvas[data-player]");
+        await expect(player.locator(".clover-canvas-controls > *")).toHaveCount(
+          width < 640 ? 2 : 1,
+        );
+        await expect(
+          player.locator(".clover-canvas-player-title"),
+        ).not.toBeEmpty();
+        // Measured: the controls' reach is written once they are laid out.
+        await expect
+          .poll(() =>
+            player.evaluate((canvas: HTMLElement) =>
+              canvas.style.getPropertyValue("--clover-canvas-controls-width"),
+            ),
+          )
+          .not.toBe("");
+        const layout = await player.evaluate((canvas) => {
+          const meets = (a: DOMRect, b: DOMRect) =>
+            a.left < b.right &&
+            b.left < a.right &&
+            a.top < b.bottom &&
+            b.top < a.bottom;
+          const title = canvas.querySelector(".clover-canvas-player-title")!;
+          const words = document.createRange();
+          words.selectNodeContents(title);
+          // The lines it shows: past a clamp, the rest are laid out unseen under them.
+          const shown = title.getBoundingClientRect();
+          const lines = Array.from(words.getClientRects()).filter(
+            (line) => line.bottom <= shown.bottom + 1,
+          );
+          const controls = Array.from(
+            canvas.querySelectorAll(".clover-canvas-controls > *"),
+            (control) => control.getBoundingClientRect(),
+          );
+          const body = canvas.getBoundingClientRect();
+          const transport = canvas
+            .querySelector(".clover-canvas-transport")!
+            .getBoundingClientRect();
+          return {
+            crossed: lines.filter((line) =>
+              controls.some((control) => meets(line, control)),
+            ).length,
+            inside:
+              lines[0].top >= body.top && transport.bottom <= body.bottom + 1,
+          };
+        });
+        expect(layout).toEqual({ crossed: 0, inside: true });
+      });
 });

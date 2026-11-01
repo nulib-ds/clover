@@ -57,6 +57,18 @@
 }
 
 /*
+ * On a small screen (under 31rem, a phone's), the header and the strip (below) are `m`
+ * inside, so their edges stay in line with the Body's controls, which step there
+ * (`Canvas.css`; Mat, 2026-10-31).
+ */
+@media (width < 31rem) {
+  .clover-template-default-header,
+  .clover-template-default-rail {
+    --clover-inset: var(--clover-space-m);
+  }
+}
+
+/*
  * Every template's title (Default's, Document's, Gallery's and its lightbox's, which set
  * `clover-template-title` beside their own): the large step, its lines closer than
  * running text's (Mat, 2026-10-26), as a heading's are, and all of it wrapped, between
@@ -289,12 +301,6 @@
   inset-block: 0;
   inset-inline-end: 0;
   z-index: 4;
-  /*
-   * Its inset `m` rather than `l` (Mat, 2026-10-31: "trim on phones"): it shares a phone's
-   * width with the page beside it. All in it steps from the inset (its sections' headings
-   * and rows, the room over them, its close button), so all of it follows.
-   */
-  --clover-inset: var(--clover-space-m);
   width: min(24rem, calc(100% - var(--clover-space-2xl)));
   max-width: none;
   max-height: none;
