@@ -9,7 +9,7 @@
 
 /*
  * Round controls: the Canvas's cluster, the media transport, Items' arrows, the Pager's
- * Previous and Next, the Panel's close and its tab row's arrows. One size, `--clover-control`: a
+ * Previous and Next, and the Panel's close. One size, `--clover-control`: a
  * 1rem icon with `s` around it.
  *
  * Their colors are their own, not the page's: a dark fill (`--clover-color-control`)
@@ -25,9 +25,7 @@
   button.clover-items-scroll-next,
   button.clover-pager-previous,
   button.clover-pager-next,
-  button.clover-panel-close,
-  button.clover-sections-scroll-prev,
-  button.clover-sections-scroll-next
+  button.clover-panel-close
 ) {
   display: flex;
   flex-shrink: 0;
@@ -53,9 +51,7 @@
     button.clover-items-scroll-next,
     button.clover-pager-previous,
     button.clover-pager-next,
-    button.clover-panel-close,
-    button.clover-sections-scroll-prev,
-    button.clover-sections-scroll-next
+    button.clover-panel-close
   )
   svg {
   flex-shrink: 0;
@@ -76,9 +72,7 @@ button.clover-canvas-button svg {
   button.clover-items-scroll-next,
   button.clover-pager-previous,
   button.clover-pager-next,
-  button.clover-panel-close,
-  button.clover-sections-scroll-prev,
-  button.clover-sections-scroll-next
+  button.clover-panel-close
 ):is(:hover, :focus-visible) {
   background-color: var(--clover-color-accent, #0065c3);
 }
@@ -95,9 +89,7 @@ button.clover-canvas-button svg {
     button.clover-items-scroll-next,
     button.clover-pager-previous,
     button.clover-pager-next,
-    button.clover-panel-close,
-    button.clover-sections-scroll-prev,
-    button.clover-sections-scroll-next
+    button.clover-panel-close
   ):is(:hover, :focus-visible) {
   background-color: var(--clover-accent-fill);
 }
@@ -109,9 +101,7 @@ button.clover-canvas-button svg {
     button.clover-items-scroll-next,
     button.clover-pager-previous,
     button.clover-pager-next,
-    button.clover-panel-close,
-    button.clover-sections-scroll-prev,
-    button.clover-sections-scroll-next
+    button.clover-panel-close
   ):hover:not(:focus-visible) {
   outline: var(--clover-accent-ring-hover);
   outline-offset: 1px;

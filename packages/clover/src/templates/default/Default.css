@@ -69,25 +69,6 @@
 }
 
 /*
- * Every template's title (Default's, Document's, Gallery's and its lightbox's, which set
- * `clover-template-title` beside their own): the large step, its lines closer than
- * running text's (Mat, 2026-10-26), as a heading's are, and all of it wrapped, between
- * any letters where a word is longer than the line (a file's name, an address), so on a
- * phone, zoomed or spaced out it is never cut short or run past its box (WCAG 1.4.10,
- * 1.4.12; a reader's own spacing still wins). Each template keeps its own weight.
- */
-.clover-template-title {
-  margin: 0;
-  font-size: var(--clover-text-l);
-  line-height: 1.25;
-  overflow-wrap: anywhere;
-}
-
-.clover-template-default-title {
-  font-weight: 400;
-}
-
-/*
  * The header's pagers, small (`size="small"`): a content state's targets' after the
  * title, in its line, right after it on one baseline; on a line too short for both, under
  * the title, rather than past the header's inset (WCAG 1.4.10).
@@ -220,33 +201,39 @@
 }
 
 /*
- * Beside the rest, in its own space, when there is room for both (the template measures
- * its own width). Its width is the split's: 24rem to start, then wherever it is dragged.
- * Its height is the main pane's, from the header's top to the strip's foot, however long
- * its sections run: size containment keeps its content from making the row taller, and
- * it scrolls within.
+ * The information panel, every template's (`shared/PanelPane.tsx`), written once here, in
+ * `styles.css`. Beside the rest, in its own space, when there is room for both (the
+ * template measures its own width): its width the split's, 24rem to start, then wherever
+ * its bar is dragged; its height the Split's, however long its sections run: size
+ * containment keeps its content from making the row taller, and it scrolls within.
  */
-.clover-template-default-panel {
-  contain: size;
-  overflow-y: auto;
+.clover-template-panes {
+  position: relative;
 }
 
-.clover-template-default-panel[hidden] {
+.clover-template-panel {
+  contain: size;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: var(--clover-color-secondary, #fff);
+}
+
+.clover-template-panel[hidden] {
   display: none;
 }
 
 /*
- * The handle lies over the Body's edge, centered on it (Mat, 2026-10-26: "overlap the
- * body slightly … even on both sides"): drawn back half its bar's width toward the main
- * pane, so the bar and its grip (6px, centered on the bar) are both 3px over each side,
- * and stay aligned as they light. A transform, so neither pane's size moves; its area to
- * grab moves with it.
+ * Its bar lies over the Body's edge, centered on it (Mat, 2026-10-26: "overlap the body
+ * slightly … even on both sides"): drawn back half its width toward the main pane, so the
+ * bar and its grip (6px, centered on the bar) are both 3px over each side, and stay
+ * aligned as they light. A transform, so neither pane's size moves; its area to grab
+ * moves with it.
  */
-.clover-template-default-panes > .clover-split-handle {
+.clover-template-panes > .clover-template-panel-handle {
   translate: -1.5px 0;
 }
 
-.clover-template-default-panes:dir(rtl) > .clover-split-handle {
+.clover-template-panes:dir(rtl) > .clover-template-panel-handle {
   translate: 1.5px 0;
 }
 
@@ -463,26 +450,47 @@
 }
 
 /*
- * Open beside the Body, the panel's toggle sits on the bar between them, its spine: a
- * box of no width in the Split's row, right after the bar, which the toggle hangs from,
- * centered on the bar (half its 3px back) and level with the Body's controls (their
- * inset, `--clover-inset`, down from the Body's top, `useSpineTop`). In the row, it moves
- * with the bar as it is dragged, and reads right to left with the page.
+ * Open beside the Body, the panel's toggle sits on the bar between them, its spine
+ * (`PanelPane`, every template's): a box of no width in the Split's row, right after the
+ * bar, which the toggle hangs from, centered on the bar (half its 3px back) and level
+ * with the Body's controls (their inset, `--clover-inset`, down from the Body's top,
+ * `useSpineTop`). In the row, it moves with the bar as it is dragged, and reads right to
+ * left with the page. Over what floats over a narrow page (Document's thumbnails) and the
+ * wash beside it.
  */
-.clover-template-default-spine {
+.clover-template-spine {
   position: relative;
-  z-index: 3;
+  z-index: 4;
   flex: none;
   width: 0;
 }
 
-.clover-template-default-spine > * {
+.clover-template-spine > * {
   position: absolute;
   top: calc(var(--clover-template-spine-top, 0px) + var(--clover-inset));
   inset-inline-start: -1.5px;
   translate: -50%;
 }
 
-.clover-template-default-spine:dir(rtl) > * {
+/*
+ * Its place goes where it is measured at once, never sliding there (Mat, 2026-11-01:
+ * "jarring for the eye"): the round controls ease `all` (`ui/Button.css`, outweighing a
+ * class alone), which took in `top`, so on a first load it slid down the bar to the
+ * Body's top. Its colors still ease.
+ */
+.clover-template-panes .clover-template-spine > * {
+  transition-property: background-color, color, outline-color;
+}
+
+/*
+ * Before the Root has anything to show (`idle`), what is over the Body is empty and the
+ * Body's top is not where it will be: the toggle waits unseen, then shows level with the
+ * Body once the resource fills the layout, rather than drop as it fills.
+ */
+.clover-root[data-status="idle"] .clover-template-spine {
+  visibility: hidden;
+}
+
+.clover-template-spine:dir(rtl) > * {
   translate: 50%;
 }

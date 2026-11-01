@@ -9,9 +9,9 @@ import { ComposeExample } from "docs/components/Clover4/ComposeExample";
 
 <div className="docs-lede">
   Every template is a composition of Clover's parts, and so is a layout of your
-  own. A `Root` loads the content and holds where the reader is. Every part
-  inside it reads from the nearest `Root`, wherever it sits in your markup, so a
-  layout is your own HTML with parts placed in it.
+  own. A `Root` loads the content and holds the current view. Every part inside
+  it reads from the nearest `Root`, wherever it sits in your markup, so a layout
+  is your own HTML with parts placed in it.
 </div>
 
 ## A layout of your own
@@ -62,24 +62,24 @@ function MyLayout(props) {
 
 ## `Root`
 
-| Prop                   | Type                              | Description                                                                                                                                                                                                     |
-| ---------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `iiifContent`          | `string \| object`                | A URL, a IIIF resource (Presentation 2, 3 or 4), or a content state.                                                                                                                                            |
-| `canvasId`             | `string`                          | The Canvas to show, controlled. Moving calls `onCanvasChange` instead.                                                                                                                                          |
-| `defaultCanvasId`      | `string`                          | The Canvas to start on. A content state, then the Manifest's `start`, win over it.                                                                                                                              |
-| `onCanvasChange`       | `(canvasId: string) => void`      | The reader moved to a Canvas.                                                                                                                                                                                   |
-| `onStatusChange`       | `(status, error) => void`         | `"loading"`, `"ready"` or `"error"`.                                                                                                                                                                            |
-| `request`              | `{ credentials, headers, fetch }` | Used for every request any part makes.                                                                                                                                                                          |
-| `language`             | `string`                          | The language to read IIIF text in. The page's, then the reader's, by default.                                                                                                                                   |
-| `highContrast`         | `boolean`                         | Clover's higher-contrast mode, for every part inside: the accent kept to rings, outlines and marks, never under words or a glyph. On wherever the reader's system asks for more contrast, too. Default `false`. |
-| `annotations`          | URL, object or list               | AnnotationPages or AnnotationCollections to show beside the Manifest's own.                                                                                                                                     |
-| `manifestId`           | `string`                          | In a Collection, the member to show, controlled.                                                                                                                                                                |
-| `defaultManifestId`    | `string`                          | In a Collection, the member to open first.                                                                                                                                                                      |
-| `onManifestChange`     | `(manifestId) => void`            | In a Collection, the reader moved, or asks to move, to another member.                                                                                                                                          |
-| `searchQuery`          | `string`                          | A Content Search to run once the Manifest is shown, and whenever it changes.                                                                                                                                    |
-| `onContentStateChange` | `({ json, encoded }) => void`     | Where the reader is, as a content state, each time it settles.                                                                                                                                                  |
-| `renderers`            | list                              | Components that draw views Clover does not; see [below](#renderers-of-your-own).                                                                                                                                |
-| `as`                   | element type                      | Default `div`.                                                                                                                                                                                                  |
+| Prop                   | Type                              | Description                                                                                                                                                                                            |
+| ---------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `iiifContent`          | `string \| object`                | A URL, a IIIF resource (Presentation 2, 3 or 4), or a content state.                                                                                                                                   |
+| `canvasId`             | `string`                          | The Canvas to show, controlled. Moving calls `onCanvasChange` instead.                                                                                                                                 |
+| `defaultCanvasId`      | `string`                          | The Canvas to start on. A content state, then the Manifest's `start`, win over it.                                                                                                                     |
+| `onCanvasChange`       | `(canvasId: string) => void`      | The current Canvas changed.                                                                                                                                                                            |
+| `onStatusChange`       | `(status, error) => void`         | `"loading"`, `"ready"` or `"error"`.                                                                                                                                                                   |
+| `request`              | `{ credentials, headers, fetch }` | Used for every request any part makes.                                                                                                                                                                 |
+| `language`             | `string`                          | The language to read IIIF text in. The page's, then the browser's, by default.                                                                                                                         |
+| `highContrast`         | `boolean`                         | Clover's higher-contrast mode, for every part inside: the accent kept to rings, outlines and marks, never under words or a glyph. On wherever the system asks for more contrast, too. Default `false`. |
+| `annotations`          | URL, object or list               | AnnotationPages or AnnotationCollections to show beside the Manifest's own.                                                                                                                            |
+| `manifestId`           | `string`                          | In a Collection, the member to show, controlled.                                                                                                                                                       |
+| `defaultManifestId`    | `string`                          | In a Collection, the member to open first.                                                                                                                                                             |
+| `onManifestChange`     | `(manifestId) => void`            | In a Collection, another member opened, or was asked for.                                                                                                                                              |
+| `searchQuery`          | `string`                          | A Content Search to run once the Manifest is shown, and whenever it changes.                                                                                                                           |
+| `onContentStateChange` | `({ json, encoded }) => void`     | The current view, as a content state, each time it settles.                                                                                                                                            |
+| `renderers`            | list                              | Components that draw views Clover does not; see [below](#renderers-of-your-own).                                                                                                                       |
+| `as`                   | element type                      | Default `div`.                                                                                                                                                                                         |
 
 `iiifContent` can be a Manifest, a Collection, a Canvas or a content state, as a URL or
 an object; see [what the Viewer opens](/docs/viewer#what-iiifcontent-can-be). Every
@@ -89,11 +89,11 @@ template, and the Viewer, takes these props and hands them to its `Root`.
 
 | Part                                               | What it renders                                                                                                                                                                                                                  |
 | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Root`                                             | Loads the content and holds where the reader is. Renders a `div` (or `as`), and announces moves.                                                                                                                                 |
+| `Root`                                             | Loads the content and holds the current view. Renders a `div` (or `as`), and announces moves.                                                                                                                                    |
 | [`Body`](/docs/body)                               | The current view, drawn by `Canvas`: a page, a spread, a video or sound. Children join its controls. While it loads, Clover's loading mark runs along its top edge; nothing moves.                                               |
-| [`Label`](/docs/primitives/label)                  | The Manifest's label, or the current Canvas's with `of="canvas"`, in the reader's language.                                                                                                                                      |
+| [`Label`](/docs/primitives/label)                  | The Manifest's label, or the current Canvas's with `of="canvas"`, in the defined language.                                                                                                                                       |
 | [`Previous`, `Next`](/docs/items#one-at-a-time)    | Round arrow controls that move a view at a time (a spread, in a paged book), as Items' arrows do, or with `of="members"` a Collection's Manifest. Each names itself on hover and focus, and shows disabled at an end.            |
-| [`Position`](/docs/items#one-at-a-time)            | "2 / 5", counted in views (or members); "Item 2 of 5" to assistive technology, in the reader's language. Its room is its widest count's.                                                                                         |
+| [`Position`](/docs/items#one-at-a-time)            | "2 / 5", counted in views (or members); "Item 2 of 5" to assistive technology, in the interface language. Its room is its widest count's.                                                                                        |
 | `Status`                                           | Loading, as Clover's loading mark (announced "Loading…"), or what went wrong. Once loaded, its status region stays, empty and hidden, so the next load is announced. `loading={false}` only announces it, where `Body` shows it. |
 | [`Items`](/docs/items)                             | Thumbnails of the views, as a slider, list or grid, or `layout="pager"`: `Position`, `Previous` and `Next` in a `nav`. See [Items](/docs/items).                                                                                 |
 | [`Panel`](/docs/panel)                             | The resource's information in sections, as tabs or an accordion: the ones it has data for, or `Tab`s of your own. See [Panel](/docs/panel).                                                                                      |
@@ -103,7 +103,7 @@ template, and the Viewer, takes these props and hands them to its `Root`.
 | [`Annotations`](/docs/annotations)                 | The view's annotations by set: content to read, a button to find each on the Canvas, and an eye before each set's label that hides its annotations on the Canvas (shared with the Canvas's annotations menu).                    |
 | [`Download`](/docs/download)                       | The `rendering` of the page in view and of the Manifest (a PDF, say), as links in two groups.                                                                                                                                    |
 | [`Transcript`](/docs/transcript)                   | The view's captions as text: the current cue marked as it plays, a press seeking there.                                                                                                                                          |
-| [`Contents`](/docs/contents)                       | The table of contents from the Manifest's Ranges, the entry the reader is in marked. Hovering an entry draws its chapter out on the Canvas's seek bar, and the chapter under the pointer there marks its entry.                  |
+| [`Contents`](/docs/contents)                       | The table of contents from the Manifest's Ranges, the current entry marked. Hovering an entry draws its chapter out on the Canvas's seek bar, and the chapter under the pointer there marks its entry.                           |
 | [`Search`](/docs/search)                           | IIIF Content Search (1 or 2): a field, then the hits by page with the words around them.                                                                                                                                         |
 | [`Collection`](/docs/collection)                   | The Collection the Manifest is in: its label, summary, members, homepage and address, as the `Panel`'s Collection section shows it. Fetched when it first shows. `headingLevel` sets its headings (default 3).                   |
 | [`CollectionSelect`](/docs/collection)             | In a Collection, a menu of its members; choosing one shows it. By keyboard, the arrows move through the members and Enter opens one; Escape, or leaving the menu, takes the step back.                                           |
@@ -117,7 +117,7 @@ Parts that have nothing to show render nothing: `Items` and its pager for a sing
 
 [Primitives](/docs/primitives) has a page for each. Each IIIF descriptive property is a part of its own, reading the Manifest, or the
 current Canvas with `of="canvas"`. A value passed as `value` wins, so they also work
-outside a `Root`. Text is in the reader's language and marked with `lang`; HTML is
+outside a `Root`. Text is in the defined language and marked with `lang`; HTML is
 limited to what IIIF allows and sanitized, by a sanitizer that loads only when a value
 carries markup.
 
@@ -200,12 +200,12 @@ when each shows, headings, closing a panel that floats over the page, and its pr
 
 `Split`, `SplitPane` and `SplitHandle` put panes side by side, with a bar between them
 that shares the width. One pane beside each bar has a `size` (with `min` and `max`, in px,
-rem or %); the other takes what is left. The reader drags the bar by its grip, or clicks
-or taps it: each click steps the pane on to its next width, from its narrowest to its own
+rem or %); the other takes what is left. The bar is dragged by its grip, or clicked
+or tapped: each click steps the pane on to its next width, from its narrowest to its own
 `size` to its widest and then around again, so one pointer can resize it without dragging. The
 bar is a focusable `separator` that names itself on hover and focus: the arrow keys move
 it (Shift for bigger steps), and Home and End go to the limits. With `storageKey` the
-reader's sizes are remembered. The `Default` and `Document` templates use it, and nothing
+sizes chosen are remembered. The `Default` and `Document` templates use it, and nothing
 ties it to any part.
 
 ```jsx
@@ -232,7 +232,7 @@ Hooks read from the nearest `Root`. Each re-renders only when what it reads chan
 | `useManifest()`             | The Manifest, in Presentation 4.                                                                                                                               |
 | `useSequence()`             | `{ canvases, views, direction }`                                                                                                                               |
 | `useVisibleCanvases()`      | The Canvases of the current view.                                                                                                                              |
-| `useActiveCanvas()`         | The Canvas the reader is on.                                                                                                                                   |
+| `useActiveCanvas()`         | The current Canvas.                                                                                                                                            |
 | `useNavigation()`           | `{ position, total, hasPrevious, hasNext, previous, next, first, last, goTo }`                                                                                 |
 | `useAnnotationCollection()` | Annotations walked as one whole, the content's AnnotationPage or the Manifest's AnnotationCollection: `{ id, type, label, total, pages, entries }`, or `null`. |
 | `useLocalized(value)`       | `{ text, lang }` for a IIIF language map, in the Root's language.                                                                                              |
@@ -363,9 +363,10 @@ interface language: the one set with `initCloverI18n`, else the page's `<html la
 the first of the browser's languages it has, else English, so it speaks the language of
 the page around it. It ships English, Finnish,
 French, Norwegian (Bokmål and Nynorsk), Portuguese (European) and Spanish, each complete.
-IIIF text is read in the Root's `language`, else the page's, else the browser's. Where
+IIIF text is read in the defined language: the Root's `language`, else the page's, else
+the browser's. Where
 what the resource says of itself comes in several languages, the Panel's About offers
-them, and the one the reader chooses is the whole Root's until the page sets another
+them, and the one chosen there is the whole Root's until the page sets another
 `language`.
 
 ```jsx
@@ -387,13 +388,13 @@ or a test, that needs them in place first waits for them:
 await initCloverI18n({ lng: "fr" }).ready();
 ```
 
-Where the interface language is not the page's (a French reader on an English page), each
+Where the interface language is not the page's (French on an English page), each
 of Clover's strings carries it as `lang`, on the element that shows it or is named by it.
-The page's language is the nearest `lang` around the `Root`, or one you give the `Root`.
-The `Root` carries none of its own, so what you put in it, and IIIF text in no language
-(`none`), keep the page's. A language you bootstrap with some strings falls back to
-English for the rest, each such string marked `lang="en"` too. In a part of your own,
-mark Clover's strings the same way:
+The page's language is the `lang` of the `Root`'s nearest parent that has one, or one you
+give the `Root`. The `Root` carries none of its own, so what you put in it, and IIIF text
+in no language (`none`), keep the page's. A language you bootstrap with some strings falls
+back to English for the rest, each such string marked `lang="en"` too. In a part of your
+own, mark Clover's strings the same way:
 
 ```jsx
 const t = Clover.useT();

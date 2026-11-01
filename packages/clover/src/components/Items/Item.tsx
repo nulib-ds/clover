@@ -197,13 +197,18 @@ function ItemLabel({
   );
 }
 
+/** The line under an item's label: its summary, its date (`navDate`), or neither. */
+export type ItemSecondary = "summary" | "navDate" | "none";
+
 export interface ItemFigureProps {
   item: ItemModel;
   size: number;
   language?: string;
   request?: CloverRequest;
-  /** Show the item's summary below its label (a Collection's members have them). */
+  /** Show a line below the item's label (a Collection's members have them). */
   showSummary?: boolean;
+  /** Which line, when `showSummary`: the summary (the default), the date, or none. */
+  secondary?: ItemSecondary;
 }
 
 /**
@@ -226,13 +231,19 @@ export function ItemFigure({
   language,
   request,
   showSummary = false,
+  secondary = "summary",
 }: ItemFigureProps) {
   const labels = item.parts.map((part) =>
     localize(item.parts.length === 1 ? item.label : part.label, language),
   );
-  const summary = showSummary ? localize(item.summary, language) : null;
-  // A member's date and summary, under its label (Cookbook 0318).
-  const navDate = showSummary ? readDate(item.navDate) : null;
+  // A member's summary, or its date (Cookbook 0318), under its label: one line, the one
+  // `secondary` names.
+  const summary =
+    showSummary && secondary === "summary"
+      ? localize(item.summary, language)
+      : null;
+  const navDate =
+    showSummary && secondary === "navDate" ? readDate(item.navDate) : null;
   const labeled = labels.some((label) => label.text);
   return (
     <figure

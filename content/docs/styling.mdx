@@ -32,7 +32,7 @@ elements as they reach the React parts.
 
 Clover sets no font and no font size. Every size it draws, a space, a line of text, a
 control, is a step from your page's `1rem`: the root's font size, 16px unless your page
-or your reader's browser sets another. Change it, and all of Clover changes with it, in
+or the browser sets another. Change it, and all of Clover changes with it, in
 proportion:
 
 ```css
@@ -117,7 +117,7 @@ and says what it is doing in `data-*` attributes, for your own CSS to select. A 
 | ------ | --------------- | --------------- | ---------------------------------------------------------------------------- |
 | Body   | `clover-body`   | `data-renderer` | <span data-code-flavor="both">`canvas`, `timeline`, `scene`, `custom`</span> |
 | Canvas | `clover-canvas` | `data-media`    | `video`, `audio`; none for a picture                                         |
-| Items  | `clover-items`  | `data-layout`   | `slider`, `list`, `grid`, `pager`                                            |
+| Items  | `clover-items`  | `data-layout`   | `slider`, `list`, `grid`, `masonry`, `pager`                                 |
 | Panel  | `clover-panel`  | `data-layout`   | `tabs`, `accordion`                                                          |
 
 ```css
@@ -125,6 +125,25 @@ and says what it is doing in `data-*` attributes, for your own CSS to select. A 
   --clover-items-size: 12rem;
 }
 ```
+
+## Headings
+
+A title Clover draws is a heading at the level its `headingLevel` gives it: every
+template's title, Items' title on its own, the Collection's, and About's label of the
+resource, each with the class `clover-title`. Its size is your page's for that level:
+Clover sets none, so an `h3` title looks as your other `h3`s do. Clover gives it only a
+regular weight and lines a little closer than running text's, with no specificity, so
+your own rule for that level, or for `.clover-title`, wins.
+
+```css
+.clover-title:is(h2, h3) {
+  font-size: 1.25rem;
+}
+```
+
+Set `--clover-title-weight` to change every title's weight at once. The headings that are
+part of a template's controls, the panel's section titles and the groups inside them
+(Search's pages, Download's groups), are styled by Clover.
 
 ## Lists in Markdown text
 
@@ -175,7 +194,7 @@ words takes the round controls' dark fill instead, `control-glyph` on `control`.
 that is all; under the pointer it is ringed in the accent at half strength, 1px clear, as
 Items rings an item, and chosen (the language read, a menu open), ringed whole. Focus keeps
 its own ring. Text in the accent is your `accent-text` where you set one, else the text's
-own color. Clover turns the mode on by itself for a reader whose system asks for more
+own color. Clover turns the mode on by itself wherever the system asks for more
 contrast (`prefers-contrast: more`), whatever the page sets.
 
 ```jsx
@@ -186,7 +205,7 @@ contrast (`prefers-contrast: more`), whatever the page sets.
 
 - Set `--clover-color-secondary` to your page's background. Most parts paint no ground of
   their own, so Clover's text sits on your page.
-- Size your page in `rem` or `%`, never in pixels on its root, so your reader's own text
+- Size your page in `rem` or `%`, never in pixels on its root, so the browser's own text
   size reaches Clover too.
 - Give a dark mode a lighter `accent-text` for links and labels, and keep the accent for
   rings and fills.
@@ -201,8 +220,8 @@ contrast (`prefers-contrast: more`), whatever the page sets.
   pictures, and keep a dark fill and white glyphs in both.
 - Don't take the markers off Clover's lists with a reset, or
   [put them back](#lists-in-markdown-text).
-- Don't bring back the Body's motion for a reader who prefers less: Clover turns it off
-  for them, and a rule of yours outside `@media (prefers-reduced-motion: no-preference)`
+- Don't bring back the Body's motion where less is preferred: Clover turns it off
+  there, and a rule of yours outside `@media (prefers-reduced-motion: no-preference)`
   would turn it on again.
 - Don't set a `--clover-*` property that [Variables](#variables) does not list: Clover
   sets those itself as it runs, to hold its state.
@@ -295,8 +314,8 @@ On the transport's dark scrim, in every theme.
 ### The Body
 
 On `.clover-canvas`, but for `--clover-body-height`, which you can set on Body or on any
-element that contains it. Clover sets the controls' durations to `0s` for a reader who prefers reduced
-motion: set yours inside `@media (prefers-reduced-motion: no-preference)`.
+element that contains it. Clover sets the controls' durations to `0s` where reduced motion is
+preferred: set yours inside `@media (prefers-reduced-motion: no-preference)`.
 
 | Variable                         | Default                                                                                                   | What it sets                                                   |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -304,7 +323,7 @@ motion: set yours inside `@media (prefers-reduced-motion: no-preference)`.
 | `--clover-canvas-wash`           | `#0001`                                                                                                   | The Body's ground, a wash over the page's, kept in full screen |
 | `--clover-canvas-inset`          | `0px` (Document: `var(--clover-inset)`)                                                                   | A margin around the picture at home                            |
 | `--clover-canvas-controls-inset` | `var(--clover-inset)` (on a screen under 31rem: `var(--clover-space-m)`)                                  | How far the controls sit in from the Body's edges              |
-| `--clover-controls-leave`        | `180ms cubic-bezier(0.4, 0, 1, 1)`                                                                        | How the controls leave when the reader is idle                 |
+| `--clover-controls-leave`        | `180ms cubic-bezier(0.4, 0, 1, 1)`                                                                        | How the controls leave when idle                               |
 | `--clover-controls-enter`        | `340ms cubic-bezier(0.34, 1.56, 0.64, 1)`                                                                 | How they come back                                             |
 | `--clover-controls-tuck`         | `var(--clover-space-s)`                                                                                   | How far they tuck toward their edge as they leave              |
 
@@ -326,6 +345,7 @@ them or on any element that contains them.
 
 ### Templates
 
-| Variable                            | Default                                                 | What it sets                                             |
-| ----------------------------------- | ------------------------------------------------------- | -------------------------------------------------------- |
-| `--clover-template-document-height` | `min(85svh, 56rem)` (`vh` where a browser has no `svh`) | Document's height, set on the template (its `className`) |
+| Variable                            | Default                                                 | What it sets                                                                                            |
+| ----------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `--clover-template-document-height` | `min(85svh, 56rem)` (`vh` where a browser has no `svh`) | Document's height, set on the template (its `className`)                                                |
+| `--clover-title-weight`             | `400`                                                   | Every title's weight (templates', Items', the Collection's, About's label), on it or anything around it |

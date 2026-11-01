@@ -35,9 +35,7 @@ test.describe("Viewer", () => {
     await serveIIIF(page);
     await page.goto("/?content=https://fixtures.test/0009-book-1.json");
     // Open, the panel's toggle is on the spine, beside the Canvas, not in its cluster.
-    const toggle = page.locator(
-      '.clover-template-default-spine [data-button="panel"]',
-    );
+    const toggle = page.locator('.clover-template-spine [data-button="panel"]');
     await expect(toggle).toHaveAttribute("aria-expanded", "true");
     // Each control fades on its own; the panel's toggle never does.
     const zoom = page.locator(
@@ -70,7 +68,7 @@ test.describe("Viewer", () => {
     await serveIIIF(page);
     await page.goto("/?content=https://fixtures.test/0009-book-1.json");
     await expect(
-      page.locator('.clover-template-default-spine [data-button="panel"]'),
+      page.locator('.clover-template-spine [data-button="panel"]'),
     ).toHaveAttribute("aria-expanded", "true");
     const zoom = page.locator(
       '.clover-canvas-controls > [data-button="zoom-in"]',

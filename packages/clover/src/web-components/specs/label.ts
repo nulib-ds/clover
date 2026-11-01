@@ -1,22 +1,25 @@
 import type { ElementDocs, ElementSpec } from "../spec";
 
 /**
- * What `as` may name: text, or a heading for the page's outline (Clover's parts never
- * hard-code a level; WCAG 1.3.1). Not any tag: an attribute that named `script` would
- * write one.
+ * What `as` may name: a heading for the page's outline first (Clover's parts never
+ * hard-code a level; WCAG 1.3.1), then a name for something (a `label`, a `figcaption`),
+ * then text, `div` last, allowed but not offered (Mat, 2026-11-01: the docs list them in
+ * this order). Not any tag: an attribute that named `script` would write one.
  */
 const TAGS = [
-  "span",
-  "p",
-  "div",
-  "strong",
-  "em",
   "h1",
   "h2",
   "h3",
   "h4",
   "h5",
   "h6",
+  "span",
+  "label",
+  "figcaption",
+  "p",
+  "strong",
+  "em",
+  "div",
 ] as const;
 
 /** `<clover-label>`: a resource's label, in the language it is in. */

@@ -58,6 +58,31 @@ const typeOf = (type: AttributeType) =>
       ? "string (a URL or JSON)"
       : (type as string);
 
+/**
+ * The values an attribute takes, each its own chip, `|` between them, in its spec's order
+ * (Mat, 2026-11-01: a Label's elements headings first, "by highlight, I meant ordering").
+ */
+function ValuesCell({
+  values,
+  Code,
+}: {
+  values: readonly string[];
+  Code: React.ElementType;
+}) {
+  return (
+    <>
+      {values.map((value, index) => {
+        return (
+          <React.Fragment key={value}>
+            {index > 0 && " | "}
+            <Code>{`"${value}"`}</Code>
+          </React.Fragment>
+        );
+      })}
+    </>
+  );
+}
+
 /** What an event's `keeps` makes the element hold, read-only. */
 const keptOf = (spec: ElementSpec) =>
   Object.values(spec.events ?? {})
@@ -66,7 +91,8 @@ const keptOf = (spec: ElementSpec) =>
 
 type Row = {
   name: string;
-  type: string;
+  /** Its type, or the values it takes, each its own chip (`ValuesCell`). */
+  type: string | readonly string[];
   fallback?: string;
   description: string;
 };
@@ -91,7 +117,9 @@ function ElementTable({
   const rows: Row[] = [
     ...attributes.map(([name, attribute]) => ({
       name,
-      type: typeOf(attribute.type),
+      type: Array.isArray(attribute.type)
+        ? (attribute.type as readonly string[])
+        : typeOf(attribute.type),
       fallback: docs.attributes[name]?.default,
       description: docs.attributes[name]?.description ?? "",
     })),
@@ -138,7 +166,11 @@ function ElementTable({
                 <Code>{row.name}</Code>
               </Td>
               <Td>
-                <Code>{row.type}</Code>
+                {typeof row.type === "string" ? (
+                  <Code>{row.type}</Code>
+                ) : (
+                  <ValuesCell values={row.type} Code={Code} />
+                )}
               </Td>
               <Td>{row.fallback ? <Code>{row.fallback}</Code> : "—"}</Td>
               <Td>{row.description}</Td>

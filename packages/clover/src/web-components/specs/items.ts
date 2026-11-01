@@ -5,7 +5,11 @@ export const items: ElementSpec = {
   tag: "clover-items",
   kind: "part",
   attributes: {
-    layout: { prop: "layout", type: ["slider", "list", "grid", "pager"] },
+    layout: {
+      prop: "layout",
+      type: ["slider", "list", "grid", "masonry", "pager"],
+    },
+    secondary: { prop: "secondary", type: ["summary", "navDate", "none"] },
     size: { prop: "size", type: ["large", "small"] },
     of: { prop: "of", type: ["views", "members", "targets", "annotations"] },
     navigation: { prop: "navigation", type: ["id", "homepage"] },
@@ -13,6 +17,7 @@ export const items: ElementSpec = {
     header: { prop: "header", type: "boolean" },
     "heading-level": { prop: "headingLevel", type: "number", min: 2 },
     "thumbnail-size": { prop: "thumbnailSize", type: "number", min: 1 },
+    "single-item": { prop: "singleItem", type: "boolean" },
     language: { prop: "language", type: "string" },
     "high-contrast": { prop: "highContrast", type: "boolean" },
   },
@@ -29,8 +34,13 @@ export const itemsDocs: ElementDocs = {
   attributes: {
     layout: {
       description:
-        "A scrolling row, a column, a wrapping grid, or a pager: Previous, the position and Next, with no thumbnails.",
+        "A scrolling row, a column, a wrapping grid, masonry (a grid whose pictures keep their proportions, packed in reading order), or a pager: Previous, the position and Next, with no thumbnails.",
       default: "slider",
+    },
+    secondary: {
+      description:
+        "The line under an item's label, where it has one (a Collection's members do): its summary, its navDate, or none.",
+      default: "summary",
     },
     size: {
       description:
@@ -64,12 +74,17 @@ export const itemsDocs: ElementDocs = {
       description: "Pixels to ask for each thumbnail's longer side.",
       default: "200",
     },
+    "single-item": {
+      description:
+        "Inside a root: its views even where there is only one, as a gallery's grid does. The pager, with nothing to step to, still draws nothing.",
+      default: "false",
+    },
     language: {
       description: "Alone: the language to read IIIF text in.",
     },
     "high-contrast": {
       description:
-        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the system asks for more contrast, too.",
       default: "false",
     },
   },

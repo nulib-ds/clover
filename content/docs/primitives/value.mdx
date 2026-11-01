@@ -1,6 +1,6 @@
 ---
 title: Value
-description: Any IIIF language map you hold, in the reader's language, read strictly by its format as plain text, IIIF's HTML or Markdown.
+description: Any IIIF language map you hold, in the defined language, read strictly by its format as plain text, IIIF's HTML or Markdown.
 ---
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
@@ -18,7 +18,7 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 </div>
 
 <div className="docs-lede">
-  Any IIIF text you hold, in the reader's language, as plain text, HTML or
+  Any IIIF text you hold, in the defined language, as plain text, HTML or
   Markdown.
 </div>
 
@@ -37,7 +37,7 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 
 ## API reference
 
-Shows `value` in the reader's language, read by its `format`, and renders a `span`. Its
+Shows `value` in the defined language, read by its `format`, and renders a `span`. Its
 HTML is sanitized to what IIIF allows. It reads nothing from the Root's resource, renders
 nothing while there is no text, and its other props go to its element.
 

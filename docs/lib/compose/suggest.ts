@@ -443,7 +443,7 @@ export function suggest(
       );
     if (structure.annotations.referenced)
       notes.push(
-        "Annotation pages it names were not read: Clover fetches them as the reader goes (the Root's annotationPages).",
+        "Annotation pages it names were not read: Clover fetches them as the view moves (the Root's annotationPages).",
       );
     if (structure.truncated)
       notes.push(

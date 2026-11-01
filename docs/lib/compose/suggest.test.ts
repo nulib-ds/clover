@@ -104,7 +104,7 @@ describe("suggest", () => {
     );
     expect(items?.props.find((prop) => prop.prop === "layout")).toEqual({
       prop: "layout",
-      type: '"slider" | "list" | "grid" | "pager"',
+      type: '"slider" | "list" | "grid" | "masonry" | "pager"',
       default: "slider",
       says: expect.any(String),
     });

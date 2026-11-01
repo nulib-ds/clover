@@ -40,7 +40,7 @@ export const timelineDocs: ElementDocs = {
     language: { description: "The language to read IIIF text in." },
     "high-contrast": {
       description:
-        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the system asks for more contrast, too.",
       default: "false",
     },
     controls: {
@@ -83,7 +83,7 @@ export const timelineDocs: ElementDocs = {
     "clover-caption-change": {
       detail: "{ caption: { id: string; language?: string } | null }",
       description:
-        "The reader chose a caption file in the Body's Captions menu, or Off (null).",
+        "A caption file was chosen in the Body's Captions menu, or Off (null).",
     },
     "clover-ended": {
       detail: "Record<string, never>",
@@ -122,7 +122,7 @@ export const sceneDocs: ElementDocs = {
     language: { description: "The language to read IIIF text in." },
     "high-contrast": {
       description:
-        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the system asks for more contrast, too.",
       default: "false",
     },
     controls: {

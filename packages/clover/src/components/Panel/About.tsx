@@ -131,13 +131,31 @@ function AboutContent({
    */
   useEffect(() => {
     const about = root.current;
-    const image = about?.querySelector<HTMLElement>(".clover-about-thumbnail");
-    if (!about || !image || typeof ResizeObserver === "undefined") return;
-    const heading = about.querySelector<HTMLElement>(".clover-about-label");
+    const head = about?.querySelector<HTMLElement>(".clover-about-head");
+    if (!about || !head || typeof ResizeObserver === "undefined") return;
+    const watched = new Set<Element>();
     const write = () => {
+      /*
+       * Found again at each measure, never kept from the first: the label is drawn
+       * again as a new element (its heading level settling), and the thumbnail may
+       * arrive after About does. One let go measures 0, which wrote the label's height
+       * as 0 and slid the label under the thumbnail.
+       */
+      const image = head.querySelector<HTMLElement>(".clover-about-thumbnail");
+      const heading = head.querySelector<HTMLElement>(".clover-about-label");
+      for (const element of [image, heading])
+        if (element && !watched.has(element)) {
+          watched.add(element);
+          observer.observe(element);
+        }
+      const style = about.style;
+      if (!image) {
+        style.removeProperty("--clover-about-label-height");
+        style.removeProperty("--clover-about-thumbnail-width");
+        return;
+      }
       const height = `${heading?.offsetHeight ?? 0}px`;
       const width = `${image.offsetWidth}px`;
-      const style = about.style;
       if (style.getPropertyValue("--clover-about-label-height") !== height)
         style.setProperty("--clover-about-label-height", height);
       if (style.getPropertyValue("--clover-about-thumbnail-width") !== width)
@@ -147,16 +165,16 @@ function AboutContent({
      * Measured now, then a frame after each resize: what is written wraps the label
      * again, so writing as the observer reports would resize what it watches in the
      * same frame, and the browser reports "ResizeObserver loop completed with
-     * undelivered notifications" to the page's error handlers.
+     * undelivered notifications" to the page's error handlers. The head is watched
+     * too, so a label or thumbnail drawn anew is found.
      */
-    write();
     let frame = 0;
     const observer = new ResizeObserver(() => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(write);
     });
-    observer.observe(image);
-    if (heading) observer.observe(heading);
+    observer.observe(head);
+    write();
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
@@ -216,7 +234,10 @@ function AboutContent({
             />
           )}
           {label && (
-            <Label as={titleTag(headingLevel)} className="clover-about-label" />
+            <Label
+              as={titleTag(headingLevel)}
+              className="clover-about-label clover-title"
+            />
           )}
         </div>
       )}

@@ -29,16 +29,21 @@ type Named = keyof typeof TEMPLATES;
  */
 const ONLY: Record<string, readonly Named[]> = {
   header: ["default"],
-  panel: ["default"],
-  items: ["default"],
+  panel: ["default", "gallery"],
+  items: ["default", "gallery"],
+  singleItem: ["default", "document"],
   fill: ["default"],
-  defaultPanelOpen: ["default", "document"],
-  panelLayout: ["default", "document"],
-  download: ["default", "document"],
-  languages: ["default", "document"],
-  storageKey: ["default", "document"],
+  defaultPanelOpen: ["default", "document", "gallery"],
+  panelLayout: ["default", "document", "gallery"],
+  download: ["default", "document", "gallery"],
+  languages: ["default", "document", "gallery"],
+  storageKey: ["default", "document", "gallery"],
   defaultSidebarOpen: ["document"],
   size: ["gallery"],
+  height: ["gallery"],
+  gap: ["gallery"],
+  secondary: ["gallery"],
+  lightboxItems: ["gallery"],
 };
 
 /**

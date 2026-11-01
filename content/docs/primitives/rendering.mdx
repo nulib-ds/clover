@@ -41,11 +41,11 @@ view's and the resource's together, in two groups.
 
 <ApiReference elements="clover-rendering">
 
-| Prop        | Type                      | Default      | Description                                                        |
-| ----------- | ------------------------- | ------------ | ------------------------------------------------------------------ |
-| `of`        | `"manifest" \| "canvas"`  | `"manifest"` | Whose `rendering`: the resource's, or the Canvas the reader is on. |
-| `value`     | `{ id, label, format }[]` | —            | Formats to show instead of the Root's, as IIIF gives them.         |
-| `className` | `string`                  | —            | Added to `clover-rendering`.                                       |
+| Prop        | Type                      | Default      | Description                                                 |
+| ----------- | ------------------------- | ------------ | ----------------------------------------------------------- |
+| `of`        | `"manifest" \| "canvas"`  | `"manifest"` | Whose `rendering`: the resource's, or the current Canvas's. |
+| `value`     | `{ id, label, format }[]` | —            | Formats to show instead of the Root's, as IIIF gives them.  |
+| `className` | `string`                  | —            | Added to `clover-rendering`.                                |
 
 </ApiReference>
 
@@ -53,8 +53,8 @@ view's and the resource's together, in two groups.
 
 ### The current Canvas
 
-Beside a `Body`, `of="canvas"` lists the formats of the Canvas in view, and changes as
-the reader moves. Each page of this newspaper links its own text.
+Beside a `Body`, `of="canvas"` lists the formats of the Canvas in view, and changes with
+the current Canvas. Each page of this newspaper links its own text.
 
 <Example>
 <PartDemo

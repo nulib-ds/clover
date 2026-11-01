@@ -1,11 +1,9 @@
 /*
  * The Collection (`Collection.tsx`), laid out as About is (`Panel.css`): its
- * parts `m` apart. Its label at the heading's size, medium, its lines balanced.
+ * parts `m` apart. Its label a title (`clover-title`, `styles/scale.css`), its lines
+ * balanced.
  */
 .clover-collection-title {
-  margin: 0;
-  font-size: var(--clover-text-m);
-  font-weight: 500;
   text-wrap: balance;
 }
 

@@ -452,6 +452,42 @@ b {
 }
 
 /*
+ * Clover's labels and titles drawn as headings in the site's examples take the site's
+ * size for their level, as a page's own do: Clover leaves a title's size to the page
+ * (Mat, 2026-11-01: "leave size to the page"; "the size changes to adjust to inherited
+ * size/heading of consuming page"). Nextra's reset gives a bare heading no size of its
+ * own, so the site says it here, a golden step a level, for those in an example alone:
+ * the docs' own headings, and Clover's section headings, keep theirs.
+ */
+[data-example] :is(h1, h2, h3, h4, h5, h6):is(.clover-label, .clover-title) {
+  line-height: 1.25;
+}
+
+[data-example] h1:is(.clover-label, .clover-title) {
+  font-size: 2rem;
+}
+
+[data-example] h2:is(.clover-label, .clover-title) {
+  font-size: 1.618rem;
+}
+
+[data-example] h3:is(.clover-label, .clover-title) {
+  font-size: 1.382rem;
+}
+
+[data-example] h4:is(.clover-label, .clover-title) {
+  font-size: 1.236rem;
+}
+
+[data-example] h5:is(.clover-label, .clover-title) {
+  font-size: 1.146rem;
+}
+
+[data-example] h6:is(.clover-label, .clover-title) {
+  font-size: 1rem;
+}
+
+/*
  * Nextra weights both its prose and its frame with utility classes (`x:font-medium`,
  * `x:font-semibold`: the sidebar, the table of contents and the navbar), so collapsing
  * them into the two-weight system means naming them. Nextra's are in cascade layers and

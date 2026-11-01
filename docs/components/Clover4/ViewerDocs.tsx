@@ -173,6 +173,8 @@ export interface LiveProps {
   template?: TemplateName;
   /** The Viewer's props, as plain values. */
   props?: Record<string, Plain>;
+  /** Custom properties on the Viewer's own root (`--clover-…`), beside the example's own. */
+  vars?: Record<string, string>;
   /** Open at a region of a Canvas, by its place in the Manifest, as a content state. */
   place?: { canvas: number; xywh: string };
   /** The Body's height (`--clover-body-height`). */
@@ -190,6 +192,7 @@ export function Live({
   resource,
   template,
   props,
+  vars,
   place,
   height = "22rem",
   box,
@@ -235,6 +238,7 @@ export function Live({
             ["--clover-body-height" as string]: height,
             // Document is as tall as its pages' column: the Body and its toolbar.
             ["--clover-template-document-height" as string]: `calc(${height} + 4rem)`,
+            ...vars,
           }}
           {...(request ? { request } : undefined)}
           {...(box ? { fill: true } : undefined)}
@@ -288,13 +292,55 @@ export function ViewerExample({
         <AgentPreview shown={preview} />
       ) : (
         <>
-          <div className={styles.preview} {...example(EXAMPLE)}>
+          <div className={styles.preview} data-bleed {...example(EXAMPLE)}>
             <Live {...live} />
           </div>
           {children && <CodeArea editor={editor}>{children}</CodeArea>}
         </>
       )}
     </figure>
+  );
+}
+
+/**
+ * A switch over an example, outside its card (Mat, 2026-11-01: "move this above the
+ * example, out of the dropshadow container … keep styling the same for all segmented
+ * controls"): its name, then buttons that show which is pressed, in a group named by it.
+ * One look for every example's (`switchAbove`, `ViewerDocs.module.css`).
+ */
+function ExampleSwitch({
+  id,
+  label,
+  options,
+  chosen,
+  onChoose,
+}: {
+  /** The id of its legend, which names the group. */
+  id: string;
+  label: string;
+  options: { key: string; label: string }[];
+  chosen: number;
+  onChoose: (index: number) => void;
+}) {
+  return (
+    <fieldset className={styles.switchAbove}>
+      <legend className={styles.switchLabel} id={id}>
+        {label}
+      </legend>
+      <div className={styles.segmented}>
+        {options.map((option, index) => (
+          <button
+            key={option.key}
+            type="button"
+            aria-pressed={index === chosen}
+            className={styles.segment}
+            onClick={() => onChoose(index)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </fieldset>
   );
 }
 
@@ -342,63 +388,55 @@ export function OptionsExample({
         ? { width: String(value) }
         : { props: { ...live.props, [prop]: value } };
   return (
-    <figure
-      ref={ref}
-      className={styles.example}
-      data-lead={lead || undefined}
-      data-wide={wide || undefined}
-    >
-      {preview ? (
-        <AgentPreview shown={preview} />
-      ) : (
-        <>
-          <div className={styles.switchBar}>
-            <span className={styles.switchLabel} id={`${id}-label`}>
-              {label}
-            </span>
-            <div
-              role="group"
-              aria-labelledby={`${id}-label`}
-              className={styles.segmented}
-            >
-              {options.map((option, index) => (
-                <button
-                  key={nameOf(option)}
-                  type="button"
-                  aria-pressed={option === value}
-                  className={styles.segment}
-                  onClick={() => setValue(option)}
-                >
-                  {labels?.[index] ?? nameOf(option)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className={styles.preview} {...example(EXAMPLE)}>
-            <Live key={nameOf(value)} {...live} {...shown} />
-          </div>
-          <CodeArea editor={editor}>
-            {/*
-             * The chosen value's code shows; the others are hidden by CSS, not `hidden`, so the
-             * page's Markdown keeps every value's code (`data-shown`, `ViewerDocs.module.css`).
-             */}
-            {React.Children.map(children, (child) =>
-              React.isValidElement<{
-                "data-option"?: string;
-                "data-shown"?: string;
-              }>(child) && child.props["data-option"] !== undefined
-                ? React.cloneElement(child, {
-                    "data-shown":
-                      child.props["data-option"] === nameOf(value)
-                        ? ""
-                        : undefined,
-                  })
-                : child,
-            )}
-          </CodeArea>
-        </>
+    <>
+      {!preview && (
+        <ExampleSwitch
+          id={`${id}-label`}
+          label={label}
+          options={options.map((option, index) => ({
+            key: nameOf(option),
+            label: labels?.[index] ?? nameOf(option),
+          }))}
+          chosen={options.indexOf(value)}
+          onChoose={(index) => setValue(options[index])}
+        />
       )}
-    </figure>
+      <figure
+        ref={ref}
+        className={styles.example}
+        data-lead={lead || undefined}
+        data-wide={wide || undefined}
+      >
+        {preview ? (
+          <AgentPreview shown={preview} />
+        ) : (
+          <>
+            <div className={styles.preview} data-bleed {...example(EXAMPLE)}>
+              <Live key={nameOf(value)} {...live} {...shown} />
+            </div>
+            <CodeArea editor={editor}>
+              {/*
+               * The chosen value's code shows; the others are hidden by CSS, not `hidden`, so the
+               * page's Markdown keeps every value's code (`data-shown`, `ViewerDocs.module.css`).
+               */}
+              {React.Children.map(children, (child) =>
+                React.isValidElement<{
+                  "data-option"?: string;
+                  "data-shown"?: string;
+                }>(child) && child.props["data-option"] !== undefined
+                  ? React.cloneElement(child, {
+                      "data-shown":
+                        child.props["data-option"] === nameOf(value)
+                          ? ""
+                          : undefined,
+                    })
+                  : child,
+              )}
+            </CodeArea>
+          </>
+        )}
+      </figure>
+    </>
   );
 }
 
@@ -421,11 +459,17 @@ export interface LiveTemplate {
  */
 export function LiveTemplates({
   options,
+  resources,
   editor,
   wide,
   ...live
 }: Omit<LiveProps, "template" | "props"> & {
   options: LiveTemplate[];
+  /**
+   * Resources to switch between, at the top (`LiveViewerExample`'s `resources`): the
+   * Viewer opens the one chosen, and the code names its address.
+   */
+  resources?: { label: string; resource: string; address: string }[];
   editor?: Editor;
   /** Wider than the page's column, where the window has room (`data-wide`). */
   wide?: boolean;
@@ -434,6 +478,8 @@ export function LiveTemplates({
   // The frame, which can hold an agent's preview in place of the Viewer (`PreviewHost`).
   const { ref: figure, preview } = usePreviewHost();
   const [chosen, setChosen] = useState(options[0].name);
+  const [source, setSource] = useState(0);
+  const shownResource = resources?.[source];
   const [values, setValues] = useState(() =>
     Object.fromEntries(
       options.map((option) => [option.name, initialValues(option.knobs)]),
@@ -462,75 +508,99 @@ export function LiveTemplates({
     setValues((all) => ({ ...all, [name]: { ...all[name], [knob]: value } }));
   };
   return (
-    <figure
-      ref={figure}
-      className={styles.example}
-      data-lead
-      data-wide={wide || undefined}
-    >
-      {preview ? (
-        <AgentPreview shown={preview} />
-      ) : (
-        <>
-          <div className={styles.preview} {...example(EXAMPLE)}>
-            <Live
-              key={`${option.name}|${remountKey(option.knobs, current)}`}
-              {...live}
-              template={option.name}
-              props={knobProps(option.knobs, current) as Record<string, Plain>}
-            />
-          </div>
-          <CodeArea editor={editor}>
-            {/*
-             * Every template's code, the chosen one's shown by CSS (`data-shown`), as
-             * `OptionsExample` keeps each value's, so the page's Markdown holds them all.
-             */}
-            {options.map((each) => (
-              <div
-                key={each.name}
-                data-option={each.name}
-                data-shown={each.name === option.name ? "" : undefined}
-              >
-                <LiveCode
-                  tree={each.tree}
-                  knobs={each.knobs}
-                  values={values[each.name]}
-                  onChange={set(each.name)}
-                />
-              </div>
-            ))}
-          </CodeArea>
-          <div className={styles.switchUnder}>
-            <span className={styles.switchUnderLabel} id={`${id}-label`}>
-              Template
-            </span>
-            <div
-              className="code-switch"
-              role="radiogroup"
-              aria-labelledby={`${id}-label`}
-            >
-              {options.map(({ name }) => (
-                <label
-                  key={name}
-                  className="code-switch-option"
-                  data-option={name}
-                  data-checked={name === option.name || undefined}
-                >
-                  <input
-                    type="radio"
-                    name={`${id}-template`}
-                    value={name}
-                    checked={name === option.name}
-                    onChange={() => setChosen(name)}
-                  />
-                  <span>{name}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </>
+    <>
+      {!preview && resources && resources.length > 1 && (
+        // What it opens, switched over the example.
+        <ExampleSwitch
+          id={`${id}-resource`}
+          label="Resource"
+          options={resources.map((each) => ({
+            key: each.resource,
+            label: each.label,
+          }))}
+          chosen={source}
+          onChoose={setSource}
+        />
       )}
-    </figure>
+      <figure
+        ref={figure}
+        className={styles.example}
+        data-lead
+        data-wide={wide || undefined}
+      >
+        {preview ? (
+          <AgentPreview shown={preview} />
+        ) : (
+          <>
+            <div className={styles.preview} data-bleed {...example(EXAMPLE)}>
+              <Live
+                key={`${option.name}|${shownResource?.resource ?? ""}|${remountKey(option.knobs, current)}`}
+                {...live}
+                {...(shownResource
+                  ? { resource: shownResource.resource }
+                  : null)}
+                template={option.name}
+                props={
+                  knobProps(option.knobs, current) as Record<string, Plain>
+                }
+              />
+            </div>
+            <CodeArea editor={editor}>
+              {/*
+               * Every template's code, the chosen one's shown by CSS (`data-shown`), as
+               * `OptionsExample` keeps each value's, so the page's Markdown holds them all.
+               */}
+              {options.map((each) => (
+                <div
+                  key={each.name}
+                  data-option={each.name}
+                  data-shown={each.name === option.name ? "" : undefined}
+                >
+                  <LiveCode
+                    tree={
+                      shownResource
+                        ? { ...each.tree, url: shownResource.address }
+                        : each.tree
+                    }
+                    knobs={each.knobs}
+                    values={values[each.name]}
+                    onChange={set(each.name)}
+                  />
+                </div>
+              ))}
+            </CodeArea>
+            <div className={styles.switchUnder}>
+              <span className={styles.switchUnderLabel} id={`${id}-label`}>
+                Template
+              </span>
+              <div
+                className="code-switch"
+                role="radiogroup"
+                aria-labelledby={`${id}-label`}
+              >
+                {options.map(({ name }) => (
+                  <label
+                    key={name}
+                    className="code-switch-option"
+                    data-option={name}
+                    data-checked={name === option.name || undefined}
+                  >
+                    <input
+                      type="radio"
+                      name={`${id}-template`}
+                      value={name}
+                      checked={name === option.name}
+                      onChange={() => setChosen(name)}
+                    />
+                    <span>{name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </figure>
+    </>
   );
 }
 

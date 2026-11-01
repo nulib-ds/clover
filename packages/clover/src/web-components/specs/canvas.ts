@@ -222,7 +222,7 @@ export const canvasDocs: ElementDocs = {
     language: { description: "The language to read IIIF text in." },
     "high-contrast": {
       description:
-        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the system asks for more contrast, too.",
       default: "false",
     },
     controls: {
@@ -245,7 +245,7 @@ export const canvasDocs: ElementDocs = {
     },
     "animate-annotations": {
       description:
-        "Glide to a picked annotation, rather than frame it in one cut. A reader who asks for reduced motion gets the cut.",
+        "Glide to a picked annotation, rather than frame it in one cut. Where reduced motion is asked for, it cuts.",
       default: "false",
     },
   },
@@ -282,7 +282,7 @@ export const canvasDocs: ElementDocs = {
     "clover-annotation-select": {
       detail: "{ id: string | null }",
       description:
-        "The reader picked an annotation, on the Body or in its menu; null when they let it go.",
+        "An annotation was picked, on the Body or in its menu; null when it is let go.",
     },
     "clover-annotation-active": {
       detail: "{ id: string | null }",
@@ -291,7 +291,7 @@ export const canvasDocs: ElementDocs = {
     "clover-caption-change": {
       detail: "{ caption: { id: string; language?: string } | null }",
       description:
-        "The reader chose a caption file in the Captions menu, or Off (null).",
+        "A caption file was chosen in the Captions menu, or Off (null).",
     },
     "clover-ended": {
       detail: "Record<string, never>",

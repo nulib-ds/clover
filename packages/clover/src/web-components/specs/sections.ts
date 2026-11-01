@@ -1,7 +1,7 @@
 import type { ElementDocs, ElementSpec } from "../spec";
 
 /*
- * The parts that read their root's state: where the reader is, what the Manifest holds,
+ * The parts that read their root's state: the current view, what the Manifest holds,
  * and what Clover is doing. Each draws nothing outside a `<clover-root>` (`needsRoot`),
  * but the map, which can show what it is given.
  */
@@ -64,7 +64,7 @@ export const position: ElementSpec = {
 export const positionDocs: ElementDocs = {
   name: "CloverPositionElement",
   description:
-    "Where the reader is, as a count: Item 3 of 12. It keeps the room of its widest count, so nothing beside it moves.",
+    "The current position, as a count: Item 3 of 12. It keeps the room of its widest count, so nothing beside it moves.",
   attributes: {
     ...ofStepsDocs,
     as: { description: "The element to draw.", default: "span" },
@@ -345,7 +345,7 @@ export const mapDocs: ElementDocs = {
     language: { description: "Alone: the language to read IIIF text in." },
     "high-contrast": {
       description:
-        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the system asks for more contrast, too.",
       default: "false",
     },
   },

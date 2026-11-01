@@ -54,7 +54,7 @@ export async function run(
         ...(plan.sample && { sample: plan.sample }),
         ...(plan.page && { page: plan.page }),
         where:
-          "In the page's first example, in place of its own, its code under it in the reader's flavor. The reader brings the page's example back with Show this page's example.",
+          "In the page's first example, in place of its own, its code under it in the chosen flavor. Show this page's example brings the page's own back.",
         notes: plan.notes,
       };
     }

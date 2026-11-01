@@ -1,33 +1,91 @@
-/* The lightbox: a modal dialog holding the Body. */
+/*
+ * The lightbox: a modal layer over the layout, and only the layout (`Lightbox.tsx`). By
+ * default it fills the layout's bounds, edge to edge. To show the layout dimmed around
+ * it, give it room and a backdrop:
+ *   --clover-template-lightbox-inset     room around the panel (default 0)
+ *   --clover-template-lightbox-backdrop  what fills that room (default transparent)
+ *   --clover-template-lightbox-radius    the panel's corners (default 0)
+ * e.g. var(--clover-inset), rgb(0 0 0 / 0.6), var(--clover-radius).
+ */
 .clover-template-lightbox {
-  width: min(96vw, 72rem);
-  max-height: 94vh;
-  /* Within the window as it shows now, a phone's toolbars and all, where a browser knows it. */
-  max-height: 94dvh;
-  padding: 0;
-  border: 0;
-  border-radius: var(--clover-radius, 3px);
-  background: var(--clover-color-secondary, #fff);
-  color: var(--clover-color-primary, #1a1d1e);
-  box-shadow: 0 8px 40px rgb(0 0 0 / 0.35);
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  padding: var(--clover-template-lightbox-inset, 0);
+  background: var(--clover-template-lightbox-backdrop, transparent);
 }
 
-.clover-template-lightbox::backdrop {
-  background: rgb(0 0 0 / 0.6);
+.clover-template-lightbox[hidden] {
+  display: none;
 }
 
+/*
+ * The panel, held in the window while a layout taller than it scrolls: as tall as the
+ * layout's bounds, or the window's, whichever is less.
+ */
 .clover-template-lightbox-content {
+  position: sticky;
+  top: var(--clover-template-lightbox-inset, 0);
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: var(--clover-space-m);
+  height: min(
+    100%,
+    calc(100vh - 2 * var(--clover-template-lightbox-inset, 0px))
+  );
   padding: var(--clover-inset);
+  border-radius: var(--clover-template-lightbox-radius, 0);
+  background: var(--clover-color-secondary, #fff);
+  color: var(--clover-color-primary, #1a1d1e);
   --clover-body-height: min(70vh, 48rem);
 }
 
+/*
+ * The window's smallest height where a browser knows it: on a phone, `vh` is the window
+ * with its toolbars away, so a panel sized by it ran on under them.
+ */
 @supports (height: 1svh) {
   .clover-template-lightbox-content {
+    height: min(
+      100%,
+      calc(100svh - 2 * var(--clover-template-lightbox-inset, 0px))
+    );
     --clover-body-height: min(70svh, 48rem);
   }
+}
+
+/*
+ * Under the title, the view and the information panel beside it (`PanelPane`), taking
+ * the height the title leaves: the main pane the Body over its thumbnails or pager, `m`
+ * apart, the Body taking what they leave.
+ */
+.clover-template-lightbox-content > .clover-template-lightbox-panes {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.clover-template-lightbox-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-m);
+  min-height: 0;
+}
+
+.clover-template-lightbox-main > .clover-template-lightbox-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/*
+ * The thumbnails under the Body, a short strip (Mat, 2026-11-01: "items should be small
+ * in height"): Items' documented sizes, its pictures half their height and each label on
+ * one line, so the Body keeps the room.
+ */
+.clover-template-lightbox-main > .clover-items[data-layout="slider"] {
+  flex: none;
+  --clover-items-height: 4rem;
+  --clover-items-lines: 1;
 }
 
 /* The Body's box while its code loads: its height and a Canvas's own background. */
@@ -42,14 +100,81 @@
   gap: var(--clover-space-m);
 }
 
-/*
- * Its title, at whatever level the layout gives it (past h6, no heading): every template
- * title's size, lines and wrapping (`Default.css`), beside Close.
- */
-.clover-template-lightbox-title {
+/* The levels' trail over the title, the two beside Close (`Trail`, `Lightbox.tsx`). */
+.clover-template-lightbox-heading {
+  display: flex;
   flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--clover-space-3xs);
   min-width: 0;
-  font-weight: 700;
+}
+
+/*
+ * The levels over the view, a step under the title and muted, a chevron between them
+ * that assistive technology passes over (the `nav` and its list say what they are). Each
+ * wraps as a long label needs (WCAG 1.4.10).
+ */
+.clover-template-lightbox-trail > ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--clover-space-2xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--clover-color-primary-muted, #26292b);
+  font-size: var(--clover-text-s);
+}
+
+.clover-template-lightbox-trail li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--clover-space-2xs);
+  min-width: 0;
+  min-block-size: 24px;
+  overflow-wrap: anywhere;
+}
+
+.clover-template-lightbox-trail li + li::before {
+  content: "›";
+  content: "›" / "";
+}
+
+.clover-template-lightbox-trail li + li:dir(rtl)::before {
+  content: "‹";
+  content: "‹" / "";
+}
+
+/*
+ * A level to step back out to: a link's look, its words underlined in the text accent, so
+ * it never reads by color alone (WCAG 1.4.1), at least 24px tall (2.5.8). `button.` for
+ * its weight against CSS resets (`ui/Button.css`).
+ */
+.clover-template-lightbox-trail button {
+  min-block-size: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--clover-radius, 3px);
+  background: none;
+  color: var(
+    --clover-color-accent-text,
+    var(--clover-accent-text-fallback, var(--clover-color-accent, #0065c3))
+  );
+  font: inherit;
+  text-align: start;
+  text-decoration-line: underline;
+  text-underline-offset: var(--clover-space-3xs);
+  cursor: pointer;
+}
+
+.clover-template-lightbox-trail button:hover {
+  text-decoration-thickness: 2px;
+}
+
+.clover-template-lightbox-trail button:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
 }
 
 button.clover-template-lightbox-close {

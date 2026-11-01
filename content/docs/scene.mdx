@@ -60,19 +60,19 @@ left, plus and minus zoom, and 0 resets. A plain wheel scrolls the page.
 
 <ApiReference elements="clover-scene">
 
-| Prop             | Type                                                          | Default                     | Description                                                                                                                                                                                         |
-| ---------------- | ------------------------------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scene`          | `object`                                                      | The Root's view             | A Presentation 4 Scene to draw; `toPresentation4()` upgrades older ones.                                                                                                                            |
-| `iiifContent`    | `string \| object`                                            | —                           | A Scene to load and draw, or a Manifest's first: URL or JSON.                                                                                                                                       |
-| `label`          | language map or `string`                                      | The Scene's label           | The view's accessible name.                                                                                                                                                                         |
-| `language`       | `string`                                                      | The reader's, or the Root's | The language to read its label, summary and metadata in.                                                                                                                                            |
-| `highContrast`   | `boolean`                                                     | `false`                     | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. Inside a `Root`, the Root's too; on wherever the reader's system asks for more contrast. |
-| `controls`       | `boolean \| { zoom, fullPage, rotation, reset, information }` | `true`                      | All of Clover's controls, none, or all but those set `false`.                                                                                                                                       |
-| `controlButtons` | `object`                                                      | —                           | Components of your own for any control, as Canvas takes them.                                                                                                                                       |
-| `options`        | `{ request?, hideDelay? }`                                    | —                           | Credentials and headers for the Scene and its models; the controls' fade.                                                                                                                           |
-| `engine`         | `"clover" \| "three"`                                         | `"clover"`                  | Clover's own WebGL2 renderer, or three.js, once the page registers it.                                                                                                                              |
-| `className`      | `string`                                                      | —                           | Added to `clover-canvas clover-scene`, on its `figure`.                                                                                                                                             |
-| `children`       | `ReactNode`                                                   | —                           | Your own controls, after Clover's.                                                                                                                                                                  |
+| Prop             | Type                                                          | Default                   | Description                                                                                                                                                                                |
+| ---------------- | ------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `scene`          | `object`                                                      | The Root's view           | A Presentation 4 Scene to draw; `toPresentation4()` upgrades older ones.                                                                                                                   |
+| `iiifContent`    | `string \| object`                                            | —                         | A Scene to load and draw, or a Manifest's first: URL or JSON.                                                                                                                              |
+| `label`          | language map or `string`                                      | The Scene's label         | The view's accessible name.                                                                                                                                                                |
+| `language`       | `string`                                                      | The Root's, or the page's | The language to read its label, summary and metadata in.                                                                                                                                   |
+| `highContrast`   | `boolean`                                                     | `false`                   | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. Inside a `Root`, the Root's too; on wherever the system asks for more contrast. |
+| `controls`       | `boolean \| { zoom, fullPage, rotation, reset, information }` | `true`                    | All of Clover's controls, none, or all but those set `false`.                                                                                                                              |
+| `controlButtons` | `object`                                                      | —                         | Components of your own for any control, as Canvas takes them.                                                                                                                              |
+| `options`        | `{ request?, hideDelay? }`                                    | —                         | Credentials and headers for the Scene and its models; the controls' fade.                                                                                                                  |
+| `engine`         | `"clover" \| "three"`                                         | `"clover"`                | Clover's own WebGL2 renderer, or three.js, once the page registers it.                                                                                                                     |
+| `className`      | `string`                                                      | —                         | Added to `clover-canvas clover-scene`, on its `figure`.                                                                                                                                    |
+| `children`       | `ReactNode`                                                   | —                         | Your own controls, after Clover's.                                                                                                                                                         |
 
 </ApiReference>
 
@@ -170,8 +170,8 @@ Both of these are a Scene with the same model, seen from the same camera; only t
 ### Scene or Body
 
 In a layout, place [`Body`](/docs/body). It handles every container the IIIF Presentation
-API defines, a Canvas, a Timeline or a Scene, so as your reader moves from one view to the
-next, it switches between Canvas, Timeline and Scene on the fly. It adds a height, your
+API defines, a Canvas, a Timeline or a Scene, so as one view follows
+another, it switches between Canvas, Timeline and Scene on the fly. It adds a height, your
 renderers and the loading mark too.
 
 ```jsx

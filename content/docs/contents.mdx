@@ -1,6 +1,6 @@
 ---
 title: Contents
-description: A Manifest's table of contents from its Ranges, the entry the reader is in marked, each entry going to its Canvas.
+description: A Manifest's table of contents from its Ranges, the current entry marked, each entry going to its Canvas.
 ---
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
@@ -17,8 +17,8 @@ import { PartHead } from "docs/components/Clover4/PartHead";
 </div>
 
 <div className="docs-lede">
-  A Manifest's table of contents, from its Ranges, with the entry the reader is
-  in marked.
+  A Manifest's table of contents, from its Ranges, with the current entry
+  marked.
 </div>
 
 <Example>
@@ -37,12 +37,12 @@ import { PartHead } from "docs/components/Clover4/PartHead";
 
 Inside a `Root`, it lists the Manifest's Ranges (`structures`), nested as they nest, in a
 `nav` named "Contents": choosing an entry goes to its Canvas, framed to its region or at
-its time, and the entry the reader is in is `aria-current`. An entry with entries under
+its time, and the current entry is `aria-current`. An entry with entries under
 it opens and closes them by the button at the end of its row; they start closed, but for
-the entries holding the one the reader is in, open from the top down to it and set in
+the entries holding the current one, open from the top down to it and set in
 bold, so the way to it shows. An entry in parts, columns or pages out of order, steps
 through them in its Range's order while it is the current one, and the regions any Range
-names are drawn on the Canvas as annotations are. The entry the reader is in shows its
+names are drawn on the Canvas as annotations are. The current entry shows its
 Range's `thumbnail` under its words, as a chapter's shows over the seek bar and under it
 in the chapters' menu. It renders nothing without Ranges. Its other props, and its `ref`, go to its element. For the view itself, see
 [`Body`](/docs/body).
@@ -128,7 +128,7 @@ The Viewer's Panel shows it as its Contents section, for a Manifest with Ranges.
 Use `tableOfContents` for the same entries, in a table of your own: each has its `label`,
 the `canvasId` it goes to, its `time` or `region`, its `parts` where it has some, and its
 `children`. `currentContents`
-names the entry the reader is in, and `chaptersOf` gives a recording's chapters.
+names the current entry, and `chaptersOf` gives a recording's chapters.
 
 ```jsx
 const manifest = Clover.useManifest();

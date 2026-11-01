@@ -1,21 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 
 import * as Clover from "../../parts";
 import type { PanelLayout, RootProps } from "../../parts";
+import { PanelPane } from "../shared/PanelPane";
 import { preloadDrag } from "../shared/useDragToClose";
 import { useDrawer } from "../shared/useDrawer";
 import { useFollowFocus } from "../shared/useFollowFocus";
-import {
-  BESIDE_REM,
-  PAGE_MIN,
-  PANEL_MIN,
-  useWideEnough,
-} from "../shared/useSlide";
-import type DocumentPanelPart from "./DocumentPanel";
+import { useLazyPanelPane } from "../shared/useLazyPanelPane";
+import { BESIDE_REM, PAGE_MIN, useWideEnough } from "../shared/useSlide";
 import { Sheets } from "./Sheets";
-
-// The information panel, a chunk of its own (`DocumentPanel`).
-const loadPanel = () => import("./DocumentPanel");
 
 export type DocumentProps = Omit<RootProps, "children"> & {
   /**
@@ -23,6 +16,11 @@ export type DocumentProps = Omit<RootProps, "children"> & {
    * where they would float over the page, they start put away.
    */
   defaultSidebarOpen?: boolean;
+  /**
+   * The page thumbnails, and their toggle, even where the resource has one page, which
+   * has nothing to choose between. Default `false`.
+   */
+  singleItem?: boolean;
   /**
    * Whether the information panel starts open beside the page. Default `false`. Where it
    * has no room there and would slide over the page, it starts closed.
@@ -65,6 +63,7 @@ export type DocumentProps = Omit<RootProps, "children"> & {
 export function Document({
   className,
   defaultSidebarOpen,
+  singleItem = false,
   defaultPanelOpen = false,
   panelLayout = "accordion",
   download = true,
@@ -89,6 +88,7 @@ export function Document({
       <DocumentLayout
         title={title}
         defaultSidebarOpen={defaultSidebarOpen}
+        singleItem={singleItem}
         defaultPanelOpen={defaultPanelOpen}
         panelLayout={panelLayout}
         download={download}
@@ -116,6 +116,7 @@ const SIDEBAR_BESIDE_REM = 40;
 
 function DocumentLayout({
   defaultSidebarOpen,
+  singleItem,
   defaultPanelOpen,
   download,
   languages,
@@ -126,6 +127,7 @@ function DocumentLayout({
 }: { title: Clover.Titled } & Pick<
   DocumentProps,
   | "defaultSidebarOpen"
+  | "singleItem"
   | "defaultPanelOpen"
   | "download"
   | "languages"
@@ -166,11 +168,12 @@ function DocumentLayout({
     followFocus,
   });
   /*
-   * Thumbnails only when there is more than one page to choose. Until the content has
-   * loaded there are none, so a one-page document never shows an empty sidebar first.
-   * The pane stays in the tree, hidden, so the page beside it is never remounted.
+   * Thumbnails only when there is more than one page to choose, or one where the host
+   * asks (`singleItem`). Until the content has loaded there are none, so a one-page
+   * document never shows an empty sidebar first. The pane stays in the tree, hidden, so
+   * the page beside it is never remounted.
    */
-  const pages = navigation.total > 1;
+  const pages = navigation.total > (singleItem ? 0 : 1);
   const showSidebar = pages && sidebar.open;
   /*
    * The panel sits beside the page, its own pane with a bar to share the width, where
@@ -180,31 +183,19 @@ function DocumentLayout({
    * pages and the panel, while the panel is open beside them, and among the Canvas's
    * controls otherwise; a press moves it, and focus follows it there.
    */
-  const panel = useDrawer({
+  // Its code loads as the reader reaches for it, as it starts shut (`PanelPart`).
+  const panel = useLazyPanelPane({
     id: `${id}-panel`,
     beside: useWideEnough(panes, BESIDE_REM + (showSidebar ? SIDEBAR_REM : 0)),
     defaultOpen: Boolean(defaultPanelOpen),
-    side: "end",
     followFocus,
   });
-  const over = panel.over;
-  /*
-   * The panel's code loads as the reader reaches for its toggle (pointed at or focused),
-   * or as it opens (the host's, or beside the page again). A first press waits for it,
-   * then opens the panel whole, so focus has its section to go to.
-   */
-  const [PanelPart, setPanelPart] = useState<typeof DocumentPanelPart>();
-  const loadPart = () =>
-    loadPanel().then((module) => setPanelPart(() => module.default));
-  useEffect(() => {
-    if (panel.open) void loadPart();
-  }, [panel.open]);
+  // Over the page, reaching for the thumbnails' toggle loads the drag's code too.
   const reach = (event: React.SyntheticEvent) => {
-    const toggle = (pane: string) =>
-      (event.target as Element).closest?.(`[aria-controls~="${id}-${pane}"]`);
-    if (!PanelPart && toggle("panel")) void loadPart();
-    // Over the page, the drag's code too (`preloadDrag`).
-    if ((over && toggle("panel")) || (sidebar.over && toggle("sidebar")))
+    if (
+      sidebar.over &&
+      (event.target as Element).closest?.(`[aria-controls~="${id}-sidebar"]`)
+    )
       preloadDrag();
   };
 
@@ -213,20 +204,8 @@ function DocumentLayout({
     if (sidebar.over) sidebar.close();
   };
 
-  const docked = !over && panel.open;
-  // Each toggle on its spine is placed by the stylesheet (`Document.css`): over the
-  // thumbnails it belongs to, but for its far rounded end, over the page.
-  const panelToggle = (
-    <Clover.PanelToggle
-      open={panel.open}
-      onOpenChange={(next) =>
-        next && !PanelPart
-          ? loadPart().then(() => panel.setOpen(true))
-          : panel.setOpen(next)
-      }
-      controls={`${id}-panel`}
-    />
-  );
+  const docked = panel.docked;
+  const panelToggle = panel.toggle;
 
   const toggle = pages && (
     <button
@@ -269,7 +248,7 @@ function DocumentLayout({
       <header className="clover-template-document-toolbar">
         <Clover.Label
           as={title.as}
-          className="clover-template-document-title clover-template-title"
+          className="clover-template-document-title clover-template-title clover-title"
           {...title.title}
         />
         {download && <Clover.Download headingLevel={below(headingLevel)} />}
@@ -288,7 +267,7 @@ function DocumentLayout({
         className="clover-template-document-panes clover-template-panes"
         data-sidebar={showSidebar ? "open" : "closed"}
         data-narrow={sidebar.over || undefined}
-        data-panel={over ? "over" : "beside"}
+        data-panel={panel.splitProps["data-panel"]}
         storageKey={storageKey || undefined}
         onKeyDown={(event: React.KeyboardEvent<HTMLElement>) => {
           // Escape anywhere puts what floats over the page away, the panel first,
@@ -297,8 +276,14 @@ function DocumentLayout({
           panel.onKeyDown(event);
           sidebar.onKeyDown(event);
         }}
-        onPointerOver={reach}
-        onFocus={reach}
+        onPointerOver={(event) => {
+          panel.splitProps.onPointerOver(event);
+          reach(event);
+        }}
+        onFocus={(event) => {
+          panel.splitProps.onFocus(event);
+          reach(event);
+        }}
       >
         <Clover.SplitPane
           ref={sidebar.pane}
@@ -327,6 +312,7 @@ function DocumentLayout({
           )}
           <Clover.Items
             layout="list"
+            singleItem={singleItem}
             aria-label={sidebarLang ? undefined : t("templateSidebar")}
             thumbnailSize={320}
             onSelect={choose}
@@ -360,45 +346,19 @@ function DocumentLayout({
           {/* The pages, and the one Canvas, which holds the panel's toggle. */}
           <Sheets>{!docked && panelToggle}</Sheets>
         </Clover.SplitPane>
-        {/* The bar between the page and the panel beside it; over the page, none. */}
-        {docked && <Clover.SplitHandle aria-controls={`${id}-panel`} />}
-        {/* Open beside the pages, its toggle on the spine, right after the bar. */}
-        {docked && (
-          <div className="clover-template-document-spine">{panelToggle}</div>
-        )}
-        <Clover.SplitPane
-          ref={panel.pane}
-          id={`${id}-panel`}
-          data-spine={over || undefined}
-          name="panel"
-          className="clover-template-document-panel clover-template-drawer"
-          size="24rem"
-          min={over ? undefined : PANEL_MIN}
-          data-open={panel.opened}
-          hidden={!panel.shown}
-        >
-          {/*
-           * Over the page it floats, so Escape and its own button put it away too. Its
-           * About offers no downloads: the toolbar has them.
-           */}
-          {PanelPart && (
-            <PanelPart
-              layout={panelLayout}
-              headingLevel={below(headingLevel)}
-              download={false}
-              languages={languages}
-              onClose={over ? panel.close : undefined}
-              closeOnEscape={over}
-            />
-          )}
-        </Clover.SplitPane>
-        {/* A press on the page beside what covers it puts that away. */}
-        {panel.scrim && (
-          <div
-            className="clover-template-document-scrim clover-template-scrim"
-            {...panel.scrim}
-          />
-        )}
+        {/*
+         * The panel, every template's (`shared/PanelPane.tsx`): its bar, its spine and
+         * toggle, the pane and, over the page, the wash beside it. Its About offers no
+         * downloads: the toolbar has them.
+         */}
+        <PanelPane
+          pane={panel}
+          className="clover-template-document-panel"
+          layout={panelLayout}
+          headingLevel={below(headingLevel)}
+          download={false}
+          languages={languages}
+        />
         {pages && sidebar.scrim && (
           <div
             className="clover-template-document-scrim clover-template-scrim"

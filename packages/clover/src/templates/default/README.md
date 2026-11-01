@@ -11,7 +11,7 @@ The panel never stacks. As in 3.x it has its own space beside the Body, 24rem to
 and the bar between them shares the width: drag it by its grip; click or tap it to step
 the panel from its narrowest to 24rem to its widest and around again; or focus it and use
 the arrow keys (Home and End for the limits). The Body keeps at least
-16rem and the panel 14rem, and the width the reader chooses is remembered. With no room
+16rem and the panel 14rem, and the width chosen is remembered. With no room
 for both (about 31rem, a phone), the panel slides over the Body instead, leaving a strip
 of the page uncovered: a click on the strip, Escape or its close button puts it away, and
 a touch can drag it back off the way it came, flicked or past a third of its width.
@@ -47,6 +47,7 @@ pass it: `template={Default}`, from `@nulib/clover/templates`.
 | `defaultPanelOpen` | `true`                      | Whether the panel starts open beside the Body; over it, closed.                                       |
 | `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.                                                   |
 | `items`            | `"slider"`                  | The thumbnails: `"slider"`, `"list"`, `"grid"`, or `false`.                                           |
+| `singleItem`       | `false`                     | The thumbnails even where the resource has one view.                                                  |
 | `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                            |
 | …                  |                             | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`…                                       |
 
@@ -60,8 +61,9 @@ and every heading moves down a level, so the page's outline stays true. With
 `headingLevel` itself: under a page's `h1`, they are `h2`s.
 
 To change the layout, copy `Default.tsx` and `Default.css` into your app, and import the
-parts from `@nulib/clover` where they import `../../parts`. They use only what
-`@nulib/clover` exports, and the hooks in `templates/shared/` (`useSlide.ts`,
-`useDragToClose.ts`, `useSpine.ts`, `useFollowFocus.ts`); copy those too. The
-split is `Clover.Split`, `Clover.SplitPane` and `Clover.SplitHandle`, which you can use
-for any layout of your own.
+parts from `@nulib/clover` where they import `../../parts`, with what in
+`templates/shared/` they import: the information panel every template shares
+(`PanelPane.tsx`), and through it `useDrawer.ts`, `useSlide.ts`, `useSpine.ts`,
+`useDragToClose.ts` (with `dragToClose.ts`) and `useFollowFocus.ts`. Otherwise they use only
+what `@nulib/clover` exports. The split is `Clover.Split`, `Clover.SplitPane` and
+`Clover.SplitHandle`, which you can use for any layout of your own.

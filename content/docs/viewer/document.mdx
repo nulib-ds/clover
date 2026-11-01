@@ -1,0 +1,111 @@
+---
+title: Document
+description: "The Viewer's Document template, read as a PDF is: a toolbar, page thumbnails down the left, the pages down one column, and the information panel."
+---
+
+import { ViewerExample } from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { LiveViewerExample } from "docs/components/Clover4/LiveExample";
+
+# Document
+
+<div className="docs-lede">
+  Reads as a PDF does: a toolbar, page thumbnails down the left, the pages down
+  one column, and the information panel on the right.
+</div>
+
+<LiveViewerExample
+  wide
+  resource="catalog"
+  headingLevel={2}
+  height="26rem"
+  templates={{
+    Document: [
+      { prop: "defaultSidebarOpen", value: true, remount: true },
+      { prop: "defaultPanelOpen", value: false, remount: true },
+      {
+        prop: "panelLayout",
+        value: "accordion",
+        options: ["accordion", "tabs"],
+      },
+    ],
+  }}
+/>
+
+## API reference
+
+The toolbar holds the title, Download's links where there is a `rendering`, and the
+provider's logo. The pages run down one column, a spread to a sheet, the top of the next
+always showing: scrolling moves through them as a PDF reader's continuous view does, and
+PageUp and PageDown go a sheet at a time. A resource of one page has no thumbnails unless
+`singleItem` asks for them.
+
+The thumbnails' toggle sits on the bar between them and the pages; drag the bar, or use
+the arrow keys on it, to widen or narrow them. The information panel sits to the right of
+the pages, with its own bar, where there is room for both, and slides out over them where
+there is not. On a phone the thumbnails float over the page too, and choosing one puts
+them away. Size it with `--clover-template-document-height`.
+
+<ApiReference elements="clover-viewer">
+
+| Prop                 | Type                    | Default                      | Description                                                                                                                        |
+| -------------------- | ----------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `defaultSidebarOpen` | `boolean`               | `true`                       | Whether the page thumbnails start shown; over the page, not.                                                                       |
+| `singleItem`         | `boolean`               | `false`                      | The page thumbnails and their toggle even where the resource has one page.                                                         |
+| `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the panel starts open beside the page; over it, closed.                                                                    |
+| `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | The panel's sections as stacked boxes, or as tabs.                                                                                 |
+| `download`           | `boolean`               | `true`                       | Download's links in the toolbar, where there is a `rendering`.                                                                     |
+| `languages`          | `boolean`               | `true`                       | The languages to read the resource in, beside the panel's About heading, where it comes in several; `false` leaves the choice out. |
+| `headingLevel`       | `number`                | `2`                          | The title's level; the panel's sections are a level below.                                                                         |
+| `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.                                                                     |
+
+</ApiReference>
+
+## Examples
+
+### Thumbnails put away
+
+Use `defaultSidebarOpen={false}` to start with the page thumbnails put away, their toggle
+over the page's top left.
+
+<ViewerExample
+  resource="catalog"
+  template="Document"
+  props={{ defaultSidebarOpen: false }}
+>
+
+```jsx
+<Viewer iiifContent={url} template={Document} defaultSidebarOpen={false} />
+```
+
+</ViewerExample>
+
+### Panel open
+
+Use `defaultPanelOpen` to start with the information panel open beside the pages. On a
+phone, where it would cover them, it starts closed whatever you pass.
+
+<ViewerExample
+  resource="catalog"
+  template="Document"
+  props={{ defaultPanelOpen: true }}
+>
+
+```jsx
+<Viewer iiifContent={url} template={Document} defaultPanelOpen />
+```
+
+</ViewerExample>
+
+### One page
+
+Use `singleItem` to show the page thumbnails, and their toggle, even where the resource
+has one page.
+
+<ViewerExample resource="photo" template="Document" props={{ singleItem: true }}>
+
+```jsx
+<Viewer iiifContent={url} template={Document} singleItem />
+```
+
+</ViewerExample>

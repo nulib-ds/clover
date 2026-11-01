@@ -77,6 +77,19 @@ schedule excuses a failure.
   font. One rule in `src/styles/scale.css` hands them the page's
   (`:where(...) :where(button, input, select, textarea) { font: inherit }`). It has no
   specificity, so any part's own size wins.
+- **Headings are the page's** (Mat, 2026-11-01: "all headings should behave like
+  [this] throughout"). A title Clover draws, a resource's or a part's own (every
+  template's title, the Gallery lightbox's, Items' standalone title, the Collection's,
+  About's label), is a heading at the level its `headingLevel` gives it, `clover-title`
+  beside its own class. Its size is the page's for that level, never Clover's (Mat,
+  2026-11-01: "leave size to the page"); the rest of its look is only a default, one rule
+  in `styles/scale.css` with no specificity (`:where(.clover-title)`): regular weight
+  (`--clover-title-weight`, 400), lines a little closer than running text's, wrapped. So
+  the page's own rule for that level (`h3 { … }`) wins, as does one for the class. The one exception is a heading that is a template's control or
+  section: the Panel's section titles, About's own sub-sections, Search's pages,
+  Annotations' sets and Canvases, Download's groups. Clover styles those itself, as a
+  control's look is its own. A new title follows the first rule; a new section heading the
+  second.
 - **No shadow root.** Clover's web components render into their own children, light
   DOM, as its React parts render into the page: the page's CSS reaches every part, its
   font, size and custom properties with it, Clover's rules stay in `@layer clover` under

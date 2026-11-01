@@ -46,6 +46,23 @@
 }
 
 /*
+ * Every title Clover draws, a resource's or a part's own (`clover-title`, beside its own
+ * class: every template's, the Gallery lightbox's, Items' standalone title, the
+ * Collection's, About's label), is a heading at the level its `headingLevel` gives it,
+ * and takes the page's styling for that level (`DESIGN.md` §1, "Headings are the
+ * page's"): its size is never Clover's (Mat, 2026-11-01: "leave size to the page"), and
+ * its weight regular (`--clover-title-weight`), its lines closer than running text's and
+ * wrapped anywhere a word runs past the line (WCAG 1.4.10, 1.4.12), all with no
+ * specificity, so the page's own rule for that level, or for the class, wins.
+ */
+:where(.clover-title) {
+  margin: 0;
+  font-weight: var(--clover-title-weight, 400);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+/*
  * Controls take the page's type: browsers give buttons, fields and menus their own font
  * otherwise. No specificity, so any part's own size wins.
  */

@@ -1,23 +1,62 @@
-/* Gallery: a heading, then a grid of views that open in the lightbox. */
+/*
+ * Gallery: a heading, then a grid of views (or a Collection's members) that open in the
+ * lightbox, all inside the region's inset. It holds the lightbox, which fills its bounds.
+ *   --clover-template-gallery-height  its height, from the `height` prop (fixed)
+ *   --clover-template-gallery-gap     the space between cells, from `gap` (the inset)
+ */
 .clover-template-gallery {
+  position: relative;
+  /*
+   * Its own stacking context, so the lightbox's layer (`z-index`, `Lightbox.css`) stacks
+   * within the Gallery and never over the page around it: a page's sticky header stays
+   * over the lightbox's panel as it is held in the window (Mat, 2026-11-01).
+   */
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   gap: var(--clover-space-m);
+  padding: var(--clover-inset);
   color: var(--clover-color-primary, #1a1d1e);
 }
 
+/* A fixed height: the header keeps its place and the grid scrolls in what is left. */
+.clover-template-gallery[data-height="fixed"] {
+  box-sizing: border-box;
+  height: var(--clover-template-gallery-height);
+}
+
+.clover-template-gallery[data-height="fixed"] > .clover-items {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  /*
+   * The box that scrolls clips what passes its edges, and Items keeps each cell's ring
+   * just past them (`--clover-items-ring-room`): the room taken inside the box and given
+   * back outside it, so nothing moves and every ring shows whole, the first row's and the
+   * chosen cell's (WCAG 2.4.7).
+   */
+  margin: calc(-1 * var(--clover-items-ring-room, 4px));
+  padding: var(--clover-items-ring-room, 4px);
+}
+
 .clover-template-gallery-header {
+  flex: none;
   display: flex;
   flex-direction: column;
   gap: var(--clover-space-2xs);
 }
 
-/* Its size, lines and wrapping are every template title's (`Default.css`). */
-.clover-template-gallery-title {
-  font-weight: 700;
-}
-
 /* In the text's own color, not muted: a summary is the resource's own words. */
 .clover-template-gallery-summary {
   margin: 0;
+}
+
+/*
+ * The cells: the inset apart unless `gap` says otherwise (Items sets its gap on its own
+ * class, so it is set there). Each label is shown whole (Mat, 2026-10-30: no pop-out over
+ * a cut-off one): with nothing cut short, none is needed and nothing is lost to a reader.
+ */
+.clover-template-gallery .clover-items {
+  --clover-items-gap: var(--clover-template-gallery-gap, var(--clover-inset));
+  --clover-items-lines: none;
 }

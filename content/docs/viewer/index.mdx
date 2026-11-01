@@ -46,7 +46,10 @@ import { LiveViewerExample } from "docs/components/Clover4/LiveExample";
         options: ["accordion", "tabs"],
       },
     ],
-    Gallery: [{ prop: "size", value: 10, format: "{}rem", min: 6, max: 20 }],
+    Gallery: [
+      { prop: "items", value: "grid", options: ["grid", "masonry"] },
+      { prop: "size", value: 10, format: "{}rem", min: 6, max: 20 },
+    ],
   }}
 />
 
@@ -60,25 +63,25 @@ every template is built on.
 
 ### Viewer
 
-| Prop                   | Type                                 | Default              | Description                                                                                                                                                             |
-| ---------------------- | ------------------------------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `iiifContent`          | `string \| object`                   | Required             | What to show: a URL, or a IIIF resource or content state as an object.                                                                                                  |
-| `template`             | `Template`                           | `Default`, on demand | The layout: one from `@nulib/clover/templates`, or your own.                                                                                                            |
-| `canvasId`             | `string`                             | —                    | The Canvas to show, controlled: moving asks `onCanvasChange` to change it.                                                                                              |
-| `defaultCanvasId`      | `string`                             | —                    | The Canvas to start on. A content state or the Manifest's `start` still wins.                                                                                           |
-| `onCanvasChange`       | `(canvasId: string) => void`         | —                    | The reader moved to a Canvas.                                                                                                                                           |
-| `manifestId`           | `string`                             | —                    | In a Collection, the Manifest to show, controlled, with `onManifestChange`.                                                                                             |
-| `defaultManifestId`    | `string`                             | —                    | In a Collection, the Manifest to open first.                                                                                                                            |
-| `onManifestChange`     | `(manifestId: string) => void`       | —                    | In a Collection, the reader moved, or asks to move, to a Manifest.                                                                                                      |
-| `searchQuery`          | `string`                             | —                    | A Content Search query, run once the Manifest shows and whenever it changes.                                                                                            |
-| `annotations`          | `string \| object \| array`          | —                    | Annotation pages or collections to show beside the Manifest's own.                                                                                                      |
-| `annotationPages`      | `"view" \| "all"`                    | `"view"`             | Whose referenced annotation pages to fetch: the view's, or every Canvas's at once.                                                                                      |
-| `onContentStateChange` | `(state: { json, encoded }) => void` | —                    | Where the reader is, as a content state, whenever it settles.                                                                                                           |
-| `onStatusChange`       | `(status, error) => void`            | —                    | The resource is `"loading"`, `"ready"`, or met an `"error"`.                                                                                                            |
-| `request`              | `{ credentials, headers, fetch }`    | —                    | Credentials, headers and a `fetch` of your own, for every request.                                                                                                      |
-| `language`             | `string`                             | The reader's         | The language to read IIIF text in.                                                                                                                                      |
-| `highContrast`         | `boolean`                            | `false`              | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. On wherever the reader's system asks for more contrast, too. |
-| `renderers`            | `BodyRenderer[]`                     | —                    | Components of your own for views Clover does not draw.                                                                                                                  |
+| Prop                   | Type                                 | Default                      | Description                                                                                                                                                    |
+| ---------------------- | ------------------------------------ | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `iiifContent`          | `string \| object`                   | Required                     | What to show: a URL, or a IIIF resource or content state as an object.                                                                                         |
+| `template`             | `Template`                           | `Default`, on demand         | The layout: one from `@nulib/clover/templates`, or your own.                                                                                                   |
+| `canvasId`             | `string`                             | —                            | The Canvas to show, controlled: moving asks `onCanvasChange` to change it.                                                                                     |
+| `defaultCanvasId`      | `string`                             | —                            | The Canvas to start on. A content state or the Manifest's `start` still wins.                                                                                  |
+| `onCanvasChange`       | `(canvasId: string) => void`         | —                            | The current Canvas changed.                                                                                                                                    |
+| `manifestId`           | `string`                             | —                            | In a Collection, the Manifest to show, controlled, with `onManifestChange`.                                                                                    |
+| `defaultManifestId`    | `string`                             | —                            | In a Collection, the Manifest to open first.                                                                                                                   |
+| `onManifestChange`     | `(manifestId: string) => void`       | —                            | In a Collection, another Manifest opened, or was asked for.                                                                                                    |
+| `searchQuery`          | `string`                             | —                            | A Content Search query, run once the Manifest shows and whenever it changes.                                                                                   |
+| `annotations`          | `string \| object \| array`          | —                            | Annotation pages or collections to show beside the Manifest's own.                                                                                             |
+| `annotationPages`      | `"view" \| "all"`                    | `"view"`                     | Whose referenced annotation pages to fetch: the view's, or every Canvas's at once.                                                                             |
+| `onContentStateChange` | `(state: { json, encoded }) => void` | —                            | The current view, as a content state, whenever it settles.                                                                                                     |
+| `onStatusChange`       | `(status, error) => void`            | —                            | The resource is `"loading"`, `"ready"`, or met an `"error"`.                                                                                                   |
+| `request`              | `{ credentials, headers, fetch }`    | —                            | Credentials, headers and a `fetch` of your own, for every request.                                                                                             |
+| `language`             | `string`                             | The page's, or the browser's | The language to read IIIF text in.                                                                                                                             |
+| `highContrast`         | `boolean`                            | `false`                      | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. On wherever the system asks for more contrast, too. |
+| `renderers`            | `BodyRenderer[]`                     | —                            | Components of your own for views Clover does not draw.                                                                                                         |
 
 `iiifContent` can be:
 
@@ -102,7 +105,8 @@ Everything is upgraded to IIIF Presentation 4 as it loads, so every part reads o
 ### Default
 
 The Viewer's own layout, drawn when it is given no `template`: the title over the Body,
-the thumbnails under it, and the information panel beside them, as in Clover 3.x.
+the thumbnails under it, and the information panel beside them, as in Clover 3.x. More
+on [its own page](/docs/viewer/default).
 
 | Prop               | Type                                    | Default                     | Description                                                                                                                                                                                        |
 | ------------------ | --------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -114,6 +118,7 @@ the thumbnails under it, and the information panel beside them, as in Clover 3.x
 | `defaultPanelOpen` | `boolean`                               | `true`                      | Whether the panel starts open beside the Body; over it, closed.                                                                                                                                    |
 | `panelLayout`      | `"accordion" \| "tabs"`                 | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                                                                                                                                                 |
 | `items`            | `"slider" \| "list" \| "grid" \| false` | `"slider"`                  | The thumbnails under the Body, or none.                                                                                                                                                            |
+| `singleItem`       | `boolean`                               | `false`                     | The thumbnails even where the resource has one view.                                                                                                                                               |
 | `storageKey`       | `string \| false`                       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                                                                                                                         |
 | `fill`             | `boolean`                               | `false`                     | Fill the box it sits in; the Body takes what the rest leave.                                                                                                                                       |
 
@@ -121,10 +126,12 @@ the thumbnails under it, and the information panel beside them, as in Clover 3.x
 
 Reads like a PDF viewer: a toolbar with the title and Download, page thumbnails down the
 left, the pages down one column, and the information panel sliding out on the right.
+More on [its own page](/docs/viewer/document).
 
 | Prop                 | Type                    | Default                      | Description                                                                                                                        |
 | -------------------- | ----------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `defaultSidebarOpen` | `boolean`               | `true`                       | Whether the page thumbnails start shown; over the page, not.                                                                       |
+| `singleItem`         | `boolean`               | `false`                      | The page thumbnails and their toggle even where the resource has one page.                                                         |
 | `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the panel starts open beside the page; over it, closed.                                                                    |
 | `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | The panel's sections as stacked boxes, or as tabs.                                                                                 |
 | `download`           | `boolean`               | `true`                       | Download's links in the toolbar, where there is a `rendering`.                                                                     |
@@ -134,13 +141,25 @@ left, the pages down one column, and the information panel sliding out on the ri
 
 ### Gallery
 
-A grid of the views, a spread one cell, that opens one in a lightbox to pan, zoom and
-page through.
+A grid framed by what it opens, a Manifest's views (even one) or a Collection's members,
+each cell opening in a lightbox within the gallery's bounds. More on
+[its own page](/docs/viewer/gallery).
 
-| Prop           | Type     | Default | Description                                           |
-| -------------- | -------- | ------- | ----------------------------------------------------- |
-| `size`         | `string` | `10rem` | A cell's width (sets `--clover-items-size`).          |
-| `headingLevel` | `number` | `2`     | The title's level; the lightbox's title is one below. |
+| Prop               | Type                               | Default                     | Description                                                                                               |
+| ------------------ | ---------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `items`            | `"grid" \| "masonry"`              | `"grid"`                    | The grid, as its Items' layout: square cells, or each picture at its own proportions.                     |
+| `secondary`        | `"summary" \| "navDate" \| "none"` | `"summary"`                 | The line under each cell's label, where it has one: its summary, its date, or none.                       |
+| `size`             | `string`                           | `10rem`                     | A cell's width (sets `--clover-items-size`).                                                              |
+| `gap`              | `number \| string`                 | The inset                   | The space between cells.                                                                                  |
+| `height`           | `"auto" \| number \| string`       | `"auto"`                    | `auto` grows with the grid; a height holds it, the grid scrolling under the header.                       |
+| `lightboxItems`    | `"slider" \| "pager"`              | `"slider"`                  | How the lightbox moves on from its view: a short strip of thumbnails, or Previous, the position and Next. |
+| `panel`            | `boolean`                          | `true`                      | The information panel beside the lightbox's view, and its toggle, as Default's and Document's.            |
+| `defaultPanelOpen` | `boolean`                          | `true`                      | Whether the panel starts open beside the view; over it, closed.                                           |
+| `panelLayout`      | `"accordion" \| "tabs"`            | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                                                        |
+| `download`         | `boolean`                          | `true`                      | The downloads in the panel's About, where there is a `rendering`.                                         |
+| `languages`        | `boolean`                          | `true`                      | The languages to read the resource in, beside the panel's About heading, where it comes in several.       |
+| `storageKey`       | `string \| false`                  | `"clover-template-gallery"` | Where the panel's width is remembered; `false` forgets it.                                                |
+| `headingLevel`     | `number`                           | `2`                         | The title's level; the lightbox's title is one below.                                                     |
 
 </ApiReference>
 
@@ -193,85 +212,6 @@ boxes.
 </div>
 </OptionsExample>
 
-### Thumbnails
-
-Use `items` to lay the thumbnails under the Body out as a slider, a list or a grid, or
-`false` to leave them out.
-
-<OptionsExample
-  prop="items"
-  label="items"
-  options={["slider", "list", "grid", false]}
-  resource="catalog"
->
-<div data-option="slider">
-
-```jsx
-<Viewer iiifContent={url} items="slider" />
-```
-
-</div>
-<div data-option="list">
-
-```jsx
-<Viewer iiifContent={url} items="list" />
-```
-
-</div>
-<div data-option="grid">
-
-```jsx
-<Viewer iiifContent={url} items="grid" />
-```
-
-</div>
-<div data-option="false">
-
-```jsx
-<Viewer iiifContent={url} items={false} />
-```
-
-</div>
-</OptionsExample>
-
-### Header and panel
-
-Use `header={false}` to leave out the title over the Body, and `panel={false}` to leave
-out the information panel and its toggle. `defaultPanelOpen` starts the panel open or
-closed beside the Body. On a phone, where it would cover the Body, it starts closed
-whatever you pass, and the reader opens it with its toggle.
-
-<ViewerExample resource="film" props={{ header: false, panel: false }}>
-
-```jsx
-<Viewer
-  iiifContent="https://api.dc.library.northwestern.edu/api/v2/works/d8fb6329-f7fb-48bf-8bb7-70a64ded5a15?as=iiif"
-  header={false}
-  panel={false}
-/>
-```
-
-</ViewerExample>
-
-### Fill
-
-Use `fill` to have the Viewer fill a box of a set height, the window under a page's own
-header, say. The Body takes what the title and the thumbnails leave, never less than
-16rem; a shorter box scrolls.
-
-<ViewerExample resource="postcard" box="34rem">
-
-```jsx
-<div style={{ height: "34rem" }}>
-  <Viewer
-    iiifContent="https://api.dc.library.northwestern.edu/api/v2/works/0e66d6d8-5dc5-4686-b056-d18682c79ebf?as=iiif"
-    fill
-  />
-</div>
-```
-
-</ViewerExample>
-
 ### Heading level
 
 Use `headingLevel` to fit the Viewer into the page's outline. Its title is an `h2`, and
@@ -286,17 +226,9 @@ Viewers on this page sit under `h3`s, and pass `4`.
 With `header={false}` there is no title, and the panel's sections take its place, at
 `headingLevel` itself.
 
-### Gallery size
-
-Use `size` to set the width of Gallery's cells.
-
-<ViewerExample resource="catalog" template="Gallery" props={{ size: "8rem" }}>
-
-```jsx
-<Viewer iiifContent={url} template={Gallery} size="8rem" />
-```
-
-</ViewerExample>
+Every template's title is a heading at that level, and its size is your page's for it:
+Clover sets none, only a regular weight, so a title given `h4` looks as your other `h4`s
+do. Style it by its level or by `.clover-title` ([Styling](/docs/styling#headings)).
 
 ### Collection
 
@@ -372,8 +304,8 @@ const state = {
 
 </ViewerExample>
 
-`onContentStateChange` hands you a content state whenever the reader settles: the Canvas
-and region, or the moment in a recording, they are at. Put it in a link to share it.
+`onContentStateChange` hands you a content state whenever the view settles: the Canvas
+and region, or the moment in a recording, it is at. Put it in a link to share it.
 
 ```jsx
 <Viewer
@@ -467,8 +399,8 @@ time, Previous and Next to step from one frame to the next, and the frames liste
 labels. Each frame shows for its own span, so frames timed together show together. A
 frame may be a video or sound, which plays from its own start in its region, or text,
 drawn in its region and read by screen readers outside the picture.
-`auto-advance` plays it on arrival and `repeat` loops it. Nothing plays for a reader who
-asks for reduced motion.
+`auto-advance` plays it on arrival and `repeat` loops it. Nothing plays where reduced
+motion is asked for.
 
 <ViewerExample resource="animation">
 

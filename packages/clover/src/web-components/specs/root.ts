@@ -37,7 +37,7 @@ export const root: ElementSpec = {
 export const rootDocs: ElementDocs = {
   name: "CloverRootElement",
   description:
-    "The root of a layout of your own: it loads what it is given, holds where the reader is, and gives every part inside it the same state. The page's markup inside it stays as written.",
+    "The root of a layout of your own: it loads what it is given, holds the current view, and gives every part inside it the same state. The page's markup inside it stays as written.",
   attributes: {
     "iiif-content": {
       description:
@@ -45,19 +45,19 @@ export const rootDocs: ElementDocs = {
     },
     "canvas-id": {
       description:
-        "The Canvas to open on. Changed later, it moves the reader there.",
+        "The Canvas to open on. Changed later, the view moves there.",
     },
     "manifest-id": {
       description:
-        "In a Collection, the Manifest to open first. Changed later, it moves the reader there.",
+        "In a Collection, the Manifest to open first. Changed later, the view moves there.",
     },
     language: {
       description:
-        "The language to read IIIF text in. The page's, then the reader's, by default.",
+        "The language to read IIIF text in. The page's, then the browser's, by default.",
     },
     "high-contrast": {
       description:
-        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the system asks for more contrast, too.",
       default: "false",
     },
     "search-query": {
@@ -70,7 +70,7 @@ export const rootDocs: ElementDocs = {
     },
     "annotation-pages": {
       description:
-        "Whose referenced annotation pages to fetch: the view's as the reader moves, or every Canvas's at once.",
+        "Whose referenced annotation pages to fetch: the current view's as it changes, or every Canvas's at once.",
       default: "view",
     },
     lang: {
@@ -114,11 +114,11 @@ export const rootDocs: ElementDocs = {
     },
     "clover-canvas-change": {
       detail: "{ canvasId: string }",
-      description: "The reader moved to a Canvas.",
+      description: "The current Canvas changed.",
     },
     "clover-manifest-change": {
       detail: "{ manifestId: string }",
-      description: "In a Collection, the reader moved to another Manifest.",
+      description: "In a Collection, another Manifest opened.",
     },
     "clover-status-change": {
       detail: '{ status: "loading" | "ready" | "error"; error: Error | null }',
@@ -127,7 +127,7 @@ export const rootDocs: ElementDocs = {
     "clover-content-state-change": {
       detail: "{ json: Record<string, unknown>; encoded: string }",
       description:
-        "Where the reader is, as a IIIF content state, each time it settles.",
+        "The current view, as a IIIF content state, each time it settles.",
     },
   },
 };

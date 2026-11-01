@@ -234,6 +234,7 @@ export function LivePart({
  */
 export function LiveViewerExample({
   resource,
+  resources,
   templates,
   headingLevel,
   height,
@@ -241,17 +242,25 @@ export function LiveViewerExample({
 }: {
   /** A key of the homepage's resources (`playground-config.ts`). */
   resource: string;
+  /**
+   * Resources to switch between, a switch at the example's top (Mat, 2026-11-01: the
+   * Gallery's page, "obvious at the top", a Manifest and the Collection it is in): each a
+   * homepage resource's key or an address, and its name on the switch. The first opens.
+   */
+  resources?: { label: string; resource: string }[];
   templates: Partial<Record<TemplateName, Knob[]>>;
   headingLevel?: number;
   height?: string;
   /** Wider than the page's column, where the window has room (Mat, 2026-10-23). */
   wide?: boolean;
 }) {
-  const found = resourceByKey(resource);
-  if (!found) throw new Error(`LiveViewerExample: no resource ${resource}`);
-  const address = found.mock
-    ? publishedAddress(found.resource)
-    : found.resource;
+  const addressOf = (key: string) => {
+    if (/^https?:/.test(key)) return key;
+    const found = resourceByKey(key);
+    if (!found) throw new Error(`LiveViewerExample: no resource ${key}`);
+    return found.mock ? publishedAddress(found.resource) : found.resource;
+  };
+  const address = addressOf(resources?.[0]?.resource ?? resource);
   const entries = Object.entries(templates) as [TemplateName, Knob[]][];
   const names = entries.map(([name]) => name);
   const options = entries.map(([name, knobs]) => {
@@ -303,7 +312,11 @@ export function LiveViewerExample({
     <LiveTemplates
       wide={wide}
       options={options}
-      resource={resource}
+      resource={resources?.[0]?.resource ?? resource}
+      resources={resources?.map((each) => ({
+        ...each,
+        address: addressOf(each.resource),
+      }))}
       headingLevel={headingLevel}
       height={height}
     />

@@ -218,7 +218,7 @@ export function TargetsSection({
       <div className="clover-targets-head">
         {heading.text && (
           <Title
-            className="clover-collection-title"
+            className="clover-collection-title clover-title"
             {...languageProps(heading.lang)}
           >
             {heading.text}

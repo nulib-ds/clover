@@ -869,7 +869,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             isCaptionOpen &&
             !event.defaultPrevented
           ) {
-            // It closes, and nothing around it: not a modal `<dialog>` (the Lightbox).
+            // It closes, and nothing around it: not the Gallery's Lightbox, which heeds it.
             event.preventDefault();
             closeCaption(false);
             return;

@@ -29,17 +29,6 @@ import { SLIDE_MS } from "./shared/useSlide";
 
 beforeEach(() => initCloverI18n({ lng: "en" }));
 
-// jsdom has `<dialog>` but not `showModal()` or `close()`.
-beforeAll(() => {
-  HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {
-    this.setAttribute("open", "");
-  };
-  HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) {
-    this.removeAttribute("open");
-    this.dispatchEvent(new Event("close"));
-  };
-});
-
 function sources(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
     const path = join(dir, name);
@@ -93,7 +82,7 @@ describe("templates", () => {
     // Open, it sits on the bar between them; closed, among the Canvas's controls.
     const toggle = () =>
       screen.getByRole("button", { name: "More information" });
-    expect(toggle().closest(".clover-template-default-spine")).not.toBeNull();
+    expect(toggle().closest(".clover-template-spine")).not.toBeNull();
     fireEvent.click(toggle());
     expect(panel).not.toBeVisible();
     expect(toggle()).toHaveAttribute("aria-expanded", "false");
@@ -547,7 +536,7 @@ describe("templates", () => {
     ).not.toHaveAttribute("hidden");
     // Focus on its toggle, on the spine, follows it to the Body's controls as it narrows.
     const onSpine = document.querySelector<HTMLElement>(
-      ".clover-template-default-spine [data-button='panel']",
+      ".clover-template-spine [data-button='panel']",
     )!;
     onSpine.focus();
     width.mockReturnValue(390);
@@ -610,9 +599,7 @@ describe("templates", () => {
       };
 
       await open();
-      fireEvent.click(
-        document.querySelector(".clover-template-default-scrim")!,
-      );
+      fireEvent.click(document.querySelector(".clover-template-scrim")!);
       expect(toggle()).toHaveAttribute("aria-expanded", "false");
 
       await open();
@@ -657,9 +644,7 @@ describe("templates", () => {
       expect(panel()).not.toBeVisible();
       expect(toggle()).toHaveAttribute("aria-expanded", "false");
       // Nothing over the Body on arrival, nor a moment later.
-      expect(
-        document.querySelector(".clover-template-default-scrim"),
-      ).toBeNull();
+      expect(document.querySelector(".clover-template-scrim")).toBeNull();
       await act(() => new Promise((done) => setTimeout(done, SLIDE_MS + 60)));
       expect(panel()).not.toBeVisible();
       expect(document.body).toHaveFocus();
@@ -760,6 +745,55 @@ describe("templates", () => {
     ).toHaveAttribute("data-sidebar", "closed");
   });
 
+  it("Document: singleItem shows the thumbnails and their toggle for a single page", async () => {
+    render(<Templates.Document iiifContent={singleJson} singleItem />);
+    const listbox = await screen.findByRole("listbox", { name: "Items" });
+    expect(within(listbox).getAllByRole("option")).toHaveLength(1);
+    expect(
+      screen.getByRole("button", { name: /^Show items/ }),
+    ).toBeInTheDocument();
+    expect(
+      document.querySelector(".clover-template-document-panes"),
+    ).toHaveAttribute("data-sidebar", "open");
+  });
+
+  it("Default: no thumbnails for a single view, unless singleItem asks", async () => {
+    const plain = render(<Templates.Default iiifContent={singleJson} />);
+    await screen.findByRole("heading", {
+      level: 2,
+      name: "Still image from an opera performance at Indiana University",
+    });
+    expect(screen.queryByRole("listbox", { name: "Items" })).toBeNull();
+    plain.unmount();
+    render(<Templates.Default iiifContent={singleJson} singleItem />);
+    const listbox = await screen.findByRole("listbox", { name: "Items" });
+    const options = within(listbox).getAllByRole("option");
+    expect(options).toHaveLength(1);
+    expect(options[0]).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("Gallery: a grid even of one view, its cell opening the lightbox", async () => {
+    const model = render(<Templates.Gallery iiifContent={modelJson} />);
+    expect(await screen.findAllByRole("option")).toHaveLength(1);
+    model.unmount();
+    render(<Templates.Gallery iiifContent={singleJson} />);
+    const options = await screen.findAllByRole("option");
+    expect(options).toHaveLength(1);
+    fireEvent.click(options[0]);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  it('Gallery: lightboxItems="pager" steps through the views in the lightbox instead', async () => {
+    render(<Templates.Gallery iiifContent={bookJson} lightboxItems="pager" />);
+    fireEvent.click((await screen.findAllByRole("option"))[1]);
+    const dialog = screen.getByRole("dialog", { name: "Frontispiece" });
+    // Its view's code loads with the first open, the pager's with it.
+    expect(await within(dialog).findByText(/Item 2 of 3/)).toBeInTheDocument();
+    expect(within(dialog).queryByRole("listbox")).toBeNull();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Next" }));
+    expect(within(dialog).getByText(/Item 3 of 3/)).toBeInTheDocument();
+  });
+
   it("Gallery: a grid whose cells open the lightbox at that view", async () => {
     render(<Templates.Gallery iiifContent={bookJson} />);
     const options = await screen.findAllByRole("option");
@@ -773,9 +807,17 @@ describe("templates", () => {
     expect(
       within(dialog).getByRole("heading", { name: "Frontispiece" }),
     ).toBeInTheDocument();
-    expect(within(dialog).getByText(/Item 2 of 3/)).toBeInTheDocument();
+    // A short strip of the views by default, the one shown chosen in it.
+    const strip = within(dialog).getByRole("listbox", { name: "Items" });
+    expect(strip.closest(".clover-items")).toHaveAttribute(
+      "data-layout",
+      "slider",
+    );
+    expect(
+      within(strip).getByRole("option", { selected: true }),
+    ).toHaveAccessibleName(/Frontispiece/);
     // The Body's code loads with the first open (or as the reader reaches for the grid):
-    // the title, Close and the pager are there at once, the Body a moment later.
+    // the title, Close and the strip are there at once, the Body a moment later.
     await waitFor(() =>
       expect(dialog.querySelector(".clover-body")).not.toBeNull(),
     );
@@ -783,7 +825,164 @@ describe("templates", () => {
       dialog.querySelector(".clover-template-lightbox-pending"),
     ).toBeNull();
     fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
-    expect(dialog.querySelector(".clover-body")).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("Gallery: the lightbox is modal within the Gallery, and Escape gives focus back to the cell", async () => {
+    const { container } = render(<Templates.Gallery iiifContent={bookJson} />);
+    const options = await screen.findAllByRole("option");
+    options[1].focus();
+    fireEvent.click(options[1]);
+    const dialog = screen.getByRole("dialog", { name: "Frontispiece" });
+    expect(dialog).toHaveAttribute("aria-modal", "true");
+    // A layer in the Gallery, not the window's top layer: its bounds are the Gallery's.
+    const gallery = container.querySelector(".clover-template-gallery")!;
+    const layer = dialog.parentElement!;
+    expect(layer).toHaveClass("clover-template-lightbox");
+    expect(layer.parentElement).toBe(gallery);
+    expect(container.querySelector("dialog")).toBeNull();
+    // Focus on the view shown, in the strip; the rest of the Gallery out of reach.
+    expect(
+      within(dialog).getByRole("option", { selected: true }),
+    ).toHaveFocus();
+    expect(gallery.querySelector(".clover-items")).toHaveProperty(
+      "inert",
+      true,
+    );
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(gallery.querySelector(".clover-items")).toHaveProperty(
+      "inert",
+      false,
+    );
+    expect(options[1]).toHaveFocus();
+    // A press on the layer outside the panel closes it too.
+    fireEvent.click(options[2]);
+    fireEvent.click(screen.getByRole("dialog").parentElement!);
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("Gallery: height, gap, and its Items as masonry with no secondary line", async () => {
+    const { container } = render(
+      <Templates.Gallery
+        iiifContent={bookJson}
+        height={600}
+        gap="1rem"
+        items="masonry"
+        secondary="none"
+      />,
+    );
+    await screen.findAllByRole("option");
+    const gallery = container.querySelector<HTMLElement>(
+      ".clover-template-gallery",
+    )!;
+    expect(gallery).toHaveAttribute("data-height", "fixed");
+    expect(
+      gallery.style.getPropertyValue("--clover-template-gallery-height"),
+    ).toBe("600px");
+    expect(
+      gallery.style.getPropertyValue("--clover-template-gallery-gap"),
+    ).toBe("1rem");
+    expect(container.querySelector(".clover-items")).toHaveAttribute(
+      "data-layout",
+      "masonry",
+    );
+  });
+
+  // Cookbook 0032: a Collection as the content, its members in the grid.
+  it("Gallery: opened on a Collection, its title and a cell for each member", async () => {
+    const letter = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/letter",
+      type: "Manifest",
+      label: { en: ["A letter"] },
+      items: [
+        {
+          id: "https://example.org/letter/canvas/1",
+          type: "Canvas",
+          label: { en: ["The letter"] },
+          width: 100,
+          height: 100,
+          items: [],
+        },
+      ],
+    };
+    const shelf = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/shelf",
+      type: "Collection",
+      label: { en: ["Shelf"] },
+      summary: { en: ["Two things on a shelf."] },
+      items: [
+        { id: bookJson.id, type: "Manifest", label: { en: ["The book"] } },
+        {
+          id: letter.id,
+          type: "Manifest",
+          label: { en: ["A letter"] },
+          summary: { en: ["Text"] },
+        },
+      ],
+    };
+    const table: Record<string, unknown> = {
+      [bookJson.id]: bookJson,
+      [letter.id]: letter,
+    };
+    const fetch = vi.fn(async (url: string) =>
+      table[url] === undefined
+        ? new Response("missing", { status: 404 })
+        : new Response(JSON.stringify(table[url]), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+    );
+    render(<Templates.Gallery iiifContent={shelf} request={{ fetch }} />);
+    // The Collection's own title and summary, not its first member's.
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "Shelf" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Two things on a shelf.")).toBeInTheDocument();
+    const members = await screen.findAllByRole("option");
+    expect(members).toHaveLength(2);
+    // A member's summary under its label, the default secondary line.
+    expect(members[1]).toHaveAccessibleName("A letter Text");
+    // Choosing one shows that Manifest in the lightbox.
+    fireEvent.click(members[1]);
+    const dialog = await screen.findByRole("dialog", { name: "The letter" });
+    // Its levels over its title: the Collection, a step back out, then the Manifest.
+    const trail = await within(dialog).findByRole("navigation", {
+      name: "Breadcrumb",
+    });
+    await waitFor(() =>
+      expect(within(trail).getAllByRole("listitem")).toHaveLength(2),
+    );
+    expect(within(trail).getByText("A letter")).toBeInTheDocument();
+    fireEvent.click(within(trail).getByRole("button", { name: "Shelf" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("Gallery: the lightbox shows the Manifest over its view, a step back out to the grid", async () => {
+    render(<Templates.Gallery iiifContent={bookJson} />);
+    const cells = await screen.findAllByRole("option");
+    cells[1].focus();
+    fireEvent.click(cells[1]);
+    const dialog = screen.getByRole("dialog", { name: "Frontispiece" });
+    // Focus on the view shown, in the strip, for the arrow keys to go on from.
+    expect(
+      within(dialog).getByRole("option", { selected: true }),
+    ).toHaveFocus();
+    const trail = within(dialog).getByRole("navigation", {
+      name: "Breadcrumb",
+    });
+    const out = within(trail).getByRole("button", {
+      name: "Simple Manifest - Book",
+    });
+    // The title stays the view's, under its level.
+    expect(
+      within(dialog).getByRole("heading", { name: "Frontispiece" }),
+    ).toBeInTheDocument();
+    fireEvent.click(out);
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(cells[1]).toHaveFocus();
   });
 
   it("Gallery: the title at headingLevel, the lightbox's a level under it", async () => {

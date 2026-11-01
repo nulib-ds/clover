@@ -16,8 +16,7 @@
    * moves the page. When the bar is held, the Viewer fills the screen under it: the
    * screen less the navbar, the bar (the field, 3.375rem and its edge, and its padding,
    * less what is held under the navbar), the space under the bar and room for the
-   * Viewer's shadow. A template taller than it (a
-   * Gallery) scrolls inside.
+   * Viewer's shadow. A Gallery is held to it, its grid scrolling under its header.
    */
   --pg-viewer-height: clamp(
     36rem,
@@ -805,7 +804,9 @@
 
 /*
  * A frame of one height, the edge of the box an implementer would give Clover. Each
- * template is fitted to it: Default and Document fill it, and Gallery scrolls within it.
+ * template is fitted to it: Default and Document fill it, and Gallery is held to it by its
+ * own `height` (`Playground.tsx`), its grid scrolling under its header, inside its own
+ * inset (the template's, never one of the frame's).
  */
 .viewer {
   background: var(--color-background);
@@ -839,16 +840,6 @@
 
 .viewer :global(.clover-template-document) {
   --clover-template-document-height: 100%;
-}
-
-.viewer :global(.clover-template-gallery) {
-  padding: 1.25rem 1.5rem 1.5rem;
-}
-
-@media (max-width: 640px) {
-  .viewer :global(.clover-template-gallery) {
-    padding-inline: 1rem;
-  }
 }
 
 /* ── Under the Viewer: a template, or a layout of one's own ─────────────── */

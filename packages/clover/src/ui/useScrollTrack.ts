@@ -34,8 +34,11 @@ export interface ScrollTrack {
   canScrollNext: boolean;
   scrollPrev: () => void;
   scrollNext: () => void;
-  /** Bring slide `index` to rest according to `align`. */
-  scrollToIndex: (index: number, options?: { instant?: boolean }) => void;
+  /**
+   * Bring slide `index` to rest according to `align`. False where it could not: the
+   * scrolling element or the slide not drawn yet.
+   */
+  scrollToIndex: (index: number, options?: { instant?: boolean }) => boolean;
   /** Re-measure, after slides change size. */
   measure: () => void;
 }
@@ -120,7 +123,7 @@ export function useScrollTrack({
       const slide = viewport?.querySelector<HTMLElement>(
         `[data-track-index="${index}"]`,
       );
-      if (!viewport || !slide) return;
+      if (!viewport || !slide) return false;
       const box = viewport.getBoundingClientRect();
       const rect = slide.getBoundingClientRect();
       const rtl = getComputedStyle(viewport).direction === "rtl";
@@ -132,6 +135,7 @@ export function useScrollTrack({
             : rect.left - box.left,
         instant,
       );
+      return true;
     },
     [viewport, scrollAlong],
   );

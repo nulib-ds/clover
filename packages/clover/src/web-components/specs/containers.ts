@@ -73,12 +73,12 @@ export const panelDocs: ElementDocs = {
   events: {
     "clover-value-change": {
       detail: "{ value: string }",
-      description: "The reader chose a tab, or opened a box.",
+      description: "A tab was chosen, or a box opened.",
     },
     "clover-close": {
       detail: "Record<string, never>",
       description:
-        "The reader closed the panel. Cancel it (preventDefault) to keep it shown.",
+        "Its close button was pressed. Cancel it (preventDefault) to keep the panel shown.",
     },
   },
 };
@@ -135,7 +135,7 @@ export const panelToggleDocs: ElementDocs = {
     "clover-open-change": {
       detail: "{ open: boolean }",
       description:
-        "The reader pressed it, to show (open) or hide what it controls. Cancel it (preventDefault) to leave that as it is.",
+        "It was pressed, to show (open) or hide what it controls. Cancel it (preventDefault) to leave that as it is.",
     },
   },
 };
@@ -149,11 +149,11 @@ export const split: ElementSpec = {
 export const splitDocs: ElementDocs = {
   name: "CloverSplitElement",
   description:
-    "Panes side by side, its clover-split-pane children, divided by clover-split-handle bars the reader drags, clicks or moves by keyboard to share the width.",
+    "Panes side by side, its clover-split-pane children, divided by clover-split-handle bars that share the width, dragged, clicked or moved by keyboard.",
   attributes: {
     "storage-key": {
       description:
-        "Remember the sizes the reader chooses in localStorage under this key, so the layout opens at them next time.",
+        "Remember the sizes chosen in localStorage under this key, so the layout opens at them next time.",
     },
   },
 };

@@ -85,7 +85,6 @@
 .clover-template-document-title {
   flex: 1 1 6rem;
   min-width: 0;
-  font-weight: 400;
 }
 
 /*
@@ -439,25 +438,9 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 /* ---------- information panel ---------- */
 
 /*
- * Beside the page, where there is room for both (the template measures its own width):
- * a pane of its own, `24rem` to start, then wherever the bar before it is dragged
- * (remembered under `storageKey`). As tall as the Split, whatever its sections run to,
- * scrolling within.
- */
-.clover-template-document-panel {
-  contain: size;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  background-color: var(--clover-color-secondary, #fff);
-}
-
-.clover-template-document-panel[hidden] {
-  display: none;
-}
-
-/*
- * Over the page, where there is not: it slides out over the right, as Default's does, and
- * so does the wash beside it (`templates/default/Default.css`, in `styles.css`).
+ * The information panel: beside the page where there is room for both, over it where
+ * there is not, as every template's is (`shared/PanelPane.tsx`; its look, and the wash
+ * beside it, written once in `templates/default/Default.css`, in `styles.css`).
  */
 
 /* Under the thumbnails, which sit lower than the panel. */

@@ -117,8 +117,9 @@ every rule below.
 - **What goes full screen** is the Root a Canvas, Scene or player is in, a template's Viewer
   or a page's own layout, so a reader goes on through the resource there, its Items and
   Panel too; a Canvas on its own goes itself (`getCloverRoot`, `lib/fullscreen.ts`; Mat,
-  2026-10-29: a regression of 2026-10-10 had taken the Canvas alone). Not across a dialog
-  in the Root (the Gallery's lightbox, modal), which full screen over it would hide. A
+  2026-10-29: a regression of 2026-10-10 had taken the Canvas alone). Not across a
+  `<dialog>` in the Root (a page's own modal one), which full screen over it would hide;
+  the Gallery's lightbox is a layer in its Root, so the Root goes, the lightbox filling it. A
   control names its state by containment (`useWithinFullscreen`), never by the Canvas
   being the full-screen element (`useFullscreen`). The pill, "Exit full screen", shows on
   the Canvas or Scene full screen itself, or first in the Root that is
@@ -455,14 +456,21 @@ every rule below.
   commit takes the toggle off its spine); widening brings it back beside. Opened over the
   page, it takes focus (the panel's open section, the thumbnail of the page the reader is
   on); Escape anywhere, the wash, a drag or its toggle puts it away, focus in it to the
-  toggle and focus elsewhere left there (WCAG 2.4.11). Document's two are
-  `shared/useDrawer.ts`, one `useFollowFocus` for both (two raced: the panel's follow took
-  the focus the thumbnails' toggle was owed); Default writes the same rule in its own
-  code: through the hook it weighed 74 B more, and Default loads (lazily) on Document's
-  page, so whatever it takes from `shared/` lands there up front too , and in
-  `<clover-viewer>`'s entry: a helper both templates need goes in a module both load
-  anyway (`panelFocus` in `useSlide.ts`; imported from `useDrawer.ts`, it brought the hook
-  into that entry). Document decides where its thumbnails go by its own width
+  toggle and focus elsewhere left there (WCAG 2.4.11). The rule is `shared/useDrawer.ts`.
+  The information panel is one pane for every template, Default's, Document's and the
+  Gallery's lightbox's (Mat, 2026-11-01: "an abstracted pane and not recreating the wheel
+  for every template"): `shared/PanelPane.tsx`, `usePanelPane` (on `useDrawer`: its toggle,
+  the spine's place, its code loaded on reach where `load` is given, the Split's
+  `splitProps`) and `<PanelPane>` (the bar, the spine and its toggle, the pane holding the
+  Panel with its close and Escape while it floats, the wash), its look written once in
+  `Default.css` (`clover-template-panel`, `-panel-handle`, `-spine`), in `styles.css`. A
+  template places only the toggle among its Body's controls while the panel is not docked,
+  and gives the hook its own width (`useWideEnough`) and Body. Document's thumbnails are
+  `useDrawer` too, one `useFollowFocus` for both its drawers (two raced: the panel's
+  follow took the focus the thumbnails' toggle was owed). Default loads (lazily) on
+  Document's page and in `<clover-viewer>`'s entry, so what it takes from `shared/` lands
+  there up front too: a helper the templates need goes in a module they all load anyway
+  (`panelFocus` in `useSlide.ts`). Document decides where its thumbnails go by its own width
   (`data-narrow` under 40rem), never the window's. The drag is `shared/useDragToClose.ts`,
   its code `shared/dragToClose.ts`, loaded and attached the first time a drawer floats
   (Mat, 2026-10-27: kept, loaded when needed): a wide layout never loads it. It starts
@@ -517,13 +525,23 @@ every rule below.
   panel's inner edge (`data-floating`: the start, for a panel over the end of the page).
   A docked panel (`Default`'s, beside the Body) gets no `onClose`: its toggle closes it
   (Mat). A floating one (`Default` on a phone, `Document`) also takes focus when it
-  opens. Any new layout with a panel does the same. `shared/Lightbox.tsx` is a native `<dialog>`; jsdom lacks
-  `showModal()`, so tests polyfill it.
+  opens. Any new layout with a panel does the same. `shared/Lightbox.tsx` is not a
+  `<dialog>` (Mat, 2026-10-30: its backdrop "should not extend beyond the bounds of the
+  template"): a layer in the Root, `role="dialog"` and `aria-modal`, the rest of the Root
+  `inert` while it is open (but its announcer), focus on the view shown in its strip
+  (on Close with `lightboxItems="pager"`; Mat, 2026-11-01) and back to the cell, closing
+  on Escape (unless a menu or caption inside took it), Close, a press outside its panel
+  or a step out in its trail: the levels over its title, by their labels (the Manifest's,
+  and a Collection's over it), the one the reader came from a button back out (Mat,
+  2026-11-01: "always show the labels … navigate in/out of the levels"). It fills the layout's bounds unless `--clover-template-lightbox-inset`,
+  `-backdrop` and `-radius` give it room; the layout positions it.
 - **What starts hidden loads when first wanted** (Mat, 2026-10-27): the Gallery's lightbox
-  Body (`shared/LightboxBody.tsx`, lazy, a busy box in its place meanwhile) and Document's
-  Panel (`document/DocumentPanel.tsx`, loaded by hand: a first press waits for it, then
-  opens the pane whole, so focus finds its section). The lightbox's title, Close and pager
-  stay up front, so the dialog is named and focus lands on Close at once; its busy box is
+  Body (`shared/LightboxBody.tsx`, lazy, a busy box in its place meanwhile) and the
+  information panel where it starts shut or out of sight, Document's and the lightbox's
+  (`shared/PanelPart.tsx`, through `usePanelPane`'s `load`: a first press waits for it,
+  then opens the pane whole, so focus finds its section). The lightbox's title, Close and
+  thumbnails stay up front, so the dialog is named and focus lands on the view in its
+  strip at once; its busy box is
   `clover-template-lightbox-pending`, in `Lightbox.css`, so the elements' sheets bring it
   with Gallery. A server render with `defaultPanelOpen` draws Document's pane without its
   sections. Each starts loading as the reader reaches for it (pointer or focus on the

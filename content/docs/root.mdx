@@ -1,0 +1,117 @@
+---
+title: Root
+description: "Loads a IIIF resource and holds its current view: every other part goes inside a Root and reads from it."
+---
+
+import { PartDemo } from "docs/components/Clover4/PartDemo";
+import { Example } from "docs/components/Clover4/ViewerDocs";
+import { Related, RelatedLink } from "docs/components/Related";
+
+# Root
+
+<div className="docs-lede">
+  Loads a IIIF resource and holds its current view. Every other part goes inside
+  a Root and reads from it.
+</div>
+
+<Example>
+<PartDemo
+  parts={[{ part: "Label", props: { as: "h3" } }, { part: "Items" }]}
+  body
+/>
+
+```jsx
+<Clover.Root iiifContent={url}>
+  <Clover.Label as="h3" />
+  <Clover.Body />
+  <Clover.Items />
+</Clover.Root>
+```
+
+</Example>
+
+## API reference
+
+Give it `iiifContent`: a Manifest, a Collection, a Canvas or a content state, as a URL or
+an object, in Presentation 2, 3 or 4. The parts inside it show that resource and move
+through it together: choose a thumbnail in `Items`, and the `Body`, the `Label` of the
+Canvas and the `Panel` follow. It renders a `div` of your own layout, and announces each
+move to assistive technology.
+
+Its most used props are `iiifContent`, `canvasId` with `onCanvasChange` (the current Canvas,
+controlled), `language`, `request` and `highContrast`. Every prop is in
+[Composing layouts](/docs/composing#root), with how to lay its parts out. The Viewer and
+its templates are each a Root and its parts, and take the same props.
+
+## A Root inside a Root
+
+A Root can hold another, as a context of its own. Each part reads its nearest parent
+Root, as a web component's element reads its nearest parent `clover-root`: the inner Root
+loads its own resource and keeps its own place in it, and announces its own moves.
+Nothing passes between them. Choosing a thumbnail in the inner Root's `Items` moves the
+inner Root alone, and its `request` and `language` are its own. Use it to show a second
+resource in the same layout: a related Manifest, say, beside the one the page is about.
+
+Two things are the page's, not either Root's. The page's language is read once, at the
+outer Root. And the higher-contrast mode of the outer Root holds for everything inside
+it, the inner Root too. Full screen takes the Root its control is in, the inner one for
+the inner Root's parts.
+
+```jsx
+<Clover.Root iiifContent={url}>
+  <Clover.Label as="h3" />
+  <Clover.Body />
+  <aside>
+    <Clover.Root iiifContent={related}>
+      <Clover.Label as="h4" />
+      <Clover.Items />
+    </Clover.Root>
+  </aside>
+</Clover.Root>
+```
+
+```html twin
+<clover-root
+  iiif-content="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+>
+  <clover-label as="h3"></clover-label>
+  <clover-body></clover-body>
+  <aside>
+    <clover-root iiif-content="https://example.org/related/manifest.json">
+      <clover-label as="h4"></clover-label>
+      <clover-items></clover-items>
+    </clover-root>
+  </aside>
+</clover-root>
+```
+
+## Next
+
+<Related>
+  <RelatedLink
+    href="/docs/composing"
+    title="Composing"
+    note="Layouts of your own, from the parts and hooks."
+  />
+  <RelatedLink href="/docs/body" title="Body" note="The current view." />
+  <RelatedLink
+    href="/docs/items"
+    title="Items"
+    note="Thumbnails that move through it."
+  />
+  <RelatedLink
+    href="/docs/panel"
+    title="Panel"
+    note="Everything the resource says of itself."
+  />
+  <RelatedLink
+    href="/docs/primitives"
+    title="Primitives"
+    note="One part for each IIIF property."
+  />
+  <RelatedLink
+    href="/docs/viewer"
+    title="Viewer"
+    note="A Root laid out by a template."
+  />
+</Related>

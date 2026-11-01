@@ -1,6 +1,6 @@
 ---
 title: Metadata
-description: The metadata of the resource, or of the current Canvas, as a description list of labels and values in the reader's language.
+description: The metadata of the resource, or of the current Canvas, as a description list of labels and values in the defined language.
 ---
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
@@ -47,7 +47,7 @@ renders nothing while there is no metadata. Its other props go to the `dl`.
 
 | Prop          | Type                     | Default      | Description                                                      |
 | ------------- | ------------------------ | ------------ | ---------------------------------------------------------------- |
-| `of`          | `"manifest" \| "canvas"` | `"manifest"` | Whose metadata: the resource's, or the Canvas the reader is on.  |
+| `of`          | `"manifest" \| "canvas"` | `"manifest"` | Whose metadata: the resource's, or the current Canvas's.         |
 | `value`       | `{ label, value }[]`     | —            | Pairs to show instead of the Root's. Outside a `Root`, the ones. |
 | `renderValue` | `(item) => ReactNode`    | —            | A value of your own; Clover's where it returns `undefined`.      |
 | `className`   | `string`                 | —            | Added to `clover-metadata`.                                      |

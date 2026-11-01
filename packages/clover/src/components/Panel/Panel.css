@@ -472,14 +472,6 @@ button.clover-about-download-button:focus-visible {
   float: left;
 }
 
-/* The label, at About's own heading level, a step up from its words. */
-.clover-about-label {
-  margin: 0;
-  font-size: var(--clover-text-m);
-  font-weight: 600;
-  line-height: 1.25;
-}
-
 .clover-about :is(p, ul) {
   margin: 0;
 }

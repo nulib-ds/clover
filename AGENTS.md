@@ -117,8 +117,11 @@ deadline.
     `PanelToggle` (round, the controls' fill and glyph, the accent under the pointer or
     focused, its glyph mirrored for a panel on the left, a mask that forced colors paint;
     Mat, 2026-10-23).
-  - Every part the homepage shows has a page under "Root components" (Mat, 2026-10-20;
-    the group so named on 2026-10-26):
+  - Every part the homepage shows has a page under "Components" (Mat, 2026-10-20; the
+    group named "Root components" on 2026-10-26, "Components" again on 2026-11-01), led
+    by Root's own (`content/docs/root.mdx`; Mat, 2026-11-01), light: what it is, one
+    example, its most used props, and links to Composing, which holds its props' table,
+    and to the parts:
     Body, Canvas, Items, Panel, the Panel's sections (Annotations, Collection with
     CollectionSelect, Contents, Search, Transcript), Download and Map, then Primitives
     (`content/docs/primitives/`, an overview and a page per property part: Label,
@@ -198,7 +201,17 @@ deadline.
     technology. Where the line is too narrow, the two go under the title, and the badge
     under the name. A new part gets its size measured (`PARTS` in `build/sizes.mjs`) and
     its head. Its examples are on a card lifted as the homepage's example viewer is
-    (`--card-shadow`): the demo, then its code.
+    (`--card-shadow`): the demo, then its code. A template's demo (a Viewer, on any page,
+    an agent's preview of one too) runs to the card's edges, never held in by its room,
+    its top corners clipped to the card's (Mat, 2026-11-01: "templates should not be bound
+    by padding"): the frame marks it, `data-bleed` (`ViewerDocs.module.css`), so it is out
+    there before the Viewer mounts. The code and every other demo keep the card's room.
+    A switch over an example (`ExampleSwitch`, `ViewerDocs.tsx`: an `OptionsExample`'s
+    values, the Gallery page's resources) sits above its card, outside it, every one in
+    one look: a fieldset at the example's start, its legend over the buttons, small and
+    muted as Clover's menus key theirs (Mat, 2026-11-01: "don't center"). Clover's labels and titles drawn as
+    headings in an example take the site's size for their level (`tokens.css`, a golden
+    step a level), as a page's own do: Clover leaves a title's size to the page.
   - Every code block on the site is drawn as the homepage's editor is (`CodeBlock`,
     `docs/components/CodeBlock.tsx`, through `mdx-components.tsx`'s `pre`, styled in
     `docs/styles/code.css`; Mat, 2026-10-22): its language over it (the fence's, kept as
@@ -279,10 +292,21 @@ deadline.
     code attached under it. The page has no table of contents, so its prose, tables and
     examples have the width, to one right edge (Mat, 2026-10-23), and its sections more
     room (`layout.css`).
+  - Each template has a page of its own under the Viewer, in the menu under it: Default,
+    Document and Gallery (`/docs/viewer/default`, `/document`, `/gallery`; Mat, 2026-10-30
+    for Gallery, 2026-11-01 for the other two), built as the Viewer's is: a live example
+    (`LiveViewerExample`, that template's knobs), what it lays out and its props' table,
+    then examples (`ViewerExample`, whose `vars` set custom properties on the Viewer's
+    root). The Gallery's opens on its catalog's Manifest, switched at the card's top to
+    the Collection it is in (`LiveViewerExample`'s `resources`, a docs example's switch,
+    never the template's; Mat, 2026-11-01: "highlight how gallery can be used in both
+    levels"). An example of what one template alone reads is on its page; the Viewer page
+    keeps what every template, or Default and Document both (Panel layout), read. The
+    Viewer page's table for each template lists the same props and links to its page.
   - The Default template's walk-through (`/docs/viewer/default`, region by region, its code
     quoted from the package by `SourceFile`) was taken down on 2026-10-22 (Mat: kept in
-    Git's history, to become the example in a guide to making templates); its address
-    forwards to the Viewer's templates.
+    Git's history, to become the example in a guide to making templates); since
+    2026-11-01 its address is the Default template's page.
   - A Viewer or standalone `Items` on a docs page takes the `headingLevel` one below the
     heading it sits under (`docs/components/Clover4/Demos.tsx`: 3 under an `h2`, 4 under
     an `h3`), so the page's outline stays true. Move a demo, and check its level. The DC
@@ -1008,6 +1032,12 @@ e2e:docs`.
   Document's scrolling pages are its column. A template's `-body` class sits on its
   `Clover.Body` alone (`-panes` on its `Split`). Where `body` would meet a IIIF
   annotation's body, take a fuller name (`bodyBox`, `figure`).
+- The docs never call the person on a page "the reader" (Mat, 2026-11-01: "this reads
+  oddly"): they say how Clover works, the current Canvas, view or entry, the defined
+  language (the Root's `language`, else the page's, else the browser's; Composing's
+  Languages), the browser's or the system's settings, or what is pressed or chosen; "user"
+  only where a person must act (an agent's tools speak of "the user"). "Screen reader"
+  stays, and the 3.x pages keep their own words.
 - Paths: TS path aliases enabled via `vite-tsconfig-paths`.
 
 ## Testing Guidelines

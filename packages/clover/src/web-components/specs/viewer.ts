@@ -8,7 +8,7 @@ export const viewer: ElementSpec = {
     template: { prop: "template", type: ["default", "document", "gallery"] },
     "iiif-content": { prop: "iiifContent", type: "string" },
     "canvas-id": { prop: "defaultCanvasId", type: "string" },
-    // Where it opens, not held there: a reader moves on through the Collection.
+    // Where it opens, not held there: the view moves on through the Collection.
     "manifest-id": { prop: "defaultManifestId", type: "string" },
     language: { prop: "language", type: "string" },
     "high-contrast": { prop: "highContrast", type: "boolean" },
@@ -16,7 +16,11 @@ export const viewer: ElementSpec = {
     annotations: { prop: "annotations", type: "data" },
     // Past 6 the titles name what they head instead (`ui/heading.ts`).
     "heading-level": { prop: "headingLevel", type: "number", min: 2 },
-    items: { prop: "items", type: ["slider", "list", "grid", "false"] },
+    items: {
+      prop: "items",
+      type: ["slider", "list", "grid", "masonry", "false"],
+    },
+    "single-item": { prop: "singleItem", type: "boolean" },
     header: { prop: "header", type: "boolean" },
     panel: { prop: "panel", type: "boolean" },
     download: { prop: "download", type: "boolean" },
@@ -28,6 +32,10 @@ export const viewer: ElementSpec = {
     "storage-key": { prop: "storageKey", type: "string" },
     fill: { prop: "fill", type: "boolean" },
     size: { prop: "size", type: "string" },
+    height: { prop: "height", type: "string" },
+    gap: { prop: "gap", type: "string" },
+    secondary: { prop: "secondary", type: ["summary", "navDate", "none"] },
+    "lightbox-items": { prop: "lightboxItems", type: ["slider", "pager"] },
   },
   properties: ["iiifContent", "annotations", "request", "renderers"],
   events: {
@@ -63,12 +71,12 @@ export const viewerDocs: ElementDocs = {
     "canvas-id": { description: "The Canvas to open on." },
     "manifest-id": {
       description:
-        "In a Collection, the Manifest to open first. The reader moves on from it.",
+        "In a Collection, the Manifest to open first. The others stay reachable from it.",
     },
     language: { description: "The language to read IIIF text in." },
     "high-contrast": {
       description:
-        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the reader's system asks for more contrast, too.",
+        "Clover's higher-contrast mode, for what is inside: the accent kept to rings, outlines and marks, never under words or a glyph, where the controls' dark fill takes its place, edged in the accent. On wherever the system asks for more contrast, too.",
       default: "false",
     },
     "search-query": {
@@ -85,8 +93,13 @@ export const viewerDocs: ElementDocs = {
     },
     items: {
       description:
-        'Default: the thumbnails, as a slider, list or grid, or "false" for none.',
+        "Default and Gallery: Default's thumbnails, as a slider, list or grid, or \"false\" for none; Gallery's grid, as grid (its default) or masonry.",
       default: "slider",
+    },
+    "single-item": {
+      description:
+        "Default and Document: the thumbnails even where the resource has one view, which has nothing to choose between. Gallery's grid always shows them.",
+      default: "false",
     },
     header: {
       description:
@@ -94,26 +107,27 @@ export const viewerDocs: ElementDocs = {
       default: "true",
     },
     panel: {
-      description: 'Default: "false" leaves out the information panel.',
+      description:
+        "Default and Gallery: \"false\" leaves out the information panel, Default's beside its Body, the Gallery's beside its lightbox's view.",
       default: "true",
     },
     download: {
       description:
-        "Default and Document: \"false\" leaves out the downloads: Default's from a Download button beside its panel's About heading, Document's in its toolbar (its panel's About offers none).",
+        "Default, Document and Gallery: \"false\" leaves out the downloads: Default's and the Gallery's from a Download button beside its panel's About heading, Document's in its toolbar (its panel's About offers none).",
       default: "true",
     },
     languages: {
       description:
-        'Default and Document: where what the resource says of itself comes in several languages, the panel\'s About heading offers them, and the whole Viewer reads in the one chosen. "false" leaves the choice out.',
+        'Default, Document and Gallery: where what the resource says of itself comes in several languages, the panel\'s About heading offers them, and the whole Viewer reads in the one chosen. "false" leaves the choice out.',
       default: "true",
     },
     "panel-open": {
       description:
-        "Default and Document: whether the information panel starts open beside the page. Default's does, by default; Document's starts shut. Where it would slide over the page (a phone), it starts shut.",
+        "Default, Document and Gallery: whether the information panel starts open beside the page (the Gallery's, beside its lightbox's view). Default's and the Gallery's do, by default; Document's starts shut. Where it would slide over the page (a phone), it starts shut.",
     },
     "panel-layout": {
       description:
-        "Default and Document: the panel's sections as stacked boxes, each opened by its heading, or as tabs.",
+        "Default, Document and Gallery: the panel's sections as stacked boxes, each opened by its heading, or as tabs.",
       default: "accordion",
     },
     "sidebar-open": {
@@ -122,7 +136,7 @@ export const viewerDocs: ElementDocs = {
     },
     "storage-key": {
       description:
-        'Default and Document: where the width the reader gives a pane is remembered (localStorage); "false" forgets it.',
+        'Default, Document and Gallery: where the width chosen for a pane is remembered (localStorage); "false" forgets it.',
     },
     fill: {
       description:
@@ -132,6 +146,25 @@ export const viewerDocs: ElementDocs = {
     size: {
       description: "Gallery: the size of a cell in the grid.",
       default: "10rem",
+    },
+    height: {
+      description:
+        "Gallery: its height, auto (growing with its grid) or a CSS length, the grid scrolling under the header.",
+      default: "auto",
+    },
+    gap: {
+      description:
+        "Gallery: the space between the grid's cells, a CSS length. Its inset unless set.",
+    },
+    secondary: {
+      description:
+        "Gallery: the line under each cell's label, where it has one: summary, navDate or none.",
+      default: "summary",
+    },
+    "lightbox-items": {
+      description:
+        "Gallery: how its lightbox moves on from the view it shows: a short strip of thumbnails (slider), or a pager, Previous, the position and Next.",
+      default: "slider",
     },
   },
   properties: {
@@ -159,11 +192,11 @@ export const viewerDocs: ElementDocs = {
   events: {
     "clover-canvas-change": {
       detail: "{ canvasId: string }",
-      description: "The reader moved to a Canvas.",
+      description: "The current Canvas changed.",
     },
     "clover-manifest-change": {
       detail: "{ manifestId: string }",
-      description: "In a Collection, the reader moved to another Manifest.",
+      description: "In a Collection, another Manifest opened.",
     },
     "clover-status-change": {
       detail: '{ status: "loading" | "ready" | "error"; error: Error | null }',
@@ -172,7 +205,7 @@ export const viewerDocs: ElementDocs = {
     "clover-content-state-change": {
       detail: "{ json: Record<string, unknown>; encoded: string }",
       description:
-        "Where the reader is, as a IIIF content state, each time it settles.",
+        "The current view, as a IIIF content state, each time it settles.",
     },
   },
 };

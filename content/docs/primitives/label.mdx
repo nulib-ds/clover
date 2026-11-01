@@ -1,6 +1,6 @@
 ---
 title: Label
-description: The resource's label, or the current Canvas's, in the reader's language, in the element you choose.
+description: The resource's label, or the current Canvas's, in the defined language, in the element you choose.
 ---
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
@@ -18,13 +18,30 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 </div>
 
 <div className="docs-lede">
-  The resource's label, or the current Canvas's, in the reader's language.
+  The resource's label, or the current Canvas's, in the defined language.
 </div>
 
 <LivePart
   part="Label"
   knobs={[
-    { prop: "as", value: "p", options: ["p", "span", "h2"] },
+    {
+      prop: "as",
+      value: "h2",
+      options: [
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "span",
+        "label",
+        "figcaption",
+        "p",
+        "strong",
+        "em",
+      ],
+    },
     { prop: "of", value: "manifest", options: ["manifest", "canvas"] },
   ]}
 />
@@ -36,12 +53,12 @@ nothing while there is no label. Its other props, and its `ref`, go to its eleme
 
 <ApiReference elements="clover-label">
 
-| Prop        | Type                     | Default      | Description                                                       |
-| ----------- | ------------------------ | ------------ | ----------------------------------------------------------------- |
-| `of`        | `"manifest" \| "canvas"` | `"manifest"` | Whose label: the resource's, or the Canvas the reader is on.      |
-| `label`     | language map or `string` | —            | A label to show instead of the Root's. Outside a `Root`, the one. |
-| `as`        | element type             | `"span"`     | The element to render: a heading, a paragraph, any other.         |
-| `className` | `string`                 | —            | Added to `clover-label`.                                          |
+| Prop        | Type                                                                                                                                            | Default      | Description                                                                                                                                                             |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `of`        | `"manifest" \| "canvas"`                                                                                                                        | `"manifest"` | Whose label: the resource's, or the current Canvas's.                                                                                                                   |
+| `label`     | language map or `string`                                                                                                                        | —            | A label to show instead of the Root's. Outside a `Root`, the one.                                                                                                       |
+| `as`        | `"h1"` \| `"h2"` \| `"h3"` \| `"h4"` \| `"h5"` \| `"h6"` \| `"span"` \| `"label"` \| `"figcaption"` \| `"p"` \| `"strong"` \| `"em"` \| `"div"` | `"span"`     | The element to render: a heading at your page's level, whose size is your page's for that level; a name for something; or text. In React, any element or component too. |
+| `className` | `string`                                                                                                                                        | —            | Added to `clover-label`.                                                                                                                                                |
 
 </ApiReference>
 
@@ -63,7 +80,7 @@ Use `as` to make it a heading, at the level that fits your page's outline: here,
 
 ### The current Canvas
 
-Use `of="canvas"` for the label of the Canvas in view. It changes as the reader moves.
+Use `of="canvas"` for the label of the Canvas in view. It changes with the current Canvas.
 
 <Example>
 <PartDemo part="Label" props={{ of: "canvas", as: "p" }} body />

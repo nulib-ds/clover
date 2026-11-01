@@ -213,7 +213,8 @@ export function writeLayout(layout: Layout, flavor: Flavor = "react"): Written {
     ...(template && {
       template: {
         name: template.name,
-        docs: pageAddress("/docs/viewer#templates"),
+        // Each template's own page, under the Viewer's (Mat, 2026-11-01).
+        docs: pageAddress(`/docs/viewer/${template.name.toLowerCase()}`),
         ...(template.loads && { loads: `${template.loads} kB` }),
       },
     }),

@@ -48,13 +48,13 @@ the Default and Document templates its logo alone, at the end of their title's l
 
 <ApiReference elements="clover-provider">
 
-| Prop        | Type                              | Default               | Description                                                       |
-| ----------- | --------------------------------- | --------------------- | ----------------------------------------------------------------- |
-| `of`        | `"manifest" \| "canvas"`          | `"manifest"`          | Whose `provider`: the resource's, or the Canvas the reader is on. |
-| `value`     | `{ id, label, homepage, logo }[]` | —                     | Providers to show instead of the Root's, as IIIF gives them.      |
-| `link`      | `boolean`                         | `true`                | Link each provider to its homepage, when it has one.              |
-| `children`  | `ReactNode`                       | its logo and its name | What to draw for each provider.                                   |
-| `className` | `string`                          | —                     | Added to `clover-provider`.                                       |
+| Prop        | Type                              | Default               | Description                                                  |
+| ----------- | --------------------------------- | --------------------- | ------------------------------------------------------------ |
+| `of`        | `"manifest" \| "canvas"`          | `"manifest"`          | Whose `provider`: the resource's, or the current Canvas's.   |
+| `value`     | `{ id, label, homepage, logo }[]` | —                     | Providers to show instead of the Root's, as IIIF gives them. |
+| `link`      | `boolean`                         | `true`                | Link each provider to its homepage, when it has one.         |
+| `children`  | `ReactNode`                       | its logo and its name | What to draw for each provider.                              |
+| `className` | `string`                          | —                     | Added to `clover-provider`.                                  |
 
 </ApiReference>
 

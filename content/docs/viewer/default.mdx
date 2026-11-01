@@ -1,0 +1,165 @@
+---
+title: Default
+description: "The Viewer's Default template, drawn when it is given no other: the title over the Body, the thumbnails under it, and the information panel beside them."
+---
+
+import {
+  OptionsExample,
+  ViewerExample,
+} from "docs/components/Clover4/ViewerDocs";
+import { ApiReference } from "docs/components/Clover4/ApiReference";
+import { LiveViewerExample } from "docs/components/Clover4/LiveExample";
+
+# Default
+
+<div className="docs-lede">
+  The Viewer's own layout: the title over the Body, the thumbnails under it, and
+  the information panel beside them, as in Clover 3.x.
+</div>
+
+<LiveViewerExample
+  wide
+  resource="catalog"
+  headingLevel={2}
+  height="26rem"
+  templates={{
+    Default: [
+      {
+        prop: "items",
+        value: "slider",
+        options: ["slider", "list", "grid", false],
+      },
+      {
+        prop: "panelLayout",
+        value: "accordion",
+        options: ["accordion", "tabs"],
+      },
+      { prop: "header", value: true },
+    ],
+  }}
+/>
+
+## API reference
+
+The Viewer draws Default when it is given no `template`. Over the Body are the title and
+the provider's logo; opened on a Collection, the Collection's title is under the
+Manifest's, with a pager among its members. Under the Body, the thumbnails, headed by the
+titles of the current view and where it is among them. A Manifest of one view
+has no thumbnails unless `singleItem` asks for them.
+
+The information panel is beside all three, the layout's full height, and a bar between
+shares the width: drag it, or use the arrow keys on it. Where there is no room for both,
+on a phone, the panel slides over the Body instead, and a press beside it, Escape or its
+close button puts it away. Size the Body with `--clover-body-height`.
+
+<ApiReference elements="clover-viewer">
+
+| Prop               | Type                                    | Default                     | Description                                                                                                                                                                                        |
+| ------------------ | --------------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `header`           | `boolean`                               | `true`                      | The title and provider over the Body; opened on a Collection, the Collection's title over the Manifest's and a pager among its members; for a content state's several targets, a pager among them. |
+| `headingLevel`     | `number`                                | `2`                         | The title's level; the panel's sections are a level below.                                                                                                                                         |
+| `panel`            | `boolean`                               | `true`                      | The information panel and its toggle.                                                                                                                                                              |
+| `download`         | `boolean`                               | `true`                      | The downloads in the panel's About, where there is a `rendering`.                                                                                                                                  |
+| `languages`        | `boolean`                               | `true`                      | The languages to read the resource in, beside the panel's About heading, where it comes in several; `false` leaves the choice out.                                                                 |
+| `defaultPanelOpen` | `boolean`                               | `true`                      | Whether the panel starts open beside the Body; over it, closed.                                                                                                                                    |
+| `panelLayout`      | `"accordion" \| "tabs"`                 | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                                                                                                                                                 |
+| `items`            | `"slider" \| "list" \| "grid" \| false` | `"slider"`                  | The thumbnails under the Body, or none.                                                                                                                                                            |
+| `singleItem`       | `boolean`                               | `false`                     | The thumbnails even where the resource has one view.                                                                                                                                               |
+| `storageKey`       | `string \| false`                       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                                                                                                                         |
+| `fill`             | `boolean`                               | `false`                     | Fill the box it sits in; the Body takes what the rest leave.                                                                                                                                       |
+
+</ApiReference>
+
+## Examples
+
+### Thumbnails
+
+Use `items` to lay the thumbnails under the Body out as a slider, a list or a grid, or
+`false` to leave them out.
+
+<OptionsExample
+  prop="items"
+  label="items"
+  options={["slider", "list", "grid", false]}
+  resource="catalog"
+>
+<div data-option="slider">
+
+```jsx
+<Viewer iiifContent={url} items="slider" />
+```
+
+</div>
+<div data-option="list">
+
+```jsx
+<Viewer iiifContent={url} items="list" />
+```
+
+</div>
+<div data-option="grid">
+
+```jsx
+<Viewer iiifContent={url} items="grid" />
+```
+
+</div>
+<div data-option="false">
+
+```jsx
+<Viewer iiifContent={url} items={false} />
+```
+
+</div>
+</OptionsExample>
+
+### One view
+
+Use `singleItem` to show the thumbnails even where the resource has one view, which has
+nothing to choose between.
+
+<ViewerExample resource="photo" props={{ singleItem: true }}>
+
+```jsx
+<Viewer iiifContent={url} singleItem />
+```
+
+</ViewerExample>
+
+### Header and panel
+
+Use `header={false}` to leave out the title over the Body, and `panel={false}` to leave
+out the information panel and its toggle. `defaultPanelOpen` starts the panel open or
+closed beside the Body. On a phone, where it would cover the Body, it starts closed
+whatever you pass, and its toggle opens it.
+
+<ViewerExample resource="film" props={{ header: false, panel: false }}>
+
+```jsx
+<Viewer
+  iiifContent="https://api.dc.library.northwestern.edu/api/v2/works/d8fb6329-f7fb-48bf-8bb7-70a64ded5a15?as=iiif"
+  header={false}
+  panel={false}
+/>
+```
+
+</ViewerExample>
+
+### Fill
+
+Use `fill` to have the Viewer fill a box of a set height, the window under a page's own
+header, say. The Body takes what the title and the thumbnails leave, never less than
+16rem; a shorter box scrolls.
+
+<ViewerExample resource="postcard" box="34rem">
+
+```jsx
+<div style={{ height: "34rem" }}>
+  <Viewer
+    iiifContent="https://api.dc.library.northwestern.edu/api/v2/works/0e66d6d8-5dc5-4686-b056-d18682c79ebf?as=iiif"
+    fill
+  />
+</div>
+```
+
+</ViewerExample>

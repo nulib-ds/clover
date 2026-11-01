@@ -26,8 +26,6 @@ const MOVES: [RegExp, string][] = [
   [/^\/docs\/viewer\/demo$/, "/"],
   // The templates' page, folded into the Viewer's (Mat, 2026-10-21).
   [/^\/docs\/viewer\/templates$/, "/docs/viewer#templates"],
-  // The Default template's walk-through, taken down for now (Mat, 2026-10-22).
-  [/^\/docs\/viewer\/default$/, "/docs/viewer#templates"],
   // The 3.x Viewer's own pages: content state, search and prefetched content.
   [/^\/docs\/viewer\/(.+)$/, "/docs/deprecated-versions/viewer/$1"],
   // The component's page, from when the Panel was the InformationPanel.

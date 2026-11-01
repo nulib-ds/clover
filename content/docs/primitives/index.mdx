@@ -38,7 +38,7 @@ import { Example } from "docs/components/Clover4/ViewerDocs";
 ## The parts
 
 Inside a `Root`, each reads its property from the resource, or with `of="canvas"` from
-the Canvas the reader is on, wherever it sits in your markup. Give it a `value` (a
+the current Canvas, wherever it sits in your markup. Give it a `value` (a
 `label`, for `Label`), and it shows that instead, in a `Root` or on its own. With nothing
 to show, it renders nothing.
 
@@ -68,7 +68,7 @@ The [Panel](/docs/panel)'s About section shows several of them together.
 ## Languages
 
 Text is read in the Root's `language`, else the page's `<html lang>`, else the browser's
-languages: the closest language the value has (`fr` for a reader in `fr-CA`), else its
+languages: the closest language the value has (`fr` for `fr-CA`), else its
 `none`, else the first it has. A language's several values are joined with commas.
 
 Each element carries the language its text is in as `lang`, so assistive technology reads

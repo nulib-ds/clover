@@ -84,6 +84,8 @@ const LAZY_MODULES = [
   "/components/Items/TargetItems.tsx",
   // An AnnotationCollection's annotations (Cookbook 0309), listed and counted.
   "/components/Items/AnnotationItems.tsx",
+  // Items' masonry layout, which spans each item over the rows its height needs.
+  "/components/Items/masonry.ts",
   // A floating drawer's drag, loaded as one first floats.
   "/templates/shared/dragToClose.ts",
   // Every language but English, the first time Clover is to speak it.

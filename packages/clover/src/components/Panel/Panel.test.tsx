@@ -652,7 +652,7 @@ describe("Viewer panel", () => {
       toggle().getAttribute("aria-controls")!,
     )!;
     expect(toggle()).toHaveAttribute("aria-expanded", "true");
-    expect(toggle().closest(".clover-template-default-spine")).not.toBeNull();
+    expect(toggle().closest(".clover-template-spine")).not.toBeNull();
     expect(panel).toBeVisible();
     toggle().focus();
     fireEvent.click(toggle());

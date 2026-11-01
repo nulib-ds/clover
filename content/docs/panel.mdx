@@ -88,7 +88,7 @@ Canvas's controls.
 ### About
 
 The panel's first section, and a part of its own: the resource's label and thumbnail, summary,
-metadata, required statement, its date (`navDate`, in the reader's language), provider, rights,
+metadata, required statement, its date (`navDate`, in the defined language), provider, rights,
 homepage, see also, downloads and address. For a Canvas shown
 on its own, it starts with the Manifest the Canvas is part of.
 
@@ -163,7 +163,7 @@ control it. The default sections are `about`, `targets`, `collection`, `contents
 `transcript` and `annotations`. A search started outside the Search section (the Root's
 `searchQuery`, or your own `clover.search()`) opens it, ahead of `defaultValue`, so its
 hits come with their list. Focus stays where it is, and a Panel that is shut stays shut
-until the reader opens it, on Search. A `value` you control is left as you set it. This film opens on its chapters.
+until it is opened, on Search. A `value` you control is left as you set it. This film opens on its chapters.
 
 <Example>
 <PartDemo
@@ -184,9 +184,8 @@ until the reader opens it, on Search. A `value` you control is left as you set i
 
 Where what a resource says of itself comes in several languages, About's heading offers
 them, shown whichever section is open, and every part in the Root reads IIIF text in the
-one chosen, a title over it as About. It starts in the Root's `language`, which a page
-sets to read in its own, here French, else in the reader's. A reader's choice lasts until
-the page gives the Root another `language`. This painting is described in English and
+one chosen, a title over it as About. It starts in the Root's `language`, here French. A choice made
+there lasts until the page gives the Root another `language`. This painting is described in English and
 French.
 
 <Example>

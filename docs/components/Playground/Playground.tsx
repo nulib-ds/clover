@@ -438,6 +438,14 @@ const Playground = forwardRef<PlaygroundHandle, PlaygroundProps>(
                   headingLevel={3}
                   // The catalog's search, answered here: the static site cannot read `?q=`.
                   request={MOCK_SEARCH}
+                  /*
+                   * Gallery held to the frame, as its own `height` holds it (Mat,
+                   * 2026-11-01: "max-height this container"): its header stays and its
+                   * grid scrolls under it, rather than all of it scrolling in the frame.
+                   */
+                  {...(spec.name === "Gallery"
+                    ? { height: "100%" }
+                    : undefined)}
                 />
               )}
             </div>

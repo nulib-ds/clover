@@ -85,6 +85,8 @@ describe("catalog", () => {
             at > components &&
             at < after &&
             key !== "primitives" &&
+            // The Root a layout's parts go in, never one of them (Mat, 2026-11-01).
+            key !== "root" &&
             titleOf(entry)
           );
         })
@@ -119,7 +121,7 @@ describe("catalog", () => {
     expect(items.jsx).toBe("Clover.Items");
     expect(items.props.find((prop) => prop.prop === "layout")).toMatchObject({
       attribute: "layout",
-      type: ["slider", "list", "grid", "pager"],
+      type: ["slider", "list", "grid", "masonry", "pager"],
       default: "slider",
     });
     expect(items.codeProps).toContain("renderItem");
@@ -147,7 +149,19 @@ describe("catalog", () => {
       expect(template.loads, template.name).toBeDefined();
     }
     expect(findTemplate("gallery")?.props.map((prop) => prop.prop)).toEqual([
+      "items",
+      // Its lightbox's information panel, the pane Default's and Document's is.
+      "panel",
+      "download",
+      "languages",
+      "defaultPanelOpen",
+      "panelLayout",
+      "storageKey",
       "size",
+      "height",
+      "gap",
+      "secondary",
+      "lightboxItems",
     ]);
     expect(findTemplate("Document")?.props.map((prop) => prop.prop)).toContain(
       "defaultSidebarOpen",

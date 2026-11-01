@@ -46,7 +46,8 @@ button.clover-sections-button {
  * one line: the row scrolls rather than cut it short (WCAG 1.4.12).
  */
 .clover-sections[data-layout="tabs"] .clover-sections-tabs {
-  --clover-sections-fade: calc(var(--clover-control) + var(--clover-space-s));
+  /* An arrow's width (a step's, `ui/Steps.css`) and `s` before the tabs show whole. */
+  --clover-sections-fade: calc(var(--clover-space-l) + var(--clover-space-s));
   border-bottom: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
 }
 
@@ -116,14 +117,27 @@ button.clover-sections-button {
 }
 
 /*
- * The arrows, Clover's round controls (`ui/Button.css`), centered on the row at its
- * ends, over the fade. Hidden while nothing lies past their end.
+ * The arrows, small steps as Search's are (`clover-steps-step`, `ui/Steps.css`; Mat,
+ * 2026-11-01: "small like search result nav"): 26px, no fill, the muted glyph, the
+ * accent under the pointer or focused. Centered on the row at its ends, over the fade,
+ * on the panel's own ground at rest, so the tabs fading under them never show through.
+ * Hidden while nothing lies past their end. Written with the row's class: Steps.css
+ * comes later and places its steps in the flow.
  */
-:is(button.clover-sections-scroll-prev, button.clover-sections-scroll-next) {
+.clover-sections-tabs
+  :is(button.clover-sections-scroll-prev, button.clover-sections-scroll-next) {
   position: absolute;
   top: 50%;
   z-index: 1;
   translate: 0 -50%;
+}
+
+.clover-sections-tabs
+  :is(
+    button.clover-sections-scroll-prev,
+    button.clover-sections-scroll-next
+  ):not(:hover, :focus-visible) {
+  background-color: var(--clover-color-secondary, #fff);
 }
 
 :is(

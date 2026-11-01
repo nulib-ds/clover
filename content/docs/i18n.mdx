@@ -1,6 +1,6 @@
 ---
 title: i18n
-description: How Clover 4 speaks its reader's language, the languages it ships, and how to add one.
+description: How Clover 4 chooses its language, the languages it ships, and how to add one.
 ---
 
 import { LanguagesDemo } from "docs/components/Clover4/LanguagesDemo";
@@ -22,16 +22,16 @@ Clover 3.x keep working.
 
 Each is complete: it has every string English has, which a test checks.
 
-| Language          | Tag  | Notes                                                       |
-| :---------------- | :--- | :---------------------------------------------------------- |
-| English           | `en` | Comes with Clover. Every other language falls back to it.   |
-| Spanish           | `es` |                                                             |
-| Finnish           | `fi` |                                                             |
-| French            | `fr` |                                                             |
-| Norwegian Bokmål  | `nb` |                                                             |
-| Norwegian Nynorsk | `nn` |                                                             |
-| Norwegian         | `no` | The same strings as `nb`.                                   |
-| Portuguese        | `pt` | European Portuguese, which Brazilian (`pt-BR`) readers get. |
+| Language          | Tag  | Notes                                                     |
+| :---------------- | :--- | :-------------------------------------------------------- |
+| English           | `en` | Comes with Clover. Every other language falls back to it. |
+| Spanish           | `es` |                                                           |
+| Finnish           | `fi` |                                                           |
+| French            | `fr` |                                                           |
+| Norwegian Bokmål  | `nb` |                                                           |
+| Norwegian Nynorsk | `nn` |                                                           |
+| Norwegian         | `no` | The same strings as `nb`.                                 |
+| Portuguese        | `pt` | European Portuguese, which Brazilian (`pt-BR`) gets too.  |
 
 Pick one to hear the Viewer in it. This page is in English, so each of Clover's words in
 another language carries that language's `lang`.
@@ -45,8 +45,7 @@ order:
 
 1. First, it checks for a language you set yourself, with `initCloverI18n({ lng })`.
 2. Then, it reads the page it is on, for the language in its `<html lang>`.
-3. Then, it looks at the reader's browser, and takes the first of their languages that
-   Clover ships.
+3. Then, it reads the browser's languages, and takes the first that Clover ships.
 4. Last, for any string the language it chose does not have, it uses the `fallbackLng`
    you give, and then English.
 
@@ -111,11 +110,11 @@ await initCloverI18n({ lng: "fr" }).ready();
 
 ## Marking languages
 
-Where one of Clover's strings is not in the page's language (a French reader on an
-English page, or a string that fell back to English), the element that shows it, or is
-named by it, carries its language as `lang`, so a screen reader pronounces it correctly
-(WCAG 3.1.2). The page's language is the nearest `lang` around the `Root`, or one you give
-the `Root`. A part of your own does the same with `useT` and `useLangOf`, as
+Where one of Clover's strings is not in the page's language (French on an English
+page, or a string that fell back to English), the element that shows it, or is named by
+it, carries its language as `lang`, so a screen reader pronounces it correctly (WCAG
+3.1.2). The page's language is the `lang` of the `Root`'s nearest parent that has one, or
+one you give the `Root`. A part of your own does the same with `useT` and `useLangOf`, as
 [Languages](/docs/composing#languages) in Composing layouts shows.
 
 Text in a language written right to left (Arabic, Hebrew, Persian, Urdu…) carries
@@ -123,7 +122,7 @@ Text in a language written right to left (Arabic, Hebrew, Persian, Urdu…) carr
 written on a page written either way: Clover's own strings in such a language, and the
 resource's labels, summaries, metadata and annotations alike. Text in a language written
 left to right takes the page's direction. Fields are the exception: a search field's
-direction is the reader's typing, not its placeholder's.
+direction follows what is typed, not its placeholder.
 
 ## Adding a language to Clover
 
@@ -158,7 +157,7 @@ export const loaders: Record<string, LocaleLoader> = {
 ```
 
 For a regional variant, name the file by its full tag (`fr-CA.json`) and give its loader
-the same key (`"fr-CA"`); readers of that region get it, and others the base language.
+the same key (`"fr-CA"`); `fr-CA` gets it, and other French the base language.
 
 A new key in `en.json` is added to every locale, translated, in the same change, and the
 test fails until it is. If you speak one of the languages Clover ships, a review of its

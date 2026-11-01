@@ -104,12 +104,12 @@ What React hands a callback, an element sends as an event: `clover-` and what ha
 bubbling, so a page can listen for it anywhere above the element. Its `detail` holds what
 the callback is given.
 
-| React prop             | Event                         | `detail`                                      |
-| ---------------------- | ----------------------------- | --------------------------------------------- |
-| `onCanvasChange`       | `clover-canvas-change`        | `{ canvasId }`                                |
-| `onManifestChange`     | `clover-manifest-change`      | `{ manifestId }`, in a Collection             |
-| `onStatusChange`       | `clover-status-change`        | `{ status, error }`, as it loads              |
-| `onContentStateChange` | `clover-content-state-change` | `{ json, encoded }`, where the reader settles |
+| React prop             | Event                         | `detail`                                        |
+| ---------------------- | ----------------------------- | ----------------------------------------------- |
+| `onCanvasChange`       | `clover-canvas-change`        | `{ canvasId }`                                  |
+| `onManifestChange`     | `clover-manifest-change`      | `{ manifestId }`, in a Collection               |
+| `onStatusChange`       | `clover-status-change`        | `{ status, error }`, as it loads                |
+| `onContentStateChange` | `clover-content-state-change` | `{ json, encoded }`, each time the view settles |
 
 <div data-code-flavor="web-components">
 
@@ -129,7 +129,7 @@ viewer.addEventListener("clover-canvas-change", (event) => {
 
 ## Languages
 
-Clover's own words follow the page's `<html lang>`, then the reader's browser, in either.
+Clover's own words follow the page's `<html lang>`, then the browser's, in either.
 `initCloverI18n` sets their language, or adds strings, for every Clover part on the page;
 see [i18n](/docs/i18n).
 
@@ -194,11 +194,11 @@ own markup between them stays as written.
 
 | Elements                                                                                                                                                                                                                             | What they draw                                                                                                             | Attributes                                                                                                                                                                                               |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<clover-root>`                                                                                                                                                                                                                      | Nothing of its own: it loads what it is given, and its parts read where the reader is.                                     | `iiif-content` (or the `iiifContent` property), `canvas-id` and `manifest-id` (where it opens; changed later, they move the reader), `language`, `search-query`, `annotations`.                          |
+| `<clover-root>`                                                                                                                                                                                                                      | Nothing of its own: it loads what it is given and holds the current view, which its parts read.                            | `iiif-content` (or the `iiifContent` property), `canvas-id` and `manifest-id` (where it opens; changed later, the view moves there), `language`, `search-query`, `annotations`.                          |
 | `<clover-body>`                                                                                                                                                                                                                      | The view, in a box as tall as `--clover-body-height` (60vh) or its own `style`; a `<button>` in it is one of its controls. | `controls` and `navigator` (`false` turns one off), `placeholder`, `animate-annotations`; [parts of your own](#parts-of-your-own).                                                                       |
 | `<clover-canvas>`                                                                                                                                                                                                                    | Clover's renderer for images, video and sound: alone, what it is given; in a root, its view.                               | `iiif-content`, `src` and `tiled`, `controls`, `navigator`, and [more](#alone).                                                                                                                          |
 | `<clover-items>`                                                                                                                                                                                                                     | Thumbnails of the views, or of the Collection's members.                                                                   | `layout` (`slider`, `list`, `grid` or `pager`), `of`, `navigation`, `thumbnail-size`; alone, `iiif-content`, `header`, `heading-level`.                                                                  |
-| `<clover-previous>`, `<clover-position>`, `<clover-next>`                                                                                                                                                                            | Stepping through the views, and where the reader is.                                                                       | `of` (`views` or `members`).                                                                                                                                                                             |
+| `<clover-previous>`, `<clover-position>`, `<clover-next>`                                                                                                                                                                            | Stepping through the views, and the current position.                                                                      | `of` (`views` or `members`).                                                                                                                                                                             |
 | `<clover-status>`                                                                                                                                                                                                                    | What the root is doing: loading, or why it failed.                                                                         | `loading="false"`, where the Body shows its own.                                                                                                                                                         |
 | `<clover-label>`, `<clover-thumbnail>`, `<clover-summary>`, `<clover-metadata>`, `<clover-required-statement>`, `<clover-rights>`, `<clover-homepage>`, `<clover-see-also>`, `<clover-rendering>`, `<clover-part-of>`, `<clover-id>` | One IIIF property each, of the Manifest or the Canvas in view.                                                             | `of` (`manifest` or `canvas`); `value`, its own as text, a URL or JSON, which alone, outside a root, it shows; `as` on a label (a heading, `h1` to `h6`) and a summary; `size` and `alt` on a thumbnail. |
 | `<clover-value>`                                                                                                                                                                                                                     | Any language map, as text, HTML or Markdown.                                                                               | `value`, `format`, `heading-level`, `as`.                                                                                                                                                                |
@@ -206,12 +206,12 @@ own markup between them stays as written.
 | `<clover-map>`                                                                                                                                                                                                                       | The root's places and georeferenced images; alone, those of its `iiif-content`.                                            | `overlay`, `overlay-opacity`, `style-url`, `scroll-zoom`.                                                                                                                                                |
 | `<clover-panel>`, `<clover-tab>`                                                                                                                                                                                                     | The information panel, in tabs or stacked boxes: the sections Clover has data for, or `<clover-tab>`s of your own.         | `layout`, `value`, `heading-level`, `closable`; a tab's `value` and `label` (or a `slot="label"` child).                                                                                                 |
 | `<clover-panel-toggle>`                                                                                                                                                                                                              | A button that shows and hides the panel, or anything, by its id; in a `<clover-body>`, one of the Body's controls.         | `controls`.                                                                                                                                                                                              |
-| `<clover-split>`, `<clover-split-pane>`, `<clover-split-handle>`                                                                                                                                                                     | Panes side by side, and the bars between them, which the reader drags, clicks or moves by keyboard.                        | The split's `storage-key`; a pane's `size`, `min`, `max` and `name`.                                                                                                                                     |
+| `<clover-split>`, `<clover-split-pane>`, `<clover-split-handle>`                                                                                                                                                                     | Panes side by side, and the bars between them, dragged, clicked or moved by keyboard.                                      | The split's `storage-key`; a pane's `size`, `min`, `max` and `name`.                                                                                                                                     |
 | `<clover-tip>`                                                                                                                                                                                                                       | Clover's popover, in a button of yours: its label and its key, as Clover's controls show theirs.                           | `label`, `keys`, `glyph`, `lang`.                                                                                                                                                                        |
 
 Every attribute, property and event is in the [manifest](#types). A part of a root draws
 nothing outside one, and says so in the console. Give an element no `aria-label` or
-`role`: it is a box no reader is told of, and Clover names what it draws itself; a
+`role`: it is a box with no role, and Clover names what it draws itself; a
 landmark of the page's own around an element names it otherwise. The one exception is a
 Split's handle, which is the separator itself: name it with `aria-label` where "Resize
 panels" is not the right word.
@@ -231,7 +231,7 @@ of your own, and `PanelToggle` shows and hides it: see
 <div data-code-flavor="web-components">
 
 A layout as the Default template's, written in HTML: the Body with the panel's toggle
-among its controls, a bar the reader can move, and the information panel beside it, with
+among its controls, a bar that resizes them, and the information panel beside it, with
 tabs of your own.
 
 ```html
@@ -265,8 +265,8 @@ tabs of your own.
 - **The panel** has the sections Clover has data for, or one tab for each `<clover-tab>`
   in it, in their order. A tab's content stays where you wrote it until its section first
   opens, and then moves there. Its label is its `label`, or a copy of its `slot="label"`
-  child, for markup. `value` is the tab it opens on, and changing it shows another; the
-  reader's choice sends `clover-value-change`. With `closable`, it has a close button,
+  child, for markup. `value` is the tab it opens on, and changing it shows another; a
+  choice sends `clover-value-change`. With `closable`, it has a close button,
   which sends `clover-close` (cancel it to keep the panel shown) and hides what its toggle
   shows.
 - **The toggle** shows its target while the target is not `hidden`, so write `hidden` on
@@ -427,14 +427,14 @@ A few of the functions Clover's parts are built with, for parts of your own and 
 around Clover, from `@nulib/clover`'s main entry. With React or with the elements, a
 bundler reaches them there; the elements' CDN scripts do not carry them.
 
-| Helper                                                      | What it does                                                                                                                                                                                                              |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `readAs(format, value)`                                     | How a text is read: `"html"`, `"markdown"` or `"plain"`, by its `format`'s media type, or, with none, by IIIF's rule (HTML only from a first `<` to a last `>`).                                                          |
-| `toPlainText(html)`                                         | IIIF HTML as plain text, its tags dropped and the common entities decoded, for where markup cannot go: an `alt`, an `aria-label`.                                                                                         |
-| `thumbnailSource(resource)`                                 | Where a resource's thumbnail comes from: its `thumbnail`, else the first image it paints, its placeholder's or its accompanying Canvas's. `null` if it has nothing to show.                                               |
-| `regionSource(canvas, { x, y, w, h })`                      | A small picture of a region of a Canvas, in the Canvas's own coordinates (an annotation's `xywh`), cut by the image server. `null` where no image with a service is painted there.                                        |
-| `resolveThumbnail(source, size, request)`                   | Either source as a URL about `size` pixels on its longer side (200 by default), asked of the image service as its own `info.json` allows: never larger than the image, and a level 0 server's listed sizes only.          |
-| `buildContentState({ manifestId, canvasId, region, time })` | Where a reader is, as a content state: `{ json, encoded }`, the annotation and its base64url form for a link's `iiif-content`. `encodeContentState(json)` encodes one of your own, `decodeContentState(value)` reads one. |
+| Helper                                                      | What it does                                                                                                                                                                                                     |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `readAs(format, value)`                                     | How a text is read: `"html"`, `"markdown"` or `"plain"`, by its `format`'s media type, or, with none, by IIIF's rule (HTML only from a first `<` to a last `>`).                                                 |
+| `toPlainText(html)`                                         | IIIF HTML as plain text, its tags dropped and the common entities decoded, for where markup cannot go: an `alt`, an `aria-label`.                                                                                |
+| `thumbnailSource(resource)`                                 | Where a resource's thumbnail comes from: its `thumbnail`, else the first image it paints, its placeholder's or its accompanying Canvas's. `null` if it has nothing to show.                                      |
+| `regionSource(canvas, { x, y, w, h })`                      | A small picture of a region of a Canvas, in the Canvas's own coordinates (an annotation's `xywh`), cut by the image server. `null` where no image with a service is painted there.                               |
+| `resolveThumbnail(source, size, request)`                   | Either source as a URL about `size` pixels on its longer side (200 by default), asked of the image service as its own `info.json` allows: never larger than the image, and a level 0 server's listed sizes only. |
+| `buildContentState({ manifestId, canvasId, region, time })` | A view, as a content state: `{ json, encoded }`, the annotation and its base64url form for a link's `iiif-content`. `encodeContentState(json)` encodes one of your own, `decodeContentState(value)` reads one.   |
 
 ```js
 import {

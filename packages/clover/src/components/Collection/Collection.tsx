@@ -75,7 +75,7 @@ export const Collection = forwardRef<HTMLDivElement, CollectionProps>(
         <Label
           as={label.as}
           label={shown.label}
-          className="clover-collection-title"
+          className="clover-collection-title clover-title"
           {...label.title}
         />
         <Summary value={shown.summary} className="clover-about-summary" />

@@ -1,6 +1,6 @@
 ---
 title: RequiredStatement
-description: The required statement of the resource, or of the current Canvas, such as an attribution, as a label and value in the reader's language.
+description: The required statement of the resource, or of the current Canvas, such as an attribution, as a label and value in the defined language.
 ---
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
@@ -42,7 +42,7 @@ nothing while there is none. Its other props go to the `dl`.
 
 | Prop        | Type                     | Default      | Description                                                           |
 | ----------- | ------------------------ | ------------ | --------------------------------------------------------------------- |
-| `of`        | `"manifest" \| "canvas"` | `"manifest"` | Whose statement: the resource's, or the Canvas the reader is on.      |
+| `of`        | `"manifest" \| "canvas"` | `"manifest"` | Whose statement: the resource's, or the current Canvas's.             |
 | `value`     | `{ label, value }`       | —            | A statement to show instead of the Root's. Outside a `Root`, the one. |
 | `className` | `string`                 | —            | Added to `clover-required-statement`.                                 |
 

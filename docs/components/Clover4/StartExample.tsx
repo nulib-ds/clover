@@ -383,7 +383,11 @@ export function StartExample() {
           <>
             {way === "viewer" ? (
               <>
-                <div className={styles.preview} {...example(EXAMPLE)}>
+                <div
+                  className={styles.preview}
+                  data-bleed
+                  {...example(EXAMPLE)}
+                >
                   <Live
                     key={template}
                     resource={URL}

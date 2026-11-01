@@ -399,7 +399,7 @@ export function Sections({
    * for a pointer. The keyboard reaches every tab already (the arrow keys move through
    * them, and the row follows focus), and a tab list holds only tabs, so they sit beside
    * it, out of the tab order and the accessibility tree; a press leaves focus where it
-   * was. Each names itself on hover, as Clover's round controls do.
+   * was. Each names itself on hover, as Search's steps do.
    */
   const scroller = (step: "prev" | "next") => {
     const more = step === "prev" ? track.canScrollPrev : track.canScrollNext;
@@ -408,7 +408,8 @@ export function Sections({
     return (
       <button
         type="button"
-        className={`clover-sections-scroll-${step}`}
+        // A step, drawn as Search's are (`ui/Steps.css`), placed at the row's end.
+        className={`clover-steps-step clover-sections-scroll-${step}`}
         aria-hidden="true"
         tabIndex={-1}
         hidden={!more}
@@ -419,8 +420,8 @@ export function Sections({
         <svg
           aria-hidden="true"
           focusable="false"
-          width="16"
-          height="16"
+          width="12"
+          height="12"
           viewBox="0 0 16 16"
         >
           <path

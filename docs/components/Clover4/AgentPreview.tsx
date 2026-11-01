@@ -182,7 +182,12 @@ export function AgentPreview({ shown }: { shown: Shown }) {
           Show this page&apos;s example
         </button>
       </div>
-      <div className={styles.preview} {...example(EXAMPLE)}>
+      {/* A Viewer's template runs to the card's edges, as the docs' own do. */}
+      <div
+        className={styles.preview}
+        data-bleed={isViewer(shown.plan.layout) || undefined}
+        {...example(EXAMPLE)}
+      >
         <Holds key={shown.id}>
           <Drawn shown={shown} />
         </Holds>

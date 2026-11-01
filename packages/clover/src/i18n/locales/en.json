@@ -38,6 +38,7 @@
   "downloadAll": "All pages",
   "templateSidebar": "Items",
   "templateSidebarToggle": "Show items",
+  "templateTrail": "Breadcrumb",
   "collectionLabel": "Collection",
   "itemsScrollBack": "Show previous items",
   "itemsScrollForward": "Show more items",

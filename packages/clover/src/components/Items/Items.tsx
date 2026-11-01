@@ -1,7 +1,7 @@
 import React, { Suspense, forwardRef, lazy, useEffect, useRef } from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
-import { ItemFigure } from "./Item";
+import { ItemFigure, type ItemSecondary } from "./Item";
 import type { Steps } from "./Position";
 import type { PagerProps } from "./PagerLayout";
 import { Tip } from "../../ui/Tip";
@@ -33,18 +33,26 @@ import {
 } from "../../hooks/useHighContrast";
 
 /**
- * A scrolling row of thumbnails (`slider`), a column, a wrapping grid, or one item at a
- * time (`pager`: Previous, Position and Next).
+ * A scrolling row of thumbnails (`slider`), a column, a wrapping grid, a grid whose
+ * pictures keep their proportions (`masonry`), or one item at a time (`pager`: Previous,
+ * Position and Next).
  */
-export type ItemsLayout = "slider" | "list" | "grid" | "pager";
+export type ItemsLayout = "slider" | "list" | "grid" | "masonry" | "pager";
 
 export interface ItemsProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "onSelect" | "children"> {
   /**
-   * A scrolling row (the default), a column, a wrapping grid, or `pager`: Previous,
-   * Position and Next, stepping one item at a time, with no thumbnails.
+   * A scrolling row (the default), a column, a wrapping grid, `masonry`, or `pager`:
+   * Previous, Position and Next, stepping one item at a time, with no thumbnails.
+   * `masonry` is a grid whose pictures keep their own proportions, each item packed up
+   * under the one above it, still in reading order, left to right.
    */
   layout?: ItemsLayout;
+  /**
+   * The line under an item's label, where it has one (a Collection's members do): its
+   * `summary` (the default), its `navDate`, or `none`. Default `"summary"`.
+   */
+  secondary?: ItemSecondary;
   /**
    * The pager's size: `large` (the default), round controls; or `small`, its steps and
    * count as Search's are, for a header's line. Default `"large"`.
@@ -86,6 +94,12 @@ export interface ItemsProps
   headingLevel?: number;
   /** Pixels requested for each thumbnail's longer side. Default 200. */
   thumbnailSize?: number;
+  /**
+   * Inside a `Root`: list the views even where there is only one, as a gallery's grid
+   * does. The pager, with nothing to step to, still draws nothing. Default `false`: one
+   * view has nothing to choose between.
+   */
+  singleItem?: boolean;
   /** Standalone: credentials, headers and `fetch`. In a `Root`, the Root's are used. */
   request?: CloverRequest;
   /** Standalone: the language to read IIIF text in. */
@@ -254,6 +268,7 @@ function MemberItems({
 function ViewItems({
   onSelect,
   forwardedRef,
+  singleItem = false,
   ...rest
 }: ItemsProps & Forwarded) {
   const { clover, language } = useOptionalClover()!;
@@ -265,8 +280,8 @@ function ViewItems({
     (state) => selectSequence(state.manifest).direction,
   );
   const items = itemsOfManifest(manifest);
-  // One view has nothing to choose between.
-  if (items.length < 2) return null;
+  // One view has nothing to choose between, unless it is asked for.
+  if (items.length < (singleItem ? 1 : 2)) return null;
   // A step is a selection, as the slider's arrows' are: the Root goes there.
   const select = (item: ItemModel) => clover.goTo(item.id);
   if (rest.layout === "pager") {
@@ -370,6 +385,7 @@ export function ItemsView({
   request,
   language,
   showSummary = false,
+  secondary = "summary",
   heading,
   headingLevel = 2,
   renderItem,
@@ -378,9 +394,11 @@ export function ItemsView({
   as: Tag = "section",
   className,
   "aria-label": ariaLabel,
-  // The pager's, not a list's.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // The pager's, not a list's, and the views' alone (`ViewItems`).
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   size,
+  singleItem,
+  /* eslint-enable @typescript-eslint/no-unused-vars */
   highContrast,
   ...rest
 }: ItemsViewProps) {
@@ -394,6 +412,25 @@ export function ItemsView({
 
   const slider = layout === "slider";
   const listbox = navigation === "id";
+  /*
+   * Masonry is a grid whose items span the rows their heights need (`masonry.ts`): its
+   * code loads only where the layout is masonry, so no other layout carries it.
+   */
+  const viewport = useRef<HTMLDivElement>(null);
+  const masonry = layout === "masonry";
+  useEffect(() => {
+    const box = viewport.current;
+    if (!masonry || !box) return;
+    let release: (() => void) | undefined;
+    let live = true;
+    void import("./masonry").then(({ attachMasonry }) => {
+      if (live) release = attachMasonry(box);
+    });
+    return () => {
+      live = false;
+      release?.();
+    };
+  }, [masonry]);
   const track = useScrollTrack({
     align: listbox ? "center" : "start",
     itemCount: items.length,
@@ -447,22 +484,28 @@ export function ItemsView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
-  // Keep the selection in view: at once on arrival, smoothly after.
+  /*
+   * Keep the selection in view: at once on arrival, smoothly after. A slider's scrolling
+   * box reaches the track a render after it mounts, so a strip that mounts with its
+   * selection (a lightbox's) tries again as it arrives, and has arrived only once it
+   * could scroll.
+   */
   const arrived = useRef(false);
   useEffect(() => {
     if (selected < 0) return;
     const instant = !arrived.current;
-    arrived.current = true;
     if (slider) {
-      track.scrollToIndex(selected, { instant });
+      if (track.scrollToIndex(selected, { instant })) arrived.current = true;
       return;
     }
+    arrived.current = true;
     const option = listRef.current?.querySelector<HTMLElement>(
       `[data-track-index="${selected}"]`,
     );
     if (option) keepInView(option, instant);
+    // `track` is a new object each render; its `scrollToIndex` follows the box.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slider, selected]);
+  }, [slider, selected, track.scrollToIndex]);
 
   // Past 6 not a heading (`ui/heading.ts`): the list is named by it either way.
   const Title = titleTag(headingLevel) as "h2";
@@ -495,6 +538,7 @@ export function ItemsView({
         language={language}
         request={request}
         showSummary={showSummary}
+        secondary={secondary}
       />
     );
 
@@ -504,7 +548,9 @@ export function ItemsView({
     !(
       renderItem ||
       localize(item.label, language).text ||
-      (showSummary && localize(item.summary, language).text)
+      (showSummary &&
+        secondary === "summary" &&
+        localize(item.summary, language).text)
     );
   const positionName = (item: ItemModel, index: number) =>
     positioned(item)
@@ -599,7 +645,7 @@ export function ItemsView({
           <header className="clover-items-header">
             {headingLabel?.text && (
               <Title
-                className="clover-items-title"
+                className="clover-items-title clover-title"
                 id={`${id}-title`}
                 {...languageProps(headingLabel.lang)}
               >
@@ -636,7 +682,7 @@ export function ItemsView({
           <div
             id={`${id}-viewport`}
             className="clover-items-viewport"
-            ref={slider ? track.ref : undefined}
+            ref={slider ? track.ref : viewport}
           >
             {listbox ? (
               <div

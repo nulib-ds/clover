@@ -52,6 +52,36 @@ describe("Items in a Root", () => {
       </Clover.Root>,
     );
 
+  it("draws nothing for a single view, unless singleItem asks", async () => {
+    const plain = render(
+      <Clover.Root iiifContent={audioJson}>
+        <Clover.Items />
+      </Clover.Root>,
+    );
+    await waitFor(() =>
+      expect(document.querySelector(".clover-root")).toHaveAttribute(
+        "data-status",
+        "ready",
+      ),
+    );
+    expect(screen.queryByRole("listbox")).toBeNull();
+    plain.unmount();
+    render(
+      <Clover.Root iiifContent={audioJson}>
+        <Clover.Items singleItem />
+        {/* The pager, with nothing to step to, still draws nothing. */}
+        <Clover.Items singleItem layout="pager" />
+      </Clover.Root>,
+    );
+    const listbox = await screen.findByRole("listbox", { name: "Items" });
+    const options = within(listbox).getAllByRole("option");
+    expect(options).toHaveLength(1);
+    expect(options[0]).toHaveAttribute("aria-selected", "true");
+    expect(document.querySelector(".clover-pager")).toBeNull();
+    // Never an attribute on the list.
+    expect(document.querySelector("[singleitem], [singleItem]")).toBeNull();
+  });
+
   it("is a listbox of views, a spread as one option, the current one selected", async () => {
     renderInRoot();
     const listbox = await screen.findByRole("listbox", { name: "Items" });
@@ -332,10 +362,11 @@ describe("Items standalone", () => {
   });
 
   // Cookbook 0318: a Collection's members, each with a date for navigation.
-  it("shows a member's date under its label, then its summary", async () => {
+  it('shows a member\'s date under its label, with `secondary="navDate"`', async () => {
     const [castel, colosseum] = romeJson.items;
     render(
       <Clover.Items
+        secondary="navDate"
         items={[
           castel,
           { ...colosseum, summary: { en: ["Rome's great amphitheater."] } },
@@ -352,16 +383,36 @@ describe("Items standalone", () => {
     // Written as its year's first moment, it is that year.
     expect(date).toHaveTextContent(/^1776$/);
     expect(date).toHaveAttribute("datetime", "1776");
-    // Under the label, before the summary, and part of the member's name.
+    // Under the label, in place of the summary, and part of the member's name.
     const caption = second.querySelector("figcaption")!;
     expect([...caption.children].map((child) => child.className)).toEqual([
       "clover-items-label",
       "clover-items-date",
-      "clover-items-summary",
     ]);
+    expect(second).toHaveAccessibleName("The Colosseum 1776");
+  });
+
+  it("shows a member's summary under its label by default, and neither with `none`", () => {
+    const [castel, colosseum] = romeJson.items;
+    const members = [
+      castel,
+      { ...colosseum, summary: { en: ["Rome's great amphitheater."] } },
+    ];
+    const { rerender } = render(<Clover.Items items={members} />);
+    let second = screen.getAllByRole("link")[1];
+    expect(
+      [...second.querySelector("figcaption")!.children].map((c) => c.className),
+    ).toEqual(["clover-items-label", "clover-items-summary"]);
     expect(second).toHaveAccessibleName(
-      "The Colosseum 1776 Rome's great amphitheater.",
+      "The Colosseum Rome's great amphitheater.",
     );
+    expect(second.querySelector("time")).toBeNull();
+    rerender(<Clover.Items items={members} secondary="none" />);
+    second = screen.getAllByRole("link")[1];
+    expect(
+      [...second.querySelector("figcaption")!.children].map((c) => c.className),
+    ).toEqual(["clover-items-label"]);
+    expect(second).toHaveAccessibleName("The Colosseum");
   });
 
   it("hands a link's click to onSelect, which may keep the reader on the page", async () => {

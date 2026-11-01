@@ -3,8 +3,8 @@
 Reads like a PDF viewer: a toolbar across the top (the title, and Download), page
 thumbnails down the left, and the pages down one column on a gray ground, as a PDF
 reader's continuous view. The page thumbnails' toggle is drawn as Clover's round controls
-are: the glyph of a list of thumbnails, its pictures filled while they show, and where the
-reader is ("3 / 17"). While they show, it sits on the bar between them and the page, over
+are: the glyph of a list of thumbnails, its pictures filled while they show, and the current
+page ("3 / 17"). While they show, it sits on the bar between them and the page, over
 them but for its far rounded end, so the thumbnails have their pane's whole height; put
 away, it waits over the page's top left, level with the Canvas's controls. The bar widens
 or narrows them (8rem to 24rem; drag it, click or tap it to step from 8rem to 13rem to
@@ -43,15 +43,16 @@ import "@nulib/clover/templates.css";
 <Viewer iiifContent="https://example.org/manifest.json" template={Document} />;
 ```
 
-| Prop                 | Default                      | What it does                                                    |
-| -------------------- | ---------------------------- | --------------------------------------------------------------- |
-| `defaultSidebarOpen` | `true`                       | Whether the page thumbnails start shown; over the page, not.    |
-| `defaultPanelOpen`   | `false`                      | Whether the panel starts open beside the page; over it, closed. |
-| `panelLayout`        | `"accordion"`                | The panel's sections as stacked boxes, or `"tabs"`.             |
-| `download`           | `true`                       | Download's links in the toolbar, where there is a `rendering`.  |
-| `headingLevel`       | `2`                          | The title's level; the panel's sections are a level below.      |
-| `storageKey`         | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.  |
-| …                    |                              | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`… |
+| Prop                 | Default                      | What it does                                                               |
+| -------------------- | ---------------------------- | -------------------------------------------------------------------------- |
+| `defaultSidebarOpen` | `true`                       | Whether the page thumbnails start shown; over the page, not.               |
+| `singleItem`         | `false`                      | The page thumbnails and their toggle even where the resource has one page. |
+| `defaultPanelOpen`   | `false`                      | Whether the panel starts open beside the page; over it, closed.            |
+| `panelLayout`        | `"accordion"`                | The panel's sections as stacked boxes, or `"tabs"`.                        |
+| `download`           | `true`                       | Download's links in the toolbar, where there is a `rendering`.             |
+| `headingLevel`       | `2`                          | The title's level; the panel's sections are a level below.                 |
+| `storageKey`         | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.             |
+| …                    |                              | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`…            |
 
 Size it with `--clover-template-document-height` (default `min(85svh, 56rem)`, the
 window's smallest height where a browser knows it, else `min(85vh, 56rem)`). In a box too
@@ -69,10 +70,12 @@ Pinch and Ctrl-wheel zoom into the current sheet; the plain wheel always scrolls
 column. On a touch screen a finger scrolls it too, until you zoom in: then it moves
 about the page. A 3D Scene takes a finger's drag always, to turn it, as in Default.
 
-The information panel loads its code when it first opens, or as the reader points at its
-toggle or focuses it, so the page loads without it.
+The information panel loads its code when it first opens, or as its toggle is pointed at
+or focused, so the page loads without it.
 
-To change the layout, copy `Document.tsx`, `Sheets.tsx`, `DocumentPanel.tsx` and
-`Document.css` into your app, with the hooks in `templates/shared/` they import (`useDrawer.ts`, and through it
-`useSlide.ts`, `useDragToClose.ts` and `useFollowFocus.ts`). Otherwise they use only what
-`@nulib/clover` exports.
+To change the layout, copy `Document.tsx`, `Sheets.tsx` and `Document.css` into your app,
+with what in `templates/shared/` they import: the information panel every template shares
+(`PanelPane.tsx`, `PanelPart.tsx`, `useLazyPanelPane.ts`), and through them
+`useDrawer.ts`, `useSlide.ts`, `useSpine.ts`,
+`useDragToClose.ts` (with `dragToClose.ts`) and `useFollowFocus.ts`. Otherwise they use only
+what `@nulib/clover` exports.

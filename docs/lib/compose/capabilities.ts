@@ -186,7 +186,7 @@ export const CAPABILITIES = {
     resource: "paged",
   },
   panes: {
-    says: "Panes side by side, the reader resizing them by drag or keyboard.",
+    says: "Panes side by side, resized by drag or keyboard.",
     words: ["split", "side by side", "resizable", "columns"],
     parts: ["Split", "SplitPane", "SplitHandle"],
     resource: "paged",
@@ -198,7 +198,7 @@ export const CAPABILITIES = {
     resource: "paged",
   },
   text: {
-    says: "Any IIIF language map as text, HTML or Markdown, in the reader's language.",
+    says: "Any IIIF language map as text, HTML or Markdown, in the defined language.",
     words: ["language map", "markdown", "html"],
     parts: ["Value"],
   },

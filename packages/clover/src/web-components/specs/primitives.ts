@@ -222,7 +222,7 @@ export const value: ElementSpec = {
 export const valueDocs: ElementDocs = {
   name: "CloverValueElement",
   description:
-    "Any IIIF language map in the reader's language, read strictly by its format: text/html as sanitized HTML, text/plain as written, text/markdown as Markdown.",
+    "Any IIIF language map in the defined language, read strictly by its format: text/html as sanitized HTML, text/plain as written, text/markdown as Markdown.",
   attributes: {
     value: {
       description: "What to show: text, or a IIIF language map as JSON.",

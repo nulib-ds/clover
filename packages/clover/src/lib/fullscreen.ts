@@ -40,8 +40,9 @@ export const isFullscreenSupported = (): boolean => {
  * What goes full screen, found from an element inside it: the Root a Canvas is in, a
  * template's Viewer or a page's own layout, so a reader goes on through the resource
  * there, its Items and Panel too (Mat, 2026-10-29); else the Canvas, on its own. Not
- * across a dialog in the Root (the Gallery's lightbox, a modal one): full screen over
- * it would hide the dialog, so its Canvas goes alone.
+ * across a `<dialog>` in the Root (a page's own modal one): full screen over it would
+ * hide the dialog, so its Canvas goes alone. The Gallery's lightbox is a layer in its
+ * Root, not a `<dialog>`: the Root goes, the lightbox filling it.
  */
 export const getCloverRoot = (from: Element | null): HTMLElement | null => {
   const root = from?.closest(".clover-root");

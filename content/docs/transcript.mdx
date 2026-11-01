@@ -48,7 +48,7 @@ of its own: the page has one choice of language. Over
 the captions, a field finds words as they are typed: the cues with them marked and
 counted, the first current, and Previous, Next or Enter going through them, each seeking
 the recording there. A long transcript is drawn a chunk of cues at a time, more as the
-reader nears its end.
+end nears.
 `Default` and `Document` show it in their [Panel](/docs/panel). Its other props, and its
 `ref`, go to its element.
 
@@ -95,7 +95,7 @@ keyboard can reach, as here (WCAG 2.1.1).
 ```
 
 ```html twin
-<!-- The element is a box no reader is told of: the page's own region names and scrolls it. -->
+<!-- The element is a box with no role: the page's own region names and scrolls it. -->
 <section
   aria-label="Transcript"
   tabindex="0"
@@ -133,9 +133,9 @@ Of an image, it shows what is written on it: here, a newspaper page's OCR, in Ge
 
 </Example>
 
-### Leave the scrolling to the reader
+### Without following
 
-Use `follow={false}` to leave the scrolling to the reader. The cue playing is still
+Use `follow={false}` to keep the transcript from scrolling to the cue playing. The cue playing is still
 marked.
 
 <Example>

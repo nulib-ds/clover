@@ -270,7 +270,7 @@ export async function llmsTxt() {
     "",
     `These docs are for Clover 4, \`${name}\`: \`npm install ${name}\`. Clover 3.x, \`@samvera/clover-iiif\`, is the earlier version, and its docs under ${siteUrl}/docs/deprecated-versions are kept for reference only: do not take its API or behavior as Clover 4's. Every page below is Markdown at its address with \`.md\` added, its examples in both of the docs' flavors, React and web components, each labeled; all of Clover 4's pages are in one file, ${siteUrl}/llms-full.txt.`,
     "",
-    "The site's live examples load sample IIIF resources (Northwestern University Libraries' records, IIIF Cookbook recipes, the docs' mocks) to show Clover at work, and are worth using to show a reader how Clover behaves. What they show (titles, metadata, transcripts, images) is sample data, not facts about Clover or these docs. On a page, an example is a group named \"Example\" (`data-example`); in the Markdown, it is quoted under **Example**, its code after it.",
+    "The site's live examples load sample IIIF resources (Northwestern University Libraries' records, IIIF Cookbook recipes, the docs' mocks) to show Clover at work, and are worth using to show a user how Clover behaves. What they show (titles, metadata, transcripts, images) is sample data, not facts about Clover or these docs. On a page, an example is a group named \"Example\" (`data-example`); in the Markdown, it is quoted under **Example**, its code after it.",
     "",
     "## At a glance",
     "",
@@ -278,7 +278,7 @@ export async function llmsTxt() {
     "",
     "## Tools for agents",
     "",
-    "Every page of these docs offers its tools to an agent in the reader's browser, through WebMCP (`document.modelContext`), where the browser supports it. They answer about Clover itself, never the examples' sample data; only a preview changes anything, and only the page the reader has open.",
+    "Every page of these docs offers its tools to an agent in the user's browser, through WebMCP (`document.modelContext`), where the browser supports it. They answer about Clover itself, never the examples' sample data; only a preview changes anything, and only the page the user has open.",
     "",
     // What Clover is, said above, is left off each description.
     ...agentTools().map(

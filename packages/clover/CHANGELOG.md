@@ -11,16 +11,94 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **`<clover-label>` takes `as="label"` and `as="figcaption"`.** Its allowed elements are
+  now listed headings first: `h1` to `h6`, then `span`, `label`, `figcaption`, `p`,
+  `strong`, `em` and `div`.
+
+- **`singleItem`, for thumbnails of a resource with one view.** Items in a `Root` drew
+  nothing for a Manifest of one view, as there is nothing to choose between. Given
+  `singleItem`, it lists that one view (as a slider, list or grid; the pager, with nothing
+  to step to, still draws nothing). The Default and Document templates take it too, for
+  their thumbnails (Document's sidebar and its toggle), and `<clover-viewer>` and
+  `<clover-items>` as `single-item`. Off by default, so nothing changes unless you ask:
+
+  ```jsx
+  <Viewer iiifContent={url} singleItem />
+  ```
+
+- **Items' `masonry` layout.** `layout="masonry"` extends `grid`: the same cells and arrow
+  keys, each picture at its own proportions, each item packed up under the one above it,
+  still placed left to right, in reading order (not in columns). Its code loads only where
+  the layout is masonry. As a web component, `layout="masonry"`.
+- **Items' `secondary` line.** `secondary="summary"` (the default), `"navDate"` or `"none"`:
+  the one line under an item's label, where it has one (a Collection's members do). As a
+  web component, the `secondary` attribute.
+- **The Gallery, framed by what it opens.** Opened on a Collection, its title and summary
+  are the Collection's and its grid the Collection's members; choosing one shows that
+  Manifest in the lightbox. New props: `items` (`"grid"` or `"masonry"`), `secondary`,
+  `gap` (the space between cells, the inset unless set), `height` (`"auto"`, or a
+  height that holds it, the grid scrolling under the header) and `lightboxItems`; as
+  `<clover-viewer template="gallery">`'s `items`, `secondary`, `gap`, `height` and
+  `lightbox-items` attributes. Its lightbox has the information panel beside its view,
+  the same pane as Default's and Document's (`shared/PanelPane.tsx`), with their props:
+  `panel`, `defaultPanelOpen`, `panelLayout`, `download`, `languages` and `storageKey`. Its page:
+  `/docs/viewer/gallery`.
+
 ### Changed
 
-- **The Default template's header collapses by its own width.** Its main pane is now a
-  size container, `clover-template-default-main`, and the header follows it. Under 36rem,
-  the provider's logo keeps to the title's line and the Collection's line takes the whole
-  width under both, rather than squeezing beside the logo. Under 26rem (a phone, or a
-  narrow column beside a docked panel), the logo is tucked away when the template has a
-  panel, whose About shows the provider still, with its name and link. With
-  `panel={false}`, the logo keeps to the title's line instead. Nothing changes from
-  36rem up. A page's own CSS can query the same container:
+- **Every title takes the page's heading styles.** Every template's title (Default's,
+  Document's, the Gallery's and its lightbox's), Items' standalone title, the Collection's
+  and About's label carry `clover-title`, and their size is the page's for their heading
+  level: Clover sets none. Their weight is regular (`--clover-title-weight`), with no
+  specificity (`:where(.clover-title)`), so a page's rule for their level, or for the
+  class, wins. Section and control headings keep Clover's own look.
+
+- **The Panel's tab arrows are small steps, as Search's are.** The arrows at the ends of a
+  tab row were the 36px round controls; they are now 26px steps, unfilled, the muted
+  glyph and the accent under the pointer, on the panel's own ground. They carry
+  `clover-steps-step` beside `clover-sections-scroll-prev` and `-next`, and the row's
+  fade (`--clover-sections-fade`) narrows with them. A page that styled them as round
+  controls styles them as steps (`.clover-steps-step`).
+
+- **The Gallery's lightbox stays in the Gallery's bounds.** It is a modal layer in the
+  Root, not a `<dialog>`, whose backdrop covered the whole window: the rest of the Gallery
+  is inert while it is open, focus is on the view shown in its strip, and Escape, Close,
+  a press outside the panel or a step out in its trail (the levels over its title) closes
+  it, focus going back to the cell. It fills the Gallery's bounds by default;
+  `--clover-template-lightbox-inset`, `--clover-template-lightbox-backdrop` and
+  `--clover-template-lightbox-radius` give it room, a backdrop and corners. A page that
+  styled `.clover-template-lightbox` as a dialog (its width, its `::backdrop`) styles the
+  layer and its panel, `.clover-template-lightbox-content`, instead.
+- **The Gallery's grid sits inside its inset**, its cells the inset apart, and shows each
+  label whole: with no label cut short, none needs showing in full over its cell.
+- **Choosing a Collection's member no longer moves the Gallery's grid**: its Status only
+  announces the member's loading, which the lightbox's Body shows.
+- **A Collection's members show one line under their labels**, their summary, where they
+  had their `navDate` and their summary both. `secondary="navDate"` shows the date:
+
+  ```jsx
+  <Clover.Items of="members" secondary="navDate" />
+  ```
+
+- **The Gallery template shows its grid for a resource with one view.** It drew no grid
+  for a Manifest of one view, which left only its title and summary; now the one view is
+  a cell, opening in the lightbox as any other. Nothing to do.
+
+- **Budgets:** raised on purpose for what every template and page that draws Items now
+  carries (Items' `masonry` loader and styles, `secondary` and `singleItem`, About's label
+  measured afresh, the Panel's tab arrows as steps, every title's look a default the page outranks), for the information panel every
+  template now shares (`shared/PanelPane.tsx`, in place of Default's and Document's own),
+  and for the Gallery's Collection framing, `height`, `gap`, its lightbox's layer, trail
+  and strip (its view, with the panel's pane, loaded when the reader reaches for the grid).
+  In B gzip: the Default template 73,050 → 73,600 and to first view
+  95,050 → 95,900; Document 68,450 → 68,900 and 91,300 → 92,250; Gallery
+  29,050 → 29,750 and 54,000 → 55,200; `styles.css` 19,050 → 19,200 and `templates.css`
+  2,150 → 2,500; the `Viewer` entry 101,800 → 102,550. As web components: a
+  `<clover-viewer>` 122,050 → 122,700, in Document 129,500 → 129,800; a page of four
+  parts 100,300 → 100,750; a layout of containers 118,050 → 118,550; a `<clover-canvas>`
+  alone 87,750 → 88,000.
 
   ```css
   @container clover-template-default-main (width < 26rem) {
@@ -85,6 +163,15 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   as the others. Each template keeps its own weight.
 
 ### Fixed
+
+- **About's thumbnail no longer covers its label.** About measured its label once, as it
+  mounted: where the label was drawn again as a new element (its heading level
+  settling), or the thumbnail arrived after it, the label's height was written as 0 and
+  its lines ran under the thumbnail. It now finds both at each measure. Nothing to do.
+- **The Default template's panel toggle no longer slides into place on a first load.** It
+  sat on the spine before the Root had loaded anything, eased down the bar to the Body's
+  top, then dropped again as the resource filled the header. It now waits unseen until
+  the Root has something to show, and goes to its place at once. Nothing to do.
 
 - **A Scene's model draws on a phone whose GPU takes smaller textures.** A model's
   texture larger than the GPU's `MAX_TEXTURE_SIZE` (often 4096 on a phone, where a
