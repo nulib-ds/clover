@@ -89,6 +89,15 @@ const publisher = {
 };
 
 /*
+ * The site's name as search results show it over a page's title: its publisher's (Mat,
+ * 2026-11-01), "Clover IIIF" the name Google may take instead (`alternateName`). Google
+ * reads it from the homepage's `WebSite` data first, then `og:site_name`; without either
+ * it fell back to the parent domain's, "Northwestern University". Titles keep
+ * `siteTitle`.
+ */
+const siteName = publisher.name;
+
+/*
  * A page as Markdown, for agents: its address with `.md` added, which
  * `scripts/build-agent-docs.mjs` writes after the build; the homepage's is `llms.txt`,
  * what the site is for an agent.
@@ -139,7 +148,7 @@ export function pageMetadata({
       url: canonical,
       title: fullTitle,
       description: text,
-      siteName: siteTitle,
+      siteName,
       images: [shareImage],
     },
     /*
@@ -237,7 +246,12 @@ export function structuredData({
         ...(modified && { dateModified: modified }),
         version: earlier ? "3.x" : "4",
         ...(earlier && { creativeWorkStatus: "Superseded" }),
-        isPartOf: { "@type": "WebSite", name: siteTitle, url: siteUrl },
+        isPartOf: {
+          "@type": "WebSite",
+          name: siteName,
+          alternateName: siteTitle,
+          url: siteUrl,
+        },
         publisher,
         about: earlier
           ? {
@@ -286,7 +300,8 @@ export function homeStructuredData({
       {
         "@type": "WebSite",
         "@id": `${siteUrl}#website`,
-        name: siteTitle,
+        name: siteName,
+        alternateName: siteTitle,
         url: siteUrl,
         headline: homeHeadline,
         alternativeHeadline: homeTagline,

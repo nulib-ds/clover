@@ -798,7 +798,11 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     from the package's build).
   - Titles and share cards are `pageMetadata` (`docs/lib/site.ts`), the root layout's
     `metadata` and each page's `generateMetadata` (`app/[[...mdxPath]]/page.tsx`): the
-    homepage's title is "Clover IIIF – A viewer as distinctive as your collections" and the site's
+    homepage's title is "Clover IIIF – A viewer as distinctive as your collections"; the
+    site's name, which a search result shows over the title, is its publisher's,
+    "Northwestern University Libraries", "Clover IIIF" its `alternateName` (the `WebSite`
+    data and `og:site_name`, `siteName`; Mat, 2026-11-01: Google had fallen back to the
+    parent domain's "Northwestern University"), every title keeping "Clover IIIF"; and the site's
     description says what Clover is, plainly, in Get started's words, in React or as web
     components (Mat, 2026-10-21: so an agent or a search result can tell; plural since
     2026-10-22, when every part became one, never "a web component"; every description of
