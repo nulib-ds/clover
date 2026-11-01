@@ -15,7 +15,7 @@
   "timelineFirstViewGzip": 44600,
   "sceneFirstViewGzip": 26650,
   "mapFirstViewGzip": 24950,
-  "stylesGzip": 19600,
+  "stylesGzip": 19650,
   "templatesStylesGzip": 2500,
   "mapInitialGzip": 16200,
   "mapOnDemandGzip": 300000,
@@ -26,6 +26,6 @@
   "layoutPageGzip": 118550,
   "canvasElementGzip": 88000,
   "documentElementGzip": 129800,
-  "galleryElementGzip": 125650,
+  "galleryElementGzip": 125700,
   "viewerEntryGzip": 102600
 }

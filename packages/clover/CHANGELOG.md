@@ -145,9 +145,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   load only as a Canvas draws its controls, so a Canvas's own first load is lighter than
   before, the controls' coming and going no longer in it), its tray's look and opening,
   and a placeholder's toggle among the controls, and its tray scrolling across only, with
-  room for a Tip wrapped to it, in B gzip: `styles.css` 19,200 → 19,600; to first view,
-  the Default template 96,300 → 96,450, Document 92,650 → 92,850 and the Gallery
-  55,250 → 55,800; `<clover-viewer>`'s own entry 102,550 → 102,600; a Timeline, which
+  room for a Tip wrapped to it, and by touch, in B gzip: `styles.css` 19,200 → 19,650; to
+  first view, the Default template 96,300 → 96,450, Document 92,650 → 92,850 and the
+  Gallery 55,250 → 55,800; `<clover-viewer>`'s own entry 102,550 → 102,600, and in the
+  Gallery 125,650 → 125,700; a Timeline, which
   keeps its coming and going and draws on Canvas's controls, 24,550 → 25,000 and to first
   view 44,150 → 44,600.
 - **Budgets:** raised on purpose for what every template and page that draws Items now
