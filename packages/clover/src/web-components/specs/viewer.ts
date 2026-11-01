@@ -35,6 +35,7 @@ export const viewer: ElementSpec = {
     height: { prop: "height", type: "string" },
     gap: { prop: "gap", type: "string" },
     secondary: { prop: "secondary", type: ["summary", "navDate", "none"] },
+    summary: { prop: "summary", type: "boolean" },
     "lightbox-items": { prop: "lightboxItems", type: ["slider", "pager"] },
   },
   properties: ["iiifContent", "annotations", "request", "renderers"],
@@ -160,6 +161,11 @@ export const viewerDocs: ElementDocs = {
       description:
         "Gallery: the line under each cell's label, where it has one: summary, navDate or none.",
       default: "summary",
+    },
+    summary: {
+      description:
+        'Gallery: the resource\'s summary under the title, cut to two lines with Read more under it where it runs longer; "false" leaves it out.',
+      default: "true",
     },
     "lightbox-items": {
       description:

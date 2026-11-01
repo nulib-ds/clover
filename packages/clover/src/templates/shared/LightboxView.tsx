@@ -9,13 +9,15 @@ import { BESIDE_REM, PAGE_MIN, useWideEnough } from "./useSlide";
 
 /**
  * What the lightbox shows under its title, drawn as it opens (so its panes measure their
- * own width): the Body and the thumbnails or pager in the main pane, and beside them the
+ * own width): the Body, the view's label and the thumbnails or pager in the main pane,
+ * and beside them the
  * information panel, every template's (`PanelPane`): beside the view where there is
  * room, over it where there is not, its toggle on the bar between or among the Body's
  * controls.
  */
 export default function LightboxView({
   id,
+  annotations,
   items,
   headingLevel,
   panel = true,
@@ -24,21 +26,44 @@ export default function LightboxView({
   download = true,
   languages = true,
   storageKey,
-}: Omit<LightboxProps, "open" | "onClose" | "className"> & { id: string }) {
+}: Omit<LightboxProps, "open" | "onClose" | "className"> & {
+  id: string;
+  /**
+   * Whether the grid is annotations given as the content, so the strip steps through
+   * them: the lightbox reads it (`useGivenAnnotations`), which keeps this chunk from
+   * importing the Gallery's.
+   */
+  annotations: boolean;
+}) {
   const panes = useRef<HTMLElement>(null);
   /*
    * Arriving after the lightbox opened (its code still loading as the reader pressed),
-   * focus waits on Close: it goes on to the view shown in the strip, as at once it would.
+   * focus waits on Close: it goes on to the view shown in the strip, as at once it would,
+   * and, where the strip's own code comes later still (the annotations'), as it arrives,
+   * so long as focus is still waiting there.
    */
   useEffect(() => {
     const dialog = panes.current?.closest('[role="dialog"]');
-    const active = dialog?.ownerDocument.activeElement;
-    if (!active?.matches(".clover-template-lightbox-close")) return;
-    dialog
-      ?.querySelector<HTMLElement>(
+    if (!dialog || items === "pager") return;
+    const waiting = () =>
+      dialog.ownerDocument.activeElement?.matches(
+        ".clover-template-lightbox-close",
+      );
+    const moved = () => {
+      const chosen = dialog.querySelector<HTMLElement>(
         '[role="listbox"] [role="option"][aria-selected="true"]',
-      )
-      ?.focus({ preventScroll: true });
+      );
+      if (chosen && waiting()) chosen.focus({ preventScroll: true });
+      return Boolean(chosen);
+    };
+    if (moved() || !waiting()) return;
+    const observer = new MutationObserver(() => {
+      if (moved() || !waiting()) observer.disconnect();
+    });
+    observer.observe(dialog, { childList: true, subtree: true });
+    return () => observer.disconnect();
+    // Once, as it opens; the observer follows the strip from there.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   // Its code loads as the lightbox opens, the chunk Document's is (`PanelPart`).
   const pane = useLazyPanelPane({
@@ -66,7 +91,17 @@ export default function LightboxView({
         <Clover.Body className="clover-template-lightbox-body">
           {panel && !pane.docked && pane.toggle}
         </Clover.Body>
-        <Clover.Items layout={items === "pager" ? "pager" : "slider"} />
+        {/* The view's label under it, the Manifest's over it as the lightbox's title. */}
+        <Clover.Label
+          of="canvas"
+          as="p"
+          className="clover-template-lightbox-caption"
+        />
+        {/* The grid's own: the views, or the annotations it opened on. */}
+        <Clover.Items
+          layout={items === "pager" ? "pager" : "slider"}
+          {...(annotations && { of: "annotations" as const })}
+        />
       </Clover.SplitPane>
       {panel && (
         <PanelPane

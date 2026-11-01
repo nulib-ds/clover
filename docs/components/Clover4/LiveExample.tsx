@@ -16,6 +16,7 @@ import {
   type CodeTree,
   type Knob,
   knobId,
+  pageAddress,
   publishedAddress,
 } from "docs/lib/live-code";
 import { type PartDemoResource, RESOURCES } from "docs/lib/part-demo-resources";
@@ -245,7 +246,8 @@ export function LiveViewerExample({
   /**
    * Resources to switch between, a switch at the example's top (Mat, 2026-11-01: the
    * Gallery's page, "obvious at the top", a Manifest and the Collection it is in): each a
-   * homepage resource's key or an address, and its name on the switch. The first opens.
+   * homepage resource's key, an address, or a path to a file of this site's own
+   * (`/annotations/james-turner.json`), and its name on the switch. The first opens.
    */
   resources?: { label: string; resource: string }[];
   templates: Partial<Record<TemplateName, Knob[]>>;
@@ -256,6 +258,8 @@ export function LiveViewerExample({
 }) {
   const addressOf = (key: string) => {
     if (/^https?:/.test(key)) return key;
+    // A file of this site's own (`public/`), by its path: its published address.
+    if (key.startsWith("/")) return pageAddress(key);
     const found = resourceByKey(key);
     if (!found) throw new Error(`LiveViewerExample: no resource ${key}`);
     return found.mock ? publishedAddress(found.resource) : found.resource;

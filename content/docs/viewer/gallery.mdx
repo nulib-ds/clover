@@ -6,12 +6,20 @@ description: The Viewer's Gallery template, a grid framed by what it opens, each
 import { ViewerExample } from "docs/components/Clover4/ViewerDocs";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { LiveViewerExample } from "docs/components/Clover4/LiveExample";
+import { TemplateHead } from "docs/components/Clover4/PartHead";
+
+<div className="docs-title-row">
 
 # Gallery
 
+<TemplateHead template="Gallery" />
+
+</div>
+
 <div className="docs-lede">
-  A grid framed by what it opens: a Manifest's views, or a Collection's members.
-  Each cell opens in a lightbox, within the gallery's own bounds.
+  A grid framed by what it opens: a Manifest's views, a Collection's members, or
+  a page of annotations. Each cell opens in a lightbox, within the gallery's own
+  bounds.
 </div>
 
 <LiveViewerExample
@@ -24,11 +32,13 @@ import { LiveViewerExample } from "docs/components/Clover4/LiveExample";
       resource:
         "https://api.dc.library.northwestern.edu/api/v2/collections/cd92fb8d-76a7-4e72-be0f-78a5839caa89?as=iiif",
     },
+    { label: "AnnotationPage", resource: "/annotations/james-turner.json" },
   ]}
   headingLevel={2}
   templates={{
     Gallery: [
       { prop: "items", value: "grid", options: ["grid", "masonry"] },
+      { prop: "height", value: 70, format: "{}vh", min: 30, max: 100 },
       { prop: "size", value: 10, format: "{}rem", min: 6, max: 20 },
       {
         prop: "secondary",
@@ -43,14 +53,17 @@ import { LiveViewerExample } from "docs/components/Clover4/LiveExample";
 
 Opened on a Manifest, its title and summary head the grid, a cell for each view (a
 spread is one cell). Opened on a Collection, the Collection's own title and summary head
-it, a cell for each member; choosing one shows that Manifest in the lightbox. The grid is
-inside the gallery's inset, its cells the inset apart.
+it, a cell for each member; choosing one shows that Manifest in the lightbox. Opened on
+an AnnotationPage of tags across Manifests, its label heads the grid, a cell for each
+tag, its region cut from its view; choosing one shows its Manifest in the lightbox, framed
+on the tag, and the lightbox's strip steps through the tags. The grid is inside the
+gallery's inset, its cells the inset apart.
 
 The lightbox is a layer over the gallery, filling its bounds: modal within it, the rest of
-the gallery out of reach while it is open. Over its view's title are the levels it sits
-in, the Manifest's label, and the Collection's over it where the gallery opened on one:
-the level it opened from steps back out to the grid. Under its view, a short strip
-of thumbnails moves on, focus on the view shown, so the arrow keys go on at
+the gallery out of reach while it is open. Its title is the Manifest's label, with Back
+before it, a step back out to the grid, named for where it goes (the Collection, or the
+annotations' page, where the gallery opened on one), and Close after it. Under its view, the view's own label,
+then a short strip of thumbnails that moves on, focus on the view shown, so the arrow keys go on at
 once; or, with `lightboxItems="pager"`, Previous and Next, focus on Close. Beside its view is the information panel, as Default's and Document's is beside theirs: docked where there is room, its toggle on the bar, and sliding over the view where there is not. Escape, Close or
 a press outside its panel closes it too, and focus goes back to the cell. Its Body loads
 as the pointer or focus first reaches the gallery.
@@ -61,6 +74,7 @@ as the pointer or focus first reaches the gallery.
 | ------------------ | ---------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `items`            | `"grid" \| "masonry"`              | `"grid"`                    | The grid, as its Items' layout: square cells, or each picture at its own proportions, in reading order.         |
 | `secondary`        | `"summary" \| "navDate" \| "none"` | `"summary"`                 | The line under each cell's label, where it has one (a Collection's members do): its summary, its date, or none. |
+| `summary`          | `boolean`                          | `true`                      | The resource's summary under the title, cut to two lines with Read more; `false` leaves it out.                 |
 | `size`             | `string`                           | `10rem`                     | A cell's width (sets `--clover-items-size`).                                                                    |
 | `gap`              | `number \| string`                 | The inset                   | The space between cells: pixels, or a CSS length.                                                               |
 | `height`           | `"auto" \| number \| string`       | `"auto"`                    | `auto` grows with the grid; a height (pixels, or a CSS length) holds it, the grid scrolling under the header.   |

@@ -525,18 +525,25 @@ every rule below.
   panel's inner edge (`data-floating`: the start, for a panel over the end of the page).
   A docked panel (`Default`'s, beside the Body) gets no `onClose`: its toggle closes it
   (Mat). A floating one (`Default` on a phone, `Document`) also takes focus when it
-  opens. Any new layout with a panel does the same. `shared/Lightbox.tsx` is not a
+  opens. Any new layout with a panel does the same. Opened on annotations given as the
+  content (an AnnotationPage of tags across Manifests, James Turner's; Mat, 2026-11-01),
+  the Gallery's grid is the annotations, titled by their page, and its lightbox's strip
+  steps through them, Back named for their page (`shared/givenAnnotations.ts`); an
+  AnnotationCollection a Manifest's pages are part of (Cookbook 0309) leaves the grid the
+  Manifest's views. `shared/Lightbox.tsx` is not a
   `<dialog>` (Mat, 2026-10-30: its backdrop "should not extend beyond the bounds of the
   template"): a layer in the Root, `role="dialog"` and `aria-modal`, the rest of the Root
   `inert` while it is open (but its announcer), focus on the view shown in its strip
   (on Close with `lightboxItems="pager"`; Mat, 2026-11-01) and back to the cell, closing
   on Escape (unless a menu or caption inside took it), Close, a press outside its panel
-  or a step out in its trail: the levels over its title, by their labels (the Manifest's,
-  and a Collection's over it), the one the reader came from a button back out (Mat,
-  2026-11-01: "always show the labels … navigate in/out of the levels"). It fills the layout's bounds unless `--clover-template-lightbox-inset`,
+  or Back: a round control before its title, as Close is after it, named for the level it
+  goes back to ("Back to" the Collection's label or the Manifest's; Mat, 2026-11-01: "I do
+  not like the breadcrumb. but we want to retain ability to toggle back obviously to the
+  level above it"). Its title is the Manifest's label, the view's under its Body (Mat,
+  2026-11-01). It fills the layout's bounds unless `--clover-template-lightbox-inset`,
   `-backdrop` and `-radius` give it room; the layout positions it.
 - **What starts hidden loads when first wanted** (Mat, 2026-10-27): the Gallery's lightbox
-  Body (`shared/LightboxBody.tsx`, lazy, a busy box in its place meanwhile) and the
+  Body (`shared/LightboxView.tsx`, lazy, a busy box in its place meanwhile) and the
   information panel where it starts shut or out of sight, Document's and the lightbox's
   (`shared/PanelPart.tsx`, through `usePanelPane`'s `load`: a first press waits for it,
   then opens the pane whole, so focus finds its section). The lightbox's title, Close and

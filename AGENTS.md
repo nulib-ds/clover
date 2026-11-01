@@ -304,12 +304,17 @@ deadline.
     Document and Gallery (`/docs/viewer/default`, `/document`, `/gallery`; Mat, 2026-10-30
     for Gallery, 2026-11-01 for the other two), built as the Viewer's is: a live example
     (`LiveViewerExample`, that template's knobs, with no template switch under its code:
-    there is one template to show; Mat, 2026-11-01), what it lays out and its props' table,
+    there is one template to show; Mat, 2026-11-01), its head as a component's (`TemplateHead`,
+    `PartHead.tsx`; Mat, 2026-11-01): the Viewer in that template as the reader's code
+    writes it and, on the badge, what a page with it loads to its first view, styles
+    included (`templateLoads`, `templateElementLoads` in `docs/lib/sizes.ts`), what it lays out and its props' table,
     then examples (`ViewerExample`, whose `vars` set custom properties on the Viewer's
     root). The Gallery's opens on its catalog's Manifest, switched at the card's top to
-    the Collection it is in (`LiveViewerExample`'s `resources`, a docs example's switch,
-    never the template's; Mat, 2026-11-01: "highlight how gallery can be used in both
-    levels"). An example of what one template alone reads is on its page; the Viewer page
+    the Collection it is in, and to James Turner's AnnotationPage (Mat, 2026-11-01), a path
+    to a file of the site's own (`/annotations/james-turner.json`), fetched from the site
+    it is on (the published one sends no CORS headers) and written in the code as its
+    published address (`LiveViewerExample`'s `resources`, a docs example's switch, never
+    the template's; Mat, 2026-11-01: "highlight how gallery can be used in both levels"). An example of what one template alone reads is on its page; the Viewer page
     keeps what every template, or Default and Document both (Panel layout), read. The
     Viewer page's table for each template lists the same props and links to its page.
   - The Default template's walk-through (`/docs/viewer/default`, region by region, its code
@@ -1401,7 +1406,9 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   - A new template: its word in the Viewer spec's `template`, its name and what it is in
     the spec's description ("Gallery (a grid, …)"), each of its props' descriptions opening
     with its name ("Default and Document: …"), and its sizes measured (`build/sizes.mjs`:
-    `<word>TemplateGzip`, and `<word>TemplateFirstViewGzip`, which the catalog reads).
+    `<word>TemplateGzip`, and `<word>TemplateFirstViewGzip`, which the catalog reads), and
+    as an element (`<word>ElementGzip` in `build/element-size.mjs`'s `PAGES`, Default's being
+    `webComponentsGzip`), which its page's head shows beside React's.
   - A new prop: its spec's attribute is enough; its description opens "Alone:" or "Inside a
     root:" where it is read in one place only. A prop only code can give (a function) goes
     in the spec's `properties`, and a layout leaves it out with a note.

@@ -221,4 +221,10 @@ export const PAGES = [
     "documentElementGzip",
     ["clover-viewer", "src/templates/document/Document.tsx", ...UPGRADER],
   ],
+  // And in the Gallery: its grid, its lightbox loading as it first opens.
+  [
+    "A <clover-viewer> in Gallery",
+    "galleryElementGzip",
+    ["clover-viewer", "src/templates/gallery/Gallery.tsx", ...UPGRADER],
+  ],
 ];

@@ -45,6 +45,26 @@ export const elementLoads = {
   ...inKB(sizes.elementPartsAlone),
 };
 
+/**
+ * What a page with the Viewer in each template loads to its first view, in kB, by the
+ * template's name, for each template's page (Mat, 2026-11-01: "like with components,
+ * include the size of the template"): React's, its styles and the upgrader with it
+ * (`<word>TemplateFirstViewGzip`), and as a `<clover-viewer>`, Preact and the stylesheet
+ * with it. Default's element is the Viewer's own (`webComponentsGzip`).
+ */
+export const templateLoads = {
+  Default: kB(sizes.defaultTemplateFirstViewGzip),
+  Document: kB(sizes.documentTemplateFirstViewGzip),
+  Gallery: kB(sizes.galleryTemplateFirstViewGzip),
+};
+
+export const templateElementLoads: Record<keyof typeof templateLoads, string> =
+  {
+    Default: kB(sizes.webComponentsGzip),
+    Document: kB(sizes.documentElementGzip),
+    Gallery: kB(sizes.galleryElementGzip),
+  };
+
 /** The parts measured alone, with no `Root` around them. */
 export const aloneParts = new Set(Object.keys(sizes.partsAlone));
 

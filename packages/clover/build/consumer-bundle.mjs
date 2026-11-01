@@ -1,7 +1,13 @@
 /*
  * What a consumer's app ships, built as a Vite app builds it for production (Rollup,
- * minified), with React left out. The size budgets and the Viewer's shell test both use
- * it.
+ * minified), with React left out of the count. The size budgets and the Viewer's shell
+ * test both use it.
+ *
+ * React is bundled, in a chunk of its own, as an app bundles it, and that chunk is left
+ * out of what this returns: never counted, but there, so Clover's own chunks reach it as
+ * a real app's do. Left external, as it was until 2026-11-01, they read it by name and
+ * measured a few hundred bytes lighter than a browser fetches them (the Default template
+ * 73,183 B, in an app 73,605 B; `build/first-view.mjs` found it).
  *
  * Vite rather than esbuild: through the package entry, esbuild's code splitting counts a
  * module as reachable from the page by its re-export alone, even once tree shaking has
@@ -14,6 +20,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { gzipSync } from "node:zlib";
 import { build } from "vite";
+
+/** React, as an app bundles it: in a chunk of its own (`first-view.mjs` builds so too). */
+const REACT = /node_modules\/(react|react-dom|scheduler)\//;
 
 /**
  * Bundle `contents` as an app's entry. Resolves to the emitted chunks by file name, and
@@ -34,8 +43,10 @@ export async function bundleAsConsumer(contents) {
         modulePreload: { polyfill: false },
         rollupOptions: {
           input,
-          external: [/^react(-dom)?(\/.*)?$/],
           preserveEntrySignatures: "exports-only",
+          output: {
+            manualChunks: (id) => (REACT.test(id) ? "react" : undefined),
+          },
           // `"use client"` is dropped in a bundle, and Rollup says so per module. An
           // import it cannot find would be left out of the count: fail instead.
           onwarn: (warning) => {
@@ -46,9 +57,10 @@ export async function bundleAsConsumer(contents) {
       },
     });
     const output = (Array.isArray(result) ? result[0] : result).output;
+    // React's chunk left out, so nothing reaches it to count it.
     const chunks = new Map(
       output
-        .filter((item) => item.type === "chunk")
+        .filter((item) => item.type === "chunk" && item.name !== "react")
         .map((chunk) => [chunk.fileName, chunk]),
     );
     const initial = new Set();

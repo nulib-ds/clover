@@ -43,6 +43,7 @@ const ONLY: Record<string, readonly Named[]> = {
   height: ["gallery"],
   gap: ["gallery"],
   secondary: ["gallery"],
+  summary: ["gallery"],
   lightboxItems: ["gallery"],
 };
 

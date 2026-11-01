@@ -13,6 +13,19 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **The Gallery opens annotations given as the content** (an AnnotationPage of tags across
+  Manifests): their page's label heads the grid, a cell for each tag, its region cut from
+  its view; choosing one shows its Manifest in the lightbox, framed on the tag, its strip
+  stepping through the tags and Back named for their page.
+
+- **The Gallery's `summary`** (`summary` on `<clover-viewer>`): `false` leaves out the
+  resource's summary under its title. Shown, it is cut to two lines, with Read more under
+  it where it runs longer.
+
+- **`--clover-template-lightbox-top`.** Under a page's own sticky header, its height holds
+  the Gallery's lightbox below it, so the header never covers the lightbox's title, Back
+  or Close.
+
 - **`<clover-label>` takes `as="label"` and `as="figcaption"`.** Its allowed elements are
   now listed headings first: `h1` to `h6`, then `span`, `label`, `figcaption`, `p`,
   `strong`, `em` and `div`.
@@ -48,6 +61,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **The Gallery** keeps its grid `l` under its header, and its lightbox's Back and Close
+  are clear at rest, taking the accent under the pointer or focused.
+
 - **Every title takes the page's heading styles.** Every template's title (Default's,
   Document's, the Gallery's and its lightbox's), Items' standalone title, the Collection's
   and About's label carry `clover-title`, and their size is the page's for their heading
@@ -65,8 +81,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **The Gallery's lightbox stays in the Gallery's bounds.** It is a modal layer in the
   Root, not a `<dialog>`, whose backdrop covered the whole window: the rest of the Gallery
   is inert while it is open, focus is on the view shown in its strip, and Escape, Close,
-  a press outside the panel or a step out in its trail (the levels over its title) closes
-  it, focus going back to the cell. It fills the Gallery's bounds by default;
+  a press outside the panel or Back (a step out to the grid, named for where it goes)
+  closes it, focus going back to the cell. Its title is the Manifest's label, and the
+  view's label sits under its Body. It fills the Gallery's bounds by default;
   `--clover-template-lightbox-inset`, `--clover-template-lightbox-backdrop` and
   `--clover-template-lightbox-radius` give it room, a backdrop and corners. A page that
   styled `.clover-template-lightbox` as a dialog (its width, its `::backdrop`) styles the
@@ -90,13 +107,15 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   carries (Items' `masonry` loader and styles, `secondary` and `singleItem`, About's label
   measured afresh, the Panel's tab arrows as steps, every title's look a default the page outranks), for the information panel every
   template now shares (`shared/PanelPane.tsx`, in place of Default's and Document's own),
-  and for the Gallery's Collection framing, `height`, `gap`, its lightbox's layer, trail
+  and for the Gallery's Collection framing, `height`, `gap`, its lightbox's layer, Back
   and strip (its view, with the panel's pane, loaded when the reader reaches for the grid).
   In B gzip: the Default template 73,050 → 73,600 and to first view
   95,050 → 95,900; Document 68,450 → 68,900 and 91,300 → 92,250; Gallery
   29,050 → 29,750 and 54,000 → 55,200; `styles.css` 19,050 → 19,200 and `templates.css`
   2,150 → 2,500; the `Viewer` entry 101,800 → 102,550. As web components: a
-  `<clover-viewer>` 122,050 → 122,700, in Document 129,500 → 129,800; a page of four
+  `<clover-viewer>` 122,050 → 122,700, in Document 129,500 → 129,800, and in the Gallery,
+  measured now for its docs page's head, 125,650 (its grid framing
+  annotations given as the content among it); a page of four
   parts 100,300 → 100,750; a layout of containers 118,050 → 118,550; a `<clover-canvas>`
   alone 87,750 → 88,000.
 
@@ -163,6 +182,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   as the others. Each template keeps its own weight.
 
 ### Fixed
+
+- **Items' sizes reach it from an element around it**, as documented:
+  `--clover-items-size`, `--clover-items-height`, `--clover-items-gap` and
+  `--clover-items-lines` set on a template's root or any ancestor, not only on
+  `.clover-items`. The Gallery's `size`, which sets `--clover-items-size` on its root, now
+  sizes its cells.
 
 - **About's thumbnail no longer covers its label.** About measured its label once, as it
   mounted: where the label was drawn again as a new element (its heading level

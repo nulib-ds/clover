@@ -14,7 +14,8 @@
   isolation: isolate;
   display: flex;
   flex-direction: column;
-  gap: var(--clover-space-m);
+  /* Its header `l` over the grid (Mat, 2026-11-01: "increase gap between header and grid"). */
+  gap: var(--clover-space-l);
   padding: var(--clover-inset);
   color: var(--clover-color-primary, #1a1d1e);
 }
@@ -46,9 +47,14 @@
   gap: var(--clover-space-2xs);
 }
 
-/* In the text's own color, not muted: a summary is the resource's own words. */
+/*
+ * In the text's own color, not muted: a summary is the resource's own words. Two lines of
+ * it, Read more under them where it runs longer (Mat, 2026-11-01: "clamp summary on
+ * gallery"), so the grid starts close under the title: Summary's own lines, set.
+ */
 .clover-template-gallery-summary {
   margin: 0;
+  --clover-summary-lines: 2;
 }
 
 /*

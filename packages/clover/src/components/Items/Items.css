@@ -1,23 +1,25 @@
 /*
  * Items: a slider (the default), a list or a grid of thumbnails.
  *
- * Sizes are custom properties, set on `.clover-items` or any ancestor:
+ * Sizes are custom properties, set on `.clover-items` or any ancestor (a template's root:
+ * the Gallery's `size`), their defaults written where each is read, never declared on
+ * `.clover-items`, which would hide an ancestor's value from it:
  *   --clover-items-height  a slider's picture height (default 8rem)
  *   --clover-items-size    a grid column's width (default 10rem)
- *   --clover-items-gap     the space between items (default 0.75rem)
+ *   --clover-items-gap     the space between items (default `m`)
  *   --clover-items-lines   the lines a slider's or grid's title runs to (default 3)
  *
  * The scroll container, its flex row and each item's snap point are set inline (by the
  * component and `useScrollTrack`), so a slider still scrolls without this file.
  */
 .clover-items {
-  --clover-items-height: 8rem;
-  --clover-items-size: 10rem;
-  /* Each item is a group (a picture and its caption): `m` apart, a step over its insides. */
-  --clover-items-gap: var(--clover-space-m);
   /* Room around each item's pictures for their ring: 1px clear, then the ring, 3px. */
   --clover-items-ring-room: 4px;
-  --clover-items-lines: 3;
+  /*
+   * The slider's picture height in use, its default written here once: read on this
+   * element, so a height set on it or on any ancestor still reaches it. Clover's own.
+   */
+  --clover-items-picture-height: var(--clover-items-height, 8rem);
   color: var(--clover-color-primary, #1a1d1e);
 }
 
@@ -52,7 +54,8 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  gap: var(--clover-items-gap);
+  /* Each item is a group (a picture and its caption): `m` apart, a step over its insides. */
+  gap: var(--clover-items-gap, var(--clover-space-m));
 }
 
 /*
@@ -101,7 +104,7 @@
     top: var(--clover-items-ring-room);
     z-index: 1;
     width: var(--clover-space-s);
-    height: var(--clover-items-height);
+    height: var(--clover-items-picture-height);
     background: linear-gradient(
       var(--clover-items-shade),
       rgb(0 0 0 / 0.16),
@@ -158,7 +161,7 @@
   display: grid;
   grid-template-columns: repeat(
     auto-fill,
-    minmax(min(100%, var(--clover-items-size)), 1fr)
+    minmax(min(100%, var(--clover-items-size, 10rem)), 1fr)
   );
 }
 
@@ -323,8 +326,8 @@
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: var(--clover-items-lines);
-  line-clamp: var(--clover-items-lines);
+  -webkit-line-clamp: var(--clover-items-lines, 3);
+  line-clamp: var(--clover-items-lines, 3);
 }
 
 /*
@@ -383,7 +386,7 @@
 .clover-items[data-layout="slider"] .clover-items-picture[data-empty],
 .clover-items[data-layout="slider"] .clover-items-picture img {
   width: auto;
-  height: var(--clover-items-height);
+  height: var(--clover-items-picture-height);
 }
 
 /* Grid: square cells, the picture contained. */
@@ -568,7 +571,7 @@
  */
 :is(button.clover-items-scroll-prev, button.clover-items-scroll-next) {
   position: absolute;
-  top: calc(var(--clover-items-height) / 2);
+  top: calc(var(--clover-items-picture-height) / 2);
   /* Over the shadows at the track's ends. */
   z-index: 2;
   translate: 0 -50%;

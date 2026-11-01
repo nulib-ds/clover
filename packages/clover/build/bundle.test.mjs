@@ -263,8 +263,8 @@ test("a Timeline never loads the image renderer", async () => {
 
 /*
  * A Gallery draws thumbnails until the reader opens one, and Document's panel starts
- * shut: the lightbox's Body and Document's Panel load on demand (`LightboxBody`,
- * `DocumentPanel`), never with the template.
+ * shut: the lightbox's Body and Document's Panel load on demand (`LightboxView`,
+ * `PanelPart`), never with the template.
  */
 test("a Gallery loads its lightbox's Body, and Document its Panel, only on demand", async () => {
   const chunks = await emitted();

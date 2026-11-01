@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useEffect, useRef } from "react";
 
 import * as Clover from "../../parts";
 import type { PanelLayout } from "../../parts";
+import { useGivenAnnotations } from "./givenAnnotations";
 
 /*
  * What it shows under its title (the Body, the thumbnails, the information panel and its
@@ -48,13 +49,17 @@ export interface LightboxProps {
 
 /**
  * The current Canvas in a modal layer over the layout, and only the layout (Mat,
- * 2026-10-30: "backdrop should not extend beyond the bounds of the template"): its label,
- * the Body, and a short strip of thumbnails (Mat, 2026-11-01: "carousel by default") or
- * the pager (with the position). A modal `<dialog>`'s backdrop always covers the whole
- * window, so this is a layer in the Root, a `dialog` to assistive technology: while it is
- * open the rest of the Root is inert, focus is on the view in its strip (on Close with the
- * pager), and Escape, Close, a press on the layer outside the panel or a step out in its
- * trail closes it, focus going back to what opened it.
+ * 2026-10-30: "backdrop should not extend beyond the bounds of the template"): over it,
+ * a step back to the level it opened from, the Manifest's label as its title (Mat,
+ * 2026-11-01: "the Manifest label stay up here in the title and be more obvious as a
+ * heading") and Close; then the Body, the view's label under it (Mat, 2026-11-01: "move
+ * the Canvas/Scene/Timeline label below the item"), and a short strip of thumbnails (Mat,
+ * 2026-11-01: "carousel by default") or the pager (with the position). A modal
+ * `<dialog>`'s backdrop always covers the whole window, so this is a layer in the Root, a
+ * `dialog` to assistive technology, named by its title: while it is open the rest of the
+ * Root is inert, focus is on the view in its strip (on Close with the pager), and Escape,
+ * Close, Back or a press on the layer outside the panel closes it, focus going back to
+ * what opened it.
  * By default it fills the layout's bounds; `--clover-template-lightbox-inset`,
  * `-backdrop` and `-radius` give it room, a backdrop and corners (`Lightbox.css`). The
  * layout positions it and holds its stacking (`position: relative` and `isolation:
@@ -84,10 +89,12 @@ export function Lightbox({
   const close = useRef<HTMLButtonElement>(null);
   const baseId = Clover.useUniqueId().replace(/:/g, "");
   const titleId = `${baseId}-title`;
-  const manifestTitleId = `${baseId}-manifest`;
-  // Named by the Canvas's label, else by the Manifest's, so it always has a name.
-  const canvasLabel = Clover.useLocalized(Clover.useActiveCanvas()?.label);
-  const named = canvasLabel.text ? titleId : manifestTitleId;
+  const viewTitleId = `${baseId}-view`;
+  // Named by its title, the Manifest's label, else by its view's, so it always has a name.
+  const manifestLabel = Clover.useLocalized(Clover.useManifest()?.label);
+  const named = manifestLabel.text ? titleId : viewTitleId;
+  // The grid's annotations, given as the content: the strip steps through them.
+  const given = Boolean(useGivenAnnotations());
   const closing = useRef(onClose);
   closing.current = onClose;
 
@@ -150,19 +157,16 @@ export function Lightbox({
           className="clover-template-lightbox-content"
         >
           <header className="clover-template-lightbox-header">
-            <div className="clover-template-lightbox-heading">
-              <Trail id={baseId} onOut={onClose} />
-              {/* Past h6 no heading; the dialog is named by it either way. */}
-              <Clover.Label
-                of="canvas"
-                as={Clover.titled(headingLevel, titleId).as}
-                id={titleId}
-                className="clover-template-lightbox-title clover-template-title clover-title"
-              />
-            </div>
-            {/* Hidden: a name still reads it, and the content does not repeat it. */}
-            {named === manifestTitleId && (
-              <Clover.Label id={manifestTitleId} hidden />
+            <Back onOut={onClose} />
+            {/* Past h6 no heading; the dialog is named by it either way. */}
+            <Clover.Label
+              as={Clover.titled(headingLevel, titleId).as}
+              id={titleId}
+              className="clover-template-lightbox-title clover-template-title clover-title"
+            />
+            {/* Hidden: a name reads it at once; the view's label under the Body loads later. */}
+            {named === viewTitleId && (
+              <Clover.Label of="canvas" id={viewTitleId} hidden />
             )}
             <button
               ref={close}
@@ -199,6 +203,7 @@ export function Lightbox({
           >
             <LightboxView
               id={baseId}
+              annotations={given}
               items={items}
               headingLevel={headingLevel}
               {...view}
@@ -211,56 +216,55 @@ export function Lightbox({
 }
 
 /**
- * The levels over the view the lightbox shows, by their labels, so opening a view never
- * loses where it sits (Mat, 2026-11-01: "always show the labels and it should be obvious
- * that a user can navigate in/out of the levels"): the Manifest's, and over it, opened
- * through a Collection, the Collection's. The level the reader came in from (the grid's:
- * the Manifest's views, or the Collection's members) is a button that steps back out to
- * it, closing the lightbox with focus back on the cell; the Manifest inside a Collection
- * is the level the lightbox shows, named only. In a `nav` named for a breadcrumb, each
- * a step smaller than the title, the steps apart by a chevron (`Lightbox.css`).
+ * A step back out to the level the lightbox opened from (Mat, 2026-11-01: "I do not like
+ * the breadcrumb. but we want to retain ability to toggle back obviously to the level
+ * above it"): the grid, a Collection's members or a Manifest's views. A round control at
+ * the header's start, as Close is at its end, its caret pointing back (mirrored in a
+ * language written right to left), named for where it goes, "Back to" the Collection's
+ * label, the annotations' page's or the Manifest's; pressed, the lightbox closes, focus
+ * going back to the cell.
  */
-function Trail({ id, onOut }: { id: string; onOut: () => void }) {
+function Back({ onOut }: { onOut: () => void }) {
   const t = Clover.useT();
   const langOf = Clover.useLangOf();
   const collection = Clover.useCloverSelector((state) =>
     state.throughCollection ? state.collection : null,
   );
-  // In the page's language, its `aria-label`; else a hidden element's, carrying `lang`.
-  const nameLang = langOf("templateTrail");
-  const manifest = <Clover.Label as="span" />;
+  // Opened on annotations given as the content, back to them, by their page's label.
+  const set = useGivenAnnotations();
+  const manifest = Clover.useManifest();
+  const above = Clover.useLocalized(
+    (set ? set.label : (collection?.label ?? manifest?.label)) as Parameters<
+      typeof Clover.useLocalized
+    >[0],
+  );
+  const key = above.text ? "templateBackTo" : "templateBack";
+  const label = t(key, { label: above.text });
   return (
-    <nav
-      className="clover-template-lightbox-trail"
-      aria-label={nameLang ? undefined : t("templateTrail")}
-      aria-labelledby={nameLang ? `${id}-trail` : undefined}
+    <button
+      type="button"
+      className="clover-template-lightbox-back"
+      aria-label={label}
+      lang={langOf(key)}
+      onClick={onOut}
     >
-      {nameLang && (
-        <span hidden id={`${id}-trail`} lang={nameLang}>
-          {t("templateTrail")}
-        </span>
-      )}
-      <ol>
-        {collection ? (
-          <>
-            <li>
-              <button type="button" onClick={onOut}>
-                <Clover.Label
-                  as="span"
-                  label={collection.label as Clover.LabelProps["label"]}
-                />
-              </button>
-            </li>
-            <li>{manifest}</li>
-          </>
-        ) : (
-          <li>
-            <button type="button" onClick={onOut}>
-              {manifest}
-            </button>
-          </li>
-        )}
-      </ol>
-    </nav>
+      <svg
+        aria-hidden="true"
+        focusable="false"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M10 3L5 8l5 5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <Clover.Tip label={label} lang={langOf(key)} />
+    </button>
   );
 }

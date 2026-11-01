@@ -406,6 +406,9 @@
   --clover-color-secondary-muted: var(--gray-3);
   --clover-color-secondary-alt: var(--gray-6);
 
+  /* The Gallery's lightbox held under the navbar, never behind it (WCAG 2.4.11). */
+  --clover-template-lightbox-top: var(--nextra-navbar-height, 4rem);
+
   /*
    * No font property. Clover's components inherit their type from whatever contains
    * them, and `html, body` below already sets it.

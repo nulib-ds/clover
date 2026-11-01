@@ -786,7 +786,9 @@ describe("templates", () => {
   it('Gallery: lightboxItems="pager" steps through the views in the lightbox instead', async () => {
     render(<Templates.Gallery iiifContent={bookJson} lightboxItems="pager" />);
     fireEvent.click((await screen.findAllByRole("option"))[1]);
-    const dialog = screen.getByRole("dialog", { name: "Frontispiece" });
+    const dialog = screen.getByRole("dialog", {
+      name: "Simple Manifest - Book",
+    });
     // Its view's code loads with the first open, the pager's with it.
     expect(await within(dialog).findByText(/Item 2 of 3/)).toBeInTheDocument();
     expect(within(dialog).queryByRole("listbox")).toBeNull();
@@ -802,10 +804,20 @@ describe("templates", () => {
       "grid",
     );
     fireEvent.click(options[1]);
-    // The Canvas's label alone: the Manifest's names it only when the Canvas has none.
-    const dialog = screen.getByRole("dialog", { name: "Frontispiece" });
+    // Its title the Manifest's label, which names it; the view's label under the Body.
+    const dialog = screen.getByRole("dialog", {
+      name: "Simple Manifest - Book",
+    });
     expect(
-      within(dialog).getByRole("heading", { name: "Frontispiece" }),
+      within(dialog).getByRole("heading", {
+        level: 3,
+        name: "Simple Manifest - Book",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      await within(dialog).findByText("Frontispiece", {
+        selector: ".clover-template-lightbox-caption",
+      }),
     ).toBeInTheDocument();
     // A short strip of the views by default, the one shown chosen in it.
     const strip = within(dialog).getByRole("listbox", { name: "Items" });
@@ -833,7 +845,9 @@ describe("templates", () => {
     const options = await screen.findAllByRole("option");
     options[1].focus();
     fireEvent.click(options[1]);
-    const dialog = screen.getByRole("dialog", { name: "Frontispiece" });
+    const dialog = screen.getByRole("dialog", {
+      name: "Simple Manifest - Book",
+    });
     expect(dialog).toHaveAttribute("aria-modal", "true");
     // A layer in the Gallery, not the window's top layer: its bounds are the Gallery's.
     const gallery = container.querySelector(".clover-template-gallery")!;
@@ -947,40 +961,48 @@ describe("templates", () => {
     expect(members[1]).toHaveAccessibleName("A letter Text");
     // Choosing one shows that Manifest in the lightbox.
     fireEvent.click(members[1]);
-    const dialog = await screen.findByRole("dialog", { name: "The letter" });
-    // Its levels over its title: the Collection, a step back out, then the Manifest.
-    const trail = await within(dialog).findByRole("navigation", {
-      name: "Breadcrumb",
-    });
-    await waitFor(() =>
-      expect(within(trail).getAllByRole("listitem")).toHaveLength(2),
+    // Its title the Manifest's label; Back steps out to the Collection's members.
+    const dialog = await screen.findByRole("dialog", { name: "A letter" });
+    // (Its panel's About, a level under, names it too, as every template's does.)
+    expect(
+      within(dialog).getByRole("heading", { level: 3, name: "A letter" }),
+    ).toBeInTheDocument();
+    expect(
+      await within(dialog).findByText("The letter", {
+        selector: ".clover-template-lightbox-caption",
+      }),
+    ).toBeInTheDocument();
+    expect(within(dialog).queryByRole("navigation")).toBeNull();
+    fireEvent.click(
+      await within(dialog).findByRole("button", { name: "Back to Shelf" }),
     );
-    expect(within(trail).getByText("A letter")).toBeInTheDocument();
-    fireEvent.click(within(trail).getByRole("button", { name: "Shelf" }));
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("Gallery: the lightbox shows the Manifest over its view, a step back out to the grid", async () => {
+  it("Gallery: the lightbox's title is the Manifest's, Back a step out to the grid", async () => {
     render(<Templates.Gallery iiifContent={bookJson} />);
     const cells = await screen.findAllByRole("option");
     cells[1].focus();
     fireEvent.click(cells[1]);
-    const dialog = screen.getByRole("dialog", { name: "Frontispiece" });
+    const dialog = screen.getByRole("dialog", {
+      name: "Simple Manifest - Book",
+    });
     // Focus on the view shown, in the strip, for the arrow keys to go on from.
     expect(
       within(dialog).getByRole("option", { selected: true }),
     ).toHaveFocus();
-    const trail = within(dialog).getByRole("navigation", {
-      name: "Breadcrumb",
+    // No breadcrumb: Back, named for the grid it goes back to, before the title.
+    expect(within(dialog).queryByRole("navigation")).toBeNull();
+    const back = within(dialog).getByRole("button", {
+      name: "Back to Simple Manifest - Book",
     });
-    const out = within(trail).getByRole("button", {
-      name: "Simple Manifest - Book",
-    });
-    // The title stays the view's, under its level.
     expect(
-      within(dialog).getByRole("heading", { name: "Frontispiece" }),
+      within(dialog).getByRole("heading", {
+        level: 3,
+        name: "Simple Manifest - Book",
+      }),
     ).toBeInTheDocument();
-    fireEvent.click(out);
+    fireEvent.click(back);
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(cells[1]).toHaveFocus();
   });
@@ -994,22 +1016,103 @@ describe("templates", () => {
       }),
     ).toBeInTheDocument();
     fireEvent.click((await screen.findAllByRole("option"))[1]);
-    const dialog = screen.getByRole("dialog", { name: "Frontispiece" });
+    const dialog = screen.getByRole("dialog", {
+      name: "Simple Manifest - Book",
+    });
     expect(
-      within(dialog).getByRole("heading", { level: 4, name: "Frontispiece" }),
+      within(dialog).getByRole("heading", {
+        level: 4,
+        name: "Simple Manifest - Book",
+      }),
     ).toBeInTheDocument();
   });
 
-  it("Gallery: the lightbox is named by the Manifest when its Canvas has no label", async () => {
-    const unlabeled = {
-      ...bookJson,
-      items: bookJson.items.map((canvas) => ({ ...canvas, label: undefined })),
+  it("Gallery: annotations given as the content, a cell for each, opening each in its Manifest", async () => {
+    // James Turner's way: tags on Canvases of two Manifests, in a page of their own.
+    const tag = (
+      n: number,
+      manifest: { id: string; items: { id: string }[] },
+    ) => ({
+      id: `https://example.org/tags.json#${n}`,
+      type: "Annotation",
+      motivation: "tagging",
+      body: { type: "TextualBody", value: `Tag ${n}`, format: "text/plain" },
+      target: {
+        type: "SpecificResource",
+        source: {
+          id: manifest.items[0].id,
+          type: "Canvas",
+          partOf: [{ id: manifest.id, type: "Manifest" }],
+        },
+        selector: {
+          type: "FragmentSelector",
+          conformsTo: "http://www.w3.org/TR/media-frags/",
+          value: "xywh=0,0,100,100",
+        },
+      },
+    });
+    const tags = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/tags.json",
+      type: "AnnotationPage",
+      label: { en: ["Two tags"] },
+      items: [tag(1, bookJson), tag(2, singleJson)],
     };
-    render(<Templates.Gallery iiifContent={unlabeled} />);
+    const manifests: Record<string, unknown> = {
+      [bookJson.id]: bookJson,
+      [singleJson.id]: singleJson,
+    };
+    const fetch = vi.fn(
+      async (url: string) => new Response(JSON.stringify(manifests[url])),
+    );
+    render(<Templates.Gallery iiifContent={tags} request={{ fetch }} />);
+    // Titled by their page, not the first tag's Manifest, and with no summary of its own.
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "Two tags" }),
+    ).toBeInTheDocument();
+    const cells = await screen.findAllByRole("option");
+    expect(cells).toHaveLength(2);
+    expect(cells[1]).toHaveAccessibleName(/Tag 2/);
+    fireEvent.click(cells[1]);
+    // The second tag's Manifest in the lightbox, Back a step out to the tags.
+    const dialog = await screen.findByRole("dialog", {
+      name: "Still image from an opera performance at Indiana University",
+    });
+    expect(
+      within(dialog).getByRole("button", { name: "Back to Two tags" }),
+    ).toBeInTheDocument();
+    // Its strip the tags, the one shown chosen.
+    const strip = await within(dialog).findByRole("listbox", { name: "Items" });
+    expect(
+      within(strip).getByRole("option", { selected: true }),
+    ).toHaveAccessibleName(/Tag 2/);
+  });
+
+  it("Gallery: its summary under the title, two lines with Read more, unless summary is false", async () => {
+    const summarized = { ...bookJson, summary: { en: ["A book of plates."] } };
+    const { unmount } = render(<Templates.Gallery iiifContent={summarized} />);
+    const shown = await screen.findByText("A book of plates.");
+    // Summary's own clamp, its lines set by the template (`Gallery.css`).
+    expect(shown).toHaveClass(
+      "clover-summary",
+      "clover-template-gallery-summary",
+    );
+    unmount();
+    render(<Templates.Gallery iiifContent={summarized} summary={false} />);
+    await screen.findAllByRole("option");
+    expect(screen.queryByText("A book of plates.")).toBeNull();
+  });
+
+  it("Gallery: the lightbox is named by its view when the Manifest has no label", async () => {
+    render(
+      <Templates.Gallery iiifContent={{ ...bookJson, label: undefined }} />,
+    );
     fireEvent.click((await screen.findAllByRole("option"))[1]);
     expect(
-      screen.getByRole("dialog", { name: "Simple Manifest - Book" }),
+      screen.getByRole("dialog", { name: "Frontispiece" }),
     ).toBeInTheDocument();
+    // Back, with nothing to name where it goes, is Back.
+    expect(screen.getByRole("button", { name: "Back" })).toBeInTheDocument();
   });
 
   it("Document: toolbar, thumbnails, a sheet for each view, PageDown, and a sliding panel", async () => {

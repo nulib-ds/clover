@@ -161,6 +161,7 @@ describe("catalog", () => {
       "height",
       "gap",
       "secondary",
+      "summary",
       "lightboxItems",
     ]);
     expect(findTemplate("Document")?.props.map((prop) => prop.prop)).toContain(

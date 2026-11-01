@@ -1,17 +1,20 @@
 # Gallery
 
-A grid framed by what it opens, each cell opening in a lightbox: its label under the
-levels it sits in, the Body to pan and zoom, a short strip of thumbnails to move on (or the
-pager), and the information panel beside it. Opened on a Manifest, the grid is its
+A grid framed by what it opens, each cell opening in a lightbox: the Manifest's label as
+its title, the Body to pan and zoom with the view's label under it, a short strip of
+thumbnails to move on (or the pager), and the information panel beside it. Opened on a Manifest, the grid is its
 views (a spread is one cell, and one view still a grid); opened on a Collection, the Collection's title and summary
-head it and its members are the cells, each showing that Manifest in the lightbox.
+head it and its members are the cells, each showing that Manifest in the lightbox; opened
+on an AnnotationPage of tags across Manifests (`shared/givenAnnotations.ts`), its label
+heads it and its tags are the cells, each showing its Manifest framed on it, the
+lightbox's strip stepping through the tags.
 
 The lightbox is a modal layer inside the Gallery, filling its bounds, not a window-wide
-`<dialog>`: the rest of the Gallery is out of reach while it is open. Over its title, the
-levels it sits in (the Manifest's label, and a Collection's), the one it opened from a
-step back out. Focus is on the view shown in its strip of thumbnails (on Close with the
-pager). Escape, Close, a press outside its panel or the step out closes it, and focus
-returns to the cell.
+`<dialog>`: the rest of the Gallery is out of reach while it is open. Before its title,
+Back, a step out to the grid, named for where it goes ("Back to" the Collection, or the
+Manifest); after it, Close. Focus is on the view shown in its strip of thumbnails (on
+Close with the pager). Escape, Close, Back or a press outside its panel closes it, and
+focus returns to the cell.
 
 ```jsx
 import Viewer from "@nulib/clover";
@@ -31,6 +34,7 @@ import "@nulib/clover/templates.css";
 | ------------------ | --------------------------- | ------------------------------------------------------------------------------ |
 | `items`            | `"grid"`                    | The grid, as its Items' layout: `grid` (square cells) or `masonry`.            |
 | `secondary`        | `"summary"`                 | The line under each cell's label: `summary`, `navDate` or `none`.              |
+| `summary`          | `true`                      | The summary under the title, two lines with Read more; `false` leaves it out.  |
 | `size`             | `10rem`                     | A grid cell's width (sets `--clover-items-size`).                              |
 | `gap`              | The inset                   | The space between cells: pixels, or a CSS length.                              |
 | `height`           | `"auto"`                    | `auto` grows with the grid; a height holds it, the grid scrolling under it.    |
@@ -46,7 +50,9 @@ import "@nulib/clover/templates.css";
 
 The lightbox fills the Gallery by default. `--clover-template-lightbox-inset`,
 `--clover-template-lightbox-backdrop` and `--clover-template-lightbox-radius` give it room
-around its panel, a backdrop there and corners.
+around its panel, a backdrop there and corners. Under a page's own sticky header,
+`--clover-template-lightbox-top`, that header's height, holds the lightbox below it, so
+the header never covers its title, Back or Close.
 
 The lightbox's Body loads its code when the lightbox first opens, or as a
 pointer or focus first comes to the gallery, so the page loads only the thumbnails.

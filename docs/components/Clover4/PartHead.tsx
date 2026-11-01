@@ -1,7 +1,13 @@
 import React from "react";
 
 import { Flavored, PartName } from "docs/components/Flavored";
-import { aloneParts, elementLoads, partLoads } from "docs/lib/sizes";
+import {
+  aloneParts,
+  elementLoads,
+  partLoads,
+  templateElementLoads,
+  templateLoads,
+} from "docs/lib/sizes";
 
 /**
  * A size set as the homepage's figures are (`Home.module.css`'s `.figure`): the number,
@@ -65,6 +71,56 @@ export function PartHead({ part }: { part: keyof typeof partLoads }) {
                   ? "loaded by a page with it alone to first view, styles included, gzipped"
                   : "added to a page with a <clover-root>, styles included, gzipped"
               }
+            />
+          }
+        />
+      </span>
+    </p>
+  );
+}
+
+/**
+ * A template's page's head, as a component's (`PartHead`; Mat, 2026-11-01: "like with
+ * components, include the size of the template in the top right. style it the same"):
+ * the Viewer in that template as the reader's code writes it, and on the badge what a
+ * page with it loads to its first view, its styles with it, as that technology measures
+ * it (`templateLoads`, `templateElementLoads`).
+ *
+ * ```mdx
+ * <div className="docs-title-row">
+ *
+ * # Gallery
+ *
+ * <TemplateHead template="Gallery" />
+ *
+ * </div>
+ * ```
+ */
+export function TemplateHead({
+  template,
+}: {
+  template: keyof typeof templateLoads;
+}) {
+  return (
+    <p className="docs-part-head">
+      <span className="docs-part-head-name">
+        <Flavored
+          react={`<Viewer template={${template}} />`}
+          webComponents={`<clover-viewer template="${template.toLowerCase()}">`}
+        />
+      </span>
+      <span className="docs-part-badge">
+        <Flavored
+          react={
+            <Figure
+              value={templateLoads[template]}
+              caption={`loaded by a page with the Viewer in ${template} to first view, styles included, gzipped`}
+            />
+          }
+          webComponents={
+            <Figure
+              value={templateElementLoads[template]}
+              caption={`loaded by a page with a <clover-viewer> in ${template} to first view, styles included, gzipped`}
             />
           }
         />

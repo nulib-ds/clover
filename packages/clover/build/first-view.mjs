@@ -154,6 +154,13 @@ const ELEMENTS = [
     { template: true },
   ],
   [
+    "<clover-viewer> in Gallery",
+    sizes.galleryElementGzip,
+    "index.mjs",
+    `<clover-viewer template="gallery" iiif-content="${IMAGE}"></clover-viewer>`,
+    { template: true },
+  ],
+  [
     "<clover-root> and <clover-label>",
     sizes.labelPageGzip,
     "index.mjs",
@@ -176,9 +183,13 @@ const ELEMENTS = [
   ]),
 ];
 
-/** Never counted: engines others make, loaded on demand; a part's, the upgrader too. */
+/**
+ * Never counted: engines others make, loaded on demand; a part's, the upgrader too, and
+ * the upgrade step that loads with it (`core/upgrade.ts`, with `keep-fragments.ts`, a
+ * chunk of its own since 2026-10-30), which a Presentation 4 resource needs neither of.
+ */
 const THEIRS = /^(maplibre-gl|maplibre-gl-worker|worker|hls)-/;
-const UPGRADER = /^(upgrader|keep-fragments)-/;
+const UPGRADER = /^(upgrader|upgrade|keep-fragments)-/;
 // What `sizes.mjs` measures as `gzipSync(…, { level: 9 })`.
 const gzip = (code) => gzipSync(code, { level: 9 }).length;
 // Gzip does not add up file by file: a few hundred bytes either way are its rounding.

@@ -7,6 +7,7 @@ import type {
   PanelLayout,
   RootProps,
 } from "../../parts";
+import { useGivenAnnotations } from "../shared/givenAnnotations";
 import { Lightbox, preloadLightbox } from "../shared/Lightbox";
 
 export type GalleryProps = Omit<RootProps, "children"> & {
@@ -32,6 +33,11 @@ export type GalleryProps = Omit<RootProps, "children"> & {
    * `summary`, its `navDate`, or `none`. Default `summary`.
    */
   secondary?: ItemsProps["secondary"];
+  /**
+   * The resource's summary under the title, cut to two lines with Read more under it where
+   * it runs longer. Default `true`; `false` leaves it out, the title alone over the grid.
+   */
+  summary?: boolean;
   /**
    * How the lightbox moves on from the view it shows: a short strip of thumbnails
    * (`slider`, Items' carousel), or `pager`, Previous, the position and Next. Default
@@ -89,6 +95,7 @@ export function Gallery({
   gap,
   items = "grid",
   secondary,
+  summary = true,
   lightboxItems = "slider",
   panel = true,
   defaultPanelOpen = true,
@@ -131,6 +138,7 @@ export function Gallery({
         // Its grid is a grid or masonry; anything else (an element's attribute) a grid.
         layout={items === "masonry" ? "masonry" : "grid"}
         secondary={secondary}
+        summary={summary}
         onOpen={() => setOpen(true)}
       />
       <Lightbox
@@ -153,11 +161,13 @@ function GalleryGrid({
   title,
   layout,
   secondary,
+  summary,
   onOpen,
 }: {
   title: ReturnType<typeof Clover.titled>;
   layout: NonNullable<GalleryProps["items"]>;
   secondary: GalleryProps["secondary"];
+  summary: boolean;
   onOpen: () => void;
 }) {
   // Opened as a Collection, the Root shows a member at a time: the grid is the
@@ -165,31 +175,43 @@ function GalleryGrid({
   const collection = Clover.useCloverSelector((state) =>
     state.throughCollection ? state.collection : null,
   );
+  /*
+   * Opened on annotations (an AnnotationPage of tags across Manifests, as James Turner's;
+   * Mat, 2026-11-01), the Root shows the Manifest of the one picked: the grid is the
+   * annotations, a cell for each, titled by their page. Not an AnnotationCollection a
+   * Manifest's pages are part of (Cookbook 0309): that Manifest's views are its grid.
+   */
+  const set = useGivenAnnotations();
   return (
     <>
       <header className="clover-template-gallery-header">
         <Clover.Label
           as={title.as}
           className="clover-template-gallery-title clover-template-title clover-title"
-          label={collection?.label}
+          label={
+            (set ? set.label : collection?.label) as Clover.LabelProps["label"]
+          }
           {...title.title}
         />
-        <Clover.Summary
-          className="clover-template-gallery-summary"
-          value={collection?.summary}
-        />
+        {/* Annotations have no summary of their own: the Manifest's is not theirs. */}
+        {summary && !set && (
+          <Clover.Summary
+            className="clover-template-gallery-summary"
+            value={collection?.summary}
+          />
+        )}
       </header>
       {/*
        * Choosing a member loads it, which the lightbox's Body shows. A "Loading…" here
        * would push the grid down and back up as it came and went: once the Collection
        * is in, the Status only announces.
        */}
-      <Clover.Status loading={collection ? false : undefined} />
+      <Clover.Status loading={collection || set ? false : undefined} />
       {/* A grid even of one view: the gallery is its items, and one still opens. */}
       <Clover.Items
         layout={layout}
         secondary={secondary}
-        of={collection ? "members" : "views"}
+        of={set ? "annotations" : collection ? "members" : "views"}
         singleItem
         onSelect={onOpen}
       />

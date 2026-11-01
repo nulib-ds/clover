@@ -89,6 +89,14 @@ function useResource(key: string) {
       setUrl(key);
       return;
     }
+    /*
+     * A file of this site's own, by its path, from the site it is on: the published site
+     * sends no CORS headers, so `npm run dev` could not read its copy there.
+     */
+    if (key.startsWith("/")) {
+      setUrl(new URL(`${basePath}${key}`, location.origin).href);
+      return;
+    }
     const resource = resources.find((item) => item.key === key);
     if (!resource) return;
     const address = resource.mock ? mock(resource.resource) : resource.resource;
