@@ -94,25 +94,31 @@ export interface ContentStateOutput {
 }
 
 /**
- * Where the reader is, as a content state: the Canvas within its Manifest, and the
- * visible region (`xywh=`) or the media time (`t=`) when there is one. Regions are
- * rounded to whole pixels.
+ * Where the reader is, as a content state: the Canvas (or Presentation 4's Timeline or
+ * Scene, by its `type`) within its Manifest, and the visible region (`xywh=`) or the
+ * media time (`t=`) when there is one. Regions are rounded to whole pixels. A Canvas
+ * shown on its own, outside a Manifest (one made around it carries its id, `loneCanvas`),
+ * is named without a `partOf`.
  */
 export function buildContentState({
   manifestId,
   canvasId,
+  type = "Canvas",
   region,
   time,
 }: {
-  manifestId: string;
+  manifestId?: string | null;
   canvasId: string;
+  type?: string;
   region?: { x: number; y: number; w: number; h: number } | null;
   time?: number | null;
 }): ContentStateOutput {
   const source = {
     id: canvasId,
-    type: "Canvas",
-    partOf: [{ id: manifestId, type: "Manifest" }],
+    type,
+    ...(manifestId && manifestId !== canvasId
+      ? { partOf: [{ id: manifestId, type: "Manifest" }] }
+      : {}),
   };
   const fragment =
     time != null && time > 0
@@ -121,7 +127,8 @@ export function buildContentState({
         ? `xywh=${[region.x, region.y, region.w, region.h].map(Math.round).join(",")}`
         : null;
   const json = {
-    "@context": "http://iiif.io/api/presentation/3/context.json",
+    // A Timeline and a Scene are Presentation 4's: Presentation 3 knows only the Canvas.
+    "@context": `http://iiif.io/api/presentation/${type === "Canvas" ? 3 : 4}/context.json`,
     id: `${canvasId}#content-state`,
     type: "Annotation",
     motivation: ["contentState"],

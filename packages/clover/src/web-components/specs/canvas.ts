@@ -8,6 +8,18 @@ export const READY = {
   "clover-ready": { prop: "onReady", detail: ["handle"], keeps: "handle" },
 } as const;
 
+/** Where it is, as a content state, as it changes: `{ json, encoded }`, as a root's. */
+export const CONTENT_STATE = {
+  "clover-content-state-change": {
+    prop: "onContentStateChange",
+    detail: "first",
+  },
+} as const;
+
+/** The content state's detail, as `<clover-root>`'s. */
+export const CONTENT_STATE_DETAIL =
+  "{ json: Record<string, unknown>; encoded: string }";
+
 /**
  * `<clover-canvas>`: Clover's renderer for images, video and sound. Alone, it draws what
  * it is given (`iiif-content`, `src`, or Canvases as a property); inside a
@@ -24,7 +36,7 @@ export const canvas: ElementSpec = {
     language: { prop: "language", type: "string" },
     "high-contrast": { prop: "highContrast", type: "boolean" },
     controls: { prop: "controls", type: "boolean" },
-    "more-controls": { prop: "moreControls", type: ["auto", "always"] },
+    "collapse-controls": { prop: "collapseControls", type: ["auto", "always"] },
     navigator: { prop: "navigator", type: "boolean" },
     placeholder: { prop: "placeholder", type: "boolean" },
     "viewing-direction": {
@@ -49,6 +61,7 @@ export const canvas: ElementSpec = {
   ],
   events: {
     ...READY,
+    ...CONTENT_STATE,
     "clover-annotation-select": { prop: "onAnnotationSelect", detail: ["id"] },
     "clover-annotation-active": { prop: "onAnnotationActive", detail: ["id"] },
     "clover-caption-change": { prop: "onCaptionChange", detail: ["caption"] },
@@ -230,9 +243,9 @@ export const canvasDocs: ElementDocs = {
       description: '"false" leaves out the controls over the Body.',
       default: "true",
     },
-    "more-controls": {
+    "collapse-controls": {
       description:
-        "When the view's controls (zoom, the turns, reset, full screen) wait behind More, at the end of the controls' one row: auto, only where the row cannot hold them all; always, wherever there are any. Pressed, More opens a tray of them beside the rest.",
+        "When the view's controls (zoom, the turns, reset, full screen) collapse behind one button, at the end of the controls' one row, so the row fits any width and leaves the media more room: auto, only where the row cannot hold them all; always, wherever there are any. Pressed, the button opens a tray of them beside the rest.",
       default: "auto",
     },
     navigator: {
@@ -285,6 +298,11 @@ export const canvasDocs: ElementDocs = {
   },
   events: {
     "clover-ready": handleDocs.event,
+    "clover-content-state-change": {
+      detail: CONTENT_STATE_DETAIL,
+      description:
+        "Where it is, as a IIIF content state, as it changes: the Canvas within its Manifest, and the region in view or the media's time. Only for a Canvas loaded (iiif-content), handed as a property, or the root's.",
+    },
     "clover-annotation-select": {
       detail: "{ id: string | null }",
       description:

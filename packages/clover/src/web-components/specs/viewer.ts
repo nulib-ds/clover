@@ -31,7 +31,7 @@ export const viewer: ElementSpec = {
     "sidebar-open": { prop: "defaultSidebarOpen", type: "boolean" },
     "storage-key": { prop: "storageKey", type: "string" },
     fill: { prop: "fill", type: "boolean" },
-    "more-controls": { prop: "moreControls", type: ["auto", "always"] },
+    "collapse-controls": { prop: "collapseControls", type: ["auto", "always"] },
     size: { prop: "size", type: "string" },
     height: { prop: "height", type: "string" },
     gap: { prop: "gap", type: "string" },
@@ -145,9 +145,9 @@ export const viewerDocs: ElementDocs = {
         "Default: as tall as the box it is in, the Body taking what the header and the thumbnails leave.",
       default: "false",
     },
-    "more-controls": {
+    "collapse-controls": {
       description:
-        "Default, Document and Gallery: when the Body's view controls (zoom, the turns, reset, full screen) wait behind More, the Gallery's in its lightbox: auto, only where the row cannot hold them all; always, wherever there are any.",
+        "Default, Document and Gallery: when the Body's view controls (zoom, the turns, reset, full screen) collapse behind one button, the Gallery's in its lightbox: auto, only where the row cannot hold them all; always, wherever there are any, leaving the media more room.",
       default: "auto",
     },
     size: {
@@ -217,7 +217,7 @@ export const viewerDocs: ElementDocs = {
     "clover-content-state-change": {
       detail: "{ json: Record<string, unknown>; encoded: string }",
       description:
-        "The current view, as a IIIF content state, each time it settles.",
+        "The current view, as a IIIF content state, as it changes: at most every 100ms while it moves, and always its last place.",
     },
   },
 };

@@ -13,11 +13,23 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- **`moreControls`, on Canvas, Body and the templates.** Where a Canvas's view controls
-  (zoom in and out, the two rotations, reset, full screen) wait behind More: `"auto"`, the
-  default, only where the controls' one row cannot hold them all; `"always"`, however
-  wide the Body is. The Default, Document and Gallery templates hand it to their Body (the
-  Gallery's in its lightbox). As web components, `more-controls` on `<clover-canvas>`,
+- **`onContentStateChange` on Body, Canvas, Timeline and Scene**, as Root and the Viewer
+  have it: where each is, as a IIIF content state, as the annotation (`json`) and
+  encoded for a URL (`encoded`). Every one, Root's and the Viewer's too, now reports as
+  the view changes, at most every 100ms while it moves and always its last place,
+  where it waited 300ms after the view settled. A Body reports its Root's view,
+  whatever draws it; a Canvas or Timeline its Canvas within its Manifest, and the region
+  in view or the media's time, on its own (`iiifContent`, or `canvases` handed to it) or
+  in a Root; a Scene the Scene within its Manifest. As web components,
+  `clover-content-state-change` on `<clover-body>`, `<clover-canvas>`,
+  `<clover-timeline>` and `<clover-scene>`.
+
+- **`collapseControls`, on Canvas, Body and the templates.** When a Canvas's view controls
+  (zoom in and out, the two rotations, reset, full screen) collapse behind one button, so
+  the controls' one row fits any width and the media has more room: `"auto"`, the
+  default, only where the row cannot hold them all; `"always"`, however wide the Body
+  is. The Default, Document and Gallery templates hand it to their Body (the
+  Gallery's in its lightbox). As web components, `collapse-controls` on `<clover-canvas>`,
   `<clover-body>` and `<clover-viewer>`.
 
 - **The Gallery opens annotations given as the content** (an AnnotationPage of tags across
@@ -68,6 +80,23 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **`--clover-canvas-wash` is now `--clover-canvas-background`**, on `.clover-canvas`,
+  default `#0001`, and black behind a video. The Styling page shows setting it apart for video and images,
+  by `data-media`.
+- **A Canvas's `data-media` is its painting body's `type`**, lowercased, as the resource
+  writes it (`image`, `video`, `sound`…), on every Canvas, a picture's too (it was `video`
+  or `audio`, and none for a picture). `data-recording` marks one that plays a recording.
+
+- **A recording's player is laid out as a video is.** Its artwork (never wider than
+  12rem) and, beside it, its title (1rem, bold) are one block in its middle, which
+  nothing moves; its transport and captions are the Canvas's own, along its foot; its
+  annotations on their time are along its top, at an annotation label's size, ringed in
+  the accent, their page's label read but not shown; its ground is darker
+  (its artwork, blurred, under 86% of the controls' fill, 72% before); and its chapters
+  are in the transport's Chapters menu alone, no longer listed under a tall player
+  (`.clover-canvas-player-chapters` is gone). Captions everywhere take their size from
+  `--clover-cue-size`, set by the Body's width as before.
+
 - **A Canvas's controls stay on one row.** On a narrow Body they no longer wrap onto more
   rows. The view's controls come first (zoom in and out, the two rotations, reset and
   full screen), then the Canvas's own (its place, annotations and About, at the row's
@@ -93,11 +122,21 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and "Close image viewer" as before. A video's Play, in the middle of its still, is as it
   was.
 
-- **A Canvas's controls stay in sight, for now,** while their design is reviewed: they no
-  longer fade after a pause, nor wait for a tap on the picture on a touch screen, and a
-  Canvas reads no `options.hideDelay` meanwhile. Over an image, no dark wash lies behind
-  them now, their own fill enough; over a video or sound, it does. A Timeline's and a
-  Scene's still come and go.
+- **A picture's controls stay in sight, while a video's come and go.** Over an image,
+  they no longer fade after a pause, nor wait for a tap on the picture on a touch
+  screen, and no dark wash lies behind them, their own fill enough. Over a video they
+  fade after a pause (`options.hideDelay`), as a Timeline's and a Scene's do, a paused
+  Play staying in sight and Pause going with the rest; no wash at the top, only the
+  transport's at the bottom.
+- **A video opened from its placeholder has no Close player**: Play in the middle of its
+  still opens it, and it plays on. The `playerClose` string is gone.
+- **A recording's Chapters are a control at the top**, left of its Annotations, its menu
+  drawn as theirs is: each chapter with its start, the one playing checked and its
+  picture under it. The transport no longer has a Chapters menu; its seek bar still
+  marks them, and it names the one playing.
+- **A lone video can fill its Body.** A control left of Full screen, "Fill frame", fills
+  the Body with the video's middle, and, pressed again, "Fit to frame", shows it whole,
+  as it opens; centered either way, and kept as the Body resizes.
 
 - **The Gallery** keeps its grid `l` under its header, and its lightbox's Back and Close
   are clear at rest, taking the accent under the pointer or focused.
@@ -223,6 +262,27 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   missed on a slow connection. Layouts whose panes sit beside the page still never load
   it.
 
+- **Size budgets raised for this round's work** (`build/size-budget.json`, each the
+  measured size and about 250 B more): the content state on Body, Canvas, Timeline and
+  Scene, the Canvas's `data-media` from its body's type and `data-recording`, the
+  controls collapsed behind one button, and the player laid out as a video add about
+  0.2 to 0.8 kB. Canvas alone to 40.15 kB initial (from 39.4) and 46.45 to first view
+  (from 45.8), Timeline to 26.15 and 45.3, Scene to 16.95 and 27.3, Map to first view
+  25.25; the Viewer with Default to 74.9 (from 74.25), Document 70.05, Gallery 30.45;
+  the elements' pages 0.4 to 0.9 kB each (`<clover-viewer>` 124.05, its own entry
+  103.9). The Viewer with Default to first view to 97.3 (from 97.0; it measures 97.02).
+  A video's controls coming and going load with video alone (`ControlsFade`), so a
+  picture's page carries none of that code.
+  Then the Chapters control at the top (its menu loaded once it shows) and a video's
+  fit add about 0.4 to 0.5 kB more (Canvas alone to 40.95 kB initial, the Viewer with
+  Default to 97.8 to first view), the fit's framing with the video's own code; a
+  Timeline, which loads that code at once, to 47.0 to first view.
+  The controls' collapse button and tray (`ImageControls`, `More` before) now load only
+  where the row cannot hold the view's controls, or where `collapseControls` is
+  `"always"`, so a first view at most widths fetches none of it (about 2.3 kB), and the
+  stated sizes match what a browser fetches; the measuring that decides it is counted in
+  every page, about 0.25 kB (the Viewer with Default to 98.3 kB to first view).
+
 - **Size budgets raised for the phone work above** (`build/size-budget.json`, each the
   measured size and about 250 B more): the drag's preloading, the safe areas, the small
   screen's insets (the Panel's, the Body's controls', the templates' edges), the header's
@@ -241,6 +301,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   as the others. Each template keeps its own weight.
 
 ### Fixed
+
+- **A content state names a Timeline or a Scene by its own type**, in Presentation 4's
+  context, rather than as a Canvas; and a Canvas shown on its own, outside a Manifest, is
+  named without a `partOf` (it named itself as its Manifest).
 
 - **A Canvas's annotations stay clear of its controls.** A hotspot's popover, its
   annotation's text, is kept under the controls' row and above a recording's transport,

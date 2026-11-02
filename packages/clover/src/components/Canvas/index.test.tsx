@@ -25,6 +25,8 @@ import { initCloverI18n } from "../../i18n";
 import { IdPrefixContext } from "../../ui/useUniqueId";
 import { CanvasRenderer } from "../../lib/renderer";
 import { Root } from "../Root/Root";
+import { Body } from "../Body/Body";
+import { decodeContentState } from "../../core/content-state-reader";
 import { stubViewport } from "./testing/viewport";
 
 // Published fixtures, upgraded to Presentation 4 as Clover holds them.
@@ -94,7 +96,7 @@ const loaded = () =>
       import("./AnnotationState"),
       import("./AnnotationMenu"),
       import("./ChoiceMenu"),
-      import("./More"),
+      import("./ImageControls"),
     ]);
   });
 
@@ -173,6 +175,91 @@ describe("Canvas", () => {
         ).toBeInTheDocument(),
       { timeout: 3000 },
     );
+  });
+
+  describe("onContentStateChange", () => {
+    afterEach(() => vi.useRealTimers());
+
+    /** The camera moves for a while, then settles, and the content state is read. */
+    const settle = async () => {
+      for (let frame = 0; frame < 10; frame++) act(() => listeners.viewport());
+      await act(() => vi.advanceTimersByTimeAsync(400));
+    };
+
+    // Loaded alone: the Canvas within the Manifest it loaded, as an object and encoded.
+    it("reports where it is, alone, once it settles", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const onContentStateChange = vi.fn();
+      render(
+        <Canvas
+          iiifContent={bookJson as never}
+          onContentStateChange={onContentStateChange}
+        />,
+      );
+      await waitFor(() => expect(renderer.setImages).toHaveBeenCalled(), {
+        timeout: 3000,
+      });
+      await open();
+      await settle();
+      expect(onContentStateChange).toHaveBeenCalledTimes(1);
+      const [{ json, encoded }] = onContentStateChange.mock.lastCall!;
+      expect(json.target).toMatchObject({
+        type: "SpecificResource",
+        source: {
+          id: bookJson.items[0].id,
+          type: "Canvas",
+          partOf: [{ id: bookJson.id, type: "Manifest" }],
+        },
+        selector: { value: expect.stringMatching(/^xywh=/) },
+      });
+      expect(decodeContentState(encoded)).toEqual(json);
+      // Nothing more while it holds still.
+      await settle();
+      expect(onContentStateChange).toHaveBeenCalledTimes(1);
+    });
+
+    it("names a Canvas loaded on its own without a Manifest", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const onContentStateChange = vi.fn();
+      render(
+        <Canvas
+          iiifContent={bookJson.items[1] as never}
+          onContentStateChange={onContentStateChange}
+        />,
+      );
+      await waitFor(() => expect(renderer.setImages).toHaveBeenCalled(), {
+        timeout: 3000,
+      });
+      await open();
+      await settle();
+      const [{ json }] = onContentStateChange.mock.lastCall!;
+      expect(json.target.source).toEqual({
+        id: bookJson.items[1].id,
+        type: "Canvas",
+      });
+    });
+
+    // In a Root, a Body reports the Root's view, and hands it to no part to report again.
+    it("reports the Root's view from a Body, once", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      const onContentStateChange = vi.fn();
+      render(
+        <Root iiifContent={bookJson as never}>
+          <Body onContentStateChange={onContentStateChange} />
+        </Root>,
+      );
+      await waitFor(() => expect(renderer.setImages).toHaveBeenCalled(), {
+        timeout: 3000,
+      });
+      await open();
+      await settle();
+      expect(onContentStateChange).toHaveBeenCalledTimes(1);
+      const [{ json }] = onContentStateChange.mock.lastCall!;
+      expect(json.target.source).toMatchObject({
+        id: bookJson.items[0].id,
+        partOf: [{ id: bookJson.id, type: "Manifest" }],
+      });
+    });
   });
 
   // Its own annotations, as a Canvas on its own carries them: drawn where they target.
@@ -1587,12 +1674,9 @@ describe("Canvas", () => {
       ).toBeInTheDocument();
       // Playback starts in an effect once the element exists, which can trail the Body.
       await vi.waitFor(() => expect(play).toHaveBeenCalled());
-      // The toggle is the close control in the top right now, named for the player.
-      const close = screen.getByRole("button", { name: "Close player" });
-      expect(close).toHaveAttribute("data-button", "placeholder");
-      expect(close.querySelector(".clover-tip")).toHaveTextContent(
-        "Close player",
-      );
+      // Open, it plays on: no control takes it back to its still (Mat, 2026-11-01).
+      expect(screen.queryByRole("button", { name: "Close player" })).toBeNull();
+      expect(document.querySelector('[data-button="placeholder"]')).toBeNull();
       play.mockRestore();
     });
 
@@ -2005,7 +2089,7 @@ describe("Canvas", () => {
 
     it("puts the view's controls behind More always, where asked, room or not", async () => {
       const [natural] = metadataAnywhere.items as any[];
-      render(<Canvas canvases={[natural]} moreControls="always" />);
+      render(<Canvas canvases={[natural]} collapseControls="always" />);
       await loaded();
       resize(400);
       expect(inRow()).toEqual(["more", "information"]);
@@ -2029,7 +2113,7 @@ describe("Canvas", () => {
       render(
         <Canvas
           canvases={[natural]}
-          moreControls="always"
+          collapseControls="always"
           controls={{
             zoom: false,
             rotation: false,

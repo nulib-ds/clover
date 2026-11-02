@@ -113,12 +113,13 @@ the `Items` that list the views, a `Label`, the `Panel`, and the rest
 ([Composing](/docs/composing)). Each names itself with one `clover-*` class on its root
 and says what it is doing in `data-*` attributes, for your own CSS to select. A few:
 
-| Part   | Class           | State           | Values                                                                       |
-| ------ | --------------- | --------------- | ---------------------------------------------------------------------------- |
-| Body   | `clover-body`   | `data-renderer` | <span data-code-flavor="both">`canvas`, `timeline`, `scene`, `custom`</span> |
-| Canvas | `clover-canvas` | `data-media`    | `video`, `audio`; none for a picture                                         |
-| Items  | `clover-items`  | `data-layout`   | `slider`, `list`, `grid`, `masonry`, `pager`                                 |
-| Panel  | `clover-panel`  | `data-layout`   | `tabs`, `accordion`                                                          |
+| Part   | Class           | State            | Values                                                                       |
+| ------ | --------------- | ---------------- | ---------------------------------------------------------------------------- |
+| Body   | `clover-body`   | `data-renderer`  | <span data-code-flavor="both">`canvas`, `timeline`, `scene`, `custom`</span> |
+| Canvas | `clover-canvas` | `data-media`     | Its painting body's `type`, lowercased: `image`, `video`, `sound`…           |
+| Canvas | `clover-canvas` | `data-recording` | Present while it plays a recording, video or sound                           |
+| Items  | `clover-items`  | `data-layout`    | `slider`, `list`, `grid`, `masonry`, `pager`                                 |
+| Panel  | `clover-panel`  | `data-layout`    | `tabs`, `accordion`                                                          |
 
 ```css
 .clover-items[data-layout="grid"] {
@@ -317,15 +318,35 @@ On `.clover-canvas`, but for `--clover-body-height`, which you can set on Body o
 element that contains it. Clover sets the controls' durations to `0s` where reduced motion is
 preferred: set yours inside `@media (prefers-reduced-motion: no-preference)`.
 
-| Variable                         | Default                                                                                                   | What it sets                                                   |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `--clover-body-height`           | `60vh` (Default `min(65svh, 40rem)`, the lightbox `min(70svh, 48rem)`, `vh` where a browser has no `svh`) | The Body's height                                              |
-| `--clover-canvas-wash`           | `#0001`                                                                                                   | The Body's ground, a wash over the page's, kept in full screen |
-| `--clover-canvas-inset`          | `0px` (Document: `var(--clover-inset)`)                                                                   | A margin around the picture at home                            |
-| `--clover-canvas-controls-inset` | `var(--clover-inset)` (on a screen under 31rem: `var(--clover-space-m)`)                                  | How far the controls sit in from the Body's edges              |
-| `--clover-controls-leave`        | `180ms cubic-bezier(0.4, 0, 1, 1)`                                                                        | How the controls leave when idle                               |
-| `--clover-controls-enter`        | `340ms cubic-bezier(0.34, 1.56, 0.64, 1)`                                                                 | How they come back                                             |
-| `--clover-controls-tuck`         | `var(--clover-space-s)`                                                                                   | How far they tuck toward their edge as they leave              |
+| Variable                         | Default                                                                                                   | What it sets                                            |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `--clover-body-height`           | `60vh` (Default `min(65svh, 40rem)`, the lightbox `min(70svh, 48rem)`, `vh` where a browser has no `svh`) | The Body's height                                       |
+| `--clover-canvas-background`     | `#0001`, a wash over the page's; behind a video, black (`#000`)                                           | The Canvas's background, any color, kept in full screen |
+| `--clover-canvas-inset`          | `0px` (Document: `var(--clover-inset)`)                                                                   | A margin around the picture at home                     |
+| `--clover-canvas-controls-inset` | `var(--clover-inset)` (on a screen under 31rem: `var(--clover-space-m)`)                                  | How far the controls sit in from the Body's edges       |
+| `--clover-controls-leave`        | `180ms cubic-bezier(0.4, 0, 1, 1)`                                                                        | How the controls leave when idle                        |
+| `--clover-controls-enter`        | `340ms cubic-bezier(0.34, 1.56, 0.64, 1)`                                                                 | How they come back                                      |
+| `--clover-controls-tuck`         | `var(--clover-space-s)`                                                                                   | How far they tuck toward their edge as they leave       |
+
+A Canvas says what it shows by `data-media`, its painting body's own `type` lowercased, as
+the resource writes it: `image`, `video`, `sound`. Set the background for each where they
+should differ, black behind video, say, and white behind images:
+
+```css
+/* Images */
+.clover-canvas[data-media="image"] {
+  --clover-canvas-background: #fff;
+}
+
+/* Video */
+.clover-canvas[data-media="video"] {
+  --clover-canvas-background: #000;
+}
+```
+
+Set it on `.clover-canvas` itself, not on a parent: the Canvas sets its own default, which
+wins over one it would inherit. A recording of sound alone plays on a ground of its
+artwork's colors, drawn over this background.
 
 ### Items, Summary, Logo, Map and Search
 

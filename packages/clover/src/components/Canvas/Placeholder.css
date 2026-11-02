@@ -96,7 +96,7 @@
 }
 
 /* The whole still plays it: pointing anywhere on it lights the play button, as on it. */
-.clover-canvas[data-placeholder="true"][data-media]:has(
+.clover-canvas[data-placeholder="true"][data-recording]:has(
     > .clover-canvas-placeholder[data-media="true"]:hover
   )
   > button.clover-canvas-placeholder-toggle {
@@ -109,10 +109,10 @@
  * its own ring.
  */
 :where([data-high-contrast])
-  .clover-canvas[data-placeholder="true"][data-media]
+  .clover-canvas[data-placeholder="true"][data-recording]
   > button.clover-canvas-placeholder-toggle:is(:hover, :focus-visible),
 :where([data-high-contrast])
-  .clover-canvas[data-placeholder="true"][data-media]:has(
+  .clover-canvas[data-placeholder="true"][data-recording]:has(
     > .clover-canvas-placeholder[data-media="true"]:hover
   )
   > button.clover-canvas-placeholder-toggle {
@@ -120,10 +120,10 @@
 }
 
 :where([data-high-contrast])
-  .clover-canvas[data-placeholder="true"][data-media]
+  .clover-canvas[data-placeholder="true"][data-recording]
   > button.clover-canvas-placeholder-toggle:hover:not(:focus-visible),
 :where([data-high-contrast])
-  .clover-canvas[data-placeholder="true"][data-media]:has(
+  .clover-canvas[data-placeholder="true"][data-recording]:has(
     > .clover-canvas-placeholder[data-media="true"]:hover
   )
   > button.clover-canvas-placeholder-toggle:not(:focus-visible) {

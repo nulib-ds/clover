@@ -77,8 +77,8 @@ function MyLayout(props) {
 | `defaultManifestId`    | `string`                          | In a Collection, the member to open first.                                                                                                                                                             |
 | `onManifestChange`     | `(manifestId) => void`            | In a Collection, another member opened, or was asked for.                                                                                                                                              |
 | `searchQuery`          | `string`                          | A Content Search to run once the Manifest is shown, and whenever it changes.                                                                                                                           |
-| `onContentStateChange` | `({ json, encoded }) => void`     | The current view, as a content state, each time it settles.                                                                                                                                            |
-| `renderers`            | list                              | Components that draw views Clover does not; see [below](#renderers-of-your-own).                                                                                                                       |
+| `onContentStateChange` | `({ json, encoded }) => void`     | The current view, as a content state, as it changes.                                                                                                                                                   |
+| `renderers`            | list                              | Components that draw views Clover does not; see [below](#custom-renderer).                                                                                                                             |
 | `as`                   | element type                      | Default `div`.                                                                                                                                                                                         |
 
 `iiifContent` can be a Manifest, a Collection, a Canvas or a content state, as a URL or
@@ -432,49 +432,100 @@ const langOf = Clover.useLangOf();
 </script>
 ```
 
-## Renderers of your own
+## Custom renderer
 
 Give `Root` (or one `Body`) `renderers`, and a view they claim is drawn by your
-component instead of Clover's own (Canvas, Timeline or Scene): a PDF, a 3D model drawn
-your way, anything Clover does not draw, or draws otherwise than you want. Claim a view by
-its Canvas id, by a painted body's `format`, or with a `match` test. The first renderer
-that claims a view draws it. This is 3.x's `customDisplays`.
+component instead of Clover's own (Canvas, Timeline or Scene): a PDF, as here, or anything
+else Clover does not draw, or draws otherwise than you want. Claim a view by its Canvas
+id, by a painted body's `format`, or with a `match` test. The first renderer that claims
+a view draws it. This is 3.x's `customDisplays`.
+
+Here a Canvas that paints a PDF (`application/pdf`) is drawn by a PDF viewer, which
+stands in for the one of your choice. Its pages keep their words as text, so they can be
+read, searched and selected, and its box takes focus, so they scroll by keyboard.
 
 ```jsx
-function ModelViewer({ bodies }) {
+import { useState } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/TextLayer.css";
+
+// react-pdf stands in for the PDF viewer of your choice.
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url,
+).toString();
+
+function PdfViewer({ bodies }) {
   // Inside the Root: Clover's hooks work here (useNavigation, useActiveCanvas, useClover…).
-  return <model-viewer src={bodies[0].id} camera-controls />;
+  const [pages, setPages] = useState(0);
+  return (
+    <div
+      style={{ position: "absolute", inset: 0, overflow: "auto" }}
+      tabIndex={0}
+    >
+      <Document
+        file={bodies[0].id}
+        onLoadSuccess={({ numPages }) => setPages(numPages)}
+      >
+        {Array.from({ length: pages }, (_, index) => (
+          <Page key={index} pageNumber={index + 1} />
+        ))}
+      </Document>
+    </div>
+  );
 }
 
 <Clover.Root
   iiifContent={url}
-  renderers={[{ format: ["model/gltf-binary"], component: ModelViewer }]}
+  renderers={[{ format: ["application/pdf"], component: PdfViewer }]}
 >
   <Clover.Body />
 </Clover.Root>;
 ```
 
 ```html twin
-<clover-root
-  iiif-content="https://iiif.io/api/cookbook/recipe/0608-mvm-3d/manifest.json"
->
+<!-- A Manifest whose Canvas paints a PDF (application/pdf). -->
+<clover-root iiif-content="https://example.org/iiif/report/manifest.json">
   <clover-body></clover-body>
 </clover-root>
 
 <script type="module">
+  import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
+  import { EventBus, PDFViewer } from "pdfjs-dist/web/pdf_viewer.mjs";
+
+  // pdf.js's own viewer stands in for the PDF viewer of your choice.
+  GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+
   document.querySelector("clover-root").renderers = [
     {
-      format: ["model/gltf-binary"],
+      format: ["application/pdf"],
       render(container, { bodies }) {
-        const model = document.createElement("model-viewer");
-        model.setAttribute("src", bodies[0].id);
-        model.setAttribute("camera-controls", "");
-        container.append(model);
+        // pdf.js scrolls its pages in a box placed absolutely, and they go in .pdfViewer.
+        const box = document.createElement("div");
+        box.style.cssText = "position: absolute; inset: 0; overflow: auto";
+        box.tabIndex = 0;
+        box.innerHTML = '<div class="pdfViewer"></div>';
+        container.append(box);
+        const viewer = new PDFViewer({
+          container: box,
+          eventBus: new EventBus(),
+        });
+        const loading = getDocument(bodies[0].id);
+        loading.promise.then((pdf) => viewer.setDocument(pdf));
+        return () => loading.destroy();
       },
     },
   ];
 </script>
 ```
+
+<div data-code-flavor="web-components">
+
+As web components, a renderer's `render` draws the view into a box of its own, filling
+the Body, and returns what undoes it, which Clover calls when the view changes or goes
+before it empties the box.
+
+</div>
 
 A renderer gets the view's `canvases`, their painting `bodies` (a `Choice` as its first
 item, a `SpecificResource` as its source) and `Body`'s `children`. The Viewer and every

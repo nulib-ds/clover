@@ -19,6 +19,24 @@ export const Comment = () => (
   />
 );
 
+/**
+ * A list's lines and their dots: a recording's Chapters control, as the transport drew
+ * it (`ui/mediaIcons.tsx`'s `ChaptersIcon`), as shapes for a control's own `svg`.
+ */
+export const Chapters = () => (
+  <>
+    <path
+      d="M160 144h288M160 256h288M160 368h288"
+      fill="none"
+      strokeLinecap="round"
+      strokeWidth="32"
+    />
+    <circle cx="80" cy="144" r="20" stroke="none" />
+    <circle cx="80" cy="256" r="20" stroke="none" />
+    <circle cx="80" cy="368" r="20" stroke="none" />
+  </>
+);
+
 /** A serifed lower-case `i`: the information control. */
 export const Information = () => (
   <path

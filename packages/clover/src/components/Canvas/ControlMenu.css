@@ -42,7 +42,8 @@
  * too short for that to leave a box worth reading, it may cover them, as far as the
  * Body's inset, and closes to give them back (WCAG 1.4.10).
  */
-.clover-canvas[data-media] > :is(.clover-canvas-caption, .clover-canvas-menu) {
+.clover-canvas[data-recording]
+  > :is(.clover-canvas-caption, .clover-canvas-menu) {
   max-height: max(
     calc(100% - var(--top) - var(--clover-transport-room)),
     min(
@@ -143,6 +144,39 @@
 .clover-canvas-menu input {
   margin: 0;
   accent-color: var(--clover-color-accent, #0065c3);
+}
+
+/*
+ * A recording's chapters (`ChaptersMenu`): each with where it starts, muted; the one
+ * playing tinted and bold, as Contents marks its current entry, never by color alone,
+ * its picture under it.
+ */
+.clover-canvas-menu .clover-canvas-chapters-item {
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.clover-canvas-chapters-item > .clover-cue-time {
+  color: var(--clover-color-primary-muted, #26292b);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (forced-colors: none) {
+  .clover-canvas-menu .clover-canvas-chapters-item:has(input:checked) {
+    background-color: color-mix(
+      in srgb,
+      var(--clover-color-accent, #0065c3) 8%,
+      transparent
+    );
+  }
+}
+
+.clover-canvas-chapters-item:has(input:checked) {
+  font-weight: 600;
+}
+
+.clover-canvas-chapters-item > .clover-entry-thumbnail {
+  flex-basis: 100%;
 }
 
 /* An item's picture (an animation's frames have one): `xl` high, beside its label. */

@@ -1,5 +1,11 @@
 import type { ElementDocs, ElementSpec } from "../spec";
-import { READY, canvasDocs, handleDocs } from "./canvas";
+import {
+  CONTENT_STATE,
+  CONTENT_STATE_DETAIL,
+  READY,
+  canvasDocs,
+  handleDocs,
+} from "./canvas";
 
 /** `<clover-body>`: the root's view, drawn. */
 export const body: ElementSpec = {
@@ -8,7 +14,7 @@ export const body: ElementSpec = {
   needsRoot: true,
   attributes: {
     controls: { prop: "controls", type: "boolean" },
-    "more-controls": { prop: "moreControls", type: ["auto", "always"] },
+    "collapse-controls": { prop: "collapseControls", type: ["auto", "always"] },
     navigator: { prop: "navigator", type: "boolean" },
     placeholder: { prop: "placeholder", type: "boolean" },
     "animate-annotations": { prop: "animateAnnotations", type: "boolean" },
@@ -16,6 +22,7 @@ export const body: ElementSpec = {
   properties: ["controls", "options", "controlButtons", "renderers"],
   events: {
     ...READY,
+    ...CONTENT_STATE,
     "clover-annotation-active": { prop: "onAnnotationActive", detail: ["id"] },
     "clover-caption-change": { prop: "onCaptionChange", detail: ["caption"] },
     "clover-ended": { prop: "onEnded", detail: [] },
@@ -31,7 +38,7 @@ export const bodyDocs: ElementDocs = {
       description: '"false" leaves out the controls over the Body.',
       default: "true",
     },
-    "more-controls": canvasDocs.attributes["more-controls"],
+    "collapse-controls": canvasDocs.attributes["collapse-controls"],
     navigator: {
       description: "A small map of the whole image, while zoomed in.",
       default: "false",
@@ -52,6 +59,11 @@ export const bodyDocs: ElementDocs = {
   },
   events: {
     "clover-ready": handleDocs.event,
+    "clover-content-state-change": {
+      detail: CONTENT_STATE_DETAIL,
+      description:
+        "The root's view, as a IIIF content state, as it changes, whatever draws it.",
+    },
     "clover-annotation-active": canvasDocs.events!["clover-annotation-active"],
     "clover-caption-change": canvasDocs.events!["clover-caption-change"],
     "clover-ended": canvasDocs.events!["clover-ended"],

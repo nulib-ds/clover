@@ -431,6 +431,26 @@ export function paintedImages(
  * played, or, where they are painted one after another on its time, each in turn
  * (`mediaSegments`).
  */
+/**
+ * What the Canvases paint, by the first painting body's own `type`, as its resource
+ * writes it (`Image`, `Video`, `Sound`…), lowercased: the figure's `data-media` (Mat,
+ * 2026-11-01: "always derive directly from the media resource `Type` in the annotation
+ * body"). None where nothing is painted.
+ */
+export function paintedType(
+  canvases: IIIFCanvas[],
+  selections: ChoiceSelections = {},
+): string | undefined {
+  for (const canvas of canvases) {
+    let type: unknown;
+    eachPainted(canvas, selections, (resolved) => {
+      type ??= resolved.body.type;
+    });
+    if (typeof type === "string") return type.toLowerCase();
+  }
+  return undefined;
+}
+
 export function paintedMedia(
   canvas: IIIFCanvas,
   selections: ChoiceSelections = {},

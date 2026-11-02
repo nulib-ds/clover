@@ -236,6 +236,32 @@ describe("Scene", () => {
     await waitFor(() => expect(engine.draw).toHaveBeenCalled());
   });
 
+  // A content state carries no camera: the Scene within its Manifest, as the Scene shows.
+  it("reports the Scene it loaded as a content state, within its Manifest", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const onContentStateChange = vi.fn();
+    render(
+      <Clover.Scene
+        iiifContent={modelJson as never}
+        onContentStateChange={onContentStateChange}
+      />,
+    );
+    await screen.findByRole("img", { name: "A Scene" });
+    await act(() => vi.advanceTimersByTimeAsync(400));
+    expect(onContentStateChange).toHaveBeenCalledTimes(1);
+    const [{ json, encoded }] = onContentStateChange.mock.lastCall!;
+    expect(json["@context"]).toBe(
+      "http://iiif.io/api/presentation/4/context.json",
+    );
+    expect(json.target).toEqual({
+      id: modelJson.items[0].id,
+      type: "Scene",
+      partOf: [{ id: modelJson.id, type: "Manifest" }],
+    });
+    expect(typeof encoded).toBe("string");
+    vi.useRealTimers();
+  });
+
   it("draws with Clover's own renderer, or with three.js once the page registers it", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const { unmount } = render(<Clover.Scene scene={scene as never} />);

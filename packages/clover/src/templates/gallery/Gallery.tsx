@@ -76,9 +76,9 @@ export type GalleryProps = Omit<RootProps, "children"> & {
   /**
    * When the Body's view controls (zoom, the turns, reset, full screen) wait behind
    * More: `"auto"` (the default), only where its row cannot hold them all; `"always"`.
-   * Its lightbox's Body's `moreControls`.
+   * Its lightbox's Body's `collapseControls`.
    */
-  moreControls?: "auto" | "always";
+  collapseControls?: "auto" | "always";
 };
 
 /** The heading level under another. Past 6, the parts' titles name what they head. */
@@ -110,7 +110,7 @@ export function Gallery({
   languages = true,
   storageKey = "clover-template-gallery",
   headingLevel = 2,
-  moreControls,
+  collapseControls,
   style,
   ...root
 }: GalleryProps) {
@@ -159,7 +159,7 @@ export function Gallery({
         download={download}
         languages={languages}
         storageKey={storageKey}
-        moreControls={moreControls}
+        collapseControls={collapseControls}
       />
     </Clover.Root>
   );

@@ -33,8 +33,9 @@ export type MakeSurface = ((
   /**
    * Whether the controls over it are shown, where they come and go: a Timeline's, as they
    * always have (`Body/useControlsVisibility.ts`), its cluster wrapping onto rows. Without
-   * it, a Canvas's stay in sight, on one row, the rest behind More (Mat, 2026-11-01:
-   * Canvas's alone, for now). A hook, the same for the life of a view.
+   * it, a Canvas's are on one row, the rest behind More, and come and go by the same hook
+   * only while it shows a video; a picture's stay in sight (Mat, 2026-11-01). A hook, the
+   * same for the life of a view.
    */
   controlsVisibility?: (
     element: HTMLElement | null,

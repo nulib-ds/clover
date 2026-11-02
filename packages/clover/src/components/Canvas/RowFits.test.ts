@@ -1,4 +1,4 @@
-import { fitsRow } from "./More";
+import { fitsRow } from "./RowFits";
 
 describe("fitsRow", () => {
   it("fits controls, and the gaps between them, in the room", () => {

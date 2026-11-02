@@ -24,7 +24,7 @@ export type TimelineProps = Omit<
   | "isTiledImage"
   | "viewingDirection"
   | "navigator"
-  | "moreControls"
+  | "collapseControls"
   | "onViewportChange"
   | "onReady"
   | "animateAnnotations"

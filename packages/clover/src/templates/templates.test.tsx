@@ -772,24 +772,26 @@ describe("templates", () => {
     expect(options[0]).toHaveAttribute("aria-selected", "true");
   });
 
-  it("Default, Document and Gallery hand their Body moreControls", async () => {
+  it("Default, Document and Gallery hand their Body collapseControls", async () => {
     const more = async () =>
       within(
         (await screen.findByRole("button", { name: "Expand viewer controls" }))
           .parentElement!,
       ).queryByRole("button", { name: "Zoom in" });
     const { unmount } = render(
-      <Templates.Default iiifContent={bookJson} moreControls="always" />,
+      <Templates.Default iiifContent={bookJson} collapseControls="always" />,
     );
     // The view's controls behind More, the Body's row room or not.
     expect(await more()).toBeNull();
     unmount();
     const document = render(
-      <Templates.Document iiifContent={bookJson} moreControls="always" />,
+      <Templates.Document iiifContent={bookJson} collapseControls="always" />,
     );
     expect(await more()).toBeNull();
     document.unmount();
-    render(<Templates.Gallery iiifContent={bookJson} moreControls="always" />);
+    render(
+      <Templates.Gallery iiifContent={bookJson} collapseControls="always" />,
+    );
     fireEvent.click((await screen.findAllByRole("option"))[0]);
     expect(await more()).toBeNull();
   });

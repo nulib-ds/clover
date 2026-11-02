@@ -806,15 +806,16 @@ export function createClover(options: CloverOptions = {}): Clover {
         element && element.currentTime > 0 ? element.currentTime : null;
       // The visible region names the Canvas filling most of a spread. One left over from
       // the previous view, before the new one reports, is ignored.
+      const visible = selectVisibleCanvases(manifest, canvasId);
       const current =
-        view &&
-        selectVisibleCanvases(manifest, canvasId).some(
-          (canvas) => canvas.id === view.canvasId,
-        );
+        view && visible.some((canvas) => canvas.id === view.canvasId);
       const onView = current && !time ? view : null;
+      const shown = onView?.canvasId ?? canvasId;
       return buildContentState({
         manifestId: manifest.id,
-        canvasId: onView?.canvasId ?? canvasId,
+        canvasId: shown,
+        // A Timeline or a Scene by its own type: a Canvas's is the default.
+        type: visible.find((canvas) => canvas.id === shown)?.type,
         region: onView?.region,
         time,
       });

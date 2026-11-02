@@ -73,8 +73,9 @@ export interface RootProps
    */
   annotationPages?: "view" | "all";
   /**
-   * Where the reader is, as a IIIF content state, whenever it settles: after a move, a
-   * pan or zoom, or a pause or seek in media. Debounced, and only when it changed.
+   * Where the reader is, as a IIIF content state, as it changes: a move, a pan or zoom,
+   * or a pause or seek in media. At most every 150ms while it moves, always its last
+   * place, and only when it changed.
    */
   onContentStateChange?: (state: ContentStateOutput) => void;
   /** The element to render. Default `div`. */

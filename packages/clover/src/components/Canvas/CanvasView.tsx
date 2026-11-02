@@ -32,6 +32,7 @@ import {
   startingChoices,
   placeholderStill,
   resolveDirection,
+  paintedType,
 } from "./layout";
 import ExitFullscreen from "../../ui/ExitFullscreen";
 import { useNearViewport } from "../Body/useNearViewport";
@@ -60,6 +61,11 @@ import { type Rect, union } from "../../lib/renderer/math/rect";
 import { findImageServiceId } from "../../lib/renderer/sources/imageService";
 import { type CanvasSurface, type MakeSurface, hasCamera } from "./surface";
 import { languageProps } from "../../i18n/direction";
+import { buildContentState } from "../../core/content-state";
+import {
+  useContentStateOutput,
+  watchMedia,
+} from "../../react/useContentStateOutput";
 
 type CanvasStatus = "loading" | "ready" | "error";
 
@@ -97,6 +103,10 @@ const PlaceBox = lazy(() => import("./PlaceBox"));
  */
 const Placeholder = lazy(() => import("./Placeholder"));
 // Its toggle, one of the row's controls, from the same chunk.
+// A video's controls coming and going, loaded only for a Canvas that shows one.
+const ControlsFade = lazy(() => import("./ControlsFade"));
+// Where controls stay in sight: a picture's.
+const inSight = () => true;
 const PlaceholderToggle = lazy(() =>
   import("./Placeholder").then(({ PlaceholderToggle }) => ({
     default: PlaceholderToggle,
@@ -151,7 +161,6 @@ const ANNOTATION_KEYS = {
 };
 
 /** A Canvas's controls, always shown. */
-const inSight = () => true;
 
 export type CanvasViewProps = CloverCanvasProps & {
   /** What it draws on: Canvas's renderer, or a Timeline's surface (`surface.ts`). */
@@ -199,11 +208,12 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     options,
     navigator = false,
     controls = true,
-    moreControls = "auto",
+    collapseControls = "auto",
     controlButtons,
     annotations: allAnnotations,
     onReady,
     onViewportChange,
+    onContentStateChange,
     onMediaElement,
     onCaptionChange,
     caption,
@@ -231,17 +241,18 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   // Standalone, the higher-contrast mode is the Canvas's own: the page's, or the reader's.
   const contrast = useHighContrast(highContrast);
   /*
-   * A Canvas's controls stay in sight, for now (Mat, 2026-11-01). A Timeline's come and go
-   * as they did, on a mouse's activity and after a pause, or a tap on the picture under a
-   * finger, held by focus no press brought: its surface says so (`surface.ts`).
+   * A Canvas's controls on one row, the view's behind a button where they do not all fit
+   * (`fit`); a Timeline's wrap onto rows, as they did: its surface says so (`surface.ts`).
    */
-  const fades = Boolean(makeSurface.controlsVisibility);
+  const surfaceFades = Boolean(makeSurface.controlsVisibility);
   const useVisibility = makeSurface.controlsVisibility ?? inSight;
-  const controlsVisible = useVisibility(
-    wrapperElement,
+  const surfaceVisible = useVisibility(
+    surfaceFades ? wrapperElement : null,
     options?.hideDelay,
     hostRef,
   );
+  // A video's, reported by its own part, loaded for one (`ControlsFade`).
+  const [videoVisible, setVideoVisible] = useState(false);
   /*
    * Nothing is fetched until the Canvas comes within half a screen of view: no
    * `info.json` or tiles, and no video, sound or captions (nor the media code itself).
@@ -453,6 +464,25 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    * picture of its own and is never placed.
    */
   const media = scene?.media[0] ?? null;
+  /*
+   * Whether its controls come and go, on a mouse's activity and after a pause, or a tap
+   * on the picture under a finger, held by focus no press brought: a Timeline's, and a
+   * video's (Mat, 2026-11-01: "the controls for video on canvas should fade back after a
+   * bit of time"); a picture's stay in sight. A paused video's Play stays with them gone,
+   * its Pause going with the rest (`Canvas.css`).
+   */
+  const videoFades = !surfaceFades && media?.kind === "video";
+  const fades = surfaceFades || videoFades;
+  const controlsVisible = surfaceFades ? surfaceVisible : videoVisible;
+  // What it paints, by its body's own `type`; what `src` names is images.
+  const painted = useMemo(() => {
+    if (canvases?.length) return paintedType(canvases, selections);
+    const handed = (Array.isArray(body) ? body : body ? [body] : [])[0] as
+      | { type?: unknown }
+      | undefined;
+    if (typeof handed?.type === "string") return handed.type.toLowerCase();
+    return src ? "image" : undefined;
+  }, [canvases, selections, body, src]);
   const [mediaElement, setMediaElement] = useState<HTMLVideoElement | null>(
     null,
   );
@@ -471,10 +501,12 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   const mediaOnly = Boolean(media) && canvases?.length === 1;
   /*
    * A lone recording of sound is a player, as a music app's (Mat, 2026-10-24: Apple
-   * Music's and Spotify's): its artwork, its title, the transport, its captions as lyrics
-   * and its chapters as tracks, drawn by `MediaBody` (`media/Player.tsx`), never a picture.
+   * Music's and Spotify's): its artwork and its title in the middle, the transport and its
+   * captions along the foot, drawn by `MediaBody` (`media/Player.tsx`), never a picture.
    */
   const player = mediaOnly && media?.kind === "audio";
+  // A lone video, which may fill its Body (`MediaBody`; Mat, 2026-11-01).
+  const fillable = mediaOnly && media?.kind === "video";
   /*
    * A lone Canvas that paints nothing (Cookbook 0283: a page missing from a book, its
    * `items` empty) is not a picture to explore either: the camera stays put, no zoom,
@@ -568,15 +600,20 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    */
   /*
    * The placeholder's toggle in the row, as the `i` and annotations are (Mat, 2026-11-01):
-   * an image's always, a video's once open (before, it is Play in the middle). The row is
-   * drawn for it alone where nothing else shows, `controls={false}` too: it is the way in.
+   * an image's, always. A video's is Play in the middle of its still, and once open, none
+   * (Mat, 2026-11-01: "remove this", of its "Close player"): it plays on, its transport
+   * its controls. The row is drawn for an image's alone where nothing else shows,
+   * `controls={false}` too: it is the way in.
    */
-  const cornerToggle =
-    stills.length > 0 && !player && !(media && showPlaceholder);
+  const cornerToggle = stills.length > 0 && !player && !media;
   const shownControls = !controlsConfig
     ? null
     : showPlaceholder
-      ? captioned.length || hostControls || listedCount
+      ? captioned.length ||
+        hostControls ||
+        listedCount ||
+        // A recording's chapters, offered over its still too.
+        (media && chapters?.length)
         ? onlyInformation(controlsConfig, { annotations: true })
         : null
       : mediaOnly || empty
@@ -584,6 +621,8 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
           captioned.length ||
           hostControls ||
           listedCount ||
+          // A recording's chapters, listed by a control of its own (`ChaptersMenu`).
+          (media && chapters?.length) ||
           (fullscreenExit && controlsConfig.fullPage)
           ? onlyInformation(controlsConfig, {
               annotations: true,
@@ -652,6 +691,24 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     // Closed, the pick is let go: nothing of it shows, and pressing it again reopens.
     if (!showPlaceholder) releaseAnnotation();
   };
+  /*
+   * A chapter picked (`ChaptersMenu`): there at once, or, over the placeholder's still,
+   * the recording opened and taken there as its element arrives.
+   */
+  const pendingChapter = useRef<number | null>(null);
+  const goToChapter = (start: number) => {
+    if (mediaElement && !showPlaceholder) {
+      mediaElement.currentTime = start;
+      return;
+    }
+    pendingChapter.current = start;
+    if (showPlaceholder) togglePlaceholder();
+  };
+  useEffect(() => {
+    if (!mediaElement || pendingChapter.current === null) return;
+    mediaElement.currentTime = pendingChapter.current;
+    pendingChapter.current = null;
+  }, [mediaElement]);
   /*
    * The viewport always has a name: the given label, else the first Canvas's or body's,
    * else a generic one, each with its language. Not as a `lang` on the viewport, which
@@ -733,6 +790,46 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    */
   const drawn = !canvases || drawnScene.current?.key === canvasKey;
 
+  /*
+   * Where it is, as a content state (`onContentStateChange`), read as it settles: the
+   * Canvas filling most of the view within its Manifest, and the region in view or its
+   * media's time. Only for Canvases it is handed (loaded, or its Root's): what `src` and
+   * `body` paint has no Canvas to name. Nothing while the next Manifest loads.
+   */
+  const contentStateChanged = useContentStateOutput(() => {
+    const shown = drawnScene.current;
+    const surface = surfaceRef.current;
+    if (!shown || manifestId === "loading") return null;
+    const time =
+      mediaElement && mediaElement.currentTime > 0
+        ? mediaElement.currentTime
+        : null;
+    const region =
+      !time && surface && hasCamera(surface)
+        ? canvasRegion(surface.getBounds(), shown.canvases, shown.placements)
+        : null;
+    const canvas =
+      shown.canvases.find((each) => each.id === region?.canvasId) ??
+      shown.canvases[0];
+    if (!canvas) return null;
+    return buildContentState({
+      manifestId,
+      canvasId: canvas.id,
+      type: canvas.type,
+      region: region && {
+        x: region.rect.x,
+        y: region.rect.y,
+        w: region.rect.width,
+        h: region.rect.height,
+      },
+      time,
+    });
+  }, onContentStateChange);
+  useEffect(
+    () => watchMedia(mediaElement, contentStateChanged),
+    [mediaElement, contentStateChanged],
+  );
+
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
@@ -746,6 +843,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     const offOpen = surface.on("open", () => {
       setCleared(false);
       markDrawn();
+      contentStateChanged();
       setStatus("ready");
       setSceneVersion((v) => v + 1);
       if (!renderer) return;
@@ -773,6 +871,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     const offChange = surface.on("change", () => {
       setCleared(false);
       markDrawn();
+      contentStateChanged();
       setStatus("ready");
       setSceneVersion((v) => v + 1);
     });
@@ -784,6 +883,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     );
     const offViewport = surface.on("viewport", () => {
       if (renderer) onViewportChangeRef.current?.(renderer.getBounds());
+      contentStateChanged();
     });
 
     return () => {
@@ -879,7 +979,8 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         data-controls={
           fades ? (controlsVisible ? "visible" : "hidden") : undefined
         }
-        data-media={media?.kind}
+        data-media={painted}
+        data-recording={media ? "" : undefined}
         data-player={player ? "" : undefined}
         data-animated={animated ? "" : undefined}
         data-navigable={navigable}
@@ -944,6 +1045,16 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         {(shownControls || showNavigator) && media && (
           <div className="clover-canvas-scrim" aria-hidden="true" />
         )}
+        {videoFades && (
+          <Suspense fallback={null}>
+            <ControlsFade
+              element={wrapperElement}
+              hideDelay={options?.hideDelay}
+              picture={hostRef}
+              onChange={setVideoVisible}
+            />
+          </Suspense>
+        )}
         {/* Revealed while this Canvas is full screen, or first in its Root that is. */}
         <ExitFullscreen hidden={!exitShown} />
         {surface && (shownControls || cornerToggle) && (
@@ -953,6 +1064,10 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             config={shownControls ?? NO_CONTROLS}
             controlButtons={controlButtons}
             placeholderIsMore={cornerToggle && !media}
+            chapters={media ? chapters : undefined}
+            mediaElement={mediaElement}
+            onChapter={goToChapter}
+            request={options?.request}
             placeholder={
               cornerToggle && (
                 <Suspense fallback={null}>
@@ -972,8 +1087,8 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
                 </Suspense>
               )
             }
-            fit={!fades}
-            more={moreControls}
+            fit={!surfaceFades}
+            more={collapseControls}
             choices={showPlaceholder ? [] : choices}
             selections={selections}
             onSelect={selectChoice}
@@ -1100,6 +1215,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             <MediaBody
               media={media}
               request={options?.request}
+              fillable={fillable}
               surface={surface}
               instance={instance}
               onElement={handleMediaElement}

@@ -113,6 +113,52 @@ export const ChaptersIcon = () => (
   </svg>
 );
 
+/*
+ * A video's fit, one control's two faces (Mat, 2026-11-01: "a toggle to full/contain
+ * video … two different icons but be one button"): the frame, and arrows out to fill it
+ * (offered while the video is fitted) or in to fit within it (while it fills).
+ */
+const Frame = () => (
+  <rect
+    x="40"
+    y="104"
+    width="432"
+    height="304"
+    rx="56"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="36"
+  />
+);
+
+export const FillIcon = () => (
+  <svg {...svgProps}>
+    <Frame />
+    <path
+      d="M204 208l-48 48 48 48M308 208l48 48-48 48"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="36"
+    />
+  </svg>
+);
+
+export const FitIcon = () => (
+  <svg {...svgProps}>
+    <Frame />
+    <path
+      d="M140 208l48 48-48 48M372 208l-48 48 48 48"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="36"
+    />
+  </svg>
+);
+
 export const FullScreenIcon = () => (
   <svg {...svgProps}>
     <ZoomFullScreen />

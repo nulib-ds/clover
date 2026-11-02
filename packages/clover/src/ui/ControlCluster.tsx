@@ -26,7 +26,7 @@ export interface ControlSpec {
 export interface ControlClusterProps {
   /**
    * One row that never wraps, the controls that do not fit behind More: a Canvas's
-   * (`Canvas/More.tsx`), which lays them out. Otherwise rows that wrap: a Timeline's, a
+   * (`Canvas/ImageControls.tsx`, measured by `Canvas/RowFits.tsx`), which lays them out. Otherwise rows that wrap: a Timeline's, a
    * Scene's.
    */
   fit?: boolean;

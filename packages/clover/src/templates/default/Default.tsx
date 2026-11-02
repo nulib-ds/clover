@@ -56,9 +56,9 @@ export type DefaultProps = Omit<RootProps, "children"> & {
   /**
    * When the Body's view controls (zoom, the turns, reset, full screen) wait behind
    * More: `"auto"` (the default), only where its row cannot hold them all; `"always"`.
-   * The Body's `moreControls`.
+   * The Body's `collapseControls`.
    */
-  moreControls?: "auto" | "always";
+  collapseControls?: "auto" | "always";
 };
 
 /**
@@ -86,7 +86,7 @@ export function Default({
   singleItem = false,
   storageKey = "clover-template-default",
   fill = false,
-  moreControls,
+  collapseControls,
   ...root
 }: DefaultProps) {
   const panes = useRef<HTMLElement>(null);
@@ -162,7 +162,7 @@ export function Default({
           <Clover.Status loading={false} />
           <Clover.Body
             className="clover-template-default-body"
-            moreControls={moreControls}
+            collapseControls={collapseControls}
           >
             {panel && !docked && pane.toggle}
           </Clover.Body>

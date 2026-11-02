@@ -7,11 +7,7 @@ import {
   thumbnailSource,
 } from "../../../core/thumbnail";
 import { type LanguageMapLike, localize } from "../../../core/value";
-import { useCloverTranslation } from "../../../i18n/useCloverTranslation";
-import { useContainerName } from "../../../i18n/useContainerName";
 import type { IIIFCanvas } from "../layout";
-import type { TransportChapter } from "./Transport";
-import { CueTime } from "../../../ui/Cue";
 import { useThumbnail } from "../../../ui/EntryThumbnail";
 import { languageProps } from "../../../i18n/direction";
 
@@ -174,68 +170,6 @@ export function PlayerFace({
           </p>
         )}
       </div>
-    </>
-  );
-}
-
-/**
- * The chapters as a music app lists an album's tracks: numbered, each with where it
- * starts, the one playing marked (`aria-current`, and in words and weight, never by color
- * alone), a press playing it from its start, as a press on any time Clover lists does.
- * Where the player is too short for it, the stylesheet leaves it out, and the menu stays.
- */
-export function PlayerChapters({
-  chapters,
-  current,
-  onSeek,
-}: {
-  chapters: TransportChapter[];
-  current: number;
-  onSeek: (seconds: number) => void;
-}) {
-  const { t, langOf, hostLanguage } = useCloverTranslation();
-  const name = useContainerName(
-    t("playerChapters"),
-    langOf("playerChapters"),
-    false,
-    hostLanguage,
-  );
-  return (
-    <>
-      <ol className="clover-canvas-player-chapters" {...name.props}>
-        {chapters.map((chapter, index) => (
-          <li key={chapter.id ?? index}>
-            <button
-              type="button"
-              className="clover-canvas-player-chapter"
-              aria-current={index === current ? "true" : undefined}
-              onClick={() => onSeek(chapter.start)}
-            >
-              <span
-                className="clover-canvas-player-chapter-number"
-                aria-hidden="true"
-              >
-                {index + 1}
-              </span>
-              <span
-                className="clover-canvas-player-chapter-label"
-                {...languageProps(chapter.lang || undefined)}
-              >
-                {chapter.label}
-              </span>{" "}
-              {/*
-               * Apart from the label in its name, as on screen: "Allegro 12:30". Where it
-               * starts, as every time a recording lists is written (`CueTime`).
-               */}
-              <CueTime
-                start={chapter.start}
-                className="clover-canvas-player-chapter-time"
-              />
-            </button>
-          </li>
-        ))}
-      </ol>
-      {name.node}
     </>
   );
 }

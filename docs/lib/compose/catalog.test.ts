@@ -158,7 +158,7 @@ describe("catalog", () => {
       "panelLayout",
       "storageKey",
       // Its lightbox's Body's, when the view's controls wait behind More.
-      "moreControls",
+      "collapseControls",
       "size",
       "height",
       "gap",

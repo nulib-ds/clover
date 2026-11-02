@@ -26,6 +26,10 @@ import { Information } from "../Body/glyphs";
 import { useControlsVisibility } from "../Body/useControlsVisibility";
 import { useNearViewport } from "../Body/useNearViewport";
 import type { CloverRequest } from "../../core/request";
+import {
+  type ContentStateOutput,
+  buildContentState,
+} from "../../core/content-state";
 import { requestKey } from "../../core/request";
 import { localize } from "../../core/value";
 import useFullscreen from "../../hooks/useFullscreen";
@@ -68,6 +72,7 @@ import { useUniqueId } from "../../ui/useUniqueId";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { engineFor } from "./engines";
 import { languageProps } from "../../i18n/direction";
+import { useContentStateOutput } from "../../react/useContentStateOutput";
 
 /** Which of the Scene's controls to show. All are on by default. */
 export interface SceneControlsConfig {
@@ -126,6 +131,13 @@ export interface SceneProps {
    * rest, and sparse accessors, which Clover's does not draw yet.
    */
   engine?: "clover" | "three";
+  /**
+   * Where it is, as a IIIF content state, each time the Scene shown changes: the Scene
+   * within its Manifest (`manifestId`, the one it loaded, or its Root's), as the
+   * annotation (`json`) and the same encoded for a URL (`encoded`). A content state has no
+   * camera to carry, so turning or zooming the models leaves it as it is.
+   */
+  onContentStateChange?: (state: ContentStateOutput) => void;
   /** Rendered after the controls in the cluster: a host's own controls. */
   children?: React.ReactNode;
 }
@@ -192,9 +204,23 @@ function SceneBody({
   options,
   manifestId,
   engine: drawWith = "clover",
+  onContentStateChange,
   children,
 }: SceneProps & { scene: IIIFScene }) {
   const { t } = useCloverTranslation();
+  // The Scene shown, within its Manifest; nothing while the next Manifest loads.
+  const contentStateChanged = useContentStateOutput(
+    () =>
+      manifestId === "loading"
+        ? null
+        : buildContentState({ manifestId, canvasId: scene.id, type: "Scene" }),
+    onContentStateChange,
+  );
+  useEffect(
+    () => contentStateChanged(),
+    [scene.id, manifestId, contentStateChanged],
+  );
+
   const [wrapper, setWrapper] = useState<HTMLElement | null>(null);
   const root = useRootLanguage(setWrapper as React.RefCallback<HTMLElement>);
   // Standalone, the higher-contrast mode is the Scene's own: the page's, or the reader's.

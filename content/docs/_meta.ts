@@ -15,7 +15,6 @@ const meta: MetaRecord = {
   viewer: "Viewer",
   composing: "Composing",
   styling: "Styling",
-  technical: "Technical overview",
   // Hidden for now (Mat, 2026-10-26): out of the menu and of search, at its address still.
   agents: { title: "Build with an agent", display: "hidden" },
   "--components": {
@@ -37,10 +36,14 @@ const meta: MetaRecord = {
   download: "Download",
   map: "Map",
   primitives: "Primitives",
-  "--contribute": {
+  // How Clover works, then how to work on it (Mat, 2026-11-01: "rename contribute to
+  // Technical. move the technical docs down there. make it first. call this one Overview").
+  "--technical": {
     type: "separator",
-    title: "Contribute",
+    title: "Technical",
   },
+  technical: "Overview",
+  "content-state": "Content State",
   i18n: "i18n",
   mocks: { title: "Mocks", display: "hidden" },
   "--earlier": {

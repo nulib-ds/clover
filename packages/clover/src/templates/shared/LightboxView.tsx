@@ -26,7 +26,7 @@ export default function LightboxView({
   download = true,
   languages = true,
   storageKey,
-  moreControls,
+  collapseControls,
 }: Omit<LightboxProps, "open" | "onClose" | "className"> & {
   id: string;
   /**
@@ -91,7 +91,7 @@ export default function LightboxView({
       >
         <Clover.Body
           className="clover-template-lightbox-body"
-          moreControls={moreControls}
+          collapseControls={collapseControls}
         >
           {panel && !pane.docked && pane.toggle}
         </Clover.Body>

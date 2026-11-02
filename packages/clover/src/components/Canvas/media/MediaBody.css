@@ -92,21 +92,38 @@
 /*
  * Captions grow with the picture, a step at a time, on the scale: `s` on a small player,
  * then the page's size, `m` and `l` as the Body widens (where 2.6% of its width reaches
- * each step).
+ * each step). Each step is `--clover-cue-size` too, on what the media layer holds, so a
+ * recording's player keeps room for a cue of its size (`Player.css`): keep the two in step.
  */
+.clover-canvas-media > * {
+  --clover-cue-size: var(--clover-text-s);
+}
+
 @container (min-width: 38.5rem) {
+  .clover-canvas-media > * {
+    --clover-cue-size: 1rem;
+  }
+
   .clover-canvas-captions-cue {
     font-size: inherit;
   }
 }
 
 @container (min-width: 44rem) {
+  .clover-canvas-media > * {
+    --clover-cue-size: var(--clover-text-m);
+  }
+
   .clover-canvas-captions-cue {
     font-size: var(--clover-text-m);
   }
 }
 
 @container (min-width: 47.5rem) {
+  .clover-canvas-media > * {
+    --clover-cue-size: var(--clover-text-l);
+  }
+
   .clover-canvas-captions-cue {
     font-size: var(--clover-text-l);
   }

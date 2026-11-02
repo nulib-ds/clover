@@ -76,7 +76,7 @@ every template is built on.
 | `searchQuery`          | `string`                             | —                            | A Content Search query, run once the Manifest shows and whenever it changes.                                                                                   |
 | `annotations`          | `string \| object \| array`          | —                            | Annotation pages or collections to show beside the Manifest's own.                                                                                             |
 | `annotationPages`      | `"view" \| "all"`                    | `"view"`                     | Whose referenced annotation pages to fetch: the view's, or every Canvas's at once.                                                                             |
-| `onContentStateChange` | `(state: { json, encoded }) => void` | —                            | The current view, as a content state, whenever it settles.                                                                                                     |
+| `onContentStateChange` | `(state: { json, encoded }) => void` | —                            | The current view, as a content state, as it changes.                                                                                                           |
 | `onStatusChange`       | `(status, error) => void`            | —                            | The resource is `"loading"`, `"ready"`, or met an `"error"`.                                                                                                   |
 | `request`              | `{ credentials, headers, fetch }`    | —                            | Credentials, headers and a `fetch` of your own, for every request.                                                                                             |
 | `language`             | `string`                             | The page's, or the browser's | The language to read IIIF text in.                                                                                                                             |
@@ -121,7 +121,7 @@ on [its own page](/docs/viewer/default).
 | `singleItem`       | `boolean`                               | `false`                     | The thumbnails even where the resource has one view.                                                                                                                                               |
 | `storageKey`       | `string \| false`                       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                                                                                                                         |
 | `fill`             | `boolean`                               | `false`                     | Fill the box it sits in; the Body takes what the rest leave.                                                                                                                                       |
-| `moreControls`     | `"auto" \| "always"`                    | `"auto"`                    | When the Body's view controls (zoom, rotation, reset, full screen) wait behind More: only where its row cannot hold them all, or always.                                                           |
+| `collapseControls` | `"auto" \| "always"`                    | `"auto"`                    | When the Body's view controls (zoom, rotation, reset, full screen) collapse behind one button: only where its row cannot hold them all, or always, leaving the media more room.                    |
 
 ### Document
 
@@ -129,17 +129,17 @@ Reads like a PDF viewer: a toolbar with the title and Download, page thumbnails 
 left, the pages down one column, and the information panel sliding out on the right.
 More on [its own page](/docs/viewer/document).
 
-| Prop                 | Type                    | Default                      | Description                                                                                                                              |
-| -------------------- | ----------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `defaultSidebarOpen` | `boolean`               | `true`                       | Whether the page thumbnails start shown; over the page, not.                                                                             |
-| `singleItem`         | `boolean`               | `false`                      | The page thumbnails and their toggle even where the resource has one page.                                                               |
-| `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the panel starts open beside the page; over it, closed.                                                                          |
-| `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | The panel's sections as stacked boxes, or as tabs.                                                                                       |
-| `download`           | `boolean`               | `true`                       | Download's links in the toolbar, where there is a `rendering`.                                                                           |
-| `languages`          | `boolean`               | `true`                       | The languages to read the resource in, beside the panel's About heading, where it comes in several; `false` leaves the choice out.       |
-| `headingLevel`       | `number`                | `2`                          | The title's level; the panel's sections are a level below.                                                                               |
-| `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.                                                                           |
-| `moreControls`       | `"auto" \| "always"`    | `"auto"`                     | When the Body's view controls (zoom, rotation, reset, full screen) wait behind More: only where its row cannot hold them all, or always. |
+| Prop                 | Type                    | Default                      | Description                                                                                                                                                                     |
+| -------------------- | ----------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `defaultSidebarOpen` | `boolean`               | `true`                       | Whether the page thumbnails start shown; over the page, not.                                                                                                                    |
+| `singleItem`         | `boolean`               | `false`                      | The page thumbnails and their toggle even where the resource has one page.                                                                                                      |
+| `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the panel starts open beside the page; over it, closed.                                                                                                                 |
+| `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | The panel's sections as stacked boxes, or as tabs.                                                                                                                              |
+| `download`           | `boolean`               | `true`                       | Download's links in the toolbar, where there is a `rendering`.                                                                                                                  |
+| `languages`          | `boolean`               | `true`                       | The languages to read the resource in, beside the panel's About heading, where it comes in several; `false` leaves the choice out.                                              |
+| `headingLevel`       | `number`                | `2`                          | The title's level; the panel's sections are a level below.                                                                                                                      |
+| `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.                                                                                                                  |
+| `collapseControls`   | `"auto" \| "always"`    | `"auto"`                     | When the Body's view controls (zoom, rotation, reset, full screen) collapse behind one button: only where its row cannot hold them all, or always, leaving the media more room. |
 
 ### Gallery
 
@@ -147,23 +147,23 @@ A grid framed by what it opens, a Manifest's views (even one) or a Collection's 
 each cell opening in a lightbox within the gallery's bounds. More on
 [its own page](/docs/viewer/gallery).
 
-| Prop               | Type                               | Default                     | Description                                                                                                                                  |
-| ------------------ | ---------------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `items`            | `"grid" \| "masonry"`              | `"grid"`                    | The grid, as its Items' layout: square cells, or each picture at its own proportions.                                                        |
-| `secondary`        | `"summary" \| "navDate" \| "none"` | `"summary"`                 | The line under each cell's label, where it has one: its summary, its date, or none.                                                          |
-| `summary`          | `boolean`                          | `true`                      | The resource's summary under the title, cut to two lines with Read more; `false` leaves it out.                                              |
-| `size`             | `string`                           | `10rem`                     | A cell's width (sets `--clover-items-size`).                                                                                                 |
-| `gap`              | `number \| string`                 | The inset                   | The space between cells.                                                                                                                     |
-| `height`           | `"auto" \| number \| string`       | `"auto"`                    | `auto` grows with the grid; a height holds it, the grid scrolling under the header.                                                          |
-| `lightboxItems`    | `"slider" \| "pager"`              | `"slider"`                  | How the lightbox moves on from its view: a short strip of thumbnails, or Previous, the position and Next.                                    |
-| `panel`            | `boolean`                          | `true`                      | The information panel beside the lightbox's view, and its toggle, as Default's and Document's.                                               |
-| `defaultPanelOpen` | `boolean`                          | `true`                      | Whether the panel starts open beside the view; over it, closed.                                                                              |
-| `panelLayout`      | `"accordion" \| "tabs"`            | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                                                                                           |
-| `download`         | `boolean`                          | `true`                      | The downloads in the panel's About, where there is a `rendering`.                                                                            |
-| `languages`        | `boolean`                          | `true`                      | The languages to read the resource in, beside the panel's About heading, where it comes in several.                                          |
-| `storageKey`       | `string \| false`                  | `"clover-template-gallery"` | Where the panel's width is remembered; `false` forgets it.                                                                                   |
-| `headingLevel`     | `number`                           | `2`                         | The title's level; the lightbox's title is one below.                                                                                        |
-| `moreControls`     | `"auto" \| "always"`               | `"auto"`                    | When the lightbox's view controls (zoom, rotation, reset, full screen) wait behind More: only where its row cannot hold them all, or always. |
+| Prop               | Type                               | Default                     | Description                                                                                                                                                                         |
+| ------------------ | ---------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `items`            | `"grid" \| "masonry"`              | `"grid"`                    | The grid, as its Items' layout: square cells, or each picture at its own proportions.                                                                                               |
+| `secondary`        | `"summary" \| "navDate" \| "none"` | `"summary"`                 | The line under each cell's label, where it has one: its summary, its date, or none.                                                                                                 |
+| `summary`          | `boolean`                          | `true`                      | The resource's summary under the title, cut to two lines with Read more; `false` leaves it out.                                                                                     |
+| `size`             | `string`                           | `10rem`                     | A cell's width (sets `--clover-items-size`).                                                                                                                                        |
+| `gap`              | `number \| string`                 | The inset                   | The space between cells.                                                                                                                                                            |
+| `height`           | `"auto" \| number \| string`       | `"auto"`                    | `auto` grows with the grid; a height holds it, the grid scrolling under the header.                                                                                                 |
+| `lightboxItems`    | `"slider" \| "pager"`              | `"slider"`                  | How the lightbox moves on from its view: a short strip of thumbnails, or Previous, the position and Next.                                                                           |
+| `panel`            | `boolean`                          | `true`                      | The information panel beside the lightbox's view, and its toggle, as Default's and Document's.                                                                                      |
+| `defaultPanelOpen` | `boolean`                          | `true`                      | Whether the panel starts open beside the view; over it, closed.                                                                                                                     |
+| `panelLayout`      | `"accordion" \| "tabs"`            | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                                                                                                                                  |
+| `download`         | `boolean`                          | `true`                      | The downloads in the panel's About, where there is a `rendering`.                                                                                                                   |
+| `languages`        | `boolean`                          | `true`                      | The languages to read the resource in, beside the panel's About heading, where it comes in several.                                                                                 |
+| `storageKey`       | `string \| false`                  | `"clover-template-gallery"` | Where the panel's width is remembered; `false` forgets it.                                                                                                                          |
+| `headingLevel`     | `number`                           | `2`                         | The title's level; the lightbox's title is one below.                                                                                                                               |
+| `collapseControls` | `"auto" \| "always"`               | `"auto"`                    | When the lightbox's view controls (zoom, rotation, reset, full screen) collapse behind one button: only where its row cannot hold them all, or always, leaving the media more room. |
 
 </ApiReference>
 
@@ -308,8 +308,9 @@ const state = {
 
 </ViewerExample>
 
-`onContentStateChange` hands you a content state whenever the view settles: the Canvas
-and region, or the moment in a recording, it is at. Put it in a link to share it.
+`onContentStateChange` hands you a content state as the view changes: the Canvas and
+region, or the moment in a recording, it is at
+([Content State](/docs/content-state)). Put it in a link to share it.
 
 ```jsx
 <Viewer
@@ -462,7 +463,7 @@ credentials. So does an image served without CORS, which Clover shows as an `<im
 
 Use `renderers` to draw a view with a component of your own: one Clover does not draw, a
 PDF say, or one you want drawn otherwise. See
-[Renderers of your own](/docs/composing#renderers-of-your-own).
+[Custom renderer](/docs/composing#custom-renderer).
 
 ### Styles
 

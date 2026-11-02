@@ -1,4 +1,5 @@
 import type { ElementDocs, ElementSpec } from "../spec";
+import { CONTENT_STATE, CONTENT_STATE_DETAIL } from "./canvas";
 
 /*
  * Presentation 4's other containers, beside `<clover-canvas>`: a Timeline (sound) and a
@@ -20,6 +21,7 @@ export const timeline: ElementSpec = {
   },
   properties: ["iiifContent", "timeline", "annotations", "options", "controls"],
   events: {
+    ...CONTENT_STATE,
     "clover-caption-change": { prop: "onCaptionChange", detail: ["caption"] },
     "clover-ended": { prop: "onEnded", detail: [] },
   },
@@ -80,6 +82,11 @@ export const timelineDocs: ElementDocs = {
     },
   },
   events: {
+    "clover-content-state-change": {
+      detail: CONTENT_STATE_DETAIL,
+      description:
+        "Where it is, as a IIIF content state, as it changes: the Timeline within its Manifest, and the time once it pauses or seeks.",
+    },
     "clover-caption-change": {
       detail: "{ caption: { id: string; language?: string } | null }",
       description:
@@ -105,6 +112,7 @@ export const scene: ElementSpec = {
     engine: { prop: "engine", type: ["clover", "three"] },
   },
   properties: ["iiifContent", "scene", "options", "controls"],
+  events: { ...CONTENT_STATE },
 };
 
 export const sceneDocs: ElementDocs = {
@@ -153,6 +161,13 @@ export const sceneDocs: ElementDocs = {
       type: "boolean | { zoom?: boolean; fullPage?: boolean; rotation?: boolean; reset?: boolean; information?: boolean } | null",
       description:
         "Which of the Body's controls it shows: false for none, or some ({ rotation: false }), in place of the attribute.",
+    },
+  },
+  events: {
+    "clover-content-state-change": {
+      detail: CONTENT_STATE_DETAIL,
+      description:
+        "The Scene shown, within its Manifest, as a IIIF content state, each time that changes. A content state carries no camera, so turning the models leaves it as it is.",
     },
   },
 };

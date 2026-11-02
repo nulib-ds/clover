@@ -24,17 +24,29 @@ import type {
  *
  * </ApiReference>
  * ```
+ *
+ * With `sections`, one element's reference is split as the React tables are, under their
+ * `###` headings: each of its rows goes to the section that lists its React prop, and a
+ * row whose prop no section lists fails the build, saying so.
  */
 export function ApiReference({
   elements,
+  sections,
   children,
 }: {
   /** The elements' tags, space-separated: `clover-panel clover-tab`. */
   elements: string;
+  /** Split the one element's table by the React tables' `###` headings. */
+  sections?: boolean;
   children: React.ReactNode;
 }) {
   const docs = DOCS();
+  const md = useMDXComponents() as Record<string, React.ElementType>;
   const tags = elements.split(/\s+/).filter(Boolean);
+  if (sections && tags.length !== 1)
+    throw new Error(
+      `ApiReference: sections split one element, not ${elements}`,
+    );
   return (
     <>
       <div data-code-flavor="react">{children}</div>
@@ -43,12 +55,78 @@ export function ApiReference({
           const spec = SPECS.find((each) => each.tag === tag);
           if (!spec || !docs[tag])
             throw new Error(`ApiReference: no element ${tag}`);
-          return <ElementTable key={tag} spec={spec} docs={docs[tag]} />;
+          return (
+            <ElementTable
+              key={tag}
+              spec={spec}
+              docs={docs[tag]}
+              sections={sections ? sectionsOf(children, md) : undefined}
+            />
+          );
         })}
       </div>
     </>
   );
 }
+
+type Section = { title: string; props: string[] };
+
+/** A node's text, as its MDX children write it. */
+const textOf = (node: React.ReactNode): string =>
+  typeof node === "string" || typeof node === "number"
+    ? String(node)
+    : Array.isArray(node)
+      ? node.map(textOf).join("")
+      : React.isValidElement<{ children?: React.ReactNode }>(node)
+        ? textOf(node.props.children)
+        : "";
+
+/** Every element under `node` that `is` picks, in document order. */
+const findAll = (
+  node: React.ReactNode,
+  is: (element: React.ReactElement) => boolean,
+): React.ReactElement<{ children?: React.ReactNode }>[] =>
+  React.Children.toArray(node).flatMap((child) => {
+    if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return [];
+    return [
+      ...(is(child) ? [child] : []),
+      ...findAll(child.props.children, is),
+    ];
+  });
+
+/**
+ * The React tables' sections: each `###` heading's title, and the props its tables list
+ * (each body row's first cell), in their order.
+ */
+function sectionsOf(
+  children: React.ReactNode,
+  md: Record<string, React.ElementType>,
+): Section[] {
+  const of = (name: string) => (element: React.ReactElement) =>
+    element.type === md[name] || element.type === name;
+  const found: Section[] = [];
+  for (const child of React.Children.toArray(children)) {
+    if (!React.isValidElement<{ children?: React.ReactNode }>(child)) continue;
+    if (of("h3")(child)) {
+      found.push({ title: textOf(child.props.children).trim(), props: [] });
+      continue;
+    }
+    for (const row of findAll(child, of("tr"))) {
+      const [first] = React.Children.toArray(row.props.children).filter(
+        React.isValidElement,
+      );
+      if (first && of("td")(first))
+        found.at(-1)?.props.push(textOf(first).trim());
+    }
+  }
+  return found;
+}
+
+const slug = (title: string) =>
+  title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 
 /** An attribute's type as the manifest writes it. */
 const typeOf = (type: AttributeType) =>
@@ -91,6 +169,8 @@ const keptOf = (spec: ElementSpec) =>
 
 type Row = {
   name: string;
+  /** The React prop it stands for, which places it in a section. */
+  prop?: string;
   /** Its type, or the values it takes, each its own chip (`ValuesCell`). */
   type: string | readonly string[];
   fallback?: string;
@@ -99,24 +179,31 @@ type Row = {
 
 /**
  * One element: its attributes, then what it takes as properties (`.items`), what it keeps
- * (`.handle`), the events it sends and the slots it reads, one table, as each part's is.
+ * (`.handle`), the events it sends and the slots it reads, one table, as each part's is;
+ * or, given the React tables' `sections`, a table under each section's own heading.
  */
 function ElementTable({
   spec,
   docs,
+  sections,
 }: {
   spec: ElementSpec;
   docs: ElementDocs;
+  sections?: Section[];
 }) {
   const md = useMDXComponents() as Record<string, React.ElementType>;
-  const { h3: H3, p: P, code: Code, table: Table, tr: Tr, th: Th, td: Td } = md;
+  const { h3: H3, h4: H4, p: P, code: Code } = md;
   const attributes = Object.entries(spec.attributes);
   const byAttribute = new Set(
     attributes.map(([, attribute]) => attribute.prop),
   );
+  const keeper = (name: string) =>
+    Object.values(spec.events ?? {}).find((event) => event.keeps === name)
+      ?.prop;
   const rows: Row[] = [
     ...attributes.map(([name, attribute]) => ({
       name,
+      prop: attribute.prop,
       type: Array.isArray(attribute.type)
         ? (attribute.type as readonly string[])
         : typeOf(attribute.type),
@@ -129,12 +216,14 @@ function ElementTable({
         const property = docs.properties![name];
         return {
           name: `.${name}`,
+          prop: keeper(name) ?? name,
           type: property.type,
           description: `${property.readonly ? "Read-only. " : ""}${byAttribute.has(name) ? "As a property: " : ""}${property.description}`,
         };
       }),
-    ...Object.keys(spec.events ?? {}).map((name) => ({
+    ...Object.entries(spec.events ?? {}).map(([name, event]) => ({
       name,
+      prop: event.prop,
       type: docs.events?.[name]?.detail ?? "",
       description: `An event. ${docs.events?.[name]?.description ?? ""}`,
     })),
@@ -144,40 +233,80 @@ function ElementTable({
       description: docs.slots?.[name]?.description ?? "",
     })),
   ];
+  if (sections) {
+    const unplaced = rows.filter(
+      (row) => !sections.some((section) => section.props.includes(row.prop!)),
+    );
+    if (unplaced.length)
+      throw new Error(
+        `ApiReference: <${spec.tag}>'s ${unplaced.map((row) => `${row.name} (${row.prop ?? "no prop"})`).join(", ")} in none of the page's sections: list each prop in one of its React tables`,
+      );
+  }
   return (
     <>
       <H3 id={`element-${spec.tag}`}>
         <Code>{`<${spec.tag}>`}</Code>
       </H3>
       <P>{docs.description}</P>
-      <Table>
-        <thead>
-          <Tr>
-            <Th>Name</Th>
-            <Th>Type</Th>
-            <Th>Default</Th>
-            <Th>Description</Th>
-          </Tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <Tr key={row.name}>
-              <Td>
-                <Code>{row.name}</Code>
-              </Td>
-              <Td>
-                {typeof row.type === "string" ? (
-                  <Code>{row.type}</Code>
-                ) : (
-                  <ValuesCell values={row.type} Code={Code} />
-                )}
-              </Td>
-              <Td>{row.fallback ? <Code>{row.fallback}</Code> : "—"}</Td>
-              <Td>{row.description}</Td>
-            </Tr>
-          ))}
-        </tbody>
-      </Table>
+      {sections ? (
+        sections.map((section) => {
+          const order = (row: Row) => section.props.indexOf(row.prop!);
+          const shown = rows
+            .filter((row) => order(row) !== -1)
+            .sort((a, b) => order(a) - order(b));
+          return shown.length ? (
+            <React.Fragment key={section.title}>
+              <H4 id={`element-${spec.tag}-${slug(section.title)}`}>
+                {section.title}
+              </H4>
+              <RowsTable rows={shown} md={md} />
+            </React.Fragment>
+          ) : null;
+        })
+      ) : (
+        <RowsTable rows={rows} md={md} />
+      )}
     </>
+  );
+}
+
+/** Rows as a table: Name, Type, Default and Description. */
+function RowsTable({
+  rows,
+  md,
+}: {
+  rows: Row[];
+  md: Record<string, React.ElementType>;
+}) {
+  const { code: Code, table: Table, tr: Tr, th: Th, td: Td } = md;
+  return (
+    <Table>
+      <thead>
+        <Tr>
+          <Th>Name</Th>
+          <Th>Type</Th>
+          <Th>Default</Th>
+          <Th>Description</Th>
+        </Tr>
+      </thead>
+      <tbody>
+        {rows.map((row) => (
+          <Tr key={row.name}>
+            <Td>
+              <Code>{row.name}</Code>
+            </Td>
+            <Td>
+              {typeof row.type === "string" ? (
+                <Code>{row.type}</Code>
+              ) : (
+                <ValuesCell values={row.type} Code={Code} />
+              )}
+            </Td>
+            <Td>{row.fallback ? <Code>{row.fallback}</Code> : "—"}</Td>
+            <Td>{row.description}</Td>
+          </Tr>
+        ))}
+      </tbody>
+    </Table>
   );
 }

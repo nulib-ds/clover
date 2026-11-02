@@ -1103,9 +1103,26 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `core/text.ts`, which is small and synchronous. Never use `toPlainText` on raw
   Markdown.
 - **Content state out.** `clover.getContentState()` builds it from the viewport channel
-  (ignoring a region left over from the previous view) or the media time. `Root`'s
-  `onContentStateChange` debounces on store, viewport and media events; there is no
-  polling anywhere.
+  (ignoring a region left over from the previous view) or the media time. Every part that
+  shows a view reports one as `onContentStateChange` (Mat, 2026-11-01: "templates, body,
+  canvas, timeline, and scene … dynamically send back at all times what a content state
+  object looks like … as both an object or encoded"; the name kept as Root's, released
+  in 4.0.0, over "contentStateCallback"), `{ json, encoded }`, through one hook,
+  `react/useContentStateOutput.ts`: a part calls what it returns whenever its place may
+  have moved, and it reads a moment later, at most every 100ms while it keeps moving and
+  always within that of the last change (Mat, 2026-11-01: "the callback is slow", then
+  "even faster … I'd prefer every 100ms"; it waited 300ms after the view settled until
+  then, and 150ms between), and only when changed; there is no polling anywhere. At ten a
+  second, a page writing each into its address (`history.replaceState`) can meet
+  Safari's cap of 100 calls in its window during a long pan. Root and Body read the Root (`useRootContentState`: store,
+  viewport and media), so a Body covers a renderer of yours and hands the prop to no
+  part; CanvasView reads its own drawn Canvases (`canvasRegion`), so Canvas and Timeline
+  report alone, loaded or in a Root, but not for `src` or `body`, which name no Canvas;
+  SceneView names its Scene (no camera: a content state has none). The templates have it
+  as Root's prop. `buildContentState` names a Timeline or a Scene by its type, in
+  Presentation 4's context, and a lone Canvas (`loneCanvas`, its Manifest's id its own)
+  without a `partOf`. As web components, `clover-content-state-change` (`CONTENT_STATE`,
+  `specs/canvas.ts`).
 - **Media text.** `core/vtt.ts` parses WebVTT and caches each file's text (`loadVtt`),
   shared by the Canvas's caption tracks and `Transcript`; tests call `clearVttCache()`.
   A transcript as plain text (`canvasTextTranscripts` in `Canvas/layout.ts`: a Canvas's
@@ -1461,33 +1478,41 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   chunk (`media/Player.tsx`, `Player.css`), the figure `data-player`:
   - its artwork is its placeholder Canvas until it first plays, then its accompanying
     Canvas, each standing in for the other, else its thumbnail (`stillSource`), at its
-    own shape (`--clover-player-art-ratio`), asked as its service's `info.json` allows
+    own shape (`--clover-player-art-ratio`), never wider than 12rem (Mat, 2026-11-01:
+    "it's way too big"), asked as its service's `info.json` allows
     (`resolveThumbnail`, 1,200 px), its alt its Canvas's label; none of it is in the
     scene (`canvasScene`'s `standIns: false`), so the renderer draws nothing;
-  - its ground is a few pixels of the same artwork (32 px), blurred, under a wash of 72%
-    of `--clover-color-control`, which keeps white text 6.9:1 and the 80% second line
-    5.1:1 whatever the picture; with no artwork, the accent darkened by that fill;
-  - its title is its name (the viewport's too, so `aria-hidden`), with `partOf` under
-    it (the Manifest's label, from `Connected` and `LoadedCanvas`). Level with the
-    controls in the corner, its first lines keep clear of them by a float as large as
-    they reach (`--clover-canvas-controls-width` and `-height`, `useClusterReach`), so
-    only those lines are shorter (2026-11-01: one control's padding let a phone's other
-    button cover it). Beside the artwork under 30rem wide, the column is too narrow to
-    share, so the spacer floats not (`--clover-player-clear-float: none`) and the title
-    starts under them; under the artwork, or in the centered block, it has no height.
-    Under 30rem wide and 26rem tall the title keeps to two lines and `partOf` to one
-    (Mat, 2026-11-01), so a long title never runs the player past its Body. Clamped, each
-    is a box of its own, which Chrome sets beside a float even where a word must break,
-    so beside the artwork it needs the spacer to be a block;
-  - Canvas's transport, captions and annotations stay as they are, laid out by CSS
-    alone (the bar's pieces on one grid by `display: contents`, never moved in the
-    reading order), always shown; the cues show as lyrics; chapters are also listed as
-    tracks (`PlayerChapters`, `aria-current`, bold and a bar, never color alone) where
-    the player is at least 24rem tall;
-  - it lays itself out by container queries on the media layer: one row when short;
-    from 18rem tall, the transport across under the artwork; from 28rem × 40rem, one
-    centered block; under 30rem wide, the transport in three rows, under 26rem tall too,
-    the title clamped, and under 16rem tall, the artwork set aside;
+  - its ground is a few pixels of the same artwork (32 px), blurred, under a wash of 86%
+    of `--clover-color-control` (Mat, 2026-11-01: "even darker of a bg"; 72% before),
+    which keeps white text 11:1 and the 80% second line 7.7:1 whatever the picture; with
+    no artwork, the accent (12%) darkened by that fill;
+  - its title is its name (the viewport's too, so `aria-hidden`), at 1rem and bold, with
+    `partOf` under it a step smaller (`--clover-text-s`), `xs` apart (Mat, 2026-11-01;
+    the title `--clover-text-l` before) (the Manifest's label, from `Connected` and
+    `LoadedCanvas`);
+  - the artwork, and beside it the title over its line, centered against it (Mat,
+    2026-11-01: "show thumb to the left like we had it before with labels v-aligning with
+    it and stacked above each other"), one block in the middle (Mat, 2026-11-01: "I don't like
+    the top/bottom layout shift. move the controls to the bottom. make seek bar look
+    more like it does for canvas. make vtts read more like that as well. place thumbnail
+    and labels in the center still"; a grid of the artwork, the title, the cues as
+    lyrics and the transport until then, which moved as a cue came and went, with layouts
+    by container queries for short, tall, narrow and large players). The block keeps the
+    room under the cluster and, over the transport (`--clover-transport-room`), a cue's
+    two lines at the size the Body gives cues (`--clover-cue-size`, set by `MediaBody.css`
+    on what the media layer holds), so nothing that shows or hides moves it; the
+    artwork takes what height is left. Under 16rem tall the artwork steps aside, and the
+    title and its line clamp to two and one;
+  - Canvas's transport and captions as they are, along its foot, as a video's: the seek
+    bar, the bar, the cue's box; always shown (`--clover-controls-shown: 1` on the
+    figure); its annotations on their time apart, along its top
+    (`.clover-canvas-player-notes`, `MediaBody`), centered and clear of the controls on
+    both sides, at a Canvas annotation label's size (`s`), ringed in the accent alone (2px, no
+    light line or dark edge: Mat, 2026-11-01), their page's label visually hidden (Mat, 2026-11-01: "bring timeline
+    annotations up", "outlined like an active annotation in Canvas"), the top keeping
+    two of their lines; the chapters the transport's Chapters menu's alone (Mat, 2026-11-01: "remove
+    this chapter control here. we should just have the regular one"; listed as tracks
+    under a tall player until then);
   - the placeholder never holds it back (its still is the artwork, not a gate), and it
     never plays by itself; the viewport keeps the keys and the name, its focus ring
     drawn again over the player (`Player.css`).
@@ -1696,8 +1721,13 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   the way out of full screen and a navigator, and holds one row at its end. Where the
   Canvas's controls all fit (`Fits`, measured as the Body's width changes and as controls
   come and go, each control's width read while it is laid out), they are the row.
-  `Canvas/More.tsx` holds More and that measuring, loaded as a Canvas draws its controls
-  (`useLoaded`), never with a Timeline's; until it arrives the row holds them all.
+  `Canvas/RowFits.tsx` holds that measuring, drawn with the controls (a Timeline's,
+  which wrap, never draw it); `Canvas/ImageControls.tsx` holds the button and its tray
+  (More until 2026-11-01: Mat, "rename More as ImageControls. load it dynamically. don't
+  include it in size"), loaded only where the row cannot hold the view's controls, or
+  always (`collapseControls`, a placeholder's toggle), so a first view at most widths
+  fetches none of it and the stated sizes leave it out; until it arrives the row holds
+  them all. Its class names (`clover-canvas-more`…) are as they were.
   The row runs, left to right, the view's (`VIEW`, `Controls.tsx`: zoom in and out, the
   two turns, reset, full screen) and a placeholder's toggle, then Choice and the
   Canvas's own (the place, annotations, the `i`, at the row's end) (Mat, 2026-11-01:
@@ -1707,13 +1737,16 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   (`more-<instance>`), in their place, the others keeping their order (Mat, 2026-11-01:
   "let's not cause other items to lose their ordering"); a host's own come after them and
   always keep their places.
-  `moreControls` says when (Mat, 2026-11-01: "only when full but add prop to
-  canvas/body/templates to allow implementer to set as `auto` (default) or `always`"):
-  `"auto"`, where they do not all fit; `"always"`, wherever the Canvas offers any (no
-  measuring then). Body hands it to Canvas alone (a Timeline's and a Scene's controls
-  take none), and Default, Document (`Sheets`) and the Gallery's lightbox
-  (`LightboxView`) to their Body; `more-controls` on `<clover-canvas>`, `<clover-body>`
-  and `<clover-viewer>`.
+  `collapseControls` says when (Mat, 2026-11-01: "only when full but add prop to
+  canvas/body/templates to allow implementer to set as `auto` (default) or `always`";
+  `moreControls` until later that day: "let's call it Collapse Controls … explain that
+  this is for responsive reason and to increase screen space for media viewing"; the
+  docs and descriptions say the controls collapse behind one button, never "More",
+  which is the component's name in code alone): `"auto"`, where they do not all fit;
+  `"always"`, wherever the Canvas offers any (no measuring then). Body hands it to Canvas
+  alone (a Timeline's and a Scene's controls take none), and Default, Document
+  (`Sheets`) and the Gallery's lightbox (`LightboxView`) to their Body;
+  `collapse-controls` on `<clover-canvas>`, `<clover-body>` and `<clover-viewer>`.
   - More is a disclosure (`aria-expanded`, `aria-controls`), named for what it does now,
     "Expand viewer controls" and "Collapse viewer controls" (`canvasExpandControls`,
     `canvasCollapseControls`; Mat, 2026-11-01: "don't label this more controls"; "More
@@ -1741,7 +1774,7 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     outline. it's a little out of place"; 3px of the accent at half strength before, and
     a soft inset shade before that), the picture behind it blurred ("blur bg behind the
     control toggle deck"; the tray is no header, which stay solid), opening swiftly out of its toggle (`clover-more-open`, its ground drawn out
-    and its controls fading in, never moved, as `More.tsx` measures where they rest,
+    and its controls fading in, never moved, as `ImageControls.tsx` measures where they rest,
     220ms, none where less motion is asked for; closing at once), on the controls' own
     dark fill, see-through (40%; "make tray bg even more subtle. aim under 50%"; Mat,
     2026-11-01: "instead of going with bg, going back to a transparent black"; the
@@ -1807,20 +1840,45 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   - For hosts, `src/core/sequence.ts` (`groupViews`) groups a Manifest into views by
     `behavior`. It is the only sequence implementation. `paged` must match
     `@iiif/helpers`' `getManifestSequence`.
-- **For now a Canvas's controls stay in sight** (Mat, 2026-11-01: "let's not [have]
-  controls fade back away so that we can better design this"; and "I don't like controls
-  not being visible on smaller viewports as it requires a mystery click"): `CanvasView`
-  calls `useControlsVisibility` only through its surface (`controlsVisibility` on the
-  `MakeSurface`, `Canvas/surface.ts`), which only a Timeline's gives
-  (`Timeline/playerSurface.ts`), so a Canvas's figure has no `data-controls`, reads no
-  `options.hideDelay`, and carries none of the hook's code; and `Canvas.css` holds
-  `--clover-controls-shown: 1` on `.clover-canvas:not([data-controls])`: the cluster,
-  the navigator, the scrim and a recording's transport alike. A Timeline's controls (on
-  `CanvasView`, its cluster wrapping onto rows, `fit` off) and a Scene's still come and go
-  as follows, and a Canvas's would again with the hook back on `rendererSurface`. The
-  top scrim is drawn only over video and sound (`media`): over an image, the controls'
-  own fill is enough (Mat, 2026-11-01: "remove the shadow/scrim on canvas for images.
-  keep it still for video").
+- **A picture's controls stay in sight; a video's come and go** (Mat, 2026-11-01: "let's
+  not [have] controls fade back away so that we can better design this", and "I don't
+  like controls not being visible on smaller viewports as it requires a mystery click";
+  then, that day, "the controls for video on canvas should fade back after a bit of time
+  … the play button should always be visible if it is pause … the pause would fade away
+  with other parts of bottom control"). `CanvasView` takes its surface's
+  `controlsVisibility` (`MakeSurface`, `Canvas/surface.ts`; a Timeline's,
+  `Timeline/playerSurface.ts`), else `useControlsVisibility` itself, and hands it the
+  figure only where the controls fade, a Timeline's or a video's (`fades`), so a
+  picture's figure has no `data-controls` and `Canvas.css` holds
+  `--clover-controls-shown: 1` on `.clover-canvas:not([data-controls])`. `fit` (one row,
+  the rest behind More) follows the surface alone: a video's stays on one row. A paused
+  Play stays (the rule above); Pause goes with the rest. No scrim from the top over a
+  video (Mat, 2026-11-01: "remove the black scrim from the top of video. it should only
+  be on the bottom"), only the transport's; none over an image either ("remove the
+  shadow/scrim on canvas for images").
+- **A video's placeholder toggle is Play alone** (Mat, 2026-11-01: "remove this", of its
+  "Close player"): Play in the middle of its still until it opens, and nothing after, no
+  way back to the still; focus that was on Play goes to the transport's Pause, else the
+  view (`PlaceholderToggle`, WCAG 2.4.3). `playerClose` is gone from the locales.
+- **A recording's Chapters are a control at the top**, left of Annotations, beside the
+  panel's toggle (Mat, 2026-11-01: "move annotations back up next to panel toggle. to the
+  left of it place the chapters toggle. chapterls toggle and annotations should no
+  longer be below"; that day Annotations went to the transport and came back, and the
+  Chapters menu was the transport's until then). `Controls` draws it (`chapters`,
+  `mediaElement`, from `CanvasView`), and its menu, `ChaptersMenu`, is a `ControlMenu`
+  as Choice's and Annotations' are, loaded once it shows: each chapter with its start,
+  the one playing checked and its picture under it; a pointer's pick or Enter goes there
+  and closes, the arrows move and leave it open. A lone recording draws the row for it.
+  Its control gone while it had focus, the row too, focus goes to the transport's Play
+  (WCAG 2.4.3). The transport keeps the chapters on its seek bar and the one playing by
+  name. It never fades, as Annotations does not.
+- **A lone video's fit is a transport control**, left of Full screen (Mat, 2026-11-01:
+  "add a toggle to full/contain video. it should always center regardless. contain is
+  default. it should act as a toggle with two different icons but be one button"):
+  `playerFill` ("Fill frame") while it is fitted, `playerFit` ("Fit to frame") while it
+  fills, `FillIcon` and `FitIcon` (`ui/mediaIcons.tsx`). Fitted is home; filled frames
+  `fillRect` of its bounds, the part with the Body's shape about the middle, framed
+  again on resize and as the next video opens (`CanvasView`).
 - The controls follow the Player for a mouse, or a pen that hovers (`isHovering`: a pen
   `pointermove` with `buttons === 0`). `useControlsVisibility` sets
   `data-controls="visible"` on its activity and hides them after `hideDelay`. A finger,

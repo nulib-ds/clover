@@ -10,7 +10,7 @@ import { p4 } from "../../../fixtures/presentation4";
 import React from "react";
 
 import Canvas from "..";
-import { containAspect } from "./MediaBody";
+import { containAspect, fillRect } from "./MediaBody";
 import { chapterAt } from "./Transport";
 import { alongBar, gapsOf, lengthOnBar } from "./seekGaps";
 import { type FakeTrack, FakeTrackList } from "../testing/textTracks";
@@ -152,6 +152,14 @@ describe("Canvas media", () => {
       "data-media",
       "video",
     );
+    expect(screen.getByTestId("clover-canvas")).toHaveAttribute(
+      "data-recording",
+    );
+    // A video's controls come and go (Mat, 2026-11-01), hidden until there is activity.
+    expect(screen.getByTestId("clover-canvas")).toHaveAttribute(
+      "data-controls",
+      "hidden",
+    );
     // An overview cannot show a playing frame.
     expect(screen.queryByTestId("clover-canvas-navigator")).toBeNull();
   });
@@ -281,9 +289,11 @@ describe("Canvas media", () => {
     expect(screen.getByText("Opening")).toHaveClass(
       "clover-canvas-transport-chapter",
     );
+    // In the controls at the top, beside the annotations' (Mat, 2026-11-01).
     const button = screen.getByRole("button", { name: "Chapters" });
+    expect(button.closest(".clover-canvas-controls")).not.toBeNull();
     fireEvent.click(button);
-    pick(screen.getByRole("radio", { name: /Lunch/ }));
+    pick(await screen.findByRole("radio", { name: /Lunch/ }));
     expect(element.currentTime).toBe(10);
     // Closed, with focus back on its button rather than on the page.
     expect(button).toHaveAttribute("aria-expanded", "false");
@@ -516,31 +526,29 @@ describe("Canvas media", () => {
   });
 
   it("closes a menu when keyboard focus moves on past it, and leaves focus there", async () => {
-    render(
-      <Canvas
-        canvases={video.items as any}
-        chapters={[
-          { label: "Opening", start: 0, end: 10 },
-          { label: "Lunch", start: 10, end: 20 },
-        ]}
-      />,
+    vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+      Promise.resolve(new Response("WEBVTT\n")),
     );
+    URL.createObjectURL = vi.fn(() => "blob:http://localhost/captions");
+    URL.revokeObjectURL = vi.fn();
+    const [captioned] = languages.items as any[];
+    render(<Canvas canvases={[captioned]} />);
     await transport();
-    const button = screen.getByRole("button", { name: "Chapters" });
+    const button = screen.getByRole("button", { name: "Captions" });
     act(() => button.focus());
     fireEvent.click(button);
     expect(button).toHaveAttribute("aria-expanded", "true");
 
     // Into the menu, and out of focus altogether (a press on an option's text, another
     // window): it stays open.
-    const lunch = screen.getByRole("radio", { name: /Lunch/ });
-    act(() => lunch.focus());
-    act(() => lunch.blur());
+    const option = screen.getAllByRole("radio").at(-1)!;
+    act(() => option.focus());
+    act(() => option.blur());
     expect(button).toHaveAttribute("aria-expanded", "true");
 
     // On to another control, which the open menu might cover: it closes, and focus
     // stays where the reader took it.
-    act(() => lunch.focus());
+    act(() => option.focus());
     const mute = screen.getByRole("button", { name: "Mute" });
     act(() => mute.focus());
     expect(button).toHaveAttribute("aria-expanded", "false");
@@ -769,8 +777,8 @@ describe("Canvas media", () => {
       { timeout: 5000 },
     );
     expect(title).toHaveAttribute("lang", "it");
-    fireEvent.click(screen.getByRole("button", { name: "Chapters" }));
-    expect(screen.getByText("Remainder of Atto Primo")).toHaveAttribute(
+    fireEvent.click(await screen.findByRole("button", { name: "Chapters" }));
+    expect(await screen.findByText("Remainder of Atto Primo")).toHaveAttribute(
       "lang",
       "en",
     );
@@ -865,6 +873,8 @@ describe("Canvas media", () => {
         await import("../Annotations");
         await import("../AnnotationMenu");
       });
+      // Its annotations read: their control is up.
+      await screen.findByRole("button", { name: "Annotations" });
       return onMediaElement.mock.calls.at(-1)?.[0] as HTMLMediaElement;
     };
     const cues = () =>
@@ -1224,12 +1234,11 @@ describe("Canvas media", () => {
     clearInfoCache();
   });
 
-  it("lists a player's chapters as tracks, the one playing marked, a press going to it", async () => {
-    const onMediaElement = vi.fn();
+  // Mat, 2026-11-01: "remove this chapter control here. we should just have the regular one".
+  it("gives a player's chapters to its Chapters control alone, listing none under it", async () => {
     render(
       <Canvas
         canvases={audio.items as any}
-        onMediaElement={onMediaElement}
         chapters={[
           { label: "Opening", start: 0, end: 10 },
           { label: "Lunch", start: 10, end: 20 },
@@ -1237,27 +1246,50 @@ describe("Canvas media", () => {
       />,
     );
     await transport();
-    const element = onMediaElement.mock.calls.at(-1)?.[0] as HTMLVideoElement;
-    const tracks = () =>
-      within(screen.getByRole("list", { name: "Chapters" })).getAllByRole(
-        "button",
-      );
-    // Each named by its title and its start, the number for the eye alone.
-    expect(tracks().map((track) => track.textContent)).toEqual([
-      "1Opening 0:00",
-      "2Lunch 0:10",
-    ]);
-    expect(tracks()[0]).toHaveAttribute("aria-current", "true");
-    fireEvent.click(tracks()[1]);
-    expect(element.currentTime).toBe(10);
-    act(() => {
-      element.dispatchEvent(new Event("timeupdate"));
-    });
-    expect(tracks()[1]).toHaveAttribute("aria-current", "true");
-    expect(tracks()[0]).not.toHaveAttribute("aria-current");
+    expect(screen.getByTestId("clover-canvas")).toHaveAttribute("data-player");
+    expect(screen.queryByRole("list", { name: "Chapters" })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Chapters" }),
+    ).toBeInTheDocument();
   });
 
   // Never for a recording beside a picture, or a video: those keep Canvas's look.
+  // Mat, 2026-11-01: "to the left of full screen. add a toggle to full/contain video".
+  it("offers a lone video's fit, fitted at first, left of full screen", async () => {
+    render(<Canvas canvases={video.items as any} />);
+    await transport();
+    const fill = screen.getByRole("button", { name: "Fill frame" });
+    const end = fill.closest(".clover-canvas-transport-end")!;
+    const order = Array.from(
+      end.querySelectorAll<HTMLElement>("[data-button]"),
+    ).map((each) => each.dataset.button);
+    if (order.includes("fullscreen"))
+      expect(order.indexOf("fill")).toBe(order.indexOf("fullscreen") - 1);
+    // One button, named for what a press does.
+    fireEvent.click(fill);
+    expect(fill).toHaveAccessibleName("Fit to frame");
+    fireEvent.click(fill);
+    expect(fill).toHaveAccessibleName("Fill frame");
+  });
+
+  it("fills the view with the middle of a video, whatever their shapes", () => {
+    const world = { x: 0, y: 0, width: 1600, height: 900 };
+    // A square view: all of its height, the middle of its width.
+    expect(fillRect(world, 1)).toEqual({
+      x: 350,
+      y: 0,
+      width: 900,
+      height: 900,
+    });
+    // A wider view: all of its width, the middle of its height.
+    expect(fillRect(world, 32 / 9)).toEqual({
+      x: 0,
+      y: 225,
+      width: 1600,
+      height: 450,
+    });
+  });
+
   it("plays no video as a player", async () => {
     render(<Canvas canvases={video.items as any} />);
     await transport();
@@ -1270,8 +1302,17 @@ describe("Canvas media", () => {
   it("does not load the media player for a Canvas of images", () => {
     render(<Canvas src="https://example.org/a.jpg" />);
     expect(screen.queryByTestId("clover-canvas-media")).toBeNull();
-    expect(screen.getByTestId("clover-canvas")).not.toHaveAttribute(
+    // What it paints by its body's type, and no recording to play.
+    expect(screen.getByTestId("clover-canvas")).toHaveAttribute(
       "data-media",
+      "image",
+    );
+    expect(screen.getByTestId("clover-canvas")).not.toHaveAttribute(
+      "data-recording",
+    );
+    // A picture's stay in sight.
+    expect(screen.getByTestId("clover-canvas")).not.toHaveAttribute(
+      "data-controls",
     );
   });
 });

@@ -104,12 +104,12 @@ What React hands a callback, an element sends as an event: `clover-` and what ha
 bubbling, so a page can listen for it anywhere above the element. Its `detail` holds what
 the callback is given.
 
-| React prop             | Event                         | `detail`                                        |
-| ---------------------- | ----------------------------- | ----------------------------------------------- |
-| `onCanvasChange`       | `clover-canvas-change`        | `{ canvasId }`                                  |
-| `onManifestChange`     | `clover-manifest-change`      | `{ manifestId }`, in a Collection               |
-| `onStatusChange`       | `clover-status-change`        | `{ status, error }`, as it loads                |
-| `onContentStateChange` | `clover-content-state-change` | `{ json, encoded }`, each time the view settles |
+| React prop             | Event                         | `detail`                                                                        |
+| ---------------------- | ----------------------------- | ------------------------------------------------------------------------------- |
+| `onCanvasChange`       | `clover-canvas-change`        | `{ canvasId }`                                                                  |
+| `onManifestChange`     | `clover-manifest-change`      | `{ manifestId }`, in a Collection                                               |
+| `onStatusChange`       | `clover-status-change`        | `{ status, error }`, as it loads                                                |
+| `onContentStateChange` | `clover-content-state-change` | `{ json, encoded }`, as the view changes ([Content State](/docs/content-state)) |
 
 <div data-code-flavor="web-components">
 
@@ -337,7 +337,7 @@ Hooks read from the nearest `Root`, and each re-renders only when what it reads 
 `useNavigation()`, `useVisibleCanvases()`, `useActiveCanvas()` and the rest, in
 [Parts of your own](/docs/composing#parts-of-your-own). `Canvas` and `Body` hand their
 handle to `onReady`; `renderers` on a `Root`, `Body` or `Viewer` draws views of your own
-([Renderers of your own](/docs/composing#renderers-of-your-own)); and `controlButtons`
+([Custom renderer](/docs/composing#custom-renderer)); and `controlButtons`
 puts buttons of yours in place of the Body's controls
 ([Controls of your own](/docs/composing#controls-of-your-own)).
 
@@ -427,14 +427,14 @@ A few of the functions Clover's parts are built with, for parts of your own and 
 around Clover, from `@nulib/clover`'s main entry. With React or with the elements, a
 bundler reaches them there; the elements' CDN scripts do not carry them.
 
-| Helper                                                      | What it does                                                                                                                                                                                                     |
-| ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `readAs(format, value)`                                     | How a text is read: `"html"`, `"markdown"` or `"plain"`, by its `format`'s media type, or, with none, by IIIF's rule (HTML only from a first `<` to a last `>`).                                                 |
-| `toPlainText(html)`                                         | IIIF HTML as plain text, its tags dropped and the common entities decoded, for where markup cannot go: an `alt`, an `aria-label`.                                                                                |
-| `thumbnailSource(resource)`                                 | Where a resource's thumbnail comes from: its `thumbnail`, else the first image it paints, its placeholder's or its accompanying Canvas's. `null` if it has nothing to show.                                      |
-| `regionSource(canvas, { x, y, w, h })`                      | A small picture of a region of a Canvas, in the Canvas's own coordinates (an annotation's `xywh`), cut by the image server. `null` where no image with a service is painted there.                               |
-| `resolveThumbnail(source, size, request)`                   | Either source as a URL about `size` pixels on its longer side (200 by default), asked of the image service as its own `info.json` allows: never larger than the image, and a level 0 server's listed sizes only. |
-| `buildContentState({ manifestId, canvasId, region, time })` | A view, as a content state: `{ json, encoded }`, the annotation and its base64url form for a link's `iiif-content`. `encodeContentState(json)` encodes one of your own, `decodeContentState(value)` reads one.   |
+| Helper                                                            | What it does                                                                                                                                                                                                                                                                                                                                             |
+| ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `readAs(format, value)`                                           | How a text is read: `"html"`, `"markdown"` or `"plain"`, by its `format`'s media type, or, with none, by IIIF's rule (HTML only from a first `<` to a last `>`).                                                                                                                                                                                         |
+| `toPlainText(html)`                                               | IIIF HTML as plain text, its tags dropped and the common entities decoded, for where markup cannot go: an `alt`, an `aria-label`.                                                                                                                                                                                                                        |
+| `thumbnailSource(resource)`                                       | Where a resource's thumbnail comes from: its `thumbnail`, else the first image it paints, its placeholder's or its accompanying Canvas's. `null` if it has nothing to show.                                                                                                                                                                              |
+| `regionSource(canvas, { x, y, w, h })`                            | A small picture of a region of a Canvas, in the Canvas's own coordinates (an annotation's `xywh`), cut by the image server. `null` where no image with a service is painted there.                                                                                                                                                                       |
+| `resolveThumbnail(source, size, request)`                         | Either source as a URL about `size` pixels on its longer side (200 by default), asked of the image service as its own `info.json` allows: never larger than the image, and a level 0 server's listed sizes only.                                                                                                                                         |
+| `buildContentState({ manifestId, canvasId, type, region, time })` | A view, as a [content state](/docs/content-state): `{ json, encoded }`, the annotation and its base64url form for a link's `iiif-content`. `type` is the container's (`"Canvas"`, the default, `"Timeline"` or `"Scene"`); with no `manifestId`, no `partOf`. `encodeContentState(json)` encodes one of your own, `decodeContentState(value)` reads one. |
 
 ```js
 import {

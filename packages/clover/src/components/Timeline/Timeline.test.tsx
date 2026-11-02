@@ -298,7 +298,8 @@ describe("Timeline", () => {
     expect((await metadataLoaded(onMediaElement)).currentTime).toBe(720);
   });
 
-  it("plays a track pressed in the player's list from its start, its time a cue's", async () => {
+  // Its chapters in its Chapters menu, at the top (Mat, 2026-11-01), the Ranges'.
+  it("goes to a chapter chosen in the Chapters menu, its start beside it", async () => {
     const onMediaElement = vi.fn();
     render(
       <Clover.Timeline
@@ -306,15 +307,14 @@ describe("Timeline", () => {
         onMediaElement={onMediaElement}
       />,
     );
-    const track = await screen.findByRole("button", {
+    const element = await metadataLoaded(onMediaElement);
+    fireEvent.click(await screen.findByRole("button", { name: "Chapters" }));
+    const second = await screen.findByRole("radio", {
       name: /Second movement/,
     });
-    const element = await metadataLoaded(onMediaElement);
-    const play = vi.spyOn(element, "play").mockResolvedValue(undefined);
-    fireEvent.click(track);
+    expect(second.closest("label")).toHaveTextContent("10:00");
+    fireEvent.click(second);
     expect(element.currentTime).toBe(600);
-    expect(play).toHaveBeenCalled();
-    expect(track.querySelector(".clover-cue-time")).toHaveTextContent("10:00");
   });
 
   it("says so when the content has no Timeline", async () => {

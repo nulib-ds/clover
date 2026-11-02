@@ -1,16 +1,21 @@
 import type { CloverRequest } from "../../../core/request";
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import type { TimedAnnotation } from "../Annotations";
 import type { MediaPlacement } from "../layout";
-import { type PlayerInfo, PlayerChapters, PlayerFace } from "./Player";
-import Transport, { type TransportChapter, chapterAt } from "./Transport";
+import { type PlayerInfo, PlayerFace } from "./Player";
+import Transport, { type TransportChapter } from "./Transport";
 import { type CaptionOption, useCaptionTracks } from "./useCaptionTracks";
 import { useMediaController } from "./useMediaController";
 import { captionName, useMediaElement } from "./useMediaElement";
 import { cueText } from "../../../core/vtt";
-import { playFrom } from "../../../lib/time";
-import type { CanvasSurface } from "../surface";
+import { type CanvasSurface, hasCamera } from "../surface";
 import type { Rect } from "../../../lib/renderer";
 import { useOptionalClover } from "../../../react/context";
 import { BodyUnloadable } from "../../../ui/BodyUnloadable";
@@ -23,6 +28,8 @@ const MOMENT_SECONDS = 3;
 export interface MediaBodyProps {
   media: MediaPlacement;
   request?: CloverRequest;
+  /** A lone video, which may fill the Body: its fit's toggle in the transport. */
+  fillable?: boolean;
   /** What the Canvas draws on, whose viewport takes the clicks and keys. */
   surface: CanvasSurface;
   instance: string;
@@ -64,8 +71,7 @@ export interface MediaBodyProps {
   notes?: TimedAnnotation[];
   /**
    * A lone recording of sound, played as a player (`Player.tsx`): its artwork, title and
-   * what it is part of, its cues as lyrics and its chapters as tracks, around the
-   * transport.
+   * what it is part of in the middle, the transport and its cues along the foot.
    */
   player?: PlayerInfo;
 }
@@ -92,6 +98,7 @@ export interface MediaBodyProps {
 const MediaBody: React.FC<MediaBodyProps> = ({
   media,
   request,
+  fillable = false,
   surface,
   instance,
   onElement,
@@ -115,6 +122,60 @@ const MediaBody: React.FC<MediaBodyProps> = ({
   const language = givenLanguage ?? rootLanguage;
   const element = useMediaElement(media, { request, language });
   const controller = useMediaController(element, media.duration);
+  /*
+   * A lone video, fitted to the Body (the default) or filling it, centered either way
+   * (Mat, 2026-11-01: "add a toggle to full/contain video. it should always center
+   * regardless. contain is default"): filled, the part of the video that has the Body's
+   * shape, about its middle (`fillRect`), framed again as the Body resizes and as the next
+   * one opens. Here, with the video's own code, so a picture's page carries none of it.
+   */
+  const [filled, setFilled] = useState(false);
+  const filledRef = useRef(filled);
+  filledRef.current = filled;
+  const frameVideo = useCallback(
+    (immediate: boolean) => {
+      if (!hasCamera(surface)) return;
+      if (!filledRef.current) return surface.home(immediate);
+      const world = surface.getHomeBounds();
+      const host = surface.host;
+      if (!world || !host?.clientWidth || !host.clientHeight) return;
+      surface.fitBounds(
+        fillRect(world, host.clientWidth / host.clientHeight),
+        immediate,
+      );
+    },
+    [surface],
+  );
+  // Pressed: to the other fit, as the camera moves (none where less motion is asked).
+  const firstFit = useRef(true);
+  useEffect(() => {
+    if (firstFit.current) {
+      firstFit.current = false;
+      return;
+    }
+    if (fillable) frameVideo(false);
+  }, [filled, fillable, frameVideo]);
+  // Filled, framed again as the Body resizes and as the next video opens.
+  useEffect(() => {
+    if (!fillable || !filled || !hasCamera(surface)) return;
+    const again = () => frameVideo(true);
+    const observer = new ResizeObserver(again);
+    observer.observe(surface.host);
+    const offOpen = surface.on("open", again);
+    const offChange = surface.on("change", again);
+    return () => {
+      observer.disconnect();
+      offOpen();
+      offChange();
+    };
+  }, [fillable, filled, surface, frameVideo]);
+  const fill = useMemo(
+    () =>
+      fillable
+        ? { filled, onToggle: () => setFilled((was) => !was) }
+        : undefined,
+    [fillable, filled],
+  );
   const failed = useMediaFailed(element);
   // The Manifest's tracks, named in the reader's language and tagged with it (WCAG 3.1.2).
   const own = useMemo<CaptionOption[]>(
@@ -286,53 +347,58 @@ const MediaBody: React.FC<MediaBodyProps> = ({
       highlightedChapter={highlightedChapter}
       onChapterHighlight={onChapterHighlight}
       request={request}
+      fill={fill}
     />
   );
+  const noteLines = playing.map((note) => (
+    <span
+      className="clover-canvas-captions-cue"
+      data-kind="annotation"
+      key={note.id}
+    >
+      {note.page && (
+        <span
+          className="clover-canvas-captions-cue-label"
+          {...languageProps(note.page.lang)}
+        >
+          {note.page.text}
+        </span>
+      )}
+      <span {...languageProps(note.lang)}>{note.label}</span>
+    </span>
+  ));
+  const captionLines = cues.map((text, index) => (
+    <span
+      className="clover-canvas-captions-cue"
+      key={index}
+      {...languageProps(
+        captionLanguage && captionLanguage !== "none"
+          ? captionLanguage
+          : undefined,
+      )}
+    >
+      {text}
+    </span>
+  ));
   /*
    * After the transport: the stylesheet lifts the cues clear of it. The annotations over
-   * the captions, which keep the line nearest the bar. In a player, they are its lyrics.
+   * the captions, which keep the line nearest the bar. A player sets its annotations
+   * apart, along its top (Mat, 2026-11-01: "bring timeline annotations up"), its
+   * captions at its foot as a video's.
    */
   const cuesShown = cues.length + playing.length > 0 && (
     <div className="clover-canvas-captions" aria-live="off">
-      {playing.map((note) => (
-        <span
-          className="clover-canvas-captions-cue"
-          data-kind="annotation"
-          key={note.id}
-        >
-          {note.page && (
-            <span
-              className="clover-canvas-captions-cue-label"
-              {...languageProps(note.page.lang)}
-            >
-              {note.page.text}
-            </span>
-          )}
-          <span {...languageProps(note.lang)}>{note.label}</span>
-        </span>
-      ))}
-      {cues.map((text, index) => (
-        <span
-          className="clover-canvas-captions-cue"
-          key={index}
-          {...languageProps(
-            captionLanguage && captionLanguage !== "none"
-              ? captionLanguage
-              : undefined,
-          )}
-        >
-          {text}
-        </span>
-      ))}
+      {noteLines}
+      {captionLines}
     </div>
   );
 
   if (player) {
-    // The chapter playing, as the transport finds it: the last begun.
-    const current = chapterAt(chapters ?? [], currentTime);
     /*
-     * In reading order, which is also the keyboard's: what it is, its lyrics, the
-     * transport, then its tracks, under it as an album's are under its player.
+     * In reading order, which is also the keyboard's: what it is, its cues, then the
+     * transport, whose Chapters menu lists its chapters (Mat, 2026-11-01: "remove this
+     * chapter control here. we should just have the regular one"; listed as tracks under
+     * the player until then).
      */
     return (
       <div
@@ -348,17 +414,21 @@ const MediaBody: React.FC<MediaBodyProps> = ({
             request={request}
             language={language}
           />
-          {cuesShown}
+          {playing.length > 0 && (
+            <div
+              className="clover-canvas-captions clover-canvas-player-notes"
+              aria-live="off"
+            >
+              {noteLines}
+            </div>
+          )}
+          {cues.length > 0 && (
+            <div className="clover-canvas-captions" aria-live="off">
+              {captionLines}
+            </div>
+          )}
           {transport}
           <BodyUnloadable kind={media.kind} shown={failed} room />
-          {chapters && chapters.length > 0 && (
-            <PlayerChapters
-              chapters={chapters}
-              current={current}
-              // A track pressed plays from its start, as every time a part lists does.
-              onSeek={(seconds) => element && playFrom(element, seconds)}
-            />
-          )}
         </div>
       </div>
     );
@@ -427,6 +497,27 @@ function useVideoSize(element: HTMLVideoElement | null) {
     };
   }, [element]);
   return size;
+}
+
+/**
+ * The part of `world` a view of the given shape (its width over its height) shows when
+ * it fills the view, about the middle: the whole of its height and the middle of its
+ * width where it is wider than the view, else the reverse. Framed, it fills the view.
+ */
+export function fillRect(world: Rect, shape: number): Rect {
+  return world.width / world.height > shape
+    ? {
+        x: world.x + (world.width - world.height * shape) / 2,
+        y: world.y,
+        width: world.height * shape,
+        height: world.height,
+      }
+    : {
+        x: world.x,
+        y: world.y + (world.height - world.width / shape) / 2,
+        width: world.width,
+        height: world.width / shape,
+      };
 }
 
 /**

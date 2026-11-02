@@ -1,0 +1,110 @@
+/*
+ * The controls of a page's own under the Canvas: native buttons, a field and a switch,
+ * drawn as the site's outline call to action is (`.cta-outline`, `tokens.css`), smaller
+ * and with the card's inner corners, each at least 24px (WCAG 2.5.8).
+ */
+.demo {
+  display: grid;
+  gap: 1rem;
+}
+
+.view {
+  background-color: var(--gray-3);
+  height: 28rem;
+  position: relative;
+}
+
+.controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.group {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.name {
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+}
+
+.button,
+.field {
+  border: 1px solid
+    color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
+  border-radius: var(--radius-2);
+  color: var(--gray-12);
+  font: inherit;
+  font-size: var(--text-sm);
+  min-height: 2rem;
+}
+
+.button {
+  background: transparent;
+  cursor: pointer;
+  padding: 0 0.75rem;
+  transition:
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.button:hover:not(:disabled) {
+  border-color: var(--accent-11);
+  color: var(--accent-11);
+}
+
+.button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.button:focus-visible,
+.field:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+.field {
+  background: var(--color-background);
+  font-family: var(--font-mono);
+  padding: 0 0.5rem;
+  width: 14rem;
+}
+
+.field[aria-invalid="true"] {
+  border-color: var(--red-11);
+}
+
+.switch {
+  align-items: center;
+  display: inline-flex;
+  font-size: var(--text-sm);
+  gap: 0.5rem;
+  min-height: 2rem;
+}
+
+.switch input {
+  accent-color: var(--accent-9);
+  height: 1rem;
+  margin: 0;
+  width: 1rem;
+}
+
+.error {
+  color: var(--red-11);
+  flex-basis: 100%;
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.readout {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  min-height: 1.5rem;
+}

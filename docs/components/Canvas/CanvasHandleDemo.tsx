@@ -1,127 +1,163 @@
 "use client";
 
 import CloverCanvas from "docs/components/DynamicImports/Canvas";
-import { useEffect, useRef, useState } from "react";
-import { useMock } from "docs/lib/useMock";
+import { Fragment, useEffect, useId, useRef, useState } from "react";
 import type { CanvasHandle } from "@nulib/clover";
+import styles from "./CanvasHandleDemo.module.css";
 
 /**
- * Drives a Canvas through the handle `onReady` returns, and reports the visible region
- * as an `xywh=` fragment — the value a content-state link would carry.
+ * Zoom levels to jump to. World units are the image's own pixels, so the camera's
+ * `zoom` is screen pixels per image pixel: 1 is the image at 100%.
+ */
+const LEVELS = [0.25, 0.5, 1];
+
+/**
+ * A Canvas driven by controls of the page's own, through the handle `onReady` passes:
+ * zoom by a step or to a level, turn, reset and frame an `xywh` region, each animated or
+ * not, and the region in view as `onViewportChange` reports it. Its code on the Canvas
+ * page ("Canvas handles and callbacks") is this, written plainly: keep the two in step.
  */
 const CanvasHandleDemo = ({
-  id,
-  body,
   src,
-  iiifContent,
-  mock,
   isTiledImage,
-  annotations,
   label,
+  region: start,
 }: {
-  id?: string;
-  body?: any;
-  src?: any;
-  /** A Canvas (or Manifest) for the Canvas to load itself. */
-  iiifContent?: string;
-  /** Or one of this site's mocks, by its path under `/mocks/`. */
-  mock?: string;
+  src: string;
   isTiledImage?: boolean;
-  annotations?: any[];
-  /**
-   * The viewport's accessible name: what the image shows. Loading its own, the Canvas
-   * takes its label, as it does each Canvas a link leads it to.
-   */
-  label?: string;
+  /** The viewport's accessible name: what the image shows. */
+  label: string;
+  /** The region the field starts with, in the image's pixels. */
+  region: string;
 }) => {
-  const mockUrl = useMock(mock ?? "");
-  const content = mock ? (mockUrl ?? undefined) : iiifContent;
-  const handle = useRef<CanvasHandle | null>(null);
-  const [backend, setBackend] = useState("");
-  const [region, setRegion] = useState("");
+  const id = useId();
+  const [canvas, setCanvas] = useState<CanvasHandle | null>(null);
+  const [animate, setAnimate] = useState(true);
+  const [region, setRegion] = useState(start);
+  const [invalid, setInvalid] = useState(false);
+  const [inView, setInView] = useState("");
   /*
-   * The view's region, written once it settles: the readout is a live region (`output`),
-   * and a pan or zoom changes the view every frame, which would be read out as it goes.
+   * The region in view, written once the view settles: the readout is a live region
+   * (`output`), and a pan or zoom moves the view every frame.
    */
   const settle = useRef(0);
   useEffect(() => () => window.clearTimeout(settle.current), []);
 
-  const button = (label: string, action: (h: CanvasHandle) => void) => (
+  const zoomTo = (level: number) =>
+    canvas?.zoomBy(level / canvas.getCamera().zoom, undefined, animate);
+  const rotate = (degrees: number) =>
+    canvas?.setRotation(canvas.getRotation() + degrees, !animate);
+  const goTo = () => {
+    const [x, y, width, height] = region
+      .replace("xywh=", "")
+      .split(",")
+      .map(Number);
+    const valid =
+      [x, y, width, height].every(Number.isFinite) && width > 0 && height > 0;
+    setInvalid(!valid);
+    if (valid) canvas?.fitBounds({ x, y, width, height }, !animate);
+  };
+
+  const button = (text: string, action: () => void, name?: string) => (
     <button
       type="button"
-      onClick={() => handle.current && action(handle.current)}
-      style={{
-        padding: "0.25rem 0.75rem",
-        borderRadius: "999px",
-        border: "1px solid currentColor",
-        background: "transparent",
-        cursor: "pointer",
-        font: "inherit",
-      }}
+      className={styles.button}
+      disabled={!canvas}
+      aria-label={name}
+      onClick={action}
     >
-      {label}
+      {text}
     </button>
   );
 
   return (
-    <div
-      style={{ display: "grid", gap: "0.75rem", margin: "1.5rem 0" }}
-      data-demo={id ?? "main"}
-    >
-      <div
-        style={{
-          position: "relative",
-          height: "450px",
-          backgroundColor: "#f0f0f0",
-        }}
-      >
+    <div className={styles.demo}>
+      <div className={styles.view}>
         <CloverCanvas
-          body={body}
           src={src}
-          iiifContent={content}
           isTiledImage={isTiledImage}
-          annotations={annotations}
-          label={
-            label ??
-            (iiifContent || mock
-              ? undefined
-              : "Göttingen market square, IIIF Image API reference image")
-          }
-          onReady={(h: CanvasHandle) => {
-            handle.current = h;
-            setBackend(h.backendKind);
-            // Another when a context is lost, or taken anew back in view.
-            h.on("backend", () => setBackend(h.backendKind));
-          }}
-          onViewportChange={(bounds) => {
+          label={label}
+          onReady={setCanvas}
+          onViewportChange={({ x, y, width, height }) => {
             window.clearTimeout(settle.current);
             settle.current = window.setTimeout(
-              () =>
-                setRegion(
-                  `xywh=${[bounds.x, bounds.y, bounds.width, bounds.height]
-                    .map(Math.round)
-                    .join(",")}`,
-                ),
+              () => setInView([x, y, width, height].map(Math.round).join(",")),
               250,
             );
           }}
         />
       </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-        {button("Zoom in", (h) => h.zoomBy(2))}
-        {button("Zoom out", (h) => h.zoomBy(0.5))}
-        {button("Rotate", (h) => h.rotateBy(90))}
-        {button("Home", (h) => h.home())}
+      <div className={styles.controls}>
+        <div className={styles.group}>
+          {button("Zoom in", () => canvas?.zoomBy(2, undefined, animate))}
+          {button("Zoom out", () => canvas?.zoomBy(0.5, undefined, animate))}
+        </div>
+        <div
+          className={styles.group}
+          role="group"
+          aria-labelledby={`${id}-level`}
+        >
+          <span id={`${id}-level`} className={styles.name}>
+            Zoom to
+          </span>
+          {LEVELS.map((level) => (
+            <Fragment key={level}>
+              {button(
+                `${level * 100}%`,
+                () => zoomTo(level),
+                `Zoom to ${level * 100}%`,
+              )}
+            </Fragment>
+          ))}
+        </div>
+        <div className={styles.group}>
+          {button("Rotate left", () => rotate(-90))}
+          {button("Rotate right", () => rotate(90))}
+          {button("Reset", () => canvas?.home(!animate))}
+        </div>
+        <form
+          className={styles.group}
+          onSubmit={(event) => {
+            event.preventDefault();
+            goTo();
+          }}
+        >
+          <label htmlFor={`${id}-region`} className={styles.name}>
+            Region (xywh)
+          </label>
+          <input
+            id={`${id}-region`}
+            className={styles.field}
+            value={region}
+            spellCheck={false}
+            autoComplete="off"
+            aria-invalid={invalid}
+            aria-describedby={invalid ? `${id}-error` : undefined}
+            onChange={(event) => {
+              setRegion(event.target.value);
+              setInvalid(false);
+            }}
+          />
+          <button type="submit" className={styles.button} disabled={!canvas}>
+            Go to region
+          </button>
+          {invalid && (
+            <p id={`${id}-error`} className={styles.error}>
+              Give four numbers: x, y, width and height.
+            </p>
+          )}
+        </form>
+        <label className={styles.switch}>
+          <input
+            type="checkbox"
+            checked={animate}
+            onChange={(event) => setAnimate(event.target.checked)}
+          />
+          Animate
+        </label>
       </div>
-      <output
-        style={{
-          display: "block",
-          minHeight: "1.5rem",
-          fontFamily: "monospace",
-          fontSize: "0.875rem",
-        }}
-      >
-        {backend ? `backend: ${backend} · ${region}` : "Loading…"}
+      <output className={styles.readout}>
+        {canvas ? `In view: xywh=${inView}` : "Loading…"}
       </output>
     </div>
   );

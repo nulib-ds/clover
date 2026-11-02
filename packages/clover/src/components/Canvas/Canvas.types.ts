@@ -17,6 +17,7 @@ import type { IIIFCanvas, ViewingDirection } from "./layout";
 import type { ControlButtons } from "../../ui/controlButtons";
 import type { AnnotationLink } from "../../core/link";
 import type { CloverRequest } from "../../core/request";
+import type { ContentStateOutput } from "../../core/content-state";
 
 /** A painting body as `body` takes it: a web resource that may carry a `label`. */
 export interface LabeledIIIFExternalWebResource
@@ -193,12 +194,13 @@ export interface CloverCanvasProps {
    */
   controls?: boolean | CanvasControlsConfig;
   /**
-   * When the view's controls (zoom in and out, the two turns, reset, full screen) wait
-   * behind More, at the end of the controls' one row: `"auto"` (the default), only where
-   * the row cannot hold them all; `"always"`, wherever the Canvas offers any, so the row
-   * holds only the rest. Pressed, More opens a tray of them beside the rest.
+   * When the view's controls (zoom in and out, the two turns, reset, full screen)
+   * collapse behind one button, at the end of the controls' one row, so the row fits any
+   * width and leaves the media more room: `"auto"` (the default), only where the row
+   * cannot hold them all; `"always"`, wherever the Canvas offers any, so the row holds
+   * only the rest. Pressed, the button opens a tray of them beside the rest.
    */
-  moreControls?: "auto" | "always";
+  collapseControls?: "auto" | "always";
   /** Replace any control with your own component — the `Viewer`'s `controlButtons`. */
   controlButtons?: ControlButtons;
   /**
@@ -266,6 +268,17 @@ export interface CloverCanvasProps {
   manifestId?: string;
   /** The visible world rectangle, at most once per frame while the camera moves. */
   onViewportChange?: (bounds: Rect) => void;
+  /**
+   * Where it is, as a IIIF content state, as it changes: as the Canvas changes, the
+   * camera pans or zooms, or its media pauses or seeks. Both forms, the
+   * annotation (`json`) and the same encoded for a URL (`encoded`); the Canvas, within its
+   * Manifest (`manifestId`, the one it loaded, or its Root's), and the region in view or
+   * the time. Of several shown together, it names the one filling most of the view.
+   * Given `canvases`, it names no Manifest unless `manifestId` does; given only `src` or
+   * `body`, it has no Canvas to name, and reports nothing. At most every 150ms while it
+   * moves, always its last place, and only when it changed.
+   */
+  onContentStateChange?: (state: ContentStateOutput) => void;
   /**
    * A time-based Canvas's media element once it exists, and `null` when it goes: for a
    * host's own transcript, chapters or `#t=` seeks. Sound plays through a `<video>` too.

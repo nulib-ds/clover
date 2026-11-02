@@ -1,0 +1,341 @@
+---
+title: Content State
+description: "How Clover opens a IIIF content state, and reports where each of its parts is as one, as an object or encoded for a link."
+---
+
+import { ContentStateExample } from "docs/components/Clover4/ContentStateExample";
+
+# Content State
+
+<div className="docs-lede">
+  A IIIF content state is a place in a resource: a Canvas within its Manifest,
+  and a region of it or a moment in it. Clover opens one, and tells you where it
+  is as one, so a page can share a view, keep it, or come back to it.
+</div>
+
+Clover reads and writes content states as the
+[IIIF Content State API](https://iiif.io/api/content-state/) defines them: an annotation
+whose motivation is `contentState`, as JSON, or the same encoded for a URL.
+
+## Where it is, as a content state
+
+`onContentStateChange` hands you a content state as the view changes: as the Canvas
+changes, as the camera pans or zooms, and as a recording pauses or seeks. While the view
+keeps moving it comes at most every 100 milliseconds, ten times a second, and the last
+place is always sent. It comes
+in both forms at once, `{ json, encoded }`: the annotation as an object, and the same
+encoded for a link. Nothing is sent while the view is unchanged.
+
+Pan or zoom the catalog, or pick another of its pages under it; or play the film, pause
+it, or pick another reel. What it reports follows. Write a note, and it goes with the
+annotation, in both forms.
+
+<ContentStateExample>
+
+<div data-option="catalog">
+
+```jsx
+import { useState } from "react";
+import * as Clover from "@nulib/clover";
+
+// A note of your own, as the annotation's body: plain text, encoded with it.
+function withNote(state, note) {
+  if (!note.trim()) return state;
+  const json = {
+    ...state.json,
+    body: { type: "TextualBody", value: note, format: "text/plain" },
+  };
+  return { json, encoded: Clover.encodeContentState(json) };
+}
+
+export default function Catalog() {
+  const [reported, setReported] = useState(null);
+  const [note, setNote] = useState("");
+  const state = reported && withNote(reported, note);
+  return (
+    <>
+      <Clover.Root
+        iiifContent="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+        onContentStateChange={setReported}
+      >
+        <Clover.Body style={{ height: 384 }} />
+        <Clover.Items />
+      </Clover.Root>
+      <label htmlFor="note">Note (optional)</label>
+      <textarea
+        id="note"
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+      />
+      <pre>{state && JSON.stringify(state.json, null, 2)}</pre>
+      <pre>{state?.encoded}</pre>
+      {state && (
+        <a
+          href={`https://clover.iiif.library.northwestern.edu/?iiif-content=${state.encoded}`}
+        >
+          Open this content state in the homepage demo
+        </a>
+      )}
+    </>
+  );
+}
+```
+
+```html twin
+<clover-root
+  iiif-content="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+>
+  <clover-body style="height: 384px"></clover-body>
+  <clover-items></clover-items>
+</clover-root>
+<label for="note">Note (optional)</label>
+<textarea id="note"></textarea>
+<pre id="json"></pre>
+<pre id="encoded"></pre>
+<a id="open" hidden>Open this content state in the homepage demo</a>
+
+<script type="module">
+  // As the Content State API encodes one for a link: base64url of the URI-encoded JSON.
+  const encode = (json) =>
+    btoa(encodeURIComponent(JSON.stringify(json)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+  const note = document.getElementById("note");
+  let reported = null;
+
+  function show() {
+    if (!reported) return;
+    // A note of your own, as the annotation's body: plain text, encoded with it.
+    const written = note.value.trim();
+    const json = written
+      ? {
+          ...reported.json,
+          body: {
+            type: "TextualBody",
+            value: note.value,
+            format: "text/plain",
+          },
+        }
+      : reported.json;
+    const encoded = written ? encode(json) : reported.encoded;
+    document.getElementById("json").textContent = JSON.stringify(json, null, 2);
+    document.getElementById("encoded").textContent = encoded;
+    const open = document.getElementById("open");
+    open.href = `https://clover.iiif.library.northwestern.edu/?iiif-content=${encoded}`;
+    open.hidden = false;
+  }
+
+  document
+    .querySelector("clover-root")
+    .addEventListener("clover-content-state-change", ({ detail }) => {
+      reported = detail;
+      show();
+    });
+  note.addEventListener("input", show);
+</script>
+```
+
+</div>
+<div data-option="film">
+
+```jsx
+import { useState } from "react";
+import * as Clover from "@nulib/clover";
+
+// A note of your own, as the annotation's body: plain text, encoded with it.
+function withNote(state, note) {
+  if (!note.trim()) return state;
+  const json = {
+    ...state.json,
+    body: { type: "TextualBody", value: note, format: "text/plain" },
+  };
+  return { json, encoded: Clover.encodeContentState(json) };
+}
+
+export default function Film() {
+  const [reported, setReported] = useState(null);
+  const [note, setNote] = useState("");
+  const state = reported && withNote(reported, note);
+  return (
+    <>
+      <Clover.Root
+        iiifContent="https://api.dc.library.northwestern.edu/api/v2/works/d8fb6329-f7fb-48bf-8bb7-70a64ded5a15?as=iiif"
+        onContentStateChange={setReported}
+      >
+        <Clover.Body style={{ height: 384 }} />
+        <Clover.Items />
+      </Clover.Root>
+      <label htmlFor="note">Note (optional)</label>
+      <textarea
+        id="note"
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+      />
+      <pre>{state && JSON.stringify(state.json, null, 2)}</pre>
+      <pre>{state?.encoded}</pre>
+      {state && (
+        <a
+          href={`https://clover.iiif.library.northwestern.edu/?iiif-content=${state.encoded}`}
+        >
+          Open this content state in the homepage demo
+        </a>
+      )}
+    </>
+  );
+}
+```
+
+```html twin
+<clover-root
+  iiif-content="https://api.dc.library.northwestern.edu/api/v2/works/d8fb6329-f7fb-48bf-8bb7-70a64ded5a15?as=iiif"
+>
+  <clover-body style="height: 384px"></clover-body>
+  <clover-items></clover-items>
+</clover-root>
+<label for="note">Note (optional)</label>
+<textarea id="note"></textarea>
+<pre id="json"></pre>
+<pre id="encoded"></pre>
+<a id="open" hidden>Open this content state in the homepage demo</a>
+
+<script type="module">
+  // As the Content State API encodes one for a link: base64url of the URI-encoded JSON.
+  const encode = (json) =>
+    btoa(encodeURIComponent(JSON.stringify(json)))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+  const note = document.getElementById("note");
+  let reported = null;
+
+  function show() {
+    if (!reported) return;
+    // A note of your own, as the annotation's body: plain text, encoded with it.
+    const written = note.value.trim();
+    const json = written
+      ? {
+          ...reported.json,
+          body: {
+            type: "TextualBody",
+            value: note.value,
+            format: "text/plain",
+          },
+        }
+      : reported.json;
+    const encoded = written ? encode(json) : reported.encoded;
+    document.getElementById("json").textContent = JSON.stringify(json, null, 2);
+    document.getElementById("encoded").textContent = encoded;
+    const open = document.getElementById("open");
+    open.href = `https://clover.iiif.library.northwestern.edu/?iiif-content=${encoded}`;
+    open.hidden = false;
+  }
+
+  document
+    .querySelector("clover-root")
+    .addEventListener("clover-content-state-change", ({ detail }) => {
+      reported = detail;
+      show();
+    });
+  note.addEventListener("input", show);
+</script>
+```
+
+</div>
+
+</ContentStateExample>
+
+Every part that shows a view reports back its current content state:
+
+| Part                         | What its content state names                                                                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`Root`](/docs/root)         | The view's Canvas within the Manifest, and the region in view or the time.                                                                                                      |
+| [`Viewer`](/docs/viewer)     | In any of its templates, Default, Document or Gallery: the Canvas it shows within the Manifest, and the region in view or the time, as Root's.                                  |
+| [`Body`](/docs/body)         | Its Root's view, whatever draws it: Canvas, Timeline, Scene or a renderer of yours.                                                                                             |
+| [`Canvas`](/docs/canvas)     | Its Canvas within its Manifest, and the region in view or the time: on its own (`iiifContent`, or Canvases handed to it) or in a Root. Given only `src` or `body`, it has none. |
+| [`Timeline`](/docs/timeline) | Its Timeline within its Manifest, and the time once it pauses or seeks.                                                                                                         |
+| [`Scene`](/docs/scene)       | Its Scene within its Manifest. A content state carries no camera, so turning the models leaves it as it is.                                                                     |
+
+Of several Canvases shown together, a spread say, each names the one filling most of the
+view.
+
+## The object
+
+`json` is the annotation. Its target is the Canvas, by its `id` and `type`, with the
+Manifest it is `partOf`, and a selector for the region in view (`xywh=`, in the Canvas's
+own pixels) or the time (`t=`, in seconds), where there is one:
+
+```json
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/5#content-state",
+  "type": "Annotation",
+  "motivation": ["contentState"],
+  "target": {
+    "type": "SpecificResource",
+    "source": {
+      "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/5",
+      "type": "Canvas",
+      "partOf": [
+        {
+          "id": "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
+          "type": "Manifest"
+        }
+      ]
+    },
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=2705,66,1419,1518"
+    }
+  }
+}
+```
+
+A note of your own goes in its `body`, as plain text:
+`{ "type": "TextualBody", "value": "…", "format": "text/plain" }`. It is optional; Clover
+shows one on the Canvas as it opens the content state, read as plain text, never as
+markup.
+
+A Timeline or a Scene is named by its own `type`, and its context is the one that
+defines them. A Canvas shown on its own, outside any Manifest, is named without a
+`partOf`.
+
+## Encoded
+
+`encoded` is the same annotation as the Content State API encodes it for a URL:
+URI-encoded JSON, as base64url, without padding. Put it in a link, as the value of
+`iiif-content`, and a viewer that reads content states opens the view it names, Clover's
+own [homepage](/) among them.
+
+```jsx
+<Viewer
+  iiifContent={url}
+  onContentStateChange={({ encoded }) =>
+    history.replaceState(null, "", `?iiif-content=${encoded}`)
+  }
+/>
+```
+
+```html twin
+<clover-viewer
+  iiif-content="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+></clover-viewer>
+
+<script type="module">
+  document
+    .querySelector("clover-viewer")
+    .addEventListener("clover-content-state-change", ({ detail }) =>
+      history.replaceState(null, "", `?iiif-content=${detail.encoded}`),
+    );
+</script>
+```
+
+## Opening one
+
+Give a content state as `iiifContent`, as JSON or encoded, to the Viewer, a `Root`, or a
+`Canvas`, `Timeline` or `Scene` on its own, and it opens there: the Manifest it is part
+of, at the Canvas it names, framed on its region or at its time.
+[Opening at a place](/docs/viewer#opening-at-a-place) shows one.
+
+`buildContentState`, `encodeContentState` and `decodeContentState` make, encode and read
+one of your own, as the [helpers](/docs/technical#helpers) describe.

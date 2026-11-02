@@ -52,9 +52,9 @@ export type DocumentProps = Omit<RootProps, "children"> & {
   /**
    * When the Body's view controls (zoom, the turns, reset, full screen) wait behind
    * More: `"auto"` (the default), only where its row cannot hold them all; `"always"`.
-   * The Body's `moreControls`.
+   * The Body's `collapseControls`.
    */
-  moreControls?: "auto" | "always";
+  collapseControls?: "auto" | "always";
 };
 
 /**
@@ -76,7 +76,7 @@ export function Document({
   languages = true,
   headingLevel = 2,
   storageKey = "clover-template-document",
-  moreControls,
+  collapseControls,
   ...root
 }: DocumentProps) {
   // Past h6 the title is no heading, and names the Viewer instead (`Clover.titled`).
@@ -102,7 +102,7 @@ export function Document({
         languages={languages}
         headingLevel={headingLevel}
         storageKey={storageKey}
-        moreControls={moreControls}
+        collapseControls={collapseControls}
       />
     </Clover.Root>
   );
@@ -131,7 +131,7 @@ function DocumentLayout({
   headingLevel = 2,
   storageKey,
   panelLayout,
-  moreControls,
+  collapseControls,
   title,
 }: { title: Clover.Titled } & Pick<
   DocumentProps,
@@ -143,7 +143,7 @@ function DocumentLayout({
   | "headingLevel"
   | "storageKey"
   | "panelLayout"
-  | "moreControls"
+  | "collapseControls"
 >) {
   const t = Clover.useT();
   const langOf = Clover.useLangOf();
@@ -354,7 +354,9 @@ function DocumentLayout({
             </div>
           )}
           {/* The pages, and the one Canvas, which holds the panel's toggle. */}
-          <Sheets moreControls={moreControls}>{!docked && panelToggle}</Sheets>
+          <Sheets collapseControls={collapseControls}>
+            {!docked && panelToggle}
+          </Sheets>
         </Clover.SplitPane>
         {/*
          * The panel, every template's (`shared/PanelPane.tsx`): its bar, its spine and

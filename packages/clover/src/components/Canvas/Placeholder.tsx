@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { Close, CloseViewer, OpenViewer, Play } from "../Body/glyphs";
+import { CloseViewer, OpenViewer, Play } from "../Body/glyphs";
 import Button from "../../ui/Button";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import type { CloverRequest } from "../../core/request";
@@ -97,14 +97,15 @@ function Still({
 
 /**
  * The placeholder's toggle, named for what it opens and closes, as the Viewer's toggle
- * is: "Close player", not a bare "Close" beside the caption's own (WCAG 2.4.6). An
+ * is: "Close image viewer", not a bare "Close" beside the caption's own (WCAG 2.4.6). An
  * image's opens and closes with a magnifier, one of the row's controls, as the `i` and
  * annotations are (Mat, 2026-11-01: "placeholder should not be a special case"), drawn
- * there by `Controls.tsx`; a video's, before it opens, is Play in the middle of its
- * still, drawn by `Placeholder`, and once open, the row's close control.
+ * there by `Controls.tsx`; a video's is Play in the middle of its still, drawn by
+ * `Placeholder`, and gone once it opens (Mat, 2026-11-01).
  *
- * Pressed, it goes from one place to the other (Play to the row, the row to Play): where
- * it had focus, focus follows it to its new place (WCAG 2.4.3).
+ * Pressed, an image's goes from one place to the other, and where it had focus, focus
+ * follows it; a video's Play goes as the video opens, and focus goes to its transport's
+ * Pause, or its view while the transport arrives, never to the page (WCAG 2.4.3).
  */
 export function PlaceholderToggle({
   instance,
@@ -123,9 +124,7 @@ export function PlaceholderToggle({
   const { t, langOf } = useCloverTranslation();
   const id = `placeholder-${instance}`;
   const toggleKey = media
-    ? active
-      ? "playerPlay"
-      : "playerClose"
+    ? "playerPlay"
     : more
       ? active
         ? "canvasExpandControls"
@@ -141,23 +140,22 @@ export function PlaceholderToggle({
       lang={langOf(toggleKey)}
       onClick={(event) => {
         const focused = document.activeElement === event.currentTarget;
+        const figure = event.currentTarget.closest(".clover-canvas");
         onToggle();
         if (focused)
-          requestAnimationFrame(() => document.getElementById(id)?.focus());
+          requestAnimationFrame(() =>
+            (
+              document.getElementById(id) ??
+              figure?.querySelector<HTMLElement>(
+                '.clover-canvas-transport :is([data-button="pause"], [data-button="play"])',
+              ) ??
+              figure?.querySelector<HTMLElement>(".clover-canvas-viewport")
+            )?.focus(),
+          );
       }}
     >
       {/* A video's opens as play; an image's opens and closes with a magnifier. */}
-      {media ? (
-        active ? (
-          <Play />
-        ) : (
-          <Close />
-        )
-      ) : active ? (
-        <OpenViewer />
-      ) : (
-        <CloseViewer />
-      )}
+      {media ? <Play /> : active ? <OpenViewer /> : <CloseViewer />}
     </Button>
   );
 }
@@ -167,9 +165,9 @@ export function PlaceholderToggle({
  * to the Body and centered, in place of the Canvas until the reader opens it. Nothing
  * of the Canvas is fetched, and none of its controls shown, until then.
  *
- * Its toggle (`PlaceholderToggle`), among the row's controls, opens the Canvas and, once
- * open, goes back to the placeholder; a click on the image opens it too. A video's is
- * Play in the middle of the still, drawn here, until it opens. Several Canvases with
+ * Its toggle (`PlaceholderToggle`), among the row's controls, opens an image's Canvas
+ * and, once open, goes back to the placeholder; a click on the image opens it too. A
+ * video's is Play in the middle of the still, drawn here, until it opens, and none after. Several Canvases with
  * placeholders (a spread) are fitted together as one picture, edge to edge.
  */
 const Placeholder: React.FC<PlaceholderProps> = ({

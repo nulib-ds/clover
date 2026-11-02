@@ -7,6 +7,7 @@ import { rendererSurface } from "../Canvas/rendererSurface";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
 import { useVisibleCanvases } from "../../react/hooks";
+import { useRootContentState } from "../../react/useContentStateOutput";
 import { Loading } from "../../ui/Loading";
 
 /*
@@ -46,11 +47,14 @@ export function Body({
   className,
   style,
   renderers,
-  moreControls,
+  collapseControls,
+  onContentStateChange,
   children,
   ...canvas
 }: BodyProps) {
   const root = useClover("Body");
+  // The Root's view, whatever draws it: Canvas, Timeline, Scene or a renderer of yours.
+  useRootContentState(root.clover, onContentStateChange);
   const canvases = useVisibleCanvases();
   const bodies = useMemo(() => paintingBodies(canvases), [canvases]);
   const renderer = pickRenderer(renderers ?? root.renderers, {
@@ -90,7 +94,7 @@ export function Body({
         // Canvas's alone: a Timeline's and a Scene's controls are their own (as yet).
         <ConnectedCanvas
           {...canvas}
-          moreControls={moreControls}
+          collapseControls={collapseControls}
           surface={rendererSurface}
         >
           {children}

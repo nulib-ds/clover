@@ -24,8 +24,9 @@ import { SHORTCUTS, Tip } from "../../../ui/Tip";
 import { useOneOpen } from "../../../ui/useOneOpen";
 import {
   CaptionsIcon,
-  ChaptersIcon,
   ExitFullScreenIcon,
+  FillIcon,
+  FitIcon,
   FullScreenIcon,
   PauseIcon,
   PlayIcon,
@@ -63,6 +64,11 @@ interface TransportProps {
   onChapterHighlight?: (id: string | null) => void;
   /** How the chapters' pictures are fetched: the host's credentials and headers. */
   request?: CloverRequest;
+  /**
+   * A lone video's fit, fitted (the default) or filling the Body, centered either way:
+   * one control, left of full screen, named for what a press does (Mat, 2026-11-01).
+   */
+  fill?: { filled: boolean; onToggle: () => void };
 }
 
 export interface TransportChapter {
@@ -81,7 +87,7 @@ export interface TransportChapter {
 }
 
 /** A chapter's picture as a source, a URL given as it is. */
-const chapterPicture = (chapter?: TransportChapter) =>
+export const chapterPicture = (chapter?: TransportChapter) =>
   typeof chapter?.thumbnail === "string"
     ? { src: chapter.thumbnail }
     : imageSource(chapter?.thumbnail as Record<string, any> | undefined);
@@ -378,6 +384,7 @@ const Transport: React.FC<TransportProps> = ({
   highlightedChapter = null,
   onChapterHighlight,
   request,
+  fill,
 }) => {
   const { t, langOf } = useCloverTranslation();
   // Where the root cannot go full screen (iPhone), a video still can, in the system player.
@@ -673,27 +680,8 @@ const Transport: React.FC<TransportProps> = ({
          * The controls at the end keep together, at the end of their row, and wrap onto
          * a row of their own, the bar's last, where they would not fit beside the rest.
          */}
-        {(chapters.length > 0 || captions.length > 0 || hasFullscreen) && (
+        {(captions.length > 0 || hasFullscreen || fill) && (
           <div className="clover-canvas-transport-end">
-            {chapters.length > 0 && (
-              <TransportMenu
-                id={`${instance}-chapters`}
-                label={t("playerChapters")}
-                labelLang={langOf("playerChapters")}
-                button="chapters"
-                icon={<ChaptersIcon />}
-                options={chapters.map((item) => ({
-                  label: item.label,
-                  lang: item.lang,
-                  time: formatTime(item.start),
-                  thumbnail: chapterPicture(item),
-                }))}
-                selected={chapter}
-                onSelect={(index) => controller.seek(chapters[index].start)}
-                request={request}
-                asMenu
-              />
-            )}
             {captions.length > 0 && (
               <TransportMenu
                 id={`${instance}-captions`}
@@ -707,6 +695,15 @@ const Transport: React.FC<TransportProps> = ({
                 selected={activeCaption + 1}
                 onSelect={(index) => onCaptionChange(index - 1)}
               />
+            )}
+            {fill && (
+              <TransportButton
+                words={fill.filled ? "playerFit" : "playerFill"}
+                button="fill"
+                onClick={fill.onToggle}
+              >
+                {fill.filled ? <FitIcon /> : <FillIcon />}
+              </TransportButton>
             )}
             {hasFullscreen && (
               <TransportButton

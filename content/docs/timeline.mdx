@@ -1,6 +1,6 @@
 ---
 title: Timeline
-description: "Clover's player for IIIF Presentation 4 Timelines: sound played as a music app plays it, with its artwork, captions as lyrics and chapters as tracks."
+description: "Clover's player for IIIF Presentation 4 Timelines: sound played with its artwork, title, captions and chapters, on its own or in a Root."
 ---
 
 import { Example, ViewerExample } from "docs/components/Clover4/ViewerDocs";
@@ -20,8 +20,8 @@ import { Measured } from "docs/components/Clover4/Measured";
 
 <div className="docs-lede">
   Sound, as Presentation 4 shapes it: a Timeline, played as a music app plays
-  it, its artwork beside its title, its captions as lyrics and its chapters as
-  tracks.
+  it, its artwork and title in the middle, its transport and captions along its
+  foot.
 </div>
 
 <LivePart
@@ -49,33 +49,35 @@ with it too. It fills its parent, so give the parent a height.
 
 It plays through [Canvas](/docs/canvas), with its transport, captions, chapters and
 annotations on the recording's time, as a player: the Timeline's label is its title and
-its Manifest's is under it; its captions and annotations show as lyrics; and where it
-has room, its chapters are listed as tracks under it. Its artwork is the Timeline's
+its Manifest's is under it; its captions and annotations show along its foot, over the
+transport, as a video's do; and its chapters are on its seek bar and in its Chapters
+menu. Its artwork is the Timeline's
 placeholder Canvas until it first plays, then its accompanying Canvas, each standing in
 for the other, else its thumbnail, at its own shape. The player's ground takes the
 artwork's colors.
 
 <ApiReference elements="clover-timeline">
 
-| Prop              | Type                                                 | Default                   | Description                                                                                                                                                                                |
-| ----------------- | ---------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `timeline`        | `object`                                             | The Root's view           | A Presentation 4 Timeline to play; `toPresentation4()` upgrades older ones.                                                                                                                |
-| `iiifContent`     | `string \| object`                                   | —                         | A Timeline to load and play, or a Manifest's first: URL or JSON.                                                                                                                           |
-| `label`           | language map or `string`                             | The Timeline's label      | The view's accessible name, and the player's title.                                                                                                                                        |
-| `partOf`          | language map or `string`                             | The Manifest's label      | What it is part of, under its title.                                                                                                                                                       |
-| `language`        | `string`                                             | The Root's, or the page's | The language to read labels, captions' names and annotations in.                                                                                                                           |
-| `highContrast`    | `boolean`                                            | `false`                   | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. Inside a `Root`, the Root's too; on wherever the system asks for more contrast. |
-| `controls`        | `boolean \| { annotations, information }`            | `true`                    | The round controls over the Body; the transport stays.                                                                                                                                     |
-| `placeholder`     | `boolean`                                            | `true`                    | Show the Timeline's `placeholderContainer` as its artwork until it plays.                                                                                                                  |
-| `annotations`     | `{ annotation, targetIndex, pageLabel?, pageId? }[]` | The Root's                | Annotations on its time, each a cue while its stretch plays.                                                                                                                               |
-| `chapters`        | `{ id?, label, lang?, start, end? }[]`               | The Ranges, in a `Root`   | Chapters, on its seek bar, in a menu, and as tracks where there is room.                                                                                                                   |
-| `caption`         | `string \| null`                                     | —                         | The caption file (`id`) to show while captions are on.                                                                                                                                     |
-| `onCaptionChange` | `(caption: { id, language? } \| null) => void`       | —                         | A caption file was chosen, or Off (`null`).                                                                                                                                                |
-| `onMediaElement`  | `(element: HTMLVideoElement \| null) => void`        | —                         | The recording's element, for a transcript of your own.                                                                                                                                     |
-| `onEnded`         | `() => void`                                         | —                         | Playback reached the end: a cue to move on.                                                                                                                                                |
-| `options`         | `object`                                             | —                         | Canvas's: `request` and `hideDelay` among them.                                                                                                                                            |
-| `className`       | `string`                                             | —                         | Added to `clover-canvas clover-timeline`, on its `figure`.                                                                                                                                 |
-| `children`        | `ReactNode`                                          | —                         | Your own controls, kept over the Body.                                                                                                                                                     |
+| Prop                   | Type                                                 | Default                   | Description                                                                                                                                                                                |
+| ---------------------- | ---------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `timeline`             | `object`                                             | The Root's view           | A Presentation 4 Timeline to play; `toPresentation4()` upgrades older ones.                                                                                                                |
+| `iiifContent`          | `string \| object`                                   | —                         | A Timeline to load and play, or a Manifest's first: URL or JSON.                                                                                                                           |
+| `label`                | language map or `string`                             | The Timeline's label      | The view's accessible name, and the player's title.                                                                                                                                        |
+| `partOf`               | language map or `string`                             | The Manifest's label      | What it is part of, under its title.                                                                                                                                                       |
+| `language`             | `string`                                             | The Root's, or the page's | The language to read labels, captions' names and annotations in.                                                                                                                           |
+| `highContrast`         | `boolean`                                            | `false`                   | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. Inside a `Root`, the Root's too; on wherever the system asks for more contrast. |
+| `controls`             | `boolean \| { annotations, information }`            | `true`                    | The round controls over the Body; the transport stays.                                                                                                                                     |
+| `placeholder`          | `boolean`                                            | `true`                    | Show the Timeline's `placeholderContainer` as its artwork until it plays.                                                                                                                  |
+| `annotations`          | `{ annotation, targetIndex, pageLabel?, pageId? }[]` | The Root's                | Annotations on its time, each a cue while its stretch plays.                                                                                                                               |
+| `chapters`             | `{ id?, label, lang?, start, end? }[]`               | The Ranges, in a `Root`   | Chapters, on its seek bar and in its Chapters menu.                                                                                                                                        |
+| `caption`              | `string \| null`                                     | —                         | The caption file (`id`) to show while captions are on.                                                                                                                                     |
+| `onCaptionChange`      | `(caption: { id, language? } \| null) => void`       | —                         | A caption file was chosen, or Off (`null`).                                                                                                                                                |
+| `onMediaElement`       | `(element: HTMLVideoElement \| null) => void`        | —                         | The recording's element, for a transcript of your own.                                                                                                                                     |
+| `onEnded`              | `() => void`                                         | —                         | Playback reached the end: a cue to move on.                                                                                                                                                |
+| `onContentStateChange` | `(state: { json, encoded }) => void`                 | —                         | Where it is, as a [content state](/docs/content-state): the Timeline within its Manifest, and the time once it pauses or seeks.                                                            |
+| `options`              | `object`                                             | —                         | Canvas's: `request` and `hideDelay` among them.                                                                                                                                            |
+| `className`            | `string`                                             | —                         | Added to `clover-canvas clover-timeline`, on its `figure`.                                                                                                                                 |
+| `children`             | `ReactNode`                                          | —                         | Your own controls, kept over the Body.                                                                                                                                                     |
 
 </ApiReference>
 
@@ -135,13 +137,12 @@ focus is in them. With the view focused, Space or K plays and pauses, J and L sk
 seconds back or forward, and M mutes.
 
 Captions come from the Timeline's WebVTT files, each in its own language, and show in
-the player as lyrics; its plain-text transcript shows in the Panel's Transcript. Each
+the player as a video's do; its plain-text transcript shows in the Panel's Transcript. Each
 file is taken for what its annotation `provides`, as a publisher says in Presentation 4:
 captions, subtitles, or a transcript, which shows in the Transcript and is never offered
 as captions, since it may leave out the sounds captions describe. The
 artwork is described by its Canvas's label, and every word and control on the player's
-ground keeps its contrast whatever the artwork's colors. The chapters listed as tracks
-say which is playing in words and weight, not color alone. A recording never starts by
+ground keeps its contrast whatever the artwork's colors. A recording never starts by
 itself: it plays from Play, a link, or the Manifest's
 `auto-advance`.
 

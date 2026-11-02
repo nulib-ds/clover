@@ -127,7 +127,7 @@ export const rootDocs: ElementDocs = {
     "clover-content-state-change": {
       detail: "{ json: Record<string, unknown>; encoded: string }",
       description:
-        "The current view, as a IIIF content state, each time it settles.",
+        "The current view, as a IIIF content state, as it changes: at most every 100ms while it moves, and always its last place.",
     },
   },
 };

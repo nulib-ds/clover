@@ -242,7 +242,16 @@ deadline.
     "everything should be about a quick start"), Viewer (`/docs/viewer`,
     the templates on it: their old page, `/docs/viewer/templates`, forwards to
     `#templates`), Composing, Styling (the menu's names, short; "Composing" for the page
-    titled "Composing layouts"; Mat, 2026-10-23), Technical overview (`/docs/technical`;
+    titled "Composing layouts"; Mat, 2026-10-23). Under Technical (Mat, 2026-11-01: the
+    group that was Contribute, renamed, the overview moved there and first, as
+    "Overview"): Overview, Content State, i18n. Content State (`/docs/content-state`) is
+    what Clover reads and writes as a IIIF content state: `onContentStateChange` on every
+    part that shows a view, `{ json, encoded }`, then the object, the encoding, and
+    opening one. Its example (`ContentStateExample.tsx`) is a Root, its Body and Items,
+    over an image or a video (the catalog, the 1959 football film; its switch "Resource
+    type", Image or Video), the callback on the Root (Mat, 2026-11-01: "why is the
+    callback here and not on root?"), both forms shown as they come, and a link opening
+    the view in the homepage's demo; under it, the chosen one's code. Overview, titled Technical overview (`/docs/technical`;
     Mat, 2026-10-26: the package's entry points, the Viewer, events, languages, parts,
     layouts, parts of your own, helpers (every public function, each documented there;
     Mat, 2026-10-27), types, what it loads, styles, and coming from 3.x, in React and as
@@ -826,7 +835,13 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     made (Turbopack caches it against the new files): clear `.next/dev` as you restart. A component's "API reference" wraps its React tables in
     `<ApiReference elements="clover-…">` (`docs/components/Clover4/ApiReference.tsx`),
     which draws its elements' tables from their specs, with the page's own Markdown
-    components, in the other flavor. `OptionsExample` shows its chosen value's code by
+    components, in the other flavor. A long reference is split into sections, a `###`
+    heading and a table each (Canvas's: Resource and accessibility, View and rendering,
+    Controls, Annotations, Recordings; Mat, 2026-11-01: "make sure we have headings for
+    hierarchy"), with `sections` on its one element's `ApiReference`, which splits that
+    element's table the same way, under `####` headings, each row where the React prop
+    it stands for is listed; a row whose prop no section lists fails the build, so a new
+    prop gets a row in a section. `OptionsExample` shows its chosen value's code by
     CSS (`data-shown`), so the Markdown keeps every value's. `?code=web-components` (or
     `react`) on an address chooses the flavor before the page paints, never stored; the
     homepage's editor writes HTML in that flavor (its lines as many, its values as live);
@@ -1135,7 +1150,8 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
 
 ## i18n
 
-- The docs' i18n page (`content/docs/i18n.mdx`, under Contribute; Mat, 2026-10-20) is
+- The docs' i18n page (`content/docs/i18n.mdx`, under Technical, Contribute until
+  2026-11-01; Mat, 2026-10-20) is
   for readers and contributors: the languages shipped, how one is chosen, and adding a
   language, with a demo that switches one Viewer between them (`LanguagesDemo.tsx`).
   Keep it in step with what follows.

@@ -56,11 +56,11 @@ const ratioOf = (canvas: Canvas) => {
 };
 
 export function Sheets({
-  moreControls,
+  collapseControls,
   children,
 }: {
   /** The Body's, as the template is given it. */
-  moreControls?: "auto" | "always";
+  collapseControls?: "auto" | "always";
   children?: React.ReactNode;
 }) {
   const { clover } = Clover.useClover("Document");
@@ -449,7 +449,7 @@ export function Sheets({
         <div ref={live} className="clover-template-document-live">
           <Clover.Body
             className="clover-template-document-body"
-            moreControls={moreControls}
+            collapseControls={collapseControls}
             onReady={setHandle}
           >
             {children}

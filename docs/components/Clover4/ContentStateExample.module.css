@@ -1,0 +1,91 @@
+/*
+ * The Content State page's example: a Canvas, then what it reports, the annotation and
+ * the same encoded, each in a box of its own that scrolls (and so takes focus, WCAG
+ * 2.1.1), hairline-edged as the examples' switch is (`--gray-8`).
+ */
+.demo {
+  display: grid;
+  gap: 1rem;
+}
+
+/* The Body's box, while the Root and its parts load. */
+.view {
+  background-color: var(--gray-3);
+  height: 24rem;
+}
+
+.root {
+  display: grid;
+  gap: 1rem;
+}
+
+.note {
+  display: grid;
+  gap: 0.382rem;
+}
+
+.note .name,
+.hint {
+  margin: 0;
+}
+
+.hint {
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+}
+
+/* Edged as the site's controls are (`.cta-outline`): 3:1 against the page (1.4.11). */
+.field {
+  background: var(--color-background);
+  border: 1px solid
+    color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
+  border-radius: var(--radius-3);
+  color: var(--gray-12);
+  font: inherit;
+  padding: 0.382rem 0.618rem;
+  resize: vertical;
+}
+
+.field:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+.forms {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+.name {
+  color: var(--gray-11);
+  font-size: var(--text-sm);
+  margin: 0 0 0.382rem;
+}
+
+.box {
+  border: 1px solid var(--gray-8);
+  border-radius: var(--radius-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  margin: 0;
+  max-height: 16rem;
+  overflow: auto;
+  padding: 0.618rem;
+  white-space: pre;
+}
+
+.encoded {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.box:focus-visible {
+  box-shadow: var(--focus-ring);
+  outline: none;
+}
+
+/* Drawn as the site's outline call to action (`.cta-outline`), at the start of the row. */
+.open {
+  justify-self: start;
+}

@@ -46,12 +46,13 @@ edge; `<Clover.Status loading={false} />` announces it. The table of contents is
 
 <ApiReference elements="clover-body">
 
-| Prop        | Type                  | Default    | Description                                                |
-| ----------- | --------------------- | ---------- | ---------------------------------------------------------- |
-| `renderers` | `BodyRenderer[]`      | The Root's | Components of yours that draw the views they claim.        |
-| `style`     | `React.CSSProperties` | —          | On its box, merged over its inline `height`.               |
-| `className` | `string`              | —          | Added to `clover-body`.                                    |
-| `children`  | `ReactNode`           | —          | Controls after Clover's own, or the renderer's `children`. |
+| Prop                   | Type                                 | Default    | Description                                                                                   |
+| ---------------------- | ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------- |
+| `renderers`            | `BodyRenderer[]`                     | The Root's | Components of yours that draw the views they claim.                                           |
+| `onContentStateChange` | `(state: { json, encoded }) => void` | —          | The Root's view, as a [content state](/docs/content-state), as it changes, whatever draws it. |
+| `style`                | `React.CSSProperties`                | —          | On its box, merged over its inline `height`.                                                  |
+| `className`            | `string`                             | —          | Added to `clover-body`.                                                                       |
+| `children`             | `ReactNode`                          | —          | Controls after Clover's own, or the renderer's `children`.                                    |
 
 </ApiReference>
 
@@ -132,7 +133,7 @@ over a placeholder, or a lone recording. Name each one as Clover's are named
 
 Give `renderers` to `Body`, or to the `Root` for every `Body` in it, and a view that
 one claims, by Canvas id, painting `format` or a `match` test, is drawn by your component
-([Renderers of your own](/docs/composing#renderers-of-your-own)).
+([Custom renderer](/docs/composing#custom-renderer)).
 
 ```jsx
 const renderers = [{ format: ["model/gltf-binary"], component: ModelViewer }];

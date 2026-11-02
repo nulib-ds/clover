@@ -1,6 +1,6 @@
 ---
 title: Canvas
-description: "Clover's own renderer for IIIF Canvases: images, video and sound on one pan and zoom surface, on its own or in a Root."
+description: "The view that renders 2D images and video, with easy pan and zoom in an accessible and configurable interface."
 ---
 
 import CanvasHandleDemo from "docs/components/Canvas/CanvasHandleDemo";
@@ -20,8 +20,8 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 </div>
 
 <div className="docs-lede">
-  Clover's own renderer for IIIF Canvases: images, video and sound on one pan
-  and zoom surface.
+  The view that renders 2D images and video. Allows for easy pan and zoom in an
+  accessible and configurable interface.
 </div>
 
 <LivePart
@@ -38,62 +38,85 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
     },
     { prop: "placeholder", value: true },
     { prop: "controls", value: true },
-    { prop: "moreControls", value: "auto", options: ["auto", "always"] },
+    { prop: "collapseControls", value: "auto", options: ["auto", "always"] },
   ]}
 />
 
 ## API reference
 
-Draws the Presentation 4 Canvases you hand it, or loads one itself (`iiifContent`), with
+Draws the Canvases you hand it, or loads one itself (`iiifContent`), with
 WebGL2, else Canvas2D. Inside a `Root`, given nothing to draw, it shows the Root's current
 view. It fills its parent, so give the parent a height.
 
 It is experimental: its API may change in any release. A plain wheel scrolls the page,
 unless `options.gestures.scrollToZoom` is on.
 
-<ApiReference elements="clover-canvas">
+<ApiReference elements="clover-canvas" sections>
 
-| Prop                     | Type                                                                            | Default                            | Description                                                                                                                                                                                |
-| ------------------------ | ------------------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `iiifContent`            | `string \| object`                                                              | —                                  | A Canvas to load and draw, or a Manifest's first: URL or JSON.                                                                                                                             |
-| `canvases`               | `object[]`                                                                      | The Root's view                    | Presentation 4 Canvases, drawn together; `toPresentation4()` upgrades older ones.                                                                                                          |
-| `body`                   | `object \| object[]`                                                            | —                                  | IIIF painting bodies to draw; they win over `src`.                                                                                                                                         |
-| `src`                    | `string \| string[]`                                                            | —                                  | Image URLs, or image services with `isTiledImage`.                                                                                                                                         |
-| `isTiledImage`           | `boolean`                                                                       | `false`                            | Read each `src` as an image service: its base URI or `info.json`.                                                                                                                          |
-| `viewingDirection`       | `"left-to-right" \| "right-to-left" \| "top-to-bottom" \| "bottom-to-top"`      | `"left-to-right"`                  | How several Canvases line up; in a `Root`, the Manifest's.                                                                                                                                 |
-| `label`                  | language map or `string`                                                        | The Canvas's label                 | The viewport's accessible name.                                                                                                                                                            |
-| `partOf`                 | language map or `string`                                                        | The Manifest's label               | Under the title of a lone recording of sound, which plays as a [player](/docs/timeline).                                                                                                   |
-| `language`               | `string`                                                                        | The Root's, or the page's          | The language to read labels, Choices and annotations in.                                                                                                                                   |
-| `highContrast`           | `boolean`                                                                       | `false`                            | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. Inside a `Root`, the Root's too; on wherever the system asks for more contrast. |
-| `controls`               | `boolean \| { zoom, fullPage, rotation, reset, annotations, information, map }` | `true`                             | All of Clover's controls, none, or all but those set `false`.                                                                                                                              |
-| `moreControls`           | `"auto" \| "always"`                                                            | `"auto"`                           | When the view's controls (zoom, rotation, reset, full screen) wait behind More, at the end of the controls' one row: only where the row cannot hold them all, or always.                   |
-| `navPlace`               | `object`                                                                        | —                                  | Where it is, the Manifest's `navPlace`, which its Map control shows where its Canvases have none. In a `Root`, the Root's Manifest's.                                                      |
-| `navigator`              | `boolean`                                                                       | `false`                            | An overview of the whole image, to press or drag in.                                                                                                                                       |
-| `placeholder`            | `boolean`                                                                       | `true`                             | Open on the Canvas's `placeholderContainer`, where it has one.                                                                                                                             |
-| `options`                | `object`                                                                        | —                                  | `backend`, `gestures`, `maxZoomPixelRatio`, `minZoomImageRatio`, `animationTime`, `hideDelay`, `animation`, `media`, `request`.                                                            |
-| `controlButtons`         | `object`                                                                        | —                                  | Components of your own for `zoomIn`, `zoomOut`, `fullPage`, `rotateRight`, `rotateLeft`, `reset`, `choice`.                                                                                |
-| `onReady`                | `(handle: CanvasHandle) => void`                                                | —                                  | Once laid out, a handle to zoom, pan and turn it.                                                                                                                                          |
-| `onViewportChange`       | `(bounds: { x, y, width, height }) => void`                                     | —                                  | The region in view, at most once a frame.                                                                                                                                                  |
-| `annotations`            | `{ annotation, targetIndex, pageLabel?, pageId? }[]`                            | The loaded Canvas's, or the Root's | Hotspots on regions, points and shapes; whole-Canvas ones go to its information.                                                                                                           |
-| `hiddenPages`            | `string[]`                                                                      | —                                  | AnnotationPages (`pageId`) not drawn; its menu still lists them.                                                                                                                           |
-| `onPageVisibilityChange` | `(pageIds: string[], visible: boolean) => void`                                 | —                                  | Pages were hidden, or shown, from the menu.                                                                                                                                                |
-| `selectedAnnotation`     | `string \| null`                                                                | —                                  | The picked annotation, controlled; `null` picks none.                                                                                                                                      |
-| `onAnnotationSelect`     | `(id: string \| null) => void`                                                  | —                                  | A hotspot or the menu picked one, or `null` let it go.                                                                                                                                     |
-| `highlightedAnnotation`  | `string \| null`                                                                | —                                  | One to highlight, as hovering it in a list does.                                                                                                                                           |
-| `onAnnotationActive`     | `(id: string \| null) => void`                                                  | —                                  | The hotspot hovered or focused, or `null`.                                                                                                                                                 |
-| `onAnnotationLink`       | `(link: { id, canvasId?, manifestId? }) => void`                                | —                                  | A linking hotspot was pressed; in a `Root` or with `iiifContent`, followed for you.                                                                                                        |
-| `animateAnnotations`     | `boolean`                                                                       | `false`                            | Glide to a picked annotation, rather than cut to it.                                                                                                                                       |
-| `chapters`               | `{ id?, label, lang?, start, end? }[]`                                          | The Ranges, in a `Root`            | Chapters of the recording, on its seek bar and in a menu.                                                                                                                                  |
-| `highlightedChapter`     | `string \| null`                                                                | —                                  | A chapter (`id`) to draw out on the seek bar.                                                                                                                                              |
-| `onChapterHighlight`     | `(id: string \| null) => void`                                                  | —                                  | The chapter under the pointer on the seek bar, or `null`.                                                                                                                                  |
-| `caption`                | `string \| null`                                                                | —                                  | The caption file (`id`) to show while captions are on.                                                                                                                                     |
-| `onCaptionChange`        | `(caption: { id, language? } \| null) => void`                                  | —                                  | A caption file was chosen, or Off (`null`).                                                                                                                                                |
-| `onMediaElement`         | `(element: HTMLVideoElement \| null) => void`                                   | —                                  | The recording's element, for a transcript of your own.                                                                                                                                     |
-| `onEnded`                | `() => void`                                                                    | —                                  | Playback reached the end: a cue to move on.                                                                                                                                                |
-| `manifestId`             | `string`                                                                        | —                                  | The Canvases' Manifest: a new one clears the Canvas at once.                                                                                                                               |
-| `instanceId`             | `string`                                                                        | —                                  | A stable id; a new one remounts the renderer.                                                                                                                                              |
-| `className`              | `string`                                                                        | —                                  | Added to `clover-canvas`, on its `figure`.                                                                                                                                                 |
-| `children`               | `ReactNode`                                                                     | —                                  | Your own controls, after Clover's.                                                                                                                                                         |
+### Resource and accessibility
+
+| Prop           | Type                     | Default                   | Description                                                                                                                                                                                |
+| -------------- | ------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `iiifContent`  | `string \| object`       | —                         | A Canvas to load and draw, or a Manifest's first: URL or JSON.                                                                                                                             |
+| `canvases`     | `object[]`               | The Root's view           | Canvases, drawn together; `toPresentation4()` upgrades older ones.                                                                                                                         |
+| `body`         | `object \| object[]`     | —                         | IIIF painting bodies to draw; they win over `src`.                                                                                                                                         |
+| `src`          | `string \| string[]`     | —                         | Image URLs, or image services with `isTiledImage`.                                                                                                                                         |
+| `isTiledImage` | `boolean`                | `false`                   | Read each `src` as an image service: its base URI or `info.json`.                                                                                                                          |
+| `manifestId`   | `string`                 | —                         | The Canvases' Manifest: a new one clears the Canvas at once.                                                                                                                               |
+| `label`        | language map or `string` | The Canvas's label        | The viewport's accessible name.                                                                                                                                                            |
+| `partOf`       | language map or `string` | The Manifest's label      | Under the title of a lone recording of sound, which plays as a [player](/docs/timeline).                                                                                                   |
+| `language`     | `string`                 | The Root's, or the page's | The language to read labels, Choices and annotations in.                                                                                                                                   |
+| `highContrast` | `boolean`                | `false`                   | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. Inside a `Root`, the Root's too; on wherever the system asks for more contrast. |
+| `placeholder`  | `boolean`                | `true`                    | Open on the Canvas's `placeholderContainer`, where it has one.                                                                                                                             |
+| `navPlace`     | `object`                 | —                         | Where it is, the Manifest's `navPlace`, which its Map control shows where its Canvases have none. In a `Root`, the Root's Manifest's.                                                      |
+
+### View and rendering
+
+| Prop                   | Type                                                                       | Default           | Description                                                                                                                                                    |
+| ---------------------- | -------------------------------------------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `viewingDirection`     | `"left-to-right" \| "right-to-left" \| "top-to-bottom" \| "bottom-to-top"` | `"left-to-right"` | How several Canvases line up; in a `Root`, the Manifest's.                                                                                                     |
+| `navigator`            | `boolean`                                                                  | `false`           | An overview of the whole image, to press or drag in.                                                                                                           |
+| `options`              | `object`                                                                   | —                 | `backend`, `gestures`, `maxZoomPixelRatio`, `minZoomImageRatio`, `animationTime`, `hideDelay`, `animation`, `media`, `request`.                                |
+| `onReady`              | `(handle: CanvasHandle) => void`                                           | —                 | Once laid out, a handle to zoom, pan and turn it.                                                                                                              |
+| `onViewportChange`     | `(bounds: { x, y, width, height }) => void`                                | —                 | The region in view, at most once a frame.                                                                                                                      |
+| `onContentStateChange` | `(state: { json, encoded }) => void`                                       | —                 | Where it is, as a IIIF [content state](/docs/content-state), each time it settles: the Canvas within its Manifest, and the region in view or the media's time. |
+| `instanceId`           | `string`                                                                   | —                 | A stable id; a new one remounts the renderer.                                                                                                                  |
+| `className`            | `string`                                                                   | —                 | Added to `clover-canvas`, on its `figure`.                                                                                                                     |
+
+### Controls
+
+| Prop               | Type                                                                            | Default  | Description                                                                                                                                                                                                     |
+| ------------------ | ------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `controls`         | `boolean \| { zoom, fullPage, rotation, reset, annotations, information, map }` | `true`   | All of Clover's controls, none, or all but those set `false`.                                                                                                                                                   |
+| `collapseControls` | `"auto" \| "always"`                                                            | `"auto"` | When the view's controls (zoom, rotation, reset, full screen) collapse behind one button, at the end of the controls' one row: only where the row cannot hold them all, or always, leaving the media more room. |
+| `controlButtons`   | `object`                                                                        | —        | Components of your own for `zoomIn`, `zoomOut`, `fullPage`, `rotateRight`, `rotateLeft`, `reset`, `choice`.                                                                                                     |
+| `children`         | `ReactNode`                                                                     | —        | Your own controls, after Clover's.                                                                                                                                                                              |
+
+### Annotations
+
+| Prop                     | Type                                                 | Default                            | Description                                                                         |
+| ------------------------ | ---------------------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------- |
+| `annotations`            | `{ annotation, targetIndex, pageLabel?, pageId? }[]` | The loaded Canvas's, or the Root's | Hotspots on regions, points and shapes; whole-Canvas ones go to its information.    |
+| `hiddenPages`            | `string[]`                                           | —                                  | AnnotationPages (`pageId`) not drawn; its menu still lists them.                    |
+| `onPageVisibilityChange` | `(pageIds: string[], visible: boolean) => void`      | —                                  | Pages were hidden, or shown, from the menu.                                         |
+| `selectedAnnotation`     | `string \| null`                                     | —                                  | The picked annotation, controlled; `null` picks none.                               |
+| `onAnnotationSelect`     | `(id: string \| null) => void`                       | —                                  | A hotspot or the menu picked one, or `null` let it go.                              |
+| `highlightedAnnotation`  | `string \| null`                                     | —                                  | One to highlight, as hovering it in a list does.                                    |
+| `onAnnotationActive`     | `(id: string \| null) => void`                       | —                                  | The hotspot hovered or focused, or `null`.                                          |
+| `onAnnotationLink`       | `(link: { id, canvasId?, manifestId? }) => void`     | —                                  | A linking hotspot was pressed; in a `Root` or with `iiifContent`, followed for you. |
+| `animateAnnotations`     | `boolean`                                            | `false`                            | Glide to a picked annotation, rather than cut to it.                                |
+
+### Video
+
+| Prop                 | Type                                           | Default                 | Description                                               |
+| -------------------- | ---------------------------------------------- | ----------------------- | --------------------------------------------------------- |
+| `chapters`           | `{ id?, label, lang?, start, end? }[]`         | The Ranges, in a `Root` | Chapters of the recording, on its seek bar and in a menu. |
+| `highlightedChapter` | `string \| null`                               | —                       | A chapter (`id`) to draw out on the seek bar.             |
+| `onChapterHighlight` | `(id: string \| null) => void`                 | —                       | The chapter under the pointer on the seek bar, or `null`. |
+| `caption`            | `string \| null`                               | —                       | The caption file (`id`) to show while captions are on.    |
+| `onCaptionChange`    | `(caption: { id, language? } \| null) => void` | —                       | A caption file was chosen, or Off (`null`).               |
+| `onMediaElement`     | `(element: HTMLVideoElement \| null) => void`  | —                       | The recording's element, for a transcript of your own.    |
+| `onEnded`            | `() => void`                                   | —                       | Playback reached the end: a cue to move on.               |
 
 </ApiReference>
 
@@ -123,14 +146,19 @@ Use `src` for images that are not on a Canvas: plain URLs, or IIIF image service
 
 </Example>
 
-### Controls behind More
+### Collapse controls
 
 The controls stay on one row: the view's first (zoom, rotation, reset and full screen),
-then the Canvas's own (its place, annotations and About). Where the row cannot hold them
-all, the view's wait behind "Expand viewer controls", in their place. Pressed, it opens a tray
-of them beside the rest, with arrows at its ends where it is too narrow for them all, and
-pressed again, "Collapse viewer controls", it closes. Use `moreControls="always"` to keep
-them there however wide the Body is.
+then the Canvas's own (its place, annotations and About). Collapsing the view's controls
+behind one button keeps that row to the room it has, on a phone or in a narrow column, and
+leaves more of the screen to the image or recording. `collapseControls` says when: by
+default, <span data-code-flavor="both">`auto`</span>, only where the row cannot hold them
+all; or <span data-code-flavor="both">`always`</span>, however wide the Body is, for the
+most room around the media.
+
+Collapsed, they wait behind "Expand viewer controls", in their place. Pressed, it opens a
+tray of them beside the rest, with arrows at its ends where it is too narrow for them all,
+and pressed again, "Collapse viewer controls", it closes.
 
 <Example>
 <div style={{ height: 420 }}>
@@ -138,7 +166,7 @@ them there however wide the Body is.
     src="https://iiif.dc.library.northwestern.edu/iiif/3/bcb98b9f-4c44-4fd0-bfa9-673fb904a2b1"
     isTiledImage
     label="The Vanishing Race - Navaho"
-    moreControls="always"
+    collapseControls="always"
   />
 </div>
 
@@ -147,7 +175,7 @@ them there however wide the Body is.
   src="https://iiif.dc.library.northwestern.edu/iiif/3/bcb98b9f-4c44-4fd0-bfa9-673fb904a2b1"
   isTiledImage
   label="The Vanishing Race - Navaho"
-  moreControls="always"
+  collapseControls="always"
 />
 ```
 
@@ -192,10 +220,10 @@ const views = Clover.groupViews(
 ### Video and sound
 
 A Canvas of video or sound plays in Clover's own transport, with the captions it carries.
-Each WebVTT file is offered for what its annotation `provides` (Presentation 4):
+Each WebVTT file is offered for what its annotation `provides`:
 `closedCaptions` as captions, `subtitles` or `translation` as subtitles, and a
 `transcript` alone only in the [Transcript](/docs/transcript). A file that provides
-nothing, as in Presentation 3, is captions.
+nothing is captions.
 
 <Example>
 <div style={{ height: 420 }}>
@@ -225,48 +253,248 @@ Picking one, from the annotations menu or a list beside it, goes to its time.
 
 </Example>
 
-### Driving it
+### Canvas handles and callbacks
 
-`onReady` hands you a handle (`zoomBy`, `panBy`, `rotateBy`, `home`, `fitBounds` and more) to
-drive the view from controls of your own, and `onViewportChange` reports the region in view.
+`onReady` hands you the Canvas's handle, to drive the view from controls of your own. Here
+each of the page's buttons calls it: `zoomBy` zooms by a step, or to a level, as world
+units are the first image's pixels and a camera `zoom` of 1 is the image at 100%;
+`setRotation` turns it a quarter turn; `home` goes back to the whole image, upright; and
+`fitBounds` frames an `xywh` region, the map's title to start. Each takes whether to
+animate, which Animate sets here; where the system asks for reduced motion, the view
+never animates.
+
+<div data-code-flavor="react">
+
+`onViewportChange` reports the region in view as it moves, in the same pixels: an `xywh`
+you can hand `fitBounds` again.
+
+</div>
+
+<div data-code-flavor="web-components">
+
+The handle's `viewport` event (`handle.on("viewport", …)`) says when the view moves, and
+`handle.getBounds()` gives the region in view, in the same pixels: an `xywh` you can hand
+`fitBounds` again.
+
+</div>
 
 <Example>
 <CanvasHandleDemo
   src="https://iiif.dc.library.northwestern.edu/iiif/3/2fb1e81a-9e24-420c-b224-0bfd6a279baf"
   isTiledImage
   label="Map of the Township of Evanston, Cook County, Illinois"
+  region="4200,1300,2400,1300"
 />
 
 ```jsx
-const canvas = useRef(null);
+import { useEffect, useRef, useState } from "react";
+import * as Clover from "@nulib/clover";
 
-<Clover.Canvas
-  src={service}
-  isTiledImage
-  label={label}
-  onReady={(handle) => (canvas.current = handle)}
-  onViewportChange={(bounds) => setRegion(bounds)}
-/>
-<button onClick={() => canvas.current.zoomBy(2)}>Zoom in</button>
+// World units are the image's pixels, so a camera zoom of 1 is the image at 100%.
+const LEVELS = [0.25, 0.5, 1];
+
+export default function MapControls() {
+  const [canvas, setCanvas] = useState(null);
+  const [animate, setAnimate] = useState(true);
+  const [region, setRegion] = useState("4200,1300,2400,1300");
+  const [invalid, setInvalid] = useState(false);
+  const [inView, setInView] = useState("");
+  const settle = useRef();
+  useEffect(() => () => clearTimeout(settle.current), []);
+
+  const zoomTo = (level) =>
+    canvas.zoomBy(level / canvas.getCamera().zoom, undefined, animate);
+  const rotate = (degrees) =>
+    canvas.setRotation(canvas.getRotation() + degrees, !animate);
+  const goTo = (event) => {
+    event.preventDefault();
+    const [x, y, width, height] = region
+      .replace("xywh=", "")
+      .split(",")
+      .map(Number);
+    const valid =
+      [x, y, width, height].every(Number.isFinite) && width > 0 && height > 0;
+    setInvalid(!valid);
+    if (valid) canvas.fitBounds({ x, y, width, height }, !animate);
+  };
+
+  return (
+    <>
+      <div style={{ height: 450 }}>
+        <Clover.Canvas
+          src="https://iiif.dc.library.northwestern.edu/iiif/3/2fb1e81a-9e24-420c-b224-0bfd6a279baf"
+          isTiledImage
+          label="Map of the Township of Evanston, Cook County, Illinois"
+          onReady={setCanvas}
+          onViewportChange={({ x, y, width, height }) => {
+            // Once the view settles: the readout is a live region, and the view
+            // moves every frame.
+            clearTimeout(settle.current);
+            settle.current = setTimeout(
+              () => setInView([x, y, width, height].map(Math.round).join(",")),
+              250,
+            );
+          }}
+        />
+      </div>
+      <button
+        type="button"
+        disabled={!canvas}
+        onClick={() => canvas.zoomBy(2, undefined, animate)}
+      >
+        Zoom in
+      </button>
+      <button
+        type="button"
+        disabled={!canvas}
+        onClick={() => canvas.zoomBy(0.5, undefined, animate)}
+      >
+        Zoom out
+      </button>
+      <div role="group" aria-labelledby="zoom-to">
+        <span id="zoom-to">Zoom to</span>
+        {LEVELS.map((level) => (
+          <button
+            key={level}
+            type="button"
+            disabled={!canvas}
+            aria-label={`Zoom to ${level * 100}%`}
+            onClick={() => zoomTo(level)}
+          >
+            {level * 100}%
+          </button>
+        ))}
+      </div>
+      <button type="button" disabled={!canvas} onClick={() => rotate(-90)}>
+        Rotate left
+      </button>
+      <button type="button" disabled={!canvas} onClick={() => rotate(90)}>
+        Rotate right
+      </button>
+      <button
+        type="button"
+        disabled={!canvas}
+        onClick={() => canvas.home(!animate)}
+      >
+        Reset
+      </button>
+      <form onSubmit={goTo}>
+        <label htmlFor="region">Region (xywh)</label>
+        <input
+          id="region"
+          value={region}
+          aria-invalid={invalid}
+          aria-describedby={invalid ? "region-error" : undefined}
+          onChange={(event) => {
+            setRegion(event.target.value);
+            setInvalid(false);
+          }}
+        />
+        <button disabled={!canvas}>Go to region</button>
+        {invalid && (
+          <p id="region-error">Give four numbers: x, y, width and height.</p>
+        )}
+      </form>
+      <label>
+        <input
+          type="checkbox"
+          checked={animate}
+          onChange={(event) => setAnimate(event.target.checked)}
+        />
+        Animate
+      </label>
+      <output>{canvas ? `In view: xywh=${inView}` : "Loading…"}</output>
+    </>
+  );
+}
 ```
 
 ```html twin
-<clover-canvas
-  id="picture"
-  src="https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen"
-  tiled
-  label="Göttingen's market square"
-></clover-canvas>
-<button type="button" id="zoom">Zoom in</button>
+<div style="height: 450px">
+  <clover-canvas
+    id="map"
+    src="https://iiif.dc.library.northwestern.edu/iiif/3/2fb1e81a-9e24-420c-b224-0bfd6a279baf"
+    tiled
+    label="Map of the Township of Evanston, Cook County, Illinois"
+  ></clover-canvas>
+</div>
+<div id="controls">
+  <button type="button" data-zoom="2">Zoom in</button>
+  <button type="button" data-zoom="0.5">Zoom out</button>
+  <div role="group" aria-labelledby="zoom-to">
+    <span id="zoom-to">Zoom to</span>
+    <button type="button" data-level="0.25" aria-label="Zoom to 25%">
+      25%
+    </button>
+    <button type="button" data-level="0.5" aria-label="Zoom to 50%">50%</button>
+    <button type="button" data-level="1" aria-label="Zoom to 100%">100%</button>
+  </div>
+  <button type="button" data-turn="-90">Rotate left</button>
+  <button type="button" data-turn="90">Rotate right</button>
+  <button type="button" data-reset>Reset</button>
+</div>
+<form id="go">
+  <label for="region">Region (xywh)</label>
+  <input
+    id="region"
+    value="4200,1300,2400,1300"
+    aria-describedby="region-error"
+  />
+  <button>Go to region</button>
+  <p id="region-error"></p>
+</form>
+<label><input type="checkbox" id="animate" checked /> Animate</label>
+<output id="in-view">Loading…</output>
 
 <script type="module">
-  const canvas = document.getElementById("picture");
-  canvas.addEventListener("clover-ready", ({ detail: { handle } }) => {
-    handle.on("viewport", () => setRegion(handle.getBounds()));
+  const map = document.getElementById("map");
+  const animate = document.getElementById("animate");
+  const region = document.getElementById("region");
+  const error = document.getElementById("region-error");
+  const inView = document.getElementById("in-view");
+  let settle;
+
+  map.addEventListener("clover-ready", ({ detail: { handle } }) => {
+    handle.on("viewport", () => {
+      // Once the view settles: the readout is a live region, and the view moves
+      // every frame.
+      clearTimeout(settle);
+      settle = setTimeout(() => {
+        const { x, y, width, height } = handle.getBounds();
+        const xywh = [x, y, width, height].map(Math.round).join(",");
+        inView.value = `In view: xywh=${xywh}`;
+      }, 250);
+    });
   });
-  document
-    .getElementById("zoom")
-    .addEventListener("click", () => canvas.handle?.zoomBy(2));
+
+  // World units are the image's pixels, so a camera zoom of 1 is the image at 100%.
+  document.getElementById("controls").addEventListener("click", (event) => {
+    const button = event.target.closest("button");
+    const handle = map.handle;
+    if (!button || !handle) return;
+    const { zoom, level, turn } = button.dataset;
+    const motion = animate.checked;
+    if (zoom) handle.zoomBy(Number(zoom), undefined, motion);
+    if (level)
+      handle.zoomBy(Number(level) / handle.getCamera().zoom, undefined, motion);
+    if (turn) handle.setRotation(handle.getRotation() + Number(turn), !motion);
+    if ("reset" in button.dataset) handle.home(!motion);
+  });
+
+  document.getElementById("go").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const [x, y, width, height] = region.value
+      .replace("xywh=", "")
+      .split(",")
+      .map(Number);
+    const valid =
+      [x, y, width, height].every(Number.isFinite) && width > 0 && height > 0;
+    region.setAttribute("aria-invalid", String(!valid));
+    error.textContent = valid
+      ? ""
+      : "Give four numbers: x, y, width and height.";
+    if (valid) map.handle?.fitBounds({ x, y, width, height }, !animate.checked);
+  });
 </script>
 ```
 

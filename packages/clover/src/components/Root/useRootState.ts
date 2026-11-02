@@ -17,6 +17,7 @@ import type { ContentStateOutput } from "../../core/content-state";
 import type { IIIFContent } from "../../core/load";
 import { type CloverRequest, requestKey } from "../../core/request";
 import type { CloverContextValue } from "../../react/context";
+import { useRootContentState } from "../../react/useContentStateOutput";
 import { type BodyRenderer, sameRenderers } from "../Body/renderers";
 
 /** What a Root is given about its content: every prop but its element's. */
@@ -141,7 +142,7 @@ export function useRootState<Props extends RootStateOptions>({
     clover.setAnnotationPages(annotationPages);
   }, [clover, annotationPages]);
 
-  useContentStateOutput(clover, onContentStateChange);
+  useRootContentState(clover, onContentStateChange);
 
   // A controlled host's Manifest, once the Collection has loaded.
   useEffect(() => {
@@ -208,63 +209,6 @@ function annotationsInputKey(input: AnnotationsInput | undefined): string {
         : ((item as { id?: string })?.id ?? "object"),
     ),
   );
-}
-
-/** How long the reader's place must hold still before it is reported. */
-const SETTLE_MS = 300;
-
-/**
- * Report the content state when it settles: after the Canvas changes, the camera stops,
- * or media pauses or seeks. One debounce, not polling; nothing fires while unchanged.
- */
-function useContentStateOutput(
-  clover: Clover,
-  onChange: ((state: ContentStateOutput) => void) | undefined,
-) {
-  const latest = useRef(onChange);
-  latest.current = onChange;
-  const enabled = Boolean(onChange);
-  useEffect(() => {
-    if (!enabled) return;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    let last = "";
-    const settle = () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        const state = clover.getContentState();
-        if (!state || state.encoded === last) return;
-        last = state.encoded;
-        latest.current?.(state);
-      }, SETTLE_MS);
-    };
-    let canvasId = clover.store.get().canvasId;
-    const offStore = clover.store.subscribe(() => {
-      const next = clover.store.get().canvasId;
-      if (next !== canvasId) {
-        canvasId = next;
-        settle();
-      }
-    });
-    const offViewport = clover.viewport.subscribe(settle);
-    let element: HTMLVideoElement | null = null;
-    const watch = (next: HTMLVideoElement | null) => {
-      element?.removeEventListener("pause", settle);
-      element?.removeEventListener("seeked", settle);
-      element = next;
-      element?.addEventListener("pause", settle);
-      element?.addEventListener("seeked", settle);
-    };
-    watch(clover.media.get());
-    const offMedia = clover.media.subscribe(watch);
-    settle();
-    return () => {
-      clearTimeout(timer);
-      offStore();
-      offViewport();
-      offMedia();
-      watch(null);
-    };
-  }, [clover, enabled]);
 }
 
 /**

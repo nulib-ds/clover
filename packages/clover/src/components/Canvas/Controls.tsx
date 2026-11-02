@@ -1,8 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import type { CanvasControlsConfig } from "./Canvas.types";
 import type { ListedAnnotation } from "./Annotations";
-import { Comment, Information, Place } from "../Body/glyphs";
+import { Chapters, Comment, Information, Place } from "../Body/glyphs";
+import type { TransportChapter } from "./media/Transport";
+import type { CloverRequest } from "../../core/request";
 import Button from "../../ui/Button";
 import type { ChoiceGroup, ChoiceSelections } from "./layout";
 import ControlCluster, {
@@ -25,6 +27,7 @@ import { toggleFullscreen } from "../../lib/fullscreen";
 import useFullscreenSupported from "../../hooks/useFullscreenSupported";
 import useWithinFullscreen from "../../hooks/useWithinFullscreen";
 import { useLoaded } from "../../hooks/useLoaded";
+import { Fits } from "./RowFits";
 import { SHORTCUTS } from "../../ui/Tip";
 import type { CanvasRenderer } from "../../lib/renderer";
 
@@ -33,9 +36,14 @@ import type { CanvasRenderer } from "../../lib/renderer";
  * by the time it is pressed, and never for a Canvas that offers neither.
  */
 const loadAnnotationMenu = () => import("./AnnotationMenu");
+const loadChaptersMenu = () => import("./ChaptersMenu");
 const loadChoiceMenu = () => import("./ChoiceMenu");
-// More, and the measuring that says when it is needed: any Canvas's, never a Timeline's.
-const loadMore = () => import("./More");
+/*
+ * The image controls' button and tray (`ImageControls`), loaded only where needed: where
+ * the row cannot hold the view's controls, which `Fits` measures, or always where asked
+ * (Mat, 2026-11-01: "rename More as ImageControls. load it dynamically").
+ */
+const loadImageControls = () => import("./ImageControls");
 
 /** OpenSeadragon's `zoomPerClick`. */
 const ZOOM_PER_CLICK = 2;
@@ -70,6 +78,16 @@ interface CanvasControlsProps {
   choices?: ChoiceGroup[];
   selections?: ChoiceSelections;
   onSelect?: (key: string, index: number) => void;
+  /**
+   * A recording's chapters, and its element: with any, a control lists them, left of the
+   * annotations' (`ChaptersMenu`; Mat, 2026-11-01).
+   */
+  chapters?: TransportChapter[];
+  mediaElement?: HTMLMediaElement | null;
+  /** Go to a chapter's start: the Canvas opens the recording first, over its still. */
+  onChapter?: (start: number) => void;
+  /** How the chapters' pictures are fetched. */
+  request?: CloverRequest;
   /** The Canvas's annotations, on its picture and its time. With any, a control lists them. */
   annotations?: ListedAnnotation[];
   /** The pages whose annotations are hidden, which the menu lists with their toggles. */
@@ -109,7 +127,7 @@ interface CanvasControlsProps {
  * One row, never wrapped (Mat, 2026-11-01): the view's (zoom, the turns, reset, full
  * screen) and a placeholder's toggle, then Choice and the Canvas's own (the place,
  * annotations, the `i`). Where they do not all fit, the view's wait behind More, in their
- * place, the others in sight as its tray runs left from it (`More.tsx`). A host's own,
+ * place, the others in sight as its tray runs left from it (`ImageControls.tsx`). A host's own,
  * after them, always keep theirs.
  */
 const Controls: React.FC<CanvasControlsProps> = ({
@@ -123,6 +141,10 @@ const Controls: React.FC<CanvasControlsProps> = ({
   selections = {},
   onSelect,
   annotations = [],
+  chapters = [],
+  mediaElement = null,
+  onChapter,
+  request,
   hiddenPages,
   onPageVisibilityChange,
   selectedAnnotation = null,
@@ -157,6 +179,47 @@ const Controls: React.FC<CanvasControlsProps> = ({
   );
   const showAnnotations =
     config.annotations && annotations.length > 0 && onAnnotationSelect;
+  const [chaptersOpen, setChaptersOpen] = useState(false);
+  const chaptersId = `chapters-${instance}`;
+  const chaptersMenuId = `${chaptersId}-menu`;
+  const showChapters = chapters.length > 0 && Boolean(onChapter);
+  /*
+   * Its control gone while it had focus (the next recording has no chapters, or nothing
+   * the row would show, so the row goes too): focus goes to the transport's Play, as the
+   * transport's own controls hand it on, never to the page (WCAG 2.4.3).
+   */
+  const chaptersFocused = useRef(false);
+  const figure = useRef<Element | null>(null);
+  useEffect(() => {
+    const follow = () => {
+      chaptersFocused.current = document.activeElement?.id === chaptersId;
+    };
+    document.addEventListener("focusin", follow);
+    return () => document.removeEventListener("focusin", follow);
+  }, [chaptersId]);
+  const handOn = useCallback(() => {
+    if (!chaptersFocused.current) return;
+    chaptersFocused.current = false;
+    const active = document.activeElement;
+    if (active && active !== document.body) return;
+    figure.current
+      ?.querySelector<HTMLElement>(
+        '.clover-canvas-transport :is([data-button="play"], [data-button="pause"])',
+      )
+      ?.focus();
+  }, []);
+  useEffect(() => {
+    if (!showChapters) handOn();
+  }, [showChapters, handOn]);
+  // The row itself gone: after it is, so focus is no longer on its control.
+  useEffect(() => () => handOn(), [handOn]);
+  const closeChapters = useCallback(
+    (restoreFocus: boolean) => {
+      setChaptersOpen(false);
+      if (restoreFocus) document.getElementById(chaptersId)?.focus();
+    },
+    [chaptersId],
+  );
   const showInformation = config.information && captionId && onCaptionToggle;
   const showPlace = config.map && placeId && onPlaceToggle;
   const choiceId = `choice-${instance}`;
@@ -176,6 +239,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
     loadAnnotationMenu,
     Boolean(showAnnotations),
   )?.default;
+  const ChaptersMenu = useLoaded(loadChaptersMenu, showChapters)?.default;
   const ChoiceMenu = useLoaded(
     loadChoiceMenu,
     choices.length > 0 && Boolean(onSelect),
@@ -191,12 +255,29 @@ const Controls: React.FC<CanvasControlsProps> = ({
   // iPhone Safari cannot full-screen an element: the control is not offered there.
   const canFullscreen = useFullscreenSupported();
   const [cluster, setCluster] = useState<HTMLDivElement | null>(null);
+  useEffect(() => {
+    figure.current = cluster?.closest(".clover-canvas") ?? null;
+  }, [cluster]);
   /*
    * Whether these controls are inside whatever is full screen, so the full-screen control
    * names and draws the way out: the Viewer's element, or the Canvas's own.
    */
   const isFullscreen = useWithinFullscreen(cluster);
   const [moreOpen, setMoreOpen] = useState(false);
+  const annotationsButton = (className?: string) => (
+    <Button
+      key="annotations"
+      className={className}
+      id={annotationsId}
+      label={annotationsLabel}
+      lang={annotationsLang}
+      onClick={() => setAnnotationsOpen((open) => !open)}
+      expanded={annotationsOpen}
+      controls={annotationsMenuId}
+    >
+      <Comment />
+    </Button>
+  );
   const controls = (): ControlSpec[] => {
     const specs: ControlSpec[] = [];
     const camera = renderer;
@@ -316,22 +397,27 @@ const Controls: React.FC<CanvasControlsProps> = ({
         </Button>
       ),
     },
-    showAnnotations && {
-      id: annotationsId,
+    showChapters && {
+      id: chaptersId,
       view: false,
       node: (
         <Button
-          key="annotations"
-          id={annotationsId}
-          label={annotationsLabel}
-          lang={annotationsLang}
-          onClick={() => setAnnotationsOpen((open) => !open)}
-          expanded={annotationsOpen}
-          controls={annotationsMenuId}
+          key="chapters"
+          id={chaptersId}
+          label={t("playerChapters")}
+          lang={langOf("playerChapters")}
+          onClick={() => setChaptersOpen((open) => !open)}
+          expanded={chaptersOpen}
+          controls={chaptersMenuId}
         >
-          <Comment />
+          <Chapters />
         </Button>
       ),
+    },
+    showAnnotations && {
+      id: annotationsId,
+      view: false,
+      node: annotationsButton(),
     },
     showInformation && {
       id: `information-${instance}`,
@@ -374,10 +460,8 @@ const Controls: React.FC<CanvasControlsProps> = ({
     ...own.filter((item) => !toggle.includes(item)),
   ];
   const items = [...lead, ...rest];
-  // Whether they all fit, measured where More is, which loads for a Canvas alone.
+  // Whether they all fit, measured as the row is drawn: a Canvas's, never a Timeline's.
   const [fits, setFits] = useState(true);
-  const more = useLoaded(loadMore, fit);
-  const More = more?.More;
   /*
    * Behind More where the row is full, or always; until it arrives, all on the row. An
    * image's placeholder toggle is More (Mat, 2026-11-01: "the placeholder toggle is the
@@ -387,8 +471,14 @@ const Controls: React.FC<CanvasControlsProps> = ({
    * its toggle at its end, wherever the Canvas offers the view's controls.
    */
   const always = moreWhen === "always" || placeholderIsMore;
+  const ImageControls = useLoaded(
+    loadImageControls,
+    fit && (always || !fits) && items.some((item) => item.view),
+  )?.ImageControls;
   const tucked =
-    (fits && !always) || !More ? [] : items.filter((item) => item.view);
+    (fits && !always) || !ImageControls
+      ? []
+      : items.filter((item) => item.view);
   const deck = placeholderIsMore && tucked.length > 0;
   // Nothing behind it any more: it closes, so it comes back closed.
   useEffect(() => {
@@ -415,21 +505,21 @@ const Controls: React.FC<CanvasControlsProps> = ({
           Canvas's own.
         */}
         {shown(lead)}
-        {More && tucked.length > 0 && (
-          <More
+        {ImageControls && tucked.length > 0 && (
+          <ImageControls
             instance={instance}
             open={deck || moreOpen}
             onOpenChange={setMoreOpen}
             toggle={deck ? placeholder : undefined}
           >
             {tucked.map(({ node }) => node)}
-          </More>
+          </ImageControls>
         )}
         {shown(rest)}
         {children}
       </ControlCluster>
-      {more && fit && !always && cluster && (
-        <more.Fits
+      {fit && !always && cluster && (
+        <Fits
           cluster={cluster}
           ids={items.map(({ id }) => id)}
           more={`more-${instance}`}
@@ -442,6 +532,19 @@ const Controls: React.FC<CanvasControlsProps> = ({
         is: all three hang in one place, below the controls, and stay under them, so a
         control's Tip is never covered (`ControlMenu.css`).
       */}
+      {ChaptersMenu && chaptersOpen && showChapters && (
+        <ChaptersMenu
+          id={chaptersMenuId}
+          triggerId={chaptersId}
+          label={t("playerChapters")}
+          labelLang={langOf("playerChapters")}
+          chapters={chapters}
+          element={mediaElement}
+          onChapter={onChapter!}
+          request={request}
+          onClose={closeChapters}
+        />
+      )}
       {AnnotationMenu && annotationsOpen && showAnnotations && (
         <AnnotationMenu
           id={annotationsMenuId}

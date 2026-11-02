@@ -34,9 +34,14 @@
   position: relative;
   /* A <figure>, whose caption is the Canvases' information: no browser margins. */
   margin: 0;
-  /* The Viewer's default canvas ground: a translucent wash, for images and media alike. */
-  --clover-canvas-wash: #0001;
-  background-color: var(--clover-canvas-wash);
+  /*
+   * The Canvas's background, kept in full screen (Mat, 2026-11-01: "call it
+   * --clover-canvas-background (not wash)"; `--clover-canvas-wash` until then): by
+   * default a translucent wash over the page's, for images and media alike. A page sets
+   * any color here, and by what it shows (`[data-media]`, Styling).
+   */
+  --clover-canvas-background: #0001;
+  background-color: var(--clover-canvas-background);
   width: 100%;
   height: 100%;
   min-height: inherit;
@@ -64,8 +69,8 @@
  */
 .clover-canvas[data-fullscreen="true"] {
   background-image: linear-gradient(
-    var(--clover-canvas-wash),
-    var(--clover-canvas-wash)
+    var(--clover-canvas-background),
+    var(--clover-canvas-background)
   );
   background-color: var(--clover-color-secondary, #fff);
   color: var(--clover-color-primary, #1a1d1e);
@@ -117,7 +122,7 @@
   );
 }
 
-.clover-canvas[data-media] {
+.clover-canvas[data-recording] {
   --clover-canvas-clear-bottom: var(--clover-transport-room);
 }
 
@@ -245,10 +250,30 @@
 }
 
 /*
- * For now a Canvas's controls stay in sight, taking presses, never fading (Mat,
- * 2026-11-01: "let's not [have] controls fade back away so that we can better design
- * this"): no mystery press on the picture to find them on a phone. A Scene's and a
- * Timeline's, on the same figure, still come and go as below (`data-controls`).
+ * Behind a video, black, as video players have it (Mat, 2026-11-01: "make it so video on
+ * canvas is default black. not just on the templates"; the templates' alone, `#0009` and
+ * then black, before). A page's own on `.clover-canvas` still wins: Clover's styles are
+ * in `@layer clover` (Styling).
+ */
+.clover-canvas[data-media="video"] {
+  --clover-canvas-background: #000;
+}
+
+/*
+ * Over a video, no scrim from the top: only the transport's, from the bottom (Mat,
+ * 2026-11-01: "remove the black scrim from the top of video. it should only be on the
+ * bottom"). The cluster's buttons carry their own dark fill, their glyphs 15:1 on it.
+ */
+.clover-canvas[data-media="video"] > .clover-canvas-scrim {
+  display: none;
+}
+
+/*
+ * A picture's controls stay in sight, taking presses, never fading (Mat, 2026-11-01:
+ * "let's not [have] controls fade back away so that we can better design this"): no
+ * mystery press on the picture to find them on a phone. A video's, a Scene's and a
+ * Timeline's come and go as below (`data-controls`; Mat, 2026-11-01: "the controls for
+ * video on canvas should fade back after a bit of time"), a paused Play staying.
  */
 .clover-canvas:not([data-controls]) {
   --clover-controls-shown: 1;
@@ -271,7 +296,7 @@
 /*
  * A Canvas's cluster is one row, never wrapped (Mat, 2026-11-01: "I don't like when
  * controls wrap lines"), as wide as the Body leaves it: the controls that do not fit wait
- * behind More, at its end (`More.tsx`, which measures this row). It starts clear of what
+ * behind More, at its end (`ImageControls.tsx`; `RowFits.tsx` measures this row). It starts clear of what
  * holds the Body's top start: the way out of full screen, and a navigator.
  */
 .clover-canvas > .clover-canvas-controls[data-fit] {
@@ -307,7 +332,7 @@
 }
 
 /*
- * More and its tray (`More.tsx`), at the end of the Canvas's controls. Open, the tray
+ * More and its tray (`ImageControls.tsx`), at the end of the Canvas's controls. Open, the tray
  * runs left from where More was, the other controls kept beside it: the view's controls,
  * then More, the close, at its end, `xs` apart as every control on the row is (Mat,
  * 2026-11-01: "normalize control gaps"; "tighter gap on controls"), one group on one
@@ -363,7 +388,7 @@
 /*
  * Opening, it comes out of its toggle, swiftly (Mat, 2026-11-01: "play around with
  * swiftly animating the opening of this"): its ground drawn out from the toggle, its
- * controls fading in with it, never moved, so where they rest is what `More.tsx`
+ * controls fading in with it, never moved, so where they rest is what `ImageControls.tsx`
  * measures. Closing, it goes at once. Right to left, the toggle is
  * at the left, and it comes out the other way. Not where less motion is asked for.
  */
@@ -439,7 +464,7 @@
 }
 
 /*
- * It scrolls only while its controls run past it (`data-past`, `More.tsx`): a box that
+ * It scrolls only while its controls run past it (`data-past`, `ImageControls.tsx`): a box that
  * scrolls always could be nudged by the room its hidden Tips hang past the last control,
  * its first cut off and its last short of the close (Mat, 2026-11-01: "it feels like
  * there are pixels off here").
@@ -492,7 +517,7 @@
 }
 
 /*
- * A control an end cuts (`data-partial`, `More.tsx`), faded starkly and taking no press,
+ * A control an end cuts (`data-partial`, `ImageControls.tsx`), faded starkly and taking no press,
  * so none is pressed by accident half under the fade (Mat, 2026-11-01: "if a button is
  * only partially visible in the dock, then disable it. and fade it out more starkly"): to
  * the keyboard it is there all along, Tab bringing it clear, and whole while focused.
@@ -503,7 +528,7 @@
 }
 
 /*
- * Its arrows (`More.tsx`), as the Panel's tabs have (`ui/Sections.css`; Mat, 2026-11-01:
+ * Its arrows (`ImageControls.tsx`), as the Panel's tabs have (`ui/Sections.css`; Mat, 2026-11-01:
  * "bring the next/prev buttons like we have on tabs to the expanded controls deck"):
  * small steps, centered on its row at its ends, over the fade, the next before the close;
  * shown while controls lie past that end. On the controls' own dark fill, the glyph in
@@ -604,6 +629,7 @@
   > :is(
     [data-button="information"],
     [data-button="annotations"],
+    [data-button="chapters"],
     [data-button="placeholder"]
   ),
 .clover-canvas-transport-bar > [data-button="play"] {
