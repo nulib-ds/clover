@@ -775,7 +775,7 @@ describe("templates", () => {
   it("Default, Document and Gallery hand their Body moreControls", async () => {
     const more = async () =>
       within(
-        (await screen.findByRole("button", { name: "More controls" }))
+        (await screen.findByRole("button", { name: "Expand viewer controls" }))
           .parentElement!,
       ).queryByRole("button", { name: "Zoom in" });
     const { unmount } = render(

@@ -1329,9 +1329,26 @@ describe("Canvas", () => {
     });
     const [first, second] = (book.items as any[]).map(withPlaceholder);
     const openViewer = () =>
-      screen.getByRole("button", { name: "Open image viewer" });
+      screen.getByRole("button", { name: "Expand viewer controls" });
     const closeViewer = () =>
-      screen.getByRole("button", { name: "Close image viewer" });
+      screen.getByRole("button", { name: "Collapse viewer controls" });
+
+    it("names an image's toggle for the viewer alone where it offers no view controls", async () => {
+      render(
+        <Canvas
+          canvases={[first]}
+          controls={{
+            zoom: false,
+            rotation: false,
+            reset: false,
+            fullPage: false,
+          }}
+        />,
+      );
+      expect(
+        await screen.findByRole("button", { name: "Open image viewer" }),
+      ).toHaveAttribute("data-button", "placeholder");
+    });
 
     it("shows the still fitted in place of the Canvas, with only a toggle", async () => {
       render(<Canvas canvases={[first]} />);
@@ -1346,7 +1363,7 @@ describe("Canvas", () => {
       );
       // One of the row's controls, from the placeholder's own chunk, as it arrives.
       expect(
-        await screen.findByRole("button", { name: "Open image viewer" }),
+        await screen.findByRole("button", { name: "Expand viewer controls" }),
       ).toHaveAttribute("data-button", "placeholder");
       expect(openViewer().closest(".clover-canvas-controls")).not.toBeNull();
       // Nothing of the Canvas is fetched, and no other control is shown.
@@ -1764,13 +1781,16 @@ describe("Canvas", () => {
       room = width;
       act(() => resized.forEach((callback) => callback()));
     };
-    const more = () => screen.getByRole("button", { name: "More controls" });
+    const more = () =>
+      screen.getByRole("button", {
+        name: /^(Expand|Collapse) viewer controls$/,
+      });
     const inRow = () =>
       Array.from(
         screen
           .getByTestId("clover-canvas-controls")
           .querySelectorAll(
-            ":scope > button, :scope > .clover-canvas-more > button",
+            ":scope > button, :scope > .clover-canvas-more > button:not(.clover-canvas-more-step)",
           ),
         (button) => (button as HTMLElement).dataset.button,
       );
@@ -1779,26 +1799,45 @@ describe("Canvas", () => {
       render(<Canvas src="a.jpg" instanceId="x" />);
       await loaded();
       expect(inRow()).toEqual(["more"]);
+      expect(more()).toHaveAccessibleName("Expand viewer controls");
       expect(more()).toHaveAttribute("aria-expanded", "false");
       expect(more()).toHaveAttribute("aria-controls", "more-x-list");
       expect(document.getElementById("more-x-list")).not.toBeVisible();
       expect(screen.queryByRole("button", { name: "Zoom in" })).toBeNull();
     });
 
-    it("puts More far right, the others before it in their order", async () => {
+    it("ends with the Canvas's own, the view's before them, all on the row or not", async () => {
       const [natural] = metadataAnywhere.items as any[];
       render(<Canvas canvases={[natural]} />);
       await loaded();
-      expect(inRow()).toEqual(["information", "more"]);
+      resize(400);
+      expect(inRow()).toEqual([
+        "zoom-in",
+        "zoom-out",
+        "rotate-right",
+        "rotate-left",
+        "reset",
+        "full-page",
+        "information",
+      ]);
     });
 
-    it("opens its tray left of the others, which stay, and More, at its end, closes it", async () => {
+    it("puts More where the view's controls are, the Canvas's own after it", async () => {
+      const [natural] = metadataAnywhere.items as any[];
+      render(<Canvas canvases={[natural]} />);
+      await loaded();
+      expect(inRow()).toEqual(["more", "information"]);
+    });
+
+    it("opens its tray left of More, the others staying, and More, at its end, closes it", async () => {
       const [natural] = metadataAnywhere.items as any[];
       render(<Canvas canvases={[natural]} instanceId="x" />);
       await loaded();
       fireEvent.click(more());
+      // Named for what it does now (Mat, 2026-11-01).
+      expect(more()).toHaveAccessibleName("Collapse viewer controls");
       expect(more()).toHaveAttribute("aria-expanded", "true");
-      const tray = screen.getByRole("group", { name: "More controls" });
+      const tray = screen.getByRole("group", { name: "Viewer controls" });
       expect(tray).toHaveAttribute("id", "more-x-list");
       expect(
         within(tray)
@@ -1813,7 +1852,7 @@ describe("Canvas", () => {
         "full-page",
       ]);
       // Its own, then More, the close, at its end; the `i` before it, still in sight.
-      expect(inRow()).toEqual(["information", "more"]);
+      expect(inRow()).toEqual(["more", "information"]);
       expect(tray.nextElementSibling).toBe(more());
       expect(screen.getByRole("button", { name: "About" })).toBeVisible();
       fireEvent.click(
@@ -1854,11 +1893,66 @@ describe("Canvas", () => {
       expect(fireEvent.keyDown(more(), { key: "Escape" })).toBe(true);
     });
 
+    it("pages its tray by arrows at its ends, out of the tab order, as tabs do", async () => {
+      render(<Canvas src="a.jpg" instanceId="x" />);
+      await loaded();
+      fireEvent.click(more());
+      const tray = screen.getByRole("group", { name: "Viewer controls" });
+      const [back, forward] = Array.from(
+        document.querySelectorAll<HTMLElement>(".clover-canvas-more-step"),
+      );
+      // The keyboard reaches every control in the tray: the arrows are for a pointer.
+      for (const step of [back, forward]) {
+        expect(step).toHaveAttribute("aria-hidden", "true");
+        expect(step).toHaveAttribute("tabindex", "-1");
+      }
+      // 100px of tray, its controls 300 long: by most of what shows, never past them.
+      const rect = (left: number, right: number) =>
+        ({ left, right, width: right - left, top: 0, bottom: 0 }) as DOMRect;
+      tray.getBoundingClientRect = () => rect(0, 100);
+      (tray.firstElementChild as HTMLElement).getBoundingClientRect = () =>
+        rect(0, 36);
+      (tray.lastElementChild as HTMLElement).getBoundingClientRect = () =>
+        rect(264, 300);
+      tray.style.scrollPaddingLeft = "20px";
+      tray.scrollBy = vi.fn() as never;
+      const zoomIn = within(tray).getByRole("button", { name: "Zoom in" });
+      zoomIn.focus();
+      fireEvent.mouseDown(forward);
+      fireEvent.click(forward);
+      expect(tray.scrollBy).toHaveBeenCalledWith(
+        expect.objectContaining({ left: 60 }),
+      );
+      expect(zoomIn).toHaveFocus();
+    });
+
+    it("fades a control an end cuts and takes no press there, keeping it for the keyboard", async () => {
+      render(<Canvas src="a.jpg" instanceId="x" />);
+      await loaded();
+      fireEvent.click(more());
+      const tray = screen.getByRole("group", { name: "Viewer controls" });
+      const rect = (left: number, right: number) =>
+        ({ left, right, width: right - left, top: 0, bottom: 0 }) as DOMRect;
+      // 100px of tray, its controls 40px apart: past its end from the third on.
+      tray.getBoundingClientRect = () => rect(0, 100);
+      const controls = Array.from(tray.children) as HTMLElement[];
+      controls.forEach((control, index) => {
+        control.getBoundingClientRect = () => rect(index * 40, index * 40 + 36);
+      });
+      tray.style.scrollPaddingLeft = "20px";
+      fireEvent.scroll(tray);
+      expect(controls[1]).not.toHaveAttribute("data-partial");
+      expect(controls[2]).toHaveAttribute("data-partial");
+      // Never disabled: Tab reaches it, and brings it clear.
+      expect(controls[2]).not.toBeDisabled();
+      expect(controls[2]).not.toHaveAttribute("aria-disabled");
+    });
+
     it("scrolls its tray across only, never up and down", async () => {
       render(<Canvas src="a.jpg" instanceId="x" />);
       await loaded();
       fireEvent.click(more());
-      const tray = screen.getByRole("group", { name: "More controls" });
+      const tray = screen.getByRole("group", { name: "Viewer controls" });
       // A wheel or a swipe, past a Tip wrapped tall, as a browser would scroll it.
       Object.defineProperty(tray, "scrollTop", { value: 13, writable: true });
       fireEvent.scroll(tray);
@@ -1878,7 +1972,7 @@ describe("Canvas", () => {
         "full-page",
       ]);
       expect(
-        screen.queryByRole("button", { name: "More controls" }),
+        screen.queryByRole("button", { name: /viewer controls$/ }),
       ).toBeNull();
     });
 
@@ -1914,10 +2008,10 @@ describe("Canvas", () => {
       render(<Canvas canvases={[natural]} moreControls="always" />);
       await loaded();
       resize(400);
-      expect(inRow()).toEqual(["information", "more"]);
+      expect(inRow()).toEqual(["more", "information"]);
       fireEvent.click(more());
       expect(
-        within(screen.getByRole("group", { name: "More controls" }))
+        within(screen.getByRole("group", { name: "Viewer controls" }))
           .getAllByRole("button")
           .map((button) => button.dataset.button),
       ).toEqual([
@@ -1978,13 +2072,13 @@ describe("Canvas", () => {
         />,
       );
       await loaded();
-      expect(inRow()).toEqual(["information", "placeholder"]);
+      expect(inRow()).toEqual(["placeholder", "information"]);
       // Opening the view opens the tray of its controls with it, the toggle at its end.
       fireEvent.click(
-        await screen.findByRole("button", { name: "Open image viewer" }),
+        await screen.findByRole("button", { name: "Expand viewer controls" }),
       );
       await open();
-      const tray = screen.getByRole("group", { name: "More controls" });
+      const tray = screen.getByRole("group", { name: "Viewer controls" });
       expect(tray).toBeVisible();
       expect(
         within(tray)
@@ -1998,13 +2092,13 @@ describe("Canvas", () => {
         "reset",
         "full-page",
       ]);
-      expect(inRow()).toEqual(["information", "placeholder"]);
-      const close = screen.getByRole("button", { name: "Close image viewer" });
+      expect(inRow()).toEqual(["placeholder", "information"]);
+      const close = screen.getByRole("button", {
+        name: "Collapse viewer controls",
+      });
       expect(tray.nextElementSibling).toBe(close);
       // No More of its own, nor an Escape that closes the tray and not the view.
-      expect(
-        screen.queryByRole("button", { name: "More controls" }),
-      ).toBeNull();
+      expect(document.querySelector('[data-button="more"]')).toBeNull();
       fireEvent.keyDown(
         within(tray).getByRole("button", { name: "Reset zoom" }),
         {
@@ -2015,8 +2109,10 @@ describe("Canvas", () => {
       // Closing the view closes its tray.
       renderer.isOpen = true;
       fireEvent.click(close);
-      expect(screen.queryByRole("group", { name: "More controls" })).toBeNull();
-      expect(inRow()).toEqual(["information", "placeholder"]);
+      expect(
+        screen.queryByRole("group", { name: "Viewer controls" }),
+      ).toBeNull();
+      expect(inRow()).toEqual(["placeholder", "information"]);
     });
 
     it("leaves a host's own controls in the row, after More", async () => {

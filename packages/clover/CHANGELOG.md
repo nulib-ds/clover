@@ -69,21 +69,29 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - **A Canvas's controls stay on one row.** On a narrow Body they no longer wrap onto more
-  rows. Where they do not all fit, the view's controls (zoom in and out, the two
-  rotations, reset and full screen) wait behind More (a magnifier, as a placeholder's
-  toggle is, named "More controls", a new string in every locale), at the row's end, the
-  other controls before it in their order. Pressed, More opens a tray of them, running
-  left from where it was on one translucent ground, its close at the tray's end, the
-  other controls still in sight beside it; pressed again, it closes. A tray too narrow
-  for them all scrolls across, by wheel, trackpad or touch, never up and down.
-  A Timeline's and a Scene's controls are as they were.
+  rows. The view's controls come first (zoom in and out, the two rotations, reset and
+  full screen), then the Canvas's own (its place, annotations and About, at the row's
+  end). Where they do not all fit, the view's wait behind a control in their place (a
+  magnifier, as a placeholder's toggle is, named "Expand viewer controls", and once open
+  "Collapse viewer controls").
+  Pressed, it opens a tray of them on a translucent dark ground, running left from where
+  it was, its close at the tray's end, the other controls still in sight beside it, as
+  near it on either side; pressed again, it closes. A tray too narrow for them all
+  scrolls across, by wheel, trackpad or touch, never up and down, with arrows at its ends
+  for a pointer, as the Panel's tabs have. New strings in every locale:
+  `canvasExpandControls`, `canvasCollapseControls`, `canvasViewerControls` (the tray's
+  name), `canvasScrollBack` and `canvasScrollForward`. A Timeline's and a Scene's
+  controls are as they were.
 
 - **A placeholder's toggle is one of the row's controls.** The magnifier that opens and
   closes a Canvas's `placeholderCanvas` (and a video's close once it plays) sits in the
-  controls' row after the `i`, rather than in a corner of its own, as the others there
-  are. For an image, it is More too: opening the viewer opens the tray of the view's
-  controls with it, the toggle at its end, and closing the viewer closes both. A video's
-  Play, in the middle of its still, is as it was.
+  controls' row, after the view's controls and before the Canvas's own, rather than in a
+  corner of its own. For an image, it is the
+  same control as the view's controls' toggle, and named as it is: opening the viewer
+  opens the tray of the view's controls with it, the toggle at its end, and closing the
+  viewer closes both. Where the Canvas offers no view controls, it is "Open image viewer"
+  and "Close image viewer" as before. A video's Play, in the middle of its still, is as it
+  was.
 
 - **A Canvas's controls stay in sight, for now,** while their design is reviewed: they no
   longer fade after a pause, nor wait for a tap on the picture on a touch screen, and a
@@ -143,14 +151,17 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   92,250 → 92,650; the Gallery 29,750 → 29,950 and 55,200 → 55,250.
 - **Budgets:** raised for the Canvas's one row and More (its measuring and More itself
   load only as a Canvas draws its controls, so a Canvas's own first load is lighter than
-  before, the controls' coming and going no longer in it), its tray's look and opening,
-  and a placeholder's toggle among the controls, and its tray scrolling across only, with
-  room for a Tip wrapped to it, and by touch, in B gzip: `styles.css` 19,200 → 19,650; to
-  first view, the Default template 96,300 → 96,450, Document 92,650 → 92,850 and the
-  Gallery 55,250 → 55,800; `<clover-viewer>`'s own entry 102,550 → 102,600, and in the
-  Gallery 125,650 → 125,700; a Timeline, which
-  keeps its coming and going and draws on Canvas's controls, 24,550 → 25,000 and to first
-  view 44,150 → 44,600.
+  before, the controls' coming and going no longer in it), its tray's look, opening,
+  names and arrows, and a placeholder's toggle among the controls, its tray scrolling
+  across only, with room for a Tip wrapped to it, and by touch, and annotations framed
+  and named clear of the controls, in B gzip: `styles.css` 19,200 → 19,950; to first
+  view, the Default template 96,300 → 97,000, Document 92,650 → 93,350 and the Gallery
+  55,250 → 56,150; the Gallery template 29,950 → 30,000; `<clover-viewer>`'s own entry
+  102,550 → 103,150, a page of it 122,700 → 123,200, in Document 129,800 → 130,300 and
+  in the Gallery 125,650 → 126,200; `<clover-canvas>` alone 88,000 → 88,450; the four
+  parts 100,750 → 101,200 and a layout of containers 118,550 → 119,000; a Timeline,
+  which keeps its coming and going and draws on Canvas's controls, 24,550 → 25,100 and
+  to first view 44,150 → 44,750.
 - **Budgets:** raised on purpose for what every template and page that draws Items now
   carries (Items' `masonry` loader and styles, `secondary` and `singleItem`, About's label
   measured afresh, the Panel's tab arrows as steps, every title's look a default the page outranks), for the information panel every
@@ -230,6 +241,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   as the others. Each template keeps its own weight.
 
 ### Fixed
+
+- **A Canvas's annotations stay clear of its controls.** A hotspot's popover, its
+  annotation's text, is kept under the controls' row and above a recording's transport,
+  never under them, and an annotation picked, from the list, on the picture or by
+  `zoomToAnnotation`, is framed in the part of the Body they leave.
 
 - **Items' sizes reach it from an element around it**, as documented:
   `--clover-items-size`, `--clover-items-height`, `--clover-items-gap` and

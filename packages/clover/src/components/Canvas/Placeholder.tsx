@@ -111,16 +111,28 @@ export function PlaceholderToggle({
   media,
   active,
   onToggle,
-}: Pick<PlaceholderProps, "instance" | "media" | "active" | "onToggle">) {
+  more = false,
+}: Pick<PlaceholderProps, "instance" | "media" | "active" | "onToggle"> & {
+  /**
+   * An image's that is More, opening and closing the view's controls with the view: named
+   * as More is (Mat, 2026-11-01: "it should be the same in both cases"). Where the Canvas
+   * offers none, it opens and closes the image viewer alone, and says so.
+   */
+  more?: boolean;
+}) {
   const { t, langOf } = useCloverTranslation();
   const id = `placeholder-${instance}`;
   const toggleKey = media
     ? active
       ? "playerPlay"
       : "playerClose"
-    : active
-      ? "imageViewerOpen"
-      : "imageViewerClose";
+    : more
+      ? active
+        ? "canvasExpandControls"
+        : "canvasCollapseControls"
+      : active
+        ? "imageViewerOpen"
+        : "imageViewerClose";
   return (
     <Button
       className="clover-canvas-placeholder-toggle"

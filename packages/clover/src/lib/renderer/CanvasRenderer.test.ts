@@ -176,6 +176,33 @@ describe("CanvasRenderer", () => {
     renderer.dispose();
   });
 
+  it("frames an annotation clear of the controls over the view, turned too", async () => {
+    mockedLoad.mockResolvedValue(bitmap(1000, 1000));
+    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    // What the controls cover: the hotspots' layer's scroll padding (`Annotations.css`).
+    const layer = document.createElement("div");
+    layer.style.scrollPaddingTop = "60px";
+    layer.style.scrollPaddingBottom = "100px";
+    renderer.overlays = { container: layer } as never;
+
+    for (const turns of [0, 1]) {
+      if (turns) renderer.rotateBy(90);
+      // 300 × 300 with its padding of a tenth of the image each side: 500 × 500, in the
+      // 440 left between 60 and 160 from the 600px Body's foot.
+      renderer.fitAnnotation({ x: 400, y: 400, width: 300, height: 300 }, true);
+      const corners = [
+        renderer.worldToScreenPoint({ x: 300, y: 300 }),
+        renderer.worldToScreenPoint({ x: 800, y: 800 }),
+      ];
+      const ys = corners.map((point) => point.y).sort((a, b) => a - b);
+      expect(ys[0]).toBeCloseTo(60, 6);
+      expect(ys[1]).toBeCloseTo(500, 6);
+    }
+    renderer.overlays = null;
+    renderer.dispose();
+  });
+
   it("keeps zoom within its limits", async () => {
     mockedLoad.mockResolvedValue(bitmap(1000, 1000));
     const renderer = new CanvasRenderer(host(), { animationTime: 0 });

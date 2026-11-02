@@ -961,6 +961,13 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
                     media={Boolean(media)}
                     active={showPlaceholder}
                     onToggle={togglePlaceholder}
+                    more={
+                      !!controlsConfig &&
+                      (controlsConfig.zoom ||
+                        controlsConfig.rotation ||
+                        controlsConfig.reset ||
+                        controlsConfig.fullPage)
+                    }
                   />
                 </Suspense>
               )

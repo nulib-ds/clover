@@ -106,11 +106,11 @@ interface CanvasControlsProps {
  * `controlButtons` contract — driven by click handlers instead of OpenSeadragon's id
  * binding. Ids keep the `<key>-<instance>` shape so `data-button` reads the same.
  *
- * One row, never wrapped (Mat, 2026-11-01): where they do not all fit, the view's (zoom,
- * the turns, reset, full screen) wait behind More, at the end of the others (Choice and
- * the Canvas's own: annotations, place, the `i`, a placeholder's toggle), which keep
- * their order and stay in sight as its tray runs left from it (`More.tsx`). A host's
- * own, after them, always keep theirs.
+ * One row, never wrapped (Mat, 2026-11-01): the view's (zoom, the turns, reset, full
+ * screen) and a placeholder's toggle, then Choice and the Canvas's own (the place,
+ * annotations, the `i`). Where they do not all fit, the view's wait behind More, in their
+ * place, the others in sight as its tray runs left from it (`More.tsx`). A host's own,
+ * after them, always keep theirs.
  */
 const Controls: React.FC<CanvasControlsProps> = ({
   renderer,
@@ -283,7 +283,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
   };
   /*
    * Full screen ends the view's controls, over every picture alike, whichever of them a
-   * Canvas offers: left of the Canvas's own, the `i` among them (Mat, 2026-10-29).
+   * Canvas offers (Mat, 2026-10-29), before the Canvas's own (below).
    */
   const specs = controls();
   const view = [
@@ -299,23 +299,6 @@ const Controls: React.FC<CanvasControlsProps> = ({
    * controls are Canvas's alone, so they are not replaceable through `controlButtons`.
    */
   const own = [
-    showAnnotations && {
-      id: annotationsId,
-      view: false,
-      node: (
-        <Button
-          key="annotations"
-          id={annotationsId}
-          label={annotationsLabel}
-          lang={annotationsLang}
-          onClick={() => setAnnotationsOpen((open) => !open)}
-          expanded={annotationsOpen}
-          controls={annotationsMenuId}
-        >
-          <Comment />
-        </Button>
-      ),
-    },
     showPlace && {
       id: `place-${instance}`,
       view: false,
@@ -330,6 +313,23 @@ const Controls: React.FC<CanvasControlsProps> = ({
           controls={placeId}
         >
           <Place />
+        </Button>
+      ),
+    },
+    showAnnotations && {
+      id: annotationsId,
+      view: false,
+      node: (
+        <Button
+          key="annotations"
+          id={annotationsId}
+          label={annotationsLabel}
+          lang={annotationsLang}
+          onClick={() => setAnnotationsOpen((open) => !open)}
+          expanded={annotationsOpen}
+          controls={annotationsMenuId}
+        >
+          <Comment />
         </Button>
       ),
     },
@@ -359,7 +359,21 @@ const Controls: React.FC<CanvasControlsProps> = ({
     (item): item is { id: string; view: boolean; node: React.ReactElement } =>
       Boolean(item),
   );
-  const items = [...view, ...own];
+  /*
+   * The view's first, full screen last, then a placeholder's toggle: what waits behind
+   * More, which stands where they do; then Choice and the Canvas's own, the place,
+   * annotations and the `i`, at the row's end, in sight whether or not the view's fit
+   * beside them (Mat, 2026-11-01: "make it now so order from right to left is: `i`,
+   * annotations, map, then the viewer controls"; the Canvas's own led the row for a
+   * while that day, and stood after the view's before it).
+   */
+  const toggle = own.filter((item) => item.id === `placeholder-${instance}`);
+  const lead = [...view.filter((item) => item.view), ...toggle];
+  const rest = [
+    ...view.filter((item) => !item.view),
+    ...own.filter((item) => !toggle.includes(item)),
+  ];
+  const items = [...lead, ...rest];
   // Whether they all fit, measured where More is, which loads for a Canvas alone.
   const [fits, setFits] = useState(true);
   const more = useLoaded(loadMore, fit);
@@ -381,22 +395,26 @@ const Controls: React.FC<CanvasControlsProps> = ({
     if (!tucked.length) setMoreOpen(false);
   }, [tucked.length]);
 
+  // On the row: all but what waits behind More, and an image's toggle where it is More.
+  const shown = (list: typeof items) =>
+    list
+      .filter(
+        (item) =>
+          !tucked.includes(item) &&
+          !(deck && item.id === `placeholder-${instance}`),
+      )
+      .map(({ node }) => node);
+
   return (
     <>
       <ControlCluster fit={fit} clusterRef={setCluster}>
         {/*
-          The others in their order, then More, far right (Mat, 2026-11-01: "put it far
-          right"); open, its tray runs left from it, the others kept in sight beside it
-          ("make it so the other controls are still visible and don't disappear. just
-          expand the controls to the left").
+          The view's, or More in their place, its tray running left from it as it opens,
+          the others kept in sight beside it ("make it so the other controls are still
+          visible and don't disappear. just expand the controls to the left"); then the
+          Canvas's own.
         */}
-        {items
-          .filter(
-            (item) =>
-              !tucked.includes(item) &&
-              !(deck && item.id === `placeholder-${instance}`),
-          )
-          .map(({ node }) => node)}
+        {shown(lead)}
         {More && tucked.length > 0 && (
           <More
             instance={instance}
@@ -407,6 +425,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
             {tucked.map(({ node }) => node)}
           </More>
         )}
+        {shown(rest)}
         {children}
       </ControlCluster>
       {more && fit && !always && cluster && (

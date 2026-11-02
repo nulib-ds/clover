@@ -29,7 +29,13 @@ import { type LoadedImage, loadImage } from "./io/decode";
 import { FrameLoop } from "./loop/FrameLoop";
 import { uploadBudget } from "./scene/uploadBudget";
 import { type Point, apply, compose, rotate, scale } from "./math/affine";
-import { type Rect, clamp, transformRect, union } from "./math/rect";
+import {
+  type Rect,
+  clamp,
+  rectCenter,
+  transformRect,
+  union,
+} from "./math/rect";
 import type { Navigator } from "./overlays/Navigator";
 import type { OverlayLayer } from "./overlays/OverlayLayer";
 import { planFrame } from "./scene/planFrame";
@@ -119,16 +125,22 @@ const NO_INSET: Inset = { top: 0, right: 0, bottom: 0, left: 0 };
 /*
  * The host's padding, in CSS pixels. The stylesheet sets it (`--clover-canvas-inset`), and
  * the placeholder takes the same, so a still and the picture it hands over to sit alike.
+ * Or an element's scroll padding: what of the hotspots' layer the controls cover
+ * (`Annotations.css`).
  */
-function readInset(host: HTMLElement): Inset {
-  if (typeof getComputedStyle !== "function") return NO_INSET;
-  const style = getComputedStyle(host);
-  const px = (value: string) => parseFloat(value) || 0;
+function readInset(
+  element: HTMLElement | undefined,
+  box: "padding" | "scroll-padding" = "padding",
+): Inset {
+  if (!element || typeof getComputedStyle !== "function") return NO_INSET;
+  const style = getComputedStyle(element);
+  const px = (side: string) =>
+    parseFloat(style.getPropertyValue(`${box}-${side}`)) || 0;
   return {
-    top: px(style.paddingTop),
-    right: px(style.paddingRight),
-    bottom: px(style.paddingBottom),
-    left: px(style.paddingLeft),
+    top: px("top"),
+    right: px("right"),
+    bottom: px("bottom"),
+    left: px("left"),
   };
 }
 
@@ -421,19 +433,42 @@ export class CanvasRenderer implements GestureTarget {
     return true;
   }
 
-  /** Frame `bounds` (world units) in the viewport. */
-  fitBounds(bounds: Rect, immediate = false): void {
-    const target = fitCamera(
-      bounds,
-      this.viewport,
-      this.camera.destination.rotation,
-      0,
-    );
+  /** Frame `bounds` (world units) in the viewport, or in the part of it `inset` leaves. */
+  fitBounds(bounds: Rect, immediate = false, inset = NO_INSET): void {
+    const target = this.fit(bounds, this.camera.destination.rotation, inset);
     this.atHome = false;
     this.animateTo(
       this.constrain(target, { allowBeyondLimits: true }),
       immediate,
     );
+  }
+
+  /**
+   * The camera that frames `bounds`, turned by `rotation`, in the part of the viewport
+   * `inset` leaves: centered there, off the viewport's center where its sides differ.
+   */
+  private fit(
+    bounds: Rect,
+    rotation: number,
+    { top, right, bottom, left }: Inset,
+  ): CameraState {
+    const { width, height } = this.viewport;
+    const { zoom } = fitCamera(
+      bounds,
+      {
+        width: Math.max(1, width - left - right),
+        height: Math.max(1, height - top - bottom),
+      },
+      rotation,
+    );
+    const center = anchoredCenter(
+      rectCenter(bounds),
+      { x: (width + left - right) / 2, y: (height + top - bottom) / 2 },
+      zoom,
+      rotation,
+      this.viewport,
+    );
+    return { ...center, zoom, rotation };
   }
 
   /**
@@ -445,7 +480,10 @@ export class CanvasRenderer implements GestureTarget {
     if (world) this.fitAnnotation(world, immediate);
   }
 
-  /** Zoom to a world rectangle with OpenSeadragon's annotation padding. */
+  /**
+   * Zoom to a world rectangle with OpenSeadragon's annotation padding, clear of the
+   * controls over the view (the hotspots' layer's scroll padding, `Annotations.css`).
+   */
   fitAnnotation(world: Rect, immediate = false): void {
     const first = this.items[0];
     if (!first) return;
@@ -458,6 +496,7 @@ export class CanvasRenderer implements GestureTarget {
         height: world.height + pad * 2,
       },
       immediate,
+      readInset(this.overlays?.container, "scroll-padding"),
     );
   }
 
@@ -865,19 +904,8 @@ export class CanvasRenderer implements GestureTarget {
     const turn = 2 * Math.PI;
     const upright =
       Math.round(this.camera.destination.rotation / turn) * turn || 0;
-    const { top, right, bottom, left } = this.inset;
-    const camera = fitCamera(
-      this.worldBounds,
-      {
-        width: Math.max(1, this.viewport.width - left - right),
-        height: Math.max(1, this.viewport.height - top - bottom),
-      },
-      upright,
-    );
-    // Centered in the padded area, off the viewport's center when its sides differ.
-    camera.x -= (left - right) / 2 / camera.zoom;
-    camera.y -= (top - bottom) / 2 / camera.zoom;
-    return camera;
+    // In the padded area.
+    return this.fit(this.worldBounds, upright, this.inset);
   }
 
   /**

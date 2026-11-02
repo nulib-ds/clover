@@ -446,7 +446,7 @@ test.describe("transport", () => {
     );
     await page.goto("/?content=https://fixtures.test/muybridge.json");
     // The plate opens on its placeholder still.
-    const open = page.getByRole("button", { name: "Open image viewer" });
+    const open = page.getByRole("button", { name: "Expand viewer controls" });
     await open.focus();
     await page.keyboard.press("Enter");
     const trigger = page.locator(".clover-canvas-transport-frames > button");

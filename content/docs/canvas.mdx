@@ -125,9 +125,12 @@ Use `src` for images that are not on a Canvas: plain URLs, or IIIF image service
 
 ### Controls behind More
 
-The controls stay on one row. Where the row cannot hold them all, the view's (zoom,
-rotation, reset and full screen) wait behind More, at its end, the others before it in their
-order. Pressed, More opens a tray of them beside the rest, and pressed again, closes it. Use `moreControls="always"` to keep them there however wide the Body is.
+The controls stay on one row: the view's first (zoom, rotation, reset and full screen),
+then the Canvas's own (its place, annotations and About). Where the row cannot hold them
+all, the view's wait behind "Expand viewer controls", in their place. Pressed, it opens a tray
+of them beside the rest, with arrows at its ends where it is too narrow for them all, and
+pressed again, "Collapse viewer controls", it closes. Use `moreControls="always"` to keep
+them there however wide the Body is.
 
 <Example>
 <div style={{ height: 420 }}>

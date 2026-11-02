@@ -165,6 +165,7 @@ button.clover-template-document-sidebar-toggle > .clover-tip::before,
   .clover-tip,
 button.clover-items-scroll-prev > .clover-tip,
 button.clover-sections-scroll-prev > .clover-tip,
+button.clover-canvas-more-step[data-step="prev"] > .clover-tip,
 .clover-transcript-languages > .clover-transcript-language > .clover-tip,
 .clover-template-document-sidebar-closed
   > button.clover-template-document-sidebar-toggle
@@ -182,6 +183,7 @@ button.clover-sections-scroll-prev > .clover-tip,
 button.clover-canvas-caption-close > .clover-tip,
 button.clover-items-scroll-next > .clover-tip,
 button.clover-sections-scroll-next > .clover-tip,
+button.clover-canvas-more-step[data-step="next"] > .clover-tip,
 button.clover-canvas-placeholder-toggle > .clover-tip,
 .clover-panel:not([data-floating]) > button.clover-panel-close > .clover-tip,
 .clover-sections-actions
@@ -202,17 +204,20 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
 /*
  * A hotspot's (`Canvas/Annotations.tsx`): its annotation's text, which may run long, so
  * it wraps, no wider than the Body. It hangs on the side of the hotspot with more room,
- * and is kept inside the Body, `xs` from its edges, across and down: where that side has
- * too little room (a hotspot as tall as the Body, or zoomed into), it moves over the
- * hotspot, to its edge in sight. The renderer's overlay layer, which pins each hotspot,
- * writes where it is: `--clover-overlay-x`, its center; `--clover-overlay-top` and
- * `-bottom`, its edges; and `data-overlay-room`, the side. Without them, while the view
- * is turned, it hangs below, centered.
+ * and is kept inside the Body, `xs` from its edges across, and down, clear of the
+ * controls over it (`--clover-canvas-clear-top` and `-bottom`, `Canvas.css`; Mat,
+ * 2026-11-01: "annotations slide under the control deck. this should never happen"):
+ * where that side has too little room (a hotspot as tall as the Body, or zoomed into),
+ * it moves over the hotspot, to its edge in sight. The renderer's overlay layer, which
+ * pins each hotspot, writes where it is: `--clover-overlay-x`, its center;
+ * `--clover-overlay-top` and `-bottom`, its edges; and `data-overlay-room`, the side.
+ * Without them, while the view is turned, it hangs below, centered.
  *
- * Taller than the Body, it is capped there and scrolls (WCAG 1.4.10): by wheel or touch
- * over it, and by the arrows, the page keys, Home and End from its hotspot. A scroller
- * cuts what passes its edge, so the gap to the hotspot is bridged inside its own box: an
- * `xs` border on the hotspot's side, clear (`background-clip`), rather than `::before`.
+ * Taller than that room, it is capped there and scrolls (WCAG 1.4.10): by wheel or touch
+ * over it, and by the arrows, the page keys, Home and End from its hotspot. On a Body too
+ * short to leave a few lines there, it may run under the controls. A scroller cuts what
+ * passes its edge, so the gap to the hotspot is bridged inside its own box: an `xs`
+ * border on the hotspot's side, clear (`background-clip`), rather than `::before`.
  */
 :is(button, a).clover-canvas-annotation > .clover-tip {
   /*
@@ -221,6 +226,11 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
    * have them (Mat, 2026-10-29).
    */
   text-align: start;
+  --clover-tip-top: var(--clover-canvas-clear-top, var(--clover-space-xs));
+  --clover-tip-bottom: var(
+    --clover-canvas-clear-bottom,
+    var(--clover-space-xs)
+  );
   --clover-tip-x: clamp(
     var(--clover-space-xs) - var(--clover-overlay-x, 50cqw),
     -50%,
@@ -229,7 +239,10 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
   top: 100%;
   bottom: auto;
   max-width: min(18rem, 100cqw - 2 * var(--clover-space-xs));
-  max-height: calc(100cqh - 2 * var(--clover-space-xs));
+  max-height: max(
+    100cqh - var(--clover-tip-top) - var(--clover-tip-bottom),
+    min(2 * var(--clover-space-2xl), 100cqh - 2 * var(--clover-space-xs))
+  );
   overflow-y: auto;
   border: solid transparent;
   border-width: var(--clover-space-xs) 0 0;
@@ -267,9 +280,10 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
   top: 100%;
   translate: var(--clover-tip-x)
     clamp(
-      0px - var(--clover-overlay-bottom),
+      var(--clover-tip-top) - var(--clover-space-xs) -
+        var(--clover-overlay-bottom),
       0px,
-      100cqh - var(--clover-overlay-bottom) - var(--clover-space-xs) - 100%
+      100cqh - var(--clover-overlay-bottom) - var(--clover-tip-bottom) - 100%
     );
 }
 
@@ -280,9 +294,10 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
   border-width: 0 0 var(--clover-space-xs);
   translate: var(--clover-tip-x)
     clamp(
-      100% + var(--clover-space-xs) - var(--clover-overlay-top),
+      100% + var(--clover-tip-top) - var(--clover-overlay-top),
       0px,
-      100cqh - var(--clover-overlay-top)
+      100cqh + var(--clover-space-xs) - var(--clover-tip-bottom) -
+        var(--clover-overlay-top)
     );
 }
 

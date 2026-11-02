@@ -20,6 +20,13 @@
    */
   isolation: isolate;
   container-type: size;
+  /*
+   * What of it the controls cover (`Canvas.css`), which a picked annotation is framed
+   * clear of (the renderer's `fitAnnotation`) and a hotspot's Tip kept clear of
+   * (`ui/Tip.css`). It scrolls nothing: it is clipped, never a scroller.
+   */
+  scroll-padding-block: var(--clover-canvas-clear-top, 0)
+    var(--clover-canvas-clear-bottom, 0);
 }
 
 /* A hotspot's place is inline too (`OverlayLayer.add`). */

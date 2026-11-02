@@ -5,6 +5,8 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { useContainerName } from "../../i18n/useContainerName";
 import { useOneOpen } from "../../ui/useOneOpen";
 import { CloseViewer, OpenViewer } from "../Body/glyphs";
+import { languageProps } from "../../i18n/direction";
+import { Tip } from "../../ui/Tip";
 
 /*
  * A Canvas's controls on one row, never wrapped (Mat, 2026-11-01: "I don't like when
@@ -174,6 +176,23 @@ interface MoreProps {
  * Its controls run on past a row too narrow for them all (a phone's Body), scrolled
  * across, never wrapped or cut off: faded at an end with more past it (`data-past`).
  */
+/*
+ * How far a tray's controls run past its box at either side: theirs, never what it can
+ * scroll, which a control's Tip, hanging past them while it shows, adds to.
+ */
+function overhang(list: HTMLElement) {
+  const box = list.getBoundingClientRect();
+  const ring = parseFloat(getComputedStyle(list).paddingLeft) || 0;
+  const first = list.firstElementChild?.getBoundingClientRect();
+  const last = list.lastElementChild?.getBoundingClientRect();
+  return {
+    box,
+    ring,
+    left: first ? box.left - (first.left - ring) : 0,
+    right: last ? last.right + ring - box.right : 0,
+  };
+}
+
 export function More({
   instance,
   open,
@@ -185,8 +204,16 @@ export function More({
   const id = `more-${instance}`;
   const listId = `${id}-list`;
   const listRef = useRef<HTMLDivElement>(null);
-  const label = t("canvasMoreControls");
-  const name = useContainerName(label, langOf("canvasMoreControls"));
+  /*
+   * Named for what it does now (Mat, 2026-11-01: "just say 'Expand viewer controls' and
+   * 'Collapse viewer controls'"), as an image's placeholder toggle, which is More, is; its
+   * tray, for what is in it.
+   */
+  const labelKey = open ? "canvasCollapseControls" : "canvasExpandControls";
+  const name = useContainerName(
+    t("canvasViewerControls"),
+    langOf("canvasViewerControls"),
+  );
   useOneOpen(open && !placeholder, () => undefined);
   /*
    * Opening, More goes to the tray's end, after its controls, and closing, back before
@@ -207,26 +234,11 @@ export function More({
   useLayoutEffect(() => {
     const list = listRef.current;
     if (!open || !list) return;
-    /*
-     * How far its controls run past the box at either side: theirs, never what it can
-     * scroll, which a control's Tip, hanging past them while it shows, adds to.
-     */
-    const past = () => {
-      const box = list.getBoundingClientRect();
-      const ring = parseFloat(getComputedStyle(list).paddingLeft) || 0;
-      const first = list.firstElementChild?.getBoundingClientRect();
-      const last = list.lastElementChild?.getBoundingClientRect();
-      return {
-        box,
-        ring,
-        left: first ? box.left - (first.left - ring) : 0,
-        right: last ? last.right + ring - box.right : 0,
-      };
-    };
+    const past = () => overhang(list);
     const mark = () => {
       // Never up or down: only across (`Canvas.css`).
       if (list.scrollTop) list.scrollTop = 0;
-      const { left, right } = past();
+      const { box, left, right } = past();
       /*
        * Scrolling, never past the controls' ends, into a Tip's room: back to the last.
        * (Not while they slide in as it opens, offset from where they come to rest; nor
@@ -248,6 +260,22 @@ export function More({
         .join(" ");
       if (ends) list.dataset.past = ends;
       else delete list.dataset.past;
+      /*
+       * A control an end with more past it cuts, under the fade and its arrow, is faded
+       * further and takes no press (`data-partial`, `Canvas.css`; Mat, 2026-11-01: "if a
+       * button is only partially visible in the dock, then disable it … we don't want
+       * accidental clicks"): never `disabled`, which would take it from the keyboard,
+       * whose Tab brings it clear (WCAG 2.1.1).
+       */
+      const fade = parseFloat(getComputedStyle(list).scrollPaddingLeft) || 0;
+      for (const control of Array.from(list.children)) {
+        const own = control.getBoundingClientRect();
+        const cut =
+          (left > 1 && own.left < box.left + fade - 0.5) ||
+          (right > 1 && own.right > box.right - fade + 0.5);
+        if (cut !== control.hasAttribute("data-partial"))
+          control.toggleAttribute("data-partial", cut);
+      }
     };
     /*
      * A control reached by Tab comes clear of the fade (its `scroll-padding`) where more
@@ -284,6 +312,8 @@ export function More({
       list.removeEventListener("animationend", mark);
       resize.disconnect();
       delete list.dataset.past;
+      for (const control of Array.from(list.children))
+        control.removeAttribute("data-partial");
     };
   }, [open]);
 
@@ -299,8 +329,8 @@ export function More({
     <Button
       key="more"
       id={id}
-      label={label}
-      lang={langOf("canvasMoreControls")}
+      label={t(labelKey)}
+      lang={langOf(labelKey)}
       expanded={open}
       controls={listId}
       onClick={(event) =>
@@ -310,6 +340,63 @@ export function More({
       {open ? <CloseViewer /> : <OpenViewer />}
     </Button>
   );
+  /*
+   * The arrows at the tray's ends, shown while controls lie past that end (`Canvas.css`),
+   * as the Panel's tabs have them (Mat, 2026-11-01: "bring the next/prev buttons like we
+   * have on tabs to the expanded controls deck"; `ui/Sections.tsx`). They page the tray
+   * for a pointer, by most of what shows, never past its controls' ends. The keyboard
+   * reaches every control already, each brought clear of the fade, so they sit out of the
+   * tab order and the accessibility tree, and a press leaves focus where it was.
+   */
+  const page = (forward: boolean) => {
+    const list = listRef.current;
+    if (!list) return;
+    const { box, left, right } = overhang(list);
+    const style = getComputedStyle(list);
+    const most = box.width - 2 * (parseFloat(style.scrollPaddingLeft) || 0);
+    const rightward = forward !== (style.direction === "rtl");
+    list.scrollBy({
+      left: rightward ? Math.min(most, right) : -Math.min(most, left),
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+    });
+  };
+  const step = (forward: boolean) => {
+    const key = forward ? "canvasScrollForward" : "canvasScrollBack";
+    return (
+      <button
+        key={key}
+        type="button"
+        // A step, drawn as the tabs' are (`ui/Steps.css`), placed at the tray's end.
+        className="clover-steps-step clover-canvas-more-step"
+        data-step={forward ? "next" : "prev"}
+        aria-hidden="true"
+        tabIndex={-1}
+        {...languageProps(langOf(key))}
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={() => page(forward)}
+      >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          width="12"
+          height="12"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d={forward ? "M6 3l5 5-5 5" : "M10 3L5 8l5 5"}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <Tip label={t(key)} />
+      </button>
+    );
+  };
   const list = (
     <div
       key="list"
@@ -344,6 +431,7 @@ export function More({
       */}
       {open ? [list, more] : [more, list]}
       {name.node}
+      {open && [step(false), step(true)]}
     </div>
   );
 }

@@ -473,6 +473,21 @@
 }
 
 /*
+ * Hanging over the Body by half its width less half the bar's, it ends a Canvas's row
+ * there, `xs` short of it, as the toggle in the row would (`Canvas.css`), so the deck of
+ * the view's controls stands as near it, panel open or closed (Mat, 2026-11-01: "do the
+ * same for when panel is expanded. always have the same gap").
+ */
+.clover-template-panes:has(> .clover-template-spine)
+  > :first-child
+  .clover-canvas
+  > .clover-canvas-controls[data-fit] {
+  inset-inline-end: calc(
+    var(--clover-control) / 2 - 1.5px + var(--clover-space-xs)
+  );
+}
+
+/*
  * Its place goes where it is measured at once, never sliding there (Mat, 2026-11-01:
  * "jarring for the eye"): the round controls ease `all` (`ui/Button.css`, outweighing a
  * class alone), which took in `top`, so on a first load it slid down the bar to the
