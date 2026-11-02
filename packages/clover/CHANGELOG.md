@@ -9,7 +9,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 `@samvera/clover-iiif`, keeps its own changelog on the repository's
 [`v3` branch](https://github.com/nulib-ds/clover/blob/v3/CHANGELOG.md).
 
-## Unreleased
+## [4.1.0] - 2026-11-02
 
 ### Added
 
