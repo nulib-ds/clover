@@ -468,8 +468,8 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    * Whether its controls come and go, on a mouse's activity and after a pause, or a tap
    * on the picture under a finger, held by focus no press brought: a Timeline's, and a
    * video's (Mat, 2026-11-01: "the controls for video on canvas should fade back after a
-   * bit of time"); a picture's stay in sight. A paused video's Play stays with them gone,
-   * its Pause going with the rest (`Canvas.css`).
+   * bit of time"); a picture's stay in sight. A paused video holds them all, and they go
+   * once it plays (Mat, 2026-11-02; `Canvas.css`).
    */
   const videoFades = !surfaceFades && media?.kind === "video";
   const fades = surfaceFades || videoFades;

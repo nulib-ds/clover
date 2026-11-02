@@ -155,7 +155,7 @@ export const sceneDocs: ElementDocs = {
     options: {
       type: "{ request?: Record<string, unknown>; hideDelay?: number } | null",
       description:
-        "request: credentials and headers for the Scene and its models; hideDelay: how long the controls stay after a mouse stops, in milliseconds.",
+        "request: credentials and headers for the Scene and its models; hideDelay: how long the controls stay after a mouse stops or a finger lifts, in milliseconds (3000).",
     },
     controls: {
       type: "boolean | { zoom?: boolean; fullPage?: boolean; rotation?: boolean; reset?: boolean; information?: boolean } | null",

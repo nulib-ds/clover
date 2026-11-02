@@ -38,13 +38,18 @@
   pointer-events: var(--clover-controls-events);
 }
 
-/* Resting on one of them holds the controls, as resting on the cluster does. */
-.clover-scene:has(
-  > .clover-scene-navigation :is(button, .clover-scene-rotate-disc):hover
-) {
-  --clover-controls-shown: 1;
-  --clover-controls-events: auto;
-  --clover-controls-timing: var(--clover-controls-enter);
+/*
+ * Resting on one of them holds the controls, as resting on the cluster does: only where a
+ * pointer hovers, as a finger's last press keeps `:hover` in Safari on iOS (`Canvas.css`).
+ */
+@media (hover: hover) {
+  .clover-scene:has(
+    > .clover-scene-navigation :is(button, .clover-scene-rotate-disc):hover
+  ) {
+    --clover-controls-shown: 1;
+    --clover-controls-events: auto;
+    --clover-controls-timing: var(--clover-controls-enter);
+  }
 }
 
 /*

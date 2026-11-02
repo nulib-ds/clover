@@ -3,6 +3,7 @@
 import CloverCanvas from "docs/components/DynamicImports/Canvas";
 import { ADAPTERS, type AdapterName } from "./adapters";
 import { useEffect, useMemo, useState } from "react";
+import { useSiteMock } from "docs/lib/useMock";
 import {
   type CloverCanvasOptions,
   groupViews,
@@ -47,10 +48,13 @@ const CanvasRecipe = ({
 }) => {
   const [manifest, setManifest] = useState<any>(null);
   const [viewIndex, setViewIndex] = useState(0);
+  // A published mock is read from the site the page is on (`useSiteMock`).
+  const address = useSiteMock(iiifContent);
 
   useEffect(() => {
+    if (!address) return;
     let canceled = false;
-    fetch(iiifContent)
+    fetch(address)
       .then((response) => response.json())
       .then((json) => toPresentation4(adapt ? ADAPTERS[adapt](json) : json))
       .then((upgraded) => {
@@ -61,7 +65,7 @@ const CanvasRecipe = ({
     return () => {
       canceled = true;
     };
-  }, [iiifContent, adapt]);
+  }, [address, adapt]);
 
   const canvases = useMemo(() => manifest?.items ?? [], [manifest]);
   const views = useMemo(

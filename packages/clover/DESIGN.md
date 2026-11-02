@@ -267,12 +267,18 @@ The stylesheet's size is part of the design.
   `--clover-controls-timing` on `.clover-canvas`; one rule fades, tucks and spares each
   of the controls from them, and captions lift by the same number. Never repeat the
   state's selector per piece.
-- **The controls never hide on a timer from a reader who cannot hover** (WCAG 2.2.1). A
-  mouse, or a pen that hovers, shows them by moving, and they fade after `hideDelay`.
-  Resting on one of them holds them (`:hover`, WCAG 1.4.13). A finger, or a pen that
-  does not hover, has no timer: a tap on the picture shows the controls, and the next
-  tap hides them. A press where faded controls sit only shows them, and goes no further:
-  no zoom, no play, no hotspot. Focus that no press brought, and keyboard focus
+- **The controls wait longer for a reader who cannot hover** (WCAG 2.2.1). A mouse, or a
+  pen that hovers, shows them by moving, and they fade after `hideDelay`. Resting on one
+  of them holds them (`:hover`, WCAG 1.4.13), only where a pointer hovers
+  (`@media (hover: hover)`), as Safari on iOS keeps `:hover` on what a finger last
+  pressed. A finger, or a pen that does not hover, has the same wait, 3 seconds by
+  default for both (Mat, 2026-11-02: "do them all at 3s"): a tap on
+  the picture shows the controls, and the next tap hides them, or the wait; using one (a
+  tap, a drag along the seek bar, a menu's pick) starts the wait again, and no timer runs
+  while a finger is down. Nothing is lost as they fade, a tap brings them back, and a
+  paused recording holds them all, as do the controls that never fade. `hideDelay: Infinity` keeps them
+  for every pointer. A press where faded controls sit only shows them, and goes no
+  further: no zoom, no play, no hotspot. Focus that no press brought, and keyboard focus
   (`:has(:focus-visible)`), hold them. One pointer can always zoom back out: at the
   largest zoom, a click, a double click or a double tap goes home (WCAG 2.5.1).
 - **The viewport lies beneath everything else in the figure**: `z-index: -1` in an

@@ -116,7 +116,7 @@ export interface SceneProps {
   options?: {
     /** Credentials and headers for the Scene and its models. Inside a `Root`, the Root's. */
     request?: CloverRequest;
-    /** Milliseconds the controls stay after a mouse stops moving, as `Canvas`'s. */
+    /** Milliseconds the controls stay after a mouse stops or a finger lifts, as `Canvas`'s. */
     hideDelay?: number;
   };
   /**

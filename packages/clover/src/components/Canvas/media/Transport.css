@@ -107,6 +107,16 @@
 }
 
 /*
+ * Each piece of the bar is a layer of its own (it fades and tucks, `Canvas.css`), so a
+ * control's Tip rises no higher than its piece, and the pieces after it lie over it: the
+ * time, a row up on a narrow Body, ran over Play's Tip (Mat, 2026-11-02). The piece
+ * pointed at, pressed or holding focus is raised over the rest, Tip and ring with it.
+ */
+.clover-canvas-transport-bar > :is(:hover, :active, :focus-within) {
+  z-index: 1;
+}
+
+/*
  * The time and the chapter take the room between the start and end controls, pushing
  * those at the end to it. Only the time's width counts toward a row: the title takes
  * what is left.

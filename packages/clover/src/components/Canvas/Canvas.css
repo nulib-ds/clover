@@ -149,9 +149,14 @@
   cursor: grabbing;
 }
 
-/* A Canvas the reader cannot move, a lone recording or one held still: no grab hand. */
+/*
+ * A Canvas that cannot be moved, a lone recording or one held still: no grab hand, and a
+ * finger's drag or pinch is the page's, so it scrolls past (or zooms) as anywhere else
+ * (Mat, 2026-11-02: a vertical drag through a video kept the page from scrolling).
+ */
 .clover-canvas[data-navigable="false"] > .clover-canvas-viewport {
   cursor: default;
+  touch-action: manipulation;
 }
 
 /*
@@ -273,7 +278,7 @@
  * "let's not [have] controls fade back away so that we can better design this"): no
  * mystery press on the picture to find them on a phone. A video's, a Scene's and a
  * Timeline's come and go as below (`data-controls`; Mat, 2026-11-01: "the controls for
- * video on canvas should fade back after a bit of time"), a paused Play staying.
+ * video on canvas should fade back after a bit of time"), all of them held while paused.
  */
 .clover-canvas:not([data-controls]) {
   --clover-controls-shown: 1;
@@ -620,9 +625,6 @@
  * summary, metadata) is always a press away. Nor the annotations control, over a picture
  * or a recording: what is said of it, likewise. Nor a placeholder's toggle, the way in
  * and back out.
- * Nor, paused, a recording's (or an animation's) Play, at the start of its bar: playing is
- * always a press away, in one place. Playing, its Pause goes with the rest (Mat,
- * 2026-10-19).
  */
 .clover-canvas
   > .clover-canvas-controls
@@ -631,24 +633,46 @@
     [data-button="annotations"],
     [data-button="chapters"],
     [data-button="placeholder"]
-  ),
-.clover-canvas-transport-bar > [data-button="play"] {
+  ) {
   --clover-controls-shown: 1;
   --clover-controls-events: auto;
 }
 
 /*
  * Shown while the pointer is active over the Canvas, rests on one of the controls,
- * keyboard focus is inside it, or a menu is open: decided here, once, for every one of
- * them. A control under a resting pointer stays, Tip and all (WCAG 1.4.13), so a press
- * never falls through to the picture. Faded controls take no pointer, so they cannot be
- * hovered back; the panel's toggle, the `i`, the annotations control and a paused
- * recording's Play never fade, so they hold nothing.
+ * keyboard focus is inside it, a menu is open, or its recording is paused (its bar's
+ * Play, not Pause; Mat, 2026-11-02: "on PAUSE, hold the seek bar/ time/ controls", where
+ * only Play stayed from 2026-10-19): decided here, once, for every one of them. They go
+ * once it plays, the wait starting as Play is pressed (`useControlsVisibility`). A
+ * control under a resting pointer stays, Tip and all (WCAG 1.4.13), so a press never
+ * falls through to the picture. Faded controls take no pointer, so they cannot be
+ * hovered back; the panel's toggle, the `i` and the annotations control never fade, so
+ * they hold nothing.
  */
 .clover-canvas:is(
   [data-controls="visible"],
   :has(:focus-visible, [aria-expanded="true"]:not([data-button="panel"])),
   :has(
+    > .clover-canvas-media
+      > .clover-canvas-transport
+      > .clover-canvas-transport-bar
+      > [data-button="play"]
+  )
+) {
+  --clover-controls-shown: 1;
+  --clover-controls-events: auto;
+  --clover-controls-timing: var(--clover-controls-enter);
+}
+
+/*
+ * The resting pointer's hold, only where a pointer hovers. A touch screen has none, but
+ * Safari on iOS leaves `:hover` on what a finger last pressed (Mat, 2026-11-02): a
+ * video's Pause, once its Play was pressed, held its controls over the picture, Tip and
+ * all, after they had faded, and took the next press as half its own, so the tap that
+ * should show them did nothing.
+ */
+@media (hover: hover) {
+  .clover-canvas:has(
     > .clover-canvas-controls
       > :not(
         [data-button="panel"],
@@ -658,12 +682,12 @@
       ):hover,
     > .clover-canvas-navigator:hover,
     .clover-canvas-transport-seek-area:hover,
-    .clover-canvas-transport-bar > :not([data-button="play"]):hover
-  )
-) {
-  --clover-controls-shown: 1;
-  --clover-controls-events: auto;
-  --clover-controls-timing: var(--clover-controls-enter);
+    .clover-canvas-transport-bar > :hover
+  ) {
+    --clover-controls-shown: 1;
+    --clover-controls-events: auto;
+    --clover-controls-timing: var(--clover-controls-enter);
+  }
 }
 
 /*
@@ -672,7 +696,7 @@
  * not the cluster, so one can stay, and a faded one keeps its room (nothing beside it
  * moves). A video or sound's transport, or an animation's frames (`Transport.css`), and
  * the captions (`MediaBody.css`) read the same state, in the media layer: its scrim, its
- * seek bar and each piece of its bar, so its Play can stay. A placeholder's toggle never
+ * seek bar and each piece of its bar. A placeholder's toggle never
  * fades: open, it is the way back to the still, so it stays in sight.
  */
 .clover-canvas > .clover-canvas-controls > *,

@@ -967,16 +967,20 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   Never upgrade a page that came out of an upgraded resource again: nested pages carry
   no `@context`, so `upgradePage` would take them for Presentation 3 (`LoadedCanvas`
   reads embedded pages with `readPage` for that reason).
-- **The `i`, the annotations control and a paused Play never fade** (Mat, 2026-10-19),
-  as the panel toggle and a placeholder's toggle do (`[data-button="information"]`,
-  `[data-button="annotations"]`, `[data-button="placeholder"]`, and a transport bar's
-  `[data-button="play"]`, in
-  `Canvas.css`), over a picture or a recording; playing, its Pause fades with the rest
-  (Mat: only while paused). For Play, the transport fades by its parts (its
+- **The `i` and the annotations control never fade** (Mat, 2026-10-19), as the panel
+  toggle and a placeholder's toggle do (`[data-button="information"]`,
+  `[data-button="annotations"]`, `[data-button="placeholder"]`, in `Canvas.css`), over a
+  picture or a recording. **A paused recording holds every control** (Mat, 2026-11-02:
+  "on PAUSE, hold the seek bar/ time/ controls. they should only fade away in 4 seconds
+  after play", then 3 for every fade; from 2026-10-19 only its Play stayed): the reveal rule's
+  `:has(… > .clover-canvas-transport-bar > [data-button="play"])`, the bar's Play being
+  there only while paused. Pressed, Play starts the wait (`useControlsVisibility` reads
+  the drawn `--clover-controls-shown` as the press lands, so the timer that ran out
+  while paused does not drop them at once). The transport fades by its parts (its
   `::before` scrim, which carries every scrim, sound's too; its seek area; each of its
-  bar's children), never its box, so the one child can stay. A large paused play button
-  in the middle, shown while the controls were away, was tried and removed (Mat: it came
-  and went). Captions tell their state
+  bar's children), never its box. A large paused play button in the middle, shown while
+  the controls were away, was tried and removed (Mat: it came and went). Captions tell
+  their state
   by the glyph, outlined or filled (`CaptionsIcon` `on`), not the transport's bar.
 - **What an annotation leads to, carries and covers** (Mat, 2026-10-19; Cookbook 0022,
   0377, 0266, 0019, 0103). Each in the lazy chunks, not a Canvas's first:
@@ -1851,8 +1855,8 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   figure only where the controls fade, a Timeline's or a video's (`fades`), so a
   picture's figure has no `data-controls` and `Canvas.css` holds
   `--clover-controls-shown: 1` on `.clover-canvas:not([data-controls])`. `fit` (one row,
-  the rest behind More) follows the surface alone: a video's stays on one row. A paused
-  Play stays (the rule above); Pause goes with the rest. No scrim from the top over a
+  the rest behind More) follows the surface alone: a video's stays on one row. Paused,
+  every control stays (the rule above); playing, they fade. No scrim from the top over a
   video (Mat, 2026-11-01: "remove the black scrim from the top of video. it should only
   be on the bottom"), only the transport's; none over an image either ("remove the
   shadow/scrim on canvas for images").
@@ -1882,9 +1886,14 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
 - The controls follow the Player for a mouse, or a pen that hovers (`isHovering`: a pen
   `pointermove` with `buttons === 0`). `useControlsVisibility` sets
   `data-controls="visible"` on its activity and hides them after `hideDelay`. A finger,
-  or a pen not yet seen to hover (`isDirect(pointerType, hovers)`), gets no timer
-  (WCAG 2.2.1). A tap on the picture (the viewport) toggles the controls after `TAP_MS`,
-  so the second tap of a double tap is left alone, and a tap elsewhere only shows them.
+  or a pen not yet seen to hover (`isDirect(pointerType, hovers)`), waits as long, from
+  its lift (`hideDelay`, 3 seconds for both; Mat, 2026-11-02: "do them all at 3s";
+  WCAG 2.2.1), and no timer runs while it is down. A tap on the picture (the
+  viewport) toggles the controls after `TAP_MS`, so the second tap of a double tap is
+  left alone, and a tap elsewhere only shows them. Its press lifted, from one of the
+  controls (`isInteractive`, a menu option's `label` too, off the picture, so not a
+  hotspot) while they were in sight or held by an open menu, or from a drag, the wait
+  starts again; a control pressed drops a tap's waiting reveal.
   A press on the picture where faded controls sit (`FADING_CONTROLS`: the cluster's
   children, the navigator, the transport's children) is held in the capture phase on
   the figure: it shows the controls, and neither its pointer events nor its click
@@ -2017,12 +2026,15 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     2.5.8). Anything placed in the figure to lie beneath the viewport (sound's `<video>`,
     while the iPhone's system player has it) goes first, at `z-index: -1`.
   - The transport fades with the rest of the controls, through the single reveal rule
-    in `Canvas.css`, all but its Play while paused, which never fades (above). Do not add
-    "stay visible while paused" or other overrides beyond that one. The
+    in `Canvas.css`, which holds them all while paused (above). Do not add overrides
+    beyond that rule. The
     reveal is `data-controls` (from `useControlsVisibility`: a mouse's activity, lingering
-    `LEAVE_DELAY` after leave or blur; a finger's tap on the picture; focus no press
-    brought), `:has(:focus-visible)`, an open menu, or a control, the navigator or the
-    transport under a resting pointer (`:hover`, Play's aside), so a control never fades,
+    `LEAVE_DELAY` after leave or blur; a finger's tap on the picture or use of a control,
+    for `hideDelay`; focus no press brought), `:has(:focus-visible)`, an open menu,
+    a paused recording, or a control, the navigator or the
+    transport under a resting pointer (`:hover`, under
+    `@media (hover: hover)`: Safari on iOS keeps `:hover` on a finger's last press, which
+    held a playing video's controls and split the next tap), so a control never fades,
     Tip and all, while the pointer is on it (WCAG 1.4.13). It is not `:focus-within`: a
     click focuses the viewport and would pin a video's bar.
 - The wrapper is a `<figure>`. A shown Canvas with a `summary` or `metadata` (as in

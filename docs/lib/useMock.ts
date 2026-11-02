@@ -13,3 +13,22 @@ export function useMock(path: string) {
   }, [basePath, path]);
   return url;
 }
+
+/** The published site's mocks, as the docs' examples write their addresses. */
+const PUBLISHED_MOCKS = "https://clover.iiif.library.northwestern.edu/mocks/";
+
+/**
+ * An address as an example's code writes it, a published mock's fetched from the site the
+ * page is on instead (`useMock`): the published site sends no CORS headers, so from
+ * `npm run dev` or a preview its own address fails to fetch. Any other address is as
+ * given; a mock's is null until mounted.
+ */
+export function useSiteMock(address: string): string | null;
+export function useSiteMock(address?: string): string | null | undefined;
+export function useSiteMock(address?: string) {
+  const path = address?.startsWith(PUBLISHED_MOCKS)
+    ? address.slice(PUBLISHED_MOCKS.length)
+    : "";
+  const mock = useMock(path);
+  return path ? mock : address;
+}

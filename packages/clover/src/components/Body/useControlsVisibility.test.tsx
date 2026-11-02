@@ -96,6 +96,9 @@ function tap(target: Element, options: Parameters<typeof press>[2] = {}) {
 
 const wait = (ms: number) => act(() => void vi.advanceTimersByTime(ms));
 
+/** How long a finger's controls wait: a mouse's. */
+const TOUCH_DELAY = DEFAULT_HIDE_DELAY;
+
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
@@ -249,7 +252,7 @@ describe("useControlsVisibility", () => {
   });
 
   describe.each(["touch", "pen"])("under a %s", (pointerType) => {
-    it("shows on a tap on the picture, and stays until the next, with no timer", () => {
+    it("shows on a tap on the picture, and fades after a mouse's wait, or the next tap", () => {
       const { getByTestId } = render(<Probe />);
       const probe = getByTestId("probe");
       const picture = getByTestId("picture");
@@ -260,12 +263,54 @@ describe("useControlsVisibility", () => {
       wait(TAP_MS);
       expect(probe).toHaveAttribute("data-visible", "true");
 
-      // However long the reader takes (WCAG 2.2.1).
-      wait(DEFAULT_HIDE_DELAY * 30);
+      // As long as a mouse's, for whoever needs longer to reach one (WCAG 2.2.1).
+      wait(TOUCH_DELAY - 1);
       expect(probe).toHaveAttribute("data-visible", "true");
+      wait(1);
+      expect(probe).toHaveAttribute("data-visible", "false");
 
       tap(picture, { pointerType });
       wait(TAP_MS);
+      expect(probe).toHaveAttribute("data-visible", "true");
+      tap(picture, { pointerType });
+      wait(TAP_MS);
+      expect(probe).toHaveAttribute("data-visible", "false");
+    });
+
+    it("keeps the wait when a pressed control lets focus drop to the page", () => {
+      const { getByTestId, getByRole } = render(<Probe />);
+      const probe = getByTestId("probe");
+      const picture = getByTestId("picture");
+      const zoom = getByRole("button", { name: "Inside" });
+      tap(picture, { pointerType });
+      wait(TAP_MS);
+      // Focus the press gave inside the viewer (the viewport's, in a browser).
+      act(() => zoom.focus());
+      // Pause pressed: Safari gives the button no focus, and focus leaves for the page.
+      tap(getByRole("button", { name: "Zoom in" }), { pointerType });
+      act(() => zoom.blur());
+      wait(LEAVE_DELAY * 2);
+      expect(probe).toHaveAttribute("data-visible", "true");
+      wait(TOUCH_DELAY - LEAVE_DELAY * 2);
+      expect(probe).toHaveAttribute("data-visible", "false");
+    });
+
+    it("runs no timer while a finger is down, and starts the wait again as it lifts", () => {
+      const { getByTestId } = render(<Probe />);
+      const probe = getByTestId("probe");
+      const picture = getByTestId("picture");
+      tap(picture, { pointerType });
+      wait(TAP_MS);
+
+      // A drag across the picture, held a long while.
+      press(picture, "pointerdown", { pointerType });
+      press(picture, "pointermove", { pointerType, x: 60 });
+      wait(TOUCH_DELAY * 3);
+      expect(probe).toHaveAttribute("data-visible", "true");
+      press(picture, "pointerup", { pointerType, x: 60 });
+      wait(TOUCH_DELAY - 1);
+      expect(probe).toHaveAttribute("data-visible", "true");
+      wait(1);
       expect(probe).toHaveAttribute("data-visible", "false");
     });
 
@@ -328,6 +373,112 @@ describe("useControlsVisibility", () => {
       tap(getByRole("button", { name: "Zoom in" }), { pointerType });
       tap(getByRole("button", { name: "Hotspot" }), { pointerType });
       wait(TAP_MS);
+      expect(probe).toHaveAttribute("data-visible", "false");
+    });
+
+    it("starts the wait again when one of them is used, then fades", () => {
+      const { getByTestId, getByRole } = render(<Probe />);
+      const probe = getByTestId("probe");
+      const zoom = getByRole("button", { name: "Zoom in" });
+
+      tap(getByTestId("picture"), { pointerType });
+      wait(TAP_MS);
+      expect(probe).toHaveAttribute("data-visible", "true");
+
+      // A tap on one, Play say, late in the wait: it starts over.
+      wait(TOUCH_DELAY - 100);
+      tap(zoom, { pointerType });
+      wait(TOUCH_DELAY - 1);
+      expect(probe).toHaveAttribute("data-visible", "true");
+      wait(1);
+      expect(probe).toHaveAttribute("data-visible", "false");
+
+      // A drag along one, the seek bar's, from where it was pressed.
+      tap(getByTestId("picture"), { pointerType });
+      wait(TAP_MS);
+      press(zoom, "pointerdown", { pointerType });
+      press(zoom, "pointermove", { pointerType, x: 80 });
+      press(zoom, "pointerup", { pointerType, x: 80 });
+      wait(TOUCH_DELAY);
+      expect(probe).toHaveAttribute("data-visible", "false");
+    });
+
+    it.each([
+      ["a pick in a menu", "label"],
+      ["Play on a paused video", "button"],
+    ])(
+      "waits again after %s the stylesheet held in sight, then fades",
+      (_, tag) => {
+        const { getByTestId, getByRole } = render(<Probe />);
+        const probe = getByTestId("probe");
+        tap(getByTestId("picture"), { pointerType });
+        wait(TAP_MS + TOUCH_DELAY);
+        expect(probe).toHaveAttribute("data-visible", "false");
+        // Held by the stylesheet meanwhile: a menu open among them, or paused.
+        probe.style.setProperty("--clover-controls-shown", "1");
+        const control = document.createElement(tag);
+        getByRole("button", { name: "Zoom in" }).after(control);
+        tap(control, { pointerType });
+        probe.style.removeProperty("--clover-controls-shown");
+        expect(probe).toHaveAttribute("data-visible", "true");
+        wait(TOUCH_DELAY - 1);
+        expect(probe).toHaveAttribute("data-visible", "true");
+        wait(1);
+        expect(probe).toHaveAttribute("data-visible", "false");
+      },
+    );
+
+    it("drops a tap's waiting reveal when a control is pressed, so nothing stays up", () => {
+      const { getByTestId, getByRole } = render(<Probe />);
+      const probe = getByTestId("probe");
+      const picture = getByTestId("picture");
+      const zoom = getByRole("button", { name: "Zoom in" });
+
+      // The picture tapped, and Play at once, inside the double tap's window.
+      tap(picture, { pointerType });
+      tap(zoom, { pointerType });
+      wait(TAP_MS + TOUCH_DELAY);
+      expect(probe).toHaveAttribute("data-visible", "false");
+
+      // Shown, the picture tapped (to hide them), and a control at once: they still go.
+      tap(picture, { pointerType });
+      wait(TAP_MS);
+      expect(probe).toHaveAttribute("data-visible", "true");
+      tap(picture, { pointerType });
+      tap(zoom, { pointerType });
+      wait(TAP_MS + TOUCH_DELAY);
+      expect(probe).toHaveAttribute("data-visible", "false");
+    });
+
+    it("leaves faded controls faded when a control that never fades is used", () => {
+      const { getByTestId, getByRole } = render(<Probe />);
+      const probe = getByTestId("probe");
+      tap(getByRole("button", { name: "Zoom in" }), { pointerType });
+      wait(TAP_MS + TOUCH_DELAY);
+      expect(probe).toHaveAttribute("data-visible", "false");
+    });
+
+    it("keeps focus that no press brought, a screen reader's, past a control's use", () => {
+      const { getByTestId, getByRole } = render(<Probe />);
+      const probe = getByTestId("probe");
+      const zoom = getByRole("button", { name: "Zoom in" });
+      act(() => zoom.focus());
+      expect(probe).toHaveAttribute("data-visible", "true");
+      // A screen reader's activation is a click, with no press before it.
+      click(zoom);
+      wait(LEAVE_DELAY * 10);
+      expect(probe).toHaveAttribute("data-visible", "true");
+    });
+
+    it("lets a hotspot take its press, the controls waiting again as it lifts", () => {
+      const { getByTestId, getByRole } = render(<Probe />);
+      const probe = getByTestId("probe");
+      tap(getByTestId("picture"), { pointerType });
+      wait(TAP_MS);
+      tap(getByRole("button", { name: "Hotspot" }), { pointerType });
+      wait(TOUCH_DELAY - 1);
+      expect(probe).toHaveAttribute("data-visible", "true");
+      wait(1);
       expect(probe).toHaveAttribute("data-visible", "false");
     });
 

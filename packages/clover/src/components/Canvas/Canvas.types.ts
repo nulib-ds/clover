@@ -62,9 +62,9 @@ export interface CloverCanvasOptions {
   animationTime?: number;
   /**
    * Milliseconds the controls and navigator stay after a mouse (or a pen that hovers)
-   * stops moving, as the Player's `hideDelay`. Default 2000; `Infinity` keeps them once
-   * shown. A finger, or a pen that does not hover, has no timer: a tap on the picture
-   * shows them, and another hides them. Focus that no press brought holds them too.
+   * stops moving, or a finger lifts, as the Player's `hideDelay`. Default 3000; `Infinity`
+   * keeps them once shown. A tap on the picture shows them, and another hides them. Focus
+   * that no press brought holds them, and so does a paused recording.
    * A Timeline's: a Canvas's controls stay in sight, for now (Mat, 2026-11-01).
    */
   hideDelay?: number;

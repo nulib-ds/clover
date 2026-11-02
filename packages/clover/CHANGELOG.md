@@ -9,6 +9,45 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 `@samvera/clover-iiif`, keeps its own changelog on the repository's
 [`v3` branch](https://github.com/nulib-ds/clover/blob/v3/CHANGELOG.md).
 
+## Unreleased
+
+### Fixed
+
+- **A drag through a video scrolls the page.** A Canvas that cannot be moved, a lone
+  video or recording, or one held still, took every touch, so a finger dragging through it
+  could not scroll the page past it, nor pinch to zoom the page. Its viewport now leaves
+  drags and pinches to the page (`touch-action: manipulation`); a tap still plays, pauses
+  and shows the controls. A Canvas that can be panned and zoomed keeps every touch, as
+  before.
+- **A tap on a playing video's hidden Pause shows its controls.** On a phone, once Play
+  was tapped, Safari kept the Pause under the finger hovered, so the controls stayed
+  drawn (its Tip "Pause (K)" over the time) after they had faded, and the next tap did
+  nothing: it took a second to show them and a third to pause. The controls are held by
+  a resting pointer only where a pointer hovers (`@media (hover: hover)`), on a Canvas
+  and a Scene, so one tap shows them and the next pauses.
+- **A transport control's Tip lies over the time.** Each piece of a video's bar is a
+  layer of its own, so Play's Tip ran under the time beside it, a row up on a narrow
+  Body. The piece pointed at, pressed or holding focus is now raised over the rest.
+
+### Changed
+
+- **A paused video holds all its controls.** The seek bar, the time and every button
+  stay while it is paused, before it first plays too, and fade once it plays: 3 seconds
+  after Play is tapped, or after a mouse goes still. Only Play stayed before, its Pause
+  fading with the rest.
+- **The controls wait 3 seconds before fading, for every pointer.** `hideDelay`'s default
+  is now 3000 (it was 2000).
+- **On a touch screen, the controls fade.** Shown by a tap, they fade after `hideDelay`,
+  as a mouse's do, where they stayed until the next tap; a tap on Play,
+  Pause or another control, a drag along the seek bar or a pick in the captions menu
+  starts the wait again, so a video tapped to play is not left under them, and no timer
+  runs while a finger is down. A tap brings them back. Keyboard focus, focus no press
+  brought (a screen reader's), an open menu and a paused Play still hold them, a mouse's
+  controls are as they were, and `hideDelay: Infinity` keeps them for every pointer. A
+  tap on a menu option's label now counts as a press on a control. A control pressed
+  just after a tap on the picture (Play at once, within the double tap's window) drops
+  that tap's reveal, which landed after the fade began and left the controls up.
+
 ## [4.1.0] - 2026-11-02
 
 ### Added

@@ -49,7 +49,10 @@ export function scrollsWithin(
   return false;
 }
 
-/** A control, link or overlay within `bodyBox` that handles its own presses. */
+/**
+ * A control, link or overlay within `bodyBox` that handles its own presses. A label is
+ * its control's: a press on a menu's option lands on it, not on its radio.
+ */
 export function isInteractive(
   target: EventTarget | null,
   bodyBox: HTMLElement,
@@ -60,6 +63,7 @@ export function isInteractive(
       node instanceof HTMLButtonElement ||
       node instanceof HTMLAnchorElement ||
       node instanceof HTMLInputElement ||
+      node instanceof HTMLLabelElement ||
       node instanceof HTMLSelectElement ||
       node.dataset?.cloverCanvasInteractive !== undefined
     ) {
