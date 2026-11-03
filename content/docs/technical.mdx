@@ -407,7 +407,10 @@ that uses any element.
 - **Controls of your own.** `controlButtons` on a `<clover-body>` or `<clover-canvas>`
   replaces any of its controls with a button you make: a function given the control's
   `name`, `label` and Clover's `icon`, returning the button. Clover keeps it named, keyed
-  and in its state, presses the control with it, and adds its popover. A `<button>` you
+  and in its state, presses the control with it, and adds its popover. While zoom in is
+  at the greatest zoom, zoom out at the least, or reset at home, `buttonProps` has
+  `aria-disabled: true` and no `onClick`: spread it, and style `[aria-disabled="true"]`
+  dimmed, never with `disabled`, which takes the button from the keyboard. A `<button>` you
   write in a `<clover-body>` is one of its controls, after Clover's, as a React host's
   children are. `class="clover-canvas-button"` gives it Clover's look, and a
   `<clover-tip>` in it the popover Clover's controls show (`<Clover.Tip>` in React).

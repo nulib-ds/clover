@@ -45,6 +45,7 @@ beforeEach(() => {
     getBounds: () => ({ x: 0, y: 0, width: 100, height: 100 }),
     fitBounds: vi.fn(),
     zoomBy: vi.fn(),
+    viewLimits: () => ({ atMax: false, atMin: false, atHome: false }),
     rotateBy: vi.fn(),
     home: vi.fn(),
     invalidate: vi.fn(),

@@ -17,7 +17,14 @@ export type ControlButtonProps = {
     lang?: string;
     /** The key the Canvas answers to for this control, when it has one. */
     "aria-keyshortcuts"?: string;
+    /** Absent while the control would do nothing, as at the greatest zoom. */
     onClick?: React.MouseEventHandler<HTMLButtonElement>;
+    /**
+     * `true` while the control would do nothing: zoom in at the greatest zoom, zoom out at
+     * the least, reset at home. Spread it with the rest, never as `disabled`, which would
+     * take the button from the keyboard (WCAG 2.4.3), and dim it.
+     */
+    "aria-disabled"?: true;
     /** On a control that opens a menu (the Choice control): its state and target. */
     "aria-expanded"?: boolean;
     "aria-controls"?: string;
