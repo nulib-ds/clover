@@ -1623,7 +1623,10 @@ describe("Canvas", () => {
         "true",
       );
       await open();
-      expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
+      expect(screen.getByTestId("clover-canvas-placeholder")).toHaveAttribute(
+        "data-hidden",
+        "true",
+      );
       // One of the row's controls, as the `i` and annotations are.
       expect(closeViewer().closest(".clover-canvas-controls")).toBe(
         screen.getByTestId("clover-canvas-controls"),
@@ -1657,6 +1660,20 @@ describe("Canvas", () => {
       ).toBeNull();
     });
 
+    it("keeps the same still mounted across open and close", async () => {
+      render(<Canvas canvases={[first]} />);
+      const stillImg = () =>
+        screen.getByTestId("clover-canvas-placeholder").querySelector("img");
+      const still = stillImg();
+      expect(still).not.toBeNull();
+      fireEvent.click(openViewer());
+      await open();
+      expect(stillImg()).toBe(still);
+      renderer.isOpen = true;
+      fireEvent.click(closeViewer());
+      expect(stillImg()).toBe(still);
+    });
+
     it("opens straight away when told to skip the placeholder", () => {
       render(<Canvas canvases={[first]} placeholder={false} />);
       expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
@@ -1672,7 +1689,10 @@ describe("Canvas", () => {
         ),
       );
       await open();
-      expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
+      expect(screen.getByTestId("clover-canvas-placeholder")).toHaveAttribute(
+        "data-hidden",
+        "true",
+      );
       expect(closeViewer()).toBeInTheDocument();
     });
 
@@ -1697,7 +1717,10 @@ describe("Canvas", () => {
       );
       expect(renderer.setImages.mock.lastCall[0][0].url).not.toMatch(/still/);
       await open();
-      expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
+      expect(screen.getByTestId("clover-canvas-placeholder")).toHaveAttribute(
+        "data-hidden",
+        "true",
+      );
 
       renderer.isOpen = true;
       fireEvent.click(closeViewer());
