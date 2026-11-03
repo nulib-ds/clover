@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.2.0] - 2026-11-03
+
 ### Added
 
 - **`Panel`'s `sections`: Clover's own sections, minus the ones you do not want.** A panel
