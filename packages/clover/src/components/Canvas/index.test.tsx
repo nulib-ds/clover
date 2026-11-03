@@ -24,6 +24,7 @@ import missingImageJson from "../../fixtures/iiif-cookbook/0283-missing-image.js
 import { initCloverI18n } from "../../i18n";
 import { IdPrefixContext } from "../../ui/useUniqueId";
 import { CanvasRenderer } from "../../lib/renderer";
+import { clearInfoCache } from "../../lib/renderer/sources/imageService";
 import { Root } from "../Root/Root";
 import { Body } from "../Body/Body";
 import { decodeContentState } from "../../core/content-state-reader";
@@ -1435,6 +1436,58 @@ describe("Canvas", () => {
       expect(
         await screen.findByRole("button", { name: "Open image viewer" }),
       ).toHaveAttribute("data-button", "placeholder");
+    });
+
+    it("asks a still's info.json on mount, beside the placeholder's chunk", async () => {
+      clearInfoCache();
+      const service = "https://example.org/iiif/still-service";
+      const fetch = vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              "@context": "http://iiif.io/api/image/3/context.json",
+              id: service,
+              type: "ImageService3",
+              protocol: "http://iiif.io/api/image",
+              profile: "level0",
+              width: 400,
+              height: 300,
+              sizes: [{ width: 400, height: 300 }],
+            }),
+          ),
+      );
+      const canvas = {
+        ...first,
+        placeholderContainer: {
+          ...first.placeholderContainer,
+          items: [
+            {
+              items: [
+                {
+                  motivation: "painting",
+                  body: {
+                    id: `${service}/full/max/0/default.jpg`,
+                    type: "Image",
+                    width: 400,
+                    height: 300,
+                    service: [{ id: service, type: "ImageService3" }],
+                  },
+                  target: `${first.id}/placeholder`,
+                },
+              ],
+            },
+          ],
+        },
+      };
+      render(<Canvas canvases={[canvas]} options={{ request: { fetch } }} />);
+      // Straight after mount, not once the lazy Placeholder has arrived to ask for it.
+      expect(fetch).toHaveBeenCalledWith(
+        `${service}/info.json`,
+        expect.anything(),
+      );
+      await screen.findByTestId("clover-canvas-placeholder");
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(renderer.setImages).not.toHaveBeenCalled();
     });
 
     it("shows the still fitted in place of the Canvas, with only a toggle", async () => {
