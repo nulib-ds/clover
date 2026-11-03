@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useEffect, useRef } from "react";
 
 import * as Clover from "../../parts";
 import type {
+  CloverCanvasOptions,
   PanelLayout,
   PanelSection,
   PanelSectionLabels,
@@ -63,6 +64,8 @@ export interface LightboxProps {
   storageKey?: string | false;
   /** The Body's `collapseControls`: when the view's controls collapse behind one button. */
   collapseControls?: "auto" | "always";
+  /** The Body's Canvas `options`: its gestures, zoom limits and motion. */
+  canvasOptions?: CloverCanvasOptions;
   className?: string;
 }
 

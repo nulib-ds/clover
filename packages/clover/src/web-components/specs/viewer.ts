@@ -41,7 +41,13 @@ export const viewer: ElementSpec = {
     summary: { prop: "summary", type: "boolean" },
     "lightbox-items": { prop: "lightboxItems", type: ["slider", "pager"] },
   },
-  properties: ["iiifContent", "annotations", "request", "renderers"],
+  properties: [
+    "iiifContent",
+    "annotations",
+    "request",
+    "renderers",
+    "canvasOptions",
+  ],
   events: {
     "clover-canvas-change": { prop: "onCanvasChange", detail: ["canvasId"] },
     "clover-manifest-change": {
@@ -205,6 +211,11 @@ export const viewerDocs: ElementDocs = {
       type: "CloverRenderer[] | null",
       description:
         "Renderers of yours, for its Body: each claims views (canvasId, format or match) and draws one into a box of its own (render), returning what undoes it.",
+    },
+    canvasOptions: {
+      type: "CloverCanvasOptions | null",
+      description:
+        "Default, Document and Gallery: the Body's Canvas options (its gestures, zoom limits and motion), the Gallery's in its lightbox.",
     },
     iiifContent: {
       type: "string | Record<string, unknown> | null",

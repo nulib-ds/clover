@@ -33,6 +33,11 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   />
   ```
 
+- **`canvasOptions` on the Default, Document and Gallery templates** (and on
+  `<clover-viewer>` as a property), handed to the Body's Canvas as its `options`, the
+  Gallery's in its lightbox. The Viewer passes it through:
+  `<Viewer iiifContent={url} canvasOptions={{ animationDuration: 1.2 }} />`.
+
 ## [4.2.0] - 2026-11-03
 
 ### Added

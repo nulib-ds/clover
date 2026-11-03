@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 
 import * as Clover from "../../parts";
 import type {
+  CloverCanvasOptions,
   ItemsLayout,
   ItemsProps,
   PanelLayout,
@@ -94,6 +95,8 @@ export type GalleryProps = Omit<RootProps, "children"> & {
    * Its lightbox's Body's `collapseControls`.
    */
   collapseControls?: "auto" | "always";
+  /** Its lightbox's Body's Canvas `options`: its gestures, zoom limits and motion. */
+  canvasOptions?: CloverCanvasOptions;
 };
 
 /** The heading level under another. Past 6, the parts' titles name what they head. */
@@ -128,6 +131,7 @@ export function Gallery({
   storageKey = "clover-template-gallery",
   headingLevel = 2,
   collapseControls,
+  canvasOptions,
   style,
   ...root
 }: GalleryProps) {
@@ -179,6 +183,7 @@ export function Gallery({
         languages={languages}
         storageKey={storageKey}
         collapseControls={collapseControls}
+        canvasOptions={canvasOptions}
       />
     </Clover.Root>
   );

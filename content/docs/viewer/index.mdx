@@ -124,6 +124,7 @@ on [its own page](/docs/viewer/default).
 | `storageKey`       | `string \| false`                       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                                                                                                                         |
 | `fill`             | `boolean`                               | `false`                     | Fill the box it sits in; the Body takes what the rest leave.                                                                                                                                       |
 | `collapseControls` | `"auto" \| "always"`                    | `"auto"`                    | When the Body's view controls (zoom, rotation, reset, full screen) collapse behind one button: only where its row cannot hold them all, or always, leaving the media more room.                    |
+| `canvasOptions`    | `CloverCanvasOptions`                   | —                           | The Body's Canvas `options`: its gestures, zoom limits and [motion](/docs/canvas#motion).                                                                                                          |
 
 ### Document
 
@@ -144,6 +145,7 @@ More on [its own page](/docs/viewer/document).
 | `headingLevel`       | `number`                | `2`                          | The title's level; the panel's sections are a level below.                                                                                                                      |
 | `storageKey`         | `string \| false`       | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.                                                                                                                  |
 | `collapseControls`   | `"auto" \| "always"`    | `"auto"`                     | When the Body's view controls (zoom, rotation, reset, full screen) collapse behind one button: only where its row cannot hold them all, or always, leaving the media more room. |
+| `canvasOptions`      | `CloverCanvasOptions`   | —                            | The Body's Canvas `options`: its gestures, zoom limits and [motion](/docs/canvas#motion).                                                                                       |
 
 ### Gallery
 
@@ -170,6 +172,7 @@ each cell opening in a lightbox within the gallery's bounds. More on
 | `storageKey`       | `string \| false`                  | `"clover-template-gallery"` | Where the panel's width is remembered; `false` forgets it.                                                                                                                          |
 | `headingLevel`     | `number`                           | `2`                         | The title's level; the lightbox's title is one below.                                                                                                                               |
 | `collapseControls` | `"auto" \| "always"`               | `"auto"`                    | When the lightbox's view controls (zoom, rotation, reset, full screen) collapse behind one button: only where its row cannot hold them all, or always, leaving the media more room. |
+| `canvasOptions`    | `CloverCanvasOptions`              | —                           | The lightbox's Canvas `options`: its gestures, zoom limits and [motion](/docs/canvas#motion).                                                                                       |
 
 </ApiReference>
 
