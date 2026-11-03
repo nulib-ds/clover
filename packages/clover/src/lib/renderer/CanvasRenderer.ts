@@ -533,8 +533,11 @@ export class CanvasRenderer implements GestureTarget {
   home(immediate = false): void {
     const home = this.homeCamera();
     if (!home) return;
+    const was = this.atHome;
     this.atHome = true;
     this.animateTo(home, immediate);
+    // Already framed as home by hand, the camera doesn't move, so no frame says so.
+    if (!was && this.opened) this.emit("viewport");
   }
 
   /** Zoomed in as far as it goes, or on the way there. */

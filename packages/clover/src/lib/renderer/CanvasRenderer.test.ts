@@ -261,7 +261,11 @@ describe("CanvasRenderer", () => {
     renderer.zoomBy(1 / 1.5, undefined, false);
     expect(renderer.viewLimits().atHome).toBe(false);
     expect(renderer.isAtHome).toBe(false);
+    // Framed as home already, `home` moves nothing, so it says so itself.
+    const told = vi.fn();
+    renderer.on("viewport", told);
     renderer.home(true);
+    expect(told).toHaveBeenCalled();
     expect(renderer.viewLimits().atHome).toBe(true);
     renderer.rotateBy(90);
     expect(renderer.viewLimits().atHome).toBe(false);
