@@ -71,6 +71,15 @@ const OWNERS = {
     "components/Canvas/media/Transport.tsx",
     "components/Canvas/FrameAnimation.tsx",
   ],
+  // The scrolling edge's shadow, which the sections, Search, a Transcript, Items' slider
+  // and the pager cast.
+  "ui/Shade": [
+    "ui/Sections.tsx",
+    "components/Search/Search.tsx",
+    "components/Transcript/Transcript.tsx",
+    "components/Items/Items.tsx",
+    "components/Items/Pager.tsx",
+  ],
   "ui/ReadMore": ["ui/ReadMore.tsx", "web-components/elements/read-more.tsx"],
   // A row of language codes: a Transcript's files, an annotation set's languages.
   "ui/Codes": [
@@ -415,10 +424,26 @@ function importersOf() {
 }
 
 /**
- * The parts that draw what a module draws: its own part (`PART_SHEETS`), or, for a module
- * of no part (`ui/`, `lib/`), the parts of the modules that import it.
+ * The part sheets a page of a part needs besides core's and its own, for the parts it
+ * draws inside it, where it draws them: a Canvas's recordings, animations and map of a
+ * place, and a Body's Scene; the Panel's Collection and Views sections' items, and its Map
+ * section. Styling's table says the same. `build/styles.test.mjs` fails on a part that
+ * draws what another part's sheet styles unnamed here, and on a name here it never needs.
  */
-export function partsDrawing() {
+export const DRAWN_INSIDE = {
+  core: ["media", "scene", "map"],
+  panel: ["items", "map"],
+};
+
+/**
+ * The parts that draw what a module draws: its own part (`PART_SHEETS`), or, for a module
+ * of no part (`ui/`, `lib/`), the parts of the modules that import it. `inside`: every
+ * part that draws it, inside another part too (`DRAWN_INSIDE`), up to core, which every
+ * page has, with what it draws inside it. A template draws every part, and the Viewer's
+ * page takes styles.css whole, so a template's modules are its own alone, and draw no
+ * part inside them.
+ */
+export function partsDrawing({ inside = false } = {}) {
   const importers = importersOf();
   const prefixes = Object.entries(PART_SHEETS)
     .flatMap(([name, paths]) => paths.map((path) => [resolve(src, path), name]))
@@ -432,12 +457,16 @@ export function partsDrawing() {
     prefixes.find(
       ([prefix]) => file === `${prefix}.tsx` || file.startsWith(`${prefix}/`),
     )?.[1];
+  const inTemplate = (file) => file.startsWith(`${resolve(src, "templates")}/`);
   const usersOf = (file, seen = new Set()) => {
     const part = partOf(file);
-    if (part) return [part];
+    if (part && (!inside || part === "core" || inTemplate(file))) return [part];
     if (seen.has(file)) return [];
     seen.add(file);
-    return (importers.get(file) ?? []).flatMap((by) => usersOf(by, seen));
+    const users = (importers.get(file) ?? [])
+      .filter((by) => !inside || !inTemplate(by))
+      .flatMap((by) => usersOf(by, seen));
+    return part ? [part, ...users] : users;
   };
   return (file) => new Set(usersOf(file));
 }

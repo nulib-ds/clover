@@ -10,6 +10,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 import {
+  DRAWN_INSIDE,
   PART_SHEETS,
   partSheets,
   partsDrawing,
@@ -98,6 +99,13 @@ function rulesIn(css, conditions = "") {
   }
   return rules;
 }
+
+/** Minified CSS's `@keyframes`, each its name and its whole block. */
+const keyframesIn = (css) =>
+  [...css.matchAll(/@keyframes\s*([\w-]+)\s*\{/g)].map((match) => [
+    match[1],
+    css.slice(match.index, blockEnd(css, match.index + match[0].length - 1)),
+  ]);
 
 const compare = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
 
@@ -212,6 +220,36 @@ test("the part sheets together declare what styles.css does", () => {
     [...whole].filter((each) => !parts.has(each)),
     [],
   );
+  // And its keyframes, each in one part sheet.
+  const blocks = (css) => keyframesIn(css).map(([, block]) => block);
+  assert.deepEqual(
+    Object.keys(GROUPS)
+      .flatMap((name) => blocks(read(`styles/${name}.css`)))
+      .sort(),
+    blocks(read("styles.css")).sort(),
+  );
+});
+
+/*
+ * An animation runs only where its keyframes are on the page: in its own part sheet, or
+ * in core.css, which every page imports.
+ */
+test("every part sheet's animations have their keyframes there or in core", () => {
+  const names = (css) => new Set(keyframesIn(css).map(([name]) => name));
+  const all = names(read("styles.css"));
+  const core = names(read("styles/core.css"));
+  const missing = [];
+  for (const part of Object.keys(GROUPS)) {
+    const css = read(`styles/${part}.css`);
+    const own = names(css);
+    for (const { selector, declarations } of rulesIn(css))
+      for (const [property, value] of declarations)
+        if (/^animation(-name)?$/.test(property))
+          for (const name of value.split(/[\s,]+/))
+            if (all.has(name) && !own.has(name) && !core.has(name))
+              missing.push(`${part}.css ${selector} runs ${name}`);
+  }
+  assert.deepEqual([...new Set(missing)], []);
 });
 
 /*
@@ -277,8 +315,8 @@ const DRAWN_APART = [
   // A Canvas has `data-player` only while a recording's player, media's, draws in it.
   /\[data-player\]/,
 ];
-test("no part draws what only another part's sheet styles", () => {
-  const drawing = partsDrawing();
+/** The classes each part's code writes, whole words in its strings, by `drawing`. */
+function writtenBy(drawing) {
   const walk = (dir) =>
     readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
       const path = resolve(dir, entry.name);
@@ -288,7 +326,6 @@ test("no part draws what only another part's sheet styles", () => {
         ? [path]
         : [];
     });
-  // The classes each part's code writes: whole words in its strings.
   const written = new Map();
   for (const file of walk(resolve(root, "src"))) {
     const classes = [
@@ -299,6 +336,11 @@ test("no part draws what only another part's sheet styles", () => {
     for (const part of drawing(file))
       written.set(part, new Set([...(written.get(part) ?? []), ...classes]));
   }
+  return written;
+}
+
+test("no part draws what only another part's sheet styles", () => {
+  const written = writtenBy(partsDrawing());
   const leaks = [];
   for (const part of Object.keys(GROUPS)) {
     if (part === "core") continue;
@@ -312,6 +354,39 @@ test("no part draws what only another part's sheet styles", () => {
     }
   }
   assert.deepEqual([...new Set(leaks)], []);
+});
+
+/*
+ * A part that draws another inside it (the Panel's Collection section draws `Items`) needs
+ * that part's sheet too, where it draws it: a rule of the other's sheet whose classes the
+ * part and what it draws write, all of them, and its own code alone does not (the test
+ * above). `DRAWN_INSIDE` names each, and Styling's table says so.
+ */
+test("a part names the sheets of the parts it draws inside it", () => {
+  const own = writtenBy(partsDrawing());
+  const inside = writtenBy(partsDrawing({ inside: true }));
+  const needed = new Set();
+  for (const part of Object.keys(GROUPS)) {
+    if (part === "core") continue;
+    for (const { selector } of rulesIn(read(`styles/${part}.css`))) {
+      const classes = [...classesOf(selector)];
+      if (!classes.length) continue;
+      for (const [other, names] of inside)
+        if (
+          other !== part &&
+          classes.every((name) => names.has(name)) &&
+          !classes.every((name) => own.get(other)?.has(name))
+        )
+          needed.add(`${other}: ${part}`);
+    }
+  }
+  assert.deepEqual(
+    [...needed].sort(),
+    Object.entries(DRAWN_INSIDE)
+      .flatMap(([part, sheets]) => sheets.map((sheet) => `${part}: ${sheet}`))
+      .sort(),
+    "update DRAWN_INSIDE (build/clover-sheets.mjs) and Styling's table",
+  );
 });
 
 test("every part sheet resolves through the package's exports", () => {

@@ -46,6 +46,7 @@ beforeEach(() => {
     backendKind: "webgl2",
     getBounds: () => ({ x: 0, y: 0, width: 100, height: 100 }),
     zoomBy: vi.fn(),
+    viewLimits: () => ({ atMax: false, atMin: false, atHome: false }),
     rotateBy: vi.fn(),
     home: vi.fn(),
     invalidate: vi.fn(),

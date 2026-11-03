@@ -41,6 +41,8 @@ const missingImage = p4(missingImageJson);
 
 const listeners: Record<string, (detail?: unknown) => void> = {};
 let renderer: Record<string, any>;
+// Which controls the renderer says would do nothing (`viewLimits`).
+let limits = { atMax: false, atMin: false, atHome: false };
 
 vi.mock("../../lib/renderer", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../lib/renderer")>()),
@@ -56,6 +58,7 @@ afterEach(() => viewport.restore());
 
 beforeEach(() => {
   vi.clearAllMocks();
+  limits = { atMax: false, atMin: false, atHome: false };
   const overlays = document.createElement("div");
   renderer = {
     host: document.createElement("div"),
@@ -67,6 +70,7 @@ beforeEach(() => {
     isOpen: false,
     backendKind: "webgl2",
     getBounds: () => ({ x: 1, y: 2, width: 3, height: 4 }),
+    viewLimits: () => ({ ...limits }),
     zoomBy: vi.fn(),
     rotateBy: vi.fn(),
     home: vi.fn(),
@@ -820,6 +824,102 @@ describe("Canvas", () => {
           initCloverI18n({ lng: "en" });
         });
       }
+    });
+
+    describe("at a zoom limit", () => {
+      // The view reports its limits as the image opens and as it moves.
+      const reach = (next: Partial<typeof limits>) => {
+        Object.assign(limits, next);
+        act(() => listeners.viewport());
+      };
+
+      it("shows zoom in unavailable at the greatest zoom, and presses nothing", () => {
+        render(<Canvas src="a.jpg" />);
+        reach({ atMax: true });
+        const zoomIn = screen.getByRole("button", { name: "Zoom in" });
+        expect(zoomIn).toHaveAttribute("aria-disabled", "true");
+        // Never `disabled`, which would take it from the keyboard.
+        expect(zoomIn).not.toBeDisabled();
+        fireEvent.click(zoomIn);
+        expect(renderer.zoomBy).not.toHaveBeenCalled();
+        const zoomOut = screen.getByRole("button", { name: "Zoom out" });
+        expect(zoomOut).not.toHaveAttribute("aria-disabled");
+        fireEvent.click(zoomOut);
+        expect(renderer.zoomBy).toHaveBeenCalledWith(0.5);
+      });
+
+      it("shows zoom out unavailable at the least zoom", () => {
+        render(<Canvas src="a.jpg" />);
+        reach({ atMin: true });
+        const zoomOut = screen.getByRole("button", { name: "Zoom out" });
+        expect(zoomOut).toHaveAttribute("aria-disabled", "true");
+        fireEvent.click(zoomOut);
+        expect(renderer.zoomBy).not.toHaveBeenCalled();
+      });
+
+      it("shows reset unavailable at home, and available once the view moves", () => {
+        render(<Canvas src="a.jpg" />);
+        reach({ atHome: true });
+        const reset = screen.getByRole("button", { name: "Reset zoom" });
+        expect(reset).toHaveAttribute("aria-disabled", "true");
+        fireEvent.click(reset);
+        expect(renderer.home).not.toHaveBeenCalled();
+        reach({ atHome: false });
+        expect(reset).not.toHaveAttribute("aria-disabled");
+        fireEvent.click(reset);
+        expect(renderer.home).toHaveBeenCalled();
+      });
+
+      it("is available again once the view leaves the limit", () => {
+        render(<Canvas src="a.jpg" />);
+        reach({ atMax: true });
+        const zoomIn = screen.getByRole("button", { name: "Zoom in" });
+        expect(zoomIn).toHaveAttribute("aria-disabled", "true");
+        reach({ atMax: false });
+        expect(zoomIn).not.toHaveAttribute("aria-disabled");
+        fireEvent.click(zoomIn);
+        expect(renderer.zoomBy).toHaveBeenCalledWith(2);
+      });
+
+      it("reads the limits again when the image opens or changes", () => {
+        render(<Canvas src="a.jpg" />);
+        limits.atMax = true;
+        act(() => listeners.open());
+        const zoomIn = screen.getByRole("button", { name: "Zoom in" });
+        expect(zoomIn).toHaveAttribute("aria-disabled", "true");
+        limits.atMax = false;
+        act(() => listeners.change());
+        expect(zoomIn).not.toHaveAttribute("aria-disabled");
+      });
+
+      it("hands a replacement the state, and no handler while it holds", () => {
+        const ZoomIn = vi.fn(({ buttonProps, label }: any) => (
+          <button {...buttonProps}>{label}</button>
+        ));
+        render(<Canvas src="a.jpg" controlButtons={{ zoomIn: ZoomIn }} />);
+        reach({ atMax: true });
+        const props = ZoomIn.mock.lastCall![0].buttonProps;
+        expect(props["aria-disabled"]).toBe(true);
+        expect(props.onClick).toBeUndefined();
+        const custom = screen.getByRole("button", { name: "Zoom in" });
+        expect(custom).toHaveAttribute("aria-disabled", "true");
+        fireEvent.click(custom);
+        expect(renderer.zoomBy).not.toHaveBeenCalled();
+      });
+
+      it("reaches the controls behind More, where the tray shows them", async () => {
+        render(<Canvas src="a.jpg" collapseControls="always" />);
+        await loaded();
+        reach({ atMax: true });
+        fireEvent.click(
+          screen.getByRole("button", { name: /^Expand viewer controls$/ }),
+        );
+        expect(
+          within(
+            screen.getByRole("group", { name: "Viewer controls" }),
+          ).getByRole("button", { name: "Zoom in" }),
+        ).toHaveAttribute("aria-disabled", "true");
+      });
     });
 
     it("honors controlButtons replacements", () => {
@@ -1623,7 +1723,10 @@ describe("Canvas", () => {
         "true",
       );
       await open();
-      expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
+      expect(screen.getByTestId("clover-canvas-placeholder")).toHaveAttribute(
+        "data-hidden",
+        "true",
+      );
       // One of the row's controls, as the `i` and annotations are.
       expect(closeViewer().closest(".clover-canvas-controls")).toBe(
         screen.getByTestId("clover-canvas-controls"),
@@ -1657,6 +1760,20 @@ describe("Canvas", () => {
       ).toBeNull();
     });
 
+    it("keeps the same still mounted across open and close", async () => {
+      render(<Canvas canvases={[first]} />);
+      const stillImg = () =>
+        screen.getByTestId("clover-canvas-placeholder").querySelector("img");
+      const still = stillImg();
+      expect(still).not.toBeNull();
+      fireEvent.click(openViewer());
+      await open();
+      expect(stillImg()).toBe(still);
+      renderer.isOpen = true;
+      fireEvent.click(closeViewer());
+      expect(stillImg()).toBe(still);
+    });
+
     it("opens straight away when told to skip the placeholder", () => {
       render(<Canvas canvases={[first]} placeholder={false} />);
       expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
@@ -1672,7 +1789,10 @@ describe("Canvas", () => {
         ),
       );
       await open();
-      expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
+      expect(screen.getByTestId("clover-canvas-placeholder")).toHaveAttribute(
+        "data-hidden",
+        "true",
+      );
       expect(closeViewer()).toBeInTheDocument();
     });
 
@@ -1697,7 +1817,10 @@ describe("Canvas", () => {
       );
       expect(renderer.setImages.mock.lastCall[0][0].url).not.toMatch(/still/);
       await open();
-      expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
+      expect(screen.getByTestId("clover-canvas-placeholder")).toHaveAttribute(
+        "data-hidden",
+        "true",
+      );
 
       renderer.isOpen = true;
       fireEvent.click(closeViewer());

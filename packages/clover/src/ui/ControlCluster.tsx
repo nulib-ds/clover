@@ -21,6 +21,12 @@ export interface ControlSpec {
   shortcut?: Shortcut;
   /** The language of `label`, where it is not the page's: Clover's, or a Choice's. */
   lang?: string;
+  /**
+   * The control would do nothing now (zoom in at the greatest zoom): shown unavailable,
+   * `aria-disabled` and never `disabled`, which would take it from the keyboard (WCAG
+   * 2.4.3), and its press does nothing.
+   */
+  unavailable?: boolean;
 }
 
 export interface ControlClusterProps {
@@ -53,6 +59,7 @@ export function renderControl(
     controls,
     shortcut,
     lang,
+    unavailable,
   }: ControlSpec,
   controlButtons?: ControlButtons,
 ) {
@@ -67,7 +74,8 @@ export function renderControl(
           "aria-label": label,
           ...(lang && { lang }),
           ...(shortcut && { "aria-keyshortcuts": shortcut.keys }),
-          onClick,
+          onClick: unavailable ? undefined : onClick,
+          ...(unavailable && { "aria-disabled": true as const }),
           ...(expanded !== undefined && {
             "aria-expanded": expanded,
             "aria-controls": controls,
@@ -83,7 +91,8 @@ export function renderControl(
       key={key}
       id={id}
       label={label}
-      onClick={onClick}
+      onClick={unavailable ? undefined : onClick}
+      unavailable={unavailable}
       expanded={expanded}
       controls={controls}
       shortcut={shortcut}

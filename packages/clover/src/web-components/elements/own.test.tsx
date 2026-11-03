@@ -36,6 +36,7 @@ vi.mock("../../lib/renderer", async (importOriginal) => ({
       isAtHome: true,
       backendKind: "webgl2",
       getBounds: () => ({ x: 0, y: 0, width: 100, height: 100 }),
+      viewLimits: () => ({ atMax: false, atMin: false, atHome: false }),
       getHomeBounds: () => ({ x: 0, y: 0, width: 100, height: 100 }),
       getCamera: () => ({ x: 50, y: 50, zoom: 1, rotation: 0 }),
       getRotation: () => 0,

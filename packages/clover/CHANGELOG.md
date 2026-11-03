@@ -14,16 +14,26 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - **Stylesheets a part at a time.** A page of parts can import
-  `@nulib/clover/styles/core.css` first, then the sheet of each other part it draws
-  (`styles/items.css`, `styles/panel.css`, `styles/media.css` and the rest; Styling lists
-  them), in place of `styles.css`. A page of images with `Root`, `Status`, `Body`,
-  `Position` and `Items` loads about 11 kB of styles, gzipped, instead of 19.2 kB.
-  `styles.css` is unchanged.
+  `@nulib/clover/styles/core.css` first, then the sheet of each other part it draws, or
+  that one draws inside it (`styles/items.css`, `styles/panel.css`, `styles/media.css` and
+  the rest; Styling lists them, and the parts drawn inside another), in place of
+  `styles.css`. A page of images with `Root`, `Status`, `Body`, `Position` and `Items`
+  loads about 11 kB of styles, gzipped, instead of 19.2 kB. `styles.css` is unchanged.
+  The size budgets for a `<clover-viewer>`, the four parts and a viewer in Document rise
+  by 50 B gzip for it.
 
   ```jsx
   import "@nulib/clover/styles/core.css";
   import "@nulib/clover/styles/items.css";
   ```
+
+### Changed
+
+- **Zoom in, zoom out and reset show when they would do nothing.** At the greatest zoom,
+  zoom in is `aria-disabled` and dimmed, zoom out at the least, reset at home. They keep
+  focus and their popovers. A `controlButtons` replacement is given `aria-disabled: true`
+  in its `buttonProps`, and no `onClick`, while its control would do nothing. The size
+  budgets for a Canvas, the templates and the elements rise by 150 to 350 B gzip for it.
 
 ## [4.2.0] - 2026-11-03
 

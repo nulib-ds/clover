@@ -97,6 +97,7 @@ beforeEach(() => {
     isOpen: false,
     backendKind: "webgl2",
     getBounds: () => ({ x: 0, y: 0, width: 1, height: 1 }),
+    viewLimits: () => ({ atMax: false, atMin: false, atHome: false }),
     attachNavigator: vi.fn(() => vi.fn()),
     on: (event: string, listener: (detail?: unknown) => void) => {
       listeners[event] = listener;

@@ -1,0 +1,15 @@
+/*
+ * A shadow fading in with the scroll, at a scrolling list's edge: the sections' headings,
+ * Search's field, a Transcript's, Items' slider and the pager's list. Both ends are given:
+ * each shadow is hidden as it stands (`opacity: 0`), so where its container cannot
+ * scroll, and the timeline has nothing to drive, it stays hidden. A sheet of its own, as
+ * Items and the panel both draw with it: in `core.css` (`build/clover-sheets.mjs`).
+ */
+@keyframes clover-shade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
