@@ -21,7 +21,10 @@ export type KnobOn = "part" | "root" | "box" | "code";
 
 /** A value in an example's code that the reader can change. */
 export interface Knob {
-  /** The prop it sets (`controls`), or a style's property (`style.height`). */
+  /**
+   * The prop it sets (`controls`), a style's property (`style.height`), or a key of an
+   * object a prop takes (`options.gestures.scrollToZoom`).
+   */
   prop: string;
   on?: KnobOn;
   /**
@@ -89,7 +92,14 @@ export function knobProps(
     if ((knob.on ?? "part") !== on || !isLive(knob, knobs, values)) continue;
     const value = propValue(knob, values[knobId(knob)]);
     if (knob.prop.startsWith("style.")) style[knob.prop.slice(6)] = value;
-    else props[knob.prop] = value;
+    else if (knob.prop.includes(".")) {
+      // A key of an object the prop takes, inside the objects its path names.
+      const path = knob.prop.split(".");
+      let into = props;
+      for (const name of path.slice(0, -1))
+        into = (into[name] ??= {}) as Record<string, unknown>;
+      into[path.at(-1)!] = value;
+    } else props[knob.prop] = value;
   }
   if (Object.keys(style).length) props.style = style;
   return props;
@@ -112,6 +122,14 @@ export interface CodeStyle {
   knob?: string;
 }
 
+/** A key of an object a prop takes: fixed, set by a knob, or an object of keys. */
+export interface CodeEntry {
+  name: string;
+  value?: Plain;
+  knob?: string;
+  entries?: CodeEntry[];
+}
+
 /** A prop as an element's code writes it. */
 export interface CodeAttr {
   /** Its name in React: a prop, or `style`. */
@@ -131,6 +149,14 @@ export interface CodeAttr {
   template?: string;
   /** A style: its properties. */
   style?: CodeStyle[];
+  /**
+   * An object of keys (`options`): React writes it `options={{ … }}`, a key a line. HTML
+   * has no attribute for it: a module script after the markup sets the element's property,
+   * named by `attribute`, as the site's twins do.
+   */
+  entries?: CodeEntry[];
+  /** Script of the host's own, as React writes it: `{manifest.label}`. */
+  expression?: string;
 }
 
 /** An element in an example's code, and the elements in it. */
@@ -161,6 +187,11 @@ export interface CodeTree {
   loaded?: boolean;
   /** The example's resource, its published address. */
   url: string;
+  /**
+   * Lines of the host's own before the markup, as written (`const views = …`, or HTML's
+   * `<!-- … -->`); `""` is a line left empty. With them, React's markup is a statement.
+   */
+  before?: string[];
 }
 
 export type Flavor = "react" | "html";
@@ -172,7 +203,8 @@ export type TokenKind =
   | "attr"
   | "punctuation"
   | "number"
-  | "property";
+  | "property"
+  | "comment";
 
 /**
  * A run of code: its text, its color, and, for a knob's value, the knob's id and, for a
@@ -273,24 +305,79 @@ function shows(id: string, context: Context) {
   return context.measure || isLive(knob, context.knobs, context.values);
 }
 
-/** Whether a prop is written: fixed, its knob live, or a style with a property to say. */
+/** Whether an object's key is written: fixed, its knob live, or an object with a key to say. */
+function entryShows(entry: CodeEntry, context: Context): boolean {
+  if (entry.entries)
+    return entry.entries.some((each) => entryShows(each, context));
+  return !entry.knob || shows(entry.knob, context);
+}
+
+/**
+ * Whether a prop is written: fixed, its knob live, or a style or an object with a key to
+ * say.
+ */
 function written(attribute: CodeAttr, context: Context) {
   if (attribute.style)
     return attribute.style.some(
       (entry) => !entry.knob || shows(entry.knob, context),
     );
+  if (attribute.entries)
+    return attribute.entries.some((entry) => entryShows(entry, context));
   return !attribute.knob || shows(attribute.knob, context);
 }
 
+const KEYWORDS = new Set([
+  "async",
+  "await",
+  "const",
+  "default",
+  "export",
+  "from",
+  "function",
+  "import",
+  "let",
+  "new",
+  "return",
+]);
+
+/**
+ * A line of the host's own script (`tree.before`, an `expression`), or HTML's comment, as
+ * runs colored as the editor colors them: keywords, strings, numbers, a property or a
+ * method after its dot, a function called.
+ */
+function scriptTokens(line: string): Token[] {
+  if (line.startsWith("<!--")) return [run("comment")(line)];
+  const tokens: Token[] = [];
+  const pattern =
+    /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)|(\s+|=>|[^\w\s])/g;
+  for (const match of line.matchAll(pattern)) {
+    const [text, string, number, name] = match;
+    const at = match.index! + text.length;
+    if (string) tokens.push(str(text));
+    else if (number) tokens.push(num(text));
+    else if (name && KEYWORDS.has(name)) tokens.push(keyword(text));
+    else if (name && (line[match.index! - 1] === "." || line[at] === "("))
+      tokens.push(property(text));
+    else if (name) tokens.push(plain(text));
+    else tokens.push(/^\s+$/.test(text) ? plain(text) : punct(text));
+  }
+  return tokens;
+}
+
+/** A value as script writes it: `true`, `0.25`, `"auto"`. */
+const scripted = (value: Plain) =>
+  typeof value === "string" ? JSON.stringify(value) : String(value);
+
 /**
  * A knob's value, as runs: the value itself, the knob's to change, and what its flavor
- * writes around it, on a prop or in a style. In HTML's style it is CSS, unquoted.
+ * writes around it, on a prop, in a style, or as an object's key. In HTML's style it is
+ * CSS, unquoted; as a key, script in both flavors.
  */
 function knobTokens(
   id: string,
   context: Context,
   flavor: Flavor,
-  where: "prop" | "style",
+  where: "prop" | "style" | "entry",
 ): Token[] {
   const knob = knobOf(context, id)!;
   const value = context.values[id];
@@ -308,7 +395,9 @@ function knobTokens(
         ? String(option)
         : where === "style"
           ? JSON.stringify(String(option))
-          : writtenOption(option, flavor);
+          : where === "entry"
+            ? scripted(option)
+            : writtenOption(option, flavor);
     return [
       live(
         typeof value === "string" ? "string" : "number",
@@ -332,6 +421,11 @@ function knobTokens(
     const px = css && !UNITLESS.has(name) && !name.startsWith("--");
     return px ? [live("number", shown), plain("px")] : [live("number", shown)];
   }
+  if (
+    where === "entry" &&
+    (typeof value === "number" || typeof value === "boolean")
+  )
+    return [live("number", shown)];
   if (typeof value === "number" || typeof value === "boolean")
     return flavor === "html"
       ? [punct('"'), live("number", shown), punct('"')]
@@ -378,8 +472,42 @@ function styleTokens(
 }
 
 /**
+ * An object's keys as script writes them, in both flavors, a key a line, an object of keys
+ * opening and closing on lines of its own (`gestures: {` … `},`), each `indent` in.
+ */
+function entryLines(
+  entries: CodeEntry[],
+  context: Context,
+  flavor: Flavor,
+  indent: string,
+): Token[][] {
+  const lead = indent ? [plain(indent)] : [];
+  return entries
+    .filter((entry) => entryShows(entry, context))
+    .flatMap((entry) => {
+      if (entry.entries)
+        return [
+          [...lead, property(entry.name), punct(": {")],
+          ...entryLines(entry.entries, context, flavor, `${indent}  `),
+          [...lead, punct("},")],
+        ];
+      const value = entry.knob
+        ? knobTokens(entry.knob, context, flavor, "entry")
+        : [
+            typeof entry.value === "string"
+              ? str(JSON.stringify(entry.value))
+              : num(String(entry.value)),
+          ];
+      return [
+        [...lead, property(entry.name), punct(": "), ...value, punct(",")],
+      ];
+    });
+}
+
+/**
  * A prop as its flavor writes it, as lines: one, but for a style too long for its line,
- * which React writes a property a line (`style={{` … `}}`).
+ * which React writes a property a line (`style={{` … `}}`), and an object, which React
+ * writes a key a line (HTML sets it by script, `propertyLines`).
  */
 function attrLines(
   attribute: CodeAttr,
@@ -415,6 +543,16 @@ function attrLines(
       [punct("}}")],
     ];
   }
+  if (attribute.entries)
+    return [
+      [name, punct("={{")],
+      ...entryLines(attribute.entries, context, flavor, "  "),
+      [punct("}}")],
+    ];
+  if (attribute.expression !== undefined)
+    return [
+      [name, punct("={"), ...scriptTokens(attribute.expression), punct("}")],
+    ];
   if (attribute.url) {
     if (html) return [[name, punct("="), str(quoted(context.url))]];
     return context.whole
@@ -540,7 +678,11 @@ function nodeLines(
       ...(own ? { part: own } : {}),
     });
   const name = html ? node.html : node.jsx;
-  const attrs = node.attrs.filter((each) => written(each, context));
+  // HTML sets an object by script, after the markup (`propertyLines`).
+  const tagged = (each: CodeAttr) => !(html && each.entries);
+  const attrs = node.attrs.filter(
+    (each) => tagged(each) && written(each, context),
+  );
   const children = node.children ?? [];
   const room = WIDTH - 2 * (depth + 1);
   const close = html ? [punct(">")] : [punct(children.length ? ">" : " />")];
@@ -561,15 +703,20 @@ function nodeLines(
    * reader changes them.
    */
   const measure = { ...context, measure: true };
-  const longest = node.attrs.filter((each) => written(each, measure));
+  const longest = node.attrs.filter(
+    (each) => tagged(each) && written(each, measure),
+  );
   // A lone style of several properties breaks, as Prettier breaks an object.
   const lone =
     !html &&
     longest.length <= 1 &&
-    !(longest[0]?.style && longest[0].style.length > 1);
+    !(longest[0]?.style && longest[0].style.length > 1) &&
+    !longest[0]?.entries;
+  // So does an element with an object, which React writes a key a line.
   const fits =
     (width(line(longest, measure), context) <= WIDTH - 2 * depth &&
-      longest.length < 3) ||
+      longest.length < 3 &&
+      !longest.some((each) => each.entries)) ||
     lone;
   if (fits) push(depth, line(attrs, context));
   else {
@@ -658,11 +805,76 @@ export function codeLines(
     if (flavor === "react" || !tree.loaded)
       lines.push({ depth: 0, tokens: [] });
   }
+  for (const line of tree.before ?? [])
+    lines.push({
+      depth: Math.floor(line.match(/^ */)![0].length / 2),
+      tokens: line.trim() ? scriptTokens(line.trim()) : [],
+    });
   tree.nodes.forEach((node) => nodeLines(node, 0, context, flavor, lines));
-  // A module's markup is a statement: it ends in a semicolon, as Prettier writes it.
-  if (context.whole && flavor === "react")
+  // A module's markup is a statement, as is markup after script: it ends in a semicolon,
+  // as Prettier writes it.
+  if ((context.whole || tree.before?.length) && flavor === "react")
     lines.at(-1)!.tokens.push(punct(";"));
+  if (flavor === "html") lines.push(...propertyLines(tree.nodes, context));
   return lines;
+}
+
+/**
+ * HTML's script for the objects its elements take as properties, after the markup: each
+ * element found, then its property set, as the site's twins write it
+ * (`const canvas = document.querySelector("clover-canvas");`).
+ */
+function propertyLines(nodes: CodeNode[], context: Context): Line[] {
+  const set: { node: CodeNode; attribute: CodeAttr }[] = [];
+  const walk = (each: CodeNode) => {
+    for (const attribute of each.attrs)
+      if (attribute.entries && written(attribute, context))
+        set.push({ node: each, attribute });
+    each.children?.forEach(walk);
+  };
+  nodes.forEach(walk);
+  if (!set.length) return [];
+  const named = (node: CodeNode) =>
+    node.html
+      .replace(/^clover-/, "")
+      .replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
+  const found = [...new Set(set.map(({ node }) => node))];
+  return [
+    { depth: 0, tokens: [] },
+    {
+      depth: 0,
+      tokens: [
+        punct("<"),
+        tag("script"),
+        plain(" "),
+        attr("type"),
+        punct("="),
+        str('"module"'),
+        punct(">"),
+      ],
+    },
+    ...found.map((node) => ({
+      depth: 1,
+      tokens: [
+        keyword("const"),
+        plain(` ${named(node)} = document.querySelector(`),
+        str(JSON.stringify(node.html)),
+        punct(");"),
+      ],
+    })),
+    ...set.flatMap(({ node, attribute }) => [
+      {
+        depth: 1,
+        tokens: [plain(`${named(node)}.${attribute.attribute} = `), punct("{")],
+      },
+      ...entryLines(attribute.entries!, context, "html", "").map((tokens) => ({
+        depth: 2,
+        tokens,
+      })),
+      { depth: 1, tokens: [punct("};")] },
+    ]),
+    { depth: 0, tokens: [punct("</"), tag("script"), punct(">")] },
+  ];
 }
 
 /** Lines as text: what Copy copies and agents read. */

@@ -61,12 +61,25 @@ const VIEW = new Set<ControlSpec["key"]>([
   "fullPage",
 ]);
 
+export interface ViewLimits {
+  atMax: boolean;
+  atMin: boolean;
+  atHome: boolean;
+}
+export const NO_LIMITS: ViewLimits = {
+  atMax: false,
+  atMin: false,
+  atHome: false,
+};
+
 interface CanvasControlsProps {
   /** The camera the zoom, rotation and reset controls move; none offers them. */
   renderer: CanvasRenderer | null;
   instance: string;
   config: Required<CanvasControlsConfig>;
   controlButtons?: ControlButtons;
+  /** Which of zoom in, zoom out and reset would do nothing now: shown unavailable. */
+  limits?: ViewLimits;
   /** A placeholder's toggle (`PlaceholderToggle`), last of the Canvas's own. */
   placeholder?: React.ReactNode;
   /**
@@ -135,6 +148,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
   instance,
   config,
   controlButtons,
+  limits = NO_LIMITS,
   placeholder,
   placeholderIsMore = false,
   choices = [],
@@ -290,6 +304,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
           label: t("imageZoomIn"),
           lang: langOf("imageZoomIn"),
           glyph: <ZoomIn />,
+          unavailable: limits.atMax,
           onClick: () => camera.zoomBy(ZOOM_PER_CLICK),
         },
         {
@@ -299,6 +314,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
           label: t("imageZoomOut"),
           lang: langOf("imageZoomOut"),
           glyph: <ZoomOut />,
+          unavailable: limits.atMin,
           onClick: () => camera.zoomBy(1 / ZOOM_PER_CLICK),
         },
       );
@@ -344,6 +360,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
         label: t("imageResetZoom"),
         lang: langOf("imageResetZoom"),
         glyph: <Reset />,
+        unavailable: limits.atHome,
         // Home also turns the image upright, as `Image`'s reset does.
         onClick: () => camera.home(),
       });

@@ -234,6 +234,72 @@ describe("CanvasRenderer", () => {
     renderer.dispose();
   });
 
+  it("knows which of zoom in, zoom out and home would change nothing", async () => {
+    mockedLoad.mockResolvedValue(bitmap(1000, 1000));
+    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    expect(renderer.viewLimits()).toEqual({
+      atMax: false,
+      atMin: false,
+      atHome: true,
+    });
+
+    renderer.zoomBy(1000, undefined, false);
+    expect(renderer.viewLimits()).toEqual({
+      atMax: true,
+      atMin: false,
+      atHome: false,
+    });
+    renderer.zoomBy(0.0001, undefined, false);
+    expect(renderer.viewLimits()).toMatchObject({ atMin: true, atHome: false });
+
+    // Back to the same view by hand is not home: only `home` is (`isAtHome`), and a
+    // reader who is not home keeps reset, which brings the Document's sheets back.
+    renderer.home(true);
+    renderer.zoomBy(1.5, undefined, false);
+    expect(renderer.viewLimits().atHome).toBe(false);
+    renderer.zoomBy(1 / 1.5, undefined, false);
+    expect(renderer.viewLimits().atHome).toBe(false);
+    expect(renderer.isAtHome).toBe(false);
+    // Framed as home already, `home` moves nothing, so it says so itself.
+    const told = vi.fn();
+    renderer.on("viewport", told);
+    renderer.home(true);
+    expect(told).toHaveBeenCalled();
+    expect(renderer.viewLimits().atHome).toBe(true);
+    renderer.rotateBy(90);
+    expect(renderer.viewLimits().atHome).toBe(false);
+    renderer.dispose();
+  });
+
+  it("judges the limits where the camera is heading, before a frame draws", async () => {
+    mockedLoad.mockResolvedValue(bitmap(1000, 1000));
+    const renderer = new CanvasRenderer(host(), { animationTime: 1000 });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    renderer.zoomBy(1000);
+    expect(renderer.getCamera().zoom).toBeLessThan(1.1);
+    expect(renderer.viewLimits().atMax).toBe(true);
+    renderer.dispose();
+  });
+
+  it("says its view changed when a resize moves what it may zoom to", async () => {
+    mockedLoad.mockResolvedValue(bitmap(1000, 1000));
+    const element = host();
+    const renderer = new CanvasRenderer(element, { animationTime: 0 });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    renderer.zoomBy(1.2, undefined, false);
+    // A frame drawn, so the one a resize draws has no move of its own to report.
+    (renderer as unknown as { loop: { drawNow(): void } }).loop.drawNow();
+    const moved = vi.fn();
+    renderer.on("viewport", moved);
+    element.getBoundingClientRect = () =>
+      ({ left: 0, top: 0, width: 800, height: 300 }) as DOMRect;
+    // Its observer is what notices it; the camera itself stays where it was.
+    (renderer as unknown as { measure(now: boolean): void }).measure(true);
+    expect(moved).toHaveBeenCalled();
+    renderer.dispose();
+  });
+
   it("comes home by the shortest way upright, never spinning a whole turn back", async () => {
     mockedLoad.mockResolvedValue(bitmap(1000, 1000));
     const renderer = new CanvasRenderer(host(), { animationTime: 0 });

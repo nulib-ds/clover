@@ -81,6 +81,13 @@ export default async function RootLayout({
          */}
         <script dangerouslySetInnerHTML={{ __html: CODE_FLAVOR_SCRIPT }} />
         {/*
+         * Without scripts, an example's long code shows whole, as its button, which
+         * shows the rest, cannot work (`CodeBlock.tsx`, `docs/styles/code.css`).
+         */}
+        <noscript>
+          <style>{`.docs-code[data-clipped] pre code.nextra-code > span { display: block !important; } .docs-code > .docs-code-more { display: none; } .docs-code.docs-code.docs-code[data-clips] pre { padding-bottom: var(--clover-space-s, 0.618rem); }`}</style>
+        </noscript>
+        {/*
          * Chrome's origin trial for WebMCP, once its token is registered: readers' Chrome
          * then offers the page `document.modelContext`, for the agent tools (AGENTS.md,
          * "Agent tools (WebMCP)").

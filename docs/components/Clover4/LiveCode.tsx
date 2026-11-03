@@ -50,6 +50,7 @@ const COLOR: Record<TokenKind, string> = {
   punctuation: "var(--editor-punctuation)",
   number: "var(--editor-number)",
   property: "var(--editor-property)",
+  comment: "var(--editor-faint)",
 };
 
 const LANGUAGE: Record<Flavor, string> = { react: "jsx", html: "html" };
@@ -141,14 +142,19 @@ function Block({
   );
 }
 
-/** An example's live code, in React and as HTML, the reader's flavor shown. */
+/**
+ * An example's live code, in React and as HTML, the reader's flavor shown: one tree for
+ * both, or HTML's own (`html`) where the elements say it another way.
+ */
 export function LiveCode({
   tree,
+  html,
   knobs,
   values,
   onChange,
 }: {
   tree: CodeTree;
+  html?: CodeTree;
   knobs: Knob[];
   values: Values;
   onChange: (id: string, value: Plain) => void;
@@ -161,7 +167,12 @@ export function LiveCode({
           data-code-flavor={flavor === "react" ? "react" : "web-components"}
         >
           <Block
-            lines={codeLines(tree, knobs, values, flavor)}
+            lines={codeLines(
+              flavor === "html" ? (html ?? tree) : tree,
+              knobs,
+              values,
+              flavor,
+            )}
             flavor={flavor}
             knobs={knobs}
             values={values}
@@ -195,8 +206,16 @@ const BODY_PARTS = {
  * What a live example draws: a part in a `Root` (`PartDemo`), or one of `BODY_PARTS` or
  * `Map` alone.
  */
+/** A host's Canvases, as the Canvas page's `CanvasRecipe` shows a Manifest's. */
+const CanvasRecipe = dynamic(
+  () => import("docs/components/Canvas/CanvasRecipe"),
+  { ssr: false },
+);
+
 export interface LiveDemo {
-  kind: "part" | "bodyPart" | "map";
+  /** `recipe`: the host's Canvases (`CanvasRecipe`), its props `recipe`. */
+  kind: "part" | "bodyPart" | "map" | "recipe";
+  recipe?: React.ComponentProps<typeof CanvasRecipe>;
   part: PartName | keyof typeof BODY_PARTS | "Map";
   /** Its fixed props: those its code writes, and those given to the demo alone. */
   props?: Record<string, unknown>;
@@ -231,8 +250,12 @@ function Demo({
   const path: string = RESOURCES[demo.resource];
   // A mock is this site's; an address of its own (a Cookbook recipe's) is as it is.
   const remote = /^https?:/.test(path);
-  const mock = useMock(demo.kind === "part" || remote ? "" : path);
+  const mock = useMock(
+    demo.kind === "part" || demo.kind === "recipe" || remote ? "" : path,
+  );
   const url = remote ? path : mock;
+  if (demo.kind === "recipe" && demo.recipe)
+    return <CanvasRecipe {...demo.recipe} {...props} />;
   if (demo.kind === "bodyPart") {
     const BodyPart = BODY_PARTS[demo.part as keyof typeof BODY_PARTS];
     return (
@@ -261,10 +284,13 @@ function Demo({
  */
 export function LiveFrame({
   tree,
+  html,
   knobs,
   demo,
 }: {
   tree: CodeTree;
+  /** HTML's own code, where the elements say the example another way (`LiveCode`). */
+  html?: CodeTree;
   knobs: Knob[];
   demo: LiveDemo;
 }) {
@@ -289,6 +315,7 @@ export function LiveFrame({
           <div className={styles.code}>
             <LiveCode
               tree={tree}
+              html={html}
               knobs={knobs}
               values={values}
               onChange={set}

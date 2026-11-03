@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import React, { useEffect, useId, useRef, useState } from "react";
+import { ClipContext } from "docs/components/CodeBlock";
 import { encodeContentState } from "docs/components/Clover4/Demos";
 import { LiveCode } from "docs/components/Clover4/LiveCode";
 import { ExampleSwitch } from "docs/components/Clover4/ExampleSwitch";
@@ -267,7 +268,8 @@ type Editor = "light" | "dark";
 /**
  * An example's code, under its demo: its blocks drawn as every code block on the site is
  * (`CodeBlock`, through `mdx-components.tsx`), each with its own Copy, in the editor that
- * follows the page's mode, or the one the example sets (`data-editor`).
+ * follows the page's mode, or the one the example sets (`data-editor`). Long code shows
+ * its first lines until its button shows them all (`ClipContext`).
  */
 function CodeArea({
   children,
@@ -278,7 +280,7 @@ function CodeArea({
 }) {
   return (
     <div className={styles.code} data-editor={editor}>
-      {children}
+      <ClipContext.Provider value>{children}</ClipContext.Provider>
     </div>
   );
 }

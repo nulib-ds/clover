@@ -28,6 +28,7 @@ vi.mock("../../lib/renderer", async (importOriginal) => ({
     isOpen: false,
     backendKind: "webgl2",
     getBounds: () => ({ x: 0, y: 0, width: 100, height: 100 }),
+    viewLimits: () => ({ atMax: false, atMin: false, atHome: false }),
     invalidate: vi.fn(),
     attachNavigator: vi.fn(() => vi.fn()),
     overlays: { container: document.createElement("div"), add: vi.fn() },

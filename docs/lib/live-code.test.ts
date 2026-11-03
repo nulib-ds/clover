@@ -420,4 +420,104 @@ describe("codeLines", () => {
       ].join("\n"),
     });
   });
+
+  it("writes an object's keys a line each, and HTML sets it by script", () => {
+    const knobs: Knob[] = [
+      { prop: "options.gestures.scrollToZoom", value: false },
+      { prop: "options.animationTime", value: 0.09, step: 0.01 },
+      {
+        prop: "options.springStiffness",
+        value: 6.5,
+        when: { "options.gestures.scrollToZoom": [true] },
+      },
+    ];
+    const tree: CodeTree = {
+      url: URL,
+      nodes: [
+        {
+          jsx: "Clover.Canvas",
+          html: "clover-canvas",
+          attrs: [
+            { prop: "navigator", attribute: "navigator", value: true },
+            {
+              prop: "options",
+              attribute: "options",
+              entries: [
+                {
+                  name: "gestures",
+                  entries: [
+                    {
+                      name: "scrollToZoom",
+                      knob: "part:options.gestures.scrollToZoom",
+                    },
+                  ],
+                },
+                { name: "animationTime", knob: "part:options.animationTime" },
+                {
+                  name: "springStiffness",
+                  knob: "part:options.springStiffness",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    expect(code(tree, knobs)).toEqual({
+      react: [
+        "<Clover.Canvas",
+        "  navigator",
+        "  options={{",
+        "    gestures: {",
+        "      scrollToZoom: false,",
+        "    },",
+        "    animationTime: 0.09,",
+        "  }}",
+        "/>",
+      ].join("\n"),
+      html: [
+        "<clover-canvas navigator></clover-canvas>",
+        "",
+        '<script type="module">',
+        '  const canvas = document.querySelector("clover-canvas");',
+        "  canvas.options = {",
+        "    gestures: {",
+        "      scrollToZoom: false,",
+        "    },",
+        "    animationTime: 0.09,",
+        "  };",
+        "</script>",
+      ].join("\n"),
+    });
+    // Each value its knob's to change, in both flavors.
+    const lines = codeLines(tree, knobs, initialValues(knobs), "html");
+    expect(
+      lines.flatMap((line) => line.tokens).filter((token) => token.knob),
+    ).toEqual([
+      {
+        kind: "number",
+        text: "false",
+        knob: "part:options.gestures.scrollToZoom",
+      },
+      { kind: "number", text: "0.09", knob: "part:options.animationTime" },
+    ]);
+  });
+});
+
+describe("knobProps", () => {
+  it("gives an object's keys to the demo inside the objects their path names", () => {
+    const knobs: Knob[] = [
+      { prop: "controls", value: true },
+      { prop: "options.gestures.scrollToZoom", value: true },
+      { prop: "options.gestures.flickMinSpeed", value: 200 },
+      { prop: "options.animationTime", value: 0.09 },
+    ];
+    expect(knobProps(knobs, initialValues(knobs))).toEqual({
+      controls: true,
+      options: {
+        gestures: { scrollToZoom: true, flickMinSpeed: 200 },
+        animationTime: 0.09,
+      },
+    });
+  });
 });

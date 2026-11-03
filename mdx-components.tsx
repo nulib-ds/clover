@@ -1,4 +1,5 @@
 import type React from "react";
+import { Children, isValidElement } from "react";
 import { useMDXComponents as getThemeComponents } from "nextra-theme-docs";
 
 import { CodeBlock } from "docs/components/CodeBlock";
@@ -21,16 +22,27 @@ const ThemePre = themeComponents.pre as React.ComponentType<
 /*
  * A code block, drawn as the homepage's editor draws code, or its install a command
  * (`CodeBlock`), its fence's language kept on it (`data-lang`; Nextra's takes
- * `data-language` for its icon and drops it), which its head shows (`docs/styles/code.css`).
+ * `data-language` for its icon and drops it), which its head shows (`docs/styles/code.css`),
+ * and its lines counted, so an example's long code is cut short as the page is drawn.
  */
 function Pre(
   props: React.ComponentProps<"pre"> & { "data-language"?: string },
 ) {
   return (
-    <CodeBlock lang={props["data-language"]}>
+    <CodeBlock lang={props["data-language"]} lines={linesOf(props.children)}>
       <ThemePre {...props} data-lang={props["data-language"]} />
     </CodeBlock>
   );
+}
+
+/** A fence's lines: the elements in its `code`, a `span` a line as Shiki writes them. */
+function linesOf(children: React.ReactNode) {
+  const code = Children.toArray(children).find(isValidElement) as
+    | React.ReactElement<{ children?: React.ReactNode }>
+    | undefined;
+  return code
+    ? Children.toArray(code.props.children).filter(isValidElement).length
+    : 0;
 }
 
 function Code({

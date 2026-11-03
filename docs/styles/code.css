@@ -264,7 +264,8 @@
  * text at the head's size, the text's own under the pointer. In code, in its head's row
  * at its end; in a command, after it.
  */
-.docs-code-copy {
+.docs-code-copy,
+.docs-code-more {
   background: none;
   border: 0;
   border-radius: var(--radius-2);
@@ -285,12 +286,34 @@
   top: 0.382rem;
 }
 
-.docs-code-copy:hover {
+.docs-code-copy:hover,
+.docs-code-more:hover {
   color: var(--editor-text);
 }
 
-.docs-code-copy:focus-visible {
+.docs-code-copy:focus-visible,
+.docs-code-more:focus-visible {
   outline: 2px solid var(--editor-text);
+}
+
+/*
+ * An example's long code, cut to its first 20 lines (`CLIP_LINES`, `CodeBlock.tsx`) until
+ * its button shows them all: the rest out of sight and out of the accessibility tree, still
+ * in the page for Copy, agents and search. The button is drawn as Copy is, in room the
+ * code keeps under its lines, at its start.
+ */
+.docs-code[data-clipped] pre code.nextra-code > span:nth-child(n + 21) {
+  display: none;
+}
+
+.docs-code.docs-code[data-clips] pre {
+  padding-bottom: calc(24px + 2 * 0.382rem);
+}
+
+.docs-code > .docs-code-more {
+  bottom: 0.382rem;
+  left: 0.618rem;
+  position: absolute;
 }
 
 .docs-terminal > .docs-code-copy {

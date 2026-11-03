@@ -338,6 +338,12 @@ export const findTemplate = (name: string) =>
  * React's `defaultX`, where it opens and what moves it later, is `x`'s. Undefined where
  * the element has none for it.
  */
+/** Whether an element takes a prop as a property, set by script: `options`. */
+export const takesProperty = (tag: string, prop: string) =>
+  Boolean(
+    SPECS.find((each) => each.tag === tag)?.properties?.includes(prop as never),
+  );
+
 export function attributeFor(tag: string, prop: string) {
   if (prop === "style") return "style";
   const spec = SPECS.find((each) => each.tag === tag);
