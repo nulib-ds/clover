@@ -14,10 +14,10 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 
 - **Stylesheets a part at a time.** A page of parts can import
-  `@nulib/clover/styles/core.css`, which every part needs, and the sheet of each other
-  part it draws (`styles/items.css`, `styles/panel.css`, `styles/media.css` and the rest;
-  Styling lists them), in place of `styles.css`. A page of images with `Root`, `Status`,
-  `Body`, `Position` and `Items` loads about 11 kB of styles, gzipped, instead of 19.5 kB.
+  `@nulib/clover/styles/core.css` first, then the sheet of each other part it draws
+  (`styles/items.css`, `styles/panel.css`, `styles/media.css` and the rest; Styling lists
+  them), in place of `styles.css`. A page of images with `Root`, `Status`, `Body`,
+  `Position` and `Items` loads about 11 kB of styles, gzipped, instead of 19.2 kB.
   `styles.css` is unchanged.
 
   ```jsx
