@@ -18,7 +18,7 @@ import type {
   CloverCanvasOptions,
   CloverCanvasProps,
 } from "./Canvas.types";
-import Controls from "./Controls";
+import Controls, { NO_LIMITS } from "./Controls";
 import type { PlaceholderStill } from "./Placeholder";
 import {
   type AnimationFrame,
@@ -286,6 +286,12 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   const [unloadable, setUnloadable] = useState(false);
   /** Bumped whenever the scene is laid out, so world-pinned overlays re-place. */
   const [sceneVersion, setSceneVersion] = useState(0);
+  /*
+   * Which of zoom in, zoom out and reset would do nothing, read as the view moves (a
+   * resize moves it too) and as the image changes, and kept only when one flips, so a
+   * gesture does not render the Canvas every frame.
+   */
+  const [viewLimits, setViewLimits] = useState(NO_LIMITS);
 
   // Callbacks and options are read through refs so new identities don't remount.
   const onReadyRef = useRef(onReady);
@@ -856,8 +862,20 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     surfaceRef.current = surface;
     setSurface(surface);
     surface.setDismiss(releaseAnnotation);
+    const readLimits = () => {
+      if (!renderer) return;
+      const next = renderer.viewLimits();
+      setViewLimits((last) =>
+        last.atMax === next.atMax &&
+        last.atMin === next.atMin &&
+        last.atHome === next.atHome
+          ? last
+          : next,
+      );
+    };
 
     const offOpen = surface.on("open", () => {
+      readLimits();
       setCleared(false);
       markDrawn();
       contentStateChanged();
@@ -886,6 +904,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
       );
     });
     const offChange = surface.on("change", () => {
+      readLimits();
       setCleared(false);
       markDrawn();
       contentStateChanged();
@@ -899,6 +918,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
       setUnloadable(Boolean(failed)),
     );
     const offViewport = surface.on("viewport", () => {
+      readLimits();
       if (renderer) onViewportChangeRef.current?.(renderer.getBounds());
       contentStateChanged();
     });
@@ -1080,6 +1100,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             instance={instance}
             config={shownControls ?? NO_CONTROLS}
             controlButtons={controlButtons}
+            limits={viewLimits}
             placeholderIsMore={cornerToggle && !media}
             chapters={media ? chapters : undefined}
             mediaElement={mediaElement}

@@ -51,6 +51,7 @@ beforeEach(() => {
     isOpen: false,
     backendKind: "webgl2",
     getBounds: () => ({ x: 0, y: 0, width: 4032, height: 3024 }),
+    viewLimits: () => ({ atMax: false, atMin: false, atHome: false }),
     fitBounds: vi.fn(),
     fitAnnotation: vi.fn(),
     home: vi.fn(),

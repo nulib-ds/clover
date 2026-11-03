@@ -234,6 +234,36 @@ describe("CanvasRenderer", () => {
     renderer.dispose();
   });
 
+  it("knows which of zoom in, zoom out and home would change nothing", async () => {
+    mockedLoad.mockResolvedValue(bitmap(1000, 1000));
+    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    expect(renderer.viewLimits()).toEqual({
+      atMax: false,
+      atMin: false,
+      atHome: true,
+    });
+
+    renderer.zoomBy(1000, undefined, false);
+    expect(renderer.viewLimits()).toEqual({
+      atMax: true,
+      atMin: false,
+      atHome: false,
+    });
+    renderer.zoomBy(0.0001, undefined, false);
+    expect(renderer.viewLimits()).toMatchObject({ atMin: true, atHome: false });
+
+    // Home by hand, not by `home`: the same view is home however it got there.
+    renderer.home(true);
+    renderer.zoomBy(1.5, undefined, false);
+    expect(renderer.viewLimits().atHome).toBe(false);
+    renderer.zoomBy(1 / 1.5, undefined, false);
+    expect(renderer.viewLimits().atHome).toBe(true);
+    renderer.rotateBy(90);
+    expect(renderer.viewLimits().atHome).toBe(false);
+    renderer.dispose();
+  });
+
   it("comes home by the shortest way upright, never spinning a whole turn back", async () => {
     mockedLoad.mockResolvedValue(bitmap(1000, 1000));
     const renderer = new CanvasRenderer(host(), { animationTime: 0 });

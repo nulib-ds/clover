@@ -208,7 +208,7 @@ export const handleDocs = {
   controlButtons: {
     type: "CloverControlButtons | null",
     description:
-      "The Body's controls, each replaced by a button you make: a function given the control's name, label and Clover's icon, returning the button. Clover keeps it named, keyed and in its state, presses the control with it, and adds its popover.",
+      "The Body's controls, each replaced by a button you make: a function given the control's name, label and Clover's icon, returning the button. Clover keeps it named, keyed and in its state, presses the control with it, and adds its popover. Where zoom in, zoom out or reset would do nothing, its props carry aria-disabled and no click handler: spread them.",
   },
 };
 

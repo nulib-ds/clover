@@ -154,6 +154,30 @@ button.clover-canvas-button svg {
 }
 
 /*
+ * A view control with nowhere to go (zoom in at the greatest zoom, reset at home): its glyph
+ * dimmed, no accent under the pointer, no pointing hand. Unlike the steps above it takes the
+ * pointer, so its popover still shows, and its focus is drawn as ever. An inactive control
+ * needs no contrast (WCAG 1.4.3, 1.4.11); `aria-disabled` tells assistive technology.
+ */
+button.clover-canvas-button[aria-disabled="true"] {
+  cursor: default;
+}
+
+button.clover-canvas-button[aria-disabled="true"] svg {
+  opacity: 0.5;
+}
+
+button.clover-canvas-button[aria-disabled="true"]:hover:not(:focus-visible) {
+  background-color: var(--clover-color-control, #1a1d1e);
+}
+
+:where([data-high-contrast])
+  button.clover-canvas-button[aria-disabled="true"]:hover:not(:focus-visible) {
+  background-color: var(--clover-color-control, #1a1d1e);
+  outline: none;
+}
+
+/*
  * `data-button` rather than the id, so the nudge is language-independent: the ids carry a
  * localized label, the attribute does not.
  */
@@ -184,6 +208,15 @@ button.clover-canvas-button[data-button="rotate-left"]:is(
 button.clover-canvas-button[data-button="reset"]:is(:hover, :focus-visible)
   svg {
   rotate: -15deg;
+}
+
+/* A control that does nothing does not nudge its glyph. */
+button.clover-canvas-button[aria-disabled="true"][data-button]:is(
+    :hover,
+    :focus-visible
+  )
+  svg {
+  rotate: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

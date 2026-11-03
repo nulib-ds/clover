@@ -17,6 +17,8 @@ interface ButtonProps {
   shortcut?: Shortcut;
   /** The language of `label`, where it is not the page's: Clover's, or a Choice's. */
   lang?: string;
+  /** It would do nothing now: `aria-disabled`, so it keeps focus and its popover. */
+  unavailable?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -29,6 +31,7 @@ const Button: React.FC<ButtonProps> = ({
   controls,
   shortcut,
   lang,
+  unavailable,
 }) => {
   // Extract button type from id (e.g., "rotateLeft-abc123" → "rotate-left")
   // This ensures data-button is language-independent for CSS selectors
@@ -44,6 +47,7 @@ const Button: React.FC<ButtonProps> = ({
       data-testid="clover-canvas-button"
       data-button={dataButton}
       onClick={onClick}
+      aria-disabled={unavailable || undefined}
       aria-expanded={expanded}
       aria-controls={controls}
       /*

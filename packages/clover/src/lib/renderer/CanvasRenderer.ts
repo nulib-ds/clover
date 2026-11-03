@@ -545,6 +545,25 @@ export class CanvasRenderer implements GestureTarget {
     );
   }
 
+  /**
+   * Which of zoom in, zoom out and home would change nothing, judged where the camera is
+   * heading, as `atMaxZoom` is. Home is the same zoom, center and turn, to within half a
+   * screen pixel and a thousandth of the zoom.
+   */
+  viewLimits(): { atMax: boolean; atMin: boolean; atHome: boolean } {
+    const { zoom, x, y, rotation } = this.camera.destination;
+    const home = this.homeCamera();
+    return {
+      atMax: this.atMaxZoom(),
+      atMin: zoom <= this.getZoomLimits().min * (1 + ZOOM_EPSILON),
+      atHome:
+        !home ||
+        (Math.abs(zoom / home.zoom - 1) < 1e-3 &&
+          Math.hypot(x - home.x, y - home.y) * zoom < 0.5 &&
+          Math.abs(rotation - home.rotation) < 1e-3),
+    };
+  }
+
   zoomBy(factor: number, at?: Point, animate = true): void {
     const base = animate ? this.camera.destination : this.camera.current;
     const screen = at ?? {

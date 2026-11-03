@@ -11,6 +11,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **Zoom in, zoom out and reset show when they would do nothing.** At the greatest zoom,
+  zoom in is `aria-disabled` and dimmed, zoom out at the least, reset at home. They stay
+  in the tab order and keep their popovers, as Previous and Next do at an end. A
+  `controlButtons` replacement is given `aria-disabled: true` in its `buttonProps`, and
+  no `onClick`, while its control would do nothing.
+
 ## [4.2.0] - 2026-11-03
 
 ### Added
