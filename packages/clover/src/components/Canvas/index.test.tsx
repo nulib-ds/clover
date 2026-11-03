@@ -1586,6 +1586,24 @@ describe("Canvas", () => {
       expect(renderer.setImages.mock.lastCall[1].fit).toBe(true);
     });
 
+    it("keeps the same toggle as the view opens and closes", async () => {
+      render(<Canvas canvases={[first]} />);
+      await loaded();
+      const toggle = openViewer();
+      expect(toggle.closest(".clover-canvas-more")).not.toBeNull();
+
+      fireEvent.click(toggle);
+      await open();
+      expect(closeViewer()).toBe(toggle);
+
+      renderer.isOpen = true;
+      fireEvent.click(closeViewer());
+      expect(openViewer()).toBe(toggle);
+      expect(
+        document.querySelector(".clover-canvas-more[data-open]"),
+      ).toBeNull();
+    });
+
     it("opens straight away when told to skip the placeholder", () => {
       render(<Canvas canvases={[first]} placeholder={false} />);
       expect(screen.queryByTestId("clover-canvas-placeholder")).toBeNull();
