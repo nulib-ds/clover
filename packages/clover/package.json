@@ -63,6 +63,7 @@
     "./web-components/three": "./dist/web-components/three.mjs",
     "./web-components/custom-elements.json": "./dist/web-components/custom-elements.json",
     "./styles.css": "./dist/styles.css",
+    "./styles/*.css": "./dist/styles/*.css",
     "./templates.css": "./dist/templates.css",
     "./package.json": "./package.json"
   },

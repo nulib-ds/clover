@@ -99,7 +99,13 @@ every rule below.
   Color tokens are `--clover-color-*` with literal fallbacks, since a page sets them. The
   scale's tokens (`--clover-space-*`, `--clover-text-*`, `--clover-control`) are defined
   in `src/styles/scale.css`, first in the list, and need none. Add every new stylesheet to
-  the list.
+  the list. The same sheets are built again a part at a time (`dist/styles/<part>.css`,
+  `partSheets` in `build/clover-sheets.mjs`): each sheet goes in the part sheet of the
+  parts that draw what it styles (`OWNERS`, a `ui/` module standing for its importers),
+  else `core.css`. Each source sheet keeps a layer of its own in `clover`, and every part
+  sheet states their order, so the parts cascade as `styles.css` does in any import order.
+  A new `components/` directory gets a line in `PART_SHEETS`; `build/styles.test.mjs`
+  fails until it does.
 - **Space, type and selectors follow `DESIGN.md`.** Every space and text size is a step of
   the golden scale from the page's own 1rem, chosen by how closely things belong together
   (a container's inset one step above the gap between its children). Never set a font

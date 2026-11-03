@@ -1,6 +1,7 @@
 /*
- * Builds dist/styles.css from the hand-ordered aggregate src/styles/clover.css, and
- * dist/templates.css from src/templates/templates.css (the templates' own styles).
+ * Builds dist/styles.css from the hand-ordered aggregate src/styles/clover.css,
+ * dist/templates.css from src/templates/templates.css (the templates' own styles), and
+ * the same sheets again a part at a time, in dist/styles/ (`partSheets`).
  *
  * Package JS never imports CSS: consumers import "@nulib/clover/styles.css" once. That
  * keeps server rendering free of a flash of unstyled content, works under a strict CSP,
@@ -11,6 +12,8 @@ import { build } from "esbuild";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { layerOf, partSheets, rulesOf, SHEETS } from "./clover-sheets.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -43,3 +46,22 @@ async function bundle(source, output) {
 
 await bundle("src/styles/clover.css", "dist/styles.css");
 await bundle("src/templates/templates.css", "dist/templates.css");
+
+/*
+ * A page imports part sheets in any order, so each sheet's rules sit in a layer of their
+ * own within `clover`, and every part sheet opens by stating the order of them all,
+ * styles.css's, whichever part sheet loads first.
+ */
+const order = `@layer ${SHEETS.filter(({ inStyles }) => inStyles)
+  .map(layerOf)
+  .join(",")};`;
+mkdirSync(resolve(root, "dist/styles"), { recursive: true });
+for (const [name, sheets] of Object.entries(partSheets())) {
+  const layers = await Promise.all(
+    sheets.map(async (sheet) => `@layer ${layerOf(sheet)}{${await rulesOf(sheet)}}`),
+  );
+  writeFileSync(
+    resolve(root, `dist/styles/${name}.css`),
+    `@layer clover{${order}${layers.join("")}}\n`,
+  );
+}
