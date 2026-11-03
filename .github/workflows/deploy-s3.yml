@@ -12,15 +12,24 @@ permissions:
   # Required for the OIDC token that configure-aws-credentials exchanges for a role.
   id-token: write
 
-concurrency:
-  group: deploy-s3
-  cancel-in-progress: true
-
 jobs:
   deploy:
-    # If triggered by workflow_run, require success on main; always allow manual dispatch.
+    # If triggered by workflow_run, require a successful Tests run for a push to this
+    # repository's main; always allow manual dispatch. A pull request's Tests run names
+    # its own head branch, which a fork can call `main`, so the branch alone is not
+    # enough: the event and the repository say the commit is one already on main.
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') }}
+      ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository) }}
+    # On the job, not the workflow, so only a run that deploys joins the group: every
+    # pull request's Tests run starts this workflow, and at the workflow's level its
+    # skipped run would cancel a deploy in progress.
+    concurrency:
+      group: deploy-s3
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     environment:
       name: production
