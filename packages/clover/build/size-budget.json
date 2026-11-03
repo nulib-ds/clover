@@ -17,7 +17,7 @@
   "mapFirstViewGzip": 25250,
   "stylesGzip": 19950,
   "templatesStylesGzip": 2500,
-  "coreStylesGzip": 8550,
+  "coreStylesGzip": 8650,
   "mapInitialGzip": 16200,
   "mapOnDemandGzip": 300000,
   "webComponentsGzip": 125950,

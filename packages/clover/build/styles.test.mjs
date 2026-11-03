@@ -9,7 +9,12 @@ import { dirname, resolve } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { PART_SHEETS, partSheets, rulesOf } from "./clover-sheets.mjs";
+import {
+  PART_SHEETS,
+  partSheets,
+  partsDrawing,
+  rulesOf,
+} from "./clover-sheets.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = resolve(root, "dist");
@@ -71,12 +76,20 @@ function rulesIn(css, conditions = "") {
     const body = css.slice(open + 1, end - 1);
     if (/^@(layer|media|supports|container)\b/.test(prelude))
       rules.push(
-        ...rulesIn(body, prelude.startsWith("@layer") ? conditions : `${conditions}${prelude}|`),
+        ...rulesIn(
+          body,
+          prelude.startsWith("@layer")
+            ? conditions
+            : `${conditions}${prelude}|`,
+        ),
       );
     else if (!prelude.startsWith("@")) {
       const declarations = splitTop(body, ";").map((declaration) => {
         const colon = declaration.indexOf(":");
-        return [declaration.slice(0, colon).trim(), declaration.slice(colon + 1).trim()];
+        return [
+          declaration.slice(0, colon).trim(),
+          declaration.slice(colon + 1).trim(),
+        ];
       });
       for (const selector of splitTop(prelude, ","))
         rules.push({ selector: selector.trim(), conditions, declarations });
@@ -160,7 +173,9 @@ const classesOf = (css) =>
     ),
   );
 const pseudoElementOf = (compound) =>
-  compound.match(/::?(before|after|marker|placeholder|backdrop|-webkit-[\w-]+)/)?.[0] ?? "";
+  compound.match(
+    /::?(before|after|marker|placeholder|backdrop|-webkit-[\w-]+)/,
+  )?.[0] ?? "";
 const meets = (a, b) => [...a].some((name) => b.has(name));
 
 test("every sheet of styles.css is in exactly one part sheet, each written", () => {
@@ -179,15 +194,24 @@ test("the part sheets together declare what styles.css does", () => {
   const declarations = (rules) =>
     new Set(
       rules.flatMap(({ selector, conditions, declarations }) =>
-        declarations.map(([property, value]) => `${conditions}${selector}{${property}:${value}}`),
+        declarations.map(
+          ([property, value]) =>
+            `${conditions}${selector}{${property}:${value}}`,
+        ),
       ),
     );
   const whole = declarations(rulesIn(read("styles.css")));
   const parts = declarations(
     Object.keys(GROUPS).flatMap((name) => rulesIn(read(`styles/${name}.css`))),
   );
-  assert.deepEqual([...parts].filter((each) => !whole.has(each)), []);
-  assert.deepEqual([...whole].filter((each) => !parts.has(each)), []);
+  assert.deepEqual(
+    [...parts].filter((each) => !whole.has(each)),
+    [],
+  );
+  assert.deepEqual(
+    [...whole].filter((each) => !parts.has(each)),
+    [],
+  );
 });
 
 /*
@@ -225,7 +249,7 @@ test("imported core first, the part sheets cascade as styles.css does", async ()
       if (compare(early.specificity, late.specificity) !== 0) continue;
       if (early.pseudoElement !== late.pseudoElement) continue;
       // A class in common on the element, or, where one names none, its type and a
-      // class in common on the way to it.
+      // class in common on the way to it. Two classes one element carries are missed.
       const sameElement =
         early.classes.size && late.classes.size
           ? meets(early.classes, late.classes)
@@ -240,6 +264,54 @@ test("imported core first, the part sheets cascade as styles.css does", async ()
         );
     }
   assert.deepEqual(flips, []);
+});
+
+/*
+ * A rule in one part's sheet whose classes another part's code writes, all of them,
+ * styles that part's page too, which may not import the sheet: its sheet's owners in
+ * `OWNERS` (`build/clover-sheets.mjs`) are missing that part's modules.
+ */
+const DRAWN_APART = [
+  // Every Canvas's `--clover-transport-room`, which only a recording's rules read.
+  /^\.clover-canvas$/,
+  // A Canvas has `data-player` only while a recording's player, media's, draws in it.
+  /\[data-player\]/,
+];
+test("no part draws what only another part's sheet styles", () => {
+  const drawing = partsDrawing();
+  const walk = (dir) =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const path = resolve(dir, entry.name);
+      if (entry.isDirectory())
+        return entry.name === "web-components" ? [] : walk(path);
+      return /\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name)
+        ? [path]
+        : [];
+    });
+  // The classes each part's code writes: whole words in its strings.
+  const written = new Map();
+  for (const file of walk(resolve(root, "src"))) {
+    const classes = [
+      ...readFileSync(file, "utf8").matchAll(
+        /(?<=["'` ])clover-[\w-]+(?=["'` ])/g,
+      ),
+    ].map(([name]) => name);
+    for (const part of drawing(file))
+      written.set(part, new Set([...(written.get(part) ?? []), ...classes]));
+  }
+  const leaks = [];
+  for (const part of Object.keys(GROUPS)) {
+    if (part === "core") continue;
+    for (const { selector } of rulesIn(read(`styles/${part}.css`))) {
+      const classes = [...classesOf(selector)];
+      if (!classes.length || DRAWN_APART.some((rule) => rule.test(selector)))
+        continue;
+      for (const [other, names] of written)
+        if (other !== part && classes.every((name) => names.has(name)))
+          leaks.push(`${other} draws ${selector}, styled in ${part}.css`);
+    }
+  }
+  assert.deepEqual([...new Set(leaks)], []);
 });
 
 test("every part sheet resolves through the package's exports", () => {

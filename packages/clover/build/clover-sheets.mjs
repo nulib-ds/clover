@@ -101,6 +101,12 @@ const OWNERS = {
     "components/Items/Pager.tsx",
     "components/Items/Position.tsx",
   ],
+  // The Collection's list, which Items' targets and count menu draw too.
+  "components/Collection/Collection": [
+    "components/Collection/Collection.tsx",
+    "components/Items/TargetItems.tsx",
+    "components/Items/CountMenu.tsx",
+  ],
   // The panel's own, and the lists of its sections and About's, anywhere.
   "components/Panel/Panel": [
     "components/Panel/Panel.tsx",
@@ -409,10 +415,10 @@ function importersOf() {
 }
 
 /**
- * Each of `PART_SHEETS`' sheets with the sheets in it, in the cascade's order: together,
- * styles.css's. The other templates' stay in templates.css alone, for the Viewer.
+ * The parts that draw what a module draws: its own part (`PART_SHEETS`), or, for a module
+ * of no part (`ui/`, `lib/`), the parts of the modules that import it.
  */
-export function partSheets() {
+export function partsDrawing() {
   const importers = importersOf();
   const prefixes = Object.entries(PART_SHEETS)
     .flatMap(([name, paths]) => paths.map((path) => [resolve(src, path), name]))
@@ -426,7 +432,6 @@ export function partSheets() {
     prefixes.find(
       ([prefix]) => file === `${prefix}.tsx` || file.startsWith(`${prefix}/`),
     )?.[1];
-  // The parts a module is drawn by: its own, or those of the modules that import it.
   const usersOf = (file, seen = new Set()) => {
     const part = partOf(file);
     if (part) return [part];
@@ -434,6 +439,15 @@ export function partSheets() {
     seen.add(file);
     return (importers.get(file) ?? []).flatMap((by) => usersOf(by, seen));
   };
+  return (file) => new Set(usersOf(file));
+}
+
+/**
+ * Each of `PART_SHEETS`' sheets with the sheets in it, in the cascade's order: together,
+ * styles.css's. The other templates' stay in templates.css alone, for the Viewer.
+ */
+export function partSheets() {
+  const drawing = partsDrawing();
   const groups = Object.fromEntries(
     Object.keys(PART_SHEETS).map((name) => [name, []]),
   );
@@ -441,10 +455,9 @@ export function partSheets() {
     const users = new Set(
       ownersOf(sheet)
         .filter((file) => !file.startsWith(resolve(src, "web-components")))
-        .flatMap((file) => usersOf(file)),
+        .flatMap((file) => [...drawing(file)]),
     );
     groups[users.size === 1 ? [...users][0] : "core"].push(sheet);
   }
   return groups;
 }
-
