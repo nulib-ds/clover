@@ -186,6 +186,30 @@ deadline.
     caption's words (WCAG 2.5.3). "Scene or Body" says Body handles every container the
     Presentation API defines, switching between Canvas, Timeline and Scene as the reader
     moves (Mat, 2026-10-23).
+  - Canvas's page has an Interaction section after its examples (Mat, 2026-11-03: "a
+    section below for configuration of canvas interaction UX"): a playground of its
+    `options` first ("a jsx playground that allows someone to dial this options around"),
+    a `LivePart` whose knobs are keys of the object (`options.gestures.scrollToZoom`),
+    which React writes `options={{ … }}` and HTML sets by a module script after the
+    markup (`entries`, `docs/lib/live-code.ts`), each redrawing the Canvas
+    (`remount`, as the renderer reads its options as it mounts); then a table per subject
+    in the API reference's form, Option, Type, Default and Description ("make this a
+    table like the above APIs"), the one place on a component page with tables outside
+    its API reference, the keys a table too, a spring's playground under Easing, and the
+    Viewer's `canvasOptions`. A new option gets a row there, and a knob where its change
+    shows at once.
+  - Every Canvas example whose Canvas has a `placeholderCanvas` has `placeholder` as a
+    value to change in its code, `true` to start, but `false` in the Interaction
+    section's playgrounds, which open on the view (Mat, 2026-11-03: "make placeholder prop
+    toggleable on canvas all canvas examples. make true by default. except on
+    interaction, make false"; and "this should have been just a toggleable prop in the jsx
+    example for each": never a switch over the card). An image's `src` has none, so
+    those examples have no such value. Navigating Canvases (Several Canvases until
+    2026-11-03) and, after it, Painting multiple Canvases, two of the catalog's pages side
+    by side (Mat, 2026-11-03), are `LiveRecipe`s (`LiveExample.tsx`): React's code is the
+    host's own, its script before the markup (`before`) and the Canvases it hands over
+    (`expression`), and HTML's its own tree, a root showing the view of one Canvas, as the
+    elements take only Presentation 4 Canvases; the demo is `CanvasRecipe`.
   - A component page's head (Mat, 2026-10-22): no breadcrumb (none on any docs page), its
     title set as the homepage's section titles are, with no stroke under it (`layout.css`,
     as every docs page's is), and opposite it, on one line
@@ -237,7 +261,16 @@ deadline.
     (`--editor-mark`: its 24% dark, 8% light, where 24% would take the text under 4.5:1);
     every line keeps its colors (dimming the rest would take them under 4.5:1), and the
     twin marks the same element's lines (`twinLines`, `code-flavors.mjs`). Mark a part's
-    own lines where an example's code holds a `Root` or other parts around it.
+    own lines where an example's code holds a `Root` or other parts around it. An
+    example's code longer than 25 lines shows its first 20 (Mat, 2026-11-03: "allow
+    examples to be clipped and expanded (like a read more) … show the first 20 lines.
+    this should be the default"), and a button under them, drawn as Copy is, "Show all
+    120 lines" (`aria-expanded`), shows the rest, then "Show fewer lines", focus kept on
+    it and it kept in view (`CLIP_LINES`, `ClipContext` from `CodeArea`). Cut on the
+    server (`mdx-components.tsx`'s `Pre` counts the lines), so nothing moves as the page
+    loads; the lines cut are out of sight and out of the accessibility tree but in the
+    HTML, for Copy, the Markdown and search, and whole where scripts do not run (the
+    root layout's `noscript`).
   - Use Clover: Get started (`/docs`, a quick start and nothing more; Mat, 2026-10-26:
     "everything should be about a quick start"), Viewer (`/docs/viewer`,
     the templates on it: their old page, `/docs/viewer/templates`, forwards to

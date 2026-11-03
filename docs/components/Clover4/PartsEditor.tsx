@@ -418,6 +418,7 @@ const COLOR: Record<TokenKind, string> = {
   punctuation: "var(--editor-punctuation)",
   number: "var(--editor-number)",
   property: "var(--editor-property)",
+  comment: "var(--editor-faint)",
 };
 
 const LANGUAGE: Record<Flavor, string> = { react: "jsx", html: "html" };

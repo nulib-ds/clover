@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 
 import * as Clover from "../../parts";
 import type {
+  CloverCanvasOptions,
   PanelLayout,
   PanelSection,
   PanelSectionLabels,
@@ -73,6 +74,8 @@ export type DocumentProps = Omit<RootProps, "children"> & {
    * The Body's `collapseControls`.
    */
   collapseControls?: "auto" | "always";
+  /** The Body's Canvas `options`: its gestures, zoom limits and motion. */
+  canvasOptions?: CloverCanvasOptions;
 };
 
 /**
@@ -97,6 +100,7 @@ export function Document({
   headingLevel = 2,
   storageKey = "clover-template-document",
   collapseControls,
+  canvasOptions,
   ...root
 }: DocumentProps) {
   // Past h6 the title is no heading, and names the Viewer instead (`Clover.titled`).
@@ -125,6 +129,7 @@ export function Document({
         headingLevel={headingLevel}
         storageKey={storageKey}
         collapseControls={collapseControls}
+        canvasOptions={canvasOptions}
       />
     </Clover.Root>
   );
@@ -156,6 +161,7 @@ function DocumentLayout({
   panelSections,
   panelLabels,
   collapseControls,
+  canvasOptions,
   title,
 }: { title: Clover.Titled } & Pick<
   DocumentProps,
@@ -170,6 +176,7 @@ function DocumentLayout({
   | "panelSections"
   | "panelLabels"
   | "collapseControls"
+  | "canvasOptions"
 >) {
   const t = Clover.useT();
   const langOf = Clover.useLangOf();
@@ -381,7 +388,10 @@ function DocumentLayout({
             </div>
           )}
           {/* The pages, and the one Canvas, which holds the panel's toggle. */}
-          <Sheets collapseControls={collapseControls}>
+          <Sheets
+            collapseControls={collapseControls}
+            canvasOptions={canvasOptions}
+          >
             {!docked && panelToggle}
           </Sheets>
         </Clover.SplitPane>

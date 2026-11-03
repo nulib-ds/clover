@@ -15,13 +15,11 @@ export interface GestureTarget {
   panBy(dx: number, dy: number, animate: boolean): void;
   /** Zoom by `factor` about `at`, or the viewport center. */
   zoomBy(factor: number, at: Point | undefined, animate: boolean): void;
-  /** Continue a released drag at `vx, vy` px/s. */
-  flick(vx: number, vy: number): void;
   home(): void;
   /** The view is zoomed in as far as it goes. */
   atMaxZoom?(): boolean;
   rotateBy(degrees: number): void;
-  /** A pointer is down. The camera tracks it 1:1, so any animation is canceled. */
+  /** A pointer is down (true) or the last one lifted (false). */
   setInteracting(interacting: boolean): void;
   /** A mouse click that is not a zoom (click-to-zoom is off): video toggles playback. */
   tap?(at: Point): void;
@@ -53,6 +51,15 @@ export interface GestureOptions {
    * or sound, always fitted to the Body).
    */
   navigable: boolean;
+  /**
+   * A mouse or pen drag tracks the pointer 1:1 and glides on after a fast release. Off,
+   * the drag is eased instead and stops where the pointer does. A finger always tracks 1:1 and flicks.
+   */
+  flickEnabled: boolean;
+  /** Release speed, px/s, below which a drag does not flick. */
+  flickMinSpeed: number;
+  /** Seconds of release velocity the flick travels. */
+  flickMomentum: number;
 }
 
 export const DEFAULT_GESTURES: GestureOptions = {
@@ -61,13 +68,15 @@ export const DEFAULT_GESTURES: GestureOptions = {
   pinchToZoom: true,
   scrollToZoom: false,
   navigable: true,
+  flickEnabled: true,
+  flickMinSpeed: 200,
+  flickMomentum: 0.25,
 };
 
 const CLICK_ZOOM = 2;
 const KEY_ZOOM = 1.5;
 const KEY_PAN_FRACTION = 0.1;
 const VELOCITY_WINDOW_MS = 100;
-const MIN_FLICK_SPEED = 200;
 /** One wheel "line" of zoom: e^(−deltaY × rate). */
 const WHEEL_ZOOM_RATE = 0.002;
 const PINCH_WHEEL_ZOOM_RATE = 0.01;
@@ -167,7 +176,7 @@ export class GestureController {
         this.down.moved = true;
       }
       if (this.down?.moved && this.options.navigable) {
-        this.target.panBy(dx, dy, false);
+        this.target.panBy(dx, dy, !this.tracksPointer(event.pointerType));
       }
       this.samples.push({ x: p.x, y: p.y, t: event.timeStamp });
       const cutoff = event.timeStamp - VELOCITY_WINDOW_MS;
@@ -259,14 +268,19 @@ export class GestureController {
       return;
     }
 
-    if (!this.options.navigable) return;
+    if (!this.options.navigable || !this.tracksPointer(event.pointerType)) {
+      return;
+    }
     const first = this.samples[0];
     const last = this.samples[this.samples.length - 1];
     const span = (last?.t ?? 0) - (first?.t ?? 0);
     if (first && last && span > 0 && event.timeStamp - last.t < 50) {
       const vx = ((last.x - first.x) / span) * 1000;
       const vy = ((last.y - first.y) / span) * 1000;
-      if (Math.hypot(vx, vy) > MIN_FLICK_SPEED) this.target.flick(vx, vy);
+      if (Math.hypot(vx, vy) > this.options.flickMinSpeed) {
+        const momentum = this.options.flickMomentum;
+        this.target.panBy(vx * momentum, vy * momentum, true);
+      }
     }
   };
 
@@ -346,6 +360,11 @@ export class GestureController {
     }
     event.preventDefault();
   };
+
+  /** A drag that follows the pointer exactly, and so may flick on release. */
+  private tracksPointer(pointerType: string): boolean {
+    return pointerType === "touch" || this.options.flickEnabled;
+  }
 
   private pinchState(): { distance: number; mid: Point } {
     const [a, b] = [...this.pointers.values()];

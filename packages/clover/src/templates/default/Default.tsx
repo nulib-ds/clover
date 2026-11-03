@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 
 import * as Clover from "../../parts";
 import type {
+  CloverCanvasOptions,
   PanelLayout,
   PanelSection,
   PanelSectionLabels,
@@ -78,6 +79,8 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    * The Body's `collapseControls`.
    */
   collapseControls?: "auto" | "always";
+  /** The Body's Canvas `options`: its gestures, zoom limits and motion. */
+  canvasOptions?: CloverCanvasOptions;
 };
 
 /**
@@ -108,6 +111,7 @@ export function Default({
   storageKey = "clover-template-default",
   fill = false,
   collapseControls,
+  canvasOptions,
   ...root
 }: DefaultProps) {
   const panes = useRef<HTMLElement>(null);
@@ -185,6 +189,7 @@ export function Default({
           <Clover.Body
             className="clover-template-default-body"
             collapseControls={collapseControls}
+            options={canvasOptions}
           >
             {panel && !docked && pane.toggle}
           </Clover.Body>

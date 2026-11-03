@@ -13,7 +13,6 @@ function setup(options = DEFAULT_GESTURES) {
   const target: GestureTarget = {
     panBy: vi.fn(),
     zoomBy: vi.fn(),
-    flick: vi.fn(),
     home: vi.fn(),
     rotateBy: vi.fn(),
     setInteracting: vi.fn(),
@@ -42,6 +41,57 @@ describe("GestureController", () => {
     expect(event.defaultPrevented).toBe(true);
     const [factor] = (target.zoomBy as ReturnType<typeof vi.fn>).mock.calls[0];
     expect(factor).toBeGreaterThan(1);
+  });
+
+  it.each([
+    ["mouse", true, false],
+    ["mouse", false, true],
+    ["touch", false, false],
+  ])(
+    "a %s drag with flickEnabled %s is eased: %s",
+    (pointerType, flickEnabled, eased) => {
+      const { element, target } = setup({ ...DEFAULT_GESTURES, flickEnabled });
+      const at = (type: string, x: number, timeStamp: number) => {
+        const event = Object.assign(
+          new MouseEvent(type, { clientX: x, clientY: 50, button: 0 }),
+          { pointerId: 1, pointerType },
+        );
+        Object.defineProperty(event, "timeStamp", { value: timeStamp });
+        element.dispatchEvent(event);
+      };
+      at("pointerdown", 50, 0);
+      at("pointermove", 70, 16);
+      at("pointermove", 90, 32);
+      at("pointerup", 90, 40);
+      const calls = (target.panBy as ReturnType<typeof vi.fn>).mock.calls;
+      expect(calls[0]).toEqual([20, 0, eased]);
+      // 40 px in 32 ms, carried on for flickMomentum (0.25 s) unless the drag was eased.
+      if (eased) expect(calls).toHaveLength(2);
+      else expect(calls[2]).toEqual([312.5, 0, true]);
+    },
+  );
+
+  it.each([
+    ["below flickMinSpeed, does not glide", { flickMinSpeed: 2000 }, undefined],
+    ["glides for flickMomentum seconds", { flickMomentum: 0.5 }, 625],
+  ])("a mouse drag released %s", (_, options, glide) => {
+    const { element, target } = setup({ ...DEFAULT_GESTURES, ...options });
+    const at = (type: string, x: number, timeStamp: number) => {
+      const event = Object.assign(
+        new MouseEvent(type, { clientX: x, clientY: 50, button: 0 }),
+        { pointerId: 1, pointerType: "mouse" },
+      );
+      Object.defineProperty(event, "timeStamp", { value: timeStamp });
+      element.dispatchEvent(event);
+    };
+    at("pointerdown", 50, 0);
+    at("pointermove", 70, 16);
+    at("pointermove", 90, 32);
+    at("pointerup", 90, 40);
+    const calls = (target.panBy as ReturnType<typeof vi.fn>).mock.calls;
+    // 40 px in 32 ms is 1250 px/s.
+    if (glide === undefined) expect(calls).toHaveLength(2);
+    else expect(calls[2]).toEqual([glide, 0, true]);
   });
 
   it("leaves the wheel to a box in the Body that scrolls that way", () => {
@@ -172,7 +222,6 @@ describe("GestureController", () => {
     pointer("pointermove", 60);
     pointer("pointerup", 60);
     expect(target.panBy).not.toHaveBeenCalled();
-    expect(target.flick).not.toHaveBeenCalled();
 
     // A click is still a tap (play / pause).
     pointer("pointerdown", 20);

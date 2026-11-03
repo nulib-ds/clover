@@ -4,12 +4,11 @@ description: "The view that renders 2D images and video, with easy pan and zoom 
 ---
 
 import CanvasHandleDemo from "docs/components/Canvas/CanvasHandleDemo";
-import CanvasRecipe from "docs/components/Canvas/CanvasRecipe";
 import { Example } from "docs/components/Clover4/ViewerDocs";
 import CloverCanvas from "docs/components/DynamicImports/Canvas";
 import { ApiReference } from "docs/components/Clover4/ApiReference";
 import { PartHead } from "docs/components/Clover4/PartHead";
-import { LivePart } from "docs/components/Clover4/LiveExample";
+import { LivePart, LiveRecipe } from "docs/components/Clover4/LiveExample";
 
 <div className="docs-title-row">
 
@@ -72,16 +71,16 @@ unless `options.gestures.scrollToZoom` is on.
 
 ### View and rendering
 
-| Prop                   | Type                                                                       | Default           | Description                                                                                                                                                    |
-| ---------------------- | -------------------------------------------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `viewingDirection`     | `"left-to-right" \| "right-to-left" \| "top-to-bottom" \| "bottom-to-top"` | `"left-to-right"` | How several Canvases line up; in a `Root`, the Manifest's.                                                                                                     |
-| `navigator`            | `boolean`                                                                  | `false`           | An overview of the whole image, to press or drag in.                                                                                                           |
-| `options`              | `object`                                                                   | —                 | `backend`, `gestures`, `maxZoomPixelRatio`, `minZoomImageRatio`, `animationTime`, `hideDelay`, `animation`, `media`, `request`.                                |
-| `onReady`              | `(handle: CanvasHandle) => void`                                           | —                 | Once laid out, a handle to zoom, pan and turn it.                                                                                                              |
-| `onViewportChange`     | `(bounds: { x, y, width, height }) => void`                                | —                 | The region in view, at most once a frame.                                                                                                                      |
-| `onContentStateChange` | `(state: { json, encoded }) => void`                                       | —                 | Where it is, as a IIIF [content state](/docs/content-state), each time it settles: the Canvas within its Manifest, and the region in view or the media's time. |
-| `instanceId`           | `string`                                                                   | —                 | A stable id; a new one remounts the renderer.                                                                                                                  |
-| `className`            | `string`                                                                   | —                 | Added to `clover-canvas`, on its `figure`.                                                                                                                     |
+| Prop                   | Type                                                                       | Default           | Description                                                                                                                                                                                                                                          |
+| ---------------------- | -------------------------------------------------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `viewingDirection`     | `"left-to-right" \| "right-to-left" \| "top-to-bottom" \| "bottom-to-top"` | `"left-to-right"` | How several Canvases line up; in a `Root`, the Manifest's.                                                                                                                                                                                           |
+| `navigator`            | `boolean`                                                                  | `false`           | An overview of the whole image, to press or drag in.                                                                                                                                                                                                 |
+| `options`              | `object`                                                                   | —                 | `backend`, `gestures`, `maxZoomPixelRatio`, `minZoomImageRatio`, `animationTime`, `animationDuration`, `springStiffness`, `constrainDuringPan`, `hideDelay`, `animation`, `media`, `request`. How it moves and answers: [Interaction](#interaction). |
+| `onReady`              | `(handle: CanvasHandle) => void`                                           | —                 | Once laid out, a handle to zoom, pan and turn it.                                                                                                                                                                                                    |
+| `onViewportChange`     | `(bounds: { x, y, width, height }) => void`                                | —                 | The region in view, at most once a frame.                                                                                                                                                                                                            |
+| `onContentStateChange` | `(state: { json, encoded }) => void`                                       | —                 | Where it is, as a IIIF [content state](/docs/content-state), each time it settles: the Canvas within its Manifest, and the region in view or the media's time.                                                                                       |
+| `instanceId`           | `string`                                                                   | —                 | A stable id; a new one remounts the renderer.                                                                                                                                                                                                        |
+| `className`            | `string`                                                                   | —                 | Added to `clover-canvas`, on its `figure`.                                                                                                                                                                                                           |
 
 ### Controls
 
@@ -181,41 +180,83 @@ and pressed again, "Collapse viewer controls", it closes.
 
 </Example>
 
-### Several Canvases
+### Motion
+
+To move as Clover 3's `Image` did, on OpenSeadragon's defaults, ease each move over 1.2
+seconds, let a drag pull the image past its edge, and ease a mouse's drag with no glide
+after it. [Interaction](#interaction) has every option for how the Canvas moves.
+
+<Example>
+<div style={{ height: 420 }}>
+  <CloverCanvas
+    src="https://iiif.dc.library.northwestern.edu/iiif/3/bcb98b9f-4c44-4fd0-bfa9-673fb904a2b1"
+    isTiledImage
+    label="The Vanishing Race - Navaho"
+    options={{
+      animationDuration: 1.2,
+      constrainDuringPan: false,
+      gestures: { flickEnabled: false, flickMinSpeed: 120 },
+    }}
+  />
+</div>
+
+```jsx
+<Clover.Canvas
+  src="https://iiif.dc.library.northwestern.edu/iiif/3/bcb98b9f-4c44-4fd0-bfa9-673fb904a2b1"
+  isTiledImage
+  label="The Vanishing Race - Navaho"
+  options={{
+    animationDuration: 1.2,
+    constrainDuringPan: false,
+    gestures: { flickEnabled: false, flickMinSpeed: 120 },
+  }}
+/>
+```
+
+</Example>
+
+### Navigating Canvases
 
 Hand it the Canvases to show together, a spread say; which to show, and moving between
 them, is yours. `groupViews` reads a Manifest's `behavior` as the Viewer does.
 
-<Example>
-<CanvasRecipe
-  id="paged"
-  iiifContent="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+<LiveRecipe
+  recipe={{
+    id: "paged",
+    iiifContent:
+      "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
+  }}
+  before={[
+    "const manifest = await Clover.toPresentation4(json);",
+    "const views = Clover.groupViews(",
+    "  manifest.items,",
+    "  Clover.resolveBehavior(manifest.behavior),",
+    ");",
+  ]}
+  canvases="views[view].map((index) => manifest.items[index])"
+  canvasId="https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/5"
+  note="A view of a Manifest: its first Canvas alone, or any view within a root."
+  knobs={[{ prop: "placeholder", value: true, remount: true }]}
 />
 
-```jsx
-const manifest = await Clover.toPresentation4(json);
-const views = Clover.groupViews(
-  manifest.items,
-  Clover.resolveBehavior(manifest.behavior),
-);
+### Painting multiple Canvases
 
-<Clover.Canvas
-  canvases={views[view].map((index) => manifest.items[index])}
-  label={manifest.label}
-/>;
-```
+Hand it more than one Canvas, and it paints them side by side, in their order along
+`viewingDirection`: here the catalog's Page 1 and Page 2.
 
-```html twin
-<!-- A view of a Manifest: its first Canvas alone, or any view within a root. -->
-<clover-root
-  iiif-content="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
-  canvas-id="https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/5"
->
-  <clover-canvas></clover-canvas>
-</clover-root>
-```
-
-</Example>
+<LiveRecipe
+  recipe={{
+    id: "paged-spread",
+    iiifContent:
+      "https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json",
+    canvasIndexes: [1, 2],
+  }}
+  before={["const manifest = await Clover.toPresentation4(json);"]}
+  canvases="manifest.items.slice(1, 3)"
+  canvasId="https://clover.iiif.library.northwestern.edu/mocks/paged/canvas/2"
+  note="The elements take Presentation 4 Canvases: from a Manifest, a root paints a view's."
+  knobs={[{ prop: "placeholder", value: true, remount: true }]}
+/>
 
 ### Video and sound
 
@@ -242,16 +283,11 @@ An annotation on a stretch of a recording (`#t=`) shows among its captions while
 stretch plays; one with a region too (`xywh=…&t=…`) follows what it marks, frame by frame.
 Picking one, from the annotations menu or a list beside it, goes to its time.
 
-<Example>
-<div style={{ height: 420 }}>
-  <CloverCanvas iiifContent="https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/manifest.json" />
-</div>
-
-```jsx
-<Clover.Canvas iiifContent="https://clover.iiif.library.northwestern.edu/mocks/rudolf-hess-nuremberg/manifest.json" />
-```
-
-</Example>
+<LivePart
+  part="Canvas"
+  resource="footage"
+  knobs={[{ prop: "placeholder", value: true }]}
+/>
 
 ### Canvas handles and callbacks
 
@@ -510,6 +546,180 @@ Root loads. A `Canvas` alone in a `Root` shows the same view, without them.
 <Clover.Root iiifContent={url}>
   <Clover.Body />
 </Clover.Root>
+```
+
+## Interaction
+
+How the Canvas answers a mouse, a pen, a finger, a wheel and the keyboard, and how it
+moves, is set in `options`. Each can be left out: unset, the Canvas works as these tables
+describe. In the Viewer, give the same options as the template's `canvasOptions`
+([below](#in-the-viewer)).
+
+Try them here: change a value in the code, and the Canvas draws again with it. Then drag,
+click, pinch or scroll over the image to feel the difference.
+
+<LivePart
+  part="Canvas"
+  resource="standalone-canvas"
+  knobs={[
+    { prop: "placeholder", value: false, remount: true },
+    { prop: "options.gestures.clickToZoom", value: true, remount: true },
+    { prop: "options.gestures.scrollToZoom", value: false, remount: true },
+    { prop: "options.gestures.flickEnabled", value: true, remount: true },
+    {
+      prop: "options.gestures.flickMinSpeed",
+      value: 200,
+      min: 0,
+      max: 2000,
+      step: 50,
+      remount: true,
+      label: "Canvas flick minimum speed, in pixels a second",
+    },
+    {
+      prop: "options.gestures.flickMomentum",
+      value: 0.25,
+      min: 0,
+      max: 2,
+      step: 0.05,
+      remount: true,
+      label: "Canvas flick momentum, in seconds",
+    },
+    { prop: "options.constrainDuringPan", value: true, remount: true },
+    {
+      prop: "options.animationTime",
+      value: 0.09,
+      min: 0,
+      max: 2,
+      step: 0.01,
+      remount: true,
+      label: "Canvas animation time, in seconds",
+    },
+    {
+      prop: "options.maxZoomPixelRatio",
+      value: 1.1,
+      min: 0.5,
+      max: 8,
+      step: 0.1,
+      remount: true,
+      label: "Canvas closest zoom, in screen pixels to an image pixel",
+    },
+    {
+      prop: "options.minZoomImageRatio",
+      value: 0.9,
+      min: 0.1,
+      max: 1,
+      step: 0.05,
+      remount: true,
+      label: "Canvas farthest zoom, as a share of the whole image's fit",
+    },
+    {
+      prop: "options.hideDelay",
+      value: 3000,
+      min: 0,
+      max: 10000,
+      step: 500,
+      label: "Canvas hide delay, in milliseconds",
+    },
+  ]}
+/>
+
+### Pointer and touch
+
+A drag pans the image, and a finger always follows 1:1.
+
+| Option                    | Type      | Default | Description                                                                                                                                                                                                                             |
+| ------------------------- | --------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gestures.clickToZoom`    | `boolean` | `true`  | A click doubles the zoom where it lands, and a click with Shift halves it. At the closest zoom, a click goes home, so a pointer alone can always zoom back out. A double tap, with a finger or a pen that does not hover, zooms in too. |
+| `gestures.dblClickToZoom` | `boolean` | `true`  | A double click zooms in, where `clickToZoom` is off.                                                                                                                                                                                    |
+| `gestures.pinchToZoom`    | `boolean` | `true`  | Two fingers pinch to zoom.                                                                                                                                                                                                              |
+| `gestures.scrollToZoom`   | `boolean` | `false` | A plain wheel zooms. Off, the wheel scrolls the page past the Canvas, as it would past any picture, so an embedded Canvas never takes the page's scroll. A trackpad's pinch zooms either way.                                           |
+| `gestures.navigable`      | `boolean` | `true`  | Off, a drag, a pinch, the wheel, a click and the keys leave the view where it is. The Canvas's controls and its [handle](#canvas-handles-and-callbacks) still move it.                                                                  |
+
+### Drag and glide
+
+| Option                   | Type      | Default | Description                                                                                                                                 |
+| ------------------------ | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `gestures.flickEnabled`  | `boolean` | `true`  | A mouse or pen drag follows the pointer and glides on after a fast release. Off, the view eases after the pointer and stops where it stops. |
+| `gestures.flickMinSpeed` | `number`  | `200`   | The release speed, in pixels a second, under which a drag does not glide.                                                                   |
+| `gestures.flickMomentum` | `number`  | `0.25`  | How far a glide goes: as far as the release speed carries it in this many seconds.                                                          |
+| `constrainDuringPan`     | `boolean` | `true`  | Holds the image within its bounds as it is dragged. Off, a drag can pull it past its edge, and it springs back on release.                  |
+
+### Easing
+
+| Option              | Type     | Default | Description                                                                                                                        |
+| ------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `animationTime`     | `number` | `0.09`  | The seconds a zoom, a glide or the way home takes to close most of its distance, slowing as it nears. `0` makes each move at once. |
+| `animationDuration` | `number` | —       | The seconds each move takes, end to end, on a spring, in place of `animationTime`.                                                 |
+| `springStiffness`   | `number` | `6.5`   | With `animationDuration`, how much of a move comes early. Higher starts faster.                                                    |
+
+Where the system asks for reduced motion, the Canvas makes every move at once, whatever
+these say. To ease on a spring, set `animationDuration`, and try its stiffness:
+
+<LivePart
+  part="Canvas"
+  resource="standalone-canvas"
+  knobs={[
+    { prop: "placeholder", value: false, remount: true },
+    {
+      prop: "options.animationDuration",
+      value: 1.2,
+      min: 0,
+      max: 4,
+      step: 0.1,
+      remount: true,
+      label: "Canvas animation duration, in seconds",
+    },
+    {
+      prop: "options.springStiffness",
+      value: 6.5,
+      min: 1,
+      max: 20,
+      step: 0.5,
+      remount: true,
+      label: "Canvas spring stiffness",
+    },
+  ]}
+/>
+
+### Zoom limits
+
+| Option              | Type     | Default | Description                                                     |
+| ------------------- | -------- | ------- | --------------------------------------------------------------- |
+| `maxZoomPixelRatio` | `number` | `1.1`   | The closest zoom, in screen pixels to an image pixel.           |
+| `minZoomImageRatio` | `number` | `0.9`   | The farthest, as a share of the zoom that fits the whole image. |
+
+At either limit, zoom in or zoom out shows that it would do nothing (`aria-disabled`,
+dimmed), as reset does at home. Each keeps its place and its tip.
+
+### Keyboard
+
+Focused, the Canvas answers to these keys, and describes them to assistive technology.
+`gestures.navigable` turns off all but Escape and a recording's.
+
+| Key            | Action                                                     |
+| -------------- | ---------------------------------------------------------- |
+| Arrow keys     | Pan by a tenth of the view, or by three tenths with Shift. |
+| Plus, minus    | Zoom in or out a step, by half again.                      |
+| 0              | Go home.                                                   |
+| R, Shift and R | Turn the image a quarter turn to the right, or the left.   |
+| Escape         | Let go of a picked annotation.                             |
+| Space or K     | On a recording, play or pause.                             |
+| J, L           | On a recording, skip ten seconds back or forward.          |
+| M              | On a recording, mute or unmute.                            |
+
+### Hiding the controls
+
+| Option      | Type     | Default | Description                                                                                                                                                                                                                                                                     |
+| ----------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hideDelay` | `number` | `3000`  | The milliseconds the controls and the navigator stay once a mouse or a pen that hovers stops moving, or a finger lifts. `Infinity` keeps them once shown. A tap on the image shows them and another hides them. Focus from the keyboard holds them, as a paused recording does. |
+
+### In the Viewer
+
+The Default and Document templates hand the options in `canvasOptions` to their Body's
+Canvas, and the Gallery to the Canvas in its lightbox.
+
+```jsx
+<Viewer iiifContent={url} canvasOptions={{ animationDuration: 1.2 }} />
 ```
 
 ## Previous versions

@@ -61,6 +61,15 @@ export interface CloverCanvasOptions {
   /** Seconds for an animation to close most of its distance. 0 disables easing. */
   animationTime?: number;
   /**
+   * Seconds each animation (zoom, glide, home) takes, on a fixed-length spring. Unset,
+   * the camera eases by `animationTime` instead.
+   */
+  animationDuration?: number;
+  /** With `animationDuration`, how much of the movement comes early: higher starts faster. Default 6.5. */
+  springStiffness?: number;
+  /** Hold the image inside its bounds while dragging. Default true; false lets it spring back on release. */
+  constrainDuringPan?: boolean;
+  /**
    * Milliseconds the controls and navigator stay after a mouse (or a pen that hovers)
    * stops moving, or a finger lifts, as the Player's `hideDelay`. Default 3000; `Infinity`
    * keeps them once shown. A tap on the picture shows them, and another hides them. Focus

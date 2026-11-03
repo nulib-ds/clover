@@ -57,10 +57,12 @@ const ratioOf = (canvas: Canvas) => {
 
 export function Sheets({
   collapseControls,
+  canvasOptions,
   children,
 }: {
-  /** The Body's, as the template is given it. */
+  /** The Body's, as the template is given them. */
   collapseControls?: "auto" | "always";
+  canvasOptions?: Clover.CloverCanvasOptions;
   children?: React.ReactNode;
 }) {
   const { clover } = Clover.useClover("Document");
@@ -450,6 +452,7 @@ export function Sheets({
           <Clover.Body
             className="clover-template-document-body"
             collapseControls={collapseControls}
+            options={canvasOptions}
             onReady={setHandle}
           >
             {children}

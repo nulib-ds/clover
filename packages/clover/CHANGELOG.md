@@ -27,6 +27,33 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   import "@nulib/clover/styles/items.css";
   ```
 
+- **Canvas motion options.** `options.animationDuration` eases each zoom, glide and
+  return home over that many seconds on a fixed-length spring, with
+  `options.springStiffness` (default `6.5`) setting how much of the movement comes early.
+  `options.constrainDuringPan: false` lets a drag carry the image past its edge, to spring
+  back on release. `options.gestures` takes `flickEnabled` (`false` eases a mouse or pen
+  drag instead of tracking it 1:1, with no glide after), `flickMinSpeed` (`200` px/s) and
+  `flickMomentum` (`0.25` s). None changes anything unless set: without
+  `animationDuration` the camera eases by `animationTime` as before. The Canvas page's
+  Interaction section lists every option for how it moves and answers. The size budgets
+  for a Canvas, the templates and the elements rise by 250 to 350 B gzip for it.
+
+  ```jsx
+  // Close to Clover 3's Image, on OpenSeadragon's defaults.
+  <Clover.Canvas
+    options={{
+      animationDuration: 1.2,
+      constrainDuringPan: false,
+      gestures: { flickEnabled: false, flickMinSpeed: 120 },
+    }}
+  />
+  ```
+
+- **`canvasOptions` on the Default, Document and Gallery templates** (and on
+  `<clover-viewer>` as a property), handed to the Body's Canvas as its `options`, the
+  Gallery's in its lightbox. The Viewer passes it through:
+  `<Viewer iiifContent={url} canvasOptions={{ animationDuration: 1.2 }} />`.
+
 ### Changed
 
 - **Zoom in, zoom out and reset show when they would do nothing.** At the greatest zoom,

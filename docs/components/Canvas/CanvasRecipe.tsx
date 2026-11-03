@@ -35,6 +35,8 @@ const CanvasRecipe = ({
   behavior,
   viewingDirection,
   options,
+  placeholder,
+  canvasIndexes,
   height = 420,
 }: {
   id: string;
@@ -44,6 +46,13 @@ const CanvasRecipe = ({
   viewingDirection?: string;
   /** Passed straight to `Canvas`, e.g. `{ animation: { autoplay: true } }`. */
   options?: CloverCanvasOptions;
+  /** Passed straight to `Canvas`: open on each Canvas's `placeholderCanvas`. */
+  placeholder?: boolean;
+  /**
+   * Canvases painted together, by their place in the Manifest, in place of its views:
+   * no stepper, as the host shows these alone.
+   */
+  canvasIndexes?: number[];
   height?: number;
 }) => {
   const [manifest, setManifest] = useState<any>(null);
@@ -69,14 +78,19 @@ const CanvasRecipe = ({
 
   const canvases = useMemo(() => manifest?.items ?? [], [manifest]);
   const views = useMemo(
-    () => groupViews(canvases, resolveBehavior(behavior ?? manifest?.behavior)),
-    [canvases, behavior, manifest],
+    () =>
+      canvasIndexes
+        ? [canvasIndexes]
+        : groupViews(canvases, resolveBehavior(behavior ?? manifest?.behavior)),
+    [canvases, behavior, manifest, canvasIndexes],
   );
   const direction = resolveDirection(
     viewingDirection ?? manifest?.viewingDirection,
   );
+  // Only Canvases the Manifest has: `canvasIndexes` names them before it arrives.
   const shown = useMemo(
-    () => (views[viewIndex] ?? []).map((index) => canvases[index]),
+    () =>
+      (views[viewIndex] ?? []).map((index) => canvases[index]).filter(Boolean),
     [views, viewIndex, canvases],
   );
 
@@ -136,6 +150,7 @@ const CanvasRecipe = ({
             viewingDirection={direction}
             label={manifest?.label}
             options={options}
+            placeholder={placeholder}
           />
         )}
       </div>

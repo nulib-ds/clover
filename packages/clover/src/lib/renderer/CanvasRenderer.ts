@@ -64,6 +64,18 @@ export interface CanvasRendererOptions {
   minZoomImageRatio?: number;
   /** Seconds for an animation to close most of its distance. 0 disables animation. */
   animationTime?: number;
+  /**
+   * Seconds each animation (zoom, glide, home) takes. Set, the camera eases on a
+   * fixed-length spring instead of `animationTime`'s open-ended approach.
+   */
+  animationDuration?: number;
+  /** With `animationDuration`, how much of the movement comes early: higher starts faster. */
+  springStiffness?: number;
+  /**
+   * Hold the image inside its bounds while dragging. Off, a drag may carry it past the
+   * edge and it springs back on release.
+   */
+  constrainDuringPan?: boolean;
   /** Credentials, headers and `fetch` for `info.json` and image requests. */
   request?: CloverRequest;
   /** Decoded tile bytes to keep in memory. */
@@ -98,6 +110,9 @@ const DEFAULTS = {
   maxZoomPixelRatio: 1.1,
   minZoomImageRatio: 0.9,
   animationTime: 0.09,
+  animationDuration: undefined as number | undefined,
+  springStiffness: 6.5,
+  constrainDuringPan: true,
   request: undefined as CloverRequest | undefined,
   byteBudget: 192 * 1024 * 1024,
   maxInFlight: 6,
@@ -219,6 +234,8 @@ export class CanvasRenderer implements GestureTarget {
   private opened = false;
   /** True until the reader moves the camera; a resize then refits rather than crops. */
   private atHome = true;
+  /** A pointer is down. Without `constrainDuringPan`, the center may leave the world. */
+  private interacting = false;
   private lastEmitted: CameraState | null = null;
   private generation = 0;
   private listeners = new Map<CanvasRendererEvent, Set<Listener>>();
@@ -237,11 +254,20 @@ export class CanvasRenderer implements GestureTarget {
       ...DEFAULTS,
       ...stripUndefined(options),
     } as typeof DEFAULTS;
-    if (prefersReducedMotion()) this.options.animationTime = 0;
+    if (prefersReducedMotion()) {
+      this.options.animationTime = 0;
+      if (this.options.animationDuration !== undefined) {
+        this.options.animationDuration = 0;
+      }
+    }
 
+    const { animationDuration, springStiffness } = this.options;
     this.camera = new CameraAnimator(
       { x: 0, y: 0, zoom: 1, rotation: 0 },
       this.options.animationTime,
+      animationDuration === undefined
+        ? undefined
+        : { duration: animationDuration, stiffness: springStiffness },
     );
     this.loop = new FrameLoop(this.tick);
     this.gestureOptions = stripUndefined(options.gestures ?? {});
@@ -626,11 +652,6 @@ export class CanvasRenderer implements GestureTarget {
     this.animateTo(this.constrain({ ...base, ...point }), immediate);
   }
 
-  flick(vx: number, vy: number): void {
-    // Glide the distance the release velocity would cover in a quarter second.
-    this.panBy(vx * 0.25, vy * 0.25, true);
-  }
-
   rotateBy(degrees: number): void {
     const base = this.camera.destination;
     this.setRotation((base.rotation * 180) / Math.PI + degrees);
@@ -675,8 +696,17 @@ export class CanvasRenderer implements GestureTarget {
   }
 
   setInteracting(interacting: boolean): void {
-    // A pointer is down: the camera tracks it 1:1, so cancel any animation in flight.
-    if (interacting) this.camera.stop();
+    this.interacting = interacting;
+    // A press catches a glide in flight.
+    if (interacting) {
+      this.camera.stop();
+      return;
+    }
+    if (this.options.constrainDuringPan) return;
+    // A drag let past the edge springs back once released.
+    const destination = this.camera.destination;
+    const settled = this.constrain(destination);
+    if (!sameCamera(destination, settled)) this.animateTo(settled, false);
   }
 
   worldToScreenPoint(point: Point): Point {
@@ -949,6 +979,9 @@ export class CanvasRenderer implements GestureTarget {
     const zoom = allowBeyondLimits
       ? clamp(state.zoom, min, Math.max(max, state.zoom))
       : clamp(state.zoom, min, max);
+    if (this.interacting && !this.options.constrainDuringPan) {
+      return { ...state, zoom };
+    }
     return {
       ...state,
       zoom,

@@ -320,6 +320,51 @@ describe("CanvasRenderer", () => {
     renderer.dispose();
   });
 
+  it("holds a drag at the image's edge by default", async () => {
+    mockedLoad.mockResolvedValue(bitmap(1000, 1000));
+    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+
+    renderer.setInteracting(true);
+    renderer.panBy(5000, 0, false);
+    expect(renderer.getCamera().x).toBe(0);
+    renderer.dispose();
+  });
+
+  it("without constrainDuringPan, lets a drag carry the image past its edge, then springs it back", async () => {
+    mockedLoad.mockResolvedValue(bitmap(1000, 1000));
+    const renderer = new CanvasRenderer(host(), {
+      animationTime: 0,
+      constrainDuringPan: false,
+    });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    const home = renderer.getCamera();
+
+    renderer.setInteracting(true);
+    renderer.panBy(5000, 0, false);
+    expect(renderer.getCamera().x).toBeLessThan(0);
+
+    renderer.setInteracting(false);
+    expect(renderer.getCamera().x).toBe(0);
+    expect(renderer.getCamera().y).toBeCloseTo(home.y);
+    renderer.dispose();
+  });
+
+  it("stops a glide in flight when a pointer goes down", async () => {
+    mockedLoad.mockResolvedValue(bitmap(1000, 1000));
+    const renderer = new CanvasRenderer(host(), { animationTime: 10 });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    renderer.zoomBy(4, undefined, false);
+
+    renderer.panBy(200, 0, true);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    renderer.setInteracting(true);
+    const caught = renderer.getCamera();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(renderer.getCamera()).toEqual(caught);
+    renderer.dispose();
+  });
+
   it("keeps the reader's view when the images are swapped", async () => {
     mockedLoad.mockResolvedValue(bitmap(1000, 1000));
     const renderer = new CanvasRenderer(host(), { animationTime: 0 });

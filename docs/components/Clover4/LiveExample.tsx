@@ -1,7 +1,7 @@
 import React from "react";
 
 import { elementTag } from "docs/components/Flavored";
-import { attributeFor } from "docs/lib/compose/catalog";
+import { attributeFor, takesProperty } from "docs/lib/compose/catalog";
 import { type LiveDemo, LiveFrame } from "docs/components/Clover4/LiveCode";
 import type { PartName } from "docs/components/Clover4/PartDemo";
 import {
@@ -11,6 +11,7 @@ import {
 import { resourceByKey } from "docs/components/Playground/playground-config";
 import {
   type CodeAttr,
+  type CodeEntry,
   type CodeNode,
   type CodeStyle,
   type CodeTree,
@@ -57,11 +58,21 @@ const wordsOf = (name: string) =>
     .replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`)
     .replace(/-/g, " ");
 
-/** A knob's name for assistive technology, from its element and prop, its unit after. */
+/** The property an element's spec takes a prop as, or, failing the build, none. */
+function propertyOf(tag: string, prop: string) {
+  if (!takesProperty(tag, prop))
+    throw new Error(`LiveExample: <${tag}> has no property for ${prop}`);
+  return prop;
+}
+
+/**
+ * A knob's name for assistive technology, from its element and prop (a key's own name, for
+ * a key of an object: `scrollToZoom`), its unit after.
+ */
 function labelOf(element: string, knob: Knob) {
   if (knob.label) return knob.label;
   if (!knob.prop.startsWith("style."))
-    return `${element} ${wordsOf(knob.prop)}`;
+    return `${element} ${wordsOf(knob.prop.split(".").at(-1)!)}`;
   const name = knob.prop.slice(6);
   const words = wordsOf(name.replace(/^--clover-[a-z]+-/, ""));
   const unit =
@@ -70,9 +81,24 @@ function labelOf(element: string, knob: Knob) {
   return `${element} ${words}${unit ? `, in ${unit === "px" ? "pixels" : unit}` : ""}`;
 }
 
+/** A knob's place in an object's keys, by its path, the objects on the way made as needed. */
+function addEntry(entries: CodeEntry[], path: string[], knob: string) {
+  const [name, ...rest] = path;
+  if (!rest.length) {
+    entries.push({ name, knob });
+    return;
+  }
+  let inner = entries.find((entry) => entry.name === name && entry.entries);
+  if (!inner) {
+    inner = { name, entries: [] };
+    entries.push(inner);
+  }
+  addEntry(inner.entries!, rest, knob);
+}
+
 /**
- * An element's props, as its code writes them: the fixed ones, then its knobs, a style's
- * properties together last.
+ * An element's props, as its code writes them: the fixed ones, then its knobs, each
+ * object's keys together where its first knob is, a style's properties together last.
  */
 function attrsOf(
   tag: string,
@@ -93,10 +119,21 @@ function attrsOf(
       ([name, value]) => ({ name, value }),
     ),
   ];
+  const objects = new Map<string, CodeAttr>();
   for (const knob of knobs) {
     if (knob.prop.startsWith("style."))
       styled.push({ name: knob.prop.slice(6), knob: knobId(knob) });
-    else
+    else if (knob.prop.includes(".")) {
+      // A key of an object the element takes as a property: `options.animationTime`.
+      const [prop, ...path] = knob.prop.split(".");
+      let object = objects.get(prop);
+      if (!object) {
+        object = { prop, attribute: propertyOf(tag, prop), entries: [] };
+        objects.set(prop, object);
+        attrs.push(object);
+      }
+      addEntry(object.entries!, path, knobId(knob));
+    } else
       attrs.push({
         prop: knob.prop,
         attribute: attributeOf(tag, knob.prop),
@@ -226,6 +263,84 @@ export function LivePart({
     box,
   };
   return <LiveFrame tree={tree} knobs={named} demo={demo} />;
+}
+
+/**
+ * A Canvas page's example of a host's own Canvases (`CanvasRecipe`), its code live (Mat,
+ * 2026-11-03: "a toggleable prop in the jsx example for each"): React's the host's script,
+ * then the Canvas with the Canvases it hands over, and its knobs; HTML's the elements' way,
+ * a root showing the view of one Canvas, its knobs on `<clover-canvas>`, as the elements
+ * take only Presentation 4 Canvases.
+ */
+export function LiveRecipe({
+  recipe,
+  before,
+  canvases,
+  canvasId,
+  note,
+  knobs = [],
+}: {
+  /** What the demo shows: `CanvasRecipe`'s props. */
+  recipe: { id: string; iiifContent: string; canvasIndexes?: number[] };
+  /** React's script before the markup, a line each. */
+  before: string[];
+  /** The Canvases React hands over, as its script writes them. */
+  canvases: string;
+  /** HTML's root shows the view of this Canvas. */
+  canvasId: string;
+  /** HTML's comment over its markup, saying why it is a root's. */
+  note: string;
+  knobs?: Knob[];
+}) {
+  const named = knobs.map((knob) => ({
+    ...knob,
+    label: labelOf("Canvas", knob),
+  }));
+  const tree: CodeTree = {
+    url: recipe.iiifContent,
+    before: [...before, ""],
+    nodes: [
+      {
+        jsx: "Clover.Canvas",
+        html: "clover-canvas",
+        attrs: [
+          { prop: "canvases", attribute: "canvases", expression: canvases },
+          { prop: "label", attribute: "label", expression: "manifest.label" },
+          ...attrsOf("clover-canvas", {}, named),
+        ],
+      },
+    ],
+  };
+  const html: CodeTree = {
+    url: recipe.iiifContent,
+    before: [`<!-- ${note} -->`],
+    nodes: [
+      {
+        jsx: "Clover.Root",
+        html: "clover-root",
+        attrs: attrsOf(
+          "clover-root",
+          { iiifContent: recipe.iiifContent, canvasId },
+          [],
+        ),
+        children: [
+          {
+            jsx: "Clover.Canvas",
+            html: "clover-canvas",
+            attrs: attrsOf("clover-canvas", {}, named),
+          },
+        ],
+      },
+    ],
+  };
+  return (
+    <LiveFrame
+      tree={tree}
+      html={html}
+      knobs={named}
+      demo={{ kind: "recipe", part: "Canvas", resource: "paged", recipe }}
+    />
+  );
 }
 
 /**
