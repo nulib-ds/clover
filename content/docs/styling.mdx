@@ -27,8 +27,9 @@ import "@nulib/clover/styles.css";
 <div data-code-flavor="react">
 
 A page of parts can import only the sheets of the parts it draws, in place of
-`styles.css`: `styles/core.css` first, then one sheet for each other part on the page.
-A page of images with `Root`, `Status`, `Body`, `Position` and `Items` needs two:
+`styles.css`, never beside it: `styles/core.css` first, then one sheet for each other part
+on the page, and `templates.css` after them if you use it. A page of images with `Root`,
+`Status`, `Body`, `Position` and `Items` needs two:
 
 ```jsx react
 import "@nulib/clover/styles/core.css";
