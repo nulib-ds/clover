@@ -252,6 +252,62 @@ test("every part sheet's animations have their keyframes there or in core", () =
   assert.deepEqual([...new Set(missing)], []);
 });
 
+test("every part sheet's container queries name a container there or in core", () => {
+  const names = (css) =>
+    new Set(
+      [...css.matchAll(/container(?:-name)?:\s*([\w-]+)/g)].map(([, n]) => n),
+    );
+  const core = names(read("styles/core.css"));
+  const missing = [];
+  for (const part of Object.keys(GROUPS)) {
+    const css = read(`styles/${part}.css`);
+    const own = names(css);
+    for (const [, name] of css.matchAll(/@container\s+([\w-]+)/g))
+      if (!own.has(name) && !core.has(name))
+        missing.push(`${part}.css queries ${name}`);
+  }
+  assert.deepEqual([...new Set(missing)], []);
+});
+
+/*
+ * A custom property a part sheet reads with no fallback, set only in another part's sheet
+ * (core's aside), is invalid on a page without that sheet. Allowed where the reading rule
+ * only matches when the setter's part is drawn.
+ */
+const READ_APART = {
+  // Read under `[data-recording]`, which only a recording, media's, sets.
+  "--clover-transport-room": "media",
+};
+test("no part sheet reads a custom property only another part's sets", () => {
+  const sets = (css) =>
+    new Set([...css.matchAll(/(?<=[{;])\s*(--[\w-]+)\s*:/g)].map(([, n]) => n));
+  const set = Object.fromEntries(
+    Object.keys(GROUPS).map((part) => [part, sets(read(`styles/${part}.css`))]),
+  );
+  const unset = [];
+  for (const part of Object.keys(GROUPS))
+    for (const [, name] of read(`styles/${part}.css`).matchAll(
+      /var\((--[\w-]+)\s*\)/g,
+    )) {
+      if (set[part].has(name) || set.core.has(name)) continue;
+      const by = Object.keys(set).filter((other) => set[other].has(name));
+      if (by.length && !by.includes(READ_APART[name]))
+        unset.push(`${part}.css reads ${name}, set in ${by.join(", ")}.css`);
+    }
+  assert.deepEqual([...new Set(unset)], []);
+});
+
+test("Styling's table lists every part sheet", () => {
+  const styling = readFileSync(
+    resolve(root, "../../content/docs/styling.mdx"),
+    "utf8",
+  );
+  const listed = [...styling.matchAll(/^\| `styles\/([\w-]+)\.css`/gm)].map(
+    ([, name]) => name,
+  );
+  assert.deepEqual(listed.sort(), Object.keys(GROUPS).sort());
+});
+
 /*
  * A page imports core.css first, then the other part sheets in any order. Where two
  * rules tie (the same specificity and property, on an element both could style), the

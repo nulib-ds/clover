@@ -9,7 +9,11 @@
  *
  *   npx vite --config e2e/vite.elements.config.mjs     (the server, port 4323)
  *   npm run build -w @nulib/clover                     (the whole stylesheet to compare)
- *   node e2e/check-sheets.mjs [page] [--dark]
+ *   node e2e/check-sheets.mjs [page] [--dark] [--parts]
+ *
+ * `--parts` checks the React part sheets instead (`dist/styles/<part>.css`): the elements'
+ * own sheets switched off, each page is read with core.css and the sheets Styling says its
+ * parts need (`PARTS`), then with the whole stylesheet in their place.
  *
  * It opens the IIIF Cookbook's resources, so it needs the network. Keep A/V muted.
  */
@@ -22,6 +26,7 @@ const pkg = join(dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
 const only = args.find((arg) => !arg.startsWith("--"));
 const scheme = args.includes("--dark") ? "dark" : "light";
+const partsMode = args.includes("--parts");
 const require = createRequire(join(pkg, "../../package.json"));
 const { chromium } = require("playwright");
 const whole = ["styles.css", "templates.css"]
@@ -75,6 +80,7 @@ const PAGES = {
   content: inRoot(IMAGE, `<clover-body ${box}></clover-body>`),
   "content, annotations": inRoot(TAGGING, `<clover-body ${box}></clover-body>`),
   "content, video": inRoot(VIDEO, `<clover-body ${box}></clover-body>`),
+  "content, place": inRoot(NAVPLACE, `<clover-body ${box}></clover-body>`),
   canvas: `<clover-canvas iiif-content="${IMAGE}" ${box}></clover-canvas>`,
   about: inRoot(BOOK, `<clover-about></clover-about>`),
   annotations: inRoot(TAGGING, `<clover-annotations></clover-annotations>`),
@@ -98,6 +104,7 @@ const PAGES = {
     TOC,
     `<clover-panel layout="tabs"><clover-tab value="about" label="About"><clover-about></clover-about></clover-tab><clover-tab value="contents" label="Contents"><clover-contents></clover-contents></clover-tab></clover-panel>`,
   ),
+  "panel, place": inRoot(NAVPLACE, `<clover-panel></clover-panel>`),
   split: inRoot(
     BOOK,
     `<clover-split><clover-split-pane><clover-label></clover-label></clover-split-pane><clover-split-handle></clover-split-handle><clover-split-pane id="side"><clover-summary></clover-summary></clover-split-pane></clover-split>`,
@@ -109,6 +116,43 @@ const PAGES = {
   "viewer, gallery": `<clover-viewer template="gallery" iiif-content="${BOOK}"></clover-viewer>`,
   "viewer, video": `<clover-viewer iiif-content="${VIDEO}"></clover-viewer>`,
 };
+
+/*
+ * The part sheets each page needs beside core.css, as Styling's table and its note on
+ * parts that draw others give them. The Viewer's pages take styles.css, so none here.
+ */
+const PARTS = {
+  label: [],
+  properties: [],
+  status: [],
+  pager: ["items"],
+  items: ["items"],
+  "items grid": ["items"],
+  "items list": ["items"],
+  "items pager": ["items"],
+  "items alone": ["items"],
+  content: [],
+  "content, annotations": [],
+  "content, video": ["media"],
+  "content, place": ["map"],
+  canvas: [],
+  about: ["panel"],
+  annotations: ["panel"],
+  collection: ["panel", "items"],
+  "collection select": ["collection-select"],
+  contents: ["panel"],
+  transcript: ["media", "panel"],
+  download: ["panel"],
+  map: ["map"],
+  panel: ["panel"],
+  "panel, tabs": ["panel"],
+  "panel, place": ["panel", "items", "map"],
+  split: ["split"],
+  "read more": [],
+  tip: [],
+};
+const sheetOf = (part) =>
+  readFileSync(join(pkg, "dist/styles", `${part}.css`), "utf8");
 
 const PROPS = [
   "display",
@@ -185,6 +229,7 @@ const SELECTOR =
 let problems = 0;
 for (const [name, markup] of Object.entries(PAGES)) {
   if (only && name !== only) continue;
+  if (partsMode && !PARTS[name]) continue;
   const page = await browser.newPage({
     viewport: { width: 1280, height: 900 },
     colorScheme: scheme,
@@ -266,18 +311,41 @@ for (const [name, markup] of Object.entries(PAGES)) {
         (style) => style.dataset.clover,
       ),
     );
+    // Clover's sheets in the page, its own or the elements' (never MapLibre's, which no
+    // stylesheet of the package holds), and a sheet given for the test in their place.
+    const swap = (css) =>
+      page.evaluate(
+        ([css, partsMode]) => {
+          document.getElementById("sheet-for-test")?.remove();
+          if (partsMode)
+            for (const style of document.head.querySelectorAll(
+              "style[data-clover-index]",
+            ))
+              style.disabled = style.dataset.clover !== "maplibre";
+          if (css === null) return;
+          const style = document.createElement("style");
+          style.id = "sheet-for-test";
+          style.textContent = css;
+          document.head.append(style);
+        },
+        [css, partsMode],
+      );
+    const given = partsMode
+      ? ["core", ...PARTS[name]].map(sheetOf).join("\n")
+      : null;
+    await swap(given);
+    await page.waitForTimeout(300);
     const before = await snapshot();
-    await page.evaluate((css) => {
-      const style = document.createElement("style");
-      style.id = "whole-for-test";
-      style.textContent = css;
-      document.head.append(style);
-    }, whole);
+    await swap(whole);
     await page.waitForTimeout(300);
     const after = await snapshot();
-    await page.evaluate(() =>
-      document.getElementById("whole-for-test")?.remove(),
-    );
+    await swap(null);
+    await page.evaluate(() => {
+      for (const style of document.head.querySelectorAll(
+        "style[data-clover-index]",
+      ))
+        style.disabled = false;
+    });
     const diffs = [];
     before.forEach((parts, at) =>
       parts.forEach((value, which) => {

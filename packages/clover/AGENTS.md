@@ -111,7 +111,11 @@ every rule below.
   that part's sheet in `DRAWN_INSIDE`, and Styling's table says so; the test fails on one
   missing or stale. Keyframes shared across part sheets go in a sheet of their own, which
   falls to core (`ui/Shade.css`), as an animation whose keyframes are in neither its own
-  part sheet nor core fails the test too.
+  part sheet nor core fails the test too, as does a container query or a custom property
+  read with no fallback (`READ_APART` the exceptions) given only in another part's sheet.
+  In a browser, `node e2e/check-sheets.mjs --parts` renders each part with the sheets
+  Styling gives it (`PARTS` there) and compares every node's computed style with
+  `styles.css`'s.
 - **Space, type and selectors follow `DESIGN.md`.** Every space and text size is a step of
   the golden scale from the page's own 1rem, chosen by how closely things belong together
   (a container's inset one step above the gap between its children). Never set a font
