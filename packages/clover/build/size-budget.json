@@ -12,7 +12,7 @@
   "documentTemplateFirstViewGzip": 95550,
   "galleryTemplateFirstViewGzip": 56150,
   "canvasFirstViewGzip": 47950,
-  "timelineFirstViewGzip": 47650,
+  "timelineFirstViewGzip": 47800,
   "sceneFirstViewGzip": 27300,
   "mapFirstViewGzip": 25250,
   "stylesGzip": 19950,
@@ -22,10 +22,10 @@
   "webComponentsGzip": 126250,
   "labelPageGzip": 35650,
   "elementsEntryGzip": 5750,
-  "composedPageGzip": 103550,
+  "composedPageGzip": 103800,
   "layoutPageGzip": 122000,
   "canvasElementGzip": 90900,
-  "documentElementGzip": 133150,
+  "documentElementGzip": 133400,
   "galleryElementGzip": 129300,
   "viewerEntryGzip": 105950
 }
