@@ -3,7 +3,11 @@ import placeholderJson from "../fixtures/iiif-cookbook/0013-placeholderCanvas.js
 import { p4 } from "../fixtures/presentation4";
 import { clearInfoCache } from "../lib/renderer/sources/imageService";
 import { regionSource } from "./region";
-import { resolveThumbnail, thumbnailSource } from "./thumbnail";
+import {
+  resolveThumbnail,
+  type ThumbnailSource,
+  thumbnailSource,
+} from "./thumbnail";
 
 const book = p4(bookJson);
 const placeholder = p4(placeholderJson);
@@ -124,6 +128,71 @@ describe("resolveThumbnail", () => {
         { fetch },
       ),
     ).toBe("https://example.org/page/1000,750,1000,750/100,75/0/default.jpg");
+  });
+
+  it("uses a thumbnail's own id, with no info.json read, when it is about the size asked", async () => {
+    const fetch = serving(level2("https://example.org/iiif/a", 4000, 3000));
+    const source = thumbnailSource({
+      thumbnail: [
+        {
+          id: "https://example.org/iiif/a/full/300,225/0/default.jpg",
+          type: "Image",
+          width: 300,
+          height: 225,
+          service: [
+            { id: "https://example.org/iiif/a", type: "ImageService3" },
+          ],
+        },
+      ],
+    }) as ThumbnailSource;
+    expect(await resolveThumbnail(source, 200, { fetch })).toBe(
+      "https://example.org/iiif/a/full/300,225/0/default.jpg",
+    );
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("reads info.json when a thumbnail is too small or far too large for the size", async () => {
+    const fetch = serving(level2("https://example.org/iiif/a", 4000, 3000));
+    const thumbnail = (width: number, height: number) =>
+      thumbnailSource({
+        thumbnail: [
+          {
+            id: `https://example.org/iiif/a/full/${width},${height}/0/default.jpg`,
+            type: "Image",
+            width,
+            height,
+            service: [
+              { id: "https://example.org/iiif/a", type: "ImageService3" },
+            ],
+          },
+        ],
+      }) as ThumbnailSource;
+    expect(await resolveThumbnail(thumbnail(100, 75), 200, { fetch })).toBe(
+      "https://example.org/iiif/a/full/200,150/0/default.jpg",
+    );
+    expect(await resolveThumbnail(thumbnail(1000, 750), 200, { fetch })).toBe(
+      "https://example.org/iiif/a/full/200,150/0/default.jpg",
+    );
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("reads info.json for a bare service or a thumbnail without dimensions", async () => {
+    const fetch = serving(level2("https://example.org/iiif/a", 4000, 3000));
+    const bare = thumbnailSource({
+      thumbnail: [
+        {
+          id: "https://example.org/iiif/a/full/300,/0/default.jpg",
+          type: "Image",
+          service: [
+            { id: "https://example.org/iiif/a", type: "ImageService3" },
+          ],
+        },
+      ],
+    }) as ThumbnailSource;
+    expect(await resolveThumbnail(bare, 200, { fetch })).toBe(
+      "https://example.org/iiif/a/full/200,150/0/default.jpg",
+    );
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   it("uses the fallback when info.json fails", async () => {

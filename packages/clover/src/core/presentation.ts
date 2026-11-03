@@ -49,16 +49,18 @@ export function isPresentation4(resource: unknown): boolean {
  * agree for every fixture (`presentation.test.ts`).
  */
 let upgrader: Promise<(resource: unknown) => unknown> | null = null;
+let reader: Promise<typeof import("./upgrade")> | null = null;
 
 /**
- * Starts loading the upgrader. Call it as a fetch begins, so the two arrive together and
- * upgrading adds no round trip.
+ * Starts loading the upgrader and `upgrade.ts`, which reads what it returns. Call it as a
+ * fetch begins, so all three arrive together and upgrading adds no round trip.
  */
 export function preloadUpgrader() {
+  reader ??= import("./upgrade");
   upgrader ??= import("@iiif/parser/presentation-4/upgrader").then(
     ({ upgradePresentation3To4 }) => upgradePresentation3To4,
   );
-  return upgrader;
+  return Promise.all([upgrader, reader]);
 }
 
 /**
@@ -70,9 +72,6 @@ export async function toPresentation4<
   T = Manifest | Presentation4Collection | Container,
 >(resource: unknown): Promise<T> {
   if (isPresentation4(resource)) return resource as T;
-  const [toFour, { upgrade }] = await Promise.all([
-    preloadUpgrader(),
-    import("./upgrade"),
-  ]);
+  const [toFour, { upgrade }] = await preloadUpgrader();
   return (await upgrade(resource, toFour)) as T;
 }

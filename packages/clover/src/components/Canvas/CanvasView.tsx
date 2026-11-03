@@ -58,7 +58,10 @@ import { useRootLanguage } from "../../i18n/useRootLanguage";
 import { useContainerName } from "../../i18n/useContainerName";
 import type { CanvasRenderer, SceneImage } from "../../lib/renderer";
 import { type Rect, union } from "../../lib/renderer/math/rect";
-import { findImageServiceId } from "../../lib/renderer/sources/imageService";
+import {
+  fetchInfo,
+  findImageServiceId,
+} from "../../lib/renderer/sources/imageService";
 import { type CanvasSurface, type MakeSurface, hasCamera } from "./surface";
 import { languageProps } from "../../i18n/direction";
 import { buildContentState } from "../../core/content-state";
@@ -563,6 +566,20 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     !player &&
     stills.length > 0 &&
     (media ? mediaOpenedFor !== canvasKey : !imagesOpen);
+  /*
+   * Asked now, beside the placeholder's chunk, not after it: a still's `info.json` and the
+   * resolver that reads it would otherwise wait for `Placeholder` to arrive and mount.
+   * `fetchInfo` shares one request per service, so `resolveThumbnail` finds it under way.
+   * The Canvas itself stays held back: its own `info.json` is asked when it opens.
+   */
+  const stillsRequest = options?.request;
+  useEffect(() => {
+    if (!showPlaceholder) return;
+    void import("../../core/thumbnail");
+    for (const { source } of stills)
+      if (source.service)
+        fetchInfo(source.service, { request: stillsRequest }).catch(() => {});
+  }, [showPlaceholder, stills, stillsRequest]);
   /*
    * A lone media Canvas carries all its controls in the transport at the bottom: full
    * screen moves there, and the top cluster (and the scrim behind it) is shown only for a
