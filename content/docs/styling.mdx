@@ -24,6 +24,35 @@ over specificity. Without them, every part still renders a plain, usable layout.
 import "@nulib/clover/styles.css";
 ```
 
+<div data-code-flavor="react">
+
+A page of parts can import only the sheets of the parts it draws, in place of
+`styles.css`, never beside it: `styles/core.css` first, then the sheet of each other part
+on the page or drawn inside one (the Panel's Collection section draws `Items`), and
+`templates.css` after them if you use it. A page of images with `Root`, `Status`, `Body`,
+`Position` and `Items` needs two:
+
+```jsx react
+import "@nulib/clover/styles/core.css";
+import "@nulib/clover/styles/items.css";
+```
+
+| Sheet                          | Its parts                                                                                             |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `styles/core.css`              | `Root`, `Body` and `Canvas`, `Status`, `Label`, the Primitives                                        |
+| `styles/items.css`             | `Items` and `Position`, and the items in the Panel's Collection and Views sections                    |
+| `styles/panel.css`             | `Panel` and its sections: `Annotations`, `Collection`, `Contents`, `Download`, `Search`, `Transcript` |
+| `styles/media.css`             | Video, sound, `Timeline` and animations, in a `Body` or a `Canvas` too                                |
+| `styles/scene.css`             | `Scene`, and a 3D model in a `Body`                                                                   |
+| `styles/map.css`               | `Map`, the Panel's Map section, and a Canvas's Map control                                            |
+| `styles/split.css`             | `Split`                                                                                               |
+| `styles/collection-select.css` | `CollectionSelect`                                                                                    |
+| `styles/default.css`           | The `Default` template                                                                                |
+
+The Viewer draws most parts: give it `styles.css`, and `templates.css`.
+
+</div>
+
 The web components carry their styles: each element adds its own to the document once,
 first in `<head>`, so your rules still win, and the custom properties below reach the
 elements as they reach the React parts.

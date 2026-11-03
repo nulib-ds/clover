@@ -411,20 +411,6 @@ button.clover-sections-scroll-next {
   }
 }
 
-/*
- * A shadow fading in with the scroll; Items' slider uses it too. Both ends are given:
- * each shadow is hidden as it stands (`opacity: 0`), so where its container cannot
- * scroll, and the timeline has nothing to drive, it stays hidden.
- */
-@keyframes clover-shade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 /* Open or closed, a heading's label is in the text's color. */
 .clover-sections[data-layout="accordion"] button.clover-sections-button {
   position: relative;

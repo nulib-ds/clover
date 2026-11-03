@@ -13,6 +13,20 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Stylesheets a part at a time.** A page of parts can import
+  `@nulib/clover/styles/core.css` first, then the sheet of each other part it draws, or
+  that one draws inside it (`styles/items.css`, `styles/panel.css`, `styles/media.css` and
+  the rest; Styling lists them, and the parts drawn inside another), in place of
+  `styles.css`. A page of images with `Root`, `Status`, `Body`, `Position` and `Items`
+  loads about 11 kB of styles, gzipped, instead of 19.2 kB. `styles.css` is unchanged.
+  The size budgets for a `<clover-viewer>`, the four parts and a viewer in Document rise
+  by 50 B gzip for it.
+
+  ```jsx
+  import "@nulib/clover/styles/core.css";
+  import "@nulib/clover/styles/items.css";
+  ```
+
 - **Canvas motion options.** `options.animationDuration` eases each zoom, glide and
   return home over that many seconds on a fixed-length spring, with
   `options.springStiffness` (default `6.5`) setting how much of the movement comes early.
@@ -22,7 +36,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `flickMomentum` (`0.25` s). None changes anything unless set: without
   `animationDuration` the camera eases by `animationTime` as before. The Canvas page's
   Interaction section lists every option for how it moves and answers. The size budgets
-  for a Canvas, the templates and the elements rise by 250 to 400 B gzip for it.
+  for a Canvas, the templates and the elements rise by 250 to 350 B gzip for it.
 
   ```jsx
   // Close to Clover 3's Image, on OpenSeadragon's defaults.
