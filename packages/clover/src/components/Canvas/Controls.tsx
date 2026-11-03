@@ -469,17 +469,25 @@ const Controls: React.FC<CanvasControlsProps> = ({
    * at the same time … the placeholder toggle off would toggle off the viewer. likewise
    * it would also always turn off controls deck"): its tray is open while the view is,
    * its toggle at its end, wherever the Canvas offers the view's controls.
+   *
+   * The toggle stays in the tray while the view is closed too, the tray shut and empty,
+   * so it is the same button either side of a press. Moved between the row and the tray,
+   * React drew a new one each time: its popover went, to come back named the other way,
+   * and the pointer over it lost its hover.
    */
   const always = moreWhen === "always" || placeholderIsMore;
   const ImageControls = useLoaded(
     loadImageControls,
-    fit && (always || !fits) && items.some((item) => item.view),
+    fit &&
+      (placeholderIsMore ||
+        ((always || !fits) && items.some((item) => item.view))),
   )?.ImageControls;
   const tucked =
     (fits && !always) || !ImageControls
       ? []
       : items.filter((item) => item.view);
-  const deck = placeholderIsMore && tucked.length > 0;
+  const deck =
+    placeholderIsMore && Boolean(placeholder) && Boolean(ImageControls);
   // Nothing behind it any more: it closes, so it comes back closed.
   useEffect(() => {
     if (!tucked.length) setMoreOpen(false);
@@ -505,10 +513,10 @@ const Controls: React.FC<CanvasControlsProps> = ({
           Canvas's own.
         */}
         {shown(lead)}
-        {ImageControls && tucked.length > 0 && (
+        {ImageControls && (tucked.length > 0 || deck) && (
           <ImageControls
             instance={instance}
-            open={deck || moreOpen}
+            open={deck ? tucked.length > 0 : moreOpen}
             onOpenChange={setMoreOpen}
             toggle={deck ? placeholder : undefined}
           >

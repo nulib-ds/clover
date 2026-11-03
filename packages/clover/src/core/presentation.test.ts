@@ -261,3 +261,22 @@ describe("toPresentation4", () => {
     },
   );
 });
+
+describe("preloadUpgrader", () => {
+  afterEach(() => {
+    vi.doUnmock("./upgrade");
+    vi.resetModules();
+  });
+
+  it("starts loading upgrade.ts with the upgrader, before any resource arrives", async () => {
+    vi.resetModules();
+    const requested = vi.fn();
+    vi.doMock("./upgrade", async (importOriginal) => {
+      requested();
+      return importOriginal();
+    });
+    const { preloadUpgrader } = await import("./presentation");
+    await preloadUpgrader();
+    expect(requested).toHaveBeenCalledTimes(1);
+  });
+});

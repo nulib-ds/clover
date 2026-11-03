@@ -21,6 +21,9 @@ import { asArray } from "../lib/asArray";
  *   nor than its limits, at level 0 only a size it lists (Mat, 2026-10-24: "be
  *   responsible when making IIIF image server requests"). What a manifest says of a
  *   service is not trusted to say what its server does.
+ * - A `thumbnail` whose own `width` and `height` already fit the size (`resolveThumbnail`)
+ *   is used as the manifest gives it, with no `info.json` read: the publisher's own URL,
+ *   not one built from what a service says.
  * - Without a service, the image itself is used.
  */
 
@@ -36,6 +39,8 @@ export interface ThumbnailSource {
   region?: RegionShare | string;
   /** Used if the service cannot answer. */
   fallback?: string;
+  /** The pixels `fallback` is, as its own `width` and `height` say (a `thumbnail`'s). */
+  fallbackSize?: { width: number; height: number };
 }
 
 type Json = Record<string, any>;
@@ -72,13 +77,18 @@ function regionShare(
 export function imageSource(
   image: Json | undefined,
   region = "full",
+  sized = false,
 ): ThumbnailSource | null {
   if (!image) return null;
   const service = findImageServiceId(image.service);
   if (service) {
-    return region === "full"
-      ? { service, fallback: image.id }
-      : { service, region, fallback: image.id };
+    if (region !== "full") return { service, region, fallback: image.id };
+    // Only a `thumbnail`'s dimensions are the picture its `id` is; a painted body's can be
+    // the whole image's while its `id` cuts a region.
+    const { width, height } = image;
+    return sized && image.id && width > 0 && height > 0
+      ? { service, fallback: image.id, fallbackSize: { width, height } }
+      : { service, fallback: image.id };
   }
   return image.id ? { src: image.id } : null;
 }
@@ -91,7 +101,11 @@ export function thumbnailSource(resource: unknown): ThumbnailSource | null {
   const value = resource as Json | undefined;
   if (!value) return null;
   return (
-    imageSource(asArray(value.thumbnail)[0] as Json | undefined) ??
+    imageSource(
+      asArray(value.thumbnail)[0] as Json | undefined,
+      "full",
+      true,
+    ) ??
     imageSource(firstPaintedImage(value)) ??
     imageSource(firstPaintedImage(value.placeholderContainer)) ??
     imageSource(firstPaintedImage(value.accompanyingContainer))
@@ -111,13 +125,16 @@ export function stillSource(resource: unknown): ThumbnailSource | null {
     imageSource(firstPaintedImage(value)) ??
     imageSource(firstPaintedImage(value.placeholderContainer)) ??
     imageSource(firstPaintedImage(value.accompanyingContainer)) ??
-    imageSource(asArray(value.thumbnail)[0] as Json | undefined)
+    imageSource(asArray(value.thumbnail)[0] as Json | undefined, "full", true)
   );
 }
 
 /**
  * A source's URL at about `size` pixels on its longer side: a service's, made from its own
  * `info.json` (`sizedImageUrl`), else the fallback, as where the service cannot answer.
+ * The fallback itself, with no `info.json` read, when it is all of the image and its
+ * longer side is from `size` to twice it: no blurrier than the service would be asked
+ * for, and not much heavier.
  */
 export async function resolveThumbnail(
   source: ThumbnailSource,
@@ -126,6 +143,11 @@ export async function resolveThumbnail(
 ): Promise<string | undefined> {
   if (source.src) return source.src;
   if (!source.service) return source.fallback;
+  const own = source.fallbackSize;
+  if (own && source.fallback && source.region === undefined) {
+    const longer = Math.max(own.width, own.height);
+    if (longer >= size && longer <= size * 2) return source.fallback;
+  }
   try {
     const info = await fetchInfo(source.service, { request });
     const share =
