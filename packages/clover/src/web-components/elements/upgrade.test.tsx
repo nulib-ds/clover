@@ -23,6 +23,16 @@ beforeEach(() => {
   initCloverI18n({ lng: "en" });
 });
 
+/*
+ * The tests share one page, so it is emptied once they are done, and the host sees the
+ * elements go while there is a document: left to jsdom's teardown, their unmount ran after
+ * it, and Preact's portals reached for a `document` already gone.
+ */
+afterAll(async () => {
+  document.body.innerHTML = "";
+  await settle();
+});
+
 it("waits for a root defined after its parts, and takes what was set on either before", async () => {
   document.body.innerHTML = `
     <clover-root id="one">
