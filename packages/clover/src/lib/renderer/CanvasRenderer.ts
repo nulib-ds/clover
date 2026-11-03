@@ -547,20 +547,25 @@ export class CanvasRenderer implements GestureTarget {
 
   /**
    * Which of zoom in, zoom out and home would change nothing, judged where the camera is
-   * heading, as `atMaxZoom` is. Home is the same zoom, center and turn, to within half a
-   * screen pixel and a thousandth of the zoom.
+   * heading, as `atMaxZoom` is. Home is `isAtHome` and the same zoom, center and turn, to
+   * within half a screen pixel and a thousandth of the zoom: after a zoom in and out by
+   * hand the reader is not home, so reset stays, as the Document's sheets (`atHome`)
+   * and a resize's refit need it to.
    */
   viewLimits(): { atMax: boolean; atMin: boolean; atHome: boolean } {
     const { zoom, x, y, rotation } = this.camera.destination;
-    const home = this.homeCamera();
+    const { min, max } = this.getZoomLimits();
+    // The flag first: `homeCamera` is a fit, which this runs every frame of a move.
+    const home = this.atHome ? this.homeCamera() : null;
     return {
-      atMax: this.atMaxZoom(),
-      atMin: zoom <= this.getZoomLimits().min * (1 + ZOOM_EPSILON),
+      atMax: zoom >= max * (1 - ZOOM_EPSILON),
+      atMin: zoom <= min * (1 + ZOOM_EPSILON),
       atHome:
-        !home ||
-        (Math.abs(zoom / home.zoom - 1) < 1e-3 &&
-          Math.hypot(x - home.x, y - home.y) * zoom < 0.5 &&
-          Math.abs(rotation - home.rotation) < 1e-3),
+        this.atHome &&
+        (!home ||
+          (Math.abs(zoom / home.zoom - 1) < 1e-3 &&
+            Math.hypot(x - home.x, y - home.y) * zoom < 0.5 &&
+            Math.abs(rotation - home.rotation) < 1e-3)),
     };
   }
 
@@ -1145,6 +1150,8 @@ export class CanvasRenderer implements GestureTarget {
           this.constrain({ ...current, zoom: current.zoom * ratio }),
         );
       }
+      // The camera may not have moved, but what it may zoom to and home have.
+      this.emit("viewport");
     }
     if (now) this.loop.drawNow();
     else this.invalidate();

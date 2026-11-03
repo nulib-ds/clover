@@ -287,9 +287,9 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   /** Bumped whenever the scene is laid out, so world-pinned overlays re-place. */
   const [sceneVersion, setSceneVersion] = useState(0);
   /*
-   * Which of zoom in, zoom out and reset would do nothing, read as the view moves (a
-   * resize moves it too) and as the image changes, and kept only when one flips, so a
-   * gesture does not render the Canvas every frame.
+   * Which of zoom in, zoom out and reset would do nothing, read as the view moves or is
+   * resized (the renderer says so on `viewport`) and as the image changes, and kept only
+   * when one flips, so a gesture does not render the Canvas every frame.
    */
   const [viewLimits, setViewLimits] = useState(NO_LIMITS);
 

@@ -253,14 +253,46 @@ describe("CanvasRenderer", () => {
     renderer.zoomBy(0.0001, undefined, false);
     expect(renderer.viewLimits()).toMatchObject({ atMin: true, atHome: false });
 
-    // Home by hand, not by `home`: the same view is home however it got there.
+    // Back to the same view by hand is not home: only `home` is (`isAtHome`), and a
+    // reader who is not home keeps reset, which brings the Document's sheets back.
     renderer.home(true);
     renderer.zoomBy(1.5, undefined, false);
     expect(renderer.viewLimits().atHome).toBe(false);
     renderer.zoomBy(1 / 1.5, undefined, false);
+    expect(renderer.viewLimits().atHome).toBe(false);
+    expect(renderer.isAtHome).toBe(false);
+    renderer.home(true);
     expect(renderer.viewLimits().atHome).toBe(true);
     renderer.rotateBy(90);
     expect(renderer.viewLimits().atHome).toBe(false);
+    renderer.dispose();
+  });
+
+  it("judges the limits where the camera is heading, before a frame draws", async () => {
+    mockedLoad.mockResolvedValue(bitmap(1000, 1000));
+    const renderer = new CanvasRenderer(host(), { animationTime: 1000 });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    renderer.zoomBy(1000);
+    expect(renderer.getCamera().zoom).toBeLessThan(1.1);
+    expect(renderer.viewLimits().atMax).toBe(true);
+    renderer.dispose();
+  });
+
+  it("says its view changed when a resize moves what it may zoom to", async () => {
+    mockedLoad.mockResolvedValue(bitmap(1000, 1000));
+    const element = host();
+    const renderer = new CanvasRenderer(element, { animationTime: 0 });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    renderer.zoomBy(1.2, undefined, false);
+    // A frame drawn, so the one a resize draws has no move of its own to report.
+    (renderer as unknown as { loop: { drawNow(): void } }).loop.drawNow();
+    const moved = vi.fn();
+    renderer.on("viewport", moved);
+    element.getBoundingClientRect = () =>
+      ({ left: 0, top: 0, width: 800, height: 300 }) as DOMRect;
+    // Its observer is what notices it; the camera itself stays where it was.
+    (renderer as unknown as { measure(now: boolean): void }).measure(true);
+    expect(moved).toHaveBeenCalled();
     renderer.dispose();
   });
 
