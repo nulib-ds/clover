@@ -27,6 +27,15 @@
   pointer-events: none;
 }
 
+/*
+ * Opened and drawn: kept mounted so its still stays loaded and decoded for the next
+ * collapse (`display: none` would drop the bitmap), out of sight and out of the way.
+ */
+.clover-canvas-placeholder[data-hidden="true"] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .clover-canvas-placeholder-frame {
   display: flex;
   width: min(100cqw, 100cqh * var(--ratio));

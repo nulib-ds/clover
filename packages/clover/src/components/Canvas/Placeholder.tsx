@@ -198,11 +198,13 @@ const Placeholder: React.FC<PlaceholderProps> = ({
           onToggle={onToggle}
         />
       )}
-      {(active || lingering) && (
+      {/* An image's still stays mounted, hidden, once open, so collapsing shows it loaded: a new <img> would flash the Body empty for a frame. */}
+      {(active || lingering || !media) && (
         <div
           aria-hidden={active ? undefined : true}
           className="clover-canvas-placeholder"
-          data-lingering={!active}
+          data-hidden={!active && !lingering}
+          data-lingering={!active && lingering}
           data-media={media}
           data-testid="clover-canvas-placeholder"
           data-vertical={vertical}
