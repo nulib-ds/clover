@@ -117,6 +117,8 @@ on [its own page](/docs/viewer/default).
 | `languages`        | `boolean`                               | `true`                      | The languages to read the resource in, beside the panel's About heading, where it comes in several; `false` leaves the choice out.                                                                 |
 | `defaultPanelOpen` | `boolean`                               | `true`                      | Whether the panel starts open beside the Body; over it, closed.                                                                                                                                    |
 | `panelLayout`      | `"accordion" \| "tabs"`                 | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                                                                                                                                                 |
+| `panelSections`    | `PanelSection[]`                        | All                         | Which of the panel's sections it may have; each still shows only where the resource has data for it, and no panel at all where it has none of them.                                                |
+| `panelLabels`      | `PanelSectionLabels`                    | —                           | What a panel section says, in place of Clover's own word for it: text, or text by language tag.                                                                                                    |
 | `items`            | `"slider" \| "list" \| "grid" \| false` | `"slider"`                  | The thumbnails under the Body, or none.                                                                                                                                                            |
 | `singleItem`       | `boolean`                               | `false`                     | The thumbnails even where the resource has one view.                                                                                                                                               |
 | `storageKey`       | `string \| false`                       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                                                                                                                         |
@@ -135,6 +137,8 @@ More on [its own page](/docs/viewer/document).
 | `singleItem`         | `boolean`               | `false`                      | The page thumbnails and their toggle even where the resource has one page.                                                                                                      |
 | `defaultPanelOpen`   | `boolean`               | `false`                      | Whether the panel starts open beside the page; over it, closed.                                                                                                                 |
 | `panelLayout`        | `"accordion" \| "tabs"` | `"accordion"`                | The panel's sections as stacked boxes, or as tabs.                                                                                                                              |
+| `panelSections`      | `PanelSection[]`        | All                          | Which of the panel's sections it may have; each still shows only where the resource has data for it, and no panel at all where it has none of them.                             |
+| `panelLabels`        | `PanelSectionLabels`    | —                            | What a panel section says, in place of Clover's own word for it: text, or text by language tag.                                                                                 |
 | `download`           | `boolean`               | `true`                       | Download's links in the toolbar, where there is a `rendering`.                                                                                                                  |
 | `languages`          | `boolean`               | `true`                       | The languages to read the resource in, beside the panel's About heading, where it comes in several; `false` leaves the choice out.                                              |
 | `headingLevel`       | `number`                | `2`                          | The title's level; the panel's sections are a level below.                                                                                                                      |
@@ -159,6 +163,8 @@ each cell opening in a lightbox within the gallery's bounds. More on
 | `panel`            | `boolean`                          | `true`                      | The information panel beside the lightbox's view, and its toggle, as Default's and Document's.                                                                                      |
 | `defaultPanelOpen` | `boolean`                          | `true`                      | Whether the panel starts open beside the view; over it, closed.                                                                                                                     |
 | `panelLayout`      | `"accordion" \| "tabs"`            | `"accordion"`               | The panel's sections as stacked boxes, or as tabs.                                                                                                                                  |
+| `panelSections`    | `PanelSection[]`                   | All                         | Which of the panel's sections it may have; each still shows only where the resource has data for it, and no panel at all where it has none of them.                                 |
+| `panelLabels`      | `PanelSectionLabels`               | —                           | What a panel section says, in place of Clover's own word for it: text, or text by language tag.                                                                                     |
 | `download`         | `boolean`                          | `true`                      | The downloads in the panel's About, where there is a `rendering`.                                                                                                                   |
 | `languages`        | `boolean`                          | `true`                      | The languages to read the resource in, beside the panel's About heading, where it comes in several.                                                                                 |
 | `storageKey`       | `string \| false`                  | `"clover-template-gallery"` | Where the panel's width is remembered; `false` forgets it.                                                                                                                          |
@@ -215,6 +221,28 @@ boxes.
 
 </div>
 </OptionsExample>
+
+### Panel sections
+
+Use `panelSections` to keep the panel to some of Clover's own sections: it leaves About,
+the Collection or any other out, and each of the rest still shows only where the resource
+has data for it ([Panel](/docs/panel#only-some-of-them)). Where it has none of them there
+is no panel at all: no pane, no bar and no toggle. `panelLabels` says what a section's tab
+or heading says, in place of Clover's own word for it.
+
+```jsx
+<Viewer
+  iiifContent={url}
+  panelSections={["contents", "search", "transcript", "annotations"]}
+/>
+```
+
+```html twin
+<clover-viewer
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+  panel-sections="contents search transcript annotations"
+></clover-viewer>
+```
 
 ### Heading level
 

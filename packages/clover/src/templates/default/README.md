@@ -46,6 +46,7 @@ pass it: `template={Default}`, from `@nulib/clover/templates`.
 | `download`         | `true`                      | The downloads, from a Download button beside the panel's About heading, where there is a `rendering`. |
 | `defaultPanelOpen` | `true`                      | Whether the panel starts open beside the Body; over it, closed.                                       |
 | `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.                                                   |
+| `panelSections`    | All                         | Which of the panel's sections it may have; none with data, and there is no panel at all.              |
 | `items`            | `"slider"`                  | The thumbnails: `"slider"`, `"list"`, `"grid"`, or `false`.                                           |
 | `singleItem`       | `false`                     | The thumbnails even where the resource has one view.                                                  |
 | `storageKey`       | `"clover-template-default"` | Where the panel's width is remembered; `false` forgets it.                                            |

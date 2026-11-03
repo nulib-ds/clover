@@ -175,9 +175,10 @@ open.
 ## The information panel
 
 `Panel` shows About, and each other section the content has something for:
-Collection, Contents, Search, Map, Transcript and Annotations. Give it `Tab`s to choose
-the sections yourself, in your order. Each part a default section uses works on its own
-too, in a `Tab` or anywhere in the layout, and so does a part of your own.
+Collection, Contents, Search, Map, Transcript and Annotations. `sections` keeps it to some
+of them, the data checks and all, and `labels` says what one of them says; give it `Tab`s
+to choose the sections yourself, in your order. Each part a default section uses works on
+its own too, in a `Tab` or anywhere in the layout, and so does a part of your own.
 
 ```jsx
 <Clover.Panel>
@@ -193,7 +194,16 @@ too, in a `Tab` or anywhere in the layout, and so does a part of your own.
 ```
 
 `PanelToggle` shows and hides it; as a child of `Body`, it sits with the Canvas's
-controls. [Panel](/docs/panel) has its layouts, the sections and
+controls. Where you keep the panel to some sections, ask `usePanelSections` first and draw
+no pane for a resource that has none of them, as the templates do: a `Panel` with no
+section to show draws nothing, and the room around it would be left empty.
+
+```jsx
+const sections = Clover.usePanelSections(["contents", "search"]);
+return sections.length ? <Clover.Panel sections={sections} /> : null;
+```
+
+[Panel](/docs/panel) has its layouts, the sections and
 when each shows, headings, closing a panel that floats over the page, and its props.
 
 ## Panes side by side
@@ -238,6 +248,7 @@ Hooks read from the nearest `Root`. Each re-renders only when what it reads chan
 | `useLocalized(value)`       | `{ text, lang }` for a IIIF language map, in the Root's language.                                                                                              |
 | `useT()`                    | `t(key, values)`: Clover's strings, in its interface language.                                                                                                 |
 | `useLangOf()`               | `langOf(key)`: a string's `lang` where it is not the page's language.                                                                                          |
+| `usePanelSections(names?)`  | Which of a `Panel`'s default sections this resource has data for, in the panel's order, narrowed to `names`: none of them, and a `Panel` would draw nothing.   |
 
 ```jsx
 function PageCount() {

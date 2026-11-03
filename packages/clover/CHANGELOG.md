@@ -11,6 +11,63 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **`Panel`'s `sections`: Clover's own sections, minus the ones you do not want.** A panel
+  with no `Tab` children has the sections Clover has data for, all of them; the only way to
+  drop one was to hand-build every section as a `Tab`, which gave up the checks that decide
+  whether each is worth showing. `sections` names the ones to keep instead, in Clover's own
+  order, and each still shows only where the resource has data for it. A resource with none
+  of them has no panel: `Panel` draws nothing, as it always has when it has no section, and
+  the templates now keep no pane, bar or toggle for it either. `Tab` children still win:
+  they are the panel's sections, whole.
+
+  ```jsx
+  // About and the Collection left out; Contents, Search, the Transcript and Annotations
+  // each shown only where the resource has them.
+  <Clover.Panel
+    sections={["contents", "search", "transcript", "annotations"]}
+  />
+  ```
+
+  Leaving `about` out leaves out what its heading holds with it, shown whichever section is
+  open: the Download button (`download`) and the languages to read the resource in
+  (`languages`). Give the Root a `language`, or place `About` yourself, where a resource
+  needs them.
+
+  The templates take it as `panelSections`, so `<Viewer panelSections={[…]} />` and
+  `<clover-viewer panel-sections="contents search">` reach their panel, and
+  `<clover-panel sections="contents search">` is the element's own.
+
+- **`Panel`'s `labels`: a word of your own for a section.** It says what a default
+  section's tab or heading says, in place of Clover's own word for it, for this panel alone
+  (`initCloverI18n`'s strings are the page's, every
+  panel on it). A string is taken to be in the page's language; give it by language tag
+  (`{ en: "Chapters", de: "Kapitel" }`) and Clover reads it in the language it speaks, the
+  tab carrying that language where it is not the page's (WCAG 3.1.2). The templates take it
+  as `panelLabels`.
+
+  ```jsx
+  <Clover.Panel
+    sections={["contents", "annotations"]}
+    labels={{
+      contents: "Chapters",
+      annotations: { en: "Notes", de: "Anmerkungen" },
+    }}
+  />
+  ```
+
+- **`usePanelSections`.** Which of a `Panel`'s default sections the resource has data for,
+  in the panel's order, narrowed to the ones given: for a layout of your own to ask before
+  it draws the pane that would hold the panel. It reads the Root as `Panel` does and loads
+  no section's code. There is no `panelSections()` on a root to match it: that would put
+  the panel's checks on every page that uses any element, and an element layout needs
+  none, since a `<clover-panel>` with no section draws nothing where it stands.
+
+- **The size budgets rise with these** (`build/size-budget.json`), by what they cost: about
+  400 B gzip on a page with the Default template, 530 B with Document, 80 B on the elements
+  entry, and 20 B on the Gallery, whose panel is its lightbox's.
+
 ### Fixed
 
 - **A drag through a video scrolls the page.** A Canvas that cannot be moved, a lone

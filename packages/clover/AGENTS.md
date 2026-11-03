@@ -178,6 +178,27 @@ every rule below.
   it first opens, so a section never opened is never fetched. Its helpers (whether to
   offer a section) must not import the section's module: `partOfCollection` lives in
   `core/selectors.ts` for that.
+- **Which default sections there are** is decided in one place,
+  `components/Panel/sections.ts`: `PANEL_SECTIONS`, their order (its own, not exported);
+  `HAS`, whether the
+  resource holds anything for each (About always); and `usePanelSections(sections?)`, one
+  read of the Root for each, never one for the list, which a selector returning an array
+  would make new every render. `Panel` reads it, and so does every template, through
+  `shared/PanelPane.tsx`, which draws no pane, no bar and no toggle where it comes back
+  empty, as `Panel` itself draws nothing then. A pane says whether its panel has About
+  (`data-about`), which Default's header reads before it tucks the provider's logo away
+  under 26rem, since it is About that shows the provider. A new default section is added
+  there, with its label key, and nothing it needs may reach a section's own module: the
+  checks ride in every page with a template, and `geo-detect` and `Canvas/layout` are
+  already among the heaviest of them (a root's `panelSections()` was tried and dropped,
+  2026-11-02: 4.6 kB gzip on a page with `<clover-label>` alone).
+- A page chooses among them with `Panel`'s `sections` (the templates' `panelSections`),
+  which narrows and never reorders, and names one with `labels` (`panelLabels`), for one
+  panel where `initCloverI18n` is the page's. A label in one language is the page's own
+  words, marked with nothing; given by language tag it is read in the language Clover
+  speaks (`languageToRead`) and marked with it where that is not the page's
+  (`langWithin`, as `tabLabel` marks Clover's own strings; WCAG 3.1.2). `Tab` children
+  win over both.
 - Accordion headings stay in sight in a scrolling container (Mat): sticky, stacked at
   the top when scrolled past and at the bottom when an open section pushes them below.
   Labels wrap (`overflow-wrap: anywhere`) and are never cut short (WCAG 1.4.12), so
@@ -2123,7 +2144,12 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     where it opens and what moves it later: changed later, `canvas-id` and `manifest-id`
     move the reader, while `panel-open` and `sidebar-open` only say how the panes start;
     `tiled` (`isTiledImage`) is the one other exception. A value its type cannot read is
-    warned of once and ignored, so the part keeps its default. 3.x defines
+    warned of once and ignored, so the part keeps its default. An attribute's type is
+    `string`, `number`, `boolean`, `list` (words parted by spaces or commas, for a prop
+    that takes an array of them: `<clover-panel sections="contents search">`), `data` (a
+    URL as written, or JSON) or a list of words; a new one is read in `base.ts`, written
+    as text by `build/custom-elements.mjs`, and read by the docs' agent helpers
+    (`docs/lib/compose/layout.ts`, `suggest.ts`). 3.x defines
     `clover-viewer`, `clover-image`, `clover-slider` and `clover-map`, in light DOM too,
     and a tag takes one definition, so a page runs one version's elements, never both.
   - **Parity** (`specs/specs.test.ts`): every part `parts.ts` exports has an element, or

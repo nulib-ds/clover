@@ -39,7 +39,8 @@ export async function readSpecs() {
 /** An attribute's type, as the manifest and the docs write it. */
 function attributeType(type) {
   if (Array.isArray(type)) return type.map((word) => `"${word}"`).join(" | ");
-  return type === "data" ? "string" : type;
+  // An attribute is text, whatever the element reads out of it.
+  return type === "data" || type === "list" ? "string" : type;
 }
 
 /** What an element's events keep, as read-only properties (`keeps`): its handle, its API. */

@@ -39,8 +39,9 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 
 ## API reference
 
-Inside a `Root`, it shows About and each section the resource has data for, or `Tab`s of
-your own: one always open, each loaded the first time it opens. Its tabs and accordion
+Inside a `Root`, it shows About and each section the resource has data for — `sections`
+narrows that set — or `Tab`s of your own: one always open, each loaded the first time it
+opens. Its tabs and accordion
 follow WAI-ARIA's patterns. It is as tall as its sections; to scroll it, give the element
 around it a height and `overflow-y: auto`, as the templates do. Its other props, and its
 `ref`, go to its element.
@@ -60,6 +61,8 @@ around it a height and `overflow-y: auto`, as the templates do. Its other props,
 | `headingLevel`  | `number`                  | `3`       | Its first headings: one below the heading over it.                                                                             |
 | `download`      | `boolean`                 | `true`    | A Download button beside About's heading, listing the downloads; `false` leaves them out.                                      |
 | `languages`     | `boolean`                 | `true`    | About's heading offers the languages the resource comes in, the whole Root reading in the one chosen; `false` leaves them out. |
+| `sections`      | `PanelSection[]`          | All       | Which of the default sections it may have; each still shows only where the resource has data for it.                           |
+| `labels`        | `PanelSectionLabels`      | —         | What a default section says, in place of Clover's own word for it: text, or text by language tag.                              |
 | `as`            | element type              | `"aside"` | The element to render.                                                                                                         |
 | `children`      | `ReactNode`               | —         | `Tab`s: sections of your own, in place of the defaults.                                                                        |
 | `className`     | `string`                  | —         | Added to `clover-panel`.                                                                                                       |
@@ -180,6 +183,84 @@ until it is opened, on Search. A `value` you control is left as you set it. This
 
 </Example>
 
+### Only some of them
+
+`sections` narrows Clover's own sections to the ones you name: `about`, `targets`,
+`collection`, `contents`, `search`, `map`, `transcript` and `annotations`. They keep
+Clover's order, whatever order you name them in, and `defaultValue` says which opens
+first. Each still shows only where the resource has data for it,
+so you keep the checks the defaults make, and where it has none of them the panel draws
+nothing at all. `Tab`s of your own win over it: they are the panel's sections, whole.
+
+Leaving `about` out leaves out what its heading holds with it: the Download button and the
+languages to read the resource in, which show beside it whichever section is open. Give
+the Root a `language`, or place `About` yourself, where a resource needs them.
+
+<Example>
+<PartDemo
+  part="Panel"
+  resource="search"
+  props={{
+    sections: ["contents", "search", "transcript", "annotations"],
+    headingLevel: 4,
+  }}
+  body
+  box="24rem"
+/>
+
+```jsx
+<Clover.Panel sections={["contents", "search", "transcript", "annotations"]} />
+```
+
+```html twin
+<clover-panel sections="contents search transcript annotations"></clover-panel>
+```
+
+</Example>
+
+In a layout of your own, ask first with `usePanelSections`, so nothing keeps room for a
+panel with nothing in it. The templates do this themselves: with `panelSections`, a
+resource with none of them has no pane, no bar and no toggle. As elements, there is
+nothing to ask: a `<clover-panel>` with no section to show draws nothing where it stands.
+
+```jsx
+function Aside() {
+  const sections = Clover.usePanelSections(["contents", "search"]);
+  if (!sections.length) return null;
+  return (
+    <Clover.SplitPane size="24rem">
+      <Clover.Panel sections={sections} />
+    </Clover.SplitPane>
+  );
+}
+```
+
+### A word of your own for a section
+
+`labels` says what a section's tab or heading says, in place of Clover's own word for it.
+A string is the page's own words, in the page's language. To say it in more than one, give
+it by language tag: Clover reads it in the language it speaks, by IIIF's rule, and the tab
+carries that language where it is not the page's (WCAG 3.1.2). `initCloverI18n` changes
+Clover's own words for every panel on the page ([i18n](/docs/i18n)); `labels` is this
+panel's alone.
+
+```jsx
+<Clover.Panel
+  sections={["contents", "annotations"]}
+  labels={{
+    contents: "Chapters",
+    annotations: { en: "Notes", de: "Anmerkungen" },
+  }}
+/>
+```
+
+```html twin
+<clover-panel
+  sections="contents annotations"
+  labels='{"contents": "Chapters", "annotations": {"en": "Notes", "de": "Anmerkungen"}}'
+></clover-panel>
+```
+
 ### Languages
 
 Where what a resource says of itself comes in several languages, About's heading offers
@@ -212,7 +293,8 @@ French.
 
 ### Sections of your own
 
-Give it `Tab`s, and they are its sections, in their order. Each holds Clover's parts or a
+Give it `Tab`s, and they are its sections, in their order, in place of Clover's own and
+of any `sections` names. Each holds Clover's parts or a
 component of your own that reads the Root through hooks. Give the parts in them the
 heading level the panel would: its own in tabs, one below it in an accordion.
 
@@ -300,5 +382,8 @@ function Layout({ url }) {
 
 - `options.informationPanel` becomes [`Default`](/docs/viewer#default)'s panel props, and
   `Tab`s.
+- `renderAbout` and `renderContentSearch` become `sections`, which names the sections to
+  keep: `sections={["contents", "search", "transcript", "annotations"]}` for a panel with
+  no About.
 - A plugin's panel is a `Tab` of your own.
 - `defaultTab` is `defaultValue`.

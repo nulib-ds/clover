@@ -1,7 +1,11 @@
 import React, { Suspense, lazy, useEffect, useRef } from "react";
 
 import * as Clover from "../../parts";
-import type { PanelLayout } from "../../parts";
+import type {
+  PanelLayout,
+  PanelSection,
+  PanelSectionLabels,
+} from "../../parts";
 import { useGivenAnnotations } from "./givenAnnotations";
 
 /*
@@ -38,6 +42,19 @@ export interface LightboxProps {
   defaultPanelOpen?: boolean;
   /** The panel's sections as stacked boxes (`"accordion"`, the default) or tabs. */
   panelLayout?: PanelLayout;
+  /**
+   * The panel's sections, from Clover's own: with
+   * `["contents", "search", "transcript", "annotations"]` it has those four, each still
+   * only where the resource has data for it, and no panel at all where it has none of
+   * them. Default: every section.
+   */
+  panelSections?: readonly PanelSection[];
+  /**
+   * What a panel section's tab or heading says, in place of Clover's own word for it:
+   * `{ annotations: "Chapters" }`, or a word by language tag to say it in several (the
+   * Panel's `labels`).
+   */
+  panelLabels?: PanelSectionLabels;
   /** The downloads in the panel's About, where there is a `rendering`. Default `true`. */
   download?: boolean;
   /** The languages to read the resource in, beside the panel's About heading. Default `true`. */

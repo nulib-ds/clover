@@ -43,16 +43,17 @@ import "@nulib/clover/templates.css";
 <Viewer iiifContent="https://example.org/manifest.json" template={Document} />;
 ```
 
-| Prop                 | Default                      | What it does                                                               |
-| -------------------- | ---------------------------- | -------------------------------------------------------------------------- |
-| `defaultSidebarOpen` | `true`                       | Whether the page thumbnails start shown; over the page, not.               |
-| `singleItem`         | `false`                      | The page thumbnails and their toggle even where the resource has one page. |
-| `defaultPanelOpen`   | `false`                      | Whether the panel starts open beside the page; over it, closed.            |
-| `panelLayout`        | `"accordion"`                | The panel's sections as stacked boxes, or `"tabs"`.                        |
-| `download`           | `true`                       | Download's links in the toolbar, where there is a `rendering`.             |
-| `headingLevel`       | `2`                          | The title's level; the panel's sections are a level below.                 |
-| `storageKey`         | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.             |
-| …                    |                              | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`…            |
+| Prop                 | Default                      | What it does                                                                      |
+| -------------------- | ---------------------------- | --------------------------------------------------------------------------------- |
+| `defaultSidebarOpen` | `true`                       | Whether the page thumbnails start shown; over the page, not.                      |
+| `singleItem`         | `false`                      | The page thumbnails and their toggle even where the resource has one page.        |
+| `defaultPanelOpen`   | `false`                      | Whether the panel starts open beside the page; over it, closed.                   |
+| `panelLayout`        | `"accordion"`                | The panel's sections as stacked boxes, or `"tabs"`.                               |
+| `panelSections`      | All                          | Which of the panel's sections it may have; none with data, and there is no panel. |
+| `download`           | `true`                       | Download's links in the toolbar, where there is a `rendering`.                    |
+| `headingLevel`       | `2`                          | The title's level; the panel's sections are a level below.                        |
+| `storageKey`         | `"clover-template-document"` | Where the thumbnails' width is remembered; `false` forgets it.                    |
+| …                    |                              | Every `Clover.Root` prop: `request`, `canvasId`, `annotations`…                   |
 
 Size it with `--clover-template-document-height` (default `min(85svh, 56rem)`, the
 window's smallest height where a browser knows it, else `min(85vh, 56rem)`). In a box too

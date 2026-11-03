@@ -167,11 +167,12 @@
 /*
  * Under 26rem (a phone, or a narrow column beside the panel), the logo is tucked away,
  * so the title and the Collection's line have the whole width: the panel's About shows
- * it still, its name and its link, one press away. With no panel, nothing else shows it,
- * so it keeps to the title's line.
+ * it still, its name and its link, one press away. With no panel, or a panel whose
+ * sections leave About out (`data-about`), nothing else shows it, so it keeps to the
+ * title's line.
  */
 @container clover-template-default-main (width < 26rem) {
-  .clover-template-default:has(.clover-template-default-panel)
+  .clover-template-default:has(.clover-template-default-panel[data-about])
     .clover-template-default-provider {
     display: none;
   }

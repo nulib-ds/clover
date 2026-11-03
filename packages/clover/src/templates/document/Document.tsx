@@ -1,7 +1,12 @@
 import React, { useRef } from "react";
 
 import * as Clover from "../../parts";
-import type { PanelLayout, RootProps } from "../../parts";
+import type {
+  PanelLayout,
+  PanelSection,
+  PanelSectionLabels,
+  RootProps,
+} from "../../parts";
 import { PanelPane } from "../shared/PanelPane";
 import { preloadDrag } from "../shared/useDragToClose";
 import { useDrawer } from "../shared/useDrawer";
@@ -31,6 +36,19 @@ export type DocumentProps = Omit<RootProps, "children"> & {
    * Default's), stacked boxes each opened by its heading, or `"tabs"`.
    */
   panelLayout?: PanelLayout;
+  /**
+   * The panel's sections, from Clover's own: with
+   * `["contents", "search", "transcript", "annotations"]` it has those four, each still
+   * only where the resource has data for it, and no panel at all where it has none of
+   * them. Default: every section.
+   */
+  panelSections?: readonly PanelSection[];
+  /**
+   * What a panel section's tab or heading says, in place of Clover's own word for it:
+   * `{ annotations: "Chapters" }`, or a word by language tag to say it in several (the
+   * Panel's `labels`).
+   */
+  panelLabels?: PanelSectionLabels;
   /** The downloads in the toolbar, as links: the page's and the Manifest's `rendering`. Default `true`. */
   download?: boolean;
   /**
@@ -72,6 +90,8 @@ export function Document({
   singleItem = false,
   defaultPanelOpen = false,
   panelLayout = "accordion",
+  panelSections,
+  panelLabels,
   download = true,
   languages = true,
   headingLevel = 2,
@@ -98,6 +118,8 @@ export function Document({
         singleItem={singleItem}
         defaultPanelOpen={defaultPanelOpen}
         panelLayout={panelLayout}
+        panelSections={panelSections}
+        panelLabels={panelLabels}
         download={download}
         languages={languages}
         headingLevel={headingLevel}
@@ -131,6 +153,8 @@ function DocumentLayout({
   headingLevel = 2,
   storageKey,
   panelLayout,
+  panelSections,
+  panelLabels,
   collapseControls,
   title,
 }: { title: Clover.Titled } & Pick<
@@ -143,6 +167,8 @@ function DocumentLayout({
   | "headingLevel"
   | "storageKey"
   | "panelLayout"
+  | "panelSections"
+  | "panelLabels"
   | "collapseControls"
 >) {
   const t = Clover.useT();
@@ -199,6 +225,7 @@ function DocumentLayout({
     beside: useWideEnough(panes, BESIDE_REM + (showSidebar ? SIDEBAR_REM : 0)),
     defaultOpen: Boolean(defaultPanelOpen),
     followFocus,
+    sections: panelSections,
   });
   // Over the page, reaching for the thumbnails' toggle loads the drag's code too.
   const reach = (event: React.SyntheticEvent) => {
@@ -367,6 +394,8 @@ function DocumentLayout({
           pane={panel}
           className="clover-template-document-panel"
           layout={panelLayout}
+          sections={panelSections}
+          labels={panelLabels}
           headingLevel={below(headingLevel)}
           download={false}
           languages={languages}
