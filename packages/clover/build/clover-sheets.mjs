@@ -1,5 +1,5 @@
 import { build as esbuild } from "esbuild";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -71,6 +71,15 @@ const OWNERS = {
     "components/Canvas/media/Transport.tsx",
     "components/Canvas/FrameAnimation.tsx",
   ],
+  // The scrolling edge's shadow, which the sections, Search, a Transcript, Items' slider
+  // and the pager cast.
+  "ui/Shade": [
+    "ui/Sections.tsx",
+    "components/Search/Search.tsx",
+    "components/Transcript/Transcript.tsx",
+    "components/Items/Items.tsx",
+    "components/Items/Pager.tsx",
+  ],
   "ui/ReadMore": ["ui/ReadMore.tsx", "web-components/elements/read-more.tsx"],
   // A row of language codes: a Transcript's files, an annotation set's languages.
   "ui/Codes": [
@@ -100,6 +109,12 @@ const OWNERS = {
   "components/Items/Pager": [
     "components/Items/Pager.tsx",
     "components/Items/Position.tsx",
+  ],
+  // The Collection's list, which Items' targets and count menu draw too.
+  "components/Collection/Collection": [
+    "components/Collection/Collection.tsx",
+    "components/Items/TargetItems.tsx",
+    "components/Items/CountMenu.tsx",
   ],
   // The panel's own, and the lists of its sections and About's, anywhere.
   "components/Panel/Panel": [
@@ -140,15 +155,18 @@ const listed = (list) =>
  * (`src/templates/templates.css`), as an app loads `templates.css` after `styles.css`.
  * Each sheet's place in it is its index, by which the page's registry orders it.
  */
+const STYLES = listed(resolve(src, "styles/clover.css"));
 export const SHEETS = [
   createRequire(import.meta.url).resolve("maplibre-gl/dist/maplibre-gl.css"),
-  ...listed(resolve(src, "styles/clover.css")),
+  ...STYLES,
   ...listed(resolve(src, "templates/templates.css")),
 ].map((file, index) => ({
   file,
   index,
   key: index === 0 ? "maplibre" : relative(src, file).replace(/\.css$/, ""),
   layered: index !== 0,
+  // In `dist/styles.css`, and so in a part sheet (`partSheets`).
+  inStyles: STYLES.includes(file),
 }));
 
 /**
@@ -239,7 +257,7 @@ export function ownersOf(sheet) {
  * Sheets' rules, minified as one, as `build/styles.mjs` minifies the whole stylesheet: a
  * run's sheets together, which merges what they repeat.
  */
-async function rulesOf(...sheets) {
+export async function rulesOf(...sheets) {
   const { outputFiles } = await esbuild({
     stdin: {
       contents: sheets
@@ -325,4 +343,150 @@ export function cloverSheets(options = {}) {
       };
     },
   };
+}
+
+/**
+ * The stylesheets a page of parts can import one by one (`build/styles.mjs`), by the
+ * source each part's code is in, its own and what it draws with. A sheet goes in the one
+ * of these its users all fall in, else `core`: its users are its owners (`ownersOf`), a
+ * module outside them (`ui/`, `lib/`) standing for the modules that import it. So
+ * `ui/Sections.css` is the panel's, as only the panel and its sections draw sections.
+ */
+export const PART_SHEETS = {
+  core: [
+    "components/Root",
+    "components/Provider",
+    "components/Body",
+    "components/Canvas",
+    "components/Status",
+    "components/Label",
+    "components/Primitives",
+    "components/Viewer",
+  ],
+  items: ["components/Items"],
+  panel: [
+    "components/Panel",
+    "components/Annotations",
+    "components/Collection",
+    "components/Contents",
+    "components/Download",
+    "components/Search",
+    "components/Transcript",
+  ],
+  // Recordings' Body and transport, and an animation's, which plays with the same bar.
+  media: [
+    "components/Canvas/media",
+    "components/Canvas/FrameAnimation",
+    "components/Timeline",
+  ],
+  scene: ["components/Scene"],
+  map: ["components/Map"],
+  split: ["components/Split"],
+  "collection-select": ["components/CollectionSelect"],
+  default: ["templates/default"],
+};
+
+/** The modules that import each module in `src/`, the elements' own and tests left out. */
+function importersOf() {
+  const importers = new Map();
+  const walk = (dir) =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const path = resolve(dir, entry.name);
+      if (entry.isDirectory())
+        return path === resolve(src, "web-components") ? [] : walk(path);
+      return /\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name)
+        ? [path]
+        : [];
+    });
+  const target = (from, specifier) =>
+    ["", ".tsx", ".ts", "/index.tsx", "/index.ts"]
+      .map((ending) => resolve(dirname(from), specifier + ending))
+      .find((file) => existsSync(file) && /\.tsx?$/.test(file));
+  for (const file of walk(src)) {
+    const source = readFileSync(file, "utf8");
+    // Statements (a type-only one draws nothing), side effects, and dynamic imports.
+    const specifiers = [
+      ...[
+        ...source.matchAll(
+          /^(?:import|export)\b(\s+type\b)?[^;]*?\bfrom\s*"(\.[^"]+)"/gm,
+        ),
+      ].flatMap(([, type, specifier]) => (type ? [] : [specifier])),
+      ...[...source.matchAll(/^import\s*"(\.[^"]+)"/gm)].map(([, s]) => s),
+      ...[...source.matchAll(/\bimport\(\s*"(\.[^"]+)"/g)].map(([, s]) => s),
+    ];
+    for (const specifier of specifiers) {
+      const imported = target(file, specifier);
+      if (imported)
+        importers.set(imported, [...(importers.get(imported) ?? []), file]);
+    }
+  }
+  return importers;
+}
+
+/**
+ * The part sheets a page of a part needs besides core's and its own, for the parts it
+ * draws inside it, where it draws them: a Canvas's recordings, animations and map of a
+ * place, and a Body's Scene; the Panel's Collection and Views sections' items, and its Map
+ * section. Styling's table says the same. `build/styles.test.mjs` fails on a part that
+ * draws what another part's sheet styles unnamed here, and on a name here it never needs.
+ */
+export const DRAWN_INSIDE = {
+  core: ["media", "scene", "map"],
+  panel: ["items", "map"],
+};
+
+/**
+ * The parts that draw what a module draws: its own part (`PART_SHEETS`), or, for a module
+ * of no part (`ui/`, `lib/`), the parts of the modules that import it. `inside`: every
+ * part that draws it, inside another part too (`DRAWN_INSIDE`), up to core, which every
+ * page has, with what it draws inside it. A template draws every part, and the Viewer's
+ * page takes styles.css whole, so a template's modules are its own alone, and draw no
+ * part inside them.
+ */
+export function partsDrawing({ inside = false } = {}) {
+  const importers = importersOf();
+  const prefixes = Object.entries(PART_SHEETS)
+    .flatMap(([name, paths]) => paths.map((path) => [resolve(src, path), name]))
+    .sort(([a], [b]) => b.length - a.length);
+  for (const [prefix] of prefixes)
+    if (!existsSync(prefix) && !existsSync(`${prefix}.tsx`))
+      throw new Error(
+        `part sheets: ${relative(src, prefix)} does not exist; update PART_SHEETS (build/clover-sheets.mjs)`,
+      );
+  const partOf = (file) =>
+    prefixes.find(
+      ([prefix]) => file === `${prefix}.tsx` || file.startsWith(`${prefix}/`),
+    )?.[1];
+  const inTemplate = (file) => file.startsWith(`${resolve(src, "templates")}/`);
+  const usersOf = (file, seen = new Set()) => {
+    const part = partOf(file);
+    if (part && (!inside || part === "core" || inTemplate(file))) return [part];
+    if (seen.has(file)) return [];
+    seen.add(file);
+    const users = (importers.get(file) ?? [])
+      .filter((by) => !inside || !inTemplate(by))
+      .flatMap((by) => usersOf(by, seen));
+    return part ? [part, ...users] : users;
+  };
+  return (file) => new Set(usersOf(file));
+}
+
+/**
+ * Each of `PART_SHEETS`' sheets with the sheets in it, in the cascade's order: together,
+ * styles.css's. The other templates' stay in templates.css alone, for the Viewer.
+ */
+export function partSheets() {
+  const drawing = partsDrawing();
+  const groups = Object.fromEntries(
+    Object.keys(PART_SHEETS).map((name) => [name, []]),
+  );
+  for (const sheet of SHEETS.filter(({ inStyles }) => inStyles)) {
+    const users = new Set(
+      ownersOf(sheet)
+        .filter((file) => !file.startsWith(resolve(src, "web-components")))
+        .flatMap((file) => [...drawing(file)]),
+    );
+    groups[users.size === 1 ? [...users][0] : "core"].push(sheet);
+  }
+  return groups;
 }

@@ -322,6 +322,7 @@ const ALONE = [
 const STYLES = [
   ["styles.css", "stylesGzip", "styles.css"],
   ["templates.css", "templatesStylesGzip", "templates.css"],
+  ["styles/core.css", "coreStylesGzip", "styles/core.css"],
 ];
 
 /**

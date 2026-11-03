@@ -99,7 +99,19 @@ every rule below.
   Color tokens are `--clover-color-*` with literal fallbacks, since a page sets them. The
   scale's tokens (`--clover-space-*`, `--clover-text-*`, `--clover-control`) are defined
   in `src/styles/scale.css`, first in the list, and need none. Add every new stylesheet to
-  the list.
+  the list. The same sheets are built again a part at a time (`dist/styles/<part>.css`,
+  `partSheets` in `build/clover-sheets.mjs`): each sheet goes in the part sheet of the
+  parts that draw what it styles (`OWNERS`, a `ui/` module standing for its importers),
+  else `core.css`. Each is plain `@layer clover`, its sheets in the list's order, and a
+  page imports `core.css` first: `build/styles.test.mjs` fails on any tie (same
+  specificity and property, the same element) between two other parts, or where core's
+  rule comes later in the list, as either would cascade apart from `styles.css`. A new
+  `components/` directory gets a line in `PART_SHEETS`; the test fails until it does. A
+  part that draws another inside it (the Panel's Collection section draws `Items`) names
+  that part's sheet in `DRAWN_INSIDE`, and Styling's table says so; the test fails on one
+  missing or stale. Keyframes shared across part sheets go in a sheet of their own, which
+  falls to core (`ui/Shade.css`), as an animation whose keyframes are in neither its own
+  part sheet nor core fails the test too.
 - **Space, type and selectors follow `DESIGN.md`.** Every space and text size is a step of
   the golden scale from the page's own 1rem, chosen by how closely things belong together
   (a container's inset one step above the gap between its children). Never set a font
@@ -230,7 +242,8 @@ every rule below.
   same shadows at its ends from the frame's `::before` / `::after`, reading the
   viewport's scroll through a named timeline (`--clover-items-track`, `timeline-scope`
   on the frame); its arrows sit above them (`z-index: 2`). Both use
-  `@keyframes clover-shade`.
+  `@keyframes clover-shade`, in a sheet of its own (`ui/Shade.css`), so `core.css` has it
+  for both.
 - Chromium scrolls a focused element into view only when it is outside the scrollport,
   whatever covers it. So `keepInSight` (the list's `onFocus`) moves the scroller to
   bring focus out between the stacks (WCAG 2.4.11). It is not redundant with the scroll
