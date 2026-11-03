@@ -13,7 +13,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { layerOf, partSheets, rulesOf, SHEETS } from "./clover-sheets.mjs";
+import { partSheets, rulesOf } from "./clover-sheets.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -48,20 +48,14 @@ await bundle("src/styles/clover.css", "dist/styles.css");
 await bundle("src/templates/templates.css", "dist/templates.css");
 
 /*
- * A page imports part sheets in any order, so each sheet's rules sit in a layer of their
- * own within `clover`, and every part sheet opens by stating the order of them all,
- * styles.css's, whichever part sheet loads first.
+ * The same sheets a part at a time, each in the one `clover` layer, its sheets in
+ * styles.css's order. Core's rules come before every other part's in that order, or tie
+ * with none, so a page that imports core.css first cascades as styles.css does
+ * (`build/styles.test.mjs`).
  */
-const order = `@layer ${SHEETS.filter(({ inStyles }) => inStyles)
-  .map(layerOf)
-  .join(",")};`;
 mkdirSync(resolve(root, "dist/styles"), { recursive: true });
-for (const [name, sheets] of Object.entries(partSheets())) {
-  const layers = await Promise.all(
-    sheets.map(async (sheet) => `@layer ${layerOf(sheet)}{${await rulesOf(sheet)}}`),
-  );
+for (const [name, sheets] of Object.entries(partSheets()))
   writeFileSync(
     resolve(root, `dist/styles/${name}.css`),
-    `@layer clover{${order}${layers.join("")}}\n`,
+    `@layer clover{${await rulesOf(...sheets)}}\n`,
   );
-}

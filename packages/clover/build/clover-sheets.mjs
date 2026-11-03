@@ -389,9 +389,17 @@ function importersOf() {
       .find((file) => existsSync(file) && /\.tsx?$/.test(file));
   for (const file of walk(src)) {
     const source = readFileSync(file, "utf8");
-    for (const [, specifier] of source.matchAll(
-      /(?:from|import|import\()\s*"(\.[^"]+)"/g,
-    )) {
+    // Statements (a type-only one draws nothing), side effects, and dynamic imports.
+    const specifiers = [
+      ...[
+        ...source.matchAll(
+          /^(?:import|export)\b(\s+type\b)?[^;]*?\bfrom\s*"(\.[^"]+)"/gm,
+        ),
+      ].flatMap(([, type, specifier]) => (type ? [] : [specifier])),
+      ...[...source.matchAll(/^import\s*"(\.[^"]+)"/gm)].map(([, s]) => s),
+      ...[...source.matchAll(/\bimport\(\s*"(\.[^"]+)"/g)].map(([, s]) => s),
+    ];
+    for (const specifier of specifiers) {
       const imported = target(file, specifier);
       if (imported)
         importers.set(imported, [...(importers.get(imported) ?? []), file]);
@@ -440,16 +448,3 @@ export function partSheets() {
   return groups;
 }
 
-/**
- * A sheet's own layer within `clover` in the part sheets, named for its file:
- * `components/Items/Pager` is `items-pager`, `ui/Button` `button`.
- */
-export const layerOf = (sheet) =>
-  sheet.key
-    .replace(/^(components|styles|ui|templates)\//, "")
-    .replace(/([^/]+)\/([^/]+)$/, (both, dir, file) =>
-      dir.toLowerCase() === file.toLowerCase() ? dir : both,
-    )
-    .replace(/([a-z])([A-Z])/g, "$1-$2")
-    .replace(/\//g, "-")
-    .toLowerCase();

@@ -19,6 +19,7 @@
   "mapOnDemandGzip": 289655,
   "stylesGzip": 19232,
   "templatesStylesGzip": 2346,
+  "coreStylesGzip": 8476,
   "elementsEntryGzip": 5670,
   "webComponentsGzip": 125735,
   "labelPageGzip": 35442,

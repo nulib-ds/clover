@@ -102,10 +102,11 @@ every rule below.
   the list. The same sheets are built again a part at a time (`dist/styles/<part>.css`,
   `partSheets` in `build/clover-sheets.mjs`): each sheet goes in the part sheet of the
   parts that draw what it styles (`OWNERS`, a `ui/` module standing for its importers),
-  else `core.css`. Each source sheet keeps a layer of its own in `clover`, and every part
-  sheet states their order, so the parts cascade as `styles.css` does in any import order.
-  A new `components/` directory gets a line in `PART_SHEETS`; `build/styles.test.mjs`
-  fails until it does.
+  else `core.css`. Each is plain `@layer clover`, its sheets in the list's order, and a
+  page imports `core.css` first: `build/styles.test.mjs` fails on any tie (same
+  specificity and property, the same element) between two other parts, or where core's
+  rule comes later in the list, as either would cascade apart from `styles.css`. A new
+  `components/` directory gets a line in `PART_SHEETS`; the test fails until it does.
 - **Space, type and selectors follow `DESIGN.md`.** Every space and text size is a step of
   the golden scale from the page's own 1rem, chosen by how closely things belong together
   (a container's inset one step above the gap between its children). Never set a font
