@@ -69,12 +69,18 @@ const HAS: Record<PanelSection, (state: CloverState) => boolean> = {
     selectListedSets(state.manifest, state.addedSets).length > 0,
 };
 
-/** Those of `PANEL_SECTIONS` with data, narrowed to the ones a page asked for. */
+/**
+ * Those of `PANEL_SECTIONS` with data, narrowed to the ones a page asked for. Anything
+ * but an array is no narrowing: an element's attribute carries whatever JSON it was
+ * given, and a page that wrote something else keeps every section rather than none.
+ */
 const narrow = (
   data: Record<PanelSection, boolean>,
   sections?: readonly PanelSection[],
 ) => {
-  const chosen = sections && new Set<string>(sections);
+  const chosen = Array.isArray(sections)
+    ? new Set<string>(sections)
+    : undefined;
   return PANEL_SECTIONS.filter(
     (section) => data[section] && (!chosen || chosen.has(section)),
   );

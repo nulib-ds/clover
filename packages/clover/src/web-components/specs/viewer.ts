@@ -28,7 +28,7 @@ export const viewer: ElementSpec = {
     // The templates' own (`templates/`): each one's, where it has it.
     "panel-open": { prop: "defaultPanelOpen", type: "boolean" },
     "panel-layout": { prop: "panelLayout", type: ["accordion", "tabs"] },
-    "panel-sections": { prop: "panelSections", type: "list" },
+    "panel-sections": { prop: "panelSections", type: "data" },
     "panel-labels": { prop: "panelLabels", type: "data" },
     "sidebar-open": { prop: "defaultSidebarOpen", type: "boolean" },
     "storage-key": { prop: "storageKey", type: "string" },
@@ -136,7 +136,7 @@ export const viewerDocs: ElementDocs = {
     },
     "panel-sections": {
       description:
-        'Default, Document and Gallery: which of the panel\'s sections it may have, parted by spaces: "contents search transcript annotations" leaves out About and the rest. Each still shows only where the resource has data for it, and there is no panel where none of them does.',
+        'Default, Document and Gallery: which of the panel\'s sections it may have, as a JSON array: ["contents","search","transcript","annotations"] leaves out About and the rest. Each still shows only where the resource has data for it, and there is no panel where none of them does.',
       default: "every section",
     },
     "panel-labels": {

@@ -70,7 +70,7 @@ describe("The panel and its tabs, as elements", () => {
 
   it("keeps to the sections its sections attribute names, and says them as labels asks", async () => {
     const element = root(
-      `<clover-panel sections="contents, annotations" labels='{"contents":"Chapters"}'></clover-panel>`,
+      `<clover-panel sections='["contents","annotations"]' labels='{"contents":"Chapters"}'></clover-panel>`,
     );
     const tablist = await within(element).findByRole("tablist");
     // Those two, in Clover's order, with no About: this Manifest has Ranges and
@@ -80,6 +80,19 @@ describe("The panel and its tabs, as elements", () => {
         .getAllByRole("tab")
         .map((tab) => tab.textContent),
     ).toEqual(["Chapters", "Annotations"]);
+  });
+
+  it("says a section in the language its labels give, marked with it", async () => {
+    document.documentElement.lang = "en";
+    const element = root(
+      `<clover-panel sections='["contents"]' labels='{"contents":{"de":"Kapitel"}}'></clover-panel>`,
+    );
+    const tablist = await within(element).findByRole("tablist");
+    const tab = within(tablist).getByRole("tab", { name: "Kapitel" });
+    // German on an English page, so the tab says which language it is in (WCAG 3.1.2).
+    await waitFor(() =>
+      expect(within(tab).getByText("Kapitel")).toHaveAttribute("lang", "de"),
+    );
   });
 
   it("draws a tab for each clover-tab, moving its content into its section as it first opens", async () => {

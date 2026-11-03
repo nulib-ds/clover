@@ -36,8 +36,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   needs them.
 
   The templates take it as `panelSections`, so `<Viewer panelSections={[…]} />` and
-  `<clover-viewer panel-sections="contents search">` reach their panel, and
-  `<clover-panel sections="contents search">` is the element's own.
+  `<clover-viewer panel-sections='["contents","search"]'>` reach their panel, and
+  `<clover-panel sections='["contents","search"]'>` is the element's own. An attribute
+  carries a list as JSON, as `annotations` and `labels` do.
 
 - **`Panel`'s `labels`: a word of your own for a section.** It says what a default
   section's tab or heading says, in place of Clover's own word for it, for this panel alone
@@ -64,9 +65,9 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the panel's checks on every page that uses any element, and an element layout needs
   none, since a `<clover-panel>` with no section draws nothing where it stands.
 
-- **The size budgets rise with these** (`build/size-budget.json`), by what they cost: about
-  400 B gzip on a page with the Default template, 530 B with Document, 80 B on the elements
-  entry, and 20 B on the Gallery, whose panel is its lightbox's.
+- **The size budgets rise with these** (`build/size-budget.json`), by what they cost: 394 B
+  gzip on a page with the Default template, 519 B with Document, 42 B on the elements
+  entry, and 25 B on the Gallery, whose panel is its lightbox's.
 
 ### Fixed
 

@@ -2144,14 +2144,21 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     where it opens and what moves it later: changed later, `canvas-id` and `manifest-id`
     move the reader, while `panel-open` and `sidebar-open` only say how the panes start;
     `tiled` (`isTiledImage`) is the one other exception. A value its type cannot read is
-    warned of once and ignored, so the part keeps its default. An attribute's type is
-    `string`, `number`, `boolean`, `list` (words parted by spaces or commas, for a prop
-    that takes an array of them: `<clover-panel sections="contents search">`), `data` (a
-    URL as written, or JSON) or a list of words; a new one is read in `base.ts`, written
-    as text by `build/custom-elements.mjs`, and read by the docs' agent helpers
-    (`docs/lib/compose/layout.ts`, `suggest.ts`). 3.x defines
+    warned of once and ignored, so the part keeps its default. 3.x defines
     `clover-viewer`, `clover-image`, `clover-slider` and `clover-map`, in light DOM too,
     and a tag takes one definition, so a page runs one version's elements, never both.
+  - **An attribute's type** is `string`, `number`, `boolean`, `data` (a URL as written, or
+    JSON) or a list of words. **A prop that takes an array or an object is `data`, never a
+    list of tokens** (Mat, 2026-11-02): `<clover-panel sections='["contents","search"]'>`,
+    not `sections="contents search"`. A token list is HTML's own pattern for its own
+    elements (`class`, `rel`, `sandbox`), and the platform never gave a custom element the
+    `DOMTokenList` to go with it (W3C 27114, resolved NEEDSINFO); the web components
+    around us settled on JSON instead, which is what Lit's default converter writes and
+    reads for an array. So `annotations`, `labels` and `sections` all read the same way,
+    and `[]` says something `sections=""` cannot. A part whose prop may also be a string
+    types it so (`AnnotationsInput`); one whose prop may not guards what arrives, where it
+    reads it (`narrow`, `components/Panel/sections.ts`), since an attribute carries
+    whatever JSON it was given. Do not add an attribute type for a shape `data` can carry.
   - **Parity** (`specs/specs.test.ts`): every part `parts.ts` exports has an element, or
     a reason why not yet (`LATER`, empty since 2026-10-22) or not at all (`NEVER`, empty
     since 2026-10-22: `Tip` is `<clover-tip>`, `ReadMore` `<clover-read-more>`). A new

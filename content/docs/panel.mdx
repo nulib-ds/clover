@@ -213,7 +213,9 @@ the Root a `language`, or place `About` yourself, where a resource needs them.
 ```
 
 ```html twin
-<clover-panel sections="contents search transcript annotations"></clover-panel>
+<clover-panel
+  sections='["contents", "search", "transcript", "annotations"]'
+></clover-panel>
 ```
 
 </Example>
@@ -238,17 +240,21 @@ function Aside() {
 ### A word of your own for a section
 
 `labels` says what a section's tab or heading says, in place of Clover's own word for it.
-A string is the page's own words, in the page's language. To say it in more than one, give
-it by language tag: Clover reads it in the language it speaks, by IIIF's rule, and the tab
-carries that language where it is not the page's (WCAG 3.1.2). `initCloverI18n` changes
-Clover's own words for every panel on the page ([i18n](/docs/i18n)); `labels` is this
-panel's alone.
+A string is the page's own words, in the page's language, and carries no `lang`. To say it
+in more than one, give it by language tag: Clover reads it in the language it speaks, by
+IIIF's rule, and the tab carries that language where it is not the page's (WCAG 3.1.2).
+`initCloverI18n` changes Clover's own words for every panel on the page
+([i18n](/docs/i18n)); `labels` is this panel's alone.
+
+So on an English page, with Clover speaking German, the panel below says `Kapitel` and
+`Anmerkungen`, each in a `<span lang="de">`; with Clover speaking English, `Chapters` and
+`Notes`, unmarked. A tag Clover speaks no word for falls back as any language map does.
 
 ```jsx
 <Clover.Panel
   sections={["contents", "annotations"]}
   labels={{
-    contents: "Chapters",
+    contents: { en: "Chapters", de: "Kapitel" },
     annotations: { en: "Notes", de: "Anmerkungen" },
   }}
 />
@@ -256,8 +262,8 @@ panel's alone.
 
 ```html twin
 <clover-panel
-  sections="contents annotations"
-  labels='{"contents": "Chapters", "annotations": {"en": "Notes", "de": "Anmerkungen"}}'
+  sections='["contents", "annotations"]'
+  labels='{"contents": {"en": "Chapters", "de": "Kapitel"}, "annotations": {"en": "Notes", "de": "Anmerkungen"}}'
 ></clover-panel>
 ```
 

@@ -153,7 +153,6 @@ function meaningOf(need: string, words: Map<string, Meaning>) {
 function typeOf(info: PropInfo) {
   if (!Array.isArray(info.type)) {
     if (info.type === "data") return "string | JSON";
-    if (info.type === "list") return "string[]";
     return info.type as string;
   }
   return (info.type as readonly string[])

@@ -17,7 +17,7 @@ export const panel: ElementSpec = {
     "heading-level": { prop: "headingLevel", type: "number", min: 1 },
     download: { prop: "download", type: "boolean" },
     languages: { prop: "languages", type: "boolean" },
-    sections: { prop: "sections", type: "list" },
+    sections: { prop: "sections", type: "data" },
     labels: { prop: "labels", type: "data" },
     closable: { prop: "closable", type: "boolean" },
     "close-on-escape": { prop: "closeOnEscape", type: "boolean" },
@@ -59,7 +59,7 @@ export const panelDocs: ElementDocs = {
     },
     sections: {
       description:
-        'Which of the default sections it may have, parted by spaces: "contents search transcript annotations" leaves out About and the rest. Each still shows only where the resource has data for it, and the panel draws nothing where none of them does. Its clover-tab children win over it.',
+        'Which of the default sections it may have, as a JSON array: ["contents","search","transcript","annotations"] leaves out About and the rest. Each still shows only where the resource has data for it, and the panel draws nothing where none of them does. Its clover-tab children win over it.',
       default: "every section",
     },
     labels: {

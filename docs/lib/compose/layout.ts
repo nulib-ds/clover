@@ -152,13 +152,6 @@ function valueOf(
       return { error: `is a number, ${info.min} or more.` };
     return { value: number };
   }
-  if (type === "list") {
-    if (Array.isArray(value) && value.every((each) => typeof each === "string"))
-      return { value };
-    if (typeof value === "string")
-      return { value: value.split(/[\s,]+/).filter(Boolean) };
-    return { error: "is a list of words." };
-  }
   if (type === "string") {
     if (typeof value === "string") return { value };
     return {

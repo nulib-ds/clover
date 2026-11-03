@@ -7,15 +7,14 @@
 
 /**
  * How an attribute is read: as written (`string`); a number; a boolean (present is true,
- * as HTML's are, and `"false"` turns it off); a list of words, parted by spaces or commas
- * (`list`); data (a URL as written, or JSON); or one of a list of words, in any case
+ * as HTML's are, and `"false"` turns it off); data (a URL as written, or JSON, which is
+ * how an attribute carries a list or an object); or one of a list of words, in any case
  * (`"false"` among them turns the prop off).
  */
 export type AttributeType =
   | "string"
   | "number"
   | "boolean"
-  | "list"
   | "data"
   | readonly string[];
 

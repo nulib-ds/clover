@@ -60,11 +60,6 @@ function read(
     }
     return number;
   }
-  if (type === "list") {
-    // Words parted by spaces or commas: `sections="contents, search"`. None is none.
-    const words = value.split(/[\s,]+/).filter(Boolean);
-    return words.length ? words : undefined;
-  }
   if (type === "data") {
     // A URL as written; JSON when it opens as JSON does.
     const text = value.trim();
