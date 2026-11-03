@@ -24,6 +24,40 @@ over specificity. Without them, every part still renders a plain, usable layout.
 import "@nulib/clover/styles.css";
 ```
 
+<div data-code-flavor="react">
+
+A page of parts can import only the sheets of the parts it draws, in place of
+`styles.css`: `styles/core.css`, which every part needs, and the sheet of each other part
+on the page. A page of images with `Root`, `Status`, `Body`, `Position` and `Items` needs
+two:
+
+```jsx react
+import "@nulib/clover/styles/core.css";
+import "@nulib/clover/styles/items.css";
+```
+
+| Sheet                          | Its parts                                                                                                                                                                    |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `styles/core.css`              | The scale and higher-contrast mode every part reads, `Root`, `Body` and its `Canvas` with the Canvas's controls, annotations and menus, `Status`, `Label` and the Primitives |
+| `styles/items.css`             | `Items`, its pager, and `Position`                                                                                                                                           |
+| `styles/panel.css`             | `Panel` and its sections: `Annotations`, `Collection`, `Contents`, `Download`, `Search` and `Transcript`                                                                     |
+| `styles/media.css`             | A Body's video or sound, with its player and transport, `Timeline`, and an animation's player                                                                                |
+| `styles/scene.css`             | `Scene`                                                                                                                                                                      |
+| `styles/map.css`               | `Map`                                                                                                                                                                        |
+| `styles/split.css`             | `Split`                                                                                                                                                                      |
+| `styles/collection-select.css` | `CollectionSelect`                                                                                                                                                           |
+| `styles/default.css`           | The Viewer's `Default` template                                                                                                                                              |
+
+Their rules sit in `@layer clover`, as `styles.css`'s do, each source file's in a layer
+of its own within it (`clover.items`, `clover.button`), and every sheet opens by stating
+the order of those layers. So the sheets cascade as `styles.css` does, whichever order you
+import them in. A later version may add unstyled sheets beside these, with only the rules
+a part needs to work (its sections opening and closing, what sits over what), in a layer
+stated before the others. The Viewer draws most parts: give it `styles.css`, and
+`templates.css`.
+
+</div>
+
 The web components carry their styles: each element adds its own to the document once,
 first in `<head>`, so your rules still win, and the custom properties below reach the
 elements as they reach the React parts.
