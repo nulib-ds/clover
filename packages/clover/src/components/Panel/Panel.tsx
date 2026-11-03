@@ -12,16 +12,10 @@ import { AboutActions } from "./AboutActions";
 import { InPanelContext } from "./ReadingLanguages";
 import { Tip } from "../../ui/Tip";
 import { Close } from "../Body/glyphs";
-import {
-  canvasTimedText,
-  canvasTextTranscripts,
-  type IIIFCanvas,
-} from "../Canvas/layout";
-import { SEARCH_SET_ID, searchServiceOf } from "../../core/search-service";
-import { hasMapData } from "../../core/geo-detect";
-import { tableOfContents } from "../../core/ranges";
-import { partOfCollection, selectVisibleCanvases } from "../../core/selectors";
-import { selectListedSets } from "../../core/annotation-sets";
+import { SEARCH_SET_ID } from "../../core/search-service";
+import { type PanelSection, usePanelSections } from "./sections";
+import { langWithin } from "../../i18n/config";
+import { languageToRead } from "../../i18n/languages";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useClover, useCloverSelector } from "../../react/context";
@@ -72,6 +66,20 @@ const Annotations = lazy(() =>
 const later = (content: React.ReactNode) => (
   <Suspense fallback={null}>{content}</Suspense>
 );
+
+export type { PanelSection };
+
+/**
+ * What a page calls a section, in place of Clover's own word for it: its words, taken to
+ * be in the page's language, or its words by language tag, one of which the tab carries
+ * as its `lang` where it is not the page's (WCAG 3.1.2).
+ */
+export type PanelSectionLabel = string | Readonly<Record<string, string>>;
+
+/** A label for any of the default sections, by its value. */
+export type PanelSectionLabels = Partial<
+  Record<PanelSection, PanelSectionLabel>
+>;
 
 export interface TabProps {
   /** Identifies the tab, for `value` / `defaultValue` on the panel. */
@@ -142,7 +150,22 @@ export interface PanelProps
    */
   languages?: boolean;
   /**
-   * `Clover.Tab`s. Without any, the panel has the tabs Clover has data for: About,
+   * Which of the default sections the panel may have, in Clover's own order: with
+   * `["contents", "search"]` it has those two and no About. Each still shows only where
+   * the resource has data for it, so a resource with none of them draws no panel at all.
+   * `Tab` children win over it. Default: every section.
+   */
+  sections?: readonly PanelSection[];
+  /**
+   * What a default section's tab or heading says, in place of Clover's own word for it:
+   * `{ annotations: "Chapters" }`, or `{ annotations: { en: "Chapters", de: "Kapitel" } }`
+   * to say it in several, read in the one Clover speaks and marked with its language
+   * where that is not the page's (WCAG 3.1.2). A `Tab` of your own says it in `label`.
+   */
+  labels?: PanelSectionLabels;
+  /**
+   * `Clover.Tab`s, the panel's sections whole, in their order: they win over `sections`.
+   * Without any, the panel has the tabs Clover has data for: About,
    * Contents when the Manifest has Ranges, Search when it has a Content Search service, a
    * Map when it (or a Canvas or annotation) has navPlace or a georeference,
    * a Transcript when the view's media has captions or a plain-text transcript, and
@@ -163,6 +186,14 @@ export interface PanelProps
  *   <Clover.Tab value="notes" label="Notes"><MyNotes /></Clover.Tab>
  * </Clover.Panel>
  * ```
+ *
+ * To keep Clover's own sections but not all of them, name the ones you want in
+ * `sections`: each still shows only where the resource has data for it, and a resource
+ * with none of them has no panel.
+ *
+ * ```jsx
+ * <Clover.Panel sections={["contents", "search", "transcript", "annotations"]} />
+ * ```
  */
 export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
   {
@@ -176,6 +207,8 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
     as: Tag = "aside",
     download = true,
     languages = true,
+    sections,
+    labels,
     className,
     children,
     onKeyDown,
@@ -185,7 +218,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
 ) {
   const { clover } = useClover("Panel");
   const element = useRef<HTMLElement | null>(null);
-  const { t, langOf } = useCloverTranslation();
+  const { t, langOf, hostLanguage, i18n } = useCloverTranslation();
   /*
    * Its landmark named as its sections are, so a list of landmarks tells it from another
    * (the Document template's thumbnails, "Items"). A name the host gives it stands; an
@@ -202,40 +235,34 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
     const lang = langOf(key);
     return lang ? <span {...languageProps(lang)}>{t(key)}</span> : t(key);
   };
-  const hasAnnotations = useCloverSelector(
-    (state) => selectListedSets(state.manifest, state.addedSets).length > 0,
-  );
-  const hasTranscript = useCloverSelector((state) =>
-    (
-      selectVisibleCanvases(
-        state.manifest,
-        state.canvasId,
-      ) as unknown as IIIFCanvas[]
-    ).some(
-      (canvas) =>
-        canvasTimedText(canvas).length > 0 ||
-        canvasTextTranscripts(canvas).length > 0,
-    ),
-  );
-  const hasContents = useCloverSelector(
-    (state) => tableOfContents(state.manifest).length > 0,
-  );
-  const hasSearch = useCloverSelector((state) =>
-    Boolean(searchServiceOf(state.manifest)),
-  );
-  const hasMap = useCloverSelector((state) =>
-    hasMapData(state.manifest, state.collection),
-  );
-  // A content state's several targets (Cookbook 0540), listed as a Collection's members are.
-  const hasTargets = useCloverSelector(
-    (state) => (state.targets?.items.length ?? 0) > 1,
-  );
-  // Reached through a Collection, or part of one: offered either way, fetched only when opened.
-  const hasCollection = useCloverSelector(
-    (state) =>
-      (state.collection?.items?.length ?? 0) > 0 ||
-      Boolean(partOfCollection(state.manifest)),
-  );
+  /*
+   * What a section's tab says: Clover's own word for it, or the page's (`labels`), read
+   * in the language Clover speaks where the page gives it in several (IIIF's rule, as
+   * every language map is read) and marked with that language where it is not the page's,
+   * as Clover's own strings are (WCAG 3.1.2). A label in one language is the page's own
+   * words on its own page, so it is marked with nothing.
+   */
+  const sectionLabel = (section: PanelSection, key: string) => {
+    const given = labels?.[section];
+    if (given === undefined) return tabLabel(key);
+    if (typeof given === "string") return given;
+    const tags = Object.keys(given);
+    const tag = languageToRead(tags, i18n.language);
+    if (!tag) return tabLabel(key);
+    const lang = langWithin(tag, hostLanguage);
+    return lang ? (
+      <span {...languageProps(lang)}>{given[tag]}</span>
+    ) : (
+      given[tag]
+    );
+  };
+  /*
+   * The sections this panel may have, in Clover's order: About, and each other one the
+   * resource has data for, narrowed to `sections` where the page names its own
+   * (`usePanelSections`, which a layout of its own can ask first).
+   */
+  const offered = usePanelSections(sections);
+  const has = (section: PanelSection) => offered.includes(section);
   const given = React.Children.toArray(children).filter(
     (child): child is React.ReactElement<TabProps> =>
       React.isValidElement(child) && child.type === Tab,
@@ -260,44 +287,51 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
         ...(props.value === "about" && { actions: aboutActions }),
       }))
     : [
-        {
-          value: "about",
-          label: tabLabel("informationPanelTabsAbout"),
-          content: <About headingLevel={inner} download={download} />,
-          actions: aboutActions,
-        },
-        ...(hasTargets
+        ...(has("about")
+          ? [
+              {
+                value: "about",
+                label: sectionLabel("about", "informationPanelTabsAbout"),
+                content: <About headingLevel={inner} download={download} />,
+                actions: aboutActions,
+              },
+            ]
+          : []),
+        ...(has("targets")
           ? [
               {
                 value: "targets",
-                label: tabLabel("informationPanelTabsTargets"),
+                label: sectionLabel("targets", "informationPanelTabsTargets"),
                 content: later(<Targets headingLevel={inner} />),
               },
             ]
           : []),
-        ...(hasCollection
+        ...(has("collection")
           ? [
               {
                 value: "collection",
-                label: tabLabel("informationPanelTabsCollection"),
+                label: sectionLabel(
+                  "collection",
+                  "informationPanelTabsCollection",
+                ),
                 content: later(<Collection headingLevel={inner} />),
               },
             ]
           : []),
-        ...(hasContents
+        ...(has("contents")
           ? [
               {
                 value: "contents",
-                label: tabLabel("informationPanelTabsContents"),
+                label: sectionLabel("contents", "informationPanelTabsContents"),
                 content: later(<Contents />),
               },
             ]
           : []),
-        ...(hasSearch
+        ...(has("search")
           ? [
               {
                 value: "search",
-                label: tabLabel("informationPanelTabsSearch"),
+                label: sectionLabel("search", "informationPanelTabsSearch"),
                 // Its field small and held as the hits scroll (Mat, 2026-10-26).
                 content: later(
                   <Search headingLevel={inner} sticky size="small" />,
@@ -305,30 +339,33 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
               },
             ]
           : []),
-        ...(hasMap
+        ...(has("map")
           ? [
               {
                 value: "map",
-                label: tabLabel("informationPanelTabsMap"),
+                label: sectionLabel("map", "informationPanelTabsMap"),
                 content: later(<RootMap />),
               },
             ]
           : []),
-        ...(hasTranscript
+        ...(has("transcript")
           ? [
               {
                 value: "transcript",
-                label: tabLabel("transcriptLabel"),
+                label: sectionLabel("transcript", "transcriptLabel"),
                 // Its find field small and held as the cues scroll, as Search's.
                 content: later(<Transcript sticky size="small" />),
               },
             ]
           : []),
-        ...(hasAnnotations
+        ...(has("annotations")
           ? [
               {
                 value: "annotations",
-                label: tabLabel("informationPanelTabsAnnotations"),
+                label: sectionLabel(
+                  "annotations",
+                  "informationPanelTabsAnnotations",
+                ),
                 // Every Canvas's, by Canvas, those in view kept in sight.
                 content: later(<Annotations headingLevel={inner} />),
               },

@@ -41,8 +41,12 @@ export { Panel, Tab } from "./components/Panel/Panel";
 export type {
   PanelLayout,
   PanelProps,
+  PanelSection,
+  PanelSectionLabel,
+  PanelSectionLabels,
   TabProps,
 } from "./components/Panel/Panel";
+export { usePanelSections } from "./components/Panel/sections";
 export { About } from "./components/Panel/About";
 export { Annotations } from "./components/Annotations/Annotations";
 export type { AnnotationsProps } from "./components/Annotations/Annotations";

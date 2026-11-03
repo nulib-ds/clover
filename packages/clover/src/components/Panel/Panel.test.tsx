@@ -574,6 +574,160 @@ describe("Panel", () => {
   });
 });
 
+describe("The sections a panel has", () => {
+  const SHELF = "https://example.org/letters";
+  /*
+   * The letter, reached through a Collection, with a Content Search service and a Range:
+   * About, Collection, Contents and Search have data; Views, a Map, the Transcript and
+   * Annotations have none.
+   */
+  const several = {
+    ...manifest,
+    partOf: [{ id: SHELF, type: "Collection", label: { en: ["Letters"] } }],
+    service: [
+      {
+        id: `${SHELF}/search`,
+        type: "SearchService2",
+        profile: "http://iiif.io/api/search/2/search",
+      },
+    ],
+    structures: [
+      {
+        id: "https://example.org/range/1",
+        type: "Range",
+        label: { en: ["The first part"] },
+        items: [{ id: "https://example.org/canvas/1", type: "Canvas" }],
+      },
+    ],
+  };
+  const tabs = () => screen.queryAllByRole("tab").map((tab) => tab.textContent);
+
+  afterEach(() => {
+    document.documentElement.lang = "";
+  });
+
+  it("has every section the resource has data for, unasked", async () => {
+    render(
+      <Clover.Root iiifContent={several}>
+        <Clover.Panel />
+      </Clover.Root>,
+    );
+    await screen.findByRole("tab", { name: "About" });
+    expect(tabs()).toEqual(["About", "Collection", "Contents", "Search"]);
+  });
+
+  it("keeps to the sections asked for, each still only where there is data", async () => {
+    render(
+      <Clover.Root iiifContent={several}>
+        <Clover.Panel
+          sections={["contents", "search", "transcript", "annotations"]}
+        />
+      </Clover.Root>,
+    );
+    await screen.findByRole("tab", { name: "Contents" });
+    // Contents and Search have data; the Transcript and Annotations have none, and
+    // About and the Collection were not asked for.
+    expect(tabs()).toEqual(["Contents", "Search"]);
+  });
+
+  it("leaves About out, its Download button and languages with it", async () => {
+    render(
+      <Clover.Root iiifContent={several}>
+        <Clover.Panel sections={["contents"]} />
+      </Clover.Root>,
+    );
+    await screen.findByRole("tab", { name: "Contents" });
+    expect(tabs()).toEqual(["Contents"]);
+    expect(
+      screen.queryByRole("button", { name: "Download" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("draws no panel at all where none of them has data", async () => {
+    const { container } = render(
+      <Clover.Root iiifContent={manifest}>
+        <Clover.Panel
+          sections={["contents", "search", "transcript", "annotations"]}
+        />
+      </Clover.Root>,
+    );
+    // The Root draws, and nothing in it is a panel.
+    await waitFor(() =>
+      expect(container.querySelector(".clover-root")).toBeInTheDocument(),
+    );
+    expect(container.querySelector(".clover-panel")).toBeNull();
+    expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+    expect(tabs()).toEqual([]);
+  });
+
+  it("lets Tabs of your own win over it", async () => {
+    render(
+      <Clover.Root iiifContent={several}>
+        <Clover.Panel sections={["contents"]}>
+          <Clover.Tab value="notes" label="Notes">
+            <p>My notes</p>
+          </Clover.Tab>
+        </Clover.Panel>
+      </Clover.Root>,
+    );
+    await screen.findByRole("tab", { name: "Notes" });
+    expect(tabs()).toEqual(["Notes"]);
+  });
+
+  it("tells a layout of its own which sections it would have", async () => {
+    function Asked({ sections }: { sections?: Clover.PanelSection[] }) {
+      return <p>{Clover.usePanelSections(sections).join(" ") || "none"}</p>;
+    }
+    const { rerender } = render(
+      <Clover.Root iiifContent={several}>
+        <Asked />
+      </Clover.Root>,
+    );
+    expect(
+      await screen.findByText("about collection contents search"),
+    ).toBeInTheDocument();
+    rerender(
+      <Clover.Root iiifContent={several}>
+        <Asked sections={["transcript", "annotations"]} />
+      </Clover.Root>,
+    );
+    expect(await screen.findByText("none")).toBeInTheDocument();
+  });
+
+  it("takes a word of your own for a section, in the page's language", async () => {
+    render(
+      <Clover.Root iiifContent={several}>
+        <Clover.Panel
+          sections={["contents", "search"]}
+          labels={{ contents: "Chapters" }}
+        />
+      </Clover.Root>,
+    );
+    const tab = await screen.findByRole("tab", { name: "Chapters" });
+    // The page's own words on its own page: nothing marks them.
+    expect(tab.querySelector("[lang]")).toBeNull();
+    expect(tabs()).toEqual(["Chapters", "Search"]);
+  });
+
+  it("reads a word given in several languages in the one Clover speaks, marked with it", async () => {
+    document.documentElement.lang = "en";
+    await initCloverI18n({ lng: "fr" }).ready();
+    render(
+      <Clover.Root iiifContent={several}>
+        <Clover.Panel
+          sections={["contents"]}
+          labels={{ contents: { en: "Chapters", fr: "Chapitres" } }}
+        />
+      </Clover.Root>,
+    );
+    const tab = await screen.findByRole("tab", { name: "Chapitres" });
+    // French on an English page, so the tab says which language it is in (WCAG 3.1.2).
+    await waitFor(() =>
+      expect(within(tab).getByText("Chapitres")).toHaveAttribute("lang", "fr"),
+    );
+  });
+});
+
 describe("Panel closing", () => {
   function Host({ closeOnEscape = false }: { closeOnEscape?: boolean }) {
     const [open, setOpen] = React.useState(true);

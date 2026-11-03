@@ -5,6 +5,8 @@ import type {
   ItemsLayout,
   ItemsProps,
   PanelLayout,
+  PanelSection,
+  PanelSectionLabels,
   RootProps,
 } from "../../parts";
 import { useGivenAnnotations } from "../shared/givenAnnotations";
@@ -56,6 +58,19 @@ export type GalleryProps = Omit<RootProps, "children"> & {
   defaultPanelOpen?: boolean;
   /** How the panel lays out its sections: `"accordion"` (the default) or `"tabs"`. */
   panelLayout?: PanelLayout;
+  /**
+   * The panel's sections, from Clover's own: with
+   * `["contents", "search", "transcript", "annotations"]` it has those four, each still
+   * only where the resource has data for it, and no panel at all where it has none of
+   * them. Default: every section.
+   */
+  panelSections?: readonly PanelSection[];
+  /**
+   * What a panel section's tab or heading says, in place of Clover's own word for it:
+   * `{ annotations: "Chapters" }`, or a word by language tag to say it in several (the
+   * Panel's `labels`).
+   */
+  panelLabels?: PanelSectionLabels;
   /** The downloads in the panel's About, where there is a `rendering`. Default `true`. */
   download?: boolean;
   /**
@@ -106,6 +121,8 @@ export function Gallery({
   panel = true,
   defaultPanelOpen = true,
   panelLayout = "accordion",
+  panelSections,
+  panelLabels,
   download = true,
   languages = true,
   storageKey = "clover-template-gallery",
@@ -156,6 +173,8 @@ export function Gallery({
         panel={panel}
         defaultPanelOpen={defaultPanelOpen}
         panelLayout={panelLayout}
+        panelSections={panelSections}
+        panelLabels={panelLabels}
         download={download}
         languages={languages}
         storageKey={storageKey}

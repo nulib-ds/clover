@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 
 import * as Clover from "../../parts";
-import type { PanelProps } from "../../parts";
+import type { PanelProps, PanelSection, PanelToggleProps } from "../../parts";
 import { preloadDrag } from "./useDragToClose";
 import { useDrawer } from "./useDrawer";
 import type { useFollowFocus } from "./useFollowFocus";
@@ -28,6 +28,12 @@ export interface PanelPaneOptions {
    * sits the inset down from the spine's top, as the Body starts there.
    */
   body?: () => HTMLElement | null | undefined;
+  /**
+   * The sections the panel may have (`Clover.Panel`'s `sections`). Where the resource has
+   * none of them the pane and its toggle are left out altogether, so a layout never keeps
+   * room for a panel with nothing in it.
+   */
+  sections?: readonly PanelSection[];
   /**
    * The Panel: `Clover.Panel`, drawn at once where the panel starts open; or, while its
    * code is still to come, nothing (`useLazyPanelPane`).
@@ -61,6 +67,7 @@ export function usePanelPane({
   defaultOpen,
   followFocus,
   body,
+  sections,
   panel,
   load,
 }: PanelPaneOptions) {
@@ -85,7 +92,8 @@ export function usePanelPane({
   };
 
   const toggle = (
-    <Clover.PanelToggle
+    <PaneToggle
+      sections={sections}
       open={drawer.open}
       onOpenChange={(next) =>
         next && !panel && load
@@ -117,10 +125,26 @@ export function usePanelPane({
 export type PanelPaneState = ReturnType<typeof usePanelPane>;
 
 /**
+ * The toggle, drawn only where the panel it opens has a section to show
+ * (`usePanelSections`): a template places it among the Body's controls and on the spine,
+ * both inside the Root, so it can ask there what the pane itself asks.
+ */
+function PaneToggle({
+  sections,
+  ...props
+}: { sections?: readonly PanelSection[] } & PanelToggleProps) {
+  return Clover.usePanelSections(sections).length ? (
+    <Clover.PanelToggle {...props} />
+  ) : null;
+}
+
+/**
  * The panel's side of a template's `Split`, after its main pane: while docked, the bar
  * and the spine holding the toggle; the pane itself (`clover-template-panel`), its Panel
  * given `onClose` and Escape while it floats over the Body; and, over the Body, the wash
- * beside it. Its look is written once, in `Default.css`, which `styles.css` carries.
+ * beside it. Nothing at all where the resource has none of the panel's sections: a
+ * template keeps no room, and no toggle, for a panel that would draw nothing. Its look is
+ * written once, in `Default.css`, which `styles.css` carries.
  */
 export function PanelPane({
   pane,
@@ -131,6 +155,8 @@ export function PanelPane({
   "onClose" | "closeOnEscape"
 >) {
   const { id, over, docked, Part } = pane;
+  const offered = Clover.usePanelSections(panel.sections);
+  if (!offered.length) return null;
   return (
     <>
       {docked && (
@@ -149,6 +175,12 @@ export function PanelPane({
         id={id}
         data-spine={over || undefined}
         name="panel"
+        /*
+         * Whether its panel has About, which Default's header reads to decide whether it
+         * may tuck the provider's logo away in a narrow column: About shows the provider,
+         * and a panel without it shows the provider nowhere.
+         */
+        data-about={offered.includes("about") || undefined}
         className={["clover-template-panel clover-template-drawer", className]
           .filter(Boolean)
           .join(" ")}

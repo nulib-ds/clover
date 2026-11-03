@@ -30,23 +30,24 @@ import "@nulib/clover/templates.css";
 />;
 ```
 
-| Prop               | Default                     | What it does                                                                   |
-| ------------------ | --------------------------- | ------------------------------------------------------------------------------ |
-| `items`            | `"grid"`                    | The grid, as its Items' layout: `grid` (square cells) or `masonry`.            |
-| `secondary`        | `"summary"`                 | The line under each cell's label: `summary`, `navDate` or `none`.              |
-| `summary`          | `true`                      | The summary under the title, two lines with Read more; `false` leaves it out.  |
-| `size`             | `10rem`                     | A grid cell's width (sets `--clover-items-size`).                              |
-| `gap`              | The inset                   | The space between cells: pixels, or a CSS length.                              |
-| `height`           | `"auto"`                    | `auto` grows with the grid; a height holds it, the grid scrolling under it.    |
-| `lightboxItems`    | `"slider"`                  | Under the lightbox's view: a short strip of thumbnails, or `"pager"`.          |
-| `panel`            | `true`                      | The information panel beside the lightbox's view, as Default's and Document's. |
-| `defaultPanelOpen` | `true`                      | Whether the panel starts open beside the view; over it, closed.                |
-| `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.                            |
-| `download`         | `true`                      | The downloads in the panel's About.                                            |
-| `languages`        | `true`                      | The languages to read the resource in, beside the panel's About heading.       |
-| `storageKey`       | `"clover-template-gallery"` | Where the panel's width is remembered; `false` forgets it.                     |
-| `headingLevel`     | `2`                         | The title's level; the lightbox's title is one below.                          |
-| …                  |                             | Every `Clover.Root` prop.                                                      |
+| Prop               | Default                     | What it does                                                                      |
+| ------------------ | --------------------------- | --------------------------------------------------------------------------------- |
+| `items`            | `"grid"`                    | The grid, as its Items' layout: `grid` (square cells) or `masonry`.               |
+| `secondary`        | `"summary"`                 | The line under each cell's label: `summary`, `navDate` or `none`.                 |
+| `summary`          | `true`                      | The summary under the title, two lines with Read more; `false` leaves it out.     |
+| `size`             | `10rem`                     | A grid cell's width (sets `--clover-items-size`).                                 |
+| `gap`              | The inset                   | The space between cells: pixels, or a CSS length.                                 |
+| `height`           | `"auto"`                    | `auto` grows with the grid; a height holds it, the grid scrolling under it.       |
+| `lightboxItems`    | `"slider"`                  | Under the lightbox's view: a short strip of thumbnails, or `"pager"`.             |
+| `panel`            | `true`                      | The information panel beside the lightbox's view, as Default's and Document's.    |
+| `defaultPanelOpen` | `true`                      | Whether the panel starts open beside the view; over it, closed.                   |
+| `panelLayout`      | `"accordion"`               | The panel's sections as stacked boxes, or `"tabs"`.                               |
+| `panelSections`    | All                         | Which of the panel's sections it may have; none with data, and there is no panel. |
+| `download`         | `true`                      | The downloads in the panel's About.                                               |
+| `languages`        | `true`                      | The languages to read the resource in, beside the panel's About heading.          |
+| `storageKey`       | `"clover-template-gallery"` | Where the panel's width is remembered; `false` forgets it.                        |
+| `headingLevel`     | `2`                         | The title's level; the lightbox's title is one below.                             |
+| …                  |                             | Every `Clover.Root` prop.                                                         |
 
 The lightbox fills the Gallery by default. `--clover-template-lightbox-inset`,
 `--clover-template-lightbox-backdrop` and `--clover-template-lightbox-radius` give it room

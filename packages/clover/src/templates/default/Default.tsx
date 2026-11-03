@@ -1,7 +1,13 @@
 import React, { useEffect, useRef } from "react";
 
 import * as Clover from "../../parts";
-import type { PanelLayout, ItemsLayout, RootProps } from "../../parts";
+import type {
+  PanelLayout,
+  PanelSection,
+  PanelSectionLabels,
+  ItemsLayout,
+  RootProps,
+} from "../../parts";
 import { PanelPane, usePanelPane } from "../shared/PanelPane";
 import { BESIDE_REM, PAGE_MIN, useWideEnough } from "../shared/useSlide";
 import { useFollowFocus } from "../shared/useFollowFocus";
@@ -27,6 +33,19 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    * stacked boxes each opened by its heading, or `"tabs"`.
    */
   panelLayout?: PanelLayout;
+  /**
+   * The panel's sections, from Clover's own: with
+   * `["contents", "search", "transcript", "annotations"]` it has those four, each still
+   * only where the resource has data for it, and no panel at all where it has none of
+   * them. Default: every section.
+   */
+  panelSections?: readonly PanelSection[];
+  /**
+   * What a panel section's tab or heading says, in place of Clover's own word for it:
+   * `{ annotations: "Chapters" }`, or a word by language tag to say it in several (the
+   * Panel's `labels`).
+   */
+  panelLabels?: PanelSectionLabels;
   /** The downloads, from a Download button beside the panel's About heading. Default `true`. */
   download?: boolean;
   /**
@@ -80,6 +99,8 @@ export function Default({
   panel = true,
   defaultPanelOpen,
   panelLayout = "accordion",
+  panelSections,
+  panelLabels,
   download = true,
   languages = true,
   items = "slider",
@@ -106,6 +127,7 @@ export function Default({
     beside: useWideEnough(panes, BESIDE_REM),
     defaultOpen: defaultPanelOpen ?? true,
     followFocus: useFollowFocus(),
+    sections: panelSections,
     body: () =>
       panes.current?.querySelector<HTMLElement>(
         ".clover-template-default-body",
@@ -179,6 +201,8 @@ export function Default({
             pane={pane}
             className="clover-template-default-panel"
             layout={panelLayout}
+            sections={panelSections}
+            labels={panelLabels}
             download={download}
             languages={languages}
             // With no title over them, the sections take its place in the outline.
