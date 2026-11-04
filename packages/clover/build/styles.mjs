@@ -6,14 +6,17 @@
  * Package JS never imports CSS: consumers import "@nulib/clover/styles.css" once. That
  * keeps server rendering free of a flash of unstyled content, works under a strict CSP,
  * and suits frameworks (Next's Pages Router) that only allow global CSS in one place.
- * Every part still lays out plainly without it.
+ * Every part still lays out plainly without it. Only the part sheets of what loads as it
+ * draws (a recording, a Scene, a map) come with their code instead, adopted by the
+ * document as it loads (`lazySheets`, `src/ui/adoptSheet.ts`), which a strict CSP allows
+ * and no framework sees.
  */
 import { build } from "esbuild";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { partSheets, rulesOf } from "./clover-sheets.mjs";
+import { lazyParts, partSheets, rulesOf } from "./clover-sheets.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -44,8 +47,23 @@ async function bundle(source, output) {
   writeFileSync(resolve(root, output), `@layer clover{${css}}\n`);
 }
 
-await bundle("src/styles/clover.css", "dist/styles.css");
+/*
+ * styles.css is the list's sheets but the part sheets that load with their parts' code
+ * (`lazyParts`: a recording's, a Scene's, a map's), which the package's build hands to the
+ * page as those parts load (`lazySheets`). The docs, from source, take the list whole.
+ */
+const groups = partSheets();
+const lazy = new Set(lazyParts(groups).flatMap((name) => groups[name]));
 await bundle("src/templates/templates.css", "dist/templates.css");
+writeFileSync(
+  resolve(root, "dist/styles.css"),
+  `@layer clover{${await rulesOf(
+    ...Object.values(groups)
+      .flat()
+      .filter((sheet) => !lazy.has(sheet))
+      .sort((a, b) => a.index - b.index),
+  )}}\n`,
+);
 
 /*
  * The same sheets a part at a time, each in the one `clover` layer, its sheets in
@@ -54,7 +72,7 @@ await bundle("src/templates/templates.css", "dist/templates.css");
  * (`build/styles.test.mjs`).
  */
 mkdirSync(resolve(root, "dist/styles"), { recursive: true });
-for (const [name, sheets] of Object.entries(partSheets()))
+for (const [name, sheets] of Object.entries(groups))
   writeFileSync(
     resolve(root, `dist/styles/${name}.css`),
     `@layer clover{${await rulesOf(...sheets)}}\n`,

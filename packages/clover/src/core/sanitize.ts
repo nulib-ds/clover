@@ -1,4 +1,9 @@
-import DOMPurify from "dompurify";
+import DOMPurify, { type Config } from "dompurify";
+
+import { trusted, trustedPolicy } from "./trusted";
+
+// For the sink the sanitized HTML is written to (`ui/Markup.tsx`), loaded with this.
+export { trusted };
 
 /**
  * IIIF's limited HTML, and nothing else: the tags and attributes the Presentation API
@@ -131,7 +136,7 @@ const BLOCKS = new Set([
 function tidy(html: string): string {
   if (!html) return html;
   const box = document.createElement("template");
-  box.innerHTML = html;
+  box.innerHTML = trusted(html);
   for (const image of box.content.querySelectorAll("img:not([src])"))
     image.remove();
   for (const paragraph of box.content.querySelectorAll("p"))
@@ -238,5 +243,19 @@ export function sanitizeHTML(
   { markdown = false }: SanitizeOptions = {},
 ): string {
   if (typeof window === "undefined") return html;
-  return tidy(purifier().sanitize(html, markdown ? MARKDOWN_CONFIG : CONFIG));
+  const config = markdown ? MARKDOWN_CONFIG : CONFIG;
+  // Parsed through Clover's policy where the page requires Trusted Types (`trusted.ts`).
+  const policy = trustedPolicy();
+  return tidy(
+    purifier().sanitize(
+      html,
+      policy
+        ? {
+            ...config,
+            TRUSTED_TYPES_POLICY:
+              policy as unknown as Config["TRUSTED_TYPES_POLICY"],
+          }
+        : config,
+    ) as string,
+  );
 }

@@ -1,5 +1,3 @@
-import { asArray } from "../lib/asArray";
-
 /**
  * IIIF Content State: a link that opens a resource at a place — a Canvas, a region of it,
  * a moment in it. Clover reads the forms the spec gives (an annotation with the
@@ -67,16 +65,6 @@ export interface ContentTargets {
 }
 
 type Json = Record<string, any>;
-
-/** Whether JSON is a content state, rather than a IIIF resource to show. */
-export function isContentState(json: unknown): boolean {
-  const value = json as Json | null;
-  if (!value || typeof value !== "object") return false;
-  if (value.type === "Annotation") {
-    return asArray(value.motivation).includes("contentState");
-  }
-  return value.type === "SpecificResource";
-}
 
 /** A content state as a link carries it: base64url of the URI-encoded JSON, unpadded. */
 export function encodeContentState(json: unknown): string {

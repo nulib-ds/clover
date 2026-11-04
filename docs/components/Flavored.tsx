@@ -26,14 +26,11 @@ export function Flavored({
 export const elementTag = (name: string) =>
   `clover-${name.replace(/[A-Z]/g, (letter, at) => `${at ? "-" : ""}${letter.toLowerCase()}`)}`;
 
-/** The parts imported on their own, not from `Clover`: `Map`, from `@nulib/clover/map`. */
-const OWN_IMPORT = new Set(["Map"]);
-
 /** A part's name as the reader's code writes it: `<Clover.Label />`, or `<clover-label>`. */
 export function PartName({ name }: { name: string }) {
   return (
     <Flavored
-      react={OWN_IMPORT.has(name) ? `<${name} />` : `<Clover.${name} />`}
+      react={`<Clover.${name} />`}
       webComponents={`<${elementTag(name)}>`}
     />
   );

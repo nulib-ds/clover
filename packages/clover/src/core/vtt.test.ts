@@ -1,5 +1,5 @@
 import { chaptersOf, parseTime } from "./ranges";
-import { cueAt, decodeText, paragraphsOf, parseVtt } from "./vtt";
+import { cueAt, decodeText, paragraphsOf, parseVtt, vttBlocks } from "./vtt";
 
 const VTT = `WEBVTT
 Kind: captions
@@ -53,6 +53,23 @@ describe("parseVtt", () => {
     ];
     expect(cueAt(cues, 2.5)).toBe(1);
     expect(cueAt(cues, 5)).toBe(0);
+  });
+});
+
+describe("vttBlocks", () => {
+  it("keeps each cue as the file writes it, for a track's own cues", () => {
+    const text =
+      "WEBVTT\n\nNOTE a note\n\nintro\n00:01.000 --> 00:02.500 align:start position:10%,line-left\n<v Ann>Hi</v> <i>there</i>\n\n00:03.000 --> 00:04.000\nTwo\nlines\n";
+    expect(vttBlocks(text)).toEqual([
+      {
+        id: "intro",
+        start: 1,
+        end: 2.5,
+        settings: "align:start position:10%,line-left",
+        raw: "<v Ann>Hi</v> <i>there</i>",
+      },
+      { id: "", start: 3, end: 4, settings: "", raw: "Two\nlines" },
+    ]);
   });
 });
 

@@ -105,6 +105,33 @@ function host() {
 }
 
 describe("CanvasRenderer", () => {
+  it("lets a release glide on only where the system allows motion", () => {
+    // Every move is made at once under reduced motion, so a glide would jump the image.
+    const glide = () => {
+      const renderer = new CanvasRenderer(host(), {});
+      const { options } = (
+        renderer as unknown as {
+          gestures: { options: { flickMomentum: number } };
+        }
+      ).gestures;
+      renderer.dispose();
+      return options.flickMomentum;
+    };
+    expect(glide()).toBe(0.25);
+    const matchMedia = window.matchMedia;
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes("reduce"),
+      media: query,
+      addEventListener() {},
+      removeEventListener() {},
+    })) as unknown as typeof window.matchMedia;
+    try {
+      expect(glide()).toBe(0);
+    } finally {
+      window.matchMedia = matchMedia;
+    }
+  });
+
   it("opens on the first images, fitted, in the image's own pixels", async () => {
     mockedLoad.mockResolvedValue(bitmap(2048, 1306));
     const renderer = new CanvasRenderer(host(), { animationTime: 0 });

@@ -79,9 +79,9 @@ export interface LightboxProps {
  * 2026-11-01: "carousel by default") or the pager (with the position). A modal
  * `<dialog>`'s backdrop always covers the whole window, so this is a layer in the Root, a
  * `dialog` to assistive technology, named by its title: while it is open the rest of the
- * Root is inert, focus is on the view in its strip (on Close with the pager), and Escape,
- * Close, Back or a press on the layer outside the panel closes it, focus going back to
- * what opened it.
+ * Root is inert but what speaks, focus is on the view in its strip (on Close with the
+ * pager), Tab comes round inside it, and Escape, Close, Back or a press on the layer
+ * outside the panel closes it, focus going back to the grid's cell of the view shown.
  * By default it fills the layout's bounds; `--clover-template-lightbox-inset`,
  * `-backdrop` and `-radius` give it room, a backdrop and corners (`Lightbox.css`). The
  * layout positions it and holds its stacking (`position: relative` and `isolation:
@@ -125,11 +125,16 @@ export function Lightbox({
     const root = element?.parentElement;
     if (!open || !element || !root) return;
     const opener = element.ownerDocument.activeElement as HTMLElement | null;
-    // Modal within the layout: the rest of the Root is out of reach (WCAG 2.4.3), but
-    // not the Root's announcer, which still tells of each move.
+    /*
+     * Modal within the layout: the rest of the Root is out of reach (WCAG 2.4.3), but
+     * not what speaks: the Root's announcer, which tells of each move, and the Status,
+     * which tells that a member chosen in the lightbox is loading (4.1.3).
+     */
     const others = Array.from(root.children).filter(
       (child): child is HTMLElement =>
-        child !== element && !child.classList.contains("clover-announcer"),
+        child !== element &&
+        !child.classList.contains("clover-announcer") &&
+        !child.classList.contains("clover-status"),
     );
     others.forEach((child) => (child.inert = true));
     // The whole panel in the window (it may open partly past its edge), then focus.
@@ -142,9 +147,45 @@ export function Lightbox({
       '[role="listbox"] [role="option"][aria-selected="true"]',
     );
     (chosen ?? close.current)?.focus({ preventScroll: true });
+    /*
+     * And where a browser's own Tab leaves it all the same (WebKit's skips links, so
+     * from the stop before one it goes on past the dialog, to the document itself): once
+     * a Tab from inside has moved focus, focus outside comes back, to the dialog's first
+     * stop, or its last for Shift+Tab. Only a Tab: a pointer's press on the page around
+     * the layout is its own.
+     */
+    const doc = element.ownerDocument;
+    let check: ReturnType<typeof setTimeout> | undefined;
+    const onTab = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || !panel.current?.contains(event.target as Node))
+        return;
+      const back = event.shiftKey;
+      clearTimeout(check);
+      check = setTimeout(() => {
+        const dialog = panel.current;
+        if (!dialog || dialog.contains(doc.activeElement)) return;
+        const stops = stopsOf(dialog);
+        (back ? stops.at(-1) : stops[0])?.focus();
+      });
+    };
+    doc.addEventListener("keydown", onTab, true);
     return () => {
+      doc.removeEventListener("keydown", onTab, true);
+      clearTimeout(check);
       others.forEach((child) => (child.inert = false));
-      if (opener?.isConnected) opener.focus({ preventScroll: true });
+      /*
+       * Back to the view now shown, in the grid that opened it (the strip may have
+       * stepped on from the one opened), else to what opened it, brought into sight: the
+       * grid may have scrolled its box to keep the shown view's cell in view (2.4.3,
+       * 2.4.11).
+       */
+      const shown = opener
+        ?.closest('[role="listbox"]')
+        ?.querySelector<HTMLElement>('[role="option"][aria-selected="true"]');
+      const back = shown ?? opener;
+      if (!back?.isConnected) return;
+      back.focus({ preventScroll: true });
+      back.scrollIntoView?.({ block: "nearest" });
     };
   }, [open]);
 
@@ -165,7 +206,12 @@ export function Lightbox({
        * bubbles), so Escape puts those away first, as in every template.
        */
       onKeyDown={(event) => {
-        if (event.key !== "Escape" || event.defaultPrevented) return;
+        if (event.defaultPrevented) return;
+        if (event.key === "Tab" && panel.current) {
+          wrapFocus(panel.current, event);
+          return;
+        }
+        if (event.key !== "Escape") return;
         event.preventDefault();
         closing.current();
       }}
@@ -235,6 +281,39 @@ export function Lightbox({
       )}
     </div>
   );
+}
+
+/** What Tab stops on: what takes focus, shown and live (not inert, nor disabled). */
+const STOPS =
+  'a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"])';
+
+/** The dialog's stops, in their order. */
+const stopsOf = (dialog: HTMLElement) =>
+  Array.from(dialog.querySelectorAll<HTMLElement>(STOPS)).filter(
+    (stop) =>
+      stop.tabIndex >= 0 &&
+      !stop.matches(":disabled") &&
+      !stop.closest("[inert]") &&
+      (stop.checkVisibility?.({ visibilityProperty: true }) ?? true),
+  );
+
+/**
+ * Tab from the dialog's last stop comes round to its first, and Shift+Tab from its first
+ * to its last, as a modal dialog keeps focus (`aria-modal`; 4.0.0's `showModal()` did):
+ * the rest of the Root is inert, so Tab would go on into the page around it, which a
+ * screen reader hides while the dialog is modal. Only the keyboard's way out is held: a
+ * pointer still reaches the page around the layout, which the lightbox does not cover.
+ */
+function wrapFocus(dialog: HTMLElement, event: React.KeyboardEvent) {
+  const stops = stopsOf(dialog);
+  const first = stops[0];
+  const last = stops.at(-1);
+  if (!first || !last) return;
+  const at = dialog.ownerDocument.activeElement;
+  if (event.shiftKey ? at === first : at === last) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+  }
 }
 
 /**

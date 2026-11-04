@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 import { type Page, expect, test } from "@playwright/test";
 
 import { serveIIIF } from "./fixtures";
@@ -5,16 +8,40 @@ import { serveIIIF } from "./fixtures";
 /*
  * A Transcript of several caption files (Cookbook 0074: English and Italian), in the
  * Default template's accordion: its languages, as codes, beside the Transcript's heading
- * (`useSectionActions`), and following the Canvas's own Captions menu.
+ * (`useSectionActions`), and following the Canvas's own Captions menu. Its label here in
+ * English alone: a label in both, as 0074's own is, has About offer the Language to read
+ * it in, which the Transcript follows, drawing no languages of its own (one choice of
+ * language, the Root's; 2026-10-28).
  */
-const LANGUAGES =
-  "/?content=https://fixtures.test/0074-multiple-language-captions.json";
+const ONE_LABEL = "https://fixtures.test/0074-one-label.json";
+const LANGUAGES = `/?content=${ONE_LABEL}`;
 /** WCAG 1.4.12's text spacing, as a reader's own stylesheet sets it. */
 const SPACING = `* { line-height: 1.5 !important; letter-spacing: 0.12em !important;
   word-spacing: 0.16em !important; } p { margin-bottom: 2em !important; }`;
 
 async function open(page: Page) {
   await serveIIIF(page);
+  const manifest = JSON.parse(
+    readFileSync(
+      resolve(
+        __dirname,
+        "../../src/fixtures/iiif-cookbook/0074-multiple-language-captions.json",
+      ),
+      "utf8",
+    ),
+  );
+  await page.route(ONE_LABEL, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({
+        ...manifest,
+        id: ONE_LABEL,
+        label: { en: manifest.label.en },
+      }),
+    }),
+  );
   await page.goto(LANGUAGES);
   // On a phone the panel is over the Body, and opened by its toggle.
   const panel = page.getByRole("button", { name: "More information" });

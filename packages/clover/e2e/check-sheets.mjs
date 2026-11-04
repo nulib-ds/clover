@@ -3,9 +3,10 @@
  * holds one element (or one natural group), defined from source by the elements' dev
  * server, so it brings only the sheets its code owns (`build/clover-sheets.mjs`). Every
  * node's computed style, and its ::before's and ::after's, is read with those sheets, then
- * with the package's whole stylesheet added (`dist/styles.css`, `dist/templates.css`); at
- * rest, then with every disclosure and tab opened. A node that changes shows a sheet some
- * module draws without owning it: name the module in `OWNERS`.
+ * with the package's whole stylesheet added (`dist/styles.css`, `dist/templates.css` and
+ * the part sheets that load with their code); at rest, then with every disclosure and tab
+ * opened. A node that changes shows a sheet some module draws without owning it: name the
+ * module in `OWNERS`.
  *
  *   npx vite --config e2e/vite.elements.config.mjs     (the server, port 4323)
  *   npm run build -w @nulib/clover                     (the whole stylesheet to compare)
@@ -29,7 +30,13 @@ const scheme = args.includes("--dark") ? "dark" : "light";
 const partsMode = args.includes("--parts");
 const require = createRequire(join(pkg, "../../package.json"));
 const { chromium } = require("playwright");
-const whole = ["styles.css", "templates.css"]
+// With the part sheets that load with their code, adopted after the rest.
+const { lazyParts } = await import("../build/clover-sheets.mjs");
+const whole = [
+  "styles.css",
+  "templates.css",
+  ...lazyParts().map((name) => `styles/${name}.css`),
+]
   .map((file) => readFileSync(join(pkg, "dist", file), "utf8"))
   .join("\n");
 

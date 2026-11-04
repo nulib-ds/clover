@@ -8,6 +8,8 @@
  * checked; anything else (scripts, `foreignObject`, styles, handlers, links) is dropped.
  */
 
+import { trusted } from "./trusted";
+
 export interface SvgShapeElement {
   tag: "path" | "polygon" | "polyline" | "rect" | "circle" | "ellipse" | "line";
   /** Geometry attributes only, validated. */
@@ -39,7 +41,8 @@ export function readSvgShape(svg: string): SvgShape | null {
   if (typeof DOMParser === "undefined" || !svg) return null;
   let doc: Document;
   try {
-    doc = new DOMParser().parseFromString(svg, "image/svg+xml");
+    // Read where nothing runs: through Clover's policy where Trusted Types are required.
+    doc = new DOMParser().parseFromString(trusted(svg), "image/svg+xml");
   } catch {
     return null;
   }

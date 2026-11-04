@@ -66,6 +66,29 @@ export { Search } from "./components/Search/Search";
 export type { SearchProps } from "./components/Search/Search";
 export { search } from "./core/search";
 export { SEARCH_SET_ID, searchServiceOf } from "./core/search-service";
+/**
+ * Where IIIF resources are, on a map (`<Clover.Map />`), and its helpers: the same as
+ * `@nulib/clover/map`'s. MapLibre loads only as a map is first shown, and a page that
+ * draws no map ships none of it (`build/bundle.test.mjs`): a template's build drops it.
+ * Here, with the parts: exported by the main entry instead, it moved modules up front as
+ * an app's bundler splits a template, about 130 B gzip on the Viewer's first view.
+ */
+export { CloverMap as Map } from "./components/Map/Map";
+export type { MapProps } from "./components/Map/Map";
+export {
+  affineTransform,
+  boundsOf,
+  cornersOf,
+  georeferencesOf,
+  hasMapData,
+  navPlaceOf,
+  readGeoreference,
+} from "./core/geo";
+export type {
+  Georeference,
+  MapFeature,
+  MapFeatureCollection,
+} from "./core/geo";
 /** Where MapLibre's worker is served from, for every map (a Viewer's Map tab included). */
 export { setMapWorkerUrl } from "./core/map-config";
 export type {

@@ -18,7 +18,11 @@ import { ScaleCalculator } from "docs/components/ScaleCalculator";
 
 Import `@nulib/clover/styles.css` once, and `@nulib/clover/templates.css` for Document
 and Gallery. Their rules sit in `@layer clover`, so your own CSS wins without a fight
-over specificity. Without them, every part still renders a plain, usable layout.
+over specificity. Without them, every part still renders a plain, usable layout. The
+styles of a recording, a Scene and a map are not in them: each comes with the code that
+draws it, as that code loads, in the same layer, so a page that shows none of them loads
+none of their styles. A map brings MapLibre's own stylesheet the same way, in a layer
+after Clover's, unless the page imports `maplibre-gl/dist/maplibre-gl.css` itself.
 
 ```jsx react
 import "@nulib/clover/styles.css";
@@ -48,6 +52,10 @@ import "@nulib/clover/styles/items.css";
 | `styles/split.css`             | `Split`                                                                                               |
 | `styles/collection-select.css` | `CollectionSelect`                                                                                    |
 | `styles/default.css`           | The `Default` template                                                                                |
+
+`styles/media.css`, `styles/scene.css` and `styles/map.css` come on their own here too,
+as their parts' code loads. Import one only where a server draws its part, so its first
+paint is styled before the page's scripts run.
 
 The Viewer draws most parts: give it `styles.css`, and `templates.css`.
 

@@ -24,10 +24,14 @@
 /*
  * The panel, held in the window while a layout taller than it scrolls, under a page's
  * own header (`--clover-template-lightbox-top`): as tall as the layout's bounds, or the
- * window's below that header, whichever is less.
+ * window's below that header, whichever is less. On a window too short for its title,
+ * Body, strip and caption (a phone turned, a page zoomed to 400%), it scrolls them
+ * rather than crushing the Body (WCAG 1.4.10), the panel itself, as a scrolling layer
+ * around it would hold it there and not in the window.
  */
 .clover-template-lightbox-content {
   position: sticky;
+  overflow-y: auto;
   top: calc(
     var(--clover-template-lightbox-top, 0px) +
       var(--clover-template-lightbox-inset, 0px)
@@ -70,11 +74,13 @@
 /*
  * Under the title, the view and the information panel beside it (`PanelPane`), taking
  * the height the title leaves: the main pane the Body over its thumbnails or pager, `m`
- * apart, the Body taking what they leave.
+ * apart, the Body taking what they leave. Never under Document's panes' 16rem, so the
+ * Body keeps room for its controls and some of the view, the panel scrolling past that
+ * (above).
  */
 .clover-template-lightbox-content > .clover-template-lightbox-panes {
   flex: 1 1 auto;
-  min-height: 0;
+  min-height: 16rem;
 }
 
 .clover-template-lightbox-main {

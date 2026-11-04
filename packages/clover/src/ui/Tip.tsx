@@ -153,6 +153,17 @@ function placeTip(event: Event) {
   if (tip) keepInside(tip);
 }
 
+/**
+ * A control's popover placed again, where what holds it has moved it since it showed: the
+ * image controls' tray scrolls a control into sight as focus reaches it, after its
+ * popover measured itself, and it would be cut at the tray's edge (WCAG 1.4.10, 1.4.12;
+ * `ImageControls.tsx`, loaded only with the tray, which calls it).
+ */
+export function placeTipAgain(control: Element) {
+  const tip = tipOf(controlOf(control));
+  if (tip && isShown(tip)) keepInside(tip);
+}
+
 /** A control's popover, if it has one. */
 function tipOf(control: Element) {
   return Array.from(control.children).find((child) =>

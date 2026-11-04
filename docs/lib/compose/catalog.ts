@@ -85,8 +85,11 @@ export interface TemplateInfo {
   loads?: string;
 }
 
-/** Where React imports a part from, where it is not `@nulib/clover`. */
-const ENTRY: Record<string, string> = { Map: "@nulib/clover/map" };
+/**
+ * Where React imports a part from, where it is not `@nulib/clover`: none, since `Map`
+ * joined the parts (`<Clover.Map />`, 2026-11-03; `@nulib/clover/map` still exports it).
+ */
+const ENTRY: Record<string, string> = {};
 
 /**
  * The parts whose element only the part around it reads (`kind: "config"`), and those that

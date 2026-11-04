@@ -275,15 +275,25 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
   transition-delay: 0s;
 }
 
+/*
+ * Below or above its hotspot, clear of the controls at the Body's top and foot. A note
+ * too tall for the room between them (a Body 154px tall, at 400%) would be held under the
+ * top controls and run off the Body's foot, as `clamp()` keeps its least where that is
+ * past its most: the outer `min()` holds it inside the Body instead, `xs` from its foot,
+ * over the controls if it must (WCAG 1.4.10). Its height is capped inside the Body.
+ */
 :is(button, a).clover-canvas-annotation[data-overlay-room="below"]
   > .clover-tip {
   top: 100%;
   translate: var(--clover-tip-x)
-    clamp(
-      var(--clover-tip-top) - var(--clover-space-xs) -
-        var(--clover-overlay-bottom),
-      0px,
-      100cqh - var(--clover-overlay-bottom) - var(--clover-tip-bottom) - 100%
+    min(
+      clamp(
+        var(--clover-tip-top) - var(--clover-space-xs) -
+          var(--clover-overlay-bottom),
+        0px,
+        100cqh - var(--clover-overlay-bottom) - var(--clover-tip-bottom) - 100%
+      ),
+      100cqh - var(--clover-space-xs) - var(--clover-overlay-bottom) - 100%
     );
 }
 
@@ -293,11 +303,14 @@ button.clover-canvas-placeholder-toggle > .clover-tip,
   bottom: 100%;
   border-width: 0 0 var(--clover-space-xs);
   translate: var(--clover-tip-x)
-    clamp(
-      100% + var(--clover-tip-top) - var(--clover-overlay-top),
-      0px,
-      100cqh + var(--clover-space-xs) - var(--clover-tip-bottom) -
-        var(--clover-overlay-top)
+    min(
+      clamp(
+        100% + var(--clover-tip-top) - var(--clover-overlay-top),
+        0px,
+        100cqh + var(--clover-space-xs) - var(--clover-tip-bottom) -
+          var(--clover-overlay-top)
+      ),
+      100cqh - var(--clover-overlay-top)
     );
 }
 

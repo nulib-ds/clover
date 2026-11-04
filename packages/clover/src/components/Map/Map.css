@@ -1,6 +1,6 @@
 /*
- * Map: MapLibre's own stylesheet (`maplibre-gl/dist/maplibre-gl.css`) styles the map; this
- * frames it, over its places, and draws its controls and popups as Clover's own. Size it with
+ * Map: MapLibre's own stylesheet (`maplibre-gl/dist/maplibre-gl.css`, the page's, or
+ * brought with MapLibre where it has none, `sheet.ts`) styles the map; this frames it, over its places, and draws its controls and popups as Clover's own. Size it with
  * `--clover-map-height`. The places are the panel's rows (`Panel.css`,
  * "Rows"), `s` under the map: two parts of one.
  */
@@ -51,8 +51,10 @@
  * buttons and its credits' ⓘ are the round controls (`ui/Button.css`), in the controls'
  * fill and glyph, the accent under the pointer or focused, each glyph Clover's own (its
  * zoom and information glyphs, as masks the glyph's color fills) and each named by
- * Clover's popover (`Tip`, from `MapView`). MapLibre's stylesheet is unlayered and
- * Clover's layered, so what MapLibre sets is set here `!important`.
+ * Clover's popover (`Tip`, from `MapView`). MapLibre's stylesheet outranks Clover's
+ * (unlayered as a page imports it; in a layer after Clover's where the map brings it,
+ * `Map/sheet.ts`), so what MapLibre sets is set here `!important`, the controls' corners
+ * too: the docs read Clover's CSS unlayered, where those won without it.
  */
 /*
  * The page's type in the map, as in every part: MapLibre sets its own (12px Helvetica) on
@@ -80,20 +82,20 @@
 }
 
 .clover-geomap :is(.maplibregl-ctrl-top-right, .maplibregl-ctrl-bottom-right) {
-  right: var(--clover-map-controls-inset);
+  right: var(--clover-map-controls-inset) !important;
 }
 
 .clover-geomap .maplibregl-ctrl-top-right {
-  top: var(--clover-map-controls-inset);
+  top: var(--clover-map-controls-inset) !important;
 }
 
 .clover-geomap
   :is(.maplibregl-ctrl-bottom-left, .maplibregl-ctrl-bottom-right) {
-  bottom: var(--clover-map-controls-inset);
+  bottom: var(--clover-map-controls-inset) !important;
 }
 
 .clover-geomap .maplibregl-ctrl-bottom-left {
-  left: var(--clover-map-controls-inset);
+  left: var(--clover-map-controls-inset) !important;
 }
 
 .clover-geomap
@@ -157,26 +159,19 @@
   outline-offset: 1px !important;
 }
 
-.clover-geomap .maplibregl-ctrl-group button .maplibregl-ctrl-icon,
-.clover-geomap .maplibregl-ctrl-attrib-button::before {
-  width: 1rem !important;
-  height: 1rem !important;
-  background-color: currentColor !important;
-  background-image: none !important;
-  mask: var(--clover-map-glyph) center / contain no-repeat;
-  content: "";
+/*
+ * Clover's glyphs, each in an svg of its own (`MapGlyph`, `MapView.tsx`), as every
+ * control's: never a CSS image, which a strict Content Security Policy refuses as `data:`
+ * (`img-src`). MapLibre's own go.
+ */
+.clover-geomap .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  display: none !important;
 }
 
-.clover-geomap .maplibregl-ctrl-zoom-in {
-  --clover-map-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M256 112v288M400 256H112' fill='none' stroke='%23000' stroke-width='45' stroke-linecap='round'/%3E%3C/svg%3E");
-}
-
-.clover-geomap .maplibregl-ctrl-zoom-out {
-  --clover-map-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M400 256H112' fill='none' stroke='%23000' stroke-width='45' stroke-linecap='round'/%3E%3C/svg%3E");
-}
-
-.clover-geomap .maplibregl-ctrl-attrib-button {
-  --clover-map-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M256 72A48 48 0 1 1 256 168A48 48 0 1 1 256 72Z M192 216H296V384H328V432H184V384H216V264H192Z'/%3E%3C/svg%3E");
+.clover-geomap .clover-geomap-glyph {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
 }
 
 /*
@@ -199,7 +194,7 @@
   flex-direction: row-reverse;
   align-items: flex-end;
   gap: var(--clover-space-xs);
-  box-sizing: border-box;
+  box-sizing: border-box !important;
   min-height: 0 !important;
   max-width: calc(
     100cqi - 2 * var(--clover-map-controls-inset) -
@@ -237,8 +232,12 @@
 }
 
 .clover-geomap .maplibregl-ctrl-attrib-button::before {
-  width: var(--clover-text-s) !important;
-  height: var(--clover-text-s) !important;
+  content: none !important;
+}
+
+.clover-geomap .maplibregl-ctrl-attrib-button .clover-geomap-glyph {
+  width: var(--clover-text-s);
+  height: var(--clover-text-s);
 }
 
 .clover-geomap
@@ -329,13 +328,8 @@
   bottom: 100%;
 }
 
-/* Where forced colors paint the ground, the glyph takes the button's text. */
+/* Where forced colors paint the ground, the glyph takes the button's text (its `currentColor`). */
 @media (forced-colors: active) {
-  .clover-geomap .maplibregl-ctrl-group button .maplibregl-ctrl-icon,
-  .clover-geomap .maplibregl-ctrl-attrib-button::before {
-    background-color: ButtonText !important;
-  }
-
   .clover-geomap
     :is(.maplibregl-ctrl-group button, .maplibregl-ctrl-attrib-button) {
     border: 1px solid ButtonText !important;
@@ -353,8 +347,8 @@
 /*
  * A place's name over the map, as Clover's popover (`ui/Tip.css`) names a hotspot: the
  * text's color for a ground, the ground's for its words, its tip with it. MapLibre's
- * stylesheet is unlayered and Clover's layered (`dist`), so MapLibre's white ground would
- * win: hence `!important`, on the ground and the tip only.
+ * stylesheet outranks Clover's (above), so MapLibre's white ground would win: hence
+ * `!important`, on the ground and the tip only.
  */
 .clover-geomap-popup .maplibregl-popup-content {
   padding: var(--clover-space-2xs) var(--clover-space-xs);

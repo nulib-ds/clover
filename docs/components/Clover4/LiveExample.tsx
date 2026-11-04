@@ -202,7 +202,7 @@ export function LivePart({
   const bodyPart = BODY_PARTS.includes(part);
   const single = alone || bodyPart || part === "Map";
   const own: CodeNode = {
-    jsx: part === "Map" ? "Map" : `Clover.${part}`,
+    jsx: `Clover.${part}`,
     html: tag,
     attrs: [
       ...(bodyPart || part === "Map" ? [url(tag)] : []),

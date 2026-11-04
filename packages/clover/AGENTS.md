@@ -96,7 +96,17 @@ every rule below.
   into `dist/styles.css` (esbuild), which `build/styles.mjs` wraps in `@layer clover`.
   Keep the aggregate's imports plain: the docs import it from source, and Next 14 reads
   `@import … layer()` as a media query that never matches. Package JS never imports CSS.
-  Color tokens are `--clover-color-*` with literal fallbacks, since a page sets them. The
+  Only the part sheets of what loads as it draws, a recording's, a Scene's and a map's
+  (`lazyParts`, `build/clover-sheets.mjs`), come with their code instead, and
+  `styles.css` leaves them out (the docs, from source, take the list whole): the React
+  build (`lazySheets`) has every module that draws what they style (their sheets'
+  `OWNERS`) hand its sheet to `ui/adoptSheet.ts`, which the document adopts (a constructed
+  sheet, after every other, which a strict CSP allows; a `<style>` where a browser cannot
+  adopt one). A call, never an import for its side effect, which `sideEffects` would let
+  a bundler drop. A page whose server draws one imports its part sheet too. Core never
+  reads what only such a sheet sets: a recording's still draws before its transport loads
+  (so `--clover-transport-room` is `Canvas.css`'s). MapLibre's stylesheet comes the same
+  way, with MapLibre, where the page has none (the Map, below). Color tokens are `--clover-color-*` with literal fallbacks, since a page sets them. The
   scale's tokens (`--clover-space-*`, `--clover-text-*`, `--clover-control`) are defined
   in `src/styles/scale.css`, first in the list, and need none. Add every new stylesheet to
   the list. The same sheets are built again a part at a time (`dist/styles/<part>.css`,
@@ -112,7 +122,8 @@ every rule below.
   missing or stale. Keyframes shared across part sheets go in a sheet of their own, which
   falls to core (`ui/Shade.css`), as an animation whose keyframes are in neither its own
   part sheet nor core fails the test too, as does a container query or a custom property
-  read with no fallback (`READ_APART` the exceptions) given only in another part's sheet.
+  read with no fallback given only in another part's sheet. A sheet that loads with its
+  code is adopted after `templates.css`, so it may tie with no template's rule either.
   In a browser, `node e2e/check-sheets.mjs --parts` renders each part with the sheets
   Styling gives it (`PARTS` there) and compares every node's computed style with
   `styles.css`'s.
@@ -1113,6 +1124,29 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   adds only what `markdownToHtml` writes: `ul`, `ol` and `li`; `role="heading"` and
   `aria-level` 1–6 on `p`; and a numeric `start` on `ol`. The hook removes these
   anywhere else. IIIF HTML never gets them.
+- **A strict Content Security Policy** (Mat, 2026-11-03: "do the strict csp"): Clover
+  works on a page whose policy allows no `'unsafe-inline'`, no `data:` and no `blob:`, and
+  where it requires Trusted Types, in both flavors. `e2e/check-csp.mjs` holds it, in a
+  browser: run it after a change that writes HTML, styles, URLs or workers. So:
+  - No style attribute in markup and no `<style>` a page cannot allow: styles are files
+    (`styles.css`), constructed sheets (`ui/adoptSheet.ts`), or the elements' registry
+    (`web-components/styles.ts`), whose `<style>` takes the page's nonce (`cspNonce`)
+    and, refused all the same (no `sheet`), gives way to adopted sheets in the same order.
+    Inline styles set through the DOM (`style={…}` in the browser, `element.style`) are
+    CSSOM, which no policy governs; a server writes them as `style` attributes, which a
+    strict policy refuses (Technical overview: `style-src-attr 'unsafe-inline'`, not
+    checked in a browser yet).
+  - No `data:` or `blob:` address for anything a page shows: a glyph is an inline svg
+    (the map's controls too, `MapGlyph`), and a caption file's cues go to its track
+    (`addCues`, `Canvas/media/useMediaElement.ts`), never its text as an address. The one
+    `blob:` is MapLibre's worker, asked first (`blobWorkersAllowed`, `Map/worker.ts`):
+    refused, the map says it could not be shown and the console names `setMapWorkerUrl`.
+  - Every HTML sink (`innerHTML`, `dangerouslySetInnerHTML`, `DOMParser`) takes
+    `trusted(html)` (`core/trusted.ts`), Clover's `clover` policy where the page requires
+    Trusted Types, and only for what DOMPurify has sanitized or what is parsed inert.
+    DOMPurify parses through it too (`TRUSTED_TYPES_POLICY`). The policy makes no script
+    URL. MapLibre builds its worker and reads its credits from strings, which a page's own
+    default policy must let through: a map under Trusted Types is the page's to allow.
 - **Text formats, strictly** (Mat, 2026-10-19). `readAs(format, value)` in
   `core/text.ts` decides: the media type before any `;`, case aside — `text/html` is
   HTML, `text/markdown` Markdown, anything else plain, shown as written. No format: IIIF's
@@ -1392,15 +1426,23 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   alone does the same with its own pages (`CanvasView.tsx`). Never a recording's text,
   and never captions: caption files (WebVTT) are left out of every set (`readBodies`),
   and captions and transcripts are read from the Canvas itself (`layout.ts`).
-- **Map** (`@nulib/clover/map`, `src/map/index.ts`, a third entry). Keep MapLibre small:
+- **Map** (`<Clover.Map />`: one of the parts, `parts.ts` exporting it and its helpers;
+  Mat, 2026-11-03: "export map so Clover.Map works". From `index.ts` instead it cost the
+  Viewer's first view about 130 B, as an app's bundler split a template; a build drops
+  it where no map is drawn, but source, as the docs and the tests run it, loads it with
+  the parts.
+  `@nulib/clover/map`, `src/map/index.ts`, a third entry, exports the same for pages that
+  import from it; the docs write `Clover.Map`). Keep MapLibre small:
   - `maplibre-gl` is a dependency (Mat: the Viewer shows the map by itself, no prop, so
     the default path must resolve it), imported only inside the Map's mount effect, and
     only once its box comes within half a screen of view (`useNearViewport`, as a
     Canvas's images; Mat, 2026-10-27): a map far down a page, or in a tab not yet open,
     loads none of it. The map keeps its own loading status and alert, not the Body's
     `Loading` and `BodyAlert`, which would change how it looks and add bytes (2026-10-27).
-    `bundle.test.mjs` asserts no entry imports it statically and that the parts reach the
-    map only lazily; `@allmaps/*` is on the forbidden list (422 kB gzip). The size table
+    `bundle.test.mjs` asserts no entry imports it statically, that an app's page that
+    draws no map ships none of it (`bundleAsConsumer`: the package's own graph reaches
+    `Map` through the parts, as an app's tree shaking does not), and that the Viewer's
+    Map tab is a lazy chunk; `@allmaps/*` is on the forbidden list (422 kB gzip). The size table
     has "Map, before MapLibre" and "MapLibre, on a map" (MapLibre's chunks only).
   - The panel offers the tab when `core/geo-detect.ts` `hasMapData` (a look, not a read)
     finds navPlace or a georeference, and lazy-loads `RootMap` from
@@ -1444,8 +1486,15 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     `components/Map/maplibre-worker.ts`), started from a `blob:` URL the first time a map
     shows, unless the page set one with `setMapWorkerUrl`, as a page whose Content
     Security Policy refuses `blob:` workers does (root `AGENTS.md`, "MapLibre's worker").
-    The docs set their own (`docs/lib/map-worker.ts`). MapLibre's CSS is the host's import
-    too.
+    The docs set their own (`docs/lib/map-worker.ts`). MapLibre's stylesheet comes the
+    same way: loaded with MapLibre where the page has none (`components/Map/sheet.ts`,
+    which looks for it on a probe), from a placeholder the React build fills
+    (`components/Map/maplibre-sheet.ts`, `lazySheets`), adopted in a layer of its own after
+    Clover's (`maplibre`), so it outranks Clover's rules as it does unlayered and a page's
+    own rules outrank it. A page's own import, the docs' and the elements' (their registry)
+    keep theirs, and nothing more loads. Whatever Clover's rules set that MapLibre's also
+    set is `!important` in `Map.css`: the docs read Clover's CSS unlayered, where a rule
+    that loses in an app wins (the controls' corners did, until 2026-11-03).
   - Wheel zoom off by default; default basemap as 3.x (Liberty, roads removed,
     hillshade); classes `clover-geomap*` (3.x has `clover-map*`); layer ids `geomap-*`.
   - Tests mock `maplibre-gl` (`components/Map/Map.test.tsx`): the module has no

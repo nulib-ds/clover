@@ -12,6 +12,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { build } from "vite";
 
+import { bundleAsConsumer } from "./consumer-bundle.mjs";
 import { measure } from "./sizes.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -192,26 +193,36 @@ test("media, caption details, hotspots, the Canvas's menus, the navigator, langu
   }
 });
 
-test("MapLibre loads only on demand; the parts reach the map only lazily", async () => {
+test("MapLibre loads only on demand; a page reaches the map only lazily, unless it draws one", async () => {
   const chunks = await emitted();
   for (const entry of ["index.mjs", "templates/index.mjs", "map/index.mjs"]) {
-    const initial = closure(chunks, entry);
-    for (const fileName of initial) {
+    for (const fileName of closure(chunks, entry)) {
       for (const id of chunks.get(fileName).imports) {
         assert.ok(
           packageName(id) !== "maplibre-gl",
           `${fileName} (from ${entry}) imports ${id} statically`,
         );
       }
-      if (entry === "map/index.mjs") continue;
-      // The Viewer's Map tab is a lazy chunk: nothing of the map loads up front.
-      const modules = Object.keys(chunks.get(fileName).modules);
-      assert.ok(
-        !modules.some((id) => /\/components\/Map\/|\/core\/geo\.ts$/.test(id)),
-        `${fileName} (from ${entry}) carries the map statically`,
-      );
     }
   }
+  /*
+   * `Map` is one of the parts (`<Clover.Map />`), so the package's own graph reaches it,
+   * as an app's tree shaking does not: a page that draws no map ships none of it, the
+   * Viewer's Map tab a lazy chunk.
+   */
+  const page = await bundleAsConsumer(
+    [
+      `export { default, Root, Body, Items, Panel } from ${JSON.stringify(resolve(root, "dist/index.mjs"))};`,
+      `export { Default, Document } from ${JSON.stringify(resolve(root, "dist/templates/index.mjs"))};`,
+    ].join("\n"),
+  );
+  for (const fileName of page.initial)
+    assert.ok(
+      !Object.keys(page.chunks.get(fileName).modules).some((id) =>
+        /\/components\/Map\/|\/core\/geo\.mjs$/.test(id),
+      ),
+      `${fileName} carries the map up front, on a page that draws none`,
+    );
   const reachable = closure(chunks, "index.mjs", true);
   assert.ok(
     [...reachable].some((fileName) =>

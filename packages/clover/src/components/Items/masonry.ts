@@ -10,9 +10,14 @@
  * track adds later are measured as they come. Loaded only for a masonry layout
  * (`Items.tsx`), so no other layout carries it.
  *
+ * Its thin rows apply only once it is here (`data-masonry`, `Items.css`): until its
+ * code arrives, or if it never does, the items sit in an ordinary grid, never one over
+ * another.
+ *
  * Returns what lets it go: the items' spans cleared, the watching stopped.
  */
 export function attachMasonry(box: HTMLElement): () => void {
+  box.dataset.masonry = "";
   const items = () =>
     Array.from(
       box.querySelectorAll<HTMLElement>(
@@ -46,5 +51,6 @@ export function attachMasonry(box: HTMLElement): () => void {
     added.disconnect();
     sizes?.disconnect();
     items().forEach((item) => item.style.removeProperty("grid-row-end"));
+    delete box.dataset.masonry;
   };
 }

@@ -23,6 +23,8 @@ interface ChaptersMenuProps {
   element: HTMLMediaElement | null;
   /** Go to a chapter's start, opening the recording first where it is not yet. */
   onChapter: (start: number) => void;
+  /** Over the recording's still: the arrow keys only move the check (below). */
+  overStill?: boolean;
   /** How the chapters' pictures are fetched. */
   request?: CloverRequest;
   /** Close, returning focus to the control that opened it when `restoreFocus`. */
@@ -35,8 +37,10 @@ interface ChaptersMenuProps {
  * the transport's menu until then): each with where it starts, as radio buttons, the one
  * playing checked and its picture under it, as Contents shows the current entry's. A
  * pointer's pick, or Enter, goes there and closes the menu; the arrow keys go from one to
- * the next and leave it open, as the transport's menus did. Each label carries its
- * language (WCAG 3.1.2).
+ * the next and leave it open, as the transport's menus did. Over the recording's still
+ * (`overStill`), where going there opens the recording and plays it, the arrow keys only
+ * move the check, so looking through the names never starts the sound (WCAG 3.2.2):
+ * Enter or a press goes. Each label carries its language (WCAG 3.1.2).
  */
 const ChaptersMenu: React.FC<ChaptersMenuProps> = ({
   id,
@@ -46,6 +50,7 @@ const ChaptersMenu: React.FC<ChaptersMenuProps> = ({
   chapters,
   element,
   onChapter,
+  overStill = false,
   request,
   onClose,
 }) => {
@@ -89,7 +94,12 @@ const ChaptersMenu: React.FC<ChaptersMenuProps> = ({
               type="radio"
               name={id}
               checked={index === current}
-              onChange={() => go(index)}
+              onChange={() => {
+                // Over the still, a key's move only marks it: Enter goes (below).
+                if (overStill && !pointer.current)
+                  setTime(chapters[index].start);
+                else go(index);
+              }}
               onClick={() => {
                 if (pointer.current) onClose(true);
               }}

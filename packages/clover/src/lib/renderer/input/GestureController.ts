@@ -277,10 +277,9 @@ export class GestureController {
     if (first && last && span > 0 && event.timeStamp - last.t < 50) {
       const vx = ((last.x - first.x) / span) * 1000;
       const vy = ((last.y - first.y) / span) * 1000;
-      if (Math.hypot(vx, vy) > this.options.flickMinSpeed) {
-        const momentum = this.options.flickMomentum;
+      const momentum = this.options.flickMomentum;
+      if (momentum > 0 && Math.hypot(vx, vy) > this.options.flickMinSpeed)
         this.target.panBy(vx * momentum, vy * momentum, true);
-      }
     }
   };
 

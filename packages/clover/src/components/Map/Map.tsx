@@ -19,7 +19,8 @@ export type { MapProps } from "./MapView";
  * Canvas. Under the map, a list names each place and overlay, as buttons that do the same:
  * the map's text, and the keyboard's way to its places.
  *
- * MapLibre GL loads when a map is first shown, and nothing of it before. Its stylesheet is yours to import: `maplibre-gl/dist/maplibre-gl.css`.
+ * MapLibre GL loads when a map is first shown, and nothing of it before, its stylesheet with
+ * it where the page has none of its own.
  */
 export const CloverMap = forwardRef<HTMLElement, MapProps>(
   function CloverMap(props, ref) {

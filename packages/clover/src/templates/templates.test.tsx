@@ -887,6 +887,22 @@ describe("templates", () => {
       "inert",
       true,
     );
+    // But not what speaks: a member loading as it is chosen is still told (WCAG 4.1.3).
+    expect(gallery.querySelector(".clover-status")).not.toHaveProperty(
+      "inert",
+      true,
+    );
+    // Tab comes round inside it, either way (2.4.3), as `aria-modal` says.
+    const back = within(dialog).getAllByRole("button")[0];
+    back.focus();
+    fireEvent.keyDown(back, { key: "Tab", shiftKey: true });
+    const stops = dialog.querySelectorAll<HTMLElement>(
+      'button, [tabindex]:not([tabindex="-1"])',
+    );
+    const last = stops[stops.length - 1];
+    expect(last).toHaveFocus();
+    fireEvent.keyDown(last, { key: "Tab" });
+    expect(back).toHaveFocus();
     fireEvent.keyDown(dialog, { key: "Escape" });
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(gallery.querySelector(".clover-items")).toHaveProperty(

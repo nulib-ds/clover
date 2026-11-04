@@ -49,8 +49,19 @@ export function cueText(raw: string): string {
     });
 }
 
-export function parseVtt(text: string): Cue[] {
-  const cues: Cue[] = [];
+/** A cue as the file writes it: its id, times and settings, and its text with its tags. */
+export interface VttBlock {
+  id: string;
+  start: number;
+  end: number;
+  /** What follows the end time: `align:start line:85%`. */
+  settings: string;
+  raw: string;
+}
+
+/** A file's cues as it writes them, in its order. */
+export function vttBlocks(text: string): VttBlock[] {
+  const cues: VttBlock[] = [];
   // Blocks are separated by blank lines; the first is the header.
   const blocks = text.replace(/\r\n?/g, "\n").split(/\n{2,}/);
   for (const block of blocks) {
@@ -59,14 +70,27 @@ export function parseVtt(text: string): Cue[] {
     if (timing === -1) continue; // Header, NOTE, STYLE or REGION.
     const [from, rest] = lines[timing].split("-->");
     const start = seconds(from);
-    const end = seconds(rest.trim().split(/\s+/)[0]);
+    const [until, ...settings] = rest.trim().split(/\s+/);
+    const end = seconds(until);
     if (!Number.isFinite(start) || !Number.isFinite(end)) continue;
-    const raw = lines.slice(timing + 1).join("\n");
-    const voice = /<v(?:\.[^\s>]+)*\s+([^>]+)>/.exec(raw)?.[1]?.trim();
-    const body = cueText(raw);
-    cues.push({ start, end, text: body, ...(voice ? { voice } : {}) });
+    cues.push({
+      id: timing ? lines[0] : "",
+      start,
+      end,
+      settings: settings.join(" "),
+      raw: lines.slice(timing + 1).join("\n"),
+    });
   }
-  return cues.sort((a, b) => a.start - b.start);
+  return cues;
+}
+
+export function parseVtt(text: string): Cue[] {
+  return vttBlocks(text)
+    .map(({ start, end, raw }) => {
+      const voice = /<v(?:\.[^\s>]+)*\s+([^>]+)>/.exec(raw)?.[1]?.trim();
+      return { start, end, text: cueText(raw), ...(voice ? { voice } : {}) };
+    })
+    .sort((a, b) => a.start - b.start);
 }
 
 /**

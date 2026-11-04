@@ -27,22 +27,40 @@ interface Box {
 }
 
 /*
- * The popover of each control in the Body, measured as it shows on keyboard focus. (By
- * pointer, a wrapped row's popovers hang over the row under it; the unit tests cover the
- * pointer's way in, `ui/Tip.test.tsx`.)
+ * The popover of each control in the Body, measured as it shows on keyboard focus. Where
+ * the row is too narrow, the view's controls wait behind More (`collapseControls`,
+ * "auto"): it is opened first, and each control in its tray, which scrolls it into sight
+ * as focus reaches it, is measured a frame later, inside the tray too. (By pointer, a
+ * wrapped row's popovers hang over the row under it; the unit tests cover the pointer's
+ * way in, `ui/Tip.test.tsx`.)
  */
 async function tipsOver(page: Page) {
-  const controls = page.locator(".clover-canvas-controls > button");
+  const more = page.getByRole("button", { name: "Expand viewer controls" });
+  if (await more.isVisible()) {
+    // By keyboard, as a keyboard user opens it: focus stays visible on what it holds.
+    await more.focus();
+    await page.keyboard.press("Enter");
+  }
+  const controls = page.locator(".clover-canvas-controls button");
   await expect(controls.first()).toBeVisible();
-  const seen: { name: string; tip: Box; cut: boolean }[] = [];
+  const seen: { name: string; tip: Box; cut: boolean; tray?: Box }[] = [];
   for (const control of await controls.all()) {
     if (!(await control.isVisible())) continue;
     await control.focus();
     const tip = control.locator("> .clover-tip");
+    if (!(await tip.count())) continue;
     await expect(tip).toBeVisible();
+    await page.evaluate(
+      () =>
+        new Promise((done) =>
+          requestAnimationFrame(() => requestAnimationFrame(done)),
+        ),
+    );
     seen.push(
       await tip.evaluate((element) => {
         const { left, right, top, bottom } = element.getBoundingClientRect();
+        const list = element.closest(".clover-canvas-more-list");
+        const tray = list ? list.getBoundingClientRect() : undefined;
         // Its words fit inside its own box: wrapped, not overflowing it.
         const range = document.createRange();
         range.selectNodeContents(element);
@@ -51,6 +69,12 @@ async function tipsOver(page: Page) {
           name: element.textContent ?? "",
           tip: { left, right, top, bottom },
           cut: words.left < left - 0.5 || words.right > right + 0.5,
+          tray: tray && {
+            left: tray.left,
+            right: tray.right,
+            top: tray.top,
+            bottom: tray.bottom,
+          },
         };
       }),
     );
@@ -86,10 +110,14 @@ for (const spaced of [false, true]) {
       const bodyBox = await bodyBoxOf(page);
       const tips = await tipsOver(page);
       expect(tips.length).toBeGreaterThan(3);
-      for (const { name, tip, cut } of tips) {
+      for (const { name, tip, cut, tray } of tips) {
         expect(tip.left, name).toBeGreaterThanOrEqual(bodyBox.left);
         expect(tip.right, name).toBeLessThanOrEqual(bodyBox.right);
         expect(cut, name).toBe(false);
+        // In the tray, which cuts what runs past it, inside it too.
+        if (!tray) continue;
+        expect(tip.left, name).toBeGreaterThanOrEqual(tray.left - 0.5);
+        expect(tip.right, name).toBeLessThanOrEqual(tray.right + 0.5);
       }
     });
   }

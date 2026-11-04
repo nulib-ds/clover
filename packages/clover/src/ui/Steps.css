@@ -39,9 +39,13 @@ button.clover-steps-step {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  /* 26px, past the 24 WCAG 2.5.8 asks of a target. */
-  width: var(--clover-space-l);
-  height: var(--clover-space-l);
+  /*
+   * 26px at a 16px page, past the 24 WCAG 2.5.8 asks of a target, and never under 24 on a
+   * page whose own size is smaller: the tabs' and the tray's arrows overlap what they
+   * scroll, so their room around them does not count.
+   */
+  width: max(24px, var(--clover-space-l));
+  height: max(24px, var(--clover-space-l));
   margin: 0;
   padding: 0;
   border: 0;

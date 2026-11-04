@@ -1602,9 +1602,13 @@ describe("Canvas", () => {
         "true",
       );
       // One of the row's controls, from the placeholder's own chunk, as it arrives.
-      expect(
-        await screen.findByRole("button", { name: "Expand viewer controls" }),
-      ).toHaveAttribute("data-button", "placeholder");
+      const toggle = await screen.findByRole("button", {
+        name: "Expand viewer controls",
+      });
+      expect(toggle).toHaveAttribute("data-button", "placeholder");
+      // A disclosure, as More is: collapsed while the still shows, its tray named.
+      expect(toggle).toHaveAttribute("aria-expanded", "false");
+      expect(toggle.getAttribute("aria-controls")).toMatch(/^more-.+-list$/);
       expect(openViewer().closest(".clover-canvas-controls")).not.toBeNull();
       // Nothing of the Canvas is fetched, and no other control is shown.
       expect(renderer.setImages).not.toHaveBeenCalled();

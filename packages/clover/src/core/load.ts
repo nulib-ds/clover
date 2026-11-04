@@ -1,8 +1,5 @@
-import {
-  type ContentTargets,
-  type Target,
-  isContentState,
-} from "./content-state";
+import type { ContentTargets, Target } from "./content-state";
+import { asArray } from "../lib/asArray";
 import {
   type Presentation4Collection,
   type Manifest,
@@ -27,6 +24,20 @@ export type IIIFContent = string | Record<string, unknown>;
 
 /** The content-state reader, loaded only for one: a URL to show needs none. */
 const readContentState = () => import("./content-state-reader");
+
+/**
+ * Whether JSON is a content state, rather than a IIIF resource to show. Here, beside the
+ * one that asks, not with content state's writer (`content-state.ts`), which a Canvas
+ * loads only where its page asks for content states.
+ */
+function isContentState(json: unknown): boolean {
+  const value = json as Record<string, unknown> | null;
+  if (!value || typeof value !== "object") return false;
+  if (value.type === "Annotation") {
+    return asArray(value.motivation).includes("contentState");
+  }
+  return value.type === "SpecificResource";
+}
 
 export interface Loaded {
   manifest: Manifest;

@@ -5,6 +5,7 @@ import { selectSequence } from "./selectors";
 import { toPlainText } from "./text";
 import { type LanguageMapLike, localize } from "./value";
 import { asArray } from "../lib/asArray";
+import type { Json } from "./json";
 
 /**
  * Where a IIIF resource is, read for a map: navPlace (on a Collection, Manifest, Canvas
@@ -68,8 +69,6 @@ export interface Georeference {
   /** What to draw: an image body (or a bare image service), sized by `overlayImageUrl`. */
   image: Record<string, unknown>;
 }
-
-type Json = Record<string, any>;
 
 const GEOMETRIES = new Set([
   "Point",

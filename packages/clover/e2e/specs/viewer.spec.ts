@@ -27,7 +27,8 @@ test.describe("Viewer", () => {
     );
   });
 
-  test("the controls fade while the information panel is open", async ({
+  // A picture's controls stay in sight (4.1.0), the information panel open or not.
+  test("a picture's controls stay in sight while the information panel is open", async ({
     page,
     isMobile,
   }) => {
@@ -49,12 +50,13 @@ test.describe("Viewer", () => {
       figure!.y + figure!.height / 2,
     );
     await expect.poll(opacity).toBe("1");
-    // Away from the Canvas: it lingers a second, then fades, panel open or not.
+    // Away from the Canvas, well past the hide delay: still there, and the panel's toggle.
     await page.mouse.move(
       figure!.x + figure!.width / 2,
       figure!.y + figure!.height + 200,
     );
-    await expect.poll(opacity, { timeout: 5000 }).toBe("0");
+    await page.waitForTimeout(4000);
+    expect(await opacity()).toBe("1");
     expect(await toggle.evaluate((el) => getComputedStyle(el).opacity)).toBe(
       "1",
     );
@@ -88,12 +90,14 @@ test.describe("Viewer", () => {
     expect(await opacity()).toBe("1");
     await expect(zoom.locator(".clover-tip")).toBeVisible();
 
-    // Back on the picture, the controls fade as before.
+    // Back on the picture, a picture's controls stay too (4.1.0); a recording's, which
+    // fade, need one that plays, which this harness has not.
     await page.mouse.move(
       figure!.x + figure!.width / 2,
       figure!.y + figure!.height / 2,
     );
-    await expect.poll(opacity, { timeout: 5000 }).toBe("0");
+    await page.waitForTimeout(4000);
+    expect(await opacity()).toBe("1");
   });
 
   test("reads right to left: the strip runs leftward, Previous on the right", async ({

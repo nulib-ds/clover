@@ -418,9 +418,13 @@
 /*
  * Masonry: a grid whose pictures keep their own proportions. Its rows are thin, and each
  * item spans as many as its height and the gap below it need (`masonry.ts`), so the items
- * pack up under the ones above, still placed left to right, in reading order.
+ * pack up under the ones above, still placed left to right, in reading order. Thin only
+ * once that code measures them (`data-masonry`): before, on 4px rows with no spans, the
+ * items lay one over another.
  */
-.clover-items[data-layout="masonry"] .clover-items-track {
+.clover-items[data-layout="masonry"]
+  .clover-items-viewport[data-masonry]
+  .clover-items-track {
   grid-auto-rows: 4px;
   row-gap: 0;
   align-items: start;

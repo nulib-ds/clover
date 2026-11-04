@@ -457,7 +457,8 @@ deadline.
     plainest resource of its kind (an image for the Viewer): React and the engines others
     make that load on demand (MapLibre and its worker, hls.js, three.js) never counted;
     the upgrader and, in React, the stylesheets counted for a template only, a part's
-    React figure its script alone (`build/sizes.mjs`, held to a browser by
+    React figure its script alone, with the styles its code adopts (a recording's, a
+    Scene's, a map's) (`build/sizes.mjs`, held to a browser by
     `npm run check:first-view -w @nulib/clover`). Its unit is shown as written, "kB",
     never lowercased, and its figure rounded, never in tenths: "89 kB", a whole number, or
     under 1 kB its tenth, "0.5 kB", with no "~" (`kB` in `docs/lib/sizes.ts`; Mat,
@@ -1114,6 +1115,10 @@ e2e:docs`.
 - Branch from `main`; keep PRs focused and small.
 - Commits: concise, imperative (“Fix slider scroll behavior”); reference issues `#123`.
 - PRs: include description, linked issues, and screenshots/GIFs for UI changes.
+- A PR's description is slim (Mat, 2026-11-03; nulib-ds/clover#390 is the model): a line
+  of what it is, then sections (`##`) of bullets, each item one line, conversational, no
+  fluff, and no "Generated with Claude Code" or other agent line at the bottom. Commits
+  carry no `Co-Authored-By` trailer for an agent either.
 - Required: `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build` must pass.
 - Update docs (`docs/` or `content/`) when changing public APIs or behavior.
 

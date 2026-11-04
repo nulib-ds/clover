@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, isAbsolute, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
+import { lazySheets } from "./build/clover-sheets.mjs";
 import { inlineMapLibreWorker } from "./build/maplibre-worker.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
@@ -25,8 +26,11 @@ const packageName = (id) =>
 export default defineConfig({
   root,
   publicDir: false,
-  // MapLibre's worker, bundled, so a consumer's bundler need not find it.
-  plugins: [inlineMapLibreWorker()],
+  /*
+   * MapLibre's worker, bundled, so a consumer's bundler need not find it; and the part
+   * sheets styles.css leaves out, brought by the code that draws what they style.
+   */
+  plugins: [inlineMapLibreWorker(), lazySheets()],
   esbuild: { jsx: "automatic" },
   json: { stringify: true },
   build: {
@@ -53,7 +57,12 @@ export default defineConfig({
        * in silently.
        */
       external(id, importer) {
-        if (id.startsWith("\0") || id.startsWith(".") || isAbsolute(id)) {
+        if (
+          id.startsWith("\0") ||
+          id.startsWith("virtual:clover-") ||
+          id.startsWith(".") ||
+          isAbsolute(id)
+        ) {
           return false;
         }
         if (allowed.has(packageName(id))) return true;

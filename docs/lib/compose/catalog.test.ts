@@ -126,8 +126,8 @@ describe("catalog", () => {
     });
     expect(items.codeProps).toContain("renderItem");
     expect(findPart("Map")).toMatchObject({
-      jsx: "Map",
-      from: "@nulib/clover/map",
+      jsx: "Clover.Map",
+      from: "@nulib/clover",
     });
     expect(rootProps.map((prop) => prop.prop)).toContain("iiifContent");
   });

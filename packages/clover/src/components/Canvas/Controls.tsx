@@ -99,6 +99,11 @@ interface CanvasControlsProps {
   mediaElement?: HTMLMediaElement | null;
   /** Go to a chapter's start: the Canvas opens the recording first, over its still. */
   onChapter?: (start: number) => void;
+  /**
+   * The recording's still shows: going to a chapter opens the recording and plays it, so
+   * the chapters' arrow keys only move the check, and Enter or a press goes there.
+   */
+  overStill?: boolean;
   /** How the chapters' pictures are fetched. */
   request?: CloverRequest;
   /** The Canvas's annotations, on its picture and its time. With any, a control lists them. */
@@ -158,6 +163,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
   chapters = [],
   mediaElement = null,
   onChapter,
+  overStill,
   request,
   hiddenPages,
   onPageVisibilityChange,
@@ -549,6 +555,9 @@ const Controls: React.FC<CanvasControlsProps> = ({
           ids={items.map(({ id }) => id)}
           more={`more-${instance}`}
           fits={fits}
+          settled={
+            fits || tucked.length > 0 || !items.some((item) => item.view)
+          }
           onFits={setFits}
         />
       )}
@@ -566,6 +575,7 @@ const Controls: React.FC<CanvasControlsProps> = ({
           chapters={chapters}
           element={mediaElement}
           onChapter={onChapter!}
+          overStill={overStill}
           request={request}
           onClose={closeChapters}
         />

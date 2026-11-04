@@ -87,15 +87,15 @@ describe("compose", () => {
     });
   });
 
-  it("imports a part from its own entry point, drawn alone", () => {
+  it("writes a part drawn alone as the parts are, Map too", () => {
     expect(
       code({ resource: URL, root: false, parts: [{ part: "Map" }] }).code,
     ).toBe(
       [
-        'import { Map } from "@nulib/clover/map";',
+        'import * as Clover from "@nulib/clover";',
         'import "@nulib/clover/styles.css";',
         "",
-        `<Map iiifContent="${URL}" />;`,
+        `<Clover.Map iiifContent="${URL}" />;`,
       ].join("\n"),
     );
   });
