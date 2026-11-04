@@ -19,7 +19,7 @@ import { loads } from "docs/lib/figures";
 | ------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `@nulib/clover`                       | The [Viewer](/docs/viewer) (the default export), and every part, hook and helper (named).          |
 | `@nulib/clover/templates`             | The [templates](/docs/viewer#templates): `Default`, `Document` and `Gallery`.                      |
-| `@nulib/clover/map`                   | [`Map`](/docs/map), for navPlace and georeferenced images. The Viewer adds its Map tab itself.     |
+| `@nulib/clover/map`                   | [`Map`](/docs/map) and its helpers, as `@nulib/clover` exports them (`Clover.Map`).                |
 | `@nulib/clover/three`                 | `registerThreeEngine`, to draw a [Scene](/docs/scene) with three.js, which you install.            |
 | `@nulib/clover/web-components`        | `<clover-viewer>`, and [every part as an element](#parts), for a page without React.               |
 | `@nulib/clover/web-components/viewer` | `<clover-viewer>` alone, built whole, for a page that shows a Viewer and nothing else of Clover's. |
@@ -520,6 +520,52 @@ reaches it, as 3.x's does. Clover's styles are added to the document once each, 
 [Styling](/docs/styling).
 
 </div>
+
+## Content Security Policy
+
+Clover works on a page whose Content Security Policy allows no `'unsafe-inline'`, no
+`data:` and no `blob:`. It writes no inline script, sets its inline styles through the
+DOM, draws its glyphs as inline SVG, and hands a video its captions as cues, never as an
+address. What a policy allows for Clover is where the resources it shows come from:
+
+| Directive     | What it allows                                                                                                                |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `connect-src` | The resources' hosts: Manifests, Collections, annotations, captions and transcripts, `info.json`, search, a basemap           |
+| `img-src`     | The image servers and thumbnails                                                                                              |
+| `media-src`   | The audio and video, and `blob:` for a stream (HLS), which plays through Media Source Extensions, as every such player's does |
+| `worker-src`  | A map's worker (below)                                                                                                        |
+
+<div data-code-flavor="react">
+
+`styles.css` is a file, which your app serves as it serves its own CSS. The styles of a
+recording, a Scene and a map, which load with their code, are constructed stylesheets,
+which `style-src` does not govern. In the browser, React sets the parts' own `style`
+props through the DOM, which no policy governs; drawn on a server, they reach the page
+as `style` attributes, which a page allows with `style-src-attr 'unsafe-inline'`.
+
+</div>
+
+<div data-code-flavor="web-components">
+
+The elements add each stylesheet as a `<style>`, first in `<head>`, with the page's nonce
+where it names one: `<meta property="csp-nonce" nonce="…">`, else its scripts' own. Where
+the policy refuses one all the same, the document adopts them instead, in the same order,
+after the page's own stylesheets: a page whose own cascade layers should outrank Clover's
+names `clover` first, `@layer clover;`.
+
+</div>
+
+MapLibre's worker starts from a `blob:` URL: Clover's own, or one MapLibre makes for a
+worker on another host, as a CDN's. Where `worker-src` refuses it, serve the worker from
+your site and name it with `setMapWorkerUrl` ([Map](/docs/map#maplibres-worker)). Until
+then, the map says it could not be shown, and the console says how.
+
+Where a page requires Trusted Types (`require-trusted-types-for 'script'`), Clover writes
+IIIF's HTML, once sanitized, and reads SVG selectors through a policy of its own,
+`clover`. A page that lists its policies allows it, `trusted-types clover` (with
+`'allow-duplicates'` where React's Clover and the elements share a page). MapLibre makes
+its worker and reads its credits from strings, which the page's own default policy must
+let through for a map to draw.
 
 ## Coming from Clover 3.x
 

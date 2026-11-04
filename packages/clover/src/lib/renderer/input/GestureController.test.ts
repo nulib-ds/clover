@@ -74,6 +74,8 @@ describe("GestureController", () => {
   it.each([
     ["below flickMinSpeed, does not glide", { flickMinSpeed: 2000 }, undefined],
     ["glides for flickMomentum seconds", { flickMomentum: 0.5 }, 625],
+    // The renderer's, where the system asks for reduced motion: no jump on release.
+    ["with no flickMomentum, does not glide", { flickMomentum: 0 }, undefined],
   ])("a mouse drag released %s", (_, options, glide) => {
     const { element, target } = setup({ ...DEFAULT_GESTURES, ...options });
     const at = (type: string, x: number, timeStamp: number) => {

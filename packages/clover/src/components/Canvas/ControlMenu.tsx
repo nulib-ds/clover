@@ -98,8 +98,20 @@ const ControlMenu: React.FC<ControlMenuProps> = ({
       // Handled here, so nothing around it closes as well: the Gallery's Lightbox,
       // a floating Panel. Heard in the capture phase,
       // before the page's own handlers, the panel's among them.
-      if (inside) event.preventDefault();
-      onClose(inside);
+      if (inside) {
+        event.preventDefault();
+        onClose(true);
+        return;
+      }
+      /*
+       * From elsewhere, once the key has been through the page: only if nothing where
+       * focus is took it (the image controls' tray, a floating panel), so one Escape
+       * closes one thing (DESIGN.md §0).
+       */
+      const after = (late: KeyboardEvent) => {
+        if (late === event && !event.defaultPrevented) onClose(false);
+      };
+      document.addEventListener("keydown", after, { once: true });
     };
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown, true);

@@ -235,7 +235,6 @@ test.describe("transport", () => {
           "Play",
           "Mute",
           "Volume",
-          "Chapters",
           "Captions",
           "Full screen",
         ]),
@@ -264,7 +263,8 @@ test.describe("transport", () => {
    * Where the bar needs a third row: the Default template at 1280 × 720 and 200% (a
    * Body beside the panel), and the Document template at 320 px, short and tall. The
    * controls at the end keep together at the end of the bar's last row, and their
-   * menus open above them, in the Body.
+   * menus open above them, in the Body; and the Chapters menu, a control at the top
+   * since 4.1.0 (no longer the bar's), opens under it, in the Body too.
    */
   for (const { scene, width, height } of [
     { scene: "", width: 640, height: 360 },
@@ -286,24 +286,31 @@ test.describe("transport", () => {
       const bar = await layout(page);
       expect(bar.inside).toBe(true);
       expect(bar.endTogether).toBe(true);
-      for (const name of ["Chapters", "Captions"]) {
-        expect(await menuInBody(page, name)).toEqual({
-          menu: true,
-          first: true,
-        });
-      }
+      expect(await menuInBody(page, "Captions")).toEqual({
+        menu: true,
+        first: true,
+      });
 
-      // Keyboard focus moving on past an open menu closes it, so it never covers the
-      // control focus lands on (WCAG 2.4.11).
       const chapters = page.getByRole("button", { name: "Chapters" });
       await chapters.focus();
       await page.keyboard.press("Enter");
+      const chaptersMenu = page.getByTestId("clover-canvas-chapters");
+      await expect(chaptersMenu).toBeVisible();
+      await expect.poll(() => inBody(chaptersMenu)).toBe(true);
+      await page.keyboard.press("Escape");
+      await expect(chapters).toBeFocused();
+
+      // Keyboard focus moving on past an open menu closes it, so it never covers the
+      // control focus lands on (WCAG 2.4.11).
+      const captions = page.getByRole("button", { name: "Captions" });
+      await captions.focus();
+      await page.keyboard.press("Enter");
       await page.keyboard.press("Tab");
       await page.keyboard.press("Shift+Tab");
-      await expect(chapters).toBeFocused();
-      await expect(chapters).toHaveAttribute("aria-expanded", "true");
+      await expect(captions).toBeFocused();
+      await expect(captions).toHaveAttribute("aria-expanded", "true");
       await page.keyboard.press("Shift+Tab");
-      await expect(chapters).toHaveAttribute("aria-expanded", "false");
+      await expect(captions).toHaveAttribute("aria-expanded", "false");
       const volume = page.getByRole("slider", { name: "Volume" });
       await expect(volume).toBeFocused();
       expect(await topmost(volume)).toBe("itself");
@@ -573,9 +580,11 @@ test.describe("transport", () => {
     );
     const captions = page.getByRole("button", { name: "Captions" });
     await expect(captions).toBeAttached();
+    // The element may come a moment after its controls: read its tracks once it is in.
+    await expect(page.locator("video")).toBeAttached();
     const modes = () =>
       page.evaluate(() =>
-        Array.from(document.querySelector("video")!.textTracks).map(
+        Array.from(document.querySelector("video")?.textTracks ?? []).map(
           (track) => track.mode,
         ),
       );

@@ -26,9 +26,8 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
   part="Map"
   resource="navplace"
   imports={[
-    'import { Map } from "@nulib/clover/map";',
+    'import * as Clover from "@nulib/clover";',
     'import "@nulib/clover/styles.css";',
-    'import "maplibre-gl/dist/maplibre-gl.css";',
   ]}
   knobs={[
     {
@@ -85,7 +84,7 @@ control points, clipped to its mask. The image server must allow CORS.
 <MapDemo mock="georeference/manifest.json" />
 
 ```jsx
-<Map iiifContent="https://clover.iiif.library.northwestern.edu/mocks/georeference/manifest.json" />
+<Clover.Map iiifContent="https://clover.iiif.library.northwestern.edu/mocks/georeference/manifest.json" />
 ```
 
 </Example>
@@ -112,11 +111,10 @@ region.
 
 ```jsx
 import * as Clover from "@nulib/clover";
-import { Map } from "@nulib/clover/map";
 
 <Clover.Root iiifContent={url}>
   <Clover.Body />
-  <Map />
+  <Clover.Map />
 </Clover.Root>;
 ```
 
@@ -126,7 +124,7 @@ Size the map with `--clover-map-height` (default `24rem`), never `height`: `styl
 to the box around the map and its list.
 
 ```jsx
-<Map iiifContent={url} style={{ "--clover-map-height": "420px" }} />
+<Clover.Map iiifContent={url} style={{ "--clover-map-height": "420px" }} />
 ```
 
 ### MapLibre's worker
@@ -134,7 +132,8 @@ to the box around the map and its list.
 Clover brings MapLibre's worker, bundled, and starts it from a `blob:` URL, so a map draws
 its places in any bundler with no setup. A page whose Content Security Policy refuses
 `blob:` workers (`worker-src`) serves the worker itself, and tells Clover where, once,
-for every map.
+for every map. Until it does, the map says it could not be shown, and the console says
+how.
 
 ```js
 import { setMapWorkerUrl } from "@nulib/clover";
@@ -151,7 +150,7 @@ another MapLibre serves that one's worker the same way; Clover says so in the co
 
 [Clover 3.x › Map](/docs/deprecated-versions/map)
 
-- `Map` is a named export of `@nulib/clover/map`.
+- `Map` is one of the parts, `Clover.Map` (`@nulib/clover/map` exports it too).
 - A Viewer shows it in its Panel by itself: no `options.map`.
 - `georefAnnotation` is `georeferences`, and overlays draw by default.
 - MapLibre's worker comes with Clover: no `workerUrl` to set.

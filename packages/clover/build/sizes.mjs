@@ -249,13 +249,16 @@ const BUNDLES = [
     { draws: FIRST_VIEW[part] },
   ]),
   ["Map, before MapLibre", "mapInitialGzip", "Map", "map/index.mjs"],
-  // What a Viewer loads when its Map tab is first shown: MapLibre.
+  // What a Viewer loads when its Map tab is first shown: MapLibre, and its stylesheet.
   [
     "MapLibre, on a map",
     "mapOnDemandGzip",
     "default",
     "index.mjs",
-    { onDemand: /maplibre-gl/, also: ["Default", "templates/index.mjs"] },
+    {
+      onDemand: /maplibre-gl|\/components\/Map\/maplibre-sheet\.mjs$/,
+      also: ["Default", "templates/index.mjs"],
+    },
   ],
 ];
 

@@ -163,7 +163,11 @@ test("in the accordion's Map section, the map is no second region", async ({
   isMobile,
 }) => {
   await openViewer(page, isMobile, "panel=accordion&");
-  await page.getByRole("button", { name: "Map", exact: true }).click();
+  // The panel's section: the Canvas's place control is named "Map" too.
+  await page
+    .getByLabel("Information panel")
+    .getByRole("button", { name: "Map", exact: true })
+    .click();
   await ready(page);
   // The section is the landmark; the map in it is a group of the same name.
   const section = page.getByRole("region", { name: "Map" });

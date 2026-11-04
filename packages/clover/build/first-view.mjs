@@ -188,7 +188,7 @@ const ELEMENTS = [
  * the upgrade step that loads with it (`core/upgrade.ts`, with `keep-fragments.ts`, a
  * chunk of its own since 2026-10-30), which a Presentation 4 resource needs neither of.
  */
-const THEIRS = /^(maplibre-gl|maplibre-gl-worker|worker|hls)-/;
+const THEIRS = /^(maplibre-gl|maplibre-gl-worker|maplibre-sheet|worker|hls)-/;
 const UPGRADER = /^(upgrader|upgrade|keep-fragments)-/;
 // What `sizes.mjs` measures as `gzipSync(…, { level: 9 })`.
 const gzip = (code) => gzipSync(code, { level: 9 }).length;

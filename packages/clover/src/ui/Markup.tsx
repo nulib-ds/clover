@@ -21,26 +21,36 @@ function useSanitized(
   text: string,
   markdown = false,
   headingLevel = 3,
-): string | null {
+): Sanitized | null {
   const markup = markdown || hasMarkup(text);
   const key = markdown ? `${headingLevel}\n${text}` : text;
-  const [html, setHtml] = useState<{ for: string; html: string } | null>(null);
+  const [html, setHtml] = useState<(Sanitized & { for: string }) | null>(null);
   useEffect(() => {
     if (!markup) return;
     let live = true;
     Promise.all([
       import("../core/sanitize"),
       markdown ? import("../core/markdown") : null,
-    ]).then(([{ sanitizeHTML }, md]) => {
+    ]).then(([{ sanitizeHTML, trusted }, md]) => {
       const source = md ? md.markdownToHtml(text, { headingLevel }) : text;
-      if (live)
-        setHtml({ for: key, html: sanitizeHTML(source, { markdown: !!md }) });
+      const clean = sanitizeHTML(source, { markdown: !!md });
+      if (live) setHtml({ for: key, html: clean, inner: trusted(clean) });
     });
     return () => {
       live = false;
     };
   }, [text, key, markup, markdown, headingLevel]);
-  return markup && html?.for === key ? html.html : null;
+  return markup && html?.for === key ? html : null;
+}
+
+/**
+ * Sanitized HTML, and the same for the element's `innerHTML`: through Clover's policy
+ * where the page requires Trusted Types (`core/trusted.ts`), made once, so a render
+ * writes it again only when it changes.
+ */
+interface Sanitized {
+  html: string;
+  inner: string;
 }
 
 type MarkupProps = {
@@ -97,11 +107,12 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
   const kind = readAs(format, text);
   const markdown = kind === "markdown";
   // Plain text is never markup: nothing is sanitized, so nothing loads for it.
-  const html = useSanitized(
+  const sanitized = useSanitized(
     kind === "plain" ? "" : text,
     markdown,
     headingLevel,
   );
+  const html = sanitized?.html ?? null;
   if (!text) return null;
   if (kind === "plain")
     return (
@@ -127,12 +138,12 @@ export const Markup = forwardRef<HTMLElement, MarkupProps>(function Markup(
     /<(p|ul|ol|div)[\s>]/i.test(html)
       ? "div"
       : Tag;
-  return html !== null ? (
+  return sanitized ? (
     <Box
       ref={ref}
       {...rest}
       {...written}
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: sanitized.inner }}
     />
   ) : (
     // Until the sanitizer arrives, Markdown shows without its syntax.

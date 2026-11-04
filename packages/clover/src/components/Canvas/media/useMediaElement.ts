@@ -8,7 +8,7 @@ import {
   requestKey,
   sendsCredentials,
 } from "../../../core/request";
-import { loadVtt } from "../../../core/vtt";
+import { loadVtt, vttBlocks } from "../../../core/vtt";
 import { isHls } from "../../../lib/hls";
 
 /**
@@ -90,9 +90,9 @@ export function useMediaElement(
     /*
      * A cross-origin `<track>` loads only when the video itself asks for CORS, which a
      * `dom` video does not. So each file is fetched here (CORS, as Clover fetches all
-     * WebVTT) and handed to its track as a same-origin blob.
+     * WebVTT) and its cues handed to its track, never as an address: a `blob:` track is
+     * refused where a page's Content Security Policy keeps `media-src` to its own hosts.
      */
-    const blobs: string[] = [];
     media.captions.forEach((caption, index) => {
       const track = document.createElement("track");
       // Captions or subtitles, as its annotation `provides` it.
@@ -104,12 +104,7 @@ export function useMediaElement(
       // Shared with `Transcript`: one fetch per file.
       loadVtt(caption.id, requestRef.current)
         .then((text) => {
-          if (canceled) return;
-          const url = URL.createObjectURL(
-            new Blob([text], { type: "text/vtt" }),
-          );
-          blobs.push(url);
-          track.src = url;
+          if (!canceled) addCues(track.track, text);
         })
         .catch(() => undefined);
     });
@@ -174,7 +169,6 @@ export function useMediaElement(
       video.removeAttribute("src");
       video.load();
       video.remove();
-      blobs.forEach((url) => URL.revokeObjectURL(url));
       setElement(null);
     };
     // `captionsKey` and `segmentsKey` stand in for `media.captions` and `media.segments`,
@@ -190,4 +184,43 @@ export function useMediaElement(
   ]);
 
   return element;
+}
+
+/**
+ * A file's cues on its track, as the browser would read them from the file: their text
+ * with its tags and their settings, which the system's player draws (an iPhone's full
+ * screen, picture in picture); Clover draws the words alone. Nothing where the browser
+ * has no cues to make (a test's DOM).
+ */
+export function addCues(track: TextTrack | undefined, text: string): void {
+  if (!track || typeof VTTCue === "undefined") return;
+  for (const { id, start, end, settings, raw } of vttBlocks(text)) {
+    const cue = new VTTCue(start, end, raw);
+    cue.id = id;
+    settle(cue, settings);
+    track.addCue(cue);
+  }
+}
+
+/** A cue's settings, each as far as the browser takes it, else its default. */
+function settle(cue: VTTCue, settings: string): void {
+  for (const setting of settings.split(" ")) {
+    const [name, value = ""] = setting.split(":");
+    const [first, second] = value.split(",");
+    try {
+      if (name === "vertical") cue.vertical = first as DirectionSetting;
+      else if (name === "align") cue.align = first as AlignSetting;
+      else if (name === "size") cue.size = parseFloat(first);
+      else if (name === "position") {
+        cue.position = parseFloat(first);
+        if (second) cue.positionAlign = second as PositionAlignSetting;
+      } else if (name === "line") {
+        cue.snapToLines = !first.endsWith("%");
+        cue.line = parseFloat(first);
+        if (second) cue.lineAlign = second as LineAlignSetting;
+      }
+    } catch {
+      // A value out of range: the setting's default.
+    }
+  }
 }

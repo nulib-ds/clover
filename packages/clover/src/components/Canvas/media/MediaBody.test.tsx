@@ -557,13 +557,45 @@ describe("Canvas media", () => {
   });
 
   it("offers caption tracks from the Canvas, with Off", async () => {
-    // Fetched with CORS and handed over as a same-origin blob, since a `dom` video
-    // does not ask for CORS and a cross-origin track would be refused.
+    // Fetched with CORS and its cues handed to the track, since a `dom` video does not
+    // ask for CORS and a cross-origin track would be refused; never as an address, which
+    // a strict Content Security Policy refuses too (`media-src`).
     const fetch = vi
       .spyOn(globalThis, "fetch")
-      .mockResolvedValue(new Response("WEBVTT\n"));
-    URL.createObjectURL = vi.fn(() => "blob:http://localhost/captions");
-    URL.revokeObjectURL = vi.fn();
+      .mockResolvedValue(
+        new Response(
+          "WEBVTT\n\nhello\n00:00.500 --> 00:02.000 align:start line:85%\n<v Ann>Hello</v>\n",
+        ),
+      );
+    class Cue {
+      id = "";
+      align = "center";
+      line: number | "auto" = "auto";
+      snapToLines = true;
+      constructor(
+        public startTime: number,
+        public endTime: number,
+        public text: string,
+      ) {}
+    }
+    vi.stubGlobal("VTTCue", Cue);
+    const added: Cue[] = [];
+    const tracks = new WeakMap<
+      HTMLTrackElement,
+      { addCue: (cue: Cue) => void }
+    >();
+    Object.defineProperty(HTMLTrackElement.prototype, "track", {
+      configurable: true,
+      get(this: HTMLTrackElement) {
+        if (!tracks.has(this))
+          tracks.set(this, { addCue: (cue: Cue) => added.push(cue) });
+        return tracks.get(this);
+      },
+    });
+    onTestFinished(() => {
+      delete (HTMLTrackElement.prototype as { track?: unknown }).track;
+      vi.unstubAllGlobals();
+    });
     const onMediaElement = vi.fn();
     render(
       <Canvas
@@ -578,9 +610,17 @@ describe("Canvas media", () => {
       "https://fixtures.iiif.io/video/indiana/lunchroom_manners/lunchroom_manners.vtt",
       expect.objectContaining({ credentials: "same-origin" }),
     );
-    await vi.waitFor(() =>
-      expect(track.src).toBe("blob:http://localhost/captions"),
-    );
+    await vi.waitFor(() => expect(added).toHaveLength(1));
+    expect(added[0]).toMatchObject({
+      id: "hello",
+      startTime: 0.5,
+      endTime: 2,
+      text: "<v Ann>Hello</v>",
+      align: "start",
+      line: 85,
+      snapToLines: false,
+    });
+    expect(track.getAttribute("src")).toBeNull();
     expect(track.label).toBe("Captions in WebVTT format");
     expect(track.srclang).toBe("en");
 

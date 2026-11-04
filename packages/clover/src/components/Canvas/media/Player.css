@@ -228,10 +228,12 @@
  * size (`Tip.css`'s `s`) however wide the Body, and ringed in the accent, as a Canvas's
  * active annotation's band is (`Annotations.css`), with no light line or dark edge (Mat,
  * 2026-11-01: "remove the light hairline … just do the outline in accent"): told from a
- * caption by its ring, never its color alone (WCAG 1.4.1), 3:1 or more on the dark
- * ground (1.4.11). Its page's label is not in sight, only read ("don't show the annotation page
- * label … outlined like an active annotation in Canvas"). They stand `s` apart, so the
- * rings never touch.
+ * caption by its ring, never its color alone (WCAG 1.4.1). The accent lightened by the
+ * secondary color, 70% to 30%, so it holds 3:1 on the dark ground (1.4.11): the default
+ * accent alone was 1.9:1 there over a light still under its wash, 2.7:1 with none. Its
+ * page's label is not in sight, only read ("don't show the annotation page label …
+ * outlined like an active annotation in Canvas"). They stand `s` apart, so the rings
+ * never touch.
  */
 .clover-canvas-player > .clover-canvas-player-notes {
   --clover-player-notes-clear: calc(
@@ -253,7 +255,12 @@
 .clover-canvas-player .clover-canvas-captions-cue[data-kind="annotation"] {
   max-width: 100%;
   font-size: var(--clover-text-s);
-  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline: 2px solid
+    color-mix(
+      in srgb,
+      var(--clover-color-accent, #0065c3) 70%,
+      var(--clover-color-secondary, #fff)
+    );
   outline-offset: 0;
 }
 

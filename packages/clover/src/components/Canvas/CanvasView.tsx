@@ -64,7 +64,7 @@ import {
 } from "../../lib/renderer/sources/imageService";
 import { type CanvasSurface, type MakeSurface, hasCamera } from "./surface";
 import { languageProps } from "../../i18n/direction";
-import { buildContentState } from "../../core/content-state";
+import type { buildContentState } from "../../core/content-state";
 import {
   useContentStateOutput,
   watchMedia,
@@ -73,6 +73,16 @@ import {
 type CanvasStatus = "loading" | "ready" | "error";
 
 /** Video and sound: only fetched when a Canvas paints them. */
+/*
+ * Content state's writer (`onContentStateChange`), loaded only for a page that asks for
+ * one: a Canvas that reports nothing never carries it. Once here, it stays.
+ */
+let writeContentState: typeof buildContentState | undefined;
+const loadContentState = () =>
+  import("../../core/content-state").then((module) => {
+    writeContentState = module.buildContentState;
+  });
+
 const MediaBody = lazy(() => import("./media/MediaBody"));
 /**
  * The hotspots, and the annotations' state (`AnnotationState`), loaded for a Canvas with
@@ -835,7 +845,12 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
       shown.canvases.find((each) => each.id === region?.canvasId) ??
       shown.canvases[0];
     if (!canvas) return null;
-    return buildContentState({
+    // The writer as the page first asks, and the place reported once it is here.
+    if (!writeContentState) {
+      void loadContentState().then(() => contentStateChanged());
+      return null;
+    }
+    return writeContentState({
       manifestId,
       canvasId: canvas.id,
       type: canvas.type,
@@ -1105,6 +1120,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
             chapters={media ? chapters : undefined}
             mediaElement={mediaElement}
             onChapter={goToChapter}
+            overStill={Boolean(media) && showPlaceholder}
             request={options?.request}
             placeholder={
               cornerToggle && (

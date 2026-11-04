@@ -271,6 +271,10 @@ export class CanvasRenderer implements GestureTarget {
     );
     this.loop = new FrameLoop(this.tick);
     this.gestureOptions = stripUndefined(options.gestures ?? {});
+    // No glide on release where the system asks for less motion: every move is made at
+    // once there, so a glide would jump the image by its whole length. The view stops
+    // where the pointer let go.
+    if (prefersReducedMotion()) this.gestureOptions.flickMomentum = 0;
     this.gestures = new GestureController(host, this, {
       ...DEFAULT_GESTURES,
       ...this.gestureOptions,

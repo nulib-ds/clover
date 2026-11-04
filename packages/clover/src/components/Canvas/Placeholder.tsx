@@ -138,6 +138,12 @@ export function PlaceholderToggle({
       id={id}
       label={t(toggleKey)}
       lang={langOf(toggleKey)}
+      /*
+       * As More, a disclosure as More is (WCAG 4.1.2; DESIGN.md §0, one thing alike
+       * wherever it shows): expanded while the view, and its tray of controls, are open.
+       */
+      expanded={more && !media ? !active : undefined}
+      controls={more && !media ? `more-${instance}-list` : undefined}
       onClick={(event) => {
         const focused = document.activeElement === event.currentTarget;
         const figure = event.currentTarget.closest(".clover-canvas");

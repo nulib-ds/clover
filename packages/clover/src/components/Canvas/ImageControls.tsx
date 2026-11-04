@@ -6,7 +6,7 @@ import { useContainerName } from "../../i18n/useContainerName";
 import { useOneOpen } from "../../ui/useOneOpen";
 import { CloseViewer, OpenViewer } from "../Body/glyphs";
 import { languageProps } from "../../i18n/direction";
-import { Tip } from "../../ui/Tip";
+import { Tip, placeTipAgain } from "../../ui/Tip";
 
 /*
  * A Canvas's controls on one row, never wrapped (Mat, 2026-11-01: "I don't like when
@@ -176,15 +176,24 @@ export function ImageControls({
       else if (under > 0) list.scrollLeft -= Math.min(under, Math.max(left, 0));
       mark();
     };
+    /*
+     * The focused control's popover measured itself before the tray scrolled it into
+     * sight (here, or the browser's own scroll to focus): placed again as it scrolls.
+     */
+    const scrolled = () => {
+      mark();
+      const active = list.ownerDocument.activeElement;
+      if (active && list.contains(active)) placeTipAgain(active);
+    };
     mark();
-    list.addEventListener("scroll", mark, { passive: true });
+    list.addEventListener("scroll", scrolled, { passive: true });
     list.addEventListener("focusin", reveal);
     // Read again as its controls come to rest, having slid in.
     list.addEventListener("animationend", mark);
     const resize = new ResizeObserver(() => mark());
     resize.observe(list);
     return () => {
-      list.removeEventListener("scroll", mark);
+      list.removeEventListener("scroll", scrolled);
       list.removeEventListener("focusin", reveal);
       list.removeEventListener("animationend", mark);
       resize.disconnect();

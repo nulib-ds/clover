@@ -44,6 +44,7 @@ export function Fits({
   ids,
   more,
   fits,
+  settled,
   onFits,
 }: {
   cluster: HTMLElement;
@@ -51,6 +52,11 @@ export function Fits({
   /** The image controls' button's id. */
   more: string;
   fits: boolean;
+  /**
+   * The row shows what `fits` says: the view's controls are in its tray where they do not
+   * fit, the tray's code having arrived (`ImageControls`, loaded only then).
+   */
+  settled: boolean;
   onFits: (fits: boolean) => void;
 }) {
   const shown = useRef(fits);
@@ -118,14 +124,20 @@ export function Fits({
     };
   }, [cluster, key, more]);
 
+  /*
+   * Once the row has changed: the first time the controls stop fitting, the tray's code
+   * arrives a commit after `fits` says so, and only then is the focused control moved
+   * into it, out of sight, so the focus it had waits until then.
+   */
   useLayoutEffect(() => {
+    if (!settled) return;
     const id = moved.current;
     moved.current = null;
     if (id === null) return;
     const active = cluster.ownerDocument.activeElement;
     if (!active || !cluster.contains(active) || active.closest("[hidden]"))
       refocus(cluster, id, more);
-  }, [fits, cluster, more]);
+  }, [fits, settled, cluster, more]);
 
   return null;
 }

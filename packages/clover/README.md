@@ -94,7 +94,7 @@ If you serve Clover's files yourself, copy the whole `dist/web-components` folde
 | ------------------------------------- | ------------------------------------------------------------------------------------- |
 | `@nulib/clover`                       | The Viewer (the default export), and every part, hook and helper (named).             |
 | `@nulib/clover/templates`             | The templates: `Default`, `Document` and `Gallery`.                                   |
-| `@nulib/clover/map`                   | `Map`, for navPlace and georeferenced images. The Viewer adds its Map tab itself.     |
+| `@nulib/clover/map`                   | `Map` and its helpers, as `@nulib/clover` exports them (`Clover.Map`).                |
 | `@nulib/clover/three`                 | `registerThreeEngine`, to draw a Scene with three.js, which you install.              |
 | `@nulib/clover/web-components`        | `<clover-viewer>`, and every part as an element.                                      |
 | `@nulib/clover/web-components/viewer` | `<clover-viewer>` alone, for a page that shows a Viewer and nothing else of Clover's. |

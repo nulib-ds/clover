@@ -10,20 +10,9 @@
  * On the scale: in from the Body's sides and bottom by the controls' inset
  * (`--clover-canvas-controls-inset`, `l` by default), as the image controls are, with
  * `xl` of scrim above; the seek row `xs` over the bar (they are one control); the bar's
- * controls `s` apart, as the cluster's are (`xs` on a narrow Body, below).
- * `--clover-transport-room` is what that takes up, and `m` clear of it, for anything that
- * has to clear it (captions, the caption box). The bar is one control high, or as high as
- * the transport measures it (`--clover-transport-bar-height`, `useBarHeight`) once it
- * wraps.
+ * controls `s` apart, as the cluster's are (`xs` on a narrow Body, below). What that
+ * takes up is `--clover-transport-room` (`Canvas.css`).
  */
-.clover-canvas {
-  --clover-transport-room: calc(
-    var(--clover-transport-bar-height, var(--clover-control)) +
-      var(--clover-space-l) + var(--clover-space-xs) +
-      var(--clover-canvas-controls-inset) + var(--clover-space-m)
-  );
-}
-
 .clover-canvas-transport {
   position: absolute;
   inset: auto 0 0 0;

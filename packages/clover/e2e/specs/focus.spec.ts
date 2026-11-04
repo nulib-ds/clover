@@ -108,8 +108,8 @@ test.describe("Arrows at the ends keep focus", () => {
 
 /*
  * Escape in a Canvas's menu closes the menu and hands focus to its control, and closes
- * nothing else: in the Gallery's Lightbox, a modal `<dialog>`, the dialog stays open
- * until the next Escape (WCAG 2.4.3).
+ * nothing else: in the Gallery's Lightbox, a modal `dialog` within the Gallery, the
+ * dialog stays open until the next Escape (WCAG 2.4.3).
  */
 test.describe("Escape closes one thing at a time", () => {
   const TWO = "https://fixtures.test/two-choices.json";
@@ -147,8 +147,8 @@ test.describe("Escape closes one thing at a time", () => {
     const option = page.getByRole("option").first();
     await option.focus();
     await page.keyboard.press("Enter");
-    const dialog = page.locator("dialog.clover-template-lightbox");
-    await expect(dialog).toHaveJSProperty("open", true);
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
 
     const control = dialog.locator('[data-button="choice"]');
     await control.focus();
@@ -159,11 +159,138 @@ test.describe("Escape closes one thing at a time", () => {
     await page.keyboard.press("Escape");
     await expect(dialog.getByRole("radio")).toHaveCount(0);
     await expect(control).toBeFocused();
-    await expect(dialog).toHaveJSProperty("open", true);
+    await expect(dialog).toBeVisible();
 
     // The next Escape is the dialog's, and focus goes back to the option.
     await page.keyboard.press("Escape");
-    await expect(dialog).toHaveJSProperty("open", false);
+    await expect(dialog).toHaveCount(0);
     await expect(option).toBeFocused();
   });
+});
+
+/*
+ * The Gallery's Lightbox is modal within the Gallery (`aria-modal`): Tab from its last
+ * stop comes round to its first, and Shift+Tab the other way, so the keyboard never
+ * leaves it for the page, which a screen reader hides meanwhile (WCAG 2.4.3).
+ */
+test("Tab comes round inside the Gallery's Lightbox, either way", async ({
+  page,
+}) => {
+  await serveIIIF(page);
+  await page.goto(
+    "/?scene=gallery&content=https://fixtures.test/0009-book-1.json",
+  );
+  await page.getByRole("option").first().click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  const inside = () =>
+    dialog.evaluate((node) => node.contains(document.activeElement));
+  for (let press = 0; press < 24; press++) {
+    await page.keyboard.press("Tab");
+    expect(await inside()).toBe(true);
+  }
+  for (let press = 0; press < 24; press++) {
+    await page.keyboard.press("Shift+Tab");
+    expect(await inside()).toBe(true);
+  }
+});
+
+/*
+ * On a window too short for its title, Body, strip and caption (320 × 256, a page at
+ * 400%), the Lightbox scrolls them, and its Body keeps room for its controls (WCAG
+ * 1.4.10): it collapsed to a few pixels when the panel only took the window's height.
+ */
+test("on a short window the Lightbox scrolls rather than crushing its Body", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 256 });
+  await serveIIIF(page);
+  await page.goto(
+    "/?scene=gallery&content=https://fixtures.test/0009-book-1.json",
+  );
+  await page.getByRole("option").first().click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  const body = dialog.locator(".clover-template-lightbox-body").first();
+  await expect(body).toBeVisible();
+  // Read once its view, which loads apart, has laid out.
+  await expect
+    .poll(async () => (await body.boundingBox())!.height)
+    .toBeGreaterThan(120);
+  // The panel scrolls, and what it holds is reached by scrolling to it.
+  await expect
+    .poll(() =>
+      dialog.evaluate((node) => node.scrollHeight > node.clientHeight),
+    )
+    .toBe(true);
+  const close = dialog.getByRole("button", { name: "Close" });
+  await close.scrollIntoViewIfNeeded();
+  await expect(close).toBeInViewport();
+});
+
+/*
+ * The first time a Canvas's row stops fitting (the window narrowed, the page zoomed),
+ * its view's controls go behind More, whose code loads only then: focus on one of them is
+ * handed on once they have moved, never dropped to the page (WCAG 2.4.3).
+ */
+test("focus on a view control survives its row's first overflow", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "a phone's own width");
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await serveIIIF(page);
+  await page.goto("/?content=https://fixtures.test/0009-book-1.json");
+  const zoom = page.getByRole("button", { name: "Zoom in", exact: true });
+  await expect(zoom).toBeVisible();
+  await zoom.focus();
+  await page.setViewportSize({ width: 320, height: 800 });
+  await expect(
+    page.getByRole("button", { name: "Expand viewer controls" }),
+  ).toBeVisible();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const active = document.activeElement;
+        return Boolean(
+          active &&
+            active !== document.body &&
+            active.closest(".clover-canvas-controls") &&
+            !active.closest("[hidden]"),
+        );
+      }),
+    )
+    .toBe(true);
+});
+
+/*
+ * One Escape closes one thing: with a Canvas's Choice menu open and focus back in the
+ * image controls' tray, Escape closes the tray, where focus is, and leaves the menu open
+ * for the next (DESIGN.md §0). Both closed at once before.
+ */
+test("Escape in the tray closes the tray, not an open menu too", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "a phone's own width");
+  await page.setViewportSize({ width: 320, height: 800 });
+  await serveIIIF(page);
+  await page.goto("/?content=https://fixtures.test/0033-choice.json");
+  const more = page.getByRole("button", { name: "Expand viewer controls" });
+  await expect(more).toBeVisible();
+  await more.focus();
+  await page.keyboard.press("Enter");
+  // Open, it is named for closing it: found by its state from here.
+  const toggle = page.locator(".clover-canvas-more button[aria-expanded]");
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  const choice = page.locator('[data-button="choice"]');
+  await choice.focus();
+  await page.keyboard.press("Enter");
+  const radios = page.getByRole("radio");
+  await expect(radios.first()).toBeFocused();
+  // Back into the tray, its first control.
+  await page.getByRole("button", { name: "Zoom in", exact: true }).focus();
+  await page.keyboard.press("Escape");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(radios.first()).toBeVisible();
 });

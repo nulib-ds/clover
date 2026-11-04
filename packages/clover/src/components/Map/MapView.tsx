@@ -34,6 +34,8 @@ import { getMapWorkerUrl } from "../../core/map-config";
 import { useNearViewport } from "../Body/useNearViewport";
 import { directionOf, languageProps } from "../../i18n/direction";
 import { Tip } from "../../ui/Tip";
+import { ZoomIn, ZoomOut } from "../../ui/controlGlyphs";
+import { Information } from "../Body/glyphs";
 import { NavDate } from "../../ui/NavDate";
 import { readDate } from "../../core/dates";
 import { dateTimeOf, formatDate } from "../../core/dates-format";
@@ -327,7 +329,7 @@ function MapView({
   const [box, setBox] = useState<HTMLDivElement | null>(null);
   const near = useNearViewport(box);
   const [map, setMap] = useState<any>(null);
-  // MapLibre's controls, each with Clover's popover in it.
+  // MapLibre's controls, each with Clover's glyph and popover in it.
   const [tips, setTips] = useState<{ element: Element; key: string }[]>([]);
   const [failed, setFailed] = useState(false);
   // The overlays on the map, by id, once their images are drawn.
@@ -363,9 +365,15 @@ function MapView({
     let observer: ResizeObserver | null = null;
     // Its listener on the page for Escape, let go with the map.
     let letGo: (() => void) | null = null;
-    // MapLibre and its worker together: a page that sets no worker gets Clover's.
-    Promise.all([import("maplibre-gl"), import("./worker")])
-      .then(([module, bundled]) => {
+    // MapLibre and what Clover brings with it: its worker, for a page that sets none, and
+    // its stylesheet, for a page that has none, in before the map draws.
+    Promise.all([
+      import("maplibre-gl"),
+      import("./worker").then((bundled) =>
+        bundled.mapLibreSheet().then(() => bundled),
+      ),
+    ])
+      .then(async ([module, bundled]) => {
         // ES builds export `Map` by name; a CommonJS interop may wrap it in `default`.
         const maplibre: any =
           "Map" in module ? module : (module as any).default;
@@ -374,6 +382,20 @@ function MapView({
           workerUrl ??
           getMapWorkerUrl() ??
           bundled.bundledWorkerUrl(maplibre.getVersion?.());
+        /*
+         * A worker that starts from a `blob:` URL (Clover's own, or one on another host,
+         * as a CDN's, which MapLibre wraps in one), where the page's policy lets it
+         * start: else no map.
+         */
+        const viaBlob =
+          !!worker &&
+          (worker.startsWith("blob:") ||
+            new URL(worker, location.href).origin !== location.origin);
+        if (viaBlob && !(await bundled.blobWorkersAllowed())) {
+          if (live) setFailed(true);
+          return;
+        }
+        if (!live || !container.current) return;
         if (worker) maplibre.setWorkerUrl(worker);
         const { t } = latest.current;
         instance = new maplibre.Map({
@@ -828,7 +850,10 @@ function MapView({
           {map &&
             tips.map(({ element, key }) =>
               createPortal(
-                <Tip label={t(key)} lang={langOf(key)} />,
+                <>
+                  <MapGlyph name={key} />
+                  <Tip label={t(key)} lang={langOf(key)} />
+                </>,
                 element,
                 key,
               ),
@@ -1125,4 +1150,33 @@ function hash(text: string): string {
     value = (value * 31 + text.charCodeAt(i)) | 0;
   }
   return (value >>> 0).toString(36);
+}
+
+/** Clover's glyph for each of MapLibre's controls it names. */
+const GLYPHS: Record<string, () => React.ReactElement> = {
+  imageZoomIn: ZoomIn,
+  imageZoomOut: ZoomOut,
+  mapAttribution: Information,
+};
+
+/**
+ * A control's glyph, drawn as Clover's controls draw theirs, in place of MapLibre's
+ * (`Map.css`): an svg of its own, never a CSS image, which a strict Content Security
+ * Policy refuses as `data:` (`img-src`).
+ */
+function MapGlyph({ name }: { name: string }) {
+  const Glyph = GLYPHS[name];
+  if (!Glyph) return null;
+  return (
+    <svg
+      className="clover-geomap-glyph"
+      viewBox="0 0 512 512"
+      fill="currentColor"
+      stroke="currentColor"
+      focusable="false"
+      aria-hidden="true"
+    >
+      <Glyph />
+    </svg>
+  );
 }

@@ -100,10 +100,13 @@ describe("<clover-viewer>", () => {
       expect.arrayContaining(["styles/scale", "components/Label/Label"]),
     );
     expect(keys.some((key) => key!.startsWith("styles-"))).toBe(true);
-    // Nothing it does not draw: no map, no media, no other template.
+    /*
+     * Nothing it does not draw: no media, no other template. (Nor a map, but this runs
+     * the source, where the parts bring `Map` with them, `<Clover.Map />`; the elements'
+     * build loads it for a `<clover-map>` alone, and React's drops it where no map is
+     * drawn, `build/bundle.test.mjs`.)
+     */
     for (const absent of [
-      "maplibre",
-      "components/Map/Map",
       "components/Canvas/media/Transport",
       "templates/document/Document",
     ])

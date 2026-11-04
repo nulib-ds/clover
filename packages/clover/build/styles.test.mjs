@@ -1,7 +1,7 @@
 /*
  * The part sheets in `dist/styles/` as `build/styles.mjs` writes them: together, every
- * declaration of styles.css, and, imported core first, the same cascade. Run
- * `npm run build -w @nulib/clover` first.
+ * declaration of styles.css and of the sheets that load with their parts' code, and,
+ * imported core first, the same cascade. Run `npm run build -w @nulib/clover` first.
  */
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
@@ -12,6 +12,10 @@ import { fileURLToPath } from "node:url";
 import {
   DRAWN_INSIDE,
   PART_SHEETS,
+  SHEETS,
+  lazyParts,
+  mapLibreSheetCss,
+  ownersOf,
   partSheets,
   partsDrawing,
   rulesOf,
@@ -20,6 +24,8 @@ import {
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = resolve(root, "dist");
 const GROUPS = partSheets();
+/** The part sheets that load with their code, and are not in styles.css. */
+const LAZY = lazyParts(GROUPS);
 const read = (file) => readFileSync(resolve(dist, file), "utf8").trim();
 
 /** The index after the block that opens at `open`, past quoted braces. */
@@ -198,7 +204,7 @@ test("every sheet of styles.css is in exactly one part sheet, each written", () 
   );
 });
 
-test("the part sheets together declare what styles.css does", () => {
+test("the part sheets together, but those loaded with their code, declare what styles.css does", () => {
   const declarations = (rules) =>
     new Set(
       rules.flatMap(({ selector, conditions, declarations }) =>
@@ -208,9 +214,10 @@ test("the part sheets together declare what styles.css does", () => {
         ),
       ),
     );
+  const kept = Object.keys(GROUPS).filter((name) => !LAZY.includes(name));
   const whole = declarations(rulesIn(read("styles.css")));
   const parts = declarations(
-    Object.keys(GROUPS).flatMap((name) => rulesIn(read(`styles/${name}.css`))),
+    kept.flatMap((name) => rulesIn(read(`styles/${name}.css`))),
   );
   assert.deepEqual(
     [...parts].filter((each) => !whole.has(each)),
@@ -223,11 +230,80 @@ test("the part sheets together declare what styles.css does", () => {
   // And its keyframes, each in one part sheet.
   const blocks = (css) => keyframesIn(css).map(([, block]) => block);
   assert.deepEqual(
-    Object.keys(GROUPS)
-      .flatMap((name) => blocks(read(`styles/${name}.css`)))
-      .sort(),
+    kept.flatMap((name) => blocks(read(`styles/${name}.css`))).sort(),
     blocks(read("styles.css")).sort(),
   );
+});
+
+/*
+ * A recording's, a Scene's and a map's sheets load with the code that draws what they
+ * style (`lazySheets`): each a module of what its part sheet holds, which every module
+ * that draws any of it adopts as it loads.
+ */
+test("each part sheet loaded with its code is its file's, adopted where it draws", async () => {
+  assert.deepEqual(LAZY.sort(), ["map", "media", "scene"]);
+  const src = resolve(root, "src");
+  for (const name of LAZY) {
+    const { default: css } = await import(
+      resolve(dist, `ui/sheets/${name}.mjs`)
+    );
+    assert.equal(css, read(`styles/${name}.css`));
+    const owners = GROUPS[name]
+      .flatMap((sheet) => ownersOf(sheet))
+      .filter((file) => !file.startsWith(resolve(src, "web-components")));
+    assert.ok(owners.length);
+    for (const owner of new Set(owners)) {
+      const built = owner.replace(src, dist).replace(/\.tsx?$/, ".mjs");
+      assert.match(
+        readFileSync(built, "utf8"),
+        new RegExp(`adoptSheet\\("${name}", __clover_sheet_${name}\\)`),
+        `${built} draws what ${name}.css styles without adopting it`,
+      );
+    }
+  }
+});
+
+/*
+ * MapLibre's stylesheet, for a page with none of its own: MapLibre's rules whole, in a
+ * layer after Clover's, loaded only with MapLibre (`components/Map/sheet.ts`), never with
+ * the map's own code, and in the elements' build left empty, their registry bringing it.
+ */
+test("MapLibre's stylesheet loads with MapLibre, after Clover's layer", async () => {
+  const { css } = await import(
+    resolve(dist, "components/Map/maplibre-sheet.mjs")
+  );
+  assert.equal(css, await mapLibreSheetCss());
+  assert.match(
+    css,
+    /^@layer clover,maplibre;@layer maplibre\{\.maplibregl-map\{/,
+  );
+  const statically = (file) =>
+    [
+      ...readFileSync(resolve(dist, file), "utf8").matchAll(
+        /^import\b[^;]*?"([^"]+)"/gm,
+      ),
+    ].map(([, specifier]) => specifier);
+  assert.ok(statically("components/Map/worker.mjs").includes("./sheet.mjs"));
+  assert.match(
+    readFileSync(resolve(dist, "components/Map/sheet.mjs"), "utf8"),
+    /import\("\.\/maplibre-sheet\.mjs"\)/,
+  );
+  for (const file of ["components/Map/MapView.mjs", "components/Map/sheet.mjs"])
+    assert.ok(
+      !statically(file).some((specifier) =>
+        /maplibre-sheet|\.\/sheet\.mjs/.test(specifier),
+      ),
+      `${file} loads MapLibre's stylesheet with the map's own code`,
+    );
+  const elements = resolve(dist, "web-components");
+  const placeholder = readdirSync(elements).find((file) =>
+    /^maplibre-sheet-.*\.mjs$/.test(file),
+  );
+  if (placeholder)
+    assert.doesNotMatch(
+      readFileSync(resolve(elements, placeholder), "utf8"),
+      /maplibregl/,
+    );
 });
 
 /*
@@ -271,13 +347,9 @@ test("every part sheet's container queries name a container there or in core", (
 
 /*
  * A custom property a part sheet reads with no fallback, set only in another part's sheet
- * (core's aside), is invalid on a page without that sheet. Allowed where the reading rule
- * only matches when the setter's part is drawn.
+ * (core's aside), is invalid on a page without that sheet, and until it loads where the
+ * sheet comes with its code: a recording's Body draws its still before its transport.
  */
-const READ_APART = {
-  // Read under `[data-recording]`, which only a recording, media's, sets.
-  "--clover-transport-room": "media",
-};
 test("no part sheet reads a custom property only another part's sets", () => {
   const sets = (css) =>
     new Set([...css.matchAll(/(?<=[{;])\s*(--[\w-]+)\s*:/g)].map(([, n]) => n));
@@ -291,7 +363,7 @@ test("no part sheet reads a custom property only another part's sets", () => {
     )) {
       if (set[part].has(name) || set.core.has(name)) continue;
       const by = Object.keys(set).filter((other) => set[other].has(name));
-      if (by.length && !by.includes(READ_APART[name]))
+      if (by.length)
         unset.push(`${part}.css reads ${name}, set in ${by.join(", ")}.css`);
     }
   assert.deepEqual([...new Set(unset)], []);
@@ -317,8 +389,40 @@ test("Styling's table lists every part sheet", () => {
  * toward failing.
  */
 test("imported core first, the part sheets cascade as styles.css does", async () => {
+  const rules = await placed(GROUPS);
+  const flips = [];
+  for (const early of rules)
+    for (const late of rules) {
+      if (early.index >= late.index || early.part === late.part) continue;
+      if (early.part === "core") continue;
+      flips.push(...tied(early, late));
+    }
+  assert.deepEqual(flips, []);
+});
+
+/*
+ * The sheets that load with their code are adopted after every sheet of the page, so
+ * after templates.css too, which came after them in styles.css's order: a tie between
+ * one of theirs and a template's would flip.
+ */
+test("the part sheets loaded with their code tie with no template's", async () => {
+  const lazy = await placed(
+    Object.fromEntries(LAZY.map((name) => [name, GROUPS[name]])),
+  );
+  const templates = await placed({
+    templates: SHEETS.filter(({ inStyles, layered }) => !inStyles && layered),
+  });
+  assert.ok(templates.length);
+  const flips = [];
+  for (const early of lazy)
+    for (const late of templates) flips.push(...tied(early, late));
+  assert.deepEqual(flips, []);
+});
+
+/** Each rule of each part's sheets, with its place and what a tie is read from. */
+async function placed(groups) {
   const rules = [];
-  for (const [part, sheets] of Object.entries(GROUPS))
+  for (const [part, sheets] of Object.entries(groups))
     for (const sheet of sheets)
       for (const rule of rulesIn(await rulesOf(sheet))) {
         const subject = subjectOf(rule.selector);
@@ -335,30 +439,29 @@ test("imported core first, the part sheets cascade as styles.css does", async ()
           properties: new Set(rule.declarations.map(([property]) => property)),
         });
       }
-  const flips = [];
-  for (const early of rules)
-    for (const late of rules) {
-      if (early.index >= late.index || early.part === late.part) continue;
-      if (early.part === "core") continue;
-      if (compare(early.specificity, late.specificity) !== 0) continue;
-      if (early.pseudoElement !== late.pseudoElement) continue;
-      // A class in common on the element, or, where one names none, its type and a
-      // class in common on the way to it. Two classes one element carries are missed.
-      const sameElement =
-        early.classes.size && late.classes.size
-          ? meets(early.classes, late.classes)
-          : early.subject === late.subject && meets(early.all, late.all);
-      if (!sameElement) continue;
-      const shared = [...early.properties].filter((property) =>
-        late.properties.has(property),
-      );
-      if (shared.length)
-        flips.push(
-          `${early.key} ${early.selector} and ${late.key} ${late.selector}: ${shared.join(", ")}`,
-        );
-    }
-  assert.deepEqual(flips, []);
-});
+  return rules;
+}
+
+/** Where `late` would win a tie that `early` won before, each property tied, said. */
+function tied(early, late) {
+  if (compare(early.specificity, late.specificity) !== 0) return [];
+  if (early.pseudoElement !== late.pseudoElement) return [];
+  // A class in common on the element, or, where one names none, its type and a
+  // class in common on the way to it. Two classes one element carries are missed.
+  const sameElement =
+    early.classes.size && late.classes.size
+      ? meets(early.classes, late.classes)
+      : early.subject === late.subject && meets(early.all, late.all);
+  if (!sameElement) return [];
+  const shared = [...early.properties].filter((property) =>
+    late.properties.has(property),
+  );
+  return shared.length
+    ? [
+        `${early.key} ${early.selector} and ${late.key} ${late.selector}: ${shared.join(", ")}`,
+      ]
+    : [];
+}
 
 /*
  * A rule in one part's sheet whose classes another part's code writes, all of them,
@@ -366,8 +469,6 @@ test("imported core first, the part sheets cascade as styles.css does", async ()
  * `OWNERS` (`build/clover-sheets.mjs`) are missing that part's modules.
  */
 const DRAWN_APART = [
-  // Every Canvas's `--clover-transport-room`, which only a recording's rules read.
-  /^\.clover-canvas$/,
   // A Canvas has `data-player` only while a recording's player, media's, draws in it.
   /\[data-player\]/,
 ];

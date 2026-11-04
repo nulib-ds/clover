@@ -122,6 +122,21 @@
   );
 }
 
+/*
+ * What a recording's transport takes up (`media/Transport.css`), and `m` clear of it, for
+ * anything that has to clear it (captions, the caption box, a menu). The bar is one
+ * control high, or as high as the transport measures it (`--clover-transport-bar-height`,
+ * `useBarHeight`) once it wraps. Here, not with the transport, which loads only as a
+ * recording opens: its still, and what opens over it, keep the same room.
+ */
+.clover-canvas {
+  --clover-transport-room: calc(
+    var(--clover-transport-bar-height, var(--clover-control)) +
+      var(--clover-space-l) + var(--clover-space-xs) +
+      var(--clover-canvas-controls-inset) + var(--clover-space-m)
+  );
+}
+
 .clover-canvas[data-recording] {
   --clover-canvas-clear-bottom: var(--clover-transport-room);
 }

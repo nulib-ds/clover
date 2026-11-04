@@ -68,6 +68,9 @@ test("without the stylesheet, the Canvas's controls sit over the picture and tak
     "ready",
   );
   await expect.poll(() => area(page)).not.toBeNull();
+  // On a phone the view's controls wait behind More (4.1.0): pressed, as a pointer would.
+  const more = page.getByRole("button", { name: "Expand viewer controls" });
+  if (await more.isVisible()) await more.click();
 
   // What a pointer reaches at each control's center is the control, not the picture.
   const missed = await page

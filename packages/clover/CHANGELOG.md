@@ -13,14 +13,18 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **`Clover.Map`.** `Map` and its helpers (`navPlaceOf`, `hasMapData` and the rest) are
+  exported from `@nulib/clover` too, so a layout writes `<Clover.Map />` as it writes
+  every other part. `@nulib/clover/map` exports them as before. A page that draws no map
+  ships none of it.
+
 - **Stylesheets a part at a time.** A page of parts can import
   `@nulib/clover/styles/core.css` first, then the sheet of each other part it draws, or
-  that one draws inside it (`styles/items.css`, `styles/panel.css`, `styles/media.css` and
-  the rest; Styling lists them, and the parts drawn inside another), in place of
-  `styles.css`. A page of images with `Root`, `Status`, `Body`, `Position` and `Items`
-  loads about 11 kB of styles, gzipped, instead of 19.2 kB. `styles.css` is unchanged.
-  The size budgets for a `<clover-viewer>`, the four parts and a viewer in Document rise
-  by 50 B gzip for it.
+  that one draws inside it (`styles/items.css`, `styles/panel.css` and the rest; Styling
+  lists them, and the parts drawn inside another), in place of `styles.css`. A page of
+  images with `Root`, `Status`, `Body`, `Position` and `Items` loads about 10.6 kB of
+  styles, gzipped, instead of 14.8 kB. The size budgets for a `<clover-viewer>`, the four
+  parts and a viewer in Document rise by 50 B gzip for it.
 
   ```jsx
   import "@nulib/clover/styles/core.css";
@@ -56,11 +60,78 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **A recording's, a Scene's and a map's styles load with their code.** `styles.css` no
+  longer holds them: the document adopts each as the code that draws it loads, so a page
+  imports nothing more, and one that shows none of them loads none of it. `styles.css`
+  falls from 19.3 to 14.8 kB gzip, and the Viewer to its first view from 99.6 to 95 kB
+  (Default), 96 to 91.5 kB (Document) and 56.3 to 51.7 kB (Gallery). Where a server draws
+  one of them, `styles/media.css`, `styles/scene.css` or `styles/map.css` gives its first
+  paint its styles. The size budgets for a Timeline, Scene or Map alone rise by 1.4 to
+  4 kB gzip, as they now hold their styles, and those for the templates by 50 B.
+
+- **MapLibre's stylesheet comes with the map.** A page with a `Map`, or a Viewer's Map
+  tab, no longer imports `maplibre-gl/dist/maplibre-gl.css`: where the page has none, it
+  loads with MapLibre as a map is first shown, in a layer of its own after Clover's, so
+  the page's own rules outrank it. A page that imports it keeps its own and loads nothing
+  more. What a map loads with MapLibre grows by the stylesheet, 10.5 kB gzip, on such a
+  page, and the size budgets for a Map alone rise by 50 B.
+
 - **Zoom in, zoom out and reset show when they would do nothing.** At the greatest zoom,
   zoom in is `aria-disabled` and dimmed, zoom out at the least, reset at home. They keep
   focus and their popovers. A `controlButtons` replacement is given `aria-disabled: true`
   in its `buttonProps`, and no `onClick`, while its control would do nothing. The size
   budgets for a Canvas, the templates and the elements rise by 150 to 350 B gzip for it.
+
+### Fixed
+
+- **Captions under a strict Content Security Policy.** Clover handed each caption file to
+  its video as a `blob:` address, which a policy that keeps `media-src` to its own hosts
+  refuses, so the video had no captions. Their cues now go to the video directly, with
+  their settings. The size budget for a Timeline alone rises by 350 B gzip for it.
+- **The elements' styles under a strict Content Security Policy.** Each `<style>` takes
+  the page's nonce where it names one (`<meta property="csp-nonce">`, else its scripts'),
+  and where the policy refuses one, the document adopts every sheet instead, in the same
+  order. The size budgets for the elements rise by 350 to 550 B gzip for it.
+- **The map's glyphs under a strict Content Security Policy.** Zoom in, zoom out and the
+  credits' ⓘ are drawn as Clover's own SVG, no longer `data:` images, which `img-src`
+  refuses.
+- **A map whose worker the page refuses says so**: "The map could not be shown.", and the
+  console names `setMapWorkerUrl`, in place of an empty box.
+- **Trusted Types.** Where a page requires them, Clover writes IIIF's HTML and reads SVG
+  selectors through a policy of its own, `clover`, which a page that lists its policies
+  allows by name (`trusted-types clover`). The size budgets for the templates rise by
+  50 B gzip for it, and for a Map by 50 to 100 B for its glyphs.
+
+- **A map's controls sit in from its edges in an app,** as the docs show them: zoom in
+  and out at its lower left and the credits at its lower right, `--clover-map-controls-inset`
+  from the edges. MapLibre's own placing had outranked Clover's.
+
+- **The Gallery's lightbox keeps the keyboard in**, as its `aria-modal` says: Tab past its
+  last control comes round to its first, and Shift+Tab the other way. On a window too
+  short for it (a page at 400%) it scrolls, rather than crushing its Body to a few
+  pixels. Its Status still tells that a member chosen in it is loading, and closing it
+  puts focus on the grid's cell of the view now shown, brought into sight.
+- **A long hotspot note on a short Body stays inside the Body**, over the controls if it
+  must, rather than running off its foot.
+- **The image controls' tray:** each control's popover is placed again as the tray
+  scrolls it into sight, so its name is never cut at the tray's edge; focus on a view
+  control survives its row's first overflow, rather than dropping to the page; and one
+  Escape in the tray closes the tray, leaving an open menu for the next.
+- **Chapters over a video's still:** the arrow keys only mark a chapter, and Enter or a
+  press goes there, opening the video. Looking through the names no longer starts it.
+- **Reduced motion:** a fast drag's release no longer jumps the image by the glide's
+  length; the view stops where the pointer let go.
+- **An image's placeholder toggle**, where it is the image controls' button, is a
+  disclosure as that button is (`aria-expanded`, `aria-controls` its tray).
+- **A recording's annotations are ringed in a lighter accent**, 3:1 or more on the
+  player's dark ground, where the accent itself fell to 1.9:1.
+- **Small steps** (Search's, the panel's tabs' and the tray's arrows) stay 24px or more
+  on a page set smaller than 16px.
+- **Masonry items** no longer lie one over another before the layout's code arrives.
+- **A Canvas loads content state's writer only where its page asks for content states**
+  (`onContentStateChange`): 0.1 to 0.3 kB gzip less for a Canvas or Timeline that does
+  not. The size budgets for the templates and the elements rise by 100 to 600 B gzip for
+  these fixes.
 
 ## [4.2.0] - 2026-11-03
 

@@ -310,8 +310,8 @@ export function cloverSheets(options = {}) {
       throw new Error(
         `web components: OWNERS names ${key}.css, which no list imports`,
       );
-  const register = (index, key, css) =>
-    `addSheet(${index}, ${JSON.stringify(key)}, ${JSON.stringify(css)});`;
+  const register = (index, key, css, unlayered = false) =>
+    `addSheet(${index}, ${JSON.stringify(key)}, ${JSON.stringify(css)}${unlayered ? ", true" : ""});`;
   const registry = `import { addSheet } from ${JSON.stringify(REGISTRY)};`;
   return {
     name: "clover-sheets",
@@ -331,7 +331,10 @@ export function cloverSheets(options = {}) {
       if (grouped(sheet, options)) return `import "${GROUP}";`;
       const own = await rules(sheet);
       const css = sheet.layered ? `@layer clover{${own}}` : own;
-      return [registry, register(sheet.index, sheet.key, css)].join("\n");
+      return [
+        registry,
+        register(sheet.index, sheet.key, css, !sheet.layered),
+      ].join("\n");
     },
     // After the module's own lines, which keep their place: imports run first wherever written.
     transform(code, id) {
@@ -341,6 +344,92 @@ export function cloverSheets(options = {}) {
         code: `${code}\n${keys.map((key) => `import "${ID}${key}";`).join("\n")}\n`,
         map: null,
       };
+    },
+  };
+}
+
+/**
+ * The part sheets that load with their part's code, and are left out of styles.css
+ * (`build/styles.mjs`): those whose every sheet the elements load lazily too (`LAZY`), a
+ * recording's, a Scene's and a map's, which only code loaded as they draw draws.
+ */
+export function lazyParts(groups = partSheets()) {
+  return Object.keys(groups).filter(
+    (name) =>
+      groups[name].length && groups[name].every(({ key }) => LAZY.has(key)),
+  );
+}
+
+const PART_ID = "virtual:clover-part-sheet-";
+const ADOPT = resolve(src, "ui/adoptSheet.ts");
+/** The placeholder the React build fills with MapLibre's stylesheet (`Map/sheet.ts`). */
+const MAPLIBRE_SHEET = resolve(src, "components/Map/maplibre-sheet.ts");
+/*
+ * MapLibre's stylesheet as the map brings it: in a layer of its own, after Clover's (the
+ * statement declares both, whichever sheet comes first), so it outranks Clover's rules as
+ * it does unlayered, and a page's own rules outrank it, as they do Clover's.
+ */
+export const mapLibreSheetCss = async () =>
+  `@layer clover,maplibre;@layer maplibre{${await rulesOf(
+    SHEETS.find(({ key }) => key === "maplibre"),
+  )}}`;
+/** Where a lazy part sheet's module is, as if in `src/` (`dist/ui/sheets/media.mjs`). */
+const sheetModule = (name) => resolve(src, "ui/sheets", `${name}.ts`);
+
+/**
+ * The React build's lazy part sheets (`lazyParts`): each a module of its CSS, which every
+ * module that draws what it styles (its sheets' `OWNERS`) hands to `adoptSheet`
+ * (`src/ui/adoptSheet.ts`) as it loads, so a page never imports them. A call, not an
+ * import for its side effect, which the package's `sideEffects` would let a bundler drop.
+ * It fills MapLibre's placeholder too (`components/Map/maplibre-sheet.ts`), which the map
+ * loads where the page has no MapLibre stylesheet (`Map/sheet.ts`). The elements' build
+ * leaves it empty: their registry brings MapLibre's with the map's code (`OWNERS`), so
+ * the map finds it there and loads nothing.
+ */
+export function lazySheets() {
+  const groups = partSheets();
+  const owned = new Map();
+  for (const name of lazyParts(groups))
+    for (const sheet of groups[name])
+      for (const owner of ownersOf(sheet))
+        if (!owner.startsWith(resolve(src, "web-components")))
+          owned.set(owner, new Set([...(owned.get(owner) ?? []), name]));
+  const binding = (name) => `__clover_sheet_${name.replace(/\W/g, "_")}`;
+  /*
+   * Each sheet's module at a path of its own, never on disk, so the build names it for
+   * its part, as a consumer's bundler does its chunk (Vite's preload list names it).
+   */
+  const modules = new Map(
+    lazyParts(groups).map((name) => [sheetModule(name), name]),
+  );
+  for (const file of modules.keys())
+    if (existsSync(file))
+      throw new Error(
+        `lazy sheets: ${relative(src, file)} is a lazy part sheet's module; move the file`,
+      );
+  return {
+    name: "clover-lazy-sheets",
+    resolveId: (id) =>
+      id.startsWith(PART_ID) ? sheetModule(id.slice(PART_ID.length)) : null,
+    async load(id) {
+      if (id === MAPLIBRE_SHEET)
+        return `export const css = ${JSON.stringify(await mapLibreSheetCss())};`;
+      const name = modules.get(id);
+      if (!name) return null;
+      const css = await rulesOf(...groups[name]);
+      return `export default ${JSON.stringify(`@layer clover{${css}}`)};`;
+    },
+    transform(code, id) {
+      const names = owned.get(id.split("?")[0]);
+      if (!names) return null;
+      const lines = [
+        `import { adoptSheet as __clover_adoptSheet } from ${JSON.stringify(ADOPT)};`,
+        ...[...names].flatMap((name) => [
+          `import ${binding(name)} from "${PART_ID}${name}";`,
+          `__clover_adoptSheet(${JSON.stringify(name)}, ${binding(name)});`,
+        ]),
+      ];
+      return { code: `${code}\n${lines.join("\n")}\n`, map: null };
     },
   };
 }
