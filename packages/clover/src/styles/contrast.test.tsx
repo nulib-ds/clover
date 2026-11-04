@@ -20,6 +20,7 @@ const DECORATION = [
   "clover-sections-label", // the line under an accordion's heading
   "clover-split-handle", // the bar between two panes, and its grip
   "clover-canvas-annotation-point", // a point's dot, ringed light and dark
+  "clover-canvas-transport-mark-point", // a point's on the seek bar, ringed alike
 ];
 
 function stylesheets(dir: string): string[] {

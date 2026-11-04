@@ -1291,6 +1291,10 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
               }
               language={language}
               notes={model.timed}
+              marked={model.placed}
+              selectedAnnotation={model.selected}
+              onAnnotationSelect={hasAnnotations ? model.select : undefined}
+              onAnnotationActivate={model.activate}
               player={
                 player && canvases
                   ? {

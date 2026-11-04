@@ -582,13 +582,21 @@ describe("Canvas media", () => {
     const added: Cue[] = [];
     const tracks = new WeakMap<
       HTMLTrackElement,
-      { addCue: (cue: Cue) => void }
+      { cues: Cue[]; addCue: (cue: Cue) => void }
     >();
     Object.defineProperty(HTMLTrackElement.prototype, "track", {
       configurable: true,
       get(this: HTMLTrackElement) {
-        if (!tracks.has(this))
-          tracks.set(this, { addCue: (cue: Cue) => added.push(cue) });
+        if (!tracks.has(this)) {
+          const cues: Cue[] = [];
+          tracks.set(this, {
+            cues,
+            addCue: (cue: Cue) => {
+              cues.push(cue);
+              added.push(cue);
+            },
+          });
+        }
         return tracks.get(this);
       },
     });
@@ -621,6 +629,13 @@ describe("Canvas media", () => {
       snapToLines: false,
     });
     expect(track.getAttribute("src")).toBeNull();
+    // Settling, Chrome and Firefox empty a track with no address: its cues are handed to
+    // it again. (WebKit neither settles it nor empties it, and keeps the first.)
+    const own = (track as unknown as { track: { cues: Cue[] } }).track;
+    own.cues.length = 0;
+    fireEvent.error(track);
+    expect(added).toHaveLength(2);
+    expect(own.cues).toHaveLength(1);
     expect(track.label).toBe("Captions in WebVTT format");
     expect(track.srclang).toBe("en");
 
@@ -925,25 +940,31 @@ describe("Canvas media", () => {
         ),
       );
 
-    it("shows one as a cue while its stretch plays, under its page's label", async () => {
+    /*
+     * A lone recording, so a player: its annotations are the seek bar's points alone, never
+     * a cue (Mat, 2026-11-04: "remove annotation bar in the top").
+     */
+    it("marks one on the seek bar where it starts, and a press plays from there", async () => {
       const element = await renderPoetry();
-      const at = (seconds: number) =>
-        act(() => {
-          element.currentTime = seconds;
-          element.dispatchEvent(new Event("timeupdate"));
-        });
-      at(700);
-      expect(cues()).toHaveLength(0);
-      at(703);
-      const [cue] = cues();
-      expect(cue).toHaveTextContent(
-        "Environmental NoiseSoft laughter, rustling",
-      );
+      // Its points' code loads with the first recording that has any.
+      const marks = await screen.findByRole("toolbar", { name: "Annotations" });
+      const point = within(marks).getByRole("button", {
+        name: "11:42 Soft laughter, rustling",
+      });
+      // Its popover: its time over its words, as the chapter's is.
       expect(
-        cue.querySelector(".clover-canvas-captions-cue-label"),
-      ).toHaveAttribute("lang", "en");
-      at(705);
+        point.parentElement!.querySelector(".clover-tip-lead"),
+      ).toHaveTextContent("11:42");
+      expect(point).toHaveAttribute("tabindex", "0");
+      act(() => {
+        element.currentTime = 703;
+        element.dispatchEvent(new Event("timeupdate"));
+      });
       expect(cues()).toHaveLength(0);
+      fireEvent.click(point);
+      expect(element.currentTime).toBe(702);
+      expect(play).toHaveBeenCalledTimes(1);
+      expect(point).toHaveAttribute("data-active", "true");
     });
 
     it("goes there when picked from the Annotations list beside it", async () => {
@@ -986,8 +1007,12 @@ describe("Canvas media", () => {
       expect(element.currentTime).toBe(702);
       // Paused it was; pressed, it plays from there (Mat, 2026-10-26).
       expect(play).toHaveBeenCalledTimes(1);
-      act(() => element.dispatchEvent(new Event("seeked")));
-      expect(cues()).toHaveLength(1);
+      // Its point on the seek bar is marked picked.
+      expect(
+        await screen.findByRole("button", {
+          name: "11:42 Soft laughter, rustling",
+        }),
+      ).toHaveAttribute("data-active", "true");
     });
   });
 

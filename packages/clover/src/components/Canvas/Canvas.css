@@ -133,12 +133,38 @@
   --clover-transport-room: calc(
     var(--clover-transport-bar-height, var(--clover-control)) +
       var(--clover-space-l) + var(--clover-space-xs) +
-      var(--clover-canvas-controls-inset) + var(--clover-space-m)
+      var(--clover-canvas-controls-inset) + var(--clover-space-m) +
+      var(--clover-transport-marks-room, 0px)
   );
 }
 
 .clover-canvas[data-recording] {
   --clover-canvas-clear-bottom: var(--clover-transport-room);
+}
+
+/*
+ * A lone recording's player (`media/Player.css`) is never shorter than its short layout
+ * needs with a caption showing (Mat, 2026-11-04: "timeline has a minimum height to be
+ * effective", "adjust the minimum height so active vtt doesn't crowd further. 200 might
+ * be right. but it could be rem dependent"), in from the Body's top and foot as the
+ * controls are: a caption's two lines at the most the short player gives them (`m`, its
+ * box `2xs` over and under), its box's room (`xs` over it, `2xs` and the annotations'
+ * points under it), then the seek bar and the bar (measured, as it wraps); and never less
+ * than its artwork at its least, 12rem ÷ φ. About 12.3rem with points, 11.3rem without.
+ * Here, so the Body holds that height before the player's styles apply.
+ */
+.clover-canvas[data-player] {
+  --clover-player-art-least: calc(12rem / 1.618);
+  min-height: calc(
+    2 * var(--clover-canvas-controls-inset) +
+      max(
+        var(--clover-player-art-least),
+        2.7 * var(--clover-text-m) + 3 * var(--clover-space-2xs) +
+          var(--clover-space-xs) + var(--clover-transport-marks-room, 0px) +
+          var(--clover-space-l) +
+          var(--clover-transport-bar-height, var(--clover-control))
+      )
+  );
 }
 
 /*

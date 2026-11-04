@@ -11,6 +11,58 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **Annotations on the seek bar.** Each annotation on a recording's time, a video's or a
+  Timeline's, is a point over the seek bar where it starts, drawn as an image's point is,
+  with a faint stem down to the bar; the bar's thumb passes in front of them. Pointed at
+  or focused, its popover shows its time and words; pressed, it plays from there, as
+  picking it from the Annotations menu does. Annotations whose points would overlap share
+  one, whose popover steps through them ("2 / 7", Previous and Next), each step picking
+  the next. The points are one Tab stop, before the seek bar, and the arrow keys, Home and
+  End move among them; Tab from a point reaches its popover's steps, Up and Down scroll a
+  long one's words, and Escape puts its popover away. They are in a new
+  `.clover-canvas-transport-marks`, each a `.clover-canvas-transport-mark`.
+
+### Changed
+
+- **A short Timeline plays as a mini player.** Under 24rem tall, a recording's artwork
+  moves to the start, as tall as the player (12rem at most), with its title, captions,
+  seek bar and controls beside it; on a narrow one, a small artwork sits beside the title,
+  with the rest under them. A caption has a row of its own over the seek bar, and where
+  room runs out it pushes the title up and out of view, never covering the seek bar; once
+  the artwork is under 12rem, a caption takes the title's place while it shows, a step
+  smaller on the type scale. A Timeline is now never shorter than that layout needs with a
+  caption showing, about 12.3rem with annotations (11.3rem without), a little more where
+  its controls take two rows. The player's cues sit in a new `.clover-canvas-player-cues`.
+- **A Timeline shows its annotations on the seek bar alone.** They no longer show along
+  the top of the player; `.clover-canvas-player-notes` is gone.
+- **A Timeline's ground takes more of its artwork's color.** It is the artwork, more
+  saturated, under still glows and shade, multiplied by a dark gray rather than washed
+  with one, so it keeps its hues while every word and control on it holds its contrast.
+  The black scrim under its transport is now a light shade.
+- **The Chapters menu reads as Contents does.** Each chapter's start is in a column of
+  its own, its title wrapping beside it; the one playing is tinted and bold, and the row
+  shows focus in place of a radio.
+- **Chapter titles take the bar's room.** The chapter's title beside the time fills the
+  room up to the controls at the end, no longer 16rem at most, and is cut short only
+  where it would wrap.
+
+### Size
+
+- The size budgets rise for the short Timeline, its ground, the seek bar's points and
+  the Chapters menu: a Timeline alone to its first view by 1.55 kB gzip, the templates
+  by up to 150 B to their first views (Default to 95.25 kB), the stylesheets by 100 B, and
+  the web components' pages by up to 250 B. The points' code loads only for a
+  recording with annotations, and their styles with the transport.
+
+### Fixed
+
+- **Captions show again on a stream, and on a second view.** Since 4.3.0 a Manifest's
+  captions could show nothing: hls.js emptied their track as it attached to an HLS
+  recording, and a caption file already loaded (by the Transcript, or a view drawn
+  before) reached its track before the track was ready, which emptied it.
+
 ## [4.3.0] - 2026-11-03
 
 ### Added

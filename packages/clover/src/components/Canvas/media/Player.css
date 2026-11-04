@@ -54,7 +54,7 @@
 }
 
 /*
- * The block, in the room between the cluster (and the annotations) over it and, under it,
+ * The block, in the room between the cluster over it and, under it,
  * a caption's two lines
  * at the size the Body gives cues (`--clover-cue-size`, `MediaBody.css`), `s` clear, over
  * the transport (`--clover-transport-room`).
@@ -68,21 +68,10 @@
     transparent
   );
   --clover-player-dark: var(--clover-color-control, #1a1d1e);
-  /*
-   * Over the block: the controls' row, or an annotation's two lines where it is taller
-   * (`.clover-canvas-player-notes`), kept whether one shows or not.
-   */
-  --clover-player-notes-room: max(
-    var(--clover-control),
-    calc(
-      2.7 * var(--clover-text-s) + 2 * var(--clover-space-2xs) +
-        var(--clover-player-ring)
-    )
-  );
-  --clover-player-ring: 6px;
+  /* Over the block, the controls' row. */
   --clover-player-top: calc(
     var(--clover-canvas-controls-inset, var(--clover-space-l)) +
-      var(--clover-player-notes-room) + var(--clover-space-s)
+      var(--clover-control) + var(--clover-space-s)
   );
   --clover-player-bottom: calc(
     var(--clover-transport-room, 0px) + 2.7 *
@@ -109,32 +98,116 @@
 
 /* ── the ground ──────────────────────────────────────────────────────────── */
 
+/*
+ * The artwork's own colors, as a music app's player takes them (Mat, 2026-11-04: "a
+ * little more vibrant … evoke the thumbnail image a bit more"), with no script to read
+ * them: a few pixels of it, spread across the player, blurred to washes of its colors
+ * ("increase the blur of the bg") and livelier (`saturate`; a `brightness` lifted a
+ * light picture to white, which the gray then grayed). Over them, still, a play of light
+ * ("put movement in there (not animated movement) with simple gradients to evoke
+ * glows"): soft radial glows of the controls' white, blended as soft light (`::before`),
+ * which lifts the artwork's own hues where they fall and adds none of their own. Then
+ * all of it multiplied by a dark gray (`--clover-player-depth`, the controls' dark fill
+ * 82% into their white, `::after`), shaded with that fill between the glows, which
+ * keeps every hue and caps every pixel at that gray. However light the picture
+ * and wherever the glows fall, the ground is no lighter than #444748: white words on it
+ * hold 9:1, the second line (80% white) 6.6:1, the seek bar's rail 5:1 and the light
+ * ring of an annotation's point on it 9:1 (WCAG 1.4.3, 1.4.11). An 86% wash of the dark fill did that
+ * before, and grayed every color with it. The blends stay inside the ground, which is a
+ * layer of its own.
+ */
 .clover-canvas-player-ground {
+  --clover-player-depth: color-mix(
+    in srgb,
+    var(--clover-player-dark) 82%,
+    var(--clover-player-text)
+  );
+  --clover-player-glow: color-mix(
+    in srgb,
+    var(--clover-player-text) 61.8%,
+    #0000
+  );
+  --clover-player-shade: color-mix(
+    in srgb,
+    var(--clover-player-dark) 61.8%,
+    #0000
+  );
   position: absolute;
   inset: 0;
   z-index: -1;
   overflow: hidden;
+  isolation: isolate;
   background-color: color-mix(
     in srgb,
-    var(--clover-color-accent, #0065c3) 12%,
+    var(--clover-color-accent, #0065c3) 23.6%,
     var(--clover-player-dark)
   );
 }
 
+/* Past the player's edges by more than the blur reaches, so no edge fades in. */
 .clover-canvas-player-ground > img {
   position: absolute;
-  inset: -12%;
-  width: 124%;
-  height: 124%;
+  inset: -24%;
+  z-index: 0;
+  width: 148%;
+  height: 148%;
   object-fit: cover;
-  filter: blur(2.618rem) saturate(1.382);
+  filter: blur(var(--clover-space-2xl)) saturate(2.618);
+}
+
+/*
+ * The glows: one up at the start, where the artwork sits in a short player, and one low
+ * at the end, lifting the artwork's own colors where they fall; and between them, in the
+ * multiply (`::after`), shade at the foot's start, under the transport, and at the top's
+ * end, which darkens any picture, a light one too, whose colors the cap already holds.
+ * Ellipses, so they read as light across the player, not spots.
+ */
+.clover-canvas-player-ground[data-art]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(
+      61.8% 85% at 23.6% 23.6%,
+      var(--clover-player-glow),
+      #0000 70%
+    ),
+    radial-gradient(50% 70% at 85% 76.4%, var(--clover-player-glow), #0000 70%);
+  mix-blend-mode: soft-light;
 }
 
 .clover-canvas-player-ground[data-art]::after {
   content: "";
   position: absolute;
   inset: 0;
-  background-color: color-mix(in srgb, var(--clover-player-dark) 86%, #0000);
+  z-index: 2;
+  background:
+    radial-gradient(
+      61.8% 76.4% at 0% 100%,
+      var(--clover-player-shade),
+      #0000 100%
+    ),
+    radial-gradient(
+      50% 61.8% at 100% 0%,
+      var(--clover-player-shade),
+      #0000 100%
+    ),
+    var(--clover-player-depth);
+  mix-blend-mode: multiply;
+}
+
+/*
+ * The transport's scrim only a shade under the bar, for depth: the ground holds every
+ * control and word on it without one (above), as the black scrim a picture needs would
+ * only hide it (Mat, 2026-11-04: "scale back the black scrim").
+ */
+.clover-canvas-player > .clover-canvas-transport::before {
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--clover-player-dark) 38.2%, #0000),
+    #0000
+  );
 }
 
 /* ── the artwork, the title ──────────────────────────────────────────────── */
@@ -219,60 +292,9 @@
 
 /* ── the cues ──────────────────────────────────────────────────────────── */
 
-/*
- * Annotations on its time along its top, apart from the captions at its foot (Mat,
- * 2026-11-01: "bring timeline annotations up. render them closer in font size to labels
- * for xywh annotations in canvas"; over the captions until then): centered, level with
- * the controls in the corner and clear of them on both sides, so they stay centered;
- * the first at their top. Each is drawn as a caption is, at a Canvas annotation label's
- * size (`Tip.css`'s `s`) however wide the Body, and ringed in the accent, as a Canvas's
- * active annotation's band is (`Annotations.css`), with no light line or dark edge (Mat,
- * 2026-11-01: "remove the light hairline … just do the outline in accent"): told from a
- * caption by its ring, never its color alone (WCAG 1.4.1). The accent lightened by the
- * secondary color, 70% to 30%, so it holds 3:1 on the dark ground (1.4.11): the default
- * accent alone was 1.9:1 there over a light still under its wash, 2.7:1 with none. Its
- * page's label is not in sight, only read ("don't show the annotation page label …
- * outlined like an active annotation in Canvas"). They stand `s` apart, so the rings
- * never touch.
- */
-.clover-canvas-player > .clover-canvas-player-notes {
-  --clover-player-notes-clear: calc(
-    var(--clover-canvas-controls-width, var(--clover-control)) +
-      var(--clover-space-s) +
-      var(--clover-canvas-controls-inset, var(--clover-space-l))
-  );
-  inset: calc(
-      var(--clover-canvas-controls-inset, var(--clover-space-l)) +
-        var(--clover-player-ring) / 2
-    )
-    var(--clover-player-notes-clear) auto;
-  justify-content: flex-start;
-  gap: var(--clover-space-s);
-  padding: 0;
-  transition: none;
-}
-
-.clover-canvas-player .clover-canvas-captions-cue[data-kind="annotation"] {
-  max-width: 100%;
-  font-size: var(--clover-text-s);
-  outline: 2px solid
-    color-mix(
-      in srgb,
-      var(--clover-color-accent, #0065c3) 70%,
-      var(--clover-color-secondary, #fff)
-    );
-  outline-offset: 0;
-}
-
-.clover-canvas-player .clover-canvas-captions-cue-label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
+/* Their box is the player's here: it sets them out only where the player is short. */
+.clover-canvas-player-cues {
+  display: contents;
 }
 
 /* ── sizes ───────────────────────────────────────────────────────────────── */
@@ -285,12 +307,131 @@
 }
 
 /*
- * Too short for the artwork to read (under 4rem left it): it steps aside, and the title
- * keeps to two lines and its line to one, so the block never runs into the transport.
+ * Short (under 24rem, where the artwork in the middle comes to its least, 12rem ÷ φ,
+ * `--clover-player-art-least`, `Canvas.css`), the block moves to the start, as a music
+ * app's player does when small (Mat, 2026-11-04: "push the thumb/labels to the left";
+ * "bring the seek bar in to here at small heights"; "the play and lower controls should
+ * come with the seek bar"): the artwork as tall as the block, up to its widest (12rem)
+ * and never under its least; beside it, its title and line at its top, the cues under
+ * them, and the transport, its seek bar over its bar, the bar's foot on the artwork's.
+ * The transport's box gives way (`display: contents`), so its seek area and its bar take
+ * their places in the player's grid, in the order they are read; over the player's own
+ * dark ground they need no scrim. The block is centered in the Body, in from its top and
+ * foot as the controls are.
+ *
+ * A caption comes first here (Mat, 2026-11-04: "vtt should push other elements out the
+ * top. it is most important", "don't cover the seek bar"): it has a row of its own over
+ * the seek bar, as tall as it needs, and where the block has no room left the rows above
+ * it go up and out of the Body's top, the title first, rather than a caption over the
+ * seek bar or under the title.
  */
-@container (max-height: 16rem) {
+@container (max-height: 24rem) {
+  .clover-canvas-player {
+    --clover-player-room: calc(
+      100cqb - 2 * var(--clover-canvas-controls-inset)
+    );
+    --clover-player-art-height: clamp(
+      var(--clover-player-art-least, 7.416rem),
+      var(--clover-player-room),
+      12rem
+    );
+    --clover-player-centering: max(
+      0px,
+      (var(--clover-player-room) - var(--clover-player-art-height)) / 2
+    );
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto auto;
+    align-content: end;
+    gap: 0 var(--clover-player-pad);
+    padding: calc(
+        var(--clover-canvas-controls-inset) + var(--clover-player-centering)
+      )
+      var(--clover-canvas-controls-inset);
+  }
+
+  /* Its foot on the bar's, as the rows over it go up. */
   .clover-canvas-player-art {
+    grid-row: 1 / -1;
+    align-self: end;
+    width: min(
+      calc(var(--clover-player-art-height) * var(--clover-player-art-ratio, 1)),
+      38.2cqi,
+      12rem
+    );
+  }
+
+  .clover-canvas-player-head,
+  .clover-canvas-player-cues,
+  .clover-canvas-player .clover-canvas-transport-seek-area,
+  .clover-canvas-player .clover-canvas-transport-bar {
+    grid-column: 2;
+  }
+
+  /* Clear of the controls in the corner, beside its top. */
+  .clover-canvas-player-head {
+    grid-row: 1;
+    max-width: none;
+    margin-inline-end: calc(
+      var(--clover-canvas-controls-width, var(--clover-control)) +
+        var(--clover-space-s)
+    );
+  }
+
+  .clover-canvas-player-cues {
+    grid-row: 2;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--clover-space-2xs);
+    /* Clear of the annotations' points over the seek bar (`Canvas.css`). */
+    padding: var(--clover-space-xs) 0
+      calc(var(--clover-space-2xs) + var(--clover-transport-marks-room, 0px));
+    pointer-events: none;
+  }
+
+  /* In its box, at the start, under the title, as the title reads. */
+  .clover-canvas-player-cues > .clover-canvas-captions {
+    position: static;
+    align-items: flex-start;
+    padding: 0;
+    transition: none;
+  }
+
+  .clover-canvas-player-cues .clover-canvas-captions-cue {
+    max-width: 100%;
+    text-align: start;
+  }
+
+  .clover-canvas-player > .clover-canvas-transport {
+    display: contents;
+  }
+
+  .clover-canvas-player > .clover-canvas-transport::before {
     display: none;
+  }
+
+  /*
+   * Over the cues while the pointer or focus is on them, so the seek bar's popover, a
+   * menu or a focused control is never under a cue (WCAG 1.4.13, 2.4.11).
+   */
+  .clover-canvas-player .clover-canvas-transport-seek-area {
+    grid-row: 3;
+    z-index: 2;
+  }
+
+  .clover-canvas-player .clover-canvas-transport-bar {
+    grid-row: 4;
+    z-index: 2;
+  }
+
+  .clover-canvas-player
+    :is(
+      .clover-canvas-transport-seek-area:is(:hover, :focus-within),
+      .clover-canvas-transport-bar:has([aria-expanded="true"], :focus-visible)
+    ) {
+    z-index: 4;
   }
 
   .clover-canvas-player-title,
@@ -303,6 +444,98 @@
 
   .clover-canvas-player-part-of {
     -webkit-line-clamp: 1;
+  }
+}
+
+/*
+ * Short and narrow (under 37.5rem, where the bar takes two rows), the column beside a
+ * large artwork would be too narrow for the transport: the artwork is small, `2xl`,
+ * beside the title, and the cues, the seek bar and the bar run the Body's width under
+ * them, along its foot.
+ */
+@container (max-height: 24rem) and (max-width: 37.5rem) {
+  .clover-canvas-player {
+    --clover-player-art-height: var(--clover-space-2xl);
+    --clover-player-centering: 0px;
+  }
+
+  .clover-canvas-player-art {
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .clover-canvas-player-head {
+    align-self: center;
+  }
+
+  .clover-canvas-player-cues,
+  .clover-canvas-player .clover-canvas-transport-seek-area,
+  .clover-canvas-player .clover-canvas-transport-bar {
+    grid-column: 1 / -1;
+  }
+}
+
+/*
+ * Shorter still, where the artwork comes under its widest (12rem, with the controls'
+ * inset over and under it: 15.236rem; Mat, 2026-11-04: "make breakpoint dependent on
+ * the height/size of the thumb. when thumb starts shrinking is the point"), a caption
+ * takes the labels' place while it shows ("just have vtt completely push the labels
+ * out"), rather than pushing them half out of the Body's top; where the Body is narrow,
+ * the row of the artwork and the labels. They are out of sight, not gone: the line
+ * under the title is read nowhere else, so it stays in the accessibility tree, and the
+ * artwork its alternative.
+ */
+@container (max-height: 15.236rem) {
+  .clover-canvas-player:has(
+      > .clover-canvas-player-cues > .clover-canvas-captions
+    )
+    > .clover-canvas-player-head {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/*
+ * There, its captions a step smaller on the type scale than the Body's width gives them
+ * (`MediaBody.css`; Mat, 2026-11-04: "adjust the caption height a bit at smaller height.
+ * bring it down a gr level. the 250 break point should be the trigger"): `m` for `l`,
+ * the page's size for `m`, `s` for the page's. Never under `s`, a narrow Body's, the
+ * smallest Clover's running text takes.
+ */
+@container (max-height: 15.236rem) and (min-width: 38.5rem) {
+  .clover-canvas-player-cues .clover-canvas-captions-cue {
+    font-size: var(--clover-text-s);
+  }
+}
+
+@container (max-height: 15.236rem) and (min-width: 44rem) {
+  .clover-canvas-player-cues .clover-canvas-captions-cue {
+    font-size: inherit;
+  }
+}
+
+@container (max-height: 15.236rem) and (min-width: 47.5rem) {
+  .clover-canvas-player-cues .clover-canvas-captions-cue {
+    font-size: var(--clover-text-m);
+  }
+}
+
+@container (max-height: 15.236rem) and (max-width: 37.5rem) {
+  .clover-canvas-player:has(
+      > .clover-canvas-player-cues > .clover-canvas-captions
+    )
+    > .clover-canvas-player-art {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
 }
 
@@ -322,9 +555,5 @@
 
   .clover-canvas-player {
     color: CanvasText;
-  }
-
-  .clover-canvas-player .clover-canvas-captions-cue[data-kind="annotation"] {
-    outline-color: Highlight;
   }
 }

@@ -77,9 +77,21 @@ function Block({
   }, [copied]);
   const text = textOf(lines);
   const language = LANGUAGE[flavor];
+  /*
+   * A block that scrolls across (JSX runs past its edge, `code.css`) is reached by the
+   * keyboard as Nextra's are, by focus on it, where no value in it takes focus first: an
+   * agent's preview has none (WCAG 2.1.1).
+   */
+  const reachable = lines.some((line) =>
+    line.tokens.some((token) => token.knob),
+  );
   return (
     <div className="docs-code">
-      <pre data-lang={language} data-live-code={text}>
+      <pre
+        data-lang={language}
+        data-live-code={text}
+        tabIndex={reachable ? undefined : 0}
+      >
         <code className={`nextra-code language-${language}`}>
           {lines.map((line, index) => (
             <React.Fragment key={index}>

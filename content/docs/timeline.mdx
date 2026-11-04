@@ -32,7 +32,7 @@ import { Measured } from "docs/components/Clover4/Measured";
       prop: "style.height",
       on: "box",
       value: 240,
-      min: 160,
+      min: 200,
       max: 480,
       label: "Height of the box around Timeline, in pixels",
     },
@@ -49,12 +49,19 @@ with it too. It fills its parent, so give the parent a height.
 
 It plays through [Canvas](/docs/canvas), with its transport, captions, chapters and
 annotations on the recording's time, as a player: the Timeline's label is its title and
-its Manifest's is under it; its captions and annotations show along its foot, over the
-transport, as a video's do; and its chapters are on its seek bar and in its Chapters
-menu. Its artwork is the Timeline's
+its Manifest's is under it; its captions show along its foot, over the transport, as a
+video's do; its annotations are points on its seek bar, each where it starts, its time
+and words in its popover, a press playing from there; and its chapters are on its seek
+bar and in its Chapters menu. Its artwork is the Timeline's
 placeholder Canvas until it first plays, then its accompanying Canvas, each standing in
 for the other, else its thumbnail, at its own shape. The player's ground takes the
 artwork's colors.
+
+Under 24rem tall it plays as a mini player: the artwork at the start, as tall as the
+player, with the title, captions, seek bar and controls beside it, or on a narrow player
+a small artwork beside the title and the rest under them. A caption has a row of its own
+over the seek bar and takes the title's place where room runs out, a step smaller. It is
+never shorter than a caption there needs, about 12.3rem.
 
 <ApiReference elements="clover-timeline">
 
@@ -68,7 +75,7 @@ artwork's colors.
 | `highContrast`         | `boolean`                                            | `false`                   | Clover's higher-contrast mode: the accent kept to rings, outlines and marks, never under words or a glyph. Inside a `Root`, the Root's too; on wherever the system asks for more contrast. |
 | `controls`             | `boolean \| { annotations, information }`            | `true`                    | The round controls over the Body; the transport stays.                                                                                                                                     |
 | `placeholder`          | `boolean`                                            | `true`                    | Show the Timeline's `placeholderContainer` as its artwork until it plays.                                                                                                                  |
-| `annotations`          | `{ annotation, targetIndex, pageLabel?, pageId? }[]` | The Root's                | Annotations on its time, each a cue while its stretch plays.                                                                                                                               |
+| `annotations`          | `{ annotation, targetIndex, pageLabel?, pageId? }[]` | The Root's                | Annotations on its time, each a point on its seek bar.                                                                                                                                     |
 | `chapters`             | `{ id?, label, lang?, start, end? }[]`               | The Ranges, in a `Root`   | Chapters, on its seek bar and in its Chapters menu.                                                                                                                                        |
 | `caption`              | `string \| null`                                     | —                         | The caption file (`id`) to show while captions are on.                                                                                                                                     |
 | `onCaptionChange`      | `(caption: { id, language? } \| null) => void`       | —                         | A caption file was chosen, or Off (`null`).                                                                                                                                                |

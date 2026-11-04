@@ -1,4 +1,6 @@
 import React, {
+  Suspense,
+  lazy,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -11,6 +13,7 @@ import { useBarHeight } from "./useBarHeight";
 import { type MediaController, formatTime } from "./useMediaController";
 import { alongBar, gapMask, gapsOf, lengthOnBar, seekShare } from "./seekGaps";
 import { placeMenu } from "./placeMenu";
+import type { SeekMark } from "./SeekMarks";
 import type { CloverRequest } from "../../../core/request";
 import { type ThumbnailSource, imageSource } from "../../../core/thumbnail";
 import {
@@ -69,7 +72,23 @@ interface TransportProps {
    * one control, left of full screen, named for what a press does (Mat, 2026-11-01).
    */
   fill?: { filled: boolean; onToggle: () => void };
+  /** Annotations on the recording's time, each a point over the seek bar (`SeekMarks`). */
+  marks?: SeekMark[];
+  /** The annotation picked, by its `id`. */
+  selectedMark?: string | null;
+  onMarkSelect?: (id: string) => void;
+  onMarkActivate?: (id: string | null) => void;
 }
+
+/*
+ * The annotations' points over the seek bar, loaded only for a recording with any, so
+ * one without carries none of their code (`SeekMarks.tsx`).
+ */
+const SeekMarks = lazy(() =>
+  import("./SeekMarks").then(({ SeekMarks }) => ({ default: SeekMarks })),
+);
+/** What the seek area's pointer passes over, without loading them to know it. */
+const SEEK_MARKS = ".clover-canvas-transport-marks";
 
 export interface TransportChapter {
   /** Its Range's id, by which a list beside the Canvas names it. */
@@ -385,6 +404,10 @@ const Transport: React.FC<TransportProps> = ({
   onChapterHighlight,
   request,
   fill,
+  marks = [],
+  selectedMark,
+  onMarkSelect,
+  onMarkActivate,
 }) => {
   const { t, langOf } = useCloverTranslation();
   // Where the root cannot go full screen (iPhone), a video still can, in the system player.
@@ -529,9 +552,15 @@ const Transport: React.FC<TransportProps> = ({
         ref={seekArea}
         className="clover-canvas-transport-seek-area"
         onPointerMove={(event) => {
-          // Over its popover, the chapter it shows stays.
-          if (!duration || (event.target as Element).closest(".clover-tip"))
+          const over = event.target as Element;
+          // Over an annotation's point, its own popover, not the chapter's.
+          if (over.closest(SEEK_MARKS)) {
+            setPointing(false);
+            point(-1);
             return;
+          }
+          // Over its popover, the chapter it shows stays.
+          if (!duration || over.closest(".clover-tip")) return;
           const at = seekShare(event.currentTarget, event.clientX) * duration;
           setPointing(true);
           setPointedAt(Math.floor(at));
@@ -554,6 +583,17 @@ const Transport: React.FC<TransportProps> = ({
             : undefined
         }
       >
+        {onMarkSelect && marks.length > 0 && (
+          <Suspense fallback={null}>
+            <SeekMarks
+              marks={marks}
+              duration={duration}
+              selected={selectedMark}
+              onSelect={onMarkSelect}
+              onActivate={onMarkActivate}
+            />
+          </Suspense>
+        )}
         <input
           aria-label={t("playerSeek")}
           lang={langOf("playerSeek")}

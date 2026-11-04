@@ -7,10 +7,16 @@ import React, {
   useState,
 } from "react";
 
-import type { TimedAnnotation } from "../Annotations";
+// Types alone: the hotspots' module loads only for a Canvas with annotations.
+import type {
+  ListedAnnotation,
+  PlacedAnnotation,
+  TimedAnnotation,
+} from "../Annotations";
 import type { MediaPlacement } from "../layout";
 import { type PlayerInfo, PlayerFace } from "./Player";
 import Transport, { type TransportChapter } from "./Transport";
+import type { SeekMark } from "./SeekMarks";
 import { type CaptionOption, useCaptionTracks } from "./useCaptionTracks";
 import { useMediaController } from "./useMediaController";
 import { captionName, useMediaElement } from "./useMediaElement";
@@ -70,6 +76,16 @@ export interface MediaBodyProps {
    */
   notes?: TimedAnnotation[];
   /**
+   * The annotations placed on the picture: those that follow the recording
+   * (`xywh=…&t=…`) are marked on the seek bar where they start, as those on its time are.
+   */
+  marked?: PlacedAnnotation[];
+  /** The annotation picked, by its `id`. */
+  selectedAnnotation?: string | null;
+  /** Pick one, as the Canvas's Annotations menu does; none, and the seek bar marks none. */
+  onAnnotationSelect?: (annotation: ListedAnnotation) => void;
+  onAnnotationActivate?: (id: string | null) => void;
+  /**
    * A lone recording of sound, played as a player (`Player.tsx`): its artwork, title and
    * what it is part of in the middle, the transport and its cues along the foot.
    */
@@ -115,6 +131,10 @@ const MediaBody: React.FC<MediaBodyProps> = ({
   onChapterHighlight,
   language: givenLanguage,
   notes,
+  marked,
+  selectedAnnotation,
+  onAnnotationSelect,
+  onAnnotationActivate,
   player,
 }) => {
   // IIIF text in the Root's language, or the reader's when there is no Root.
@@ -325,6 +345,35 @@ const MediaBody: React.FC<MediaBodyProps> = ({
     [notes, currentTime],
   );
 
+  /*
+   * The annotations on the recording's time, those on its time alone and those that follow
+   * its picture, each a point on the seek bar where it starts (`SeekMarks`), in time's
+   * order: the shown pages' only, as their cues and hotspots are.
+   */
+  const marking = useMemo(() => {
+    const byId = new Map<string, ListedAnnotation>();
+    const marks: SeekMark[] = [];
+    for (const annotation of [
+      ...(notes ?? []),
+      ...(marked ?? []).filter((each) => each.track?.length),
+    ]) {
+      // Its own start, or its track's (`startOf`, which would bring the hotspots here).
+      const start =
+        "start" in annotation ? annotation.start : annotation.track?.[0]?.start;
+      if (start === undefined || !annotation.label || byId.has(annotation.id))
+        continue;
+      byId.set(annotation.id, annotation);
+      marks.push({
+        id: annotation.id,
+        start,
+        label: annotation.label,
+        lang: annotation.lang,
+      });
+    }
+    marks.sort((a, b) => a.start - b.start);
+    return { marks, byId };
+  }, [notes, marked]);
+
   const transport = (
     <Transport
       instance={instance}
@@ -348,6 +397,16 @@ const MediaBody: React.FC<MediaBodyProps> = ({
       onChapterHighlight={onChapterHighlight}
       request={request}
       fill={fill}
+      marks={marking.marks}
+      selectedMark={selectedAnnotation}
+      onMarkSelect={
+        onAnnotationSelect &&
+        ((id) => {
+          const annotation = marking.byId.get(id);
+          if (annotation) onAnnotationSelect(annotation);
+        })
+      }
+      onMarkActivate={onAnnotationActivate}
     />
   );
   const noteLines = playing.map((note) => (
@@ -414,19 +473,19 @@ const MediaBody: React.FC<MediaBodyProps> = ({
             request={request}
             language={language}
           />
-          {playing.length > 0 && (
-            <div
-              className="clover-canvas-captions clover-canvas-player-notes"
-              aria-live="off"
-            >
-              {noteLines}
-            </div>
-          )}
-          {cues.length > 0 && (
-            <div className="clover-canvas-captions" aria-live="off">
-              {captionLines}
-            </div>
-          )}
+          {/*
+           * Its captions alone: its annotations on their time are the seek bar's points
+           * (Mat, 2026-11-04: "remove annotation bar in the top"; along its top until
+           * then), each read in its popover and listed in the Annotations menu. One box
+           * where the player is short (`Player.css`), none otherwise.
+           */}
+          <div className="clover-canvas-player-cues">
+            {cues.length > 0 && (
+              <div className="clover-canvas-captions" aria-live="off">
+                {captionLines}
+              </div>
+            )}
+          </div>
           {transport}
           <BodyUnloadable kind={media.kind} shown={failed} room />
         </div>

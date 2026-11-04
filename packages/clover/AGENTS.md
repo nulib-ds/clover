@@ -1573,10 +1573,20 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     "it's way too big"), asked as its service's `info.json` allows
     (`resolveThumbnail`, 1,200 px), its alt its Canvas's label; none of it is in the
     scene (`canvasScene`'s `standIns: false`), so the renderer draws nothing;
-  - its ground is a few pixels of the same artwork (32 px), blurred, under a wash of 86%
-    of `--clover-color-control` (Mat, 2026-11-01: "even darker of a bg"; 72% before),
-    which keeps white text 11:1 and the 80% second line 7.7:1 whatever the picture; with
-    no artwork, the accent (12%) darkened by that fill;
+  - its ground is a few pixels of the same artwork (32 px), blurred (`2xl`; Mat,
+    2026-11-04: "increase the blur of the bg") and saturated, lit by still radial glows of
+    the controls' white as soft light (`::before`: "put movement in there (not animated
+    movement) with simple gradients to evoke glows"), then multiplied by
+    `--clover-player-depth`, the controls' dark fill 82% into their white, shaded with the
+    fill between the glows (`::after`; soft light cannot darken a light picture, a
+    multiply can) (Mat, 2026-11-04: "a little more vibrant … evoke the thumbnail image a
+    bit more", "try not to do any js"; an 86% wash of the fill before, from 2026-11-01's
+    "even darker of a bg", which grayed every color): the blend keeps each hue and caps every
+    pixel at #444748, so white text holds 9:1, the 80% line 6.6:1, the rail 5:1 and an
+    annotation's ring 3.3:1 whatever the picture (no `brightness`: it lifted a light
+    picture to white, which the cap then grayed); with no artwork, the accent (23.6%)
+    darkened by that fill. The transport's scrim is only a 38.2% shade of the fill
+    there ("scale back the black scrim");
   - its title is its name (the viewport's too, so `aria-hidden`), at 1rem and bold, with
     `partOf` under it a step smaller (`--clover-text-s`), `xs` apart (Mat, 2026-11-01;
     the title `--clover-text-l` before) (the Manifest's label, from `Connected` and
@@ -1592,16 +1602,34 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     room under the cluster and, over the transport (`--clover-transport-room`), a cue's
     two lines at the size the Body gives cues (`--clover-cue-size`, set by `MediaBody.css`
     on what the media layer holds), so nothing that shows or hides moves it; the
-    artwork takes what height is left. Under 16rem tall the artwork steps aside, and the
-    title and its line clamp to two and one;
+    artwork takes what height is left. Under 24rem tall, where that comes to 12rem ÷ φ
+    (`--clover-player-art-least`, `Canvas.css`), it plays as a mini player (Mat,
+    2026-11-04: "push the thumb/labels to the left", "bring the seek bar in to here",
+    "the play and lower controls should come with the seek bar"): a grid, the artwork
+    at the start as tall as the block (12rem at most), and beside it the title, the
+    cues, the seek bar and the bar, the transport's box `display: contents` so its two
+    rows are the grid's, its scrim gone; the title and its line clamp to two and one.
+    A caption has its own row over the seek bar and pushes the rows over it up and out
+    of the Body's top (`align-content: end`; Mat, 2026-11-04: "vtt should push other
+    elements out the top. it is most important", "don't cover the seek bar"). Under 15.236rem, where
+    the artwork comes under 12rem (with the inset over and under it; Mat, 2026-11-04:
+    "make breakpoint dependent on the height/size of the thumb"), a caption showing takes
+    the labels' place (`:has()` on the player), out of sight but still read ("just have
+    vtt completely push the labels out"), and on a narrow one the artwork's too. Under
+    37.5rem wide too, the
+    artwork is `2xl` beside the title, the rest under them the Body's width. Under
+    15.236rem the captions are a step smaller than the Body's width gives them ("bring it
+    down a gr level. the 250 break point should be the trigger"), never under `s`. The
+    figure is never shorter than that layout needs with a caption showing ("so active vtt
+    doesn't crowd further … it could be rem dependent"): two lines at `m`, their box's
+    room, the points' room, the seek bar and the bar, all tokens (`min-height` on
+    `[data-player]`, `Canvas.css`, so it holds before the player's styles);
   - Canvas's transport and captions as they are, along its foot, as a video's: the seek
     bar, the bar, the cue's box; always shown (`--clover-controls-shown: 1` on the
-    figure); its annotations on their time apart, along its top
-    (`.clover-canvas-player-notes`, `MediaBody`), centered and clear of the controls on
-    both sides, at a Canvas annotation label's size (`s`), ringed in the accent alone (2px, no
-    light line or dark edge: Mat, 2026-11-01), their page's label visually hidden (Mat, 2026-11-01: "bring timeline
-    annotations up", "outlined like an active annotation in Canvas"), the top keeping
-    two of their lines; the chapters the transport's Chapters menu's alone (Mat, 2026-11-01: "remove
+    figure); its annotations on their time the seek bar's points alone, never cues (Mat,
+    2026-11-04: "remove annotation bar in the top"; along its top, ringed in the accent,
+    from 2026-11-01's "bring timeline annotations up" until then), so the top keeps the
+    controls' row only; the chapters the transport's Chapters menu's alone (Mat, 2026-11-01: "remove
     this chapter control here. we should just have the regular one"; listed as tracks
     under a tall player until then);
   - the placeholder never holds it back (its still is the artwork, not a gate), and it
@@ -1957,8 +1985,12 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   longer be below"; that day Annotations went to the transport and came back, and the
   Chapters menu was the transport's until then). `Controls` draws it (`chapters`,
   `mediaElement`, from `CanvasView`), and its menu, `ChaptersMenu`, is a `ControlMenu`
-  as Choice's and Annotations' are, loaded once it shows: each chapter with its start,
-  the one playing checked and its picture under it; a pointer's pick or Enter goes there
+  as Choice's and Annotations' are, loaded once it shows: each chapter set as Contents
+  sets a Range on a recording's time (Mat, 2026-11-04: "render chapters like we do in the
+  chapters/structures ranges component"), its start muted in a column and its title
+  wrapping beside it, the one playing tinted and bold with its picture under both, the
+  row the control (its radio unseen, the row ringed in the accent while it has focus,
+  `ControlMenu.css`); a pointer's pick or Enter goes there
   and closes, the arrows move and leave it open. A lone recording draws the row for it.
   Its control gone while it had focus, the row too, focus goes to the transport's Play
   (WCAG 2.4.3). The transport keeps the chapters on its seek bar and the one playing by
@@ -2006,8 +2038,46 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     the canvas, was dropped). So it asks for no CORS. Should a recipe ever need a painting
     over a video, stack it in the DOM layer; if frames are ever uploaded again, use
     `texImage2D`, never `texSubImage2D`, which uploads a video black in Chrome.
-  - Captions are fetched with CORS and handed to `<track>` as blob URLs, because a
-    cross-origin track is refused on a video without `crossorigin`. `useCaptionTracks`
+  - Annotations on a recording's time are points on its seek bar (`SeekMarks.tsx`, in
+    the seek area, so they share the thumb's travel, `alongBar`; Mat, 2026-11-04: "add
+    points of annotations in the seekbar … in accent … styled like a point selector would
+    be in an image … slightly off the seekbar"; on the rail as "little bumps" for a while,
+    then "bring annotations off the seekbar again … a gr step above what seekbar is (the
+    gap)": `s` over the rail, the step over its `xs`), each with a faint 3px stem of the
+    accent down under the rail to its foot, fading as it goes ("a gradient mask"). The
+    dots are drawn under the seek bar's input and their clear buttons over it ("make sure
+    seekbar knob is above things"), the buttons lighting their dots (`lit`), and the room
+    they reach over the seek bar joins `--clover-transport-room`
+    (`--clover-transport-marks-room`, `Canvas.css`, `:has()` on the figure), so captions
+    and menus clear them: those on its time alone and those that follow its picture
+    (`xywh=…&t=…`), of the shown pages, each where it starts (`MediaBody`'s `marking`),
+    a video's and a Timeline's alike. Each is a button, named by its time and words, its
+    popover (`Tip`) the two, start-aligned as a hotspot's is ("do not center the
+    annotation time/label in popover"); pressed, it is picked as from the Annotations
+    menu, which plays from its time. One Tab stop, a toolbar named "Annotations" with a
+    roving tabindex (arrows, Home, End), before the seek bar's; the seek area's chapter
+    popover gives way while the pointer is on a point. Those whose points would overlap,
+    within a target's width (`groupMarks`, measured along the bar), are one point (Mat,
+    2026-11-04: "we should be able to toggle multiple use the collection/search results
+    page on pager in the popover"): its popover shows one at a time with `ui/Steps`
+    ("2 / 7", Previous, Next), each step picking the next, so no two targets overlap
+    (WCAG 2.5.8). That popover is beside its button in a group, not in it (`Tip` is
+    `aria-hidden` and a button holds no buttons), shown on hover and while focus is in
+    the group (`Tip.css`), so Tab reaches its steps; Escape from them sends focus back
+    to the point before putting it away. It keeps inside the Body as a hotspot's popover
+    does ("use similar functionality to what we use on xywh"): a `clamp()` of its point's
+    place in the Body (`--clover-mark-x`, measured with the bar) against its own width,
+    so a step to longer words stays in, never wider than the Body, its height the room
+    over the seek bar (its words scroll, its steps whole), and the media layer lifted
+    over the corner controls while it shows (`MediaBody.css`, as for an open menu).
+  - Captions are fetched with CORS, because a cross-origin track is refused on a video
+    without `crossorigin`, and their cues handed to a `<track>` with no address
+    (`addCues`; a `blob:` one is refused by a strict `media-src`). Not before two things
+    (Mat, 2026-11-04: "I am not seeing the vtt captions"): the track has settled
+    (`whenSettled`: with no address it fails to load a moment after its mode leaves
+    `disabled`, and empties its cues as it does, so a file `loadVtt` already had came
+    back too soon), and, for a stream, hls.js has attached (`attached`), as it empties
+    every text track on the element then. `useCaptionTracks`
     lists the Manifest's tracks first, then any the media adds (hls.js, in-band). Clover
     draws the chosen track's cues, so that track is `hidden`. The Manifest's other
     tracks stay `hidden`, and the media's are `disabled`, which stops hls.js loading

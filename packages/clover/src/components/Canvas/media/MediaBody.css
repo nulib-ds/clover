@@ -15,8 +15,15 @@
   container-type: size;
 }
 
-/* An open menu is over everything in the Body, the Canvas's controls too. */
-.clover-canvas-media:has([aria-expanded="true"]) {
+/*
+ * An open menu is over everything in the Body, the Canvas's controls too; and so is an
+ * annotation's popover on the seek bar while it shows, which a short Body has it reach
+ * the controls in its corner (`SeekMarks.tsx`), never under them (WCAG 1.4.13).
+ */
+.clover-canvas-media:has(
+  [aria-expanded="true"],
+  .clover-canvas-transport-mark-group:is(:hover, :focus-within)
+) {
   z-index: 4;
 }
 

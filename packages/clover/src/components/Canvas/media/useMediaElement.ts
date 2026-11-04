@@ -87,31 +87,14 @@ export function useMediaElement(
         },
       );
 
-    /*
-     * A cross-origin `<track>` loads only when the video itself asks for CORS, which a
-     * `dom` video does not. So each file is fetched here (CORS, as Clover fetches all
-     * WebVTT) and its cues handed to its track, never as an address: a `blob:` track is
-     * refused where a page's Content Security Policy keeps `media-src` to its own hosts.
-     */
-    media.captions.forEach((caption, index) => {
-      const track = document.createElement("track");
-      // Captions or subtitles, as its annotation `provides` it.
-      track.kind = caption.kind;
-      if (caption.language) track.srclang = caption.language;
-      // Named as Clover's menu names it, for the system player's own menu.
-      track.label = captionName(caption, index, languageRef.current).text;
-      video.appendChild(track);
-      // Shared with `Transcript`: one fetch per file.
-      loadVtt(caption.id, requestRef.current)
-        .then((text) => {
-          if (!canceled) addCues(track.track, text);
-        })
-        .catch(() => undefined);
-    });
-
     let hls: { destroy: () => void } | null = null;
+    /*
+     * hls.js empties every text track on the element as it attaches (its captions'
+     * `_cleanTracks`), the Manifest's too: their cues wait for it (`attached`).
+     */
+    let attached: Promise<unknown> = Promise.resolve();
     if (isHls(media.src, media.format)) {
-      import("hls.js")
+      attached = import("hls.js")
         .then(({ default: Hls }) => {
           if (canceled) return;
           if (!Hls.isSupported()) {
@@ -139,6 +122,33 @@ export function useMediaElement(
     } else {
       video.src = media.src;
     }
+
+    /*
+     * A cross-origin `<track>` loads only when the video itself asks for CORS, which a
+     * `dom` video does not. So each file is fetched here (CORS, as Clover fetches all
+     * WebVTT) and its cues handed to its track, never as an address: a `blob:` track is
+     * refused where a page's Content Security Policy keeps `media-src` to its own hosts.
+     */
+    media.captions.forEach((caption, index) => {
+      const track = document.createElement("track");
+      // Captions or subtitles, as its annotation `provides` it.
+      track.kind = caption.kind;
+      if (caption.language) track.srclang = caption.language;
+      // Named as Clover's menu names it, for the system player's own menu.
+      track.label = captionName(caption, index, languageRef.current).text;
+      video.appendChild(track);
+      // Shared with `Transcript`: one fetch per file.
+      Promise.all([loadVtt(caption.id, requestRef.current), attached])
+        .then(([text]) => {
+          if (canceled) return;
+          addCues(track.track, text);
+          whenSettled(track, () => {
+            if (!canceled && !track.track?.cues?.length)
+              addCues(track.track, text);
+          });
+        })
+        .catch(() => undefined);
+    });
 
     // Hidden from the start: their cues are live, and Clover draws them.
     for (const track of Array.from(video.textTracks ?? [])) {
@@ -184,6 +194,20 @@ export function useMediaElement(
   ]);
 
   return element;
+}
+
+/**
+ * Once a `<track>` has settled, if it has yet to. With no address, in Chrome and Firefox,
+ * it fails to load as its mode leaves `disabled`, a moment later, and empties its cues as
+ * it does, so cues handed to it before then are lost (Mat, 2026-11-04: "I am not seeing
+ * the vtt captions"; a file already fetched, by `Transcript` or a Body drawn before, came
+ * back that soon): they are handed to it again then, if it has none. WebKit neither
+ * settles such a track nor empties it, so it keeps the first (`e2e/check-csp.mjs`).
+ */
+function whenSettled(element: HTMLTrackElement, then: () => void): void {
+  if (element.readyState >= HTMLTrackElement.LOADED) return;
+  element.addEventListener("load", then, { once: true });
+  element.addEventListener("error", then, { once: true });
 }
 
 /**

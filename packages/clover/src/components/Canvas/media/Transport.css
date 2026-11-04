@@ -143,10 +143,6 @@
     order: -1;
     flex-basis: 100%;
   }
-
-  .clover-canvas-transport-status > .clover-canvas-transport-chapter {
-    max-width: none;
-  }
 }
 
 @container (max-width: 28rem) {
@@ -241,6 +237,210 @@ button.clover-canvas-transport-button[aria-pressed="true"]::after {
   margin-bottom: var(--clover-space-xs);
   /* The gap where a chapter begins, a step under the track, `2xs` (below). */
   --clover-transport-gap: var(--clover-space-2xs);
+}
+
+/*
+ * Annotations on the recording's time (`SeekMarks.tsx`): a point over the seek bar where
+ * each starts, `s` over the rail, the golden step over the rail's own `xs` (Mat,
+ * 2026-11-04: "bring annotations off the seekbar again. it should not intersect. make it
+ * a gr step above what seekbar is (the gap)"; on the rail's top edge, as bumps, for a
+ * while that day), clear of the thumb too, drawn as an image's point is
+ * (`Annotations.css`): an accent dot in a light ring with a dark edge, at `s`, and while it
+ * is pointed at, focused or picked, the accent band around the ring and the edge around
+ * that. One of the two tones holds 3:1 against whatever is under it (WCAG 1.4.11). Each
+ * takes the pointer in an `l` square over the rail (WCAG 2.5.8); the rail is the seek
+ * bar's.
+ */
+.clover-canvas-transport-points,
+.clover-canvas-transport-marks {
+  --clover-transport-mark: var(--clover-space-s);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* The points under the seek bar's input, its thumb over them; their buttons over it. */
+.clover-canvas-transport-points {
+  z-index: 0;
+}
+
+.clover-canvas-transport-seek {
+  position: relative;
+  z-index: 1;
+}
+
+.clover-canvas-transport-marks {
+  z-index: 2;
+}
+
+/* Its foot `s` over the rail's top (each side a 2px ring and a 1px edge: 3px). */
+.clover-canvas-transport-mark-point {
+  position: absolute;
+  top: calc(
+    50% - var(--clover-transport-track) / 2 - var(--clover-space-s) -
+      (var(--clover-transport-mark) + 2 * 3px) / 2
+  );
+  /* The dot `s` across inside its ring, whatever the page's box sizing. */
+  box-sizing: content-box;
+  width: var(--clover-transport-mark);
+  height: var(--clover-transport-mark);
+  border: 2px solid var(--clover-color-secondary, #fff);
+  border-radius: 50%;
+  background-color: var(--clover-color-accent, #0065c3);
+  box-shadow: 0 0 0 1px var(--clover-color-primary, #1a1d1e);
+  translate: -50% -50%;
+}
+
+/*
+ * A stem from its foot down under the rail to the rail's foot (Mat, 2026-11-04: "a faint
+ * 3px line coming down off the annotation … go under the seek bar and land at the bottom
+ * of the seekbar. it can be accent with some opacity"): 38.2% of the accent, fading out
+ * as it goes down ("give it a gradient mask so that it fades out as it goes down"),
+ * decoration beside the point, which says it.
+ */
+.clover-canvas-transport-mark-point::after {
+  position: absolute;
+  /* From under its ring and edge. */
+  top: calc(100% + 3px);
+  left: 50%;
+  width: 3px;
+  height: calc(var(--clover-space-s) + var(--clover-transport-track));
+  translate: -50% 0;
+  background-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 38.2%,
+    transparent
+  );
+  mask-image: linear-gradient(#000, #0000);
+  content: "";
+}
+
+.clover-canvas-transport-mark-point[data-active="true"] {
+  box-shadow:
+    0 0 0 2px var(--clover-color-accent, #0065c3),
+    0 0 0 3px var(--clover-color-primary, #1a1d1e);
+}
+
+/*
+ * Clear, an `l` square about its point, its foot on the rail's top, so a press on the
+ * rail is the seek bar's, its thumb's too; with its popover beside it in its group.
+ */
+.clover-canvas-transport-mark-group {
+  position: absolute;
+  top: calc(50% - var(--clover-transport-track) / 2 - var(--clover-space-l));
+  width: var(--clover-space-l);
+  height: var(--clover-space-l);
+  translate: -50% 0;
+  pointer-events: var(--clover-controls-events, auto);
+}
+
+.clover-canvas-transport-mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+/* Its point shows its focus (above). */
+.clover-canvas-transport-mark:focus-visible {
+  outline: none;
+}
+
+/* The one pointed at or focused over the others, its popover too. */
+.clover-canvas-transport-mark-group:is(:hover, :focus-within) {
+  z-index: 1;
+}
+
+/*
+ * Kept inside the Body, `xs` clear of its sides, as a hotspot's popover is (`ui/Tip.css`):
+ * from its point's place in the Body (`--clover-mark-x`, `SeekMarks.tsx`), centered over
+ * it where it can be, else as near as the Body allows, by its own width (`100%`), so it
+ * holds as its words change; never wider than the Body. Its height held to the room over
+ * the seek bar, `xs` clear of the Body's top, its words scrolling where they need more,
+ * its steps always whole (WCAG 1.4.10).
+ */
+/* By its own class too, a step over the other popovers' rules (`build/styles.test.mjs`). */
+.clover-canvas-transport-mark-group
+  > .clover-tip.clover-canvas-transport-mark-tip {
+  /*
+   * Its words from the start of their line, as a hotspot's are (`ui/Tip.css`; Mat,
+   * 2026-11-04: "do not center the annotation time/label in popover"), never centered,
+   * as the group's button would have them.
+   */
+  text-align: start;
+  --clover-tip-x: clamp(
+    var(--clover-space-xs) - var(--clover-mark-x, 50cqw),
+    -50%,
+    100cqw - var(--clover-space-xs) - var(--clover-mark-x, 50cqw) - 100%
+  );
+  display: flex;
+  flex-direction: column;
+  max-width: min(18rem, 100cqw - 2 * var(--clover-space-xs));
+  max-height: calc(
+    100cqh - var(--clover-canvas-controls-inset) -
+      var(--clover-transport-bar-height, var(--clover-control)) -
+      var(--clover-space-xs) - var(--clover-space-l) / 2 -
+      var(--clover-transport-track) / 2 - var(--clover-space-l) - 3 *
+      var(--clover-space-xs)
+  );
+  /*
+   * By `transform`, over the popover's own `-50%` (`ui/Tip.css`), so no rule that
+   * places another popover by `translate` ties with it; `Tip`'s own shift is unused here.
+   */
+  transform: translateX(calc(var(--clover-tip-x) + 50%));
+}
+
+/*
+ * Shown while focus is anywhere in its group, as a control's is while it has focus
+ * (`ui/Tip.css`): it holds its steps, which focus moves on to.
+ */
+.clover-canvas-transport-mark-group:focus-within:not([data-tip-hidden])
+  > .clover-tip.clover-canvas-transport-mark-tip {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+/*
+ * With annotations' points over its seek bar, the room they reach over it: `s` clear of
+ * the rail, then the point, `s` in its 2px ring and 1px edge, less what of the seek bar's
+ * height is over the rail. Here, as the points load with the transport; `Canvas.css`
+ * adds it to `--clover-transport-room`. Constant for a recording, so nothing moves as
+ * one plays.
+ */
+.clover-canvas:has(.clover-canvas-transport-marks) {
+  --clover-transport-marks-room: calc(
+    2 * var(--clover-space-s) + 2 * 3px -
+      (var(--clover-space-l) - var(--clover-space-xs)) / 2
+  );
+}
+
+.clover-canvas-transport-mark-words {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/*
+ * Its words muted under the time, as the chapter's popover sets them, and its steps
+ * (`ui/Steps.css`) in the popover's light, under them: their muted tone the words'
+ * (10:1 on the popover's ground; WCAG 1.4.3, 1.4.11).
+ */
+.clover-canvas-transport-mark-tip {
+  --clover-color-primary-muted: var(--clover-color-secondary-alt, #c1c8cd);
+  color: var(--clover-color-secondary-alt, #c1c8cd);
+}
+
+.clover-canvas-transport-mark-group
+  .clover-canvas-transport-mark-tip
+  > .clover-steps {
+  flex: none;
+  margin-top: var(--clover-space-xs);
 }
 
 .clover-canvas-transport input[type="range"] {
@@ -719,6 +919,8 @@ button.clover-canvas-transport-time:focus-visible {
  */
 .clover-canvas-transport-chapter-span {
   position: absolute;
+  /* Over the rail, as the input is lifted over the annotations' points (above). */
+  z-index: 1;
   top: 50%;
   /* Clear of the gaps at its ends. */
   box-sizing: border-box;
@@ -765,6 +967,34 @@ button.clover-canvas-transport-time:focus-visible {
 }
 
 @media (forced-colors: active) {
+  /*
+ * A stem from its foot down under the rail to the rail's foot (Mat, 2026-11-04: "a faint
+ * 3px line coming down off the annotation … go under the seek bar and land at the bottom
+ * of the seekbar. it can be accent with some opacity"): 38.2% of the accent, fading out
+ * as it goes down ("give it a gradient mask so that it fades out as it goes down"),
+ * decoration beside the point, which says it.
+ */
+  .clover-canvas-transport-mark-point::after {
+    position: absolute;
+    /* From under its ring and edge. */
+    top: calc(100% + 3px);
+    left: 50%;
+    width: 3px;
+    height: calc(var(--clover-space-s) + var(--clover-transport-track));
+    translate: -50% 0;
+    background-color: color-mix(
+      in srgb,
+      var(--clover-color-accent, #0065c3) 38.2%,
+      transparent
+    );
+    content: "";
+  }
+
+  .clover-canvas-transport-mark-point[data-active="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: 1px;
+  }
+
   .clover-canvas-transport-chapter-span {
     background-color: Highlight;
     opacity: 1;
@@ -775,16 +1005,16 @@ button.clover-canvas-transport-time:focus-visible {
  * Muted beside the time, as the seek bar's popover sets them (Mat, 2026-10-28), and with
  * the time's shadow, but only as far as 4.5:1 allows: 85% of the bar's white over the
  * scrim's lightest (60% black over a white frame, #666) is 4.65:1; 80% fell under
- * (WCAG 1.4.3). It takes what the time leaves, up to its own width, and adds nothing to
- * the room a row needs (`width: 0`), so a long title is cut short rather than wrapping
- * the bar.
+ * (WCAG 1.4.3). It takes all the time leaves, up to the controls at the end (Mat,
+ * 2026-11-04: "let it fill space until it tries to wrap"; 16rem at most until then), and
+ * adds nothing to the room a row needs (`width: 0`), so a long title is cut short where
+ * it would wrap the bar, never before.
  */
 .clover-canvas-transport-status > .clover-canvas-transport-chapter {
   flex: 1 1 auto;
   overflow: hidden;
   width: 0;
   min-width: 0;
-  max-width: 16rem;
   color: color-mix(in srgb, var(--clover-player-text, #fff) 85%, transparent);
   font-size: var(--clover-text-s);
   text-overflow: ellipsis;
