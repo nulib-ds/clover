@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.3.1] - 2026-11-04
+
 ### Added
 
 - **Annotations on the seek bar.** Each annotation on a recording's time, a video's or a
