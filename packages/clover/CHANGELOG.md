@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.3.0] - 2026-11-03
+
 ### Added
 
 - **`Clover.Map`.** `Map` and its helpers (`navPlaceOf`, `hasMapData` and the rest) are
