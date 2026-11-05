@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.4.1] - 2026-11-04
+
 ### Fixed
 
 - **Document: no second picture around a video.** The active page's still is hidden
