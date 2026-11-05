@@ -11,6 +11,21 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **An image service as the content.** `iiifContent` (`iiif-content`) on a `Root`, the
+  Viewer or a `Canvas` may be a IIIF Image service, Image API 2 or 3: its base URI, its
+  `info.json` or the `info.json` itself. Clover shows it as the one image it is, in the
+  Body's Canvas, with no title: a Manifest of one Canvas the image's size, with no label,
+  whose id is the service's. The rights its `info.json` gives (`rights`, or Image 2's
+  `license` and `attribution`) are kept, and About is offered only for them, so the
+  Default template shows the image alone. A base URI that does not redirect to its
+  `info.json` is tried again with `/info.json` after it.
+
+  ```jsx
+  <Viewer iiifContent="https://ndeiiif.adlibhosting.com/iiif/3/Q1852477.648" />
+  ```
+
 ## [4.4.2] - 2026-11-05
 
 ### Fixed
