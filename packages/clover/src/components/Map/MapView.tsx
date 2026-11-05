@@ -66,6 +66,12 @@ export interface MapProps
   /** Zoom with the wheel or trackpad. Default false, so an embedded map never traps page scroll. */
   scrollZoom?: boolean;
   /**
+   * How close it frames its places: a lone point at this zoom, and several no closer.
+   * Default 8 for a point, a region around it, and 12 for several; 15 shows a point's
+   * streets (Mat, 2026-11-04: "zoom map to street level").
+   */
+  zoom?: number;
+  /**
    * A place was chosen, on the map or in its list. Inside a `Root`, choosing one on a
    * Canvas also goes there.
    */
@@ -306,6 +312,7 @@ function MapView({
   styleUrl,
   workerUrl,
   scrollZoom = false,
+  zoom,
   onSelect,
   request,
   forwardedRef,
@@ -807,21 +814,21 @@ function MapView({
     const extent = bounds.flat().join();
     if (extent === framed.current) return;
     framed.current = extent;
-    frame(map, bounds, POINT_ZOOM);
-  }, [map, features, overlays, overlay]);
+    frame(map, bounds, zoom ?? POINT_ZOOM, zoom);
+  }, [map, features, overlays, overlay, zoom]);
 
   // A place from the list: framed and named as on the map, then chosen.
   const choose = (feature: MapFeature) => {
     const bounds = boundsOf([feature]);
     if (map && bounds) {
-      frame(map, bounds, Math.max(map.getZoom(), POINT_ZOOM));
+      frame(map, bounds, Math.max(map.getZoom(), zoom ?? POINT_ZOOM), zoom);
       name.current?.(feature, center(bounds));
     }
     onSelect?.(feature);
   };
   const show = (item: Georeference) => {
     const bounds = boundsOf([], [item]);
-    if (map && bounds) frame(map, bounds, POINT_ZOOM);
+    if (map && bounds) frame(map, bounds, zoom ?? POINT_ZOOM, zoom);
   };
 
   return (
@@ -934,13 +941,21 @@ function MapView({
   );
 }
 
-/** Frame a box: a lone point centered at `zoom`, anything else to its bounds. */
-function frame(map: any, bounds: [Position, Position], zoom: number) {
+/**
+ * Frame a box: a lone point centered at `zoom`, anything else to its bounds, no closer
+ * than `most` (the Map's `zoom`), else 12.
+ */
+function frame(
+  map: any,
+  bounds: [Position, Position],
+  zoom: number,
+  most = 12,
+) {
   const [[west, south], [east, north]] = bounds;
   if (west === east && south === north) {
     map.jumpTo({ center: [west, south], zoom });
   } else {
-    map.fitBounds(bounds, { padding: 32, maxZoom: 12, duration: 0 });
+    map.fitBounds(bounds, { padding: 32, maxZoom: most, duration: 0 });
   }
 }
 

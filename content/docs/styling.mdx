@@ -145,18 +145,19 @@ the accent for rings and fills and give its text a lighter one.
 
 ## Classes and states
 
-A part is one of the components a layout is built from: the `Body` that draws the view,
-the `Items` that list the views, a `Label`, the `Panel`, and the rest
-([Composing](/docs/composing)). Each names itself with one `clover-*` class on its root
+A layout is built from components: the `Body` that draws the view, the `Items` that list
+the views, a `Label`, the `Panel`, and the rest ([Glossary](/docs/composing/glossary)). Each names itself with one `clover-*` class on its root
 and says what it is doing in `data-*` attributes, for your own CSS to select. A few:
 
-| Part   | Class           | State            | Values                                                                       |
-| ------ | --------------- | ---------------- | ---------------------------------------------------------------------------- |
-| Body   | `clover-body`   | `data-renderer`  | <span data-code-flavor="both">`canvas`, `timeline`, `scene`, `custom`</span> |
-| Canvas | `clover-canvas` | `data-media`     | Its painting body's `type`, lowercased: `image`, `video`, `sound`…           |
-| Canvas | `clover-canvas` | `data-recording` | Present while it plays a recording, video or sound                           |
-| Items  | `clover-items`  | `data-layout`    | `slider`, `list`, `grid`, `masonry`, `pager`                                 |
-| Panel  | `clover-panel`  | `data-layout`    | `tabs`, `accordion`                                                          |
+| Part        | Class                   | State            | Values                                                                                                                  |
+| ----------- | ----------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Body        | `clover-body`           | `data-renderer`  | <span data-code-flavor="both">`canvas`, `timeline`, `scene`, `custom`</span>                                            |
+| Canvas      | `clover-canvas`         | `data-media`     | Its painting body's `type`, lowercased: `image`, `video`, `sound`…                                                      |
+| Canvas      | `clover-canvas`         | `data-recording` | Present while it plays a recording, video or sound                                                                      |
+| Items       | `clover-items`          | `data-layout`    | `slider`, `list`, `grid`, `masonry`, `pager`                                                                            |
+| Panel       | `clover-panel`          | `data-layout`    | `tabs`, `accordion`                                                                                                     |
+| PanelToggle | `clover-canvas-button`  | `data-side`      | `start`, for a `side` of `start`: it keeps the start's top corner of the Body's controls, its glyph mirrored            |
+| PanelPane   | `clover-template-panel` | `data-side`      | `start`, `end`: the Body's side it sits on, and slides in from over the Body ([Helpers](/docs/composing/helpers#panel)) |
 
 ```css
 .clover-items[data-layout="grid"] {

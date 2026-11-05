@@ -306,6 +306,7 @@ export const map: ElementSpec = {
     "overlay-opacity": { prop: "overlayOpacity", type: "number", min: 0 },
     "style-url": { prop: "styleUrl", type: "string" },
     "scroll-zoom": { prop: "scrollZoom", type: "boolean" },
+    zoom: { prop: "zoom", type: "number", min: 0 },
     credits: { prop: "credits", type: "boolean" },
     language: { prop: "language", type: "string" },
     "high-contrast": { prop: "highContrast", type: "boolean" },
@@ -336,6 +337,10 @@ export const mapDocs: ElementDocs = {
       description:
         "Zoom with the wheel or a trackpad, which can trap the page's scroll.",
       default: "false",
+    },
+    zoom: {
+      description:
+        "How close it frames its places: a lone point at this zoom, several no closer. 8 for a point and 12 for several by default; 15 shows a point's streets.",
     },
     credits: {
       description:

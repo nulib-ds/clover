@@ -1,0 +1,538 @@
+---
+title: Customizing layouts
+description: "Fit a layout to your page: the Panel's sections, panes side by side, templates, your own components and renderers, and languages."
+---
+
+import { Example } from "docs/components/Clover4/ViewerDocs";
+import {
+  ControlDemo,
+  HeadingsDemo,
+  PanelTabsDemo,
+  ReadMoreDemo,
+  SplitDemo,
+  TemplateDemo,
+} from "docs/components/Clover4/CustomizingExamples";
+
+# Customizing layouts
+
+<div className="docs-lede">
+  Fit a layout to your page: choose the Panel's sections, set panes side by
+  side, make a template, and add components of your own.
+</div>
+
+## Panel
+
+Choose what the Panel shows with `Tab`s. Each one holds any component, Clover's or your
+own, and `Value` shows text of your own, such as the citation here.
+
+<Example>
+<PanelTabsDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0029-metadata-anywhere/manifest.json">
+  <Clover.Body style={{ height: "20rem" }} />
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--clover-space-s)",
+      paddingBlock: "var(--clover-space-s)",
+    }}
+  >
+    <Clover.Label as="h3" style={{ flex: 1, margin: 0 }} />
+    <Clover.Previous />
+    <Clover.Next />
+  </div>
+  <Clover.Panel>
+    <Clover.Tab value="about" label="About">
+      <Clover.About label={false} />
+    </Clover.Tab>
+    <Clover.Tab value="page" label="This page">
+      <Clover.Label of="canvas" as="h4" />
+      <Clover.Metadata of="canvas" />
+    </Clover.Tab>
+    <Clover.Tab value="citation" label="Citation">
+      <Clover.Value
+        as="p"
+        format="text/markdown"
+        value="Cite as: Glindoni, Henry Gillard. *John Dee performing an experiment before Queen Elizabeth I.* Oil on canvas, 1800–1899. Wellcome Collection, Wellcome Library no. 47369i."
+      />
+    </Clover.Tab>
+  </Clover.Panel>
+</Clover.Root>;
+```
+
+</Example>
+
+A Panel with nothing to show draws nothing. Ask `usePanelSections` first, and leave out
+the room around it:
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function MyPanel() {
+  const sections = Clover.usePanelSections(["contents", "search"]);
+  return sections.length ? <Clover.Panel sections={sections} /> : null;
+}
+```
+
+The Panel's layouts, sections and props are on [Panel](/docs/panel).
+
+## Splitting panes
+
+Set panes side by side with `Split`, and resize them with the `SplitHandle` between them.
+
+<Example>
+<SplitDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+<Clover.Root iiifContent="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json">
+  <Clover.Split storageKey="my-layout" style={{ height: "28rem" }}>
+    <Clover.SplitPane size="24rem" min="14rem" style={{ overflowY: "auto" }}>
+      <Clover.Panel />
+    </Clover.SplitPane>
+    <Clover.SplitHandle />
+    <Clover.SplitPane min="16rem">
+      <Clover.Body style={{ height: "100%" }} />
+    </Clover.SplitPane>
+  </Clover.Split>
+</Clover.Root>;
+```
+
+</Example>
+
+## Long values
+
+`Value` shows any text you hold, such as an annotation's or your own.
+
+`Summary` cuts a long summary short under a "Read more" button, and `ReadMore` gives your
+own text the same.
+
+<Example>
+<ReadMoreDemo />
+
+```css
+.my-layout .clover-summary {
+  --clover-summary-lines: 3;
+}
+
+.my-note {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+```
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+<Clover.Summary />
+
+<Clover.ReadMore>
+  <p className="my-note">{note}</p>
+</Clover.ReadMore>
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-summary></clover-summary>
+
+<clover-read-more>
+  <p class="my-note">…</p>
+</clover-read-more>
+```
+
+</Example>
+
+## Templates
+
+Give the Viewer your layout as its `template`, as Clover's
+[templates](/docs/viewer#templates) are:
+
+<Example>
+<TemplateDemo />
+
+```jsx
+import Viewer, * as Clover from "@nulib/clover";
+
+function MyLayout(props) {
+  return (
+    <Clover.Root {...props}>
+      <Clover.Body style={{ height: "24rem" }} />
+      <Clover.Items layout="pager" />
+    </Clover.Root>
+  );
+}
+
+<Viewer
+  iiifContent="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+  template={MyLayout}
+/>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<!-- A layout of your own is the markup itself: a root and its elements. -->
+<clover-root
+  iiif-content="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+>
+  <clover-body style="height: 24rem"></clover-body>
+  <clover-items layout="pager"></clover-items>
+</clover-root>
+```
+
+</Example>
+
+To start from one of Clover's, see [Change a template](/docs/composing/helpers#change-a-template).
+What the templates share is on [Helpers](/docs/composing/helpers#templates).
+
+## Creating custom components
+
+Your components sit beside Clover's and read the `Root` with
+[hooks](/docs/composing/helpers#hooks).
+
+### Headings
+
+Draw a title one level below the heading it sits under. `Clover.titled` gives the right
+element for a `headingLevel`.
+
+<Example>
+<HeadingsDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function MyLayout({ iiifContent, headingLevel }) {
+  const title = Clover.titled(headingLevel, "my-title");
+  return (
+    <Clover.Root iiifContent={iiifContent} {...title.group}>
+      <Clover.Label as={title.as} {...title.title} />
+      <Clover.Body style={{ height: "20rem" }} />
+    </Clover.Root>
+  );
+}
+
+<MyLayout
+  iiifContent="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+  headingLevel={4}
+/>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+>
+  <clover-label as="h4"></clover-label>
+  <clover-body style="height: 20rem"></clover-body>
+</clover-root>
+```
+
+</Example>
+
+### Controls of your own
+
+Name a control of your own with `aria-label`, and show that name on hover and focus with
+`Tip`.
+
+<Example>
+<ControlDemo />
+
+```jsx
+import { useState } from "react";
+import * as Clover from "@nulib/clover";
+
+function Bookmark() {
+  const [saved, setSaved] = useState(false);
+  return (
+    <button
+      type="button"
+      aria-label="Bookmark"
+      aria-pressed={saved}
+      onClick={() => setSaved(!saved)}
+      style={{ position: "relative" }}
+    >
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 24 24"
+        width="24"
+        height="24"
+        fill={saved ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        <path d="M6 3h12v18l-6-4-6 4z" strokeLinejoin="round" />
+      </svg>
+      <Clover.Tip label="Bookmark" />
+    </button>
+  );
+}
+```
+
+```html twin
+<button
+  type="button"
+  id="bookmark"
+  aria-label="Bookmark"
+  aria-pressed="false"
+  style="position: relative"
+>
+  <svg
+    aria-hidden="true"
+    viewBox="0 0 24 24"
+    width="24"
+    height="24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+  >
+    <path d="M6 3h12v18l-6-4-6 4z" stroke-linejoin="round" />
+  </svg>
+  <clover-tip label="Bookmark"></clover-tip>
+</button>
+
+<script type="module">
+  import "@nulib/clover/web-components";
+
+  const bookmark = document.getElementById("bookmark");
+  bookmark.addEventListener("click", () => {
+    const saved = bookmark.getAttribute("aria-pressed") !== "true";
+    bookmark.setAttribute("aria-pressed", String(saved));
+    bookmark
+      .querySelector("svg")
+      .setAttribute("fill", saved ? "currentColor" : "none");
+  });
+</script>
+```
+
+</Example>
+
+Clover opens one popup at a time. Join yours to them with `useOneOpen`:
+
+```jsx
+import { useState } from "react";
+import * as Clover from "@nulib/clover";
+
+function useMyPopup() {
+  const [open, setOpen] = useState(false);
+  Clover.useOneOpen(open, () => setOpen(false));
+  return [open, setOpen];
+}
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+
+  const root = document.querySelector("clover-root");
+  const menu = document.getElementById("my-popup");
+  let release = null;
+  const close = () => {
+    menu.hidden = true;
+    release?.();
+  };
+  const open = () => {
+    menu.hidden = false;
+    release = root.clover.oneOpen(close);
+  };
+</script>
+```
+
+### Custom renderer
+
+Draw a view your own way with `renderers`. Here a PDF viewer draws a Canvas that paints a
+PDF:
+
+```jsx
+import { useState } from "react";
+import * as Clover from "@nulib/clover";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/TextLayer.css";
+
+// react-pdf stands in for the PDF viewer of your choice.
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url,
+).toString();
+
+function PdfViewer({ bodies }) {
+  // Inside the Root: Clover's hooks work here (useNavigation, useActiveCanvas, useClover…).
+  const [pages, setPages] = useState(0);
+  return (
+    <div
+      style={{ position: "absolute", inset: 0, overflow: "auto" }}
+      tabIndex={0}
+    >
+      <Document
+        file={bodies[0].id}
+        onLoadSuccess={({ numPages }) => setPages(numPages)}
+      >
+        {Array.from({ length: pages }, (_, index) => (
+          <Page key={index} pageNumber={index + 1} />
+        ))}
+      </Document>
+    </div>
+  );
+}
+
+<Clover.Root
+  iiifContent="https://example.org/iiif/report/manifest.json"
+  renderers={[{ format: ["application/pdf"], component: PdfViewer }]}
+>
+  <Clover.Body />
+</Clover.Root>;
+```
+
+```html twin
+<!-- A Manifest whose Canvas paints a PDF (application/pdf). -->
+<clover-root iiif-content="https://example.org/iiif/report/manifest.json">
+  <clover-body></clover-body>
+</clover-root>
+
+<script type="module">
+  import "@nulib/clover/web-components";
+  import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
+  import { EventBus, PDFViewer } from "pdfjs-dist/web/pdf_viewer.mjs";
+
+  // pdf.js's own viewer stands in for the PDF viewer of your choice.
+  GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
+
+  document.querySelector("clover-root").renderers = [
+    {
+      format: ["application/pdf"],
+      render(container, { bodies }) {
+        // pdf.js scrolls its pages in a box placed absolutely, and they go in .pdfViewer.
+        const box = document.createElement("div");
+        box.style.cssText = "position: absolute; inset: 0; overflow: auto";
+        box.tabIndex = 0;
+        box.innerHTML = '<div class="pdfViewer"></div>';
+        container.append(box);
+        const viewer = new PDFViewer({
+          container: box,
+          eventBus: new EventBus(),
+        });
+        const loading = getDocument(bodies[0].id);
+        loading.promise.then((pdf) => viewer.setDocument(pdf));
+        return () => loading.destroy();
+      },
+    },
+  ];
+</script>
+```
+
+<div data-code-flavor="web-components">
+
+As web components, a renderer's `render` draws the view into the box it is given.
+
+</div>
+
+A renderer gets the view's `canvases` and their painting `bodies`.
+
+| 3.x `customDisplays`         | 4.x `renderers`                                     |
+| ---------------------------- | --------------------------------------------------- |
+| `target.canvasId`            | `canvasId`                                          |
+| `target.paintingFormat`      | `format`                                            |
+| (none)                       | `match: ({ canvases, bodies }) => boolean`          |
+| `display.component`          | `component`                                         |
+| `display.componentProps`     | close over them: `component: (p) => <X {...p} a />` |
+| `id`, `annotationBody` props | `canvases`, `bodies` props                          |
+| `hooks` prop                 | Clover's hooks, called in the component             |
+
+### Helpers
+
+Clover's helpers read IIIF resources for your components: thumbnails, text, views, places
+and content states. See [Helpers](/docs/composing/helpers).
+
+## Languages
+
+Clover's strings, such as "About" and "Zoom in", follow your page's `<html lang>`, or the
+language you set with `initCloverI18n`. It ships English, Finnish, French, Norwegian
+(Bokmål and Nynorsk), Portuguese (European) and Spanish.
+
+```jsx
+import { initCloverI18n } from "@nulib/clover";
+
+// The page's language, and strings of your own for one Clover does not ship.
+initCloverI18n({
+  lng: "de",
+  resources: { de: { clover: { informationPanelTabsAbout: "Über" } } },
+});
+```
+
+Languages other than English load when first needed. On a server or in a test, wait for
+them:
+
+```js
+import { initCloverI18n } from "@nulib/clover";
+
+await initCloverI18n({ lng: "fr" }).ready();
+```
+
+In a component of your own, `useLangOf` gives each string its `lang`:
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function CloseButton({ onClick }) {
+  const t = Clover.useT();
+  const langOf = Clover.useLangOf();
+  return (
+    <button
+      type="button"
+      aria-label={t("commonClose")}
+      lang={langOf("commonClose")}
+      onClick={onClick}
+      style={{ position: "relative" }}
+    >
+      <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16">
+        <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="2" />
+      </svg>
+      <Clover.Tip label={t("commonClose")} />
+    </button>
+  );
+}
+```
+
+```html twin
+<button type="button" id="close" style="position: relative">
+  <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16">
+    <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" />
+  </svg>
+  <clover-tip></clover-tip>
+</button>
+
+<script type="module">
+  import "@nulib/clover/web-components";
+
+  const root = document.querySelector("clover-root");
+  const close = document.getElementById("close");
+  const start = () => {
+    const label = root.clover.t("commonClose");
+    const lang = root.clover.langOf("commonClose");
+    close.setAttribute("aria-label", label);
+    close.querySelector("clover-tip").setAttribute("label", label);
+    if (lang) close.lang = lang;
+    else close.removeAttribute("lang");
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+## Styles
+
+Clover's stylesheets, custom properties and classes are on [Styling](/docs/styling).

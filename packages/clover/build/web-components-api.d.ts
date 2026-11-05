@@ -195,6 +195,9 @@ export interface CloverRootApi {
   visibleCanvases(): CloverResource[];
   activeCanvas(): CloverResource | null;
   navigation(): CloverNavigation;
+  /** Each AnnotationPage, the Manifest's and those added, with its annotations. */
+  annotationPages(): CloverAnnotationSet[];
+  /** @deprecated `annotationPages()`, the same method named for what it reads. */
   annotationSets(): CloverAnnotationSet[];
   /** Annotations walked as one whole (an AnnotationCollection); null where there is none. */
   annotationCollection(): CloverAnnotationCollection | null;

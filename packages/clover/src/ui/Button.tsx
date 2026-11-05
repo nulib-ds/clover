@@ -19,6 +19,8 @@ interface ButtonProps {
   lang?: string;
   /** It would do nothing now: `aria-disabled`, so it keeps focus and its popover. */
   unavailable?: boolean;
+  /** The side what it opens is on (the panel's toggle): `data-side`, for its corner. */
+  side?: "start" | "end";
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -32,6 +34,7 @@ const Button: React.FC<ButtonProps> = ({
   shortcut,
   lang,
   unavailable,
+  side,
 }) => {
   // Extract button type from id (e.g., "rotateLeft-abc123" → "rotate-left")
   // This ensures data-button is language-independent for CSS selectors
@@ -46,6 +49,7 @@ const Button: React.FC<ButtonProps> = ({
       className={join("clover-canvas-button", className)}
       data-testid="clover-canvas-button"
       data-button={dataButton}
+      data-side={side}
       onClick={onClick}
       aria-disabled={unavailable || undefined}
       aria-expanded={expanded}

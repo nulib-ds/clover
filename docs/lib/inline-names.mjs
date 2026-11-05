@@ -22,6 +22,7 @@ const HOOKS = {
   useSequence: "root.clover.sequence()",
   useManifest: "root.clover.manifest()",
   useStatus: "root.clover.status()",
+  useAnnotationPages: "root.clover.annotationPages()",
   useAnnotationSets: "root.clover.annotationSets()",
   useOneOpen: "root.clover.oneOpen()",
 };

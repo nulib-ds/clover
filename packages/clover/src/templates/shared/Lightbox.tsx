@@ -66,6 +66,18 @@ export interface LightboxProps {
   collapseControls?: "auto" | "always";
   /** The Body's Canvas `options`: its gestures, zoom limits and motion. */
   canvasOptions?: CloverCanvasOptions;
+  /**
+   * The Body's `placeholder`: a Canvas's `placeholderContainer` first (the default), or,
+   * `false`, the Canvas itself at once.
+   */
+  placeholder?: boolean;
+  /**
+   * The current Canvas's label under the Body. Default `true`; `false` leaves it out, as
+   * a single image with its caption beside it on the page needs no second one (Mat,
+   * 2026-11-04: "remove canvas label"). The dialog is named by the Manifest's label all
+   * the same, or the Canvas's where there is none.
+   */
+  caption?: boolean;
   className?: string;
 }
 

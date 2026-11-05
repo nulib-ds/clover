@@ -66,7 +66,7 @@ every template is built on.
 | Prop                   | Type                                 | Default                      | Description                                                                                                                                                    |
 | ---------------------- | ------------------------------------ | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `iiifContent`          | `string \| object`                   | Required                     | What to show: a URL, or a IIIF resource or content state as an object.                                                                                         |
-| `template`             | `Template`                           | `Default`, on demand         | The layout: one from `@nulib/clover/templates`, or your own.                                                                                                   |
+| `template`             | `ViewerTemplate`                     | `Default`, on demand         | The layout: one from `@nulib/clover/templates`, or your own.                                                                                                   |
 | `canvasId`             | `string`                             | —                            | The Canvas to show, controlled: moving asks `onCanvasChange` to change it.                                                                                     |
 | `defaultCanvasId`      | `string`                             | —                            | The Canvas to start on. A content state or the Manifest's `start` still wins.                                                                                  |
 | `onCanvasChange`       | `(canvasId: string) => void`         | —                            | The current Canvas changed.                                                                                                                                    |
@@ -194,8 +194,10 @@ import { Default } from "@nulib/clover/templates";
 <Viewer iiifContent={url} template={Default} />;
 ```
 
-Every template is built only from parts `@nulib/clover` exports. To change one, copy its
-source, in `packages/clover/src/templates/`, into your app. To start from nothing, see
+Every template is built only from the parts `@nulib/clover` exports and the helpers
+`@nulib/clover/templates` exports. To change one, copy its folder from the repository
+and point its imports at those two, as
+[Change a template](/docs/composing/helpers#change-a-template) shows. To start from nothing, see
 [Composing layouts](/docs/composing).
 
 ### Panel layout
@@ -281,7 +283,8 @@ members in the panel's Collection section. Choosing one shows it. `manifestId` w
 
 ### Opening at a place
 
-Give a content state as `iiifContent` to open at a Canvas, framing a region of it
+Give a content state as `iiifContent`, encoded with `encodeContentState`
+([Helpers](/docs/composing/helpers#iiif-resources)), to open at a Canvas, framing a region of it
 (`xywh=`) or seeking to a time (`t=`). This one opens the catalog at Page 4, framed on the
 plate its "Then" tags.
 
@@ -494,7 +497,7 @@ credentials. So does an image served without CORS, which Clover shows as an `<im
 
 Use `renderers` to draw a view with a component of your own: one Clover does not draw, a
 PDF say, or one you want drawn otherwise. See
-[Custom renderer](/docs/composing#custom-renderer).
+[Custom renderer](/docs/composing/customizing#custom-renderer).
 
 ### Styles
 

@@ -159,7 +159,7 @@ function usePlace(
  * and a browser keeps only so many contexts, so an example far off is let go, keeping its
  * height; never one that holds focus.
  */
-function useNear(box: React.RefObject<HTMLElement | null>) {
+export function useNear(box: React.RefObject<HTMLElement | null>) {
   const [near, setNear] = useState(false);
   useEffect(() => {
     const element = box.current;

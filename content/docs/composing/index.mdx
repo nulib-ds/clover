@@ -1,0 +1,76 @@
+---
+title: Composing layouts
+description: "Compose a layout from Clover's components inside one Root, live: move them, change their props, and copy the code."
+asIndexPage: true
+---
+
+import { ComposeExample } from "docs/components/Clover4/ComposeExample";
+import { MovedSections } from "docs/components/Clover4/MovedSections";
+import { Related, RelatedLink } from "docs/components/Related";
+
+<MovedSections />
+
+# Composing layouts
+
+<div className="docs-lede">
+  Clover is designed around `Root`, which loads and reads a IIIF resource, then
+  orchestrates its information across the many Clover components placed within
+  it.
+</div>
+
+## Root layout
+
+Design your page layout with your own markup, as you would for any other project, and
+simply drop Clover's components where they fit your vision. Try it here: move the components in
+the code, or change a value, and the example follows.
+
+<ComposeExample />
+
+## `Root`
+
+| Prop                   | Type                              | Description                                                                                                                |
+| ---------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `iiifContent`          | `string \| object`                | A URL, a IIIF resource (Presentation 2, 3 or 4), or a content state.                                                       |
+| `canvasId`             | `string`                          | The Canvas to show, controlled. Moving calls `onCanvasChange` instead.                                                     |
+| `defaultCanvasId`      | `string`                          | The Canvas to start on. A content state, then the Manifest's `start`, win over it.                                         |
+| `onCanvasChange`       | `(canvasId: string) => void`      | The current Canvas changed.                                                                                                |
+| `onStatusChange`       | `(status, error) => void`         | `"loading"`, `"ready"` or `"error"`.                                                                                       |
+| `request`              | `{ credentials, headers, fetch }` | Used for every request any component makes.                                                                                |
+| `language`             | `string`                          | The language to read IIIF text in. The page's, then the browser's, by default.                                             |
+| `highContrast`         | `boolean`                         | Clover's higher-contrast mode, for every component inside. On wherever the system asks for more contrast. Default `false`. |
+| `annotations`          | URL, object or list               | AnnotationPages or AnnotationCollections to show beside the Manifest's own.                                                |
+| `manifestId`           | `string`                          | In a Collection, the member to show, controlled.                                                                           |
+| `defaultManifestId`    | `string`                          | In a Collection, the member to open first.                                                                                 |
+| `onManifestChange`     | `(manifestId) => void`            | In a Collection, another member opened, or was asked for.                                                                  |
+| `searchQuery`          | `string`                          | A Content Search to run once the Manifest is shown, and whenever it changes.                                               |
+| `onContentStateChange` | `({ json, encoded }) => void`     | The current view, as a content state, as it changes.                                                                       |
+| `renderers`            | list                              | Components that draw views Clover does not; see [Custom renderer](/docs/composing/customizing#custom-renderer).            |
+| `as`                   | element type                      | Default `div`.                                                                                                             |
+
+The Viewer and every template take these props and pass them to their `Root`. See
+[what `iiifContent` can be](/docs/viewer#what-iiifcontent-can-be).
+
+## Next
+
+<Related>
+  <RelatedLink
+    href="/docs/composing/glossary"
+    title="Glossary"
+    note="Every component, core and UI, and every helper."
+  />
+  <RelatedLink
+    href="/docs/composing/customizing"
+    title="Customizing"
+    note="The Panel, panes, templates, components of your own and languages."
+  />
+  <RelatedLink
+    href="/docs/composing/helpers"
+    title="Helpers"
+    note="Hooks, and functions that read IIIF resources."
+  />
+  <RelatedLink
+    href="/docs/styling"
+    title="Styling"
+    note="Stylesheets, sizes, colors, classes and states."
+  />
+</Related>

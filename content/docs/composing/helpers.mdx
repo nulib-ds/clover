@@ -1,0 +1,1478 @@
+---
+title: Helpers
+description: "The helpers Clover is built with, yours to use: functions for text, thumbnails, views, maps and content states, its hooks, and what templates share."
+---
+
+import { Example } from "docs/components/Clover4/ViewerDocs";
+import {
+  ActiveCanvasDemo,
+  AnnotationCollectionDemo,
+  AnnotationPagesDemo,
+  CloverDemo,
+  CloverSelectorDemo,
+  FilmAt42,
+  ItemsDemo,
+  LangOfDemo,
+  LightboxDemo,
+  LocalizedDemo,
+  ManifestDemo,
+  MyViewerDemo,
+  NavigationDemo,
+  PanelSectionsDemo,
+  SequenceDemo,
+  StatusDemo,
+  TDemo,
+  UniqueIdDemo,
+  VisibleCanvasesDemo,
+} from "docs/components/Clover4/HelperExamples";
+
+# Helpers
+
+<div className="docs-lede">
+  Clover's helpers are yours too. Functions read IIIF resources, hooks read the
+  nearest `Root`, and the template helpers build a template of your own.
+</div>
+
+## IIIF resources
+
+These come from `@nulib/clover`, for code you bundle. The web components' script from a
+CDN leaves them out.
+
+| Helper                                    | Description                                                                                                                                                                                                                                           |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toPresentation4(resource)`               | Upgrades a Manifest, Collection, Canvas, Timeline or Scene from an earlier Presentation version to Presentation 4, the version Clover works in throughout: a Root upgrades what it loads the same way. A Presentation 4 resource comes back as it is. |
+| `readAs(format, value)`                   | Tells you whether a value, such as a `summary` or an annotation's `TextualBody`, is `"html"`, `"markdown"` or `"plain"`. It reads the `format` media type, or IIIF's rule when there's none.                                                          |
+| `toPlainText(html)`                       | Turns a IIIF HTML value into plain text, for an `alt` or an `aria-label`, where markup can't go.                                                                                                                                                      |
+| `localize(value, language)`               | Picks the text of a IIIF language map, such as a `label`, in `language`, or the closest it has. Returns `{ text, lang }`, several values joined with commas.                                                                                          |
+| `thumbnailSource(resource)`               | Finds the thumbnail of a Manifest, Collection or Canvas: its own `thumbnail`, or else the first image a Canvas paints. Returns `null` when it has neither.                                                                                            |
+| `stillSource(canvas)`                     | Finds a picture to stand in for a Canvas at the size it's drawn: the first image it paints, else its placeholder's or accompanying Canvas's, and only then its own `thumbnail`, which is often small.                                                 |
+| `regionSource(canvas, { x, y, w, h })`    | Finds an image of one region of a Canvas, in its own coordinates, such as an annotation's `xywh`. Returns `null` when no IIIF Image service is painted there.                                                                                         |
+| `resolveThumbnail(source, size, request)` | Turns what `thumbnailSource` or `regionSource` found into an image URL, about `size` pixels on its longer side (200 if you leave it out). It asks only for sizes the image's `info.json` allows.                                                      |
+| `buildContentState(view)`                 | Writes a [content state](/docs/content-state) annotation that targets a Canvas in a Manifest, and a `region` or `time` on it if you give one. Returns it as `json` and `encoded`.                                                                     |
+| `encodeContentState(json)`                | Encodes a content state annotation you wrote yourself, for a link's `iiif-content` parameter.                                                                                                                                                         |
+| `decodeContentState(value)`               | Decodes an `iiif-content` value back into its annotation. Returns `null` when it isn't one.                                                                                                                                                           |
+| `groupViews(canvases, behavior)`          | Groups a Manifest's Canvases into the views the Viewer shows: one Canvas each, two for a spread in a `paged` Manifest (the first alone, as a cover), or all of them for `continuous`. Each view is a list of the Canvases' indexes.                   |
+| `resolveBehavior(behavior)`               | Reads a `behavior` for the value that lays out a sequence: `individuals` (the default), `paged`, `continuous` or `unordered`.                                                                                                                         |
+| `resolveDirection(viewingDirection)`      | Reads a `viewingDirection`: `left-to-right` (the default), `right-to-left`, `top-to-bottom` or `bottom-to-top`.                                                                                                                                       |
+
+### Content State example
+
+A content state annotation that starts _Lunchroom Manners_
+([recipe 0219](https://iiif.io/api/cookbook/recipe/0219-using-caption-file/)) 42 seconds
+in. The same `encoded` value works in a link's `iiif-content`.
+
+<Example>
+<FilmAt42 />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+const { encoded } = Clover.buildContentState({
+  manifestId:
+    "https://iiif.io/api/cookbook/recipe/0219-using-caption-file/manifest.json",
+  canvasId:
+    "https://iiif.io/api/cookbook/recipe/0219-using-caption-file/canvas",
+  time: 42,
+});
+
+<Clover.Root iiifContent={encoded}>
+  <Clover.Body />
+</Clover.Root>;
+```
+
+```html twin
+<clover-root id="film">
+  <clover-body></clover-body>
+</clover-root>
+
+<script type="module">
+  import "@nulib/clover/web-components";
+  import { buildContentState } from "@nulib/clover";
+
+  const { encoded } = buildContentState({
+    manifestId:
+      "https://iiif.io/api/cookbook/recipe/0219-using-caption-file/manifest.json",
+    canvasId:
+      "https://iiif.io/api/cookbook/recipe/0219-using-caption-file/canvas",
+    time: 42,
+  });
+  document.getElementById("film").setAttribute("iiif-content", encoded);
+</script>
+```
+
+</Example>
+
+## Maps
+
+These read where a IIIF resource is, for a [Map](/docs/map) or a map of your own. They
+come from `@nulib/clover/map` and `@nulib/clover`.
+
+| Helper                                       | Description                                                                                                                                                                                    |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `hasMapData(manifest, collection)`           | Tells you whether a Manifest, or the Collection it's in, has anything to put on a Map: a `navPlace`, a GeoJSON annotation body or a georeferencing annotation.                                 |
+| `navPlaceOf(manifest, collection, language)` | Gathers every `navPlace` of the Collection, the Manifest, its Canvases and their loaded annotations into one GeoJSON FeatureCollection, each place named by what it belongs to, in `language`. |
+| `georeferencesOf(manifest)`                  | Gathers the georeferenced images of the Manifest's Canvases, from their loaded annotation pages.                                                                                               |
+| `readGeoreference(annotation, canvas)`       | Reads one Georeference Extension annotation as an image to lay over the Map: its control points, extent, mask and image. Returns `null` when it can't be drawn.                                |
+| `boundsOf(features, georeferences)`          | The `[[west, south], [east, north]]` box that holds places and georeferenced images. Returns `null` for none.                                                                                  |
+| `cornersOf(georeference)`                    | Where a georeferenced image's corners land, as `[longitude, latitude]`: top left, top right, bottom right, bottom left.                                                                        |
+| `affineTransform(points)`                    | The transform that best fits a georeference's control points, from image pixels to `[longitude, latitude]`. Returns `null` when the points lie on one line.                                    |
+| `setMapWorkerUrl(url)`                       | Serves MapLibre's worker from an address of your own ([Map](/docs/map#maplibres-worker)).                                                                                                      |
+
+### Map example
+
+These read Northwestern's _Map of the Township of Evanston, Cook County, Illinois_. Each
+result is in the comment under it, rounded.
+
+```js
+import {
+  boundsOf,
+  cornersOf,
+  georeferencesOf,
+  hasMapData,
+  navPlaceOf,
+  toPresentation4,
+} from "@nulib/clover";
+
+const url =
+  "https://clover.iiif.library.northwestern.edu/mocks/georeference/manifest.json";
+const manifest = await toPresentation4(await (await fetch(url)).json());
+
+hasMapData(manifest);
+// true: it has something to put on a map
+
+const places = navPlaceOf(manifest);
+// A FeatureCollection with one place, "Evanston, Illinois",
+// a Point at [-87.6877, 42.0451]
+
+const [georeference] = georeferencesOf(manifest);
+// The scanned map: its control points, width, height, label and image
+
+cornersOf(georeference);
+// Where its corners land, as [longitude, latitude]:
+// [
+//   [-87.7177, 42.0777], top left
+//   [-87.6241, 42.0754], top right
+//   [-87.6272, 41.9877], bottom right
+//   [-87.7208, 41.99], bottom left
+// ]
+
+boundsOf(places.features, [georeference]);
+// The box around them all, [[west, south], [east, north]]:
+// [[-87.7208, 41.9877], [-87.6241, 42.0777]]
+```
+
+## Hooks
+
+These come from `@nulib/clover`, for components of your own inside a `Root`. Each
+re-renders only when what it reads changes.
+
+| Hook                                 | Returns                                                                                                                                                        |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useStatus()`                        | `{ status, error }`                                                                                                                                            |
+| `useManifest()`                      | The Manifest, in Presentation 4.                                                                                                                               |
+| `useSequence()`                      | `{ canvases, views, direction }`                                                                                                                               |
+| `useVisibleCanvases()`               | The Canvases of the current view.                                                                                                                              |
+| `useActiveCanvas()`                  | The current Canvas.                                                                                                                                            |
+| `useNavigation()`                    | `{ position, total, hasPrevious, hasNext, previous, next, first, last, goTo }`                                                                                 |
+| `useAnnotationCollection()`          | Annotations walked as one whole, the content's AnnotationPage or the Manifest's AnnotationCollection: `{ id, type, label, total, pages, entries }`, or `null`. |
+| `useLocalized(value)`                | `{ text, lang }` for a IIIF language map, in the Root's language.                                                                                              |
+| `useT()`                             | `t(key, values)`: the predefined strings, in Clover's interface language.                                                                                      |
+| `useLangOf()`                        | `langOf(key)`: a string's `lang` where it is not the page's language.                                                                                          |
+| `usePanelSections(names?)`           | Which of a `Panel`'s default sections this resource has data for, in the panel's order, narrowed to `names`: none of them, and a `Panel` would draw nothing.   |
+| `useAnnotationPages()`               | Each AnnotationPage the Manifest's Canvases carry, and each the `Root`'s `annotations` adds: its `id`, `label` and annotations (`entries`).                    |
+| `useCloverSelector(select, isEqual)` | Any value from the Root's state, by `select`, re-rendering only when it changes. `isEqual` compares it, where `select` returns a new object each time.         |
+| `useUniqueId()`                      | An id unique on the page, as Clover uses wherever it needs one.                                                                                                |
+
+`useClover()` gives the Root's state and actions, for components that act rather than
+read.
+
+Each example below is a component of its own in a Root, under its Body, most over the
+IIIF Cookbook's book (recipe 0009). Its comments show the first view.
+
+<div data-code-flavor="web-components">
+
+As web components, the root's `clover` has a method for each hook but `usePanelSections`
+and `useUniqueId`, and `subscribe` hears of every change.
+
+</div>
+
+### `useStatus()`
+
+Whether the Root is loading, ready or has failed.
+
+<Example>
+<StatusDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function Status() {
+  const { status, error } = Clover.useStatus();
+  // status: "ready"
+  // error: null
+
+  return <p>{error ? error.message : status}</p>;
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <Status />
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <p id="status"></p>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("status");
+  // { status: "ready", error: null }
+  const show = () => (shown.textContent = root.clover.status().status);
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+</Example>
+
+### `useManifest()`
+
+The Manifest, in Presentation 4.
+
+<Example>
+<ManifestDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function CanvasCount() {
+  const manifest = Clover.useManifest();
+  // manifest.id: "https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+  // manifest.label: { en: ["Simple Manifest - Book"] }
+  // manifest.items.length: 5
+
+  return <p>{manifest?.items.length} Canvases</p>;
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <CanvasCount />
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <p id="canvases"></p>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("canvases");
+  // The Manifest, in Presentation 4: its items.length is 5.
+  const show = () =>
+    (shown.textContent = `${root.clover.manifest()?.items.length} Canvases`);
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+</Example>
+
+### `useSequence()`
+
+The Canvases, how they group into views, and the viewing direction.
+
+<Example>
+<SequenceDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function Views() {
+  const { canvases, views, direction } = Clover.useSequence();
+  // canvases.length: 5
+  // views: [[0], [1, 2], [3, 4]]
+  // direction: "left-to-right"
+
+  return (
+    <p>
+      {canvases.length} Canvases in {views.length} views, {direction}
+    </p>
+  );
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <Views />
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <p id="views"></p>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("views");
+  // { canvases, views: [[0], [1, 2], [3, 4]], direction: "left-to-right" }
+  const show = () => {
+    const { canvases, views, direction } = root.clover.sequence();
+    shown.textContent = `${canvases.length} Canvases in ${views.length} views, ${direction}`;
+  };
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+</Example>
+
+### `useVisibleCanvases()`
+
+The Canvases in view. Step to the next view, a spread, and it holds two.
+
+<Example>
+<VisibleCanvasesDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function InView() {
+  const canvases = Clover.useVisibleCanvases();
+  // canvases.length: 1
+  // canvases[0].id: "https://iiif.io/api/cookbook/recipe/0009-book-1/canvas/p1"
+
+  return <p>{canvases.length} in view</p>;
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--clover-space-s)",
+    }}
+  >
+    <Clover.Previous />
+    <Clover.Next />
+    <InView />
+  </div>
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <div style="display: flex; align-items: center; gap: var(--clover-space-s)">
+    <clover-previous></clover-previous>
+    <clover-next></clover-next>
+    <p id="in-view"></p>
+  </div>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("in-view");
+  // The first view's one Canvas, then a spread's two.
+  const show = () =>
+    (shown.textContent = `${root.clover.visibleCanvases().length} in view`);
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+</Example>
+
+### `useActiveCanvas()`
+
+The current Canvas.
+
+<Example>
+<ActiveCanvasDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function CanvasSize() {
+  const canvas = Clover.useActiveCanvas();
+  // canvas.id: "https://iiif.io/api/cookbook/recipe/0009-book-1/canvas/p1"
+  // canvas.label: { en: ["Blank page"] }
+  // canvas.width: 3204
+  // canvas.height: 4613
+
+  return (
+    <p>
+      {canvas?.width} × {canvas?.height}
+    </p>
+  );
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--clover-space-s)",
+    }}
+  >
+    <Clover.Previous />
+    <Clover.Next />
+    <CanvasSize />
+  </div>
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <div style="display: flex; align-items: center; gap: var(--clover-space-s)">
+    <clover-previous></clover-previous>
+    <clover-next></clover-next>
+    <p id="size"></p>
+  </div>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("size");
+  // { id, label: { en: ["Blank page"] }, width: 3204, height: 4613, … }
+  const show = () => {
+    const canvas = root.clover.activeCanvas();
+    shown.textContent = `${canvas?.width} × ${canvas?.height}`;
+  };
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+</Example>
+
+### `useNavigation()`
+
+Where the view is among the others, and the steps to them.
+
+<Example>
+<NavigationDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function Position() {
+  const { position, total } = Clover.useNavigation();
+  // position: 0
+  // total: 3
+  // hasPrevious: false
+  // hasNext: true
+  // previous(), next(), first(), last() and goTo(index) move between the views.
+
+  return (
+    <p>
+      {position + 1} / {total}
+    </p>
+  );
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--clover-space-s)",
+    }}
+  >
+    <Clover.Previous />
+    <Clover.Next />
+    <Position />
+  </div>
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <div style="display: flex; align-items: center; gap: var(--clover-space-s)">
+    <clover-previous></clover-previous>
+    <clover-next></clover-next>
+    <p id="position"></p>
+  </div>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("position");
+  // { position: 0, total: 3, hasPrevious: false, hasNext: true, … }
+  const show = () => {
+    const { position, total } = root.clover.navigation();
+    shown.textContent = `${position + 1} / ${total}`;
+  };
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+</Example>
+
+### `useAnnotationCollection()`
+
+The resource's annotations, walked as one whole. The IIIF Cookbook's _Berliner Tageblatt_ (recipe 0309) gathers its pages' annotations in one AnnotationCollection.
+
+<Example>
+<AnnotationCollectionDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function Collection() {
+  const collection = Clover.useAnnotationCollection();
+  // collection.type: "AnnotationCollection"
+  // collection.label: { en: ["Newspaper layout markup"] }
+  // collection.total: 8
+  // collection.pages.length: 2
+  // null where there is none.
+
+  return (
+    <p>
+      {collection
+        ? `${collection.total} annotations in ${collection.pages.length} AnnotationPages`
+        : "None"}
+    </p>
+  );
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0309-annotation-collection/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <Collection />
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0309-annotation-collection/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <p id="collection"></p>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("collection");
+  // { type: "AnnotationCollection", label, total: 8, pages, entries }, or null.
+  const show = () => {
+    const collection = root.clover.annotationCollection();
+    shown.textContent = collection
+      ? `${collection.total} annotations in ${collection.pages.length} AnnotationPages`
+      : "None";
+  };
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+</Example>
+
+### `useLocalized(value)`
+
+A language map's text in the defined language, and its `lang`. _Whistler's Mother_ (IIIF Cookbook recipe 0006) has its label in English and French.
+
+<Example>
+<LocalizedDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function Title() {
+  const manifest = Clover.useManifest();
+  const { text, lang } = Clover.useLocalized(manifest?.label);
+  // label: { en: ["Whistler's Mother"], fr: ["La Mère de Whistler"] }
+  // text: "Whistler's Mother"
+  // lang: "en"
+
+  return <p lang={lang}>{text}</p>;
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0006-text-language/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <Title />
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0006-text-language/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <p id="title"></p>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("title");
+  // label: { en: ["Whistler's Mother"], fr: ["La Mère de Whistler"] }
+  // { text: "Whistler's Mother", lang: "en" }
+  const show = () => {
+    const { text, lang } = root.clover.localize(root.clover.manifest()?.label);
+    shown.textContent = text;
+    if (lang) shown.lang = lang;
+  };
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+</Example>
+
+### `useT()`
+
+Clover's predefined strings, in the interface language.
+
+<Example>
+<TDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function ZoomInName() {
+  const t = Clover.useT();
+  // t("imageZoomIn"): "Zoom in"
+
+  return <p>{t("imageZoomIn")}</p>;
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <ZoomInName />
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <p id="zoom-in"></p>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("zoom-in");
+  // "Zoom in"
+  const show = () => (shown.textContent = root.clover.t("imageZoomIn"));
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+</Example>
+
+### `useLangOf()`
+
+A predefined string's `lang`, where it differs from the page's.
+
+<Example>
+<LangOfDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function ZoomInLang() {
+  const langOf = Clover.useLangOf();
+  // langOf("imageZoomIn"): undefined, as Clover speaks the page's language here.
+
+  return <p>{langOf("imageZoomIn") ?? "The page's language"}</p>;
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <ZoomInLang />
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <p id="zoom-in-lang"></p>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("zoom-in-lang");
+  // undefined, as Clover speaks the page's language here.
+  const show = () =>
+    (shown.textContent =
+      root.clover.langOf("imageZoomIn") ?? "The page's language");
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+</Example>
+
+### `usePanelSections()`
+
+Which of the Panel's default sections the resource has data for, so a layout draws a Panel only where it has something to show. The IIIF Cookbook's Ethiopic Ms 10 (recipe 0024) has a table of contents and no Content Search.
+
+<Example>
+<PanelSectionsDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function ContentsPanel() {
+  const sections = Clover.usePanelSections(["contents", "search"]);
+  // ["contents"]: this book has a table of contents, and no Content Search.
+  // []: a resource with neither, and no Panel is drawn.
+
+  return sections.length ? <Clover.Panel sections={sections} /> : null;
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <ContentsPanel />
+</Clover.Root>;
+```
+
+</Example>
+
+### `useAnnotationPages()`
+
+Each AnnotationPage, read with its annotations. The IIIF Cookbook's photograph of Göttingen (recipe 0021) has one page, holding a tag.
+
+<Example>
+<AnnotationPagesDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function AnnotationPages() {
+  const pages = Clover.useAnnotationPages();
+  const annotations = pages.reduce((sum, page) => sum + page.entries.length, 0);
+  // pages.length: 1
+  // pages[0].source: "manifest"
+  // annotations: 1
+
+  return (
+    <p>
+      AnnotationPages: {pages.length}. Annotations: {annotations}.
+    </p>
+  );
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0021-tagging/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <AnnotationPages />
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0021-tagging/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <p id="pages"></p>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("pages");
+  // One AnnotationPage, the Manifest's, holding one tag.
+  const show = () => {
+    const pages = root.clover.annotationPages();
+    const annotations = pages.reduce(
+      (sum, page) => sum + page.entries.length,
+      0,
+    );
+    shown.textContent = `AnnotationPages: ${pages.length}. Annotations: ${annotations}.`;
+  };
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+</Example>
+
+### `useCloverSelector(select)`
+
+Any value from the Root's state, here the current Canvas's id.
+
+<Example>
+<CloverSelectorDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function CanvasId() {
+  const canvasId = Clover.useCloverSelector((state) => state.canvasId);
+  // "https://iiif.io/api/cookbook/recipe/0009-book-1/canvas/p1"
+
+  return <p>{canvasId}</p>;
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--clover-space-s)",
+    }}
+  >
+    <Clover.Previous />
+    <Clover.Next />
+    <CanvasId />
+  </div>
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <div style="display: flex; align-items: center; gap: var(--clover-space-s)">
+    <clover-previous></clover-previous>
+    <clover-next></clover-next>
+    <p id="canvas-id"></p>
+  </div>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  const shown = document.getElementById("canvas-id");
+  // "https://iiif.io/api/cookbook/recipe/0009-book-1/canvas/p1"
+  const show = () => (shown.textContent = root.clover.state.canvasId);
+  const start = () => {
+    show();
+    root.clover.subscribe(show);
+  };
+  if (root.clover) start();
+  else root.addEventListener("clover-ready", start, { once: true });
+</script>
+```
+
+</Example>
+
+### `useUniqueId()`
+
+An id React generates for you, which no other element on the page has.
+
+<Example>
+<UniqueIdDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function UniqueId() {
+  const id = Clover.useUniqueId();
+  // "_r_0_", or another id no other element on the page has.
+
+  return <p id={id}>{id}</p>;
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <UniqueId />
+</Clover.Root>;
+```
+
+</Example>
+
+### `useClover()`
+
+The Root's actions. Step ahead, then Reset goes back to the first view.
+
+<Example>
+<CloverDemo />
+
+```jsx
+import * as Clover from "@nulib/clover";
+
+function ResetButton() {
+  const { clover } = Clover.useClover();
+  // clover.first(), clover.next(), clover.goTo(canvasId), clover.search(query)…
+
+  return (
+    <p>
+      <button
+        type="button"
+        onClick={() => clover.first()}
+        style={{
+          color: "var(--clover-color-accent-text)",
+          textDecoration: "underline",
+          cursor: "pointer",
+        }}
+      >
+        Reset
+      </button>
+    </p>
+  );
+}
+
+<Clover.Root iiifContent="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json">
+  <Clover.Body style={{ height: "12rem" }} />
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "var(--clover-space-s)",
+    }}
+  >
+    <Clover.Previous />
+    <Clover.Next />
+    <ResetButton />
+  </div>
+</Clover.Root>;
+```
+
+```html twin
+<script type="module">
+  import "@nulib/clover/web-components";
+</script>
+
+<clover-root
+  iiif-content="https://iiif.io/api/cookbook/recipe/0009-book-1/manifest.json"
+>
+  <clover-body style="height: 12rem"></clover-body>
+  <div style="display: flex; align-items: center; gap: var(--clover-space-s)">
+    <clover-previous></clover-previous>
+    <clover-next></clover-next>
+    <p><button type="button" id="reset">Reset</button></p>
+  </div>
+</clover-root>
+
+<script type="module">
+  const root = document.querySelector("clover-root");
+  document
+    .getElementById("reset")
+    .addEventListener("click", () => root.clover.first());
+</script>
+```
+
+</Example>
+
+## Templates
+
+<div data-code-flavor="react">
+
+Clover's templates are built from the components in `@nulib/clover` and a few helpers
+from `@nulib/clover/templates`. Your template can use them too.
+
+### Change a template
+
+The same four steps work for Default, Document and Gallery:
+
+1. On GitHub, open the [tag](https://github.com/nulib-ds/clover/tags) for the version you
+   have installed, and copy the template's folder from `packages/clover/src/templates/`
+   into your app.
+2. In the files you copied, change `../../parts` to `@nulib/clover`, and each
+   `../shared/…` to `@nulib/clover/templates`.
+3. Rename the template's component (`Default` to `MyViewer`, say), then change what you like.
+4. Import its CSS after `@nulib/clover/styles.css`, and pass it to the Viewer as its
+   `template`.
+
+```jsx react
+import Viewer from "@nulib/clover";
+import "@nulib/clover/styles.css";
+import { MyViewer } from "./MyViewer";
+import "./MyViewer.css";
+
+<Viewer iiifContent={url} template={MyViewer} />;
+```
+
+Your CSS wins over Clover's. A copy of Document or Gallery also needs
+`@nulib/clover/templates.css`, for the Lightbox.
+
+### Panel
+
+Every template places its Panel beside the Body where there is room, and over it where
+there isn't. `usePanelPane` keeps its state and `PanelPane` draws it, as the
+[Custom Panel example](#custom-panel-example) shows.
+
+#### `usePanelPane()` options
+
+```js
+import { usePanelPane } from "@nulib/clover/templates";
+```
+
+Call `usePanelPane` in your template with these options (`PanelPaneOptions`):
+
+| Option        | Type                                     | Default            | Description                                                                                                                                                                                                        |
+| ------------- | ---------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`          | `string`                                 | Required           | The Panel's `id`, which its PanelToggle's `aria-controls` names.                                                                                                                                                   |
+| `beside`      | `boolean \| undefined`                   | Required           | Whether there's room for the Panel beside the Body. Pass `useWideEnough(split, BESIDE_REM)`. Until it's measured, the Panel is beside the Body.                                                                    |
+| `defaultOpen` | `boolean`                                | Required           | Whether the Panel starts open beside the Body. Over the Body, it always starts closed.                                                                                                                             |
+| `followFocus` | `ReturnType<typeof useFollowFocus>`      | Required           | Pass `useFollowFocus()`, one per template, so focus follows the PanelToggle as it moves.                                                                                                                           |
+| `side`        | `"start" \| "end"`                       | `"end"`            | The Body's side the Panel sits on, and slides in from when it's over the Body.                                                                                                                                     |
+| `sections`    | `PanelSection[]`                         | Every section      | Which of the Panel's sections it may offer. With none that the Manifest has data for, there's no Panel and no PanelToggle.                                                                                         |
+| `body`        | `() => HTMLElement \| null \| undefined` | —                  | Finds the Body, so the PanelToggle on the SplitHandle lines up with the Body's top.                                                                                                                                |
+| `panel`       | `ComponentType<PanelProps>`              | Loaded when needed | `Clover.Panel`, to draw the Panel at once, on the server too. Without it, the Panel's code loads right away when it starts open, and once its PanelToggle is pointed at, focused or pressed when it starts closed. |
+
+#### `usePanelPane()` returns
+
+It returns the Panel's state (`PanelPaneState`). A template uses these:
+
+| Name         | Type                      | Description                                                                                                                                                                               |
+| ------------ | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open`       | `boolean`                 | Whether the Panel is open.                                                                                                                                                                |
+| `over`       | `boolean`                 | Whether the Panel is over the Body, as there's no room beside it.                                                                                                                         |
+| `docked`     | `boolean`                 | Whether the Panel is open beside the Body. Its PanelToggle then sits on the SplitHandle.                                                                                                  |
+| `toggle`     | `ReactElement`            | The PanelToggle. Put it in the Body while the Panel isn't open beside it: `{!pane.docked && pane.toggle}`.                                                                                |
+| `splitProps` | `object`                  | Spread on the Split. It tells the Split where the Panel is, closes the Panel with Escape while it's over the Body, and starts loading the Panel's code as its PanelToggle is reached for. |
+| `setOpen`    | `(open: boolean) => void` | Opens or closes the Panel.                                                                                                                                                                |
+| `close`      | `() => void`              | Closes the Panel.                                                                                                                                                                         |
+
+Give the Split the class `clover-template-panes`, which styles the Panel over the Body.
+
+#### `PanelPane` props
+
+```js
+import { PanelPane } from "@nulib/clover/templates";
+```
+
+`PanelPane` draws the Panel in a SplitPane of its own. Place it after your main
+SplitPane, or before it on the `"start"` side:
+
+| Prop        | Type             | Default  | Description                                                                                                                                                                 |
+| ----------- | ---------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pane`      | `PanelPaneState` | Required | What `usePanelPane` returns.                                                                                                                                                |
+| `className` | `string`         | —        | A class for the Panel's SplitPane, beside `clover-template-panel`.                                                                                                          |
+| …           |                  |          | Any of the [Panel's props](/docs/panel), such as `layout`, `headingLevel`, `sections` or `Clover.Tab` children. Not `onClose` or `closeOnEscape`: `PanelPane` handles them. |
+
+### Custom Panel example
+
+A template of your own: the Manifest's Label over a Panel on the start side, beside a
+Body over a Map. Northwestern's slide of a Chicago bus gives the Map its point.
+
+<Example>
+<MyViewerDemo />
+
+```jsx react {14-21,35-47}
+import { useRef } from "react";
+import Viewer, * as Clover from "@nulib/clover";
+import {
+  BESIDE_REM,
+  PAGE_MIN,
+  PanelPane,
+  useFollowFocus,
+  usePanelPane,
+  useWideEnough,
+} from "@nulib/clover/templates";
+
+export function MyCustomViewer({ headingLevel = 2, ...props }) {
+  const split = useRef(null);
+  const pane = usePanelPane({
+    id: "my-panel",
+    side: "start",
+    beside: useWideEnough(split, BESIDE_REM),
+    defaultOpen: true,
+    followFocus: useFollowFocus(),
+    sections: ["about"],
+  });
+
+  return (
+    <Clover.Root {...props}>
+      <Clover.Label
+        as={`h${headingLevel}`}
+        style={{ padding: "var(--clover-inset)" }}
+      />
+      <Clover.Split
+        ref={split}
+        className="clover-template-panes"
+        style={{ height: "40rem" }}
+        {...pane.splitProps}
+      >
+        <PanelPane
+          pane={pane}
+          layout="accordion"
+          headingLevel={headingLevel + 1}
+        >
+          <Clover.Tab value="about" label="About">
+            <Clover.About
+              label={false}
+              thumbnail={false}
+              headingLevel={headingLevel + 2}
+            />
+          </Clover.Tab>
+        </PanelPane>
+        <Clover.SplitPane
+          min={pane.over ? undefined : PAGE_MIN}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--clover-space-s)",
+          }}
+        >
+          <Clover.Body controls={{ map: false }} style={{ flex: 1 }}>
+            {!pane.docked && pane.toggle}
+          </Clover.Body>
+          <Clover.Map zoom={15} style={{ "--clover-map-height": "18rem" }} />
+        </Clover.SplitPane>
+      </Clover.Split>
+    </Clover.Root>
+  );
+}
+
+<Viewer
+  iiifContent="https://clover.iiif.library.northwestern.edu/mocks/navplace/manifest.json"
+  template={MyCustomViewer}
+  headingLevel={4}
+/>;
+```
+
+</Example>
+
+### Room beside the Body
+
+| Helper                    | Description                                                                                                                                                                |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useWideEnough(ref, rem)` | Tells you whether the element `ref` points to is at least `rem` wide, and checks again as it resizes. `undefined` until it's measured.                                     |
+| `BESIDE_REM`              | How wide, in rem, a template must be for the Body and the Panel side by side: `PAGE_MIN`, `PANEL_MIN` and the SplitHandle. Any narrower, and the Panel goes over the Body. |
+| `PAGE_MIN`, `PANEL_MIN`   | The narrowest the SplitHandle may drag the Body and the Panel, as CSS lengths.                                                                                             |
+
+#### `useWideEnough()` example
+
+Each result is in the comment under it.
+
+```jsx react
+import { useRef } from "react";
+import {
+  BESIDE_REM,
+  PAGE_MIN,
+  PANEL_MIN,
+  useWideEnough,
+} from "@nulib/clover/templates";
+
+BESIDE_REM;
+// 31: PAGE_MIN, PANEL_MIN and the SplitHandle between them, in rem
+
+PAGE_MIN;
+// "16rem"
+
+PANEL_MIN;
+// "14rem"
+
+function Room() {
+  const box = useRef(null);
+
+  const wide = useWideEnough(box, BESIDE_REM);
+  // undefined until the box is measured, then true or false as it resizes
+
+  return (
+    <div ref={box}>
+      {wide === false
+        ? "The Panel goes over the Body."
+        : "The Panel fits beside the Body."}
+    </div>
+  );
+}
+```
+
+### More SplitPanes
+
+| Helper               | Description                                                                                                                                                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useDrawer(options)` | Gives a SplitPane of your own the Panel's behavior, beside the Body or over it, as Document's thumbnails have. Give it an `id`, `beside`, `defaultOpen`, `followFocus`, and the `side` it slides in from (`"start"` or `"end"`). |
+| `useFollowFocus()`   | Moves focus with a button that's drawn somewhere new, as the PanelToggle is when the Panel opens beside the Body. Make one per template, and pass it to every `usePanelPane` and `useDrawer`.                                    |
+| `preloadDrag()`      | Starts loading the code that lets a touch drag a SplitPane closed while it's over the Body. Call it when the button that opens one is pointed at or focused.                                                                     |
+| `DrawerOptions`      | The type of what `useDrawer` takes.                                                                                                                                                                                              |
+
+#### `useDrawer()` example
+
+Items in a SplitPane at the Body's start, with a button that collapses and expands it.
+
+<Example>
+<ItemsDemo />
+
+```jsx react
+import { useRef } from "react";
+import Viewer, * as Clover from "@nulib/clover";
+import {
+  preloadDrag,
+  useDrawer,
+  useFollowFocus,
+  useWideEnough,
+} from "@nulib/clover/templates";
+
+export function MyItemsViewer(props) {
+  const split = useRef(null);
+
+  const drawer = useDrawer({
+    id: "my-items",
+    beside: useWideEnough(split, 30),
+    defaultOpen: true,
+    side: "start",
+    followFocus: useFollowFocus(),
+  });
+  // { open, over, shown, opened, setOpen, close, pane, onKeyDown, scrim }
+
+  return (
+    <Clover.Root {...props}>
+      <button
+        type="button"
+        aria-controls="my-items"
+        onPointerOver={preloadDrag}
+        onFocus={preloadDrag}
+        onClick={() => drawer.setOpen(!drawer.open)}
+        style={{
+          marginBlockEnd: "var(--clover-space-s)",
+          color: "var(--clover-color-accent-text)",
+          textDecoration: "underline",
+          cursor: "pointer",
+        }}
+      >
+        {drawer.open ? "Collapse drawer" : "Expand drawer"}
+      </button>
+
+      <Clover.Split
+        ref={split}
+        className="clover-template-panes"
+        data-panel={drawer.over ? "over" : "beside"}
+        onKeyDown={drawer.onKeyDown}
+        style={{ height: "24rem" }}
+      >
+        <Clover.SplitPane
+          ref={drawer.pane}
+          id="my-items"
+          className="clover-template-drawer"
+          data-side="start"
+          data-open={drawer.opened}
+          hidden={!drawer.shown}
+          size="12rem"
+          style={{ overflowY: "auto" }}
+        >
+          <Clover.Items layout="list" />
+        </Clover.SplitPane>
+
+        <Clover.SplitPane>
+          <Clover.Body style={{ height: "100%" }} />
+        </Clover.SplitPane>
+
+        {drawer.scrim && (
+          <div className="clover-template-scrim" {...drawer.scrim} />
+        )}
+      </Clover.Split>
+    </Clover.Root>
+  );
+}
+<Viewer
+  iiifContent="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+  template={MyItemsViewer}
+/>;
+```
+
+</Example>
+
+### Lightbox
+
+| Helper                  | Description                                                                                                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Lightbox`              | The dialog Gallery opens for one cell of its grid, a Canvas, a Collection's Manifest or a tagging annotation, with its own Body and Panel. Its props are `LightboxProps`. |
+| `preloadLightbox()`     | Starts loading the Lightbox's code. Call it when the grid is pointed at or focused.                                                                                       |
+| `useGivenAnnotations()` | When the Root's `iiifContent` is an AnnotationPage, returns its annotations as one AnnotationCollection. Returns `null` for a Manifest or a Collection.                   |
+
+#### `Lightbox` example
+
+The Manifest as a news story's figure. Press its Thumbnail to open the Lightbox, the Body
+its whole width and height.
+
+<Example>
+<LightboxDemo />
+
+```jsx react
+import { useState } from "react";
+import * as Clover from "@nulib/clover";
+import { Lightbox, preloadLightbox } from "@nulib/clover/templates";
+
+function StoryFigure() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <figure style={{ width: "min(24rem, 100%)", margin: 0 }}>
+        <button
+          type="button"
+          aria-label="Open in the Lightbox"
+          onPointerOver={preloadLightbox}
+          onFocus={preloadLightbox}
+          onClick={() => setOpen(true)}
+          style={{
+            display: "block",
+            width: "100%",
+            padding: 0,
+            border: 0,
+            cursor: "zoom-in",
+          }}
+        >
+          <Clover.Thumbnail
+            alt=""
+            style={{
+              display: "block",
+              width: "100%",
+              height: "auto",
+              borderRadius: "var(--clover-radius, 3px)",
+            }}
+          />
+        </button>
+
+        <figcaption style={{ marginBlockStart: "var(--clover-space-s)" }}>
+          <Clover.Label as="strong" style={{ display: "block" }} />
+          <Clover.Summary
+            style={{
+              margin: 0,
+              fontSize: "var(--clover-text-s)",
+              color: "var(--clover-color-primary-muted)",
+            }}
+          />
+        </figcaption>
+      </figure>
+
+      <Lightbox
+        open={open}
+        onClose={() => setOpen(false)}
+        panel={false}
+        caption={false}
+        placeholder={false}
+        headingLevel={5}
+      />
+    </>
+  );
+}
+
+<Clover.Root
+  iiifContent="https://clover.iiif.library.northwestern.edu/mocks/navplace/manifest.json"
+  style={{
+    position: "relative",
+    isolation: "isolate",
+    display: "grid",
+    placeItems: "center",
+    minHeight: "30rem",
+  }}
+>
+  <StoryFigure />
+</Clover.Root>;
+```
+
+</Example>
+
+</div>
+
+<div data-code-flavor="web-components">
+
+These helpers are React hooks and components. With web components, choose a template by
+name on `<clover-viewer>`, or lay out your own as [Layouts](/docs/technical#layouts)
+shows.
+
+</div>

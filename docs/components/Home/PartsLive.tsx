@@ -241,7 +241,7 @@ function Exploded({
 }) {
   const manifest = Clover.useManifest() as Json | null;
   const { canvases, views } = Clover.useSequence();
-  const sets = Clover.useAnnotationSets();
+  const sets = Clover.useAnnotationPages();
   const collection = Clover.useCloverSelector(
     (state) => state.collection,
   ) as Json | null;

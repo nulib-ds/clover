@@ -1,0 +1,12 @@
+/*
+ * The Hooks section's examples (`HelperExamples.tsx`): a short Body and what the hook
+ * draws under it, apart as a page's own paragraphs would be. Each holds its height while
+ * it is far from the window and not mounted, so nothing moves as it mounts.
+ */
+.holder {
+  min-height: 15rem;
+}
+
+.hook > * + * {
+  margin-block-start: var(--clover-space-s);
+}

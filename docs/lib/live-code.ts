@@ -48,13 +48,18 @@ export interface Knob {
   remount?: boolean;
   /** Its name for assistive technology, where its element and prop do not say it well. */
   label?: string;
+  /**
+   * Its own id among the example's values, where two of its elements' knobs set the same
+   * prop (a title's `as` and a Summary's): `summary:as`.
+   */
+  key?: string;
 }
 
 export type Values = Record<string, Plain>;
 
 /** A knob's key among an example's values: where it is written, and its prop. */
-export const knobId = (knob: Pick<Knob, "prop" | "on">) =>
-  `${knob.on ?? "part"}:${knob.prop}`;
+export const knobId = (knob: Pick<Knob, "prop" | "on" | "key">) =>
+  knob.key ?? `${knob.on ?? "part"}:${knob.prop}`;
 
 export const initialValues = (knobs: Knob[]): Values =>
   Object.fromEntries(knobs.map((knob) => [knobId(knob), knob.value]));
@@ -219,13 +224,15 @@ export interface Token {
 
 /**
  * A line of code: its depth, its runs, whether it is one the example is about, and the
- * movable part that wrote it, if any (`CodeNode.key`).
+ * movable part that wrote it, if any (`CodeNode.key`): `part` the innermost, `parts` every
+ * one around it, outermost first, as a part moves inside another (a header's title).
  */
 export interface Line {
   depth: number;
   tokens: Token[];
   mark?: boolean;
   part?: string;
+  parts?: string[];
 }
 
 const run =
@@ -665,17 +672,18 @@ function nodeLines(
   flavor: Flavor,
   lines: Line[],
   mark = false,
-  part?: string,
+  around: string[] = [],
 ) {
   const html = flavor === "html";
   const marked = mark || node.mark;
-  const own = node.key ?? part;
+  const parts = node.key ? [...around, node.key] : around;
+  const own = parts.at(-1);
   const push = (at: number, tokens: Token[]) =>
     lines.push({
       depth: at,
       tokens,
       ...(marked ? { mark: true } : {}),
-      ...(own ? { part: own } : {}),
+      ...(own ? { part: own, parts } : {}),
     });
   const name = html ? node.html : node.jsx;
   // HTML sets an object by script, after the markup (`propertyLines`).
@@ -734,7 +742,7 @@ function nodeLines(
       push(depth, [punct("</"), tag(name), punct(">")]);
   }
   children.forEach((child) =>
-    nodeLines(child, depth + 1, context, flavor, lines, marked, own),
+    nodeLines(child, depth + 1, context, flavor, lines, marked, parts),
   );
   if (children.length) push(depth, [punct("</"), tag(name), punct(">")]);
 }

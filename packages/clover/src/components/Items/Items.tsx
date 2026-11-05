@@ -54,6 +54,12 @@ export interface ItemsProps
    */
   secondary?: ItemSecondary;
   /**
+   * Show each item's label, and the line under it, beside its picture (`true`, the
+   * default). `false` shows the pictures alone: the labels are hidden from sight but kept
+   * as each item's name for assistive technology (WCAG 4.1.2). Default `true`.
+   */
+  labels?: boolean;
+  /**
    * The pager's size: `large` (the default), round controls; or `small`, its steps and
    * count as Search's are, for a header's line. Default `"large"`.
    */
@@ -386,6 +392,7 @@ export function ItemsView({
   language,
   showSummary = false,
   secondary = "summary",
+  labels = true,
   heading,
   headingLevel = 2,
   renderItem,
@@ -539,6 +546,7 @@ export function ItemsView({
         request={request}
         showSummary={showSummary}
         secondary={secondary}
+        labels={labels}
       />
     );
 

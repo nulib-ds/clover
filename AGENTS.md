@@ -78,14 +78,48 @@ deadline.
     `map`) shows the 4.x page, which links to its 3.x version.
   - How to compose a layout (`Root`, the parts, the property parts, the information
     panel's `Tab`s, `Split`, hooks, renderers) lives on one page,
-    `content/docs/composing.mdx` ("Composing layouts", "Composing" in the menu). The
+    `content/docs/composing.mdx` ("Composing layouts", "Composing" in the menu). Composing is a
+    folder (Mat, 2026-11-04: "break this out into two more pages and have the composing
+    page be more of a playground like Viewer is for templates"): its index, Composing,
+    the live example and the `Root`'s props, then Next; under it Glossary
+    (`/docs/composing/glossary`: Core components, every part in the Components menu with
+    the Primitives a group of its rows, drawn from the menu and each page's description
+    by `CoreComponents.tsx`, UI components (Mat, 2026-11-04: "call this UI components
+    not helper"), by hand, and the helpers, a table for each of Helpers' groups), Customizing
+    (`/docs/composing/customizing`: the Panel, panes side by side, `Value`, `Summary`
+    and `ReadMore`, templates, creating custom components (headings, controls,
+    renderers), languages and styles; its menu name chosen by an agent, to rename at
+    will) and Helpers, which holds the hooks. Composing's old anchors go on to their
+    sections' pages (`MovedSections.tsx`). Its words say component, hook or helper,
+    never "part" (Mat, 2026-11-04). The
     Viewer page covers what the Viewer handles and links there; add composition material
     there, not to the Viewer page. Its first example is live, on the examples' card
     (`ComposeExample.tsx`; Mat, 2026-10-23): a `Root` with `Body` and an aside of parts,
     its code under it in both flavors, each part's lines moved by its grip (dragged, its
     arrow keys, or pressed and then Move up or Move down, Escape letting go; WCAG 2.5.7),
-    the title's element and the other Label's `of` picked in the code, the demo
-    following. How to style one is the page after it,
+    the title's element picked in the code, the demo following; since 2026-11-04 (Mat: "let's
+    show a stronger example", then "use this one … make sure we implement items") over
+    Northwestern's manuscript notebook of Enochian calls and texts: a header of the
+    title's Label and Summary across the top (Mat: "move title and summary up above",
+    "make head stretch across"), its Body and Items under it, and beside those a sidebar
+    of its Metadata, RequiredStatement and Rights (Mat: "put the metadata and attribution
+    in a sidebar panel pane. simple implementation. but make it look cool", then "move
+    rights to under required statement"), a column as tall as they are, with no frame
+    ("remove this faux container"), that scrolls (`contain: size`, so a long record never
+    stretches them), focusable and named, stacked under them on a narrow page (the Panel's
+    Tabs in its place were tried and undone: "na, doesn't work. revert back to the old");
+    its values to change (Mat,
+    2026-11-04: "give more props to items and body and summary and metadata") the title's
+    and the Summary's `as`, the Body's `placeholder`, `controls` and height, and Items'
+    `layout` (slider or pager, the two one row tall), its pictures' height (6rem to start;
+    "make items thumbs small", 10rem before) and its `labels` (off to start: "can we
+    turn off labels for items"), or the pager's `size`, each knob keyed by its component
+    (`key`, `docs/lib/live-code.ts`), and no `of`, as the notebook's Canvases have no summary
+    or metadata ("remove of"). Every example's code on the
+    Composing pages opens with its imports, in both flavors (Mat, 2026-11-04: "include
+    imports on all examples"; the web components' a module script of
+    `@nulib/clover/web-components`), and a layout of your own takes the resource as
+    `iiifContent` (`iiif-content`), never `url` (Mat, same day). How to style one is the page after it,
     `content/docs/styling.mdx` ("Styling"; Mat, 2026-10-23): the stylesheets and their
     layer, how every size steps from the page's `1rem` (the scale, text, the control, the
     inset), colors, classes and states, lists in Markdown text, then colors and contrast
@@ -277,7 +311,24 @@ deadline.
     `#templates`), Composing, Styling (the menu's names, short; "Composing" for the page
     titled "Composing layouts"; Mat, 2026-10-23). Under Technical (Mat, 2026-11-01: the
     group that was Contribute, renamed, the overview moved there and first, as
-    "Overview"): Overview, Content State, i18n. Content State (`/docs/content-state`) is
+    "Overview"): Overview, Content State, i18n. Helpers (`/docs/composing/helpers`; Mat,
+    2026-11-04: "helpers should have its own page", then "Move helpers under composing":
+    Composing is a folder, its page the index, Helpers in its menu under it) documents
+    every helper a package entry exports: the functions that read IIIF resources
+    (`@nulib/clover`), the maps' (`@nulib/clover/map`), then what the templates share
+    (`@nulib/clover/templates`) and how to change a template, the same
+    four steps for every one, which the templates' READMEs repeat and link to. Written
+    as Strunk and White would, conversational, every thing named exactly: by its
+    component (Body, Panel, PanelToggle, SplitPane), else IIIF's word or a WAI-ARIA role,
+    never "part", "transport" or another opaque generic (Mat, 2026-11-04). Its examples
+    are real: a content state annotation that starts Cookbook 0219's _Lunchroom Manners_
+    42 seconds in ("Content State example"), and "Custom Panel example", an `h3` after the
+    Panel's API, its Label an `h4` under it (Mat, 2026-11-04: an `h2` or `h3`, by
+    `usePanelPane`): the Manifest's Label over a Split 40rem tall, the
+    Panel on the start side as an accordion of About alone (no label or thumbnail of its
+    own), and a Body without its Map button over a Map at `zoom={15}`, `s` apart, over the
+    `navplace` mock (`HelperExamples.tsx`), each over its code, the code's own lines
+    marked. Content State (`/docs/content-state`) is
     what Clover reads and writes as a IIIF content state: `onContentStateChange` on every
     part that shows a view, `{ json, encoded }`, then the object, the encoding, and
     opening one. Its example (`ContentStateExample.tsx`) is a Root, its Body and Items,
@@ -286,8 +337,8 @@ deadline.
     callback here and not on root?"), both forms shown as they come, and a link opening
     the view in the homepage's demo; under it, the chosen one's code. Overview, titled Technical overview (`/docs/technical`;
     Mat, 2026-10-26: the package's entry points, the Viewer, events, languages, parts,
-    layouts, parts of your own, helpers (every public function, each documented there;
-    Mat, 2026-10-27), types, what it loads, styles, and coming from 3.x, in React and as
+    layouts, parts of your own, a pointer to Helpers (every public function documented
+    there; Mat, 2026-10-27, its own page since 2026-11-04), types, what it loads, styles, and coming from 3.x, in React and as
     web components, the two at parity: each section says it in the reader's flavor,
     `<div data-code-flavor>`, or once for both, as the events' table does; the web
     components' detail Get started held, and `/docs/web-component`'s forward, are here).

@@ -7,6 +7,7 @@ import { lastChanged } from "docs/lib/last-changed";
 import docsMenu from "content/docs/_meta";
 import primitivesMenu from "content/docs/primitives/_meta";
 import viewerMenu from "content/docs/viewer/_meta";
+import composingMenu from "content/docs/composing/_meta";
 import {
   componentCount,
   cookbook,
@@ -122,11 +123,18 @@ export async function trailOf(route: string): Promise<Crumb[]> {
   return trail;
 }
 
-/* The folders whose pages the menu lists after their own. */
+/*
+ * The folders whose pages the menu lists after their own. A new folder of the docs goes
+ * here, or its pages are missing from `llms.txt` (`agents.test.ts` says which).
+ */
 const FOLDERS: Record<string, Record<string, Entry>> = {
   viewer: viewerMenu as Record<string, Entry>,
+  composing: composingMenu as Record<string, Entry>,
   primitives: primitivesMenu as Record<string, Entry>,
 };
+
+/** The folders listed, for `agents.test.ts`. */
+export const folderKeys = () => Object.keys(FOLDERS);
 
 /**
  * The docs as their menu lists them (`content/docs/_meta.ts`): a section for each of its

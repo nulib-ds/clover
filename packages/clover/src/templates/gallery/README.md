@@ -5,7 +5,7 @@ its title, the Body to pan and zoom with the view's label under it, a short stri
 thumbnails to move on (or the pager), and the information panel beside it. Opened on a Manifest, the grid is its
 views (a spread is one cell, and one view still a grid); opened on a Collection, the Collection's title and summary
 head it and its members are the cells, each showing that Manifest in the lightbox; opened
-on an AnnotationPage of tags across Manifests (`shared/givenAnnotations.ts`), its label
+on an AnnotationPage of tags across Manifests (`useGivenAnnotations`), its label
 heads it and its tags are the cells, each showing its Manifest framed on it, the
 lightbox's strip stepping through the tags.
 
@@ -58,9 +58,17 @@ the header never covers its title, Back or Close.
 The lightbox's Body loads its code when the lightbox first opens, or as a
 pointer or focus first comes to the gallery, so the page loads only the thumbnails.
 
-To change the layout, copy `Gallery.tsx` and `Gallery.css` into your app, with what in
-`templates/shared/` they import: `Lightbox.tsx`, `Lightbox.css` and `LightboxView.tsx`, the
-information panel every template shares (`PanelPane.tsx`, `PanelPart.tsx`,
-`useLazyPanelPane.ts`), and through them `useDrawer.ts`, `useSlide.ts`, `useSpine.ts`,
-`useDragToClose.ts` (with `dragToClose.ts`) and `useFollowFocus.ts`. Otherwise they use only
-what `@nulib/clover` exports.
+To change it, follow the same four steps as every template:
+
+1. On GitHub, open the [tag](https://github.com/nulib-ds/clover/tags) for the version you
+   have installed, and copy this folder into your app.
+2. In the files you copied, change `../../parts` to `@nulib/clover`, and each
+   `../shared/…` to `@nulib/clover/templates`.
+3. Rename `Gallery`, then make it yours.
+4. Import `Gallery.css` after Clover's CSS (`styles.css`, then `templates.css`), and hand
+   it to the Viewer:
+   `<Viewer iiifContent={url} template={MyViewer} />`.
+
+The helpers it imports from `@nulib/clover/templates` are on
+[Helpers](https://clover.iiif.library.northwestern.edu/docs/composing/helpers#templates).
+The lightbox is `Lightbox` from there, styled in `templates.css`.

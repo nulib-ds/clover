@@ -10,6 +10,7 @@ export const items: ElementSpec = {
       type: ["slider", "list", "grid", "masonry", "pager"],
     },
     secondary: { prop: "secondary", type: ["summary", "navDate", "none"] },
+    labels: { prop: "labels", type: "boolean" },
     size: { prop: "size", type: ["large", "small"] },
     of: { prop: "of", type: ["views", "members", "targets", "annotations"] },
     navigation: { prop: "navigation", type: ["id", "homepage"] },
@@ -41,6 +42,11 @@ export const itemsDocs: ElementDocs = {
       description:
         "The line under an item's label, where it has one (a Collection's members do): its summary, its navDate, or none.",
       default: "summary",
+    },
+    labels: {
+      description:
+        "Show each item's label, and the line under it, beside its picture. false shows the pictures alone, the labels hidden from sight but kept as each item's name for assistive technology.",
+      default: "true",
     },
     size: {
       description:

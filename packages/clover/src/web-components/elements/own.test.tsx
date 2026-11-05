@@ -9,6 +9,7 @@ import { fireEvent, waitFor, within } from "@testing-library/dom";
 import { defineCloverElements } from "../define";
 import bookJson from "../../fixtures/iiif-cookbook/0009-book-1.json";
 import tocJson from "../../fixtures/iiif-cookbook/0024-book-4-toc.json";
+import commentJson from "../../fixtures/iiif-cookbook/0266-full-canvas-annotation.json";
 import { stubViewport } from "../../components/Canvas/testing/viewport";
 import { initCloverI18n } from "../../i18n";
 import { tableOfContents } from "../../core/ranges";
@@ -112,6 +113,19 @@ describe("root.clover", () => {
       hasNext: true,
     });
     expect(clover.sequence().canvases).toHaveLength(bookJson.items.length);
+  });
+
+  it("reads each AnnotationPage with annotationPages(), and by its old name", async () => {
+    const { root, ready } = rootOf();
+    root.iiifContent = commentJson;
+    document.body.append(root);
+    await ready;
+    const { clover } = root;
+    await waitFor(() => expect(clover.annotationPages()).toHaveLength(1));
+    const [page] = clover.annotationPages();
+    expect(page.id).toBe(commentJson.items[0].annotations[0].id);
+    expect(page.entries).toHaveLength(1);
+    expect(clover.annotationSets()).toBe(clover.annotationPages());
   });
 
   it("moves the reader as React's hooks do, and says so to whoever subscribes", async () => {

@@ -313,6 +313,27 @@
 }
 
 /*
+ * A panel on the start side (`usePanelPane`'s `side`) slides in from the start instead,
+ * its inner edge on the right, the left right to left.
+ */
+.clover-template-panes[data-panel="over"]
+  > .clover-template-drawer[data-side="start"] {
+  inset-inline: 0 auto;
+  border-inline-start: 0;
+  border-inline-end: 1px solid var(--clover-color-secondary-muted, #e6e8eb);
+  --clover-template-out: translateX(calc(-100% - var(--clover-space-xl)));
+  --clover-template-inner: right;
+  --clover-template-toward: 1;
+}
+
+.clover-template-panes[data-panel="over"]
+  > .clover-template-drawer[data-side="start"]:dir(rtl) {
+  --clover-template-out: translateX(calc(100% + var(--clover-space-xl)));
+  --clover-template-inner: left;
+  --clover-template-toward: -1;
+}
+
+/*
  * A pane over the page (the panel, and Document's thumbnails on a narrow page, which set
  * `clover-template-float` while they float), written once: its inner edge, the one
  * toward the page, carries a grip that says it can be dragged back off

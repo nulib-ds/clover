@@ -11,7 +11,7 @@ import { LanguagesDemo } from "docs/components/Clover4/LanguagesDemo";
   Clover translates its own words: the names of its controls, its messages, and
   what it announces. IIIF text (a label, a summary, metadata) is the resource's
   own, in the languages it has, and Clover chooses among them as [Composing
-  layouts](/docs/composing#languages) describes.
+  layouts](/docs/composing/customizing#languages) describes.
 </div>
 
 Clover has its own translator, well under 1 kB gzipped, with no translation library to
@@ -114,8 +114,9 @@ Where one of Clover's strings is not in the page's language (French on an Englis
 page, or a string that fell back to English), the element that shows it, or is named by
 it, carries its language as `lang`, so a screen reader pronounces it correctly (WCAG
 3.1.2). The page's language is the `lang` of the `Root`'s nearest parent that has one, or
-one you give the `Root`. A part of your own does the same with `useT` and `useLangOf`, as
-[Languages](/docs/composing#languages) in Composing layouts shows.
+one you give the `Root`. A component of your own does the same with `useT` and
+`useLangOf`, as [Languages](/docs/composing/customizing#languages) in Customizing layouts
+shows.
 
 Text in a language written right to left (Arabic, Hebrew, Persian, Urdu…) carries
 `dir="rtl"` beside its `lang`, so its words run and its punctuation sits as they are

@@ -662,6 +662,27 @@
 }
 
 /*
+ * A panel on the start side (`PanelToggle`'s `side`): its toggle keeps the start's top
+ * corner instead, with its room kept there (Mat, 2026-11-04: "this should on the left").
+ */
+.clover-canvas
+  > .clover-canvas-controls:has(> [data-button="panel"][data-side="start"]),
+.clover-canvas
+  > .clover-canvas-controls[data-fit]:has(
+    > [data-button="panel"][data-side="start"]
+  ) {
+  padding-right: 0;
+  padding-inline-start: calc(var(--clover-control) + var(--clover-space-xs));
+}
+
+.clover-canvas
+  > .clover-canvas-controls
+  > [data-button="panel"][data-side="start"] {
+  right: auto;
+  inset-inline-start: 0;
+}
+
+/*
  * Nor does the information control (the `i`): what the Canvas says of itself (its label,
  * summary, metadata) is always a press away. Nor the annotations control, over a picture
  * or a recording: what is said of it, likewise. Nor a placeholder's toggle, the way in

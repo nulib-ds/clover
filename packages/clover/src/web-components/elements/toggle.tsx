@@ -55,12 +55,14 @@ function useOpen(doc: Document, id: string | undefined) {
 export function Toggle({ element }: { element: HTMLElement }) {
   const props = useElementProps(element);
   const controls = (props.controls as string | undefined) ?? undefined;
+  const side = props.side as "start" | "end" | undefined;
   const doc = element.ownerDocument;
   const open = useOpen(doc, controls);
   return (
     <PanelToggle
       open={open}
       controls={controls}
+      side={side}
       onOpenChange={(next) => {
         const allowed =
           (props.onOpenChange as ((open: boolean) => boolean) | undefined)?.(

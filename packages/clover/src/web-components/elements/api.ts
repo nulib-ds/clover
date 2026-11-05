@@ -72,6 +72,10 @@ function own(
         selectSequence(manifest).views.length,
       );
     },
+    annotationPages() {
+      return selectAnnotationSets(state().manifest, state().addedSets);
+    },
+    /** @deprecated `annotationPages()`, the same method named for what it reads. */
     annotationSets() {
       return selectAnnotationSets(state().manifest, state().addedSets);
     },

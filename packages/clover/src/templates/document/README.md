@@ -74,9 +74,16 @@ about the page. A 3D Scene takes a finger's drag always, to turn it, as in Defau
 The information panel loads its code when it first opens, or as its toggle is pointed at
 or focused, so the page loads without it.
 
-To change the layout, copy `Document.tsx`, `Sheets.tsx` and `Document.css` into your app,
-with what in `templates/shared/` they import: the information panel every template shares
-(`PanelPane.tsx`, `PanelPart.tsx`, `useLazyPanelPane.ts`), and through them
-`useDrawer.ts`, `useSlide.ts`, `useSpine.ts`,
-`useDragToClose.ts` (with `dragToClose.ts`) and `useFollowFocus.ts`. Otherwise they use only
-what `@nulib/clover` exports.
+To change it, follow the same four steps as every template:
+
+1. On GitHub, open the [tag](https://github.com/nulib-ds/clover/tags) for the version you
+   have installed, and copy this folder into your app.
+2. In the files you copied, change `../../parts` to `@nulib/clover`, and each
+   `../shared/…` to `@nulib/clover/templates`.
+3. Rename `Document`, then make it yours.
+4. Import `Document.css` after Clover's CSS (`styles.css`, then `templates.css`), and hand
+   it to the Viewer:
+   `<Viewer iiifContent={url} template={MyViewer} />`.
+
+The helpers it imports from `@nulib/clover/templates` are on
+[Helpers](https://clover.iiif.library.northwestern.edu/docs/composing/helpers#templates).

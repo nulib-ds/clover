@@ -92,12 +92,19 @@ export function useAnnotationCollection(): AnnotationCollection | null {
   );
 }
 
-/** Every annotation set: the Manifest's own (fetched so far) and any the host added. */
-export function useAnnotationSets(): AnnotationSet[] {
+/**
+ * Each AnnotationPage the Manifest's Canvases carry (as far as fetched), and each the host
+ * added through the Root's `annotations`, read as a set: its `id`, `label` and annotations
+ * (`entries`), painting annotations and caption files left out.
+ */
+export function useAnnotationPages(): AnnotationSet[] {
   return useCloverSelector((state) =>
     selectAnnotationSets(state.manifest, state.addedSets),
   );
 }
+
+/** @deprecated `useAnnotationPages`, the same hook named for what it reads. */
+export const useAnnotationSets = useAnnotationPages;
 
 /** A IIIF language map as text in the Root's language, with the tag it is in. */
 export function useLocalized(value: LanguageMapLike): LocalizedValue {

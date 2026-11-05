@@ -10,6 +10,7 @@ import { watchClamp } from "./clamped";
 import { languageProps } from "../../i18n/direction";
 import { readDate } from "../../core/dates";
 import { formatTime } from "../../lib/time";
+import { visuallyHidden } from "../../ui/visuallyHidden";
 // A member's date, written only where one has a date (Cookbook 0318), so a strip never
 // carries its writing.
 const NavDate = lazy(() =>
@@ -209,6 +210,8 @@ export interface ItemFigureProps {
   showSummary?: boolean;
   /** Which line, when `showSummary`: the summary (the default), the date, or none. */
   secondary?: ItemSecondary;
+  /** Show the label and its line; `false` keeps them for assistive technology alone. */
+  labels?: boolean;
 }
 
 /**
@@ -232,6 +235,7 @@ export function ItemFigure({
   request,
   showSummary = false,
   secondary = "summary",
+  labels: shown = true,
 }: ItemFigureProps) {
   const labels = item.parts.map((part) =>
     localize(item.parts.length === 1 ? item.label : part.label, language),
@@ -271,7 +275,12 @@ export function ItemFigure({
         })}
       </span>
       {(labeled || navDate || summary?.text) && (
-        <figcaption className="clover-items-caption">
+        <figcaption
+          className="clover-items-caption"
+          // Hidden, still the option's or link's name: inline, so it holds without the
+          // stylesheet.
+          style={shown ? undefined : visuallyHidden}
+        >
           {labels.map((label, index) => (
             <ItemLabel
               key={item.parts[index].id}

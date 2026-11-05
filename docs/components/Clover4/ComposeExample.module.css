@@ -1,32 +1,102 @@
 /*
  * Composing's live example (`ComposeExample.tsx`): its demo laid out as the page's code
- * writes it, a Body and an aside beside it. Its code is the docs' editor's
- * (`PartsEditor.module.css`).
+ * writes it, a header across the top, and under it the Body and Items, a sidebar beside
+ * them. Its code is the docs' editor's (`PartsEditor.module.css`).
  */
 .layout {
   align-items: start;
   display: grid;
+  gap: 1.618rem;
+  /* The header across the top; the Body and Items under it, the sidebar beside them. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+}
+
+/*
+ * Each in the row the code puts it (`--row`): the header across both columns, or in the
+ * main column where it sits between the Body and Items, beside the sidebar.
+ */
+.header {
+  align-content: start;
+  display: grid;
   gap: 1rem;
-  /* The aside is capped, so the Body keeps room at 320px. */
-  grid-template-columns: minmax(0, 1fr) min(12rem, 40%);
+  grid-column: 1 / -1;
+  grid-row: var(--row);
 }
 
-.aside {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.618rem;
-}
-
-/* A Label or the Position takes the aside's width; Previous and Next sit side by side. */
-.aside > :not(button) {
-  flex: 1 1 100%;
+.header[data-between] {
+  grid-column: 1;
 }
 
 .title {
   margin: 0;
 }
 
-.muted {
+.layout > :global(:is(.clover-body, .clover-items)) {
+  grid-column: 1;
+  grid-row: var(--row);
+}
+
+/*
+ * The sidebar: the work's metadata, attribution and rights in a column of their own, on
+ * the page's ground with no frame (Mat, 2026-11-04: "remove this faux container"), as tall
+ * as the Body and Items and scrolling within it, its own size kept out of the rows'
+ * (`contain`), so a long record never stretches them.
+ */
+.aside {
+  align-self: stretch;
+  contain: size;
+  overflow-y: auto;
+  /* A rights statement's address breaks where it must. */
+  overflow-wrap: anywhere;
+  display: grid;
+  align-content: start;
+  gap: 1.618rem;
+  grid-column: 2;
+  /* Beside the Body and Items, from the first of them to the last. */
+  grid-row: var(--rows);
+}
+
+/* Each entry set off by a hairline, its label muted over its value. */
+.aside :global(:is(.clover-metadata, .clover-required-statement)) {
+  gap: 0;
+}
+
+.aside :global(:is(.clover-metadata, .clover-required-statement)) > div {
+  border-top: 1px solid var(--gray-6);
+  padding-block: 0.618rem;
+}
+
+/* The rights statement, after the attribution, set off as its entries are. */
+.aside :global(.clover-rights) {
+  border-top: 1px solid var(--gray-6);
+  padding-top: 0.618rem;
+}
+
+.aside :global(.clover-metadata) > div:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.aside :global(:is(.clover-metadata, .clover-required-statement)) dt {
   color: var(--gray-11);
+  font-size: 0.875rem;
+}
+
+/* A narrow column stacks the sidebar under the rest (WCAG 1.4.10). */
+@media (max-width: 48rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .header,
+  .layout > :global(:is(.clover-body, .clover-items)),
+  .aside {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .aside {
+    contain: none;
+    overflow-y: visible;
+  }
 }

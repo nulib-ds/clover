@@ -57,7 +57,7 @@ unless `options.gestures.scrollToZoom` is on.
 | Prop           | Type                     | Default                   | Description                                                                                                                                                                                |
 | -------------- | ------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `iiifContent`  | `string \| object`       | —                         | A Canvas to load and draw, or a Manifest's first: URL or JSON.                                                                                                                             |
-| `canvases`     | `object[]`               | The Root's view           | Canvases, drawn together; `toPresentation4()` upgrades older ones.                                                                                                                         |
+| `canvases`     | `object[]`               | The Root's view           | Canvases, drawn together; [`toPresentation4()`](/docs/composing/helpers#iiif-resources) upgrades older ones.                                                                               |
 | `body`         | `object \| object[]`     | —                         | IIIF painting bodies to draw; they win over `src`.                                                                                                                                         |
 | `src`          | `string \| string[]`     | —                         | Image URLs, or image services with `isTiledImage`.                                                                                                                                         |
 | `isTiledImage` | `boolean`                | `false`                   | Read each `src` as an image service: its base URI or `info.json`.                                                                                                                          |
@@ -218,7 +218,8 @@ after it. [Interaction](#interaction) has every option for how the Canvas moves.
 ### Navigating Canvases
 
 Hand it the Canvases to show together, a spread say; which to show, and moving between
-them, is yours. `groupViews` reads a Manifest's `behavior` as the Viewer does.
+them, is yours. `groupViews` reads a Manifest's `behavior` as the Viewer does, and
+`toPresentation4` upgrades an earlier Manifest first ([Helpers](/docs/composing/helpers#iiif-resources)).
 
 <LiveRecipe
   recipe={{

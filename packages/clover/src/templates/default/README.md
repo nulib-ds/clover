@@ -61,10 +61,17 @@ and every heading moves down a level, so the page's outline stays true. With
 `header={false}` there is no title, and the panel's sections take its place, at
 `headingLevel` itself: under a page's `h1`, they are `h2`s.
 
-To change the layout, copy `Default.tsx` and `Default.css` into your app, and import the
-parts from `@nulib/clover` where they import `../../parts`, with what in
-`templates/shared/` they import: the information panel every template shares
-(`PanelPane.tsx`), and through it `useDrawer.ts`, `useSlide.ts`, `useSpine.ts`,
-`useDragToClose.ts` (with `dragToClose.ts`) and `useFollowFocus.ts`. Otherwise they use only
-what `@nulib/clover` exports. The split is `Clover.Split`, `Clover.SplitPane` and
-`Clover.SplitHandle`, which you can use for any layout of your own.
+To change it, follow the same four steps as every template:
+
+1. On GitHub, open the [tag](https://github.com/nulib-ds/clover/tags) for the version you
+   have installed, and copy this folder into your app.
+2. In the files you copied, change `../../parts` to `@nulib/clover`, and each
+   `../shared/…` to `@nulib/clover/templates`.
+3. Rename `Default`, then make it yours.
+4. Import `Default.css` after Clover's CSS, and hand it to the Viewer:
+   `<Viewer iiifContent={url} template={MyViewer} />`.
+
+The helpers it imports from `@nulib/clover/templates` are on
+[Helpers](https://clover.iiif.library.northwestern.edu/docs/composing/helpers#templates).
+The split is `Clover.Split`, `Clover.SplitPane` and `Clover.SplitHandle`, which you can
+use for any layout of your own.

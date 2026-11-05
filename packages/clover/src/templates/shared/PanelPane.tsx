@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import * as Clover from "../../parts";
 import type { PanelProps, PanelSection, PanelToggleProps } from "../../parts";
@@ -10,6 +10,9 @@ import { useSpineTop } from "./useSpine";
 
 export type PanelPart = React.ComponentType<PanelProps>;
 
+// The information panel, a chunk of its own (`PanelPart`), for a pane given no `panel`.
+const loadPanel = () => import("./PanelPart");
+
 export interface PanelPaneOptions {
   /** The pane's `id`, which its toggle's `aria-controls` names. */
   id: string;
@@ -20,6 +23,12 @@ export interface PanelPaneOptions {
   beside: boolean | undefined;
   /** Whether it starts open beside the Body. Over the Body it always starts closed. */
   defaultOpen: boolean;
+  /**
+   * The Body's side it sits on, and slides in from over the Body: `"end"` (the default,
+   * every template's) or `"start"`. `PanelPane` goes after the main `SplitPane` for the
+   * end, and before it for the start (Mat, 2026-11-04: the Helpers page's Map example).
+   */
+  side?: "start" | "end";
   /** The layout's `useFollowFocus`, one for all its drawers. */
   followFocus: ReturnType<typeof useFollowFocus>;
   /**
@@ -35,16 +44,14 @@ export interface PanelPaneOptions {
    */
   sections?: readonly PanelSection[];
   /**
-   * The Panel: `Clover.Panel`, drawn at once where the panel starts open; or, while its
-   * code is still to come, nothing (`useLazyPanelPane`).
+   * The Panel, `Clover.Panel`, drawn at once, on the server too: Default's. Without it,
+   * the pane loads the Panel's code itself (Mat, 2026-11-04: "always lazy if started
+   * closed. not lazy if open"): at once where it starts open, and otherwise as the
+   * reader reaches for its toggle (pointed at or focused), or on a first press, which
+   * waits for it, then opens the panel whole, so focus has its section to go to.
+   * Document's and the lightbox's, which start shut or out of sight.
    */
   panel?: PanelPart;
-  /**
-   * Where its code is still to come, what loads it: as the reader reaches for its toggle
-   * (pointed at or focused), and on a first press, which waits for it, then opens the
-   * panel whole, so focus has its section to go to (`useLazyPanelPane`).
-   */
-  load?: () => Promise<unknown>;
 }
 
 /**
@@ -65,21 +72,33 @@ export function usePanelPane({
   id,
   beside,
   defaultOpen,
+  side = "end",
   followFocus,
   body,
   sections,
   panel,
-  load,
 }: PanelPaneOptions) {
   const drawer = useDrawer({
     id,
     beside,
     defaultOpen,
-    side: "end",
+    side,
     followFocus,
   });
   const docked = !drawer.over && drawer.open;
   const spine = useRef<HTMLDivElement>(null);
+
+  // The Panel given, or once its code has come, the one it loaded.
+  const [loaded, setLoaded] = useState<PanelPart>();
+  const Part = panel ?? loaded;
+  const load = () =>
+    loadPanel().then((module) => setLoaded(() => module.default));
+  useEffect(() => {
+    if (drawer.open && !Part) void load();
+    // As it opens alone, or starts open: `load` is new each render, and `Part`, once
+    // set, stays.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drawer.open]);
   useSpineTop(spine, () => body?.(), docked && Boolean(body));
 
   // Reaching for its toggle, its code loads where it is still to come, and over the
@@ -87,7 +106,7 @@ export function usePanelPane({
   const reach = (event: React.SyntheticEvent) => {
     if (!(event.target as Element).closest?.(`[aria-controls~="${id}"]`))
       return;
-    if (!panel) void load?.();
+    if (!Part) void load();
     if (drawer.over) preloadDrag();
   };
 
@@ -96,23 +115,25 @@ export function usePanelPane({
       sections={sections}
       open={drawer.open}
       onOpenChange={(next) =>
-        next && !panel && load
+        next && !Part
           ? load().then(() => drawer.setOpen(true))
           : drawer.setOpen(next)
       }
       controls={id}
+      side={side}
     />
   );
 
   return {
     ...drawer,
     id,
+    side,
     /** Open beside the Body: its bar and spine drawn, its toggle on the spine. */
     docked,
     spine,
     /** The toggle: the template draws it among the Body's controls while `!docked`. */
     toggle,
-    Part: panel,
+    Part,
     splitProps: {
       "data-panel": drawer.over ? "over" : "beside",
       onKeyDown: drawer.onKeyDown,
@@ -139,10 +160,10 @@ function PaneToggle({
 }
 
 /**
- * The panel's side of a template's `Split`, after its main pane: while docked, the bar
- * and the spine holding the toggle; the pane itself (`clover-template-panel`), its Panel
- * given `onClose` and Escape while it floats over the Body; and, over the Body, the wash
- * beside it. Nothing at all where the resource has none of the panel's sections: a
+ * The panel's side of a template's `Split`, after its main pane (before it, for the
+ * start side): while docked, the bar and the spine holding the toggle, between the two;
+ * the pane itself (`clover-template-panel`), its Panel given `onClose` and Escape while
+ * it floats over the Body; and, over the Body, the wash beside it. Nothing at all where the resource has none of the panel's sections: a
  * template keeps no room, and no toggle, for a panel that would draw nothing. Its look is
  * written once, in `Default.css`, which `styles.css` carries.
  */
@@ -154,26 +175,29 @@ export function PanelPane({
   PanelProps,
   "onClose" | "closeOnEscape"
 >) {
-  const { id, over, docked, Part } = pane;
+  const { id, over, docked, side, Part } = pane;
   const offered = Clover.usePanelSections(panel.sections);
   if (!offered.length) return null;
+  // Between the panel and the main pane: after the panel on the start side.
+  const bar = docked && (
+    <>
+      <Clover.SplitHandle
+        className="clover-template-panel-handle"
+        aria-controls={id}
+      />
+      <div ref={pane.spine} className="clover-template-spine">
+        {pane.toggle}
+      </div>
+    </>
+  );
   return (
     <>
-      {docked && (
-        <Clover.SplitHandle
-          className="clover-template-panel-handle"
-          aria-controls={id}
-        />
-      )}
-      {docked && (
-        <div ref={pane.spine} className="clover-template-spine">
-          {pane.toggle}
-        </div>
-      )}
+      {side === "end" && bar}
       <Clover.SplitPane
         ref={pane.pane}
         id={id}
         data-spine={over || undefined}
+        data-side={side}
         name="panel"
         /*
          * Whether its panel has About, which Default's header reads to decide whether it
@@ -197,6 +221,7 @@ export function PanelPane({
           />
         )}
       </Clover.SplitPane>
+      {side === "start" && bar}
       {pane.scrim && <div className="clover-template-scrim" {...pane.scrim} />}
     </>
   );

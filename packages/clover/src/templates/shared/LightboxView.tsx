@@ -2,8 +2,7 @@ import React, { useEffect, useRef } from "react";
 
 import * as Clover from "../../parts";
 import type { LightboxProps } from "./Lightbox";
-import { PanelPane } from "./PanelPane";
-import { useLazyPanelPane } from "./useLazyPanelPane";
+import { PanelPane, usePanelPane } from "./PanelPane";
 import { useFollowFocus } from "./useFollowFocus";
 import { BESIDE_REM, PAGE_MIN, useWideEnough } from "./useSlide";
 
@@ -30,6 +29,8 @@ export default function LightboxView({
   storageKey,
   collapseControls,
   canvasOptions,
+  placeholder,
+  caption = true,
 }: Omit<LightboxProps, "open" | "onClose" | "className"> & {
   id: string;
   /**
@@ -70,7 +71,7 @@ export default function LightboxView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   // Its code loads as the lightbox opens, the chunk Document's is (`PanelPart`).
-  const pane = useLazyPanelPane({
+  const pane = usePanelPane({
     id: `${id}-panel`,
     beside: useWideEnough(panes, BESIDE_REM),
     defaultOpen: defaultPanelOpen,
@@ -97,15 +98,18 @@ export default function LightboxView({
           className="clover-template-lightbox-body"
           collapseControls={collapseControls}
           options={canvasOptions}
+          placeholder={placeholder}
         >
           {panel && !pane.docked && pane.toggle}
         </Clover.Body>
         {/* The view's label under it, the Manifest's over it as the lightbox's title. */}
-        <Clover.Label
-          of="canvas"
-          as="p"
-          className="clover-template-lightbox-caption"
-        />
+        {caption && (
+          <Clover.Label
+            of="canvas"
+            as="p"
+            className="clover-template-lightbox-caption"
+          />
+        )}
         {/* The grid's own: the views, or the annotations it opened on. */}
         <Clover.Items
           layout={items === "pager" ? "pager" : "slider"}

@@ -11,6 +11,41 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.4.0] - 2026-11-04
+
+### Added
+
+- `useAnnotationPages`, and `annotationPages()` on a `<clover-root>`'s `clover`, name the hook
+  for what it reads: each AnnotationPage, with its annotations. `useAnnotationSets` and
+  `annotationSets()` remain, the same.
+- `Items` takes `labels`: `labels={false}` (`labels="false"` on `<clover-items>`) shows the
+  pictures alone, each label hidden from sight but kept as its item's name for assistive
+  technology.
+- **Template helpers.** `@nulib/clover/templates` exports what the templates share, so a
+  copy of one imports them from there: the information panel (`usePanelPane`,
+  `PanelPane`), panes and drawers (`useDrawer`, `useWideEnough`,
+  `useFollowFocus`, `preloadDrag`, `BESIDE_REM`, `PAGE_MIN`, `PANEL_MIN`), and the
+  Gallery's lightbox (`preloadLightbox`, `useGivenAnnotations`, beside `Lightbox`). Each
+  is on the docs' new Helpers page.
+- **A Panel on the start side.** `usePanelPane` takes `side`, `"end"` (the default, as
+  every template has it) or `"start"`: place `PanelPane` before the main `SplitPane`, and
+  over the Body the Panel slides in from the start. `PanelToggle` (and
+  `<clover-panel-toggle>`) takes the same `side`: among the Body's controls it keeps the
+  start's top corner, and its glyph draws the panel on that side.
+- **`usePanelPane` loads the Panel itself.** Given no `panel`, it loads the Panel's code
+  at once where the Panel starts open, and as its PanelToggle is pointed at, focused or
+  pressed where it starts closed, as Document's and the Lightbox's do. Give
+  `panel: Clover.Panel` to draw it at once, on the server too, as Default does.
+- **The Lightbox's `caption` and `placeholder`.** `caption={false}` leaves out the
+  Canvas's label under its Body; `placeholder` is its Body's, so `false` opens the Canvas
+  itself rather than its `placeholderContainer`.
+- **A Map's `zoom`.** How close the Map (and `<clover-map>`'s `zoom`) frames its places:
+  a lone point at that zoom, several no closer. A point still opens at 8 by default;
+  15 shows its streets.
+- The size budgets rise for these: a Viewer in Default loads 0.3 kB more to first view
+  (95.5 kB), in Document or Gallery 0.2 kB more, and `styles.css` is 0.1 kB larger. As
+  web components, a page loads 0.3 kB more.
+
 ## [4.3.1] - 2026-11-04
 
 ### Added

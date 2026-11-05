@@ -54,6 +54,110 @@ describe("templates", () => {
     }
   });
 
+  // A copy of a template imports these from `@nulib/clover/templates` where it imported
+  // `../shared/…` (issue #391), so every one must be exported there.
+  it("export every helper a template imports from shared/", () => {
+    for (const file of sources(resolve(__dirname))) {
+      if (file.includes("/shared/")) continue;
+      const text = readFileSync(file, "utf8");
+      for (const [, names] of text.matchAll(
+        /^import\s+(?:type\s+)?\{([^}]*)\}\s+from "\.\.\/shared\/[^"]+"/gm,
+      )) {
+        for (const name of names.split(",").map((n) => n.trim())) {
+          if (!name || name.startsWith("type ")) continue;
+          expect(
+            name in Templates,
+            `${file} imports ${name} from shared/: export it from templates/index.ts`,
+          ).toBe(true);
+        }
+      }
+    }
+  });
+
+  // The template on the docs' Helpers page (`content/docs/composing/helpers.mdx`, Panel), built from
+  // the package's exports alone, the Panel on the start side: keep the two in step. (The
+  // page's has a Map under the Body, which jsdom cannot draw.)
+  it("make a template of your own from the helpers, as Helpers shows", async () => {
+    const Parts = await import("../parts");
+    function MyCustomViewer({
+      headingLevel = 2,
+      ...props
+    }: {
+      iiifContent: unknown;
+      headingLevel?: number;
+    }) {
+      const split = React.useRef<HTMLDivElement>(null);
+      const pane = Templates.usePanelPane({
+        id: "my-panel",
+        side: "start",
+        beside: Templates.useWideEnough(split, Templates.BESIDE_REM),
+        defaultOpen: true,
+        followFocus: Templates.useFollowFocus(),
+      });
+      return (
+        <Parts.Root {...(props as React.ComponentProps<typeof Parts.Root>)}>
+          <Parts.Label
+            as={`h${headingLevel}` as keyof React.JSX.IntrinsicElements}
+          />
+          <Parts.Split
+            ref={split}
+            className="clover-template-panes"
+            style={{ height: "40rem" }}
+            {...pane.splitProps}
+          >
+            <Templates.PanelPane
+              pane={pane}
+              layout="accordion"
+              headingLevel={headingLevel + 1}
+            >
+              <Parts.Tab value="about" label="About">
+                <Parts.About
+                  label={false}
+                  thumbnail={false}
+                  headingLevel={headingLevel + 2}
+                />
+              </Parts.Tab>
+            </Templates.PanelPane>
+            <Parts.SplitPane min={pane.over ? undefined : Templates.PAGE_MIN}>
+              <Parts.Body style={{ height: "20rem" }}>
+                {!pane.docked && pane.toggle}
+              </Parts.Body>
+            </Parts.SplitPane>
+          </Parts.Split>
+        </Parts.Root>
+      );
+    }
+    render(<MyCustomViewer iiifContent={bookJson} headingLevel={5} />);
+    // An accordion of one section, About, open beside the Body.
+    expect(
+      await screen.findByRole("button", { name: "About" }),
+    ).toHaveAttribute("aria-expanded", "true");
+    const panel = document.getElementById("my-panel")!;
+    expect(panel).not.toHaveAttribute("hidden");
+    expect(panel).toHaveAttribute("data-side", "start");
+    // On the start side: the Panel, then its SplitHandle, then the Body's SplitPane.
+    const handle = screen.getByRole("separator");
+    expect(
+      panel.compareDocumentPosition(handle) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      handle.compareDocumentPosition(document.querySelector(".clover-body")!) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    // The Manifest's label once, as the template's heading, and About's one level under
+    // it, at the levels `headingLevel` gives, as a docs demo's are.
+    expect(
+      screen.getAllByRole("heading", { name: "Simple Manifest - Book" }),
+    ).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", { level: 5, name: "Simple Manifest - Book" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 6, name: "About" }),
+    ).toBeInTheDocument();
+    expect(panel.querySelector(".clover-about-thumbnail")).toBeNull();
+  });
+
   it("Default: title, Body, strip with position and arrows, and the panel", async () => {
     render(<Templates.Default iiifContent={bookJson} />);
     expect(

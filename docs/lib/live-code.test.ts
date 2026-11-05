@@ -505,6 +505,18 @@ describe("codeLines", () => {
 });
 
 describe("knobProps", () => {
+  it("keeps apart two elements' knobs of one prop by their keys", () => {
+    const title: Knob[] = [{ prop: "as", key: "title:as", value: "h3" }];
+    const summary: Knob[] = [{ prop: "as", key: "summary:as", value: "p" }];
+    const values = initialValues([...title, ...summary]);
+    expect(values).toEqual({ "title:as": "h3", "summary:as": "p" });
+    expect(knobId(summary[0])).toBe("summary:as");
+    expect(knobProps(title, { ...values, "title:as": "h4" })).toEqual({
+      as: "h4",
+    });
+    expect(knobProps(summary, values)).toEqual({ as: "p" });
+  });
+
   it("gives an object's keys to the demo inside the objects their path names", () => {
     const knobs: Knob[] = [
       { prop: "controls", value: true },

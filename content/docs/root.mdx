@@ -1,6 +1,6 @@
 ---
 title: Root
-description: "Loads a IIIF resource and holds its current view: every other part goes inside a Root and reads from it."
+description: "Loads a IIIF resource and holds its current view: every other component goes inside a Root and reads from it."
 ---
 
 import { PartDemo } from "docs/components/Clover4/PartDemo";
@@ -40,7 +40,7 @@ move to assistive technology.
 
 Its most used props are `iiifContent`, `canvasId` with `onCanvasChange` (the current Canvas,
 controlled), `language`, `request` and `highContrast`. Every prop is in
-[Composing layouts](/docs/composing#root), with how to lay its parts out. The Viewer and
+[Composing layouts](/docs/composing#root), with how to lay its components out. The Viewer and
 its templates are each a Root and its parts, and take the same props.
 
 ## A Root inside a Root

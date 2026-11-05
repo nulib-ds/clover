@@ -41,6 +41,7 @@ export default function PagerLayout({
   navigation,
   of,
   secondary,
+  labels,
   singleItem,
   /* eslint-enable @typescript-eslint/no-unused-vars */
   highContrast,

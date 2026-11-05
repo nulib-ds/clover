@@ -61,7 +61,13 @@ export function PartsEditor<K extends string>({
   const [picked, setPicked] = useState<K | null>(null);
   const [said, setSaid] = useState("");
   const [copied, setCopied] = useState<Flavor | null>(null);
-  const pickedAt = picked ? order.indexOf(picked) : -1;
+  // Each part moves among its group: the parts with the same part around them (the
+  // header's title and summary; the header, Body and Items around it).
+  const around = aroundOf(treeOf(order, parts));
+  const groupOf = (key: K) =>
+    order.filter((each) => around.get(each) === around.get(key));
+  const pickedGroup = picked ? groupOf(picked) : [];
+  const pickedAt = picked ? pickedGroup.indexOf(picked) : -1;
 
   useEffect(() => {
     if (!picked) return;
@@ -82,11 +88,20 @@ export function PartsEditor<K extends string>({
   const blocks = useRef(new Map<string, HTMLElement>());
   const grips = useRef(new Map<string, HTMLButtonElement>());
   const press = useRef<{
+    key: K;
+    group: K[];
     from: number;
     y: number;
     rects: { top: number; height: number }[];
   } | null>(null);
-  type Drag = { flavor: Flavor; from: number; to: number; dy: number };
+  type Drag = {
+    flavor: Flavor;
+    key: K;
+    group: K[];
+    from: number;
+    to: number;
+    dy: number;
+  };
   const [drag, setDrag] = useState<Drag | null>(null);
   // The latest, for the drop, which may come before the last move has rendered.
   const dragged = useRef<Drag | null>(null);
@@ -104,24 +119,28 @@ export function PartsEditor<K extends string>({
   // The click that ends a drag is not a pick.
   const dragEnded = useRef(false);
 
-  const reorder = (from: number, to: number) => {
-    const key = order[from];
-    setOrder(moved(order, from, to));
-    setSaid(`${parts[key].name}, ${to + 1} of ${order.length}`);
+  // A part moved to another place in its group, the rest of the order as it was.
+  const reorder = (key: K, to: number) => {
+    const group = groupOf(key);
+    const next = moved(group, group.indexOf(key), to);
+    let at = 0;
+    setOrder(
+      order.map((each) =>
+        around.get(each) === around.get(key) ? next[at++] : each,
+      ),
+    );
+    setSaid(`${parts[key].name}, ${to + 1} of ${group.length}`);
   };
 
-  const step = (index: number, by: number, flavor?: Flavor) => {
-    const to = index + by;
-    if (to < 0 || to >= order.length) return;
-    if (flavor) refocus.current = `${flavor}:${order[index]}`;
-    reorder(index, to);
+  const step = (key: K, by: number, flavor?: Flavor) => {
+    const group = groupOf(key);
+    const to = group.indexOf(key) + by;
+    if (to < 0 || to >= group.length) return;
+    if (flavor) refocus.current = `${flavor}:${key}`;
+    reorder(key, to);
   };
 
-  const startDrag = (
-    flavor: Flavor,
-    index: number,
-    event: React.PointerEvent,
-  ) => {
+  const startDrag = (flavor: Flavor, key: K, event: React.PointerEvent) => {
     dragEnded.current = false;
     const target = event.target as Element;
     const fromGrip = Boolean(target.closest("[data-grip]"));
@@ -129,18 +148,23 @@ export function PartsEditor<K extends string>({
     // A value is changed, not dragged; by touch, only the grip drags, so the page scrolls.
     if (!fromGrip && target.closest("button, select, input")) return;
     if (!fromGrip && event.pointerType !== "mouse") return;
+    // The innermost part pressed drags, not the part around it.
+    event.stopPropagation();
     event.preventDefault();
     try {
       event.currentTarget.setPointerCapture(event.pointerId);
     } catch {
       // The press goes on uncaptured.
     }
+    const group = groupOf(key);
     press.current = {
-      from: index,
+      key,
+      group,
+      from: group.indexOf(key),
       y: event.clientY,
-      rects: order.map((key) => {
+      rects: group.map((each) => {
         const rect = blocks.current
-          .get(`${flavor}:${key}`)!
+          .get(`${flavor}:${each}`)!
           .getBoundingClientRect();
         return { top: rect.top, height: rect.height };
       }),
@@ -150,6 +174,7 @@ export function PartsEditor<K extends string>({
   const moveDrag = (flavor: Flavor, event: React.PointerEvent) => {
     const pressed = press.current;
     if (!pressed) return;
+    event.stopPropagation();
     const dy = event.clientY - pressed.y;
     if (!dragged.current && Math.abs(dy) < 4) return;
     const { top, height } = pressed.rects[pressed.from];
@@ -158,19 +183,29 @@ export function PartsEditor<K extends string>({
       (rect, index) =>
         index !== pressed.from && rect.top + rect.height / 2 < middle,
     ).length;
-    show({ flavor, from: pressed.from, to, dy });
+    show({
+      flavor,
+      key: pressed.key,
+      group: pressed.group,
+      from: pressed.from,
+      to,
+      dy,
+    });
   };
 
-  const endDrag = () => {
+  const endDrag = (event: React.PointerEvent) => {
+    if (press.current) event.stopPropagation();
     const last = dragged.current;
     press.current = null;
-    if (last && last.to !== last.from) reorder(last.from, last.to);
+    if (last && last.to !== last.from) reorder(last.key, last.to);
     if (last) dragEnded.current = true;
     show(null);
   };
 
   // A press on a part's lines that moved nothing picks it, or lets it go.
   const pick = (flavor: Flavor, key: K, event: React.MouseEvent) => {
+    // The innermost part pressed is picked, not the part around it.
+    event.stopPropagation();
     if (dragEnded.current) {
       dragEnded.current = false;
       return;
@@ -184,9 +219,11 @@ export function PartsEditor<K extends string>({
     grips.current.get(`${flavor}:${key}`)?.focus({ preventScroll: true });
   };
 
-  // While a part is dragged, the others step aside for it.
-  const shift = (flavor: Flavor, index: number) => {
+  // While a part is dragged, the others in its group step aside for it.
+  const shift = (flavor: Flavor, key: K) => {
     if (!drag || drag.flavor !== flavor) return 0;
+    const index = drag.group.indexOf(key);
+    if (index < 0) return 0;
     if (index === drag.from) return drag.dy;
     const height = press.current?.rects[drag.from].height ?? 0;
     if (drag.from < drag.to && index > drag.from && index <= drag.to)
@@ -234,18 +271,6 @@ export function PartsEditor<K extends string>({
   const code = (flavor: Flavor) => {
     const lines = codeLines(treeOf(order, parts), knobs, values, flavor);
     const text = textOf(lines);
-    // The lines before the parts, each part's in turn, and those after.
-    const head: Line[] = [];
-    const tail: Line[] = [];
-    const own: { key: K; lines: Line[] }[] = [];
-    for (const line of lines) {
-      const key = line.part as K | undefined;
-      if (key) {
-        const last = own.at(-1);
-        if (last?.key === key) last.lines.push(line);
-        else own.push({ key, lines: [line] });
-      } else (own.length ? tail : head).push(line);
-    }
     // Lines are numbered by where they are, not which part they belong to.
     let number = 0;
     const lineOf = (line: Line, key: React.Key, grip?: React.ReactNode) => (
@@ -264,6 +289,70 @@ export function PartsEditor<K extends string>({
     );
     const language = LANGUAGE[flavor];
     const id = (key: K) => `${flavor}:${key}`;
+    const grip = (key: K) => (
+      <button
+        ref={(node) => {
+          if (node) grips.current.set(id(key), node);
+          else grips.current.delete(id(key));
+        }}
+        type="button"
+        data-grip
+        className={styles.grip}
+        aria-label={`Move ${parts[key].name}`}
+        aria-describedby={hint}
+        onFocus={() => setPicked(key)}
+        onKeyDown={(event) => {
+          const by =
+            event.key === "ArrowUp" ? -1 : event.key === "ArrowDown" ? 1 : 0;
+          if (!by) return;
+          event.preventDefault();
+          step(key, by, flavor);
+        }}
+      >
+        <GripGlyph />
+      </button>
+    );
+    // A part's lines as one block, its grip on its first, the parts inside it blocks too.
+    const block = (key: K, own: Line[], depth: number) => (
+      <span
+        key={key}
+        ref={(node) => {
+          if (node) blocks.current.set(id(key), node);
+          else blocks.current.delete(id(key));
+        }}
+        className={styles.block}
+        data-dragged={
+          (drag?.flavor === flavor && drag.key === key) || undefined
+        }
+        data-picked={picked === key || undefined}
+        onClick={(event) => pick(flavor, key, event)}
+        style={{ transform: `translateY(${shift(flavor, key)}px)` }}
+        onPointerDown={(event) => startDrag(flavor, key, event)}
+        onPointerMove={(event) => moveDrag(flavor, event)}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+      >
+        {lineOf(own[0], "grip", grip(key))}
+        {linesOf(own.slice(1), depth + 1)}
+      </span>
+    );
+    // Lines in order: each run a part wrote, at this depth, its block.
+    const linesOf = (run: Line[], depth: number): React.ReactNode[] => {
+      const out: React.ReactNode[] = [];
+      for (let at = 0; at < run.length; ) {
+        const key = run[at].parts?.[depth] as K | undefined;
+        if (!key) {
+          out.push(lineOf(run[at], `${depth}-${at}`));
+          at += 1;
+          continue;
+        }
+        let end = at;
+        while (end < run.length && run[end].parts?.[depth] === key) end += 1;
+        out.push(block(key, run.slice(at, end), depth));
+        at = end;
+      }
+      return out;
+    };
     return (
       <div
         key={flavor}
@@ -285,15 +374,17 @@ export function PartsEditor<K extends string>({
                   type="button"
                   className={styles.button}
                   aria-disabled={pickedAt <= 0 || undefined}
-                  onClick={() => step(pickedAt, -1)}
+                  onClick={() => step(picked, -1)}
                 >
                   Move up
                 </button>
                 <button
                   type="button"
                   className={styles.button}
-                  aria-disabled={pickedAt >= order.length - 1 || undefined}
-                  onClick={() => step(pickedAt, 1)}
+                  aria-disabled={
+                    pickedAt >= pickedGroup.length - 1 || undefined
+                  }
+                  onClick={() => step(picked, 1)}
                 >
                   Move down
                 </button>
@@ -318,67 +409,7 @@ export function PartsEditor<K extends string>({
             data-live-code={text}
             data-dragging={drag?.flavor === flavor || undefined}
           >
-            <code>
-              {head.map((line, index) => lineOf(line, `head-${index}`))}
-              {own.map(({ key, lines: partLines }, index) => (
-                <span
-                  key={key}
-                  ref={(node) => {
-                    if (node) blocks.current.set(id(key), node);
-                    else blocks.current.delete(id(key));
-                  }}
-                  className={styles.block}
-                  data-dragged={
-                    (drag?.flavor === flavor && drag.from === index) ||
-                    undefined
-                  }
-                  data-picked={picked === key || undefined}
-                  onClick={(event) => pick(flavor, key, event)}
-                  style={{
-                    transform: `translateY(${shift(flavor, index)}px)`,
-                  }}
-                  onPointerDown={(event) => startDrag(flavor, index, event)}
-                  onPointerMove={(event) => moveDrag(flavor, event)}
-                  onPointerUp={endDrag}
-                  onPointerCancel={endDrag}
-                >
-                  {partLines.map((line, at) =>
-                    lineOf(
-                      line,
-                      at,
-                      at === 0 && (
-                        <button
-                          ref={(node) => {
-                            if (node) grips.current.set(id(key), node);
-                            else grips.current.delete(id(key));
-                          }}
-                          type="button"
-                          data-grip
-                          className={styles.grip}
-                          aria-label={`Move ${parts[key].name}`}
-                          aria-describedby={hint}
-                          onFocus={() => setPicked(key)}
-                          onKeyDown={(event) => {
-                            const by =
-                              event.key === "ArrowUp"
-                                ? -1
-                                : event.key === "ArrowDown"
-                                  ? 1
-                                  : 0;
-                            if (!by) return;
-                            event.preventDefault();
-                            step(index, by, flavor);
-                          }}
-                        >
-                          <GripGlyph />
-                        </button>
-                      ),
-                    ),
-                  )}
-                </span>
-              ))}
-              {tail.map((line, index) => lineOf(line, `tail-${index}`))}
-            </code>
+            <code>{linesOf(lines, 0)}</code>
           </pre>
         </div>
       </div>
@@ -394,12 +425,24 @@ export function PartsEditor<K extends string>({
           {copied ? "Copied the code" : said}
         </span>
         <span id={hint} className={styles.hidden}>
-          Arrow up or down moves the part, as Move up and Move down do.
+          Arrow up or down moves the component, as Move up and Move down do.
         </span>
       </div>
     </>
   );
 }
+
+/** Each movable part's own part around it, if any: the parts it moves among share it. */
+const aroundOf = (tree: CodeTree) => {
+  const map = new Map<string, string | undefined>();
+  const walk = (nodes: CodeNode[], parent?: string) =>
+    nodes.forEach((node) => {
+      if (node.key) map.set(node.key, parent);
+      walk(node.children ?? [], node.key ?? parent);
+    });
+  walk(tree.nodes);
+  return map;
+};
 
 /** A part moved from one place in the order to another. */
 const moved = <T,>(list: T[], from: number, to: number) => {

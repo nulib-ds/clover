@@ -82,11 +82,12 @@ One section of a `Panel`: a tab, or a heading in an accordion. It renders nothin
 A round button that shows and hides the panel. As a child of `Body`, it sits among the
 Canvas's controls.
 
-| Prop           | Type                      | Default  | Description                            |
-| -------------- | ------------------------- | -------- | -------------------------------------- |
-| `open`         | `boolean`                 | Required | Whether the panel is showing.          |
-| `onOpenChange` | `(open: boolean) => void` | Required | Called with `!open` when pressed.      |
-| `controls`     | `string`                  | —        | The panel's `id`, for `aria-controls`. |
+| Prop           | Type                      | Default  | Description                                                                                                                           |
+| -------------- | ------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `open`         | `boolean`                 | Required | Whether the panel is showing.                                                                                                         |
+| `onOpenChange` | `(open: boolean) => void` | Required | Called with `!open` when pressed.                                                                                                     |
+| `controls`     | `string`                  | —        | The panel's `id`, for `aria-controls`.                                                                                                |
+| `side`         | `"start" \| "end"`        | `"end"`  | The side of the Body the panel is on. Among the Body's controls it keeps that side's top corner, and its glyph draws the panel there. |
 
 ### About
 
@@ -353,10 +354,10 @@ function PageNotes({ notes }) {
 `closeOnEscape`; move focus into it as it opens.
 
 ```jsx
-function Layout({ url }) {
+function Layout({ iiifContent }) {
   const [open, setOpen] = React.useState(true);
   return (
-    <Clover.Root iiifContent={url}>
+    <Clover.Root iiifContent={iiifContent}>
       <Clover.Body>
         <Clover.PanelToggle
           open={open}

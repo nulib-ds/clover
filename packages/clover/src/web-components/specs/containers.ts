@@ -124,7 +124,10 @@ export const tabDocs: ElementDocs = {
 export const panelToggle: ElementSpec = {
   tag: "clover-panel-toggle",
   kind: "part",
-  attributes: { controls: { prop: "controls", type: "string" } },
+  attributes: {
+    controls: { prop: "controls", type: "string" },
+    side: { prop: "side", type: ["start", "end"] },
+  },
   events: {
     "clover-open-change": {
       prop: "onOpenChange",
@@ -140,6 +143,10 @@ export const panelToggleDocs: ElementDocs = {
   attributes: {
     controls: {
       description: "The id of what it shows and hides.",
+    },
+    side: {
+      description:
+        "The side of the Body the panel is on: end (the default) or start. Among the Body's controls it keeps that side's top corner, and its glyph draws the panel there.",
     },
   },
   events: {

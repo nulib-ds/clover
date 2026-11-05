@@ -270,6 +270,24 @@ describe("Items in a Root", () => {
     expect(options[1]).toHaveFocus();
   });
 
+  it("hides its labels from sight with labels={false}, each still its item's name", async () => {
+    renderInRoot({ labels: false });
+    const options = await screen.findAllByRole("option");
+    // The pictures alone: each caption is out of sight, inline, so it holds without the
+    // stylesheet, and still names its option (WCAG 4.1.2).
+    const caption = options[1].querySelector("figcaption") as HTMLElement;
+    expect(caption.style.position).toBe("absolute");
+    expect(caption.style.width).toBe("1px");
+    expect(caption.style.overflow).toBe("hidden");
+    expect(options[1]).toHaveAccessibleName("Frontispiece Title page");
+  });
+
+  it("shows its labels by default", async () => {
+    renderInRoot();
+    const options = await screen.findAllByRole("option");
+    expect(options[1].querySelector("figcaption")).not.toHaveAttribute("style");
+  });
+
   it("lays out as a list or a grid", async () => {
     const { container } = renderInRoot({ layout: "grid" });
     await screen.findAllByRole("option");

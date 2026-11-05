@@ -10,6 +10,11 @@ export interface PanelToggleProps {
   onOpenChange: (open: boolean) => void;
   /** The panel's `id`, for `aria-controls`. */
   controls?: string;
+  /**
+   * The side of the Body the panel is on: `"end"` (the default) or `"start"`. Among the
+   * Body's controls it keeps that side's top corner, and its glyph draws the panel there.
+   */
+  side?: "start" | "end";
 }
 
 /**
@@ -27,6 +32,7 @@ export function PanelToggle({
   open,
   onOpenChange,
   controls,
+  side,
 }: PanelToggleProps) {
   const { t, langOf } = useCloverTranslation();
   const id = useUniqueId().replace(/:/g, "");
@@ -37,6 +43,7 @@ export function PanelToggle({
       lang={langOf("informationPanelToggle")}
       expanded={open}
       controls={controls}
+      side={side === "start" ? side : undefined}
       onClick={() => onOpenChange(!open)}
     >
       {/* A page with a side panel: the panel half filled while it is open. */}

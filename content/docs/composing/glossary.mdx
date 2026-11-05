@@ -1,0 +1,111 @@
+---
+title: Glossary
+description: "Every Clover component and helper in one place: the core components and primitives, the UI components, and the functions and hooks."
+---
+
+import { CoreComponents } from "docs/components/Clover4/CoreComponents";
+
+# Glossary
+
+<div className="docs-lede">
+  Every component and helper Clover exports. Place any component inside a
+  `Root`, anywhere in your markup; one with nothing to show renders nothing.
+</div>
+
+## Core components
+
+Each has a page of its own. A primitive shows one IIIF property of the Manifest, or of
+the current Canvas with `of="canvas"`. Given a `value`, it shows that instead, inside a
+`Root` or not.
+
+<CoreComponents />
+
+## UI components
+
+These work with the core components. The ones templates share, `PanelPane` and
+`Lightbox`, are on [Helpers](/docs/composing/helpers#templates).
+
+| Component                                                                          | Description                                                                                                                                            |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`Previous`, `Next`](/docs/items#one-at-a-time)                                    | Round buttons to the previous or next view (a spread, in a paged book), or with `of="members"` a Collection's Manifest. Each shows disabled at an end. |
+| [`Position`](/docs/items#one-at-a-time)                                            | The current view's place, "2 / 5", or a member's with `of="members"`.                                                                                  |
+| `Status`                                                                           | Clover's loading mark, or what went wrong, announced to assistive technology. `loading={false}` only announces it.                                     |
+| [`Tab`](/docs/panel#sections-of-your-own)                                          | One section of the Panel: its `value`, its `label`, and what it shows.                                                                                 |
+| [`About`](/docs/panel#sections)                                                    | A Manifest's descriptive and linking properties, among them its summary, thumbnail, metadata and provider.                                             |
+| [`PanelToggle`](/docs/panel#showing-and-hiding-it)                                 | Shows and hides the Panel. Inside a `Body`, it joins the Canvas's controls.                                                                            |
+| [`CollectionSelect`](/docs/collection)                                             | A menu of a Collection's members; choosing one shows it.                                                                                               |
+| [`Split`, `SplitPane`, `SplitHandle`](/docs/composing/customizing#splitting-panes) | Panes side by side, a `SplitHandle` between them to resize them.                                                                                       |
+| [`ReadMore`](/docs/composing/customizing#long-values)                              | A "Read more" button for text of your own, as `Summary` has.                                                                                           |
+| [`Tip`](/docs/composing/customizing#controls-of-your-own)                          | A control's name and key, shown on hover and focus.                                                                                                    |
+
+## Helpers
+
+The functions and hooks Clover is built with. Each is on
+[Helpers](/docs/composing/helpers).
+
+### IIIF resources
+
+| Helper                                                         | Description                                                                 |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [`toPresentation4`](/docs/composing/helpers#iiif-resources)    | Upgrades a resource from an earlier Presentation version to Presentation 4. |
+| [`readAs`](/docs/composing/helpers#iiif-resources)             | Tells you whether a value is HTML, Markdown or plain text.                  |
+| [`toPlainText`](/docs/composing/helpers#iiif-resources)        | Turns a IIIF HTML value into plain text.                                    |
+| [`localize`](/docs/composing/helpers#iiif-resources)           | Picks a language map's text in the defined language.                        |
+| [`thumbnailSource`](/docs/composing/helpers#iiif-resources)    | Finds a Manifest's, Collection's or Canvas's thumbnail.                     |
+| [`stillSource`](/docs/composing/helpers#iiif-resources)        | Finds a picture to stand in for a Canvas at the size it's drawn.            |
+| [`regionSource`](/docs/composing/helpers#iiif-resources)       | Finds an image of one region of a Canvas.                                   |
+| [`resolveThumbnail`](/docs/composing/helpers#iiif-resources)   | Turns a source into an image URL its `info.json` allows.                    |
+| [`buildContentState`](/docs/composing/helpers#iiif-resources)  | Writes a content state annotation for a Canvas, a region or a time.         |
+| [`encodeContentState`](/docs/composing/helpers#iiif-resources) | Encodes a content state annotation for a link.                              |
+| [`decodeContentState`](/docs/composing/helpers#iiif-resources) | Decodes an `iiif-content` value back into its annotation.                   |
+| [`groupViews`](/docs/composing/helpers#iiif-resources)         | Groups a Manifest's Canvases into the views the Viewer shows.               |
+| [`resolveBehavior`](/docs/composing/helpers#iiif-resources)    | Reads the `behavior` that lays out a sequence.                              |
+| [`resolveDirection`](/docs/composing/helpers#iiif-resources)   | Reads a `viewingDirection`.                                                 |
+
+### Maps
+
+| Helper                                             | Description                                                                 |
+| -------------------------------------------------- | --------------------------------------------------------------------------- |
+| [`hasMapData`](/docs/composing/helpers#maps)       | Tells you whether a Manifest has anything to put on a Map.                  |
+| [`navPlaceOf`](/docs/composing/helpers#maps)       | Gathers every `navPlace` into one GeoJSON FeatureCollection.                |
+| [`georeferencesOf`](/docs/composing/helpers#maps)  | Gathers the georeferenced images of a Manifest's Canvases.                  |
+| [`readGeoreference`](/docs/composing/helpers#maps) | Reads one Georeference Extension annotation as an image to lay over a Map.  |
+| [`boundsOf`](/docs/composing/helpers#maps)         | The box that holds places and georeferenced images.                         |
+| [`cornersOf`](/docs/composing/helpers#maps)        | Where a georeferenced image's corners land.                                 |
+| [`affineTransform`](/docs/composing/helpers#maps)  | The transform from a georeference's image pixels to longitude and latitude. |
+| [`setMapWorkerUrl`](/docs/composing/helpers#maps)  | Serves MapLibre's worker from an address of your own.                       |
+
+### Hooks
+
+| Hook                                                                           | Description                                                                   |
+| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| [`useStatus()`](/docs/composing/helpers#usestatus)                             | Whether the Root is loading, ready or failed.                                 |
+| [`useManifest()`](/docs/composing/helpers#usemanifest)                         | The Manifest, in Presentation 4.                                              |
+| [`useSequence()`](/docs/composing/helpers#usesequence)                         | The Canvases, the views and the viewing direction.                            |
+| [`useVisibleCanvases()`](/docs/composing/helpers#usevisiblecanvases)           | The Canvases of the current view.                                             |
+| [`useActiveCanvas()`](/docs/composing/helpers#useactivecanvas)                 | The current Canvas.                                                           |
+| [`useNavigation()`](/docs/composing/helpers#usenavigation)                     | Where the view is, and the steps to the others.                               |
+| [`useAnnotationCollection()`](/docs/composing/helpers#useannotationcollection) | The content's annotations, walked as one whole.                               |
+| [`useAnnotationPages()`](/docs/composing/helpers#useannotationpages)           | Each AnnotationPage, the Manifest's and the Root's own, with its annotations. |
+| [`useLocalized(value)`](/docs/composing/helpers#uselocalizedvalue)             | A language map's text, in the Root's language.                                |
+| [`useT()`](/docs/composing/helpers#uset)                                       | The predefined strings, in Clover's interface language.                       |
+| [`useLangOf()`](/docs/composing/helpers#uselangof)                             | A predefined string's `lang`, where it isn't the page's.                      |
+| [`usePanelSections(names)`](/docs/composing/helpers#usepanelsections)          | Which of the Panel's default sections the resource has data for.              |
+| [`useCloverSelector(select)`](/docs/composing/helpers#usecloverselectorselect) | Any value from the Root's state.                                              |
+| [`useClover()`](/docs/composing/helpers#useclover)                             | The Root's state and actions.                                                 |
+| [`useUniqueId()`](/docs/composing/helpers#useuniqueid)                         | An id unique on the page.                                                     |
+
+### Templates
+
+| Helper                                                                                | Description                                             |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| [`usePanelPane`](/docs/composing/helpers#usepanelpane-options)                        | Keeps the Panel's state, beside the Body or over it.    |
+| [`PanelPane`](/docs/composing/helpers#panelpane-props)                                | Draws the Panel in a SplitPane of its own.              |
+| [`useWideEnough`](/docs/composing/helpers#room-beside-the-body)                       | Tells you whether an element is wide enough.            |
+| [`BESIDE_REM`, `PAGE_MIN`, `PANEL_MIN`](/docs/composing/helpers#room-beside-the-body) | The room the Body and the Panel need.                   |
+| [`useDrawer`](/docs/composing/helpers#more-splitpanes)                                | Gives a SplitPane of your own the Panel's behavior.     |
+| [`useFollowFocus`](/docs/composing/helpers#more-splitpanes)                           | Moves focus with a button that's drawn somewhere new.   |
+| [`preloadDrag`](/docs/composing/helpers#more-splitpanes)                              | Starts loading the code that drags a SplitPane closed.  |
+| [`Lightbox`](/docs/composing/helpers#lightbox)                                        | The dialog Gallery opens for one cell of its grid.      |
+| [`preloadLightbox`](/docs/composing/helpers#lightbox)                                 | Starts loading the Lightbox's code.                     |
+| [`useGivenAnnotations`](/docs/composing/helpers#lightbox)                             | The annotations given to the Root as an AnnotationPage. |

@@ -126,6 +126,7 @@ export type { ControlButtonProps, ControlButtons } from "./ui/controlButtons";
 export {
   useActiveCanvas,
   useAnnotationCollection,
+  useAnnotationPages,
   useAnnotationSets,
   useLocalized,
   useManifest,

@@ -84,9 +84,22 @@ every rule below.
   it is 19.5 kB gzip. Add a dependency only when a milestone needs it.
 - **ES modules only**, one file per source module (`preserveModules`), named exports
   only. Every public export is documented, or not exported (Mat, 2026-10-27, as 4.0 fixes
-  the API): the helpers (`readAs`, `toPlainText`, `thumbnailSource`, `regionSource`,
-  `resolveThumbnail`, `buildContentState`) in the Technical overview's Helpers.
-  `createClover` and `isPresentation4` are not exported (a page reads a Root through
+  the API): the helpers (`toPresentation4`, `readAs`, `toPlainText`, `localize`, the
+  thumbnails', the content states', the views' (`groupViews`, `resolveBehavior`,
+  `resolveDirection`) and the maps' (`core/geo.ts`, `setMapWorkerUrl`)) and what the
+  templates share
+  (`templates/shared/`, from `@nulib/clover/templates`) on the docs' Helpers page
+  (`content/docs/composing/helpers.mdx`; Mat, 2026-11-04, issue #391: docs reference only what npm
+  ships, and "helpers should have its own page"). A
+  template imports nothing from `shared/` that `templates/index.ts` does not export
+  (`templates.test.tsx` holds it), so a copy swaps `../../parts` for `@nulib/clover` and
+  `../shared/…` for `@nulib/clover/templates`, the same for every template; its README
+  gives those steps, linking the Helpers page. A Panel sits on the Body's end or start
+  (`usePanelPane`'s `side`, Mat, 2026-11-04): `PanelPane` draws its SplitHandle and spine
+  after it on the start side, the pane carries `data-side`, `Default.css` slides it in
+  from the start over the Body, and its `PanelToggle` takes the same `side`
+  (`data-side` on the button), pinned to the controls' start corner (`Canvas.css`), its
+  glyph mirrored (`Button.css`). Styling's states table lists both. `createClover` and `isPresentation4` are not exported (a page reads a Root through
   `useClover` and the hooks); `toPresentation4` is.
   `import * as Clover from "@nulib/clover"` gives dot notation and still tree-shakes;
   `build/consumer.test.mjs` asserts that. Never an aggregate object or `Root.Item = …`
@@ -594,8 +607,9 @@ every rule below.
 - **What starts hidden loads when first wanted** (Mat, 2026-10-27): the Gallery's lightbox
   Body (`shared/LightboxView.tsx`, lazy, a busy box in its place meanwhile) and the
   information panel where it starts shut or out of sight, Document's and the lightbox's
-  (`shared/PanelPart.tsx`, through `usePanelPane`'s `load`: a first press waits for it,
-  then opens the pane whole, so focus finds its section). The lightbox's title, Close and
+  (`shared/PanelPart.tsx`, loaded by `usePanelPane` when it is given no `panel`, at once
+  where it starts open; Mat, 2026-11-04: one hook, no `useLazyPanelPane`): a first press
+  waits for it, then opens the pane whole, so focus finds its section). The lightbox's title, Close and
   thumbnails stay up front, so the dialog is named and focus lands on the view in its
   strip at once; its busy box is
   `clover-template-lightbox-pending`, in `Lightbox.css`, so the elements' sheets bring it

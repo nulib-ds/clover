@@ -8,11 +8,10 @@ import type {
   PanelSectionLabels,
   RootProps,
 } from "../../parts";
-import { PanelPane } from "../shared/PanelPane";
+import { PanelPane, usePanelPane } from "../shared/PanelPane";
 import { preloadDrag } from "../shared/useDragToClose";
 import { useDrawer } from "../shared/useDrawer";
 import { useFollowFocus } from "../shared/useFollowFocus";
-import { useLazyPanelPane } from "../shared/useLazyPanelPane";
 import { BESIDE_REM, PAGE_MIN, useWideEnough } from "../shared/useSlide";
 import { Sheets } from "./Sheets";
 
@@ -227,7 +226,7 @@ function DocumentLayout({
    * controls otherwise; a press moves it, and focus follows it there.
    */
   // Its code loads as the reader reaches for it, as it starts shut (`PanelPart`).
-  const panel = useLazyPanelPane({
+  const panel = usePanelPane({
     id: `${id}-panel`,
     beside: useWideEnough(panes, BESIDE_REM + (showSidebar ? SIDEBAR_REM : 0)),
     defaultOpen: Boolean(defaultPanelOpen),
