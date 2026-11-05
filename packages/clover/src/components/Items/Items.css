@@ -8,6 +8,8 @@
  *   --clover-items-size    a grid column's width (default 10rem)
  *   --clover-items-gap     the space between items (default `m`)
  *   --clover-items-lines   the lines a slider's or grid's title runs to (default 3)
+ *   --clover-items-inset   room at a slider's ends, so its first and last items rest
+ *                          clear of its arrows (default 0)
  *
  * The scroll container, its flex row and each item's snap point are set inline (by the
  * component and `useScrollTrack`), so a slider still scrolls without this file.
@@ -72,6 +74,15 @@
   padding: var(--clover-items-ring-room);
   scroll-padding-inline: var(--clover-items-ring-room);
   scrollbar-width: none;
+}
+
+.clover-items[data-layout="slider"] .clover-items-viewport {
+  padding-inline: calc(
+    var(--clover-items-ring-room) + var(--clover-items-inset, 0px)
+  );
+  scroll-padding-inline: calc(
+    var(--clover-items-ring-room) + var(--clover-items-inset, 0px)
+  );
 }
 
 .clover-items-viewport::-webkit-scrollbar {
@@ -595,3 +606,100 @@
 
 /* Nowhere to go (the first item, the last, or the strip's end): shown disabled, in
    `ui/Button.css`. It takes no pointer, so a press on it reaches the picture under it. */
+
+/*
+ * A vertical slider: a column as tall as what holds it, scrolling down, its pictures
+ * as wide as the column. Its shadows and arrows move to its top and bottom.
+ */
+.clover-items[data-layout="slider"][data-orientation="vertical"] {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.clover-items[data-layout="slider"][data-orientation="vertical"]
+  .clover-items-frame {
+  flex: 1;
+  min-height: 0;
+}
+
+.clover-items[data-layout="slider"][data-orientation="vertical"]
+  .clover-items-viewport {
+  box-sizing: border-box;
+  height: calc(100% + 2 * var(--clover-items-ring-room));
+  padding: calc(var(--clover-items-ring-room) + var(--clover-items-inset, 0px))
+    var(--clover-items-ring-room);
+  scroll-padding: calc(
+      var(--clover-items-ring-room) + var(--clover-items-inset, 0px)
+    )
+    0;
+}
+
+.clover-items[data-layout="slider"][data-orientation="vertical"]
+  .clover-items-figure {
+  grid-template-columns: repeat(var(--parts, 1), 1fr);
+}
+
+/* `data-orientation` is only on a slider: without `data-layout`, so no list's picture ties. */
+.clover-items[data-orientation="vertical"] .clover-items-picture img,
+.clover-items[data-orientation="vertical"] .clover-items-picture[data-empty] {
+  width: 100%;
+  height: auto;
+}
+
+.clover-items[data-orientation="vertical"] .clover-items-picture[data-empty] {
+  aspect-ratio: 4 / 3;
+}
+
+@supports (timeline-scope: --clover-items-track) {
+  .clover-items[data-layout="slider"][data-orientation="vertical"]
+    .clover-items-viewport {
+    scroll-timeline: --clover-items-track block;
+  }
+
+  .clover-items[data-layout="slider"][data-orientation="vertical"]
+    .clover-items-frame::before,
+  .clover-items[data-layout="slider"][data-orientation="vertical"]
+    .clover-items-frame::after {
+    left: 0;
+    right: 0;
+    width: auto;
+    height: var(--clover-space-s);
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--clover-space-s),
+      #000 calc(100% - var(--clover-space-s)),
+      transparent
+    );
+  }
+
+  .clover-items[data-layout="slider"][data-orientation="vertical"]
+    .clover-items-frame::before {
+    --clover-items-shade: to bottom;
+    top: calc(-1 * var(--clover-items-ring-room));
+  }
+
+  .clover-items[data-layout="slider"][data-orientation="vertical"]
+    .clover-items-frame::after {
+    --clover-items-shade: to top;
+    top: auto;
+    bottom: calc(-1 * var(--clover-items-ring-room));
+  }
+}
+
+.clover-items[data-orientation="vertical"]
+  :is(button.clover-items-scroll-prev, button.clover-items-scroll-next) {
+  inset-inline: auto;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.clover-items[data-orientation="vertical"] button.clover-items-scroll-prev {
+  top: var(--clover-space-2xs);
+}
+
+.clover-items[data-orientation="vertical"] button.clover-items-scroll-next {
+  top: auto;
+  bottom: var(--clover-space-2xs);
+}

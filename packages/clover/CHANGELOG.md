@@ -11,6 +11,26 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **A vertical slider.** `Items` takes `orientation="vertical"` (`orientation` on
+  `<clover-items>`): the slider runs down a column that fills the height of what holds it,
+  as a filmstrip beside the Body, its pictures as wide as the column, Up and Down its arrow
+  keys. Give the container a height, as a grid or a `SplitPane` does:
+
+  ```jsx
+  <Clover.Root
+    iiifContent={url}
+    style={{ display: "grid", gridTemplateColumns: "8rem 1fr", height: 480 }}
+  >
+    <Clover.Items orientation="vertical" />
+    <Clover.Body />
+  </Clover.Root>
+  ```
+
+- **`--clover-items-inset`**, room at a slider's ends (default `0`), so its first and last
+  items rest clear of its arrows.
+
 ## [4.4.2] - 2026-11-05
 
 ### Fixed
