@@ -57,6 +57,16 @@ export interface Knob {
 
 export type Values = Record<string, Plain>;
 
+/**
+ * A live part beside its example's Body while its knobs hold `when`'s values: the Root a
+ * grid, the part's column `width`, `height` tall.
+ */
+export interface LiveBeside {
+  when: Record<string, Plain[]>;
+  width: string;
+  height: number;
+}
+
 /** A knob's key among an example's values: where it is written, and its prop. */
 export const knobId = (knob: Pick<Knob, "prop" | "on" | "key">) =>
   knob.key ?? `${knob.on ?? "part"}:${knob.prop}`;
@@ -125,6 +135,8 @@ export interface CodeStyle {
   name: string;
   value?: Plain;
   knob?: string;
+  /** Written only while the part's knobs hold one of these values, as a knob's `when`. */
+  when?: Record<string, Plain[]>;
 }
 
 /** A key of an object a prop takes: fixed, set by a knob, or an object of keys. */
@@ -179,6 +191,10 @@ export interface CodeNode {
    * writes carries it (`Line.part`), so its lines move together (`ComposeExample.tsx`).
    */
   key?: string;
+  /** Written only while the part's knobs hold one of these values, as a knob's `when`. */
+  when?: Record<string, Plain[]>;
+  /** Written except while the part's knobs hold one of these values. */
+  unless?: Record<string, Plain[]>;
 }
 
 export interface CodeTree {
@@ -312,6 +328,15 @@ function shows(id: string, context: Context) {
   return context.measure || isLive(knob, context.knobs, context.values);
 }
 
+/** Whether the part's knobs hold the values `when` names, as `isLive` reads a knob's. */
+export function holds(
+  when: Record<string, Plain[]> | undefined,
+  knobs: Knob[],
+  values: Values,
+) {
+  return isLive({ prop: "", value: "", when }, knobs, values);
+}
+
 /** Whether an object's key is written: fixed, its knob live, or an object with a key to say. */
 function entryShows(entry: CodeEntry, context: Context): boolean {
   if (entry.entries)
@@ -325,9 +350,7 @@ function entryShows(entry: CodeEntry, context: Context): boolean {
  */
 function written(attribute: CodeAttr, context: Context) {
   if (attribute.style)
-    return attribute.style.some(
-      (entry) => !entry.knob || shows(entry.knob, context),
-    );
+    return attribute.style.some((entry) => styleShows(entry, context));
   if (attribute.entries)
     return attribute.entries.some((entry) => entryShows(entry, context));
   return !attribute.knob || shows(attribute.knob, context);
@@ -441,6 +464,13 @@ function knobTokens(
   return [str('"'), live("string", shown), str('"')];
 }
 
+function styleShows(entry: CodeStyle, context: Context) {
+  return (
+    (!entry.knob || shows(entry.knob, context)) &&
+    holds(entry.when, context.knobs, context.values)
+  );
+}
+
 /** A style's properties, on one line. */
 function styleTokens(
   style: CodeStyle[],
@@ -448,7 +478,7 @@ function styleTokens(
   flavor: Flavor,
 ): Token[][] {
   return style
-    .filter((entry) => !entry.knob || shows(entry.knob, context))
+    .filter((entry) => styleShows(entry, context))
     .map((entry) => {
       const name =
         flavor === "html"
@@ -691,7 +721,11 @@ function nodeLines(
   const attrs = node.attrs.filter(
     (each) => tagged(each) && written(each, context),
   );
-  const children = node.children ?? [];
+  const children = (node.children ?? []).filter(
+    (child) =>
+      holds(child.when, context.knobs, context.values) &&
+      !(child.unless && holds(child.unless, context.knobs, context.values)),
+  );
   const room = WIDTH - 2 * (depth + 1);
   const close = html ? [punct(">")] : [punct(children.length ? ">" : " />")];
   const line = (shown: CodeAttr[], given: Context) => [

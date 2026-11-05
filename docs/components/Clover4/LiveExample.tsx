@@ -16,6 +16,7 @@ import {
   type CodeStyle,
   type CodeTree,
   type Knob,
+  type LiveBeside,
   knobId,
   pageAddress,
   publishedAddress,
@@ -175,6 +176,8 @@ interface LivePartProps {
   body?: boolean;
   /** A box of this height around it, which scrolls, as `PartDemo`'s. */
   box?: string;
+  /** With `body`: the part in a column at the Body's start while its knobs allow. */
+  beside?: LiveBeside;
   /** Its code without a `Root` (`Value`); `BODY_PARTS` and `Map` are always alone. */
   alone?: boolean;
   /** React's imports, where the code is a whole module (`Map`'s own import). */
@@ -189,6 +192,7 @@ export function LivePart({
   resource = "paged",
   body = false,
   box,
+  beside,
   alone = false,
   imports,
 }: LivePartProps) {
@@ -243,13 +247,49 @@ export function LivePart({
             html: "clover-root",
             attrs: [
               url("clover-root"),
-              ...attrsOf("clover-root", {}, on("root")),
+              ...attrsOf(
+                "clover-root",
+                {},
+                on("root"),
+                beside
+                  ? [
+                      { name: "display", value: "grid", when: beside.when },
+                      {
+                        name: "gridTemplateColumns",
+                        value: `${beside.width} 1fr`,
+                        when: beside.when,
+                      },
+                      {
+                        name: "height",
+                        value: beside.height,
+                        when: beside.when,
+                      },
+                    ]
+                  : [],
+              ),
             ],
             children: [
               ...(body
-                ? [{ jsx: "Clover.Body", html: "clover-body", attrs: [] }]
+                ? [
+                    {
+                      jsx: "Clover.Body",
+                      html: "clover-body",
+                      attrs: [],
+                      unless: beside?.when,
+                    },
+                  ]
                 : []),
               wrapped,
+              ...(body && beside
+                ? [
+                    {
+                      jsx: "Clover.Body",
+                      html: "clover-body",
+                      attrs: [],
+                      when: beside.when,
+                    },
+                  ]
+                : []),
             ],
           },
     ],
@@ -261,6 +301,7 @@ export function LivePart({
     resource,
     body,
     box,
+    beside,
   };
   return <LiveFrame tree={tree} knobs={named} demo={demo} />;
 }

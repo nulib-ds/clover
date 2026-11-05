@@ -86,6 +86,8 @@ interface PartDemoProps {
   resource?: PartDemoResource;
   /** A `Body` above it, for a part that follows the view (`of="canvas"`, a pager). */
   body?: boolean;
+  /** The parts in a column this wide at the Body's start, rather than under it. */
+  side?: string;
   /** The Body's height, in px. Default 320. */
   height?: number;
   /** The Root's own props, plain values: a `searchQuery` to run as it opens. */
@@ -102,6 +104,7 @@ const Live = dynamic(
         iiifContent,
         request,
         body,
+        side,
         height,
         rootProps,
       }: {
@@ -111,6 +114,7 @@ const Live = dynamic(
         iiifContent: string;
         request?: { fetch: typeof fetch };
         body: boolean;
+        side?: string;
         height: number;
         rootProps?: Record<string, unknown>;
       }) {
@@ -131,18 +135,26 @@ const Live = dynamic(
             iiifContent={iiifContent}
             request={request}
             style={
-              row
+              side
                 ? {
-                    display: "flex",
-                    flexWrap: "wrap",
-                    alignItems: "center",
+                    display: "grid",
+                    gridTemplateColumns: `${side} 1fr`,
                     gap: "1rem",
+                    height,
                   }
-                : { display: "grid", gap: "1rem" }
+                : row
+                  ? {
+                      display: "flex",
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                      gap: "1rem",
+                    }
+                  : { display: "grid", gap: "1rem" }
             }
           >
+            {side && <div style={{ minHeight: 0 }}>{parts}</div>}
             {body && <clover.Body style={{ height }} />}
-            {box ? (
+            {side ? null : box ? (
               <div style={{ height: box, overflowY: "auto" }}>{parts}</div>
             ) : (
               parts
@@ -164,6 +176,7 @@ export function PartDemo({
   box,
   resource = "paged",
   body = false,
+  side,
   height = 320,
   rootProps,
 }: PartDemoProps) {
@@ -185,6 +198,7 @@ export function PartDemo({
           iiifContent={url}
           request={request ?? undefined}
           body={body}
+          side={side}
           height={height}
           rootProps={rootProps}
         />
