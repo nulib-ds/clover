@@ -6,10 +6,10 @@
   "sceneCloverOnDemandGzip": 8300,
   "viewerShellGzip": 1150,
   "defaultTemplateGzip": 77550,
-  "documentTemplateGzip": 72750,
+  "documentTemplateGzip": 72900,
   "galleryTemplateGzip": 30900,
   "defaultTemplateFirstViewGzip": 95500,
-  "documentTemplateFirstViewGzip": 91850,
+  "documentTemplateFirstViewGzip": 92000,
   "galleryTemplateFirstViewGzip": 52100,
   "canvasFirstViewGzip": 48200,
   "timelineFirstViewGzip": 53600,
@@ -26,7 +26,7 @@
   "composedPageGzip": 105250,
   "layoutPageGzip": 123450,
   "canvasElementGzip": 92250,
-  "documentElementGzip": 134750,
+  "documentElementGzip": 134850,
   "galleryElementGzip": 131350,
   "viewerEntryGzip": 107350
 }
