@@ -288,6 +288,30 @@ describe("Items in a Root", () => {
     expect(options[1].querySelector("figcaption")).not.toHaveAttribute("style");
   });
 
+  it('centers a slider between its arrows with align="center"', async () => {
+    const { container } = renderInRoot({ align: "center" });
+    await screen.findAllByRole("option");
+    expect(container.querySelector(".clover-items")).toHaveAttribute(
+      "data-align",
+      "center",
+    );
+    // The arrows stay either side of the row in the document, so the tab order is as before.
+    const frame = container.querySelector(".clover-items-frame") as HTMLElement;
+    expect(Array.from(frame.children).map((child) => child.className)).toEqual([
+      "clover-items-scroll-prev",
+      "clover-items-viewport",
+      "clover-items-scroll-next",
+    ]);
+  });
+
+  it("leaves align to the slider: a grid carries none", async () => {
+    const { container } = renderInRoot({ layout: "grid", align: "center" });
+    await screen.findAllByRole("option");
+    expect(container.querySelector(".clover-items")).not.toHaveAttribute(
+      "data-align",
+    );
+  });
+
   it("lays out as a list or a grid", async () => {
     const { container } = renderInRoot({ layout: "grid" });
     await screen.findAllByRole("option");

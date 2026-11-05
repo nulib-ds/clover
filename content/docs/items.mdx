@@ -33,6 +33,12 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
       options: ["slider", "list", "grid", "masonry", "pager"],
     },
     {
+      prop: "align",
+      value: "start",
+      options: ["start", "center"],
+      when: { layout: ["slider"] },
+    },
+    {
       prop: "style.--clover-items-height",
       value: 8,
       format: "{}rem",
@@ -66,6 +72,7 @@ arrow keys and the pager's steps with it.
 | Prop            | Type                                                   | Default                         | Description                                                                                                                                                                                                                                                                                                                      |
 | --------------- | ------------------------------------------------------ | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `layout`        | `"slider" \| "list" \| "grid" \| "masonry" \| "pager"` | `"slider"`                      | Thumbnails in a row, a column, a grid, or masonry (a grid whose pictures keep their proportions, in reading order), or one at a time.                                                                                                                                                                                            |
+| `align`         | `"start" \| "center"`                                  | `"start"`                       | A slider's place in its frame: the row filling it, with its arrows over its ends, or `"center"`, the row shrunk to its thumbnails and centered between its arrows, which sit beside it. Once the thumbnails overflow, the row fills the frame and scrolls as it does at `"start"`. Only the slider has it.                       |
 | `secondary`     | `"summary" \| "navDate" \| "none"`                     | `"summary"`                     | The line under an item's label, where it has one (a Collection's members do): its summary, its date, or none.                                                                                                                                                                                                                    |
 | `labels`        | `boolean`                                              | `true`                          | Each item's label, and the line under it, beside its picture. `false` shows the pictures alone: the labels are hidden from sight but kept as each item's name for assistive technology.                                                                                                                                          |
 | `of`            | `"views" \| "members" \| "targets" \| "annotations"`   | `"views"`                       | In a `Root`: its views, its Collection's members, a content state's targets (two or more), each opening its Manifest at its place, or annotations walked as one whole: an AnnotationPage or AnnotationCollection given as the content, else an AnnotationCollection the Manifest's pages are part of, each picked on its Canvas. |
@@ -145,7 +152,8 @@ spread at a time through a paged book.
 
 Size the thumbnails with CSS: `--clover-items-height` for a slider's pictures (default
 `8rem`), `--clover-items-size` for a grid's columns (`10rem`), `--clover-items-gap`
-between them (`1rem`).
+between them (`1rem`), and `--clover-items-arrow-gap` between a centered slider's arrows
+and its pictures (`0.618rem`).
 
 <Example>
 <PartDemo

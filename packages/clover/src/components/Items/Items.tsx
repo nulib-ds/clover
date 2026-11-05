@@ -49,6 +49,14 @@ export interface ItemsProps
    */
   layout?: ItemsLayout;
   /**
+   * The `slider`'s place in its frame: `start` (the default), the row filling the frame
+   * with its arrows over its ends, or `center`, the row shrunk to its thumbnails and
+   * centered between its arrows, which sit beside it. Once the thumbnails overflow, the
+   * row fills the frame and scrolls with an arrow at either end, as `start` does. Only
+   * the slider has it. Default `"start"`.
+   */
+  align?: "start" | "center";
+  /**
    * The line under an item's label, where it has one (a Collection's members do): its
    * `summary` (the default), its `navDate`, or `none`. Default `"summary"`.
    */
@@ -387,6 +395,7 @@ export function ItemsView({
   navigation,
   rtl = false,
   layout = "slider",
+  align,
   thumbnailSize = 200,
   request,
   language,
@@ -645,6 +654,7 @@ export function ItemsView({
         ref={root.ref}
         className={join("clover-items", className)}
         data-layout={layout}
+        data-align={slider ? align : undefined}
         data-navigation={navigation}
         {...highContrastProps(contrast)}
         {...rest}
