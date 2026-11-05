@@ -550,6 +550,12 @@ button.clover-sections-scroll-next {
     > .clover-sections-label::after {
     background-color: Highlight;
   }
+
+  /* The chosen tab's line too: forced, every tab's transparent line is CanvasText. */
+  .clover-sections[data-layout="tabs"]
+    button.clover-sections-button[aria-selected="true"] {
+    border-bottom-color: Highlight;
+  }
 }
 
 /* The open box, which cannot close, is not offered as something to press. */

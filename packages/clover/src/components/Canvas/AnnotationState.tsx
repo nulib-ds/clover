@@ -46,7 +46,8 @@ export interface AnnotationModel {
   /** Comments on a whole Canvas, by Canvas, for the caption. */
   comments: Map<string, CanvasAnnotation["annotation"][]>;
   selected: string | null;
-  select: (annotation: ListedAnnotation) => void;
+  /** Picks one; `play` false for a key's move through the menu, which only seeks. */
+  select: (annotation: ListedAnnotation, play?: boolean) => void;
   activate: (id: string | null) => void;
   /** Let go of the pick: whether there was one. */
   release: () => boolean;
@@ -312,36 +313,44 @@ export function AnnotationState({
   hiddenPagesRef.current = hiddenPages;
   const setPagesVisibleRef = useRef(setPagesVisible);
   setPagesVisibleRef.current = setPagesVisible;
-  const selectAnnotation = useCallback((annotation: ListedAnnotation) => {
-    // One of a hidden page, chosen from the menu, shows its page again, as in a Root.
-    if (annotation.pageId && hiddenPagesRef.current.includes(annotation.pageId))
-      setPagesVisibleRef.current([annotation.pageId], true);
-    setOwnSelected(annotation.id);
-    onAnnotationActiveRef.current?.(annotation.id);
-    onAnnotationSelectRef.current?.(annotation.id);
-    if (held.current) return;
-    if ("start" in annotation) {
-      const element = mediaElementRef.current;
-      if (!element) return;
-      sought.current = annotation.id;
-      // Pressed in the menu or on its hotspot: from its time, playing.
-      playFrom(element, annotation.start);
-      return;
-    }
-    framed.current = annotation.id;
-    /*
-     * One that follows a recording is not framed, since it moves. Picked while it is not
-     * on the recording, the recording goes to where it starts, as one on its time does;
-     * picked where it is (its hotspot, pressed), nothing moves.
-     */
-    if (annotation.track) {
-      const element = mediaElementRef.current;
-      if (element && goToTrack(annotation, element))
+  const selectAnnotation = useCallback(
+    (annotation: ListedAnnotation, play = true) => {
+      // One of a hidden page, chosen from the menu, shows its page again, as in a Root.
+      if (
+        annotation.pageId &&
+        hiddenPagesRef.current.includes(annotation.pageId)
+      )
+        setPagesVisibleRef.current([annotation.pageId], true);
+      setOwnSelected(annotation.id);
+      onAnnotationActiveRef.current?.(annotation.id);
+      onAnnotationSelectRef.current?.(annotation.id);
+      if (held.current) return;
+      if ("start" in annotation) {
+        const element = mediaElementRef.current;
+        if (!element) return;
         sought.current = annotation.id;
-      return;
-    }
-    rendererRef.current?.fitAnnotation(annotation.world, !glide.current);
-  }, []);
+        // Pressed in the menu or on its hotspot: from its time, playing. A key's move
+        // through the menu only goes there (WCAG 3.2.2).
+        if (play) playFrom(element, annotation.start);
+        else element.currentTime = annotation.start;
+        return;
+      }
+      framed.current = annotation.id;
+      /*
+       * One that follows a recording is not framed, since it moves. Picked while it is not
+       * on the recording, the recording goes to where it starts, as one on its time does;
+       * picked where it is (its hotspot, pressed), nothing moves.
+       */
+      if (annotation.track) {
+        const element = mediaElementRef.current;
+        if (element && goToTrack(annotation, element))
+          sought.current = annotation.id;
+        return;
+      }
+      rendererRef.current?.fitAnnotation(annotation.world, !glide.current);
+    },
+    [],
+  );
   /*
    * Let go of the pick: a click or tap on the Canvas off every hotspot, or Escape in it
    * (WCAG 2.1.1). Whether there was one, so that tap does nothing more.

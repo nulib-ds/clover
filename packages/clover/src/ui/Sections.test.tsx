@@ -458,6 +458,30 @@ describe("Sections", () => {
     });
   });
 
+  // WCAG 2.4.3: a section that goes with focus in it hands focus to the open one.
+  it("hands focus to the open section when the focused one goes", () => {
+    const { rerender } = render(
+      <HeldSections
+        items={items}
+        layout="accordion"
+        value="notes"
+        onValueChange={() => {}}
+      />,
+    );
+    const notes = screen.getByRole("button", { name: "Notes" });
+    notes.focus();
+    expect(notes).toHaveFocus();
+    rerender(
+      <HeldSections
+        items={items.slice(0, 2)}
+        layout="accordion"
+        value="notes"
+        onValueChange={() => {}}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "About" })).toHaveFocus();
+  });
+
   it("mounts a section's content when it first opens, and keeps it", () => {
     render(<Layout layout="tabs" />);
     expect(mounts).toEqual(["About"]);

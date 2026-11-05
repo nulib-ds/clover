@@ -295,10 +295,8 @@ describe("Items in a Root", () => {
       "data-layout",
       "grid",
     );
-    expect(screen.getByRole("listbox")).toHaveAttribute(
-      "aria-orientation",
-      "vertical",
-    );
+    // A grid's arrows move both ways, so it claims no orientation (a list is vertical).
+    expect(screen.getByRole("listbox")).not.toHaveAttribute("aria-orientation");
   });
 });
 

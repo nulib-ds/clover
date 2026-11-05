@@ -35,7 +35,8 @@ interface ControlMenuProps {
  * own keys move through it. Opening focuses the checked
  * item (else the first that can be picked), scrolled into the menu's view. It closes on Escape (returning
  * focus to the control when focus was in the menu or on the control, and then closing
- * nothing else), on a press outside, and when another popup opens (`useOneOpen`).
+ * nothing else), on a press outside, when focus moves on into the viewport, and when
+ * another popup opens (`useOneOpen`).
  */
 const ControlMenu: React.FC<ControlMenuProps> = ({
   id,
@@ -113,11 +114,25 @@ const ControlMenu: React.FC<ControlMenuProps> = ({
       };
       document.addEventListener("keydown", after, { once: true });
     };
+    /*
+     * Focus moving on into the viewport closes it: open, it lies over the viewport, and a
+     * hotspot Tab reaches under it would be hidden (WCAG 2.4.11). Focus stays where it
+     * went. Among the controls it stays open, so Escape there closes one thing at a time
+     * (DESIGN.md §0: the tray, then the menu).
+     */
+    const onFocusIn = (event: FocusEvent) => {
+      const target = event.target as Element | null;
+      if (!target?.closest(".clover-canvas-viewport")) return;
+      if (ref.current?.contains(target)) return;
+      onClose(false);
+    };
     document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKeyDown, true);
+    document.addEventListener("focusin", onFocusIn);
     return () => {
       document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown, true);
+      document.removeEventListener("focusin", onFocusIn);
     };
   }, [triggerId, onClose, holds]);
 

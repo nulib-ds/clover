@@ -31,7 +31,8 @@ export function localize(
 
   const entry = value[tag];
   const text = Array.isArray(entry) ? entry.join(separator) : String(entry);
-  return { text, lang: tag === "none" ? undefined : tag };
+  // `none` (and Presentation 2's `@none`) is no language: the text takes the page's.
+  return { text, lang: tag === "none" || tag === "@none" ? undefined : tag };
 }
 
 /** A BCP 47 tag's shape: a language, then subtags. */

@@ -11,6 +11,55 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.4.2] - 2026-11-05
+
+### Fixed
+
+An accessibility audit of the whole package (WCAG 2.2 AA, 2026-11-05). What it fixed; what it
+left to decide is in the repository's `ACCESSIBILITY.md`.
+
+- **Targets of 24px on any page.** Every small control (Annotations' hide toggle and language
+  codes, Search's and the Transcript's Clear and small submit, About's Download, Contents'
+  toggles, the seek bar and its annotation points, the menus' rows) keeps 24px on a page
+  whose root size is under 16px.
+- **Names.** The pager's count button (a Collection's members, a content state's targets)
+  is heard as "Item 1 of 2", as `Position` reads it; a place box over the Canvas with no
+  label is named "Map"; the transport's current time and duration carry their names as
+  hidden text; its volume slider reads as a share, "50%"; a search field's landmark is
+  named by its label; a grid of Items claims no orientation.
+- **Links.** Download's links and Items' "View all" are underlined under any page's reset.
+- **Focus kept.** A transport control that goes with the next recording (Fill, the
+  annotations' points) hands focus to Play, as Captions and Chapters did. A Panel section
+  that goes with focus in it (the Transcript's, as the view changes) hands focus to the open
+  section. A Canvas menu closes as focus moves on into the viewport, so a hotspot Tab
+  reaches under it is never hidden. While the information panel floats over the page, in
+  every template, the page's pane is inert, so Tab never reaches a control under it.
+- **Keys.** The Canvas's shortcuts (zoom, rotate, reset, play, mute, skip) work from a
+  focused hotspot, as its description promises. Looking through the annotations menu with
+  the arrow keys only goes to a timed annotation's start, as the chapters menu does; Enter,
+  Space or a press plays. Escape in a caption, or on a tip, is left to a popup inside that
+  took it first.
+- **Map.** A two-finger twist or Shift+arrows no longer turns it, with no way back to north.
+  Its zoom buttons show focus in forced colors. Escape puts a place's name away only from
+  the map (focus in it, or the pointer over it), before the page's own handlers, and the
+  name stays away until the pointer leaves the place.
+- **Language.** A render error in a part says "This could not be loaded." in Clover's
+  language, the browser's message marked English, as a Body's own error does (its headline
+  was English, "Something went wrong"). A `@none` value carries no `lang`. Ottoman Turkish,
+  Dari, the Arabic dialects, N'Ko, Rohingya, Judeo-Arabic and the other right-to-left tags
+  a catalog meets take `dir="rtl"`.
+- **Web components.** `<clover-root high-contrast>`, and `prefers-contrast: more` on a page
+  of elements composed in a `<clover-root>`, now write `data-high-contrast`, so the parts
+  inside take the higher-contrast mode as they do in React. (`<clover-viewer>` and the
+  standalone elements were unaffected.)
+- **Forced colors.** The chosen tab's line in a Panel is `Highlight`.
+- **Motion.** Items' list, grid and masonry scroll the selection into view without easing
+  where the reader asks for less motion.
+- The size budgets rise for these, by 0.1 to 0.4 kB each: a Viewer in Default loads 0.3 kB
+  more to first view (95.8 kB), in Document 0.2 kB and in Gallery 0.1 kB more; a Canvas,
+  Timeline or Scene alone 0.1 kB more, a Map 0.2 kB; `styles.css` is 19 bytes larger. As
+  web components, a page loads 0.2 to 0.4 kB more.
+
 ## [4.4.1] - 2026-11-04
 
 ### Fixed

@@ -31,8 +31,8 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  min-width: var(--clover-space-l);
-  min-height: var(--clover-space-l);
+  min-width: max(24px, var(--clover-space-l));
+  min-height: max(24px, var(--clover-space-l));
   padding: 0 var(--clover-space-xs);
   border-radius: var(--clover-radius-pill, 2rem);
   color: var(--clover-color-primary-muted, #26292b);

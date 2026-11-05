@@ -218,7 +218,7 @@ describe("templates", () => {
     await screen.findByRole("heading", { level: 2, name: "The Colosseum" });
     const views = await screen.findByRole("navigation", { name: "Views" });
     expect(
-      within(views).getByRole("button", { name: "1 / 2" }),
+      within(views).getByRole("button", { name: "Item 1 of 2" }),
     ).toHaveAttribute("aria-expanded", "false");
 
     fireEvent.click(within(views).getByRole("button", { name: "Next" }));
@@ -233,7 +233,7 @@ describe("templates", () => {
 
     // The count opens them all, listed as Views lists them, the one shown selected;
     // choosing one goes there and closes it.
-    const count = within(views).getByRole("button", { name: "2 / 2" });
+    const count = within(views).getByRole("button", { name: "Item 2 of 2" });
     fireEvent.click(count);
     expect(count).toHaveAttribute("aria-expanded", "true");
     const popup = await waitFor(() => {
@@ -329,12 +329,12 @@ describe("templates", () => {
 
     const members = screen.getByRole("navigation", { name: "Collection" });
     expect(
-      within(members).getByRole("button", { name: "1 / 2" }),
+      within(members).getByRole("button", { name: "Item 1 of 2" }),
     ).toBeInTheDocument();
     fireEvent.click(within(members).getByRole("button", { name: "Next" }));
     await screen.findByRole("heading", { level: 2, name: "A letter" });
     expect(
-      within(members).getByRole("button", { name: "2 / 2" }),
+      within(members).getByRole("button", { name: "Item 2 of 2" }),
     ).toBeInTheDocument();
     // The Collection section stays, as it says of the Manifest shown.
     expect(

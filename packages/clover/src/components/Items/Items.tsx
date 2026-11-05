@@ -697,7 +697,14 @@ export function ItemsView({
                 ref={listRef}
                 role="listbox"
                 {...listName}
-                aria-orientation={slider ? "horizontal" : "vertical"}
+                // A grid's arrows move both ways: no orientation is claimed for it.
+                aria-orientation={
+                  slider
+                    ? "horizontal"
+                    : layout === "list"
+                      ? "vertical"
+                      : undefined
+                }
                 className="clover-items-track"
                 style={trackStyle}
               >
@@ -785,6 +792,12 @@ function keepInView(element: HTMLElement, instant: boolean) {
         ? inner.bottom - outer.bottom
         : 0;
   if (delta) {
-    box.scrollBy?.({ top: delta, behavior: instant ? "auto" : "smooth" });
+    const still = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    box.scrollBy?.({
+      top: delta,
+      behavior: instant || still ? "auto" : "smooth",
+    });
   }
 }

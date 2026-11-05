@@ -76,7 +76,7 @@ const Caption: React.FC<CaptionProps> = ({
       data-testid="clover-canvas-caption"
       id={id}
       onKeyDown={(event) => {
-        if (event.key !== "Escape") return;
+        if (event.key !== "Escape" || event.defaultPrevented) return;
         // It closes, and nothing around it: not a modal `<dialog>` (the Lightbox).
         event.preventDefault();
         event.stopPropagation();

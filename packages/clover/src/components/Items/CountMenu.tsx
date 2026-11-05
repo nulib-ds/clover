@@ -1,6 +1,9 @@
 import React, { Suspense, lazy, useCallback, useRef, useState } from "react";
 
 import { useUniqueId } from "../../ui/useUniqueId";
+import { useCloverTranslation } from "../../i18n/useCloverTranslation";
+import { languageProps } from "../../i18n/direction";
+import { visuallyHidden } from "../../ui/visuallyHidden";
 
 /* The popup's code, loaded as one first opens: a pager that is never opened carries none. */
 const ControlMenu = lazy(() => import("../Canvas/ControlMenu"));
@@ -28,6 +31,7 @@ export function CountMenu({
   /** The list to open: Items' (`layout="list"`), told to close once one is chosen. */
   list: (chosen: () => void) => React.ReactNode;
 }) {
+  const { t, langOf } = useCloverTranslation();
   const triggerId = `${useUniqueId().replace(/:/g, "")}-count`;
   const menuId = `${triggerId}-menu`;
   const [open, setOpen] = useState(false);
@@ -52,9 +56,18 @@ export function CountMenu({
         onClick={() => setOpen(!open)}
       >
         <span className="clover-pager-position" aria-live="polite">
-          <span>
+          {/* Shown as its figure; heard as `Position` reads it, "Item 1 of 2". */}
+          <span aria-hidden={position >= 0 || undefined}>
             {position >= 0 ? position + 1 : "–"} / {total}
           </span>
+          {position >= 0 && (
+            <span
+              style={visuallyHidden}
+              {...languageProps(langOf("canvasPosition"))}
+            >
+              {t("canvasPosition", { index: position + 1, total })}
+            </span>
+          )}
           {/*
            * The widest count, unseen in the same place: it keeps the room, so nothing
            * beside it moves as the count grows (Pager.css). Without the stylesheet, `hidden`.

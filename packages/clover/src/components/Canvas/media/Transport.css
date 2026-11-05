@@ -328,8 +328,8 @@ button.clover-canvas-transport-button[aria-pressed="true"]::after {
 .clover-canvas-transport-mark-group {
   position: absolute;
   top: calc(50% - var(--clover-transport-track) / 2 - var(--clover-space-l));
-  width: var(--clover-space-l);
-  height: var(--clover-space-l);
+  width: max(24px, var(--clover-space-l));
+  height: max(24px, var(--clover-space-l));
   translate: -50% 0;
   pointer-events: var(--clover-controls-events, auto);
 }
@@ -447,7 +447,7 @@ button.clover-canvas-transport-button[aria-pressed="true"]::after {
   appearance: none;
   -webkit-appearance: none;
   width: 100%;
-  height: var(--clover-space-l);
+  height: max(24px, var(--clover-space-l));
   margin: 0;
   background: transparent;
   cursor: pointer;
@@ -669,7 +669,7 @@ button.clover-canvas-transport-time:focus-visible {
   flex: none;
   align-items: center;
   gap: var(--clover-space-xs);
-  min-height: var(--clover-space-l);
+  min-height: max(24px, var(--clover-space-l));
   padding: var(--clover-space-xs) var(--clover-space-s);
   border-radius: var(--clover-radius, 3px);
   font-size: var(--clover-text-s);

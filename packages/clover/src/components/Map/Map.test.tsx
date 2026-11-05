@@ -98,6 +98,9 @@ class FakeMap {
     this.layers = this.layers.filter((layer) => layer.id !== id);
   }
   addControl() {}
+  // The handlers whose rotation Clover turns off (WCAG 2.5.1).
+  touchZoomRotate = { disableRotation: vi.fn() };
+  keyboard = { disableRotation: vi.fn() };
   getCanvas() {
     return this.canvas;
   }
@@ -220,6 +223,22 @@ describe("Map", () => {
     );
     // A place with no name is listed by its number.
     expect(screen.getByRole("button", { name: "Place 1" })).toBeInTheDocument();
+  });
+
+  it("keeps north up: no two-finger twist or Shift+arrow turns it (WCAG 2.5.1)", async () => {
+    render(
+      <CloverMap
+        navPlace={{
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-87.69, 42.04] },
+        }}
+      />,
+    );
+    await waitFor(() => expect(maps).toHaveLength(1));
+    expect(maps[0].options.dragRotate).toBe(false);
+    expect(maps[0].touchZoomRotate.disableRotation).toHaveBeenCalled();
+    expect(maps[0].keyboard.disableRotation).toHaveBeenCalled();
   });
 
   it("keeps its credits over the map, and none where asked to leave them out", async () => {

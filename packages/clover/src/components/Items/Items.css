@@ -46,6 +46,9 @@
     --clover-color-accent-text,
     var(--clover-accent-text-fallback, var(--clover-color-accent, #0065c3))
   );
+  /* A link under any page's reset (WCAG 1.4.1), as `Primitives.css` draws Clover's. */
+  text-decoration-line: underline;
+  text-underline-offset: var(--clover-space-3xs);
 }
 
 /* ---------- tracks ---------- */

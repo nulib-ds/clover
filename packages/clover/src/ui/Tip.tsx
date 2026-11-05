@@ -260,7 +260,7 @@ function clipOf(element: HTMLElement) {
 let listening = 0;
 
 function hideTips(event: KeyboardEvent) {
-  if (event.key !== "Escape") return;
+  if (event.key !== "Escape" || event.defaultPrevented) return;
   const shown = new Set<HTMLElement>();
   document
     .querySelectorAll<HTMLElement>(":hover > .clover-tip")
@@ -322,7 +322,10 @@ export function forwardShortcut(
   viewport: HTMLElement | null,
 ) {
   const target = event.target as HTMLElement;
-  if (!viewport || target === viewport || viewport.contains(target)) return;
+  if (!viewport || target === viewport) return;
+  // From inside the viewport only a hotspot's (the overlays'): the viewport takes its own.
+  if (viewport.contains(target) && !target.closest(".clover-canvas-overlays"))
+    return;
   if (!SHORTCUT_KEYS.has(event.key)) return;
   if (event.altKey || event.metaKey || event.ctrlKey) return;
   if (target.closest("input, select, textarea, [contenteditable]")) return;

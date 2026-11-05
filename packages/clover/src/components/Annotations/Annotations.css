@@ -158,7 +158,7 @@ label.clover-annotations-entry > input {
 /* Where a linking annotation leads (Cookbook 0022), under what it says. */
 :is(a, button).clover-annotations-link {
   display: inline-block;
-  min-height: var(--clover-space-l);
+  min-height: max(24px, var(--clover-space-l));
   margin: var(--clover-space-2xs) 0 0;
   padding: 0;
   border: 0;

@@ -376,6 +376,7 @@ function DocumentLayout({
           </div>
         )}
         <Clover.SplitPane
+          ref={panel.main}
           className="clover-template-document-main"
           // A minimum only beside another pane: Items, or the Panel docked.
           min={(showSidebar && !sidebar.over) || docked ? PAGE_MIN : undefined}

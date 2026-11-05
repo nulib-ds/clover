@@ -51,6 +51,24 @@ async function open(page: Page) {
   await expect(page.getByRole("group", { name: "Captions" })).toBeVisible();
 }
 
+/**
+ * On a phone the panel floats over the page, which is inert under it (WCAG 2.4.11): it is
+ * put away before the Canvas's controls are used, and brought back before the
+ * Transcript's. Beside the page, nothing to do.
+ */
+async function panel(page: Page, shown: boolean) {
+  if (!(await page.locator('[data-panel="over"]').count())) return;
+  const toggle = page.getByRole("button", { name: "More information" });
+  if ((await toggle.getAttribute("aria-expanded")) === String(shown)) return;
+  if (shown) {
+    await toggle.click();
+    await expect(page.getByRole("group", { name: "Captions" })).toBeVisible();
+  } else {
+    await page.getByRole("button", { name: "Close information panel" }).click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  }
+}
+
 for (const spaced of [false, true]) {
   test(`its languages sit beside its heading, clear of its label, and nothing in the panel runs past its edge${spaced ? ", text spaced" : ""} (WCAG 1.4.12)`, async ({
     page,
@@ -100,6 +118,7 @@ test("a caption file chosen in the Canvas's menu is the one the Transcript reads
   await expect(english).toBeChecked();
   // The menu's radios are its rows' for the keyboard: picked as a reader would.
   const captions = page.getByRole("button", { name: "Captions" });
+  await panel(page, false);
   await captions.focus();
   await page.keyboard.press("Enter");
   await page
@@ -107,6 +126,7 @@ test("a caption file chosen in the Canvas's menu is the one the Transcript reads
     .first()
     .focus();
   await page.keyboard.press("Enter");
+  await panel(page, true);
   const italian = page
     .getByRole("group", { name: "Captions" })
     .last()
@@ -117,11 +137,13 @@ test("a caption file chosen in the Canvas's menu is the one the Transcript reads
     "it",
   );
 
+  await panel(page, false);
   await captions.focus();
   await page.keyboard.press("Enter");
   await page.getByRole("radio", { name: "Off" }).focus();
   await page.keyboard.press("Enter");
   await expect(captions).not.toHaveAttribute("data-active", "");
+  await panel(page, true);
   await expect(italian).toBeChecked();
 });
 
@@ -140,10 +162,12 @@ test("a language chosen in the Transcript is the one the Canvas's captions show,
   );
 
   // Off stays off: the Transcript changes its language, not whether captions show.
+  await panel(page, false);
   await captions.focus();
   await page.keyboard.press("Enter");
   await page.getByRole("radio", { name: "Off" }).focus();
   await page.keyboard.press("Enter");
+  await panel(page, true);
   await transcript.getByRole("radio", { name: /^EN / }).focus();
   await page.keyboard.press("Space");
   await expect(captions).toHaveAccessibleDescription("Off");

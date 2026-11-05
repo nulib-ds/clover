@@ -431,6 +431,13 @@ function MapView({
           new maplibre.NavigationControl({ showCompass: false }),
           "bottom-left",
         );
+        /*
+         * A map of places keeps north up: a two-finger twist or Shift+arrows would turn
+         * it with no control or single pointer to turn it back (WCAG 2.5.1). The arrows
+         * still pan, + and - still zoom.
+         */
+        instance.touchZoomRotate?.disableRotation?.();
+        instance.keyboard?.disableRotation?.();
         instance.on("load", () => {
           if (!live) return;
           if (!styleUrl) applyDefaultBasemap(instance);
@@ -455,6 +462,8 @@ function MapView({
           let popup: any = null;
           let picked: MapFeature | null = null;
           let shown = "";
+          // The name Escape put away, kept away until the pointer leaves its place.
+          let dismissed = "";
           // Which place is pointed at, and which picked, by its place in the data.
           let hovered: number | undefined;
           let pickedId: number | undefined;
@@ -591,6 +600,7 @@ function MapView({
             show(kept);
           };
           name.current = (feature) => {
+            dismissed = "";
             picked = feature;
             pick(feature);
             show(feature);
@@ -606,7 +616,7 @@ function MapView({
               instance.getCanvas().style.cursor = "pointer";
               const feature = event.features?.[0] as MapFeature | undefined;
               if (!feature) return;
-              show(feature);
+              if (keyOf(feature) !== dismissed) show(feature);
               const id = idOf(feature);
               if (id === hovered) return;
               mark(hovered, "hover", false);
@@ -616,6 +626,7 @@ function MapView({
             });
             instance.on("mouseleave", layer, () => {
               instance.getCanvas().style.cursor = "";
+              dismissed = "";
               mark(hovered, "hover", false);
               hovered = undefined;
               latest.current.onHighlight?.(null);
@@ -633,14 +644,25 @@ function MapView({
             pick(null);
             unname();
           });
+          /*
+           * Escape puts the name away and lets go of the place: from the map (focus in it,
+           * or the pointer over it), before the page's own handlers, and only where
+           * nothing inside has taken it, so one Escape closes one thing (DESIGN.md §0).
+           */
           const escape = (event: KeyboardEvent) => {
-            if (event.key !== "Escape" || !popup) return;
+            if (event.key !== "Escape" || event.defaultPrevented || !popup)
+              return;
+            const own = container.current?.closest(".clover-geomap");
+            const target = event.target as Node | null;
+            if (!own?.contains(target) && !own?.matches(":hover")) return;
+            event.preventDefault();
+            dismissed = shown;
             picked = null;
             pick(null);
             unname();
           };
-          document.addEventListener("keydown", escape);
-          letGo = () => document.removeEventListener("keydown", escape);
+          document.addEventListener("keydown", escape, true);
+          letGo = () => document.removeEventListener("keydown", escape, true);
           setMap(instance);
         });
         // A map in a tab or panel is sized late: keep MapLibre's canvas in step.

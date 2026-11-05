@@ -112,7 +112,7 @@ interface CanvasControlsProps {
   hiddenPages?: string[];
   onPageVisibilityChange?: (pageIds: string[], visible: boolean) => void;
   selectedAnnotation?: string | null;
-  onAnnotationSelect?: (annotation: ListedAnnotation) => void;
+  onAnnotationSelect?: (annotation: ListedAnnotation, play?: boolean) => void;
   onAnnotationActivate?: (id: string | null) => void;
   /**
    * The id of the Canvas's caption when it has information to show (`Caption`, which the

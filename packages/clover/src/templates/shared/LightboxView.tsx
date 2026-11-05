@@ -90,6 +90,7 @@ export default function LightboxView({
       {...(panel ? pane.splitProps : { "data-panel": "beside" })}
     >
       <Clover.SplitPane
+        ref={pane.main}
         className="clover-template-lightbox-main"
         // A minimum only while the panel is docked beside it: over it, none.
         min={panel && pane.over ? undefined : PAGE_MIN}

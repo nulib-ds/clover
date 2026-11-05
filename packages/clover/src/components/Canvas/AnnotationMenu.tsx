@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 
 import { type ListedAnnotation, startOf } from "./Annotations";
 import ControlMenu from "./ControlMenu";
@@ -21,7 +21,11 @@ interface AnnotationMenuProps {
   onPageVisibilityChange?: (pageIds: string[], visible: boolean) => void;
   /** The annotation last picked, which is checked. */
   selected: string | null;
-  onSelect: (annotation: ListedAnnotation) => void;
+  /**
+   * Picks one. `play` is false for a key's move through the list, which only goes to
+   * where a timed one starts: a press plays from there (WCAG 3.2.2).
+   */
+  onSelect: (annotation: ListedAnnotation, play?: boolean) => void;
   /** Hovering or focusing an item highlights its hotspot; `null` when it leaves. */
   onActivate: (id: string | null) => void;
   /** Close, returning focus to the control that opened it when `restoreFocus`. */
@@ -56,6 +60,8 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
   onClose,
 }) => {
   const name = useContainerName(label, labelLang);
+  // Whether the change under way came from a pointer's press (else a key's move).
+  const pointer = useRef(false);
   // Runs of one page, in the order given.
   const groups: Array<{ page?: ListedAnnotation["page"]; items: number[] }> =
     [];
@@ -132,14 +138,27 @@ const AnnotationMenu: React.FC<AnnotationMenuProps> = ({
                     key={annotation.id}
                     onMouseEnter={() => onActivate(annotation.id)}
                     onMouseLeave={() => onActivate(null)}
+                    onPointerDown={() => {
+                      pointer.current = true;
+                    }}
                   >
                     <input
                       type="radio"
                       name={id}
                       checked={picked}
-                      onChange={() => onSelect(annotation)}
-                      // Re-picking the checked item goes back to it.
-                      onClick={() => picked && onSelect(annotation)}
+                      // A key's move only goes to it; a press (below) plays (3.2.2).
+                      onChange={() => onSelect(annotation, pointer.current)}
+                      // Re-picking the checked item goes back to it; Space plays.
+                      onClick={() => {
+                        if (picked || !pointer.current) onSelect(annotation);
+                      }}
+                      onKeyDown={(event) => {
+                        pointer.current = false;
+                        if (event.key === "Enter") {
+                          event.preventDefault();
+                          onSelect(annotation);
+                        }
+                      }}
                       onFocus={() => onActivate(annotation.id)}
                       onBlur={() => onActivate(null)}
                     />

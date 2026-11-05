@@ -38,6 +38,7 @@ import {
 } from "../../../ui/mediaIcons";
 import { useContainerName } from "../../../i18n/useContainerName";
 import { useCloverTranslation } from "../../../i18n/useCloverTranslation";
+import { visuallyHidden } from "../../../ui/visuallyHidden";
 import { toggleFullscreen } from "../../../lib/fullscreen";
 import useFullscreenSupported from "../../../hooks/useFullscreenSupported";
 import { languageProps } from "../../../i18n/direction";
@@ -516,13 +517,14 @@ const Transport: React.FC<TransportProps> = ({
    */
   const focused = useRef<HTMLElement | null>(null);
   const play = useRef<HTMLButtonElement>(null);
+  // After every render: any control may go (Fill, the annotations' points, a menu).
   useLayoutEffect(() => {
     const control = focused.current;
     if (!control || control.isConnected) return;
     focused.current = null;
     const active = document.activeElement;
     if (!active || active === document.body) play.current?.focus();
-  }, [captions.length, chapters.length, hasFullscreen]);
+  });
 
   return (
     <div
@@ -686,23 +688,35 @@ const Transport: React.FC<TransportProps> = ({
             }
             type="range"
             value={muted ? 0 : volume}
+            // Heard as a share, "50%", never "0.5" (WCAG 4.1.2).
+            aria-valuetext={`${Math.round((muted ? 0 : volume) * 100)}%`}
           />
         )}
 
         {/* Where it is: the time, and the chapter playing. It takes the room between. */}
         <span className="clover-canvas-transport-status">
           <span className="clover-canvas-transport-time">
-            <span
-              aria-label={t("playerCurrentTime")}
-              {...languageProps(langOf("playerCurrentTime"))}
-            >
+            {/*
+             * Each figure's name before it, out of sight: a plain span takes no name of
+             * its own (WAI-ARIA's generic role), and the seek bar's value says the same.
+             */}
+            <span>
+              <span
+                style={visuallyHidden}
+                {...languageProps(langOf("playerCurrentTime"))}
+              >
+                {t("playerCurrentTime")}{" "}
+              </span>
               {formatTime(currentTime)}
             </span>
             <span aria-hidden="true"> / </span>
-            <span
-              aria-label={t("playerDuration")}
-              {...languageProps(langOf("playerDuration"))}
-            >
+            <span>
+              <span
+                style={visuallyHidden}
+                {...languageProps(langOf("playerDuration"))}
+              >
+                {t("playerDuration")}{" "}
+              </span>
               {formatTime(duration)}
             </span>
           </span>

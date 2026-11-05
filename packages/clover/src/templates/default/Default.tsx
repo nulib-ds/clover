@@ -157,6 +157,7 @@ export function Default({
         {...(panel ? pane.splitProps : { "data-panel": "beside" })}
       >
         <Clover.SplitPane
+          ref={pane.main}
           className="clover-template-default-main"
           // A minimum only while the Panel is docked beside it: over it, none.
           min={over ? undefined : PAGE_MIN}

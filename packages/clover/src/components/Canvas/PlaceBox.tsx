@@ -7,6 +7,7 @@ import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { type LanguageMapLike, localize } from "../../core/value";
 import { useOneOpen } from "../../ui/useOneOpen";
 import { languageProps } from "../../i18n/direction";
+import { useContainerName } from "../../i18n/useContainerName";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 
 /**
@@ -41,6 +42,12 @@ export default function PlaceBox({
   const { t, langOf } = useCloverTranslation();
   useOneOpen(open, () => onClose(false));
   const heading = localize(name, language);
+  // A place with no label: the box is named for what it holds, in Clover's language.
+  const fallback = useContainerName(
+    t("mapLabel"),
+    langOf("mapLabel"),
+    Boolean(heading.text),
+  );
   return (
     <div
       className="clover-canvas-caption clover-canvas-place"
@@ -49,6 +56,7 @@ export default function PlaceBox({
       id={id}
       role="group"
       aria-labelledby={heading.text ? `${id}-name` : undefined}
+      {...fallback.props}
       onKeyDown={(event) => {
         if (event.key !== "Escape") return;
         event.preventDefault();
@@ -65,6 +73,7 @@ export default function PlaceBox({
       >
         <Close />
       </Button>
+      {fallback.node}
       {heading.text && (
         <p
           id={`${id}-name`}

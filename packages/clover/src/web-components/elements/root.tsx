@@ -9,6 +9,7 @@ import {
 import type { Clover } from "../../core/clover";
 import { HostLanguageContext } from "../../i18n/hostLanguage";
 import { CloverContext } from "../../react/context";
+import { useHighContrast } from "../../hooks/useHighContrast";
 import { useRootLanguage } from "../../i18n/useRootLanguage";
 import type { HostedProps } from "../host";
 import { CloverApiContext, cloverApi } from "./api";
@@ -52,12 +53,22 @@ function LoadedRoot({
   toRenderers?: (value: unknown) => RootStateOptions["renderers"];
   children: React.ReactNode;
 }) {
-  const { canvasId, manifestId, lang, onReady, renderers, ...rest } =
-    props as unknown as RootStateOptions & {
-      lang?: string;
-      onReady?: (clover: unknown) => void;
-      renderers?: unknown;
-    };
+  const {
+    canvasId,
+    manifestId,
+    lang,
+    highContrast,
+    onReady,
+    renderers,
+    ...rest
+  } = props as unknown as RootStateOptions & {
+    lang?: string;
+    highContrast?: boolean;
+    onReady?: (clover: unknown) => void;
+    renderers?: unknown;
+  };
+  // The mode for every part inside, as React's `Root` writes it: the page's, or the reader's.
+  const contrast = useHighContrast(highContrast);
   // The page's language, read where the element is, or its own `lang`.
   const root = useRootLanguage(undefined, lang);
   root.ref(element);
@@ -105,6 +116,10 @@ function LoadedRoot({
   useLayoutEffect(() => {
     element.setAttribute("data-status", status);
   }, [element, status]);
+  useLayoutEffect(() => {
+    element.toggleAttribute("data-high-contrast", contrast);
+    return () => element.removeAttribute("data-high-contrast");
+  }, [element, contrast]);
   useLayoutEffect(
     () => () => element.removeAttribute("data-status"),
     [element],

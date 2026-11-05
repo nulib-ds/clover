@@ -80,8 +80,8 @@ button.clover-field-pill-clear {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: var(--clover-space-l);
-  height: var(--clover-space-l);
+  width: max(24px, var(--clover-space-l));
+  height: max(24px, var(--clover-space-l));
   margin: 0;
   padding: 0;
   border: 0;
@@ -166,8 +166,8 @@ button.clover-field-pill-submit svg {
 
 /* `size="small"`: the submit `l`, its glyph and the query's room less. */
 .clover-field-pill[data-size="small"] button.clover-field-pill-submit {
-  width: var(--clover-space-l);
-  height: var(--clover-space-l);
+  width: max(24px, var(--clover-space-l));
+  height: max(24px, var(--clover-space-l));
 }
 
 .clover-field-pill[data-size="small"] button.clover-field-pill-submit svg {

@@ -60,6 +60,13 @@ export function useDrawer({
 }: DrawerOptions) {
   const pane = useRef<HTMLElement>(null);
   const scrim = useRef<HTMLDivElement>(null);
+  /*
+   * The page's own pane, which the drawer covers over the page: the layout gives it
+   * (`ref`). It is inert while the drawer is open over it, as the Lightbox makes the page
+   * around it, so Tab never reaches a control hidden under the drawer (WCAG 2.4.11), and
+   * whole again as the drawer goes, before focus is handed back.
+   */
+  const main = useRef<HTMLElement>(null);
   const over = measured === false;
   /*
    * Two choices: open beside the page (the host's to start with), and open over it. The
@@ -75,6 +82,7 @@ export function useDrawer({
   // Focus in the pane as it goes is handed to its toggle, never left on what is hidden.
   const handBack = () => {
     if (!pane.current?.contains(document.activeElement)) return;
+    main.current?.removeAttribute("inert");
     toggle()?.focus();
     follow();
   };
@@ -125,6 +133,14 @@ export function useDrawer({
   const sliding = slides && over;
   const shown = sliding ? slide.mounted : open;
   const opened = sliding ? slide.open : open;
+  const covering = over && opened;
+  useIsomorphicLayoutEffect(() => {
+    const element = main.current;
+    if (!element) return;
+    if (covering) element.setAttribute("inert", "");
+    else element.removeAttribute("inert");
+    return () => element.removeAttribute("inert");
+  }, [covering]);
   useEffect(() => {
     if (!tries.current || !pane.current) return;
     tries.current -= 1;
@@ -143,6 +159,8 @@ export function useDrawer({
 
   return {
     pane,
+    /** The page's pane it covers, inert while it is open over the page: the layout's `ref`. */
+    main,
     /** Over the page, where there is no room beside it. */
     over,
     open,

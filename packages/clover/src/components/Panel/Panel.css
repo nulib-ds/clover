@@ -300,8 +300,8 @@ button.clover-about-download-button {
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: var(--clover-space-l);
-  height: var(--clover-space-l);
+  width: max(24px, var(--clover-space-l));
+  height: max(24px, var(--clover-space-l));
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -501,7 +501,7 @@ button.clover-about-download-button:focus-visible {
 }
 
 button.clover-about-open {
-  min-height: var(--clover-space-l);
+  min-height: max(24px, var(--clover-space-l));
   margin: 0;
   padding: 0;
   border: 0;

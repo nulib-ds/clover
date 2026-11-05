@@ -8,7 +8,7 @@ function Broken(): React.ReactElement {
 }
 
 describe("ErrorBoundary", () => {
-  it("shows what went wrong in place of the part, marked as English", () => {
+  it("shows what went wrong in place of the part, the detail marked as English", () => {
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     render(
       <ErrorBoundary>
@@ -17,9 +17,9 @@ describe("ErrorBoundary", () => {
     );
     spy.mockRestore();
     const alert = screen.getByRole("alert");
-    expect(alert).toHaveAttribute("lang", "en");
-    expect(alert).toHaveTextContent("Something went wrong");
-    expect(alert).toHaveTextContent("Error message: No image");
+    expect(alert).not.toHaveAttribute("lang");
+    expect(alert).toHaveTextContent("This could not be loaded.");
+    expect(screen.getByText("No image")).toHaveAttribute("lang", "en");
   });
 
   it("renders its children when nothing breaks", () => {

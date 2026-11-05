@@ -172,6 +172,20 @@ describe("Clover's elements", () => {
     expect(element.lastElementChild).toHaveClass("clover-announcer");
   });
 
+  it("takes the higher-contrast mode as React's Root does, writing it for the parts inside", async () => {
+    const element = document.createElement("clover-root") as WithContent;
+    element.setAttribute("high-contrast", "");
+    element.innerHTML = `<clover-label as="h2"></clover-label>`;
+    element.iiifContent = bookJson;
+    document.body.append(element);
+    await within(element).findByRole("heading", { level: 2, name: BOOK });
+    expect(element).toHaveAttribute("data-high-contrast");
+    element.removeAttribute("high-contrast");
+    await waitFor(() =>
+      expect(element).not.toHaveAttribute("data-high-contrast"),
+    );
+  });
+
   it("gives every part its root's context: one place, shared", async () => {
     const element = root(`
       <clover-label of="canvas" as="p"></clover-label>

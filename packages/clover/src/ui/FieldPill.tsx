@@ -58,6 +58,8 @@ export const FieldPill = forwardRef<HTMLInputElement, FieldPillProps>(
     return (
       <form
         role="search"
+        // A `search` landmark named by its field's label (WCAG 1.3.1).
+        aria-labelledby={`${id}-label`}
         className={join("clover-field-pill", classes.form)}
         data-size={size}
         onSubmit={(event) => {
@@ -67,6 +69,7 @@ export const FieldPill = forwardRef<HTMLInputElement, FieldPillProps>(
       >
         <label
           htmlFor={id}
+          id={`${id}-label`}
           style={visuallyHidden}
           {...languageProps(langOf("informationPanelTabsSearch"))}
         >

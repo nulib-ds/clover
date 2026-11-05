@@ -334,6 +334,15 @@
     :is(.maplibregl-ctrl-group button, .maplibregl-ctrl-attrib-button) {
     border: 1px solid ButtonText !important;
   }
+
+  /*
+   * MapLibre's sheet takes the zoom buttons' outline away; forced colors drop the fill
+   * that marks focus, so the ring is drawn here (WCAG 2.4.7).
+   */
+  .clover-geomap .maplibregl-ctrl-group button:focus-visible {
+    outline: 3px solid Highlight !important;
+    outline-offset: 2px;
+  }
 }
 
 @media (forced-colors: active) {

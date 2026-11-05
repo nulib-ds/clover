@@ -110,7 +110,8 @@ describe("Items' pager", () => {
     const pager = await screen.findByRole("navigation", { name: "Collection" });
     expect(shown(pager)).toBe("1 / 2");
     // Its count opens the members, listed as the Panel lists them, the one shown selected.
-    const count = within(pager).getByRole("button", { name: "1 / 2" });
+    // Shown as its figure, it is heard as Position reads it (WCAG 2.4.6).
+    const count = within(pager).getByRole("button", { name: "Item 1 of 2" });
     fireEvent.click(count);
     await waitFor(() =>
       expect(count.getAttribute("aria-controls")).toBeTruthy(),

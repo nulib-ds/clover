@@ -205,6 +205,26 @@ export function Sections({
    */
   const list = useRef<HTMLDivElement>(null);
   const values = items.map((item) => item.value).join("\n");
+  /*
+   * A section that goes while focus is in it (the Transcript's, as the view changes to a
+   * Canvas without captions) would drop focus to the page. Whether focus is in here is
+   * read as each render begins, while the old sections are still there; if it was, and
+   * has fallen to the page, it goes to the open section's button (WCAG 2.4.3).
+   */
+  const hadFocus = useRef(false);
+  hadFocus.current = Boolean(
+    list.current?.contains(list.current.ownerDocument.activeElement),
+  );
+  useEffect(() => {
+    const root = list.current;
+    if (!root || !hadFocus.current) return;
+    const { activeElement, body } = root.ownerDocument;
+    if (activeElement && activeElement !== body) return;
+    const index = items.findIndex((item) => item.value === open);
+    buttons.current[index]?.focus();
+    // Only as the sections change: a new open one keeps focus where it is.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values]);
   useIsomorphicLayoutEffect(() => {
     const root = list.current;
     if (tabs || !root || typeof ResizeObserver === "undefined") return;
