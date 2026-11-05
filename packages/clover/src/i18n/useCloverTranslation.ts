@@ -4,7 +4,7 @@ import { CLOVER_I18N_NAMESPACE, cloverI18n } from "./config";
 import { HostLanguageContext } from "./hostLanguage";
 
 /**
- * Clover's strings in the current language. Re-renders when `initCloverI18n` changes the
+ * Clover's interface strings in the current language. Re-renders when `initCloverI18n` changes the
  * language or adds strings.
  *
  * `langOf(key)` is the language of a string where it is not the page's, for the element

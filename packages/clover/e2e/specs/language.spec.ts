@@ -3,9 +3,9 @@ import { type Locator, expect, test } from "@playwright/test";
 import { manifestOf, serveIIIF } from "./fixtures";
 
 /*
- * Clover in French on an English page (WCAG 3.1.2), as a host sets it with
- * `initCloverI18n({ lng: "fr" })` (the harness's `&lng=fr`). Each of its strings says so
- * with its own `lang`. No Clover root carries one, so the host's content
+ * Clover's interface language in French on an English page (WCAG 3.1.2): a French
+ * visitor's (the browser's `locale`), or chosen with `chooseInterfaceLanguage("fr")` (the
+ * harness's `&lng=fr`). Each of its strings says so with its own `lang`. No Clover root carries one, so the host's content
  * inside a Root, and the Manifest's text in no language, keep the page's English. A label
  * in German names the viewport through a hidden element that carries `de`. Names are read
  * from Chromium's own accessibility tree, as a screen reader gets them.
@@ -104,14 +104,20 @@ test("leaves the host's own content in a Root in the page's language", async ({
   );
 });
 
-test("speaks the page's English to a French browser, marking nothing", async ({
+test("speaks a French visitor's French on an English page, and offers the page's English", async ({
   page,
 }) => {
   // The browser is French (`locale` above); the page declares English and sets nothing.
   await page.goto(`/?scene=viewer&content=${manifest.id}`);
 
-  const next = page.getByRole("button", { name: "Next" });
+  const next = page.getByRole("button", { name: "Suivant" });
   await expect(next).toBeVisible();
-  await expect(next).not.toHaveAttribute("lang");
-  expect(await languageOf(next)).toBe("en");
+  await expect(next).toHaveAttribute("lang", "fr");
+  const choice = page.getByRole("group", { name: "Langue de l’interface" });
+  await expect(choice.getByRole("radio")).toHaveCount(2);
+  await choice.getByText("EN", { exact: true }).click();
+  await expect(page.getByRole("button", { name: "Next" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Next" })).not.toHaveAttribute(
+    "lang",
+  );
 });

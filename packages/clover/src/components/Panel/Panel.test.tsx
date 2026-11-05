@@ -239,7 +239,7 @@ describe("primitives", () => {
 describe("Panel", () => {
   // Cookbook 0318: a Manifest's date for navigation, among what About says of it.
   it("gives the Manifest's navDate a section of its own, in the reader's language", async () => {
-    await initCloverI18n({ lng: "fr" }).ready();
+    await initCloverI18n().chooseInterfaceLanguage("fr");
     render(
       <Clover.Root
         iiifContent={{ ...manifest, navDate: "1849-06-12T00:00:00Z" }}
@@ -711,7 +711,7 @@ describe("The sections a panel has", () => {
 
   it("reads a word given in several languages in the one Clover speaks, marked with it", async () => {
     document.documentElement.lang = "en";
-    await initCloverI18n({ lng: "fr" }).ready();
+    await initCloverI18n().chooseInterfaceLanguage("fr");
     render(
       <Clover.Root iiifContent={several}>
         <Clover.Panel
@@ -964,9 +964,11 @@ describe("The languages to read a resource in", () => {
       row.closest(".clover-sections-actions")?.parentElement,
     ).toHaveAttribute("data-value", "about");
     expect(screen.getAllByRole("group", { name: "Language" })).toHaveLength(1);
-    // The languages furthest along the row, the Download button before them.
-    expect(row.parentElement?.lastElementChild).toBe(row);
-    expect(row.parentElement?.firstElementChild).toContainElement(
+    // The languages furthest along the row, after their globe, the Download button
+    // before them.
+    const actions = row.closest(".clover-about-actions")!;
+    expect(actions.lastElementChild).toContainElement(row);
+    expect(actions.firstElementChild).toContainElement(
       screen.getByRole("button", { name: "Download" }),
     );
     expect(within(row).getByRole("radio", { name: /français/ })).toBeChecked();

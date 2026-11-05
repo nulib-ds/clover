@@ -1,26 +1,57 @@
 /*
  * How Clover reads a language tag, whose languages it reads in and which of a set to
- * read: the rules every page loads, for Clover's strings (`config.ts`) and IIIF text
- * (`core/value.ts`) alike. Which way a language is written, and what text in it carries,
- * is `direction.ts`; how Clover's strings are marked, `langWithin` (`config.ts`) and
- * `langOf` (`useCloverTranslation.ts`); a container's name, `useContainerName.tsx`; what
- * a language is called, `languageCode.ts` and `autonym.ts`. Each is a module of its own
- * so that a page loads it only with the parts that use it.
+ * read: the rules every page loads, for Clover's interface language (`config.ts`) and
+ * IIIF text (`core/value.ts`) alike. Which way a language is written, and what text in it
+ * carries, is `direction.ts`; how the interface's text is marked, `langWithin`
+ * (`config.ts`) and `langOf` (`useCloverTranslation.ts`); a container's name,
+ * `useContainerName.tsx`; what a language is called, `languageCode.ts` and `autonym.ts`.
+ * Each is a module of its own so that a page loads it only with the parts that use it.
  */
 
 /**
- * The reader's languages, most preferred first: the page's, then the browser's. Clover is
- * a part of its host's page, so it speaks the page's language, and reads IIIF text in it,
- * where it can, and the reader's otherwise.
+ * The visitor's languages, most preferred first, as the browser gives them (it takes them
+ * from the operating system, unless the person set their own). None on a server.
+ */
+export function visitorLanguages(): string[] {
+  if (typeof navigator === "undefined") return [];
+  return [...(navigator.languages ?? []), navigator.language].filter(Boolean);
+}
+
+/** The page's language, its `<html lang>`; none on a server, or where it declares none. */
+export function pageLanguage(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  return document.documentElement.lang || undefined;
+}
+
+/**
+ * Clover's interface language for IIIF text to lean towards: the one chosen (or none),
+ * the default, then those configured. The translator (`config.ts`) gives it as it loads, so a page
+ * that draws IIIF text and no control (a `Label` alone) never loads the translator.
+ */
+let interfaceLanguages: () => (string | undefined)[] = () => [];
+
+/** For the translator: where `readerLanguages` finds Clover's interface language. */
+export function readInterfaceLanguagesFrom(
+  source: () => (string | undefined)[],
+) {
+  interfaceLanguages = source;
+}
+
+/**
+ * The languages to read IIIF text in, most preferred first (Mat, 2026-11-05): the
+ * visitor's, then Clover's interface language (the default, then the languages
+ * configured), then the page's. An interface language the visitor chose comes first,
+ * so the values follow it (a Root's own choice, About's languages, wins over both).
  */
 export function readerLanguages(): string[] {
-  const found: string[] = [];
-  if (typeof document !== "undefined")
-    found.push(document.documentElement.lang);
-  if (typeof navigator !== "undefined") {
-    found.push(...(navigator.languages ?? []), navigator.language);
-  }
-  return found.filter(Boolean);
+  const [chosen, ...rest] = interfaceLanguages();
+  return [
+    ...new Set(
+      [chosen, ...visitorLanguages(), ...rest, pageLanguage()].filter(
+        (tag): tag is string => !!tag,
+      ),
+    ),
+  ];
 }
 
 /** A tag's base language, as written: `pt` of `pt-BR`, and `pt` of `pt` itself. */
@@ -31,15 +62,43 @@ export function sameLanguage(a: string, b: string): boolean {
   return baseLanguage(a).toLowerCase() === baseLanguage(b).toLowerCase();
 }
 
+/**
+ * A tag's language and the script it is written in, said or likely: `zh-Hant` of `zh-TW`
+ * and `zh-HK`, `zh-Hans` of `zh-CN` and `zh`, `ja-Jpan` of `ja`. Clover ships a language
+ * written in two scripts as a file for each, so a visitor in Taiwan finds Traditional
+ * Chinese, which `zh-TW`'s base, `zh`, would not tell from Simplified. None for a tag
+ * the browser cannot read.
+ */
+export function scriptLanguage(tag: string): string | undefined {
+  try {
+    const { language, script } = new Intl.Locale(tag).maximize();
+    return script && `${language}-${script}`;
+  } catch {
+    return undefined;
+  }
+}
+
+/** The tag of `tags` in the same language and script as `tag` (`zh-CN` for `zh-SG`). */
+function sameScript(tag: string, tags: string[]): string | undefined {
+  const script = scriptLanguage(tag);
+  if (!script) return undefined;
+  return tags.find(
+    (each) =>
+      each !== "none" && each !== "@none" && scriptLanguage(each) === script,
+  );
+}
+
 /** A tag's base language where it has subtags; none for a tag that is its own base. */
 const baseOf = (tag: string) => (tag.includes("-") ? baseLanguage(tag) : null);
 
 /**
- * The tag of `tags` to read a language map in, for a reader of `language`, then of
- * `fallbacks`: the language itself, its base, a fallback, a tag whose base is the
- * language, a fallback's base, and else `none` (or `@none`), else the first. IIIF's own
- * rule, as `@iiif/helpers`' `getClosestLanguage` writes it (`languages.test.ts` holds the
- * two to the same answers).
+ * The tag of `tags` to read a language map in, for a visitor of `language`, then of
+ * `fallbacks`: the language itself, its base, a tag in its language and script (`zh-CN`
+ * for `zh-SG`, never `zh-Hant`), a fallback, a tag whose base is the language, a
+ * fallback's base, and else `none` (or `@none`), else the first. IIIF's rule as
+ * `@iiif/helpers`' `getClosestLanguage` writes it, with the script added (Mat,
+ * 2026-11-05: it had shown Traditional Chinese to a visitor who reads Simplified);
+ * `languages.test.ts` holds the two to the same answers everywhere else.
  */
 export function closestLanguage(
   language: string | undefined,
@@ -54,6 +113,8 @@ export function closestLanguage(
   if (tags.includes(language)) return language;
   const base = baseOf(language);
   if (base && tags.includes(base)) return base;
+  const script = sameScript(language, tags);
+  if (script) return script;
   const fallback = fallbacks.find((tag) => tags.includes(tag));
   if (fallback) return fallback;
   const regional = tags.findIndex((tag) => baseOf(tag) === language);
@@ -66,9 +127,9 @@ export function closestLanguage(
 }
 
 /**
- * Of these tags, the one to read: for a reader of `language` where one is given (a Root's
- * `language`), else of the reader's own languages, by IIIF's rule (`closestLanguage`),
- * else the first. How any IIIF text is chosen (`localize`), and so an annotation's body
+ * Of these tags, the one to read: for `language` where one is given (a Root's `language`,
+ * or the one chosen), else in the order `readerLanguages` gives, by IIIF's rule
+ * (`closestLanguage`), else the first. How any IIIF text is chosen (`localize`), and so an annotation's body
  * and a choice's starting language.
  */
 export function languageToRead(

@@ -316,7 +316,8 @@ deadline.
     `#templates`), Composing, Styling (the menu's names, short; "Composing" for the page
     titled "Composing layouts"; Mat, 2026-10-23). Under Technical (Mat, 2026-11-01: the
     group that was Contribute, renamed, the overview moved there and first, as
-    "Overview"): Overview, Content State, i18n. Helpers (`/docs/composing/helpers`; Mat,
+    "Overview"): Overview, Content State (i18n after Styling since 2026-11-05: "move this
+    under styling"). Helpers (`/docs/composing/helpers`; Mat,
     2026-11-04: "helpers should have its own page", then "Move helpers under composing":
     Composing is a folder, its page the index, Helpers in its menu under it) documents
     every helper a package entry exports: the functions that read IIIF resources
@@ -1153,7 +1154,8 @@ e2e:docs`.
   annotation's body, take a fuller name (`bodyBox`, `figure`).
 - The docs never call the person on a page "the reader" (Mat, 2026-11-01: "this reads
   oddly"): they say how Clover works, the current Canvas, view or entry, the defined
-  language (the Root's `language`, else the page's, else the browser's; Composing's
+  language (the Root's `language`, else the browser's, then the interface's, then the
+  page's; i18n's
   Languages), the browser's or the system's settings, or what is pressed or chosen; "user"
   only where a person must act (an agent's tools speak of "the user"). "Screen reader"
   stays, and the 3.x pages keep their own words.
@@ -1244,8 +1246,8 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
 
 ## i18n
 
-- The docs' i18n page (`content/docs/i18n.mdx`, under Technical, Contribute until
-  2026-11-01; Mat, 2026-10-20) is
+- The docs' i18n page (`content/docs/i18n.mdx`, under Use Clover after Styling since
+  2026-11-05, under Technical before; Mat, 2026-10-20) is
   for readers and contributors: the languages shipped, how one is chosen, and adding a
   language, with a demo that switches one Viewer between them (`LanguagesDemo.tsx`).
   Keep it in step with what follows.
@@ -1254,15 +1256,58 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   it was about 20 kB gzip, and Clover used only key lookup, `{{name}}` interpolation,
   fallback and detection.
 - Resources keep i18next's shape, `resources[lng][namespace][key]`, with the `clover`
-  namespace, so `initCloverI18n({ lng, fallbackLng, resources })` is unchanged for
-  consumers.
-- Lookup order: the set `lng`, or else the page's `<html lang>` and then the browser's
-  languages (Mat, 2026-10-16: Clover speaks the language of the page around it; 3.x put
-  the browser first). After that come `fallbackLng`, and English last. IIIF text without
-  a Root `language` follows the same order (`readerLanguages`, which Clover's strings read
-  too; `closestLanguage` picks the tag, IIIF's rule, held to `@iiif/helpers`' by
-  `languages.test.ts`; both `src/i18n/languages.ts`). Each regional tag also tries its base
-  language (`pt-BR` → `pt`).
+  namespace, so `initCloverI18n({ languages, fallbackLng, resources })` reads as
+  i18next's options do.
+- Say "Clover's interface language" for the language of its control labels ("Zoom in"),
+  section titles ("About") and announcements ("Item 2 of 17"), with examples where it is
+  introduced (Mat, 2026-11-05): never "Clover's own words", "Clover's strings" or "UI
+  language", so it is not taken for a language code or the visitor's language.
+- How Clover chooses (Mat, 2026-11-05; it reverses 2026-10-16's "Clover speaks the
+  language of the page around it", P39). The interface: the languages configured
+  (`initCloverI18n({ languages })`, `lng` for one), then the page's `<html lang>`, derived
+  as the visitor's is ("the others are derived elsewhere"), else
+  English; then the visitor's (the browser's, which it takes from the operating system).
+  The default is the visitor's first that Clover has strings for, else the first
+  configured; where it differs from them, About's one language toggle offers both
+  (`LanguageToggle`, `cloverI18n.interfaceLanguages()`), one choice for the page,
+  lasting the visit and never stored (Mat, 2026-11-05: "per visit"). For a key it lacks: `fallbackLng`, then the
+  languages configured, then English. The resource: its languages offered wherever it has
+  two or more; each value in the visitor's language, then the interface's (the default,
+  then those configured), then the page's, else its first (`readerLanguages`,
+  `languageToRead`). The toggle is Clover's one construct for a choice of languages (Mat, 2026-11-05: "we should
+  [not] be seeing multiple `en` values", "show that globe icon whenever we have a toggle
+  of multiple langs", "build the globe in. one construct"; `ui/LanguageChoice`): a globe,
+  then the codes; folded into the globe and the code in use, a menu (`ui/LanguageMenu`),
+  as soon as the codes would reach About's title ("the dropdown should happen as soon as
+  lang codes intersect the section label", `fit`, measured on one line against the
+  box the heading keeps clear), elsewhere past five. About's offers what the resource describes itself in
+  (`useReadingLanguages`), then the interface languages it does not name (`zh-CN` names
+  `zh-Hans`), each once; a language the resource has sets the values and the interface
+  where Clover has strings for it ("toggling to `es` … should import the `i18n` language
+  code map for UI"), one only the site offers the interface alone; a language chosen for a
+  resource goes when the Root is given another, the interface it moved too ("the
+  languages set for old resource did not reset"). A choice that changes one section stays
+  in it ("in cases where language changes can be isolated to a section. only show the
+  lang option to that section"): an annotation set, or a Transcript's caption files,
+  follows About's toggle only where it offers each of their languages (`covers`), else
+  offers its own, for itself alone. A Transcript with a plain-text transcript among its
+  files keeps its own choice of files, with no globe ("the one exception is when we have
+  a TXT transcription along side actual language choices"). Folded, the button shows a
+  caret, no edge ("if dropdown, make it obvious", "this hairline is unlike what we do
+  elsewhere"), and its menu reads as the Canvas's annotations menu, the page's size, the
+  legend small and muted, the language in use marked as the Annotations list marks the
+  Canvases in view. The site's languages changing drop an interface choice they no longer
+  name ("toggling languages off does not remove them as options"). A Root given no
+  `language` follows an interface language chosen. The i18n page's resource is the
+  homepage's select (`ResourceField`'s `items`, `cookbook={false}`). The i18n page's demo checks the languages a site offers (`ExampleChecks`, a
+  grid of native checkboxes drawn as the examples' switch buttons, none checked to
+  start), opens a resource (the homepage's select) and writes its code (`LiveLines`).
+  A Root's `language` sets where a
+  resource starts. `closestLanguage` picks the tag by IIIF's rule as `@iiif/helpers` has
+  it, plus a tag in the visitor's language and script before a fallback (`zh-CN` for
+  `zh-SG`, never `zh-Hant`), held to `@iiif/helpers` everywhere else by
+  `languages.test.ts`. Each tag also tries its language in its script, then its base
+  (`zh-TW` → `zh-Hant` → `zh`, `pt-BR` → `pt`).
 - Every rule for how Clover chooses a language and marks text with it lives in
   `packages/clover/src/i18n/` (Mat, 2026-10-29: "DRY all internationalization rules"),
   each module loading where its callers do; `packages/clover/AGENTS.md`, "Languages", has
@@ -1272,8 +1317,9 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   only as the strings or settings (`version`), the page's `<html lang>` or the browser's
   languages change. Anything new it reads joins that key.
 - Components call `useCloverTranslation()` and use `t` and `langOf`. It re-renders through
-  `useSyncExternalStore` when `initCloverI18n` changes the language or the strings.
-- Any element that shows one of Clover's strings, or is named by one (an `aria-label`, an
+  `useSyncExternalStore` when `initCloverI18n` or a choice changes the language or the
+  strings.
+- Any element that shows a word of Clover's interface language, or is named by one (an `aria-label`, an
   icon button with a `Tip`), carries `lang={langOf(key)}`: the string's language where it
   differs from the page's, and nothing otherwise (WCAG 3.1.2). An element showing text,
   Clover's or a IIIF value's, spreads `{...languageProps(lang)}` (`src/i18n/direction.ts`)
@@ -1292,7 +1338,7 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   interface language stands in. The root provides it through `HostLanguageContext`
   (`src/i18n/hostLanguage.ts`), and `langOf` compares against it. No root carries a
   `lang` of its own, because a root also holds the host's content. A new standalone root
-  calls `useRootLanguage`, uses that hook's `langOf` for its own strings, passes its
+  calls `useRootLanguage`, uses that hook's `langOf` for its interface words, passes its
   `hostLanguage` to `useContainerName`, and wraps its children in
   `HostLanguageContext.Provider`.
 - IIIF text carries the `lang` that `localize` gives it. Text in `none` carries no `lang`
@@ -1311,10 +1357,13 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   arrives its strings show in English, marked `lang="en"`, and readers re-render when it
   does. A server render or a test that needs them first awaits `cloverI18n.ready()`
   (`initCloverI18n(...)` returns it).
-- Shipped: en, es, fi, fr, nb, nn, no (the same strings as nb for now, but its own file:
+- Shipped: en, es, fi, fr, ja, nb, nn, no (the same strings as nb for now, but its own file:
   Norwegian's three tags, `no`, Bokmål `nb` and Nynorsk `nn`, each keep one, to be
   translated apart; never merge them; Mat, 2026-10-27) and pt (European Portuguese, which
-  Brazilian readers get too). The non-English strings await native review
+  Brazilian readers get too), zh-Hans and zh-Hant (Mat, 2026-11-05: drafted for
+  nulib-ds/clover#321's manifest; Chinese is a file a script, never one `zh`, and a tag
+  reaches its script's before its base, `scriptLanguage` in `languages.ts`, so `zh-TW`
+  reads `zh-Hant` and `zh-CN` and `zh` read `zh-Hans`). The non-English strings await native review
   (`ACCESSIBILITY.md`, P56).
 
 ## Mocks

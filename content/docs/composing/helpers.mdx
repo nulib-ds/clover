@@ -768,7 +768,7 @@ import * as Clover from "@nulib/clover";
 
 function ZoomInLang() {
   const langOf = Clover.useLangOf();
-  // langOf("imageZoomIn"): undefined, as Clover speaks the page's language here.
+  // langOf("imageZoomIn"): undefined where Clover's interface language is the page's.
 
   return <p>{langOf("imageZoomIn") ?? "The page's language"}</p>;
 }
@@ -794,7 +794,7 @@ function ZoomInLang() {
 <script type="module">
   const root = document.querySelector("clover-root");
   const shown = document.getElementById("zoom-in-lang");
-  // undefined, as Clover speaks the page's language here.
+  // undefined where Clover's interface language is the page's.
   const show = () =>
     (shown.textContent =
       root.clover.langOf("imageZoomIn") ?? "The page's language");

@@ -130,16 +130,18 @@ viewer.addEventListener("clover-canvas-change", (event) => {
 
 ## Languages
 
-Clover's own words follow the page's `<html lang>`, then the browser's, in either.
-`initCloverI18n` sets their language, or adds strings, for every Clover part on the page;
-see [i18n](/docs/i18n).
+Clover's interface language (its control labels, section titles and announcements) is
+the visitor's where Clover has strings for it, else your site's: the languages you
+configure and the page's `<html lang>`. Where the two differ, About's heading offers
+both. `initCloverI18n` configures them, or adds strings, for every Clover part on the
+page; see [i18n](/docs/i18n).
 
 <div data-code-flavor="react">
 
 ```jsx react
 import { initCloverI18n } from "@nulib/clover";
 
-initCloverI18n({ lng: document.documentElement.lang });
+initCloverI18n({ languages: ["fr", "en"] });
 ```
 
 </div>
@@ -147,21 +149,25 @@ initCloverI18n({ lng: document.documentElement.lang });
 <div data-code-flavor="web-components">
 
 The elements carry their own copy of Clover's translator, so a page calls it through
-them: from the module, or from any element's class in a classic script.
+them: from the module, or from any element's class in a classic script. Either returns a
+promise of the translator.
 
 ```js
 // With modules.
 import { initCloverI18n } from ".../web-components/index.mjs";
-initCloverI18n({ lng: document.documentElement.lang });
+initCloverI18n({ languages: ["fr", "en"] });
 
-// From a classic script, once the element is defined.
-customElements.get("clover-viewer").initCloverI18n({ lng: "fr" });
+// From a classic script, once the element is defined: French, whatever the visitor's.
+customElements
+  .get("clover-viewer")
+  .initCloverI18n()
+  .then((i18n) => i18n.chooseInterfaceLanguage("fr"));
 ```
 
 </div>
 
-Where that language is not the page's, Clover marks each of its own words with `lang`;
-see [Languages](/docs/composing/customizing#languages).
+Where the interface language is not the page's, Clover marks each of its words with
+`lang`; see [Languages](/docs/composing/customizing#languages).
 
 ## Parts
 

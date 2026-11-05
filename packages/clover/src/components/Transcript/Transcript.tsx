@@ -32,7 +32,8 @@ import { playFrom } from "../../lib/time";
 import { sameLanguage } from "../../i18n/languages";
 import { languageProps } from "../../i18n/direction";
 import { useClover, useCloverSelector } from "../../react/context";
-import { useReadingLanguages } from "../../react/readingLanguages";
+import { covers, useReadingLanguages } from "../../react/readingLanguages";
+import { GlobeGlyph } from "../../ui/GlobeGlyph";
 import { bringIntoView, scrollerOf } from "../../ui/bringIntoView";
 import { CueTime } from "../../ui/Cue";
 import { FieldPill } from "../../ui/FieldPill";
@@ -360,10 +361,28 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
     const lang =
       track.language && track.language !== "none" ? track.language : undefined;
 
-    const languages = tracks.length > 1 && !offered && (
+    /*
+     * Its own row where About's toggle does not hold its files' languages (`covers`), with
+     * the globe of every choice of languages (`ui/LanguageChoice`); and always where a
+     * plain-text transcript
+     * is among its files (Mat, 2026-11-05: "the one exception is when we have a TXT
+     * transcription along side actual language choices"), a choice of files, not only
+     * languages, so it has no globe and About's toggle cannot stand in for it.
+     */
+    const files = tracks.some((each) => each.read === "text");
+    const follows = covers(
+      offered,
+      tracks.map((each) => each.language),
+    );
+    const languages = tracks.length > 1 && (files || !follows) && (
       <>
         {name.node}
         <fieldset {...name.props} className="clover-transcript-languages">
+          {!files && (
+            <span className="clover-languages-glyph" aria-hidden="true">
+              <GlobeGlyph />
+            </span>
+          )}
           {tracks.map((option, index) => {
             const label = localize(option.label as any, language);
             const code = codes[index];

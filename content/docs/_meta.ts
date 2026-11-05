@@ -15,6 +15,8 @@ const meta: MetaRecord = {
   viewer: "Viewer",
   composing: "Composing",
   styling: "Styling",
+  // After Styling (Mat, 2026-11-05: "move this under styling"), Technical before.
+  i18n: "i18n",
   // Hidden for now (Mat, 2026-10-26): out of the menu and of search, at its address still.
   agents: { title: "Build with an agent", display: "hidden" },
   "--components": {
@@ -44,7 +46,6 @@ const meta: MetaRecord = {
   },
   technical: "Overview",
   "content-state": "Content State",
-  i18n: "i18n",
   mocks: { title: "Mocks", display: "hidden" },
   "--earlier": {
     type: "separator",

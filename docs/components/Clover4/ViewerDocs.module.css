@@ -125,6 +125,154 @@
   margin-top: calc(0.5px - var(--clover-text-xs, 0.764rem) / 2);
 }
 
+/*
+ * Checks over an example (`ExampleChecks`): the switch's look across the example's width,
+ * its choices in a grid of equal columns, as many as fit, each the switch's button with a
+ * box before its name. The box is drawn in the button's own color, so it holds its
+ * contrast on the page and on the dark fill a checked button takes (WCAG 1.4.11): an edge
+ * at rest, filled once checked, its mark in the fill's color; the browser's own checkbox
+ * where forced colors are on.
+ */
+.checksAbove {
+  width: 100%;
+}
+
+.checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+  gap: var(--clover-space-xs, 0.382rem);
+  margin-top: calc(0.5px - var(--clover-text-xs, 0.764rem) / 2);
+}
+
+.check {
+  --check-fill: var(--color-background);
+  gap: var(--clover-space-xs, 0.382rem);
+  padding-inline: var(--clover-space-s, 0.618rem);
+}
+
+.check[data-checked] {
+  --check-fill: var(--clover-color-control, #1a1d1e);
+}
+
+:global(:root.dark) .check[data-checked] {
+  --check-fill: var(--gray-12);
+}
+
+.check:not([data-checked], [data-locked]):hover {
+  background: var(--clover-color-secondary-muted, #e6e8eb);
+  color: var(--gray-12);
+}
+
+/*
+ * Checked for the reader, and so not to change (`locked`): the light fill a choice takes
+ * under the pointer, its box and mark as a checked one's, its note under its name, small
+ * and muted (`--gray-11`, 5.9:1 on it), wrapping.
+ */
+.check[data-locked] {
+  --check-fill: var(--clover-color-secondary-muted, #e6e8eb);
+  flex-wrap: wrap;
+  row-gap: 0;
+  padding-block: var(--clover-space-2xs, 0.236rem);
+  background: var(--clover-color-secondary-muted, #e6e8eb);
+  color: var(--gray-12);
+  cursor: default;
+}
+
+.checkNote {
+  flex-basis: 100%;
+  padding-inline-start: calc(1rem + var(--clover-space-xs, 0.382rem));
+  color: var(--gray-11);
+  font-size: var(--clover-text-xs, 0.764rem);
+  font-weight: 400;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+label.check[data-locked] .checkBox > input[type="checkbox"] {
+  cursor: default;
+}
+
+/* Over the switch's input, which lies over its whole button (`layout.css`). */
+label.check .checkBox > input[type="checkbox"] {
+  position: static;
+  inset: auto;
+  appearance: none;
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+label.check .checkBox > input[type="checkbox"]:checked {
+  background: currentColor;
+}
+
+/* Its ring is the button's (`.code-switch-option`, `layout.css`). */
+label.check .checkBox > input[type="checkbox"]:focus-visible {
+  outline: none;
+}
+
+/* A check stays a target once checked, unlike a switch's chosen option. */
+label.check:has(input:checked) {
+  cursor: pointer;
+}
+
+/*
+ * Focused, the label's ring, as every switch's (`.code-switch-option`, `layout.css`,
+ * which looks for its input directly inside it; the box is wrapped here). WCAG 2.4.7.
+ */
+label.check:has(input:focus-visible) {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+/* The box and its mark together, so the mark sits on the box on any line. */
+.checkBox {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+}
+
+.checkMark {
+  position: absolute;
+  inset: 0;
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: var(--check-fill);
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+label.check .checkBox > input[type="checkbox"]:checked + .checkMark {
+  visibility: visible;
+}
+
+@media (forced-colors: active) {
+  label.check .checkBox > input[type="checkbox"] {
+    appearance: auto;
+    border: 0;
+  }
+
+  .checkMark {
+    display: none;
+  }
+}
+
+/*
+ * The i18n page's resource (`LanguagesDemo`): the homepage's select (`ResourceField`), as
+ * wide as its column, over the languages' example, `l` apart.
+ */
+.resourceSelect {
+  margin: 0 0 var(--clover-space-l, 1.618rem);
+}
+
 .switchAbove + .example {
   margin-top: 0;
 }

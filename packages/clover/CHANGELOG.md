@@ -11,6 +11,60 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **Japanese and Chinese.** Clover's interface language (its control labels, section
+  titles and announcements) can be Japanese (`ja`), Simplified Chinese (`zh-Hans`) and
+  Traditional Chinese (`zh-Hant`), each loaded the first time Clover is to speak it. A
+  visitor in `zh-TW` or `zh-HK` gets Traditional Chinese; one in `zh`, `zh-CN` or
+  `zh-SG`, Simplified. Their strings await a native speaker's review.
+- **One choice of languages, after a globe.** Every choice of languages is one construct
+  (`LanguageChoice`): a globe, then the codes, folded into the globe, the code in use and
+  a caret, which opens a menu of them, as soon as the codes would reach About's title
+  (elsewhere, past five). About's offers the languages the resource describes itself in,
+  then, where the visitor's language differs from your site's, the interface languages
+  the resource has none of, each once. Choosing a language the resource has shows it in
+  that language and speaks it too where Clover has strings for it (`ES` turns the
+  interface Spanish); one only your site offers changes the interface alone. A language
+  chosen for a resource goes when another opens. An annotation set or a Transcript whose
+  languages About's toggle does not offer offers its own, for itself alone; a Transcript
+  with a plain-text transcript among its files keeps its own choice of files, without the
+  globe. `interfaceLanguages` on `Panel`, `About` and the Default, Document and Gallery
+  templates (`interface-languages` on `<clover-panel>`, `<clover-about>` and
+  `<clover-viewer>`) leaves the interface languages out with `false`. Its new classes
+  are `clover-languages-glyph`, `clover-languages-folded`, `clover-languages-button`,
+  `clover-languages-code`, `clover-languages-caret`, `clover-languages-menu` and
+  `clover-languages-option`.
+- **The open section's chevron** is the accent at half strength, as its button is
+  disabled.
+- **`initCloverI18n({ languages })`.** The languages your site offers, most preferred
+  first; `lng` is one of them. `cloverI18n.chooseInterfaceLanguage(tag)` speaks one
+  whatever the visitor's (none goes back to theirs), and
+  `cloverI18n.interfaceLanguages()` gives the languages offered and the one in use.
+
+### Changed
+
+- **The visitor's language first.** Clover's interface language is the visitor's, from
+  the browser, where Clover has strings for it, and your site's only otherwise: the
+  languages you configure and the page's `<html lang>`, else English. A resource's text
+  is read in the visitor's language, then the interface language, then your site's, else
+  each value's first. A Root's `language` still sets the language a resource starts in.
+- **A language chosen moves both.** A language chosen in About's toggle sets the values
+  and, where Clover has strings for it, the interface; an interface language chosen leads
+  the values of a Root given no `language` of its own.
+- **A language's script.** A tag tries its language in its script before its base
+  language, so `zh-TW` reads strings given for `zh-Hant`, and `zh-CN` those for
+  `zh-Hans`, in the strings Clover ships and those a page gives `initCloverI18n`. A resource's text
+  likewise: a visitor of `zh-SG` reads a `zh-CN` value, never a `zh-Hant` one, where both
+  are there (`@iiif/helpers` would give the first).
+- **`fallbackLng`** is read right after the language Clover speaks, before your site's
+  other languages.
+- **Budgets.** Every page's translator and language rules grow by about 0.3 kB gzip
+  (the visitor's languages first, the script step, the interface's choices, three more
+  locale loaders; the locales themselves load only where they are spoken), and About's
+  heading by its toggle's glue, whose row and menu load only where there is a choice. The budgets they crossed are raised to their measured sizes: Canvas alone to
+  first view is 48.7 kB, from 48.3 kB, and the Default template 97.1 kB, from 95.8 kB.
+
 ## [4.4.2] - 2026-11-05
 
 ### Fixed

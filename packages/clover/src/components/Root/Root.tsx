@@ -95,7 +95,7 @@ export const Root = forwardRef<HTMLElement, RootProps>(function Root(
   // What it holds: its Clover, the effects that keep it in step, its parts' context.
   const [context, status, rest] = useRootState(props);
   /*
-   * The page's language, for Clover's strings to be marked where they are in another.
+   * The page's language, for Clover's interface strings to be marked where they are in another.
    * The Root carries none of its own: what the host puts in it is in the page's.
    */
   const root = useRootLanguage(ref, rest.lang);

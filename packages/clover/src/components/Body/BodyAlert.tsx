@@ -5,7 +5,7 @@ import { join } from "../../lib/classnames";
 import { languageProps } from "../../i18n/direction";
 
 /**
- * What a Body could not load, said: Clover's words, then the error's own, in English as
+ * What a Body could not load, said: Clover's interface words, then the error's own, in English as
  * the browser and Clover write them. An alert, so it is announced as it comes. A module
  * of its own, so only what fails to load carries it, never a page's first load.
  */

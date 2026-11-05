@@ -67,8 +67,8 @@ The [Panel](/docs/panel)'s About section shows several of them together.
 
 ## Languages
 
-Text is read in the Root's `language`, else the page's `<html lang>`, else the browser's
-languages: the closest language the value has (`fr` for `fr-CA`), else its
+Text is read in the Root's `language`, else the browser's languages, then Clover's
+interface language, then the page's `<html lang>` ([i18n](/docs/i18n)): the closest language the value has (`fr` for `fr-CA`), else its
 `none`, else the first it has. A language's several values are joined with commas.
 
 Each element carries the language its text is in as `lang`, so assistive technology reads

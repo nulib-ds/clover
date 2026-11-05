@@ -67,7 +67,7 @@ export type GalleryProps = Omit<RootProps, "children"> & {
    */
   panelSections?: readonly PanelSection[];
   /**
-   * What a panel section's tab or heading says, in place of Clover's own word for it:
+   * What a panel section's tab or heading says, in place of its word in Clover's interface language:
    * `{ annotations: "Chapters" }`, or a word by language tag to say it in several (the
    * Panel's `labels`).
    */
@@ -79,6 +79,13 @@ export type GalleryProps = Omit<RootProps, "children"> & {
    * it says of itself comes in several (the Panel's `languages`). Default `true`.
    */
   languages?: boolean;
+  /**
+   * Default, Document and Gallery: whether the panel's language toggle, beside its About
+   * heading, also offers Clover's interface languages (its control labels, section
+   * titles and announcements) that the resource has none of, the visitor's and the
+   * site's, where they differ (the Panel's `interfaceLanguages`). Default `true`.
+   */
+  interfaceLanguages?: boolean;
   /**
    * Where the panel's width is remembered once the reader drags its bar
    * (`localStorage`). Default `"clover-template-gallery"`; `false` forgets it.
@@ -128,6 +135,7 @@ export function Gallery({
   panelLabels,
   download = true,
   languages = true,
+  interfaceLanguages = true,
   storageKey = "clover-template-gallery",
   headingLevel = 2,
   collapseControls,
@@ -181,6 +189,7 @@ export function Gallery({
         panelLabels={panelLabels}
         download={download}
         languages={languages}
+        interfaceLanguages={interfaceLanguages}
         storageKey={storageKey}
         collapseControls={collapseControls}
         canvasOptions={canvasOptions}

@@ -5,7 +5,8 @@ import { isLoneCanvas } from "../../core/load";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useCloverSelector } from "../../react/context";
-import { InPanelContext, ReadingLanguages } from "./ReadingLanguages";
+import { LanguageToggle } from "./LanguageToggle";
+import { InPanelContext } from "./ReadingLanguages";
 import {
   Homepage,
   Id,
@@ -65,6 +66,13 @@ export interface AboutProps extends React.HTMLAttributes<HTMLElement> {
    * In a Panel, its heading offers them (the Panel's `languages`). Default `true`.
    */
   languages?: boolean;
+  /**
+   * Alone, outside a Panel: whether its language toggle also offers Clover's interface
+   * languages (its control labels, section titles and announcements) that the resource
+   * has none of, the visitor's and the site's, where they differ. In a Panel, the Panel's
+   * `interfaceLanguages`. Default `true`.
+   */
+  interfaceLanguages?: boolean;
 }
 
 /*
@@ -82,11 +90,16 @@ const PartOfManifest = lazy(() => import("./PartOfManifest"));
  * it. The downloads are Download's: the `rendering` of the page in view ("This page")
  * and of the Manifest ("All pages").
  *
- * Where what it says comes in several languages, the languages to read the resource in
- * (`ReadingLanguages`): over what About says, or, in a Panel's `about` section, beside
- * its heading, where they show whichever section is open.
+ * Where what it says comes in several languages, or the visitor's language differs from
+ * the site's, the languages to read in, as one toggle (`LanguageToggle`): over what About
+ * says, or, in a Panel's `about` section, beside its heading, where it shows whichever
+ * section is open.
  */
-export function About({ languages = true, ...props }: AboutProps) {
+export function About({
+  languages = true,
+  interfaceLanguages = true,
+  ...props
+}: AboutProps) {
   // Outside a Panel, About holds the languages itself; in one, its section's heading does.
   const inPanel = useContext(InPanelContext);
   // Its downloads too: in a Panel, its heading's Download button lists them.
@@ -95,7 +108,12 @@ export function About({ languages = true, ...props }: AboutProps) {
       {...props}
       download={!inPanel && props.download !== false}
       choice={
-        inPanel || !languages ? null : <ReadingLanguages part="clover-about" />
+        inPanel ? null : (
+          <LanguageToggle
+            values={languages}
+            interfaceLanguages={interfaceLanguages}
+          />
+        )
       }
     />
   );
