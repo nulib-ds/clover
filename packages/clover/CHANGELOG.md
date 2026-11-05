@@ -11,6 +11,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **A search keeps the reader's page.** Results that arrive go to the first hit on the
+  Canvas shown, where it has any, and only otherwise to the first of all. A content state
+  opened with a `searchQuery` (a site's search result linking to one page) stayed on that
+  page in 3.x; in 4.x it jumped to the answer's first hit, usually on the first Canvas.
+
 ## [4.4.2] - 2026-11-05
 
 ### Fixed

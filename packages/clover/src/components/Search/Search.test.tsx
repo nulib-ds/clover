@@ -7,7 +7,14 @@ import {
 } from "@testing-library/react";
 import React from "react";
 
-import { CANVAS, SEARCH_V2, manifest, v2Pages } from "../../fixtures/search";
+import {
+  CANVAS,
+  SEARCH_V1,
+  SEARCH_V2,
+  manifest,
+  v1Page,
+  v2Pages,
+} from "../../fixtures/search";
 import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
 import { createClover } from "../../core/clover";
@@ -127,6 +134,51 @@ describe("Search", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Previous" }));
     await screen.findByText("Result 2 of 3");
+  });
+
+  it("starts from the Canvas shown when it has hits, as a deep link to a page does", async () => {
+    // A host's search result: open on Page 2 with the query. Page 2 has the third hit.
+    const fetch = mockFetch();
+    render(
+      <Clover.Root
+        iiifContent={withSearch}
+        defaultCanvasId={CANVAS(2)}
+        request={{ fetch }}
+        searchQuery="bird"
+      >
+        <Clover.Label of="canvas" data-testid="canvas" />
+        <Clover.Search />
+      </Clover.Root>,
+    );
+    await screen.findByText("Result 3 of 3");
+    expect(screen.getByTestId("canvas")).toHaveTextContent("Page 2");
+  });
+
+  it("goes to the answer's first hit from a Canvas without hits", async () => {
+    // Version 1's answer has its one hit on Page 2; the reader is on Page 1.
+    const fetch = vi.fn(async (url: string) => {
+      const body = (v1Page as Record<string, unknown>)[url];
+      return body === undefined
+        ? new Response("missing", { status: 404 })
+        : new Response(JSON.stringify(body), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          });
+    });
+    render(
+      <Clover.Root
+        iiifContent={manifest([{ id: SEARCH_V1, type: "SearchService1" }])}
+        request={{ fetch }}
+        searchQuery="bird"
+      >
+        <Clover.Label of="canvas" data-testid="canvas" />
+        <Clover.Search />
+      </Clover.Root>,
+    );
+    await screen.findByText("Result 1 of 1");
+    await waitFor(() =>
+      expect(screen.getByTestId("canvas")).toHaveTextContent("Page 2"),
+    );
   });
 
   it("clears with its own Clear, focus back in the field", async () => {

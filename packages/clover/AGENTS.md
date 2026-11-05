@@ -1326,7 +1326,10 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   `ui/Steps.css`), given the hits as a `StepsModel`; the field is `ui/FieldPill.tsx`
   (`ui/FieldPill.css`), Search's and the Transcript's alike. Search goes to the first
   hit as results arrive (Mat, 2026-10-26: as find in a page does, the Canvas moving and
-  never focus, once per answer, a hit already chosen kept). None found is "No results"
+  never focus, once per answer, a hit already chosen kept), from where the reader is: the
+  first on the Canvas shown where it has hits, else the first of all, so a content state
+  with a `searchQuery` (a host's search result, opened at its page) keeps its page.
+  None found is "No results"
   in the pill. The status under the field is for assistive technology alone, but while
   loading or failed. (`pager="heading"`, the count beside the section's heading, was
   tried and taken out the same day.) `sticky` holds the field in view (under the accordion's stuck
