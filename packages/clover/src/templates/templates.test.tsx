@@ -11,6 +11,7 @@ import { join, resolve } from "node:path";
 import React from "react";
 
 import audioJson from "../fixtures/iiif-cookbook/0002-mvm-audio.json";
+import placeholderVideoJson from "../fixtures/iiif-cookbook/0013-placeholderCanvas.json";
 import bookJson from "../fixtures/iiif-cookbook/0009-book-1.json";
 import modelJson from "../fixtures/iiif-cookbook/0608-mvm-3d-v4.json";
 import singleJson from "../fixtures/iiif-cookbook/0004-canvas-size.json";
@@ -1352,6 +1353,49 @@ describe("templates", () => {
       expect(sheet()!.style.getPropertyValue("--ratio")).not.toBe(""),
     );
     expect(sheet()).not.toHaveAttribute("data-fill");
+  });
+
+  it("Document: a video showing its frames covers its sheet's still, which need not have its shape", async () => {
+    render(<Templates.Document iiifContent={placeholderVideoJson} />);
+    const column = document.querySelector<HTMLElement>(
+      ".clover-template-document-column",
+    )!;
+    const sheet = () =>
+      column.querySelector<HTMLElement>(
+        ".clover-template-document-sheet[data-active]",
+      );
+    // Its placeholder showing, the still stays: the two are the same picture.
+    await waitFor(() =>
+      expect(
+        column.querySelector(".clover-canvas[data-placeholder='true']"),
+      ).not.toBeNull(),
+    );
+    await waitFor(() => expect(sheet()).not.toBeNull());
+    expect(column).not.toHaveAttribute("data-covered");
+    const [play] = await within(
+      column.querySelector<HTMLElement>(".clover-template-document-live")!,
+    ).findAllByRole("button", { name: /^Play/ });
+    fireEvent.click(play);
+    await waitFor(() =>
+      expect(
+        column.querySelector(".clover-canvas[data-placeholder='false']"),
+      ).not.toBeNull(),
+    );
+    // jsdom has no WebGL, so the renderer places no element: one stands in for it.
+    const video = document.createElement("video");
+    column.querySelector(".clover-canvas")!.append(video);
+    // Played, but no frame yet: the still stays until there is one.
+    expect(column).not.toHaveAttribute("data-covered");
+    Object.defineProperty(video, "readyState", {
+      configurable: true,
+      value: HTMLMediaElement.HAVE_CURRENT_DATA,
+    });
+    fireEvent(video, new Event("loadeddata"));
+    await waitFor(() => expect(column).toHaveAttribute("data-covered"));
+    // Moved to another sheet, the Canvas out of sight: the still is back.
+    const live = column.querySelector(".clover-template-document-live")!;
+    live.setAttribute("data-moved", "");
+    await waitFor(() => expect(column).not.toHaveAttribute("data-covered"));
   });
 
   it("Document: the title at headingLevel, the panel's sections a level under it", async () => {

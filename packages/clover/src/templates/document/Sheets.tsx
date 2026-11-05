@@ -230,6 +230,51 @@ export function Sheets({
     });
   };
 
+  /*
+   * A video showing its frames covers the active sheet's still, which need not have the
+   * video's shape (a placeholderCanvas of another shape, a Canvas with no size, fitted
+   * whole in the column): the still goes out of sight, so none of it shows around the
+   * video (`data-covered`, `Document.css`). Until the video has a frame, while its
+   * placeholder shows, and while the Canvas moves to another sheet, the still stays. A
+   * picture's Canvas has its sheet's shape, and draws over its still exactly.
+   */
+  useEffect(() => {
+    const element = column.current;
+    const layer = live.current;
+    if (!element || !layer) return;
+    const check = () => {
+      const figure = layer.querySelector(".clover-canvas");
+      const video = layer.querySelector("video");
+      element.toggleAttribute(
+        "data-covered",
+        Boolean(
+          figure &&
+            video &&
+            video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+            figure.getAttribute("data-media") === "video" &&
+            figure.getAttribute("data-placeholder") !== "true" &&
+            !layer.hasAttribute("data-moved"),
+        ),
+      );
+    };
+    check();
+    const watch = new MutationObserver(check);
+    watch.observe(layer, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+      attributeFilter: ["data-media", "data-placeholder", "data-moved"],
+    });
+    // A media element's events do not bubble: they are caught on their way down.
+    for (const type of ["loadeddata", "emptied"])
+      layer.addEventListener(type, check, true);
+    return () => {
+      watch.disconnect();
+      for (const type of ["loadeddata", "emptied"])
+        layer.removeEventListener(type, check, true);
+    };
+  }, []);
+
   /* A sheet to the top: smoothly, or at once for less motion or a new document. */
   const bring = (index: number, instantly = false) => {
     const element = column.current;

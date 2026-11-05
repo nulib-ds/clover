@@ -11,6 +11,12 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **Document: no second picture around a video.** The active page's still is hidden
+  once its video shows a frame, so a placeholderCanvas of another shape (a 4:3 still
+  under a 16:9 video, say) no longer shows above and below the video as it plays.
+
 ## [4.4.0] - 2026-11-04
 
 ### Added

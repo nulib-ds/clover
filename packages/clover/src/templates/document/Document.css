@@ -338,6 +338,8 @@ button.clover-template-document-sidebar-toggle:focus-visible {
  * Zoomed into, moved or turned, the active sheet takes the column's whole height, pushing
  * the others down (`Sheets`), and they dissolve away; the Canvas over it shows the
  * picture, its still out of sight beneath. Home again, it is a sheet among the rest.
+ * A video showing its frames puts the still out of sight too (`data-covered`): the
+ * still need not have the video's shape, and would show around it.
  */
 .clover-template-document-column[data-zoomed]
   .clover-template-document-sheet[data-active] {
@@ -345,6 +347,9 @@ button.clover-template-document-sidebar-toggle:focus-visible {
 }
 
 .clover-template-document-column[data-zoomed]
+  .clover-template-document-sheet[data-active]
+  > *,
+.clover-template-document-column[data-covered]
   .clover-template-document-sheet[data-active]
   > * {
   visibility: hidden;
