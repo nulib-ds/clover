@@ -48,8 +48,9 @@ const meta: MetaRecord = {
   mocks: { title: "Mocks", display: "hidden" },
   "--earlier": {
     type: "separator",
-    title: "Earlier versions",
+    title: "Deprecated versions",
   },
+  upgrading: "Upgrading",
   "deprecated-versions": "Clover 3.x",
 };
 

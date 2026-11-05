@@ -165,8 +165,8 @@ export function pageMetadata({
 }
 
 /*
- * Clover 3.x, `@samvera/clover-iiif`, is the earlier version: its docs are kept under
- * `/docs/deprecated-versions/` for reference. Every
+ * Clover 3.x, `@samvera/clover-iiif`, is deprecated (Mat, 2026-11-03): its docs are
+ * kept under `/docs/deprecated-versions/` for reference. Every
  * page there says so to a reader, to search engines (its description and structured
  * data) and to the site's own search (its results are titled "(3.x)" and rank below
  * Clover 4's): see `app/[[...mdxPath]]/page.tsx`.
@@ -188,7 +188,7 @@ export const earlierTitle = (title: string) =>
 
 /* What every 3.x page's description says it documents. */
 const EARLIER_DESCRIPTION =
-  "Clover 3.x (@samvera/clover-iiif), the earlier version, kept for reference.";
+  "Clover 3.x (@samvera/clover-iiif), deprecated and no longer maintained.";
 
 /**
  * A 3.x page's description: its own, then what it documents, so a search result opens
@@ -206,7 +206,7 @@ export interface Crumb {
 
 /**
  * A page's structured data (schema.org, as JSON-LD): what it documents, which version,
- * who publishes it, and, for a 3.x page, that it is superseded, so a search engine or an
+ * who publishes it, and, for a 3.x page, that it is deprecated, so a search engine or an
  * agent reading the page knows Clover 4's docs are the current ones. Then its
  * breadcrumbs, the site, the folders the menu holds it in (`trail`) and the page, which a
  * search result shows in place of its address (Mat, 2026-10-30): the sidebar shows the
@@ -245,7 +245,7 @@ export function structuredData({
         inLanguage: "en",
         ...(modified && { dateModified: modified }),
         version: earlier ? "3.x" : "4",
-        ...(earlier && { creativeWorkStatus: "Superseded" }),
+        ...(earlier && { creativeWorkStatus: "Deprecated" }),
         isPartOf: {
           "@type": "WebSite",
           name: siteName,

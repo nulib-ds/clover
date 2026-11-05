@@ -224,7 +224,7 @@ function markdownOf(html, url) {
     `title: ${JSON.stringify(title)}`,
     description && `description: ${JSON.stringify(description)}`,
     `url: ${url}`,
-    `version: ${earlier ? '"3.x, the earlier version, superseded by Clover 4"' : '"4"'}`,
+    `version: ${earlier ? '"3.x, deprecated, superseded by Clover 4"' : '"4"'}`,
     "---",
   ].filter(Boolean);
   return { front: front.join("\n"), body, title };

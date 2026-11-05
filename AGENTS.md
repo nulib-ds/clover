@@ -33,7 +33,12 @@ deadline.
     `@samvera/clover-iiif`, is kept at `content/docs/deprecated-versions/` (URLs
     `/docs/deprecated-versions/…`, `/docs/3.x/…` until 2026-10-30: Mat, a name that holds
     the next earlier version too), one sidebar group titled "Clover 3.x", collapsed, under
-    "Earlier versions" at the bottom.
+    "Deprecated versions" at the bottom. Clover 3.x is deprecated (Mat, 2026-11-03): on
+    npm, and in every word the site and the `v3` branch's README say of it. Upgrading
+    (`content/docs/upgrading.mdx`, `/docs/upgrading`, first under that separator; Mat,
+    2026-11-04) moves a page from 3.x to Clover 4 in steps, as Get started installs:
+    the setup's radio cards (`InstallGuide`), then each way's swap and imports, React's
+    `options` moved to props, and the other components. Every 3.x notice links there.
     Its page titles end in "(3.x)" so search results tell the two apart (its overview's,
     "Clover 3.x", says it already).
   - The 3.x pages are for reference, never the standard (Mat, 2026-10-20). They document
@@ -43,7 +48,7 @@ deadline.
     readers, search engines and agents: a notice opening the page and a "(3.x)" title,
     a description in its own words, then what it documents (Mat, 2026-10-30: its own
     words first, so its search result opens with them), schema.org data (`version: "3.x"`,
-    `creativeWorkStatus: "Superseded"`), and in the site's search a "(3.x)" title, a
+    `creativeWorkStatus: "Deprecated"`), and in the site's search a "(3.x)" title, a
     `version` filter and half the weight of Clover 4's pages (`app/[[...mdxPath]]/page.tsx`,
     `docs/lib/site.ts`). `llms.txt` (`docs/lib/agents.ts`) tells agents the same. A new 3.x page gets all
     of it from its place under `content/docs/deprecated-versions/`.

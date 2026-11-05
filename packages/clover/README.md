@@ -112,7 +112,8 @@ If you serve Clover's files yourself, copy the whole `dist/web-components` folde
 - [Technical overview](https://clover.iiif.library.northwestern.edu/docs/technical): events,
   languages, types, what each part loads, and coming from Clover 3.x.
 
-Clover 3.x, `@samvera/clover-iiif`, is documented on the same site, under
+Clover 3.x, `@samvera/clover-iiif`, is deprecated and no longer maintained. Its docs are
+kept on the same site, under
 [Clover 3.x](https://clover.iiif.library.northwestern.edu/docs/deprecated-versions).
 
 ## License

@@ -1,0 +1,189 @@
+---
+title: Upgrading
+description: "Move from Clover 3.x, @samvera/clover-iiif, to Clover 4, @nulib/clover, in steps: the package, its imports, the Viewer's props and the other components."
+---
+
+import { Related, RelatedLink } from "docs/components/Related";
+import { InstallGuide, InstallWay } from "docs/components/Clover4/InstallGuide";
+
+# Upgrading
+
+<div className="docs-lede">
+  Clover 4, `@nulib/clover`, takes the place of Clover 3.x,
+  `@samvera/clover-iiif`, which is deprecated. A page with the Viewer moves over
+  in a few steps.
+</div>
+
+## Upgrade
+
+<div className="docs-steps">
+
+### Choose your setup
+
+Clover 3.x came as React components, and as a `<clover-viewer>` element from a script.
+Choose yours, and every example in these docs is written that way.
+
+<InstallGuide>
+<InstallWay way="react">
+
+### Swap the package
+
+```bash
+npm uninstall @samvera/clover-iiif
+npm install @nulib/clover
+```
+
+React 18 and 19 are supported, as they were.
+
+### Change the imports
+
+The Viewer is the package's default export, in place of `@samvera/clover-iiif/viewer`.
+Its styles are a stylesheet now: import it once.
+
+```jsx react
+import Viewer from "@nulib/clover";
+import "@nulib/clover/styles.css";
+```
+
+### Move the options to props
+
+Clover 3.x took most settings in one `options` object. In Clover 4 each is a prop of its
+own, on the Viewer or its template, or a CSS custom property. In Clover 3.x:
+
+```jsx react
+<Viewer
+  iiifContent={url}
+  canvasIdCallback={setCanvasId}
+  options={{
+    showTitle: false,
+    informationPanel: { open: false },
+    withCredentials: true,
+  }}
+/>
+```
+
+In Clover 4:
+
+```jsx react
+<Viewer
+  iiifContent={url}
+  onCanvasChange={setCanvasId}
+  header={false}
+  defaultPanelOpen={false}
+  request={{ credentials: "include" }}
+/>
+```
+
+The others move the same way:
+
+| Clover 3.x                                          | Clover 4                                                      |
+| --------------------------------------------------- | ------------------------------------------------------------- |
+| `canvasIdCallback`                                  | `onCanvasChange`                                              |
+| `contentStateCallback`                              | `onContentStateChange` ([Content State](/docs/content-state)) |
+| `iiifContentSearchQuery={{ q }}`                    | `searchQuery`                                                 |
+| `customDisplays`                                    | `renderers`                                                   |
+| `customTheme`                                       | CSS custom properties ([Styling](/docs/styling))              |
+| `plugins`                                           | A `Tab` of your own ([Panel](/docs/panel))                    |
+| `options.canvasHeight`                              | `--clover-body-height`, in your CSS                           |
+| `options.showTitle`                                 | `header`                                                      |
+| `options.showDownload`                              | `download`                                                    |
+| `options.informationPanel.open`                     | `defaultPanelOpen`                                            |
+| `options.informationPanel.renderAbout` and the rest | `panelSections`, the sections to keep                         |
+| `options.withCredentials`, `options.requestHeaders` | `request`, its `credentials` and `headers`                    |
+| `options.openSeadragon`                             | `canvasOptions` ([Interaction](/docs/canvas#interaction))     |
+| `options.map`                                       | Nothing: the Panel shows the Map by itself                    |
+
+</InstallWay>
+<InstallWay way="bundler">
+
+### Install the package
+
+```bash
+npm install @nulib/clover
+```
+
+Clover 3.x's elements came from its script alone. Clover 4's install as any package does.
+
+### Import the elements
+
+Once, anywhere on the page, in place of Clover 3.x's script. The elements bring their
+own styles, so there is no stylesheet to add.
+
+```js
+import "@nulib/clover/web-components";
+```
+
+### Name the resource
+
+`<clover-viewer>` takes the resource as `iiif-content`. Clover 3.x's `id` no longer
+names it.
+
+```html
+<clover-viewer
+  iiif-content="https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json"
+></clover-viewer>
+```
+
+Clover 3.x's `<clover-image>` is [`<clover-canvas>`](/docs/canvas).
+
+</InstallWay>
+<InstallWay way="cdn">
+
+### Swap the script
+
+In the page's `<head>`, in place of Clover 3.x's script from `@samvera/clover-iiif`. The
+elements bring their own styles, so there is no stylesheet to add.
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/web-components/index.umd.js"></script>
+```
+
+### Name the resource
+
+`<clover-viewer>` takes the resource as `iiif-content`. Clover 3.x's `id` no longer
+names it.
+
+```html
+<clover-viewer
+  iiif-content="https://iiif.io/api/cookbook/recipe/0024-book-4-toc/manifest.json"
+></clover-viewer>
+```
+
+Clover 3.x's `<clover-image>` is [`<clover-canvas>`](/docs/canvas).
+
+</InstallWay>
+</InstallGuide>
+
+### Replace the other components
+
+The Slider is [`Items`](/docs/items), the Image is [`Canvas`](/docs/canvas), and the
+primitives are components of the same names, which read the resource from the `Root`
+around them. The [Technical overview](/docs/technical#coming-from-clover-3x) lists each,
+and the page of each component that replaces one ends with what changed.
+
+</div>
+
+## Next
+
+<Related>
+  <RelatedLink
+    href="/docs/viewer"
+    title="Viewer"
+    note="Its templates, and every prop."
+  />
+  <RelatedLink
+    href="/docs/composing"
+    title="Composing"
+    note="Layouts of your own, from the components and hooks."
+  />
+  <RelatedLink
+    href="/docs/styling"
+    title="Styling"
+    note="Colors, sizes and classes, in place of a theme."
+  />
+  <RelatedLink
+    href="/docs/deprecated-versions"
+    title="Clover 3.x"
+    note="The deprecated version's docs, kept for reference."
+  />
+</Related>

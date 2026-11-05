@@ -79,9 +79,9 @@ export async function generateMetadata(props: Props) {
 const EarlierVersion = () => (
   <Callout type="warning">
     This page documents <strong>Clover 3.x</strong>,{" "}
-    <code>@samvera/clover-iiif</code>, the earlier version of Clover, kept here
-    for reference. These docs lead with Clover 4:{" "}
-    <Link href="/docs">Get started</Link>.
+    <code>@samvera/clover-iiif</code>, which is deprecated and no longer
+    maintained. Use Clover 4, <code>@nulib/clover</code>:{" "}
+    <Link href="/docs/upgrading">Upgrading</Link> moves a page over in steps.
   </Callout>
 );
 
