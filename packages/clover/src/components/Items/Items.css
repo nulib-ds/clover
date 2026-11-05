@@ -8,6 +8,9 @@
  *   --clover-items-size    a grid column's width (default 10rem)
  *   --clover-items-gap     the space between items (default `m`)
  *   --clover-items-lines   the lines a slider's or grid's title runs to (default 3)
+ *   --clover-items-arrow-gap  a centered slider's arrows from its pictures (default `s`)
+ *
+ * `data-align="center"` on a slider centers it between its arrows (`align`).
  *
  * The scroll container, its flex row and each item's snap point are set inline (by the
  * component and `useScrollTrack`), so a slider still scrolls without this file.
@@ -139,6 +142,17 @@
     animation-range: calc(100% - var(--clover-space-m)) 100%;
   }
 
+  /* Centered: the shadows sit at the row's ends, inside the arrows. */
+  .clover-items[data-layout="slider"][data-align="center"]
+    .clover-items-frame::before {
+    inset-inline-start: var(--clover-items-arrow-room);
+  }
+
+  .clover-items[data-layout="slider"][data-align="center"]
+    .clover-items-frame::after {
+    inset-inline-end: var(--clover-items-arrow-room);
+  }
+
   /* A right-to-left track starts on the right: its shadows swap ends. */
   .clover-items[data-layout="slider"] .clover-items-frame[dir="rtl"]::before {
     --clover-items-shade: to left;
@@ -151,6 +165,26 @@
     left: calc(-1 * var(--clover-items-ring-room));
     right: auto;
   }
+}
+
+/*
+ * A centered slider: the row, a scroll container, is as wide as its thumbnails (down to the
+ * room the arrows leave), and the arrows, in the flow beside it, are level with the pictures. The
+ * frame's `gap` is the arrow's distance from the pictures themselves, the viewport's
+ * negative margin taking its ring room back. `dir` on the frame turns the row around,
+ * so the order the arrows are in the document is their order on the screen.
+ */
+.clover-items[data-layout="slider"][data-align="center"] .clover-items-frame {
+  /* From the frame's edge to the viewport's: an arrow, the gap, less the ring's room. */
+  --clover-items-arrow-room: calc(
+    var(--clover-control) +
+      var(--clover-items-arrow-gap, var(--clover-space-s)) -
+      var(--clover-items-ring-room)
+  );
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--clover-items-arrow-gap, var(--clover-space-s));
 }
 
 .clover-items[data-layout="list"] .clover-items-track {
@@ -583,6 +617,21 @@
   z-index: 2;
   translate: 0 -50%;
   box-shadow: 0 1px 4px rgb(0 0 0 / 0.25);
+}
+
+/*
+ * Centered, an arrow is in the flow, still the positioned box its popover hangs from.
+ * Selected as above, with the slider's attributes, so it is more specific than the
+ * round controls' `margin: 0`.
+ */
+.clover-items[data-layout="slider"][data-align="center"]
+  :is(button.clover-items-scroll-prev, button.clover-items-scroll-next) {
+  position: relative;
+  inset: auto;
+  translate: none;
+  margin-block-start: calc(
+    (var(--clover-items-picture-height) - var(--clover-control)) / 2
+  );
 }
 
 .clover-items-scroll-prev {

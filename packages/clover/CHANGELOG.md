@@ -11,6 +11,17 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **`Items` `align`.** `align="center"` centers a slider between its arrows: the row is as
+  wide as its thumbnails, and the arrows sit beside it, level with the pictures, rather than
+  over its ends. Once the thumbnails overflow, the row fills the frame and scrolls as before.
+  `"start"`, the default, is unchanged. Also the `align` attribute of `<clover-items>`.
+  `--clover-items-arrow-gap` sets the arrows' distance from the pictures.
+- The size budgets rise for it, by 0.05 to 0.2 kB each: `styles.css` is 0.1 kB larger, a
+  Viewer to first view 0.1 to 0.2 kB, and each `<clover-viewer>` and element page 0.1 to
+  0.2 kB.
+
 ## [4.4.2] - 2026-11-05
 
 ### Fixed
