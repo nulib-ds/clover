@@ -11,6 +11,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- The Canvas's `options` take `upscale`: `upscale: false` keeps an image's home view at
+  `maxZoomPixelRatio` at most, centred, instead of enlarging it to fill the box. Default
+  `true`. The size budgets rise for it, by 50 B each: the Canvas's initial JS and first view,
+  the Document Viewer, and the `<clover-viewer>`, layout, Canvas and Gallery element pages.
+
 ## [4.4.2] - 2026-11-05
 
 ### Fixed
