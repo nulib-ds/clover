@@ -41,6 +41,23 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   first; `lng` is one of them. `cloverI18n.chooseInterfaceLanguage(tag)` speaks one
   whatever the visitor's (none goes back to theirs), and
   `cloverI18n.interfaceLanguages()` gives the languages offered and the one in use.
+- The Canvas's `options` take `upscale`: `upscale: false` keeps an image's home view at
+  `maxZoomPixelRatio` at most, centred, instead of enlarging it to fill the box. Default
+  `true`. The size budgets rise for it: by 100 B the Canvas's initial JS and first view and
+  the Viewer entry; by 50 B the Default and Document templates and their first views, the
+  `<clover-viewer>`, composed, layout, Canvas, Document and Gallery element pages.
+- **An image service as the content.** `iiifContent` (`iiif-content`) on a `Root`, the
+  Viewer or a `Canvas` may be a IIIF Image service, Image API 2 or 3: its base URI, its
+  `info.json` or the `info.json` itself. Clover shows it as the one image it is, in the
+  Body's Canvas, with no title: a Manifest of one Canvas the image's size, with no label,
+  whose id is the service's. The rights its `info.json` gives (`rights`, or Image 2's
+  `license` and `attribution`) are kept, and About is offered only for them, so the
+  Default template shows the image alone. A base URI that does not redirect to its
+  `info.json` is tried again with `/info.json` after it.
+
+  ```jsx
+  <Viewer iiifContent="https://ndeiiif.adlibhosting.com/iiif/3/Q1852477.648" />
+  ```
 
 ### Changed
 
@@ -63,7 +80,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (the visitor's languages first, the script step, the interface's choices, three more
   locale loaders; the locales themselves load only where they are spoken), and About's
   heading by its toggle's glue, whose row and menu load only where there is a choice. The budgets they crossed are raised to their measured sizes: Canvas alone to
-  first view is 48.7 kB, from 48.3 kB, and the Default template 97.1 kB, from 95.8 kB.
+  first view is 49.0 kB, from 48.3 kB, and the Default template 97.4 kB, from 95.8 kB.
 
 ## [4.4.2] - 2026-11-05
 

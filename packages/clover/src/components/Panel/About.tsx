@@ -1,7 +1,7 @@
 import React, { Suspense, lazy, useContext, useEffect, useRef } from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
-import { isLoneCanvas } from "../../core/load";
+import { isImageServiceManifest, isLoneCanvas } from "../../core/load";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { useCloverSelector } from "../../react/context";
@@ -297,9 +297,10 @@ function AboutContent({
           />
         </Suspense>,
       )}
+      {/* An image service is neither a Manifest nor a Canvas: its address is not named. */}
       {section(
         isLoneCanvas(manifest) ? "aboutCanvas" : "aboutManifest",
-        manifest.id,
+        !isImageServiceManifest(manifest) && manifest.id,
         <Id />,
       )}
     </div>
