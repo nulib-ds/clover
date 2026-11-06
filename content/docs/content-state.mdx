@@ -339,3 +339,55 @@ of, at the Canvas it names, framed on its region or at its time.
 
 `buildContentState`, `encodeContentState` and `decodeContentState` make, encode and read
 one of your own, as [Helpers](/docs/composing/helpers#iiif-resources) describes.
+
+## An annotation on its own
+
+Any annotation given as `iiifContent` opens the same way, whatever its motivation. Its
+target says where to go, and its body, where it has one, shows there as a note, picked
+as the view opens. This comment frames a region of a Canvas 42 seconds in:
+
+```json
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://example.org/notes/1",
+  "type": "Annotation",
+  "motivation": "commenting",
+  "body": {
+    "type": "TextualBody",
+    "value": "The boy at the table",
+    "language": "en"
+  },
+  "target": {
+    "type": "SpecificResource",
+    "source": {
+      "id": "https://iiif.io/api/cookbook/recipe/0219-using-caption-file/canvas",
+      "type": "Canvas",
+      "partOf": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0219-using-caption-file/manifest.json",
+          "type": "Manifest"
+        }
+      ]
+    },
+    "selector": {
+      "type": "FragmentSelector",
+      "value": "xywh=120,80,200,180&t=42,50"
+    }
+  }
+}
+```
+
+- **Where it goes.** A region (`xywh=`) and a time (`t=`), alone or together, in the
+  target's fragment or a `FragmentSelector`; a `PointSelector`'s time; the box an
+  `SvgSelector`'s shape fills. A whole Canvas opens as it is.
+- **What it opens.** The Manifest the Canvas is `partOf`, and a Collection that Manifest
+  is part of. A Canvas named by its address alone is fetched, and shown on its own where
+  it names no Manifest. A target may also be a Manifest, a Collection, a Range (its first
+  Canvas, at that Canvas's region or time) or a IIIF Image service (its image).
+- **What it shows.** A text body, an image body (named by the annotation's `label`), or a
+  link to follow (`linking`). One with no body only opens at its place. An annotation
+  that paints, given alone, shows as a note and is never painted into the Canvas.
+- **Several targets** are held as a content state's are: the view opens on the first and
+  goes to each in turn.
+- **Presentation 2's**, as Mirador 2 wrote them (`oa:Annotation`, `on`, `within`), are
+  read as Presentation 3's.

@@ -11,6 +11,22 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.5.5] - 2026-11-06
+
+### Added
+
+- **An annotation on its own opens as a content state does.** Give `iiifContent` any
+  Annotation, whatever its motivation, and Clover opens what it targets, at its region
+  (`xywh=`), its time (`t=`) or both, and shows its body there as a note, picked: text,
+  an image, or a link. Its target may be a Canvas (with the Manifest it is `partOf`), a
+  Manifest, a Collection, a Range (its first Canvas) or a IIIF Image service. An
+  `SvgSelector`'s shape frames its box. Presentation 2 annotations (`oa:Annotation`, as
+  Mirador 2 wrote them, `within` their Manifest) are read too. Before, only an annotation
+  with the `contentState` motivation opened; any other was refused ("Cannot show a
+  Annotation").
+- **A content state may target a Range or an image service.** A Range opens at its first
+  Canvas, and an image service at its image, framed on the region the state names.
+
 ## [4.5.4] - 2026-11-05
 
 ### Fixed
