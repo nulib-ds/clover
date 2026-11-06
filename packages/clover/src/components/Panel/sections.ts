@@ -4,6 +4,7 @@ import {
   type IIIFCanvas,
 } from "../Canvas/layout";
 import { hasMapData } from "../../core/geo-detect";
+import { isImageServiceManifest } from "../../core/load";
 import { searchServiceOf } from "../../core/search-service";
 import { tableOfContents } from "../../core/ranges";
 import { partOfCollection, selectVisibleCanvases } from "../../core/selectors";
@@ -39,12 +40,15 @@ const PANEL_SECTIONS: readonly PanelSection[] = [
 
 /**
  * Whether the resource holds anything for each section, read from a Root's state: the one
- * place that decides, for the `Panel` and for the templates around it. About is always
- * offered: the resource says at least its label. None of these reads the section's own
+ * place that decides, for the `Panel` and for the templates around it. About is offered
+ * wherever the resource says anything of itself, which is always but for an image service
+ * shown as its image, which says only the rights its `info.json` gave. None of these reads the section's own
  * module, so a section never opened is never fetched.
  */
 const HAS: Record<PanelSection, (state: CloverState) => boolean> = {
-  about: () => true,
+  about: (state) =>
+    !isImageServiceManifest(state.manifest) ||
+    Boolean(state.manifest?.rights || state.manifest?.requiredStatement),
   // A content state's several targets (Cookbook 0540), listed as a Collection's members are.
   targets: (state) => (state.targets?.items.length ?? 0) > 1,
   // Reached through a Collection, or part of one: offered either way, fetched when opened.
@@ -108,7 +112,7 @@ export function usePanelSections(
    * would be new every time, and re-render its reader on every change of the state.
    */
   const data: Record<PanelSection, boolean> = {
-    about: true,
+    about: useCloverSelector(HAS.about),
     targets: useCloverSelector(HAS.targets),
     collection: useCloverSelector(HAS.collection),
     contents: useCloverSelector(HAS.contents),
