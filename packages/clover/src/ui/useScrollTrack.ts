@@ -27,6 +27,8 @@ export interface ScrollTrackOptions {
   itemCount?: number;
   /** The direction the slides run: across (the default) or down. */
   axis?: "x" | "y";
+  /** A column that runs up from its foot (`column-reverse`): its next page is above. */
+  upward?: boolean;
 }
 
 export interface ScrollTrack {
@@ -57,6 +59,7 @@ export function useScrollTrack({
   dragFree = false,
   itemCount = 0,
   axis = "x",
+  upward = false,
 }: ScrollTrackOptions = {}): ScrollTrack {
   const down = axis === "y";
   const [viewport, setViewport] = useState<HTMLElement | null>(null);
@@ -73,9 +76,10 @@ export function useScrollTrack({
     const max = down
       ? viewport.scrollHeight - viewport.clientHeight
       : viewport.scrollWidth - viewport.clientWidth;
-    setCanScrollPrev(position > 1);
-    setCanScrollNext(position < max - 1);
-  }, [viewport, down]);
+    // An upward column starts at its foot: back is down, forward up.
+    setCanScrollPrev(upward ? position < max - 1 : position > 1);
+    setCanScrollNext(upward ? position > 1 : position < max - 1);
+  }, [viewport, down, upward]);
 
   /*
    * The viewport's own scrolling and snapping, set here so they hold without CSS. A row
@@ -163,12 +167,14 @@ export function useScrollTrack({
   const page = useCallback(
     (direction: 1 | -1) => {
       if (!viewport) return;
-      const rtl = !down && getComputedStyle(viewport).direction === "rtl";
+      const back = down
+        ? upward
+        : getComputedStyle(viewport).direction === "rtl";
       // Most of a screen, so the last slide seen stays in view as a landmark.
       const extent = down ? viewport.clientHeight : viewport.clientWidth;
-      scrollAlong(direction * extent * 0.9 * (rtl ? -1 : 1));
+      scrollAlong(direction * extent * 0.9 * (back ? -1 : 1));
     },
-    [viewport, scrollAlong, down],
+    [viewport, scrollAlong, down, upward],
   );
   const scrollNext = useCallback(() => page(1), [page]);
   const scrollPrev = useCallback(() => page(-1), [page]);

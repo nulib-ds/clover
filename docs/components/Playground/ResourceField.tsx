@@ -306,10 +306,11 @@ export default function ResourceField({
     selected: false,
   };
   const recipeChoices: Choice[] = (recipes ?? []).map((recipe) => ({
-    key: `recipe-${recipe.slug}`,
-    // The recipe's title as the Cookbook writes it, and its folder's name on iiif.io.
+    key: `recipe-${recipe.about}`,
+    // The recipe's title as the Cookbook writes it, and its folder's name on iiif.io (the
+    // file's path under it, where the recipe shows several resources).
     label: { text: recipe.title },
-    about: recipe.slug,
+    about: recipe.about,
     thumbnail: recipe.thumbnail,
     mark: recipe.slug.slice(0, 4),
     content: recipe.resource,
@@ -462,7 +463,7 @@ export default function ResourceField({
       if (!list.length)
         return setStatus(`${COOKBOOK_NAME} could not be loaded`);
       setCookbookShown(true);
-      setActive(`recipe-${list[0].slug}`);
+      setActive(`recipe-${list[0].about}`);
       setStatus(`${list.length} ${COOKBOOK_NAME} listed`);
       requestAnimationFrame(() => {
         const category = document.getElementById(optionId(COOKBOOK));
@@ -699,9 +700,9 @@ export default function ResourceField({
                     <span className={styles.visuallyHidden}>
                       IIIF Cookbook recipe{" "}
                     </span>
-                    {recipeHint.slug.slice(0, 4)}
+                    {recipeHint.about.slice(0, 4)}
                     <span className={styles.fieldRecipeRest}>
-                      {recipeHint.slug.slice(4)}
+                      {recipeHint.about.slice(4)}
                     </span>
                   </span>
                 )}

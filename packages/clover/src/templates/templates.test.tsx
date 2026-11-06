@@ -17,6 +17,7 @@ import modelJson from "../fixtures/iiif-cookbook/0608-mvm-3d-v4.json";
 import singleJson from "../fixtures/iiif-cookbook/0004-canvas-size.json";
 import renderingJson from "../fixtures/iiif-cookbook/0046-rendering.json";
 import rtlJson from "../fixtures/iiif-cookbook/0010-book-2-viewing-direction-rtl.json";
+import ttbJson from "../fixtures/iiif-cookbook/0010-book-2-viewing-direction-ttb.json";
 import compareJson from "../fixtures/iiif-cookbook/0540-link-for-opening-multiple-canvases-annotation.json";
 import layoutJson from "../fixtures/iiif-cookbook/0309-annotation-collection.json";
 import layoutPage1 from "../fixtures/iiif-cookbook/0309-annotation-collection-anno_p1.json";
@@ -597,6 +598,37 @@ describe("templates", () => {
     render(<Templates.Default iiifContent={rtlJson} />);
     const previous = await screen.findByRole("button", { name: "Previous" });
     expect(previous.closest("[dir]")).toHaveAttribute("dir", "rtl");
+  });
+
+  /*
+   * A book read down the page (Cookbook 0010's diary): its thumbnails a column at the
+   * Body's start, first in focus order as on screen, and the view's titles and position
+   * under the Body. A book read across keeps its strip under the Body.
+   */
+  it("Default: a top-to-bottom book's thumbnails stand at the Body's start, its titles under the Body", async () => {
+    const { unmount } = render(<Templates.Default iiifContent={ttbJson} />);
+    const column = await screen.findByRole("listbox");
+    expect(column).toHaveAttribute("aria-orientation", "vertical");
+    const views = document.querySelector(".clover-template-default-views")!;
+    expect(views).toHaveAttribute("data-orientation", "vertical");
+    const [rail, body, titles] = Array.from(views.children);
+    expect(rail).toContainElement(column);
+    expect(body).toHaveClass("clover-template-default-body");
+    expect(titles).toHaveClass("clover-template-default-rail-header");
+    expect(titles).toHaveTextContent("1 / 4");
+    unmount();
+
+    render(<Templates.Default iiifContent={bookJson} />);
+    const row = await screen.findByRole("listbox");
+    expect(row).toHaveAttribute("aria-orientation", "horizontal");
+    const across = document.querySelector(".clover-template-default-views")!;
+    expect(across).not.toHaveAttribute("data-orientation");
+    const [first, strip] = Array.from(across.children);
+    expect(first).toHaveClass("clover-template-default-body");
+    expect(strip).toContainElement(row);
+    expect(strip.firstElementChild).toHaveClass(
+      "clover-template-default-rail-header",
+    );
   });
 
   it("Default: narrowing under the open panel closes it, focus to its toggle; widening brings it back", async () => {

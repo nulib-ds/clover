@@ -579,7 +579,12 @@ member by the resource the Cookbook publishes for it (a Manifest, or a Collectio
 Cookbook's order, with:
 
 - its label, the recipe's title as the Cookbook writes it, and its summary, the name of
-  its folder on iiif.io ("0047-homepage"), in no language (`none`);
+  its folder on iiif.io ("0047-homepage"), in no language (`none`). A recipe whose page
+  shows several resources has a member for each, its summary the file's path under the
+  folder: 0010's right-to-left and top-to-bottom Manifests are
+  "0010-book-2-viewing-direction/manifest-rtl.json" and
+  "0010-book-2-viewing-direction/manifest-ttb.json" (`resourcesFor` in
+  `cookbookCatalog.ts`);
 - its thumbnail: the resource's own, else its first Canvas's (or a Collection's first
   member's), else its first image by its image service, at a size the service's
   `info.json` allows. A recipe that publishes no image has none;

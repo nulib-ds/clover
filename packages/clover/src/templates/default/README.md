@@ -3,7 +3,9 @@
 The Viewer's own layout, drawn when it is given no `template`: Clover 3.x's Viewer, built
 from 4.x parts. The title and the provider's logo over the Body (the thumbnail is About's, in the Panel; Mat, 2026-10-26); the thumbnail strip under the Body, whose
 arrows are Previous and Next, headed by the titles of the view on the left (a dot
-between a spread's two) and the position on the right; and the information panel to the right of all three, the layout's
+between a spread's two) and the position on the right (a Manifest read top to bottom or
+bottom to top has the thumbnails in a column at the Body's start instead, as tall as the
+Body, and the titles and position under the Body); and the information panel to the right of all three, the layout's
 full height, scrolling within when its sections run longer. Downloads (the page's and the
 Manifest's `rendering`) are listed from a Download button beside the panel's About heading.
 

@@ -485,12 +485,48 @@
       },
       "summary": {
         "none": [
-          "0010-book-2-viewing-direction"
+          "0010-book-2-viewing-direction/manifest-rtl.json"
         ]
       },
       "thumbnail": [
         {
           "id": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001/full/96,132/0/default.jpg",
+          "type": "Image",
+          "format": "image/jpeg"
+        }
+      ],
+      "homepage": [
+        {
+          "id": "https://iiif.io/api/cookbook/recipe/0010-book-2-viewing-direction/",
+          "type": "Text",
+          "label": {
+            "en": [
+              "Viewing direction and its effect on navigation"
+            ]
+          },
+          "format": "text/html",
+          "language": [
+            "en"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "https://iiif.io/api/cookbook/recipe/0010-book-2-viewing-direction/manifest-ttb.json",
+      "type": "Manifest",
+      "label": {
+        "en": [
+          "Viewing direction and its effect on navigation"
+        ]
+      },
+      "summary": {
+        "none": [
+          "0010-book-2-viewing-direction/manifest-ttb.json"
+        ]
+      },
+      "thumbnail": [
+        {
+          "id": "https://iiif.io/api/image/3.0/example/reference/9ee11092dfd2782634f5e8e2c87c16d5-uclamss_1841_diary_07_02/full/96,134/0/default.jpg",
           "type": "Image",
           "format": "image/jpeg"
         }

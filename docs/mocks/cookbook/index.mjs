@@ -1,9 +1,10 @@
 /**
  * The IIIF Cookbook's recipes as one IIIF Collection, curated here (Mat, 2026-10-25: "use
  * a IIIF Collection that we can curate"): each recipe a member, by the resource the
- * Cookbook publishes for it (a Manifest, or a Collection of them), in the Cookbook's
- * order, with its title as the Cookbook writes it, its folder's name on iiif.io
- * ("0047-homepage") as its summary, its thumbnail, and its page there as its homepage.
+ * Cookbook publishes for it (a Manifest, or a Collection of them; one member for each
+ * where its page shows several, as 0010's two directions), in the Cookbook's order, with
+ * its title as the Cookbook writes it, its folder's name on iiif.io ("0047-homepage") as
+ * its summary, its thumbnail, and its page there as its homepage.
  *
  * What it lists is read from `recipes.json`, written by `npm run build:cookbook` from
  * iiif.io (`scripts/build-cookbook.mjs`: the recipes on the Cookbook's viewer matrix
@@ -52,8 +53,11 @@ const member = (recipe) => {
     type: recipe.type,
     label: en(recipe.title),
     // Its folder's name on iiif.io (Mat, 2026-10-25: "named like '0047-homepage'"), a
-    // name in no language.
-    summary: { none: [recipe.slug] },
+    // name in no language; where the recipe shows several resources, the file's path
+    // under it ("0010-book-2-viewing-direction/manifest-ttb.json"), so each is told apart.
+    summary: {
+      none: [recipe.file ? `${recipe.slug}/${recipe.file}` : recipe.slug],
+    },
     ...(recipe.thumbnail && {
       thumbnail: [
         { id: recipe.thumbnail, type: "Image", ...(format && { format }) },

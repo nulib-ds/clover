@@ -61,6 +61,26 @@ export const resourceFor = (slug: string): string | undefined => {
   return resourceBySlug.get(slug) ?? `${recipeBase}${slug}/manifest.json`;
 };
 
+/**
+ * Recipes whose page on iiif.io shows more than one resource, each listed in the
+ * Cookbook's Collection as a member of its own (Mat, 2026-11-06: "add the Top to Bottom
+ * version of 0010 as well"): the paths, under the recipe's folder, after the one
+ * `resourceFor` gives.
+ */
+const moreResources: Record<string, string[]> = {
+  "0010-book-2-viewing-direction": ["manifest-ttb.json"],
+};
+
+/** Every resource a recipe shows: the one `resourceFor` gives, then any others. */
+export const resourcesFor = (slug: string): string[] => {
+  const first = resourceFor(slug);
+  if (!first) return [];
+  const more = (moreResources[slug] ?? []).map(
+    (path) => `${recipeBase}${slug}/${path}`,
+  );
+  return [first, ...more];
+};
+
 export const statusFor = (slug: string): Status =>
   slug in partialNotes ? "partial" : supportedSlugs.has(slug) ? "yes" : "no";
 
@@ -80,10 +100,9 @@ export const coverage = {
  */
 const titleByResource = new Map<string, string>();
 for (const recipe of recipes) {
-  const resource = resourceFor(recipe.slug);
-  if (!resource) continue;
-  if (!titleByResource.has(resource) || resource.includes(`/${recipe.slug}/`)) {
-    titleByResource.set(resource, recipe.title);
+  for (const resource of resourcesFor(recipe.slug)) {
+    if (!titleByResource.has(resource) || resource.includes(`/${recipe.slug}/`))
+      titleByResource.set(resource, recipe.title);
   }
 }
 

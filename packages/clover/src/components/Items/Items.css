@@ -609,7 +609,9 @@
 
 /*
  * A vertical slider: a column as tall as what holds it, scrolling down, its pictures
- * as wide as the column. Its shadows and arrows move to its top and bottom.
+ * as wide as the column. Its arrows have room of their own at its top and bottom, never
+ * over an item or its words (Mat, 2026-11-06): each at the frame's edge, and the column
+ * scrolling between them, `m` clear of each. Its shadows move to the column's ends.
  */
 .clover-items[data-layout="slider"][data-orientation="vertical"] {
   display: flex;
@@ -619,8 +621,10 @@
 
 .clover-items[data-layout="slider"][data-orientation="vertical"]
   .clover-items-frame {
+  --clover-items-ends: calc(var(--clover-control) + var(--clover-space-m));
   flex: 1;
   min-height: 0;
+  padding-block: var(--clover-items-ends);
 }
 
 .clover-items[data-layout="slider"][data-orientation="vertical"]
@@ -677,14 +681,14 @@
   .clover-items[data-layout="slider"][data-orientation="vertical"]
     .clover-items-frame::before {
     --clover-items-shade: to bottom;
-    top: calc(-1 * var(--clover-items-ring-room));
+    top: calc(var(--clover-items-ends) - var(--clover-items-ring-room));
   }
 
   .clover-items[data-layout="slider"][data-orientation="vertical"]
     .clover-items-frame::after {
     --clover-items-shade: to top;
     top: auto;
-    bottom: calc(-1 * var(--clover-items-ring-room));
+    bottom: calc(var(--clover-items-ends) - var(--clover-items-ring-room));
   }
 }
 
@@ -695,11 +699,20 @@
   translate: -50% 0;
 }
 
-.clover-items[data-orientation="vertical"] button.clover-items-scroll-prev {
-  top: var(--clover-space-2xs);
+/*
+ * Previous at the top and Next at the foot; a column read from its foot up (a Manifest's
+ * `bottom-to-top`, `data-upward`) the other way about.
+ */
+.clover-items[data-orientation="vertical"] button.clover-items-scroll-prev,
+.clover-items[data-orientation="vertical"][data-upward]
+  button.clover-items-scroll-next {
+  top: 0;
+  bottom: auto;
 }
 
-.clover-items[data-orientation="vertical"] button.clover-items-scroll-next {
+.clover-items[data-orientation="vertical"] button.clover-items-scroll-next,
+.clover-items[data-orientation="vertical"][data-upward]
+  button.clover-items-scroll-prev {
   top: auto;
-  bottom: var(--clover-space-2xs);
+  bottom: 0;
 }

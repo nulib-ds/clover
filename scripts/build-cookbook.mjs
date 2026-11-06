@@ -6,8 +6,11 @@
  * commit both.
  *
  * Each recipe is listed as `cookbookSections.ts` names and orders it, opening the resource
- * `resourceFor` gives it. Each resource is read here, so one that no longer answers is
- * left out and said, its type kept (a Manifest, or a Collection of them), and its
+ * `resourceFor` gives it, and once more for each other resource its page shows
+ * (`resourcesFor`: 0010's top-to-bottom Manifest beside its right-to-left one), each of
+ * those with its `file` under the recipe's folder. Each resource is read here, so one
+ * that no longer answers is left out and said, its type kept (a Manifest, or a
+ * Collection of them), and its
  * thumbnail found: its own, else its first Canvas's (or a Collection's first member's),
  * else the first image painted on it, by its image service at a size its `info.json`
  * allows. Nothing else is taken from a resource.
@@ -24,7 +27,10 @@ import { fileURLToPath } from "node:url";
 import prettier from "prettier";
 
 import { cookbookSections } from "docs/components/CookbookRecipes/cookbookSections";
-import { resourceFor } from "docs/components/CookbookRecipes/cookbookCatalog";
+import {
+  recipeBase,
+  resourcesFor,
+} from "docs/components/CookbookRecipes/cookbookCatalog";
 import { regionThumbnailFrom, thumbnailFrom } from "docs/lib/iiif-image-sizes";
 import { dateTimeOf } from "../packages/clover/src/core/dates-format";
 
@@ -206,32 +212,40 @@ for (const slug of [...onMatrix].filter(
 ))
   problems.push(`On the matrix, not in cookbookSections.ts: ${slug}`);
 
+// A recipe whose page shows several resources is listed once for each, with its file.
+const examples = listed
+  .filter((recipe) => onMatrix.has(recipe.slug))
+  .flatMap((recipe) => {
+    const resources = resourcesFor(recipe.slug);
+    const folder = `${recipeBase}${recipe.slug}/`;
+    return resources.map((resource) => ({
+      ...recipe,
+      resource,
+      ...(resources.length > 1 && { file: resource.slice(folder.length) }),
+    }));
+  });
+
 const recipes = (
-  await pool(
-    listed.filter((recipe) => onMatrix.has(recipe.slug)),
-    6,
-    async ({ slug, title, section }) => {
-      const resource = resourceFor(slug);
-      if (!resource) return undefined;
-      const read = await fetchJson(resource).catch((error) => {
-        problems.push(`Left out ${slug}: ${error.message}`);
-        return undefined;
-      });
-      if (!read) return undefined;
-      const type = /Collection/.test(read.type ?? read["@type"] ?? "")
-        ? "Collection"
-        : "Manifest";
-      const thumbnail = await thumbnailOf(read).catch(() => undefined);
-      return {
-        slug,
-        title,
-        section,
-        resource,
-        type,
-        ...(thumbnail && { thumbnail }),
-      };
-    },
-  )
+  await pool(examples, 6, async ({ slug, title, section, resource, file }) => {
+    const read = await fetchJson(resource).catch((error) => {
+      problems.push(`Left out ${slug}: ${error.message}`);
+      return undefined;
+    });
+    if (!read) return undefined;
+    const type = /Collection/.test(read.type ?? read["@type"] ?? "")
+      ? "Collection"
+      : "Manifest";
+    const thumbnail = await thumbnailOf(read).catch(() => undefined);
+    return {
+      slug,
+      title,
+      section,
+      resource,
+      ...(file && { file }),
+      type,
+      ...(thumbnail && { thumbnail }),
+    };
+  })
 ).filter(Boolean);
 
 // Today, as Clover writes a day for a machine (`core/dates-format.ts`).

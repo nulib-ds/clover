@@ -251,13 +251,18 @@
  * the shadow at the strip's end lay over the panel. Here the strip stops at the pane's
  * edge and keeps the room as its padding, so nothing is cut, and its end shadow is at
  * that edge. Physical sides, by the page's direction, not the book's (`dir` on the
- * strip's frame is the book's).
+ * strip's frame is the book's). A column at the Body's start is nowhere near the panel,
+ * and keeps its room on both sides.
  */
-.clover-template-default-panes:dir(ltr) .clover-items-viewport {
+.clover-template-default-panes:dir(ltr)
+  .clover-items:not([data-orientation="vertical"])
+  .clover-items-viewport {
   margin-right: 0;
 }
 
-.clover-template-default-panes:dir(rtl) .clover-items-viewport {
+.clover-template-default-panes:dir(rtl)
+  .clover-items:not([data-orientation="vertical"])
+  .clover-items-viewport {
   margin-left: 0;
 }
 
@@ -406,14 +411,17 @@
 
 /*
  * The thumbnails run on past the strip's end padding to the pane's edge, as the Body
- * does, so a thumbnail cut there reads as more to come rather than a margin.
+ * does, so a thumbnail cut there reads as more to come rather than a margin. (A column,
+ * below, keeps Items' own room, rings and arrows.)
  */
-.clover-template-default-rail > .clover-items {
+.clover-template-default-rail:not([data-orientation="vertical"])
+  > .clover-items {
   margin-inline-end: calc(-1 * var(--clover-inset));
 }
 
 /* Already at the pane's edge: no ring room past it. */
-.clover-template-default-rail .clover-items-viewport {
+.clover-template-default-rail:not([data-orientation="vertical"])
+  .clover-items-viewport {
   margin-inline-end: 0;
 }
 
@@ -423,19 +431,19 @@
  * controls, the inset in from the pane's edge, as the cluster is. In a right-to-left book they
  * swap: Next on the left, Previous on the right.
  */
-.clover-template-default-rail
+.clover-template-default-rail:not([data-orientation="vertical"])
   .clover-items-frame:not([dir="rtl"])
   > button.clover-items-scroll-prev,
-.clover-template-default-rail
+.clover-template-default-rail:not([data-orientation="vertical"])
   .clover-items-frame[dir="rtl"]
   > button.clover-items-scroll-next {
   left: calc(-1 * var(--clover-space-s));
 }
 
-.clover-template-default-rail
+.clover-template-default-rail:not([data-orientation="vertical"])
   .clover-items-frame:not([dir="rtl"])
   > button.clover-items-scroll-next,
-.clover-template-default-rail
+.clover-template-default-rail:not([data-orientation="vertical"])
   .clover-items-frame[dir="rtl"]
   > button.clover-items-scroll-prev {
   right: var(--clover-inset);
@@ -444,6 +452,71 @@
 /* One view: no position, arrows or thumbnails to show, so no strip and no gap. */
 .clover-template-default-rail:not(:has(.clover-items, .clover-pager-position)) {
   display: none;
+}
+
+/*
+ * The Body and the strip. While the strip is under the Body, their box lays out nothing
+ * of its own: the two are the main pane's, as they always were.
+ */
+.clover-template-default-views {
+  display: contents;
+}
+
+/*
+ * A Manifest read down the page (`viewingDirection` `top-to-bottom` or `bottom-to-top`):
+ * the thumbnails stand at the Body's start, a column as tall as the Body running down,
+ * and the view's titles and position go under the Body, the inset all round. Size
+ * containment keeps the thumbnails from making the row taller than the Body. The grid
+ * takes what room the main pane has past the header, as the Body did: none past the
+ * Body's own height, unless the layout fills a box (`fill`, or a host that gives the
+ * Body `--clover-body-height: auto` and a flex of its own). With nothing to choose
+ * between (one view), the column is gone, and the Body has the width.
+ */
+.clover-template-default-views[data-orientation="vertical"] {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  flex: 1 1 auto;
+}
+
+.clover-template-default:is([data-fill], :fullscreen)
+  .clover-template-default-views[data-orientation="vertical"] {
+  flex: 1 1 0;
+  min-height: 16rem;
+}
+
+.clover-template-default-views[data-orientation="vertical"]
+  > .clover-template-default-body {
+  grid-area: 1 / 2;
+}
+
+.clover-template-default-views
+  > .clover-template-default-rail[data-orientation="vertical"] {
+  grid-area: 1 / 1;
+  width: var(--clover-template-default-rail-width, 9rem);
+  contain: size;
+}
+
+.clover-template-default-views[data-orientation="vertical"]
+  > .clover-template-default-rail-header {
+  grid-area: 2 / 2;
+  padding: var(--clover-inset);
+}
+
+.clover-template-default-views[data-orientation="vertical"]
+  > .clover-template-default-rail-header:not(:has(.clover-pager-position)) {
+  display: none;
+}
+
+@container clover-template-default-main (width < 36rem) {
+  .clover-template-default-rail[data-orientation="vertical"] {
+    --clover-template-default-rail-width: 6rem;
+  }
+}
+
+.clover-template-default-rail[data-orientation="vertical"] > .clover-items {
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 /* The view's titles in the page's own size, and the position a step under it (`s`). */

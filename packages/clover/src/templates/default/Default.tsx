@@ -95,7 +95,9 @@ export type DefaultProps = Omit<RootProps, "children"> & {
  * from 4.x parts. Copy this file to start a layout of your own.
  *
  * The title and its actions over the Body, and under the Body the thumbnail strip,
- * headed by the position and a pair of arrows; the information panel to the right of all
+ * headed by the position and a pair of arrows (for a Manifest read top to bottom or bottom
+ * to top, a column at the Body's start, its titles and position under the Body); the
+ * information panel to the right of all
  * three, the layout's full height. The panel has its own space, as in 3.x, and a bar
  * between it and the rest shares the width (drag it, or use the arrow keys on it). Where there is no room for both
  * (a phone), the panel slides over the Body instead, and a strip of the page stays
@@ -195,20 +197,20 @@ export function Default({
           )}
           {/* The Body shows the loading; announced here, nothing moves. */}
           <Clover.Status loading={false} />
-          <Clover.Body
-            className="clover-template-default-body"
-            collapseControls={collapseControls}
-            options={canvasOptions}
-          >
-            {panel && !docked && pane.toggle}
-          </Clover.Body>
-          <div className="clover-template-default-rail">
-            <div className="clover-template-default-rail-header">
-              <ViewTitles />
-              <Clover.Position />
-            </div>
-            {items && <Clover.Items layout={items} singleItem={singleItem} />}
-          </div>
+          <Views
+            items={items}
+            singleItem={singleItem}
+            body={
+              <Clover.Body
+                key="body"
+                className="clover-template-default-body"
+                collapseControls={collapseControls}
+                options={canvasOptions}
+              >
+                {panel && !docked && pane.toggle}
+              </Clover.Body>
+            }
+          />
         </Clover.SplitPane>
         {panel && (
           <PanelPane
@@ -309,6 +311,65 @@ function usePickFirst(first: Clover.AnnotationEntry | undefined) {
     if (!annotationId && canvasId === first.canvasId)
       clover.selectAnnotation(first.id);
   }, [clover, first, manifestId]);
+}
+
+/**
+ * The Body and the strip: the thumbnails, and the view's titles and position over them.
+ * The strip is under the Body, a row. Where the Manifest reads down the page
+ * (`viewingDirection` `top-to-bottom` or `bottom-to-top`), the thumbnails stand at the
+ * Body's start, first in focus order as they are on screen, a column as tall as the Body
+ * running down, and the titles and position go under the Body (`Default.css`). Their box
+ * is one element either way, so the Body is moved, never drawn again, as a Manifest of
+ * another direction opens.
+ */
+function Views({
+  body,
+  items,
+  singleItem,
+}: Pick<DefaultProps, "items" | "singleItem"> & { body: React.ReactElement }) {
+  const { direction } = Clover.useSequence();
+  const vertical =
+    items === "slider" &&
+    (direction === "top-to-bottom" || direction === "bottom-to-top");
+  const header = (
+    <div key="header" className="clover-template-default-rail-header">
+      <ViewTitles />
+      <Clover.Position />
+    </div>
+  );
+  const thumbnails = items && (
+    <Clover.Items
+      layout={items}
+      orientation={vertical ? "vertical" : undefined}
+      singleItem={singleItem}
+    />
+  );
+  return (
+    <div
+      className="clover-template-default-views"
+      data-orientation={vertical ? "vertical" : undefined}
+    >
+      {vertical
+        ? [
+            <div
+              key="rail"
+              className="clover-template-default-rail"
+              data-orientation="vertical"
+            >
+              {thumbnails}
+            </div>,
+            body,
+            header,
+          ]
+        : [
+            body,
+            <div key="rail" className="clover-template-default-rail">
+              {header}
+              {thumbnails}
+            </div>,
+          ]}
+    </div>
+  );
 }
 
 /** The heading level under another. Past 6, the parts' titles name what they head. */
