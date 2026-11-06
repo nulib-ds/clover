@@ -236,8 +236,8 @@ export interface CloverCanvasProps {
   /**
    * AnnotationPages drawn (while not hidden) but never offered in the annotations menu,
    * as the Annotations list leaves them out: a search's hits, which Search lists, and a
-   * still Canvas's OCR, which a search finds in. Leave it out for the Canvas to keep its
-   * own OCR out.
+   * still Canvas's OCR where a search finds in it. Leave it out for the Canvas to offer
+   * its own OCR, hidden to start, as it has no search.
    */
   unlistedPages?: string[];
   /** The reader hid AnnotationPages from the picture (`visible` false), or showed them. */

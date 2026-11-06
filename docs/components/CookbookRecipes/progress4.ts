@@ -144,6 +144,9 @@ export const progress4: Record<string, Progress> = {
   "0064-opera-one-canvas": yes,
   // 2026-10-28: a chapter on the other Canvas now arrives at its moment, playing.
   "0065-opera-multiple-canvases": yes,
+  // 2026-11-05: its OCR, with no search service to reach it, is listed in the Canvas's
+  // annotations menu, hidden to start, and drawn from its toggle; each page's ALTO is in
+  // Download. Before, the OCR was fetched and never shown.
   "0068-newspaper": yes,
   "0074-multiple-language-captions": yes,
   // 2026-10-29: every member's place on one Map, each opening its Manifest; their dates

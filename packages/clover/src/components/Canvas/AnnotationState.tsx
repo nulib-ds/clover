@@ -159,10 +159,12 @@ export function AnnotationState({
   }, [ownHiddenPages, ownShownPages, ownQuietPages]);
   const hiddenPages = hiddenPagesProp ?? ownPages;
   /*
-   * The pages the menu never offers (`unlistedPages`), or, alone, its own OCR, as the
-   * Annotations list leaves them out (Mat, 2026-10-26). With none left, no menu control.
+   * The pages the menu never offers (`unlistedPages`: a Root's search hits, and its OCR
+   * where it has a search; Mat, 2026-10-26). Alone, the Canvas has no search, so its menu
+   * offers its own OCR, hidden to start, as the only way to it (Cookbook 0068). With
+   * nothing to offer, no menu control.
    */
-  const unlistedPages = unlistedPagesProp ?? ownQuietPages;
+  const unlistedPages = unlistedPagesProp ?? NO_PAGES;
   const listed = useCallback(
     <T extends { pageId?: string }>(list: T[]) =>
       unlistedPages.length

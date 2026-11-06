@@ -62,6 +62,27 @@ describe("useCaptionTracks", () => {
     expect(result.current.track).toBe(list.items[0]);
   });
 
+  it("starts on the track it is given, in the visitor's language, and follows it until one is chosen", () => {
+    const list = new FakeTrackList([fakeTrack(), fakeTrack()]);
+    const element = videoWith(list);
+    const { result, rerender } = renderHook(
+      ({ start }: { start: number }) =>
+        useCaptionTracks(element, [ENGLISH, ITALIAN], "a", start),
+      { initialProps: { start: 1 } },
+    );
+    expect(result.current.active).toBe(1);
+    // The language known later (a Root's, once read): the track it leads to.
+    rerender({ start: 0 });
+    expect(result.current.active).toBe(0);
+    // Once chosen, the visitor's choice stays.
+    act(() => result.current.select(1));
+    rerender({ start: 0 });
+    expect(result.current.active).toBe(1);
+    act(() => result.current.select(-1));
+    rerender({ start: 1 });
+    expect(result.current.active).toBe(-1);
+  });
+
   it("keeps the chosen track hidden for Clover to draw, and the media's others off", () => {
     const list = new FakeTrackList([fakeTrack(), fakeTrack()]);
     const { result } = setup([ENGLISH, ITALIAN], list);

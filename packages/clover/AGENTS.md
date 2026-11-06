@@ -823,7 +823,11 @@ every rule below.
     `pt-BR`; `scriptLanguage`, `zh-Hant` of `zh-TW`; `sameLanguage`), and which of a set to
     read (`closestLanguage`, IIIF's rule plus the script, held to `@iiif/helpers`' by
     `languages.test.ts`; `languageToRead`, it for a Root's `language` or else in
-    `readerLanguages`' order).
+    `readerLanguages`' order; `startingLanguage`, the one every choice of language starts
+    on, About's, the captions' and the Transcript's file, a painted `Choice`'s item: Mat,
+    2026-11-05, "all language derived properties … lean to the end user's language",
+    here rather than in `core/language-choice.ts`, which re-exports it, so the player and
+    the Canvas take it without the IIIF value reader).
   - `direction.ts`, with the parts that draw text: `directionOf` and `languageProps`.
   - `config.ts`: Clover's interface language (its control labels, section titles and
     announcements): the languages configured, the visitor's default, the choices offered
@@ -839,8 +843,7 @@ every rule below.
     the code.
 - **What reads IIIF applies them** beside what it reads, and loads with it: `localize`
   and `hrefLangOf` (`core/value.ts`), `bodyInLanguage` and `annotationName`
-  (`core/annotation-name.ts`), `descriptionLanguages` and `startingLanguage`
-  (`core/language-choice.ts`), `useReadingLanguages` (`react/readingLanguages.ts`),
+  (`core/annotation-name.ts`), `descriptionLanguages` (`core/language-choice.ts`), `useReadingLanguages` (`react/readingLanguages.ts`),
   `useInterfaceLanguages`, `useLanguageToggle` and `LanguageToggle` (About's
   language toggle, `components/Panel/LanguageToggle.tsx`), drawn by Clover's one
   construct for a choice of languages, `ui/LanguageChoice.tsx` (the globe,

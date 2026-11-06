@@ -29,7 +29,7 @@ import {
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
 import { playFrom } from "../../lib/time";
-import { sameLanguage } from "../../i18n/languages";
+import { sameLanguage, startingLanguage } from "../../i18n/languages";
 import { languageProps } from "../../i18n/direction";
 import { useClover, useCloverSelector } from "../../react/context";
 import { covers, useReadingLanguages } from "../../react/readingLanguages";
@@ -165,21 +165,34 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
     const track = tracks[choice] ?? tracks[0];
     // The Root's language, as the reader chose it there, else as the Root reads.
     const offered = useReadingLanguages();
-    const rootLanguage = offered?.chosen ?? language;
+    /*
+     * Where the Root names none, the files' own languages, by the rule every choice of
+     * language starts by (`startingLanguage`: the visitor's, then the interface's, then
+     * the page's), else the first (Mat, 2026-11-05: "all language derived properties
+     * ... lean to the end user's language").
+     */
+    const startLanguage = useMemo(() => {
+      const chosen = offered?.chosen ?? language;
+      if (chosen) return chosen;
+      const tags = tracks.flatMap((option) =>
+        option.language && option.language !== "none" ? [option.language] : [],
+      );
+      return tags.length > 1 ? startingLanguage(tags) : undefined;
+    }, [offered?.chosen, language, tracks]);
     useEffect(() => {
-      if (!rootLanguage) return;
+      if (!startLanguage) return;
       const index = tracks.findIndex(
         (option) =>
           option.language &&
           option.language !== "none" &&
-          sameLanguage(option.language, rootLanguage),
+          sameLanguage(option.language, startLanguage),
       );
       if (index < 0) return;
       setChoice(index);
       const file = tracks[index];
       if (isCaptionTrack(file) && clover.captions.get() !== file.id)
         clover.captions.emit(file.id);
-    }, [rootLanguage, tracks, clover]);
+    }, [startLanguage, tracks, clover]);
     /*
      * One choice of language for the captions and the transcript, through the Root
      * (`clover.captions`): a caption file chosen in the Canvas's own Captions menu is the

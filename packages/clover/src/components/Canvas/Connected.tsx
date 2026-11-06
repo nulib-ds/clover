@@ -17,6 +17,7 @@ import {
   selectUnlistedSets,
 } from "../../core/annotation-sets";
 import type { AnnotationLink } from "../../core/link";
+import { searchServiceOf } from "../../core/search-service";
 import { showLink } from "../../core/show-link";
 import { chaptersOf } from "../../core/ranges";
 import { hasBehavior } from "../../core/selectors";
@@ -92,8 +93,9 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
   );
   /*
    * What the menu never offers, as the Annotations list leaves it out (Mat, 2026-10-26):
-   * the search's hits, which Search lists, and the OCR that starts hidden, unless the
-   * reader's host has shown it (`shownSets`).
+   * the search's hits, which Search lists, and, where the Manifest has a search, the OCR
+   * that starts hidden, unless the reader's host has shown it (`shownSets`). Without a
+   * search, the menu offers that OCR, hidden, as nothing else reaches it (Cookbook 0068).
    */
   const unlistedSets = useCloverSelector((state) =>
     selectUnlistedSets(
@@ -101,6 +103,7 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
       state.addedSets,
       state.hiddenSets,
       state.shownSets,
+      Boolean(searchServiceOf(state.manifest)),
     ),
   );
   const hiddenSets = useCloverSelector((state) =>

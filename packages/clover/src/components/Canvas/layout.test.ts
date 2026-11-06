@@ -516,6 +516,34 @@ describe("startingChoices", () => {
     expect(startingChoices(groups)).toEqual({ [groups[0].key]: 1 });
   });
 
+  // Leaning to the visitor's language, as IIIF text does (Mat, 2026-11-05).
+  it("starts a Choice whose items are in several languages on the visitor's, else its first", () => {
+    const group = (languages: string[]) => [
+      {
+        key: "k",
+        canvasId: "c",
+        items: languages.map((language) => ({
+          type: "Sound",
+          format: "audio/mpeg",
+          language,
+        })),
+      },
+    ];
+    const visitor = vi.spyOn(navigator, "languages", "get");
+    onTestFinished(() => visitor.mockRestore());
+    visitor.mockReturnValue(["it-IT"]);
+    expect(startingChoices(group(["en", "it"]))).toEqual({ k: 1 });
+    // The Root's language wins over the visitor's.
+    expect(startingChoices(group(["en", "it"]), "en")).toEqual({});
+    visitor.mockReturnValue(["de-DE"]);
+    expect(startingChoices(group(["en", "it"]))).toEqual({});
+    // One it cannot play is never started on, whatever its language.
+    visitor.mockReturnValue(["it-IT"]);
+    const [alac] = group(["en", "it"]);
+    alac.items[1].format = "audio/alac";
+    expect(startingChoices([alac])).toEqual({});
+  });
+
   it("leaves a Choice of images, and one whose first is offered, on its first", () => {
     canPlay.mockImplementation(() => "maybe");
     expect(startingChoices(findChoices(items(choiceAv)))).toEqual({});

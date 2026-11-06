@@ -657,6 +657,38 @@ describe("Canvas media", () => {
     expect(button).toHaveAccessibleDescription("Off");
   });
 
+  /*
+   * Captions lean to the visitor's language, as IIIF text does (Mat, 2026-11-05): the
+   * track in it, else the first. Cookbook 0074 lists English, then Italian.
+   */
+  it.each([
+    [["it-IT", "en"], /^IT/],
+    [["en-US"], /^EN/],
+    // In neither: the first, as listed.
+    [["de-DE"], /^EN/],
+  ])(
+    "starts on the track in the visitor's language, else the first (%j)",
+    async (visitor, shown) => {
+      vi.spyOn(globalThis, "fetch").mockImplementation(() =>
+        Promise.resolve(new Response("WEBVTT\n")),
+      );
+      const languagesOf = vi
+        .spyOn(navigator, "languages", "get")
+        .mockReturnValue(visitor);
+      onTestFinished(() => languagesOf.mockRestore());
+      render(<Canvas canvases={languages.items as any} />);
+      await transport();
+      // Named in Clover's interface language, Italian for an Italian visitor.
+      fireEvent.click(
+        screen.getByRole("button", { name: /^(Captions|Sottotitoli)$/ }),
+      );
+      const checked = screen
+        .getAllByRole("radio")
+        .find((radio) => (radio as HTMLInputElement).checked);
+      expect(checked?.closest("label")?.textContent).toMatch(shown);
+    },
+  );
+
   it("draws the chosen track's cues in its language, as words alone", async () => {
     vi.spyOn(globalThis, "fetch").mockImplementation(() =>
       Promise.resolve(new Response("WEBVTT\n")),

@@ -148,6 +148,23 @@ describe("Transcript", () => {
     );
   });
 
+  // Leaning to the visitor's language, as IIIF text does (Mat, 2026-11-05).
+  it("starts on the caption file in the visitor's language, where the Root names none", async () => {
+    const visitor = vi
+      .spyOn(navigator, "languages", "get")
+      .mockReturnValue(["it-IT"]);
+    onTestFinished(() => visitor.mockRestore());
+    render(
+      <Clover.Root iiifContent={oneLanguage} request={{ fetch }}>
+        <Clover.Transcript />
+      </Clover.Root>,
+    );
+    const italian = await screen.findByRole("radio", {
+      name: "IT Sottotitoli in formato WebVTT",
+    });
+    await waitFor(() => expect(italian).toBeChecked());
+  });
+
   it("sits beside its heading in the information panel's accordion", async () => {
     render(
       <Clover.Root iiifContent={oneLanguage} request={{ fetch }}>

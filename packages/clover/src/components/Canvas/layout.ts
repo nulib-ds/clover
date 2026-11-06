@@ -7,6 +7,7 @@ import { choiceKey as keyOf } from "../../core/choice-key";
 import { type ViewingDirection, resolveDirection } from "../../core/sequence";
 import type { ThumbnailSource } from "../../core/thumbnail";
 import { asArray } from "../../lib/asArray";
+import { startingLanguage } from "../../i18n/languages";
 import { isHls } from "../../lib/hls";
 
 export { type ViewingDirection, resolveDirection };
@@ -72,6 +73,8 @@ export interface ChoiceGroup {
     image?: string;
     type?: string;
     format?: string;
+    /** The language it is in, where it gives one: the visitor's starts (`startingChoices`). */
+    language?: string;
   }>;
 }
 
@@ -257,6 +260,9 @@ export function findChoices(canvases: IIIFCanvas[]): ChoiceGroup[] {
             id: item.id,
             ...(typeof item.type === "string" ? { type: item.type } : {}),
             ...(typeof item.format === "string" ? { format: item.format } : {}),
+            ...(typeof asArray(item.language)[0] === "string"
+              ? { language: asArray(item.language)[0] as string }
+              : {}),
           })),
         });
       }
@@ -286,14 +292,26 @@ export function playsHere(item: ChoiceGroup["items"][number]): boolean {
 }
 
 /**
- * Which item of each Choice starts: its first, as the Choice orders them; where that one
- * is disabled (`playsHere`), the next that is not, walking the menu down (Cookbook 0434;
- * Mat, 2026-10-29). Only those not the first, by key; none where every item is disabled.
+ * Which item of each Choice starts: of those it offers (`playsHere`), where they are in
+ * two or more languages, the one in the visitor's, by the rule every choice of language
+ * starts by (`startingLanguage`, the Root's `language` where it has one; Mat, 2026-11-05:
+ * "all language derived properties ... lean to the end user's language"); else its first,
+ * as the Choice orders them, or, where that one is disabled, the next that is not,
+ * walking the menu down (Cookbook 0434; Mat, 2026-10-29). Only those not the first, by
+ * key; none where every item is disabled.
  */
-export function startingChoices(groups: ChoiceGroup[]): ChoiceSelections {
+export function startingChoices(
+  groups: ChoiceGroup[],
+  language?: string,
+): ChoiceSelections {
   const chosen: ChoiceSelections = {};
   for (const group of groups) {
-    const first = group.items.findIndex(playsHere);
+    const offered = group.items.filter(playsHere);
+    const tags = [...new Set(offered.flatMap((item) => item.language ?? []))];
+    const tag = tags.length > 1 ? startingLanguage(tags, language) : undefined;
+    const first = group.items.findIndex(
+      (item) => playsHere(item) && (!tag || item.language === tag),
+    );
     if (first > 0) chosen[group.key] = first;
   }
   return chosen;

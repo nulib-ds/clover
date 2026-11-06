@@ -8,7 +8,7 @@ import { asArray } from "../lib/asArray";
 
 export type { AnnotationBodyEntry };
 import type { Manifest } from "./presentation";
-import { SEARCH_SET_ID } from "./search-service";
+import { SEARCH_SET_ID } from "./search-set-id";
 import { selectCanvas, selectSequence } from "./selectors";
 import type { LanguageMapLike } from "./value";
 
@@ -406,7 +406,8 @@ const plays = (canvas: Json | undefined) => Number(canvas?.duration) > 0;
  * the ready, for a search to point into, and not drawn over the page; a search's hits
  * (`highlighting`) are what show. A transcription of the whole page (Maktaba's) is there
  * to read and shows as ever, a Canvas that plays keeps its own, and caption files are
- * never in a set (`readBodies`). The reader shows one with `setSetVisible`, as any set.
+ * never in a set (`readBodies`). The reader shows one with `setSetVisible`, as any set:
+ * where the Manifest has no search, from the Canvas's menu (`selectUnlistedSets`).
  */
 export function startsHidden(
   set: AnnotationSet,
@@ -480,25 +481,33 @@ export function selectHiddenSets(
 
 const unlistedOf = new WeakMap<string[], { hidden: string[]; ids: string[] }>();
 
+/** What the menu never offers, whatever the Manifest: others list them. */
+const ALWAYS_UNLISTED = [SEARCH_SET_ID, CONTENTS_SET_ID];
+
 /**
  * The sets the Canvas's menu never offers, as the Annotations list leaves them out: the
  * search's hits (`SEARCH_SET_ID`, which `Search` lists), the Ranges' regions
- * (`CONTENTS_SET_ID`, which `Contents` lists), and those that start hidden and
- * are still hidden but for the reader's own switching off (`hiddenSets`), which the menu
- * offers to show again. The same array comes back while nothing changes.
+ * (`CONTENTS_SET_ID`, which `Contents` lists), and, where the Manifest has a search to
+ * reach them, those that start hidden and are still hidden but for the reader's own
+ * switching off (`hiddenSets`), which the menu offers to show again. A Manifest with no
+ * search (Cookbook 0068) has its OCR offered by the menu, hidden to start, as nothing
+ * else would reach it. Whether it has one (`searchable`, `searchServiceOf`) is the
+ * caller's to say: a Root's Canvas reads it, and a Canvas alone never loads the reader.
+ * The same array comes back while nothing changes.
  */
 export function selectUnlistedSets(
   manifest: Manifest | null,
   added: AnnotationSet[],
   hidden: string[],
   shown: string[],
+  searchable: boolean,
 ): string[] {
+  if (!searchable) return ALWAYS_UNLISTED;
   const drawnHidden = selectHiddenSets(manifest, added, hidden, shown);
   const cached = unlistedOf.get(drawnHidden);
   if (cached && cached.hidden === hidden) return cached.ids;
   const ids = [
-    SEARCH_SET_ID,
-    CONTENTS_SET_ID,
+    ...ALWAYS_UNLISTED,
     ...drawnHidden.filter((id) => !hidden.includes(id)),
   ];
   unlistedOf.set(drawnHidden, { hidden, ids });

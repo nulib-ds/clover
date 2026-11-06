@@ -85,6 +85,8 @@ export function useCaptionTracks(
   element: HTMLVideoElement | null,
   own: CaptionOption[],
   key: string,
+  /** The Manifest's track to start on: the one in the visitor's language, else the first. */
+  start = 0,
 ): {
   options: CaptionOption[];
   /** The option chosen, or -1 for none. */
@@ -94,14 +96,24 @@ export function useCaptionTracks(
   track: TextTrack | undefined;
 } {
   const ownCount = own.length;
-  const first = ownCount ? 0 : -1;
+  const first = ownCount ? Math.min(Math.max(start, 0), ownCount - 1) : -1;
   const [selection, setSelection] = useState<Selection>({
     choice: first,
     picked: false,
     key,
   });
-  // Another recording: its first track, as the Player starts each one.
-  if (selection.key !== key) {
+  /*
+   * Another recording: its track in the visitor's language, else its first. The same
+   * one, until the visitor chooses: the track the language now leads to (the Root's
+   * language known after mount, or another chosen).
+   */
+  if (
+    selection.key !== key ||
+    (!selection.picked &&
+      typeof selection.choice === "number" &&
+      selection.choice >= 0 &&
+      selection.choice !== first)
+  ) {
     setSelection({ choice: first, picked: false, key });
   }
   const { choice, picked } = selection;

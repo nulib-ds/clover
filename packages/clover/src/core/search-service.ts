@@ -42,8 +42,7 @@ export interface SearchResults {
   set: AnnotationSet;
 }
 
-/** The set's id, so hosts and parts can tell search hotspots from annotations. */
-export const SEARCH_SET_ID = "content-search";
+export { SEARCH_SET_ID } from "./search-set-id";
 
 type Json = Record<string, any>;
 

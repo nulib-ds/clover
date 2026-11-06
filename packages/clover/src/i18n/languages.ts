@@ -139,3 +139,22 @@ export function languageToRead(
   const [first, ...rest] = language ? [language] : readerLanguages();
   return closestLanguage(first, tags, rest) ?? tags[0];
 }
+
+/**
+ * The language a choice shows: the reader's pick (`picked`) where the set has it, else the
+ * one the Root reads IIIF text in (`language`), or else the visitor's, as IIIF text is
+ * chosen (`languageToRead`); else the first given. Every choice of language starts by it
+ * (About's languages, captions, a painted `Choice`; Mat, 2026-11-05: "all language
+ * derived properties ... lean to the end user's language").
+ */
+export function startingLanguage(
+  languages: string[],
+  language?: string,
+  picked?: string,
+): string | undefined {
+  if (picked && languages.includes(picked)) return picked;
+  if (!languages.length) return undefined;
+  const tag = languageToRead(languages, language);
+  // `none` is no language to show, as IIIF text in it carries none (`localize`).
+  return tag === "none" ? languages[0] : tag;
+}

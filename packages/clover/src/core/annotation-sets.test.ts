@@ -169,22 +169,35 @@ describe("annotation sets", () => {
       ]);
     });
 
-    it("is never offered by the Canvas's menu, nor are a search's hits or the Ranges' regions, unless shown", () => {
+    it("is never offered by the Canvas's menu where a search reaches it, nor are a search's hits or the Ranges' regions, unless shown", () => {
       const page = "https://example.org/page/ocr";
-      expect(selectUnlistedSets(manifest, [], [], [])).toEqual([
+      expect(selectUnlistedSets(manifest, [], [], [], true)).toEqual([
         SEARCH_SET_ID,
         CONTENTS_SET_ID,
         page,
       ]);
       // Shown by the host, the menu offers it, to hide again; hidden again, too.
-      expect(selectUnlistedSets(manifest, [], [], [page])).toEqual([
+      expect(selectUnlistedSets(manifest, [], [], [page], true)).toEqual([
         SEARCH_SET_ID,
         CONTENTS_SET_ID,
       ]);
-      expect(selectUnlistedSets(manifest, [], [page], [])).toEqual([
+      expect(selectUnlistedSets(manifest, [], [page], [], true)).toEqual([
         SEARCH_SET_ID,
         CONTENTS_SET_ID,
       ]);
+    });
+
+    it("is offered by the Canvas's menu, hidden still, where no search would reach it (Cookbook 0068)", () => {
+      const page = "https://example.org/page/ocr";
+      expect(selectUnlistedSets(manifest, [], [], [], false)).toEqual([
+        SEARCH_SET_ID,
+        CONTENTS_SET_ID,
+      ]);
+      expect(selectHiddenSets(manifest, [], [], [])).toEqual([page]);
+      // Still left out of the Annotations list.
+      expect(selectListedSets(manifest, []).map((set) => set.id)).not.toContain(
+        page,
+      );
     });
 
     it("shows when switched on, and hides again when switched off", () => {

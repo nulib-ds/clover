@@ -26,6 +26,7 @@ import type { Rect } from "../../../lib/renderer";
 import { useOptionalClover } from "../../../react/context";
 import { BodyUnloadable } from "../../../ui/BodyUnloadable";
 import { languageProps } from "../../../i18n/direction";
+import { startingLanguage } from "../../../i18n/languages";
 
 const SKIP_SECONDS = 10;
 /** A moment's annotation (`#t=` with no end) shows this long, to read a few words. */
@@ -210,8 +211,22 @@ const MediaBody: React.FC<MediaBodyProps> = ({
       }),
     [media.captions, language],
   );
-  // The first track shows by default, as the Player shows it.
-  const captions = useCaptionTracks(element, own, media.id);
+  /*
+   * The track to start on: the one in the visitor's language, by the rule every choice
+   * of language starts by (`startingLanguage`: the Root's language where it has one, else
+   * the visitor's, then the interface's, then the page's), else the first (Mat,
+   * 2026-11-05: "all language derived properties ... lean to the end user's language").
+   */
+  const startCaption = useMemo(() => {
+    const tags = media.captions.flatMap((caption) => caption.language ?? []);
+    if (tags.length < 2) return 0;
+    const tag = startingLanguage(tags, language);
+    return Math.max(
+      0,
+      media.captions.findIndex((caption) => caption.language === tag),
+    );
+  }, [media.captions, language]);
+  const captions = useCaptionTracks(element, own, media.id, startCaption);
   /*
    * A caption file chosen elsewhere (a transcript's language) is the one shown, while one
    * shows: Off stays off, and the reader's own choice in the menu is told back as theirs.

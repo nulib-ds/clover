@@ -41,7 +41,8 @@ it has hits, else the first of all. So a page opened with a query (a content
 state and a `searchQuery`, from a site's search results) stays on that page. With `sticky` the field is held in
 view as the hits scroll; the Panel's own Search section has it, and draws its hits on the
 Canvas only while it is open. The page's own text, its OCR, is not drawn until a
-search finds something in it. In a Panel, a search started outside its Search section
+search finds something in it; without a search service, the Canvas's annotations menu
+offers it instead ([Searching supplementing annotations](#searching-supplementing-annotations)). In a Panel, a search started outside its Search section
 opens it ([The open section](/docs/panel#the-open-section)). It renders nothing without a
 search service. Its other props, and its `ref`, go to its
 element.
@@ -121,6 +122,41 @@ clover.setSetVisible(Clover.SEARCH_SET_ID, false);
     .clover.setSetVisible("content-search", false);
 </script>
 ```
+
+## Searching supplementing annotations
+
+<div data-code-flavor="both">
+
+Search asks the Manifest's Content Search service for words, and its hits point into the
+annotations that hold a page's OCR, drawn where the words are. A Manifest without a
+service, as Cookbook 0068's newspaper is, still has its OCR in reach: the Canvas's
+annotations menu lists each page's lines in the order given, choosing a line zooms to it,
+and the page's toggle draws every line on the image. Clover does not search the lines
+itself. They start hidden either way, and the Annotations list leaves them out, as a page
+of OCR runs to hundreds of lines; with a service, the menu leaves them to its hits.
+
+Clover treats an annotation as OCR by what it is, not by the file it came in: its
+motivation is `supplementing`, its target a region of a Canvas that does not play (a
+`xywh` fragment, an SVG selector or a point), and it sits in the Canvas's `annotations`,
+embedded or in an AnnotationPage referenced by its address. Its words are a
+`TextualBody`, read by its `format`:
+
+- `text/plain`, or any type not listed here: as written.
+- `text/html`: IIIF's HTML, sanitized to what the Presentation API allows.
+- `text/markdown`: as Markdown.
+- No `format`: as written, unless the whole value is HTML (from a first `<` to a last
+  `>`), read as IIIF's HTML.
+
+OCR kept in a file of its own is not read line by line:
+
+- `application/xml`, ALTO (its `profile` `http://www.loc.gov/standards/alto/`), or any
+  other file given as a Canvas's or the Manifest's `rendering`: offered in Download, as
+  Cookbook 0068 offers each page's ALTO.
+- `text/plain` (or a `.txt` address), as a Canvas's `rendering` or the body of a
+  `supplementing` annotation: shown in full in the Panel's Transcript section.
+- `text/vtt`: captions and subtitles of a Canvas that plays, never OCR.
+
+</div>
 
 ## Previous versions
 

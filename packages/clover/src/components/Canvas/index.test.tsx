@@ -1172,6 +1172,119 @@ describe("Canvas", () => {
       expect(handle.zoomToAnnotation("https://example.org/none")).toBe(false);
     });
 
+    /*
+     * A still page's OCR (Cookbook 0068): `supplementing` text on its lines, hidden from
+     * the picture to start. Where no search reaches it, the menu offers it, hidden, so a
+     * reader can show it; where a Root's search does, the menu leaves it to the search.
+     */
+    describe("a still page's OCR", () => {
+      const page = "https://example.org/ocr/page";
+      const line = (n: number, value: string) => ({
+        id: `${page}#line-${n}`,
+        type: "Annotation",
+        motivation: "supplementing",
+        body: { type: "TextualBody", value, language: "de" },
+        target: `https://example.org/canvas#xywh=0,${n * 50},400,40`,
+      });
+      const lines = [line(0, "I. 54. Jahrgang"), line(1, "Berliner Tageblatt")];
+
+      it("is offered by a Canvas alone, hidden to start, and shown from its menu", async () => {
+        render(
+          <Canvas
+            src="a.jpg"
+            annotations={lines.map((annotation) => ({
+              targetIndex: 0,
+              pageId: page,
+              annotation: annotation as any,
+            }))}
+          />,
+        );
+        await open();
+        // Not drawn over the page to start.
+        expect(
+          screen.queryByRole("button", { name: "Berliner Tageblatt" }),
+        ).toBeNull();
+        fireEvent.click(screen.getByRole("button", { name: "Annotations" }));
+        const menu = screen.getByTestId("clover-canvas-annotation-menu");
+        expect(within(menu).getAllByRole("radio")).toHaveLength(2);
+        const hide = within(menu).getByRole("checkbox", {
+          name: "Hide annotations",
+        });
+        expect(hide).toBeChecked();
+        fireEvent.click(hide);
+        expect(hide).not.toBeChecked();
+        expect(
+          screen.getByRole("button", { name: "Berliner Tageblatt" }),
+        ).toBeInTheDocument();
+      });
+
+      // The book's first page, its OCR on it, with or without a search.
+      const manifest = (service?: unknown) => {
+        const [first] = bookJson.items as any[];
+        const retarget = (annotation: any) => ({
+          ...annotation,
+          target: annotation.target.replace(
+            "https://example.org/canvas",
+            first.id,
+          ),
+        });
+        return {
+          ...bookJson,
+          ...(service ? { service: [service] } : {}),
+          items: [
+            {
+              ...first,
+              annotations: [
+                {
+                  id: page,
+                  type: "AnnotationPage",
+                  items: lines.map(retarget),
+                },
+              ],
+            },
+          ],
+        };
+      };
+
+      it("is offered in a Root whose Manifest has no search", async () => {
+        render(
+          <Root iiifContent={manifest() as never}>
+            <Canvas />
+          </Root>,
+        );
+        await screen.findByTestId("clover-canvas-viewport");
+        await open();
+        fireEvent.click(
+          await screen.findByRole("button", { name: "Annotations" }),
+        );
+        const menu = screen.getByTestId("clover-canvas-annotation-menu");
+        expect(within(menu).getByRole("checkbox")).toBeChecked();
+        expect(
+          within(menu).getByRole("radio", { name: "I. 54. Jahrgang" }),
+        ).toBeInTheDocument();
+      });
+
+      it("is left to the search in a Root whose Manifest has one", async () => {
+        render(
+          <Root
+            iiifContent={
+              manifest({
+                id: "https://example.org/ocr/search",
+                type: "SearchService2",
+              }) as never
+            }
+          >
+            <Canvas />
+          </Root>,
+        );
+        await screen.findByTestId("clover-canvas-viewport");
+        await open();
+        expect(
+          screen.queryByRole("button", { name: "Annotations" }),
+        ).toBeNull();
+      });
+    });
+
     it("zooms to its target on click", async () => {
       render(<Canvas src="a.jpg" annotations={annotations} />);
       await open();

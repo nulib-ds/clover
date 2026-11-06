@@ -318,12 +318,16 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    */
   const direction = resolveDirection(viewingDirection);
   /*
-   * A Canvas's `Choice`s, and which item of each to paint: the first, or the next not
-   * disabled where the first is (`startingChoices`), until the reader picks another
+   * A Canvas's `Choice`s, and which item of each to paint: the one in the visitor's
+   * language where its items are in several, else the first, or the next not disabled
+   * where the first is (`startingChoices`), until the reader picks another
    * from the control. A new set of Canvases starts from the first again.
    */
   const choices = useMemo(() => findChoices(canvases ?? []), [canvases]);
-  const starting = useMemo(() => startingChoices(choices), [choices]);
+  const starting = useMemo(
+    () => startingChoices(choices, language),
+    [choices, language],
+  );
   const [picked, setSelections] = useState<ChoiceSelections>({});
   const selections = useMemo(
     () => ({ ...starting, ...picked }),

@@ -11,6 +11,32 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **Captions start in the visitor's language.** A recording with caption files in
+  several languages (Cookbook 0074) starts its captions, and the Transcript, on the file
+  in the visitor's language, by the rule IIIF text is read by: the Root's `language`
+  where it has one, else the browser's languages, then Clover's interface language, then
+  the page's, else the first file, as before. A painted `Choice` whose items give their
+  `language` (a page or a recording in two languages) starts on the visitor's the same
+  way. Before, both started on the first, whatever the visitor read.
+- **A still page's OCR is reachable without a search.** Line-by-line OCR on an image
+  (`supplementing` text on regions, as Cookbook 0068's newspaper has) still starts hidden
+  from the picture and out of the Annotations list. Where the Manifest has no Content
+  Search service, the Canvas's annotations menu now lists it, with its page's show
+  toggle, so it can be read line by line and drawn; before, nothing reached it.
+  A Manifest with a search keeps it for the search, as before. A `Canvas` used alone,
+  which has no search, offers its own OCR the same way; a page that wants it left out
+  passes those AnnotationPages' ids as `unlistedPages`.
+- **Budgets.** Nothing new loads: the annotations menu was already loaded on demand,
+  only a Root's Canvas reads whether there is a search (a Canvas alone never loads the
+  search reader), and the language rule captions and Choices start by moved into
+  `i18n/languages`, which those parts already load, apart from the IIIF value reader.
+  Together they add 40 to 240 bytes gzip where a Canvas or a recording draws, and the
+  budgets they crossed are raised to the next 50 bytes: Timeline to first view to
+  54.65 kB from 54.4 kB, the most; Canvas to first view to 49.15 kB; Default and
+  Document to first view to 98.0 kB and 94.05 kB; and ten others by 50 to 100 bytes.
+
 ## [4.5.2] - 2026-11-05
 
 ### Added
