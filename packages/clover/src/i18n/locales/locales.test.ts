@@ -72,6 +72,7 @@ const SAME_AS_ENGLISH: Record<string, string[]> = {
     "logo",
   ],
   fi: ["logo"],
+  it: ["playerVolume", "logo"],
   nb: ["playerPause", "logo"],
   nn: ["playerPause", "logo"],
   no: ["playerPause", "logo"],

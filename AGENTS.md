@@ -1370,7 +1370,8 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   arrives its strings show in English, marked `lang="en"`, and readers re-render when it
   does. A server render or a test that needs them first awaits `cloverI18n.ready()`
   (`initCloverI18n(...)` returns it).
-- Shipped: en, es, fi, fr, ja, nb, nn, no (the same strings as nb for now, but its own file:
+- Shipped: en, es, fi, fr, it (Mat, 2026-11-05: stubbed, and checked against Cookbook
+  0074's Italian and English captions), ja, nb, nn, no (the same strings as nb for now, but its own file:
   Norwegian's three tags, `no`, Bokmål `nb` and Nynorsk `nn`, each keep one, to be
   translated apart; never merge them; Mat, 2026-10-27) and pt (European Portuguese, which
   Brazilian readers get too), zh-Hans and zh-Hant (Mat, 2026-11-05: drafted for

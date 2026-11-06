@@ -19,7 +19,7 @@
   "templatesStylesGzip": 2500,
   "coreStylesGzip": 8900,
   "mapInitialGzip": 18800,
-  "translatorGzip": 3550,
+  "translatorGzip": 3600,
   "mapOnDemandGzip": 300150,
   "webComponentsGzip": 130300,
   "labelPageGzip": 37100,

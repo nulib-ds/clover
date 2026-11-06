@@ -92,9 +92,19 @@ const LAZY_MODULES = [
   // A floating drawer's drag, loaded as one first floats.
   "/templates/shared/dragToClose.ts",
   // Every language but English, the first time Clover is to speak it.
-  ...["es", "fi", "fr", "ja", "nb", "nn", "no", "pt", "zh-Hans", "zh-Hant"].map(
-    (lng) => `/i18n/locales/${lng}.json`,
-  ),
+  ...[
+    "es",
+    "fi",
+    "fr",
+    "it",
+    "ja",
+    "nb",
+    "nn",
+    "no",
+    "pt",
+    "zh-Hans",
+    "zh-Hant",
+  ].map((lng) => `/i18n/locales/${lng}.json`),
 ];
 /** Packages imported only on demand: media streaming, sanitizing, upgrading old IIIF, maps, 3D. */
 const LAZY_PACKAGES = [

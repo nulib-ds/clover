@@ -26,6 +26,7 @@ const LANGUAGES: Array<{ tag: string; name: string }> = [
   { tag: "es", name: "Español" },
   { tag: "fi", name: "Suomi" },
   { tag: "fr", name: "Français" },
+  { tag: "it", name: "Italiano" },
   { tag: "ja", name: "日本語" },
   { tag: "nb", name: "Norsk bokmål" },
   { tag: "nn", name: "Norsk nynorsk" },

@@ -12,6 +12,7 @@ export const loaders: Record<string, LocaleLoader> = {
   es: () => import("./es.json"),
   fi: () => import("./fi.json"),
   fr: () => import("./fr.json"),
+  it: () => import("./it.json"),
   ja: () => import("./ja.json"),
   nb: () => import("./nb.json"),
   nn: () => import("./nn.json"),

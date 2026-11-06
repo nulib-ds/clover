@@ -11,6 +11,16 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **Italian.** Clover's interface language (its control labels, section titles and
+  announcements) can be Italian (`it`), loaded the first time Clover is to speak it. A
+  visitor in `it-IT` or `it-CH` gets it, and choosing `IT` in About's toggle for a
+  resource in Italian, as Cookbook 0074's film is, turns the interface Italian too. Its
+  strings await a native speaker's review.
+- **Budgets.** Italian's loader adds 17 bytes gzip to the translator (`initCloverI18n`,
+  with English), whose budget is raised to 3.6 kB from 3.55 kB.
+
 ## [4.5.1] - 2026-11-05
 
 ### Fixed

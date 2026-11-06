@@ -100,7 +100,7 @@ What remains. Items 1 to 4 are done in code and need a check the tests cannot ma
 
 3. **Touch with a screen reader** (2.2.1). Under a finger or a pen that does not hover, the controls wait as long as a mouse's, 3 seconds by default, before fading (Mat, 2026-11-02), and focus no press brought holds them. A screen reader's activation that sends a press, not a click alone, would fade them too: check that a second activation still reaches the faded control. Test VoiceOver in iOS Safari and TalkBack in Chrome on Android: a screen reader that moves only its own cursor sends the page no event, so a faded control could still sit unseen under it. File: `useControlsVisibility.ts`. Size S. (P104)
 
-4. **Locale review** (3.1.2). Every locale has every string, and `locales.test.ts` keeps them complete, but no native speaker has read the new ones: es, fi, fr, ja, nb (and no, its copy), nn, pt, which is European Portuguese and what Brazilian readers get too, and zh-Hans and zh-Hant (drafted 2026-11-05). Mat owns this, and will make the English strings more concise and consistent, then ask translators to review. It does not block the rest of this plan, and agents leave the translations alone until then. (P56)
+4. **Locale review** (3.1.2). Every locale has every string, and `locales.test.ts` keeps them complete, but no native speaker has read the new ones: es, fi, fr, ja, nb (and no, its copy), nn, pt, which is European Portuguese and what Brazilian readers get too, and it, zh-Hans and zh-Hant (drafted 2026-11-05). Mat owns this, and will make the English strings more concise and consistent, then ask translators to review. It does not block the rest of this plan, and agents leave the translations alone until then. (P56)
 
 ### Decisions
 

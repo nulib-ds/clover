@@ -109,6 +109,8 @@ describe("Clover i18n", () => {
     ["zh-SG", "zh-Hans", "放大"],
     ["zh", "zh-Hans", "放大"],
     ["ja-JP", "ja", "拡大"],
+    ["it-IT", "it", "Ingrandisci"],
+    ["it-CH", "it", "Ingrandisci"],
   ])(
     "speaks to a visitor of %s in the strings for its script (%s)",
     async (visitor, speaks, zoomIn) => {
