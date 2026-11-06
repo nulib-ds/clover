@@ -1,5 +1,4 @@
 import type { ContentTargets, Target } from "./content-state";
-import { asArray } from "../lib/asArray";
 import {
   type Presentation4Collection,
   type Manifest,
@@ -16,9 +15,11 @@ import type { AnnotationSet } from "./annotation-sets";
  * state (JSON or base64url). The resource may be a Manifest, a Collection (its first
  * Manifest is shown), a lone Canvas (its `partOf` Manifest, or a Manifest made around
  * it), or annotations, an AnnotationPage or AnnotationCollection (the Manifest their first
- * annotation's Canvas is `partOf`, at that Canvas). It may also be a IIIF Image service,
- * its `info.json` or its base URI, shown as the one image it is (`imageServiceContent`).
- * Everything is fetched once, with the request settings, and upgraded to Presentation 4.
+ * annotation's Canvas is `partOf`, at that Canvas). A single Annotation, of any motivation,
+ * is read as a content state is: what it targets is opened, at its region and time, its
+ * body shown there as a note. It may also be a IIIF Image service, its `info.json` or its
+ * base URI, shown as the one image it is (`imageServiceContent`). Everything is fetched
+ * once, with the request settings, and upgraded to Presentation 4.
  */
 
 export type IIIFContent = string | Record<string, unknown>;
@@ -27,17 +28,20 @@ export type IIIFContent = string | Record<string, unknown>;
 const readContentState = () => import("./content-state-reader");
 
 /**
- * Whether JSON is a content state, rather than a IIIF resource to show. Here, beside the
- * one that asks, not with content state's writer (`content-state.ts`), which a Canvas
- * loads only where its page asks for content states.
+ * Whether JSON is read as a content state, rather than a IIIF resource to show: one (an
+ * annotation with the `contentState` motivation, or its bare target, a SpecificResource),
+ * or any other annotation given alone (Presentation 2's `oa:Annotation` too), whose
+ * target is where to go. Here, beside the one that asks, not with content state's writer
+ * (`content-state.ts`), which a Canvas loads only where its page asks for content states.
  */
 function isContentState(json: unknown): boolean {
   const value = json as Record<string, unknown> | null;
   if (!value || typeof value !== "object") return false;
-  if (value.type === "Annotation") {
-    return asArray(value.motivation).includes("contentState");
-  }
-  return value.type === "SpecificResource";
+  return (
+    value.type === "Annotation" ||
+    value["@type"] === "oa:Annotation" ||
+    value.type === "SpecificResource"
+  );
 }
 
 /**
@@ -172,6 +176,8 @@ interface LoadOptions {
 export interface LoadContentOptions extends LoadOptions {
   /** In a Collection, the member Manifest to open instead of the first. */
   manifestId?: string;
+  /** How many content states have been followed to reach this content (`follow`). */
+  follows?: number;
 }
 
 /** A resource as JSON: fetched if it is only a reference. */
@@ -287,42 +293,22 @@ export async function loadContent(
   // Load the upgrader alongside the first fetch, so upgrading adds no round trip.
   void preloadUpgrader();
 
-  let target: Target | undefined;
-  /** The Collection member a content state names, to open in place of the first. */
-  let member: string | undefined;
-  /** A content state's note. */
-  let annotation: Record<string, any> | undefined;
-  /** A content state's several targets. */
-  let targets: ContentTargets | undefined;
-  let json: unknown;
-
-  /** A content state names what to load and where to go in it. */
-  const followContentState = async (state: Record<string, any>) => {
-    const { resolveContentState } = await readContentState();
-    const resolved = resolveContentState(state);
-    if (!resolved) throw new CloverContentError("Unreadable content state");
-    target = resolved.target ?? target;
-    member = resolved.manifestId ?? member;
-    annotation = resolved.annotation ?? annotation;
-    targets = resolved.targets ?? targets;
-    return fetchJson(request, resolved.id, signal);
-  };
-
+  let json: unknown = input;
   if (typeof input === "string") {
-    if (isUrl(input.trim())) {
-      json = await fetchContent(request, input.trim(), signal);
-    } else {
-      const { decodeContentState } = await readContentState();
-      const state = decodeContentState(input);
-      if (!state) throw new CloverContentError("Unreadable iiifContent");
-      json = isContentState(state) ? await followContentState(state) : state;
-    }
-  } else {
-    json = input;
+    json = isUrl(input.trim())
+      ? await fetchContent(request, input.trim(), signal)
+      : (await readContentState()).decodeContentState(input);
+    if (!json) throw new CloverContentError("Unreadable iiifContent");
   }
-  // A URL may answer with a content state of its own.
-  if (isContentState(json)) {
-    json = await followContentState(json as Record<string, any>);
+
+  /*
+   * A content state, or an annotation given alone, names what to load and where to go in
+   * it: followed in a chunk of its own, which loads what it names. A URL may answer with
+   * a content state of its own, so two are followed, and no more.
+   */
+  if (isContentState(json) && (options.follows ?? 0) < 2) {
+    const { follow } = await import("./follow-content");
+    return follow(json as Json, options, loadContent);
   }
 
   /*
@@ -348,14 +334,14 @@ export async function loadContent(
 
   switch (resource.type) {
     case "Manifest":
-      return { manifest: resource as Manifest, target, annotation, targets };
+      return { manifest: resource as Manifest };
     case "Collection": {
       const collection = await withMembers(
         resource as Presentation4Collection,
         options,
       );
-      // The host's choice, or the content state's, or else the first member.
-      const pick = options.manifestId ?? member;
+      // The host's choice (or the content state's), or else the first member.
+      const pick = options.manifestId;
       const chosen = pick
         ? ((collection.items ?? []) as Json[]).find(
             (item) => item.id === pick && item.type === "Manifest",
@@ -367,7 +353,7 @@ export async function loadContent(
       if (!manifest) {
         throw new CloverContentError("The Collection holds no Manifest");
       }
-      return { manifest, collection, target, annotation, targets };
+      return { manifest, collection };
     }
     case "Canvas":
     case "Timeline":
@@ -378,9 +364,10 @@ export async function loadContent(
        * metadata, rights…), and keeping its `partOf`, from which the full Manifest can
        * be opened in its place (`About`).
        */
-      const container = resource;
-      target ??= { canvasId: container.id };
-      return { manifest: loneCanvas(container), target, annotation };
+      return {
+        manifest: loneCanvas(resource),
+        target: { canvasId: resource.id },
+      };
     }
     default:
       throw new CloverContentError(

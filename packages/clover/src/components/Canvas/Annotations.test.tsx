@@ -778,7 +778,10 @@ describe("a linking hotspot", () => {
             motivation: "linking",
             body: [
               { type: "TextualBody", value: "The fountain's page" },
-              { id: "https://example.org/fountain", type: "Text" },
+              {
+                type: "SpecificResource",
+                source: { id: "https://example.org/fountain", type: "Text" },
+              },
             ],
             target: `${canvas}#xywh=0,0,10,10`,
           } as never,

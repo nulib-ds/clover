@@ -120,12 +120,33 @@ describe("Annotations", () => {
     );
     await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
     emit("open");
-    const follow = await screen.findByRole("button", {
-      name: "Open the link",
-    });
+    const follow = await screen.findByRole("button", { name: "Open" });
+    // It stays in the viewer, so no glyph says it leaves.
+    expect(follow.querySelector("svg")).toBeNull();
     fireEvent.click(follow);
     expect(clover!.store.get().canvasId).toBe(hotspotJson.items[1].id);
     expect(screen.getByTestId("clover-canvas-viewport")).toHaveFocus();
+  });
+
+  it("opens a page on the web in a tab of its own, its glyph saying so", async () => {
+    const page = "https://example.org/fountain";
+    const json = structuredClone(hotspotJson) as any;
+    json.items[0].annotations[0].items[0].body[1] = {
+      type: "SpecificResource",
+      source: { id: page, type: "Text" },
+    };
+    render(
+      <Clover.Root iiifContent={json}>
+        <Clover.Body />
+        <Clover.Annotations scope="view" />
+      </Clover.Root>,
+    );
+    await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
+    emit("open");
+    const link = await screen.findByRole("link", { name: "Open" });
+    expect(link).toHaveAttribute("href", page);
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
   });
 
   it("frames a picked annotation on the Canvas, and marks it picked", async () => {

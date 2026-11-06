@@ -11,6 +11,7 @@ const linking = (body: unknown) => ({
   body,
   target: "https://example.org/canvas#xywh=0,0,10,10",
 });
+const specific = (source: unknown) => ({ type: "SpecificResource", source });
 
 describe("readLink", () => {
   it("reads a Canvas and its Manifest, as Cookbook 0022 links them", () => {
@@ -24,21 +25,31 @@ describe("readLink", () => {
 
   it("reads a Manifest, and a page on the web, but never a script", () => {
     expect(
-      readLink(linking({ id: "https://example.org/m", type: "Manifest" })),
+      readLink(
+        linking(specific({ id: "https://example.org/m", type: "Manifest" })),
+      ),
     ).toEqual({
       id: "https://example.org/m",
       manifestId: "https://example.org/m",
     });
+    expect(readLink(linking(specific("https://example.org/page")))).toEqual({
+      id: "https://example.org/page",
+    });
+    expect(readLink(linking(specific("javascript:alert(1)")))).toBeUndefined();
+  });
+
+  it("follows only a SpecificResource's source, never a body's own id", () => {
     expect(
       readLink(linking({ id: "https://example.org/page", type: "Text" })),
-    ).toEqual({ id: "https://example.org/page" });
-    expect(readLink(linking("javascript:alert(1)"))).toBeUndefined();
+    ).toBeUndefined();
+    expect(readLink(linking("https://example.org/page"))).toBeUndefined();
+    expect(readLink(linking(specific("")))).toBeUndefined();
   });
 
   it("reads nothing from an annotation that is not linking", () => {
     expect(
       readLink({
-        ...linking({ id: "https://example.org/page", type: "Text" }),
+        ...linking(specific("https://example.org/page")),
         motivation: "commenting",
       }),
     ).toBeUndefined();
@@ -88,6 +99,23 @@ describe("readTagSource", () => {
         ...tag,
         body: { type: "SpecificResource", source: "javascript:alert(1)" },
       }),
+    ).toBeUndefined();
+  });
+
+  // Cookbook 0139: a geotag's GeoJSON Feature has an id that only identifies it.
+  it("reads nothing from a body that is a resource itself", () => {
+    expect(
+      readTagSource({
+        ...tag,
+        body: {
+          id: "https://example.org/geo.json",
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [0, 0] },
+        },
+      }),
+    ).toBeUndefined();
+    expect(
+      readTagSource({ ...tag, body: "http://www.wikidata.org/entity/Q1" }),
     ).toBeUndefined();
   });
 });

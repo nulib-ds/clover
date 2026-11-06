@@ -139,9 +139,12 @@ function resolveTarget(
   const time = pointTime?.t ?? startTime(parsed.t);
   if (time !== undefined) canvasTarget.time = Number(time);
 
-  const partOf = asArray(resource.partOf).find(
-    (part: any) => part?.id && (!part.type || part.type === "Manifest"),
-  ) as Json | undefined;
+  // The Manifest, named by the resource targeted, or by a SpecificResource around it.
+  const partOf = [resource, target as Json]
+    .flatMap((each) => asArray(each?.partOf))
+    .find(
+      (part: any) => part?.id && (!part.type || part.type === "Manifest"),
+    ) as Json | undefined;
   const collection = collectionOf(partOf);
   // Its note, as an annotation on the Canvas: the body as given, on its own target.
   const annotation =

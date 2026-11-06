@@ -48,9 +48,11 @@ deadline.
     readers, search engines and agents: a notice opening the page and a "(3.x)" title,
     a description in its own words, then what it documents (Mat, 2026-10-30: its own
     words first, so its search result opens with them), schema.org data (`version: "3.x"`,
-    `creativeWorkStatus: "Deprecated"`), and in the site's search a "(3.x)" title, a
-    `version` filter and half the weight of Clover 4's pages (`app/[[...mdxPath]]/page.tsx`,
-    `docs/lib/site.ts`). `llms.txt` (`docs/lib/agents.ts`) tells agents the same. A new 3.x page gets all
+    `creativeWorkStatus: "Deprecated"`), and no place in the site's search (Mat,
+    2026-11-05: "results for search SHOULD NOT include any of the deprecated 3.x docs";
+    Upgrading, a 4.x page, stays): its `main` has no `data-pagefind-body`
+    (`app/[[...mdxPath]]/page.tsx`, `docs/lib/site.ts`), while the sitemap, its Markdown
+    and `llms.txt` keep it. `llms.txt` (`docs/lib/agents.ts`) tells agents the same. A new 3.x page gets all
     of it from its place under `content/docs/deprecated-versions/`.
   - 3.x's source is not on `main`: it is on this repository's `v3` branch. The 3.x
     pages' live examples import the published `@samvera/clover-iiif` (a devDependency,
@@ -1126,7 +1128,10 @@ e2e:docs`.
   `out/_pagefind`, then writes the pages' Markdown (`scripts/build-agent-docs.mjs`). In
   `npm run dev` search answers only after a build, and the Markdown is not there; `llms.txt`,
   the sitemap and `robots.txt` are. Front matter `searchable: false` keeps a page out of
-  search, the sitemap and the Markdown.
+  search, the sitemap and the Markdown. A 3.x page is out of search alone: the page
+  route hands Nextra's wrapper `searchable: false` for it, so its `main` is no Pagefind
+  body, and Pagefind indexes only pages that have one; the Markdown builder finds any
+  page's `main`.
 - Nextra 4.6.1 needs Zod 4.3 (4.4 and later reject its Layout's props, "expected
   nonoptional … at children"): `overrides` in `package.json` hold Nextra's own Zod at
   4.3.6. Drop them with a Nextra release past 4.6.1.
