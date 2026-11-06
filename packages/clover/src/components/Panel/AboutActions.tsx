@@ -4,15 +4,8 @@ import { type Rendering, useDownloads } from "../Download/downloads";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { Tip } from "../../ui/Tip";
 import { useUniqueId } from "../../ui/useUniqueId";
-import { useReadingLanguages } from "./ReadingLanguages";
+import { LanguageToggle, useLanguageToggle } from "./LanguageToggle";
 import { languageProps } from "../../i18n/direction";
-
-// The language row, loaded only for a resource that has languages to offer.
-const LanguageChoice = lazy(() =>
-  import("../../ui/LanguageChoice").then((module) => ({
-    default: module.LanguageChoice,
-  })),
-);
 
 // The popover's ways to close, loaded as it first opens: no first view needs them.
 const ControlMenu = lazy(() => import("../Canvas/ControlMenu"));
@@ -26,32 +19,31 @@ const DownloadGroups = lazy(() =>
 /**
  * What About's heading holds in a Panel, at the end of its row, shown whichever section
  * is open (`SectionSpec`'s `actions`): a Download button where there is anything to
- * download, then, furthest along, the languages to read the resource in
- * (`ReadingLanguages`; Mat, 2026-10-28).
- * Nothing at all where it has neither, so the heading keeps no room for it.
+ * download, then, furthest along, the languages to read in, the resource's and Clover's
+ * interface languages as one toggle after a globe (`LanguageToggle`; Mat, 2026-10-28 and
+ * 2026-11-05). Nothing at all where it has neither, so the heading keeps no room for it.
  */
 export function AboutActions({
   languages = true,
+  interfaceLanguages = true,
   download = true,
 }: {
   languages?: boolean;
+  interfaceLanguages?: boolean;
   download?: boolean;
 }) {
-  const choice = useReadingLanguages();
+  const choice = useLanguageToggle({ values: languages, interfaceLanguages });
   const { page, all } = useDownloads();
   const offered = download && page.length + all.length > 0;
-  if (!(languages && choice) && !offered) return null;
+  if (!choice && !offered) return null;
   return (
     <div className="clover-about-actions">
       {offered && <DownloadButton page={page} all={all} />}
-      {languages && choice && (
-        <Suspense fallback={null}>
-          <LanguageChoice
-            {...choice}
-            nameKey="readingLanguage"
-            part="clover-about"
-          />
-        </Suspense>
+      {choice && (
+        <LanguageToggle
+          values={languages}
+          interfaceLanguages={interfaceLanguages}
+        />
       )}
     </div>
   );

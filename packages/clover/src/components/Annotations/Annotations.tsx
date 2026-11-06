@@ -41,7 +41,7 @@ import { useLoaded } from "../../hooks/useLoaded";
 import { HideToggle } from "../../ui/HideToggle";
 import { visuallyHidden } from "../../ui/visuallyHidden";
 import { startingLanguage } from "../../core/language-choice";
-import { useReadingLanguages } from "../../react/readingLanguages";
+import { covers, useReadingLanguages } from "../../react/readingLanguages";
 import { LanguageChoice } from "../../ui/LanguageChoice";
 import { inLanguage, languagesOf } from "./languages";
 import { languageProps } from "../../i18n/direction";
@@ -245,7 +245,7 @@ function AnnotationGroup({
   /** The AnnotationPage's label, and its language; empty when none, and then no heading. */
   title: LocalizedValue;
   language?: string;
-  /** Clover's words for finding one, with their language where it is not the page's. */
+  /** Clover's interface words for finding one, with their language where it is not the page's. */
   showLabel: LocalizedValue;
   hidden: boolean;
   selected: string | null;
@@ -260,11 +260,16 @@ function AnnotationGroup({
   const headingLevel = title.text ? setLevel + 1 : setLevel;
   const languages = useMemo(() => languagesOf(entries), [entries]);
   const [picked, setPicked] = useState<string>();
-  // Where the Root offers the languages, its choice is this set's, and the set offers none.
+  /*
+   * Where About's toggle holds this set's languages, its choice is the set's, and the set
+   * offers none; else the set offers its own, for itself alone (`covers`), starting in
+   * the Root's.
+   */
   const offered = useReadingLanguages();
-  const chosen = offered
-    ? startingLanguage(languages, offered.chosen)
-    : startingLanguage(languages, language, picked);
+  const follows = covers(offered, languages);
+  const chosen = follows
+    ? startingLanguage(languages, offered!.chosen)
+    : startingLanguage(languages, offered?.chosen ?? language, picked);
   const listed = entries.filter((entry) => inLanguage(entry, chosen));
   return (
     <section
@@ -283,7 +288,7 @@ function AnnotationGroup({
             {title.text}
           </Heading>
         )}
-        {chosen && !offered && (
+        {chosen && !follows && (
           <LanguageChoice
             languages={languages}
             chosen={chosen}
@@ -515,7 +520,7 @@ const AnnotationLayers = forwardRef<
   const elsewhere = useElsewhere(layers, canvasById);
   // Each layer's language, where it offers a choice: the reader's, by layer, once picked.
   const [picked, setPicked] = useState<Record<string, string>>({});
-  // Where the Root offers the languages, its choice is each layer's, and they offer none.
+  // About's choice is each layer's where it holds the layer's languages; else its own.
   const offered = useReadingLanguages();
   const manifestLabel = useCloverSelector((state) => state.manifest?.label);
   const title = useMemo(
@@ -598,9 +603,14 @@ const AnnotationLayers = forwardRef<
         const languages = languagesOf(
           layer.canvases.flatMap((group) => group.entries),
         );
-        const chosen = offered
-          ? startingLanguage(languages, offered.chosen)
-          : startingLanguage(languages, language, picked[layer.key]);
+        const follows = covers(offered, languages);
+        const chosen = follows
+          ? startingLanguage(languages, offered!.chosen)
+          : startingLanguage(
+              languages,
+              offered?.chosen ?? language,
+              picked[layer.key],
+            );
         return (
           <section
             key={layer.key}
@@ -619,7 +629,7 @@ const AnnotationLayers = forwardRef<
                   {layer.title.text}
                 </Title>
               )}
-              {chosen && !offered && (
+              {chosen && !follows && (
                 <LanguageChoice
                   languages={languages}
                   chosen={chosen}
@@ -784,7 +794,7 @@ function AnnotationItem({
   const show = time
     ? { text: t("annotationsShowTime"), lang: langOf("annotationsShowTime") }
     : showLabel;
-  // Clover's words and the annotation's: both in the page's language, or each in its own.
+  // Clover's interface words and the annotation's: both in the page's language, or each in its own.
   const oneLanguage = !show.lang && !langWithin(text.lang, hostLanguage);
   const name = text.text ? `${show.text}: ${text.text}` : show.text;
   const { clover } = useClover("Annotations");

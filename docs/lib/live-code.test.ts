@@ -189,6 +189,61 @@ describe("codeLines", () => {
     );
   });
 
+  it("writes a style or an element only while the knobs its `when` names allow it", () => {
+    const knobs: Knob[] = [
+      {
+        prop: "orientation",
+        value: "horizontal",
+        options: ["horizontal", "vertical"],
+      },
+    ];
+    const when = { orientation: ["vertical"] };
+    const bodyNode = { jsx: "Clover.Body", html: "clover-body", attrs: [] };
+    const tree: CodeTree = {
+      url: URL,
+      nodes: [
+        {
+          jsx: "Clover.Root",
+          html: "clover-root",
+          attrs: [
+            {
+              prop: "style",
+              attribute: "style",
+              style: [{ name: "display", value: "grid", when }],
+            },
+          ],
+          children: [
+            { ...bodyNode, unless: when },
+            {
+              jsx: "Clover.Items",
+              html: "clover-items",
+              attrs: [
+                {
+                  prop: "orientation",
+                  attribute: "orientation",
+                  knob: "part:orientation",
+                },
+              ],
+            },
+            { ...bodyNode, when },
+          ],
+        },
+      ],
+    };
+    const across = code(tree, knobs).react;
+    expect(across).not.toContain("display");
+    expect(across.indexOf("Clover.Body")).toBeLessThan(
+      across.indexOf("Clover.Items"),
+    );
+    const down = code(tree, knobs, { "part:orientation": "vertical" });
+    expect(down.react).toContain('style={{ display: "grid" }}');
+    expect(down.react.indexOf("Clover.Items")).toBeLessThan(
+      down.react.indexOf("Clover.Body"),
+    );
+    expect(down.html).toContain('style="display: grid"');
+    expect(down.react.match(/Clover\.Body/g)).toHaveLength(1);
+  });
+
   it("writes a whole module with its imports, its address and its template", () => {
     const knobs: Knob[] = [
       { prop: "defaultSidebarOpen", value: true, remount: true },

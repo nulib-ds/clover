@@ -116,7 +116,7 @@ describe("the Root's language", () => {
     const next = await screen.findByRole("button", { name: "Next" });
     await waitFor(() => expect(next).toHaveAttribute("lang", "en"));
     act(() => {
-      initCloverI18n({ lng: "fr" });
+      void initCloverI18n().chooseInterfaceLanguage("fr");
     });
     const suivant = await screen.findByRole("button", { name: "Suivant" });
     expect(suivant).not.toHaveAttribute("lang");
@@ -165,10 +165,9 @@ describe("the Root's language", () => {
 
   it("marks a string that fell back to English, and names a container by it apart", async () => {
     document.documentElement.lang = "de";
-    initCloverI18n({
-      lng: "de",
+    void initCloverI18n({
       resources: { de: { clover: { commonNext: "Weiter" } } },
-    });
+    }).chooseInterfaceLanguage("de");
     const { container } = render(
       <Clover.Root iiifContent={bookJson}>
         <Clover.Items layout="pager" />

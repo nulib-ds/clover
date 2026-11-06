@@ -11,9 +11,100 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **A vertical slider.** `Items` takes `orientation="vertical"` (`orientation` on
+  `<clover-items>`): the slider runs down a column that fills the height of what holds it,
+  as a filmstrip beside the Body, its pictures as wide as the column, Up and Down its arrow
+  keys. Give the container a height, as a grid or a `SplitPane` does:
+
+  ```jsx
+  <Clover.Root
+    iiifContent={url}
+    style={{ display: "grid", gridTemplateColumns: "8rem 1fr", height: 480 }}
+  >
+    <Clover.Items orientation="vertical" />
+    <Clover.Body />
+  </Clover.Root>
+  ```
+
+- **`--clover-items-inset`**, room at a slider's ends (default `0`), so its first and last
+  items rest clear of its arrows.
+- **Budgets.** The vertical slider's styles and keys add about 0.2 kB gzip to each
+  template and 0.45 kB to each template's first view and the element pages; the budgets it
+  crossed are raised to fit: the Default template to first view is 97.9 kB, from 97.4 kB.
+- **Japanese and Chinese.** Clover's interface language (its control labels, section
+  titles and announcements) can be Japanese (`ja`), Simplified Chinese (`zh-Hans`) and
+  Traditional Chinese (`zh-Hant`), each loaded the first time Clover is to speak it. A
+  visitor in `zh-TW` or `zh-HK` gets Traditional Chinese; one in `zh`, `zh-CN` or
+  `zh-SG`, Simplified. Their strings await a native speaker's review.
+- **One choice of languages, after a globe.** Every choice of languages is one construct
+  (`LanguageChoice`): a globe, then the codes, folded into the globe, the code in use and
+  a caret, which opens a menu of them, as soon as the codes would reach About's title
+  (elsewhere, past five). About's offers the languages the resource describes itself in,
+  then, where the visitor's language differs from your site's, the interface languages
+  the resource has none of, each once. Choosing a language the resource has shows it in
+  that language and speaks it too where Clover has strings for it (`ES` turns the
+  interface Spanish); one only your site offers changes the interface alone. A language
+  chosen for a resource goes when another opens. An annotation set or a Transcript whose
+  languages About's toggle does not offer offers its own, for itself alone; a Transcript
+  with a plain-text transcript among its files keeps its own choice of files, without the
+  globe. `interfaceLanguages` on `Panel`, `About` and the Default, Document and Gallery
+  templates (`interface-languages` on `<clover-panel>`, `<clover-about>` and
+  `<clover-viewer>`) leaves the interface languages out with `false`. Its new classes
+  are `clover-languages-glyph`, `clover-languages-folded`, `clover-languages-button`,
+  `clover-languages-code`, `clover-languages-caret`, `clover-languages-menu` and
+  `clover-languages-option`.
+- **The open section's chevron** is the accent at half strength, as its button is
+  disabled.
+- **`initCloverI18n({ languages })`.** The languages your site offers, most preferred
+  first; `lng` is one of them. `cloverI18n.chooseInterfaceLanguage(tag)` speaks one
+  whatever the visitor's (none goes back to theirs), and
+  `cloverI18n.interfaceLanguages()` gives the languages offered and the one in use.
+- The Canvas's `options` take `upscale`: `upscale: false` keeps an image's home view at
+  `maxZoomPixelRatio` at most, centred, instead of enlarging it to fill the box. Default
+  `true`. The size budgets rise for it: by 100 B the Canvas's initial JS and first view and
+  the Viewer entry; by 50 B the Default and Document templates and their first views, the
+  `<clover-viewer>`, composed, layout, Canvas, Document and Gallery element pages.
+- **An image service as the content.** `iiifContent` (`iiif-content`) on a `Root`, the
+  Viewer or a `Canvas` may be a IIIF Image service, Image API 2 or 3: its base URI, its
+  `info.json` or the `info.json` itself. Clover shows it as the one image it is, in the
+  Body's Canvas, with no title: a Manifest of one Canvas the image's size, with no label,
+  whose id is the service's. The rights its `info.json` gives (`rights`, or Image 2's
+  `license` and `attribution`) are kept, and About is offered only for them, so the
+  Default template shows the image alone. A base URI that does not redirect to its
+  `info.json` is tried again with `/info.json` after it.
+
+  ```jsx
+  <Viewer iiifContent="https://ndeiiif.adlibhosting.com/iiif/3/Q1852477.648" />
+  ```
+
+### Changed
+
+- **The visitor's language first.** Clover's interface language is the visitor's, from
+  the browser, where Clover has strings for it, and your site's only otherwise: the
+  languages you configure and the page's `<html lang>`, else English. A resource's text
+  is read in the visitor's language, then the interface language, then your site's, else
+  each value's first. A Root's `language` still sets the language a resource starts in.
+- **A language chosen moves both.** A language chosen in About's toggle sets the values
+  and, where Clover has strings for it, the interface; an interface language chosen leads
+  the values of a Root given no `language` of its own.
+- **A language's script.** A tag tries its language in its script before its base
+  language, so `zh-TW` reads strings given for `zh-Hant`, and `zh-CN` those for
+  `zh-Hans`, in the strings Clover ships and those a page gives `initCloverI18n`. A resource's text
+  likewise: a visitor of `zh-SG` reads a `zh-CN` value, never a `zh-Hant` one, where both
+  are there (`@iiif/helpers` would give the first).
+- **`fallbackLng`** is read right after the language Clover speaks, before your site's
+  other languages.
+- **Budgets.** Every page's translator and language rules grow by about 0.3 kB gzip
+  (the visitor's languages first, the script step, the interface's choices, three more
+  locale loaders; the locales themselves load only where they are spoken), and About's
+  heading by its toggle's glue, whose row and menu load only where there is a choice. The budgets they crossed are raised to their measured sizes: Canvas alone to
+  first view is 49.0 kB, from 48.3 kB, and the Default template 97.4 kB, from 95.8 kB.
+
 ### Fixed
 
-- **A search keeps the reader's page.** Results that arrive go to the first hit on the
+- **A search stays on the current Canvas.** Results that arrive go to the first hit on the
   Canvas shown, where it has any, and only otherwise to the first of all. A content state
   opened with a `searchQuery` (a site's search result linking to one page) stayed on that
   page in 3.x; in 4.x it jumped to the answer's first hit, usually on the first Canvas.

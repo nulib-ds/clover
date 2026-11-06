@@ -39,8 +39,10 @@ import * as Templates from "../../src/templates/index";
 import mapWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 
 const params = new URLSearchParams(location.search);
-// A host's own choice of Clover's language (`&lng=fr`), set before anything renders.
-if (params.get("lng")) Clover.initCloverI18n({ lng: params.get("lng")! });
+// Clover's interface language chosen (`&lng=fr`), as a visitor would, before anything
+// renders.
+if (params.get("lng"))
+  void Clover.initCloverI18n().chooseInterfaceLanguage(params.get("lng")!);
 const scene = params.get("scene") ?? "viewer";
 const content =
   params.get("content") ?? "https://fixtures.test/0009-book-1.json";

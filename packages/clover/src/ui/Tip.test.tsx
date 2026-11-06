@@ -27,12 +27,11 @@ describe("Tip", () => {
   });
 
   it("takes its format from the language's strings", () => {
-    initCloverI18n({
-      lng: "xx",
+    void initCloverI18n({
       resources: {
         xx: { clover: { controlShortcut: "{{shortcut}} : {{label}}" } },
       },
-    });
+    }).chooseInterfaceLanguage("xx");
     render(<Tip label="Muet" shortcut={SHORTCUTS.mute} />);
     expect(screen.getByText("M : Muet")).toBeInTheDocument();
   });

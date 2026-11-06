@@ -51,7 +51,7 @@ export interface LightboxProps {
    */
   panelSections?: readonly PanelSection[];
   /**
-   * What a panel section's tab or heading says, in place of Clover's own word for it:
+   * What a panel section's tab or heading says, in place of its word in Clover's interface language:
    * `{ annotations: "Chapters" }`, or a word by language tag to say it in several (the
    * Panel's `labels`).
    */
@@ -60,6 +60,8 @@ export interface LightboxProps {
   download?: boolean;
   /** The languages to read the resource in, beside the panel's About heading. Default `true`. */
   languages?: boolean;
+  /** Clover's interface languages in the panel's language toggle. Default `true`. */
+  interfaceLanguages?: boolean;
   /** Where the panel's width is remembered once dragged; `false` forgets it. */
   storageKey?: string | false;
   /** The Body's `collapseControls`: when the view's controls collapse behind one button. */

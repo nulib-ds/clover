@@ -245,6 +245,57 @@ describe("CanvasRenderer", () => {
     renderer.dispose();
   });
 
+  it("enlarges a small image to fill the box at home, unless upscale is off", async () => {
+    mockedLoad.mockResolvedValue(bitmap(200, 100));
+    const renderer = new CanvasRenderer(host(), {
+      animationTime: 0,
+      maxZoomPixelRatio: 1,
+    });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    renderer.home(true);
+    expect(renderer.getCamera().zoom).toBeGreaterThan(1);
+    renderer.dispose();
+  });
+
+  it("holds home at maxZoomPixelRatio, centered, with upscale off", async () => {
+    mockedLoad.mockResolvedValue(bitmap(200, 100));
+    const renderer = new CanvasRenderer(host(), {
+      animationTime: 0,
+      maxZoomPixelRatio: 1,
+      upscale: false,
+    });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    renderer.home(true);
+    const { home, min, max } = renderer.getZoomLimits();
+    expect(home).toBe(1);
+    expect(max).toBe(1);
+    expect(min).toBeCloseTo(0.9);
+    expect(renderer.getCamera().zoom).toBe(1);
+    expect(renderer.getCamera().x).toBeCloseTo(100);
+    expect(renderer.getCamera().y).toBeCloseTo(50);
+    expect(renderer.viewLimits()).toEqual({
+      atMax: true,
+      atMin: false,
+      atHome: true,
+    });
+    renderer.dispose();
+  });
+
+  it("still fits a large image to the box with upscale off", async () => {
+    mockedLoad.mockResolvedValue(bitmap(4000, 3000));
+    const renderer = new CanvasRenderer(host(), {
+      animationTime: 0,
+      upscale: false,
+    });
+    await renderer.setImages([{ id: "a", url: "a.jpg" }]);
+    renderer.home(true);
+    const { home, max } = renderer.getZoomLimits();
+    expect(home).toBeLessThan(1);
+    expect(max).toBe(1.1);
+    expect(renderer.viewLimits().atMax).toBe(false);
+    renderer.dispose();
+  });
+
   it("knows when it is zoomed in as far as it goes, or on its way there", async () => {
     mockedLoad.mockResolvedValue(bitmap(1000, 1000));
     const renderer = new CanvasRenderer(host(), { animationTime: 0 });

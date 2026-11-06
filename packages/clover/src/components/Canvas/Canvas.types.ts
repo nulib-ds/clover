@@ -58,6 +58,11 @@ export interface CloverCanvasOptions {
   maxZoomPixelRatio?: number;
   /** Smallest zoom, as a fraction of the home zoom. Default 0.9. */
   minZoomImageRatio?: number;
+  /**
+   * Whether home may enlarge the image past `maxZoomPixelRatio` to fill the box. False,
+   * home stops at that zoom and centers the image, smaller than the box. Default true.
+   */
+  upscale?: boolean;
   /** Seconds for an animation to close most of its distance. 0 disables easing. */
   animationTime?: number;
   /**

@@ -12,8 +12,8 @@ function sized(element: HTMLElement, scrollLeft = 0) {
   element.scrollLeft = scrollLeft;
 }
 
-function Track({ onPress }: { onPress?: () => void }) {
-  const track = useScrollTrack({ itemCount: 3 });
+function Track({ onPress, axis }: { onPress?: () => void; axis?: "x" | "y" }) {
+  const track = useScrollTrack({ itemCount: 3, axis });
   return (
     <>
       <div data-testid="viewport" ref={track.ref}>
@@ -49,6 +49,21 @@ describe("useScrollTrack", () => {
     const viewport = screen.getByTestId("viewport");
     expect(viewport.style.overflowX).toBe("auto");
     expect(viewport.style.scrollSnapType).toBe("x mandatory");
+  });
+
+  it("scrolls down a column with axis y", () => {
+    render(<Track axis="y" />);
+    const viewport = screen.getByTestId("viewport");
+    expect(viewport.style.overflowY).toBe("auto");
+    expect(viewport.style.overflowX).toBe("hidden");
+    expect(viewport.style.scrollSnapType).toBe("y mandatory");
+    Object.defineProperties(viewport, {
+      clientHeight: { configurable: true, value: 300 },
+      scrollHeight: { configurable: true, value: 1000 },
+    });
+    viewport.scrollTop = 700;
+    fireEvent.click(screen.getByText("measure"));
+    expect(screen.getByTestId("state")).toHaveTextContent("true/false");
   });
 
   it("knows whether there is anywhere to go", () => {

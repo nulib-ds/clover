@@ -456,7 +456,11 @@ button.clover-sections-scroll-next {
   margin-top: calc(-1 * var(--clover-sections-own));
   padding: var(--clover-space-s) var(--clover-space-s)
     calc(var(--clover-space-2xs) + 3px);
-  font-size: var(--clover-text-m);
+  /*
+   * The panel's own size, not the heading's: each control in it sets its own, and a menu
+   * one opens reads at the page's size, as the Canvas's menus do (Mat, 2026-11-05).
+   */
+  font-size: inherit;
   /* Only its controls take the pointer: the heading under the rest of it is pressed. */
   pointer-events: none;
 }
@@ -572,12 +576,18 @@ button.clover-sections-scroll-next {
  * languages), they go before the chevron, which keeps the end; the controls leave its
  * room, `m` from it. The chevron itself is `ui/Chevron.css`'s; the open box's points up,
  * in the accent of the line under its heading (Mat, 2026-10-28), its button disabled (an
- * open box cannot close).
+ * open box cannot close), so at half strength, still in sight (Mat, 2026-11-05: "mute
+ * this disabled arrow further keep it visible"; an inactive control needs no contrast,
+ * WCAG 1.4.11).
  */
 .clover-sections[data-layout="accordion"]
   button.clover-sections-button[aria-disabled="true"]
   .clover-sections-chevron {
-  color: var(--clover-color-accent, #0065c3);
+  color: color-mix(
+    in srgb,
+    var(--clover-color-accent, #0065c3) 50%,
+    var(--clover-color-secondary, #fff)
+  );
 }
 
 .clover-sections[data-layout="accordion"]

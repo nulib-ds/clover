@@ -767,7 +767,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
    * over its `img` or `group` role, and its keys, in `aria-keyshortcuts` and in words in
    * its description. The camera's keys where the reader can move it, and media's where
    * there is media; none behind a placeholder, where no key does anything. An attribute
-   * cannot carry a language, so the role keeps its own name where Clover's strings are
+   * cannot carry a language, so the role keeps its own name where Clover's interface strings are
    * not in the page's language (WCAG 3.1.2).
    */
   const viewportKeys = showPlaceholder

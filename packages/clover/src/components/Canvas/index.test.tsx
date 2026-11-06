@@ -813,7 +813,7 @@ describe("Canvas", () => {
     });
 
     it("labels them in Clover's language, as Image does", async () => {
-      await initCloverI18n({ lng: "fr" }).ready();
+      await initCloverI18n().chooseInterfaceLanguage("fr");
       try {
         render(<Canvas src="a.jpg" />);
         expect(
@@ -821,7 +821,7 @@ describe("Canvas", () => {
         ).toBeInTheDocument();
       } finally {
         act(() => {
-          initCloverI18n({ lng: "en" });
+          void initCloverI18n().chooseInterfaceLanguage();
         });
       }
     });

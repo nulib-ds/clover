@@ -17,6 +17,7 @@ export const panel: ElementSpec = {
     "heading-level": { prop: "headingLevel", type: "number", min: 1 },
     download: { prop: "download", type: "boolean" },
     languages: { prop: "languages", type: "boolean" },
+    "interface-languages": { prop: "interfaceLanguages", type: "boolean" },
     sections: { prop: "sections", type: "data" },
     labels: { prop: "labels", type: "data" },
     closable: { prop: "closable", type: "boolean" },
@@ -57,6 +58,11 @@ export const panelDocs: ElementDocs = {
         'Where what the resource says of itself comes in several languages, About\'s heading offers them, and the whole clover-root reads in the one chosen. "false" leaves the choice out.',
       default: "true",
     },
+    "interface-languages": {
+      description:
+        "About's language toggle also offers Clover's interface languages (its control labels, section titles and announcements) that the resource has none of: the visitor's and the site's, where they differ, one choice for the whole page. \"false\" leaves them out.",
+      default: "true",
+    },
     sections: {
       description:
         'Which of the default sections it may have, as a JSON array: ["contents","search","transcript","annotations"] leaves out About and the rest. Each still shows only where the resource has data for it, and the panel draws nothing where none of them does. Its clover-tab children win over it.',
@@ -64,7 +70,7 @@ export const panelDocs: ElementDocs = {
     },
     labels: {
       description:
-        'What a default section\'s tab or heading says, in place of Clover\'s own word for it, as JSON by the section\'s value: {"annotations": "Chapters"}, or {"annotations": {"en": "Chapters", "de": "Kapitel"}} to say it in several, read in the language Clover speaks and marked with it where that is not the page\'s.',
+        'What a default section\'s tab or heading says, in place of its word in Clover\'s interface language, as JSON by the section\'s value: {"annotations": "Chapters"}, or {"annotations": {"en": "Chapters", "de": "Kapitel"}} to say it in several, read in the language Clover speaks and marked with it where that is not the page\'s.',
     },
     closable: {
       description:

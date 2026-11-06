@@ -50,7 +50,7 @@ export const statusDocs: ElementDocs = {
     },
     error: {
       description:
-        "What it shows, as an alert, if loading failed, in place of Clover's words: as a copy (give it no ids).",
+        "What it shows, as an alert, if loading failed, in place of Clover's interface words: as a copy (give it no ids).",
     },
   },
 };
@@ -262,6 +262,7 @@ export const about: ElementSpec = {
     "canvas-summary": { prop: "canvasSummary", type: "boolean" },
     download: { prop: "download", type: "boolean" },
     languages: { prop: "languages", type: "boolean" },
+    "interface-languages": { prop: "interfaceLanguages", type: "boolean" },
     thumbnail: { prop: "thumbnail", type: "boolean" },
     label: { prop: "label", type: "boolean" },
     ...headingLevel,
@@ -283,6 +284,11 @@ export const aboutDocs: ElementDocs = {
     languages: {
       description:
         'Alone: outside a clover-panel, where what the resource says of itself comes in several languages, a choice of them over what it says, the whole clover-root reading in the one chosen. "false" leaves it out.',
+      default: "true",
+    },
+    "interface-languages": {
+      description:
+        "Alone: outside a clover-panel, its language toggle also offers Clover's interface languages (its control labels, section titles and announcements) that the resource has none of: the visitor's and the site's, where they differ. \"false\" leaves them out.",
       default: "true",
     },
     thumbnail: {

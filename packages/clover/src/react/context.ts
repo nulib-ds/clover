@@ -16,6 +16,13 @@ export interface CloverContextValue {
    * inside reads in it, until the Root is given another `language`.
    */
   chooseLanguage?: (tag: string) => void;
+  /**
+   * Whether a language toggle of the Root's is drawn (About's, `LanguageToggle`), so the
+   * parts that would offer their own (an annotation set's languages, a Transcript's
+   * caption files) follow it instead; `drawsToggle` says one is, until its cleanup runs.
+   */
+  toggleDrawn?: boolean;
+  drawsToggle?: () => () => void;
   /** Renderers of the host's own, for `Body` to draw some views with. */
   renderers?: BodyRenderer[];
 }
