@@ -11,6 +11,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **The page scrolls on past a vertical slider's end.** Items' slider with
+  `orientation="vertical"`, scrolled to its foot or its top, hands the next wheel or
+  swipe to the page, as the Panel does since 4.5.4. Before, the wheel stopped there. A
+  slider across keeps a sideways wheel at its ends, as before.
+
 ## [4.5.6] - 2026-11-06
 
 ### Changed

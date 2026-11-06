@@ -66,6 +66,18 @@ describe("useScrollTrack", () => {
     expect(screen.getByTestId("state")).toHaveTextContent("true/false");
   });
 
+  it("keeps a row's wheel at its ends, and hands a column's on to the page", () => {
+    const { unmount } = render(<Track />);
+    expect(screen.getByTestId("viewport").style.overscrollBehaviorX).toBe(
+      "contain",
+    );
+    unmount();
+    render(<Track axis="y" />);
+    const column = screen.getByTestId("viewport").style;
+    expect(column.overscrollBehaviorY).toBeFalsy();
+    expect(column.overscrollBehaviorX).toBeFalsy();
+  });
+
   it("knows whether there is anywhere to go", () => {
     render(<Track />);
     const viewport = screen.getByTestId("viewport");

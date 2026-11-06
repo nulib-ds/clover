@@ -77,7 +77,12 @@ export function useScrollTrack({
     setCanScrollNext(position < max - 1);
   }, [viewport, down]);
 
-  // The viewport's own scrolling and snapping, set here so they hold without CSS.
+  /*
+   * The viewport's own scrolling and snapping, set here so they hold without CSS. A row
+   * keeps a sideways wheel or swipe at its ends; a column, as the Panel's pane does, hands
+   * the next one to the page there (Mat, 2026-11-05: "once it hits bottom. the window
+   * should begin to scroll").
+   */
   useEffect(() => {
     if (!viewport) return;
     const style = viewport.style;
@@ -85,8 +90,7 @@ export function useScrollTrack({
     style.overflowY = down ? "auto" : "hidden";
     style.scrollSnapType = snap;
     style.setProperty("--clover-track-align", align);
-    if (down) style.overscrollBehaviorY = "contain";
-    else style.overscrollBehaviorX = "contain";
+    style.overscrollBehaviorX = down ? "" : "contain";
   }, [viewport, snap, align, down]);
 
   // Keep the buttons' state current as the track scrolls or resizes.

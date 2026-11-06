@@ -1431,8 +1431,10 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
   window should begin to scroll … scrolling up should do the same"): the information
   panel's pane (`clover-template-panel`, and the Panel itself while it floats) and
   Document's thumbnails scroll within with no `overscroll-behavior`, so at their foot or
-  top the next wheel or swipe scrolls the page, in every section. Popups (the Canvas's
-  menus, the pager's list) keep their `contain`.
+  top the next wheel or swipe scrolls the page, in every section; so does Items' vertical
+  slider (Mat, the same day), as `useScrollTrack` contains a row's overscroll alone
+  (`overscroll-behavior-x`). Popups (the Canvas's menus, the pager's list) keep their
+  `contain`.
 - **Finding in a transcript** (Mat, 2026-10-26: "make vtt transcripts searchable. follow
   the same rules for lazy loading"). `Transcript` (`find`, default true; captions only):
   a `FieldPill`, Search's own, the same props, size and submit (Mat: "this is a generic
