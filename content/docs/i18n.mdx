@@ -1,11 +1,18 @@
 ---
-title: i18n
+title: Internationalization (i18n)
 description: How Clover 4 chooses its interface language and a resource's, the languages it ships, and how to add one.
 ---
 
 import { LanguagesDemo } from "docs/components/Clover4/LanguagesDemo";
+import { TranslatorHead } from "docs/components/Clover4/PartHead";
 
-# i18n
+<div className="docs-title-row">
+
+# Internationalization (i18n)
+
+<TranslatorHead />
+
+</div>
 
 <div className="docs-lede">
   Clover translates its interface language: its control labels ("Zoom in"),
@@ -14,9 +21,7 @@ import { LanguagesDemo } from "docs/components/Clover4/LanguagesDemo";
   chooses among them too.
 </div>
 
-Clover has its own translator, well under 1 kB gzipped, with no translation library to
-install. Its strings are kept the way i18next keeps them, so `initCloverI18n` calls from
-Clover 3.x keep working.
+Clover has its own translator, with no translation library to install.
 
 ## Languages Clover ships
 
@@ -124,7 +129,7 @@ initCloverI18n({ languages: ["fr", "en"] });
 It can be called again: each call merges its `resources` and applies any `languages`,
 `lng` or `fallbackLng` it is given, and every Clover part on the page changes language at
 once. The web components take the same call; see
-[Languages](/docs/technical#languages) in the technical overview.
+[Languages](/docs/composing/glossary#languages) in the Glossary.
 
 To speak one language whatever the visitor's, choose it, as the visitor would:
 
@@ -192,8 +197,13 @@ direction follows what is typed, not its placeholder.
 A language added to Clover itself ships to everyone. In
 [nulib-ds/clover](https://github.com/nulib-ds/clover):
 
-1. Add `packages/clover/src/i18n/locales/<tag>.json`, with every key `en.json` has,
-   translated. Keep each `{{name}}` placeholder as it is.
+1. Add `<tag>.json` to
+   [`packages/clover/src/i18n/locales/`](https://github.com/nulib-ds/clover/tree/main/packages/clover/src/i18n/locales),
+   with every key
+   [`en.json`](https://github.com/nulib-ds/clover/blob/main/packages/clover/src/i18n/locales/en.json)
+   has, translated, as
+   [`fr.json`](https://github.com/nulib-ds/clover/blob/main/packages/clover/src/i18n/locales/fr.json)
+   does. Keep each `{{name}}` placeholder as it is.
 2. Add its loader to `loaders` in `packages/clover/src/i18n/locales/index.ts`, so it
    loads only when it is needed.
 3. Run `npm test`. `locales.test.ts` checks that the file has every key English has and

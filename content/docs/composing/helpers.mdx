@@ -1,6 +1,6 @@
 ---
 title: Helpers
-description: "The helpers Clover is built with, yours to use: functions for text, thumbnails, views, maps and content states, its hooks, and what templates share."
+description: "The helpers Clover is built with, yours to use: functions for text, thumbnails, views, maps and content states, events, hooks, and what templates share."
 ---
 
 import { Example } from "docs/components/Clover4/ViewerDocs";
@@ -29,8 +29,9 @@ import {
 # Helpers
 
 <div className="docs-lede">
-  Clover's helpers are yours too. Functions read IIIF resources, hooks read the
-  nearest `Root`, and the template helpers build a template of your own.
+  Clover's helpers are yours too. Functions read IIIF resources, events say what
+  changed, hooks read the nearest `Root`, and the template helpers build a
+  template of your own.
 </div>
 
 ## IIIF resources
@@ -160,6 +161,37 @@ boundsOf(places.features, [georeference]);
 // The box around them all, [[west, south], [east, north]]:
 // [[-87.7208, 41.9877], [-87.6241, 42.0777]]
 ```
+
+## Events
+
+What React hands a callback, an element sends as an event: `clover-` and what happened,
+bubbling, so a page can listen for it anywhere above the element. Its `detail` holds what
+the callback is given.
+
+| React prop             | Event                         | `detail`                                                                        |
+| ---------------------- | ----------------------------- | ------------------------------------------------------------------------------- |
+| `onCanvasChange`       | `clover-canvas-change`        | `{ canvasId }`                                                                  |
+| `onManifestChange`     | `clover-manifest-change`      | `{ manifestId }`, in a Collection                                               |
+| `onStatusChange`       | `clover-status-change`        | `{ status, error }`, as it loads                                                |
+| `onContentStateChange` | `clover-content-state-change` | `{ json, encoded }`, as the view changes ([Content State](/docs/content-state)) |
+
+<div data-code-flavor="web-components">
+
+```js
+viewer.addEventListener("clover-canvas-change", (event) => {
+  console.log(event.detail.canvasId);
+});
+```
+
+`<clover-root>` sends the same events as `<clover-viewer>`; `<clover-items>` and
+`<clover-map>` send `clover-select` when an item or a place is chosen (cancel it, with
+`preventDefault`, to keep a link from being followed), `<clover-collection-select>` sends
+`clover-change`, and `<clover-root>`, `<clover-body>` and `<clover-canvas>` send
+`clover-ready`: a root's `clover` then reads it, as the [hooks](#hooks) below do, and a
+Body's or Canvas's `handle` moves its view (`body.handle.zoomBy(2)`). `clover-ready` is
+the element's own and does not bubble, as `load` does not.
+
+</div>
 
 ## Hooks
 
@@ -1472,7 +1504,7 @@ function StoryFigure() {
 <div data-code-flavor="web-components">
 
 These helpers are React hooks and components. With web components, choose a template by
-name on `<clover-viewer>`, or lay out your own as [Layouts](/docs/technical#layouts)
+name on `<clover-viewer>`, or lay out your own as [Splitting panes](/docs/composing/customizing#splitting-panes)
 shows.
 
 </div>

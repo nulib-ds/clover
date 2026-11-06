@@ -1160,7 +1160,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     and, refused all the same (no `sheet`), gives way to adopted sheets in the same order.
     Inline styles set through the DOM (`style={…}` in the browser, `element.style`) are
     CSSOM, which no policy governs; a server writes them as `style` attributes, which a
-    strict policy refuses (Technical overview: `style-src-attr 'unsafe-inline'`, not
+    strict policy refuses (a page allows them with `style-src-attr 'unsafe-inline'`; not
     checked in a browser yet).
   - No `data:` or `blob:` address for anything a page shows: a glyph is an inline svg
     (the map's controls too, `MapGlyph`), and a caption file's cues go to its track
@@ -2540,7 +2540,7 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     file the entry names, from `index.mjs` and `index.umd.js` on, failing on one that is
     not there or outside `web-components/`. So `viewer/` works only inside
     `web-components/`, never copied alone, as the
-    Technical overview tells hosts; its own entry files (`index.mjs`, `index.umd.js`,
+    Glossary's Structure of project tells hosts; its own entry files (`index.mjs`, `index.umd.js`,
     `index.d.mts`) always stay.
   - **Two copies on a page.** Each entry brings its own copy of Clover, so a page loads
     one. Every element comes from one build, so what Clover keeps once (the translator,

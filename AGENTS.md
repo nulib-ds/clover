@@ -90,11 +90,19 @@ deadline.
     (`/docs/composing/glossary`: Core components, every part in the Components menu with
     the Primitives a group of its rows, drawn from the menu and each page's description
     by `CoreComponents.tsx`, UI components (Mat, 2026-11-04: "call this UI components
-    not helper"), by hand, and the helpers, a table for each of Helpers' groups), Customizing
+    not helper"), by hand, and the helpers, a table for each of Helpers' groups, Events among them; then
+    Structure of project, the package's exports as a file tree (`ProjectStructure.tsx`, a
+    nested list; Mat, 2026-11-05: "make this look more like a file tree. let's call it
+    Structure of Project", in sentence case), each flavor's notes on loading them and
+    their types, and, for web components alone, notes no other page holds, under "Web
+    components" (`<div data-code-flavor="web-components">`, so a React page shows no
+    empty heading); the web components' detail Get started held, and
+    `/docs/web-component`'s forward, are there), Customizing
     (`/docs/composing/customizing`: the Panel, panes side by side, `Value`, `Summary`
     and `ReadMore`, templates, creating custom components (headings, controls,
-    renderers), languages and styles; its menu name chosen by an agent, to rename at
-    will) and Helpers, which holds the hooks. Composing's old anchors go on to their
+    renderers) and languages, styles left to Styling (Mat, 2026-11-05: "Guidance for
+    styling of Clover is covered in Styling"); its menu name chosen by an agent, to
+    rename at will) and Helpers, which holds the hooks. Composing's old anchors go on to their
     sections' pages (`MovedSections.tsx`). Its words say component, hook or helper,
     never "part" (Mat, 2026-11-04). The
     Viewer page covers what the Viewer handles and links there; add composition material
@@ -133,7 +141,7 @@ deadline.
     label cannot hold; then "Do" and "Don't") before every pair in full, kept for audits
     and agents, and last "Variables", a glossary of every custom property a page sets,
     with its default and where to set it (never those Clover sets as it runs). A new
-    property a page may set gets its row there. Composing keeps a short Styles section linking there.
+    property a page may set gets its row there. Composing's pages keep no Styles section of their own (Mat, 2026-11-05).
   - Every docs page reads as the Components pages do (Mat, 2026-10-23: "remove breadcrumbs
     EVERYWHERE", "remove sidebars everywhere. style like the Components pages"): no
     breadcrumb and no table of contents (the `docs` folder's `theme` in
@@ -263,7 +271,9 @@ deadline.
     `sizes.json`, through `docs/lib/sizes.ts`), what was measured in words for assistive
     technology. Where the line is too narrow, the two go under the title, and the badge
     under the name. A new part gets its size measured (`PARTS` in `build/sizes.mjs`) and
-    its head. Its examples are on a card lifted as the homepage's example viewer is
+    its head. The i18n page has one too (`TranslatorHead`; Mat, 2026-11-05: "add a little
+    tag in top right for size"): `initCloverI18n()`, and the translator with its English
+    (`translatorGzip`, budgeted). Its examples are on a card lifted as the homepage's example viewer is
     (`--card-shadow`): the demo, then its code. A template's demo (a Viewer, on any page,
     an agent's preview of one too) runs to the card's edges, never held in by its room,
     its top corners clipped to the card's (Mat, 2026-11-01: "templates should not be bound
@@ -314,14 +324,16 @@ deadline.
     "everything should be about a quick start"), Viewer (`/docs/viewer`,
     the templates on it: their old page, `/docs/viewer/templates`, forwards to
     `#templates`), Composing, Styling (the menu's names, short; "Composing" for the page
-    titled "Composing layouts"; Mat, 2026-10-23). Under Technical (Mat, 2026-11-01: the
-    group that was Contribute, renamed, the overview moved there and first, as
-    "Overview"): Overview, Content State (i18n after Styling since 2026-11-05: "move this
-    under styling"). Helpers (`/docs/composing/helpers`; Mat,
+    titled "Composing layouts"; Mat, 2026-10-23). Then i18n (after Styling since 2026-11-05, "move this under
+    styling") and Content State under it ("Move Content State under i18n"); the
+    Technical group, which held them and the Technical overview, went that day ("this
+    section will go away once we move the Structure tree to glossary page"). Helpers (`/docs/composing/helpers`; Mat,
     2026-11-04: "helpers should have its own page", then "Move helpers under composing":
     Composing is a folder, its page the index, Helpers in its menu under it) documents
     every helper a package entry exports: the functions that read IIIF resources
-    (`@nulib/clover`), the maps' (`@nulib/clover/map`), then what the templates share
+    (`@nulib/clover`), the maps' (`@nulib/clover/map`), Clover's events (each React
+    callback and the event its element sends, before Hooks), the hooks, then
+    what the templates share
     (`@nulib/clover/templates`) and how to change a template, the same
     four steps for every one, which the templates' READMEs repeat and link to. Written
     as Strunk and White would, conversational, every thing named exactly: by its
@@ -341,13 +353,14 @@ deadline.
     over an image or a video (the catalog, the 1959 football film; its switch "Resource
     type", Image or Video), the callback on the Root (Mat, 2026-11-01: "why is the
     callback here and not on root?"), both forms shown as they come, and a link opening
-    the view in the homepage's demo; under it, the chosen one's code. Overview, titled Technical overview (`/docs/technical`;
-    Mat, 2026-10-26: the package's entry points, the Viewer, events, languages, parts,
-    layouts, parts of your own, a pointer to Helpers (every public function documented
-    there; Mat, 2026-10-27, its own page since 2026-11-04), types, what it loads, styles, and coming from 3.x, in React and as
-    web components, the two at parity: each section says it in the reader's flavor,
-    `<div data-code-flavor>`, or once for both, as the events' table does; the web
-    components' detail Get started held, and `/docs/web-component`'s forward, are here).
+    the view in the homepage's demo; under it, the chosen one's code. The Technical overview
+    (`/docs/technical`, Mat, 2026-10-26) went into Glossary's end on 2026-11-05 (Mat:
+    "move this to Glossary, at the very bottom"; its address forwards there), stripped
+    first to what no other page said ("strip it down to what doesn't exist elsewhere"):
+    Events to Helpers, before Hooks ("near other calls"), What it loads and the Content
+    Security Policy out ("I don't think we need this section"), the 3.x table out ("this
+    is covered in Upgrading", whose "Replace the other components" names what only it
+    did).
     Build with an agent (`/docs/agents`; Mat, 2026-10-26) is hidden for now (Mat,
     2026-10-26: "let's hide this page for now"): out of the menu (`display: "hidden"` in
     `content/docs/_meta.ts`, its place after Styling kept) and of search, the sitemap,
