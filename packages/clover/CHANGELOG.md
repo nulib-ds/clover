@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.5.7] - 2026-11-06
+
 ### Fixed
 
 - **The page scrolls on past a vertical slider's end.** Items' slider with
