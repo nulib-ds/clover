@@ -70,7 +70,8 @@ export interface PlanInput {
  * mid-animation, then the overview.
  */
 const MIDDLE_BAND = 5e6;
-const TARGET_BAND = 1e7;
+/** Where the tiles of the level a view is drawn from begin: coarser levels come before. */
+export const TARGET_BAND = 1e7;
 const IN_FLIGHT_BAND = 1.5e7;
 const OVERVIEW_BAND = 2e7;
 

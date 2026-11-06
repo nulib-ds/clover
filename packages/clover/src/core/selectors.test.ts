@@ -1,5 +1,10 @@
 import { navigationOf } from "./clover";
-import { partOfCollection, selectCanvas, selectStart } from "./selectors";
+import {
+  partOfCollection,
+  selectCanvas,
+  selectNextCanvases,
+  selectStart,
+} from "./selectors";
 import { p4 } from "../fixtures/presentation4";
 import startJson from "../fixtures/iiif-cookbook/0015-start.json";
 
@@ -58,6 +63,39 @@ describe("selectCanvas", () => {
     expect(selectCanvas(manifest, "https://example.org/3")).toBeNull();
     expect(selectCanvas(manifest, null)).toBeNull();
     expect(selectCanvas(null, "https://example.org/1")).toBeNull();
+  });
+});
+
+describe("selectNextCanvases", () => {
+  const canvas = (n: number) => ({
+    id: `https://example.org/${n}`,
+    type: "Canvas",
+  });
+  // A paged Manifest: the cover alone, then spreads.
+  const book = {
+    id: "https://example.org/book",
+    type: "Manifest",
+    behavior: ["paged"],
+    items: [1, 2, 3, 4, 5].map(canvas),
+  } as never;
+  const ids = (canvases: Array<{ id: string }>) =>
+    canvases.map(({ id }) => id.split("/").pop());
+
+  it("is the view after the one holding a Canvas, a spread whole", () => {
+    expect(ids(selectNextCanvases(book, "https://example.org/1"))).toEqual([
+      "2",
+      "3",
+    ]);
+    // From either page of a spread, the spread after it.
+    expect(ids(selectNextCanvases(book, "https://example.org/3"))).toEqual([
+      "4",
+      "5",
+    ]);
+  });
+
+  it("is nothing after the last view, or without a Manifest", () => {
+    expect(selectNextCanvases(book, "https://example.org/5")).toEqual([]);
+    expect(selectNextCanvases(null, "https://example.org/1")).toEqual([]);
   });
 });
 

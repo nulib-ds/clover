@@ -1885,6 +1885,27 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     than after them. `open` still waits on the coarsest, so a swap never flashes empty.
     A server on HTTP/1.1 (Northwestern's image server, 2026-11-06) gets six requests at a
     time from the browser whatever the window says.
+  - A scene is prepared in its order, `PREPARE_AT_ONCE` (6) images at a time, each one's
+    `info.json` and then at once its coarsest tiles before the next is begun (`inTurn`):
+    a browser sends a server on HTTP/1.1 six requests at a time in the order asked, so a
+    continuous Manifest's 31 `info.json` asked together kept every page's coarsest
+    behind them (first page 2.1 s; 0.58 s in turn, 2026-11-06). On an empty Body a scene
+    whose every image has a `placement` (as `canvasScene` gives them) goes up an image at
+    a time (`placeSoFar`), each as its own coarsest is in, framed for the whole scene with
+    the first, the closing step keeping the reader's view; with a scene on screen the
+    new one replaces it whole, so a page turn never shows half a spread. Mat, 2026-11-06:
+    "integrate Build page-at-a-time opening alongside the prefetch into 402".
+  - `prefetch(images, { world })` reads the next view ahead. `CanvasView` hands it a
+    Root's next view (`ahead`, from `selectNextCanvases`, `Connected.tsx`) once its own
+    is drawn, and the renderer starts it in a frame where nothing moves, nothing loads
+    and every wanted tile is in (`ahead`, `readAhead`): each image's `info.json`, into
+    the shared info cache, then the coarsest and middle levels of its framed view
+    (`landingWants` below `TARGET_BAND`) through `TileCache.prefetch`, which frames never
+    abort. Its sharp tiles wait until it is shown; `setImages`, `clear` or a later call
+    drops it. Never behind a placeholder still not yet opened (what loads behind one is
+    Mat's call, open since 2026-11-06), nor for a recording. Measured: a Northwestern
+    page turn's first picture 0.02 s from 0.68 s, every tile 0.72 s from 1.06 s, for
+    three requests and 17 kB read for nothing where the page is never turned.
   - The WebGL2 backend samples half a mip level sharper than the GPU would (`LOD_BIAS`,
     `backends/webgl2/shaders.ts`): the planner draws a level at one to two of its pixels to
     a device pixel, where trilinear filtering blended in the level half as sharp, and text

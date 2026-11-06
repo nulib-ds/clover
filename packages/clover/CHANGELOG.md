@@ -13,7 +13,7 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- **The Canvas sharpens sooner.** Three changes to how it asks an image server for
+- **The Canvas sharpens sooner.** Five changes to how it asks an image server for
   tiles:
   - From a server that cuts any region at any size (Image API level 1 or 2), it asks
     for tiles of at least 1024 px: several of the server's listed tiles in one request,
@@ -25,21 +25,33 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
     time from the browser.
   - While a view's sharp tiles load, the level two steps coarser comes first, under the
     ones still missing, and a new page's tiles are asked for as soon as its `info.json`
-    is read, beside its thumbnail rather than after it.
+    is read, beside its smallest size rather than after it.
+  - In a `Root`, once a view is drawn and every tile it wants is in, the next view is
+    read ahead: each of its images' `info.json`, and the smallest and middle sizes it
+    lists, so turning the page draws at once. Never behind a placeholder not yet opened,
+    nor for a recording.
+  - A view of several pages (a continuous Manifest's) goes up a page at a time on an
+    empty Body, each as soon as its own smallest size is in, rather than all at once
+    when the last is; its pages are prepared six at a time, in order, so each one's
+    smallest size follows its own `info.json`. A page turn still swaps a whole view.
 
   On Northwestern's image server, uncached, a page looked finished in 1.1 s, from 7.5 s,
-  and the next page in 0.9 s, from 5.5 s. Nothing to change in your code. A zoomed view
-  may download up to half again as many bytes, for the tiles at its edges; a CDN that
-  holds a server's listed tiles is asked for other URLs; and a server that limits how
-  many requests one visitor makes at once will see up to 16. A level 0 server still gets
-  only its own tiles, and no tile passes a server's `maxWidth`, `maxHeight` or `maxArea`.
+  and the next page in 0.9 s, from 5.5 s. Read ahead, a page turn's first picture came in
+  0.02 s, from 0.68 s, and the 31 pages of a continuous catalog showed their first in
+  0.6 s, from 3.9 s. Nothing to change in your code. A zoomed view may download up to
+  half again as many bytes, for the tiles at its edges; a page read ahead and never
+  turned to has cost three requests, about 17 kB; a CDN that holds a server's listed
+  tiles is asked for other URLs; and a server that limits how many requests one visitor
+  makes at once will see up to 16. A level 0 server still gets only its own tiles, and
+  no tile passes a server's `maxWidth`, `maxHeight` or `maxArea`.
 
-- **Budgets.** The tile scheduling adds about 0.6 kB gzip wherever a Canvas draws, and
-  letting a refusal's body go (below) 30 to 60 bytes to every entry. The budgets they
-  crossed are raised to the next 50 bytes: Canvas initial JS to 43.1 kB from 42.45 kB,
-  Canvas to first view to 49.7 kB from 49.15 kB, Default and Document to first view to
-  99.0 kB and 94.95 kB from 98.35 kB and 94.3 kB, Timeline's, Scene's and the Gallery's
-  by 50 bytes each, and nine others by 600 to 650 bytes.
+- **Budgets.** The tile scheduling, reading the next view ahead and opening a view a page
+  at a time add about 1.35 kB gzip wherever a Canvas draws, and letting a refusal's body
+  go (below) 30 to 60 bytes to every entry. The budgets they crossed are raised to the
+  next 50 bytes: Canvas initial JS to 43.8 kB from 42.45 kB, Canvas to first view to
+  50.45 kB from 49.15 kB, Default and Document to first view to 99.7 kB and 95.7 kB from
+  98.35 kB and 94.3 kB, Timeline's initial JS and first view by 200 and 150 bytes,
+  Scene's and the Gallery's by 50 bytes each, and nine others by 1.3 to 1.45 kB.
 - **Text and print on the Canvas are crisper.** Each tile is drawn from its full level
   half a step more, where it had leaned toward the softer one beneath: a page's type at
   home now looks as sharp as OpenSeadragon or Atlas draw it. Nothing to change.

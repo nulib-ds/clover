@@ -24,7 +24,9 @@ export type CanvasSurface = Pick<
   | "setDismiss"
   | "setGestures"
   | "dispose"
->;
+> &
+  // Reading the next view ahead: the renderer's, where a Timeline has nothing to read.
+  Partial<Pick<CanvasRenderer, "prefetch">>;
 
 export type MakeSurface = ((
   host: HTMLElement,

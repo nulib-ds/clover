@@ -183,6 +183,11 @@ export type CanvasViewProps = CloverCanvasProps & {
    * Root's `found`): each one frames it again (`AnnotationState`).
    */
   refind?: number;
+  /**
+   * The view after this one (`Connected.tsx`, from the Root's sequence), read ahead once
+   * this one is drawn: its images' `info.json` and their coarsest and middle levels.
+   */
+  ahead?: CloverCanvasProps["canvases"];
 };
 
 /**
@@ -235,6 +240,7 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     highlightedChapter,
     onChapterHighlight,
     placeholder = true,
+    ahead,
     children,
   } = props;
   const { t } = useCloverTranslation();
@@ -600,6 +606,36 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
       if (source.service)
         fetchInfo(source.service, { request: stillsRequest }).catch(() => {});
   }, [showPlaceholder, stills, stillsRequest]);
+  /*
+   * The view after this one, read ahead once this one is drawn, so turning to it draws at
+   * once: its images' `info.json`, then their coarsest and middle levels, which the
+   * renderer asks for only when every tile of this view is in (`prefetch`). Only where its
+   * tiles would load as it is shown: never behind a placeholder still not yet opened (the
+   * reader's choice, `imagesOpen`), nor for a recording, nor over this view's own still.
+   */
+  const aheadScene = useMemo(() => {
+    if (!ahead?.length) return null;
+    if (
+      placeholder &&
+      !imagesOpen &&
+      ahead.some((canvas) => placeholderStill(canvas))
+    )
+      return null;
+    const scene = canvasScene(ahead, direction, selections, {
+      standIns: false,
+    });
+    if (scene.media.length) return null;
+    const images = scene.images.filter(
+      (image) => image.service && !image.hidden,
+    );
+    return images.length
+      ? { images, world: union(scene.placements) ?? undefined }
+      : null;
+  }, [ahead, direction, selections, placeholder, imagesOpen]);
+  useEffect(() => {
+    if (status !== "ready" || showPlaceholder || !aheadScene) return;
+    surface?.prefetch?.(aheadScene.images, { world: aheadScene.world });
+  }, [surface, status, showPlaceholder, aheadScene]);
   /*
    * A lone media Canvas carries all its controls in the transport at the bottom: full
    * screen moves there, and the top cluster (and the scrim behind it) is shown only for a

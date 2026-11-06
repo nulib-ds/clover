@@ -20,7 +20,7 @@ import type { AnnotationLink } from "../../core/link";
 import { searchServiceOf } from "../../core/search-service";
 import { showLink } from "../../core/show-link";
 import { chaptersOf } from "../../core/ranges";
-import { hasBehavior } from "../../core/selectors";
+import { hasBehavior, selectNextCanvases } from "../../core/selectors";
 import type { CanvasAnnotation } from "./Annotations";
 import { sameLanguage } from "../../i18n/languages";
 import { useClover, useCloverSelector } from "../../react/context";
@@ -72,6 +72,10 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
   // The Root's language, unless the Canvas is given its own.
   const language = givenLanguage ?? context.language;
   const canvases = useVisibleCanvases() as unknown as IIIFCanvas[];
+  // The view after this one, read ahead once this one is drawn.
+  const ahead = useCloverSelector((state) =>
+    selectNextCanvases(state.manifest, state.canvasId),
+  ) as unknown as IIIFCanvas[];
   const { direction } = useSequence();
   const manifest = useManifest();
   const active = useActiveCanvas();
@@ -330,6 +334,7 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
       manifestId={manifestId}
       navPlace={(manifest as { navPlace?: unknown } | null)?.navPlace}
       canvases={canvases}
+      ahead={ahead}
       viewingDirection={direction}
       language={language}
       label={
