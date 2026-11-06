@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.5.1] - 2026-11-05
+
 ### Fixed
 
 - **A language chosen in About goes with its Root.** A page that mounts a new `Root` (or
