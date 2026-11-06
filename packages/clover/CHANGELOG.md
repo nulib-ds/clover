@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.5.9] - 2026-11-06
+
 ### Fixed
 
 - **A Transcript says when it cannot read its file.** When a caption or plain-text
