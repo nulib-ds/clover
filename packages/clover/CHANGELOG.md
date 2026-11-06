@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.5.2] - 2026-11-05
+
 ### Added
 
 - **Italian.** Clover's interface language (its control labels, section titles and
