@@ -175,6 +175,19 @@ label.clover-annotations-entry > input {
   cursor: pointer;
 }
 
+/* A page on the web opens in a tab of its own: its glyph says so, after the word. */
+a.clover-annotations-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--clover-space-3xs);
+}
+
+a.clover-annotations-link svg {
+  flex: none;
+  width: 0.875em;
+  height: 0.875em;
+}
+
 :is(a, button).clover-annotations-link:hover {
   text-decoration-color: currentColor;
 }

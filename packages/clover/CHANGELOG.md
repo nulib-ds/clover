@@ -11,6 +11,21 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.5.6] - 2026-11-06
+
+### Changed
+
+- **An annotation leads somewhere only by a `SpecificResource` body's `source`.** That
+  holds for a `linking` annotation (Cookbook 0022) and a `tagging` or `identifying` one
+  (0258), in the Annotations list and on the Canvas. A body that is a resource itself,
+  with an `id` of its own, is no longer followed: 0139's GeoJSON Feature, whose `id`
+  only identifies it, showed a link to an address that answers 404. To keep a link,
+  give it as `{ "type": "SpecificResource", "source": "https://…" }`.
+- **The Annotations list's link reads "Open"**, in every language Clover ships (it read
+  "Open the link"). A page on the web, which opens in a tab of its own, has an external
+  link glyph after the word (`a.clover-annotations-link svg`, sized `0.875em`); a Canvas
+  or Manifest, which opens in the viewer, has none.
+
 ## [4.5.5] - 2026-11-06
 
 ### Added

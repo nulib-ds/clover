@@ -16,6 +16,7 @@ import { usePagesReached } from "../../react/usePagesReached";
 import { ListEnd } from "../../ui/ListEnd";
 import { annotationName } from "../../core/annotation-name";
 import { readLink, readTagSource } from "../../core/link";
+import { ExternalGlyph } from "../../ui/ExternalGlyph";
 import { showLink } from "../../core/show-link";
 import type { Manifest } from "../../core/presentation";
 import { selectSequence, selectVisibleCanvases } from "../../core/selectors";
@@ -868,9 +869,10 @@ function AnnotationItem({
 }
 
 /**
- * Where a linking annotation leads (Cookbook 0022): a page on the web, as a link; a
- * Canvas or a Manifest, a button that shows it, focus going to the Canvas with it, since
- * the list may change under the button.
+ * Where a linking annotation leads (Cookbook 0022): a page on the web, as a link that
+ * opens it in a tab of its own, its glyph saying so (`ExternalGlyph`); a Canvas or a
+ * Manifest, a button that shows it, focus going to the Canvas with it, since the list may
+ * change under the button.
  */
 function FollowLink({ annotation }: { annotation: Record<string, any> }) {
   const { clover } = useClover("Annotations");
@@ -893,6 +895,7 @@ function FollowLink({ annotation }: { annotation: Record<string, any> }) {
         {...languageProps(lang)}
       >
         {text}
+        <ExternalGlyph />
       </a>
     );
   return (
