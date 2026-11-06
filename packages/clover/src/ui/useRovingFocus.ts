@@ -13,6 +13,8 @@ export interface RovingFocusOptions {
   orientation?: "horizontal" | "vertical" | "both";
   /** Right-to-left: the left arrow steps forward. */
   rtl?: boolean;
+  /** Bottom-to-top: the up arrow steps forward. */
+  upward?: boolean;
   /** Enter or Space on an option, with the key's own event. */
   onActivate?: (index: number, event: React.KeyboardEvent) => void;
   /** Focus moved to an option by an arrow, Home or End: to select as focus moves. */
@@ -25,6 +27,7 @@ export function useRovingFocus(
   {
     orientation = "both",
     rtl = false,
+    upward = false,
     onActivate,
     onMove,
   }: RovingFocusOptions = {},
@@ -52,17 +55,19 @@ export function useRovingFocus(
     (event: React.KeyboardEvent, index: number) => {
       const forward = rtl ? "ArrowLeft" : "ArrowRight";
       const backward = rtl ? "ArrowRight" : "ArrowLeft";
+      const down = upward ? "ArrowUp" : "ArrowDown";
+      const up = upward ? "ArrowDown" : "ArrowUp";
       const horizontal = orientation !== "vertical";
       const vertical = orientation !== "horizontal";
       let next: number | null = null;
       if (
         (horizontal && event.key === forward) ||
-        (vertical && event.key === "ArrowDown")
+        (vertical && event.key === down)
       ) {
         next = Math.min(count - 1, index + 1);
       } else if (
         (horizontal && event.key === backward) ||
-        (vertical && event.key === "ArrowUp")
+        (vertical && event.key === up)
       ) {
         next = Math.max(0, index - 1);
       } else if (event.key === "Home") {
@@ -81,7 +86,7 @@ export function useRovingFocus(
       focusAt(next);
       if (next !== index) move.current?.(next, event);
     },
-    [count, orientation, rtl, focusAt],
+    [count, orientation, rtl, upward, focusAt],
   );
 
   /** Props for option `index`. */

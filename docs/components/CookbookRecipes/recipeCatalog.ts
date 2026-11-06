@@ -3,6 +3,12 @@ import { basePath } from "docs/lib/router";
 /** A IIIF Cookbook recipe, as the curated Collection lists it (`docs/mocks/cookbook/`). */
 export interface CatalogRecipe {
   slug: string;
+  /**
+   * Its folder's name on iiif.io, or, where the recipe shows several resources, the
+   * file's path under it ("0010-book-2-viewing-direction/manifest-ttb.json"): the
+   * member's `summary`. Unique in the list, so it keys each choice.
+   */
+  about: string;
   title: string;
   /** Its resource's address, the member's `id`. */
   resource: string;
@@ -25,8 +31,10 @@ const recipeOf = (member: Record<string, any>): CatalogRecipe | undefined => {
   const title = first(member.label?.en ?? member.label?.none);
   if (!slug || typeof title !== "string" || typeof member.id !== "string")
     return undefined;
+  const about = first(member.summary?.none);
   return {
     slug,
+    about: typeof about === "string" ? about : slug,
     title,
     resource: member.id,
     type: member.type === "Collection" ? "Collection" : "Manifest",

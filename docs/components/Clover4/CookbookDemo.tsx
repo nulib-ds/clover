@@ -7,7 +7,7 @@ import { StatusIcon } from "docs/components/CookbookRecipes/CookbookCoverageTabl
 import ViewerDemo from "docs/components/CookbookRecipes/ViewerDemo";
 import {
   recipeBase,
-  resourceFor,
+  resourcesFor,
   statusFor as status3x,
   type Status,
 } from "docs/components/CookbookRecipes/cookbookCatalog";
@@ -105,7 +105,9 @@ const ProgressTable = React.memo(function ProgressTable({
             <tbody>
               {section.recipes.map((recipe) => {
                 const { status, note } = progressFor(recipe.slug);
-                const resource = resourceFor(recipe.slug);
+                // One View for each resource the recipe's page shows (0010 has two).
+                const resources = resourcesFor(recipe.slug);
+                const folder = `${recipeBase}${recipe.slug}/`;
                 return (
                   <tr key={recipe.slug} data-status={status}>
                     <td>
@@ -121,17 +123,37 @@ const ProgressTable = React.memo(function ProgressTable({
                     <td className={styles.note}>{note}</td>
                     <td>
                       <div className={table.actions}>
-                        <button
-                          type="button"
-                          className={table.view}
-                          aria-label={`View ${recipe.title}`}
-                          disabled={!resource}
-                          onClick={() => resource && onView(resource)}
-                          onPointerEnter={onPreload}
-                          onFocus={onPreload}
-                        >
-                          View
-                        </button>
+                        {resources.length > 1 ? (
+                          resources.map((resource) => {
+                            const file = resource.slice(folder.length);
+                            return (
+                              <button
+                                key={resource}
+                                type="button"
+                                className={table.view}
+                                // Its visible words first (WCAG 2.5.3).
+                                aria-label={`View ${file}, ${recipe.title}`}
+                                onClick={() => onView(resource)}
+                                onPointerEnter={onPreload}
+                                onFocus={onPreload}
+                              >
+                                View {file}
+                              </button>
+                            );
+                          })
+                        ) : (
+                          <button
+                            type="button"
+                            className={table.view}
+                            aria-label={`View ${recipe.title}`}
+                            disabled={!resources.length}
+                            onClick={() => resources[0] && onView(resources[0])}
+                            onPointerEnter={onPreload}
+                            onFocus={onPreload}
+                          >
+                            View
+                          </button>
+                        )}
                         <a
                           className={table.view}
                           href={`${recipeBase}${recipe.slug}/`}

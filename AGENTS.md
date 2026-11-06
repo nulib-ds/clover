@@ -1477,7 +1477,10 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   Collection, only those on its viewer matrix (`https://iiif.io/api/cookbook/recipe/matrix/`,
   which `npm run build:cookbook` reads; Mat, 2026-10-28), each a member by the resource the Cookbook publishes for it, its title,
   its folder's name on iiif.io as its summary ("0047-homepage", `none`; Mat,
-  2026-10-25), its thumbnail and its page on iiif.io (its homepage),
+  2026-10-25), its thumbnail and its page on iiif.io (its homepage); a recipe whose page
+  shows several resources a member for each, its summary the file's path under the folder
+  (`resourcesFor` in `cookbookCatalog.ts`: 0010's top-to-bottom Manifest beside its
+  right-to-left one; Mat, 2026-11-06),
   curated in its generator (its words, and `LEFT_OUT`: a resource another recipe owns is
   listed once, so 0466 and 0599 are out), from `recipes.json`, which
   `npm run build:cookbook` writes (static; the homepage's field and Natural story read

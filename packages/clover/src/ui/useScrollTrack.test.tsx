@@ -12,8 +12,16 @@ function sized(element: HTMLElement, scrollLeft = 0) {
   element.scrollLeft = scrollLeft;
 }
 
-function Track({ onPress, axis }: { onPress?: () => void; axis?: "x" | "y" }) {
-  const track = useScrollTrack({ itemCount: 3, axis });
+function Track({
+  onPress,
+  axis,
+  upward,
+}: {
+  onPress?: () => void;
+  axis?: "x" | "y";
+  upward?: boolean;
+}) {
+  const track = useScrollTrack({ itemCount: 3, axis, upward });
   return (
     <>
       <div data-testid="viewport" ref={track.ref}>
@@ -29,6 +37,7 @@ function Track({ onPress, axis }: { onPress?: () => void; axis?: "x" | "y" }) {
         {String(track.canScrollPrev)}/{String(track.canScrollNext)}
       </output>
       <button onClick={track.measure}>measure</button>
+      <button onClick={track.scrollNext}>forward</button>
     </>
   );
 }
@@ -62,6 +71,26 @@ describe("useScrollTrack", () => {
       scrollHeight: { configurable: true, value: 1000 },
     });
     viewport.scrollTop = 700;
+    fireEvent.click(screen.getByText("measure"));
+    expect(screen.getByTestId("state")).toHaveTextContent("true/false");
+  });
+
+  // A column read from its foot up (a Manifest's `bottom-to-top`) starts at the bottom.
+  it("runs an upward column from its foot: back is down, forward up", () => {
+    render(<Track axis="y" upward />);
+    const viewport = screen.getByTestId("viewport");
+    Object.defineProperties(viewport, {
+      clientHeight: { configurable: true, value: 300 },
+      scrollHeight: { configurable: true, value: 1000 },
+    });
+    const scrollBy = vi.fn();
+    viewport.scrollBy = scrollBy;
+    viewport.scrollTop = 700;
+    fireEvent.click(screen.getByText("measure"));
+    expect(screen.getByTestId("state")).toHaveTextContent("false/true");
+    fireEvent.click(screen.getByText("forward"));
+    expect(scrollBy).toHaveBeenCalledWith({ top: -270, behavior: "smooth" });
+    viewport.scrollTop = 0;
     fireEvent.click(screen.getByText("measure"));
     expect(screen.getByTestId("state")).toHaveTextContent("true/false");
   });

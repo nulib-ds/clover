@@ -268,6 +268,7 @@ function MemberItems({
       selected={items.findIndex((item) => item.id === manifestId)}
       navigation="id"
       rtl={direction === "right-to-left"}
+      upward={direction === "bottom-to-top"}
       language={language}
       request={clover.request}
       showSummary
@@ -313,6 +314,7 @@ function ViewItems({
       selected={position}
       navigation="id"
       rtl={direction === "right-to-left"}
+      upward={direction === "bottom-to-top"}
       language={language}
       request={clover.request}
       onActivate={(item, event) => {
@@ -369,6 +371,8 @@ interface ItemsViewProps extends Omit<ItemsProps, "navigation" | "items"> {
   selected: number;
   navigation: "id" | "homepage";
   rtl?: boolean;
+  /** Bottom-to-top: a vertical slider runs up from its foot. */
+  upward?: boolean;
   showSummary?: boolean;
   heading?: {
     label?: LanguageMapLike;
@@ -392,6 +396,7 @@ export function ItemsView({
   selected,
   navigation,
   rtl = false,
+  upward: bottomToTop = false,
   layout = "slider",
   orientation = "horizontal",
   thumbnailSize = 200,
@@ -426,6 +431,8 @@ export function ItemsView({
 
   const slider = layout === "slider";
   const vertical = slider && orientation === "vertical";
+  // A column read from its foot up: item 1 at the bottom, Up stepping forward.
+  const upward = vertical && bottomToTop;
   const listbox = navigation === "id";
   /*
    * Masonry is a grid whose items span the rows their heights need (`masonry.ts`): its
@@ -450,6 +457,7 @@ export function ItemsView({
     align: listbox ? "center" : "start",
     itemCount: items.length,
     axis: vertical ? "y" : "x",
+    upward,
   });
   const held = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(held.current), []);
@@ -462,6 +470,7 @@ export function ItemsView({
           ? "vertical"
           : "both",
     rtl,
+    upward,
     onActivate: (index, event) => onActivate(items[index], event),
     onMove: followFocus
       ? (index, event) => {
@@ -580,7 +589,11 @@ export function ItemsView({
   const trackStyle: React.CSSProperties | undefined = slider
     ? {
         display: "flex",
-        flexDirection: vertical ? "column" : undefined,
+        flexDirection: upward
+          ? "column-reverse"
+          : vertical
+            ? "column"
+            : undefined,
         margin: 0,
         padding: 0,
         listStyle: "none",
@@ -643,7 +656,7 @@ export function ItemsView({
           <path
             d={
               vertical
-                ? step === "next"
+                ? (step === "next") !== upward
                   ? "M3 6l5 5 5-5"
                   : "M3 10l5-5 5 5"
                 : (step === "next") !== rtl
@@ -670,6 +683,7 @@ export function ItemsView({
         className={join("clover-items", className)}
         data-layout={layout}
         data-orientation={vertical ? "vertical" : undefined}
+        data-upward={upward || undefined}
         data-navigation={navigation}
         {...highContrastProps(contrast)}
         {...rest}

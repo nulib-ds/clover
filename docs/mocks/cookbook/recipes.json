@@ -1,5 +1,5 @@
 {
-  "checked": "2026-10-29",
+  "checked": "2026-11-06",
   "recipes": [
     {
       "slug": "0001-mvm-image",
@@ -112,8 +112,18 @@
       "title": "Viewing direction and its effect on navigation",
       "section": "Building a manifest in stages, adding more complexity at each stage",
       "resource": "https://iiif.io/api/cookbook/recipe/0010-book-2-viewing-direction/manifest-rtl.json",
+      "file": "manifest-rtl.json",
       "type": "Manifest",
       "thumbnail": "https://iiif.io/api/image/3.0/example/reference/4f92cceb12dd53b52433425ce44308c7-ucla_bib1987273_no001_rs_001/full/96,132/0/default.jpg"
+    },
+    {
+      "slug": "0010-book-2-viewing-direction",
+      "title": "Viewing direction and its effect on navigation",
+      "section": "Building a manifest in stages, adding more complexity at each stage",
+      "resource": "https://iiif.io/api/cookbook/recipe/0010-book-2-viewing-direction/manifest-ttb.json",
+      "file": "manifest-ttb.json",
+      "type": "Manifest",
+      "thumbnail": "https://iiif.io/api/image/3.0/example/reference/9ee11092dfd2782634f5e8e2c87c16d5-uclamss_1841_diary_07_02/full/96,134/0/default.jpg"
     },
     {
       "slug": "0283-missing-image",

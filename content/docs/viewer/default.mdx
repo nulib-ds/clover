@@ -51,8 +51,10 @@ import { TemplateHead } from "docs/components/Clover4/PartHead";
 The Viewer draws Default when it is given no `template`. Over the Body are the title and
 the provider's logo; opened on a Collection, the Collection's title is under the
 Manifest's, with a pager among its members. Under the Body, the thumbnails, headed by the
-titles of the current view and where it is among them. A Manifest of one view
-has no thumbnails unless `singleItem` asks for them.
+titles of the current view and where it is among them. A Manifest read top to bottom or
+bottom to top (`viewingDirection`) has its thumbnails in a column at the Body's start
+instead, as tall as the Body, with the titles and the position under the Body. A Manifest
+of one view has no thumbnails unless `singleItem` asks for them.
 
 The information panel is beside all three, the layout's full height, and a bar between
 shares the width: drag it, or use the arrow keys on it. Where there is no room for both,

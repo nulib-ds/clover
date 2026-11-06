@@ -11,6 +11,26 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **A Manifest read down the page in the Default template.** Where its `viewingDirection`
+  is `top-to-bottom` or `bottom-to-top` (Cookbook 0010's diary), the thumbnails stand in a
+  column at the Body's start, as tall as the Body, and the view's titles and position go
+  under the Body. The column comes first in focus order, as it is on screen. Body and
+  strip share a box, `.clover-template-default-views`, laid out as a grid only then.
+- **A vertical slider read bottom to top.** Items' `orientation="vertical"` over a
+  `bottom-to-top` Manifest or Collection runs up from its foot: its first item at the
+  bottom, Next at the top, and the up arrow key stepping forward (`data-upward`).
+
+### Changed
+
+- **A vertical slider's arrows have room of their own.** Each sits at the column's top or
+  foot, and the column scrolls between them, `m` clear of each, so an arrow never lies
+  over a picture or its label.
+- **Budgets.** The column's styles add about 0.18 kB gzip to `styles.css`, which every
+  template loads, and Items' upward column 0.1 kB: the Default template to first view is
+  98.3 kB, from 98.0 kB. Fourteen budgets crossed are raised to the next 50 bytes.
+
 ## [4.5.7] - 2026-11-06
 
 ### Fixed

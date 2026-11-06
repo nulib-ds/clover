@@ -11,6 +11,7 @@ import React from "react";
 import audioJson from "../../fixtures/iiif-cookbook/0002-mvm-audio.json";
 import bookJson from "../../fixtures/iiif-cookbook/0009-book-1.json";
 import rtlJson from "../../fixtures/iiif-cookbook/0010-book-2-viewing-direction-rtl.json";
+import ttbJson from "../../fixtures/iiif-cookbook/0010-book-2-viewing-direction-ttb.json";
 import romeJson from "../../fixtures/iiif-cookbook/0318-navPlace-navDate-collection.json";
 import { initCloverI18n } from "../../i18n";
 import * as Clover from "../../index";
@@ -303,6 +304,48 @@ describe("Items in a Root", () => {
     fireEvent.keyDown(options[0], { key: "ArrowDown" });
     expect(options[1]).toHaveFocus();
     expect(options[1]).toHaveAttribute("aria-selected", "true");
+  });
+
+  // The Cookbook has no book read bottom to top: 0010's top-to-bottom diary, turned.
+  it("runs a bottom-to-top Manifest's column up from its foot, Up stepping forward", async () => {
+    const upward = {
+      ...ttbJson,
+      id: `${ttbJson.id}#bottom-to-top`,
+      viewingDirection: "bottom-to-top",
+    };
+    const { container } = render(
+      <Clover.Root iiifContent={upward}>
+        <Clover.Items orientation="vertical" />
+      </Clover.Root>,
+    );
+    const options = await screen.findAllByRole("option");
+    expect(container.querySelector(".clover-items")).toHaveAttribute(
+      "data-upward",
+    );
+    expect(screen.getByRole("listbox")).toHaveStyle({
+      flexDirection: "column-reverse",
+    });
+    options[0].focus();
+    fireEvent.keyDown(options[0], { key: "ArrowUp" });
+    expect(options[1]).toHaveFocus();
+    expect(options[1]).toHaveAttribute("aria-selected", "true");
+    fireEvent.keyDown(options[1], { key: "ArrowDown" });
+    expect(options[0]).toHaveFocus();
+  });
+
+  it("runs a top-to-bottom Manifest's column down, as any column", async () => {
+    const { container } = render(
+      <Clover.Root iiifContent={ttbJson}>
+        <Clover.Items orientation="vertical" />
+      </Clover.Root>,
+    );
+    await screen.findAllByRole("option");
+    expect(container.querySelector(".clover-items")).not.toHaveAttribute(
+      "data-upward",
+    );
+    expect(screen.getByRole("listbox")).toHaveStyle({
+      flexDirection: "column",
+    });
   });
 
   it("takes orientation for a slider only", async () => {
