@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.5.3] - 2026-11-05
+
 ### Changed
 
 - **Captions start in the visitor's language.** A recording with caption files in
