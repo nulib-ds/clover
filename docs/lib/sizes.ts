@@ -65,6 +65,12 @@ export const templateElementLoads: Record<keyof typeof templateLoads, string> =
     Gallery: kB(sizes.galleryElementGzip),
   };
 
+/**
+ * Clover's translator, with the English it bundles, in kB, for the i18n page's head (Mat,
+ * 2026-11-05): the same module in both flavors, React's build measured.
+ */
+export const translatorLoads = kB(sizes.translatorGzip);
+
 /** The parts measured alone, with no `Root` around them. */
 export const aloneParts = new Set(Object.keys(sizes.partsAlone));
 

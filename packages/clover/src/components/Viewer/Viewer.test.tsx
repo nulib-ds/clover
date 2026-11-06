@@ -87,6 +87,50 @@ describe("Viewer", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("reads the resource in its language, title and About alike, marked with it", async () => {
+    // Shaped as nulib-ds/clover#321's manifest: every value in four languages.
+    const map = (zhHant: string, zhCN: string, en: string, ja: string) => ({
+      "zh-Hant": [zhHant],
+      "zh-CN": [zhCN],
+      en: [en],
+      ja: [ja],
+    });
+    const manifest = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/manifest/multilingual",
+      type: "Manifest",
+      label: map("感懷帖", "感怀帖", "Reminiscence Post", "感懐帖"),
+      summary: map("書信", "书信", "A letter", "書簡"),
+      metadata: [
+        {
+          label: map("朝代", "朝代", "Dynasty", "王朝"),
+          value: map("東晉", "东晋", "Eastern Jin", "東晋"),
+        },
+      ],
+      requiredStatement: {
+        label: map("出處", "出处", "Attribution", "帰属"),
+        value: map("館藏", "馆藏", "The library", "所蔵"),
+      },
+      items: [
+        {
+          id: "https://example.org/canvas/multilingual/1",
+          type: "Canvas",
+          label: { none: ["1"] },
+          width: 100,
+          height: 100,
+          items: [],
+        },
+      ],
+    };
+    render(<Viewer iiifContent={manifest} language="ja" />);
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "感懐帖" }),
+    ).toHaveAttribute("lang", "ja");
+    for (const text of ["書簡", "王朝", "東晋", "帰属", "所蔵"])
+      expect(await screen.findByText(text)).toHaveAttribute("lang", "ja");
+    expect(screen.queryByText("Reminiscence Post")).toBeNull();
+  });
+
   it("types its props by its template", () => {
     // Checked by `tsc`, not at run time: each line must be a type error.
     const types = () => (

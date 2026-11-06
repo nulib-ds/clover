@@ -115,3 +115,202 @@
     color: HighlightText;
   }
 }
+
+/*
+ * Every choice of languages (`ui/LanguageChoice`, the Transcript's caption files): a
+ * globe, then the codes, or, past five, folded (`ui/LanguageMenu`), the globe and the code
+ * in use on a button drawn as About's Download button is, but a pill wide enough for both
+ * ("JA"), `l` tall (past 24px, WCAG 2.5.8): muted at rest; under the pointer, focused or
+ * open, filled with the accent, its glyph and code white, and focused, the accent's ring.
+ */
+/* Not the codes' small size, which its button sets for itself: its menu takes the page's. */
+.clover-languages-folded {
+  font-size: inherit;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--clover-space-3xs);
+}
+
+/*
+ * The globe before a row of codes, inside it, which says what they are: quieter than the
+ * codes (Mat, 2026-11-05: "mute it back"), their muted text at three quarters on the
+ * panel, still 3:1 beside it (WCAG 1.4.11), at the Download glyph's size.
+ */
+.clover-languages-glyph {
+  display: flex;
+  align-items: center;
+  /* A golden step clear of the first code, with the row's own gap (Mat, 2026-11-05). */
+  margin-inline-end: var(--clover-space-3xs);
+  color: color-mix(
+    in srgb,
+    var(--clover-color-primary-muted, #26292b) 75%,
+    var(--clover-color-secondary, #fff)
+  );
+}
+
+.clover-languages-glyph > svg {
+  width: var(--clover-text-s);
+  height: var(--clover-text-s);
+}
+
+button.clover-languages-button {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--clover-space-3xs);
+  box-sizing: border-box;
+  min-width: max(24px, var(--clover-space-l));
+  height: max(24px, var(--clover-space-l));
+  padding: 0 var(--clover-space-xs);
+  border: 0;
+  border-radius: var(--clover-radius-pill, 2rem);
+  background: none;
+  color: var(--clover-color-primary-muted, #26292b);
+  font: inherit;
+  font-size: var(--clover-text-xs);
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+button.clover-languages-button > svg:first-child {
+  width: var(--clover-text-s);
+  height: var(--clover-text-s);
+}
+
+button.clover-languages-button:is(
+    :hover,
+    :focus-visible,
+    [aria-expanded="true"]
+  ) {
+  background-color: var(--clover-color-accent, #0065c3);
+  color: var(--clover-color-control-glyph, #fff);
+}
+
+:where([data-high-contrast])
+  button.clover-languages-button:is(
+    :hover,
+    :focus-visible,
+    [aria-expanded="true"]
+  ) {
+  background-color: var(--clover-accent-fill);
+}
+
+:where([data-high-contrast])
+  button.clover-languages-button:hover:not(
+    :focus-visible,
+    [aria-expanded="true"]
+  ) {
+  outline: var(--clover-accent-ring-hover);
+  outline-offset: 1px;
+}
+
+:where([data-high-contrast])
+  button.clover-languages-button[aria-expanded="true"]:not(:focus-visible) {
+  outline: var(--clover-accent-ring);
+  outline-offset: 1px;
+}
+
+button.clover-languages-button:focus-visible {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  button.clover-languages-button:is(
+      :hover,
+      :focus-visible,
+      [aria-expanded="true"]
+    ) {
+    background-color: Highlight;
+    color: HighlightText;
+  }
+}
+
+/* The caret, smaller than a section's chevron beside it, in the button's own color. */
+button.clover-languages-button > .clover-languages-caret {
+  width: 0.875em;
+  height: 0.875em;
+  margin-inline-start: var(--clover-space-3xs);
+  color: inherit;
+}
+
+/*
+ * Its languages a step apart, and its legend a step over them (Mat, 2026-11-05: "more gap
+ * between options", "and between lang label and options"). A legend sits outside its
+ * fieldset's flow, so it keeps its own margin.
+ */
+.clover-languages-menu fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clover-space-xs);
+}
+
+.clover-languages-menu legend {
+  margin-block-end: var(--clover-space-xs);
+}
+
+/*
+ * Its languages drawn as the Annotations list marks the Canvases in view (Mat,
+ * 2026-11-05: "style closer to annotations selections. not radio. but it should be
+ * obvious which one is active"): each in the muted text, the one in use in the text's
+ * color and heavier, with the accent's 3px edge at its start, so by more than color (WCAG
+ * 1.4.1). The radio stays, out of sight, for the keyboard and assistive technology; the
+ * row takes the light fill under the pointer and the focus ring for it.
+ */
+.clover-languages-menu .clover-languages-option {
+  position: relative;
+  padding-block: var(--clover-space-xs);
+  padding-inline: calc(var(--clover-space-s) + 3px) var(--clover-space-s);
+  border-radius: 0;
+  color: var(--clover-color-primary-muted, #26292b);
+}
+
+.clover-languages-menu .clover-languages-option > input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.clover-languages-menu .clover-languages-option:hover {
+  background: var(--clover-color-secondary-muted, #e6e8eb);
+}
+
+.clover-languages-menu .clover-languages-option:has(> input:checked) {
+  padding-inline-start: var(--clover-space-s);
+  border-inline-start: 3px solid var(--clover-color-accent, #0065c3);
+  color: var(--clover-color-primary, #1a1d1e);
+  font-weight: 600;
+}
+
+.clover-languages-menu .clover-languages-option:has(> input:focus-visible) {
+  outline: 2px solid var(--clover-color-accent, #0065c3);
+  outline-offset: -2px;
+}
+
+@media (forced-colors: active) {
+  .clover-languages-menu .clover-languages-option:has(> input:checked) {
+    border-inline-start-color: Highlight;
+  }
+}
+
+/* Its tip says what its open menu's legend says: hidden while the menu is open. */
+button.clover-languages-button[aria-expanded="true"] > .clover-tip {
+  visibility: hidden;
+}
+
+/* Its menu, under it at its end, as About's Download menu is, at the smaller size. */
+.clover-languages-menu {
+  top: calc(100% + var(--clover-space-xs));
+  inset-inline-end: 0;
+  max-width: min(20rem, 80vw);
+  /*
+   * At the page's size, its legend small and muted (`ControlMenu.css`), as the Canvas's
+   * annotations menu is (Mat, 2026-11-05: "font sizes should match how annotations
+   * dropdown works in canvas").
+   */
+  font-size: inherit;
+  text-align: start;
+}

@@ -25,6 +25,7 @@ export const viewer: ElementSpec = {
     panel: { prop: "panel", type: "boolean" },
     download: { prop: "download", type: "boolean" },
     languages: { prop: "languages", type: "boolean" },
+    "interface-languages": { prop: "interfaceLanguages", type: "boolean" },
     // The templates' own (`templates/`): each one's, where it has it.
     "panel-open": { prop: "defaultPanelOpen", type: "boolean" },
     "panel-layout": { prop: "panelLayout", type: ["accordion", "tabs"] },
@@ -131,6 +132,11 @@ export const viewerDocs: ElementDocs = {
         'Default, Document and Gallery: where what the resource says of itself comes in several languages, the panel\'s About heading offers them, and the whole Viewer reads in the one chosen. "false" leaves the choice out.',
       default: "true",
     },
+    "interface-languages": {
+      description:
+        "Default, Document and Gallery: the panel's language toggle, beside its About heading, also offers Clover's interface languages (its control labels, section titles and announcements) that the resource has none of: the visitor's and the site's, where they differ. \"false\" leaves them out.",
+      default: "true",
+    },
     "panel-open": {
       description:
         "Default, Document and Gallery: whether the information panel starts open beside the page (the Gallery's, beside its lightbox's view). Default's and the Gallery's do, by default; Document's starts shut. Where it would slide over the page (a phone), it starts shut.",
@@ -147,7 +153,7 @@ export const viewerDocs: ElementDocs = {
     },
     "panel-labels": {
       description:
-        "Default, Document and Gallery: what a panel section's tab or heading says, in place of Clover's own word for it, as JSON by the section's value: {\"annotations\": \"Chapters\"}, or a word by language tag to say it in several (clover-panel's labels).",
+        "Default, Document and Gallery: what a panel section's tab or heading says, in place of its word in Clover's interface language, as JSON by the section's value: {\"annotations\": \"Chapters\"}, or a word by language tag to say it in several (clover-panel's labels).",
     },
     "sidebar-open": {
       description:

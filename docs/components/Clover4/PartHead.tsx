@@ -7,6 +7,7 @@ import {
   partLoads,
   templateElementLoads,
   templateLoads,
+  translatorLoads,
 } from "docs/lib/sizes";
 
 /**
@@ -123,6 +124,37 @@ export function TemplateHead({
               caption={`loaded by a page with a <clover-viewer> in ${template} to first view, styles included, gzipped`}
             />
           }
+        />
+      </span>
+    </p>
+  );
+}
+
+/**
+ * The i18n page's head, as a component's (`PartHead`; Mat, 2026-11-05: "add a little tag
+ * in top right for size"): `initCloverI18n()`, the call that configures it in either
+ * flavor, and on the badge what Clover's translator weighs with the English it bundles
+ * (`translatorGzip`). Every other language is a file of its own, loaded the first time
+ * Clover is to speak it.
+ *
+ * ```mdx
+ * <div className="docs-title-row">
+ *
+ * # Internationalization (i18n)
+ *
+ * <TranslatorHead />
+ *
+ * </div>
+ * ```
+ */
+export function TranslatorHead() {
+  return (
+    <p className="docs-part-head">
+      <span className="docs-part-head-name">initCloverI18n()</span>
+      <span className="docs-part-badge">
+        <Figure
+          value={translatorLoads}
+          caption="Clover's translator, with its English, gzipped"
         />
       </span>
     </p>

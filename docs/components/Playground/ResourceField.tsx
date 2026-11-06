@@ -134,6 +134,24 @@ export interface ResourceFieldProps {
    * does (`RecipeSelect.tsx`), a recipe opened as the reader's own is.
    */
   of?: "resources" | "recipes";
+  /**
+   * Resources of the caller's own, listed in place of the playground's, each by its key,
+   * title, a few words and thumbnail (the i18n page's, `LanguagesDemo.tsx`; Mat,
+   * 2026-11-05: "it should appear like the homepage select").
+   */
+  items?: {
+    key: string;
+    title: string;
+    description: string;
+    thumbnail?: string;
+  }[];
+  /**
+   * Whether the Cookbook's recipes are tucked away at the list's end. Default `true`;
+   * `false` lists the items alone, every one a standard option (the i18n page's; Mat,
+   * 2026-11-05: "don't show all cookbook recipes or have them broken out in their own
+   * section").
+   */
+  cookbook?: boolean;
   /** Where Open sends what it opens: to the Viewer beside it, or up top, its caret up. */
   toward?: "right" | "up";
   /**
@@ -171,6 +189,8 @@ export default function ResourceField({
   of = "resources",
   toward = "right",
   staged,
+  items = resources,
+  cookbook: withCookbook = true,
 }: ResourceFieldProps) {
   const onlyRecipes = of === "recipes";
   const id = useId();
@@ -264,7 +284,7 @@ export default function ResourceField({
             selected: current === OWN && own === content && !recipeShown,
           };
         }),
-        ...resources.map((r) => ({
+        ...items.map((r) => ({
           key: r.key,
           label: { text: r.title },
           about: r.description,
@@ -339,11 +359,13 @@ export default function ResourceField({
    */
   const unfiltered = onlyRecipes
     ? recipeChoices
-    : [...choices, cookbook, ...(cookbookShown ? recipeChoices : [])];
+    : withCookbook
+      ? [...choices, cookbook, ...(cookbookShown ? recipeChoices : [])]
+      : choices;
   const options = query
     ? [
         ...resourcesOnly.filter(matches),
-        ...(recipesShown ? [] : [cookbook].filter(matches)),
+        ...(recipesShown || !withCookbook ? [] : [cookbook].filter(matches)),
       ]
     : unfiltered;
   const listedRecipes = options.filter((o) => o.key.startsWith("recipe-"));

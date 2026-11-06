@@ -199,6 +199,32 @@ export function LiveCode({
 }
 
 /**
+ * Code an example writes for itself, as lines of runs (`Line`), in both flavors, the
+ * reader's shown, drawn as `LiveCode` draws its code, with no values to change: the i18n
+ * page's demo, whose code follows the languages checked and the resource open over it.
+ */
+export function LiveLines({ react, html }: { react: Line[]; html: Line[] }) {
+  return (
+    <>
+      {(["react", "html"] as const).map((flavor) => (
+        <div
+          key={flavor}
+          data-code-flavor={flavor === "react" ? "react" : "web-components"}
+        >
+          <Block
+            lines={flavor === "react" ? react : html}
+            flavor={flavor}
+            knobs={[]}
+            values={{}}
+            onChange={() => undefined}
+          />
+        </div>
+      ))}
+    </>
+  );
+}
+
+/**
  * The parts Body draws with, Canvas, Timeline and Scene, which a live example shows alone,
  * each loading what it draws (`iiifContent`).
  */

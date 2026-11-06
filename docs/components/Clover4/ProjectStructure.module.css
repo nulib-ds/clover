@@ -1,0 +1,108 @@
+/*
+ * The package's structure as a file tree (`ProjectStructure.tsx`): in a box as the docs'
+ * tables are (`.docs-table`), each name in the code's face, the lines that join a name to
+ * the one above it hairlines (`--gray-8`, the examples' switches' edge), and each note
+ * beside its name, the notes in one column, under the name where the box is too narrow.
+ */
+.tree {
+  /* How far each level steps in, and the names' column at the top level. */
+  --tree-indent: 1.618rem;
+  --tree-name: 14rem;
+  /* The room over a row, and its line's height, which place the joining lines. */
+  --tree-gap: 0.236rem;
+  --tree-line: 1.75rem;
+  border: 1px solid var(--gray-6);
+  border-radius: var(--radius-4);
+  box-shadow: var(--code-lift);
+  margin-top: 1.25em;
+  padding: 0.618rem 1rem;
+}
+
+.root,
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  margin: 0;
+}
+
+.row {
+  align-items: baseline;
+  column-gap: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  line-height: var(--tree-line);
+  padding-top: var(--tree-gap);
+}
+
+.name {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  width: var(--tree-name);
+}
+
+/* The package itself. */
+.root > .item > .row > .name {
+  font-weight: 600;
+}
+
+/* Each level in by one step, its names' column narrower by as much, so the notes line up. */
+.list .name {
+  width: calc(var(--tree-name) - var(--tree-indent));
+}
+
+.list .list .name {
+  width: calc(var(--tree-name) - 2 * var(--tree-indent));
+}
+
+.note {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+
+/*
+ * The joining lines: from the name above down to each row's middle, then across to its
+ * name (└), and on down past the row where another follows (├ and │).
+ */
+.list {
+  margin-inline-start: 0.5rem;
+}
+
+.list > .item {
+  padding-inline-start: calc(var(--tree-indent) - 0.5rem);
+  position: relative;
+}
+
+.list > .item::before,
+.list > .item:not(:last-child)::after {
+  border-inline-start: 1px solid var(--gray-8);
+  content: "";
+  inset-inline-start: 0;
+  position: absolute;
+}
+
+.list > .item::before {
+  border-bottom: 1px solid var(--gray-8);
+  height: calc(var(--tree-gap) + var(--tree-line) / 2);
+  top: 0;
+  width: calc(var(--tree-indent) - 0.5rem - 0.382rem);
+}
+
+.list > .item:not(:last-child)::after {
+  bottom: 0;
+  top: calc(var(--tree-gap) + var(--tree-line) / 2);
+}
+
+/* Where colors are forced, the lines take the text's. */
+@media (forced-colors: active) {
+  .list > .item::before,
+  .list > .item:not(:last-child)::after {
+    border-color: CanvasText;
+  }
+}

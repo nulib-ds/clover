@@ -459,16 +459,20 @@ and content states. See [Helpers](/docs/composing/helpers).
 
 ## Languages
 
-Clover's strings, such as "About" and "Zoom in", follow your page's `<html lang>`, or the
-language you set with `initCloverI18n`. It ships English, Finnish, French, Norwegian
-(Bokmål and Nynorsk), Portuguese (European) and Spanish.
+Clover's interface language, its control labels ("Zoom in"), section titles ("About") and
+announcements ("Item 2 of 17"), is the visitor's where Clover has strings for it, else
+the languages you configure with `initCloverI18n` and your page's `<html lang>`. Where
+the visitor's differs from yours, About's heading offers both. It ships English,
+Finnish, French, Japanese, Norwegian (Bokmål and Nynorsk), Portuguese (European),
+Simplified and Traditional Chinese, and Spanish. [i18n](/docs/i18n) says how it chooses,
+and how it chooses the resource's languages.
 
 ```jsx
 import { initCloverI18n } from "@nulib/clover";
 
-// The page's language, and strings of your own for one Clover does not ship.
+// Your site's language, and strings of your own for one Clover does not ship.
 initCloverI18n({
-  lng: "de",
+  languages: ["de"],
   resources: { de: { clover: { informationPanelTabsAbout: "Über" } } },
 });
 ```
@@ -479,7 +483,7 @@ them:
 ```js
 import { initCloverI18n } from "@nulib/clover";
 
-await initCloverI18n({ lng: "fr" }).ready();
+await initCloverI18n({ languages: ["fr"] }).ready();
 ```
 
 In a component of your own, `useLangOf` gives each string its `lang`:
@@ -532,7 +536,3 @@ function CloseButton({ onClick }) {
   else root.addEventListener("clover-ready", start, { once: true });
 </script>
 ```
-
-## Styles
-
-Clover's stylesheets, custom properties and classes are on [Styling](/docs/styling).

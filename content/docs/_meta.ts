@@ -15,8 +15,17 @@ const meta: MetaRecord = {
   viewer: "Viewer",
   composing: "Composing",
   styling: "Styling",
+  // After Styling (Mat, 2026-11-05: "move this under styling"), under Technical before.
+  // "Internationalization" in the menu, "Internationalization (i18n)" its title (Mat,
+  // 2026-11-05); its address stays.
+  i18n: "Internationalization",
+  // Under i18n (Mat, 2026-11-05: "Move Content State under i18n"), under Technical before.
+  "content-state": "Content State",
   // Hidden for now (Mat, 2026-10-26): out of the menu and of search, at its address still.
   agents: { title: "Build with an agent", display: "hidden" },
+  // Hidden, and before the Components, which the menu's readers count to the next
+  // separator (`counts.ts`, `catalog.test.ts`).
+  mocks: { title: "Mocks", display: "hidden" },
   "--components": {
     type: "separator",
     title: "Components",
@@ -36,16 +45,8 @@ const meta: MetaRecord = {
   download: "Download",
   map: "Map",
   primitives: "Primitives",
-  // How Clover works, then how to work on it (Mat, 2026-11-01: "rename contribute to
-  // Technical. move the technical docs down there. make it first. call this one Overview").
-  "--technical": {
-    type: "separator",
-    title: "Technical",
-  },
-  technical: "Overview",
-  "content-state": "Content State",
-  i18n: "i18n",
-  mocks: { title: "Mocks", display: "hidden" },
+  // The Technical group and its Overview went on 2026-11-05 (Mat: "move this to Glossary,
+  // at the very bottom"): the package's structure ends the Glossary.
   "--earlier": {
     type: "separator",
     title: "Deprecated versions",

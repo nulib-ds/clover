@@ -298,14 +298,20 @@ describe("<clover-viewer>", () => {
     await waitFor(() => expect(next).toHaveAttribute("lang", "en"));
     expect(element.querySelector(".clover-root")).not.toHaveAttribute("lang");
 
-    Element.initCloverI18n({ lng: "fr" });
-    // Not even `lang=""`, which says the language is unknown: Preact leaves it.
-    const suivant = await within(element).findByRole("button", {
-      name: "Suivant",
-    });
-    await waitFor(() => expect(suivant).not.toHaveAttribute("lang"));
-    expect(element.querySelector('[lang=""]')).toBeNull();
-    document.documentElement.lang = "";
+    // Chosen, as a visitor would choose it: the visitor's own is English.
+    const i18n = await Element.initCloverI18n();
+    void i18n.chooseInterfaceLanguage("fr");
+    try {
+      // Not even `lang=""`, which says the language is unknown: Preact leaves it.
+      const suivant = await within(element).findByRole("button", {
+        name: "Suivant",
+      });
+      await waitFor(() => expect(suivant).not.toHaveAttribute("lang"));
+      expect(element.querySelector('[lang=""]')).toBeNull();
+    } finally {
+      await i18n.chooseInterfaceLanguage();
+      document.documentElement.lang = "";
+    }
   });
 
   it("tears down when removed, and not when moved", async () => {

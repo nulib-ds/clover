@@ -56,6 +56,11 @@
   padding: var(--clover-inset);
 }
 
+/* With nothing to say (an image service shown as its image), no room is kept for it. */
+.clover-template-default-header:empty {
+  display: none;
+}
+
 /*
  * On a small screen (under 31rem, a phone's), the header and the strip (below) are `m`
  * inside, so their edges stay in line with the Body's controls, which step there

@@ -154,6 +154,7 @@ describe("catalog", () => {
       "panel",
       "download",
       "languages",
+      "interfaceLanguages",
       "defaultPanelOpen",
       "panelLayout",
       "panelSections",

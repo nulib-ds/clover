@@ -70,7 +70,7 @@ const later = (content: React.ReactNode) => (
 export type { PanelSection };
 
 /**
- * What a page calls a section, in place of Clover's own word for it: its words, taken to
+ * What a page calls a section, in place of its word in Clover's interface language: its words, taken to
  * be in the page's language, or its words by language tag, one of which the tab carries
  * as its `lang` where it is not the page's (WCAG 3.1.2).
  */
@@ -150,6 +150,13 @@ export interface PanelProps
    */
   languages?: boolean;
   /**
+   * Whether About's language toggle also offers Clover's interface languages (its
+   * control labels, section titles and announcements) that the resource has none of: the
+   * visitor's and the site's, where they differ, one choice for the page. Default
+   * `true`; `false` leaves them out, and Clover speaks the visitor's.
+   */
+  interfaceLanguages?: boolean;
+  /**
    * Which of the default sections the panel may have, in Clover's own order: with
    * `["contents", "search"]` it has those two and no About. Each still shows only where
    * the resource has data for it, so a resource with none of them draws no panel at all.
@@ -157,7 +164,7 @@ export interface PanelProps
    */
   sections?: readonly PanelSection[];
   /**
-   * What a default section's tab or heading says, in place of Clover's own word for it:
+   * What a default section's tab or heading says, in place of its word in Clover's interface language:
    * `{ annotations: "Chapters" }`, or `{ annotations: { en: "Chapters", de: "Kapitel" } }`
    * to say it in several, read in the one Clover speaks and marked with its language
    * where that is not the page's (WCAG 3.1.2). A `Tab` of your own says it in `label`.
@@ -207,6 +214,7 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
     as: Tag = "aside",
     download = true,
     languages = true,
+    interfaceLanguages = true,
     sections,
     labels,
     className,
@@ -236,10 +244,10 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
     return lang ? <span {...languageProps(lang)}>{t(key)}</span> : t(key);
   };
   /*
-   * What a section's tab says: Clover's own word for it, or the page's (`labels`), read
+   * What a section's tab says: its word in Clover's interface language, or the page's (`labels`), read
    * in the language Clover speaks where the page gives it in several (IIIF's rule, as
    * every language map is read) and marked with that language where it is not the page's,
-   * as Clover's own strings are (WCAG 3.1.2). A label in one language is the page's own
+   * as Clover's interface strings are (WCAG 3.1.2). A label in one language is the page's own
    * words on its own page, so it is marked with nothing.
    */
   const sectionLabel = (section: PanelSection, key: string) => {
@@ -271,13 +279,17 @@ export const Panel = forwardRef<HTMLElement, PanelProps>(function Panel(
   // headings.
   const inner = layout === "accordion" ? headingLevel + 1 : headingLevel;
   /*
-   * Beside About's heading, shown whichever section is open: its Download button and the
-   * languages to read the resource in, a choice that is the whole Root's
-   * (`AboutActions`).
+   * Beside About's heading, shown whichever section is open: its Download button, Clover's
+   * interface languages, the page's choice, and the languages to read the resource in, a
+   * choice that is the whole Root's (`AboutActions`).
    */
   const aboutActions =
-    languages || download ? (
-      <AboutActions languages={languages} download={download} />
+    languages || interfaceLanguages || download ? (
+      <AboutActions
+        languages={languages}
+        interfaceLanguages={interfaceLanguages}
+        download={download}
+      />
     ) : undefined;
   const tabs: SectionSpec[] = given.length
     ? given.map(({ props }) => ({

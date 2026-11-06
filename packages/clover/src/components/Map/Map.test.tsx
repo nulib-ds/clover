@@ -614,12 +614,11 @@ describe("Map", () => {
 
     // A new language renames MapLibre's own controls, title and all.
     act(() => {
-      initCloverI18n({
-        lng: "fr",
+      void initCloverI18n({
         resources: {
           fr: { clover: { mapLabel: "Carte", mapAttribution: "Crédits" } },
         },
-      });
+      }).chooseInterfaceLanguage("fr");
     });
     await waitFor(() => expect(region).toHaveAccessibleName("Carte"));
     const credits = container.querySelector(".maplibregl-ctrl-attrib-button")!;

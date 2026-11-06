@@ -92,7 +92,7 @@ const LAZY_MODULES = [
   // A floating drawer's drag, loaded as one first floats.
   "/templates/shared/dragToClose.ts",
   // Every language but English, the first time Clover is to speak it.
-  ...["es", "fi", "fr", "nb", "nn", "no", "pt"].map(
+  ...["es", "fi", "fr", "ja", "nb", "nn", "no", "pt", "zh-Hans", "zh-Hant"].map(
     (lng) => `/i18n/locales/${lng}.json`,
   ),
 ];

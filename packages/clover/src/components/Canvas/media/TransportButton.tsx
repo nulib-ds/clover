@@ -5,7 +5,7 @@ import { type Shortcut, Tip } from "../../../ui/Tip";
 import { languageProps } from "../../../i18n/direction";
 
 /**
- * One of a transport's buttons (a recording's, an animation's): named by Clover's words,
+ * One of a transport's buttons (a recording's, an animation's): named by Clover's interface words,
  * with their language, its key in `aria-keyshortcuts` and its Tip, its glyph inside.
  */
 export function TransportButton({
@@ -18,7 +18,7 @@ export function TransportButton({
   buttonRef,
   children,
 }: {
-  /** Its name, as one of Clover's strings. */
+  /** Its name, as one of Clover's interface strings. */
   words: string;
   /** `data-button`, which the stylesheet and a host read. */
   button?: string;

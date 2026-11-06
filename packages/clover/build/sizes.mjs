@@ -249,6 +249,12 @@ const BUNDLES = [
     { draws: FIRST_VIEW[part] },
   ]),
   ["Map, before MapLibre", "mapInitialGzip", "Map", "map/index.mjs"],
+  /*
+   * Clover's translator, with the English it bundles (`i18n/config.ts`), for the i18n
+   * page's head (Mat, 2026-11-05: "add a little tag in top right for size"). Every other
+   * language is a chunk of its own, loaded the first time Clover is to speak it.
+   */
+  ["Translator, with English", "translatorGzip", "initCloverI18n"],
   // What a Viewer loads when its Map tab is first shown: MapLibre, and its stylesheet.
   [
     "MapLibre, on a map",
