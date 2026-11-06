@@ -281,6 +281,96 @@ html:not(.dark)
 }
 
 /*
+ * The search's results (Mat, 2026-11-05: "remove the translucency … more black text"):
+ * a card as the docs' others are, solid on the page's ground, its edge a hairline (a
+ * border, so forced colors draw it) under `--card-lift`, its corners `--radius-4` and
+ * its rows' `--radius-2`. Each page's name is in bold, in sentence case as every
+ * heading is, over a hairline; a section's title bold too, its excerpt in the text's
+ * color, the words matched in bold on a tint of the accent. The rows are `s` apart,
+ * and the one the arrow keys or the pointer reach is ringed as Items rings an item (Mat,
+ * 2026-11-05: "style like an active item from items", "make the title/label accent"):
+ * 3px, 1px clear, with no fill, its title in the text accent. Under the pointer the ring
+ * is faint, the accent at half strength, as Items' hover is; reached by the arrow keys
+ * it is the accent whole, as half of it falls under 3:1 (WCAG 1.4.11).
+ */
+.nextra-search-results[class~="x:backdrop-blur-md"] {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background-color: var(--color-background);
+  border: 1px solid var(--gray-6);
+  border-radius: var(--radius-4);
+  box-shadow: var(--card-lift);
+  color: var(--nav-text);
+}
+
+.nextra-search-results [class~="x:uppercase"] {
+  border-color: var(--gray-6);
+  color: var(--nav-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.nextra-search-results a {
+  border-radius: var(--radius-2);
+  color: var(--nav-text);
+  outline: 3px solid transparent;
+  outline-offset: 1px;
+  transition: outline-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nextra-search-results a + a {
+  margin-top: var(--clover-space-s, 0.618rem);
+}
+
+.nextra-search-results a > [class~="x:font-semibold"] {
+  font-weight: var(--weight-bold);
+}
+
+.nextra-search-results a > [class~="x:text-gray-600"] {
+  color: var(--gray-12);
+}
+
+.nextra-search-results a mark {
+  background: color-mix(in oklab, var(--accent-9) 18%, transparent);
+  border-radius: var(--radius-2);
+  color: inherit;
+  font-weight: var(--weight-bold);
+}
+
+.nextra-search-results a[data-focus] {
+  background: none;
+  color: var(--nav-text);
+  outline-color: var(--clover-color-accent, var(--accent-9));
+}
+
+.nextra-search-results a[data-focus] > [class~="x:font-semibold"] {
+  color: var(--accent-11);
+}
+
+/* Under the pointer, the ring at half strength, as Items' hover is. */
+.nextra-search-results a[data-focus]:hover {
+  outline-color: color-mix(
+    in srgb,
+    var(--clover-color-accent, var(--accent-9)) 50%,
+    transparent
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nextra-search-results a {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .nextra-search-results a[data-focus] {
+    outline-color: Highlight;
+  }
+}
+
+/*
  * Nextra's tables scroll sideways, but the visually hidden "(opens in a new tab)" in an
  * external link is absolutely positioned, so it escaped the table and widened the page at
  * 320px. Positioning the table makes it the span's containing block, and its scroller

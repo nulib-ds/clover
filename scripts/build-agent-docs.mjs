@@ -196,10 +196,9 @@ const unescape = (text) =>
 /** A page as Markdown: its front matter (title, description, address, version), then its content. */
 function markdownOf(html, url) {
   const tree = fromHtml(html);
-  const main = find(
-    tree,
-    (node) => node.tagName === "main" && node.properties?.dataPagefindBody,
-  );
+  // A page has one `main`, Nextra's; a 3.x page's has no `data-pagefind-body`, being out
+  // of the site's search, but is written as Markdown all the same.
+  const main = find(tree, (node) => node.tagName === "main");
   if (!main) return null;
   clean(main);
   absolute(main, url);
