@@ -1,4 +1,4 @@
-import { type CloverRequest, cloverFetch } from "./request";
+import { type CloverRequest, cloverFetch, discardBody } from "./request";
 
 /** The name to save a file under: the last part of its address, else "download". */
 export function fileName(url: string): string {
@@ -27,7 +27,10 @@ export async function saveFile(
     const response = await cloverFetch(request, url, {
       referrerPolicy: "no-referrer",
     });
-    if (!response.ok) return false;
+    if (!response.ok) {
+      discardBody(response);
+      return false;
+    }
     const href = URL.createObjectURL(await response.blob());
     const link = document.createElement("a");
     link.href = href;

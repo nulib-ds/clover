@@ -1,6 +1,7 @@
 import {
   type CloverRequest,
   cloverFetch,
+  discardBody,
   requestKey,
 } from "../../core/request";
 
@@ -148,7 +149,10 @@ async function fetchBytes(
   const response = url.startsWith("data:")
     ? await fetch(url)
     : await cloverFetch(request, url);
-  if (!response.ok) throw new Error(`${url} answered ${response.status}`);
+  if (!response.ok) {
+    discardBody(response);
+    throw new Error(`${url} answered ${response.status}`);
+  }
   return response.arrayBuffer();
 }
 

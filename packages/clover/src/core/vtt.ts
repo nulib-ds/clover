@@ -1,4 +1,4 @@
-import { type CloverRequest, cloverFetch } from "./request";
+import { type CloverRequest, cloverFetch, discardBody } from "./request";
 
 /**
  * WebVTT, read by Clover: cues with their start, end and text. The Canvas's captions and
@@ -131,11 +131,11 @@ function fetchOnce(
   let file = cache.get(url);
   if (!file) {
     file = cloverFetch(request, url)
-      .then((response) =>
-        response.ok
-          ? read(response)
-          : Promise.reject(new Error(String(response.status))),
-      )
+      .then((response) => {
+        if (response.ok) return read(response);
+        discardBody(response);
+        return Promise.reject(new Error(String(response.status)));
+      })
       .catch((error) => {
         cache.delete(url);
         throw error;

@@ -11,6 +11,47 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **The Canvas sharpens sooner.** Three changes to how it asks an image server for
+  tiles:
+  - From a server that cuts any region at any size (Image API level 1 or 2), it asks
+    for tiles of at least 1024 px: several of the server's listed tiles in one request,
+    a whole number of them on the server's own grid, and its own tiles cut at 1024 px
+    where the server lists none (512 px before). A server answers a 1024 px tile in
+    about a 256 px tile's time, so a view of Northwestern's 256 px tiles is nine
+    requests where it was a hundred.
+  - Up to 16 requests at once, where it was 6. A server on HTTP/1.1 still gets six at a
+    time from the browser.
+  - While a view's sharp tiles load, the level two steps coarser comes first, under the
+    ones still missing, and a new page's tiles are asked for as soon as its `info.json`
+    is read, beside its thumbnail rather than after it.
+
+  On Northwestern's image server, uncached, a page looked finished in 1.1 s, from 7.5 s,
+  and the next page in 0.9 s, from 5.5 s. Nothing to change in your code. A zoomed view
+  may download up to half again as many bytes, for the tiles at its edges; a CDN that
+  holds a server's listed tiles is asked for other URLs; and a server that limits how
+  many requests one visitor makes at once will see up to 16. A level 0 server still gets
+  only its own tiles, and no tile passes a server's `maxWidth`, `maxHeight` or `maxArea`.
+
+- **Budgets.** The tile scheduling adds about 0.6 kB gzip wherever a Canvas draws, and
+  letting a refusal's body go (below) 30 to 60 bytes to every entry. The budgets they
+  crossed are raised to the next 50 bytes: Canvas initial JS to 43.1 kB from 42.45 kB,
+  Canvas to first view to 49.7 kB from 49.15 kB, Default and Document to first view to
+  99.0 kB and 94.95 kB from 98.35 kB and 94.3 kB, Timeline's, Scene's and the Gallery's
+  by 50 bytes each, and nine others by 600 to 650 bytes.
+- **Text and print on the Canvas are crisper.** Each tile is drawn from its full level
+  half a step more, where it had leaned toward the softer one beneath: a page's type at
+  home now looks as sharp as OpenSeadragon or Atlas draw it. Nothing to change.
+
+### Fixed
+
+- **A refused request no longer stays open.** When a server answers a tile, an
+  `info.json`, a Manifest, a caption file, a model or a download with an error (a
+  restricted image's tiles answer 403), Clover lets the answer's body go at once. Before,
+  the browser held each such request open until it was collected, and over HTTP/1.1 a
+  long error page could keep one of the six connections a page has to that server.
+
 ## [4.5.9] - 2026-11-06
 
 ### Fixed

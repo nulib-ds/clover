@@ -22,7 +22,11 @@
  * @see https://iiif.io/api/image/2.0/
  */
 
-import { type CloverRequest, cloverFetch } from "../../../core/request";
+import {
+  type CloverRequest,
+  cloverFetch,
+  discardBody,
+} from "../../../core/request";
 
 export type ImageApiVersion = 2 | 3;
 
@@ -291,6 +295,7 @@ export function fetchInfo(
   })
     .then(async (response) => {
       if (!response.ok) {
+        discardBody(response);
         throw new ImageServiceError(
           `info.json request failed with ${response.status}`,
           url,

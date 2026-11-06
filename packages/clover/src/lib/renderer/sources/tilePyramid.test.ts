@@ -5,6 +5,26 @@ import {
   LEVEL2_UNTILED_V2,
 } from "../../../fixtures/iiif-image/info";
 import { parseInfo } from "./imageService";
+
+/** Northwestern's image server's info.json, as it answers (2026-11-06). */
+const NORTHWESTERN = {
+  "@context": "http://iiif.io/api/image/3/context.json",
+  id: "https://iiif.dc.library.northwestern.edu/iiif/3/7ff31828-e562-4cbe-b517-74baace7745c",
+  type: "ImageService3",
+  protocol: "http://iiif.io/api/image",
+  profile: "level2",
+  width: 4756,
+  height: 4700,
+  tiles: [{ width: 256, height: 256, scaleFactors: [1, 2, 4, 8, 16, 32] }],
+  sizes: [
+    { width: 4756, height: 4700 },
+    { width: 2378, height: 2350 },
+    { width: 1189, height: 1175 },
+    { width: 594, height: 587 },
+    { width: 297, height: 293 },
+    { width: 148, height: 146 },
+  ],
+};
 import {
   chooseLevel,
   servicePyramid,
@@ -13,8 +33,8 @@ import {
 } from "./tilePyramid";
 
 describe("servicePyramid", () => {
-  it("builds the reference service's levels, coarse to fine, with a thumbnail", () => {
-    const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3));
+  it("builds the reference service's levels on its own grid, coarse to fine, with a thumbnail", () => {
+    const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3), 0);
     expect(pyramid.levels.map((l) => [l.scaleFactor, l.cols, l.rows])).toEqual([
       // Its own coarsest level is still 2×2 tiles, so a 512px whole image comes first.
       [4032 / 512, 1, 1],
@@ -25,7 +45,7 @@ describe("servicePyramid", () => {
   });
 
   it("cuts edge tiles to the image and sizes them by ceil(region / scale)", () => {
-    const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3));
+    const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3), 0);
     const finest = pyramid.levels.length - 1;
     const edge = pyramid.tile({ level: finest, col: 7, row: 5 });
     expect(edge.region).toEqual({ x: 3584, y: 2560, width: 448, height: 464 });
@@ -37,7 +57,7 @@ describe("servicePyramid", () => {
   });
 
   it("spells 2.0 tiles with w, and offers no native retry above level 0", () => {
-    const pyramid = servicePyramid(parseInfo(GOTTINGEN_V2_0));
+    const pyramid = servicePyramid(parseInfo(GOTTINGEN_V2_0), 0);
     const tile = pyramid.tile({ level: 1, col: 0, row: 0 });
     expect(tile.url).toMatch(/\/0,0,2048,2048\/512,\/0\/default\.jpg$/);
     expect(tile.fallbackUrl).toBeUndefined();
@@ -67,19 +87,75 @@ describe("servicePyramid", () => {
     expect(tile.fallbackUrl).toMatch(/\/native\.jpg$/);
   });
 
-  it("cuts its own 512px tiles for a level 2 service that lists none", () => {
+  it("cuts its own 1024 px tiles for a level 2 service that lists none", () => {
     const pyramid = servicePyramid(parseInfo(LEVEL2_UNTILED_V2));
-    expect(pyramid.levels.map((l) => l.scaleFactor)).toEqual([8, 4, 2, 1]);
+    expect(pyramid.levels.map((l) => l.scaleFactor)).toEqual([4, 2, 1]);
     expect(pyramid.levels[pyramid.levels.length - 1]).toMatchObject({
-      tileWidth: 512,
-      cols: 5,
-      rows: 3,
+      tileWidth: 1024,
+      cols: 3,
+      rows: 2,
     });
+  });
+
+  it("cuts its own tiles no larger than the service's maxWidth", () => {
+    const pyramid = servicePyramid(
+      parseInfo({
+        ...LEVEL2_UNTILED_V2,
+        profile: ["http://iiif.io/api/image/2/level2.json", { maxWidth: 800 }],
+      }),
+    );
+    expect(pyramid.levels[pyramid.levels.length - 1].tileWidth).toBe(512);
+  });
+
+  it("joins a service's 256 px tiles into 1024 px ones, on its own grid", () => {
+    // Northwestern's: level 2, 256 px tiles, every level a power of two.
+    const pyramid = servicePyramid(parseInfo(NORTHWESTERN));
+    const finest = pyramid.levels.length - 1;
+    expect(pyramid.levels[finest]).toMatchObject({
+      tileWidth: 1024,
+      cols: 5,
+      rows: 5,
+    });
+    const tile = pyramid.tile({ level: finest, col: 1, row: 0 });
+    expect(tile.region).toEqual({ x: 1024, y: 0, width: 1024, height: 1024 });
+    expect(tile.url).toBe(
+      `${NORTHWESTERN.id}/1024,0,1024,1024/1024,1024/0/default.jpg`,
+    );
+    // At half resolution a tile covers 2048 px of the image, at the same 1024 px.
+    const half = pyramid.tile({ level: finest - 1, col: 1, row: 1 });
+    expect(half.url).toBe(
+      `${NORTHWESTERN.id}/2048,2048,2048,2048/1024,1024/0/default.jpg`,
+    );
+    // A view of the whole page at 2× (1800 device px tall) wants scale factor 2: nine
+    // tiles, where 256 px ones would be a hundred.
+    const target = chooseLevel(pyramid, 4700 / 1800);
+    expect(pyramid.levels[target].scaleFactor).toBe(2);
+    expect(
+      tilesInRegion(pyramid, target, { x: 0, y: 0, width: 4756, height: 4700 }),
+    ).toHaveLength(9);
+  });
+
+  it("joins only as far as maxWidth and maxArea allow", () => {
+    const pyramid = servicePyramid(
+      parseInfo({ ...NORTHWESTERN, maxWidth: 600 }),
+    );
+    expect(pyramid.levels[pyramid.levels.length - 1].tileWidth).toBe(512);
+    const area = servicePyramid(
+      parseInfo({ ...NORTHWESTERN, maxArea: 600 * 600 }),
+    );
+    expect(area.levels[area.levels.length - 1].tileWidth).toBe(512);
+  });
+
+  it("keeps a level 0 service's own tiles, which may be the only ones it has", () => {
+    const pyramid = servicePyramid(
+      parseInfo({ ...NORTHWESTERN, profile: "level0" }),
+    );
+    expect(pyramid.levels[pyramid.levels.length - 1].tileWidth).toBe(256);
   });
 });
 
 describe("chooseLevel", () => {
-  const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3));
+  const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3), 0);
 
   it("picks the coarsest level with at least one level pixel per device pixel", () => {
     // 3 image pixels per device pixel: scale factor 2 is the coarsest that is ≥ 1:1.
@@ -96,7 +172,7 @@ describe("chooseLevel", () => {
 });
 
 describe("tilesInRegion", () => {
-  const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3));
+  const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3), 0);
   const finest = pyramid.levels.length - 1;
 
   it("returns only the tiles a region touches", () => {

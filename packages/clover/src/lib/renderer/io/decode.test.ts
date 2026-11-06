@@ -33,4 +33,16 @@ describe("loadImage", () => {
       headers: { Authorization: "Bearer t" },
     });
   });
+
+  it("lets a refused tile's body go, so the browser closes its request", async () => {
+    // A restricted image's tiles answer 403 (Northwestern's do, 2026-11-06).
+    const response = new Response("Forbidden", { status: 403 });
+    const cancel = vi.spyOn(response.body!, "cancel");
+    await expect(
+      loadImage("https://example.org/tile.jpg", {
+        request: { fetch: vi.fn(async () => response) },
+      }),
+    ).rejects.toMatchObject({ name: "ImageLoadError", status: 403 });
+    expect(cancel).toHaveBeenCalled();
+  });
 });

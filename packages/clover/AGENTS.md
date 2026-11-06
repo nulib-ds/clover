@@ -860,6 +860,12 @@ every rule below.
 
 ## Data and state
 
+- **Every request to a server goes through `cloverFetch`** (`core/request.ts`), with the
+  request's settings, and an answer that is an error has its body let go (`discardBody`)
+  before anything throws or returns: unread, the browser holds the request open until it
+  is collected, and over HTTP/1.1 a long error page keeps one of the six connections a
+  page has to that server (found 2026-11-06 on a restricted Northwestern work, whose
+  tiles all answer 403). A new fetch's error path does the same.
 - **One shape: Presentation 4.** `core/load.ts` fetches `iiifContent` once (with the
   request settings) and `core/presentation.ts` upgrades it through `@iiif/parser`, as
   its `upgradeToPresentation4()` does, in the steps that function takes
@@ -1842,7 +1848,15 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   service's id from what a manifest declares of it: its profile is not always the
   server's.
   `sources/tilePyramid.ts` builds levels from `tiles`, from `sizes`, or from tiles Clover
-  derives itself.
+  derives itself. A service that cuts any region at any size (level 1 and up) is asked
+  for tiles of at least `TILE_FLOOR` (1024 px; 2026-11-06): its smaller listed tiles
+  joined, a whole number of them on its own grid (`joinedTile`), and its own cut that
+  large where it lists none, each within `maxWidth`, `maxHeight` and `maxArea`; a level 0
+  service only ever gets its own tiles. A server answers a 1024 px tile in 1.1 to 1.4
+  times a 256 px one's time (Northwestern's, e-codices' and Wellcome's, measured cold),
+  and over HTTP/1.1 a browser sends six at a time, so 256 px tiles made a page's view a
+  hundred round trips. Tests of the planner's choices build their pyramid on the
+  service's own grid (`servicePyramid(info, 0)`).
 - Each frame is decided by `scene/planFrame.ts`, which is pure. Its rectangle math stays
   inline: it runs per tile per frame, where a helper returning a rectangle would allocate
   (2026-10-27). `io/TileCache.ts` follows its required set: abort on supersede, a priority
@@ -1853,6 +1867,30 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     `IN_FLIGHT_LEVELS` (2) coarser than their target. Planning every in-between view at
     full resolution was 1.8× the tiles on a fast link (M3 benchmark). Draws are always
     of the current view.
+  - At rest, under target tiles not yet in memory (`has`: one the upload budget holds
+    back counts as in), it wants the level `IN_FLIGHT_LEVELS` coarser too, in
+    `MIDDLE_BAND`, ahead of the target: about a sixteenth of the target's tiles, so a view
+    needing a hundred sharpens in two steps rather than holding the coarsest level's blur
+    (a 12× upscale on Northwestern's 256 px tiles) until the last one lands. It costs
+    about a tenth more requests; OpenSeadragon asks for every level between.
+  - Tile fetching is the speed a reader sees, and it was measured against OpenSeadragon
+    6.1.1 and Atlas 3.3.5 on five servers' pages on 2026-11-06 (a harness of the three
+    side by side, a proxy replaying each tile at a set server delay over HTTP/1.1 or
+    HTTP/2, and what each drew judged from a screencast). Two waits were Clover's own:
+    the cache's window of six requests (`maxInFlight`, 16 since then: OpenSeadragon sets
+    no limit, Atlas ¾ of the cores, 4 to 10), and the view's tiles waiting on the
+    coarsest. `setImages` now asks for the tiles of the view a new scene opens on as
+    soon as every item's `info.json` is read (`landingWants`, kept as `landing` and put
+    ahead of each frame's wants until the scene is shown), beside its coarsest rather
+    than after them. `open` still waits on the coarsest, so a swap never flashes empty.
+    A server on HTTP/1.1 (Northwestern's image server, 2026-11-06) gets six requests at a
+    time from the browser whatever the window says.
+  - The WebGL2 backend samples half a mip level sharper than the GPU would (`LOD_BIAS`,
+    `backends/webgl2/shaders.ts`): the planner draws a level at one to two of its pixels to
+    a device pixel, where trilinear filtering blended in the level half as sharp, and text
+    came out softer than OpenSeadragon and Atlas drew it (62–80% of an ideal Lanczos
+    downscale's edge energy against their 75–88%, 2026-11-06). At −0.5 it matches them on
+    text and print with little more moiré on a halftone; at −1 it shimmers.
   - `scene/uploadBudget.ts` caps new GPU uploads per frame (`UPLOAD_BUDGET_BYTES`, about
     two 512 px tiles, always at least one). A tile held back reads as missing to the
     planner, which paints the coarser level beneath it, and the frame loop runs again.
