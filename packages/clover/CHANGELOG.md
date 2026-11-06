@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.5.0] - 2026-11-05
+
 ### Added
 
 - **A vertical slider.** `Items` takes `orientation="vertical"` (`orientation` on
