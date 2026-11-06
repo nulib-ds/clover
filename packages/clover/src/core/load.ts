@@ -16,8 +16,9 @@ import type { AnnotationSet } from "./annotation-sets";
  * state (JSON or base64url). The resource may be a Manifest, a Collection (its first
  * Manifest is shown), a lone Canvas (its `partOf` Manifest, or a Manifest made around
  * it), or annotations, an AnnotationPage or AnnotationCollection (the Manifest their first
- * annotation's Canvas is `partOf`, at that Canvas). Everything is fetched once, with the
- * request settings, and upgraded to Presentation 4.
+ * annotation's Canvas is `partOf`, at that Canvas). It may also be a IIIF Image service,
+ * its `info.json` or its base URI, shown as the one image it is (`imageServiceContent`).
+ * Everything is fetched once, with the request settings, and upgraded to Presentation 4.
  */
 
 export type IIIFContent = string | Record<string, unknown>;
@@ -37,6 +38,52 @@ function isContentState(json: unknown): boolean {
     return asArray(value.motivation).includes("contentState");
   }
   return value.type === "SpecificResource";
+}
+
+/**
+ * Whether JSON is an Image API service's `info.json`, rather than a Presentation resource:
+ * by its `type` (Image 3, `ImageService3`), its `protocol` or its `@context` (Image 2 and
+ * 3, `…/api/image/…`), none of which a Presentation resource declares.
+ */
+export const isImageService = (json: unknown): boolean =>
+  Boolean(json) &&
+  typeof json === "object" &&
+  /ImageService[123]|iiif\.io\/api\/image/.test(
+    JSON.stringify(
+      ["@context", "type", "@type", "protocol"].map(
+        (key) => (json as Json)[key],
+      ),
+    ),
+  );
+
+/**
+ * A URL's JSON. An image service's base URI need not answer with its `info.json` (the
+ * Image API asks only for a redirect, which not every server makes), so where the URL
+ * fails, and could be a base URI (it names no `.json` file, as a Manifest's address often
+ * does), `/info.json` after it is tried once; the URL's own failure stands where that
+ * fails too.
+ */
+async function fetchContent(
+  request: CloverRequest | undefined,
+  url: string,
+  signal?: AbortSignal,
+): Promise<unknown> {
+  try {
+    return await fetchJson(request, url, signal);
+  } catch (error) {
+    if (signal?.aborted || /\.json([?#]|$)/i.test(url)) throw error;
+    try {
+      const json = await fetchJson(
+        request,
+        `${url.replace(/\/+$/, "")}/info.json`,
+        signal,
+      );
+      if (isImageService(json)) return json;
+    } catch {
+      // The URL's own failure says more.
+    }
+    throw error;
+  }
 }
 
 export interface Loaded {
@@ -95,6 +142,16 @@ export function loneCanvas(canvas: Json): Manifest {
 /** Whether a Manifest is a Canvas shown on its own (`loneCanvas`). */
 export const isLoneCanvas = (manifest: Json | null | undefined) =>
   Boolean(manifest) && manifest!.items?.[0]?.id === manifest!.id;
+
+/**
+ * Whether a Manifest is an image service shown as its image (`imageServiceContent`): one
+ * Canvas, its id the service's with `/canvas` after it. It says nothing of itself but the
+ * rights its `info.json` gave.
+ */
+export const isImageServiceManifest = (manifest: Json | null | undefined) =>
+  Boolean(manifest) &&
+  manifest!.items?.length === 1 &&
+  manifest!.items[0]?.id === `${manifest!.id}/canvas`;
 
 /** An AnnotationPage or AnnotationCollection, as the content. */
 const ANNOTATIONS = /^(oa:)?Annotation(Page|Collection)$/;
@@ -253,7 +310,7 @@ export async function loadContent(
 
   if (typeof input === "string") {
     if (isUrl(input.trim())) {
-      json = await fetchJson(request, input.trim(), signal);
+      json = await fetchContent(request, input.trim(), signal);
     } else {
       const { decodeContentState } = await readContentState();
       const state = decodeContentState(input);
@@ -275,6 +332,15 @@ export async function loadContent(
   if (ANNOTATIONS.test(String((json as Json)?.type ?? ""))) {
     const { annotationsContent } = await import("./annotations-content");
     return annotationsContent(json as Json, options);
+  }
+
+  /* An image service, shown as its image. Loaded only for one, as annotations are. */
+  if (isImageService(json)) {
+    const { imageServiceContent } = await import("./image-service-content");
+    return imageServiceContent(
+      json as Json,
+      typeof input === "string" ? input.trim() : undefined,
+    );
   }
 
   const resource = await toPresentation4<Record<string, any>>(json);
