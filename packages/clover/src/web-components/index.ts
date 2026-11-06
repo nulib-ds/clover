@@ -17,11 +17,12 @@
  * It defines every element, each a stub until one connects: then its code, the host and
  * the stylesheet load, once for the page, so a page loads only the elements it uses. What
  * only media and maps need of the stylesheet loads with them, as MapLibre's stylesheet and
- * worker do. `initCloverI18n` sets the language of Clover's own strings, which otherwise
- * follows the page's `<html lang>`, then the reader's browser:
+ * worker do. `initCloverI18n` configures Clover's interface language, which is otherwise
+ * the visitor's where Clover has strings for it, else the site's (those configured, then
+ * the page's `<html lang>`):
  *
  *   import { initCloverI18n } from ".../web-components/index.mjs";
- *   initCloverI18n({ lng: document.documentElement.lang });
+ *   initCloverI18n({ languages: ["fr", "en"] });
  */
 import { defineCloverElements } from "./define";
 import { initCloverI18n } from "./i18n";

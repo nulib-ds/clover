@@ -109,8 +109,8 @@ If you serve Clover's files yourself, copy the whole `dist/web-components` folde
 - [Composing layouts](https://clover.iiif.library.northwestern.edu/docs/composing): layouts of your
   own, from the parts and hooks.
 - [Styling](https://clover.iiif.library.northwestern.edu/docs/styling): colors, sizes and classes.
-- [Technical overview](https://clover.iiif.library.northwestern.edu/docs/technical): events,
-  languages, types, what each part loads, and coming from Clover 3.x.
+- [Glossary](https://clover.iiif.library.northwestern.edu/docs/composing/glossary): every
+  component and helper, and the package's structure.
 
 Clover 3.x, `@samvera/clover-iiif`, is deprecated and no longer maintained. Its docs are
 kept on the same site, under

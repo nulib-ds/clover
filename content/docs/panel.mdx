@@ -50,22 +50,23 @@ around it a height and `overflow-y: auto`, as the templates do. Its other props,
 
 ### Panel
 
-| Prop            | Type                      | Default   | Description                                                                                                                    |
-| --------------- | ------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `layout`        | `"tabs" \| "accordion"`   | `"tabs"`  | A row of tabs, or sections stacked, each under its heading.                                                                    |
-| `defaultValue`  | `string`                  | The first | The section open first.                                                                                                        |
-| `value`         | `string`                  | —         | The section open, controlled.                                                                                                  |
-| `onValueChange` | `(value: string) => void` | —         | A section was opened.                                                                                                          |
-| `onClose`       | `() => void`              | —         | A close button, for a panel floating over the page.                                                                            |
-| `closeOnEscape` | `boolean`                 | `false`   | Escape closes it too; its close button moves to its inner edge.                                                                |
-| `headingLevel`  | `number`                  | `3`       | Its first headings: one below the heading over it.                                                                             |
-| `download`      | `boolean`                 | `true`    | A Download button beside About's heading, listing the downloads; `false` leaves them out.                                      |
-| `languages`     | `boolean`                 | `true`    | About's heading offers the languages the resource comes in, the whole Root reading in the one chosen; `false` leaves them out. |
-| `sections`      | `PanelSection[]`          | All       | Which of the default sections it may have; each still shows only where the resource has data for it.                           |
-| `labels`        | `PanelSectionLabels`      | —         | What a default section says, in place of Clover's own word for it: text, or text by language tag.                              |
-| `as`            | element type              | `"aside"` | The element to render.                                                                                                         |
-| `children`      | `ReactNode`               | —         | `Tab`s: sections of your own, in place of the defaults.                                                                        |
-| `className`     | `string`                  | —         | Added to `clover-panel`.                                                                                                       |
+| Prop                 | Type                      | Default   | Description                                                                                                                                                                                                                                                |
+| -------------------- | ------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `layout`             | `"tabs" \| "accordion"`   | `"tabs"`  | A row of tabs, or sections stacked, each under its heading.                                                                                                                                                                                                |
+| `defaultValue`       | `string`                  | The first | The section open first.                                                                                                                                                                                                                                    |
+| `value`              | `string`                  | —         | The section open, controlled.                                                                                                                                                                                                                              |
+| `onValueChange`      | `(value: string) => void` | —         | A section was opened.                                                                                                                                                                                                                                      |
+| `onClose`            | `() => void`              | —         | A close button, for a panel floating over the page.                                                                                                                                                                                                        |
+| `closeOnEscape`      | `boolean`                 | `false`   | Escape closes it too; its close button moves to its inner edge.                                                                                                                                                                                            |
+| `headingLevel`       | `number`                  | `3`       | Its first headings: one below the heading over it.                                                                                                                                                                                                         |
+| `download`           | `boolean`                 | `true`    | A Download button beside About's heading, listing the downloads; `false` leaves them out.                                                                                                                                                                  |
+| `languages`          | `boolean`                 | `true`    | About's heading offers the languages the resource comes in, the whole Root reading in the one chosen; `false` leaves them out.                                                                                                                             |
+| `interfaceLanguages` | `boolean`                 | `true`    | About's language toggle also offers Clover's interface languages (its control labels, section titles and announcements) that the resource has none of: the visitor's and your site's, where they differ, one choice for the page; `false` leaves them out. |
+| `sections`           | `PanelSection[]`          | All       | Which of the default sections it may have; each still shows only where the resource has data for it.                                                                                                                                                       |
+| `labels`             | `PanelSectionLabels`      | —         | What a default section says, in place of its word in Clover's interface language: text, or text by language tag.                                                                                                                                           |
+| `as`                 | element type              | `"aside"` | The element to render.                                                                                                                                                                                                                                     |
+| `children`           | `ReactNode`               | —         | `Tab`s: sections of your own, in place of the defaults.                                                                                                                                                                                                    |
+| `className`          | `string`                  | —         | Added to `clover-panel`.                                                                                                                                                                                                                                   |
 
 ### Tab
 
@@ -96,15 +97,16 @@ metadata, required statement, its date (`navDate`, in the defined language), pro
 homepage, see also, downloads and address. For a Canvas shown
 on its own, it starts with the Manifest the Canvas is part of.
 
-| Prop            | Type      | Default | Description                                                                                                                                                       |
-| --------------- | --------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `canvasSummary` | `boolean` | `false` | The current Canvas's summary too, before the resource's.                                                                                                          |
-| `download`      | `boolean` | `true`  | Alone, outside a Panel: the downloads, Download's links, in a section of their own. In a Panel, its heading's Download button lists them.                         |
-| `languages`     | `boolean` | `true`  | Alone, outside a Panel: the languages the resource comes in, over what About says, the whole Root reading in the one chosen. In a Panel, its heading offers them. |
-| `headingLevel`  | `number`  | `3`     | Its titles: the label, Rights, Homepage and the rest.                                                                                                             |
-| `label`         | `boolean` | `true`  | The resource's label first, as a heading.                                                                                                                         |
-| `thumbnail`     | `boolean` | `true`  | The resource's thumbnail, small, beside the label.                                                                                                                |
-| `className`     | `string`  | —       | Added to `clover-about`.                                                                                                                                          |
+| Prop                 | Type      | Default | Description                                                                                                                                                                                    |
+| -------------------- | --------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `canvasSummary`      | `boolean` | `false` | The current Canvas's summary too, before the resource's.                                                                                                                                       |
+| `download`           | `boolean` | `true`  | Alone, outside a Panel: the downloads, Download's links, in a section of their own. In a Panel, its heading's Download button lists them.                                                      |
+| `languages`          | `boolean` | `true`  | Alone, outside a Panel: the languages the resource comes in, over what About says, the whole Root reading in the one chosen. In a Panel, its heading offers them.                              |
+| `interfaceLanguages` | `boolean` | `true`  | Alone, outside a Panel: its language toggle also offers Clover's interface languages that the resource has none of, the visitor's and your site's, where they differ. In a Panel, the Panel's. |
+| `headingLevel`       | `number`  | `3`     | Its titles: the label, Rights, Homepage and the rest.                                                                                                                                          |
+| `label`              | `boolean` | `true`  | The resource's label first, as a heading.                                                                                                                                                      |
+| `thumbnail`          | `boolean` | `true`  | The resource's thumbnail, small, beside the label.                                                                                                                                             |
+| `className`          | `string`  | —       | Added to `clover-about`.                                                                                                                                                                       |
 
 </ApiReference>
 
@@ -240,11 +242,12 @@ function Aside() {
 
 ### A word of your own for a section
 
-`labels` says what a section's tab or heading says, in place of Clover's own word for it.
+`labels` says what a section's tab or heading says, in place of the interface's word for
+it.
 A string is the page's own words, in the page's language, and carries no `lang`. To say it
 in more than one, give it by language tag: Clover reads it in the language it speaks, by
 IIIF's rule, and the tab carries that language where it is not the page's (WCAG 3.1.2).
-`initCloverI18n` changes Clover's own words for every panel on the page
+`initCloverI18n` configures Clover's interface language for every panel on the page
 ([i18n](/docs/i18n)); `labels` is this panel's alone.
 
 So on an English page, with Clover speaking German, the panel below says `Kapitel` and
@@ -275,6 +278,12 @@ them, shown whichever section is open, and every part in the Root reads IIIF tex
 one chosen, a title over it as About. It starts in the Root's `language`, here French. A choice made
 there lasts until the page gives the Root another `language`. This painting is described in English and
 French.
+
+The toggle comes after a globe, and offers Clover's interface languages (its control
+labels, section titles and announcements) that the resource has none of, where the
+visitor's language differs from your site's. Choosing one the resource has speaks it too,
+where Clover has strings for it; one only your site offers changes the interface alone.
+`interfaceLanguages={false}` leaves those out ([i18n](/docs/i18n)).
 
 <Example>
 <PartDemo

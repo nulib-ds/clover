@@ -12,10 +12,13 @@ export const loaders: Record<string, LocaleLoader> = {
   es: () => import("./es.json"),
   fi: () => import("./fi.json"),
   fr: () => import("./fr.json"),
+  ja: () => import("./ja.json"),
   nb: () => import("./nb.json"),
   nn: () => import("./nn.json"),
   no: () => import("./no.json"),
   pt: () => import("./pt.json"),
+  "zh-Hans": () => import("./zh-Hans.json"),
+  "zh-Hant": () => import("./zh-Hant.json"),
 };
 
 export { en };

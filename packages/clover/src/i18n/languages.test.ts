@@ -5,12 +5,15 @@ import {
   closestLanguage,
   languageToRead,
   sameLanguage,
+  scriptLanguage,
 } from "./languages";
 
 /*
  * Clover's `closestLanguage` is `@iiif/helpers`' `getClosestLanguage` as Clover calls it
- * (Mat, 2026-10-27): the same answer for every reader, fallback and language map
- * here, so which language a IIIF value shows in, and so its `lang`, never changes.
+ * (Mat, 2026-10-27), with one step added (Mat, 2026-11-05): a tag in the visitor's
+ * language and script, before a fallback, so a visitor who reads Simplified Chinese
+ * never gets Traditional where both are there. Everywhere else, the same answer for every
+ * visitor, fallback and language map here.
  */
 const TAG_SETS = [
   [],
@@ -49,15 +52,42 @@ const READERS = [
 ];
 const FALLBACKS = [[], ["fr"], ["de-DE", "en"], ["pt-PT"], ["en-US", "es-MX"]];
 
+/** Whether `answer` is in the language and script of the visitor or a fallback. */
+const byScript = (
+  answer: string | undefined,
+  reader: string | undefined,
+  fallbacks: string[],
+) =>
+  !!answer &&
+  !!scriptLanguage(answer) &&
+  [reader, ...fallbacks].some(
+    (tag) => !!tag && scriptLanguage(tag) === scriptLanguage(answer),
+  );
+
 describe("closestLanguage", () => {
-  it("answers as @iiif/helpers' getClosestLanguage does, for every case here", () => {
+  it("answers as @iiif/helpers' getClosestLanguage does, but where a script decides", () => {
     for (const tags of TAG_SETS)
       for (const reader of READERS)
-        for (const fallbacks of FALLBACKS)
+        for (const fallbacks of FALLBACKS) {
+          const ours = closestLanguage(reader, tags, fallbacks);
+          const theirs = getClosestLanguage(reader, tags, fallbacks);
           expect(
-            closestLanguage(reader, tags, fallbacks),
-            JSON.stringify({ tags, reader, fallbacks }),
-          ).toBe(getClosestLanguage(reader, tags, fallbacks));
+            ours === theirs || byScript(ours, reader, fallbacks),
+            JSON.stringify({ tags, reader, fallbacks, ours, theirs }),
+          ).toBe(true);
+        }
+  });
+
+  it("takes a tag in the visitor's language and script before a fallback", () => {
+    expect(closestLanguage("zh-SG", ["zh-Hant", "zh-CN", "en"], ["en"])).toBe(
+      "zh-CN",
+    );
+    expect(closestLanguage("zh-TW", ["zh-CN", "zh-Hant"])).toBe("zh-Hant");
+    expect(closestLanguage("zh-Hans", ["zh-Hant", "zh-CN"])).toBe("zh-CN");
+    expect(closestLanguage("zh", ["zh-Hant", "zh-CN"])).toBe("zh-CN");
+    expect(closestLanguage("en-US", ["fr", "en-GB"], ["fr"])).toBe("en-GB");
+    // Never `none`, which is in no language.
+    expect(closestLanguage("de", ["none", "en"])).toBe("none");
   });
 
   it("prefers the language, its base, a fallback, then a regional tag, then none", () => {

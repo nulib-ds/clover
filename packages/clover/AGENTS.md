@@ -237,7 +237,7 @@ every rule below.
   panel where `initCloverI18n` is the page's. A label in one language is the page's own
   words, marked with nothing; given by language tag it is read in the language Clover
   speaks (`languageToRead`) and marked with it where that is not the page's
-  (`langWithin`, as `tabLabel` marks Clover's own strings; WCAG 3.1.2). `Tab` children
+  (`langWithin`, as `tabLabel` marks the words of Clover's interface language; WCAG 3.1.2). `Tab` children
   win over both.
 - Accordion headings stay in sight in a scrolling container (Mat): sticky, stacked at
   the top when scrolled past and at the bottom when an open section pushes them below.
@@ -776,8 +776,9 @@ every rule below.
   with the spec's `seen()`, not `toBeHidden()`.
 - `specs/language.spec.ts` runs a French browser (`locale: "fr-FR"`) on the harness's
   English page, Chromium only, and reads names from Chromium's own accessibility tree
-  (CDP `Accessibility.getFullAXTree`). With `&lng=fr` Clover speaks French there and
-  marks it; without, it speaks the page's English and marks nothing.
+  (CDP `Accessibility.getFullAXTree`). Clover speaks the French visitor's French there
+  and marks it, with or without `&lng=fr` (which chooses it), and offers the page's
+  English beside it (Mat, 2026-11-05: the visitor's language first).
 - The Viewer's information panel starts closed on a phone (the `iphone` and `android`
   projects): call `openPanel(page, isMobile)` (`specs/fixtures.ts`) before choosing a
   tab or section.
@@ -814,14 +815,21 @@ every rule below.
   `languageProps` beside the translator's rules took a lone `Root` 65 B up, `autonym`
   beside `languageCode` every media element page 80 B).
   - `languages.ts`, which the translator and every IIIF value read up front: whose
-    languages (`readerLanguages`: the page's `<html lang>`, then the browser's), what a
-    tag says (`baseLanguage`, the one way to take `pt` from `pt-BR`; `sameLanguage`), and
-    which of a set to read (`closestLanguage`, IIIF's rule, held to `@iiif/helpers`' by
-    `languages.test.ts`; `languageToRead`, it for a Root's `language` or else the
-    reader's).
+    languages (`visitorLanguages`, the browser's; `pageLanguage`, the `<html lang>`;
+    `readerLanguages`, the order IIIF text is read in: a chosen interface language, the
+    visitor's, the interface's, the page's, the interface's given by the translator
+    through `readInterfaceLanguagesFrom`, so a `Label` alone never loads the translator;
+    Mat, 2026-11-05), what a tag says (`baseLanguage`, the one way to take `pt` from
+    `pt-BR`; `scriptLanguage`, `zh-Hant` of `zh-TW`; `sameLanguage`), and which of a set to
+    read (`closestLanguage`, IIIF's rule plus the script, held to `@iiif/helpers`' by
+    `languages.test.ts`; `languageToRead`, it for a Root's `language` or else in
+    `readerLanguages`' order).
   - `direction.ts`, with the parts that draw text: `directionOf` and `languageProps`.
-  - `config.ts`: Clover's strings, their lookup chain, and `langWithin`, the `lang` text
-    needs on a page in another language (it reads the interface language, so it is here).
+  - `config.ts`: Clover's interface language (its control labels, section titles and
+    announcements): the languages configured, the visitor's default, the choices offered
+    (`interfaceLanguages()`) and the one chosen (`chooseInterfaceLanguage`), its strings,
+    their lookup chain, and `langWithin`, the `lang` text needs on a page in another
+    language (it reads the interface language, so it is here).
   - `useCloverTranslation.ts` (`t`, `langOf`), `hostLanguage.ts` (`HostLanguageContext`),
     `useRootLanguage.ts` (a root's reading of the page's language) and
     `useContainerName.tsx` (a container named in another language than the page's).
@@ -833,6 +841,10 @@ every rule below.
   and `hrefLangOf` (`core/value.ts`), `bodyInLanguage` and `annotationName`
   (`core/annotation-name.ts`), `descriptionLanguages` and `startingLanguage`
   (`core/language-choice.ts`), `useReadingLanguages` (`react/readingLanguages.ts`),
+  `useInterfaceLanguages`, `useLanguageToggle` and `LanguageToggle` (About's
+  language toggle, `components/Panel/LanguageToggle.tsx`), drawn by Clover's one
+  construct for a choice of languages, `ui/LanguageChoice.tsx` (the globe,
+  `ui/GlobeGlyph.tsx`, and the fold, `ui/LanguageMenu.tsx`, its own chunk),
   `languagesOf` (`components/Annotations/languages.ts`). Each chooses through
   `languageToRead`, never a language map made up to borrow `localize`'s choice.
 - **Direction.** Text in a right-to-left language or script gets `dir="rtl"` beside its
@@ -1148,7 +1160,7 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     and, refused all the same (no `sheet`), gives way to adopted sheets in the same order.
     Inline styles set through the DOM (`style={…}` in the browser, `element.style`) are
     CSSOM, which no policy governs; a server writes them as `style` attributes, which a
-    strict policy refuses (Technical overview: `style-src-attr 'unsafe-inline'`, not
+    strict policy refuses (a page allows them with `style-src-attr 'unsafe-inline'`; not
     checked in a browser yet).
   - No `data:` or `blob:` address for anything a page shows: a glyph is an inline svg
     (the map's controls too, `MapGlyph`), and a caption file's cues go to its track
@@ -2528,7 +2540,7 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     file the entry names, from `index.mjs` and `index.umd.js` on, failing on one that is
     not there or outside `web-components/`. So `viewer/` works only inside
     `web-components/`, never copied alone, as the
-    Technical overview tells hosts; its own entry files (`index.mjs`, `index.umd.js`,
+    Glossary's Structure of project tells hosts; its own entry files (`index.mjs`, `index.umd.js`,
     `index.d.mts`) always stay.
   - **Two copies on a page.** Each entry brings its own copy of Clover, so a page loads
     one. Every element comes from one build, so what Clover keeps once (the translator,

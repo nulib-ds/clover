@@ -415,7 +415,7 @@ function MapView({
           scrollZoom,
           // Its credits behind their ⓘ, in the lower corner; none where left out.
           attributionControl: credits ? { compact: true } : false,
-          // MapLibre's own names, in Clover's words; kept current below.
+          // MapLibre's own names, in Clover's interface words; kept current below.
           locale: {
             "Map.Title": t("mapLabel"),
             "NavigationControl.ZoomIn": t("imageZoomIn"),
@@ -739,7 +739,7 @@ function MapView({
     if (described) canvas.setAttribute("aria-describedby", aboutId);
     else canvas.removeAttribute("aria-describedby");
     /*
-     * Named in Clover's words, its popover Clover's (`Tip`, below) rather than the
+     * Named in Clover's interface words, its popover Clover's (`Tip`, below) rather than the
      * browser's tooltip, which MapLibre's `title` would show (Mat, 2026-10-29: "override
      * all maplibre labels in favor of Clover flavored ones").
      */

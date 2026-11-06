@@ -44,7 +44,7 @@ export type DocumentProps = Omit<RootProps, "children"> & {
    */
   panelSections?: readonly PanelSection[];
   /**
-   * What a panel section's tab or heading says, in place of Clover's own word for it:
+   * What a panel section's tab or heading says, in place of its word in Clover's interface language:
    * `{ annotations: "Chapters" }`, or a word by language tag to say it in several (the
    * Panel's `labels`).
    */
@@ -56,6 +56,13 @@ export type DocumentProps = Omit<RootProps, "children"> & {
    * it says of itself comes in several (the Panel's `languages`). Default `true`.
    */
   languages?: boolean;
+  /**
+   * Default, Document and Gallery: whether the panel's language toggle, beside its About
+   * heading, also offers Clover's interface languages (its control labels, section
+   * titles and announcements) that the resource has none of, the visitor's and the
+   * site's, where they differ (the Panel's `interfaceLanguages`). Default `true`.
+   */
+  interfaceLanguages?: boolean;
   /**
    * The title's heading level, to fit the outline of the page around the layout (under
    * an `h2`, 3). The panel's sections, and the downloads' groups, are a level below
@@ -96,6 +103,7 @@ export function Document({
   panelLabels,
   download = true,
   languages = true,
+  interfaceLanguages = true,
   headingLevel = 2,
   storageKey = "clover-template-document",
   collapseControls,
@@ -125,6 +133,7 @@ export function Document({
         panelLabels={panelLabels}
         download={download}
         languages={languages}
+        interfaceLanguages={interfaceLanguages}
         headingLevel={headingLevel}
         storageKey={storageKey}
         collapseControls={collapseControls}
@@ -154,6 +163,7 @@ function DocumentLayout({
   defaultPanelOpen,
   download,
   languages,
+  interfaceLanguages,
   headingLevel = 2,
   storageKey,
   panelLayout,
@@ -169,6 +179,7 @@ function DocumentLayout({
   | "defaultPanelOpen"
   | "download"
   | "languages"
+  | "interfaceLanguages"
   | "headingLevel"
   | "storageKey"
   | "panelLayout"
@@ -409,6 +420,7 @@ function DocumentLayout({
           headingLevel={below(headingLevel)}
           download={false}
           languages={languages}
+          interfaceLanguages={interfaceLanguages}
         />
         {pages && sidebar.scrim && (
           <div

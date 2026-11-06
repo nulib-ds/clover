@@ -1,9 +1,11 @@
 ---
 title: Glossary
-description: "Every Clover component and helper in one place: the core components and primitives, the UI components, and the functions and hooks."
+description: "Every Clover component and helper in one place: the core components and primitives, the UI components, functions and hooks, and the package's structure."
 ---
 
 import { CoreComponents } from "docs/components/Clover4/CoreComponents";
+import { ProjectStructure } from "docs/components/Clover4/ProjectStructure";
+import { loads } from "docs/lib/figures";
 
 # Glossary
 
@@ -75,6 +77,15 @@ The functions and hooks Clover is built with. Each is on
 | [`affineTransform`](/docs/composing/helpers#maps)  | The transform from a georeference's image pixels to longitude and latitude. |
 | [`setMapWorkerUrl`](/docs/composing/helpers#maps)  | Serves MapLibre's worker from an address of your own.                       |
 
+### Events
+
+| Event                                                                                   | Description                                  |
+| --------------------------------------------------------------------------------------- | -------------------------------------------- |
+| [`onCanvasChange`, `clover-canvas-change`](/docs/composing/helpers#events)              | The current Canvas changed.                  |
+| [`onManifestChange`, `clover-manifest-change`](/docs/composing/helpers#events)          | Another Manifest of the Collection is shown. |
+| [`onStatusChange`, `clover-status-change`](/docs/composing/helpers#events)              | The Root began loading, finished, or failed. |
+| [`onContentStateChange`, `clover-content-state-change`](/docs/composing/helpers#events) | The view changed, as a content state.        |
+
 ### Hooks
 
 | Hook                                                                           | Description                                                                   |
@@ -109,3 +120,117 @@ The functions and hooks Clover is built with. Each is on
 | [`Lightbox`](/docs/composing/helpers#lightbox)                                        | The dialog Gallery opens for one cell of its grid.      |
 | [`preloadLightbox`](/docs/composing/helpers#lightbox)                                 | Starts loading the Lightbox's code.                     |
 | [`useGivenAnnotations`](/docs/composing/helpers#lightbox)                             | The annotations given to the Root as an AnnotationPage. |
+
+## Structure of project
+
+<ProjectStructure />
+
+The package is ES modules only.
+
+<div data-code-flavor="react">
+
+React 18 and 19 are supported. Import the components from `@nulib/clover`, by name or as
+`Clover`, and your bundler keeps only those you use. Its types come with it: each
+component's props are exported beside it (`ViewerProps`, `RootProps`, `BodyProps`…), with
+the types its props and hooks use.
+
+</div>
+
+<div data-code-flavor="web-components">
+
+The elements are built on their own, with [Preact](https://preactjs.com/) standing in for
+React, and carry Clover's stylesheet. `index.umd.js` is a classic script that loads the
+elements' module from beside itself, so it works from any CDN path. On a page with
+modules, load `web-components/index.mjs` with `<script type="module">` instead.
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/web-components/index.umd.js"></script>
+```
+
+A page that shows a Viewer and nothing else of Clover's can load the Viewer's own entry,
+built whole: `web-components/viewer/index.umd.js` (or `@nulib/clover/web-components/viewer`
+in a bundler) loads {loads.viewerEntry} kB to first view, where the one for every element
+loads {loads.element} kB for the same page. Load one entry on a page, not both: each brings its
+own copy of Clover.
+
+If you serve Clover's files from your own server, copy the whole `dist/web-components`
+folder, not `viewer/` alone: the Viewer's entry loads what the other entry has too (the
+map, streaming video, the languages) from the folder above its own.
+
+The module's types declare every element (`HTMLElementTagNameMap`) and every event, so
+`document.querySelector("clover-root")` is typed, and what a script reaches:
+`CloverRootApi`, `CloverCanvasHandle`, `CloverRenderer` and `CloverControlButtons`. Its
+[Custom Elements Manifest](https://github.com/webcomponents/custom-elements-manifest),
+`@nulib/clover/web-components/custom-elements.json` (the package's `customElements`),
+gives each element's attributes, properties and events to editors and tools.
+
+</div>
+
+<div data-code-flavor="web-components">
+
+## Web components
+
+### The Viewer
+
+A template takes its own attributes and ignores another's: `size` does nothing in
+Default. `false` is read in any case. An `items` value not in the list shows the slider,
+with a warning in the console. With `header="false"` there is no title, and the panel's
+sections take `heading-level` themselves.
+
+### Languages
+
+The elements carry their own copy of Clover's translator, so a page calls it through
+them: from the module, or from any element's class in a classic script. Either returns a
+promise of the translator.
+
+```js
+// With modules.
+import { initCloverI18n } from ".../web-components/index.mjs";
+initCloverI18n({ languages: ["fr", "en"] });
+
+// From a classic script, once the element is defined: French, whatever the visitor's.
+customElements
+  .get("clover-viewer")
+  .initCloverI18n()
+  .then((i18n) => i18n.chooseInterfaceLanguage("fr"));
+```
+
+### Components
+
+A component of a root draws nothing outside one, and says so in the console. Give an element
+no `aria-label` or `role`: it is a box with no role, and Clover names what it draws
+itself; a landmark of the page's own around an element names it otherwise. The one
+exception is a Split's handle, which is the separator itself: name it with `aria-label`
+where "Resize panels" is not the right word.
+
+### Layouts
+
+- **The panel's tabs.** A `<clover-tab>`'s content stays where you wrote it until its
+  section first opens, and then moves there. Its label is its `label`, or a copy of its
+  `slot="label"` child, for markup.
+- **The toggle** shows its target while the target is not `hidden`, so write `hidden` on
+  the panel to start it shut, and hide or show it yourself whenever you like: the toggle
+  follows.
+- **The Split's** elements are the panes and the bars themselves, as `Split` lays them
+  out in React: one pane beside each handle has a `size`, and the other takes what is
+  left. A handle beside a pane you hide is hidden with it.
+- **Slots.** `<clover-status>` shows your own words while the root loads
+  (`slot="loading"`) and if it fails (`slot="error"`), as copies, so give them no ids.
+
+### Components of your own
+
+Besides a method for each hook ([Helpers](/docs/composing/helpers#hooks)), a root's
+`clover` has the table of contents (`contents()`, as `tableOfContents` gives React's),
+`state`, the actions (`next()`, `goTo(id)`, `search(query)`…) and the channels
+(`viewport`, `media`…). `usePanelSections` has no method: a `<clover-panel>` draws
+nothing where it has no section, and a root would carry the panel's checks on every page
+that uses any element.
+
+### Styles
+
+The element renders into its own children, with no shadow root, so the page's CSS still
+reaches it, as 3.x's does. Clover's styles are added to the document once each, first in
+`<head>` and in the stylesheet's order, so the page's own rules win; see
+[Styling](/docs/styling).
+
+</div>

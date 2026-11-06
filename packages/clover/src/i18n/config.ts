@@ -1,8 +1,16 @@
 import { en, loaders } from "./locales";
-import { baseLanguage, readerLanguages, sameLanguage } from "./languages";
+import {
+  baseLanguage,
+  pageLanguage,
+  readInterfaceLanguagesFrom,
+  sameLanguage,
+  scriptLanguage,
+  visitorLanguages,
+} from "./languages";
 
 /**
- * Clover's translations, without a translation library.
+ * Clover's interface language: the language of its control labels ("Zoom in"), section
+ * titles ("About") and announcements ("Item 2 of 17"), without a translation library.
  *
  * Clover needs a key lookup with a fallback chain, `{{name}}` interpolation and language
  * detection. i18next did that at about 20 kB gzipped across three packages;
@@ -10,14 +18,21 @@ import { baseLanguage, readerLanguages, sameLanguage } from "./languages";
  * them, so existing `initCloverI18n` calls keep working:
  *
  *     initCloverI18n({
- *       lng: "de",
+ *       languages: ["de"],
  *       fallbackLng: ["de", "en"],
  *       resources: { de: { clover: { informationPanelTabsAbout: "Über" } } },
  *     });
  *
+ * Which it speaks (Mat, 2026-11-05): the languages configured (`languages`, or `lng` for
+ * one), then the page's `<html lang>` (Mat, 2026-11-05: derived, as the visitor's is),
+ * else English; then the visitor's languages, from
+ * the browser. The visitor's first that Clover has strings for is the default, else the
+ * first configured; where the two differ, `interfaceLanguages()` offers both, and
+ * `chooseInterfaceLanguage` takes the visitor's choice.
+ *
  * English ships with Clover. Each other language it ships loads the first time Clover is
  * to speak it, so until it arrives a string shows in English, marked as English by
- * `langOf`, and the readers re-render when it does. `cloverI18n.ready()` waits for it.
+ * `langOf`, and the parts re-render when it does. `cloverI18n.ready()` waits for it.
  */
 
 export const CLOVER_I18N_NAMESPACE = "clover";
@@ -30,9 +45,14 @@ export type CloverI18nResources = Record<
 
 export interface CloverI18nOptions {
   /**
-   * The language to use. When not given: the page's `<html lang>`, then the browser's
-   * languages, so Clover speaks the language of the page around it.
+   * The languages your site offers Clover's interface in, most preferred first. A
+   * visitor whose own language Clover has strings for sees theirs, with these offered
+   * beside it, with the page's `<html lang>`; any other visitor sees the first of these.
+   * When not given, the page's
+   * `<html lang>`, else English.
    */
+  languages?: string | readonly string[];
+  /** One language to offer, as `languages: [lng]` does. */
   lng?: string;
   /** Languages to try, in order, when a key is missing. English is always last. */
   fallbackLng?: string | readonly string[] | false;
@@ -44,7 +64,15 @@ const resources: CloverI18nResources = {
   en: { [CLOVER_I18N_NAMESPACE]: { ...en } },
 };
 
-let language: string | undefined;
+/** The languages configured (`languages`, `lng`), in order. */
+let configured: string[] = [];
+/** The interface language the visitor chose (`chooseInterfaceLanguage`), if any. */
+let chosen: string | undefined;
+/**
+ * Every interface language chosen since the choice was last reset: each stays offered, so
+ * the choice never loses the radio focus is on as another is chosen (WCAG 2.4.3).
+ */
+let picked: string[] = [];
 let fallbacks: string[] = [];
 let version = 0;
 const listeners = new Set<() => void>();
@@ -54,11 +82,21 @@ function notify() {
   listeners.forEach((listener) => listener());
 }
 
-/** `pt-BR` → `pt-BR`, `pt`: a regional tag falls back to its base language. */
+/**
+ * `pt-BR` → `pt-BR`, `pt-Latn`, `pt`: a tag falls back to its language in its script, then
+ * to its base language. So `zh-TW` reads `zh-Hant`, and `zh-CN` and `zh` read `zh-Hans`.
+ */
 function withBase(lng: string): string[] {
-  const base = baseLanguage(lng);
-  return base && base !== lng ? [lng, base] : [lng];
+  return [lng, scriptLanguage(lng), baseLanguage(lng)].filter(
+    (tag): tag is string => !!tag,
+  );
 }
+
+/** Whether Clover has strings for exactly this tag: shipped, or given by the page. */
+const has = (tag: string) => tag === "en" || ships(tag) || !!resources[tag];
+
+/** The tag Clover speaks for a visitor of `lng`: `zh-Hant` for `zh-TW`, `en` for `en-US`. */
+const speaks = (lng: string) => withBase(lng).find(has);
 
 /** Each shipped language's load, once asked for: it settles whether it loads or fails. */
 const loading = new Map<string, Promise<void>>();
@@ -103,32 +141,75 @@ function loadFor(chain: string[]): Promise<void> {
 /** The chain last made, and what it was made from (`lookupChain`). */
 let chain: string[] = [];
 let madeFrom = "";
+/** The language the visitor sees first, unless they chose another: the default. */
+let byDefault = "en";
 
 /**
- * Every language to look in, in order, ending with English. Made again only when what it
- * is made from changes: the strings or settings (`version`, which `initCloverI18n`,
- * `changeLanguage` and each language's load move), or, with no language set, the page's
- * `<html lang>` and the browser's languages. Every string asks for it, a strip of
- * hundreds of thumbnails one each, so it is read, not rebuilt.
+ * The site's languages: those configured, then the page's `<html lang>`, derived as the
+ * visitor's is (Mat, 2026-11-05: "the others are derived elsewhere"); English comes last
+ * anyway.
+ */
+function offered(): string[] {
+  const page = pageLanguage();
+  return [...new Set([...configured, ...(page ? [page] : [])])];
+}
+
+/**
+ * Every language to look in, in order, ending with English: the one the visitor chose,
+ * else the default (the visitor's first that Clover has strings for, else the first
+ * configured), then `fallbackLng`, for a key it lacks, then the languages configured
+ * (and the page's). Made again only when what it is made
+ * from changes: the strings or settings (`version`, which `initCloverI18n`,
+ * `chooseInterfaceLanguage` and each language's load move), the page's `<html lang>` and
+ * the browser's languages. Every string asks for it, a strip of hundreds of thumbnails
+ * one each, so it is read, not rebuilt.
  */
 function lookupChain(): string[] {
-  const from = language
-    ? `${version}`
-    : `${version} ${typeof document < "u" ? document.documentElement.lang : ""} ${
-        typeof navigator < "u" ? navigator.languages : ""
-      }`;
+  const from = `${version} ${typeof document < "u" ? document.documentElement.lang : ""} ${
+    typeof navigator < "u" ? navigator.languages : ""
+  }`;
   if (from === madeFrom) return chain;
   madeFrom = from;
-  const requested = language ? [language] : readerLanguages();
+  const set = offered();
+  const visitor = visitorLanguages().map(speaks).find(Boolean);
+  byDefault = visitor ?? set.map(speaks).find(Boolean) ?? "en";
   chain = [
-    ...new Set([...requested, ...fallbacks].flatMap(withBase).concat("en")),
+    ...new Set(
+      [chosen ?? byDefault, ...fallbacks, ...set]
+        .filter((tag): tag is string => !!tag)
+        .flatMap(withBase)
+        .concat("en"),
+    ),
   ];
   // Idempotent, and it settles later, so asking from a render is safe.
   void loadFor(chain);
   return chain;
 }
 
-/** One of Clover's strings, and the language it is written in. */
+/**
+ * The interface languages to offer the visitor, each as the tag Clover has strings for:
+ * the default, then the languages configured and the page's, then any chosen since the
+ * choice was reset. One where they agree.
+ */
+function offeredLanguages(): string[] {
+  lookupChain();
+  return [
+    ...new Set(
+      [byDefault, ...offered().map(speaks), ...picked.map(speaks)].filter(
+        (tag): tag is string => !!tag,
+      ),
+    ),
+  ];
+}
+
+// IIIF text leans towards the interface language: the one chosen, the default, then those
+// configured (`readerLanguages`, `languages.ts`).
+readInterfaceLanguagesFrom(() => {
+  lookupChain();
+  return [chosen, byDefault, ...offered()];
+});
+
+/** One of Clover's interface strings, and the language it is written in. */
 export interface CloverString {
   text: string;
   /** The language the string came from; undefined when no language has the key. */
@@ -152,13 +233,53 @@ export function langWithin(
 }
 
 export const cloverI18n = {
-  /** The language set, or else the first of the reader's that Clover has strings for. */
+  /**
+   * Clover's interface language: the one the visitor chose, else the first of the chain
+   * whose strings have loaded.
+   */
   get language(): string {
-    return language ?? lookupChain().find((lng) => resources[lng]) ?? "en";
+    return chosen ?? lookupChain().find((lng) => resources[lng]) ?? "en";
+  },
+
+  /** The interface language the visitor chose, if they chose one. */
+  get chosenLanguage(): string | undefined {
+    return chosen;
   },
 
   /**
-   * The language Clover's strings are in: the first of the lookup chain that has any. A
+   * The tag Clover has strings for that speaks `lng` (`zh-Hans` for `zh-CN`, `en` for
+   * `en-US`), shipped or given by the page; none where it has no strings for it.
+   */
+  stringsFor(lng: string): string | undefined {
+    return speaks(lng);
+  },
+
+  /**
+   * The interface languages to offer, and the one in use (`chosen`): the default (the
+   * visitor's, where Clover has strings for it), then the languages configured, each as
+   * the tag Clover has strings for. A choice is worth offering only where there are two
+   * or more.
+   */
+  interfaceLanguages(): { languages: string[]; chosen: string } {
+    const languages = offeredLanguages();
+    return { languages, chosen: (chosen && speaks(chosen)) || byDefault };
+  },
+
+  /**
+   * Speak `lng` whatever the visitor's languages, as their choice of interface language;
+   * none goes back to the default. Settles once its strings have loaded, or failed to.
+   *
+   *     await cloverI18n.chooseInterfaceLanguage("fr");
+   */
+  chooseInterfaceLanguage(lng?: string): Promise<void> {
+    chosen = lng || undefined;
+    picked = chosen ? [...new Set([...picked, chosen])] : [];
+    notify();
+    return loadFor(lookupChain());
+  },
+
+  /**
+   * The language Clover's interface strings are in: the first of the lookup chain that has any. A
    * language set with no strings of its own resolves to the next, English at the last.
    */
   get resolvedLanguage(): string {
@@ -170,9 +291,9 @@ export const cloverI18n = {
     );
   },
 
-  changeLanguage(lng: string) {
-    language = lng;
-    notify();
+  /** As `chooseInterfaceLanguage` does: i18next's name for it. */
+  changeLanguage(lng: string): Promise<void> {
+    return cloverI18n.chooseInterfaceLanguage(lng);
   },
 
   /** A string and the language it came from, which a missing key leaves in another. */
@@ -227,7 +348,7 @@ export const cloverI18n = {
    * Settles once the language Clover speaks has loaded, or failed to: for a server render,
    * or a test, that needs the strings in place before it draws.
    *
-   *     await initCloverI18n({ lng: "fr" }).ready();
+   *     await initCloverI18n({ languages: ["fr"] }).ready();
    */
   ready(): Promise<void> {
     return loadFor(lookupChain());
@@ -252,8 +373,11 @@ export type CloverI18n = typeof cloverI18n;
 if (typeof document !== "undefined") lookupChain();
 
 /**
- * Set Clover's language and add or override strings. Safe to call more than once: each
- * call merges its `resources` and applies any `lng` or `fallbackLng` it is given.
+ * Configure Clover's interface language (`languages`, or `lng` for one) and add or
+ * override strings. Safe to call more than once: each call merges its `resources` and
+ * applies any `languages`, `lng` or `fallbackLng` it is given. A visitor whose language
+ * Clover has strings for still sees theirs first, with yours offered beside it; to speak
+ * one language whatever the visitor's, `chooseInterfaceLanguage`.
  */
 export function initCloverI18n(options: CloverI18nOptions = {}): CloverI18n {
   for (const [lng, namespaces] of Object.entries(options.resources ?? {})) {
@@ -269,7 +393,23 @@ export function initCloverI18n(options: CloverI18nOptions = {}): CloverI18n {
     fallbacks =
       options.fallbackLng === false ? [] : [options.fallbackLng].flat();
   }
-  if (options.lng) language = options.lng;
+  const before = configured.join();
+  if (options.languages !== undefined) {
+    configured = [options.languages].flat().filter(Boolean);
+  } else if (options.lng) {
+    configured = [options.lng];
+  }
+  /*
+   * New languages for the site: what was chosen before is offered only where they or the
+   * visitor's own still name it (Mat, 2026-11-05: "toggling languages off does not remove
+   * them as options"), and an interface language chosen that they do not goes back to the
+   * visitor's.
+   */
+  if (configured.join() !== before) {
+    picked = [];
+    const kept = [...visitorLanguages(), ...offered()].map(speaks);
+    if (chosen && !kept.includes(speaks(chosen))) chosen = undefined;
+  }
   notify();
   return cloverI18n;
 }

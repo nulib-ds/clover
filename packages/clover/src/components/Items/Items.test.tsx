@@ -317,10 +317,9 @@ describe("Items standalone", () => {
 
   // Clover's own strings in a language written right to left, as a page may give it one.
   it("writes Clover's strings right to left in a language written so", async () => {
-    initCloverI18n({
-      lng: "ar",
+    void initCloverI18n({
       resources: { ar: { clover: { commonViewAll: "عرض الكل" } } },
-    });
+    }).chooseInterfaceLanguage("ar");
     const fetch = vi.fn(async () => new Response(JSON.stringify(collection)));
     render(<Clover.Items iiifContent={collection.id} request={{ fetch }} />);
     const all = await screen.findByRole("link", { name: "عرض الكل" });

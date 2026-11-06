@@ -42,7 +42,7 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    */
   panelSections?: readonly PanelSection[];
   /**
-   * What a panel section's tab or heading says, in place of Clover's own word for it:
+   * What a panel section's tab or heading says, in place of its word in Clover's interface language:
    * `{ annotations: "Chapters" }`, or a word by language tag to say it in several (the
    * Panel's `labels`).
    */
@@ -54,6 +54,13 @@ export type DefaultProps = Omit<RootProps, "children"> & {
    * it says of itself comes in several (the Panel's `languages`). Default `true`.
    */
   languages?: boolean;
+  /**
+   * Default, Document and Gallery: whether the panel's language toggle, beside its About
+   * heading, also offers Clover's interface languages (its control labels, section
+   * titles and announcements) that the resource has none of, the visitor's and the
+   * site's, where they differ (the Panel's `interfaceLanguages`). Default `true`.
+   */
+  interfaceLanguages?: boolean;
   /** The thumbnails under the Body: a layout, or `false` for none. Default `slider`. */
   items?: Exclude<ItemsLayout, "pager"> | false;
   /**
@@ -106,6 +113,7 @@ export function Default({
   panelLabels,
   download = true,
   languages = true,
+  interfaceLanguages = true,
   items = "slider",
   singleItem = false,
   storageKey = "clover-template-default",
@@ -211,6 +219,7 @@ export function Default({
             labels={panelLabels}
             download={download}
             languages={languages}
+            interfaceLanguages={interfaceLanguages}
             // With no title over them, the sections take its place in the outline.
             headingLevel={header ? below(headingLevel) : headingLevel}
           />

@@ -479,13 +479,18 @@ describe("Clover's elements", () => {
       ).toBeGreaterThan(0),
     );
     // Now Clover speaks the page's French: Preact would leave `lang=""` behind.
-    await initCloverI18n({ lng: "fr" });
-    await waitFor(() =>
-      expect(element.querySelectorAll('button[lang="en"]')).toHaveLength(0),
-    );
-    await waitFor(() =>
-      expect(element.querySelectorAll('[lang=""]')).toHaveLength(0),
-    );
+    const i18n = await initCloverI18n();
+    await i18n.chooseInterfaceLanguage("fr");
+    try {
+      await waitFor(() =>
+        expect(element.querySelectorAll('button[lang="en"]')).toHaveLength(0),
+      );
+      await waitFor(() =>
+        expect(element.querySelectorAll('[lang=""]')).toHaveLength(0),
+      );
+    } finally {
+      await i18n.chooseInterfaceLanguage();
+    }
   });
 
   it("puts the elements' styles in the document once, however many there are", async () => {

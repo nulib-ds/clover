@@ -47,8 +47,8 @@ schedule excuses a failure.
   `h7` is no heading, and names the group it heads instead (`ui/heading.ts`; Mat,
   2026-10-21), since an `aria-level` past 6 reads as 2 in JAWS, and in TalkBack with
   Chrome.
-- Mark each of Clover's strings, never a container (3.1.2). An element that shows a
-  Clover string, or is named by one, carries `lang={langOf(key)}`. A container's name in
+- Mark each word of Clover's interface language (its control labels, section titles and
+  announcements), never a container (3.1.2). An element that shows one, or is named by one, carries `lang={langOf(key)}`. A container's name in
   another language is a hidden element's, reached through `aria-labelledby`
   (`useContainerName`). No Clover root sets `lang`, because hosts put their own content
   inside it.

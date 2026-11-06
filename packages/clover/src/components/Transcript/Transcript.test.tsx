@@ -190,16 +190,17 @@ describe("Transcript", () => {
   });
 
   // Mat, 2026-10-28: "there should be one language toggle. always let root win".
-  it("offers no languages of its own where the Root offers them, and reads in the Root's", async () => {
+  it("offers no languages of its own where About draws the Root's, and reads in the Root's", async () => {
     const files = (languagesJson as any).items[0].annotations[0].items[0].body
       .items;
-    render(
+    const { container } = render(
       <Clover.Root
         iiifContent={languagesJson}
         language="it"
         request={{ fetch }}
       >
         <Spy />
+        <Clover.About />
         <Clover.Transcript />
       </Clover.Root>,
     );
@@ -208,8 +209,13 @@ describe("Transcript", () => {
     await waitFor(() =>
       expect(fetch).toHaveBeenCalledWith(files[1].id, expect.anything()),
     );
-    expect(screen.queryByRole("radio", { name: /^IT / })).toBeNull();
-    expect(screen.queryByRole("radio", { name: /^EN / })).toBeNull();
+    // About's toggle is the one choice: the Transcript offers none of its own.
+    expect(
+      await screen.findByRole("group", { name: "Language" }),
+    ).toBeInTheDocument();
+    const transcript =
+      container.querySelector<HTMLElement>(".clover-transcript")!;
+    expect(within(transcript).queryByRole("radio")).toBeNull();
   });
 
   it("shows a transcript as plain text in its paragraphs, read as the file is encoded (Cookbook 0017)", async () => {

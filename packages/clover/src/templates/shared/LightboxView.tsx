@@ -26,6 +26,7 @@ export default function LightboxView({
   panelLabels,
   download = true,
   languages = true,
+  interfaceLanguages = true,
   storageKey,
   collapseControls,
   canvasOptions,
@@ -125,6 +126,7 @@ export default function LightboxView({
           labels={panelLabels}
           download={download}
           languages={languages}
+          interfaceLanguages={interfaceLanguages}
           // A level under the lightbox's title.
           headingLevel={(headingLevel ?? 3) + 1}
         />

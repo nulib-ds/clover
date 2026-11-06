@@ -9,7 +9,7 @@ import { languageProps } from "./direction";
  * Props that name a container (a `nav`, a list, a group), and the element they may need.
  *
  * A name in the page's language, or in none given, is the container's `aria-label`. One
- * in another language (a French label on an English page, Clover's strings in the reader's
+ * in another language (a French label on an English page, Clover's interface strings in the reader's
  * language) cannot be: `aria-label` takes the container's language, and a `lang` on the
  * container would pass to everything inside it. Then the name goes in a hidden element
  * carrying its `lang`, which `aria-labelledby` points at; render `node` anywhere in the

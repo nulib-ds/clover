@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -16,6 +17,7 @@ import type { AnnotationsInput } from "../../core/annotation-collection";
 import type { ContentStateOutput } from "../../core/content-state";
 import type { IIIFContent } from "../../core/load";
 import { type CloverRequest, requestKey } from "../../core/request";
+import { cloverI18n } from "../../i18n/config";
 import type { CloverContextValue } from "../../react/context";
 import { useRootContentState } from "../../react/useContentStateOutput";
 import { type BodyRenderer, sameRenderers } from "../Body/renderers";
@@ -164,9 +166,13 @@ export function useRootState<Props extends RootStateOptions>({
   if (!sameRenderers(kept.current, renderers)) kept.current = renderers;
   const stableRenderers = kept.current;
   /*
-   * The language the reader chose to read IIIF text in (the Panel's languages), until the
-   * page gives the Root another `language`, which wins again (React's state adjusted as
-   * it renders, so no frame shows the old choice).
+   * The language chosen to read IIIF text in (About's languages), until the page gives
+   * the Root another `language`, which wins again (React's state adjusted as it renders,
+   * so no frame shows the old choice). Until one is chosen, the Root's `language`, else an
+   * interface language the visitor chose, else the visitor's (`readerLanguages`). Choosing one
+   * moves Clover's interface language with it, where Clover has strings for it (Mat,
+   * 2026-11-05: "toggling to `es` … should import the `i18n` language code map for UI"),
+   * as choosing an interface language moves the values.
    */
   const [chosen, setChosen] = useState<string>();
   const [chosenUnder, setChosenUnder] = useState(language);
@@ -174,15 +180,60 @@ export function useRootState<Props extends RootStateOptions>({
     setChosenUnder(language);
     setChosen(undefined);
   }
-  const reading = chosen ?? language;
+  /*
+   * Another resource: the language chosen for this one goes, and the interface language
+   * it moved goes back to the visitor's (Mat, 2026-11-05: "I toggled to a different
+   * resource and the languages set for old resource did not reset"). An interface
+   * language chosen for itself, one only the site offers, stays: it is the page's.
+   */
+  const moved = useRef<string | undefined>(undefined);
+  const [chosenFor, setChosenFor] = useState(key);
+  if (chosenFor !== key) {
+    setChosenFor(key);
+    setChosen(undefined);
+  }
+  useEffect(() => {
+    const spoken = moved.current;
+    moved.current = undefined;
+    if (spoken && cloverI18n.chosenLanguage === spoken)
+      void cloverI18n.chooseInterfaceLanguage();
+  }, [key]);
+  const interfaceChosen = useSyncExternalStore(
+    cloverI18n.subscribe,
+    () => cloverI18n.chosenLanguage,
+    () => cloverI18n.chosenLanguage,
+  );
+  const reading = chosen ?? language ?? interfaceChosen;
+  const chooseLanguage = useCallback((tag: string) => {
+    setChosen(tag);
+    const spoken = cloverI18n.stringsFor(tag);
+    moved.current = spoken;
+    if (spoken) void cloverI18n.chooseInterfaceLanguage(spoken);
+  }, []);
+  // How many of the Root's language toggles are drawn (About's, one per About).
+  const [toggles, setToggles] = useState(0);
+  const drawsToggle = useCallback(() => {
+    setToggles((count) => count + 1);
+    return () => setToggles((count) => count - 1);
+  }, []);
+  const toggleDrawn = toggles > 0;
   const context = useMemo(
     () => ({
       clover,
       language: reading,
       renderers: stableRenderers,
-      chooseLanguage: setChosen,
+      chooseLanguage,
+      toggleDrawn,
+      drawsToggle,
     }),
-    [clover, reading, stableRenderers],
+    [
+      clover,
+      reading,
+      stableRenderers,
+      chooseLanguage,
+      toggleDrawn,
+      drawsToggle,
+    ],
   );
   return [context, status, rest];
 }

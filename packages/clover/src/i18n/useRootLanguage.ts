@@ -6,11 +6,12 @@ import { useCloverTranslation } from "./useCloverTranslation";
 
 /**
  * A Clover root's reading of the page's language (a `Root`, or a part shown outside one),
- * for Clover's strings to be compared with (WCAG 3.1.2).
+ * for Clover's interface strings to be compared with (WCAG 3.1.2).
  *
- * Clover's strings are in the interface language: the page's where Clover has strings for
- * it, else the reader's browser's, or the one a host sets. So it can differ from the page's. A string in another language than the page's carries its own
- * `lang`, on the element that shows it or is named by it (`langOf`). No root carries one:
+ * Clover's interface language is the visitor's where Clover has strings for it, else the
+ * site's (`config.ts`), so it can differ from the page's. A string in another language
+ * than the page's carries its own `lang`, on the element that shows it or is named by it
+ * (`langOf`). No root carries one:
  * a root also holds the host's own content, which is in the page's language.
  *
  * The page's language is a `lang` given to the root, else the nearest `lang` around it,
