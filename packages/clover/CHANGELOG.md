@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.5.8] - 2026-11-06
+
 ### Added
 
 - **A Manifest read down the page in the Default template.** Where its `viewingDirection`
