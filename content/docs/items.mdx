@@ -26,6 +26,11 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
 <LivePart
   part="Items"
   body
+  beside={{
+    when: { layout: ["slider"], orientation: ["vertical"] },
+    width: "8rem",
+    height: 480,
+  }}
   knobs={[
     {
       prop: "layout",
@@ -33,12 +38,18 @@ import { LivePart } from "docs/components/Clover4/LiveExample";
       options: ["slider", "list", "grid", "masonry", "pager"],
     },
     {
+      prop: "orientation",
+      value: "horizontal",
+      options: ["horizontal", "vertical"],
+      when: { layout: ["slider"] },
+    },
+    {
       prop: "style.--clover-items-height",
       value: 8,
       format: "{}rem",
       min: 4,
       max: 16,
-      when: { layout: ["slider"] },
+      when: { layout: ["slider"], orientation: ["horizontal"] },
       label: "Items picture height, in rem",
     },
     {
@@ -66,6 +77,7 @@ arrow keys and the pager's steps with it.
 | Prop            | Type                                                   | Default                         | Description                                                                                                                                                                                                                                                                                                                      |
 | --------------- | ------------------------------------------------------ | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `layout`        | `"slider" \| "list" \| "grid" \| "masonry" \| "pager"` | `"slider"`                      | Thumbnails in a row, a column, a grid, or masonry (a grid whose pictures keep their proportions, in reading order), or one at a time.                                                                                                                                                                                            |
+| `orientation`   | `"horizontal" \| "vertical"`                           | `"horizontal"`                  | The slider's direction: a row, or a column that fills the height of what holds it, its pictures as wide as the column.                                                                                                                                                                                                           |
 | `secondary`     | `"summary" \| "navDate" \| "none"`                     | `"summary"`                     | The line under an item's label, where it has one (a Collection's members do): its summary, its date, or none.                                                                                                                                                                                                                    |
 | `labels`        | `boolean`                                              | `true`                          | Each item's label, and the line under it, beside its picture. `false` shows the pictures alone: the labels are hidden from sight but kept as each item's name for assistive technology.                                                                                                                                          |
 | `of`            | `"views" \| "members" \| "targets" \| "annotations"`   | `"views"`                       | In a `Root`: its views, its Collection's members, a content state's targets (two or more), each opening its Manifest at its place, or annotations walked as one whole: an AnnotationPage or AnnotationCollection given as the content, else an AnnotationCollection the Manifest's pages are part of, each picked on its Canvas. |
@@ -127,6 +139,32 @@ Use `layout="list"` for a column, each item's title beside its picture.
 
 </Example>
 
+### Vertical slider
+
+Use `orientation="vertical"` for a filmstrip beside the Body: a column that fills the
+height of what holds it, its pictures as wide as the column.
+
+<Example>
+<PartDemo
+  part="Items"
+  props={{ orientation: "vertical", labels: false }}
+  body
+  side="8rem"
+  height={480}
+/>
+
+```jsx
+<Clover.Root
+  iiifContent={url}
+  style={{ display: "grid", gridTemplateColumns: "8rem 1fr", height: 480 }}
+>
+  <Clover.Items orientation="vertical" labels={false} />
+  <Clover.Body />
+</Clover.Root>
+```
+
+</Example>
+
 ### One at a time
 
 Use `layout="pager"` for the count with Previous and Next, and no thumbnails. It steps a
@@ -145,7 +183,8 @@ spread at a time through a paged book.
 
 Size the thumbnails with CSS: `--clover-items-height` for a slider's pictures (default
 `8rem`), `--clover-items-size` for a grid's columns (`10rem`), `--clover-items-gap`
-between them (`1rem`).
+between them (`1rem`). `--clover-items-inset` adds room at a slider's ends (`0`), so its
+first and last items rest clear of its arrows.
 
 <Example>
 <PartDemo

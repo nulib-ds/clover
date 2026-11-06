@@ -288,6 +288,34 @@ describe("Items in a Root", () => {
     expect(options[1].querySelector("figcaption")).not.toHaveAttribute("style");
   });
 
+  it("runs a slider down a column with orientation vertical, its arrows Up and Down", async () => {
+    const { container } = renderInRoot({ orientation: "vertical" });
+    const options = await screen.findAllByRole("option");
+    expect(container.querySelector(".clover-items")).toHaveAttribute(
+      "data-orientation",
+      "vertical",
+    );
+    expect(screen.getByRole("listbox")).toHaveAttribute(
+      "aria-orientation",
+      "vertical",
+    );
+    options[0].focus();
+    fireEvent.keyDown(options[0], { key: "ArrowDown" });
+    expect(options[1]).toHaveFocus();
+    expect(options[1]).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("takes orientation for a slider only", async () => {
+    const { container } = renderInRoot({
+      layout: "grid",
+      orientation: "vertical",
+    });
+    await screen.findAllByRole("option");
+    expect(container.querySelector(".clover-items")).not.toHaveAttribute(
+      "data-orientation",
+    );
+  });
+
   it("lays out as a list or a grid", async () => {
     const { container } = renderInRoot({ layout: "grid" });
     await screen.findAllByRole("option");

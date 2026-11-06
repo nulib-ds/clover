@@ -9,6 +9,7 @@ export const items: ElementSpec = {
       prop: "layout",
       type: ["slider", "list", "grid", "masonry", "pager"],
     },
+    orientation: { prop: "orientation", type: ["horizontal", "vertical"] },
     secondary: { prop: "secondary", type: ["summary", "navDate", "none"] },
     labels: { prop: "labels", type: "boolean" },
     size: { prop: "size", type: ["large", "small"] },
@@ -37,6 +38,11 @@ export const itemsDocs: ElementDocs = {
       description:
         "A scrolling row, a column, a wrapping grid, masonry (a grid whose pictures keep their proportions, packed in reading order), or a pager: Previous, the position and Next, with no thumbnails.",
       default: "slider",
+    },
+    orientation: {
+      description:
+        "The slider's direction: a row, or a column that fills the height of what holds it, its pictures as wide as the column.",
+      default: "horizontal",
     },
     secondary: {
       description:

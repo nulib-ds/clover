@@ -49,6 +49,12 @@ export interface ItemsProps
    */
   layout?: ItemsLayout;
   /**
+   * The slider's direction: a row (`horizontal`), or a column (`vertical`) that fills
+   * the height of what holds it, as a filmstrip beside the Body, its pictures as wide as
+   * the column. Default `"horizontal"`.
+   */
+  orientation?: "horizontal" | "vertical";
+  /**
    * The line under an item's label, where it has one (a Collection's members do): its
    * `summary` (the default), its `navDate`, or `none`. Default `"summary"`.
    */
@@ -387,6 +393,7 @@ export function ItemsView({
   navigation,
   rtl = false,
   layout = "slider",
+  orientation = "horizontal",
   thumbnailSize = 200,
   request,
   language,
@@ -418,6 +425,7 @@ export function ItemsView({
   const contrast = useHighContrast(highContrast);
 
   const slider = layout === "slider";
+  const vertical = slider && orientation === "vertical";
   const listbox = navigation === "id";
   /*
    * Masonry is a grid whose items span the rows their heights need (`masonry.ts`): its
@@ -441,12 +449,14 @@ export function ItemsView({
   const track = useScrollTrack({
     align: listbox ? "center" : "start",
     itemCount: items.length,
+    axis: vertical ? "y" : "x",
   });
   const held = useRef<number | undefined>(undefined);
   useEffect(() => () => window.clearTimeout(held.current), []);
   const roving = useRovingFocus(items.length, selected, {
-    orientation:
-      layout === "slider"
+    orientation: vertical
+      ? "vertical"
+      : layout === "slider"
         ? "horizontal"
         : layout === "list"
           ? "vertical"
@@ -568,7 +578,13 @@ export function ItemsView({
     positioned(item) ? langOf("canvasPosition") : undefined;
 
   const trackStyle: React.CSSProperties | undefined = slider
-    ? { display: "flex", margin: 0, padding: 0, listStyle: "none" }
+    ? {
+        display: "flex",
+        flexDirection: vertical ? "column" : undefined,
+        margin: 0,
+        padding: 0,
+        listStyle: "none",
+      }
     : undefined;
   const slideStyle: React.CSSProperties | undefined = slider
     ? { flex: "0 0 auto", scrollSnapAlign: listbox ? "center" : "start" }
@@ -625,7 +641,15 @@ export function ItemsView({
           viewBox="0 0 16 16"
         >
           <path
-            d={(step === "next") !== rtl ? "M6 3l5 5-5 5" : "M10 3L5 8l5 5"}
+            d={
+              vertical
+                ? step === "next"
+                  ? "M3 6l5 5 5-5"
+                  : "M3 10l5-5 5 5"
+                : (step === "next") !== rtl
+                  ? "M6 3l5 5-5 5"
+                  : "M10 3L5 8l5 5"
+            }
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -645,6 +669,7 @@ export function ItemsView({
         ref={root.ref}
         className={join("clover-items", className)}
         data-layout={layout}
+        data-orientation={vertical ? "vertical" : undefined}
         data-navigation={navigation}
         {...highContrastProps(contrast)}
         {...rest}
@@ -699,11 +724,13 @@ export function ItemsView({
                 {...listName}
                 // A grid's arrows move both ways: no orientation is claimed for it.
                 aria-orientation={
-                  slider
-                    ? "horizontal"
-                    : layout === "list"
-                      ? "vertical"
-                      : undefined
+                  vertical
+                    ? "vertical"
+                    : slider
+                      ? "horizontal"
+                      : layout === "list"
+                        ? "vertical"
+                        : undefined
                 }
                 className="clover-items-track"
                 style={trackStyle}

@@ -13,6 +13,26 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **A vertical slider.** `Items` takes `orientation="vertical"` (`orientation` on
+  `<clover-items>`): the slider runs down a column that fills the height of what holds it,
+  as a filmstrip beside the Body, its pictures as wide as the column, Up and Down its arrow
+  keys. Give the container a height, as a grid or a `SplitPane` does:
+
+  ```jsx
+  <Clover.Root
+    iiifContent={url}
+    style={{ display: "grid", gridTemplateColumns: "8rem 1fr", height: 480 }}
+  >
+    <Clover.Items orientation="vertical" />
+    <Clover.Body />
+  </Clover.Root>
+  ```
+
+- **`--clover-items-inset`**, room at a slider's ends (default `0`), so its first and last
+  items rest clear of its arrows.
+- **Budgets.** The vertical slider's styles and keys add about 0.2 kB gzip to each
+  template and 0.45 kB to each template's first view and the element pages; the budgets it
+  crossed are raised to fit: the Default template to first view is 97.9 kB, from 97.4 kB.
 - **Japanese and Chinese.** Clover's interface language (its control labels, section
   titles and announcements) can be Japanese (`ja`), Simplified Chinese (`zh-Hans`) and
   Traditional Chinese (`zh-Hant`), each loaded the first time Clover is to speak it. A

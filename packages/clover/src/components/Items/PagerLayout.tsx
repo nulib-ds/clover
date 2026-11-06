@@ -32,6 +32,7 @@ export default function PagerLayout({
   forwardedRef,
   /* eslint-disable @typescript-eslint/no-unused-vars -- Items' own, not the nav's */
   layout,
+  orientation,
   thumbnailSize,
   renderItem,
   header,

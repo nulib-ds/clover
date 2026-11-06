@@ -12,10 +12,12 @@ import {
   type Flavor,
   type Knob,
   type Line,
+  type LiveBeside,
   type Plain,
   type TokenKind,
   type Values,
   codeLines,
+  holds,
   initialValues,
   knobId,
   knobProps,
@@ -261,6 +263,7 @@ export interface LiveDemo {
   body?: boolean;
   /** A box of this height around the part, which scrolls. */
   box?: string;
+  beside?: LiveBeside;
   /** The height of the box around Canvas, Timeline or Scene. */
   height?: number;
 }
@@ -303,6 +306,7 @@ function Demo({
     );
   }
   if (demo.kind === "map") return <MapDemo mock={path} props={props} />;
+  const side = demo.beside && holds(demo.beside.when, knobs, values);
   return (
     <PartDemo
       part={demo.part as PartName}
@@ -310,6 +314,8 @@ function Demo({
       resource={demo.resource}
       body={demo.body}
       box={(box?.height as string | undefined) ?? demo.box}
+      side={side ? demo.beside!.width : undefined}
+      height={side ? demo.beside!.height : undefined}
       rootProps={knobProps(knobs, values, "root")}
     />
   );
