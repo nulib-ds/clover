@@ -212,9 +212,15 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
 
     const [cues, setCues] = useState<Cue[]>([]);
     const [paragraphs, setParagraphs] = useState<string[]>([]);
+    /*
+     * A file that could not be read (a server that refuses it, or sends it without CORS) is
+     * said, as a Body says what it could not load, never an empty box.
+     */
+    const [failed, setFailed] = useState<Error | null>(null);
     useEffect(() => {
       setCues([]);
       setParagraphs([]);
+      setFailed(null);
       if (!track) return;
       let live = true;
       (track.read === "cues"
@@ -224,7 +230,10 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
         : loadText(track.id, clover.request).then(
             (text) => live && setParagraphs(paragraphsOf(text)),
           )
-      ).catch(() => undefined);
+      ).catch((error: unknown) => {
+        if (live)
+          setFailed(error instanceof Error ? error : new Error(String(error)));
+      });
       return () => {
         live = false;
       };
@@ -519,7 +528,19 @@ export const Transcript = forwardRef<HTMLElement, TranscriptProps>(
       >
         {languages && (actions ? createPortal(languages, actions) : languages)}
         {finding}
-        {track.read === "text" ? (
+        {failed ? (
+          /*
+           * As a Body's alert says it (`Body/BodyAlert.tsx`): a copy, as the two load on
+           * different pages (AGENTS.md, "Share code only where both copies load on one
+           * page"). Clover's interface words, then the error's own, in English.
+           */
+          <div className="clover-status" data-status="error" role="alert">
+            <p {...languageProps(langOf("statusError"))}>{t("statusError")}</p>
+            <p className="clover-status-detail" lang="en">
+              {failed.message}
+            </p>
+          </div>
+        ) : track.read === "text" ? (
           // Untimed: the words alone, a paragraph each, nothing to press.
           <div className="clover-transcript-body" {...languageProps(lang)}>
             {paragraphs.map((paragraph, index) => (
