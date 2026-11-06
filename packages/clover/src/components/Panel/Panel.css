@@ -100,8 +100,9 @@
  * the templates set while it floats): the close button sits on the spine, the pane's
  * inner edge, mostly over the page, and stays there however far the panel scrolls. The pane
  * itself does not scroll; the panel does, within it, and is left unpositioned so the
- * button is placed against the pane, outside what scrolls and is clipped. The room the
- * button would take in the panel's first row is given back.
+ * button is placed against the pane, outside what scrolls and is clipped; at its foot or
+ * top, the page scrolls on, as it does past the docked panel (`Default.css`). The room
+ * the button would take in the panel's first row is given back.
  */
 /* Outweighs a template's own scrolling pane, whichever stylesheet comes later. */
 .clover-split-pane[data-spine] {
@@ -114,7 +115,6 @@
   box-sizing: border-box;
   height: 100%;
   overflow-y: auto;
-  overscroll-behavior: contain;
   touch-action: pan-y;
   /*
    * A heading sticks inside what scrolls, inside its padding: so the panel keeps none

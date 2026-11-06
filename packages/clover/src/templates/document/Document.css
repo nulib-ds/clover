@@ -186,11 +186,11 @@ button.clover-template-document-sidebar-toggle:focus-visible {
   /*
    * Its height the row's, never its list's: size containment keeps the thumbnails from
    * making the template taller than its height (or, as it grows in a short box, as tall
-   * as all of them), as the panel's does; it scrolls within.
+   * as all of them), as the panel's does; it scrolls within, and at its foot or top the
+   * page scrolls on, as it does past the panel.
    */
   contain: size;
   overflow-y: auto;
-  overscroll-behavior: contain;
   padding: var(--clover-inset);
   scroll-padding-top: calc(2 * var(--clover-inset) + var(--clover-control));
   background-color: var(--clover-color-secondary, #fff);

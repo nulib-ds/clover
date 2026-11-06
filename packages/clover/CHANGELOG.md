@@ -11,6 +11,19 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **The page scrolls on past the information panel's end.** Once the Panel, docked or
+  floating over the Body, is scrolled to its foot or its top, the next wheel or swipe
+  over it scrolls the page, in every section (About, Contents, Search, Annotations, the
+  Transcript and the rest); so do Document's page thumbnails. Before, the wheel stopped
+  there, and the page would not move until the pointer left them.
+- **Budgets.** The stylesheets shrink by up to 12 bytes gzip. The elements' bundles grow
+  by up to 49 bytes, since their chunks are named by their contents and the CSS changed
+  the names they import, and four of their budgets are raised to the next 50 bytes: a
+  `<clover-viewer>` to 130.35 kB from 130.3 kB, in Document to 137.45 kB and in the
+  Gallery to 133.85 kB, and a layout of containers to 125.9 kB.
+
 ## [4.5.3] - 2026-11-05
 
 ### Changed

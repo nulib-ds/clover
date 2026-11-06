@@ -211,7 +211,9 @@
  * `styles.css`. Beside the rest, in its own space, when there is room for both (the
  * template measures its own width): its width the split's, 24rem to start, then wherever
  * its bar is dragged; its height the Split's, however long its sections run: size
- * containment keeps its content from making the row taller, and it scrolls within.
+ * containment keeps its content from making the row taller, and it scrolls within. At
+ * its foot or its top, the next wheel or swipe scrolls the page (Mat, 2026-11-05: "once
+ * it hits bottom. the window should begin to scroll"), so nothing contains its overscroll.
  */
 .clover-template-panes {
   position: relative;
@@ -220,7 +222,6 @@
 .clover-template-panel {
   contain: size;
   overflow-y: auto;
-  overscroll-behavior: contain;
   background-color: var(--clover-color-secondary, #fff);
 }
 
