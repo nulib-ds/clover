@@ -112,7 +112,21 @@ export default async function Page(props: Props) {
           trail: await trailOf(route),
         });
   return (
-    <Wrapper toc={toc} metadata={metadata} sourceCode={sourceCode}>
+    <Wrapper
+      toc={toc}
+      /*
+       * A 3.x page is out of the site's search (Pagefind): Nextra marks a page's `main`
+       * as its body (`data-pagefind-body`) unless it is `searchable: false`, and Pagefind
+       * then leaves out every page without one. It stays in the sitemap, the Markdown and
+       * `llms.txt`, which read the front matter, not this.
+       */
+      metadata={
+        earlier
+          ? ({ ...metadata, searchable: false } as typeof metadata)
+          : metadata
+      }
+      sourceCode={sourceCode}
+    >
       <script
         type="application/ld+json"
         // JSON, with `<` escaped so no value can close the script.
@@ -121,19 +135,10 @@ export default async function Page(props: Props) {
         }}
       />
       {earlier ? (
-        /*
-         * For the site's search (Pagefind): a result's title says "(3.x)", the version is
-         * a filter, and the page's words weigh half of Clover 4's, so a search for a
-         * part finds its Clover 4 page first.
-         */
-        <div
-          data-pagefind-meta={`title:${title}`}
-          data-pagefind-filter="version:3.x"
-          data-pagefind-weight="0.5"
-        >
+        <>
           <EarlierVersion />
           <MDXContent {...props} params={params} />
-        </div>
+        </>
       ) : (
         <MDXContent {...props} params={params} />
       )}
