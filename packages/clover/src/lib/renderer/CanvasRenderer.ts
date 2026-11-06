@@ -62,6 +62,12 @@ export interface CanvasRendererOptions {
   maxZoomPixelRatio?: number;
   /** Smallest zoom, as a fraction of the home zoom (OpenSeadragon's `minZoomImageRatio`). */
   minZoomImageRatio?: number;
+  /**
+   * Whether the home view may enlarge the picture past `maxZoomPixelRatio` to fill the
+   * viewport. False, home stops at that zoom and centers the picture, smaller than the
+   * viewport. Default true.
+   */
+  upscale?: boolean;
   /** Seconds for an animation to close most of its distance. 0 disables animation. */
   animationTime?: number;
   /**
@@ -109,6 +115,7 @@ type Listener = (detail?: unknown) => void;
 const DEFAULTS = {
   maxZoomPixelRatio: 1.1,
   minZoomImageRatio: 0.9,
+  upscale: true,
   animationTime: 0.09,
   animationDuration: undefined as number | undefined,
   springStiffness: 6.5,
@@ -481,9 +488,10 @@ export class CanvasRenderer implements GestureTarget {
     bounds: Rect,
     rotation: number,
     { top, right, bottom, left }: Inset,
+    maxZoom = Infinity,
   ): CameraState {
     const { width, height } = this.viewport;
-    const { zoom } = fitCamera(
+    const fitted = fitCamera(
       bounds,
       {
         width: Math.max(1, width - left - right),
@@ -491,6 +499,7 @@ export class CanvasRenderer implements GestureTarget {
       },
       rotation,
     );
+    const zoom = Math.min(fitted.zoom, maxZoom);
     const center = anchoredCenter(
       rectCenter(bounds),
       { x: (width + left - right) / 2, y: (height + top - bottom) / 2 },
@@ -545,19 +554,23 @@ export class CanvasRenderer implements GestureTarget {
 
   getZoomLimits(): { min: number; max: number; home: number } {
     const home = this.homeCamera()?.zoom ?? 1;
-    /*
-     * maxZoomPixelRatio is CSS pixels per *image* pixel, and world units may differ from
-     * those. Measured against the sharpest image in the scene, so an inset photograph
-     * denser than the page it sits on can still be zoomed to its own full resolution.
-     */
-    const worldPerPixel = this.items.length
-      ? Math.min(...this.items.map((item) => pixelsToWorld(item).x))
-      : 1;
     return {
       home,
       min: home * this.options.minZoomImageRatio,
-      max: Math.max(home, this.options.maxZoomPixelRatio / worldPerPixel),
+      max: Math.max(home, this.closestZoom()),
     };
+  }
+
+  /**
+   * `maxZoomPixelRatio` is CSS pixels per *image* pixel, and world units may differ from
+   * those. Measured against the sharpest image in the scene, so an inset photograph
+   * denser than the page it sits on can still be zoomed to its own full resolution.
+   */
+  private closestZoom(): number {
+    const worldPerPixel = this.items.length
+      ? Math.min(...this.items.map((item) => pixelsToWorld(item).x))
+      : 1;
+    return this.options.maxZoomPixelRatio / worldPerPixel;
   }
 
   home(immediate = false): void {
@@ -966,7 +979,12 @@ export class CanvasRenderer implements GestureTarget {
     const upright =
       Math.round(this.camera.destination.rotation / turn) * turn || 0;
     // In the padded area.
-    return this.fit(this.worldBounds, upright, this.inset);
+    return this.fit(
+      this.worldBounds,
+      upright,
+      this.inset,
+      this.options.upscale ? Infinity : this.closestZoom(),
+    );
   }
 
   /**
