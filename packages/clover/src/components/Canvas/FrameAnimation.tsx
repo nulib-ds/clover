@@ -50,14 +50,11 @@ export interface AnimationState {
   /** How long it runs: the Canvas's `duration`, else its last frame's end. */
   total: number;
   playing: boolean;
-  /** Loop at the end: the `repeat` behavior to start with, then the reader's choice. */
-  repeat: boolean;
   /** Go to a frame: to its start. */
   setFrame: (frame: number) => void;
   /** Go to a time, playing on from it if it plays. */
   seek: (seconds: number) => void;
   setPlaying: (playing: boolean) => void;
-  setRepeat: (repeat: boolean) => void;
 }
 
 /**
@@ -194,7 +191,6 @@ export function useAnimation(
   }, [frames, duration]);
   const [time, setTime] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [repeat, setRepeat] = useState(loop);
   // A move by the reader, so a clock playing goes on from there.
   const [moved, setMoved] = useState(0);
   const now = useRef(0);
@@ -216,7 +212,6 @@ export function useAnimation(
   useEffect(() => {
     now.current = 0;
     setTime(0);
-    setRepeat(loop);
     const reduced =
       typeof matchMedia === "function" &&
       matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -244,7 +239,8 @@ export function useAnimation(
       const before = now.current;
       let time = from.time + (Date.now() - from.at) / 1000;
       if (time >= total) {
-        if (!repeat) {
+        // Looping where the Manifest or the Canvas says `repeat`.
+        if (!loop) {
           go(total);
           setPlaying(false);
           ended.current?.();
@@ -268,7 +264,7 @@ export function useAnimation(
     if (from.time !== now.current) go(from.time);
     timer = setTimeout(tick, wait(from.time));
     return () => clearTimeout(timer);
-  }, [playing, frames, total, repeat, moved]);
+  }, [playing, frames, total, loop, moved]);
 
   const frame = frameAt(frames, time);
   const shownKey = framesAt(frames, time, total).join(",");
@@ -286,11 +282,9 @@ export function useAnimation(
     time,
     total,
     playing,
-    repeat,
     setFrame,
     seek,
     setPlaying,
-    setRepeat,
   };
 }
 
@@ -317,17 +311,7 @@ export function FrameControls({
   sound?: { muted: boolean; toggle: () => void };
 }) {
   const { t, langOf } = useCloverTranslation();
-  const {
-    frame,
-    time,
-    total,
-    playing,
-    repeat,
-    setFrame,
-    seek,
-    setPlaying,
-    setRepeat,
-  } = animation;
+  const { frame, time, total, playing, setFrame, seek, setPlaying } = animation;
   // Where frames start, each once: the steps, as a recording's chapters are.
   const starts = useMemo(
     () => [...new Set(frames.map((each) => each.start))].sort((a, b) => a - b),
@@ -483,29 +467,6 @@ export function FrameControls({
           }}
         >
           {playing ? <PauseIcon /> : <PlayIcon />}
-        </TransportButton>
-        <TransportButton
-          words="frameRepeat"
-          button="repeat"
-          pressed={repeat}
-          onClick={() => setRepeat(!repeat)}
-        >
-          <svg
-            aria-hidden="true"
-            focusable="false"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-          >
-            <path
-              d="M3 7V6a2 2 0 0 1 2-2h7l-2-2M13 9v1a2 2 0 0 1-2 2H4l2 2"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
         </TransportButton>
         {sound && (
           <TransportButton

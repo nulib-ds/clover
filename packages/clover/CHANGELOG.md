@@ -45,16 +45,45 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   makes at once will see up to 16. A level 0 server still gets only its own tiles, and
   no tile passes a server's `maxWidth`, `maxHeight` or `maxArea`.
 
-- **Budgets.** The tile scheduling, reading the next view ahead and opening a view a page
-  at a time add about 1.35 kB gzip wherever a Canvas draws, and letting a refusal's body
-  go (below) 30 to 60 bytes to every entry. The budgets they crossed are raised to the
-  next 50 bytes: Canvas initial JS to 43.8 kB from 42.45 kB, Canvas to first view to
-  50.45 kB from 49.15 kB, Default and Document to first view to 99.7 kB and 95.7 kB from
-  98.35 kB and 94.3 kB, Timeline's initial JS and first view by 200 and 150 bytes,
-  Scene's and the Gallery's by 50 bytes each, and nine others by 1.3 to 1.45 kB.
+- **Budgets.** Measured from 4.5.9, a Canvas to first view adds about 1.6 kB gzip (the
+  tile scheduling, reading the next view ahead and opening a view a page at a time about
+  1.2 kB, the loading mark's one pass about 0.4 kB), and the Default and Document
+  templates to first view about 1.7 kB; letting a refusal's body go (below) adds 30 to 60
+  bytes to every entry, and loading a vertical slider's styles apart 0.16 kB to Items.
+  `styles.css` is 81 bytes lighter, as those styles left it, and `styles/core.css`, which
+  holds the loading mark's, 0.18 kB heavier. The budgets they crossed are raised to the
+  next 50 bytes: Canvas initial JS to 44.05 kB from 42.45 kB, Canvas to first view to
+  50.7 kB from 49.15 kB, Default and Document to first view to 100.05 kB and 96 kB from
+  98.35 kB and 94.3 kB, `styles/core.css` to 9.1 kB from 8.9 kB, Timeline's, Scene's and
+  the Gallery's by 400 to 700 bytes, and the elements' by about 1.9 kB.
 - **Text and print on the Canvas are crisper.** Each tile is drawn from its full level
   half a step more, where it had leaned toward the softer one beneath: a page's type at
   home now looks as sharp as OpenSeadragon or Atlas draw it. Nothing to change.
+- **The loading mark makes one pass.** Where it ran across over and over, it now draws
+  61.8% of the way, then 61.8% of what is left, and so on, each step a golden ratio
+  slower, and once nothing loads it runs to the end and fades. Every mark in one Body
+  (the Root's Manifest, a part's code, the Canvas's tiles) goes on with the same pass,
+  as does a Viewer's Body drawn afresh for another resource. A load quick enough never
+  shows it, as before; where less motion is asked for, the pass is half the pace and
+  fades without running to the end. Nothing to change; `.clover-loading` keeps its
+  name, and its line is still the accent.
+- **A vertical slider's styles load on their own.** Items' `orientation="vertical"`
+  slider, which the Default template draws for a Manifest read down the page, takes its
+  rules from `styles/items-vertical.css`, no longer in `styles.css` or
+  `styles/items.css`: they are adopted as the slider first draws, as a recording's, a
+  Scene's and a map's are, so a page without one loads none of them. Until they are in,
+  the slider draws nothing rather than a row; where they cannot load, it is a row. A page
+  that draws a vertical slider on the server imports
+  `@nulib/clover/styles/items-vertical.css`, so its first paint is styled; otherwise,
+  nothing to change.
+
+### Removed
+
+- **An animation's Repeat button.** An image sequence played as an animation (the
+  Cookbook's multimedia recipe) no longer offers Repeat: it loops where its Manifest or
+  Canvas has the `repeat` behavior, as it started before, and otherwise stops at its end.
+  Its button (`data-button="repeat"`) is gone, and the `frameRepeat` string from every
+  locale.
 
 ### Fixed
 

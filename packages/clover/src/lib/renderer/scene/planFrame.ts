@@ -194,28 +194,17 @@ export function planFrame(input: PlanInput): FramePlan {
     // sharpen the whole view a step while the target's many load.
     const middle = target - IN_FLIGHT_LEVELS;
     if (there === here && middle > 0) {
-      const m = pyramid.levels[middle];
-      const spanX = m.tileWidth * m.scaleFactor;
-      const spanY = m.tileHeight * m.scaleFactor;
-      const asked = new Set<number>();
+      const asked = new Set<string>();
       for (const address of fine) {
         const tile = pyramid.tile(address);
         if (has(tile.url)) continue;
-        // The middle tile under this one's center.
-        const { region: r } = tile;
-        const col = Math.min(
-          m.cols - 1,
-          Math.floor((r.x + r.width / 2) / spanX),
-        );
-        const row = Math.min(
-          m.rows - 1,
-          Math.floor((r.y + r.height / 2) / spanY),
-        );
-        const index = row * m.cols + col;
-        if (asked.has(index)) continue;
-        asked.add(index);
-        const under = { level: middle, col, row };
-        want(pyramid, under, MIDDLE_BAND + distance(under));
+        // The middle tile under this one, on the same grid.
+        for (const under of tilesInRegion(pyramid, middle, tile.region)) {
+          const key = `${under.col},${under.row}`;
+          if (asked.has(key)) continue;
+          asked.add(key);
+          want(pyramid, under, MIDDLE_BAND + distance(under));
+        }
       }
     }
 

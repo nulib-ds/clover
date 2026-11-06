@@ -251,11 +251,9 @@ describe("FrameControls", () => {
     time: frames[frame]?.start ?? 0,
     total: frames.at(-1)?.end ?? 0,
     playing: true,
-    repeat: false,
     setFrame: vi.fn(),
     seek: vi.fn(),
     setPlaying: vi.fn(),
-    setRepeat: vi.fn(),
   });
 
   it("steps within the frames, pausing, and says which frame shows", () => {
@@ -371,7 +369,7 @@ describe("FrameControls", () => {
     expect(trigger).toHaveFocus();
   });
 
-  it("offers Repeat, as 3.x does, pressed when it loops", () => {
+  it("offers no Repeat: an animation loops where its Manifest says `repeat`", () => {
     const animation = state(1);
     render(
       <FrameControls
@@ -383,10 +381,7 @@ describe("FrameControls", () => {
       "aria-disabled",
       "true",
     );
-    const repeat = screen.getByRole("button", { name: "Repeat" });
-    expect(repeat).toHaveAttribute("aria-pressed", "false");
-    fireEvent.click(repeat);
-    expect(animation.setRepeat).toHaveBeenCalledWith(true);
+    expect(screen.queryByRole("button", { name: "Repeat" })).toBeNull();
   });
 });
 

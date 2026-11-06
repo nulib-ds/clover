@@ -392,8 +392,9 @@ export class CanvasRenderer implements GestureTarget {
     this.landing = [];
     this.ahead = null;
     const context = this.prepareContext();
-    const slot = inTurn(PREPARE_AT_ONCE);
-
+    // Each new image resolved, then at once its coarsest tiles, so it draws the moment it
+    // is shown: in the scene's order, `PREPARE_AT_ONCE` at a time.
+    const queue: Array<() => Promise<void>> = [];
     const prepared = images.map((spec) => {
       const kept = previous.get(spec.id);
       if (kept && sameSpec(kept.spec, spec)) {
@@ -402,45 +403,45 @@ export class CanvasRenderer implements GestureTarget {
       }
       let found!: (item: SceneItem) => void;
       let lost!: (reason: unknown) => void;
+      let done!: () => void;
       const item = new Promise<SceneItem>((resolve, reject) => {
         found = resolve;
         lost = reject;
       });
-      // Resolved, then at once its coarsest tiles, so it draws the moment it is shown.
-      const ready = slot(async () => {
-        let resolved: SceneItem;
-        try {
-          resolved = await resolveItem(spec, context);
-        } catch (error) {
-          lost(error);
-          return;
-        }
-        found(resolved);
-        await prefetchCoarse(resolved, this.cache);
-      });
+      const ready = new Promise<void>((resolve) => (done = resolve));
+      queue.push(() =>
+        resolveItem(spec, context)
+          .then((resolved) => {
+            found(resolved);
+            return prefetchCoarse(resolved, this.cache);
+          }, lost)
+          .then(done, done),
+      );
       return { item, ready };
     });
+    const work = (): Promise<unknown> | undefined =>
+      queue.shift()?.().then(work);
+    for (let slot = 0; slot < PREPARE_AT_ONCE; slot++) void work();
 
-    // On an empty Body, each placed image goes up as soon as it can be drawn.
+    // On an empty Body, a scene of placed images goes up an image at a time, as each can
+    // be drawn, framed for the whole scene with the first.
     const placements = images.flatMap((spec) =>
       spec.placement ? [spec.placement] : [],
     );
-    const piecemeal =
+    let framed = false;
+    if (
       !this.items.length &&
       images.length > 1 &&
-      placements.length === images.length;
-    const bounds = piecemeal
-      ? union(world ? [world, ...placements] : placements)
-      : null;
-    let framed = false;
-    if (bounds) {
-      const up = new Map<number, SceneItem>();
+      placements.length === images.length
+    ) {
+      const bounds = union(world ? [world, ...placements] : placements)!;
+      const up: SceneItem[] = [];
       prepared.forEach(({ item, ready }, index) => {
         void Promise.all([item, ready]).then(
           ([resolved]) => {
             if (stale()) return;
-            up.set(index, resolved);
-            this.placeSoFar(up, bounds, fit, !framed);
+            up[index] = resolved;
+            this.place(up.filter(Boolean), bounds, fit, !framed, false);
             framed = true;
           },
           () => undefined,
@@ -450,7 +451,7 @@ export class CanvasRenderer implements GestureTarget {
 
     const results = await Promise.allSettled(prepared.map(({ item }) => item));
     // Superseded by a later call, or torn down while loading.
-    if (generation !== this.generation || this.disposed) return;
+    if (stale()) return;
     this.landing = this.landingWants(
       results.flatMap((r) => (r.status === "fulfilled" ? [r.value] : [])),
       world,
@@ -458,7 +459,7 @@ export class CanvasRenderer implements GestureTarget {
     );
     this.invalidate();
     await Promise.all(prepared.map(({ ready }) => ready));
-    if (generation !== this.generation || this.disposed) return;
+    if (stale()) return;
     this.landing = [];
 
     const items = results
@@ -469,7 +470,26 @@ export class CanvasRenderer implements GestureTarget {
     const errors = results
       .filter((r): r is PromiseRejectedResult => r.status === "rejected")
       .map((r) => r.reason);
+    if (errors.length) this.emit("error", errors);
+    // Nothing to draw at all where every image failed to prepare (an address that answers
+    // with an error, before its size is known).
+    this.setUnloadable(images.length > 0 && !items.length && errors.length > 0);
+    // Up an image at a time, it was framed with the first, and the reader's view stays.
+    this.place(items, world, fit, !framed, true);
+  }
 
+  /**
+   * Put `items` on screen, the world their layout and `world`: opened, the first time;
+   * where `frame`, framed again (home where `fit`, else the reader's view, its limits
+   * applied again) and announced; else announced only where `announce`.
+   */
+  private place(
+    items: SceneItem[],
+    world: Rect | undefined,
+    fit: boolean,
+    frame: boolean,
+    announce: boolean,
+  ): void {
     this.items = items;
     this.watchMedia(items);
     const laidOut = layoutItems(items);
@@ -479,64 +499,16 @@ export class CanvasRenderer implements GestureTarget {
         : world
       : laidOut;
     this.contentVersion++;
-
-    if (errors.length) this.emit("error", errors);
-    // Nothing to draw at all where every image failed to prepare (an address that answers
-    // with an error, before its size is known).
-    this.setUnloadable(images.length > 0 && !items.length && errors.length > 0);
-
-    if (!this.worldBounds) {
-      this.invalidate();
-      return;
-    }
-
-    if (!this.opened) {
-      this.opened = true;
-      this.home(true);
-      this.emit("open");
-    } else if (framed) {
-      // Up an image at a time, and framed with the first: the reader's view stays.
-      this.emit("change");
-    } else if (fit) {
-      this.home(true);
-      this.emit("change");
-    } else {
-      // Preserve the reader's view across swaps; only re-apply limits.
-      this.camera.set(this.constrain(this.camera.current));
-      this.emit("change");
-    }
-    this.invalidate();
-  }
-
-  /**
-   * A scene going up an image at a time (`setImages` on an empty Body): the images ready
-   * so far, in the scene's order, in their places, the world already the whole scene's,
-   * and on the `first`, framed as the whole scene will be.
-   */
-  private placeSoFar(
-    up: Map<number, SceneItem>,
-    bounds: Rect,
-    fit: boolean,
-    first: boolean,
-  ): void {
-    const items = [...up.entries()]
-      .sort(([a], [b]) => a - b)
-      .map(([, item]) => item);
-    this.items = items;
-    this.watchMedia(items);
-    layoutItems(items);
-    this.worldBounds = bounds;
-    this.contentVersion++;
-    if (first) {
+    if (this.worldBounds) {
       if (!this.opened) {
         this.opened = true;
         this.home(true);
         this.emit("open");
-      } else {
+      } else if (frame) {
         if (fit) this.home(true);
         else this.camera.set(this.constrain(this.camera.current));
         this.emit("change");
-      }
+      } else if (announce) this.emit("change");
     }
     this.invalidate();
   }
@@ -1013,16 +985,9 @@ export class CanvasRenderer implements GestureTarget {
       this.landing.length ? [...this.landing, ...plan.wants] : plan.wants
     ).filter((want) => !want.url.startsWith(MEDIA_KEY_PREFIX));
     this.cache.update(wants);
-    // Every tile this scene wants is in, and nothing moves: read the next one ahead.
-    if (
-      this.ahead &&
-      !animating &&
-      !this.landing.length &&
-      !this.cache.pending &&
-      wants.every(
-        (want) => this.hasTile(want.url) || this.cache.failed(want.url),
-      )
-    ) {
+    // Nothing moves and nothing loads (the cache has just asked for every tile wanted and
+    // missing), so every tile this scene wants is in: read the next one ahead.
+    if (this.ahead && !animating && !this.cache.pending) {
       const ahead = this.ahead;
       this.ahead = null;
       void this.readAhead(ahead);
@@ -1507,28 +1472,4 @@ function stripUndefined<T extends object>(value: T): Partial<T> {
   return Object.fromEntries(
     Object.entries(value).filter(([, v]) => v !== undefined),
   ) as Partial<T>;
-}
-
-/**
- * Tasks run in the order given, `limit` at a time: each call's promise settles when its
- * task has run. A task that throws counts as run.
- */
-function inTurn(limit: number) {
-  let running = 0;
-  const waiting: Array<() => void> = [];
-  return (task: () => Promise<void>): Promise<void> =>
-    new Promise<void>((resolve) => {
-      const run = () => {
-        running++;
-        task()
-          .catch(() => undefined)
-          .then(() => {
-            running--;
-            waiting.shift()?.();
-            resolve();
-          });
-      };
-      if (running < limit) run();
-      else waiting.push(run);
-    });
 }

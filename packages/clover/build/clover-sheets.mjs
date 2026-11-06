@@ -198,6 +198,7 @@ const LAZY = new Set([
   "components/Canvas/media/Player",
   "components/Map/Map",
   "components/Scene/Scene",
+  "components/Items/vertical/ItemsVertical",
 ]);
 
 /**
@@ -454,6 +455,8 @@ export const PART_SHEETS = {
     "components/Viewer",
   ],
   items: ["components/Items"],
+  // A vertical slider's own, apart, as few Manifests run down the page (Mat, 2026-11-06).
+  "items-vertical": ["components/Items/vertical"],
   panel: [
     "components/Panel",
     "components/Annotations",
@@ -524,6 +527,15 @@ export const DRAWN_INSIDE = {
   core: ["media", "scene", "map"],
   panel: ["items", "map"],
 };
+
+/**
+ * A part sheet for a way another part draws that is seldom wanted, which that part's code
+ * loads apart, after its sheet, before it draws that way: a vertical slider's, which
+ * Items loads (`ItemsView`). It reads what that sheet sets, styles only what that part
+ * draws, and wins where the two tie, as it did in styles.css's order, where it came
+ * after. A part drawing that part inside it never needs it: it comes with that part.
+ */
+export const EXTENDING = { "items-vertical": "items" };
 
 /**
  * The parts that draw what a module draws: its own part (`PART_SHEETS`), or, for a module

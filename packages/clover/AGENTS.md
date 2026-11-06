@@ -109,17 +109,25 @@ every rule below.
   into `dist/styles.css` (esbuild), which `build/styles.mjs` wraps in `@layer clover`.
   Keep the aggregate's imports plain: the docs import it from source, and Next 14 reads
   `@import … layer()` as a media query that never matches. Package JS never imports CSS.
-  Only the part sheets of what loads as it draws, a recording's, a Scene's and a map's
-  (`lazyParts`, `build/clover-sheets.mjs`), come with their code instead, and
-  `styles.css` leaves them out (the docs, from source, take the list whole): the React
-  build (`lazySheets`) has every module that draws what they style (their sheets'
-  `OWNERS`) hand its sheet to `ui/adoptSheet.ts`, which the document adopts (a constructed
-  sheet, after every other, which a strict CSP allows; a `<style>` where a browser cannot
-  adopt one). A call, never an import for its side effect, which `sideEffects` would let
-  a bundler drop. A page whose server draws one imports its part sheet too. Core never
-  reads what only such a sheet sets: a recording's still draws before its transport loads
-  (so `--clover-transport-room` is `Canvas.css`'s). MapLibre's stylesheet comes the same
-  way, with MapLibre, where the page has none (the Map, below). Color tokens are `--clover-color-*` with literal fallbacks, since a page sets them. The
+  Only the part sheets of what loads as it draws, a recording's, a Scene's, a map's and
+  a vertical slider's (`lazyParts`, `build/clover-sheets.mjs`), come with their code
+  instead, and `styles.css` leaves them out (the docs, from source, take the list
+  whole): the React build (`lazySheets`) has every module that draws what they style
+  (their sheets' `OWNERS`) hand its sheet to `ui/adoptSheet.ts`, which the document
+  adopts (a constructed sheet, after every other, which a strict CSP allows; a `<style>`
+  where a browser cannot adopt one). A call, never an import for its side effect, which
+  `sideEffects` would let a bundler drop. A way of drawing a part that is seldom wanted
+  can load apart so: the vertical slider's rules ride with
+  `Items/vertical/ItemsVertical.ts`, a module of nothing else, which `ItemsView` loads
+  itself, drawing nothing until it is in (Mat, 2026-11-06), never under Suspense, whose
+  fallback hides what was drawn and whose reveal React holds back up to 300 ms; such a
+  sheet extends its part's (`EXTENDING`, `build/clover-sheets.mjs`). A template's own
+  rules stay in its sheet, as a copied template imports only `@nulib/clover` and
+  `@nulib/clover/templates`. A page whose server draws one imports its part sheet too.
+  Core never reads what only such a sheet sets: a recording's still draws before its
+  transport loads (so `--clover-transport-room` is `Canvas.css`'s). MapLibre's
+  stylesheet comes the same way, with MapLibre, where the page has none (the Map,
+  below). Color tokens are `--clover-color-*` with literal fallbacks, since a page sets them. The
   scale's tokens (`--clover-space-*`, `--clover-text-*`, `--clover-control`) are defined
   in `src/styles/scale.css`, first in the list, and need none. Add every new stylesheet to
   the list. The same sheets are built again a part at a time (`dist/styles/<part>.css`,
@@ -934,6 +942,17 @@ every rule below.
   costs a template 0.2–0.3 kB, the least two lazy references and a type check take
   (measured 2026-10-23; a static Timeline route measured 29 B more). A host's renderer
   (`renderers`) still goes first.
+- **The loading mark** (`ui/Loading.tsx`) makes one pass (Mat, 2026-11-06: "it should
+  move once ... get close to the end ... continue moving slower and then finish", "once
+  done zip it across"): 61.8% of the way, then 61.8% of what is left, each step a golden
+  ratio slower (`clover-loading-pass`, `Loading.css`). The marks of one Body share one
+  pass (`ui/loadingPass.ts`): each is given how long it has run
+  (`--clover-loading-elapsed`, taken off its delay), and the last to go is left in its
+  place a moment (`HANDOVER`) for a mark that takes over, then runs to the end and fades;
+  a Body drawn afresh (a Viewer remounting for another resource) takes over a pass whose
+  Body has left the page. Its exit is a copy of the mark, so `{busy && <Loading />}` and
+  Suspense fallbacks need nothing of their own. Where less motion is asked for, the pass
+  is half the pace and only fades.
 - **Measuring size.** `build/sizes.mjs` and `bundle.test.mjs` build a consumer's app as
   Vite builds one for production (`build/consumer-bundle.mjs`), never with esbuild ("Build
   and test"): what a page imports, up front (`initialGzip`), and to its first view the
