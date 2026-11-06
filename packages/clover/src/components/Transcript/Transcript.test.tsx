@@ -269,6 +269,22 @@ describe("Transcript", () => {
     expect(screen.queryByRole("group")).toBeNull();
   });
 
+  it("says a transcript it could not read, never an empty box", async () => {
+    // As a browser fails a file served without CORS (Figgy's page text, 2026-11-06).
+    const refused = vi.fn(async () => {
+      throw new TypeError("Failed to fetch");
+    });
+    render(
+      <Clover.Root iiifContent={pagesJson} request={{ fetch: refused }}>
+        <Clover.Transcript />
+      </Clover.Root>,
+    );
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("This could not be loaded.");
+    expect(alert).toHaveTextContent("Failed to fetch");
+    expect(document.querySelector(".clover-transcript-body")).toBeNull();
+  });
+
   it("reads a WebVTT file that provides a transcript alone, never as the captions (Presentation 4)", async () => {
     // Cookbook 0219, its file a transcript: what is said, without the sounds captions give.
     const provided = (provides: string[]) => {

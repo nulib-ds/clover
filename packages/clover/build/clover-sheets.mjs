@@ -95,10 +95,11 @@ const OWNERS = {
     "components/Annotations/Annotations.tsx",
     "components/Canvas/AnnotationMenu.tsx",
   ],
-  // A Body's alert, where it could not load what it was to draw.
+  // A Body's alert, where it could not load what it was to draw, and a Transcript's.
   "components/Status/Status": [
     "components/Status/Status.tsx",
     "components/Body/BodyAlert.tsx",
+    "components/Transcript/Transcript.tsx",
   ],
   // The pager is Items' (`clover-items clover-pager`).
   "components/Items/Items": [

@@ -11,6 +11,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **A Transcript says when it cannot read its file.** When a caption or plain-text
+  transcript file fails to load (a server that refuses it, or sends it without CORS),
+  the Transcript shows "This could not be loaded." and the browser's reason, as a Body
+  does, in an alert. Before, it showed an empty box. Nothing to change.
+
 ## [4.5.8] - 2026-11-06
 
 ### Added
