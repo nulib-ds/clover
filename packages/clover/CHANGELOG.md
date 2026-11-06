@@ -102,6 +102,13 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   heading by its toggle's glue, whose row and menu load only where there is a choice. The budgets they crossed are raised to their measured sizes: Canvas alone to
   first view is 49.0 kB, from 48.3 kB, and the Default template 97.4 kB, from 95.8 kB.
 
+### Fixed
+
+- **A search stays on the current Canvas.** Results that arrive go to the first hit on the
+  Canvas shown, where it has any, and only otherwise to the first of all. A content state
+  opened with a `searchQuery` (a site's search result linking to one page) stayed on that
+  page in 3.x; in 4.x it jumped to the answer's first hit, usually on the first Canvas.
+
 ## [4.4.2] - 2026-11-05
 
 ### Fixed

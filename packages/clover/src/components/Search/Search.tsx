@@ -69,6 +69,7 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
     (state) => selectSequence(state.manifest).canvases,
   );
   const selected = useCloverSelector((state) => state.annotationId);
+  const canvasId = useCloverSelector((state) => state.canvasId);
   const highlighted = useSyncExternalStore(
     clover.highlight.subscribe,
     clover.highlight.get,
@@ -94,18 +95,25 @@ export const Search = forwardRef<HTMLElement, SearchProps>(function Search(
    * Results that arrive go to their first hit (Mat, 2026-10-26), as find in a page does,
    * so the count reads "1 / 11" from the start and Next goes on to the second. Only the
    * Canvas moves, never focus; once per answer, so a reader's own pick stands.
+   *
+   * Like find in a page, it starts where the reader is: on a Canvas with hits of its
+   * own, the first of those, so a reader who arrives at a page with a query (a content
+   * state and a `searchQuery`, from a host's search results) stays on that page. On a
+   * Canvas without hits, the answer's first hit.
    */
   const arrived = useRef<unknown>(null);
   useEffect(() => {
     if (search.status !== "ready" || !search.set) return;
     if (arrived.current === search.set) return;
     arrived.current = search.set;
-    const first = search.hits[0];
     const chosen = search.hits.some(
       (hit) => selected && hit.entryIds.includes(selected),
     );
-    if (first && !chosen) clover.selectAnnotation(first.entryIds[0]);
-  }, [clover, search.status, search.set, search.hits, selected]);
+    if (chosen) return;
+    const here = search.hits.find((hit) => hit.canvasId === canvasId);
+    const to = here ?? search.hits[0];
+    if (to) clover.selectAnnotation(to.entryIds[0]);
+  }, [clover, search.status, search.set, search.hits, selected, canvasId]);
   /*
    * Held in view, the field's height is written to the part (`--clover-content-search-
    * field`), so a hit scrolled to or focused lands clear of it (WCAG 2.4.11).
