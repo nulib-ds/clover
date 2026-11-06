@@ -163,6 +163,25 @@ describe("About's language toggle", () => {
     expect(cloverI18nChosen()).toBeUndefined();
   });
 
+  it("lets a language chosen go with its Root, where a host mounts one Root a resource", async () => {
+    visitor("en");
+    const { rerender } = draw(multilingual);
+    const first = await toggle();
+    act(() => {
+      fireEvent.click(within(first).getByRole("radio", { name: /日本語/ }));
+    });
+    expect(await screen.findByRole("button", { name: "概要" })).toBeVisible();
+    rerender(
+      <Clover.Root key="french" iiifContent={french}>
+        <Clover.Label as="h1" />
+        <Clover.Panel layout="accordion" />
+      </Clover.Root>,
+    );
+    expect(await title("A letter")).toHaveAttribute("lang", "en");
+    expect(await screen.findByRole("button", { name: "About" })).toBeVisible();
+    expect(cloverI18nChosen()).toBeUndefined();
+  });
+
   it("keeps an interface language chosen for itself on another resource", async () => {
     visitor("en");
     initCloverI18n({ languages: ["en", "fi"] });

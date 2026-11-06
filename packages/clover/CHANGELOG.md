@@ -11,6 +11,14 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Fixed
+
+- **A language chosen in About goes with its Root.** A page that mounts a new `Root` (or
+  Viewer) for each resource, with a React `key`, no longer keeps the interface language
+  the old one's About toggle moved: the next resource opens in the visitor's language,
+  and its toggle offers only its own languages and the site's. An interface language
+  chosen for itself, one only the site offers, still stays for the page.
+
 ## [4.5.0] - 2026-11-05
 
 ### Added

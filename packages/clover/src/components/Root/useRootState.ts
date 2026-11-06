@@ -183,8 +183,10 @@ export function useRootState<Props extends RootStateOptions>({
   /*
    * Another resource: the language chosen for this one goes, and the interface language
    * it moved goes back to the visitor's (Mat, 2026-11-05: "I toggled to a different
-   * resource and the languages set for old resource did not reset"). An interface
-   * language chosen for itself, one only the site offers, stays: it is the page's.
+   * resource and the languages set for old resource did not reset"). So does a Root that
+   * goes, as a host that mounts one Root a resource (`key`) takes it away: the interface
+   * language is the page's, and outlives it. An interface language chosen for itself,
+   * one only the site offers, stays: it is the page's.
    */
   const moved = useRef<string | undefined>(undefined);
   const [chosenFor, setChosenFor] = useState(key);
@@ -192,12 +194,15 @@ export function useRootState<Props extends RootStateOptions>({
     setChosenFor(key);
     setChosen(undefined);
   }
-  useEffect(() => {
-    const spoken = moved.current;
-    moved.current = undefined;
-    if (spoken && cloverI18n.chosenLanguage === spoken)
-      void cloverI18n.chooseInterfaceLanguage();
-  }, [key]);
+  useEffect(
+    () => () => {
+      const spoken = moved.current;
+      moved.current = undefined;
+      if (spoken && cloverI18n.chosenLanguage === spoken)
+        void cloverI18n.chooseInterfaceLanguage();
+    },
+    [key],
+  );
   const interfaceChosen = useSyncExternalStore(
     cloverI18n.subscribe,
     () => cloverI18n.chosenLanguage,
