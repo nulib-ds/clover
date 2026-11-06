@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.5.4] - 2026-11-05
+
 ### Fixed
 
 - **The page scrolls on past the information panel's end.** Once the Panel, docked or
