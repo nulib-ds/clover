@@ -1,7 +1,7 @@
 import React, { forwardRef } from "react";
 
 import { itemsOfCollection } from "../../core/items";
-import { selectTargetIndex } from "../../core/selectors";
+import { selectShownId, selectTargetIndex } from "../../core/selectors";
 import type { ViewingDirection } from "../../core/sequence";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
@@ -40,7 +40,7 @@ export function useRootSteps(of: StepsOf, part: string): Steps {
   const navigation = useNavigation();
   const { direction } = useSequence();
   const collection = useCloverSelector((state) => state.collection);
-  const shown = useCloverSelector((state) => state.manifest?.id ?? null);
+  const shown = useCloverSelector(selectShownId);
   const targets = useCloverSelector(
     (state) => state.targets?.items.length ?? 0,
   );

@@ -327,7 +327,8 @@ const ConnectedCanvas: React.FC<CanvasViewProps> = ({
     [options, request, autoplay, loop],
   );
 
-  if (!canvases.length) return null;
+  // Nothing to draw, but for the next Manifest on its way: a view already up stays, empty.
+  if (!canvases.length && manifestId !== "loading") return null;
   return (
     <CanvasView
       {...rest}

@@ -222,7 +222,11 @@ const Placeholder: React.FC<PlaceholderProps> = ({
           >
             {stills.map((still, index) => (
               <Still
-                key={index}
+                /*
+                 * By its picture: another Canvas's still is a new one, never the last
+                 * Canvas's picture kept while its URL is made (Mat, 2026-11-06).
+                 */
+                key={`${index} ${JSON.stringify(still.source)}`}
                 still={still}
                 request={request}
                 style={{

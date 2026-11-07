@@ -176,6 +176,18 @@ export const partOfCollection = (manifest: unknown) =>
   ).find((part) => part?.id && part.type === "Collection");
 
 /**
+ * The Manifest shown, by its id, or, while the next one loads, the id it was asked by
+ * (`opening`): what marks a Collection's current member, so the choice holds through the
+ * load, and a step from it steps from there.
+ */
+export function selectShownId(state: {
+  manifest: Manifest | null;
+  opening: string | null;
+}): string | null {
+  return state.manifest?.id ?? state.opening;
+}
+
+/**
  * Which of a content state's targets is shown (Cookbook 0540): the one last gone to,
  * while it is in view, else the first in view (its Manifest shown, and its Canvas in the
  * view, where it names one); -1 where the reader has moved to a view none names.
@@ -187,7 +199,9 @@ export function selectTargetIndex(
   canvasId: string | null,
 ): number {
   const items = targets?.items;
-  if (!items?.length || !manifest) return -1;
+  if (!items?.length) return -1;
+  // Its Manifest on its way: the one gone to, so a step steps from it.
+  if (!manifest) return targetIndex ?? -1;
   const visible = selectVisibleCanvases(manifest, canvasId);
   const here = (index: number) => {
     const target = items[index];

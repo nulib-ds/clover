@@ -197,7 +197,16 @@ describe("About's language toggle", () => {
         <Clover.Panel layout="accordion" />
       </Clover.Root>,
     );
-    expect(await title("A letter")).toBeInTheDocument();
+    // The French one put away at once (Mat, 2026-11-06), so this title is the German one.
+    expect(
+      screen.queryByRole("heading", { level: 1, name: "A letter" }),
+    ).toBeNull();
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: /^(Ein Brief|A letter)$/,
+      }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tiedot" })).toBeVisible();
   });
 

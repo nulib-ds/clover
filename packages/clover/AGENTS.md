@@ -1052,6 +1052,22 @@ every rule below.
   it. The picked hotspot's Tip shows while it is `data-active` and `aria-current`
   (`ui/Tip.css`), so hovering or focusing another takes the name over and it never
   covers a hotspot in focus (2.4.11). Renderer stubs in tests list `setDismiss`.
+- **Moving on puts the last one away first** (Mat, 2026-11-06: "flush the old … the
+  first thing. even before the load of the new resource", and "the same should happen
+  between canvases too"). A Root's `begin` (`core/clover.ts`) empties the store of the
+  last Manifest, its Canvas, target, pick, search and regions before it fetches the
+  next: new content (`load`, in a layout effect in `useRootState`, so no frame paints
+  the last one) puts away the Collection and the content's own sets and targets too; a
+  move within the content (a member, a target) keeps those, and `opening` holds the id
+  asked for, which `selectShownId` reads to mark the current member through the load
+  (and after a failure, to try again). `CanvasView` clears its surface the moment its
+  `canvasKey` changes (a layout effect, before the next scene is asked for), and stays
+  mounted, empty, once it has drawn, while `manifestId` is `"loading"`, so focus on it
+  stays (2.4.3). A placeholder still is keyed by its picture, and the player's artwork
+  is held only within one recording (`useThumbnail`'s `hold`, a key). A Choice or an
+  animation's frame is the same Canvas, and stays a swap. A standalone part loading its
+  own `iiifContent` (`LoadedCanvas`, `LoadedScene`, `StandaloneItems`) drops the last
+  one in the render that receives the new one.
 - **Picks from outside open the Canvas** (Mat, 2026-10-19). `CanvasView` holds a new
   `selectedAnnotation` as pending until it is among its `annotations` (so after a move to
   its Canvas), then opens the placeholder: images through `imagesOpen`, a recording
@@ -1093,8 +1109,8 @@ canvasKey`, set by `markDrawn` on `open`/`change`). Placement uses the planned s
     (`onFollow`, given only when `onAnnotationLink` is): a web page is an `<a>`, a Canvas
     or Manifest a button that first moves focus to the viewport, since the hotspot goes
     (WCAG 2.4.3). `Connected` and the list's "Open the link" use `showLink(clover, link)`;
-    `LoadedCanvas` follows within what it loaded, keeping its `CanvasView` (with
-    `manifestId="loading"`) while another Manifest loads, so focus stays.
+    `LoadedCanvas` follows within what it loaded, keeping its `CanvasView`, empty (with
+    `manifestId="loading"` and no Canvases), while another Manifest loads, so focus stays.
   - Annotations in several languages (Mat, 2026-10-25; Northwestern's Maktaba): where a
     layer gives the same words as separate annotations, one per language
     (`languagesOf` in `components/Annotations/languages.ts`: two or more languages, split

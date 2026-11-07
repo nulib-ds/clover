@@ -20,7 +20,11 @@ import {
 import { selectAnnotationCollection } from "../../core/annotation-sets";
 import type { IIIFContent } from "../../core/load";
 import type { CloverRequest } from "../../core/request";
-import { selectPosition, selectSequence } from "../../core/selectors";
+import {
+  selectPosition,
+  selectSequence,
+  selectShownId,
+} from "../../core/selectors";
 import { type ViewingDirection, resolveDirection } from "../../core/sequence";
 import { type LanguageMapLike, localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
@@ -231,7 +235,7 @@ function MemberItems({
 }: ItemsProps & Forwarded) {
   const { clover, language } = useOptionalClover()!;
   const collection = useCloverSelector((state) => state.collection);
-  const manifestId = useCloverSelector((state) => state.manifest?.id ?? null);
+  const manifestId = useCloverSelector(selectShownId);
   const items = itemsOfCollection(collection);
   // The Collection's own `viewingDirection` orders its members, as a Manifest's its views.
   const direction = resolveDirection(

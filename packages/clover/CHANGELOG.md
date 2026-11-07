@@ -11,6 +11,28 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **Nothing of the last resource, or the last Canvas, shows while the next loads.** The
+  moment a `Root`'s `iiifContent` changes, or another of a Collection's members, a
+  content state's target or another Canvas is chosen, the last one is put away, before
+  the next is asked for: its title, thumbnails and Panel sections, and the Canvas's
+  pictures and placeholder still. The Body shows its background and the loading mark
+  until the next arrives. Before, the last one stayed up until the next was in. A
+  `Canvas`, `Scene` or `Items` given its own `iiifContent` does the same.
+  - While the next Manifest loads, `useManifest()` and the store's `manifest` are
+    `null`, and the store's new `opening` holds the id it was asked by.
+  - A Collection's members (Items, `CollectionSelect`, the Panel's Collection, the
+    Map's places) keep the member chosen marked while it loads, and one that fails to
+    load stays chosen, so Enter asks again. The Canvas stays in place, empty, so focus
+    on it stays.
+  - A Choice picked, or an animation's frame, is the same Canvas: the last picture
+    stays up until the next is in, as before.
+  - A page turn no longer swaps a whole view (4.6.0): a view of several pages goes up a
+    page at a time, as it does on an empty Body.
+  - A recording's player keeps its artwork as it turns from its placeholder to its
+    accompanying Canvas, but not into the next recording.
+
 ## [4.6.0] - 2026-11-06
 
 ### Changed

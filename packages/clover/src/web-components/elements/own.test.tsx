@@ -32,6 +32,7 @@ vi.mock("../../lib/renderer", async (importOriginal) => ({
       setGestures: vi.fn(),
       setDismiss: vi.fn(),
       setHidden: vi.fn(),
+      clear: vi.fn(),
       dispose: vi.fn(),
       isOpen: true,
       isAtHome: true,

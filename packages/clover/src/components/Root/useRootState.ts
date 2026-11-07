@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -21,6 +22,9 @@ import { cloverI18n } from "../../i18n/config";
 import type { CloverContextValue } from "../../react/context";
 import { useRootContentState } from "../../react/useContentStateOutput";
 import { type BodyRenderer, sameRenderers } from "../Body/renderers";
+
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 /** What a Root is given about its content: every prop but its element's. */
 export interface RootStateOptions {
@@ -99,7 +103,27 @@ export function useRootState<Props extends RootStateOptions>({
   );
   clover.setRequest(request);
 
-  // Load when the content (or how to request it) changes; a newer load replaces an older.
+  /*
+   * Its status, heard from before the first load begins (a layout effect, declared before
+   * it), so a load that finishes before the page's passive effects run still says so.
+   */
+  const [status, setStatus] = useState<CloverStatus>(clover.store.get().status);
+  useIsomorphicLayoutEffect(() => {
+    let last = clover.store.get().status;
+    return clover.store.subscribe(() => {
+      const { status: next, error } = clover.store.get();
+      if (next === last) return;
+      last = next;
+      setStatus(next);
+      latest.current.onStatusChange?.(next, error);
+    });
+  }, [clover]);
+
+  /*
+   * Load when the content (or how to request it) changes; a newer load replaces an older.
+   * Before the browser paints what the new content renders (a layout effect), so the last
+   * one's Manifest is put away in the same frame (`begin`): no part draws it again.
+   */
   const initial = useRef<Initial>({});
   initial.current = {
     canvasId,
@@ -110,7 +134,7 @@ export function useRootState<Props extends RootStateOptions>({
   const content = useRef(iiifContent);
   content.current = iiifContent;
   const key = contentKey(iiifContent);
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     void clover.load(content.current, initial.current);
     return () => clover.dispose();
   }, [clover, key, requestSettings]);
@@ -119,18 +143,6 @@ export function useRootState<Props extends RootStateOptions>({
   useEffect(() => {
     if (controlled) clover.syncCanvas(canvasId ?? null);
   }, [clover, controlled, canvasId]);
-
-  const [status, setStatus] = useState<CloverStatus>(clover.store.get().status);
-  useEffect(() => {
-    let last = clover.store.get().status;
-    return clover.store.subscribe(() => {
-      const { status: next, error } = clover.store.get();
-      if (next === last) return;
-      last = next;
-      setStatus(next);
-      latest.current.onStatusChange?.(next, error);
-    });
-  }, [clover]);
 
   // Added annotations: reloaded when what identifies them changes.
   const annotationsRef = useRef(annotations);

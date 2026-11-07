@@ -20,7 +20,7 @@ import {
 } from "../../core/geo";
 import type { IIIFContent } from "../../core/load";
 import { type CloverRequest, sendsCredentials } from "../../core/request";
-import { selectVisibleCanvases } from "../../core/selectors";
+import { selectShownId, selectVisibleCanvases } from "../../core/selectors";
 import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
@@ -158,12 +158,9 @@ export function ConnectedMap({
       ),
     [picked, highlighted],
   );
-  // Only a view's Canvases are current, with the member open among its Collection's:
-  // standalone, nothing shows the Root's first one.
-  const manifestId = useOptionalCloverSelector(
-    (state) => state.manifest?.id ?? null,
-    null,
-  );
+  // Only a view's Canvases are current, with the member open among its Collection's (or
+  // asked for, while it loads): standalone, nothing shows the Root's first one.
+  const manifestId = useOptionalCloverSelector(selectShownId, null);
   const current = useMemo(
     () =>
       scope === "view"

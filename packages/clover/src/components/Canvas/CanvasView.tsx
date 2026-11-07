@@ -200,7 +200,15 @@ const CanvasView: React.FC<CanvasViewProps> = (props) => {
   const hasSource =
     Boolean(props.canvases?.length) ||
     toSceneImages(props.body, props.src).length > 0;
-  if (!hasSource) return null;
+  /*
+   * But one that has shown something stays, empty, while the next Manifest loads
+   * (`manifestId="loading"`, its Root's put away at once): focus on it keeps its place
+   * (WCAG 2.4.3), and its surface is kept for the next.
+   */
+  const [kept, setKept] = useState(false);
+  const keep = hasSource || (kept && props.manifestId === "loading");
+  if (keep !== kept) setKept(keep);
+  if (!keep) return null;
   return (
     <ErrorBoundary>
       <CanvasBody {...props} />
@@ -855,11 +863,11 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
         : null;
   }, []);
   /*
-   * Whether the Canvases handed over are the ones drawn. On a move, the last view stays
-   * up until the next one's first tiles arrive: its hotspots and a pick's framing wait for
-   * that, so none is laid over the last view's pictures, and the camera moves in the
-   * scene it will end in: the spread fitted first, then the annotation (`sceneVersion`
-   * is bumped as the new scene is drawn).
+   * Whether the Canvases handed over are the ones drawn. On a move, the last view goes at
+   * once (`flushed`, below) and the next one's hotspots and a pick's framing wait for its
+   * first tiles, so none is laid over an empty Body, and the camera moves in the scene it
+   * will end in: the spread fitted first, then the annotation (`sceneVersion` is bumped
+   * as the new scene is drawn).
    */
   const drawn = !canvases || drawnScene.current?.key === canvasKey;
 
@@ -1017,18 +1025,38 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
     exitFocused.current = false;
   }, [fullscreenExit]);
 
+  /*
+   * Another view: the last one's pictures go at once, before the next one's are asked for
+   * (Mat, 2026-11-06: "the same should happen between canvases too"). From the frame the
+   * view moves on, nothing of the Canvas left shows: the Body's background and the
+   * loading mark, the next Canvas's placeholder still where it has one, then its own
+   * pictures as they arrive. A Choice picked, or an animation's frame, is the same Canvas
+   * and stays a swap (`setImages`), the last picture up until the next is in.
+   */
+  const flushed = useRef(false);
+  useLayoutEffect(() => {
+    if (shownCanvases.current === null || shownCanvases.current === canvasKey)
+      return;
+    surfaceRef.current?.clear();
+    drawnScene.current = null;
+    flushed.current = true;
+    setStatus("loading");
+  }, [canvasKey]);
+
   useEffect(() => {
     const surface = surfaceRef.current;
     if (showPlaceholder) placeholderShown.current = true;
     if (!surface || !nearViewport || showPlaceholder) return;
     const moved =
-      shownCanvases.current !== null && shownCanvases.current !== canvasKey;
+      flushed.current ||
+      (shownCanvases.current !== null && shownCanvases.current !== canvasKey);
     // Loading until it is drawn: at first, and again whenever the view moves on.
     if (!surface.isOpen || moved) setStatus("loading");
     const fit =
       mediaOnly || (placeholderShown.current && surface.isOpen) || moved;
     shownCanvases.current = canvasKey;
     placeholderShown.current = false;
+    flushed.current = false;
     surface.setImages(images, { world: world ?? undefined, fit });
     // `imagesKey` stands in for `images`, whose identity changes on every parent render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1047,12 +1075,13 @@ const CanvasBody: React.FC<CanvasViewProps> = (props) => {
   }, [manifestId]);
 
   /*
-   * Loading, shown: images on their way to a Body in view, not behind a still. A Canvas
-   * that paints none (sound alone) has nothing to wait for, so never says so.
+   * Loading, shown: images on their way to a Body in view, not behind a still, or the
+   * next Manifest on its way, nothing yet to draw. A Canvas that paints none (sound
+   * alone) has nothing to wait for, so never says so.
    */
   const loading =
     status === "loading" &&
-    images.length > 0 &&
+    (images.length > 0 || manifestId === "loading") &&
     nearViewport &&
     !showPlaceholder;
 
