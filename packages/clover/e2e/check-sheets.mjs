@@ -51,6 +51,7 @@ const VIDEO = R("0003-mvm-video/manifest.json");
 const METADATA = R("0029-metadata-anywhere/manifest.json");
 const RENDERING = R("0046-rendering/manifest.json");
 const CAPTIONS = R("0219-using-caption-file/manifest.json");
+const TOP_TO_BOTTOM = R("0010-book-2-viewing-direction/manifest-ttb.json");
 const inRoot = (url, inner) =>
   `<clover-root iiif-content="${url}">${inner}</clover-root>`;
 const box = 'style="height: 320px"';
@@ -84,6 +85,11 @@ const PAGES = {
   "items list": inRoot(BOOK, `<clover-items layout="list"></clover-items>`),
   "items pager": inRoot(BOOK, `<clover-items layout="pager"></clover-items>`),
   "items alone": `<clover-items iiif-content="${BOOK}"></clover-items>`,
+  // Its sheet loads apart, as the slider first draws (`ItemsView`).
+  "items vertical": inRoot(
+    BOOK,
+    `<clover-items orientation="vertical" ${box}></clover-items>`,
+  ),
   content: inRoot(IMAGE, `<clover-body ${box}></clover-body>`),
   "content, annotations": inRoot(TAGGING, `<clover-body ${box}></clover-body>`),
   "content, video": inRoot(VIDEO, `<clover-body ${box}></clover-body>`),
@@ -122,6 +128,7 @@ const PAGES = {
   "viewer, document": `<clover-viewer template="document" iiif-content="${TOC}"></clover-viewer>`,
   "viewer, gallery": `<clover-viewer template="gallery" iiif-content="${BOOK}"></clover-viewer>`,
   "viewer, video": `<clover-viewer iiif-content="${VIDEO}"></clover-viewer>`,
+  "viewer, top to bottom": `<clover-viewer iiif-content="${TOP_TO_BOTTOM}"></clover-viewer>`,
 };
 
 /*
@@ -138,6 +145,7 @@ const PARTS = {
   "items list": ["items"],
   "items pager": ["items"],
   "items alone": ["items"],
+  "items vertical": ["items", "items-vertical"],
   content: [],
   "content, annotations": [],
   "content, video": ["media"],

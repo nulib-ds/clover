@@ -110,10 +110,10 @@ export interface PrepareContext {
 }
 
 /**
- * Resolve an image and fetch its coarsest tiles, so the item can be drawn the moment it
- * replaces whatever was on screen.
+ * Resolve an image: its pyramid (an image service's `info.json`, or a static image's own
+ * size), clip and turn. Its tiles are not asked for yet.
  */
-export async function prepareItem(
+export async function resolveItem(
   spec: SceneImage,
   context: PrepareContext,
 ): Promise<SceneItem> {
@@ -172,15 +172,25 @@ export async function prepareItem(
     ...(turn ? { turn } : {}),
   };
 
-  // The coarsest level under the clip: usually one small request.
-  await context.cache.prefetch(
+  return item;
+}
+
+/**
+ * An item's coarsest level under its clip, usually one small request: resolved once each
+ * tile is loaded or has failed for good, never rejected.
+ */
+export function prefetchCoarse(
+  item: SceneItem,
+  cache: TileCache,
+): Promise<void> {
+  if (item.media) return Promise.resolve();
+  const { pyramid, clip } = item;
+  return cache.prefetch(
     tilesInRegion(pyramid, 0, clip).map((address) => {
-      const tile = pyramid!.tile(address);
+      const tile = pyramid.tile(address);
       return { url: tile.url, fallbackUrl: tile.fallbackUrl };
     }),
   );
-
-  return item;
 }
 
 /** Media keys never reach the tile cache: their "tile" is the element itself. */

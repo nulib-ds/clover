@@ -98,7 +98,26 @@ export function selectVisibleCanvases(
   canvasId: string | null,
 ): Container[] {
   if (!manifest) return NONE;
-  const position = selectPosition(manifest, canvasId);
+  return viewCanvases(manifest, selectPosition(manifest, canvasId));
+}
+
+/**
+ * The Canvases of the view after the one holding `canvasId`, what a reader turns to next
+ * (none after the last): a Canvas reads them ahead once its own view is drawn.
+ */
+export function selectNextCanvases(
+  manifest: Manifest | null,
+  canvasId: string | null,
+): Container[] {
+  if (!manifest) return NONE;
+  const position = selectPosition(manifest, canvasId) + 1;
+  return position < selectSequence(manifest).views.length
+    ? viewCanvases(manifest, position)
+    : NONE;
+}
+
+/** A view's Canvases, by its place in the sequence, the same array while nothing changes. */
+function viewCanvases(manifest: Manifest, position: number): Container[] {
   let byView = visible.get(manifest);
   if (!byView) visible.set(manifest, (byView = new Map()));
   let canvases = byView.get(position);

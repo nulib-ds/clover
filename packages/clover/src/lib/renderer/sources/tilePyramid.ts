@@ -48,8 +48,22 @@ export interface TilePyramid {
   tile(address: TileAddress): TileRequest;
 }
 
-/** Edge length of tiles Clover cuts itself from a service that lists none. */
+/**
+ * Edge of the whole-image thumbnail Clover asks of a service whose coarsest level is still
+ * several tiles, and of the tiles it cuts itself where it asks for no larger ones.
+ */
 export const DERIVED_TILE_SIZE = 512;
+/**
+ * The least edge of the tiles Clover asks of a service that cuts any region at any size
+ * (level 1 and up): smaller listed tiles are asked for several to a request, a whole
+ * number of them on the service's own grid, and a service that lists none is cut this
+ * large. A request costs a server about the same whatever its size, and a browser sends a
+ * server on HTTP/1.1 six at a time, so a view of 256 px tiles waited on a hundred round
+ * trips where 1024 px tiles take nine (measured 2026-11-06 on Northwestern's, e-codices'
+ * and Wellcome's servers: a 1024 px tile in 1.1 to 1.4 times a 256 px one's time; at 6×
+ * CPU, no longer a frame than 256 px tiles, the upload budget taking one a frame).
+ */
+export const TILE_FLOOR = 1024;
 /** The largest full-size image a level 0 service is asked for in one piece. */
 const MAX_SINGLE_IMAGE_PIXELS = 16_000_000;
 
@@ -84,7 +98,10 @@ export function staticPyramid(
  * The pyramid an image service supports, from what its `info.json` lists and what its
  * compliance level promises.
  */
-export function servicePyramid(info: ImageServiceInfo): TilePyramid {
+export function servicePyramid(
+  info: ImageServiceInfo,
+  tileFloor = TILE_FLOOR,
+): TilePyramid {
   const { width: W, height: H } = info;
   const levels: Array<PyramidLevel & { whole?: boolean }> = [];
   const arbitrary = info.regionByPx && info.sizeByW;
@@ -117,13 +134,19 @@ export function servicePyramid(info: ImageServiceInfo): TilePyramid {
 
   const spec = info.tiles[0];
   if (spec) {
+    const { width: tw, height: th } = arbitrary
+      ? joinedTile(info, spec, tileFloor)
+      : spec;
     for (const s of spec.scaleFactors) {
-      levels.push(tileLevel(s, spec.width, spec.height));
+      levels.push(tileLevel(s, tw, th));
     }
   } else if (arbitrary) {
     // Level 1 and 2 omit `tiles` and still serve any region: cut our own.
+    let edge = Math.max(DERIVED_TILE_SIZE, tileFloor);
+    while (edge > DERIVED_TILE_SIZE && !withinLimits(info, edge, edge))
+      edge /= 2;
     for (let s = 1; ; s *= 2) {
-      const level = tileLevel(s, DERIVED_TILE_SIZE, DERIVED_TILE_SIZE);
+      const level = tileLevel(s, edge, edge);
       levels.push(level);
       if (level.cols === 1 && level.rows === 1) break;
     }
@@ -201,6 +224,21 @@ export function servicePyramid(info: ImageServiceInfo): TilePyramid {
       };
     },
   };
+}
+
+/**
+ * The listed tile, joined with its neighbors on the service's grid until its longer edge
+ * reaches `floor`, and no further than the service's `maxWidth`, `maxHeight` and
+ * `maxArea` allow.
+ */
+function joinedTile(
+  info: ImageServiceInfo,
+  spec: { width: number; height: number },
+  floor: number,
+): { width: number; height: number } {
+  let k = Math.max(1, Math.floor(floor / Math.max(spec.width, spec.height)));
+  while (k > 1 && !withinLimits(info, spec.width * k, spec.height * k)) k--;
+  return { width: spec.width * k, height: spec.height * k };
 }
 
 function withinLimits(info: ImageServiceInfo, w: number, h: number): boolean {

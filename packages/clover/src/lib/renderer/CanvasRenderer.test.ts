@@ -86,6 +86,32 @@ function serveInfo(json: unknown) {
   );
 }
 
+/** Answer every `info.json` with Göttingen's, its `id` the service asked for. */
+function serveInfos() {
+  const fetchMock = vi.fn(async (url: string) => ({
+    ok: true,
+    json: () =>
+      Promise.resolve({
+        ...GOTTINGEN_V3,
+        id: String(url).replace(/\/info\.json$/, ""),
+      }),
+  }));
+  vi.stubGlobal("fetch", fetchMock);
+  return fetchMock;
+}
+
+/** A Göttingen-sized page of a continuous scene: `index` places it, side by side. */
+const page = (name: string, index: number) => ({
+  id: name,
+  service: `https://example.org/iiif/${name}`,
+  width: 4032,
+  height: 3024,
+  placement: { x: index * 4032, y: 0, width: 4032, height: 3024 },
+});
+
+/** The page a request is for, by its service's name. */
+const pageOf = (url: string) => String(url).match(/\/iiif\/(\w+)\//)?.[1];
+
 /** Answer every tile request with a bitmap of the size its URL asks for. */
 function serveTiles() {
   mockedLoad.mockImplementation(async (url: string) => {
@@ -96,10 +122,10 @@ function serveTiles() {
   });
 }
 
-function host() {
+function host(width = 800, height = 600) {
   const el = document.createElement("div");
   el.getBoundingClientRect = () =>
-    ({ left: 0, top: 0, width: 800, height: 600 }) as DOMRect;
+    ({ left: 0, top: 0, width, height }) as DOMRect;
   document.body.appendChild(el);
   return el;
 }
@@ -561,10 +587,10 @@ describe("CanvasRenderer", () => {
     expect(el.querySelector(".clover-canvas-dom-layer")).toBeNull();
   });
 
-  it("tiles an Image API 3 service: the thumbnail first, then the level that fits", async () => {
+  it("tiles an Image API 3 service: its coarsest level first, then the level that fits", async () => {
     serveInfo(GOTTINGEN_V3);
     serveTiles();
-    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    const renderer = new CanvasRenderer(host(1600, 1200), { animationTime: 0 });
     await renderer.setImages([
       {
         id: "g",
@@ -572,9 +598,10 @@ describe("CanvasRenderer", () => {
           "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen",
       },
     ]);
-    // Opening waited for the 512px whole-image thumbnail.
+    // Its 512 px tiles joined two by two: the quarter-resolution level is one 1008 px
+    // tile, the whole image, which opening waited for.
     expect(mockedLoad.mock.calls[0][0]).toMatch(
-      /\/full\/512,384\/0\/default\.jpg$/,
+      /\/full\/1008,756\/0\/default\.jpg$/,
     );
     expect(renderer.getHomeBounds()).toEqual({
       x: 0,
@@ -585,19 +612,203 @@ describe("CanvasRenderer", () => {
 
     await frames(4);
     const urls = mockedLoad.mock.calls.map(([url]) => url);
-    // 800px wide Body at 1x: scale factor 4, all four of its tiles.
-    expect(urls.filter((u) => /\/512,512\/0\//.test(u))).toHaveLength(1);
+    // A 1600 px wide Body at 1x: scale factor 2, its four tiles of up to 1024 px.
     expect(
-      urls.filter((u) => /,\d+\/0\/default/.test(u)).length,
-    ).toBeGreaterThanOrEqual(4);
+      urls.filter((u) => /\/0,0,2048,2048\/1024,1024\//.test(u)),
+    ).toHaveLength(1);
+    expect(
+      urls.filter((u) => /\/\d+,\d+,\d+,\d+\/\d+,\d+\//.test(u)),
+    ).toHaveLength(4);
     expect(fake.count("drawArrays")).toBeGreaterThan(0);
+    renderer.dispose();
+  });
+
+  it("asks for a new scene's view while its coarsest tile is still on its way", async () => {
+    serveInfo(GOTTINGEN_V3);
+    let release = () => {};
+    const coarsest = new Promise<void>((resolve) => (release = resolve));
+    mockedLoad.mockImplementation(async (url: string) => {
+      if (/\/full\//.test(url)) await coarsest;
+      return bitmap(1024, 1024);
+    });
+    const renderer = new CanvasRenderer(host(1600, 1200), { animationTime: 0 });
+    const opened = vi.fn();
+    renderer.on("open", opened);
+    const setting = renderer.setImages([
+      {
+        id: "g",
+        service:
+          "https://iiif.io/api/image/3.0/example/reference/918ecd18c2592080851777620de9bcb5-gottingen",
+      },
+    ]);
+    await frames(4);
+    // Not open yet, but the four half-resolution tiles of its home view are asked for.
+    expect(opened).not.toHaveBeenCalled();
+    const urls = mockedLoad.mock.calls.map(([url]) => url);
+    expect(urls[0]).toMatch(/\/full\/1008,756\//);
+    expect(
+      urls.filter((u) => /\/\d+,\d+,\d+,\d+\/\d+,\d+\//.test(u)),
+    ).toHaveLength(4);
+
+    release();
+    await setting;
+    expect(opened).toHaveBeenCalledTimes(1);
+    renderer.dispose();
+  });
+
+  it("puts a continuous scene up a page at a time on an empty Body", async () => {
+    serveInfos();
+    const held = new Map<string, () => void>();
+    mockedLoad.mockImplementation(async (url: string) => {
+      const name = pageOf(url)!;
+      if (/\/full\//.test(url) && name !== "a") {
+        await new Promise<void>((resolve) => held.set(name, resolve));
+      }
+      return bitmap(512, 384);
+    });
+    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    const opened = vi.fn();
+    renderer.on("open", opened);
+    const setting = renderer.setImages(["a", "b", "c"].map(page));
+    await frames(4);
+    // The first page is up, framed for all three, while the others' coarsest are away.
+    expect(["a", "b", "c"].map((id) => renderer.isReady(id))).toEqual([
+      true,
+      false,
+      false,
+    ]);
+    expect(opened).toHaveBeenCalledTimes(1);
+    expect(renderer.getHomeBounds()).toEqual({
+      x: 0,
+      y: 0,
+      width: 3 * 4032,
+      height: 3024,
+    });
+    // Each one as it comes, whatever the order.
+    held.get("c")!();
+    await frames(2);
+    expect(renderer.isReady("c")).toBe(true);
+    expect(renderer.isReady("b")).toBe(false);
+    held.get("b")!();
+    await setting;
+    expect(["a", "b", "c"].map((id) => renderer.isReady(id))).toEqual([
+      true,
+      true,
+      true,
+    ]);
+    expect(opened).toHaveBeenCalledTimes(1);
+    renderer.dispose();
+  });
+
+  it("replaces a scene on screen whole, never a page at a time", async () => {
+    serveInfos();
+    serveTiles();
+    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    await renderer.setImages([page("old", 0)]);
+    let release = () => {};
+    const hold = new Promise<void>((resolve) => (release = resolve));
+    mockedLoad.mockImplementation(async (url: string) => {
+      if (pageOf(url) === "b" && /\/full\//.test(url)) await hold;
+      return bitmap(512, 384);
+    });
+    const setting = renderer.setImages(["a", "b"].map(page), { fit: true });
+    await frames(4);
+    // The old page stays until every new one can be drawn.
+    expect(renderer.isReady("old")).toBe(true);
+    expect(renderer.isReady("a")).toBe(false);
+    release();
+    await setting;
+    expect(renderer.isReady("old")).toBe(false);
+    expect(renderer.isReady("a") && renderer.isReady("b")).toBe(true);
+    renderer.dispose();
+  });
+
+  it("prepares a scene's images in order, six at a time", async () => {
+    const fetchMock = serveInfos();
+    const held: Array<() => void> = [];
+    mockedLoad.mockImplementation(async (url: string) => {
+      if (/\/full\//.test(url)) await new Promise<void>((r) => held.push(r));
+      return bitmap(512, 384);
+    });
+    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    void renderer.setImages("abcdefgh".split("").map(page));
+    await frames(4);
+    const asked = () => fetchMock.mock.calls.map(([url]) => pageOf(url));
+    // Six `info.json`, each followed at once by its coarsest; the seventh waits its turn.
+    expect(asked()).toEqual(["a", "b", "c", "d", "e", "f"]);
+    expect(held).toHaveLength(6);
+    held[0]();
+    await frames(2);
+    expect(asked()).toEqual(["a", "b", "c", "d", "e", "f", "g"]);
+    renderer.dispose();
+  });
+
+  it("reads the next scene ahead once every tile of the one on screen is in", async () => {
+    const fetchMock = serveInfos();
+    let release = () => {};
+    const hold = new Promise<void>((resolve) => (release = resolve));
+    mockedLoad.mockImplementation(async (url: string) => {
+      // The scene on screen's sharp tiles (its coarsest is one whole picture), held.
+      if (pageOf(url) === "a" && /\/\d+,\d+,\d+,\d+\//.test(url)) await hold;
+      return bitmap(1024, 1024);
+    });
+    const renderer = new CanvasRenderer(host(1600, 1200), { animationTime: 0 });
+    await renderer.setImages([page("a", 0)], { fit: true });
+    renderer.prefetch([page("b", 0)]);
+    await frames(4);
+    const asked = () => fetchMock.mock.calls.map(([url]) => String(url));
+    // Nothing of the next while this one still sharpens.
+    expect(asked().some((url) => pageOf(url) === "b")).toBe(false);
+
+    release();
+    await frames(6);
+    expect(asked().filter((url) => pageOf(url) === "b")).toEqual([
+      "https://example.org/iiif/b/info.json",
+    ]);
+    const loads = () =>
+      mockedLoad.mock.calls
+        .map(([url]) => url)
+        .filter((url) => pageOf(url) === "b");
+    // Its coarsest, never its sharp tile.
+    expect(loads()).toEqual([
+      "https://example.org/iiif/b/full/1008,756/0/default.jpg",
+    ]);
+
+    // The turn to it reads neither again.
+    await renderer.setImages([page("b", 0)], { fit: true });
+    expect(asked().filter((url) => pageOf(url) === "b")).toHaveLength(1);
+    expect(
+      loads().filter((url) => /\/full\/1008,756\//.test(url)),
+    ).toHaveLength(1);
+    expect(renderer.isReady("b")).toBe(true);
+    renderer.dispose();
+  });
+
+  it("drops what it was to read ahead when the scene changes first", async () => {
+    const fetchMock = serveInfos();
+    let release = () => {};
+    const hold = new Promise<void>((resolve) => (release = resolve));
+    mockedLoad.mockImplementation(async (url: string) => {
+      if (pageOf(url) === "a" && /\/\d+,\d+,\d+,\d+\//.test(url)) await hold;
+      return bitmap(1024, 1024);
+    });
+    const renderer = new CanvasRenderer(host(1600, 1200), { animationTime: 0 });
+    await renderer.setImages([page("a", 0)], { fit: true });
+    renderer.prefetch([page("b", 0)]);
+    serveTiles();
+    await renderer.setImages([page("c", 0)], { fit: true });
+    release();
+    await frames(6);
+    expect(
+      fetchMock.mock.calls.some(([url]) => pageOf(String(url)) === "b"),
+    ).toBe(false);
     renderer.dispose();
   });
 
   it("spells Image API 2 tiles with w,", async () => {
     serveInfo(GOTTINGEN_V2_1);
     serveTiles();
-    const renderer = new CanvasRenderer(host(), { animationTime: 0 });
+    const renderer = new CanvasRenderer(host(1600, 1200), { animationTime: 0 });
     await renderer.setImages([
       {
         id: "g",
@@ -607,8 +818,9 @@ describe("CanvasRenderer", () => {
     ]);
     await frames(4);
     const urls = mockedLoad.mock.calls.map(([url]) => url);
+    expect(urls[0]).toMatch(/\/full\/1008,\/0\/default\.jpg$/);
     expect(
-      urls.some((u) => /\/0,0,2048,2048\/512,\/0\/default\.jpg$/.test(u)),
+      urls.some((u) => /\/0,0,2048,2048\/1024,\/0\/default\.jpg$/.test(u)),
     ).toBe(true);
     renderer.dispose();
   });

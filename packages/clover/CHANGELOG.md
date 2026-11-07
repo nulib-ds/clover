@@ -11,6 +11,88 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+
+- **The Canvas sharpens sooner.** Five changes to how it asks an image server for
+  tiles:
+  - From a server that cuts any region at any size (Image API level 1 or 2), it asks
+    for tiles of at least 1024 px: several of the server's listed tiles in one request,
+    a whole number of them on the server's own grid, and its own tiles cut at 1024 px
+    where the server lists none (512 px before). A server answers a 1024 px tile in
+    about a 256 px tile's time, so a view of Northwestern's 256 px tiles is nine
+    requests where it was a hundred.
+  - Up to 16 requests at once, where it was 6. A server on HTTP/1.1 still gets six at a
+    time from the browser.
+  - While a view's sharp tiles load, the level two steps coarser comes first, under the
+    ones still missing, and a new page's tiles are asked for as soon as its `info.json`
+    is read, beside its smallest size rather than after it.
+  - In a `Root`, once a view is drawn and every tile it wants is in, the next view is
+    read ahead: each of its images' `info.json`, and the smallest and middle sizes it
+    lists, so turning the page draws at once. Never behind a placeholder not yet opened,
+    nor for a recording.
+  - A view of several pages (a continuous Manifest's) goes up a page at a time on an
+    empty Body, each as soon as its own smallest size is in, rather than all at once
+    when the last is; its pages are prepared six at a time, in order, so each one's
+    smallest size follows its own `info.json`. A page turn still swaps a whole view.
+
+  On Northwestern's image server, uncached, a page looked finished in 1.1 s, from 7.5 s,
+  and the next page in 0.9 s, from 5.5 s. Read ahead, a page turn's first picture came in
+  0.02 s, from 0.68 s, and the 31 pages of a continuous catalog showed their first in
+  0.6 s, from 3.9 s. Nothing to change in your code. A zoomed view may download up to
+  half again as many bytes, for the tiles at its edges; a page read ahead and never
+  turned to has cost three requests, about 17 kB; a CDN that holds a server's listed
+  tiles is asked for other URLs; and a server that limits how many requests one visitor
+  makes at once will see up to 16. A level 0 server still gets only its own tiles, and
+  no tile passes a server's `maxWidth`, `maxHeight` or `maxArea`.
+
+- **Budgets.** Measured from 4.5.9, a Canvas to first view adds about 1.6 kB gzip (the
+  tile scheduling, reading the next view ahead and opening a view a page at a time about
+  1.2 kB, the loading mark's one pass about 0.4 kB), and the Default and Document
+  templates to first view about 1.7 kB; letting a refusal's body go (below) adds 30 to 60
+  bytes to every entry, and loading a vertical slider's styles apart 0.16 kB to Items.
+  `styles.css` is 81 bytes lighter, as those styles left it, and `styles/core.css`, which
+  holds the loading mark's, 0.18 kB heavier. The budgets they crossed are raised to the
+  next 50 bytes: Canvas initial JS to 44.05 kB from 42.45 kB, Canvas to first view to
+  50.7 kB from 49.15 kB, Default and Document to first view to 100.05 kB and 96 kB from
+  98.35 kB and 94.3 kB, `styles/core.css` to 9.1 kB from 8.9 kB, Timeline's, Scene's and
+  the Gallery's by 400 to 700 bytes, and the elements' by about 1.9 kB.
+- **Text and print on the Canvas are crisper.** Each tile is drawn from its full level
+  half a step more, where it had leaned toward the softer one beneath: a page's type at
+  home now looks as sharp as OpenSeadragon or Atlas draw it. Nothing to change.
+- **The loading mark makes one pass.** Where it ran across over and over, it now draws
+  61.8% of the way, then 61.8% of what is left, and so on, each step a golden ratio
+  slower, and once nothing loads it runs to the end and fades. Every mark in one Body
+  (the Root's Manifest, a part's code, the Canvas's tiles) goes on with the same pass,
+  as does a Viewer's Body drawn afresh for another resource. A load quick enough never
+  shows it, as before; where less motion is asked for, the pass is half the pace and
+  fades without running to the end. Nothing to change; `.clover-loading` keeps its
+  name, and its line is still the accent.
+- **A vertical slider's styles load on their own.** Items' `orientation="vertical"`
+  slider, which the Default template draws for a Manifest read down the page, takes its
+  rules from `styles/items-vertical.css`, no longer in `styles.css` or
+  `styles/items.css`: they are adopted as the slider first draws, as a recording's, a
+  Scene's and a map's are, so a page without one loads none of them. Until they are in,
+  the slider draws nothing rather than a row; where they cannot load, it is a row. A page
+  that draws a vertical slider on the server imports
+  `@nulib/clover/styles/items-vertical.css`, so its first paint is styled; otherwise,
+  nothing to change.
+
+### Removed
+
+- **An animation's Repeat button.** An image sequence played as an animation (the
+  Cookbook's multimedia recipe) no longer offers Repeat: it loops where its Manifest or
+  Canvas has the `repeat` behavior, as it started before, and otherwise stops at its end.
+  Its button (`data-button="repeat"`) is gone, and the `frameRepeat` string from every
+  locale.
+
+### Fixed
+
+- **A refused request no longer stays open.** When a server answers a tile, an
+  `info.json`, a Manifest, a caption file, a model or a download with an error (a
+  restricted image's tiles answer 403), Clover lets the answer's body go at once. Before,
+  the browser held each such request open until it was collected, and over HTTP/1.1 a
+  long error page could keep one of the six connections a page has to that server.
+
 ## [4.5.9] - 2026-11-06
 
 ### Fixed

@@ -49,6 +49,12 @@ export interface PlanInput {
   viewport: ViewportSize;
   pixelRatio: number;
   getTile: (url: string) => LoadedImage | undefined;
+  /**
+   * Whether a tile is in memory, decoded, whether or not this frame may draw it. A tile
+   * the upload budget holds back is here but not drawn, and no coarser one is fetched
+   * for it. Without it, `getTile` decides.
+   */
+  has?: (url: string) => boolean;
   /** Also want every coarsest-level tile (the navigator shows the whole image). */
   wantOverview?: boolean;
   /**
@@ -59,16 +65,20 @@ export interface PlanInput {
 }
 
 /**
- * Priority bands: coarse tiles under the view, then the target level, then the coarser
- * tiles for a view passed through mid-animation, then the overview.
+ * Priority bands: coarse tiles under the view, then the middle level under target tiles
+ * still missing, then the target level, then the coarser tiles for a view passed through
+ * mid-animation, then the overview.
  */
-const TARGET_BAND = 1e7;
+const MIDDLE_BAND = 5e6;
+/** Where the tiles of the level a view is drawn from begin: coarser levels come before. */
+export const TARGET_BAND = 1e7;
 const IN_FLIGHT_BAND = 1.5e7;
 const OVERVIEW_BAND = 2e7;
 
 /**
  * How many levels coarser than its target a view passed through mid-animation is fetched
- * at: a sixteenth of the tiles, enough for a picture in motion.
+ * at, and the middle level a view at rest shows while its target loads: a sixteenth of
+ * the tiles, enough for a picture in motion or on its way to sharp.
  */
 const IN_FLIGHT_LEVELS = 2;
 
@@ -88,8 +98,11 @@ interface ItemView {
  *
  * Per item it picks the coarsest pyramid level with at least one level pixel per device
  * pixel, and wants that level's tiles under the view plus the coarsest level's (so there
- * is always *something*). It draws the target level, and when any of its tiles are still
- * missing, every coarser level that has tiles beneath it first — so a gap shows a blurrier
+ * is always *something*). Under target tiles not yet loaded it also wants the level
+ * `IN_FLIGHT_LEVELS` coarser, ahead of the target: about a sixteenth of the tiles, so a
+ * view that needs many sharpens in two steps rather than waiting on all of them at the
+ * coarsest level's blur. It draws the target level, and when any of its tiles are still missing,
+ * every coarser level that has tiles beneath it first — so a gap shows a blurrier
  * picture, never the background.
  *
  * While the camera animates, the target level is wanted for where it will land, not for
@@ -100,6 +113,7 @@ interface ItemView {
  */
 export function planFrame(input: PlanInput): FramePlan {
   const { items, camera, viewport, pixelRatio, getTile, destination } = input;
+  const has = input.has ?? ((url: string) => getTile(url) !== undefined);
   const view = worldToScreen(camera, viewport);
   const draws: PlannedDraw[] = [];
   const wants: TileWant[] = [];
@@ -171,6 +185,25 @@ export function planFrame(input: PlanInput): FramePlan {
       if (inFlight > 0) {
         for (const address of tilesInRegion(pyramid, inFlight, area)) {
           want(pyramid, address, IN_FLIGHT_BAND + distance(address));
+        }
+      }
+    }
+
+    // At rest, the middle level under what the target still lacks: one of its tiles
+    // covers many of the target's (sixteen, where each level halves), so a few requests
+    // sharpen the whole view a step while the target's many load.
+    const middle = target - IN_FLIGHT_LEVELS;
+    if (there === here && middle > 0) {
+      const asked = new Set<string>();
+      for (const address of fine) {
+        const tile = pyramid.tile(address);
+        if (has(tile.url)) continue;
+        // The middle tile under this one, on the same grid.
+        for (const under of tilesInRegion(pyramid, middle, tile.region)) {
+          const key = `${under.col},${under.row}`;
+          if (asked.has(key)) continue;
+          asked.add(key);
+          want(pyramid, under, MIDDLE_BAND + distance(under));
         }
       }
     }

@@ -45,6 +45,7 @@ import "@nulib/clover/styles/items.css";
 | ------------------------------ | ----------------------------------------------------------------------------------------------------- |
 | `styles/core.css`              | `Root`, `Body` and `Canvas`, `Status`, `Label`, the Primitives                                        |
 | `styles/items.css`             | `Items` and `Position`, and the items in the Panel's Collection and Views sections                    |
+| `styles/items-vertical.css`    | `Items` as a vertical slider, as the `Default` template draws it for a Manifest read down the page    |
 | `styles/panel.css`             | `Panel` and its sections: `Annotations`, `Collection`, `Contents`, `Download`, `Search`, `Transcript` |
 | `styles/media.css`             | Video, sound, `Timeline` and animations, in a `Body` or a `Canvas` too                                |
 | `styles/scene.css`             | `Scene`, and a 3D model in a `Body`                                                                   |
@@ -53,9 +54,9 @@ import "@nulib/clover/styles/items.css";
 | `styles/collection-select.css` | `CollectionSelect`                                                                                    |
 | `styles/default.css`           | The `Default` template                                                                                |
 
-`styles/media.css`, `styles/scene.css` and `styles/map.css` come on their own here too,
-as their parts' code loads. Import one only where a server draws its part, so its first
-paint is styled before the page's scripts run.
+`styles/media.css`, `styles/scene.css`, `styles/map.css` and `styles/items-vertical.css`
+come on their own here too, as their parts' code loads. Import one only where a server
+draws its part, so its first paint is styled before the page's scripts run.
 
 The Viewer draws most parts: give it `styles.css`, and `templates.css`.
 

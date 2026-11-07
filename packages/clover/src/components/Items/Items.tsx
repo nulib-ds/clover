@@ -1,4 +1,11 @@
-import React, { Suspense, forwardRef, lazy, useEffect, useRef } from "react";
+import React, {
+  Suspense,
+  forwardRef,
+  lazy,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
 import { ItemFigure, type ItemSecondary } from "./Item";
@@ -390,7 +397,52 @@ interface ItemsViewProps extends Omit<ItemsProps, "navigation" | "items"> {
   followFocus?: (item: ItemModel) => void;
 }
 
-export function ItemsView({
+/**
+ * A vertical slider's styles, apart from Items' own (`vertical/ItemsVertical.css`): few
+ * Manifests run down the page, so only a slider that does loads them. `true` once they
+ * are in, `false` where they could not load.
+ */
+let verticalIn: boolean | undefined;
+let verticalLoad: Promise<boolean> | undefined;
+const loadVertical = () =>
+  (verticalLoad ??= import("./vertical/ItemsVertical").then(
+    () => (verticalIn = true),
+    () => (verticalIn = false),
+  ));
+
+/**
+ * Items, drawn once a vertical slider's styles are in: until then it draws nothing, so it
+ * never shows as a row first, and where they cannot load it is a row. Never under
+ * Suspense, whose fallback would hide what was drawn, and whose reveal React holds back.
+ */
+export function ItemsView(props: ItemsViewProps) {
+  const waits =
+    (props.layout ?? "slider") === "slider" &&
+    props.orientation === "vertical" &&
+    verticalIn === undefined;
+  const [, settle] = useState<boolean>();
+  useEffect(() => {
+    if (!waits) return;
+    let live = true;
+    void loadVertical().then((state) => live && settle(state));
+    return () => {
+      live = false;
+    };
+  }, [waits]);
+  if (waits) {
+    // Asked for as it is drawn, not after: on its way a frame sooner.
+    if (typeof document !== "undefined") void loadVertical();
+    return null;
+  }
+  return (
+    <DrawnItems
+      {...props}
+      orientation={verticalIn === false ? "horizontal" : props.orientation}
+    />
+  );
+}
+
+function DrawnItems({
   forwardedRef,
   items,
   selected,

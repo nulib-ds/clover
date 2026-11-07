@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 
 import {
   DRAWN_INSIDE,
+  EXTENDING,
   PART_SHEETS,
   SHEETS,
   lazyParts,
@@ -236,12 +237,12 @@ test("the part sheets together, but those loaded with their code, declare what s
 });
 
 /*
- * A recording's, a Scene's and a map's sheets load with the code that draws what they
- * style (`lazySheets`): each a module of what its part sheet holds, which every module
- * that draws any of it adopts as it loads.
+ * A recording's, a Scene's, a map's and a vertical slider's sheets load with the code that
+ * draws what they style (`lazySheets`): each a module of what its part sheet holds, which
+ * every module that draws any of it adopts as it loads.
  */
 test("each part sheet loaded with its code is its file's, adopted where it draws", async () => {
-  assert.deepEqual(LAZY.sort(), ["map", "media", "scene"]);
+  assert.deepEqual(LAZY.sort(), ["items-vertical", "map", "media", "scene"]);
   const src = resolve(root, "src");
   for (const name of LAZY) {
     const { default: css } = await import(
@@ -256,7 +257,9 @@ test("each part sheet loaded with its code is its file's, adopted where it draws
       const built = owner.replace(src, dist).replace(/\.tsx?$/, ".mjs");
       assert.match(
         readFileSync(built, "utf8"),
-        new RegExp(`adoptSheet\\("${name}", __clover_sheet_${name}\\)`),
+        new RegExp(
+          `adoptSheet\\("${name}", __clover_sheet_${name.replace(/\W/g, "_")}\\)`,
+        ),
         `${built} draws what ${name}.css styles without adopting it`,
       );
     }
@@ -361,7 +364,12 @@ test("no part sheet reads a custom property only another part's sets", () => {
     for (const [, name] of read(`styles/${part}.css`).matchAll(
       /var\((--[\w-]+)\s*\)/g,
     )) {
-      if (set[part].has(name) || set.core.has(name)) continue;
+      if (
+        set[part].has(name) ||
+        set.core.has(name) ||
+        set[EXTENDING[part]]?.has(name)
+      )
+        continue;
       const by = Object.keys(set).filter((other) => set[other].has(name));
       if (by.length)
         unset.push(`${part}.css reads ${name}, set in ${by.join(", ")}.css`);
@@ -394,7 +402,9 @@ test("imported core first, the part sheets cascade as styles.css does", async ()
   for (const early of rules)
     for (const late of rules) {
       if (early.index >= late.index || early.part === late.part) continue;
-      if (early.part === "core") continue;
+      // Core comes first, and a sheet extending a part's after that part's.
+      if (early.part === "core" || EXTENDING[late.part] === early.part)
+        continue;
       flips.push(...tied(early, late));
     }
   assert.deepEqual(flips, []);
@@ -506,7 +516,11 @@ test("no part draws what only another part's sheet styles", () => {
       if (!classes.length || DRAWN_APART.some((rule) => rule.test(selector)))
         continue;
       for (const [other, names] of written)
-        if (other !== part && classes.every((name) => names.has(name)))
+        if (
+          other !== part &&
+          other !== EXTENDING[part] &&
+          classes.every((name) => names.has(name))
+        )
           leaks.push(`${other} draws ${selector}, styled in ${part}.css`);
     }
   }
@@ -524,7 +538,8 @@ test("a part names the sheets of the parts it draws inside it", () => {
   const inside = writtenBy(partsDrawing({ inside: true }));
   const needed = new Set();
   for (const part of Object.keys(GROUPS)) {
-    if (part === "core") continue;
+    // A sheet extending a part comes with that part's code, wherever it draws.
+    if (part === "core" || EXTENDING[part]) continue;
     for (const { selector } of rulesIn(read(`styles/${part}.css`))) {
       const classes = [...classesOf(selector)];
       if (!classes.length) continue;

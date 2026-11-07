@@ -47,6 +47,7 @@
 @import "../components/Label/Label.css";
 @import "../components/Status/Status.css";
 @import "../components/Items/Items.css";
+@import "../components/Items/vertical/ItemsVertical.css";
 @import "../components/Items/Pager.css";
 @import "../components/Panel/Panel.css";
 @import "../components/Collection/Collection.css";

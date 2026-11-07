@@ -28,6 +28,15 @@ export function cloverFetch(
   });
 }
 
+/**
+ * Let go of an answer's body that nothing will read: an error's. Left alone, the browser
+ * holds the request open until the response is collected, and over HTTP/1.1 a long one
+ * keeps one of the six connections a page has to that host.
+ */
+export function discardBody(response: Response): void {
+  response.body?.cancel().catch(() => {});
+}
+
 /** Whether elements (`crossOrigin`) and XHR (`withCredentials`) should send cookies. */
 export const sendsCredentials = (request: CloverRequest | undefined) =>
   request?.credentials === "include";
@@ -58,6 +67,7 @@ export async function fetchJson(
     headers: { Accept: "application/ld+json, application/json" },
   });
   if (!response.ok) {
+    discardBody(response);
     throw new CloverRequestError(
       `${url} answered ${response.status}`,
       url,

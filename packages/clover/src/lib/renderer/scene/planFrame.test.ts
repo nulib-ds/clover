@@ -12,7 +12,8 @@ import { servicePyramid } from "../sources/tilePyramid";
 const viewport = { width: 800, height: 600 };
 
 function gottingen(region?: string, rotation?: string): SceneItem {
-  const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3));
+  // On the service's own 512 px grid (no joining), so each choice can be counted.
+  const pyramid = servicePyramid(parseInfo(GOTTINGEN_V3), 0);
   const size = { width: 4032, height: 3024 };
   const clip = parseRegion(region, 4032, 3024) ?? {
     x: 0,
@@ -129,7 +130,58 @@ describe("planFrame", () => {
       /\/0,0,512,512\/512,512\//.test(w.url),
     );
     expect(fine).toHaveLength(1);
-    expect(plan.wants).toHaveLength(2);
+    // The thumbnail, the quarter-resolution tile under it, and the tile itself.
+    expect(plan.wants.map((w) => w.url)).toEqual([
+      expect.stringMatching(/\/full\/512,384\//),
+      expect.stringMatching(/\/0,0,2048,2048\/512,512\//),
+      expect.stringMatching(/\/0,0,512,512\/512,512\//),
+    ]);
+  });
+
+  it("wants the middle level under target tiles still missing, ahead of them", () => {
+    const item = gottingen();
+    // Full resolution over x 1700…2500, y 1200…1800: target tiles in columns 3–4 and
+    // rows 2–3, all four under the quarter-resolution tiles (0,0) and (1,0).
+    const camera = { x: 2100, y: 1500, zoom: 1, rotation: 0 };
+    const urls = (
+      getTile: (url: string) => LoadedImage | undefined,
+      has?: (url: string) => boolean,
+    ) =>
+      planFrame({
+        items: [item],
+        camera,
+        viewport,
+        pixelRatio: 1,
+        getTile,
+        has,
+      }).wants.map((w) => w.url.replace(/^.*gottingen\//, ""));
+
+    expect(urls(() => undefined)).toEqual([
+      "full/512,384/0/default.jpg",
+      // The middle level, then the target, each nearest the center first.
+      "2048,0,1984,2048/496,512/0/default.jpg",
+      "0,0,2048,2048/512,512/0/default.jpg",
+      "2048,1024,512,512/512,512/0/default.jpg",
+      "2048,1536,512,512/512,512/0/default.jpg",
+      "1536,1024,512,512/512,512/0/default.jpg",
+      "1536,1536,512,512/512,512/0/default.jpg",
+    ]);
+
+    // Only under what is missing: with the left column in, (0,0) is not asked for.
+    const all = everything(item);
+    const left = (url: string) =>
+      /\/1536,(1024|1536),512,512\//.test(url) ? all(url) : undefined;
+    expect(urls(left)).not.toContain("0,0,2048,2048/512,512/0/default.jpg");
+    expect(urls(left)).toContain("2048,0,1984,2048/496,512/0/default.jpg");
+
+    // Every target tile in, or in memory and held back by the upload budget: none.
+    const quarter = /\/(0|2048),0,(2048|1984),2048\//;
+    expect(urls(all).some((u) => quarter.test(`/${u}`))).toBe(false);
+    const held = urls(
+      () => undefined,
+      (url) => all(url) !== undefined,
+    );
+    expect(held.some((u) => quarter.test(`/${u}`))).toBe(false);
   });
 
   it("draws coarser tiles under missing ones, then only the target once complete", () => {

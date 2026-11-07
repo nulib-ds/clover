@@ -40,6 +40,19 @@ describe("WebGL2Backend", () => {
     expect(backend.canvas.width).toBe(400);
   });
 
+  it("samples half a mip level sharper than the GPU would pick", () => {
+    const fake = createFakeGl();
+    WebGL2Backend.create(canvasWithFakeGl(fake));
+    const sources = fake.calls
+      .filter((call) => call.name === "shaderSource")
+      .map((call) => String(call.args[1]));
+    expect(
+      sources.some((source) =>
+        source.includes("texture(u_texture, v_uv, -0.5)"),
+      ),
+    ).toBe(true);
+  });
+
   it("reports cross-origin pixels as tainted rather than throwing", () => {
     const fake = createFakeGl();
     const backend = WebGL2Backend.create(canvasWithFakeGl(fake))!;

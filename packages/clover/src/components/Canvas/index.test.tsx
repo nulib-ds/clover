@@ -118,6 +118,28 @@ describe("Canvas", () => {
     expect(await screen.findByTestId("clover-canvas")).toBeInTheDocument();
   });
 
+  it("reads the next view ahead in a Root, once its own is drawn", async () => {
+    renderer.prefetch = vi.fn();
+    render(
+      <Root iiifContent={bookJson as never}>
+        <Canvas />
+      </Root>,
+    );
+    await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
+    // Nothing of the next view while this one loads.
+    expect(renderer.prefetch).not.toHaveBeenCalled();
+    await open();
+    await waitFor(() => expect(renderer.prefetch).toHaveBeenCalledTimes(1));
+    const [images, { world }] = renderer.prefetch.mock.calls[0];
+    // The spread after the cover: its two pages, framed together.
+    expect(
+      images.map((image: { service: string }) =>
+        image.service.split("_").pop(),
+      ),
+    ).toEqual(["f19", "f20"]);
+    expect(world).toEqual(expect.objectContaining({ x: 0, y: 0 }));
+  });
+
   it("says in the middle of the Body when its image could not be loaded", async () => {
     render(<Canvas iiifContent={book as never} />);
     const status = await waitFor(() => {

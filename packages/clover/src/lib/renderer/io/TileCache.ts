@@ -60,7 +60,7 @@ interface Entry {
 }
 
 const DEFAULT_BUDGET = 192 * 1024 * 1024;
-const DEFAULT_IN_FLIGHT = 6;
+const DEFAULT_IN_FLIGHT = 16;
 const MAX_ATTEMPTS = 2;
 
 export class TileCache {

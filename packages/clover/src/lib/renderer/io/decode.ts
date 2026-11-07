@@ -15,6 +15,7 @@
 import {
   type CloverRequest,
   cloverFetch,
+  discardBody,
   sendsCredentials,
 } from "../../../core/request";
 
@@ -107,6 +108,7 @@ export async function loadImage(
   }
 
   if (!response.ok) {
+    discardBody(response);
     throw new ImageLoadError(
       `Image request failed with ${response.status}`,
       url,

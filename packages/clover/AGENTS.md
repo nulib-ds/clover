@@ -109,17 +109,25 @@ every rule below.
   into `dist/styles.css` (esbuild), which `build/styles.mjs` wraps in `@layer clover`.
   Keep the aggregate's imports plain: the docs import it from source, and Next 14 reads
   `@import … layer()` as a media query that never matches. Package JS never imports CSS.
-  Only the part sheets of what loads as it draws, a recording's, a Scene's and a map's
-  (`lazyParts`, `build/clover-sheets.mjs`), come with their code instead, and
-  `styles.css` leaves them out (the docs, from source, take the list whole): the React
-  build (`lazySheets`) has every module that draws what they style (their sheets'
-  `OWNERS`) hand its sheet to `ui/adoptSheet.ts`, which the document adopts (a constructed
-  sheet, after every other, which a strict CSP allows; a `<style>` where a browser cannot
-  adopt one). A call, never an import for its side effect, which `sideEffects` would let
-  a bundler drop. A page whose server draws one imports its part sheet too. Core never
-  reads what only such a sheet sets: a recording's still draws before its transport loads
-  (so `--clover-transport-room` is `Canvas.css`'s). MapLibre's stylesheet comes the same
-  way, with MapLibre, where the page has none (the Map, below). Color tokens are `--clover-color-*` with literal fallbacks, since a page sets them. The
+  Only the part sheets of what loads as it draws, a recording's, a Scene's, a map's and
+  a vertical slider's (`lazyParts`, `build/clover-sheets.mjs`), come with their code
+  instead, and `styles.css` leaves them out (the docs, from source, take the list
+  whole): the React build (`lazySheets`) has every module that draws what they style
+  (their sheets' `OWNERS`) hand its sheet to `ui/adoptSheet.ts`, which the document
+  adopts (a constructed sheet, after every other, which a strict CSP allows; a `<style>`
+  where a browser cannot adopt one). A call, never an import for its side effect, which
+  `sideEffects` would let a bundler drop. A way of drawing a part that is seldom wanted
+  can load apart so: the vertical slider's rules ride with
+  `Items/vertical/ItemsVertical.ts`, a module of nothing else, which `ItemsView` loads
+  itself, drawing nothing until it is in (Mat, 2026-11-06), never under Suspense, whose
+  fallback hides what was drawn and whose reveal React holds back up to 300 ms; such a
+  sheet extends its part's (`EXTENDING`, `build/clover-sheets.mjs`). A template's own
+  rules stay in its sheet, as a copied template imports only `@nulib/clover` and
+  `@nulib/clover/templates`. A page whose server draws one imports its part sheet too.
+  Core never reads what only such a sheet sets: a recording's still draws before its
+  transport loads (so `--clover-transport-room` is `Canvas.css`'s). MapLibre's
+  stylesheet comes the same way, with MapLibre, where the page has none (the Map,
+  below). Color tokens are `--clover-color-*` with literal fallbacks, since a page sets them. The
   scale's tokens (`--clover-space-*`, `--clover-text-*`, `--clover-control`) are defined
   in `src/styles/scale.css`, first in the list, and need none. Add every new stylesheet to
   the list. The same sheets are built again a part at a time (`dist/styles/<part>.css`,
@@ -860,6 +868,12 @@ every rule below.
 
 ## Data and state
 
+- **Every request to a server goes through `cloverFetch`** (`core/request.ts`), with the
+  request's settings, and an answer that is an error has its body let go (`discardBody`)
+  before anything throws or returns: unread, the browser holds the request open until it
+  is collected, and over HTTP/1.1 a long error page keeps one of the six connections a
+  page has to that server (found 2026-11-06 on a restricted Northwestern work, whose
+  tiles all answer 403). A new fetch's error path does the same.
 - **One shape: Presentation 4.** `core/load.ts` fetches `iiifContent` once (with the
   request settings) and `core/presentation.ts` upgrades it through `@iiif/parser`, as
   its `upgradeToPresentation4()` does, in the steps that function takes
@@ -928,6 +942,17 @@ every rule below.
   costs a template 0.2–0.3 kB, the least two lazy references and a type check take
   (measured 2026-10-23; a static Timeline route measured 29 B more). A host's renderer
   (`renderers`) still goes first.
+- **The loading mark** (`ui/Loading.tsx`) makes one pass (Mat, 2026-11-06: "it should
+  move once ... get close to the end ... continue moving slower and then finish", "once
+  done zip it across"): 61.8% of the way, then 61.8% of what is left, each step a golden
+  ratio slower (`clover-loading-pass`, `Loading.css`). The marks of one Body share one
+  pass (`ui/loadingPass.ts`): each is given how long it has run
+  (`--clover-loading-elapsed`, taken off its delay), and the last to go is left in its
+  place a moment (`HANDOVER`) for a mark that takes over, then runs to the end and fades;
+  a Body drawn afresh (a Viewer remounting for another resource) takes over a pass whose
+  Body has left the page. Its exit is a copy of the mark, so `{busy && <Loading />}` and
+  Suspense fallbacks need nothing of their own. Where less motion is asked for, the pass
+  is half the pace and only fades.
 - **Measuring size.** `build/sizes.mjs` and `bundle.test.mjs` build a consumer's app as
   Vite builds one for production (`build/consumer-bundle.mjs`), never with esbuild ("Build
   and test"): what a page imports, up front (`initialGzip`), and to its first view the
@@ -1842,7 +1867,15 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
   service's id from what a manifest declares of it: its profile is not always the
   server's.
   `sources/tilePyramid.ts` builds levels from `tiles`, from `sizes`, or from tiles Clover
-  derives itself.
+  derives itself. A service that cuts any region at any size (level 1 and up) is asked
+  for tiles of at least `TILE_FLOOR` (1024 px; 2026-11-06): its smaller listed tiles
+  joined, a whole number of them on its own grid (`joinedTile`), and its own cut that
+  large where it lists none, each within `maxWidth`, `maxHeight` and `maxArea`; a level 0
+  service only ever gets its own tiles. A server answers a 1024 px tile in 1.1 to 1.4
+  times a 256 px one's time (Northwestern's, e-codices' and Wellcome's, measured cold),
+  and over HTTP/1.1 a browser sends six at a time, so 256 px tiles made a page's view a
+  hundred round trips. Tests of the planner's choices build their pyramid on the
+  service's own grid (`servicePyramid(info, 0)`).
 - Each frame is decided by `scene/planFrame.ts`, which is pure. Its rectangle math stays
   inline: it runs per tile per frame, where a helper returning a rectangle would allocate
   (2026-10-27). `io/TileCache.ts` follows its required set: abort on supersede, a priority
@@ -1853,6 +1886,51 @@ Presentation 4's other containers (2026-10-23), documented on `content/docs/time
     `IN_FLIGHT_LEVELS` (2) coarser than their target. Planning every in-between view at
     full resolution was 1.8× the tiles on a fast link (M3 benchmark). Draws are always
     of the current view.
+  - At rest, under target tiles not yet in memory (`has`: one the upload budget holds
+    back counts as in), it wants the level `IN_FLIGHT_LEVELS` coarser too, in
+    `MIDDLE_BAND`, ahead of the target: about a sixteenth of the target's tiles, so a view
+    needing a hundred sharpens in two steps rather than holding the coarsest level's blur
+    (a 12× upscale on Northwestern's 256 px tiles) until the last one lands. It costs
+    about a tenth more requests; OpenSeadragon asks for every level between.
+  - Tile fetching is the speed a reader sees, and it was measured against OpenSeadragon
+    6.1.1 and Atlas 3.3.5 on five servers' pages on 2026-11-06 (a harness of the three
+    side by side, a proxy replaying each tile at a set server delay over HTTP/1.1 or
+    HTTP/2, and what each drew judged from a screencast). Two waits were Clover's own:
+    the cache's window of six requests (`maxInFlight`, 16 since then: OpenSeadragon sets
+    no limit, Atlas ¾ of the cores, 4 to 10), and the view's tiles waiting on the
+    coarsest. `setImages` now asks for the tiles of the view a new scene opens on as
+    soon as every item's `info.json` is read (`landingWants`, kept as `landing` and put
+    ahead of each frame's wants until the scene is shown), beside its coarsest rather
+    than after them. `open` still waits on the coarsest, so a swap never flashes empty.
+    A server on HTTP/1.1 (Northwestern's image server, 2026-11-06) gets six requests at a
+    time from the browser whatever the window says.
+  - A scene is prepared in its order, `PREPARE_AT_ONCE` (6) images at a time, each one's
+    `info.json` and then at once its coarsest tiles before the next is begun (`inTurn`):
+    a browser sends a server on HTTP/1.1 six requests at a time in the order asked, so a
+    continuous Manifest's 31 `info.json` asked together kept every page's coarsest
+    behind them (first page 2.1 s; 0.58 s in turn, 2026-11-06). On an empty Body a scene
+    whose every image has a `placement` (as `canvasScene` gives them) goes up an image at
+    a time (`placeSoFar`), each as its own coarsest is in, framed for the whole scene with
+    the first, the closing step keeping the reader's view; with a scene on screen the
+    new one replaces it whole, so a page turn never shows half a spread. Mat, 2026-11-06:
+    "integrate Build page-at-a-time opening alongside the prefetch into 402".
+  - `prefetch(images, { world })` reads the next view ahead. `CanvasView` hands it a
+    Root's next view (`ahead`, from `selectNextCanvases`, `Connected.tsx`) once its own
+    is drawn, and the renderer starts it in a frame where nothing moves, nothing loads
+    and every wanted tile is in (`ahead`, `readAhead`): each image's `info.json`, into
+    the shared info cache, then the coarsest and middle levels of its framed view
+    (`landingWants` below `TARGET_BAND`) through `TileCache.prefetch`, which frames never
+    abort. Its sharp tiles wait until it is shown; `setImages`, `clear` or a later call
+    drops it. Never behind a placeholder still not yet opened (what loads behind one is
+    Mat's call, open since 2026-11-06), nor for a recording. Measured: a Northwestern
+    page turn's first picture 0.02 s from 0.68 s, every tile 0.72 s from 1.06 s, for
+    three requests and 17 kB read for nothing where the page is never turned.
+  - The WebGL2 backend samples half a mip level sharper than the GPU would (`LOD_BIAS`,
+    `backends/webgl2/shaders.ts`): the planner draws a level at one to two of its pixels to
+    a device pixel, where trilinear filtering blended in the level half as sharp, and text
+    came out softer than OpenSeadragon and Atlas drew it (62–80% of an ideal Lanczos
+    downscale's edge energy against their 75–88%, 2026-11-06). At −0.5 it matches them on
+    text and print with little more moiré on a halftone; at −1 it shimmers.
   - `scene/uploadBudget.ts` caps new GPU uploads per frame (`UPLOAD_BUDGET_BYTES`, about
     two 512 px tiles, always at least one). A tile held back reads as missing to the
     planner, which paints the coarser level beneath it, and the frame loop runs again.
