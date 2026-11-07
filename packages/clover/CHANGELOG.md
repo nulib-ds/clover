@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.6.1] - 2026-11-06
+
 ### Changed
 
 - **Nothing of the last resource, or the last Canvas, shows while the next loads.** The
