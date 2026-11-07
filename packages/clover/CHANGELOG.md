@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.6.0] - 2026-11-06
+
 ### Changed
 
 - **The Canvas sharpens sooner.** Five changes to how it asks an image server for
