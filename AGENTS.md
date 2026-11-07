@@ -1316,7 +1316,9 @@ Agents make code changes. Committing, versioning and releasing are done by a hum
   legend small and muted, the language in use marked as the Annotations list marks the
   Canvases in view. The site's languages changing drop an interface choice they no longer
   name ("toggling languages off does not remove them as options"). A Root given no
-  `language` follows an interface language chosen. The i18n page's resource is the
+  `language` follows an interface language chosen; a resource with none of it shows each
+  value in its first language, not the visitor's (Mat, 2026-11-06: "let's ignore this
+  case. the use can still toggle to `en` if they want to"). The i18n page's resource is the
   homepage's select (`ResourceField`'s `items`, `cookbook={false}`). The i18n page's demo checks the languages a site offers (`ExampleChecks`, a
   grid of native checkboxes drawn as the examples' switch buttons, none checked to
   start), opens a resource (the homepage's select) and writes its code (`LiveLines`).

@@ -193,17 +193,19 @@ const navPlaces = new WeakMap<object, Map<string, MapFeatureCollection>>();
  * 0139 has). A feature from a member names that member, the open one's place its own
  * Manifest's where it gives one, in the member's place in the Collection's order; one
  * from a Canvas or annotation names that Canvas. Memoized on the Manifest (and the
- * Collection), so the same collection comes back while nothing changes.
+ * Collection), so the same collection comes back while nothing changes. While a member
+ * loads, its Manifest put away, the Collection's places stay, each its member's own.
  */
 export function navPlaceOf(
   manifest: Manifest | null,
   collection: Presentation4Collection | null = null,
   language?: string,
 ): MapFeatureCollection {
-  if (!manifest) return NO_FEATURES;
+  const held = manifest ?? collection;
+  if (!held) return NO_FEATURES;
   const key = `${language ?? ""}|${(collection as Json | null)?.id ?? ""}`;
-  let byKey = navPlaces.get(manifest);
-  if (!byKey) navPlaces.set(manifest, (byKey = new Map()));
+  let byKey = navPlaces.get(held);
+  if (!byKey) navPlaces.set(held, (byKey = new Map()));
   const cached = byKey.get(key);
   if (cached) return cached;
 
@@ -222,7 +224,7 @@ export function navPlaceOf(
 
   const c = collection as Json | null;
   if (c?.navPlace) add(c.navPlace, { label: c.label, navDate: c.navDate });
-  const m = manifest as Json;
+  const m = (manifest ?? {}) as Json;
   let own = false;
   for (const member of asArray(c?.items) as Json[]) {
     if (typeof member?.id !== "string") continue;

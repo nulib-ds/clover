@@ -5,6 +5,7 @@ import colosseumJson from "../fixtures/iiif-cookbook/0540-link-for-opening-multi
 import { createClover } from "./clover";
 import {
   selectSequence,
+  selectShownId,
   selectTargetIndex,
   selectVisibleCanvases,
 } from "./selectors";
@@ -545,6 +546,77 @@ describe("createClover: Collections", () => {
     expect(onManifestChange).toHaveBeenCalledTimes(1);
   });
 
+  // Mat, 2026-11-06: "flush the old … the first thing. even before the load of the new resource".
+  it("puts the last member away the moment another is asked for, keeping the Collection", async () => {
+    let answer!: () => void;
+    const fetch = vi.fn(async (url: string) => {
+      if (url === LETTER)
+        await new Promise<void>((resolve) => (answer = resolve));
+      return new Response(JSON.stringify(url === BOOK ? bookJson : letter), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+    const clover = createClover({ request: { fetch } });
+    await clover.load(shelf([member(BOOK), member(LETTER)]));
+    clover.goTo(canvasIds[1]);
+    const going = clover.goToManifest(LETTER);
+    // Before its fetch is answered: nothing of the book, the choice held.
+    let state = clover.store.get();
+    expect(state.status).toBe("loading");
+    expect(state.manifest).toBeNull();
+    expect(state.canvasId).toBeNull();
+    expect(state.opening).toBe(LETTER);
+    expect(selectShownId(state)).toBe(LETTER);
+    expect(state.collection?.id).toBe("https://example.org/shelf");
+    expect(state.throughCollection).toBe(true);
+    // Asked again while it loads, it is not asked for twice.
+    await clover.goToManifest(LETTER);
+    expect(fetch.mock.calls.filter(([url]) => url === LETTER)).toHaveLength(1);
+    answer();
+    await going;
+    state = clover.store.get();
+    expect(state.manifest?.id).toBe(LETTER);
+    expect(state.opening).toBeNull();
+  });
+
+  it("puts everything of the last content away for new content, its Collection too", async () => {
+    let answer!: () => void;
+    const fetch = vi.fn(async (url: string) => {
+      if (url === LETTER)
+        await new Promise<void>((resolve) => (answer = resolve));
+      return new Response(JSON.stringify(url === BOOK ? bookJson : letter), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+    const clover = createClover({ request: { fetch } });
+    await clover.load(shelf([member(BOOK), member(LETTER)]));
+    const loading = clover.load(LETTER);
+    const state = clover.store.get();
+    expect(state.status).toBe("loading");
+    expect(state.manifest).toBeNull();
+    expect(state.collection).toBeNull();
+    expect(state.throughCollection).toBe(false);
+    expect(state.opening).toBeNull();
+    answer();
+    await loading;
+    expect(clover.store.get().manifest?.id).toBe(LETTER);
+  });
+
+  it("asks again for a member that would not load", async () => {
+    const MISSING = "https://example.org/missing";
+    const fetch = mockFetch({ [BOOK]: bookJson });
+    const clover = createClover({ request: { fetch } });
+    await clover.load(shelf([member(BOOK), member(MISSING)]));
+    await clover.goToManifest(MISSING);
+    expect(clover.store.get().status).toBe("error");
+    // Still the choice, the error its own.
+    expect(selectShownId(clover.store.get())).toBe(MISSING);
+    await clover.goToManifest(MISSING);
+    expect(fetch.mock.calls.filter(([url]) => url === MISSING)).toHaveLength(2);
+  });
+
   it("enters a nested Collection, showing its first Manifest", async () => {
     const NESTED = "https://example.org/drawer";
     const fetch = mockFetch({
@@ -734,8 +806,14 @@ describe("createClover: a content state's several targets", () => {
     expect(clover.store.get().targets?.items).toHaveLength(2);
 
     clover.goToTarget(0);
-    await vi.waitFor(() => expect(current(clover)).toBe(0));
+    // The one gone to is current at once, while its Manifest loads.
+    expect(clover.store.get().manifest).toBeNull();
+    expect(current(clover)).toBe(0);
+    await vi.waitFor(() =>
+      expect(clover.store.get().manifest?.id).toBe(colosseumJson.id),
+    );
     expect(clover.store.get().canvasId).toBe(colosseum.id);
+    expect(current(clover)).toBe(0);
   });
 
   it("holds no set for one target, nor for other content", async () => {
@@ -750,7 +828,10 @@ describe("createClover: a content state's several targets", () => {
     const clover = createClover({ request: { fetch: mockFetch(table) } });
     await clover.load(encode(compareJson));
     clover.goToTarget(1);
-    await vi.waitFor(() => expect(current(clover)).toBe(1));
+    await vi.waitFor(() =>
+      expect(clover.store.get().manifest?.id).toBe(monumentsJson.id),
+    );
+    expect(current(clover)).toBe(1);
     // The Manifest's other Canvas, the Temple of Vesta, is not a target.
     clover.goTo(selectSequence(clover.store.get().manifest).canvases[0].id);
     expect(current(clover)).toBe(-1);

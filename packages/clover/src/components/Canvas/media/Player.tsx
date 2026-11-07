@@ -111,9 +111,13 @@ export function PlayerFace({
     const source = thumbnailSource({ thumbnail });
     return source ? { source } : null;
   }, [shown, canvas, language]);
-  // The last artwork held (`hold`) while the next is made, so the note never flashes.
-  const src = useThumbnail(art?.source, ART_SIZE, request, true);
-  const ground = useThumbnail(art?.source, GROUND_SIZE, request, true);
+  /*
+   * The last artwork held (`hold`) while the next is made, so the note never flashes: the
+   * recording's own, as it turns from its placeholder to its accompanying Canvas. Another
+   * recording's goes at once.
+   */
+  const src = useThumbnail(art?.source, ART_SIZE, request, canvas.id);
+  const ground = useThumbnail(art?.source, GROUND_SIZE, request, canvas.id);
   const [loaded, setLoaded] = useState<string>();
   return (
     <>

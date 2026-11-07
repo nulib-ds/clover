@@ -27,9 +27,18 @@ export default function LoadedScene({ iiifContent, ...props }: SceneProps) {
       ? iiifContent
       : String((iiifContent as Record<string, unknown> | undefined)?.id ?? "");
 
+  /*
+   * Another content: the last one goes in this very render, before the next is asked for
+   * (Mat, 2026-11-06), its Body's background and the loading mark meanwhile.
+   */
+  const [loadingFor, setLoadingFor] = useState(key);
+  if (loadingFor !== key) {
+    setLoadingFor(key);
+    setView({ state: "loading" });
+  }
+
   useEffect(() => {
     let live = true;
-    setView({ state: "loading" });
     (async () => {
       const content = await loadContent(iiifContent!, { request });
       const scenes = (

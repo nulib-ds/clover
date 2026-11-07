@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import type { CloverRequest } from "../core/request";
 import { type ThumbnailSource, resolveThumbnail } from "../core/thumbnail";
@@ -23,8 +23,10 @@ export const PICTURE_SIZE = 336;
  *
  * A picture of the words beside it goes at once for another's, so none shows under words
  * it is not of (an entry's, the popover's). `hold`: keep the last one while the next is
- * made, where one replaces another in place (a player's artwork as it starts, which would
- * otherwise flash its note).
+ * made, where one replaces another in place, for as long as the key given stays the same
+ * (a recording's Canvas: its artwork as it starts, which would otherwise flash its note).
+ * Another key's goes at once, as nothing of a Canvas shows once the view has moved on
+ * from it (Mat, 2026-11-06).
  *
  * Items, the `Thumbnail` part, a Canvas's placeholder stills and Document's sheets keep
  * their own (2026-10-29): they load where no entry's picture does, so sharing this took
@@ -37,14 +39,17 @@ export function useThumbnail(
   source: ThumbnailSource | null | undefined,
   size: number,
   request?: CloverRequest,
-  hold = false,
+  hold?: string,
 ): string | undefined {
   const [src, setSrc] = useState(source?.src);
   // By what it asks for, so a source made again each render asks once.
   const key = source ? JSON.stringify(source) : "";
+  const heldFor = useRef(hold);
   useEffect(() => {
+    const held = hold !== undefined && heldFor.current === hold;
+    heldFor.current = hold;
     if (!source || source.src) return setSrc(source?.src);
-    if (!hold) setSrc(undefined);
+    if (!held) setSrc(undefined);
     let live = true;
     void resolveThumbnail(source, size, request).then(
       (url) => live && setSrc(url),

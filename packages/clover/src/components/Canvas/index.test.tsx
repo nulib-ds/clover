@@ -1422,18 +1422,40 @@ describe("Canvas", () => {
       expect(renderer.fitAnnotation).toHaveBeenCalledTimes(1);
     });
 
-    it("clears at once for another Manifest, not for another of its Canvases", () => {
+    // Mat, 2026-11-06: "the same should happen between canvases too".
+    it("clears at once for another of its Canvases, and for another Manifest, before asking for the next", () => {
+      const { rerender } = render(
+        <Canvas canvases={[pages[0]]} manifestId="https://example.org/a" />,
+      );
+      expect(renderer.clear).not.toHaveBeenCalled();
+      renderer.setImages.mockClear();
+      rerender(
+        <Canvas canvases={[pages[1]]} manifestId="https://example.org/a" />,
+      );
+      expect(renderer.clear).toHaveBeenCalled();
+      // Put away first, then the next one's pictures asked for, framed afresh.
+      expect(renderer.clear.mock.invocationCallOrder[0]).toBeLessThan(
+        renderer.setImages.mock.invocationCallOrder[0],
+      );
+      expect(lastScene()[1].fit).toBe(true);
+      renderer.clear.mockClear();
+      rerender(
+        <Canvas canvases={[pages[1]]} manifestId="https://example.org/b" />,
+      );
+      expect(renderer.clear).toHaveBeenCalled();
+    });
+
+    it("keeps its view for the same Canvases drawn again", () => {
       const { rerender } = render(
         <Canvas canvases={[pages[0]]} manifestId="https://example.org/a" />,
       );
       rerender(
-        <Canvas canvases={[pages[1]]} manifestId="https://example.org/a" />,
+        <Canvas
+          canvases={[{ ...pages[0] }]}
+          manifestId="https://example.org/a"
+        />,
       );
       expect(renderer.clear).not.toHaveBeenCalled();
-      rerender(
-        <Canvas canvases={[pages[1]]} manifestId="https://example.org/b" />,
-      );
-      expect(renderer.clear).toHaveBeenCalledTimes(1);
     });
 
     // Cookbook 0230: two Manifests whose Canvases share one id, at two sizes.
@@ -1540,8 +1562,9 @@ describe("Canvas", () => {
       fireEvent.click(screen.getByRole("radio", { name: "X-Ray" }));
       const [images, { fit }] = renderer.setImages.mock.lastCall;
       expect(images[0].url).toMatch(/xray/i);
-      // Same Canvas: the reader's view is kept.
+      // Same Canvas: the reader's view is kept, and the last picture up until the next is in.
       expect(fit).toBe(false);
+      expect(renderer.clear).not.toHaveBeenCalled();
     });
 
     it("shows an unlabeled item's number beside its radio button", () => {
@@ -1723,6 +1746,49 @@ describe("Canvas", () => {
       await screen.findByTestId("clover-canvas-placeholder");
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(renderer.setImages).not.toHaveBeenCalled();
+    });
+
+    // Mat, 2026-11-06: nothing of a Canvas shows once the view has moved on from it.
+    it("never shows the last Canvas's still while the next one's is made", async () => {
+      clearInfoCache();
+      const service = "https://example.org/iiif/next-still";
+      // The next still's info.json never answers: its URL is never made.
+      const fetch = vi.fn(() => new Promise<Response>(() => {}));
+      const next = {
+        ...second,
+        placeholderContainer: {
+          ...second.placeholderContainer,
+          items: [
+            {
+              items: [
+                {
+                  motivation: "painting",
+                  body: {
+                    id: `${service}/full/max/0/default.jpg`,
+                    type: "Image",
+                    width: 400,
+                    height: 300,
+                    service: [{ id: service, type: "ImageService3" }],
+                  },
+                  target: `${second.id}/placeholder`,
+                },
+              ],
+            },
+          ],
+        },
+      };
+      const { rerender } = render(
+        <Canvas canvases={[first]} options={{ request: { fetch } }} />,
+      );
+      const frame = await screen.findByTestId("clover-canvas-placeholder");
+      expect(within(frame).getByRole("img")).toHaveAttribute(
+        "src",
+        `${first.id}/still.jpg`,
+      );
+      rerender(<Canvas canvases={[next]} options={{ request: { fetch } }} />);
+      expect(
+        document.querySelector(`img[src="${first.id}/still.jpg"]`),
+      ).toBeNull();
     });
 
     it("shows the still fitted in place of the Canvas, with only a toggle", async () => {

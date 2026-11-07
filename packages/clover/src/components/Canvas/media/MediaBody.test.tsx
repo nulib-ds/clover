@@ -91,6 +91,7 @@ beforeEach(() => {
   renderer = {
     host,
     setImages: vi.fn().mockResolvedValue(undefined),
+    clear: vi.fn(),
     setGestures: vi.fn(),
     setDismiss: vi.fn(),
     dispose: vi.fn(),

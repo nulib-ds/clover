@@ -2,6 +2,7 @@ import React, { forwardRef, useEffect, useRef, useState } from "react";
 import { useUniqueId } from "../../ui/useUniqueId";
 
 import { itemsOfCollection } from "../../core/items";
+import { selectShownId } from "../../core/selectors";
 import { localize } from "../../core/value";
 import { useCloverTranslation } from "../../i18n/useCloverTranslation";
 import { join } from "../../lib/classnames";
@@ -51,7 +52,10 @@ export const CollectionSelect = forwardRef<HTMLElement, CollectionSelectProps>(
     const { t, langOf } = useCloverTranslation();
     const { clover, language } = useClover("CollectionSelect");
     const collection = useCloverSelector((state) => state.collection);
-    const shown = useCloverSelector((state) => state.manifest?.id ?? "");
+    // The member shown, or asked for while it loads (or after it failed), as the menu's value.
+    const shown = useCloverSelector((state) => selectShownId(state) ?? "");
+    // The Manifest loaded: choosing it again asks nothing.
+    const loaded = useCloverSelector((state) => state.manifest?.id ?? "");
     const id = useUniqueId();
     // The choice holds while its Manifest loads, rather than snapping back.
     const [pending, setPending] = useState<string | null>(null);
@@ -62,10 +66,10 @@ export const CollectionSelect = forwardRef<HTMLElement, CollectionSelectProps>(
     const asked = useRef<string | null>(null);
     useEffect(() => {
       asked.current = null;
-    }, [shown, collection]);
+    }, [loaded, collection]);
 
     const choose = (next: string | null) => {
-      if (!next || next === shown || next === asked.current) return;
+      if (!next || next === loaded || next === asked.current) return;
       asked.current = next;
       onChange?.(next);
       void clover.goToManifest(next).finally(() => {
@@ -108,7 +112,8 @@ export const CollectionSelect = forwardRef<HTMLElement, CollectionSelectProps>(
           value={pending ?? shown}
           onKeyDown={(event) => {
             const { key } = event;
-            if (key === "Enter") choose(pending);
+            // What the menu shows: a step, or the member asked for (one that failed, again).
+            if (key === "Enter") choose(pending ?? shown);
             else if (key === "Escape") {
               // Only the step is taken back: nothing around it (a dialog, a floating
               // panel) closes as well.

@@ -37,6 +37,7 @@ beforeEach(() => {
   renderer = {
     host: document.createElement("div"),
     setImages: vi.fn().mockResolvedValue(undefined),
+    clear: vi.fn(),
     setGestures: vi.fn(),
     setDismiss: vi.fn(),
     dispose: vi.fn(),
@@ -86,6 +87,82 @@ describe("Clover.Root and its parts", () => {
     );
     await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
     expect(shownCanvases()).toEqual([canvasIds[0]]);
+  });
+
+  // Mat, 2026-11-06: "flush the old … the first thing. even before the load of the new resource".
+  it("puts the last content away the moment iiifContent changes, before the next is fetched", async () => {
+    const LETTER = "https://example.org/letter";
+    let answered = false;
+    const fetch = vi.fn(
+      () =>
+        new Promise<Response>(() => {
+          answered = true;
+        }),
+    );
+    const draw = (content: Clover.RootProps["iiifContent"]) => (
+      <Clover.Root iiifContent={content} request={{ fetch }}>
+        <Clover.Label as="h1" />
+        <Clover.Body />
+        <Clover.Items />
+      </Clover.Root>
+    );
+    const { rerender } = render(draw(bookJson));
+    await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+    await waitFor(() => expect(renderer.setImages).toHaveBeenCalled());
+    const viewport = screen.getByTestId("clover-canvas-viewport");
+    viewport.focus();
+    rerender(draw(LETTER));
+    expect(fetch).toHaveBeenCalledWith(LETTER, expect.anything());
+    expect(answered).toBe(true);
+    // Nothing of the book: no title, no thumbnails, no pictures on the Canvas.
+    expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
+    expect(screen.queryByRole("option")).toBeNull();
+    expect(renderer.clear).toHaveBeenCalled();
+    // The Canvas stays, empty and busy, so focus keeps its place (WCAG 2.4.3).
+    expect(viewport).toBeInTheDocument();
+    expect(viewport).toHaveFocus();
+    expect(document.querySelector(".clover-body")).toHaveAttribute(
+      "aria-busy",
+      "true",
+    );
+  });
+
+  it("puts the last member away the moment another is chosen, the choice kept", async () => {
+    const LETTER = "https://example.org/letter";
+    const BOOK = bookJson.id;
+    const shelf = {
+      "@context": "http://iiif.io/api/presentation/3/context.json",
+      id: "https://example.org/shelf",
+      type: "Collection",
+      label: { en: ["Shelf"] },
+      items: [
+        { id: BOOK, type: "Manifest", label: { en: ["The book"] } },
+        { id: LETTER, type: "Manifest", label: { en: ["A letter"] } },
+      ],
+    };
+    const fetch = vi.fn(async (url: string) =>
+      url === LETTER
+        ? new Promise<Response>(() => {})
+        : new Response(JSON.stringify(bookJson), {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }),
+    );
+    render(
+      <Clover.Root iiifContent={shelf} request={{ fetch }}>
+        <Clover.Label as="h1" />
+        <Clover.Items of="members" />
+      </Clover.Root>,
+    );
+    await screen.findByRole("heading", { name: "Simple Manifest - Book" });
+    const letter = screen.getByRole("option", { name: /A letter/ });
+    letter.focus();
+    fireEvent.click(letter);
+    expect(screen.queryByRole("heading", { level: 1 })).toBeNull();
+    // The members stay, the one chosen current and focused while it loads.
+    expect(letter).toBeInTheDocument();
+    expect(letter).toHaveAttribute("aria-selected", "true");
+    expect(letter).toHaveFocus();
   });
 
   it("keeps focus on Next at the last view, where a press does nothing", async () => {

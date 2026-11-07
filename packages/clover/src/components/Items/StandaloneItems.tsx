@@ -37,6 +37,16 @@ export default function StandaloneItems({
       : (iiifContent as { id?: string })?.id;
   const latest = useRef({ iiifContent, request });
   latest.current = { iiifContent, request };
+  /*
+   * Another content: the last one's items go in this very render, before the next is
+   * asked for (Mat, 2026-11-06), and the choice starts again at the first.
+   */
+  const [loadingFor, setLoadingFor] = useState(key);
+  if (loadingFor !== key) {
+    setLoadingFor(key);
+    setResource(null);
+    setSelected(0);
+  }
 
   useEffect(() => {
     if (provided || latest.current.iiifContent === undefined) return;

@@ -40,7 +40,7 @@ describe("useThumbnail", () => {
   it("holds the last picture while the next is made, or lets it go at once", async () => {
     const waiting: ((url: string) => void)[] = [];
     const held = renderHook(
-      ({ source }) => useThumbnail(source, 200, undefined, true),
+      ({ source }) => useThumbnail(source, 200, undefined, "canvas-1"),
       { initialProps: { source: service("a") } },
     );
     const freed = renderHook(({ source }) => useThumbnail(source, 200), {
@@ -60,5 +60,23 @@ describe("useThumbnail", () => {
       finish("https://example.org/iiif/b/full/200,/0/default.jpg"),
     );
     await waitFor(() => expect(held.result.current).toMatch(/\/b\//));
+  });
+
+  it("holds only for the same key: another recording's artwork goes at once", async () => {
+    const waiting: ((url: string) => void)[] = [];
+    const player = renderHook(
+      ({ source, canvas }) => useThumbnail(source, 200, undefined, canvas),
+      { initialProps: { source: service("a"), canvas: "canvas-1" } },
+    );
+    await waitFor(() => expect(player.result.current).toMatch(/\/a\//));
+    resolved.mockImplementation(
+      () => new Promise<string>((resolve) => waiting.push(resolve)),
+    );
+    player.rerender({ source: service("b"), canvas: "canvas-2" });
+    expect(player.result.current).toBeUndefined();
+    waiting.forEach((finish) =>
+      finish("https://example.org/iiif/b/full/200,/0/default.jpg"),
+    );
+    await waitFor(() => expect(player.result.current).toMatch(/\/b\//));
   });
 });

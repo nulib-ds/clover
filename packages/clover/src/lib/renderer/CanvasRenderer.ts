@@ -559,9 +559,10 @@ export class CanvasRenderer implements GestureTarget {
 
   /**
    * Put the scene away at once: from the next frame nothing of it is drawn, and a swap
-   * still preparing is dropped. For moving to a different resource, whose pictures should
-   * never show beside the last one's while they load; `setImages` then draws the new
-   * scene, framed afresh. A swap within one resource keeps the old scene up instead.
+   * still preparing is dropped. For moving to another Canvas or another resource, whose
+   * pictures should never show the last one's while they load (Mat, 2026-11-06);
+   * `setImages` then draws the new scene, framed afresh, each image as it can be drawn.
+   * A swap within one Canvas (a Choice picked) keeps the old scene up instead.
    */
   clear(): void {
     this.setUnloadable(false);

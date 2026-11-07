@@ -22,6 +22,9 @@ import { useLoaded } from "../../hooks/useLoaded";
 // The Ranges' reader, loaded only for a Canvas that plays: a still image has no chapters.
 const loadRanges = () => import("../../core/ranges");
 
+/** No Canvas to draw, the same each render. */
+const NONE: IIIFCanvas[] = [];
+
 type View =
   | { state: "loading" }
   /** `next` while what a link leads to loads, the last one cleared meanwhile. */
@@ -70,14 +73,25 @@ export default function LoadedCanvas({
   >(null);
   const link = followed?.key === key ? followed : null;
 
-  useEffect(() => {
-    let live = true;
-    // What was shown stays, cleared, while the next loads: focus keeps its place.
+  /*
+   * Another content, or a link to another Manifest: the last one goes in this very render
+   * (Mat, 2026-11-06: "flush the old … the first thing. even before the load of the new
+   * resource"). Its view stays, empty, while the next loads, so focus on it keeps its
+   * place (WCAG 2.4.3).
+   */
+  const wanted = `${key}\n${link?.manifestId ?? ""}\n${link?.canvasId ?? ""}`;
+  const [loadingFor, setLoadingFor] = useState(wanted);
+  if (loadingFor !== wanted) {
+    setLoadingFor(wanted);
     setView((current) =>
       current.state === "ready"
         ? { ...current, next: true }
         : { state: "loading" },
     );
+  }
+
+  useEffect(() => {
+    let live = true;
     (async () => {
       const content = await loadContent(link?.manifestId ?? iiifContent!, {
         request,
@@ -104,7 +118,7 @@ export default function LoadedCanvas({
   }, [key, link?.manifestId, link?.canvasId, request, of]);
 
   // The Canvas's own annotations, once it shows: they never hold it back.
-  const ready = view.state === "ready" ? view : null;
+  const ready = view.state === "ready" && !view.next ? view : null;
   const [annotations, setAnnotations] = useState<CanvasAnnotation[]>([]);
   const given = Boolean(props.annotations);
   useEffect(() => {
@@ -192,11 +206,23 @@ export default function LoadedCanvas({
     ranges?.chaptersOf ?? null,
   );
 
+  // The next on its way: nothing of the last one, its label and annotations included.
+  if (view.state === "ready" && view.next)
+    return (
+      <CanvasView
+        {...props}
+        manifestId="loading"
+        canvases={NONE}
+        placeholder={placeholder}
+        onReady={handleReady}
+        onMediaElement={handleMediaElement}
+      />
+    );
   if (view.state === "ready")
     return (
       <CanvasView
         {...props}
-        manifestId={view.next ? "loading" : view.content.manifest.id}
+        manifestId={view.content.manifest.id}
         canvases={[view.canvas]}
         // Named as a Root's Canvas is: its own label, else its Manifest's.
         label={

@@ -52,8 +52,19 @@ export type CloverStatus = "idle" | "loading" | "ready" | "error";
 export interface CloverState {
   status: CloverStatus;
   error: Error | null;
-  /** The Manifest shown, in Presentation 4. */
+  /**
+   * The Manifest shown, in Presentation 4. Null from the moment another is asked for
+   * (`load`, a Collection's member, a content state's target) until it arrives: nothing
+   * of the last one shows while the next loads (Mat, 2026-11-06).
+   */
   manifest: Manifest | null;
+  /**
+   * What was asked for while it loads, by the id it was asked by: a Collection's member,
+   * a target's Manifest. What marks the current member (`selectShownId`) reads it until
+   * the Manifest arrives, so the choice holds, and a step from it steps from there; and
+   * after it fails, so the member the error is for is the one to try again.
+   */
+  opening: string | null;
   /** The Collection it was reached through, if any. */
   collection: Presentation4Collection | null;
   /**
@@ -272,6 +283,7 @@ const INITIAL: CloverState = {
   status: "idle",
   error: null,
   manifest: null,
+  opening: null,
   collection: null,
   throughCollection: false,
   canvasId: null,
@@ -411,8 +423,6 @@ export function createClover(options: CloverOptions = {}): Clover {
         (has(initial.defaultCanvasId) ? initial.defaultCanvasId! : null) ??
         canvases[0]?.id ??
         null);
-    // A search belongs to the Manifest it searched.
-    searching?.abort();
     /*
      * The content's own annotation to pick (a content state's note, the first of the
      * annotations given as the content), on the Canvas it opens on, so it names itself
@@ -431,6 +441,7 @@ export function createClover(options: CloverOptions = {}): Clover {
       search: NO_SEARCH,
       regions: null,
       manifest,
+      opening: null,
       collection,
       canvasId,
       target: arrival && arrival.canvasId === canvasId ? arrival : null,
@@ -499,23 +510,69 @@ export function createClover(options: CloverOptions = {}): Clover {
     };
   };
 
-  /** Begin a load, abandoning any in flight. */
-  const begin = () => {
+  /**
+   * Begin a load, abandoning any in flight, and first put away what it replaces (Mat,
+   * 2026-11-06: "flush the old … the first thing. even before the load of the new
+   * resource"): the Manifest, its Canvas, a target, a pick, a search and the regions its
+   * Ranges name, so no part draws the last one while the next loads. A move within the
+   * content (`within`: a Collection's member, a content state's target) keeps what it
+   * moves among, the Collection, the targets and the content's own annotations; new
+   * content puts those away too.
+   */
+  const begin = (opening: string | null, within: boolean) => {
     loading?.abort();
+    // A search belongs to the Manifest it searched.
+    searching?.abort();
     const controller = new AbortController();
     loading = controller;
     requested.clear();
-    store.set({ status: "loading", error: null, annotationId: null });
+    // A module still on its way for the last Manifest (its regions, its images' sets) drops.
+    arrivals++;
+    layerSets = [];
+    if (!within) {
+      stateSets = [];
+      contentTargets = null;
+    }
+    store.set({
+      status: "loading",
+      error: null,
+      manifest: null,
+      opening,
+      canvasId: null,
+      target: null,
+      annotationId: null,
+      search: NO_SEARCH,
+      regions: null,
+      addedSets: added(),
+      ...(!within && {
+        collection: null,
+        throughCollection: false,
+        targets: null,
+        targetIndex: null,
+      }),
+    });
     return controller.signal;
   };
+  // What was asked for stays the choice, its error shown for it; choosing it again asks again.
   const fail = (error: unknown) =>
     store.set({
       status: "error",
       error: error instanceof Error ? error : new Error(String(error)),
     });
 
-  async function load(content: IIIFContent, initial: Initial = {}) {
-    const signal = begin();
+  /**
+   * Load content: new (the Root's, `load`), or a Collection entered from its parent
+   * (`within`).
+   */
+  async function open(
+    content: IIIFContent,
+    initial: Initial = {},
+    within = false,
+  ) {
+    const signal = begin(
+      within && typeof content === "string" ? content : null,
+      within,
+    );
     try {
       const loaded = await loadContent(content, {
         request,
@@ -554,10 +611,17 @@ export function createClover(options: CloverOptions = {}): Clover {
     }
   }
 
-  /** Whether `id` is what is shown: the Manifest, or the Collection just entered. */
+  /**
+   * Whether `id` is what is shown, or on its way: the Manifest, the Collection just
+   * entered, or what was asked for while it loads (not once it has failed).
+   */
   const isShown = (id: string) => {
-    const { manifest, collection } = store.get();
-    return manifest?.id === id || collection?.id === id;
+    const { manifest, collection, opening, status } = store.get();
+    return (
+      manifest?.id === id ||
+      collection?.id === id ||
+      (opening === id && status === "loading")
+    );
   };
   const memberOf = (id: string): Record<string, any> =>
     ((store.get().collection?.items ?? []) as Array<Record<string, any>>).find(
@@ -588,11 +652,11 @@ export function createClover(options: CloverOptions = {}): Clover {
     place?: string | Target,
   ): Promise<boolean> => {
     if (member.type === "Collection") {
-      await load(member.id);
+      await open(member.id, {}, true);
       return store.get().status === "ready";
     }
     const { collection } = store.get();
-    const signal = begin();
+    const signal = begin(member.id, true);
     // A pick waiting on this move (a host that holds the Manifest made it): its Canvas.
     const pick = pending;
     pending = null;
@@ -634,7 +698,7 @@ export function createClover(options: CloverOptions = {}): Clover {
       request = next;
     },
 
-    load,
+    load: open,
     async openCollection(id) {
       const shown = store.get().manifest;
       if (!shown || store.get().collection?.id === id) return;
