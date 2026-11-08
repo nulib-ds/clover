@@ -1,0 +1,62 @@
+/* The test page: the Viewer, then its JSON, on the golden scale, as `/test/transcript`. */
+.page {
+  margin-inline: auto;
+  max-width: 1300px;
+  padding: 2.618rem 1.618rem 4.236rem;
+}
+
+.title {
+  font-size: 1.618rem;
+  font-weight: 700;
+  margin: 0 0 1.618rem;
+}
+
+.viewer {
+  border-radius: var(--radius-4);
+  box-shadow: var(--card-shadow);
+  background: var(--color-background);
+  overflow: clip;
+}
+
+.section {
+  margin-top: 2.618rem;
+}
+
+.subtitle {
+  font-size: 1.236rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.note {
+  color: var(--gray-11);
+  margin: 0 0 1rem;
+}
+
+/* The JSON, a box that scrolls: a Manifest runs to thousands of lines. */
+.scroll {
+  max-height: 40rem;
+  overflow: auto;
+}
+
+/* Its head, the language, holds still at the top as the lines scroll under it. */
+.json:global(.docs-code) .scroll::before {
+  background: var(--editor-background);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* Copy stays over the head that holds still under it. */
+.json :global(.docs-code-copy) {
+  z-index: 2;
+}
+
+/* Room for four digits before each line, where the site's blocks keep two. */
+.json:global(.docs-code.docs-code) pre code:global(.nextra-code) > span {
+  padding-inline-start: calc(0.236rem + 4ch + 0.618rem + 2ch);
+}
+
+.json:global(.docs-code) pre code:global(.nextra-code) > span::before {
+  width: 4ch;
+}

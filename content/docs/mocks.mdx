@@ -197,6 +197,31 @@ date, fetch
 `https://api.dc.library.northwestern.edu/api/v2/works/24157482-0c2c-4907-8d25-7905adc3cfd9?as=iiif`
 into `source.json` again and run `npm run build:mocks`.
 
+## Racycle: a landscape catalog
+
+Northwestern University Libraries' record of _The Special Racycle 1898 Narrow Tread_,
+the Miami Cycle & Mfg. Co.'s catalog (Middletown, Ohio), from the Transportation
+Library's bicycle catalogs: a Manifest of 26 Canvases, the front and interior of its
+envelope and 24 pages, with:
+
+- the Canvases in two shapes: the cover and the bicycle plates landscape, and the text
+  pages scanned upright as portrait images;
+- one painting annotation on each Canvas, and no others;
+- everything as Northwestern's Digital Collections API published it on November 6,
+  2026, its ids too;
+- the images from Northwestern's IIIF Image API (level 2, CORS open), linked and never
+  copied, as the record's attribution permits no further distribution.
+
+| Resource | Published (static)                                                                                         |
+| -------- | ---------------------------------------------------------------------------------------------------------- |
+| Manifest | [`/mocks/racycle/manifest.json`](https://clover.iiif.library.northwestern.edu/mocks/racycle/manifest.json) |
+
+It answers no query, so it is static only. Its generator is
+`docs/mocks/racycle/index.mjs`, and the record as fetched is
+`docs/mocks/racycle/source.json`: to bring the record up to date, fetch
+`https://api.dc.library.northwestern.edu/api/v2/works/ea3cbfc6-2c58-4d98-9c95-8cf90e876f71?as=iiif`
+into `source.json` again and run `npm run build:mocks`.
+
 ## Hindenburg: a broadcast and its box
 
 Northwestern University Libraries' record of WLS-AM's broadcast of Herbert Morrison and

@@ -28,6 +28,10 @@ import {
   manifest as navPlaceManifest,
 } from "../docs/mocks/navplace/index.mjs";
 import {
+  PUBLIC_BASE as RACYCLE_BASE,
+  manifest as racycleManifest,
+} from "../docs/mocks/racycle/index.mjs";
+import {
   PUBLIC_BASE as HINDENBURG_BASE,
   captions as hindenburgCaptions,
   manifest as hindenburgManifest,
@@ -146,6 +150,16 @@ writeFileSync(
   `${JSON.stringify(navPlaceManifest(NAVPLACE_BASE), null, 2)}\n`,
 );
 console.log("navplace: manifest.json");
+
+// The landscape catalog, kept as fetched: one static Manifest.
+const racycle = join(root, "public/mocks/racycle");
+rmSync(racycle, { recursive: true, force: true });
+mkdirSync(racycle, { recursive: true });
+writeFileSync(
+  join(racycle, "manifest.json"),
+  `${JSON.stringify(racycleManifest(RACYCLE_BASE), null, 2)}\n`,
+);
+console.log("racycle: manifest.json");
 
 // The broadcast with its box, the box accompanying the sound, and its captions.
 const hindenburg = join(root, "public/mocks/hindenburg");
