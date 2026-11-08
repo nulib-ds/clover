@@ -11,6 +11,8 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [4.7.0] - 2026-11-08
+
 ### Added
 
 - **`@nulib/clover/base.css` and `@nulib/clover/spacing.css`, for a look of your own.**
