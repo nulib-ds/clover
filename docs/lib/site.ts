@@ -33,8 +33,11 @@ const whatItDoes =
  */
 export const siteDescription = `Clover ${whatItDoes}`;
 
-/* The homepage's: the hero's line, then what Clover is, as plainly. */
-export const homeDescription = `${homeTagline} ${siteDescription}`;
+/*
+ * The homepage's: the hero's line, then what Clover is, as plainly, in the words of the
+ * repository's About (Mat, 2026-11-08).
+ */
+export const homeDescription = `${homeTagline} Clover is an accessible, lightweight viewer and design system in React or as web components.`;
 
 /*
  * The most a page's description holds: about what a search result shows before it cuts

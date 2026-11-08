@@ -10,7 +10,14 @@ import { resources } from "docs/components/Playground/playground-config";
 
 import styles from "docs/components/Playground/Playground.module.css";
 import { example } from "docs/lib/example";
-import { loadable, rootAddress, webAddress } from "docs/lib/resource-content";
+import {
+  contentStateNote,
+  itemIds,
+  loadable,
+  type NotePart,
+  rootAddress,
+  webAddress,
+} from "docs/lib/resource-content";
 
 export { loadable } from "docs/lib/resource-content";
 
@@ -68,12 +75,31 @@ const firstLabel = (label: unknown, lang?: string): Label | undefined => {
 interface Details {
   label?: Label;
   thumbnail?: string;
+  /** A Manifest's Canvases by id, for the place a content state opens on. */
+  items?: string[];
 }
+
+/*
+ * The room a content state's note keeps beside its title (`.fieldNote`): its first part
+ * whole, a place's word and figures, else its time or region, up to 16 characters, with
+ * room for the ellipsis where more follows; on a narrow field, its figures, up to 9.
+ */
+const noteRoom = ([first, ...rest]: NotePart[]) =>
+  ({
+    "--note-wide": `${
+      Math.min(
+        (first.word ? first.word.length + 1 : 0) + first.text.length,
+        16,
+      ) + (rest.length ? 1.5 : 0)
+    }ch`,
+    "--note-narrow": `${Math.min(first.text.length, 9)}ch`,
+  }) as React.CSSProperties;
 
 /**
  * What the reader's own resources name at their root: each Manifest's or Collection's own
- * `label` and `thumbnail`, never one of its Canvases' or members'. One request for each,
- * which the Viewer makes too; nothing where it names none, or cannot be read.
+ * `label` and `thumbnail`, never one of its Canvases' or members', and a Manifest's
+ * Canvases. One request for each, which the Viewer makes too; nothing where it names
+ * none, or cannot be read.
  */
 function useDetails(contents: string[]) {
   const [details, setDetails] = useState<Record<string, Details>>({});
@@ -93,6 +119,7 @@ function useDetails(contents: string[]) {
             [content]: {
               label: firstLabel(resource.label),
               thumbnail: firstThumbnail(resource.thumbnail),
+              items: itemIds(resource),
             },
           }));
         })
@@ -197,7 +224,7 @@ export default function ResourceField({
   const inputId = `${id}-input`;
   const listId = `${id}-list`;
   const errorId = `${id}-error`;
-  const recipeId = `${id}-recipe`;
+  const noteId = `${id}-note`;
   const optionId = (key: string) => `${id}-${key}`;
 
   /*
@@ -343,6 +370,11 @@ export default function ResourceField({
   const [draft, setDraft] = useState<string | null>(null);
   // The recipe in the Viewer, hinted in the field until the reader types over it.
   const recipeHint = !onlyRecipes && draft === null ? recipeShown : undefined;
+  // Where a content state of the reader's opens, said after its title in the same way.
+  const stateNote =
+    !onlyRecipes && draft === null && current === OWN && !recipeShown
+      ? contentStateNote(own, details[own]?.items)
+      : undefined;
   /* What narrows the list: what was typed, or nothing when the list was asked for. */
   const [filter, setFilter] = useState("");
   const [open, setOpen] = useState(false);
@@ -665,7 +697,7 @@ export default function ResourceField({
                   aria-autocomplete="list"
                   aria-controls={listId}
                   aria-describedby={
-                    [error && errorId, recipeHint && recipeId]
+                    [error && errorId, (recipeHint || stateNote) && noteId]
                       .filter(Boolean)
                       .join(" ") || undefined
                   }
@@ -696,13 +728,53 @@ export default function ResourceField({
                 />
                 {recipeHint && (
                   // Described to assistive technology as what it is; a press lists ours.
-                  <span className={styles.fieldRecipe} id={recipeId}>
+                  <span className={styles.fieldNote} id={noteId}>
                     <span className={styles.visuallyHidden}>
                       IIIF Cookbook recipe{" "}
                     </span>
                     {recipeHint.about.slice(0, 4)}
-                    <span className={styles.fieldRecipeRest}>
+                    <span className={styles.fieldNoteRest}>
                       {recipeHint.about.slice(4)}
+                    </span>
+                  </span>
+                )}
+                {stateNote && (
+                  /*
+                   * Where the reader's content state opens (Mat, 2026-11-08: "content state
+                   * meta info … styled like how we do the IIIF Cookbook recipe titles"):
+                   * its Canvas's place, its time or region, a dot between them. It gives way
+                   * to the title, but never below its first part, and where the field is
+                   * narrow it is that part's figures alone. Heard whole, in commas.
+                   */
+                  <span
+                    className={styles.fieldNote}
+                    id={noteId}
+                    style={noteRoom(stateNote)}
+                  >
+                    <span className={styles.visuallyHidden}>
+                      {`IIIF content state ${stateNote
+                        .map(({ word, text }) =>
+                          word ? `${word} ${text}` : text,
+                        )
+                        .join(", ")}`}
+                    </span>
+                    <span aria-hidden="true">
+                      {stateNote[0].word && (
+                        <span className={styles.fieldNoteWord}>
+                          {stateNote[0].word}{" "}
+                        </span>
+                      )}
+                      {stateNote[0].text}
+                      {stateNote.length > 1 && (
+                        <span className={styles.fieldNoteRest}>
+                          {stateNote
+                            .slice(1)
+                            .map(({ word, text }) =>
+                              word ? ` · ${word} ${text}` : ` · ${text}`,
+                            )
+                            .join("")}
+                        </span>
+                      )}
                     </span>
                   </span>
                 )}

@@ -293,7 +293,7 @@
   transition: outline-color 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fieldGroup :is(.fieldLabel, .fieldInput, .fieldRecipe) {
+.fieldGroup :is(.fieldLabel, .fieldInput, .fieldNote) {
   cursor: inherit;
 }
 
@@ -391,9 +391,10 @@
 
 /*
  * The field's line: a recipe's title, then its folder's name after it (Mat, 2026-10-25),
- * the field as wide as its words where a browser sizes it so (else the line's width, and
- * the name at its end), the name giving way first, to its number, on the title's baseline
- * (Mat, 2026-10-30).
+ * or a content state's root's label, then where it opens (Mat, 2026-11-08), the field as
+ * wide as its words where a browser sizes it so (else the line's width, and the note at
+ * its end), the note giving way first, to its start, on the title's baseline (Mat,
+ * 2026-10-30).
  */
 .fieldLine {
   align-items: baseline;
@@ -416,13 +417,15 @@
 }
 
 /*
- * The folder's name, set back from the title in the code's face and a size smaller, in
- * its muted gray (lighter would fall under 4.5:1, WCAG 1.4.3); cut short before the title.
+ * The note (a folder's name, or where a content state opens), set back from the title in
+ * the code's face and a size smaller, in its muted gray (lighter would fall under 4.5:1,
+ * WCAG 1.4.3); cut short before the title, but never below a recipe's number or a content
+ * state's first part (`--note-wide`, `noteRoom` in `ResourceField.tsx`).
  */
-.fieldRecipe {
+.fieldNote {
   color: var(--gray-11);
   flex: 0 1000 auto;
-  min-width: 5.5ch;
+  min-width: var(--note-wide, 5.5ch);
   font-family: var(--font-mono);
   font-size: 0.8125rem;
   line-height: 1.3;
@@ -433,11 +436,17 @@
 }
 
 /*
- * Where the field is narrow (a phone), its number alone, so the title has the room; the
- * rest of its name is out of sight, still in what the field is described by.
+ * Where the field is narrow (a phone), a recipe's number alone, or the figures of a
+ * content state's first part ("3 / 12"), so the title has the room; the rest is out of
+ * sight, still in what the field is described by.
  */
 @container (max-width: 20rem) {
-  .fieldRecipeRest {
+  .fieldNote {
+    min-width: var(--note-narrow, 5.5ch);
+  }
+
+  .fieldNoteRest,
+  .fieldNoteWord {
     clip-path: inset(50%);
     height: 1px;
     overflow: hidden;
