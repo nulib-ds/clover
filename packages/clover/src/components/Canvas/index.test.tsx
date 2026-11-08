@@ -1640,7 +1640,11 @@ describe("Canvas", () => {
       expect(screen.queryByTestId("clover-canvas-choice")).toBeNull();
       expect(control).toHaveFocus();
       expect(around).not.toHaveBeenCalled();
-      // With the menu closed, the next Escape is the dialog's.
+      // With the menu closed, focus is back on its control, whose popover shows: the next
+      // Escape puts that away alone (WCAG 1.4.13), and the one after is the dialog's.
+      expect(fireEvent.keyDown(control, { key: "Escape" })).toBe(false);
+      expect(control).toHaveAttribute("data-tip-hidden");
+      expect(around).not.toHaveBeenCalled();
       expect(fireEvent.keyDown(control, { key: "Escape" })).toBe(true);
       expect(around).toHaveBeenCalledTimes(1);
     });
@@ -2370,9 +2374,14 @@ describe("Canvas", () => {
       fireEvent.click(more());
       const reset = screen.getByRole("button", { name: "Reset zoom" });
       reset.focus();
+      // Its popover first, alone (WCAG 1.4.13): the tray stays open.
+      expect(fireEvent.keyDown(reset, { key: "Escape" })).toBe(false);
+      expect(reset).toHaveAttribute("data-tip-hidden");
+      expect(reset).toHaveFocus();
       expect(fireEvent.keyDown(reset, { key: "Escape" })).toBe(false);
       expect(more()).toHaveFocus();
-      // Back on the others' row, Escape is left to what is around it.
+      // Back on the others' row, More's popover, then Escape is left to what is around it.
+      expect(fireEvent.keyDown(more(), { key: "Escape" })).toBe(false);
       expect(fireEvent.keyDown(more(), { key: "Escape" })).toBe(true);
     });
 

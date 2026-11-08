@@ -1,0 +1,351 @@
+/*
+ * The Styling page's contrast guide (`ContrastGuide`): Clover's palette over the pairs it
+ * draws. Every color here is the site's own (`tokens.css`), but the palette's, which each
+ * swatch and sample draws in from what was chosen.
+ */
+
+/*
+ * A control's edge, 3:1 on the card in light and dark (WCAG 1.4.11), as the homepage's
+ * controls draw theirs (`--pg-edge`, `Playground.module.css`): the pickers, the hex fields
+ * and Reset. A hairline (`--gray-8`) is under 2:1.
+ */
+.palette,
+.bar {
+  --guide-edge: color-mix(in srgb, var(--gray-11) 75%, var(--color-background));
+}
+
+/*
+ * The Viewer over the palette, in Clover's look and the palette's colors: a page of its
+ * own, framed (`app/examples/stylesheets/styles.html`), filling the frame.
+ */
+.viewer {
+  margin-block-end: var(--clover-space-l, 1.618rem);
+}
+
+.view {
+  display: block;
+  inline-size: 100%;
+  block-size: min(36rem, 70svh);
+  border: 0;
+}
+
+/* The palette: a swatch a color, as many to a row as fit. */
+.palette {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+  gap: var(--clover-space-m, 1rem);
+}
+
+/* The picker beside its name and what it paints, its hex under them. */
+.swatch {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "pick token"
+    "pick paints"
+    "hex hex";
+  column-gap: var(--clover-space-s, 0.618rem);
+  row-gap: var(--clover-space-2xs, 0.236rem);
+  align-items: center;
+}
+
+.pick {
+  grid-area: pick;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--guide-edge);
+  border-radius: var(--radius-3);
+  background: none;
+  cursor: pointer;
+}
+
+.pick::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.pick::-webkit-color-swatch {
+  border: 0;
+  border-radius: calc(var(--radius-3) - 1px);
+}
+
+.pick::-moz-color-swatch {
+  border: 0;
+  border-radius: calc(var(--radius-3) - 1px);
+}
+
+.pick:focus-visible,
+.hex:focus-visible,
+.reset:focus-visible {
+  outline: 2px solid var(--accent-11);
+  outline-offset: 2px;
+}
+
+.token {
+  grid-area: token;
+  cursor: pointer;
+}
+
+/* A name on one line: a swatch is wide enough for the longest, `secondary-muted`. */
+.token code {
+  white-space: nowrap;
+}
+
+.paints {
+  grid-area: paints;
+  color: var(--gray-11);
+  font-size: var(--clover-text-xs, 0.764rem);
+}
+
+.hex {
+  grid-area: hex;
+  inline-size: 100%;
+  padding: var(--clover-space-2xs, 0.236rem) var(--clover-space-xs, 0.382rem);
+  border: 1px solid var(--guide-edge);
+  border-radius: var(--radius-2);
+  background: var(--color-background);
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--clover-text-s, 0.875rem);
+}
+
+.hex[aria-invalid] {
+  border-color: var(--red-11);
+}
+
+/* How many pass, and Reset, between the palette and the pairs. */
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--clover-space-s, 0.618rem);
+  margin-block: var(--clover-space-l, 1.618rem) var(--clover-space-s, 0.618rem);
+}
+
+.summary {
+  margin: 0;
+  font-weight: 600;
+}
+
+.reset {
+  min-block-size: 1.5rem;
+  padding: var(--clover-space-2xs, 0.236rem) var(--clover-space-s, 0.618rem);
+  border: 1px solid var(--guide-edge);
+  border-radius: var(--radius-2);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--clover-text-s, 0.875rem);
+  cursor: pointer;
+}
+
+.reset:hover:not(:disabled) {
+  border-color: var(--accent-11);
+}
+
+.reset:disabled {
+  color: var(--gray-11);
+  cursor: default;
+}
+
+.table td {
+  vertical-align: top;
+}
+
+/* A pair: its sample beside its name, its colors and where Clover draws it. */
+.pair {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--clover-space-s, 0.618rem);
+}
+
+.pair strong {
+  display: block;
+}
+
+.tokens,
+.where {
+  display: block;
+  font-size: var(--clover-text-s, 0.875rem);
+}
+
+.where {
+  color: var(--gray-11);
+}
+
+.number {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/*
+ * A result: a pill in its tone (`--green-*`, `--amber-*`, `--red-*`, `tokens.css`), its
+ * fill the tone's step 9 mixed into the page's ground (`--fill`, a pass's green the
+ * stronger the more room it has), its words and mark the tone's step 12, 4.5:1 on any such
+ * fill, in light and dark.
+ */
+.result {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--clover-space-2xs, 0.236rem);
+  padding: var(--clover-space-3xs, 0.146rem) var(--clover-space-s, 0.618rem);
+  border-radius: 999px;
+  background: color-mix(
+    in oklab,
+    var(--tone) var(--fill, 20%),
+    var(--color-background)
+  );
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--tone) 45%, transparent);
+  color: var(--tone-text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.result[data-result="pass"] {
+  --tone: var(--green-9);
+  --tone-text: var(--green-12);
+}
+
+.result[data-result="close"] {
+  --tone: var(--amber-9);
+  --tone-text: var(--amber-12);
+}
+
+.result[data-result="fail"] {
+  --tone: var(--red-9);
+  --tone-text: var(--red-12);
+}
+
+.hint {
+  display: block;
+  margin-block-start: var(--clover-space-2xs, 0.236rem);
+  color: var(--gray-11);
+  font-size: var(--clover-text-s, 0.875rem);
+  font-weight: 400;
+}
+
+.hint a {
+  color: var(--accent-11);
+  text-decoration: underline;
+}
+
+.none {
+  color: var(--gray-11);
+}
+
+/*
+ * A pair drawn small in its own two colors (`--fg` on `--bg`), its edge a hairline so a
+ * ground as light as the page's still shows where it ends.
+ */
+.sample {
+  flex: none;
+  display: grid;
+  place-items: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: var(--radius-2);
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1px var(--gray-6);
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.sample[data-sample="text"]::before {
+  content: "Aa";
+}
+
+.sample[data-sample="ring"]::before {
+  content: "";
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border: 3px solid var(--fg);
+  border-radius: var(--radius-2);
+}
+
+.sample[data-sample="glyph"] {
+  border-radius: 50%;
+}
+
+.sample[data-sample="glyph"] svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.sample[data-sample="line"]::before {
+  content: "";
+  inline-size: 70%;
+  block-size: 3px;
+  background: var(--fg);
+}
+
+/* Over a picture: the two tones side by side, on a ground of both, as a picture may be. */
+.sample[data-sample="duo"] {
+  background: linear-gradient(135deg, var(--fg) 50%, var(--bg) 50%);
+}
+
+.sample[data-sample="duo"]::before {
+  content: "";
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  border-radius: var(--radius-2);
+  box-shadow:
+    0 0 0 2px var(--fg),
+    0 0 0 4px var(--bg);
+}
+
+/*
+ * A control in the higher-contrast mode: its glyph on its fill (`--disc`), ringed in the
+ * accent (`--ring`), 1px clear, on the ground (`--bg`), as `styles/contrast.css` rings it.
+ */
+.sample[data-sample="ringed"] .disc {
+  display: grid;
+  place-items: center;
+  inline-size: 1.625rem;
+  block-size: 1.625rem;
+  border-radius: 50%;
+  background: var(--disc);
+  outline: 3px solid var(--ring);
+  outline-offset: 1px;
+}
+
+.sample[data-sample="ringed"] svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+/*
+ * A pair's `highContrast` exception, under its row (Mat, 2026-11-07): one with it, no
+ * rule between them, its sample in from the row's by an elbow from the pair it answers.
+ */
+.table .unless > td {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.elbow {
+  flex: none;
+  inline-size: 0.875rem;
+  block-size: 1.25rem;
+  margin-inline: 1.25rem calc(var(--clover-space-xs, 0.382rem) * -1);
+  border-inline-start: 2px solid var(--gray-8);
+  border-block-end: 2px solid var(--gray-8);
+  border-end-start-radius: var(--radius-2);
+}
+
+/* Words for assistive technology alone: the pair an exception belongs to. */
+.hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.unless strong a {
+  color: inherit;
+  text-decoration: underline;
+}

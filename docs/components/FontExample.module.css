@@ -1,0 +1,10 @@
+/*
+ * The Fonts page's framed Viewer (`FontExample`): its page fills the frame (`fill`), so
+ * the Viewer is as tall as the frame and never scrolls in it.
+ */
+.frame {
+  display: block;
+  inline-size: 100%;
+  block-size: min(36rem, 70svh);
+  border: 0;
+}

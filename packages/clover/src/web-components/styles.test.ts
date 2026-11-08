@@ -90,3 +90,21 @@ it("adopts every sheet, in order, where the page's policy refuses a <style>", ()
   ]);
   expect(adopted.at(-1)).toBe(pages);
 });
+
+/*
+ * A page with base.css (`build/tiers.mjs`) brings its own look: none of Clover's sheets
+ * goes in, only the elements' own display rules and MapLibre's sheet.
+ */
+it("brings none of Clover's sheets to a page with base.css, but the elements' own and MapLibre's", async () => {
+  // A registry of its own, with no sheet brought yet and no other document's registry.
+  vi.resetModules();
+  const { StyleRegistry, addSheet } = await import("./styles");
+  const doc = document.implementation.createHTMLDocument();
+  // What base.css sets on the page's root.
+  doc.documentElement.style.setProperty("--clover-stylesheet", "base");
+  const registry = new StyleRegistry(doc);
+  registry.inject("elements", ".elements{}");
+  addSheet(40, "test/later", ".later{}");
+  addSheet(0, "maplibre", ".maplibregl-map{}", true);
+  expect(keys(doc)).toEqual(["elements", "maplibre"]);
+});

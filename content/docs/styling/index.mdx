@@ -1,0 +1,241 @@
+---
+title: Styling
+description: "Load Clover's structure alone, add its spacing, or take its whole look, each shown live. Then change it in your own CSS, by class or custom property."
+asIndexPage: true
+---
+
+import { MovedSections } from "docs/components/Clover4/MovedSections";
+import { Related, RelatedLink } from "docs/components/Related";
+import { StylesheetExample } from "docs/components/Clover4/StylesheetExample";
+
+<MovedSections page="styling" />
+
+# Styling
+
+<div className="docs-lede">
+  Take as much of Clover's styling as you want, from its structure alone to its
+  whole look. Then change it in your own CSS: select its
+  [classes](/docs/styling/classes#classes-and-states), or set its [custom
+  properties](/docs/styling/variables).
+</div>
+
+<StylesheetExample>
+
+<div data-option="base">
+
+```jsx
+import Viewer from "@nulib/clover";
+import "@nulib/clover/base.css";
+
+export default function Catalog() {
+  return (
+    <Viewer iiifContent="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json" />
+  );
+}
+```
+
+```html twin
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/base.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/web-components/index.umd.js"></script>
+
+<clover-viewer
+  iiif-content="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+></clover-viewer>
+```
+
+</div>
+
+<div data-option="spacing">
+
+```jsx
+import Viewer from "@nulib/clover";
+import "@nulib/clover/base.css";
+import "@nulib/clover/spacing.css";
+
+export default function Catalog() {
+  return (
+    <Viewer iiifContent="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json" />
+  );
+}
+```
+
+```html twin
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/base.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/spacing.css"
+/>
+<script src="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/web-components/index.umd.js"></script>
+
+<clover-viewer
+  iiif-content="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+></clover-viewer>
+```
+
+</div>
+
+<div data-option="styles">
+
+```jsx
+import Viewer from "@nulib/clover";
+import "@nulib/clover/styles.css";
+
+export default function Catalog() {
+  return (
+    <Viewer iiifContent="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json" />
+  );
+}
+```
+
+```html twin
+<script src="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/web-components/index.umd.js"></script>
+
+<clover-viewer
+  iiif-content="https://clover.iiif.library.northwestern.edu/mocks/paged/manifest.json"
+></clover-viewer>
+```
+
+</div>
+
+</StylesheetExample>
+
+## Stylesheets
+
+| Stylesheet                                                 | What it gives                                                              |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `base.css`                                                 | Clover's structure alone: what shows, where each box sits, how large it is |
+| `base.css`, then `spacing.css`                             | Its structure, and its margins, paddings and gaps                          |
+| `styles.css`, and `templates.css` for Document and Gallery | Its whole look too: colors, edges, corners, shadows, type and motion       |
+
+Clover's stylesheets sit in `@layer clover`, so your CSS wins without a fight over
+specificity. The first two leave the look to you: see [Base styling](#base-styling).
+
+A recording, a Scene, a map and a vertical slider load their styles with their code, so a
+page without them loads none. With `base.css`, they load none of Clover's.
+
+<div data-code-flavor="react">
+
+A map brings MapLibre's stylesheet either way, in a layer after Clover's, unless your page
+imports `maplibre-gl/dist/maplibre-gl.css` itself.
+
+Import `styles.css` once, and `templates.css` for Document and Gallery. With no
+stylesheet, every component still renders a plain, usable layout.
+
+To load less, import only your components' sheets, in place of `styles.css` and never
+beside it: `styles/core.css` first, then the sheet of each component on the page or inside
+one (Collection holds `Items`). A page of images with `Root`, `Status`, `Body`, `Position`
+and `Items` needs two:
+
+```jsx react
+import "@nulib/clover/styles/core.css";
+import "@nulib/clover/styles/items.css";
+```
+
+| Sheet                          | Components                                                                                                                  |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| `styles/core.css`              | `Root`, `Body` and `Canvas`, `Status`, `Label`, the Primitives                                                              |
+| `styles/items.css`             | `Items` and `Position`, and the items in `Collection` and the Panel's Views section                                         |
+| `styles/items-vertical.css`    | `Items` as a vertical slider, as the `Default` template shows it for a Manifest read down the page                          |
+| `styles/panel.css`             | `Panel`, and `About`, `Annotations`, `Collection`, `Contents`, `Download`, `Search` and `Transcript`, in the Panel or alone |
+| `styles/media.css`             | Video, sound, `Timeline` and animations, in a `Body` or a `Canvas` too                                                      |
+| `styles/scene.css`             | `Scene`, and a 3D model in a `Body`                                                                                         |
+| `styles/map.css`               | `Map`, the Panel's Map section, and the map a Canvas opens for a place                                                      |
+| `styles/split.css`             | `Split`                                                                                                                     |
+| `styles/collection-select.css` | `CollectionSelect`                                                                                                          |
+| `styles/default.css`           | The `Default` template, and `PanelPane`, the information panel every template shares                                        |
+
+For Document or Gallery, add `styles/default.css` and `templates.css`. The sheets that load
+with their code (`media`, `scene`, `map`, `items-vertical`) need importing only where a
+server renders their component, to style its first paint.
+
+</div>
+
+<div data-code-flavor="web-components">
+
+The elements bring Clover's whole look themselves: each adds its styles once, first in
+`<head>`, so your rules still win. A map brings MapLibre's stylesheet as MapLibre ships
+it, outside any layer, even where your page has its own.
+
+</div>
+
+## Base styling
+
+For a look of your own, use `base.css` in place of Clover's styles. It keeps the structure
+of every component and template (what shows, where each box sits, what lies over what,
+how large each box and target is, and the cursor over what you can press or drag) and
+defines the scale's [custom properties](/docs/styling/variables#sizes-and-spaces). Add
+`spacing.css` after it to keep [Clover's spacing](/docs/styling/spacing), or write your
+own.
+
+<div data-code-flavor="react">
+
+Import them in place of `styles.css` and `templates.css`, then your own CSS. They serve
+the Viewer in every template.
+
+</div>
+
+<div data-code-flavor="web-components">
+
+Link them before the elements' script, then your own CSS. The elements find `base.css` as
+they load and bring none of Clover's styles. If it comes later, they keep Clover's rather
+than restyle what's already on the page. With a bundler, import
+`@nulib/clover/base.css` before `@nulib/clover/web-components`.
+
+</div>
+
+### A layout that works
+
+`base.css` alone gives you a layout that works:
+
+- Whatever lies over other content (a control's name, a menu, a sticky heading, the Panel
+  over a narrow page) gets a surface in your page's colors,
+  <span data-code-flavor="both">`Canvas` and `CanvasText`</span>, until your
+  look replaces it.
+- A control Clover's look restyles, such as a language's code or the eye that hides a set,
+  stays the browser's radio or checkbox, focus ring and all.
+- Margins and paddings that hold the layout stay: an `auto` margin that aligns a box, the
+  room PanelToggle keeps in its corner, and Items' zero margins, which undo the 40px a
+  browser puts on each side of a figure.
+- A hotspot over the picture stays see-through.
+- SplitHandle, the bar you drag between the panes to resize the Panel, shows from top to
+  bottom in your text's color.
+
+Your look decides colors and focus. Check its colors in the
+[contrast guide](/docs/styling/colors#contrast-guide), keep a focus ring on every
+control, and keep every target at least 24px.
+
+## Next
+
+<Related>
+  <RelatedLink
+    href="/docs/styling/colors"
+    title="Colors"
+    note="Your colors, with their contrast checked live."
+  />
+  <RelatedLink
+    href="/docs/styling/fonts"
+    title="Fonts"
+    note="Your page's font, and text sizes from its 1rem."
+  />
+  <RelatedLink
+    href="/docs/styling/spacing"
+    title="Spacing"
+    note="The golden scale of every space, from your 1rem."
+  />
+  <RelatedLink
+    href="/docs/styling/classes"
+    title="Classes"
+    note="Classes and states to select Clover by."
+  />
+  <RelatedLink
+    href="/docs/styling/variables"
+    title="Variables"
+    note="Every custom property you can set, with its default."
+  />
+</Related>

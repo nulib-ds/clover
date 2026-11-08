@@ -1,0 +1,56 @@
+---
+title: Fonts
+description: "Clover takes your page's font and sizes its text from your 1rem: four text sizes you can set, and titles that follow your heading styles."
+---
+
+import { FontExample } from "docs/components/FontExample";
+import { ScaleCalculator } from "docs/components/ScaleCalculator";
+
+# Fonts
+
+<div className="docs-lede">
+  Clover sets no font and no base size. It takes both from your page.
+</div>
+
+<FontExample />
+
+## Your page's size
+
+Clover sizes its text, spaces and controls on a
+[golden scale](/docs/styling/spacing#the-scale) from your page's `1rem`. That's the root's
+font size, 16px unless your page or the browser sets another. Change it, and Clover scales
+with it:
+
+```css
+html {
+  font-size: 112.5%;
+}
+```
+
+## Text sizes
+
+Clover's text inherits your page's font size, or takes one of four sizes a little above
+or below your `1rem`. Each is a
+[custom property](/docs/styling/variables#sizes-and-spaces) you can set. Change your
+`1rem` in the table: the text sizes follow, and so does the Viewer above it.
+
+<ScaleCalculator groups={["Text"]} />
+
+## Headings
+
+Every title in Clover is a heading at its `headingLevel`, with the
+[class](/docs/styling/classes#classes-and-states) `clover-title`, such as a template's
+title or the resource's label in About. Its size is your page's for that level. Clover
+gives it only a regular weight, no margin and lines a little closer than running text's,
+and lets a long word wrap, all with no specificity, so your rule for that level, or for
+`.clover-title`, wins:
+
+```css
+.clover-title:is(h2, h3) {
+  font-size: 1.25rem;
+}
+```
+
+Set [`--clover-title-weight`](/docs/styling/variables#templates) to change every title's
+weight. Clover styles the Panel's headings itself: each section's, and those of the groups
+in it, such as Search's pages.

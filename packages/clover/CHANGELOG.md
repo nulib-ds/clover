@@ -11,6 +11,91 @@ project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Added
+
+- **`@nulib/clover/base.css` and `@nulib/clover/spacing.css`, for a look of your own.**
+  `base.css` is the structure of every part and template: what shows and what is hidden,
+  where each box sits and what lies over what (position, z-index), how a region lays out
+  its parts (flex, grid), how large a box or a target is, and the cursor over what can be
+  pressed or dragged, with the scale's custom properties, and nothing of Clover's look. `spacing.css` is every margin, padding and
+  gap. In React, import them in place of `styles.css` and `templates.css`, `base.css`
+  first, then your own CSS:
+
+  ```js
+  import "@nulib/clover/base.css";
+  import "@nulib/clover/spacing.css"; // or a spacing of your own
+  import "./my-look.css";
+  ```
+
+  With the web components, link them before the elements' script. The elements find
+  `base.css` on the page and bring none of Clover's styles, only their own display rules:
+
+  ```html
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/base.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/spacing.css"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/@nulib/clover/dist/web-components/index.umd.js"></script>
+  ```
+
+  Both are derived from the same stylesheets as `styles.css` by the build, and in the
+  same `@layer clover`. `styles.css` and `templates.css` are unchanged.
+  - On their own they still draw a layout that works: what lies over other content (a
+    control's name, a menu, a sticky heading, the panel over a narrow page) has a
+    surface in the page's own colors (`Canvas`, `CanvasText`); a control Clover draws in
+    its own way (a language's code, the eye that hides a set) stays the browser's radio
+    or checkbox; an `auto` margin, or one that keeps room for a control, is kept; Items'
+    zero margins are kept, so a figure has none of the browser's 40px each side; a
+    hotspot over the picture stays see-through, never the browser's gray button; and a
+    split's handle, the bar between the panes that a press drags to resize the panel,
+    shows from top to bottom in the text's own color.
+  - On a page with `base.css`, a recording, a Scene, a map and a vertical slider bring
+    none of Clover's styles as their code loads: `base.css` holds their structure.
+    MapLibre's own stylesheet still comes. The check costs a page that loads one of those
+    sheets 15 to 49 B gzip, so two budgets rise by 50 B: a Timeline's first view
+    (`timelineFirstViewGzip`, 55.5 kB) and Document's (`documentTemplateFirstViewGzip`,
+    96.25 kB). New budgets hold the tiers: `base.css` 13.35 kB, `spacing.css` 3.85 kB.
+  - The elements read `base.css`'s mark once, as their first sheet would go in. It costs
+    every page with an element 56 to 75 B gzip (the entry 60 B, within its budget), so
+    the elements' page budgets rise by 50 B, Gallery's and a layout of containers' by
+    100 B: `webComponentsGzip` 132.75 kB, `labelPageGzip` 37.3 kB, `composedPageGzip`
+    109.45 kB, `layoutPageGzip` 128.2 kB, `canvasElementGzip` 96.05 kB,
+    `documentElementGzip` 139.9 kB, `galleryElementGzip` 136.3 kB, `viewerEntryGzip`
+    112.2 kB.
+
+### Fixed
+
+- **`--clover-color-secondary-muted` is one gray everywhere.** Where a page sets none,
+  a row under the pointer (an annotation, a Range in Contents, a Transcript's cue, a
+  Search hit, a place under the Map), a set's annotations while the eye that hides them
+  is pointed at or focused, and the ground behind Items' pictures are `#e6e8eb`, as
+  every other fill and hairline in that color is. Before, those three were `#f1f1f1`.
+- **Escape puts away a popover, and nothing more.** While a control's popover shows,
+  Escape hides it and stops there, so a menu, the image controls' tray, the caption box,
+  a floating Panel or the Lightbox around the control stays open for the next Escape
+  (WCAG 1.4.13). A menu the control itself opened still closes first. Before, the same
+  Escape closed the popup around it too and moved focus.
+- **One Escape closes one thing everywhere.** The place box, the Canvas's menus (Choice,
+  annotations, chapters, languages, About's downloads, a pager's count), a recording's
+  captions menu, `CollectionSelect` and Items' full titles leave alone an Escape something
+  inside them took. Before, the place box closed on the Escape that put away a place's
+  name.
+- **A Contents entry's toggle names itself in a popover**, "Sections", as every control
+  that shows an icon alone does. Its string, `contentsSectionsTip`, is in every shipped
+  language.
+- **Popovers keep their pause under the pointer where reduced motion is asked for.**
+  Before, reduced motion dropped the pause with the fade, so passing over a row showed
+  every name in it.
+  - Together these four cost a page 46 to 132 B gzip, so 21 budgets rise by 50 to 150 B:
+    the Default template to first view to 100.35 kB (`defaultTemplateFirstViewGzip`),
+    Document's to 96.3 kB, a `<clover-viewer>` to 132.9 kB (`webComponentsGzip`) and a
+    Canvas's first JS to 44.2 kB (`canvasInitialGzip`); `build/size-budget.json` has the
+    rest.
+
 ## [4.6.1] - 2026-11-06
 
 ### Changed

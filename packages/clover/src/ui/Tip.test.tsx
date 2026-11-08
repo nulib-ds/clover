@@ -55,6 +55,88 @@ describe("Tip", () => {
     expect(button).not.toHaveAttribute("data-tip-hidden");
   });
 
+  it("takes the Escape that puts it away, and lets the next one pass to what holds it", () => {
+    render(
+      <Button id="reset-1" label="Reset" shortcut={SHORTCUTS.reset}>
+        <path d="" />
+      </Button>,
+    );
+    const button = screen.getByRole("button", { name: "Reset" });
+    // Shown, as keyboard focus shows it.
+    const shown = vi
+      .spyOn(Element.prototype, "matches")
+      .mockImplementation(function (this: Element, selector: string) {
+        return this === button && selector.includes(":focus-visible");
+      });
+    button.focus();
+    const first = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(first);
+    expect(first.defaultPrevented).toBe(true);
+    // Put away now: a popup around the control closes on the next.
+    const second = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(second);
+    expect(second.defaultPrevented).toBe(false);
+    shown.mockRestore();
+  });
+
+  it("lets Escape close what its control opened first", () => {
+    render(
+      <button type="button" aria-expanded="true" aria-label="Captions">
+        <Tip label="Captions" />
+      </button>,
+    );
+    const button = screen.getByRole("button", { name: "Captions" });
+    const shown = vi
+      .spyOn(Element.prototype, "matches")
+      .mockImplementation(function (this: Element, selector: string) {
+        return this === button && selector.includes(":focus-visible");
+      });
+    button.focus();
+    const escape = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(escape);
+    expect(escape.defaultPrevented).toBe(false);
+    shown.mockRestore();
+  });
+
+  it("lets Escape pass when its popover is not in sight", () => {
+    render(
+      <Button id="reset-1" label="Reset" shortcut={SHORTCUTS.reset}>
+        <path d="" />
+      </Button>,
+    );
+    // Focused by a press, not the keyboard, and not hovered: the popover does not show.
+    const button = screen.getByRole("button", { name: "Reset" });
+    // As the stylesheet leaves it.
+    button.querySelector<HTMLElement>(".clover-tip")!.style.visibility =
+      "hidden";
+    const unseen = vi
+      .spyOn(Element.prototype, "matches")
+      .mockImplementation(function (this: Element, selector: string) {
+        return this !== button && selector === "input";
+      });
+    button.focus();
+    const escape = new KeyboardEvent("keydown", {
+      key: "Escape",
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(escape);
+    expect(escape.defaultPrevented).toBe(false);
+    unseen.mockRestore();
+  });
+
   it("is held by a radio's label, and Escape hides it while the radio has focus", () => {
     render(
       <label>
@@ -238,7 +320,7 @@ describe("Tip, kept inside what clips it", () => {
 
   it("wraps to the room beside its control, where it sits beside it", () => {
     const { button, tip } = inBody(250);
-    // Beside the control, toward the Body (the cluster as a column): ending 6px before it.
+    // Beside the control, as at a split's handle: ending 6px before it.
     box(
       tip,
       () => 244 - (parseFloat(room(tip)) || 260),

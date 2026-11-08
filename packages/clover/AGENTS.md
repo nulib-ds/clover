@@ -127,7 +127,9 @@ every rule below.
   Core never reads what only such a sheet sets: a recording's still draws before its
   transport loads (so `--clover-transport-room` is `Canvas.css`'s). MapLibre's
   stylesheet comes the same way, with MapLibre, where the page has none (the Map,
-  below). Color tokens are `--clover-color-*` with literal fallbacks, since a page sets them. The
+  below). Color tokens are `--clover-color-*` with literal fallbacks, since a page sets them,
+  each token's the same literal everywhere, the default Styling's Variables gives
+  (`src/styles/colors.test.ts`). The
   scale's tokens (`--clover-space-*`, `--clover-text-*`, `--clover-control`) are defined
   in `src/styles/scale.css`, first in the list, and need none. Add every new stylesheet to
   the list. The same sheets are built again a part at a time (`dist/styles/<part>.css`,
@@ -148,12 +150,45 @@ every rule below.
   In a browser, `node e2e/check-sheets.mjs --parts` renders each part with the sheets
   Styling gives it (`PARTS` there) and compares every node's computed style with
   `styles.css`'s.
+- **The stylesheet in tiers** (Mat, 2026-11-06: "base styling that simply handles z index,
+  very basic layout, hidden/nones/absolutes/relatives … spacing/paddings … defined else in
+  a spacing.css"): `dist/base.css`, the structure of every part and template, and
+  `dist/spacing.css`, every margin, padding and gap, which a page with a look of its own
+  imports in place of `styles.css` and `templates.css`, base first. The build derives
+  both from the same sheets (`build/tiers.mjs`), by each declaration's property (`BASE`,
+  `SPACING`, `LOOK`), so a part's sheet stays one file, written as it always was, and
+  nothing is split by hand. A property in no tier fails the build: add it to its list. A
+  custom property goes in the lowest tier that reads it, the scale and what a script
+  reads in base. `cursor` is base (Mat, 2026-11-07: "if it had a cursor in fully styled,
+  keep it for base"). Base.css alone must draw a layout that works (WCAG 2.2 AA): it keeps
+  a copy of the spacing and paint that are structure (`structural`: an `auto` margin, a
+  margin or padding of a control's room, a zero margin or padding on Items' own elements,
+  which undoes a figure's or a list's browser margins (Mat, 2026-11-07: "for items only,
+  retain that and override figure defaults"), a glyph's `fill` or `stroke` in
+  `currentColor` or none, and the see-through ground of what lies over the picture,
+  `SEE_THROUGH`: the hotspots, never the browser's gray button over the picture), leaves
+  to the browser an input the look hides to draw its own way
+  (`drawnByTheLook`), and gives what lies over other content a surface in `Canvas` and
+  `CanvasText` (`SURFACES`). A new element positioned over others and filled goes in
+  `SURFACES`, or in `UNDERLAID` where it needs no surface: `build/tiers.test.mjs` fails
+  naming it. Something over the picture that the look leaves see-through goes in
+  `SEE_THROUGH`. Base.css marks itself (`--clover-stylesheet: base` on `:root`), and
+  `ui/adoptSheet.ts` adopts none of the part sheets that load with their code where it
+  is, MapLibre's still. The elements' registry (`src/web-components/styles.ts`) reads the
+  mark too, once, as the first of Clover's sheets would go in, and brings none of them,
+  the elements' own display rules and MapLibre's still: a page links base.css before the
+  elements' script, which waits for the page's stylesheets. Never swap them out when the
+  mark comes later: base.css replaces Clover's sheets before any is in, so nothing of
+  Clover's look is drawn and then taken away (no flash); arriving after the first of
+  them is in, it changes nothing. The harness and the
+  elements' page show either: `?css=base`, `?css=spacing` (base then spacing,
+  `e2e/clover-tiers.mjs`).
 - **Space, type and selectors follow `DESIGN.md`.** Every space and text size is a step of
   the golden scale from the page's own 1rem, chosen by how closely things belong together
   (a container's inset one step above the gap between its children). Never set a font
-  family, a base size or a line height: Clover reads at the page's type. Select a part's
-  insides by structure under its one root class, and write families (round controls,
-  text buttons, rows, fields) once. `src/styles/scale.test.ts` fails on any literal rem or em in
+  family or a base size, or a line height on running text (`DESIGN.md` §1 says where one
+  is set): Clover reads at the page's type. Select a part's insides by structure under its
+  one root class, and write families (round controls, field pills, rows, fields) once. `src/styles/scale.test.ts` fails on any literal rem or em in
   spacing, and on any font family.
 - **Plain-layout scaffolding.** Every part must still lay out plainly without the
   stylesheet: semantic HTML in reading order, SVG icons with `width`/`height`
@@ -2589,7 +2624,8 @@ panel.tsx`) reads its `<clover-tab>` children, watched (`useWatched` in
     rule keeps its place in the one `clover` layer. Never sublayers: a later sublayer
     beats an earlier one's more specific rule. The elements take no stylesheet from the
     page (`defineCloverElements` has no `styles`; Mat, 2026-10-27): a page styles Clover
-    with its own, which outranks the `clover` layer.
+    with its own, which outranks the `clover` layer. A page with base.css gets none of
+    Clover's sheets (its mark, "The stylesheet in tiers").
     - Where they ride: the light parts' sheets (`APART`: the scale, Label, Primitives,
       ReadMore, Status) in `shared`, so a page of labels or of properties loads only
       those; media's, maps' and the other templates' (`LAZY`) in their lazy code's

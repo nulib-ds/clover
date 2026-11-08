@@ -69,6 +69,10 @@ function cspNonce(doc: Document): string {
  * page's own stylesheets, which a page's own layers then follow (a page that wants them
  * over Clover's names `clover` first, `@layer clover;`), and MapLibre's in a layer of its
  * own after Clover's, so the page's rules still outrank it.
+ *
+ * A page with base.css (`@nulib/clover/base.css`, `build/tiers.mjs`) gets none of
+ * Clover's sheets: base.css holds every part's structure, and the page brings its own
+ * look. The elements' own display rules (`inject`) and MapLibre's sheet come all the same.
  */
 export class StyleRegistry {
   private readonly injected = new Set<string>();
@@ -77,6 +81,13 @@ export class StyleRegistry {
   private readonly nonce: string;
   /** Clover's sheets, adopted, in their order, once the page's policy refuses a `<style>`. */
   private adopted: { index: number; sheet: CSSStyleSheet }[] | null = null;
+  /**
+   * Whether the page has base.css, which marks the page's root (`--clover-stylesheet:
+   * base`), as `ui/adoptSheet.ts` reads it too. Read once, as the first of Clover's sheets
+   * would go in: a page links base.css before the elements' script, which waits for the
+   * page's stylesheets, so it is there by then.
+   */
+  private base?: boolean;
 
   constructor(private readonly doc: Document) {
     this.nonce = cspNonce(doc);
@@ -103,6 +114,15 @@ export class StyleRegistry {
    */
   place(key: string, index: number, css: string, unlayered = false) {
     if (this.injected.has(key)) return;
+    if (
+      !unlayered &&
+      (this.base ??= /base/.test(
+        getComputedStyle(this.doc.documentElement).getPropertyValue(
+          "--clover-stylesheet",
+        ),
+      ))
+    )
+      return;
     this.injected.add(key);
     if (unlayered) this.unlayered.add(key);
     if (this.adopted) return this.adopt(index, key, css);

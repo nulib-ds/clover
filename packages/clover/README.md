@@ -101,6 +101,8 @@ If you serve Clover's files yourself, copy the whole `dist/web-components` folde
 | `@nulib/clover/web-components/three`  | three.js for the elements' Scene, bundled.                                            |
 | `@nulib/clover/styles.css`            | Every part's styles, and the `Default` template's.                                    |
 | `@nulib/clover/templates.css`         | The other templates' styles.                                                          |
+| `@nulib/clover/base.css`              | For a look of your own, in place of both: the structure of every part and template.   |
+| `@nulib/clover/spacing.css`           | Clover's margins, paddings and gaps, after `base.css`.                                |
 
 ## Learn more
 

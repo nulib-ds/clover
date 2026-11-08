@@ -65,6 +65,8 @@
     "./styles.css": "./dist/styles.css",
     "./styles/*.css": "./dist/styles/*.css",
     "./templates.css": "./dist/templates.css",
+    "./base.css": "./dist/base.css",
+    "./spacing.css": "./dist/spacing.css",
     "./package.json": "./package.json"
   },
   "module": "./dist/index.mjs",

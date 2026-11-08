@@ -41,6 +41,18 @@
   --red-11: #ce2c31;
 
   /*
+   * A result's three tones (Radix Colors, as the reds are): each step 9 a fill, mixed into
+   * the page's ground, under its step 12, which keeps 4.5:1 on any such fill
+   * (`ContrastGuide`'s results).
+   */
+  --green-9: #30a46c;
+  --green-12: #193b2d;
+  --amber-9: #ffc53d;
+  --amber-12: #4f3422;
+  --red-9: #e5484d;
+  --red-12: #641723;
+
+  /*
    * Surfaces.
    *
    * Solid fills, not hairlines. A panel is a block of color, and separation comes from
@@ -330,6 +342,9 @@
   );
   --accent-contrast: #ffffff;
   --red-11: #ff9592;
+  --green-12: #b1f1cb;
+  --amber-12: #ffe7b3;
+  --red-12: #ffd1d9;
 
   --color-background: var(--gray-1);
   --surface: var(--gray-3);
@@ -365,6 +380,9 @@
       #fff
     );
     --red-11: #ff9592;
+    --green-12: #b1f1cb;
+    --amber-12: #ffe7b3;
+    --red-12: #ffd1d9;
 
     --surface: var(--gray-3);
     --surface-raised: var(--gray-4);

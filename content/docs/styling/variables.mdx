@@ -1,0 +1,149 @@
+---
+title: Variables
+description: "Every custom property you can set on Clover, with its default and where to set it: colors, spaces and text sizes, the Body, Items and templates."
+---
+
+# Variables
+
+<div className="docs-lede">
+  Every custom property you can set, with its default and where to set it.
+</div>
+
+Set them on Clover or anything around it, and they cascade. Where Clover sets one closer
+in, as a default in parentheses says, set yours on that element: the Canvas's on
+`.clover-canvas`, Items' on `.clover-items`, a template's on its class, such as
+`.clover-template-default`. Your CSS wins over [Clover's layer](/docs/styling#stylesheets)
+there.
+
+## Colors
+
+Try yours in the [contrast guide](/docs/styling/colors#contrast-guide).
+
+| Variable                         | Default                                                                               | What it colors                                                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `--clover-color-primary`         | `#1a1d1e`                                                                             | Text, and the dark tone of a two-tone ring over a picture                                                                                 |
+| `--clover-color-primary-muted`   | `#26292b`                                                                             | Quieter text (descriptions, formats, status) and field edges                                                                              |
+| `--clover-color-secondary`       | `#fff`                                                                                | The ground under Clover's text: the Panel, menus, popups and fields                                                                       |
+| `--clover-color-secondary-muted` | `#e6e8eb`                                                                             | Hairlines between regions, and fills under the pointer                                                                                    |
+| `--clover-color-secondary-alt`   | `#c1c8cd`                                                                             | Quieter words in a popover, such as a chapter's title on the seek bar or a place's date on the Map, and a closed accordion heading's line |
+| `--clover-color-accent`          | `#0065c3`                                                                             | Focus rings, the selected item, the current tab and row, and a round control under the pointer                                            |
+| `--clover-color-accent-text`     | the accent (in [high contrast](/docs/styling/colors#high-contrast), the text's color) | Text in the accent: links, Read more, the selected item's label                                                                           |
+| `--clover-color-control`         | `#1a1d1e`                                                                             | The round controls' fill, on a light page and a dark one                                                                                  |
+| `--clover-color-control-glyph`   | `#fff`                                                                                | The round controls' glyphs, and Exit full screen's label                                                                                  |
+
+## The media player
+
+Video and sound play with light-on-dark controls, captions and Captions menu in every
+theme. The Chapters menu takes Clover's colors, as the Canvas's other menus do.
+
+| Variable                          | Default                                                           | What it sets                                                     |
+| --------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `--clover-player-text`            | `#fff`                                                            | Text on the controls and in the Captions menu, and slider thumbs |
+| `--clover-player-track`           | `rgb(255 255 255 / 65%)`                                          | The seek and volume sliders' tracks                              |
+| `--clover-player-track-shadow`    | `none`                                                            | A shadow under those tracks                                      |
+| `--clover-player-menu-surface`    | `#151718`                                                         | The Captions menu's ground                                       |
+| `--clover-player-menu-hover`      | `#26292b`                                                         | An option in the Captions menu under the pointer                 |
+| `--clover-player-caption-surface` | `rgb(0 0 0 / 85%)`                                                | The box behind captions                                          |
+| `--clover-player-caption-text`    | `#fff`                                                            | The captions' text                                               |
+| `--clover-player-caption-edge`    | `none`                                                            | An outline around the captions' letters (a `text-shadow`)        |
+| `--clover-transport-track`        | `var(--clover-space-xs)` on `.clover-canvas-transport`            | The height of the seek and volume sliders' tracks                |
+| `--clover-transport-gap`          | `var(--clover-space-2xs)` on `.clover-canvas-transport-seek-area` | The gap cut in the seek bar where a chapter begins               |
+
+## Sizes and spaces
+
+Every size and space follows from your `1rem`: try another on
+[Spacing](/docs/styling/spacing#the-scale) or [Fonts](/docs/styling/fonts#text-sizes). Set
+the spaces on `:root`, where `--clover-inset`, `--clover-control` and `--clover-picture`
+are worked out from them.
+
+| Variable             | Default                                                                                                                                                            | What it sizes                                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `--clover-space-3xs` | `0.146rem`                                                                                                                                                         | φ⁻⁴, the smallest space                                                                                            |
+| `--clover-space-2xs` | `0.236rem`                                                                                                                                                         | φ⁻³                                                                                                                |
+| `--clover-space-xs`  | `0.382rem`                                                                                                                                                         | φ⁻²: a thumbnail over its label                                                                                    |
+| `--clover-space-s`   | `0.618rem`                                                                                                                                                         | φ⁻¹: within a component                                                                                            |
+| `--clover-space-m`   | `1rem`                                                                                                                                                             | Your `1rem`: between components in a region                                                                        |
+| `--clover-space-l`   | `1.618rem`                                                                                                                                                         | φ: a region's inset                                                                                                |
+| `--clover-space-xl`  | `2.618rem`                                                                                                                                                         | φ²                                                                                                                 |
+| `--clover-space-2xl` | `4.236rem`                                                                                                                                                         | φ³, the largest space                                                                                              |
+| `--clover-text-xs`   | `0.764rem`                                                                                                                                                         | A badge: a duration on a thumbnail                                                                                 |
+| `--clover-text-s`    | `0.854rem`                                                                                                                                                         | Secondary text: times, formats, captions under thumbnails, legends                                                 |
+| `--clover-text-m`    | `1.146rem`                                                                                                                                                         | A section's heading, as in the Panel's accordion                                                                   |
+| `--clover-text-l`    | `1.236rem`                                                                                                                                                         | An error's headline, a sound Canvas's label beside other Canvases, captions in a Body at least 47.5rem wide        |
+| `--clover-control`   | `calc(1rem + 2 * var(--clover-space-s))` (a Scene's controls where its Body is under 32rem wide or 24rem tall: `max(1.5rem, 24px)`, on `.clover-scene-navigation`) | Every round control's width and height (2.236rem)                                                                  |
+| `--clover-inset`     | `var(--clover-space-l)` (on a screen under 31rem, `var(--clover-space-m)` in the Panel, Default's header and thumbnail strip, and Document's toolbar)              | The room between a region's edge and the components in it                                                          |
+| `--clover-picture`   | `calc(4 * var(--clover-space-xl))`                                                                                                                                 | A chapter's picture over the seek bar, and under the chapter playing in Contents and the Chapters menu (10.472rem) |
+
+## Shape and motion
+
+| Variable               | Default                                                                | What it sets                                                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `--clover-radius`      | `3px` (`6px` for the Canvas's information and every menu but Captions) | Corners of tips, menus, thumbnails, hotspots, the Map and the rows in the Panel's lists                                               |
+| `--clover-radius-pill` | `2rem`                                                                 | Fully rounded corners, as on the round controls and Search's field                                                                    |
+| `--clover-transition`  | `all 200ms cubic-bezier(0.16, 1, 0.3, 1)`                              | How a control changes under the pointer and on focus; instant in [high contrast](/docs/styling/colors#high-contrast)                  |
+| `--clover-field-edge`  | The muted text mixed 80% into the ground                               | A field's edge: Search's, the Transcript's, CollectionSelect's. Keep it [3:1](/docs/styling/colors#contrast-guide) against the ground |
+
+## The Body
+
+Set [`--clover-body-height`](/docs/styling/spacing#the-body) around a Body you compose,
+or on `.clover-template-default` or the Gallery lightbox's
+`.clover-template-lightbox-content`. In Document, the Body fills its page: size Document
+with `--clover-template-document-height`. Set the rest on `.clover-canvas` itself: the
+Canvas declares their defaults, which win over any it would inherit. Where the system asks for reduced motion, Clover sets
+the controls' durations to `0s`, so set yours inside
+`@media (prefers-reduced-motion: no-preference)`.
+
+| Variable                         | Default                                                                                                                                          | What it sets                                      |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| `--clover-body-height`           | `60vh` (Default `min(65svh, 40rem)`, the Gallery's lightbox `min(70svh, 48rem)`, `vh` where a browser has no `svh`; Document `100%` of its page) | The Body's height                                 |
+| `--clover-canvas-background`     | `#0001`, a wash over the page's; behind a video, black (`#000`) (Document keeps it `transparent`)                                                | The Canvas's background, kept in full screen      |
+| `--clover-canvas-inset`          | `0px` (Document: `var(--clover-inset)`)                                                                                                          | A margin around the picture at home               |
+| `--clover-canvas-controls-inset` | `var(--clover-inset)` (on a screen under 31rem: `var(--clover-space-m)`)                                                                         | How far the controls sit in from the Body's edges |
+| `--clover-controls-leave`        | `180ms cubic-bezier(0.4, 0, 1, 1)`                                                                                                               | How the controls leave when idle                  |
+| `--clover-controls-enter`        | `340ms cubic-bezier(0.34, 1.56, 0.64, 1)`                                                                                                        | How they come back                                |
+| `--clover-controls-tuck`         | `var(--clover-space-s)`                                                                                                                          | How far they tuck toward their edge as they leave |
+
+Set `--clover-canvas-background` for each
+[`data-media`](/docs/styling/classes#classes-and-states):
+
+```css
+.clover-canvas[data-media="image"] {
+  --clover-canvas-background: #fff;
+}
+
+.clover-canvas[data-media="video"] {
+  --clover-canvas-background: #000;
+}
+```
+
+A sound recording plays on a ground of its artwork's colors, over this background.
+
+## Items, Summary, Logo, Map and Search
+
+Set Items' on [`.clover-items`](/docs/styling/classes#classes-and-states).
+
+| Variable                      | Default                                                                      | What it sets                                                                  |
+| ----------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `--clover-items-height`       | `8rem` (the Gallery's lightbox strip: `4rem`)                                | A slider's picture height                                                     |
+| `--clover-items-size`         | `10rem`                                                                      | A grid's cell (the Gallery's `size` sets it)                                  |
+| `--clover-items-gap`          | `var(--clover-space-m)` (the Gallery: its `gap`, else `var(--clover-inset)`) | The space between items                                                       |
+| `--clover-items-inset`        | `0px`                                                                        | Room at a slider's ends, so its first and last items clear its arrows         |
+| `--clover-items-lines`        | `3` (the Gallery: `none`; its lightbox strip: `1`)                           | Lines of an item's label before it is cut                                     |
+| `--clover-summary-lines`      | `5` (the Gallery: `2`)                                                       | Lines of a Summary before Read more                                           |
+| `--clover-content-search-top` | `0px`                                                                        | How far below the top of its scrolling box Search's field sticks              |
+| `--clover-transcript-top`     | `0px`                                                                        | How far below the top of its scrolling box the Transcript's find field sticks |
+| `--clover-logo-height`        | `1.618rem`                                                                   | A provider's logo height; its width follows                                   |
+| `--clover-map-height`         | `24rem` (an annotation's place over the Body: `16rem`)                       | The Map's height                                                              |
+| `--clover-map-controls-inset` | `var(--clover-inset)` on `.clover-geomap`                                    | How far the Map's controls sit in from its edges                              |
+
+## Templates
+
+| Variable                               | Default                                                                                            | What it sets                                                                              |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `--clover-template-document-height`    | `min(85svh, 56rem)` (`vh` where a browser has no `svh`)                                            | Document's height, set on `.clover-template-document`                                     |
+| `--clover-template-default-rail-width` | `9rem` (`6rem` on `.clover-template-default-rail` where Default's main column is under 36rem wide) | The width of Default's thumbnail strip beside the Body, for a Manifest read down the page |
+| `--clover-title-weight`                | `400`                                                                                              | The weight of every [title](/docs/styling/fonts#headings)                                 |
+| `--clover-template-lightbox-top`       | `0px`                                                                                              | Your sticky header's height, so the Gallery's lightbox holds under it                     |
+| `--clover-template-lightbox-inset`     | `0px`                                                                                              | Room around the Gallery's lightbox, inside the Gallery                                    |
+| `--clover-template-lightbox-backdrop`  | `transparent`                                                                                      | What fills that room                                                                      |
+| `--clover-template-lightbox-radius`    | `0`                                                                                                | The lightbox's corners                                                                    |

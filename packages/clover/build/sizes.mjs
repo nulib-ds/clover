@@ -332,6 +332,9 @@ const STYLES = [
   ["styles.css", "stylesGzip", "styles.css"],
   ["templates.css", "templatesStylesGzip", "templates.css"],
   ["styles/core.css", "coreStylesGzip", "styles/core.css"],
+  // The tiers (`build/tiers.mjs`), which a page that brings its own look imports instead.
+  ["base.css", "baseStylesGzip", "base.css"],
+  ["spacing.css", "spacingStylesGzip", "spacing.css"],
 ];
 
 /**

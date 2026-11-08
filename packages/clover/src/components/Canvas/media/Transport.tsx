@@ -211,7 +211,7 @@ function TransportMenu({
     if (!open) return;
     const close = (event: Event) => {
       if (event instanceof KeyboardEvent) {
-        if (event.key !== "Escape") return;
+        if (event.key !== "Escape" || event.defaultPrevented) return;
         // Escape from inside the menu hands focus back to its button, not to the page,
         // and closes nothing else: not a modal `<dialog>` around it, nor a floating
         // Panel. Heard in the capture phase, before the page's handlers.

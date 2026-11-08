@@ -237,7 +237,8 @@
 /*
  * Nextra hides a closed sidebar folder, and the sidebar after "Hide sidebar", by height or
  * width and opacity alone. Their links stayed in the tab order, taking focus unseen, so
- * they are hidden as well. Visibility turns once the fade ends, so closing still animates.
+ * they are hidden as well. A folder closes at once (below, the end of this file); the
+ * sidebar's visibility turns once its fade ends, so hiding it still animates.
  */
 :is(.nextra-sidebar, .nextra-mobile-nav)
   [class~="x:overflow-hidden"][class~="x:opacity-0"] {
@@ -254,7 +255,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   :is(.nextra-sidebar, .nextra-mobile-nav)
-    [class~="x:overflow-hidden"][class~="x:opacity-0"] {
+    [class~="x:overflow-hidden"][class~="x:opacity-0"]:not(li > *) {
     transition-property: opacity, visibility;
   }
 
@@ -1342,4 +1343,14 @@ pre[class~="x:rounded-md"],
 .nextra-callout[class~="x:rounded-lg"],
 input[type="search"][class~="x:rounded-lg"] {
   border-radius: var(--radius-4);
+}
+
+/*
+ * A sidebar's folder opens and closes at once (Mat, 2026-11-07: "don't animate the
+ * collapse/expand of sections. just do it."): Nextra's Collapse eases its height and fade
+ * over 300 to 500ms, and its chevron turns, each a transition its timers do not wait on.
+ */
+:is(.nextra-sidebar, .nextra-mobile-nav) li > div,
+:is(.nextra-sidebar, .nextra-mobile-nav) li > :is(a, button) > svg {
+  transition: none;
 }

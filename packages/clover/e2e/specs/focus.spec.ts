@@ -161,7 +161,12 @@ test.describe("Escape closes one thing at a time", () => {
     await expect(control).toBeFocused();
     await expect(dialog).toBeVisible();
 
-    // The next Escape is the dialog's, and focus goes back to the option.
+    // Back on its control, the keyboard shows its popover: the next Escape puts that
+    // away alone (WCAG 1.4.13), and the one after is the dialog's, focus going back to
+    // the option.
+    await page.keyboard.press("Escape");
+    await expect(control).toHaveAttribute("data-tip-hidden", "");
+    await expect(dialog).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(dialog).toHaveCount(0);
     await expect(option).toBeFocused();
@@ -288,8 +293,13 @@ test("Escape in the tray closes the tray, not an open menu too", async ({
   await page.keyboard.press("Enter");
   const radios = page.getByRole("radio");
   await expect(radios.first()).toBeFocused();
-  // Back into the tray, its first control.
-  await page.getByRole("button", { name: "Zoom in", exact: true }).focus();
+  // Back into the tray, its first control, whose popover the keyboard shows: the first
+  // Escape puts that away alone (WCAG 1.4.13), the next closes the tray.
+  const zoomIn = page.getByRole("button", { name: "Zoom in", exact: true });
+  await zoomIn.focus();
+  await page.keyboard.press("Escape");
+  await expect(zoomIn).toHaveAttribute("data-tip-hidden", "");
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
   await page.keyboard.press("Escape");
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   await expect(radios.first()).toBeVisible();

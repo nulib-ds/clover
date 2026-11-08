@@ -173,11 +173,12 @@ export const SHEETS = [
 /**
  * Where each sheet rides. The light parts' sheets each in their own code's chunk, so a
  * page of labels, or of a record's properties, loads only theirs. The sheets of media,
- * maps and the other templates in their lazy code's, so they load as those draw. Every
- * other sheet in one chunk, `styles`, which loads with the first part to draw any of
- * them, in a few runs, each the sheets between those apart: thirty small sheets gzip to
- * 19.1 kB apart and to 10.1 kB as one, so a sheet apart in each owner's chunk cost a
- * viewer's page 4 kB, and a `<style>` of each in one chunk still 1 kB more.
+ * Scenes, maps, a vertical slider and the other templates in their lazy code's, so they
+ * load as those draw. Every other sheet in one chunk, `styles`, which loads with the
+ * first part to draw any of them, in a few runs, each the sheets between those apart:
+ * thirty small sheets gzip to 19.1 kB apart and to 10.1 kB as one, so a sheet apart in
+ * each owner's chunk cost a viewer's page 4 kB, and a `<style>` of each in one chunk
+ * still 1 kB more.
  */
 const APART = new Set([
   "styles/scale",
@@ -353,7 +354,8 @@ export function cloverSheets(options = {}) {
 /**
  * The part sheets that load with their part's code, and are left out of styles.css
  * (`build/styles.mjs`): those whose every sheet the elements load lazily too (`LAZY`), a
- * recording's, a Scene's and a map's, which only code loaded as they draw draws.
+ * recording's, a Scene's, a map's and a vertical slider's, which only code loaded as
+ * they draw draws.
  */
 export function lazyParts(groups = partSheets()) {
   return Object.keys(groups).filter(

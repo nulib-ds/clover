@@ -181,16 +181,25 @@ function controlOf(element: Element): Element {
   return holder && tipOf(holder) ? holder : element;
 }
 
+/**
+ * Whether `element` matches one of `selectors`, each read alone: an engine that cannot
+ * read one would throw out a list.
+ */
+const matchesAny = (element: Element, ...selectors: string[]) =>
+  selectors.some((selector) => {
+    try {
+      return element.matches(selector);
+    } catch {
+      return false;
+    }
+  });
+
+/** Keyboard focus on the control, or on the radio in a label that holds it. */
+const KEYED = [":focus-visible", ":has(> input:focus-visible)"];
+
 function isShown(tip: HTMLElement) {
-  try {
-    return Boolean(
-      tip.parentElement?.matches(
-        ":hover, :focus-visible, :has(> input:focus-visible)",
-      ),
-    );
-  } catch {
-    return false;
-  }
+  const control = tip.parentElement;
+  return Boolean(control && matchesAny(control, ":hover", ...KEYED));
 }
 
 /** Wraps the popover to the room there is, then moves it inward from the edge it passes. */
@@ -206,7 +215,7 @@ function keepInside(tip: HTMLElement) {
   const end = bounds.right - clear;
   const own = control.getBoundingClientRect();
   let box = tip.getBoundingClientRect();
-  // Beside its control (the cluster as a column), it has only the room on its own side.
+  // Beside its control (a split's handle), it has only the room on its own side.
   const room =
     box.right <= own.left
       ? box.right - start
@@ -268,10 +277,27 @@ function hideTips(event: KeyboardEvent) {
   const focused = document.activeElement;
   const control = focused && (controlOf(focused) as HTMLElement);
   if (control && tipOf(control)) shown.add(control);
-  // Back once the pointer comes again, or focus leaves it (or the input in it).
-  shown.forEach((control) =>
-    hideUntilBack(control, "tipHidden", ["pointerenter", "focusout"]),
-  );
+  shown.forEach((control) => {
+    if ("tipHidden" in control.dataset) return;
+    const tip = tipOf(control);
+    /*
+     * Putting away a popover in sight is all this Escape does: a popup around its control
+     * (a menu, the image controls' tray, the caption box, a floating Panel, the Lightbox)
+     * stays open, for the next Escape to close (`DESIGN.md` §0, one Escape closes one
+     * thing).
+     */
+    if (
+      tip &&
+      // Not while its control's own menu is open: that is in front, so it takes the key.
+      control.getAttribute("aria-expanded") !== "true" &&
+      // In sight: at once under keyboard focus, else once a hover's pause is over.
+      (matchesAny(control, ...KEYED) ||
+        getComputedStyle(tip).visibility !== "hidden")
+    )
+      event.preventDefault();
+    // Back once the pointer comes again, or focus leaves it (or the input in it).
+    hideUntilBack(control, "tipHidden", ["pointerenter", "focusout"]);
+  });
 }
 
 /**

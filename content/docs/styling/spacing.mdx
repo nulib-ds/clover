@@ -1,0 +1,66 @@
+---
+title: Spacing
+description: "Clover uses spacing determined by the golden ratio, from your page's 1rem. Try the scale live, see which space goes where, and size the Body."
+---
+
+import { ScaleCalculator } from "docs/components/ScaleCalculator";
+
+# Spacing
+
+<div className="docs-lede">
+  Clover uses spacing determined by the [golden
+  ratio](https://en.wikipedia.org/wiki/Golden_ratio), from your page's `1rem`.
+  The more closely two things belong together, the smaller the space between
+  them.
+</div>
+
+## The scale
+
+Each space is φ, about 1.618, times the one below it, and `m` is your page's
+[`1rem`](/docs/styling/fonts#your-pages-size). The same scale sets margins, paddings, gaps
+and [text sizes](/docs/styling/fonts#text-sizes). Every space is a
+[custom property](/docs/styling/variables#sizes-and-spaces): set one on `:root`, and
+everything that uses it follows.
+
+Change your `1rem` in the table. Every space follows, and so does the Viewer above it.
+
+<ScaleCalculator groups={["Spaces", "Controls and components"]} />
+
+## Which space goes where
+
+A region, such as a template's header, its thumbnail strip or the Panel, keeps
+[`--clover-inset`](/docs/styling/variables#sizes-and-spaces) (`l`) between its edge and
+the components in it. Inside, the closer things belong, the smaller the space: `m`
+between components (`s` along Default's header and Document's toolbar, `l` under the
+Gallery's header), `s` within a component, and `xs` between a thumbnail and its label.
+
+Set `--clover-inset` to make a layout tighter or roomier:
+
+```css
+.my-layout {
+  --clover-inset: var(--clover-space-m);
+}
+```
+
+## The Body
+
+The Body is [`--clover-body-height`](/docs/styling/variables#the-body) tall: `60vh`, or
+its template's own. Set yours around a Body you compose, or on `.clover-template-default`:
+
+```css
+.my-layout {
+  --clover-body-height: 70vh;
+}
+```
+
+In Document, the Body fills its page: size Document with
+[`--clover-template-document-height`](/docs/styling/variables#templates).
+
+At home, the picture fills the Body edge to edge, except in Document, which keeps
+`--clover-inset` around it. The Body's controls sit `--clover-inset` in from its edges, in
+line with the components around the Body. To change either, set `--clover-canvas-inset` or
+`--clover-canvas-controls-inset` on
+[`.clover-canvas`](/docs/styling/classes#classes-and-states) itself.
+
+On a screen under 31rem wide, such as a phone's, the controls sit `m` in, and so do the
+Panel, Default's header and thumbnail strip, and Document's toolbar.
