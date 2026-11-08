@@ -841,7 +841,18 @@ deadline.
     as the title where a browser sizes it so (`field-sizing`; else the name at the line's
     end), the name giving way first and never below its number, and on a narrow field
     (a container query) its number alone; the field described by it ("IIIF Cookbook recipe
-    0029-metadata-anywhere"); gone while the reader types. The playground's field only. The recipes are read through `readRecipes`
+    0029-metadata-anywhere"); gone while the reader types. The playground's field only.
+    A content state of the reader's in the Viewer is said the same way (Mat, 2026-11-08:
+    "add some content state meta info to the right here (styled like how we do the IIIF
+    Cookbook recipe titles). Should say canvas 1/12 or time, region"): after its root's
+    label, where it opens, the place of its Canvas among the Manifest's `items` where
+    there are several ("Canvas 3 / 12", IIIF's word for what it names), its time ("1:25")
+    and its region (`xywh=…`, as written), a dot between them (heard whole, in commas), giving
+    way to the title but never below its first part, and on a narrow field that part's
+    figures alone ("3 / 12"); the field described by it ("IIIF content state Canvas 3 /
+    12, 1:25"). Its root is found inside a SpecificResource's `source` too, as Clover
+    writes one for a time or a region (`rootAddress`, `contentStateNote`,
+    `docs/lib/resource-content.ts`). The recipes are read through `readRecipes`
     (`recipeCatalog.ts`), here and by the Natural story, from the `cookbook` mock, a IIIF
     Collection curated in `docs/mocks/cookbook/index.mjs` (Mat, 2026-10-25), so what it
     lists is what both list. What it lists is `docs/mocks/cookbook/recipes.json`, written
@@ -1058,7 +1069,10 @@ after it, or stays React's, shown in both; `jsx react shows to React's readers a
     today). The hero's headline and line are written once (`homeHeadline`, `homeTagline`
     in `site.ts`), for the hero and the footer, and carried wherever the brand speaks
     (Mat, 2026-10-22): the homepage's description and share text open with the line, then
-    say what Clover is, as plainly (`homeDescription`); its structured data gives them as
+    say what Clover is, as plainly (`homeDescription`; Mat, 2026-11-08: "Clover is an
+    accessible, lightweight viewer and design system in React or as web components.", in
+    the words of the repository's About, "Accessible, lightweight IIIF viewer and design
+    system in React or as web components. Use a template or compose your own."); its structured data gives them as
     `headline` and `alternativeHeadline`; `llms.txt` (and so `llms-full.txt`) and the
     README carry both. A page takes its `title` (front matter, else its first `h1`,
     Nextra's rule) and its `description`. Give every page a `description`: agents read it

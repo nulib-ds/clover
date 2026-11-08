@@ -92,8 +92,45 @@ const exampleNote = (name) => ({
   ],
 });
 
+/* Each word of `node` as code, in place: a name as code writes it. */
+function asCode(node) {
+  node.children = node.children.map((child) => {
+    if (child.type !== "text") {
+      if (child.children) asCode(child);
+      return child;
+    }
+    return child.value.trim()
+      ? {
+          type: "element",
+          tagName: "code",
+          properties: {},
+          children: [{ type: "text", value: child.value.trim() }],
+        }
+      : child;
+  });
+}
+
 function clean(node) {
   if (!node.children) return;
+  /*
+   * A page's head (`PartHead.tsx`): the part's name as its code writes it, then, apart
+   * from it, what it adds to a page, so the two never run together ("…<clover-items>)11
+   * kB").
+   */
+  if (classes(node).includes("docs-part-head")) {
+    const name = node.children.find(
+      (child) =>
+        child.type === "element" &&
+        classes(child).includes("docs-part-head-name"),
+    );
+    if (name) {
+      asCode(name);
+      node.children.splice(node.children.indexOf(name) + 1, 0, {
+        type: "text",
+        value: ": ",
+      });
+    }
+  }
   if (node.properties?.dataExample !== undefined) {
     const name = node.properties.ariaLabel;
     node.tagName = "blockquote";
