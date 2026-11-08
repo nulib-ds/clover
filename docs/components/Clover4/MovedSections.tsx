@@ -30,6 +30,7 @@ const COMPOSING: Record<string, string> = {
   styles: CUSTOMIZING,
 };
 
+const BASE = "/docs/styling/base";
 const FONTS = "/docs/styling/fonts";
 const COLORS = "/docs/styling/colors";
 const CLASSES = "/docs/styling/classes";
@@ -41,6 +42,10 @@ const VARIABLES = "/docs/styling/variables";
  * Variables' groups among them. The stylesheets stay on the page.
  */
 const STYLING: Record<string, string> = {
+  // Base styling, its examples with it (Mat, 2026-11-08: "add a Base section").
+  "base-styling": BASE,
+  "a-layout-that-works": BASE,
+  "composed-layouts": BASE,
   "font-sizes-and-spacing": FONTS,
   headings: FONTS,
   colors: COLORS,
@@ -84,6 +89,7 @@ const PAGES = {
       "every-pair": "contrast-guide",
       // The Variables' Colors, second to the page's own Colors before.
       "colors-1": "colors",
+      "base-styling": "using-basecss",
     } as Record<string, string>,
   },
 };

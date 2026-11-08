@@ -138,19 +138,27 @@ deadline.
     Styling, a folder (Mat, 2026-11-07: "break styling page out into multiple sections
     like composing is. landing page should feed into these sections. 3-4 sub page is max.
     preferable 3"; one page from 2026-10-23): its landing page
-    (`content/docs/styling/index.mdx`) opens on its example, then holds the stylesheets
-    and their layer, and base styling (Mat, 2026-11-07: "I'm wondering if base makes sense
-    on the styling homepage. let's move it there. keep the base/base+spacing/styling
-    option and rendered viewer near top. like how we do examples elsewhere"; its own page
-    for an hour before), then Next, link cards to the five pages under it, in the menu's order, Colors, Fonts,
-    Spacing, Classes, Variables (Mat, 2026-11-07: "new order should be Color, Fonts,
-    Spacing, Classes, Variables"), as Composing's
-    does; a link to an old section goes on to its page (`MovedSections`,
-    `page="styling"`). Base styling: base.css and spacing.css, whose example (Mat, 2026-11-07:
-    "show me this in a rendered example") is a page of its own in a frame, under a
-    Stylesheet switch stepping up from base.css to base.css and spacing.css to styles.css
-    (`StylesheetExample.tsx`), as the docs' pages carry Clover's whole
-    stylesheet and Nextra's reset: three pages (`app/examples/stylesheets/[page]`), each
+    (`content/docs/styling/index.mdx`) opens on styles.css's example, the framed Viewer
+    with no switch (`sheets={["styles"]}`) and its code, and a note that the base and
+    spacing examples are on Base (Mat, 2026-11-08: "keep examples for importing of
+    styles.css on main page. note that base and spacing examples can be found on the Base
+    page"), then holds the stylesheets and their layer, then Next, link cards to the six
+    pages under it, in the menu's order, Base, Colors, Fonts, Spacing, Classes, Variables
+    (Mat, 2026-11-07: "new order should be Color, Fonts, Spacing, Classes, Variables"; Base
+    first, as the choice the rest build on), as Composing's does; a link to an old section
+    goes on to its page (`MovedSections`, `page="styling"`). Base (`styling/base.mdx`; Mat,
+    2026-11-08: "styling homepage is getting a little long in the tooth. add a Base section
+    under Styling. move these examples"; on the landing page from 2026-11-07, "let's move
+    it there", and its own page for an hour before that): base.css and spacing.css, whose
+    example (Mat, 2026-11-07: "show me this in a rendered example") is a page of its own in
+    a frame, under a Stylesheet switch stepping up from base.css to base.css and
+    spacing.css to styles.css
+    (`StylesheetExample.tsx`), and under it, in Composed layouts, the same switch over a
+    `Root` of Label, Summary, Body, Items and Metadata (`layout="compose"`, the
+    `compose-…` pages; Mat, 2026-11-08: "show how base.css can affect sub components if
+    used alone in composing"); then Using base.css and A layout that works. Each example
+    is a frame, as the docs' pages carry Clover's whole stylesheet and Nextra's reset: six
+    pages (`app/examples/stylesheets/[page]`), each
     taking the docs page around it as it opens (Mat, 2026-11-07: "send in the consuming
     page font family and accent color"): its font with its `@font-face` rules, its
     headings as the docs set them (their family, weight and tracking, and a title's size
@@ -203,11 +211,16 @@ deadline.
     Variables its own page. Fonts, Colors, Classes, Variables"): every public component's
     root class, then the `data-*` states to select by, two tables under "Classes and
     states" (the heading other pages link), read from the package's source (a shared class
-    said so: PanelToggle is `clover-canvas-button` with `data-button="panel"`); a new
-    component or state a page may select gets its row; then lists in Markdown text. Variables (`styling/variables.mdx`), a glossary of every custom property a page sets,
-    with its default and where to set it (never those Clover sets as it runs). A new
-    property a page may set gets its row there, and a default Clover sets closer in (a
-    template's, a small screen's) goes in parentheses beside its own. Styling's words
+    said so: PanelToggle is `.clover-canvas-button` with `data-button="panel"`), every
+    class in code with its dot (Mat, 2026-11-08: "place a `.` in front of all classes in
+    `code`"); a new component or state a page may select gets its row; then lists in
+    Markdown text. Variables (`styling/variables.mdx`), a glossary of every custom property
+    a page sets (never those Clover sets as it runs), each table two columns, Variable and
+    Purpose (Mat, 2026-11-08: "remove default. make second column generically called
+    'Purpose'"), a name in a table's first column whole on its line from 48rem up ("make
+    tables show whole variable without wrapping. for sure on desktop views",
+    `layout.css`), and a property Clover declares on one element alone saying where to set
+    it in its Purpose. A new property a page may set gets its row there. Styling's words
     (Mat, 2026-11-07: "less words. less fluff. get to the point … be concise and let
     examples speak for themselves"): each page says that you can change what it covers,
     without an example for every case; Classes and Variables list theirs objectively;

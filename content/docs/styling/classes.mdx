@@ -6,7 +6,7 @@ description: "Every component's class and the data-* states to select in your CS
 # Classes
 
 <div className="docs-lede">
-  Select a component in your CSS by the `clover-*` class on its root, and a
+  Select a component in your CSS by the `.clover-*` class on its root, and a
   state by its `data-*` attribute.
 </div>
 
@@ -15,69 +15,82 @@ description: "Every component's class and the data-* states to select in your CS
 The web components render the same classes, with no shadow root, so one stylesheet serves
 both flavors.
 
-| Component                                                                               | Class                                                                                                  |
-| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Root                                                                                    | `clover-root`                                                                                          |
-| The Viewer                                                                              | `clover-root`, with `clover-template-default`, `clover-template-document` or `clover-template-gallery` |
-| Body                                                                                    | `clover-body`                                                                                          |
-| Canvas                                                                                  | `clover-canvas`                                                                                        |
-| Timeline                                                                                | `clover-canvas` and `clover-timeline`                                                                  |
-| Scene                                                                                   | `clover-canvas` and `clover-scene`                                                                     |
-| Items                                                                                   | `clover-items`, and `clover-pager` as a pager                                                          |
-| Previous, Next, Position                                                                | `clover-pager-previous`, `clover-pager-next`, `clover-pager-position`                                  |
-| Status                                                                                  | `clover-status`                                                                                        |
-| Panel                                                                                   | `clover-panel`                                                                                         |
-| PanelToggle                                                                             | `clover-canvas-button` with `data-button="panel"`: every round control in the Body has the class       |
-| PanelPane                                                                               | `clover-template-panel`                                                                                |
-| About                                                                                   | `clover-about`, which Collection has too                                                               |
-| Annotations                                                                             | `clover-annotations`                                                                                   |
-| Collection                                                                              | `clover-collection`                                                                                    |
-| CollectionSelect                                                                        | `clover-collection-select`                                                                             |
-| Contents                                                                                | `clover-contents`                                                                                      |
-| Download                                                                                | `clover-download`                                                                                      |
-| Search                                                                                  | `clover-content-search`                                                                                |
-| Transcript                                                                              | `clover-transcript`                                                                                    |
-| Map                                                                                     | `clover-geomap`                                                                                        |
-| Split, SplitPane, SplitHandle                                                           | `clover-split`, `clover-split-pane`, `clover-split-handle`                                             |
-| ReadMore                                                                                | `clover-read-more`                                                                                     |
-| [Primitives](/docs/primitives): Label, Thumbnail, Summary, Metadata, RequiredStatement… | `clover-` and the name, hyphenated: `clover-label`, `clover-required-statement`, `clover-see-also`…    |
-| Every title                                                                             | `clover-title`                                                                                         |
+| Component                     | Class                                                                                                      |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Root                          | `.clover-root`                                                                                             |
+| The Viewer                    | `.clover-root`, with `.clover-template-default`, `.clover-template-document` or `.clover-template-gallery` |
+| Body                          | `.clover-body`                                                                                             |
+| Canvas                        | `.clover-canvas`                                                                                           |
+| Timeline                      | `.clover-canvas` and `.clover-timeline`                                                                    |
+| Scene                         | `.clover-canvas` and `.clover-scene`                                                                       |
+| Items                         | `.clover-items`, and `.clover-pager` as a pager                                                            |
+| Previous, Next, Position      | `.clover-pager-previous`, `.clover-pager-next`, `.clover-pager-position`                                   |
+| Status                        | `.clover-status`                                                                                           |
+| Panel                         | `.clover-panel`                                                                                            |
+| PanelToggle                   | `.clover-canvas-button` with `data-button="panel"`: every round control in the Body has the class          |
+| PanelPane                     | `.clover-template-panel`                                                                                   |
+| About                         | `.clover-about`, which Collection has too                                                                  |
+| Annotations                   | `.clover-annotations`                                                                                      |
+| Collection                    | `.clover-collection`                                                                                       |
+| CollectionSelect              | `.clover-collection-select`                                                                                |
+| Contents                      | `.clover-contents`                                                                                         |
+| Download                      | `.clover-download`                                                                                         |
+| Search                        | `.clover-content-search`                                                                                   |
+| Transcript                    | `.clover-transcript`                                                                                       |
+| Map                           | `.clover-geomap`                                                                                           |
+| Split, SplitPane, SplitHandle | `.clover-split`, `.clover-split-pane`, `.clover-split-handle`                                              |
+| ReadMore                      | `.clover-read-more`                                                                                        |
+| Label                         | `.clover-label`                                                                                            |
+| Thumbnail                     | `.clover-thumbnail`                                                                                        |
+| Summary                       | `.clover-summary`                                                                                          |
+| Metadata                      | `.clover-metadata`                                                                                         |
+| RequiredStatement             | `.clover-required-statement`                                                                               |
+| Rights                        | `.clover-rights`                                                                                           |
+| Homepage                      | `.clover-homepage`                                                                                         |
+| SeeAlso                       | `.clover-see-also`                                                                                         |
+| Rendering                     | `.clover-rendering`                                                                                        |
+| PartOf                        | `.clover-part-of`                                                                                          |
+| Id                            | `.clover-id`                                                                                               |
+| Provider                      | `.clover-provider`                                                                                         |
+| Logo                          | `.clover-logo`                                                                                             |
+| Value                         | `.clover-value`                                                                                            |
+| Every title                   | `.clover-title`                                                                                            |
 
 Add a state to the class to style that state alone:
 
-| Class                                        | State                | Values                                                                                            |
-| -------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------- |
-| `clover-root`                                | `data-status`        | `idle`, `loading`, `ready`, `error`                                                               |
-| `clover-root`                                | `data-high-contrast` | Present in [high contrast](/docs/styling/colors#high-contrast), on a component standing alone too |
-| `clover-body`                                | `data-renderer`      | <span data-code-flavor="both">`canvas`, `timeline`, `scene`, `custom`</span>                      |
-| `clover-canvas`                              | `data-media`         | Its painting body's `type`, lowercased: `image`, `video`, `sound`…                                |
-| `clover-canvas`                              | `data-recording`     | Present when it paints a recording, video or sound, playing or not                                |
-| `clover-canvas`                              | `data-player`        | Present when a sound recording plays alone, as a player                                           |
-| `clover-canvas`                              | `data-animated`      | Present on an animation                                                                           |
-| `clover-canvas`                              | `data-status`        | `loading`, `ready`, `error`                                                                       |
-| `clover-canvas`                              | `data-navigable`     | `true` where it pans and zooms, else `false`                                                      |
-| `clover-canvas`                              | `data-placeholder`   | `true` while its `placeholderCanvas` shows, `false` once opened                                   |
-| `clover-canvas`                              | `data-fullscreen`    | `true`, `false`                                                                                   |
-| `clover-canvas`                              | `data-controls`      | `visible`, `hidden`, where the controls come and go                                               |
-| `clover-items`                               | `data-layout`        | `slider`, `list`, `grid`, `masonry`, `pager`                                                      |
-| `clover-items`                               | `data-orientation`   | `vertical`, on a vertical slider                                                                  |
-| `clover-items`                               | `data-navigation`    | `id`, `homepage`                                                                                  |
-| `clover-pager`                               | `data-direction`     | The resource's `viewingDirection`                                                                 |
-| `clover-pager`                               | `data-size`          | `small`                                                                                           |
-| `clover-panel`                               | `data-layout`        | `tabs`, `accordion`                                                                               |
-| `clover-panel`                               | `data-floating`      | Present when it floats and Escape closes it                                                       |
-| `clover-canvas-button`                       | `data-side`          | `start`, on a PanelToggle that takes the top start corner of the Body's controls                  |
-| `clover-template-panel`                      | `data-side`          | `start`, `end`: the Body's side it sits on ([Helpers](/docs/composing/helpers#panel))             |
-| `clover-template-panel`                      | `data-open`          | `true`, `false`                                                                                   |
-| `clover-template-panes`                      | `data-panel`         | `over`, `beside`: where a template's Panel sits                                                   |
-| `clover-template-default`                    | `data-fill`          | Present when it fills its box (`fill`)                                                            |
-| `clover-template-gallery`                    | `data-height`        | `auto`, `fixed`                                                                                   |
-| `clover-annotations`                         | `data-scope`         | `all`, and none for `view`                                                                        |
-| `clover-content-search`                      | `data-status`        | `idle`, `loading`, `ready`, `error`                                                               |
-| `clover-content-search`, `clover-transcript` | `data-sticky`        | Present when its field holds at the top as it scrolls                                             |
-| `clover-geomap`                              | `data-status`        | `loading`, `ready`, `error`                                                                       |
-| `clover-split-handle`                        | `data-dragging`      | Present while held                                                                                |
-| `clover-summary`                             | `data-read-more`     | `open`, once Read more shows it whole                                                             |
+| Class                                          | State                | Values                                                                                            |
+| ---------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------- |
+| `.clover-root`                                 | `data-status`        | `idle`, `loading`, `ready`, `error`                                                               |
+| `.clover-root`                                 | `data-high-contrast` | Present in [high contrast](/docs/styling/colors#high-contrast), on a component standing alone too |
+| `.clover-body`                                 | `data-renderer`      | <span data-code-flavor="both">`canvas`, `timeline`, `scene`, `custom`</span>                      |
+| `.clover-canvas`                               | `data-media`         | Its painting body's `type`, lowercased: `image`, `video`, `sound`…                                |
+| `.clover-canvas`                               | `data-recording`     | Present when it paints a recording, video or sound, playing or not                                |
+| `.clover-canvas`                               | `data-player`        | Present when a sound recording plays alone, as a player                                           |
+| `.clover-canvas`                               | `data-animated`      | Present on an animation                                                                           |
+| `.clover-canvas`                               | `data-status`        | `loading`, `ready`, `error`                                                                       |
+| `.clover-canvas`                               | `data-navigable`     | `true` where it pans and zooms, else `false`                                                      |
+| `.clover-canvas`                               | `data-placeholder`   | `true` while its `placeholderCanvas` shows, `false` once opened                                   |
+| `.clover-canvas`                               | `data-fullscreen`    | `true`, `false`                                                                                   |
+| `.clover-canvas`                               | `data-controls`      | `visible`, `hidden`, where the controls come and go                                               |
+| `.clover-items`                                | `data-layout`        | `slider`, `list`, `grid`, `masonry`, `pager`                                                      |
+| `.clover-items`                                | `data-orientation`   | `vertical`, on a vertical slider                                                                  |
+| `.clover-items`                                | `data-navigation`    | `id`, `homepage`                                                                                  |
+| `.clover-pager`                                | `data-direction`     | The resource's `viewingDirection`                                                                 |
+| `.clover-pager`                                | `data-size`          | `small`                                                                                           |
+| `.clover-panel`                                | `data-layout`        | `tabs`, `accordion`                                                                               |
+| `.clover-panel`                                | `data-floating`      | Present when it floats and Escape closes it                                                       |
+| `.clover-canvas-button`                        | `data-side`          | `start`, on a PanelToggle that takes the top start corner of the Body's controls                  |
+| `.clover-template-panel`                       | `data-side`          | `start`, `end`: the Body's side it sits on ([Helpers](/docs/composing/helpers#panel))             |
+| `.clover-template-panel`                       | `data-open`          | `true`, `false`                                                                                   |
+| `.clover-template-panes`                       | `data-panel`         | `over`, `beside`: where a template's Panel sits                                                   |
+| `.clover-template-default`                     | `data-fill`          | Present when it fills its box (`fill`)                                                            |
+| `.clover-template-gallery`                     | `data-height`        | `auto`, `fixed`                                                                                   |
+| `.clover-annotations`                          | `data-scope`         | `all`, and none for `view`                                                                        |
+| `.clover-content-search`                       | `data-status`        | `idle`, `loading`, `ready`, `error`                                                               |
+| `.clover-content-search`, `.clover-transcript` | `data-sticky`        | Present when its field holds at the top as it scrolls                                             |
+| `.clover-geomap`                               | `data-status`        | `loading`, `ready`, `error`                                                                       |
+| `.clover-split-handle`                         | `data-dragging`      | Present while held                                                                                |
+| `.clover-summary`                              | `data-read-more`     | `open`, once Read more shows it whole                                                             |
 
 Here a grid's [`--clover-items-size`](/docs/styling/variables#items-summary-logo-map-and-search):
 
