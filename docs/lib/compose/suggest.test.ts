@@ -28,6 +28,20 @@ function suggested(needs: string[]) {
 }
 
 describe("suggest", () => {
+  it("knows languages, content states and a vertical slider by a reader's words", () => {
+    const { handled, layout } = suggested([
+      "multilingual",
+      "deep link",
+      "vertical slider",
+    ]);
+    expect(handled.map((each) => each.capability)).toEqual([
+      "languages",
+      "content-state",
+      "navigation",
+    ]);
+    expect(layout && checkLayout(layout).ok).toBe(true);
+  });
+
   it("reads a need in a reader's words, by a capability, a property or a part", () => {
     const { handled } = suggested([
       "3D",

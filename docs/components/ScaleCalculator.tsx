@@ -5,6 +5,7 @@ import { Table } from "nextra/components";
 
 import { Scrub } from "docs/components/CodeValues";
 import { ScrollTable } from "docs/components/ScrollTable";
+import { example } from "docs/lib/example";
 
 /**
  * Everything of Clover's that `1rem` sizes, by group, in rem of the page's root size, as
@@ -101,14 +102,17 @@ export function ScaleCalculator({
   useEffect(tell, [base]);
   return (
     <div className="docs-scale">
-      <iframe
-        ref={frame}
-        className="docs-scale-viewer"
-        src={VIEWER}
-        title="Clover's Viewer, its 1rem the size set below"
-        loading="lazy"
-        onLoad={tell}
-      />
+      {/* An example (`example()`): the iframe's title names it. */}
+      <div {...example()}>
+        <iframe
+          ref={frame}
+          className="docs-scale-viewer"
+          src={VIEWER}
+          title="Clover's Viewer, its 1rem the size set below"
+          loading="lazy"
+          onLoad={tell}
+        />
+      </div>
       <ScrollTable>
         <thead>
           <Table.Tr>

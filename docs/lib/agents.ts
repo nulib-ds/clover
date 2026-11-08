@@ -37,7 +37,7 @@ import cloverPackage from "../../packages/clover/package.json";
  * figures the homepage states (`figures.ts`). Read on the server only (the file system,
  * Nextra's page map): `llms.txt` (`app/llms.txt/route.ts`), the sitemap
  * (`app/sitemap.ts`), the homepage's structured data and its list of the parts
- * (`PartsIndex.tsx`). The site is a static export (GitHub Pages), so each is a file, and
+ * (`PartsIndex.tsx`). The site is a static export (S3, behind CloudFront), so each is a file, and
  * `scripts/build-agent-docs.mjs` adds every page's Markdown and `llms-full.txt` after the
  * build.
  */
@@ -253,6 +253,7 @@ export const glance = () => {
     `${partCount} parts to compose with: ${componentCount} components, and ${primitiveCount} primitives, one for each IIIF descriptive property.`,
     `Accessible: every part is held to WCAG 2.2 AA, built on WAI-ARIA's patterns.`,
     `Seamless: no font and no base size of its own, so it takes the page's; its colors are CSS custom properties (\`--clover-color-*\`).`,
+    `Styled as much as you want: \`${name}/styles.css\` for its whole look, or \`${name}/base.css\` for its structure alone, with \`${name}/spacing.css\` for its golden-ratio spaces, the look left to your CSS; its classes, \`data-*\` states and custom properties are on ${siteUrl}/docs/styling.`,
     `Quick to load: a page loads its template and the parts it uses, nothing more. Showing an image, a Canvas (images, video and sound) loads ${loads.canvas} kB gzipped to first view, and the Viewer with its Default template ${loads.defaultTemplate} kB, its styles included (React itself not counted); maps, video streaming and the sanitizer load the first time they are needed.`,
     `Checked against every recipe in the IIIF Cookbook: ${cookbook.handled} of ${cookbook.recipes} handled, and ${cookbook.inPart} more in part (last checked ${cookbook.checked}).`,
     `Its interface language (control labels, section titles, announcements) can be ${listed(shippedLanguages())}: the visitor's where it has strings for it, else the site's, with both offered where they differ.`,

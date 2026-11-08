@@ -108,23 +108,23 @@ const INSIDE: Record<string, readonly string[]> = {
 export const BODY_DRAWS: readonly string[] = ["Canvas", "Timeline", "Scene"];
 
 /**
- * Where a part with no page of its own is documented, as Composing's table of parts
- * links it.
+ * Where a part with no page of its own is documented, as the Glossary's UI components
+ * link it (`content/docs/composing/glossary.mdx`).
  */
 const DOCUMENTED_ON: Record<string, string> = {
-  About: "/docs/panel",
+  About: "/docs/panel#sections",
   CollectionSelect: "/docs/collection",
-  Next: "/docs/items",
-  PanelToggle: "/docs/panel",
-  Position: "/docs/items",
-  Previous: "/docs/items",
-  ReadMore: "/docs/composing",
-  Split: "/docs/composing",
-  SplitHandle: "/docs/composing",
-  SplitPane: "/docs/composing",
-  Status: "/docs/composing",
-  Tab: "/docs/panel",
-  Tip: "/docs/composing",
+  Next: "/docs/items#one-at-a-time",
+  PanelToggle: "/docs/panel#showing-and-hiding-it",
+  Position: "/docs/items#one-at-a-time",
+  Previous: "/docs/items#one-at-a-time",
+  ReadMore: "/docs/composing/customizing#long-values",
+  Split: "/docs/composing/customizing#splitting-panes",
+  SplitHandle: "/docs/composing/customizing#splitting-panes",
+  SplitPane: "/docs/composing/customizing#splitting-panes",
+  Status: "/docs/composing/glossary#ui-components",
+  Tab: "/docs/panel#sections-of-your-own",
+  Tip: "/docs/composing/customizing#controls-of-your-own",
 };
 
 /** An element's part: `clover-required-statement` is `RequiredStatement`. */

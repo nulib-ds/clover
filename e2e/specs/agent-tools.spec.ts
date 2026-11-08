@@ -291,6 +291,25 @@ test("previews the Viewer on its page, and refuses a page with no example", asyn
       .getByRole("heading", { name: /White bicycles/, level: 2 }),
   ).toBeVisible();
 
+  // A template's own page shows the Viewer in that template.
+  await open(page, "/docs/viewer/document");
+  expect(await call(page, "clover_preview_layout")).toMatchObject({
+    ok: true,
+    shows: "the Viewer (Document)",
+    page: "Viewer",
+  });
+  await expect(
+    page.getByRole("group", { name: "Preview from your agent" }),
+  ).toBeVisible();
+
+  // Root's page shows a Root of the parts every view has.
+  await open(page, "/docs/root");
+  expect(await call(page, "clover_preview_layout")).toMatchObject({
+    ok: true,
+    shows: "Label, Body and Items",
+    page: "Root",
+  });
+
   await open(page, "/docs/styling");
   expect(
     await call(page, "clover_preview_layout", { capability: "3d" }),
